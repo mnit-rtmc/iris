@@ -1,0 +1,330 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Roadway Network Geometrics</title>
+</head>
+
+<body>
+<h1>Roadway Network Geometrics</h1>
+<div class="right">
+	<img src="geometrics.png" />
+	<div class="label">r_nodes &amp; r_links</div>
+</div>
+<p>
+This paper contains a method for modelling a roadway network.
+Every point of interest on the roadway network is described by an <b>r_node</b>.
+An r_node can represent a detector station, entrance ramp, exit ramp, etc.
+An <b>r_link</b> is the span of roadway which links two r_nodes together.
+A <b>corridor</b> is an ordered list of all r_nodes associated with one
+direction of a roadway.
+</p>
+<h2>R_node</h2>
+<p>
+The r_node contains information about the roadway node.
+This information includes <a href='#r_node_location'>location</a>,
+<a href='#r_node_type'>node_type</a>, <a href='#r_node_pickable'>pickable</a>,
+<a href='#r_node_transition'>transition</a>, <a href='#r_node_lanes'>lanes</a>,
+<a href='#r_node_shift'>shift</a>,
+<a href='#r_node_attach_side'>attach_side</a>,
+<a href='#r_node_station_id'>station_id</a>,
+<a href='#r_node_speed_limit'>speed_limit</a>, and
+<a href='#r_node_notes'>notes</a>.
+</p>
+<dl>
+
+<dt id='r_node_location'>location</dt>
+<dd>Foreign key into location table
+<p>
+The location table contains freeway, cross-street, and UTM coordinates.
+For a ramp r_node, the location coordinate is defined as the gore point,
+where the ramp merges onto, or splits off from the freeway.
+Mainline station nodes are usually associated with a detector station, in which
+case the location is the coordinates of the detectors.
+This is not mandatory however, as sometimes extra "shape nodes" need to be
+specified for a curved section to allow for better distance estimation.
+</p>
+</dd>
+
+<dt id='r_node_type'>node_type</dt>
+<dd>Foreign key into node type look-up table
+<table>
+<tr>
+	<th>Code</th>
+	<th>Node Type</th>
+	<th>Description</th>
+</tr>
+<tr>
+	<td>0</td>
+	<td>station</td>
+	<td>Mainline station node</td>
+</tr>
+<tr>
+	<td>1</td>
+	<td>entrance</td>
+	<td>Entrance node</td>
+</tr>
+<tr>
+	<td>2</td>
+	<td>exit</td>
+	<td>Exit node</td>
+</tr>
+<tr>
+	<td>3</td>
+	<td>intersection</td>
+	<td>At-grade intersection</td>
+</tr>
+<tr>
+	<td>4</td>
+	<td>access</td>
+	<td>Network access node</td>
+</tr>
+<tr>
+	<td>5</td>
+	<td>interchange</td>
+	<td>Freeway interchange</td>
+</tr>
+</table>
+<p>
+The node_type parameter is a key into the node_type look-up table.
+Station nodes describe a mainline detector station.
+Entrance nodes represent an entrance ramp onto a corridor.
+Exit nodes represent an exit ramp from a corridor.
+Intersection nodes represent at-grade intersections, possibly signalized.
+</p>
+<p>
+Access and interchange nodes are special nodes used for traveller information
+systems.
+</p>
+</dd>
+
+<dt id='r_node_pickable'>pickable</dt>
+<dd>boolean; true if r_node is pickable
+<p>
+For traveller information systems, a node can be marked pickable if a user is
+allowed to pick a node for an origin or destination.
+</p>
+</dd>
+
+<dt id='r_node_transition'>transition</dt>
+<dd>Foreign key into the transition look-up table
+<table>
+<tr>
+	<th>Code</th>
+	<th>Transition Type</th>
+	<th>Description</th>
+</tr>
+<tr>
+	<td>0</td>
+	<td>none</td>
+	<td>No noticable transition</td>
+</tr>
+<tr>
+	<td>1</td>
+	<td>loop</td>
+	<td>Interchange loop</td>
+</tr>
+<tr>
+	<td>2</td>
+	<td>leg</td>
+	<td>Mostly straight "leg" ramp</td>
+</tr>
+<tr>
+	<td>3</td>
+	<td>slipramp</td>
+	<td>parallel transition</td>
+</tr>
+<tr>
+	<td>4</td>
+	<td>CD</td>
+	<td>CD transition</td>
+</tr>
+<tr>
+	<td>5</td>
+	<td>HOV</td>
+	<td>HOV bypass ramp</td>
+</tr>
+<tr>
+	<td>6</td>
+	<td>common</td>
+	<td>Common section</td>
+</tr>
+<tr>
+	<td>7</td>
+	<td>flyover</td>
+	<td>Flyover ramp (bridge over mainline)</td>
+</table>
+<p>
+Transition describes how entrance or exit nodes connect with linked nodes.
+A loop transition is for ramp movements which form a loop (eg. an Eastbound to
+Northbound movement in a cloverleaf interchange).
+A leg transition is for simple "leg" movements (eg. any ramp on a diamond
+interchange).
+A slipramp applies for short ramps connecting parallel roadways.
+A CD transition is like a slipramp, except the roadways are considered to
+be the same for rendering purposes.
+An HOV transition is for a ramp meter bypass ramp.
+</p>
+<p>
+For an entrance node, transition describes what type of ramp is entering.
+An entrance node with "none" for the transition can be used for mainline
+metering (most commonly on a CD road).
+If an entrance node has a transition of "common", that indicates that two
+roadways join to form a <b>common section</b>.
+</p>
+<p>
+For an exit node, transition describes what type of ramp is exiting.
+If an exit node has a transition of "common", that indicates that all
+lanes exit from the mainline &mdash; to form a common section. In this case,
+the exit node will not be linked with the next downstream node in the corridor.
+</p>
+<p>
+For a station, intersection, access, or interchange node, the transition must
+be "none".
+</p>
+</dd>
+
+<dt id='r_node_lanes'>lanes</dt>
+<dd>integer&nbsp;&gt;=&nbsp;0; number of lanes
+<p>
+For a ramp node, this is the number of lanes entering or exiting the mainline.
+</p>
+</dd>
+
+<dt id='r_node_attach_side'>attach_side</dt>
+<dd>boolean; true if node is attached on left side of the roadway
+<p>
+This flag indicates which side of the road the r_node is attached.
+For entrance or exit ramps, this determines which side of the road the ramp
+is on.
+</p>
+</dd>
+
+<dt id='r_node_shift'>shift</dt>
+<dd>integer; lane shift to attach side of node
+<p>
+This is the lane shift from the corridor reference lane to the attach side of
+the road, just downstream of the node.
+This value can be used for lane continuity analysis within a corridor.
+</p>
+</dd>
+
+<dt id='r_node_station_id'>station_id</dt>
+<dd>varchar(8); unique station identifier
+<p>
+The station_id is a unique identifier for the detectors associated with the
+r_node.
+It is not limited to station type nodes.
+</p>
+</dd>
+
+<dt id='r_node_speed_limit'>speed_limit</dt>
+<dd>integer&nbsp;&gt;&nbsp;0; speed limit in localized units
+</tr>
+<p>
+This is the posted speed limit at the r_node.
+The units should be dependent on locale (miles per hour or kilometers per hour).
+For ramp r_nodes, it may be used to indicate the advisory speed limit on the
+ramp.
+</p>
+</dd>
+
+<dt id='r_node_notes'>notes</dt>
+<dd>text; administrator notes
+</dd>
+</dl>
+
+<h2>Automatic Linking</h2>
+<p>
+The links connecting r_nodes are dynamically created based on location and
+other attributes.
+An r_link is a directional (one-way) link from one r_node to another.
+From a set of r_nodes, the r_links can be automatically created.
+</p>
+<h3>Corridor Linking</h3>
+<p>
+To create the links for one corridor, all r_nodes with matching freeway
+and direction are found.
+These nodes are sorted based on location, from the upstream end to the
+downstream end.
+This is done by linking each r_node with its two nearest neighbors, based on
+the UTM coordinates.
+An r_link is created for each successive r_node pair, unless the r_node is
+an exit with a transition of "common".
+In that case, the link enters a "common section", and only returns to the
+main corridor at the end of the common section.
+</p>
+<h3>Ramp Linking</h3>
+<p>
+Also, r_links must be created for freeway-to-freeway ramps and CD road ramps.
+Each "exit" r_node is matched with a corresponding "entrance" node on another
+corridor.
+The matching is performed by swapping the "freeway", "freeway direction" pair
+with the "cross street", "cross street direction" pair.
+For example, an "exit" node from Hwy 62 EB to Hwy 100 NB would be matched with
+an "entrance" node on Hwy 100 NB from Hwy 62 EB.
+Two roadways will match if the names are the same, with one having an optional
+suffix.
+So, for example, "I-394" and "I-394 CD" will match.
+If there are multiple matching nodes for a given entrance or exit, the
+<em>closest</em> matching node is used, by computing the linear distance
+between the UTM points.
+</p>
+<p>
+Mainline metering entrance r_nodes (with a transition of "none") are not linked.
+</p>
+<h3>Intersection Linking</h3>
+<p>
+Each intersection node is matched with other intersection nodes.
+These nodes must have the "freeway" and "cross street" swapped, regardless of
+direction.
+For example, suppose the intersection is Hwy 169 NB @ Frontage Rd.
+This node will link to both EB and WB intersection nodes on Frontage Rd.
+</p>
+<h3>Access and Interchange Linking</h3>
+<p>
+An access node is any access point onto or off of the roadway network.
+These nodes do not specify direction, and are linked to all entrance and exit
+nodes with matching freeway and cross street.
+For example an access node at I-494 and France Ave would be matched with an
+exit node from I-494 EB to France Ave NB.
+The UTM location of an access node is roughly defined as the point where the
+two roads intersect (if any).
+They are used for traveller information systems to allow a user to select
+an origin or destination point.
+Interchange nodes are like access nodes, except they are used for route
+selection instead of origin/destination.
+</p>
+<h2>Collector-Distributor Roads</h2>
+<p>
+A <em>collector-distributor road</em> (CD) is a road which runs parallel to a
+freeway.
+Its purpose is to keep weaving and merging traffic out of the through-lanes.
+Some areas use a similar system, called <em>collector-express</em> or
+<em>local-express</em> lanes.
+A CD road is used to represent any of these configurations, in addition to any
+other ramps which cannot be described with a simple entrance or exit node type.
+An exit ramp which splits into two ramps leading to different roads may be
+called a "CD road".
+This allows complex geometrics to be modelled without a complex database schema.
+</p>
+<p>
+Each CD road is treated as a separate corridor (for example, with a roadway
+called "I-394 CD").
+If there are multiple CD roads for one freeway, they can share the same
+roadway.
+</p>
+<h2>Reversible Roads</h2>
+<p>
+A <em>reversible road</em> is a roadway with movable barracades to allow the
+flow of traffic to be reversed.
+This allows a roadway to flow one direction in the AM, and reversed in the PM.
+This type of roadway should be modelled with each direction separately, since
+the entrance and exit ramps are not shared for the opposing flow directions.
+</p>
+<div id="stamp">Douglas Lau<br/>17 April 2007</div>
+</body>
+</html>

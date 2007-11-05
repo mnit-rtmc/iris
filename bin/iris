@@ -1,0 +1,65 @@
+#!/bin/bash
+#
+# Init file for IRIS server daemon
+#
+# chkconfig: 2345 97 02
+# description: IRIS server daemon
+#
+# processname: iris
+
+# source function library
+. /etc/rc.d/init.d/functions
+
+RETVAL=0
+prog="iris"
+PROG=/usr/local/tms/iris
+WD=/usr/local/tms/iris-server
+USER=tms
+JAVA_HOME=/usr/java/current
+OPTIONS=$"$JAVA_HOME/bin/java -server -Xmx256m -jar $WD/iris-server-*.jar"
+
+start()
+{
+	# Check for server already running...
+	pid=`pidof -s $prog`
+	if [ $pid ]
+	then
+		echo $"$prog already running."
+	else
+		echo -n $"Starting $prog:"
+		su -l $USER -s /bin/sh -c "cd $WD && $PROG $OPTIONS &" && success || failure
+		RETVAL=$?
+		[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$prog
+		echo
+	fi
+}
+
+stop()
+{
+	echo -n $"Stopping $prog:"
+	killproc $PROG -TERM
+	RETVAL=$?
+	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/$prog
+	echo
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		stop
+		start
+		;;
+	status)
+		status $PROG
+		RETVAL=$?
+		;;
+	*)
+		echo $"Usage: $0 {start|stop|restart|status}"
+		RETVAL=1
+esac
+exit $RETVAL

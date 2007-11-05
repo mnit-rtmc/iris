@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>IRIS Version 4 TODO List</title>
+</head>
+
+<body>
+<p id="stamp">29 Jan 2007</p>
+<h2>IRIS Version 4 TODO List</h2>
+<dl>
+	<dt>Bugs</dt>
+	<dd><ol>
+		<li>Fix client notification problems (SONAR) (3 weeks)</li>
+		<li>IndexOutOfBoundsException: deleting detector (1 week)</li>
+		<li>Travel time messages forgotten after comm. failure</li>
+	</ol></dd>
+	<dt>General</dt>
+	<dd><ol>
+		<li>Add support for 170 version 6 protocol</li>
+		<li>Travel time estimation with branching freeways</li>
+		<li>Create SONAR, a simple client/server protocol to replace
+			RMI. Simple Object Notification And Replication.</li>
+	</ol></dd>
+	<dt>Toast</dt>
+	<dd><ol>
+		<li>Controller migration from one line to another (1 week)</li>
+		<li>Better integreation with client (user name) (1 week)</li>
+		<li>Check status updates on Sonet System form (2 days)</li>
+		<li>SELECT comm_line_event on ControllerForm (1 week)</li>
+		<li>Export device maps to ArcGIS shp/dbf files (1 week)</li>
+	</ol></dd>
+	<dt>Ramp Metering</dt>
+	<dd><ol>
+		<li>Turn-on during congestion (2-3 days)</li>
+		<li>Group meters between stations for same turn-on (3 days)</li>
+		<li>Let locked meter violate minimum release rate (4 hours)</li>
+		<li>Solution for 100' queue buffer problem (1 week)</li>
+		<li>Different start times within a stratified plan (3 days)</li>
+		<li>Use different minimum rate for A+ meters (1 week)</li>
+		<li>Don't require passage detector for metering</li>
+	</ol></dd>
+	<dt>Database</dt>
+	<dd><ol>
+		<li>Remove all arrays from PostgreSQL database</li>
+		<li>Test IRIS with standard Postgres JDBC jar</li>
+		<li>Improve database table organization</li>
+		<li>Use database schemas for tms, tesla, log, etc.</li>
+	</ol></dd>
+	<dt>DMS</dt>
+	<dd><ol>
+		<li>Add DMS sign groups for alert (1 week)</li>
+		<li>DMS pixel feedback (2 weeks)</li>
+		<li>Add sign plans for maintenance / road work (2 weeks)</li>
+		<li>Allow maintenance dispatch to send alerts (1 week)</li>
+		<li>Skyline activateMsgError 'other' shows 'noSuchName'</li>
+		<li>Download sets DMS back to photocell control</li>
+	</ol></dd>
+	<dt>Diagnostics</dt>
+	<dd><ol>
+		<li>Add alarm status interface (1 week)</li>
+		<li>Add a FramingException for NTCIP lines (1 day)</li>
+		<li>Increase/bypass bad pixel limit for Ledstar signs</li>
+	</ol></dd>
+</dl>
+</body>
+</html>

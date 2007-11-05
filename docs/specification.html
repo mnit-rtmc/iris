@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Specifications for IRIS Traffic Management System</title>
+</head>
+
+<body>
+<h2>IRIS Traffic Management System:</h2>
+
+<h3>Features</h3>
+<ul>
+	<li>Polished map-based interface</li>
+	<li>DMS sign control</li>
+	<li>Continuous traffic data collection / archiving</li>
+	<li>Ramp meter operation</li>
+	<li>Lane Control Signal operation</li>
+	<li>Camera control</li>
+	<li>Integrated database administration</li>
+</ul>
+
+<h3>Protocols</h3>
+<ul>
+	<li>NTCIP Class B (RS-232)</li>
+	<li>Wavetronix SmartSensor (detection)</li>
+	<li>3M Canoga (detection)</li>
+	<li>Vicon Switcher (camera control)</li>
+	<li>Mn/DOT 170 Protocol (detection, ramp metering, LCS)</li>
+</ul>
+
+<h3>Requirements</h3>
+<ul>
+	<li>Server
+		<ul>
+			<li>Pentium IV (or similar)</li>
+			<li>1 GB RAM</li>
+			<li>RS-232 Expansion (Digi, Cyclades or similar)</li>
+			<li>Red Hat / Fedora Core Operating System</li>
+			<li>Java 1.5 Platform</li>
+			<li>RXTX Serial Communication Package</li>
+			<li>PostgreSQL 7.4 Database</li>
+			<li>Apache 2 Web Server</li>
+		</ul>
+	</li>
+	<li>Client
+		<ul>
+			<li>Pentium IV (or similar)</li>
+			<li>512 MB RAM</li>
+			<li>Any Operating System</li>
+			<li>Java 1.5 Platform</li>
+		</ul>
+	</li>
+	<li>Administration
+		<ul>
+			<li>ESRI ArcGIS (for client maps)</li>
+			<li>LDAP server (Novell NDS or other)</li>
+		</ul>
+	</li>
+</ul>
+
+</body>
+</html>

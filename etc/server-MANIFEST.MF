@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: iris-rmi-@@VERSION@@.jar sonar-server-@@SONAR.VERSION@@.jar vault-@@VAULT.VERSION@@.jar postgresql.jar
+Main-Class: us.mn.state.dot.tms.MainServer

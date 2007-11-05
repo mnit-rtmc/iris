@@ -1,0 +1,414 @@
+<?xml version="1.0"?>
+
+<!-- ant build file for iris project -->
+<!-- Copyright 2007 Mn/DOT -->
+<project name="iris" default="dist" basedir=".">
+	<property file="project.properties"/>
+	<property file="${user.home}/.ant.properties"/>
+ 	<property name="spbase.dir" value=".."/>
+	<property name="src.dir" value="src"/>
+	<property name="etc.dir" value="etc"/>
+	<property name="images.dir" value="images"/>
+	<property name="bin.dir" value="bin"/>
+	<property name="lib.dir" value="lib"/>
+	<property name="docs.dir" value="docs"/>
+	<property name="build.dir" value="build"/>
+	<property name="build.etc" value="${build.dir}/etc"/>
+	<property name="build.src" value="${build.dir}/src"/>
+	<property name="build.lib" value="${build.dir}/lib"/>
+	<property name="build.images" value="${build.dir}/images"/>
+	<property name="build.classes" value="${build.dir}/classes"/>
+	<property name="build.javadocs" value="${build.dir}/javadocs"/>
+	<property name="dist.server" value="${name}-server-${version}"/>
+	<property name="dist.client" value="${name}-client-${version}"/>
+	<property name="manifest.server" value="server-MANIFEST.MF"/>
+	<property name="manifest.client" value="client-MANIFEST.MF"/>
+	<property name="vault.jar" value="vault-${vault.version}.jar"/>
+	<property name="sonar.server.jar"
+		  value="sonar-server-${sonar.version}.jar"/>
+	<property name="sonar.client.jar"
+		  value="sonar-client-${sonar.version}.jar"/>
+	<property name="mapbean.jar" value="MapBean-${mapbean.version}.jar"/>
+	<property name="trafmap.jar" value="TrafMap-${trafmap.version}.jar"/>
+	<property name="shapes.jar" value="Shapes-${shapes.version}.jar"/>
+	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
+	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
+	<property name="datatools.jar"
+		  value="datatools-${datatools.version}.jar"/>
+	<property name="videoclient.jar"
+		  value="video-client-${videoclient.version}.jar"/>
+	<property name="rmi.jar" value="${name}-rmi-${version}.jar"/>
+	<property name="server.jar" value="${name}-server-${version}.jar"/>
+	<property name="utils.jar" value="${name}-utils-${version}.jar"/>
+	<property name="client.jar" value="${name}-client-${version}.jar"/>
+	<property name="build.compiler.pedantic" value="true"/>
+	<property file="${lib.dir}/iris-client.properties"/>
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="*.jar"/>
+	</path>
+
+	<!-- Check for one file dependancy -->
+	<target name="check-dep">
+		<available property="file.exists"
+			   file="${lib.dir}/${file.dep}"/>
+		<fail unless="file.exists"
+		      message="Missing dependency: ${lib.dir}/${file.dep}"/>
+	</target>
+
+	<!-- Check for dependancies -->
+	<target name="check">
+		<antcall target="check-dep">
+			<param name="file.dep" value="iris-client.properties"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="iris-client.keystore"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="postgresql.jar"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="activation.jar"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="mail.jar"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${vault.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${sonar.server.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${sonar.client.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${mapbean.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${trafmap.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${shapes.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${tms-log.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${tdxml.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${datatools.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
+			<param name="file.dep" value="${videoclient.jar}"/>
+		</antcall>
+	</target>
+
+	<!-- Prepare the build directory -->
+	<target name="prepare"
+	        description="Prepare the build directory">
+
+		<copy todir="${build.src}" filtering="true">
+			<fileset dir="${src.dir}"/>
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
+			</filterset>
+		</copy>
+
+		<copy todir="${build.etc}">
+			<fileset dir="${etc.dir}" />
+			<fileset dir="${bin.dir}" />
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
+				<filter token="VAULT.VERSION"
+					value="${vault.version}"/>
+				<filter token="SONAR.VERSION"
+					value="${sonar.version}"/>
+				<filter token="TMSLOG.VERSION"
+					value="${tms-log.version}"/>
+				<filter token="TDXML.VERSION"
+					value="${tdxml.version}"/>
+				<filter token="MAPBEAN.VERSION"
+					value="${mapbean.version}"/>
+				<filter token="TRAFMAP.VERSION"
+					value="${trafmap.version}"/>
+				<filter token="DATATOOLS.VERSION"
+					value="${datatools.version}"/>
+				<filter token="VIDEOCLIENT.VERSION"
+					value="${videoclient.version}"/>
+				<filter token="SHAPES.VERSION"
+					value="${shapes.version}"/>
+				<filter token="IRIS-WEBSTART.HOST"
+					value="${iris-webstart.host}"/>
+			</filterset>
+		</copy>
+
+		<copy todir="${build.images}">
+			<fileset dir="${images.dir}">
+				<include name="*.gif"/>
+				<include name="*.jpg"/>
+			</fileset>
+		</copy>
+
+		<mkdir dir="${build.classes}"/>
+		<mkdir dir="${build.lib}"/>
+	</target>
+
+	<!-- Compile the source code -->
+	<target name="compile"
+	        depends="check,prepare"
+	        description="Compile all of the source files for the project">
+		<javac srcdir="${build.src}"
+		       destdir="${build.classes}"
+		       debug="off"
+		       deprecation="on"
+		       optimize="on"
+		       source="1.5"
+		       target="1.5">
+			<classpath refid="classpath"/>
+		</javac>
+	</target>
+
+	<!-- Build the RMI stuff -->
+	<target name="rmi-build"
+		depends="compile"
+		description="Build the RMI code">
+		<rmic base="${build.classes}"
+		      classpathref="classpath"
+		      includes="**/*Impl.class"
+		      stubversion="1.2"
+		      verify="true"/>
+	</target>
+
+	<!-- Create the RMI jar -->
+	<target name="rmi-jar"
+		depends="rmi-build"
+		description="Create the RMI jar">
+		<jar jarfile="${build.lib}/${rmi.jar}"
+		     basedir="${build.classes}"
+		     includesfile="${etc.dir}/rmi_classes.txt"/>
+	</target>
+
+	<!-- Create the server jar -->
+	<target name="server-jar"
+		depends="compile"
+		description="Create the iris-server jar">
+		<jar jarfile="${build.lib}/${server.jar}"
+		     manifest="${build.etc}/${manifest.server}">
+			<fileset dir="${build.classes}"
+				 excludesfile="${etc.dir}/rmi_classes.txt">
+				<include name="us/mn/state/dot/tms/*.class"/>
+				<include name="us/mn/state/dot/tms/comm/**/*"/>
+				<include name="us/mn/state/dot/tms/log/**/*"/>
+			</fileset>
+		</jar>
+	</target>
+
+	<!-- Create the iris server distribution -->
+	<target name="server"
+		depends="server-jar,rmi-jar"
+		description="Create the iris server distribution">
+		<copy todir="${dist.server}">
+			<fileset dir="${build.lib}">
+				<include name="${server.jar}"/>
+				<include name="${rmi.jar}"/>
+			</fileset>
+		</copy>
+		<copy todir="${dist.server}">
+			<fileset dir="${lib.dir}">
+				<include name="postgresql.jar"/>
+				<include name="${vault.jar}"/>
+				<include name="${sonar.server.jar}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Create the utils jar -->
+	<target name="utils-jar"
+		depends="compile"
+		description="Create the iris-utils jar">
+		<jar jarfile="${build.lib}/${utils.jar}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/utils/*.class"/>
+		</jar>
+	</target>
+
+	<!-- Create the client jar -->
+	<target name="client-jar"
+	        depends="compile"
+	        description="Create the iris-client jar">
+		<jar jarfile="${build.lib}/${client.jar}"
+		     manifest="${build.etc}/${manifest.client}">
+			<fileset dir="${lib.dir}"
+				 includes="iris-client.keystore"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/client/**/*"/>
+			<fileset dir="${build.dir}" includes="images/*"/>
+		</jar>
+	</target>
+
+	<!-- Create the iris client distribution -->
+	<target name="client"
+	        depends="rmi-jar,utils-jar,client-jar"
+	        description="Create the iris client distribution">
+		<mkdir dir="${dist.client}"/>
+		<copy todir="${dist.client}">
+			<fileset dir="${lib.dir}">
+				<include name="iris-client.properties"/>
+			</fileset>
+			<fileset dir="${build.etc}">
+				<include name="iris-client.jnlp"/>
+				<include name="iris.sh"/>
+				<include name="iris.bat"/>
+			</fileset>
+			<fileset dir="${docs.dir}">
+				<include name="index.html"/>
+			</fileset>
+			<fileset dir="${images.dir}">
+				<include name="iris.gif"/>
+			</fileset>
+		</copy>
+		<chmod file="${dist.client}/iris.sh" perm="ugo+x"/>
+		<fixcrlf srcDir="${dist.client}" eol="crlf" includes="*.bat"/>
+		<fixcrlf srcDir="${dist.client}" eol="lf" includes="*.sh"/>
+
+		<mkdir dir="${dist.client}/lib"/>
+		<copy todir="${dist.client}/lib">
+			<fileset dir="${lib.dir}">
+				<include name="activation.jar"/>
+				<include name="mail.jar"/>
+				<include name="${datatools.jar}"/>
+				<include name="${tdxml.jar}"/>
+				<include name="${mapbean.jar}"/>
+				<include name="${trafmap.jar}"/>
+				<include name="${shapes.jar}"/>
+				<include name="${sonar.client.jar}"/>
+				<include name="${tms-log.jar}"/>
+				<include name="${videoclient.jar}"/>
+			</fileset>
+			<fileset dir="${build.lib}">
+				<include name="${rmi.jar}"/>
+				<include name="${utils.jar}"/>
+				<include name="${client.jar}"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Create the full iris distribution -->
+	<target name="dist"
+	        depends="server,client"
+	        description="Create the full iris distribution">
+
+		<signjar keystore="${sign.store}" storepass="${sign.store.pass}"
+		         alias="${sign.alias}" keypass="${sign.alias.pass}"
+			 lazy="true">
+			<fileset dir="${dist.client}/lib">
+				<include name="*.jar"/>
+			</fileset>
+		</signjar>
+	</target>
+
+	<!-- Create the API documentation -->
+	<target name="docs"
+	        depends="prepare"
+	        description="Create the API documentation">
+		<mkdir dir="${build.javadocs}" />
+		<javadoc packagenames="${packages}"
+		         classpathref="classpath"
+			 sourcepath="${src.dir}"
+		         destdir="${build.javadocs}"
+		         author="true"
+		         version="true"
+			 windowtitle="${name} version ${version} API"
+			 doctitle="${name} version ${version}"
+		         bottom="Copyright &#169; Minnesota Department of
+		                 Transportation. All Rights Reserved."/>
+	</target>
+
+	<!-- Clean up generated stuff -->
+	<target name="clean"
+	        description="Remove the build and distribution directories">
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.server}"/>
+		<delete dir="${dist.client}"/>
+	</target>
+
+	<!-- Build all dependencies in the proper order -->
+	<target name="buildall"
+		description="Build iris and dependencies">
+		<antcall target="deps">
+			<param name="target" value="jar"/>
+		</antcall>
+		<antcall target="dist"/>
+	</target>	
+
+	<!-- Clean all build directories -->
+	<target name="cleanall" description="clean iris and dependencies">
+		<antcall target="deps">
+			<param name="target" value="clean"/>
+		</antcall>
+		<antcall target="clean"/>
+	</target>
+
+	<!-- top-level iris, apply any $target arg                  -->
+	<!-- set property 'target' to apply across all dependencies -->
+	<target name="deps"
+		depends="do-shapes,do-vault,do-datatools,do-sonar,
+			 do-videoclient,do-tms-log,do-tdxml,do-trafmap,
+			 do-mapbean">
+	</target>
+
+	<!-- subproject shapes, apply any $target arg               -->
+	<target name="do-shapes">
+		<ant dir="${spbase.dir}/shapes-${shapes.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject vault, apply any $target arg                -->
+	<target name="do-vault">
+		<ant dir="${spbase.dir}/vault-${vault.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject datatools, apply any $target arg            -->
+	<target name="do-datatools" >
+		<ant dir="${spbase.dir}/datatools-${datatools.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject sonar, apply any $target arg               -->
+	<target name="do-sonar" >
+		<ant dir="${spbase.dir}/sonar-${sonar.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject tmslog, apply any $target arg               -->
+	<target name="do-tms-log" >
+		<ant dir="${spbase.dir}/tms-log-${tms-log.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject mapbean, apply any $target arg               -->
+	<target name="do-mapbean" >
+		<ant dir="${spbase.dir}/mapbean-${mapbean.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject video, apply any $target arg               -->
+	<target name="do-videoclient" depends="do-tms-log">
+		<ant dir="${spbase.dir}/video-${videoclient.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject tdxml, apply any $target arg               -->
+	<target name="do-tdxml" depends="do-tms-log">
+		<ant dir="${spbase.dir}/tdxml-${tdxml.version}/client"
+			target="${target}" inheritAll="false"/>
+	</target>
+
+	<!-- subproject trafmap, apply any $target arg               -->
+	<target name="do-trafmap" depends="do-tdxml,do-mapbean">
+		<ant dir="${spbase.dir}/trafmap-${trafmap.version}"
+			target="${target}" inheritAll="false"/>
+	</target>
+</project>

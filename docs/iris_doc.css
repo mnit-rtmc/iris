@@ -1,0 +1,74 @@
+H1 {
+	text-align: center;
+}
+H2 {
+	page-break-after: avoid;
+}
+DIV.math {
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: larger;
+	text-align: center;
+}
+SPAN.func {
+	float: right;
+}
+BODY {
+	background: #cccccc;
+	text-align: justify;
+	orphans: 3;
+	windows: 4;
+}
+P {
+	page-break-inside: avoid;
+}
+TABLE {
+	page-break-inside: avoid;
+	border-collapse: collapse;
+	border: 3px solid black;
+	background: #f0f0f0;
+	width: 100%;
+}
+TD {
+	border-left: 1px solid gray;
+	border-right: 1px solid gray;
+	background: white;
+	text-align: center;
+	vertical-align: middle;
+}
+TD.top {
+	border-top: 1px solid gray;
+}
+TD.bottom {
+	border-bottom: 1px solid gray;
+}
+DT {
+	font-weight: bold;
+}
+DD {
+	page-break-inside: avoid;
+}
+DIV.left {
+	float: left;
+	padding-right: 8px;
+	padding-bottom: 8px;
+}
+DIV.right {
+	float: right;
+	padding-left: 8px;
+	padding-bottom: 8px;
+}
+DIV.label {
+	text-align: center;
+	font-weight: bold;
+	font-style: oblique;
+}
+OL.alpha {
+	list-style-type: lower-alpha;
+}
+OL.roman {
+	list-style-type: upper-roman;
+}
+#stamp {
+	text-align: right;
+}

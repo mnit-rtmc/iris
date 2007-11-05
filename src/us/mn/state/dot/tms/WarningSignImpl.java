@@ -1,0 +1,137 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2004-2006  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms;
+
+import java.rmi.RemoteException;
+import us.mn.state.dot.vault.FieldMap;
+import us.mn.state.dot.vault.ObjectVaultException;
+import us.mn.state.dot.tms.comm.mndot.MeterRate;
+import us.mn.state.dot.tms.comm.mndot.SetMeterRate;
+
+/**
+ * WarningSignImpl is a traffic device can display one fixed message. It can
+ * only be turned on or off.
+ *
+ * @author Douglas Lau
+ */
+public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign {
+
+	/** ObjectVault table name */
+	static public final String tableName = "warning_sign";
+
+	/** Create a new warning sign */
+	public WarningSignImpl(String i) throws ChangeVetoException,
+		RemoteException
+	{
+		super(i);
+		deviceList.add(id, this);
+	}
+
+	/** Create a warning sign from an ObjectVault field map */
+	protected WarningSignImpl(FieldMap fields) throws RemoteException {
+		super(fields);
+	}
+
+	/** Set the controller to which this sign is assigned */
+	public void setController(ControllerImpl c) throws TMSException {
+		super.setController(c);
+		if(c == null)
+			deviceList.add(id, this);
+		else
+			deviceList.remove(id);
+	}
+
+	/** Camera from which this can be seen */
+	protected CameraImpl camera;
+
+	/** Set the verification camera */
+	public void setCamera(String id) throws TMSException {
+		setCamera((CameraImpl)cameraList.getElement(id));
+	}
+
+	/** Set the verification camera */
+	protected synchronized void setCamera(CameraImpl c)
+		throws TMSException
+	{
+		if(c == camera)
+			return;
+		try { vault.update(this, "camera", c, getUserName()); }
+		catch(ObjectVaultException e) {
+			throw new TMSException(e);
+		}
+		camera = c;
+	}
+
+	/** Get verification camera */
+	public TrafficDevice getCamera() { return camera; }
+
+	/** Message text of the sign */
+	protected String text;
+
+	/** Get the message text */
+	public String getText() { return text; }
+
+	/** Set the message text */
+	public synchronized void setText(String t) throws TMSException {
+		if(t.equals(text))
+			return;
+		validateMultilineText(t);
+		try { vault.update(this, "text", t, getUserName()); }
+		catch(ObjectVaultException e) {
+			throw new TMSException(e);
+		}
+		text = t;
+	}
+
+	/** Flag for deployed status */
+	protected transient boolean deployed;
+
+	/** Check if the warning sign is deployed */
+	public boolean isDeployed() { return deployed; }
+
+	/** Set the actual deployed status from the controller */
+	public void setDeployedStatus(boolean d) {
+		if(d != deployed) {
+			deployed = d;
+			notifyStatus();
+		}
+	}
+
+	/** Get the appropriate rate for the deployed state */
+	protected int getDeployedRate(boolean d) {
+		if(d)
+			return MeterRate.CENTRAL;
+		else
+			return MeterRate.FORCED_FLASH;
+	}
+
+	/** Set the deployed status of the sign */
+	public void setDeployed(boolean d) {
+		if(isActive())
+			new SetMeterRate(this, 1, getDeployedRate(d)).start();
+	}
+
+	/** Get the current status code */
+	public int getStatusCode() {
+		if(!isActive())
+			return STATUS_INACTIVE;
+		if(isFailed())
+			return STATUS_FAILED;
+		if(isDeployed())
+			return STATUS_DEPLOYED;
+		else
+			return STATUS_AVAILABLE;
+	}
+}

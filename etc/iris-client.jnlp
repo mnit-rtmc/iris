@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- JNLP File for iris-client Web Start Application -->
+<jnlp spec="1.0"
+      codebase="http://@@IRIS-WEBSTART.HOST@@/iris-client"
+      href="iris-client.jnlp">
+    <information>
+	<title>IRIS</title>
+	<vendor>MN/DOT</vendor>
+	<homepage href="index.html"/>
+	<description>Intelligent Roadway Information System</description>
+	<icon href="images/iris.png"/>
+	<offline/>
+    </information>
+    <resources>
+	<j2se version="1.5+" max-heap-size="256m"/>
+	<jar href="lib/iris-client-@@VERSION@@.jar"/>
+	<jar href="lib/iris-rmi-@@VERSION@@.jar"/>
+	<jar href="lib/iris-utils-@@VERSION@@.jar"/>
+	<jar href="lib/sonar-client-@@SONAR.VERSION@@.jar"/>
+	<jar href="lib/MapBean-@@MAPBEAN.VERSION@@.jar"/>
+	<jar href="lib/tms-log-@@TMSLOG.VERSION@@.jar"/>
+	<jar href="lib/tdxml-@@TDXML.VERSION@@.jar"/>
+	<jar href="lib/TrafMap-@@TRAFMAP.VERSION@@.jar"/>
+	<jar href="lib/Shapes-@@SHAPES.VERSION@@.jar"/>
+	<jar href="lib/datatools-@@DATATOOLS.VERSION@@.jar"/>
+	<jar href="lib/video-client-@@VIDEOCLIENT.VERSION@@.jar"/>
+	<jar href="lib/mail.jar"/>
+	<jar href="lib/activation.jar"/>
+    </resources>
+    <security>
+       <all-permissions/>
+    </security>
+    <application-desc main-class="us.mn.state.dot.tms.client.Main">
+	<argument>http://@@IRIS-WEBSTART.HOST@@/iris-client/iris-client.properties</argument>
+    </application-desc>
+</jnlp>

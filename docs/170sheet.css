@@ -1,0 +1,46 @@
+BODY {
+	font-family: "Gill Sans", sans-serif;
+	font-size: 10pt;
+	text-align: center;
+	background: #cccccc;
+}
+TABLE {
+	font-family: "Gill Sans", sans-serif;
+	font-size: 10pt;
+	border-collapse: collapse;
+	width: 100%;
+	background: white;
+}
+TABLE.sheet {
+	border: 2px solid black;
+}
+TH {
+	border: 1px solid black;
+	background: yellow;
+}
+TABLE.header {
+	border-style: none;
+	background: #cccccc;
+}
+TH.header {
+	border-style: none;
+	text-decoration: underline;
+	background: #cccccc;
+}
+TD {
+	border-left: 1px solid black;
+	border-right: 1px solid black;
+	text-align: right;
+}
+TD.header {
+	border-style: none;
+	text-align: center;
+	background: #cccccc;
+}
+TD.left {
+	text-align: left;
+}
+COL.sep {
+	background: #cccccc;
+	width: 6px;
+}

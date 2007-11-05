@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Mn/DOT Unified Traffic Data File Format</title>
+</head>
+
+<body>
+<h1>Mn/DOT Unified Traffic Data File Format</h1>
+<h2>Abstract</h2>
+<p>
+	For many years, Mn/DOT has collected traffic data from sensors
+	(detectors) embedded in the roadway.  As of October 2006, data is
+	being collected every 30 seconds from more than 4500 detectors in the
+	Twin Cities metro area.  This raw data usually consists of volume
+	(number of vehicles, sometimes called "flow") and occupancy (percentage
+	of time a detector is "occupied").  As you might guess, this adds up to
+	a very large amount of data every day.  There is so much data that the
+	advantages of storing it in a traditional database are far outweighed
+	by the complications.  This data storage problem led to the development
+	of the Mn/DOT <b>Unified Traffic Data File Format</b>, in March 2000.
+	Freeway data from January 1994 onwards is available in this format.
+</p>
+<h2>Advantages</h2>
+<p>
+	There are many benefits to the unified traffic data file format.
+	Probably the most important benefit is simplicity. Earlier file formats
+	had complicated bit field manipulation, which made it harder to develop
+	data analysis tools.  This problem has been eliminated, since all data
+	is stored as either 8-bit or 16-bit binary integers.  Another benefit
+	is the compactness of the format.  In earlier formats, this quantity of
+	data would occupy 33 megabytes (MB) of disk space.  In this format, the
+	same data is compressed into about 13 MB (with no loss of precision).
+	Another problem with earlier formats was the distinction between
+	30-second, 5-minute, and station samples made accessing the data more
+	complex than it needed to be.  This format unifies all the data into a
+	single file, simplifying the software needed to access the data.
+	Another key benefit of the format is extensibility.  It is possible
+	to add different types of data (such as speed, vehicle classification,
+	etc.) to the format without sacrificing backward compatibility.
+</p>
+<h2>File Format</h2>
+<p>
+	Each traffic data file consists of one day's worth of traffic data.
+	The files are conventionally named with an eight-digit date (four-digit
+	year, two-digit month and two-digit day), plus an extension of
+	".traffic".  For example, a file called "20000323.traffic" would contain
+	all the detector data for March 23, 2000.  The file itself is actually
+	in the popular ZIP compression format, making it easy to extract data
+	using tools such as WinZip.
+</p>
+<p>
+	Within the traffic archive, there will be one or more files for each
+	detector.  These files are named according to the detector from which
+	the data was collected.  The base file name is the detector ID, and the
+	filename extension determines the type of sample data.  For example,
+	30-second volume samples collected from detector ID 100 would be stored
+	in a file called "100.v30".
+</p>
+<table>
+<tr>
+	<th>Extension</th>
+	<th>Uncompressed File Size</th>
+	<th>Description</th>
+	<th>Sample Size</th>
+	<th>Valid Sample Range</th>
+</tr>
+<tr>
+	<td>.v30</td>
+	<td>2880 bytes</td>
+	<td>30-second volume samples</td>
+	<td>8 bits</td>
+	<td>0 - 40</td>
+</tr>
+<tr>
+	<td>.o30</td>
+	<td>5760 bytes</td>
+	<td>30-second occupancy samples (obsolete)</td>
+	<td>16 bits</td>
+	<td>0 - 1000</td>
+</tr>
+<tr>
+	<td>.c30</td>
+	<td>5760 bytes</td>
+	<td>30-second scan samples</td>
+	<td>16 bits</td>
+	<td>0 - 1800</td>
+</tr>
+<tr>
+	<td>.s30</td>
+	<td>2880 bytes</td>
+	<td>30-second speed samples</td>
+	<td>8 bits</td>
+	<td>0 - 100</td>
+</tr>
+<tr>
+	<td>.vlog</td>
+	<td>Variable (text)</td>
+	<td>Individual vehicle samples</td>
+	<td>Variable (text)</td>
+	<td>N/A</td>
+</tr>
+</table>
+<h3>30-second Sample Data</h3>
+<p>
+	The 30-second sample files (.?30) contain binned sample data for all
+	2880 30-second periods in the day.  The first sample represents the
+	first 30-seconds of the day (midnight to 00:00:30), and the last sample
+	is the last 30-seconds of the day (23:59:30 to midnight).  Each data
+	sample is either an 8 or 16 bit signed integer, depending on the sample
+	type.  16-bit samples are in high-byte first order.  A negative value
+	(-1) indicates a missing sample.  Any data outside the valid ranges
+	should be considered "bad".
+</p>
+<p>
+	The .v30 sample data is the number of vehicles sampled at the detector
+	in 30 seconds.  A volume sample of 40 vehicles or higher should never
+	happen in the real world, since that represents a sustained average
+	headway of 0.75 seconds between vehicles.
+</p>
+<p>
+	The .o30 format is now obsolete, having been replaced by the
+	more-precise .c30 format.  Scans are defined as 1/60 second, so the
+	valid range for a sample is 0 to 1800 (30 seconds * 60 scans/second).
+	The old .o30 files are in 1/10th percent occupancy, so they range from
+	0 to 1000.  That is the only difference between the two file formats.
+	If you want to get numbers in the range of 0 to 100, divide scan data
+	by 18 or occupancy data by 10.
+</p>
+<p>
+	The .s30 sample data is raw speed data from radar or microwave sensors.
+	Each sample is the average speed in miles/hour.
+</p>
+<h3>Individual Vehicle Logging</h3>
+<p>
+	The .vlog data is a text (ascii) format with one line for each vehicle
+	detection event.  Duration, headway, and speed can be logged using the
+	.vlog format.  Values are separated by commas, and missing data is
+	represented by a '?' field.  A gap in the sampling data is represented
+	by a '*' on a line by itself.
+</p>
+<table>
+<tr>
+	<th>Column</th>
+	<th>Name</th>
+	<th>Description</th>
+</tr>
+<tr>
+	<td>1</td>
+	<td>Duration</td>
+	<td>Number of milliseconds the vehicle occupied the detector</td>
+</tr>
+<tr>
+	<td>2</td>
+	<td>Headway</td>
+	<td>Number of milliseconds bewteen vehicle start times</td>
+</tr>
+<tr>
+	<td>3</td>
+	<td>Time stamp</td>
+	<td>24-hour HH:MM:SS format (may be omitted if headway is valid)</td>
+</tr>
+<tr>
+	<td>4</td>
+	<td>Speed</td>
+	<td>Speed in miles per hour (if available)</td>
+</tr>
+</table>
+
+<p>
+	Sample .vlog data:
+</p>
+<pre>
+296,9930,17:49:36
+231,14069
+240,453
+296,23510
+259,1321
+?,?
+249,?
+323,4638,17:50:28
+258,5967
+111,1542
+304,12029
+?,?
+231,?
+341,2541,17:51:03
+258,1995
+258,4480
+258,21913
+286,13488
+</pre>
+
+<div id="stamp">23 January 2007</div>
+</body>
+</html>

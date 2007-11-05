@@ -1,0 +1,80 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <title>"IRIS - Intelligent Roadway Information System"</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EF" vlink="#51188E" alink=
+"#FF0000">
+
+<center>
+<h1>IRIS&nbsp;<img SRC="iris.gif" height=64 width=64></h1>
+</center>
+<ol>
+	<li><a href="#Introduction">Introduction</a></li>
+	<li><a href="#Installation">Installation</a></li>
+	<li><a href="#Joystick">Joysticks</a></li>
+	<li><a href="#Running">Running</a></li>
+	<li><a href="#Support">Support</a></li>
+</ol>
+<hr WIDTH="100%" />
+<h2><a NAME="Introduction"></a>1. Introduction</h2>
+<p>
+	IRIS is the software used by the RTMC staff to control field devices
+	and collect traffic data.
+</p>
+<hr WIDTH="100%" />
+<h2><a NAME="Installation"></a>2. Installation</h2>
+<p>
+	Install the
+	<a href="http://tms-pdc/downloads/sun/j2re-1_4_1-windows-i586.exe">
+	Java Runtime Environment</a>. <strong>This must be done by someone
+	with local admin privileges.</strong> If you attempt to install it
+	without proper privileges, the installation will fail and you will
+	get a "bad installation" error. For installation instructions and
+	trouble shooting help, see the
+	<a href="http://java.sun.com/j2se/1.4.1/jre/install-windows.html">
+	Java Installation Guide</a>.
+</p>
+<hr WIDTH="100%" />
+<h2><a NAME="Joysticks"></a>3. Joysticks</h2>
+<p>
+	An optional software module must be installed to control camera PTZ
+	with a joystick. First, a couple of external packages,
+	<a href="http://www.python.org/2.4">Python 2.4</a>, and the
+	<a href="../joystick/pygame-1.7.1release.win32-py2.4.exe">pygame</a>
+	library are needed. <strong>This requires admin privilegdes.</strong>
+	Also, <a href="../joystick/pygame_joy.py">this script</a> must be
+	saved in the C:\Python24\Scripts folder with the name
+	<b>pygame_joy.py</b>.
+</p>
+<hr WIDTH="100%" />
+<h2><a NAME="Running"></a>4. Running</h2>
+<p>
+	To <a href="iris-client.jnlp">run IRIS,</a> click here.
+</p>
+<p>
+	IRIS requires unrestricted network and PC access. By design,
+	Java Web Start restricts this access. You will be prompted to
+	allow unrestricted access but advised not to do so. Disregard
+	this advice and click the "Start" button to allow access.
+	After that, you may start up the Java Web Start Application Manager
+	and run it from there. The second time the program is run, you will
+	be prompted to create a shortcut on the desktop to run IRIS directly.
+	This is a good idea.
+</p>
+<hr WIDTH="100%" />
+<h2><a NAME="Support"></a>5. Support</h2>
+<p>
+	If you have any questions or comments, please feel free to contact
+	any one of the development team. They are:
+</p>
+<ul>
+	<li>Doug Lau</li>
+	<li>Tim Johnson</li>
+</ul>
+<p>
+	Last modified: 28 Apr 2006
+</p>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<!DOCTYPE tms_config SYSTEM "tms_config.dtd">
+<tms_config>
+	&r_nodes;
+	&ramp_meters;
+	&detectors;
+</tms_config>
