@@ -102,15 +102,16 @@ public class DMSProxy extends TrafficDeviceProxy {
 	protected String[] createLines(SignMessage m) {
 		if(m == null)
 			return new String[text_lines];
-		final ArrayList<String> al = new ArrayList<String>();
+		final ArrayList<String> al = new ArrayList<String>(text_lines);
 		MultiString multi = m.getMulti();
 		multi.parse(new MultiString.Callback() {
 			public void addText(int p, int l,
 				MultiString.JustificationLine j, String t)
 			{
-				while(al.size() < (p + 1) * text_lines)
+				int m_lines = Math.max(text_lines, l + 1);
+				while(al.size() < (p + 1) * m_lines)
 					al.add("");
-				int i = p * text_lines + l;
+				int i = p * m_lines + l;
 				String v = al.get(i);
 				al.set(i, trimJoin(v, t));
 			}
