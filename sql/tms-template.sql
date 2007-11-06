@@ -2281,6 +2281,7 @@ COPY r_node_transition (n_transition, name) FROM stdin;
 
 COPY role (name, pattern, priv_r, priv_w, priv_c, priv_d) FROM stdin;
 admin		f	f	f	f
+alert		f	f	f	f
 incidents		f	f	f	f
 view	.*	t	f	f	f
 dms	dms/.*/message	f	t	f	f
