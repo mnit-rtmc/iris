@@ -42,28 +42,12 @@ public class MainClient {
 	/** Socket to prevent more than one instance of IRIS per host */
 	static protected ServerSocket socket;
 
-	/** Splash screen to show while client starts up */
-	static protected SplashScreen splashScreen;
-
 	/** Bind to a socket to prevent multiple instances from running.
 	 * Only one instance of the IRIS client is allowed on any machine.
 	 * This is enforced by binding a server socket to port 1099.  If that
 	 * port is in use an error message will be displayed to the user. */
 	static protected void bindSocket() throws IOException {
 		socket = new ServerSocket(1099, 0);
-	}
-
-	/** Show the startup splash screen */
-	static protected void showSplashScreen() {
-		splashScreen = new SplashScreen();
-		splashScreen.setVisible(true);
-	}
-
-	/** Hide the startup splash screen */
-	static protected void hideSplashScreen() {
-		splashScreen.setVisible(false);
-		splashScreen.dispose();
-		splashScreen = null;
 	}
 
 	/** Read the IRIS property file */
@@ -114,6 +98,21 @@ public class MainClient {
 		return new IrisClient(props);
 	}
 
+	/** Create the IRIS client with a splash screen */
+	static protected IrisClient createClientSplash(String[] args)
+		throws Exception
+	{
+		SplashScreen splash = new SplashScreen();
+		splash.setVisible(true);
+		try {
+			return createClient(args);
+		}
+		finally {
+			splash.setVisible(false);
+			splash.dispose();
+		}
+	}
+
 	/**
 	 * Main entry point.
 	 *
@@ -121,14 +120,7 @@ public class MainClient {
 	 */
 	static protected void execute(final String[] args) throws Exception {
 		bindSocket();
-		IrisClient c;
-		showSplashScreen();
-		try {
-			c = createClient(args);
-		}
-		finally {
-			hideSplashScreen();
-		}
+		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
 		c.setVisible(true);
 	}
