@@ -30,7 +30,7 @@ import us.mn.state.dot.util.HTTPProxySelector;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class Main {
+public class MainClient {
 
 	/** Name of default properties file to load */
 	static protected final String DEFAULT_PROPERTIES =

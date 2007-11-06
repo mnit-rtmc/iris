@@ -30,7 +30,7 @@
     <security>
        <all-permissions/>
     </security>
-    <application-desc main-class="us.mn.state.dot.tms.client.Main">
+    <application-desc main-class="us.mn.state.dot.tms.client.MainClient">
 	<argument>http://@@IRIS-WEBSTART.HOST@@/iris-client/iris-client.properties</argument>
     </application-desc>
 </jnlp>
