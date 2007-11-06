@@ -23,8 +23,6 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
@@ -55,34 +53,12 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS {
 	/** Minimum speed for travel time trip calculation */
 	static protected final int MINIMUM_TRIP_SPEED = 15;
 
-	/** Left justification code for MULTI tag */
-	static protected final int LEFT_JUSTIFICATION = 2;
-
-	/** Center justification code for MULTI tag */
-	static protected final int CENTER_JUSTIFICATION = 3;
-
-	/** Right justification code for MULTI tag */
-	static protected final int RIGHT_JUSTIFICATION = 4;
-
-	/** Travel time line justification pattern */
-	static protected final Pattern JUST_PATTERN =
-		Pattern.compile("\\[jl[234]\\]");
-
-	/** Travel time validation regex pattern */
-	static protected final Pattern TRAVEL_PATTERN =
-		Pattern.compile("[\\p{Upper}\\p{Digit}\\p{Blank}:,.;%-]*");
-
 	/** Validate travel time text */
 	static protected void validateTravel(String s)
 		throws ChangeVetoException
 	{
-		String[] t = JUST_PATTERN.split(s);
-		for(int i = 0; i < t.length; i++) {
-			Matcher m = TRAVEL_PATTERN.matcher(t[i]);
-			if(!m.matches())
-				throw new ChangeVetoException(
-					"Invalid travel: " + s);
-		}
+		if(!MultiString.isValid(s))
+			throw new ChangeVetoException("Invalid travel: " + s);
 	}
 
 	/** Special value to indicate an invalid line spacing */
