@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.MessengerException;
 import us.mn.state.dot.tms.comm.MeterPoller;
-import us.mn.state.dot.tms.comm.SignPoller;
+import us.mn.state.dot.tms.comm.WarningSignPoller;
 
 /**
  * MndotPoller is a poller for the Mn/DOT 170 communication protocol,
@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.comm.SignPoller;
  * @author Douglas Lau
  */
 public class MndotPoller extends MessagePoller implements MeterPoller,
-	SignPoller
+	WarningSignPoller
 {
 	/** CommunicationLine protocol (4-bit or 5-bit) */
 	protected final int protocol;
@@ -170,5 +170,18 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 				new SetRedTime(meter, n, r).start();
 			}
 		}
+	}
+
+	/** Get the appropriate rate for the deployed state */
+	protected int getDeployedRate(boolean d) {
+		if(d)
+			return MeterRate.CENTRAL;
+		else
+			return MeterRate.FORCED_FLASH;
+	}
+
+	/** Set the deployed status of the sign */
+	public void setDeployed(WarningSignImpl sign, boolean d) {
+		new SetMeterRate(sign, 1, getDeployedRate(d)).start();
 	}
 }

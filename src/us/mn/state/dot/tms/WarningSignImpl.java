@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2006  Minnesota Department of Transportation
+ * Copyright (C) 2004-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
+import us.mn.state.dot.tms.comm.MessagePoller;
+import us.mn.state.dot.tms.comm.WarningSignPoller;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
-import us.mn.state.dot.tms.comm.mndot.MeterRate;
-import us.mn.state.dot.tms.comm.mndot.SetMeterRate;
 
 /**
  * WarningSignImpl is a traffic device can display one fixed message. It can
@@ -109,18 +109,21 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign {
 		}
 	}
 
-	/** Get the appropriate rate for the deployed state */
-	protected int getDeployedRate(boolean d) {
-		if(d)
-			return MeterRate.CENTRAL;
-		else
-			return MeterRate.FORCED_FLASH;
+	/** Get a warning sign poller */
+	protected WarningSignPoller getWarningSignPoller() {
+		if(isActive()) {
+			MessagePoller p = getPoller();
+			if(p instanceof WarningSignPoller)
+				return (WarningSignPoller)p;
+		}
+		return null;
 	}
 
 	/** Set the deployed status of the sign */
 	public void setDeployed(boolean d) {
-		if(isActive())
-			new SetMeterRate(this, 1, getDeployedRate(d)).start();
+		WarningSignPoller p = getWarningSignPoller();
+		if(p != null)
+			p.setDeployed(this, d);
 	}
 
 	/** Get the current status code */
