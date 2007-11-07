@@ -66,6 +66,9 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";
 
+	/** System-wide policy parameters */
+	static public SystemPolicyImpl policy;
+
 	/** Communication line list */
 	static CommunicationLineList lineList;
 

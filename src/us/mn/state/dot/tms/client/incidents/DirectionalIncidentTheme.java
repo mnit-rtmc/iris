@@ -24,7 +24,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
-import us.mn.state.dot.tms.DMSList;
+import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.trafmap.IncidentLayer;
 
@@ -73,9 +73,11 @@ public class DirectionalIncidentTheme extends StyledTheme {
 	{
 		super("Incidents", IncidentLayer.TWO_WAY);
 		int[] r = new int[4];
-		DMSList l = tc.getProxy().getDMSList();
-		for(int i = 0; i < r.length; i++)
-			r[i] = l.getRingRadius(i);
+		SystemPolicy policy = tc.getProxy().getPolicy();
+		r[0] = policy.getValue(SystemPolicy.RING_RADIUS_0);
+		r[1] = policy.getValue(SystemPolicy.RING_RADIUS_1);
+		r[2] = policy.getValue(SystemPolicy.RING_RADIUS_2);
+		r[3] = policy.getValue(SystemPolicy.RING_RADIUS_3);
 		ellipses = createEllipses(r);
 		addStyle(STYLE);
 	}

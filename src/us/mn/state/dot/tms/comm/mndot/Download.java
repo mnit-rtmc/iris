@@ -21,10 +21,11 @@ import us.mn.state.dot.tms.Controller170Impl;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
-import us.mn.state.dot.tms.WarningSignImpl;
+import us.mn.state.dot.tms.StratifiedPlanImpl;
+import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TMSObjectImpl;
-import us.mn.state.dot.tms.StratifiedPlanImpl;
+import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.DownloadRequestException;
@@ -291,10 +292,10 @@ public class Download extends ControllerOperation implements TimingTable {
 		for(int t = TimingPlan.AM; t <= TimingPlan.PM; t++) {
 			bcd.write16Bit(STARTUP_GREEN);
 			bcd.write16Bit(STARTUP_YELLOW);
-			bcd.write16Bit(
-				TMSObjectImpl.dmsList.getMeterGreenTime());
-			bcd.write16Bit(
-				TMSObjectImpl.dmsList.getMeterYellowTime());
+			bcd.write16Bit(TMSObjectImpl.policy.getValue(
+				SystemPolicy.METER_GREEN_TIME));
+			bcd.write16Bit(TMSObjectImpl.policy.getValue(
+				SystemPolicy.METER_YELLOW_TIME));
 			bcd.write16Bit(HOV_PREEMPT);
 			for(int i = 0; i < 6; i++)
 				bcd.write16Bit(red[t]);

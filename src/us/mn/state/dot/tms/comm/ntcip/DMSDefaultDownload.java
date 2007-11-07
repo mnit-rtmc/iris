@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.TMSObjectImpl;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -129,9 +130,11 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.add(new DefaultJustificationPage(
 				DefaultJustificationPage.TOP));
 			mess.add(new DefaultPageOnTime(
-				TMSObjectImpl.dmsList.getPageOnTime()));
+				TMSObjectImpl.policy.getValue(
+				SystemPolicy.DMS_PAGE_ON_TIME)));
 			mess.add(new DefaultPageOffTime(
-				TMSObjectImpl.dmsList.getPageOffTime()));
+				TMSObjectImpl.policy.getValue(
+				SystemPolicy.DMS_PAGE_OFF_TIME)));
 			mess.setRequest();
 			return new LedstarDefaults();
 		}

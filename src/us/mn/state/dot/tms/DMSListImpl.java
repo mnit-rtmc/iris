@@ -42,7 +42,6 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		TMSException, RemoteException
 	{
 		library = new DmsMessageLibrary(store);
-		parameters = new SystemPolicy(store);
 		super.load(c, keyField);
 	}
 
@@ -52,71 +51,6 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 	/** Get the DMS message library */
 	public DmsMessageLibrary getLibrary() {
 		return library;
-	}
-
-	/** System policy */
-	protected SystemPolicy parameters;
-
-	/** Set one of the ring radius values */
-	public void setRingRadius( int ring, int radius )
-		throws TMSException
-	{
-		parameters.setRingRadius( ring, radius );
-	}
-
-	/** Get one of the ring radius values */
-	public int getRingRadius( int ring ) {
-		return parameters.getRingRadius( ring );
-	}
-
-	/** Set the global sign page on time (tenths of a second) */
-	public void setPageOnTime( int time ) throws TMSException {
-		parameters.setPageOnTime( time );
-	}
-
-	/** Get the global sign page on time (tenths of a second) */
-	public int getPageOnTime() {
-		return parameters.getPageOnTime();
-	}
-
-	/** Set the global sign page off time (tenths of a second) */
-	public void setPageOffTime( int time ) throws TMSException {
-		parameters.setPageOffTime( time );
-	}
-
-	/** Get the global sign page off time (tenths of a second) */
-	public int getPageOffTime() {
-		return parameters.getPageOffTime();
-	}
-
-	/** Set the global ramp meter green time (tenths of a second) */
-	public void setMeterGreenTime(int time) throws TMSException {
-		parameters.setMeterGreenTime(time);
-	}
-
-	/** Get the global ramp meter green time (tenths of a second) */
-	public int getMeterGreenTime() {
-		return parameters.getMeterGreenTime();
-	}
-
-	/** Set the global ramp meter yellow time (tenths of a second) */
-	public void setMeterYellowTime(int time) throws TMSException {
-		parameters.setMeterYellowTime(time);
-	}
-
-	/** Get the global ramp meter yellow time (tenths of a second) */
-	public int getMeterYellowTime() {
-		return parameters.getMeterYellowTime();
-	}
-
-	/** Set the global ramp meter minimum red time (tenths of a second) */
-	public void setMeterMinRedTime(int time) throws TMSException {
-		parameters.setMeterMinRedTime(time);
-	}
-
-	/** Get the global ramp meter minimum red time (tenths of a second) */
-	public int getMeterMinRedTime() {
-		return parameters.getMeterMinRedTime();
 	}
 
 	/** Add a dynamic message sign to the list */

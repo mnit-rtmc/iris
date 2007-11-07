@@ -88,6 +88,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	{
 		openVault(props);
 		openEventVault(props);
+		System.err.println("Loading system-wide policy...");
+		policy = new SystemPolicyImpl(store);
 		System.err.println( "Loading comm lines..." );
 		lines.load( CommunicationLineImpl.class, "index" );
 		System.err.println( "Loading node groups..." );
@@ -443,6 +445,11 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		tours = new TourListImpl();
 		lcss = new LCSListImpl();
 		initialize();
+	}
+
+	/** Get the system-wide policy */
+	public SystemPolicy getPolicy() {
+		return policy;
 	}
 
 	/** Get the communication line list */

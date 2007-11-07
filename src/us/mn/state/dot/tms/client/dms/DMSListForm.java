@@ -29,6 +29,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 
 import us.mn.state.dot.tms.DMSList;
+import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AddForm;
@@ -66,6 +67,9 @@ public class DMSListForm extends SortedListForm {
 	/** Remote sign list interface */
 	protected final DMSList signList;
 
+	/** System policy */
+	protected final SystemPolicy policy;
+
 	/** Ring 1 radius slider */
 	protected final JSlider ring1 = new JSlider(0, 20, 1);
 
@@ -102,6 +106,7 @@ public class DMSListForm extends SortedListForm {
 		super(TITLE, tc, tc.getProxy().getDMSListModel(),
 			Icons.getIcon("drum-inactive"));
 		signList = (DMSList)obj;
+		policy = tc.getProxy().getPolicy();
 	}
 
 	/** Initialise the widgets on the form */
@@ -361,22 +366,26 @@ public class DMSListForm extends SortedListForm {
 
 	/** Update the DMSListForm with the current status */
 	protected void doUpdate() throws RemoteException {
-		ring1.setValue(signList.getRingRadius(0));
-		ring2.setValue(signList.getRingRadius(1));
-		ring3.setValue(signList.getRingRadius(2));
-		ring4.setValue(signList.getRingRadius(3));
-		pageOn.setValue(signList.getPageOnTime());
-		pageOff.setValue(signList.getPageOffTime());
+		ring1.setValue(policy.getValue(SystemPolicy.RING_RADIUS_0));
+		ring2.setValue(policy.getValue(SystemPolicy.RING_RADIUS_1));
+		ring3.setValue(policy.getValue(SystemPolicy.RING_RADIUS_2));
+		ring4.setValue(policy.getValue(SystemPolicy.RING_RADIUS_3));
+		pageOn.setValue(policy.getValue(SystemPolicy.DMS_PAGE_ON_TIME));
+		pageOff.setValue(policy.getValue(
+			SystemPolicy.DMS_PAGE_OFF_TIME));
 	}
 
 	/** Apply button pressed */
 	public void applyPressed() throws TMSException, RemoteException {
-		signList.setRingRadius(0, ring1.getValue());
-		signList.setRingRadius(1, ring2.getValue());
-		signList.setRingRadius(2, ring3.getValue());
-		signList.setRingRadius(3, ring4.getValue());
-		signList.setPageOnTime(pageOn.getValue());
-		signList.setPageOffTime(pageOff.getValue());
+		policy.setValue(SystemPolicy.RING_RADIUS_0, ring1.getValue());
+		policy.setValue(SystemPolicy.RING_RADIUS_1, ring2.getValue());
+		policy.setValue(SystemPolicy.RING_RADIUS_2, ring3.getValue());
+		policy.setValue(SystemPolicy.RING_RADIUS_3, ring4.getValue());
+		policy.setValue(SystemPolicy.DMS_PAGE_ON_TIME,
+			pageOn.getValue());
+		policy.setValue(SystemPolicy.DMS_PAGE_OFF_TIME,
+			pageOff.getValue());
+		policy.notifyUpdate();
 		signList.notifyUpdate();
 	}
 

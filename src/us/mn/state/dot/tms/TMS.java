@@ -24,6 +24,9 @@ import java.rmi.RemoteException;
  */
 public interface TMS extends Remote {
 
+	/** Get the system-wide policy */
+	SystemPolicy getPolicy() throws RemoteException;
+
 	/** Get the communication line list */
 	public IndexedList getLineList() throws RemoteException;
 

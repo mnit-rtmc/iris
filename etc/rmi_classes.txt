@@ -74,6 +74,7 @@ us/mn/state/dot/tms/StationList.class
 us/mn/state/dot/tms/Station.class
 us/mn/state/dot/tms/StationSegment.class
 us/mn/state/dot/tms/StatusTable.class
+us/mn/state/dot/tms/SystemPolicy.class
 us/mn/state/dot/tms/TimingPlan.class
 us/mn/state/dot/tms/TimingPlanList.class
 us/mn/state/dot/tms/TMS.class
