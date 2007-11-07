@@ -105,6 +105,19 @@ public class Download extends ControllerOperation implements TimingTable {
 		}
 	}
 
+	/** Set the controller firmware version */
+	protected void setVersion(int major, int minor) {
+		String v = Integer.toString(major) + "." +
+			Integer.toString(minor);
+		c170.setVersion(v);
+		if(major < 4 || (major == 4 && minor < 2) ||
+			(major == 5 && minor < 4))
+		{
+			System.err.println("BUGGY 170 firmware! (version " +
+				v + ") at " + c170.toString());
+		}
+	}
+
 	/** Phase to query the prom version */
 	protected class QueryPromVersion extends Phase {
 
@@ -113,7 +126,7 @@ public class Download extends ControllerOperation implements TimingTable {
 			byte[] data = new byte[2];
 			mess.add(new MemoryRequest(Address.PROM_VERSION, data));
 			mess.getRequest();
-			c170.setVersion(data[0], data[1]);
+			setVersion(data[0], data[1]);
 			if(data[0] > 4 || data[1] > 0)
 				return new ResetDetectors();
 			return new ResetWatchdogMonitor();

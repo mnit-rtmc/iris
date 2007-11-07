@@ -156,19 +156,6 @@ public class Controller170Impl extends ControllerImpl
 		return bitmap;
 	}
 
-	/** Set the controller firmware version */
-	public void setVersion(int major, int minor) {
-		setVersion(Integer.toString(major) + "." +
-			Integer.toString(minor));
-		TrafficDevice d = getDevice();
-		if(major < 4 || (major == 4 && minor < 2) ||
-			(major == 5 && minor < 4))
-		{
-			System.err.println("BUGGY 170 firmware! (version " +
-				major + '.' + minor + ") at " + toString());
-		}
-	}
-
 	/** Get the meter number on the controller */
 	public int getMeterNumber(RampMeterImpl meter) {
 		if(isActive()) {
