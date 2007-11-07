@@ -1897,10 +1897,10 @@ SET SESSION AUTHORIZATION 'tms';
 
 --
 -- TOC entry 137 (OID 19211576)
--- Name: dms_parameters; Type: TABLE; Schema: public; Owner: tms
+-- Name: system_policy; Type: TABLE; Schema: public; Owner: tms
 --
 
-CREATE TABLE dms_parameters (
+CREATE TABLE system_policy (
     name character varying NOT NULL,
     value integer NOT NULL
 );
@@ -1908,11 +1908,11 @@ CREATE TABLE dms_parameters (
 
 --
 -- TOC entry 138 (OID 19211576)
--- Name: dms_parameters; Type: ACL; Schema: public; Owner: tms
+-- Name: system_policy; Type: ACL; Schema: public; Owner: tms
 --
 
-REVOKE ALL ON TABLE dms_parameters FROM PUBLIC;
-GRANT SELECT ON TABLE dms_parameters TO PUBLIC;
+REVOKE ALL ON TABLE system_policy FROM PUBLIC;
+GRANT SELECT ON TABLE system_policy TO PUBLIC;
 
 
 SET SESSION AUTHORIZATION 'tms';
@@ -2230,10 +2230,10 @@ COPY road_modifier (id, modifier) FROM stdin;
 
 --
 -- Data for TOC entry 301 (OID 19211576)
--- Name: dms_parameters; Type: TABLE DATA; Schema: public; Owner: tms
+-- Name: system_policy; Type: TABLE DATA; Schema: public; Owner: tms
 --
 
-COPY dms_parameters (name, value) FROM stdin;
+COPY system_policy (name, value) FROM stdin;
 meter_green_time	13
 meter_yellow_time	7
 meter_min_red_time	1
