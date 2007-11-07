@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.client.toast.DetectorListForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.MeteringHolidayForm;
 import us.mn.state.dot.tms.client.toast.PixFontListForm;
+import us.mn.state.dot.tms.client.toast.PolicyForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.SonetRingForm;
 import us.mn.state.dot.tms.client.tour.TourListForm;
@@ -56,6 +57,13 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
+		item = new JMenuItem("Policy");
+		item.setMnemonic('P');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new PolicyForm(tc));
+			}
+		};
 		item = new JMenuItem("Sonet System", Icons.getIcon("nodegrps"));
 		item.setMnemonic('I');
 		item.setToolTipText("System status");
