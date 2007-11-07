@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,5 +111,35 @@ public class DMSParameters implements ResultFactory {
 	/** Get the global sign page off time (tenths of a second) */
 	public int getPageOffTime() {
 		return getParameter("page_off_time");
+	}
+
+	/** Set the global ramp meter green time (tenths of a second) */
+	public void setMeterGreenTime(int time) throws TMSException {
+		setParameter("meter_green_time", time);
+	}
+
+	/** Get the global ramp meter green time (tenths of a second) */
+	public int getMeterGreenTime() {
+		return getParameter("meter_green_time");
+	}
+
+	/** Set the global ramp meter yellow time (tenths of a second) */
+	public void setMeterYellowTime(int time) throws TMSException {
+		setParameter("meter_yellow_time", time);
+	}
+
+	/** Get the global ramp meter yellow time (tenths of a second) */
+	public int getMeterYellowTime() {
+		return getParameter("meter_yellow_time");
+	}
+
+	/** Set the global ramp meter minimum red time (tenths of a second) */
+	public void setMeterMinRedTime(int time) throws TMSException {
+		setParameter("meter_min_red_time", time);
+	}
+
+	/** Get the global ramp meter minimum red time (tenths of a second) */
+	public int getMeterMinRedTime() {
+		return getParameter("meter_min_red_time");
 	}
 }

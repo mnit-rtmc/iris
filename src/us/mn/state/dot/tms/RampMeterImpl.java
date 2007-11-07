@@ -27,7 +27,6 @@ import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.MeterPoller;
-import us.mn.state.dot.tms.comm.mndot.TimingTable;
 
 /**
  * Each ramp meter is an object of this class.
@@ -35,7 +34,7 @@ import us.mn.state.dot.tms.comm.mndot.TimingTable;
  * @author Douglas Lau
  */
 public class RampMeterImpl extends TrafficDeviceImpl
-	implements RampMeter, Constants, TimingTable
+	implements RampMeter, Constants
 {
 	/** ObjectVault table name */
 	static public final String tableName = "ramp_meter";
@@ -655,16 +654,18 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		float cycle = SECONDS_PER_HOUR / (float)release_rate;
 		if(singleRelease)
 			cycle /= 2;
-		// FIXME: green/yellow timing shouldn't be in mndot package
-		int red_time = Math.round(cycle * 10) -
-			(METERING_GREEN + METERING_YELLOW);
-		return Math.max(red_time, MIN_METERING_RED);
+		int green = dmsList.getMeterGreenTime();
+		int yellow = dmsList.getMeterYellowTime();
+		int min_red = dmsList.getMeterMinRedTime();
+		int red_time = Math.round(cycle * 10) - (green + yellow);
+		return Math.max(red_time, min_red);
 	}
 
 	/** Calculate the release rate from a given red time */
 	public int calculateReleaseRate(int red_time) {
-		// FIXME: green/yellow timing shouldn't be in mndot package
-		float cycle = (red_time + METERING_YELLOW + METERING_GREEN) /
+		int green = dmsList.getMeterGreenTime();
+		int yellow = dmsList.getMeterYellowTime();
+		float cycle = (red_time + yellow + green) /
 			10.0f;
 		if(singleRelease)
 			cycle *= 2;

@@ -89,6 +89,36 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		return parameters.getPageOffTime();
 	}
 
+	/** Set the global ramp meter green time (tenths of a second) */
+	public void setMeterGreenTime(int time) throws TMSException {
+		parameters.setMeterGreenTime(time);
+	}
+
+	/** Get the global ramp meter green time (tenths of a second) */
+	public int getMeterGreenTime() {
+		return parameters.getMeterGreenTime();
+	}
+
+	/** Set the global ramp meter yellow time (tenths of a second) */
+	public void setMeterYellowTime(int time) throws TMSException {
+		parameters.setMeterYellowTime(time);
+	}
+
+	/** Get the global ramp meter yellow time (tenths of a second) */
+	public int getMeterYellowTime() {
+		return parameters.getMeterYellowTime();
+	}
+
+	/** Set the global ramp meter minimum red time (tenths of a second) */
+	public void setMeterMinRedTime(int time) throws TMSException {
+		parameters.setMeterMinRedTime(time);
+	}
+
+	/** Get the global ramp meter minimum red time (tenths of a second) */
+	public int getMeterMinRedTime() {
+		return parameters.getMeterMinRedTime();
+	}
+
 	/** Add a dynamic message sign to the list */
 	public synchronized TMSObject add( String key ) throws TMSException,
 		RemoteException
