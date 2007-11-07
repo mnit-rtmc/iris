@@ -42,7 +42,7 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		TMSException, RemoteException
 	{
 		library = new DmsMessageLibrary(store);
-		parameters = new DMSParameters(store);
+		parameters = new SystemPolicy(store);
 		super.load(c, keyField);
 	}
 
@@ -54,8 +54,8 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		return library;
 	}
 
-	/** DMS Parameters */
-	protected DMSParameters parameters;
+	/** System policy */
+	protected SystemPolicy parameters;
 
 	/** Set one of the ring radius values */
 	public void setRingRadius( int ring, int radius )

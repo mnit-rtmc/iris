@@ -19,11 +19,11 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
- * DMSParameters contains a mapping of parameter names to values.
+ * SystemPolicy contains a mapping of parameter names to values.
  *
  * @author Douglas Lau
  */
-public class DMSParameters implements ResultFactory {
+public class SystemPolicy implements ResultFactory {
 
 	/** Connection to SQL database */
 	protected final SQLConnection store;
@@ -32,8 +32,8 @@ public class DMSParameters implements ResultFactory {
 	protected final HashMap<String, Integer> params =
 		new HashMap<String, Integer>();
 
-	/** Create a new DMS parameters object */
-	public DMSParameters(SQLConnection s) throws TMSException {
+	/** Create a new system policy object */
+	public SystemPolicy(SQLConnection s) throws TMSException {
 		store = s;
 		store.query("SELECT * FROM dms_parameters;", this);
 	}
