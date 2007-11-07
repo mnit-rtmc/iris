@@ -2234,11 +2234,14 @@ COPY road_modifier (id, modifier) FROM stdin;
 --
 
 COPY dms_parameters (name, value) FROM stdin;
+meter_green_time	13
+meter_yellow_time	7
+meter_min_red_time	1
+page_on_time	20
+page_off_time	0
 ring_radius_0	2
 ring_radius_1	5
 ring_radius_2	10
-page_on_time	20
-page_off_time	0
 \.
 
 
