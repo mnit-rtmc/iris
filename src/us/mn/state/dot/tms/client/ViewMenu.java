@@ -64,6 +64,7 @@ public class ViewMenu extends JMenu {
 				desktop.show(new PolicyForm(tc));
 			}
 		};
+		add(item);
 		item = new JMenuItem("Sonet System", Icons.getIcon("nodegrps"));
 		item.setMnemonic('I');
 		item.setToolTipText("System status");
