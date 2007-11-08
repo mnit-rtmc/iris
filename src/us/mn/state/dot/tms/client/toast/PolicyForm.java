@@ -65,6 +65,21 @@ public class PolicyForm extends TMSObjectForm {
 	/** System policy */
 	protected SystemPolicy policy;
 
+	/** Ramp meter green time slider */
+	protected final JSlider green = createSlider(0, 30);
+
+	/** Ramp meter yellow time slider */
+	protected final JSlider yellow = createSlider(0, 30);
+
+	/** Ramp meter minimum red time slider */
+	protected final JSlider min_red = createSlider(0, 30);
+
+	/** Page on time slider */
+	protected final JSlider pageOn = createSlider(0, 50);
+
+	/** Page off time slider */
+	protected final JSlider pageOff = createSlider(0, 50);
+
 	/** Ring 1 radius slider */
 	protected final JSlider ring1 = createSlider(0, 20);
 
@@ -76,12 +91,6 @@ public class PolicyForm extends TMSObjectForm {
 
 	/** Ring 4 radius slider */
 	protected final JSlider ring4 = createSlider(0, 20);
-
-	/** Page on time slider */
-	protected final JSlider pageOn = createSlider(0, 50);
-
-	/** Page off time slider */
-	protected final JSlider pageOff = createSlider(0, 50);
 
 	/** Apply button */
 	protected final JButton apply = new JButton("Apply Changes");
@@ -99,6 +108,7 @@ public class PolicyForm extends TMSObjectForm {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 		add(tab);
+		tab.add("Meters", createMeterPanel());
 		tab.add("DMS", createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
 		if(admin) {
@@ -111,6 +121,23 @@ public class PolicyForm extends TMSObjectForm {
 			add(apply);
 		}
 		setBackground(Color.LIGHT_GRAY);
+	}
+
+	/** Create the ramp meter policy panel */
+	protected JPanel createMeterPanel() {
+		green.setLabelTable(TIME_LABELS);
+		yellow.setLabelTable(TIME_LABELS);
+		min_red.setLabelTable(TIME_LABELS);
+
+		FormPanel panel = new FormPanel(admin);
+		panel.setCenter();
+		panel.addRow(new JLabel("System-Wide Ramp Meter"));
+		panel.setCenter();
+		panel.addRow(new JLabel("Interval Times (seconds)"));
+		panel.addRow("Green", green);
+		panel.addRow("Yellow", yellow);
+		panel.addRow("Minimum Red", min_red);
+		return panel;
 	}
 
 	/** Create the DMS policy panel */
@@ -145,6 +172,11 @@ public class PolicyForm extends TMSObjectForm {
 
 	/** Update the DMSListForm with the current status */
 	protected void doUpdate() throws RemoteException {
+		green.setValue(policy.getValue(SystemPolicy.METER_GREEN_TIME));
+		yellow.setValue(policy.getValue(
+			SystemPolicy.METER_YELLOW_TIME));
+		min_red.setValue(policy.getValue(
+			SystemPolicy.METER_MIN_RED_TIME));
 		pageOn.setValue(policy.getValue(SystemPolicy.DMS_PAGE_ON_TIME));
 		pageOff.setValue(policy.getValue(
 			SystemPolicy.DMS_PAGE_OFF_TIME));
@@ -156,6 +188,12 @@ public class PolicyForm extends TMSObjectForm {
 
 	/** Apply button pressed */
 	public void applyPressed() throws TMSException, RemoteException {
+		policy.setValue(SystemPolicy.METER_GREEN_TIME,
+			green.getValue());
+		policy.setValue(SystemPolicy.METER_YELLOW_TIME,
+			yellow.getValue());
+		policy.setValue(SystemPolicy.METER_MIN_RED_TIME,
+			min_red.getValue());
 		policy.setValue(SystemPolicy.DMS_PAGE_ON_TIME,
 			pageOn.getValue());
 		policy.setValue(SystemPolicy.DMS_PAGE_OFF_TIME,
