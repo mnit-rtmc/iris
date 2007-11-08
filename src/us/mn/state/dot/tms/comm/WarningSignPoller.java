@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.WarningSignImpl;
  *
  * @author Douglas Lau
  */
-public interface WarningSignPoller {
+public interface WarningSignPoller extends SignPoller {
 
 	/** Set the deployed status of a warning sign */
 	void setDeployed(WarningSignImpl sign, boolean d);
