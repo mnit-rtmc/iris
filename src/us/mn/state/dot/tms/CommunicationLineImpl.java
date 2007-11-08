@@ -256,10 +256,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		if(t == timeout)
 			return;
 		try {
-			if(messenger instanceof SerialMessenger) {
-				SerialMessenger sm = (SerialMessenger)messenger;
-				sm.setTimeout(t);
-			}
+			if(messenger != null)
+				messenger.setTimeout(t);
 		}
 		catch(IOException e) {
 			status = e.getMessage();
@@ -409,8 +407,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			if(messenger instanceof SerialMessenger) {
 				SerialMessenger sm = (SerialMessenger)messenger;
 				sm.setBaudRate(bitRate);
-				sm.setTimeout(timeout);
 			}
+			messenger.setTimeout(timeout);
 			messenger.open();
 			status = "OK";
 		}

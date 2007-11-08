@@ -50,6 +50,9 @@ abstract public class Messenger {
 		}
 	}
 
+	/** Set the messenger timeout */
+	abstract public void setTimeout(int t) throws IOException;
+
 	/** Get the input stream */
 	public InputStream getInputStream() {
 		return input;
