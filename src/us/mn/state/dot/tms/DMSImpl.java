@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -760,14 +761,15 @@ return t1;
 
 	/** Get the full message library for the sign */
 	public DmsMessage[] getMessages() {
-		TreeSet tree = new TreeSet();
-		HashMap map = dmsList.getLibrary().getMessages();
+		TreeSet<DmsMessage> tree = new TreeSet<DmsMessage>();
+		HashMap<Integer, DmsMessage> map =
+			dmsList.getLibrary().getMessages();
 		synchronized(map) {
-			Iterator it = map.values().iterator();
-			while(it.hasNext()) {
-				DmsMessage m = (DmsMessage)it.next();
+			for(DmsMessage m: map.values()) {
 				if(m.dms == null || id.equals(m.dms)) {
-					try { tree.add(m.clone()); }
+					try {
+						tree.add((DmsMessage)m.clone());
+					}
 					catch(CloneNotSupportedException e) {
 						// This should never happen ...
 						e.printStackTrace();
@@ -775,7 +777,7 @@ return t1;
 				}
 			}
 		}
-		calculateWidths(tree.iterator());
+		calculateWidths(tree);
 		return (DmsMessage[])tree.toArray(new DmsMessage[0]);
 	}
 
@@ -1031,11 +1033,10 @@ return t1;
 	}
 
 	/** Calculate the widths of all DMS messages in an iterator */
-	protected void calculateWidths(Iterator it) {
+	protected void calculateWidths(Collection<DmsMessage> msgs) {
 		PixFontImpl font = getFont();
 		if(font != null) {
-			while(it.hasNext()) {
-				DmsMessage m = (DmsMessage)it.next();
+			for(DmsMessage m: msgs) {
 				m.m_width = calculateWidth(font, m.message);
 				m.a_width = calculateWidth(font, m.abbrev);
 			}

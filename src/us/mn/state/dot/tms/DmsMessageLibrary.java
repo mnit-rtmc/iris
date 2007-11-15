@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,10 +29,11 @@ public class DmsMessageLibrary implements ResultFactory {
 	protected final SQLConnection store;
 
 	/** Mapping of message IDs to DmsMessage objects */
-	protected final HashMap messages = new HashMap();
+	protected final HashMap<Integer, DmsMessage> messages =
+		new HashMap<Integer, DmsMessage>();
 
 	/** Get a mapping of the messages in the library */
-	public HashMap getMessages() {
+	public HashMap<Integer, DmsMessage> getMessages() {
 		return messages;
 	}
 
@@ -83,7 +84,7 @@ public class DmsMessageLibrary implements ResultFactory {
 				insertGlobal(id, line);
 			store.query("SELECT * FROM dms_message WHERE id = '" +
 				id + "';", this);
-			return (DmsMessage)messages.get(new Integer(id));
+			return messages.get(new Integer(id));
 		}
 	}
 
