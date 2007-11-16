@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -70,7 +69,7 @@ public class TableMapping {
 		final String key = owner.getKey();
 		final HashSet set = new HashSet();
 		store.query(createLookup(table, key), new ResultFactory() {
-			public void create(ResultSet row) throws SQLException {
+			public void create(ResultSet row) throws Exception {
 				set.add(row.getObject(1));
 			}
 		});
