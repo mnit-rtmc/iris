@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.log.Log;
 import us.mn.state.dot.tms.log.SignStatusEvent;
 import us.mn.state.dot.tms.comm.mndot.LCSCommandMessage;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * Class representing a set of LCSModules.
@@ -30,10 +29,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author    Timothy A. Johnson
  */
 public class LaneControlSignalImpl extends TrafficDeviceImpl implements
-	LaneControlSignal
+	LaneControlSignal, Storable
 {
 	/** ObjectVault table name */
 	public final static String tableName = "lcs";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Camera from which this can be seen */
 	protected CameraImpl camera;
@@ -80,12 +84,7 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		CameraImpl c = (CameraImpl)cameraList.getElement(id);
 		if(c == camera)
 			return;
-		try {
-			vault.update(this, "camera", c, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "camera", c.getOID());
 		camera = c;
 	}
 

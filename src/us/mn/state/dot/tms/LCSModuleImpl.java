@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * The LCSModuleImpl is the implementation of the LCSModule remote interface.
@@ -23,10 +22,16 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author    <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  * @author Douglas Lau
  */
-public class LCSModuleImpl extends TMSObjectImpl implements LCSModule {
-
+public class LCSModuleImpl extends TMSObjectImpl implements LCSModule,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "lcs_module";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Constant for number of special function outputs */
 	static protected final int SFO_COUNT = 40;
@@ -65,20 +70,20 @@ public class LCSModuleImpl extends TMSObjectImpl implements LCSModule {
 	}
 
 	/** Set the special function output for the GREEN state */
-	protected void setGreenOutput(int value) throws ObjectVaultException {
-		vault.update(this, "sfoGreen", value, getUserName());
+	protected void setGreenOutput(int value) throws TMSException {
+		store.update(this, "sfoGreen", value);
 		sfoGreen = value;
 	}
 
 	/** Set the special function output for the YELLOW state */
-	protected void setYellowOutput(int value) throws ObjectVaultException {
-		vault.update(this, "sfoYellow", value, getUserName());
+	protected void setYellowOutput(int value) throws TMSException {
+		store.update(this, "sfoYellow", value);
 		sfoYellow = value;
 	}
 
 	/** Set the special function output for the RED state */
-	protected void setRedOutput(int value) throws ObjectVaultException {
-		vault.update(this, "sfoRed", value, getUserName());
+	protected void setRedOutput(int value) throws TMSException {
+		store.update(this, "sfoRed", value);
 		sfoRed = value;
 	}
 
@@ -90,8 +95,7 @@ public class LCSModuleImpl extends TMSObjectImpl implements LCSModule {
 			throw new ChangeVetoException(
 				"Invalid output number: " + value);
 		}
-		try {
-			switch(state) {
+		switch(state) {
 			case GREEN:
 				setGreenOutput(value);
 				return;
@@ -101,30 +105,26 @@ public class LCSModuleImpl extends TMSObjectImpl implements LCSModule {
 			case RED:
 				setRedOutput(value);
 				return;
-			}
-		}
-		catch(ObjectVaultException ove) {
-			throw new TMSException(ove);
 		}
 		throw new ChangeVetoException("Module state " + state +
 			" is invalid");
 	}
 
 	/** Set the special function input for the GREEN verify */
-	protected void setGreenInput(int value) throws ObjectVaultException {
-		vault.update(this, "sfiGreen", value, getUserName());
+	protected void setGreenInput(int value) throws TMSException {
+		store.update(this, "sfiGreen", value);
 		sfiGreen = value;
 	}
 
 	/** Set the special function input for the YELLOW verify */
-	protected void setYellowInput(int value) throws ObjectVaultException {
-		vault.update(this, "sfiYellow", value, getUserName());
+	protected void setYellowInput(int value) throws TMSException {
+		store.update(this, "sfiYellow", value);
 		sfiYellow = value;
 	}
 
 	/** Set the special function input for the RED verify */
-	protected void setRedInput(int value) throws ObjectVaultException {
-		vault.update(this, "sfiRed", value, getUserName());
+	protected void setRedInput(int value) throws TMSException {
+		store.update(this, "sfiRed", value);
 		sfiRed = value;
 	}
 
@@ -136,8 +136,7 @@ public class LCSModuleImpl extends TMSObjectImpl implements LCSModule {
 			throw new ChangeVetoException(
 				"Invalid input number: " + value);
 		}
-		try {
-			switch(state) {
+		switch(state) {
 			case GREEN:
 				setGreenInput(value);
 				return;
@@ -147,10 +146,6 @@ public class LCSModuleImpl extends TMSObjectImpl implements LCSModule {
 			case RED:
 				setRedInput(value);
 				return;
-			}
-		}
-		catch(ObjectVaultException ove) {
-			throw new TMSException(ove);
 		}
 		throw new ChangeVetoException("Module state " + state +
 			" is invalid");

@@ -15,17 +15,22 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * A Location contains attributes necessary to describe a map location.
  *
  * @author Douglas Lau
  */
-public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
-
+public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "location";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new location */
 	public LocationImpl() throws RemoteException {
@@ -119,10 +124,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 	{
 		if(f == freeway)
 			return;
-		try { vault.update(this, "freeway", f, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "freeway", f.getOID());
 		freeway = f;
 	}
 
@@ -140,13 +142,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 			return;
 		if(d < 0 || d > DIR_FREEWAY.length)
 			throw new ChangeVetoException("Invalid direction");
-		try {
-			vault.update(this, "free_dir", new Short(d),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "free_dir", d);
 		free_dir = d;
 	}
 
@@ -169,10 +165,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 	{
 		if(x == cross_street)
 			return;
-		try { vault.update(this, "cross_street", x, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "cross_street", x.getOID());
 		cross_street = x;
 	}
 
@@ -190,13 +183,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 			return;
 		if(d < 0 || d > DIRECTION.length)
 			throw new ChangeVetoException("Invalid direction");
-		try {
-			vault.update(this, "cross_dir", new Short(d),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "cross_dir", d);
 		cross_dir = d;
 	}
 
@@ -214,13 +201,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 			return;
 		if(m < 0 || m > MODIFIER.length)
 			throw new ChangeVetoException("Invalid modifier");
-		try {
-			vault.update(this, "cross_mod", new Short(m),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "cross_mod", m);
 		cross_mod = m;
 	}
 
@@ -238,13 +219,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 			return;
 		if(x < 0)
 			throw new ChangeVetoException("Invalid Easting");
-		try {
-			vault.update(this, "easting", new Integer(x),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "easting", x);
 		easting = x;
 	}
 
@@ -260,13 +235,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 	public synchronized void setEastOffset(int x) throws TMSException {
 		if(x == east_off)
 			return;
-		try {
-			vault.update(this, "east_off", new Integer(x),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "east_off", x);
 		east_off = x;
 	}
 
@@ -292,13 +261,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 			return;
 		if(y < 0)
 			throw new ChangeVetoException("Invalid Northing");
-		try {
-			vault.update(this, "northing", new Integer(y),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "northing", y);
 		northing = y;
 	}
 
@@ -314,13 +277,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable {
 	public synchronized void setNorthOffset(int y) throws TMSException {
 		if(y == north_off)
 			return;
-		try {
-			vault.update(this, "north_off", new Integer(y),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "north_off", y);
 		north_off = y;
 	}
 

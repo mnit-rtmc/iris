@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2006  Minnesota Department of Transportation
+ * Copyright (C) 2003-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * MeteringHolidayImpl
@@ -25,10 +24,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  */
 public class MeteringHolidayImpl extends TMSObjectImpl
-	implements MeteringHoliday
+	implements MeteringHoliday, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "metering_holiday";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new metering holiday */
 	public MeteringHolidayImpl(String n) throws TMSException,
@@ -80,12 +84,7 @@ public class MeteringHolidayImpl extends TMSObjectImpl
 			if(m < Calendar.JANUARY || m > Calendar.DECEMBER) throw
 				new ChangeVetoException("Invalid month:" + m);
 		}
-		try {
-			vault.update(this, "month", new Integer(m),
-				getUserName());
-		} catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "month", m);
 		month = m;
 	}
 
@@ -103,13 +102,7 @@ public class MeteringHolidayImpl extends TMSObjectImpl
 				ChangeVetoException("Invalid day:" + d);
 			checkSelection(d, week, shift);
 		}
-		try {
-			vault.update(this, "day", new Integer(d),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "day", d);
 		day = d;
 	}
 
@@ -127,13 +120,7 @@ public class MeteringHolidayImpl extends TMSObjectImpl
 				ChangeVetoException("Invalid week:" + w);
 			checkSelection(day, w, shift);
 		}
-		try {
-			vault.update(this, "week", new Integer(w),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "week", w);
 		week = w;
 	}
 
@@ -150,13 +137,7 @@ public class MeteringHolidayImpl extends TMSObjectImpl
 			if(d < Calendar.SUNDAY || d > Calendar.SATURDAY) throw
 				new ChangeVetoException("Invalid weekday:" + d);
 		}
-		try {
-			vault.update(this, "weekday", new Integer(d),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "weekday", d);
 		weekday = d;
 	}
 
@@ -172,13 +153,7 @@ public class MeteringHolidayImpl extends TMSObjectImpl
 		if(s < -6 || s > 6)
 			throw new ChangeVetoException("Invalid shift:" + s);
 		if(s != 0) checkSelection(day, week, s);
-		try {
-			vault.update(this, "shift", new Integer(s),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "shift", s);
 		shift = s;
 	}
 
@@ -195,13 +170,7 @@ public class MeteringHolidayImpl extends TMSObjectImpl
 			if(p != Calendar.AM && p != Calendar.PM) throw new
 				ChangeVetoException("Invalid period:" + p);
 		}
-		try {
-			vault.update(this, "period", new Integer(p),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "period", p);
 		period = p;
 	}
 
