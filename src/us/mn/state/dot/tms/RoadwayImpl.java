@@ -18,7 +18,6 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.rmi.RemoteException;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * The RoadwayImpl class represents a single roadway which can be used to
@@ -26,10 +25,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-class RoadwayImpl extends TMSObjectImpl implements Roadway {
+class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "roadway";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Abbreviation regex pattern */
 	static protected final Pattern ABBREV_PATTERN =
@@ -94,12 +98,7 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway {
 		Matcher m = ABBREV_PATTERN.matcher(a);
 		if(!m.matches())
 			throw new ChangeVetoException("Invalid abbrev: " + a);
-		try {
-			vault.update(this, "abbreviated", a, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "abbreviated", a);
 		abbreviated = a;
 	}
 
@@ -118,13 +117,7 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway {
 		if(t == type)
 			return;
 		updateSegmentLists(t, direction);
-		try {
-			vault.update(this, "type", new Short(t),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "type", t);
 		type = t;
 	}
 
@@ -148,13 +141,7 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway {
 		if(d == direction)
 			return;
 		updateSegmentLists(type, d);
-		try {
-			vault.update(this, "direction", new Short(d),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "direction", d);
 		direction = d;
 	}
 
@@ -200,13 +187,8 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway {
 				seg2 = createSegmentList(segment2, WEST);
 			}
 		}
-		try {
-			vault.update(this, "segment1", seg1, getUserName());
-			vault.update(this, "segment2", seg2, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "segment1", seg1.getOID());
+		store.update(this, "segment2", seg2.getOID());
 		segment1 = seg1;
 		segment2 = seg2;
 	}

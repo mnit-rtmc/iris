@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * R_NodeImpl is an implementation of the R_Node interface. Each
@@ -98,12 +97,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 			return;
 		if(t < 0 || t >= TYPES.length)
 			throw new ChangeVetoException("Bad node type: " + t);
-		try {
-			vault.update(this, "node_type", t, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "node_type", t);
 		node_type = t;
 	}
 
@@ -152,12 +146,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public synchronized void setPickable(boolean p) throws TMSException {
 		if(p == pickable)
 			return;
-		try {
-			vault.update(this, "pickable", p, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "pickable", p);
 		pickable = p;
 	}
 
@@ -175,12 +164,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 			return;
 		if(t < 0 || t >= TRANSITIONS.length)
 			throw new ChangeVetoException("Bad transition: " + t);
-		try {
-			vault.update(this, "transition", t, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "transition", t);
 		transition = t;
 	}
 
@@ -208,12 +192,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 			return;
 		if(l < 0 || l > LANES_MAX)
 			throw new ChangeVetoException("Bad lanes: " + l);
-		try {
-			vault.update(this, "lanes", l, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "lanes", l);
 		lanes = l;
 	}
 
@@ -229,12 +208,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public synchronized void setAttachSide(boolean s) throws TMSException {
 		if(s == attach_side)
 			return;
-		try {
-			vault.update(this, "attach_side", s, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "attach_side", s);
 		attach_side = s;
 	}
 
@@ -252,12 +226,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 			return;
 		if(s < SHIFT_MIN || s > SHIFT_MAX)
 			throw new ChangeVetoException("Bad shift: " + s);
-		try {
-			vault.update(this, "shift", s, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "shift", s);
 		shift = s;
 	}
 
@@ -283,14 +252,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	{
 		if(s != null)
 			statMap.add(s, new StationImpl(s, this));
-		try {
-			vault.update(this, "station_id", s, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			if(s != null)
-				statMap.remove(s);
-			throw new TMSException(e);
-		}
+		store.update(this, "station_id", s);
 		try {
 			if(station_id != null)
 				statMap.remove(station_id);
@@ -342,13 +304,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 			return;
 		if(l < MINIMUM_SPEED_LIMIT || l > MAXIMUM_SPEED_LIMIT)
 			throw new ChangeVetoException("Bad speed limit: " + l);
-		try {
-			vault.update(this, "speed_limit", new Integer(l),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "speed_limit", l);
 		speed_limit = l;
 	}
 
@@ -365,12 +321,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		if(n.equals(notes))
 			return;
 		validateText(n);
-		try {
-			vault.update(this, "notes", n, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "notes", n);
 		notes = n;
 	}
 
