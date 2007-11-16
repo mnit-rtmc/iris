@@ -194,10 +194,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	{
 		if(det == detector)
 			return 0;
-		try { vault.update(this, "detector", det, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "detector", det.getOID());
 		int index = 0;
 		if(detector != null)
 			index = detector.getIndex();
@@ -221,13 +218,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			throw new ChangeVetoException("Invalid mode");
 		if((m != MODE_UNAVAILABLE) && !isActive())
 			throw new ChangeVetoException("Meter not active");
-		try {
-			vault.update(this, "controlMode", new Integer(m),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "controlMode", m);
 		controlMode = m;
 	}
 
@@ -255,13 +246,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	{
 		if(s == singleRelease)
 			return;
-		try {
-			vault.update(this, "singleRelease", new Boolean(s),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "singleRelease", s);
 		singleRelease = s;
 	}
 
@@ -721,12 +706,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			return;
 		if(s < 1)
 			throw new ChangeVetoException("Storage must be > 0");
-		try {
-			vault.update(this, "storage", new Integer(s),
-				getUserName());
-		} catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "storage", s);
 		storage = s;
 	}
 
@@ -744,12 +724,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			return;
 		if(w < 1)
 			throw new ChangeVetoException("Wait must be > 0");
-		try {
-			vault.update(this, "maxWait", new Integer(w),
-				getUserName());
-		} catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "maxWait", w);
 		maxWait = w;
 	}
 
@@ -772,10 +747,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	{
 		if(c == camera)
 			return;
-		try { vault.update(this, "camera", c, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "camera", c.getOID());
 		camera = c;
 	}
 

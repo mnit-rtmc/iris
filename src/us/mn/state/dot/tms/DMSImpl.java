@@ -242,7 +242,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	{
 		if(c == camera)
 			return;
-		store.update(this, "camera", c.getKey());
+		store.update(this, "camera", c.getOID());
 		camera = c;
 	}
 
