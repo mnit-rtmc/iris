@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,17 +17,22 @@ package us.mn.state.dot.tms;
 import java.util.Arrays;
 import java.rmi.RemoteException;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * The PixCharacterImpl class defines all the attributes of a font character.
  *
  * @author Douglas Lau
  */
-final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter {
-
+final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "character";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new pixel font character
 	 * @param i Character index */
@@ -70,13 +75,7 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter {
 	 * @param w Character width */
 	public void setWidth( int w ) throws TMSException {
 		if( w == width ) return;
-		try {
-			vault.update( this, "width", new Integer( w ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "width", w);
 		width = w;
 	}
 
@@ -95,10 +94,7 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter {
 	 * bottom. */
 	public void setBitmap( byte[] b ) throws TMSException {
 		if( Arrays.equals( b, bitmap ) ) return;
-		try { vault.update( this, "bitmap", b, getUserName() ); }
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "bitmap", b);
 		bitmap = b;
 	}
 

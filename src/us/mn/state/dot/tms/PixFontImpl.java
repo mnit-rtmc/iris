@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * The PixFontImpl class defines all the attributes of a pixel font. These
@@ -25,10 +24,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class PixFontImpl extends TMSObjectImpl implements PixFont {
+public class PixFontImpl extends TMSObjectImpl implements PixFont, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "font";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new pixel font
 	 * @param i Font index */
@@ -70,10 +74,7 @@ public class PixFontImpl extends TMSObjectImpl implements PixFont {
 	public void setName( String n ) throws TMSException {
 		if( n.equals( name ) ) return;
 		validateText(n);
-		try { vault.update( this, "name", n, getUserName() ); }
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "name", n);
 		name = n;
 	}
 
@@ -94,13 +95,7 @@ public class PixFontImpl extends TMSObjectImpl implements PixFont {
 			ChangeVetoException( "Invalid height" );
 		if( characters.size() > 0 )
 			throw new ChangeVetoException( "Characters exist" );
-		try {
-			vault.update( this, "height", new Integer( h ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "height", h);
 		height = h;
 	}
 
@@ -118,13 +113,7 @@ public class PixFontImpl extends TMSObjectImpl implements PixFont {
 		if( s == characterSpacing ) return;
 		if( s < 0 || s > 9 ) throw new
 			ChangeVetoException( "Invalid spacing" );
-		try {
-			vault.update( this, "characterSpacing",
-				new Integer( s ), getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "characterSpacing", s);
 		characterSpacing = s;
 	}
 
@@ -143,13 +132,7 @@ public class PixFontImpl extends TMSObjectImpl implements PixFont {
 		if( s == lineSpacing ) return;
 		if( s < 0 || s > 9 ) throw new
 			ChangeVetoException( "Invalid spacing" );
-		try {
-			vault.update( this, "lineSpacing", new Integer( s ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "lineSpacing", s);
 		lineSpacing = s;
 	}
 
@@ -171,13 +154,7 @@ public class PixFontImpl extends TMSObjectImpl implements PixFont {
 	 * @param v Font version ID */
 	public void setVersionID( int v ) throws TMSException {
 		if( v == versionID ) return;
-		try {
-			vault.update( this, "versionID", new Integer( v ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "versionID", v);
 		versionID = v;
 	}
 
