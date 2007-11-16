@@ -242,10 +242,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	{
 		if(c == camera)
 			return;
-		try { vault.update(this, "camera", c, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "camera", c.getKey());
 		camera = c;
 	}
 
@@ -266,10 +263,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	public synchronized void setMile(Float m) throws TMSException {
 		if(m == mile)
 			return;
-		try { vault.update(this, "mile", m, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "mile", m);
 		mile = m;
 	}
 
@@ -293,10 +287,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 				throw new ChangeVetoException(
 					"Invalid station: " + i);
 		}
-		try { vault.update(this, "dest1", i, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "dest1", i);
 		dest1 = i;
 		route1 = null;
 	}
@@ -314,10 +305,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		if(t.equals(travel1))
 			return;
 		validateTravel(t);
-		try { vault.update(this, "travel1", t, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "travel1", t);
 		travel1 = t;
 	}
 
@@ -341,10 +329,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 				throw new ChangeVetoException(
 					"Invalid station: " + i);
 		}
-		try { vault.update(this, "dest2", i, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "dest2", i);
 		dest2 = i;
 		route2 = null;
 	}
@@ -362,10 +347,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		if(t.equals(travel2))
 			return;
 		validateTravel(t);
-		try { vault.update(this, "travel2", t, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "travel2", t);
 		travel2 = t;
 	}
 
