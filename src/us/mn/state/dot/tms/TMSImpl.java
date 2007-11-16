@@ -90,6 +90,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		openEventVault(props);
 		System.err.println("Loading system-wide policy...");
 		policy = new SystemPolicyImpl(store);
+		System.err.println("Loading roadways...");
+		roadways.load(RoadwayImpl.class, "name");
 		System.err.println( "Loading comm lines..." );
 		lines.load( CommunicationLineImpl.class, "index" );
 		System.err.println( "Loading node groups..." );
@@ -102,8 +104,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		loadAlarms();
 		System.err.println("Loading detectors...");
 		detectors.load(DetectorImpl.class, "index");
-		System.err.println("Loading roadways...");
-		roadways.load(RoadwayImpl.class, "name");
 		System.err.println("Loading r_nodes...");
 		// NOTE: must be called after detList is populated
 		r_nodes.load(R_NodeImpl.class, "vault_oid");
