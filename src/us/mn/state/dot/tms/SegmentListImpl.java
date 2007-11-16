@@ -31,13 +31,18 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-class SegmentListImpl extends AbstractListImpl {
+class SegmentListImpl extends AbstractListImpl implements Storable {
 
 	/** Number of bad consecutive stations to fail travel time */
 	static protected final int BAD_STATION_COUNT = 2;
 
 	/** ObjectVault table name */
 	static public final String tableName = "segment_list";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** ArrayList to hold all the elements in the list */
 	protected final ArrayList list;
@@ -147,13 +152,7 @@ class SegmentListImpl extends AbstractListImpl {
 	/** Start the segment list */
 	public synchronized void setStart(int lanes) throws TMSException {
 		if(startingLanes == lanes) return;
-		try {
-			vault.update(this, "startingLanes", new Integer(lanes),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "startingLanes", lanes);
 		startingLanes = lanes;
 		revalidate(0);
 		notifyUpdate();

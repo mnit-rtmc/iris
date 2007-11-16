@@ -22,10 +22,16 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO {
-
+public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "alarm";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new alarm */
 	public AlarmImpl() throws RemoteException {
@@ -51,12 +57,7 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO {
 	{
 		if(c == controller)
 			return;
-		try {
-			vault.update(this, "controller", c, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "controller", c.getOID());
 		controller = c;
 	}
 
@@ -72,12 +73,7 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO {
 	public synchronized void setPin(int p) throws TMSException {
 		if(p == pin)
 			return;
-		try {
-			vault.update(this, "pin", p, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "pin", p);
 		pin = p;
 	}
 
@@ -99,12 +95,7 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO {
 		if(n.equals(notes))
 			return;
 		validateText(n);
-		try {
-			vault.update(this, "notes", n, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "notes", n);
 		notes = n;
 	}
 

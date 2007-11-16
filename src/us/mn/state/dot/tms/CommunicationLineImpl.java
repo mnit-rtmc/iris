@@ -49,10 +49,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  */
 final class CommunicationLineImpl extends TMSObjectImpl
-	implements CommunicationLine, ErrorCounter
+	implements CommunicationLine, ErrorCounter, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "communication_line";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new communication line */
 	public CommunicationLineImpl(int i) throws RemoteException {
@@ -111,12 +116,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		if(d.equals(description))
 			return;
 		validateText(d);
-		try {
-			vault.update(this, "description", d, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "description", d);
 		description = d;
 	}
 
@@ -133,12 +133,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		if(p.equals(port))
 			return;
 		validateText(p);
-		try {
-			vault.update(this, "port", p, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "port", p);
 		close();
 		port = p;
 		open();
@@ -166,13 +161,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			status = e.getMessage();
 			return;
 		}
-		try {
-			vault.update(this, "bitRate", new Integer(b),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "bitRate", b);
 		bitRate = b;
 	}
 
@@ -231,13 +220,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			return;
 		if(!controllers.isEmpty())
 			checkProtocolChange(p);
-		try {
-			vault.update(this, "protocol", new Short(p),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "protocol", p);
 		close();
 		protocol = p;
 		open();
@@ -263,13 +246,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			status = e.getMessage();
 			return;
 		}
-		try {
-			vault.update(this, "timeout", new Integer(t),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "timeout", t);
 		timeout = t;
 	}
 

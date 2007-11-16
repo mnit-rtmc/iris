@@ -18,7 +18,6 @@ import java.rmi.RemoteException;
 import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * CameraImpl
@@ -26,10 +25,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  */
-public class CameraImpl extends TrafficDeviceImpl implements Camera {
+public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "camera";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new camera with a string id */
 	public CameraImpl(String i) throws ChangeVetoException, RemoteException
@@ -60,12 +64,7 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera {
 		if(enc.equals(encoder))
 			return;
 		validateText(enc);
-		try {
-			vault.update(this, "encoder", enc, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "encoder", enc);
 		encoder = enc;
 	}
 
@@ -81,13 +80,7 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera {
 	public synchronized void setEncoderChannel(int c) throws TMSException {
 		if(c == encoder_channel)
 			return;
-		try {
-			vault.update(this, "encoder_channel", new Integer(c),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "encoder_channel", c);
 		encoder_channel = c;
 	}
 
@@ -104,12 +97,7 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera {
 		if(n.equals(nvr))
 			return;
 		validateText(n);
-		try {
-			vault.update(this, "nvr", n, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "nvr", n);
 		nvr = n;
 	}
 
