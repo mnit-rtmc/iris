@@ -27,10 +27,16 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter {
-
+public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "node";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Node ID regex pattern */
 	static protected final Pattern ID_PATTERN =
@@ -173,10 +179,7 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter {
 	public synchronized void setNotes(String n) throws TMSException {
 		if(n.equals(notes)) return;
 		validateText(n);
-		try { vault.update(this, "notes", n, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "notes", n);
 		notes = n;
 	}
 

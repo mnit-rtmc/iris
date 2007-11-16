@@ -27,10 +27,16 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter {
-
+class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "node_group";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new node group */
 	public NodeGroupImpl(int i) throws RemoteException {
@@ -68,12 +74,7 @@ class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter {
 		if(d.equals(description))
 			return;
 		validateText(d);
-		try {
-			vault.update(this, "description", d, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "description", d);
 		description = d;
 	}
 
