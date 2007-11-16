@@ -126,8 +126,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		if(d.equals(dn))
 			return;
 		// FIXME: validate for SQL injections
-		store.update("UPDATE iris_user SET dn = '" + d +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "dn", d);
 		super.setDn(d);
 	}
 
@@ -136,8 +135,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		if(n.equals(fullName))
 			return;
 		// FIXME: validate for SQL injections
-		store.update("UPDATE iris_user SET full_name = '" + n +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "full_name", n);
 		super.setFullName(n);
 	}
 }

@@ -114,8 +114,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		if(p.equals(pattern))
 			return;
 		checkPattern(p);
-		store.update("UPDATE role SET pattern = '" + p +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "pattern", p);
 		pattern = p;
 	}
 
@@ -123,8 +122,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	public void doSetPrivR(boolean p) throws TMSException {
 		if(p == priv_r)
 			return;
-		store.update("UPDATE role SET priv_r = '" + p +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "priv_r", p);
 		super.setPrivR(p);
 	}
 
@@ -132,8 +130,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	public void doSetPrivW(boolean p) throws TMSException {
 		if(p == priv_w)
 			return;
-		store.update("UPDATE role SET priv_w = '" + p +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "priv_w", p);
 		super.setPrivW(p);
 	}
 
@@ -141,8 +138,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	public void doSetPrivC(boolean p) throws TMSException {
 		if(p == priv_c)
 			return;
-		store.update("UPDATE role SET priv_c = '" + p +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "priv_c", p);
 		super.setPrivC(p);
 	}
 
@@ -150,8 +146,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	public void doSetPrivD(boolean p) throws TMSException {
 		if(p == priv_d)
 			return;
-		store.update("UPDATE role SET priv_d = '" + p +
-			"' WHERE name = '" + name + "';");
+		store.update(this, "priv_d", p);
 		super.setPrivD(p);
 	}
 }
