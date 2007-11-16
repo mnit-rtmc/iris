@@ -18,7 +18,6 @@ import java.rmi.RemoteException;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.WarningSignPoller;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * WarningSignImpl is a traffic device can display one fixed message. It can
@@ -26,10 +25,16 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign {
-
+public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign,
+	Storable
+{
 	/** ObjectVault table name */
 	static public final String tableName = "warning_sign";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new warning sign */
 	public WarningSignImpl(String i) throws ChangeVetoException,
@@ -67,10 +72,7 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign {
 	{
 		if(c == camera)
 			return;
-		try { vault.update(this, "camera", c, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "camera", c.getOID());
 		camera = c;
 	}
 
@@ -88,10 +90,7 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign {
 		if(t.equals(text))
 			return;
 		validateMultilineText(t);
-		try { vault.update(this, "text", t, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "text", t);
 		text = t;
 	}
 
