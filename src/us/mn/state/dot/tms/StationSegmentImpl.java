@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * A station segment is a mainline station on a freeway segment list.
@@ -147,10 +146,7 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		} else if(index == null) return;
 		synchronized(statList) {
 			if(i != null) statList.add(i, this);
-			try { vault.update(this, "index", i, getUserName()); }
-			catch(ObjectVaultException e) {
-				throw new TMSException(e);
-			}
+			store.update(this, "index", i);
 			if(index != null) statList.remove(index);
 			index = i;
 		}
@@ -167,12 +163,7 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		if(l == speed_limit) return;
 		if(l < MINIMUM_SPEED_LIMIT || l > MAXIMUM_SPEED_LIMIT) throw
 			new ChangeVetoException("Invalid speed limit");
-		try {
-			vault.update(this, "speed_limit", new Integer(l),
-				getUserName());
-		} catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "speed_limit", l);
 		speed_limit = l;
 	}
 

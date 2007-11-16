@@ -21,7 +21,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * SegmentImpl is an implementation of the Segment RMI interface. Each
@@ -65,10 +64,7 @@ abstract class SegmentImpl extends TMSObjectImpl implements Segment, Storable {
 	public synchronized void setMile(Float m) throws TMSException {
 		if(m == mile)
 			return;
-		try { vault.update(this, "mile", m, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "mile", m);
 		mile = m;
 	}
 
@@ -239,10 +235,7 @@ abstract class SegmentImpl extends TMSObjectImpl implements Segment, Storable {
 		if(n.equals(notes))
 			return;
 		validateText(n);
-		try { vault.update(this, "notes", n, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "notes", n);
 		notes = n;
 	}
 }
