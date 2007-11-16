@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * Timing plan for operating a traffic management device
@@ -100,13 +99,7 @@ public class TimingPlanImpl extends TMSObjectImpl implements TimingPlan,
 	public synchronized void setStartTime(int t) throws TMSException {
 		if(t < 0 || t > stopTime)
 			throw new ChangeVetoException("Invalid start time");
-		try {
-			vault.update(this, "startTime", new Integer(t),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "startTime", t);
 		startTime = t;
 	}
 
@@ -122,13 +115,7 @@ public class TimingPlanImpl extends TMSObjectImpl implements TimingPlan,
 	public synchronized void setStopTime(int t) throws TMSException {
 		if(t < startTime || t >= MINUTES_PER_DAY)
 			throw new ChangeVetoException("Invalid stop time");
-		try {
-			vault.update(this, "stopTime", new Integer(t),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "stopTime", t);
 		stopTime = t;
 	}
 
@@ -144,13 +131,7 @@ public class TimingPlanImpl extends TMSObjectImpl implements TimingPlan,
 	public synchronized void setActive(boolean a) throws TMSException {
 		if(a == active)
 			return;
-		try {
-			vault.update(this, "active", new Boolean(a),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "active", a);
 		active = a;
 	}
 
