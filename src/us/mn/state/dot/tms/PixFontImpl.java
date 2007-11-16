@@ -73,7 +73,6 @@ public class PixFontImpl extends TMSObjectImpl implements PixFont, Storable {
 	 * @param s Font name */
 	public void setName( String n ) throws TMSException {
 		if( n.equals( name ) ) return;
-		validateText(n);
 		store.update(this, "name", n);
 		name = n;
 	}

@@ -89,7 +89,6 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign,
 	public synchronized void setText(String t) throws TMSException {
 		if(t.equals(text))
 			return;
-		validateMultilineText(t);
 		store.update(this, "text", t);
 		text = t;
 	}

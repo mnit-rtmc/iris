@@ -178,7 +178,6 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 	/** Set the administrator notes */
 	public synchronized void setNotes(String n) throws TMSException {
 		if(n.equals(notes)) return;
-		validateText(n);
 		store.update(this, "notes", n);
 		notes = n;
 	}

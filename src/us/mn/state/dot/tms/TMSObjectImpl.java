@@ -53,10 +53,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	static protected final Pattern TEXT_PATTERN =
 		Pattern.compile("[[\\p{Graph}\\p{Blank}]&&[^'\\[\\]]]*");
 
-	/** Multiline text validation regex pattern */
-	static protected final Pattern MULTILINE_PATTERN =
-		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^'\\[\\]]]*");
-
 	/** Object vault */
 	static ObjectVault vault;
 
@@ -167,15 +163,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	static protected void validateText(String s) throws ChangeVetoException
 	{
 		Matcher m = TEXT_PATTERN.matcher(s);
-		if(!m.matches()) throw
-			new ChangeVetoException("Invalid text: " + s);
-	}
-
-	/** Validate a string of multiline text */
-	static protected void validateMultilineText(String s)
-		throws ChangeVetoException
-	{
-		Matcher m = MULTILINE_PATTERN.matcher(s);
 		if(!m.matches()) throw
 			new ChangeVetoException("Invalid text: " + s);
 	}

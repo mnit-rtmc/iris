@@ -73,7 +73,6 @@ class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter,
 	public synchronized void setDescription(String d) throws TMSException {
 		if(d.equals(description))
 			return;
-		validateText(d);
 		store.update(this, "description", d);
 		description = d;
 	}

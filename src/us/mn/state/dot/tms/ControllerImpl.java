@@ -180,7 +180,6 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	public synchronized void setNotes(String n) throws TMSException {
 		if(n.equals(notes))
 			return;
-		validateText(n);
 		store.update(this, "notes", n);
 		notes = n;
 	}

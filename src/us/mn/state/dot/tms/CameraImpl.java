@@ -63,7 +63,6 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	public synchronized void setEncoder(String enc) throws TMSException {
 		if(enc.equals(encoder))
 			return;
-		validateText(enc);
 		store.update(this, "encoder", enc);
 		encoder = enc;
 	}
@@ -96,7 +95,6 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	public synchronized void setNvr(String n) throws TMSException {
 		if(n.equals(nvr))
 			return;
-		validateText(n);
 		store.update(this, "nvr", n);
 		nvr = n;
 	}

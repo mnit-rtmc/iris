@@ -115,7 +115,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	public synchronized void setDescription(String d) throws TMSException {
 		if(d.equals(description))
 			return;
-		validateText(d);
 		store.update(this, "description", d);
 		description = d;
 	}
@@ -132,7 +131,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	public synchronized void setPort(String p) throws TMSException {
 		if(p.equals(port))
 			return;
-		validateText(p);
 		store.update(this, "port", p);
 		close();
 		port = p;

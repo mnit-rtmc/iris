@@ -123,7 +123,6 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	public void doSetDn(String d) throws TMSException {
 		if(d.equals(dn))
 			return;
-		// FIXME: validate for SQL injections
 		store.update(this, "dn", d);
 		super.setDn(d);
 	}
@@ -132,7 +131,6 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	public void doSetFullName(String n) throws TMSException {
 		if(n.equals(fullName))
 			return;
-		// FIXME: validate for SQL injections
 		store.update(this, "full_name", n);
 		super.setFullName(n);
 	}

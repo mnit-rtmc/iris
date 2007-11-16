@@ -20,6 +20,8 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * Simple SQL database abstraction stuff
@@ -27,6 +29,19 @@ import java.util.LinkedList;
  * @author Douglas Lau
  */
 public class SQLConnection {
+
+	/** Pattern to match for a SQL update value */
+	static protected final Pattern SQL_VALUE =
+		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^'\\[\\]]]*");
+
+	/** Validate a SQL update value */
+	static protected void validateSql(String sql)
+		throws ChangeVetoException
+	{
+		Matcher m = SQL_VALUE.matcher(sql);
+		if(!m.matches()) throw
+			new ChangeVetoException("Invalid SQL value: " + sql);
+	}
 
 	/** Location of database server */
 	protected final String location;
@@ -155,8 +170,10 @@ public class SQLConnection {
 	public void update(Storable s, String field, Object value)
 		throws TMSException
 	{
+		String v = value.toString();
+		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET " + field +
-			" = '" + value + "' WHERE " + s.getKeyName() +
+			" = '" + v + "' WHERE " + s.getKeyName() +
 			" = '" + s.getKey() + "';");
 	}
 

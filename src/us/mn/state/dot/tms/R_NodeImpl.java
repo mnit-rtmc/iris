@@ -324,7 +324,6 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public synchronized void setNotes(String n) throws TMSException {
 		if(n.equals(notes))
 			return;
-		validateText(n);
 		store.update(this, "notes", n);
 		notes = n;
 	}

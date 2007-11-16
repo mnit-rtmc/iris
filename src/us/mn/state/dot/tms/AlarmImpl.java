@@ -94,7 +94,6 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	public synchronized void setNotes(String n) throws TMSException {
 		if(n.equals(notes))
 			return;
-		validateText(n);
 		store.update(this, "notes", n);
 		notes = n;
 	}
