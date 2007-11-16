@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashMap;
 
 /**
@@ -25,9 +24,8 @@ import java.util.HashMap;
  *
  * @author Douglas Lau
  */
-public class SystemPolicyImpl extends TMSObjectImpl
-	implements ResultFactory, SystemPolicy
-{
+public class SystemPolicyImpl extends TMSObjectImpl implements SystemPolicy {
+
 	/** Connection to SQL database */
 	protected final SQLConnection store;
 
@@ -40,14 +38,14 @@ public class SystemPolicyImpl extends TMSObjectImpl
 		RemoteException
 	{
 		store = s;
-		store.query("SELECT * FROM system_policy;", this);
-	}
-
-	/** Create a parameter from the current row of a result set */
-	public synchronized void create(ResultSet row) throws SQLException {
-		String name = row.getString(1);
-		int value = row.getInt(2);
-		params.put(name, value);
+		store.query("SELECT * FROM system_policy;", new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				String name = row.getString(1);
+				int value = row.getInt(2);
+				params.put(name, value);
+			}
+		});
 	}
 
 	/** Insert a new policy parameter */
