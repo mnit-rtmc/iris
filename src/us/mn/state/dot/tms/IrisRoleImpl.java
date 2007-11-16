@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.NamespaceError;
