@@ -57,6 +57,11 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		});
 	}
 
+	/** Get the database table name */
+	public String getTable() {
+		return "iris_user";
+	}
+
 	/** Create a new IRIS user */
 	protected IrisUserImpl(String n) {
 		super(n);
@@ -75,6 +80,11 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		for(Object o: mapping.lookup("iris_user", this))
 			r.add((IrisRoleImpl)ns.lookupObject("role", (String)o));
 		roles = r.toArray(new IrisRoleImpl[0]);
+	}
+
+	/** Get the primary key name */
+	public String getKeyName() {
+		return "name";
 	}
 
 	/** Get the primary key */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  */
 public class TimingPlanImpl extends TMSObjectImpl implements TimingPlan,
-	Comparable
+	Comparable, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "timing_plan";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Compose the hour and minute to minute-of-day */
 	static protected int minute_of_day(int hour, int minute) {

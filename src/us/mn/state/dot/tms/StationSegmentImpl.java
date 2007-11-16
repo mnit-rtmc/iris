@@ -30,6 +30,11 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 	/** ObjectVault table name */
 	static public final String tableName = "station_segment";
 
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
+
 	/** Default speed limit */
 	static public final int DEFAULT_SPEED_LIMIT = 55;
 

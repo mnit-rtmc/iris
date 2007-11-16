@@ -29,7 +29,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-abstract class SegmentImpl extends TMSObjectImpl implements Segment {
+abstract class SegmentImpl extends TMSObjectImpl implements Segment, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "segment";

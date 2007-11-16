@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.log.LogImpl;
  * @author Douglas Lau
  */
 abstract public class TMSObjectImpl extends UnicastRemoteObject
-	implements TMSObject, Storable
+	implements TMSObject
 {
 	/** Worker thread */
 	static protected final Scheduler WORKER =
@@ -332,6 +332,11 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Get the object ID */
 	public Integer getOID() {
 		return vault.getOID(this);
+	}
+
+	/** Get the primary key name */
+	public String getKeyName() {
+		return "vault_oid";
 	}
 
 	/** Get the object key */

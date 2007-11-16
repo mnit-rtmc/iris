@@ -57,6 +57,11 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		});
 	}
 
+	/** Get the database table name */
+	public String getTable() {
+		return "role";
+	}
+
 	/** Create a new IRIS role */
 	protected IrisRoleImpl(String n) {
 		super(n);
@@ -78,6 +83,11 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	/** Compare to another role */
 	public int compareTo(IrisRoleImpl o) {
 		return name.compareTo(o.name);
+	}
+
+	/** Get the primary key name */
+	public String getKeyName() {
+		return "name";
 	}
 
 	/** Get the primary key */

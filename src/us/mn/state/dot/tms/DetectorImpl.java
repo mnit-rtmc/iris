@@ -31,10 +31,15 @@ import us.mn.state.dot.tms.log.Log;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector, Constants,
-	Comparable
+	Comparable, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "detector";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Detector debug log */
 	static protected final DebugLog DET_LOG = new DebugLog("detector");
@@ -88,6 +93,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		while(buf.length() < 4)
 			buf.insert(0, ' ');
 		return buf.toString();
+	}
+
+	/** Get the primary key name */
+	public String getKeyName() {
+		return "index";
 	}
 
 	/** Get the detector key */

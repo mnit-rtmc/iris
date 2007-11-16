@@ -58,6 +58,11 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 		status = null;
 	}
 
+	/** Get the primary key name */
+	public String getKeyName() {
+		return "id";
+	}
+
 	/** Device ID */
 	protected final String id;
 

@@ -34,10 +34,15 @@ import us.mn.state.dot.tms.comm.MeterPoller;
  * @author Douglas Lau
  */
 public class RampMeterImpl extends TrafficDeviceImpl
-	implements RampMeter, Constants
+	implements RampMeter, Constants, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "ramp_meter";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Date instance for compute current minute */
 	static protected final Date DATE = new Date();

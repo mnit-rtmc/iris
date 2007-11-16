@@ -37,10 +37,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class DMSImpl extends TrafficDeviceImpl implements DMS {
+public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "dms";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Name to use for messages with no owner */
 	static protected final String NO_OWNER = "Nobody";

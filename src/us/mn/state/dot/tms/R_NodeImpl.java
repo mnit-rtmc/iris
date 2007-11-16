@@ -30,10 +30,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class R_NodeImpl extends TMSObjectImpl implements R_Node {
+public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "r_node";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Maximum number of lanes allowed */
 	static protected final int LANES_MAX = 8;
