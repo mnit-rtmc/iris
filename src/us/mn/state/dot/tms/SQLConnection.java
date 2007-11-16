@@ -62,6 +62,7 @@ public class SQLConnection {
 
 	/** Close the current database connection */
 	protected void close() throws SQLException {
+		statements.clear();
 		if(connection != null) {
 			try {
 				connection.close();
