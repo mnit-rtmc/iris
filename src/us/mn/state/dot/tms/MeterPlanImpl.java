@@ -27,6 +27,11 @@ abstract public class MeterPlanImpl extends TimingPlanImpl
 	/** ObjectVault table name */
 	static public final String tableName = "meter_plan";
 
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
+
 	/** Create a new ramp meter timing plan */
 	public MeterPlanImpl(int period) throws TMSException,
 		RemoteException

@@ -34,6 +34,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	/** ObjectVault table name */
 	static public final String tableName = "stratified_plan";
 
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
+
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/data/meter";
 

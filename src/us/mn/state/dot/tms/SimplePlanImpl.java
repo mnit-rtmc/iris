@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2004  Minnesota Department of Transportation
+ * Copyright (C) 2000-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,15 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * SimplePlanImpl
@@ -30,6 +25,11 @@ public class SimplePlanImpl extends MeterPlanImpl {
 
 	/** ObjectVault table name */
 	static public final String tableName = "simple_plan";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new simple timing plan */
 	public SimplePlanImpl(int period) throws TMSException, RemoteException
@@ -59,13 +59,7 @@ public class SimplePlanImpl extends MeterPlanImpl {
 		if( t < RampMeter.MIN_RELEASE_RATE ||
 			t > RampMeter.MAX_RELEASE_RATE ) throw new
 			ChangeVetoException( "Invalid target rate" );
-		try {
-			vault.update( this, "target", new Integer( t ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "target", t);
 		target = t;
 	}
 
