@@ -147,13 +147,19 @@ public class SQLConnection {
 		}
 	}
 
-	/** Update one field in the database table */
+	/** Update one field in a storable database table */
 	public void update(Storable s, String field, Object value)
 		throws TMSException
 	{
 		update("UPDATE " + s.getTable() + " SET " + field +
 			" = '" + value + "' WHERE " + s.getKeyName() +
 			" = '" + s.getKey() + "';");
+	}
+
+	/** Destroy one storable record */
+	public void destroy(Storable s) throws TMSException {
+		update("DELETE FROM " + s.getTable() + " WHERE " +
+			s.getKeyName() + " = '" + s.getKey() + "';");
 	}
 
 	/** Update the database with a batch of SQL commands */

@@ -104,8 +104,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Destroy an IRIS user */
 	public void doDestroy() throws TMSException {
-		store.update("DELETE FROM iris_user WHERE name = '" + name +
-			"';");
+		store.destroy(this);
 	}
 
 	/** Set the roles assigned to the user */

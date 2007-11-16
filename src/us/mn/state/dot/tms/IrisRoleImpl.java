@@ -106,7 +106,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 
 	/** Destroy an IRIS role */
 	public void doDestroy() throws TMSException {
-		store.update("DELETE FROM role WHERE name = '" + name + "';");
+		store.destroy(this);
 	}
 
 	/** Set the namespace pattern */
