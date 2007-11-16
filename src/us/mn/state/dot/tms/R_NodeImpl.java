@@ -236,7 +236,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	/** Get the staiton ID */
 	static protected String getStationID(String sid) {
 		if(sid == null || sid.length() < 1)
-			return null;
+			return "";
 		else
 			return sid;
 	}
@@ -246,15 +246,24 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return getStationID(station_id);
 	}
 
+	/** Create a remove station object */
+	protected StationImpl createStation(String s) throws RemoteException {
+		if(s != null)
+			return new StationImpl(s, this);
+		else
+			return null;
+	}
+
 	/** Put the station ID into the station list */
 	protected void _setStationID(String s) throws TMSException,
 		RemoteException
 	{
-		if(s != null)
-			statMap.add(s, new StationImpl(s, this));
+		StationImpl station = createStation(s);
 		store.update(this, "station_id", s);
 		try {
-			if(station_id != null)
+			if(station != null)
+				statMap.add(s, station);
+			if(station_id.length() > 0)
 				statMap.remove(station_id);
 		}
 		finally {
@@ -267,14 +276,9 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		RemoteException
 	{
 		s = getStationID(s);
-		if(s != null) {
-			if(s.equals(station_id))
-				return;
-			validateText(s);
-		} else {
-			if(station_id == null)
-				return;
-		}
+		if(s.equals(station_id))
+			return;
+		validateText(s);
 		synchronized(statMap) {
 			_setStationID(s);
 		}
@@ -507,7 +511,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		if(pickable)
 			out.print("pickable='t' ");
 		String sid = getStationID();
-		if(sid != null)
+		if(sid.length() > 0)
 			out.print("station_id='" + sid + "' ");
 		RoadwayImpl xs = (RoadwayImpl)location.getCrossStreet();
 		if(xs != null) {
