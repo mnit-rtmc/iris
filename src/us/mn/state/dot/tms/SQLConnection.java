@@ -75,25 +75,29 @@ public class SQLConnection {
 
 	/** Open a new database connection */
 	protected void open() throws SQLException {
-		close();
 		connection = DriverManager.getConnection(location, user,
 			password);
 		connection.setAutoCommit(true);
 	}
 
 	/** Create a database statement */
+	protected Statement _createStatement() throws SQLException {
+		if(connection == null)
+			open();
+		return connection.createStatement();
+	}
+
+	/** Create a database statement */
 	protected Statement createStatement() throws TMSException {
 		System.err.println("SQLConnection.createStatement()");
 		try {
-			if(connection == null)
-				open();
-			return connection.createStatement();
+			return _createStatement();
 		}
 		catch(SQLException e) {
 			e.printStackTrace();
 			try {
-				open();
-				return connection.createStatement();
+				close();
+				return _createStatement();
 			}
 			catch(SQLException e2) {
 				throw new TMSException(e2);
