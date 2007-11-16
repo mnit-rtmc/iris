@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * The Controller170Impl class represents model 170 traffic controllers.
@@ -29,6 +28,11 @@ public class Controller170Impl extends ControllerImpl
 {
 	/** ObjectVault table name */
 	static public final String tableName = "controller_170";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new 170 controller */
 	public Controller170Impl(CircuitImpl c, short d)
@@ -51,13 +55,7 @@ public class Controller170Impl extends ControllerImpl
 			return;
 		if(c < 0 || c >= CABINET.length || CABINET[c].equals(RESERVED))
 			throw new ChangeVetoException("Invalid cabinet type");
-		try {
-			vault.update(this, "cabinet", new Short(c),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "cabinet", c);
 		cabinet = c;
 	}
 

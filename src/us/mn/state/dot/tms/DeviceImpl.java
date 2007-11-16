@@ -25,10 +25,16 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO
+abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
+	Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "device";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Create a new device */
 	public DeviceImpl() throws RemoteException {
@@ -93,10 +99,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO
 			return;
 		if(c != null && controller != null)
 			throw new ChangeVetoException("Device has controller");
-		try { vault.update(this, "controller", c, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "controller", c.getOID());
 		controller = c;
 	}
 
@@ -121,13 +124,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO
 	public synchronized void setPin(int p) throws TMSException {
 		if(p == pin)
 			return;
-		try {
-			vault.update(this, "pin", new Integer(p),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "pin", p);
 		pin = p;
 	}
 
@@ -166,10 +163,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO
 		if(n.equals(notes))
 			return;
 		validateText(n);
-		try { vault.update(this, "notes", n, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "notes", n);
 		notes = n;
 	}
 }

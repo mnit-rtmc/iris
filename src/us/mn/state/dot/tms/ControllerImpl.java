@@ -36,10 +36,15 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  */
 public class ControllerImpl extends TMSObjectImpl implements Controller,
-	ErrorCounter
+	ErrorCounter, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "controller";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** Communication failure retry threshold */
 	static public final int RETRY_THRESHOLD = 3;
@@ -102,10 +107,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		CommunicationLineImpl line = (CommunicationLineImpl)c.getLine();
 		if(line != getLine() && line.getController(drop) != null)
 			throw new ChangeVetoException("Duplicate drop address");
-		try { vault.update(this, "circuit", c, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "circuit", c.getOID());
 		circuit.pullController(this);
 		circuit = c;
 		circuit.putController(this);
@@ -139,12 +141,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		CommunicationLineImpl line = (CommunicationLineImpl)getLine();
 		if(line.getController(d) != null)
 			throw new ChangeVetoException("Duplicate drop address");
-		try {
-			vault.update(this, "drop", new Short(d), getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "drop", d);
 		circuit.pullController(this);
 		drop = d;
 		circuit.putController(this);
@@ -157,13 +154,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	public synchronized void setActive(boolean a) throws TMSException {
 		if(a == active)
 			return;
-		try {
-			vault.update( this, "active", new Boolean( a ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "active", a);
 		active = a;
 		updateNowCounters();
 	}
@@ -190,10 +181,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		if(n.equals(notes))
 			return;
 		validateText(n);
-		try { vault.update(this, "notes", n, getUserName()); }
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "notes", n);
 		notes = n;
 	}
 
@@ -204,13 +192,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	public synchronized void setMile(float m) throws TMSException {
 		if(m == mile)
 			return;
-		try {
-			vault.update( this, "mile", new Float( m ),
-				getUserName() );
-		}
-		catch( ObjectVaultException e ) {
-			throw new TMSException( e );
-		}
+		store.update(this, "mile", m);
 		mile = m;
 	}
 
