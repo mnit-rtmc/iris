@@ -18,17 +18,21 @@ import java.rmi.RemoteException;
 import java.util.List;
 
 import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
- * CameraImpl
+ * TourImpl
  *
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  */
-public class TourImpl extends TMSObjectImpl implements Tour {
+public class TourImpl extends TMSObjectImpl implements Tour, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "tour";
+
+	/** Get the database table name */
+	public String getTable() {
+		return tableName;
+	}
 
 	/** The tour name */
 	protected final String name;
@@ -74,13 +78,7 @@ public class TourImpl extends TMSObjectImpl implements Tour {
 	public void setSystem(boolean s) throws TMSException {
 		if(s == system)
 			return;
-		try {
-			vault.update(this, "system", new Boolean(s),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "system", s);
 		system = s;
 	}
 
