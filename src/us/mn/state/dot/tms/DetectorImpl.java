@@ -253,13 +253,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	protected synchronized void _setLaneType(short t) throws TMSException {
 		if(t == laneType)
 			return;
-		try {
-			vault.update(this, "laneType", new Short(t),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "laneType", t);
 		laneType = t;
 	}
 
@@ -338,13 +332,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public synchronized void setLaneNumber(short l) throws TMSException {
 		if(l == laneNumber)
 			return;
-		try {
-			vault.update(this, "laneNumber", new Short(l),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "laneNumber", l);
 		laneNumber = l;
 	}
 
@@ -358,13 +346,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public synchronized void setAbandoned(boolean a) throws TMSException {
 		if(a == abandoned)
 			return;
-		try {
-			vault.update(this, "abandoned", new Boolean(a),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "abandoned", a);
 		abandoned = a;
 	}
 
@@ -378,13 +360,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public synchronized void setHov(boolean h) throws TMSException {
 		if(h == hov)
 			return;
-		try {
-			vault.update(this, "hov", new Boolean(h),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "hov", h);
 		hov = h;
 	}
 
@@ -398,13 +374,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public synchronized void setForceFail(boolean f) throws TMSException {
 		if(f == forceFail)
 			return;
-		try {
-			vault.update(this, "forceFail", new Boolean(f),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "forceFail", f);
 		forceFail = f;
 	}
 
@@ -430,13 +400,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	{
 		if(field == fieldLength)
 			return;
-		try {
-			vault.update(this, "fieldLength", new Float(field),
-				getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "fieldLength", field);
 		fieldLength = field;
 	}
 
@@ -480,12 +444,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		// Normalize the fake detector string
 		if(fd != null)
 			f = fd.toString();
-		try {
-			vault.update(this, "fake", f, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
+		store.update(this, "fake", f);
 		fake = f;
 		fake_det = fd;
 	}
@@ -591,11 +550,10 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		if(forceFail)
 			return;
 		try {
-			vault.update(this, "forceFail", new Boolean(true),
-				description);
+			store.update(this, "forceFail", true);
 			forceFail = true;
 		}
-		catch(ObjectVaultException e) {
+		catch(TMSException e) {
 			e.printStackTrace();
 			return;
 		}
