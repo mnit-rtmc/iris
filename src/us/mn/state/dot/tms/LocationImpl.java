@@ -124,7 +124,10 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 	{
 		if(f == freeway)
 			return;
-		store.update(this, "freeway", f.getOID());
+		if(f == null)
+			store.update(this, "freeway", "0");
+		else
+			store.update(this, "freeway", f.getOID());
 		freeway = f;
 	}
 
@@ -165,7 +168,10 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 	{
 		if(x == cross_street)
 			return;
-		store.update(this, "cross_street", x.getOID());
+		if(x == null)
+			store.update(this, "cross_street", "0");
+		else
+			store.update(this, "cross_street", x.getOID());
 		cross_street = x;
 	}
 

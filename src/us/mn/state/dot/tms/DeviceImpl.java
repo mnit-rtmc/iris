@@ -99,7 +99,10 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 			return;
 		if(c != null && controller != null)
 			throw new ChangeVetoException("Device has controller");
-		store.update(this, "controller", c.getOID());
+		if(c == null)
+			store.update(this, "controller", "0");
+		else
+			store.update(this, "controller", c.getOID());
 		controller = c;
 	}
 

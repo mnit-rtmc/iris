@@ -57,7 +57,10 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	{
 		if(c == controller)
 			return;
-		store.update(this, "controller", c.getOID());
+		if(c == null)
+			store.update(this, "controller", "0");
+		else
+			store.update(this, "controller", c.getOID());
 		controller = c;
 	}
 

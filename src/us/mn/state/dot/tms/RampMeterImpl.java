@@ -194,7 +194,10 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	{
 		if(det == detector)
 			return 0;
-		store.update(this, "detector", det.getOID());
+		if(det == null)
+			store.update(this, "detector", "0");
+		else
+			store.update(this, "detector", det.getOID());
 		int index = 0;
 		if(detector != null)
 			index = detector.getIndex();
@@ -747,7 +750,11 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	{
 		if(c == camera)
 			return;
-		store.update(this, "camera", c.getOID());
+		// FIXME: use toString() instead of getOID()
+		if(c == null)
+			store.update(this, "camera", "0");
+		else
+			store.update(this, "camera", c.getOID());
 		camera = c;
 	}
 

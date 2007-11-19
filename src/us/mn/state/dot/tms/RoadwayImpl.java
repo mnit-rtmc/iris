@@ -187,8 +187,14 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 				seg2 = createSegmentList(segment2, WEST);
 			}
 		}
-		store.update(this, "segment1", seg1.getOID());
-		store.update(this, "segment2", seg2.getOID());
+		if(seg1 == null)
+			store.update(this, "segment1", "0");
+		else
+			store.update(this, "segment1", seg1.getOID());
+		if(seg2 == null)
+			store.update(this, "segment2", "0");
+		else
+			store.update(this, "segment2", seg2.getOID());
 		segment1 = seg1;
 		segment2 = seg2;
 	}

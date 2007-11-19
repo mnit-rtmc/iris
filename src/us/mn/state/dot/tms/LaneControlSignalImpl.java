@@ -80,11 +80,21 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	}
 
 	/** Set the verification camera */
-	public synchronized void setCamera(String id) throws TMSException {
-		CameraImpl c = (CameraImpl)cameraList.getElement(id);
+	public void setCamera(String id) throws TMSException {
+		setCamera((CameraImpl)cameraList.getElement(id));
+	}
+
+	/** Set the verification camera */
+	protected synchronized void setCamera(CameraImpl c)
+		throws TMSException
+	{
 		if(c == camera)
 			return;
-		store.update(this, "camera", c.getOID());
+		// FIXME: use toString() instead of getOID()
+		if(c == null)
+			store.update(this, "camera", "0");
+		else
+			store.update(this, "camera", c.getOID());
 		camera = c;
 	}
 
