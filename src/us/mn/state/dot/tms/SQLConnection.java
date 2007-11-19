@@ -166,11 +166,20 @@ public class SQLConnection {
 		}
 	}
 
+	/** Get the string representation of an object value */
+	static protected String valueAsString(Object value) {
+		if(value != null)
+			return value.toString();
+		else
+			// this "0" is needed for ObjectVault compatibility
+			return "0";
+	}
+
 	/** Update one field in a storable database table */
 	public void update(Storable s, String field, Object value)
 		throws TMSException
 	{
-		String v = value.toString();
+		String v = valueAsString(value);
 		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET " + field +
 			" = '" + v + "' WHERE " + s.getKeyName() +
