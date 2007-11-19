@@ -83,6 +83,11 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 		return name;
 	}
 
+	/** Get the primary key name */
+	public String getKeyName() {
+		return "name";
+	}
+
 	/** Get the object key */
 	public String getKey() {
 		return name;
