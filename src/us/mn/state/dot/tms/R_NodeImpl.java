@@ -288,7 +288,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public Station getStation() {
 		synchronized(statMap) {
 			String sid = getStationID();
-			if(sid != null)
+			if(sid.length() > 0)
 				return statMap.getElement(sid);
 		}
 		return null;
@@ -438,14 +438,14 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		}
 		detectors = makeDetectorImplArray(dets);
 		String sid = getStationID();
-		if(sid != null)
+		if(sid.length() > 0)
 			statMap.add(sid, new StationImpl(sid, this));
 	}
 
 	/** Is this object deletable? */
 	public boolean isDeletable() throws TMSException {
 		// Cannot delete node with a Station
-		if(getStationID() != null)
+		if(getStationID().length() > 0)
 			return false;
 		return super.isDeletable();
 	}
