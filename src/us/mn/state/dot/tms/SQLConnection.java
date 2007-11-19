@@ -181,8 +181,11 @@ public class SQLConnection {
 	{
 		String v = valueAsString(value);
 		validateSql(v);
-		update("UPDATE " + s.getTable() + " SET " + field +
-			" = '" + v + "' WHERE " + s.getKeyName() +
+		// FIXME: throw an exception if field is mixed case or contains
+		// spaces, etc. Then we can get rid of the quotes around the
+		// field name.
+		update("UPDATE " + s.getTable() + " SET \"" + field +
+			"\" = '" + v + "' WHERE " + s.getKeyName() +
 			" = '" + s.getKey() + "';");
 	}
 
