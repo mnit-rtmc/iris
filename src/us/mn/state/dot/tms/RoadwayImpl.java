@@ -182,7 +182,7 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 			seg1 = destroySegmentList(segment1);
 			seg2 = destroySegmentList(segment2);
 		}
-		if(after) {
+/*		if(after) {
 			if(d == NORTH_SOUTH) {
 				seg1 = createSegmentList(segment1, NORTH);
 				seg2 = createSegmentList(segment2, SOUTH);
@@ -191,7 +191,7 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 				seg1 = createSegmentList(segment1, EAST);
 				seg2 = createSegmentList(segment2, WEST);
 			}
-		}
+		} */
 		if(seg1 == null)
 			store.update(this, "segment1", "0");
 		else
@@ -205,13 +205,13 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 	}
 
 	/** Create the segment (continuity) lists */
-	protected SegmentListImpl createSegmentList(SegmentListImpl s,
+/*	protected SegmentListImpl createSegmentList(SegmentListImpl s,
 		short d) throws TMSException, RemoteException
 	{
 		if(s != null)
 			throw new ChangeVetoException("Segment list exists");
 		return new SegmentListImpl(this, d);
-	}
+	} */
 
 	/** Destroy a segment list */
 	protected SegmentListImpl destroySegmentList(SegmentListImpl s)
