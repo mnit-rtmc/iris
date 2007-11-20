@@ -23,10 +23,10 @@ import us.mn.state.dot.vault.FieldMap;
  *
  * @author Douglas Lau
  */
-final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
+public class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
 	Storable
 {
-	/** ObjectVault table name */
+	/** Database table name */
 	static public final String tableName = "character";
 
 	/** Get the database table name */
@@ -36,40 +36,43 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
 
 	/** Create a new pixel font character
 	 * @param i Character index */
-	public PixCharacterImpl( int i ) throws RemoteException {
+	public PixCharacterImpl(int i) throws RemoteException {
 		super();
 		index = i;
 		width = 5;
-		bitmap = new byte[ 5 ];
+		bitmap = new byte[5];
 	}
 
 	/** Create a pixel font character from an ObjectVault field map */
-	protected PixCharacterImpl( FieldMap fields ) throws RemoteException {
+	protected PixCharacterImpl(FieldMap fields) throws RemoteException {
 		super();
-		index = fields.getInt( "index" );
+		index = fields.getInt("index");
 	}
 
 	/** Get a string representation of the character */
 	public String toString() {
-		StringBuffer buffer = new StringBuffer().append( index );
-		while( buffer.length() < 3 ) buffer.insert( 0, ' ' );
-		if( index > 31 ) {
-			buffer.append( "  (" );
-			buffer.append( (char)( index ) );
-			buffer.append( ")" );
+		StringBuffer buffer = new StringBuffer().append(index);
+		while(buffer.length() < 3)
+			buffer.insert(0, ' ');
+		if(index > 31) {
+			buffer.append("  (");
+			buffer.append((char)(index));
+			buffer.append(")");
 		}
 		return buffer.toString();
 	}
 
 	/** Character index */
-	private final int index;
+	protected final int index;
 
 	/** Get the character index.
 	 * @return Character index number */
-	public int getIndex() { return index; }
+	public int getIndex() {
+		return index;
+	}
 
 	/** Character width */
-	private int width;
+	protected int width;
 
 	/** Set the character width.
 	 * @param w Character width */
@@ -82,10 +85,12 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
 
 	/** Get the character width.
 	 * @return Character width */
-	public int getWidth() { return width; }
+	public int getWidth() {
+		return width;
+	}
 
 	/** Character bitmap */
-	private byte[] bitmap;
+	protected byte[] bitmap;
 
 	/** Set the character bitmap.
 	 * @param b A bitmap which defines the pixels within a rectangular
@@ -106,7 +111,9 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
 	 * with the pixel in the upper left corner of the character.  From
 	 * there, the character is defined in rows, left to right, then top to
 	 * bottom. */
-	public byte[] getBitmap() { return bitmap; }
+	public byte[] getBitmap() {
+		return bitmap;
+	}
 
 	/** Render the character onto a bitmap graphic */
 	public void renderOn(BitmapGraphic g, int x, int y, int h) {
