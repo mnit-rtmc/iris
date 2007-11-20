@@ -73,8 +73,9 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
 
 	/** Set the character width.
 	 * @param w Character width */
-	public void setWidth( int w ) throws TMSException {
-		if( w == width ) return;
+	public synchronized void setWidth(int w) throws TMSException {
+		if(w == width)
+			return;
 		store.update(this, "width", w);
 		width = w;
 	}
@@ -92,8 +93,9 @@ final class PixCharacterImpl extends TMSObjectImpl implements PixCharacter,
 	 * with the pixel in the upper left corner of the character.  From
 	 * there, the character is defined in rows, left to right, then top to
 	 * bottom. */
-	public void setBitmap( byte[] b ) throws TMSException {
-		if( Arrays.equals( b, bitmap ) ) return;
+	public synchronized void setBitmap(byte[] b) throws TMSException {
+		if(Arrays.equals(b, bitmap))
+			return;
 		store.update(this, "bitmap", b);
 		bitmap = b;
 	}
