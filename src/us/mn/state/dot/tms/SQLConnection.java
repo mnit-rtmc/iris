@@ -189,8 +189,16 @@ public class SQLConnection {
 			" = '" + s.getKey() + "';");
 	}
 
+	/** Create one storable record */
+	public void create(Storable s) throws TMSException {
+		validateSql(s.getKey());
+		update("INSERT INTO " + s.getTable() + " (" + s.getKeyName() +
+			") VALUES ('" + s.getKey() + "');");
+	}
+
 	/** Destroy one storable record */
 	public void destroy(Storable s) throws TMSException {
+		validateSql(s.getKey());
 		update("DELETE FROM " + s.getTable() + " WHERE " +
 			s.getKeyName() + " = '" + s.getKey() + "';");
 	}

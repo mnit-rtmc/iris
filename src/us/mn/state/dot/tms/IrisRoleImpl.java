@@ -96,10 +96,8 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 
 	/** Create a new IRIS role */
 	static public Role doCreate(String name) throws TMSException {
-		// FIXME: validate for SQL injections
 		IrisRoleImpl role = new IrisRoleImpl(name);
-		store.update("INSERT INTO role (name) VALUES ('" + name +
-			"');");
+		store.create(role);
 		return role;
 	}
 
