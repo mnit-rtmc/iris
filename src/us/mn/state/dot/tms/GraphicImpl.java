@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import us.mn.state.dot.sonar.server.Namespace;
 
@@ -161,7 +162,12 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	public void doSetPixels(String p) throws TMSException {
 		if(p.equals(pixels))
 			return;
-		// FIXME: check for valid base64
+		try {
+			Base64.decode(p);
+		}
+		catch(IOException e) {
+			throw new ChangeVetoException("Invalid Base64 data");
+		}
 		store.update(this, "pixels", p);
 		setPixels(p);
 	}
