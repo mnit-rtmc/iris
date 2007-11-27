@@ -14,12 +14,17 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.server.Namespace;
+
 /**
  * Base object class for storable SONAR objects.
  *
  * @author Douglas Lau
  */
 abstract public class BaseObjectImpl implements Storable {
+
+	/** SONAR namespace */
+	static protected Namespace namespace;
 
 	/** SQL connection to database */
 	static protected SQLConnection store;

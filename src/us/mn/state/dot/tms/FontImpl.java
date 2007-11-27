@@ -14,7 +14,13 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.sql.ResultSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.Checker;
 import us.mn.state.dot.sonar.server.Namespace;
 
 /**
@@ -81,6 +87,31 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		versionID = v;
 	}
 
+	/** Get the glyphs which make up the font */
+	protected List<GlyphImpl> _getGlyphs() throws NamespaceError {
+		final LinkedList<GlyphImpl> glyphs =
+			new LinkedList<GlyphImpl>();
+		final FontImpl font = this;
+		namespace.findObject(SONAR_TYPE, new Checker<GlyphImpl>() {
+			public boolean check(GlyphImpl g) {
+				if(g.getFont() == font)
+					glyphs.add(g);
+				return false;
+			}
+		});
+		return glyphs;
+	}
+
+	/** Get the glyphs which make up the font */
+	public List<GlyphImpl> getGlyphs() throws TMSException {
+		try {
+			return _getGlyphs();
+		}
+		catch(NamespaceError e) {
+			throw new TMSException(e);
+		}
+	}
+
 	/** Font number (both fontIndex and fontNumber NTCIP objects) */
 	protected int number;
 
@@ -119,8 +150,8 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			return;
 		if(h < 4 || h > 24)
 			throw new ChangeVetoException("Invalid height");
-//		if(characters.size() > 0)
-//			throw new ChangeVetoException("Characters exist");
+		if(getGlyphs().size() > 0)
+			throw new ChangeVetoException("Glyphs exist");
 		store.update(this, "height", h);
 		setHeight(h);
 	}
@@ -144,8 +175,8 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			return;
 		if(w < 0 || w > 12)
 			throw new ChangeVetoException("Invalid width");
-//		if(characters.size() > 0)
-//			throw new ChangeVetoException("Characters exist");
+		if(getGlyphs().size() > 0)
+			throw new ChangeVetoException("Glyphs exist");
 		store.update(this, "width", w);
 		setWidth(w);
 	}
@@ -222,28 +253,56 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		return versionID;
 	}
 
+	/** Lookup the glyph associated with a code point */
+	static protected GlyphImpl lookupGlyph(List<GlyphImpl> glyphs,
+		int code_point)
+	{
+		for(GlyphImpl g: glyphs) {
+			if(g.getCodePoint() == code_point)
+				return g;
+		}
+		return null;
+	}
+
+	/** Lookup the graphic associated with a code point */
+	static protected GraphicImpl lookupGraphic(List<GlyphImpl> glyphs,
+		int code_point) throws InvalidMessageException
+	{
+		GlyphImpl glyph = lookupGlyph(glyphs, code_point);
+		if(glyph != null) {
+			GraphicImpl graphic = (GraphicImpl)glyph.getGraphic();
+			if(graphic != null)
+				return graphic;
+		}
+		throw new InvalidMessageException("Invalid code point");
+	}
+
 	/** Render text onto a bitmap graphic */
-/*	public void renderOn(BitmapGraphic g, int x, int y, String t) {
+	public void renderOn(BitmapGraphic g, int x, int y, String t)
+		throws InvalidMessageException, TMSException, IOException
+	{
+		List<GlyphImpl> glyphs = getGlyphs();
 		for(int i = 0; i < t.length(); i++) {
 			int j = t.charAt(i);
-			GraphicImpl c = lookupGlyph(j);
+			GraphicImpl c = lookupGraphic(glyphs, j);
 			c.renderOn(g, x, y);
 			x += c.getWidth() + charSpacing;
 		}
-	} */
+	}
 
 	/** Calculate the width (in pixels) of a line of text */
-/*	public int calculateWidth(String t) {
-		int width = 0;
+	public int calculateWidth(String t) throws TMSException {
+		List<GlyphImpl> glyphs = getGlyphs();
+		int w = 0;
 		for(int i = 0; i < t.length(); i++) {
 			if(i > 0)
-				width += charSpacing;
+				w += charSpacing;
 			int j = t.charAt(i);
-			GraphicImpl c = lookupGlyph(j);
-			width += c.getWidth();
+			GraphicImpl c = lookupGraphic(glyphs, j);
+			w += c.getWidth();
 		}
-		return width;
-	} */
+		return w;
+	}
 
 	/** Test if the font matches a specified character height/width */
 	protected boolean matches(int h, int w) {
