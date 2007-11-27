@@ -176,4 +176,17 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	public String getPixels() {
 		return pixels;
 	}
+
+	/** Render the graphic onto a bitmap graphic */
+	public void renderOn(BitmapGraphic g, int x, int y) throws IOException {
+		byte[] bitmap = Base64.decode(pixels);
+		BitmapGraphic c = new BitmapGraphic(width, height);
+		c.setBitmap(bitmap);
+		for(int yy = 0; yy < height; yy++) {
+			for(int xx = 0; xx < width; xx++) {
+				int p = c.getPixel(xx, yy);
+				g.setPixel(x + xx, y + yy, p);
+			}
+		}
+	}
 }

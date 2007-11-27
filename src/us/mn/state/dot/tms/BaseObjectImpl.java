@@ -46,4 +46,19 @@ abstract public class BaseObjectImpl implements Storable {
 	protected BaseObjectImpl(String n) {
 		name = n;
 	}
+
+	/** Get a string representation of the object */
+	public String toString() {
+		return name;
+	}
+
+	/** Destroy an object */
+	public void destroy() {
+		// Handled by doDestroy() method
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		store.destroy(this);
+	}
 }
