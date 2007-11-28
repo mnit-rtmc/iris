@@ -25,13 +25,14 @@ import us.mn.state.dot.sonar.server.Namespace;
  */
 public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
-	/** Lookup all the graphics */
-	static public void lookup(final Namespace ns) throws TMSException {
+	/** Load all the graphics */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading DMS graphics...");
 		store.query("SELECT name, bpp, height, width, pixels " +
 			"FROM graphic;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.add(new GraphicImpl(
+				namespace.add(new GraphicImpl(
 					row.getString(1),	// name
 					row.getInt(2),		// bpp
 					row.getInt(3),		// height

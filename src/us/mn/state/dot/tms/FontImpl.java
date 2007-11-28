@@ -30,14 +30,15 @@ import us.mn.state.dot.sonar.server.Namespace;
  */
 public class FontImpl extends BaseObjectImpl implements Font {
 
-	/** Lookup all the fonts */
-	static public void lookup(final Namespace ns) throws TMSException {
+	/** Load all the fonts */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading DMS fonts...");
 		store.query("SELECT name, number, height, width, " +
 			"line_spacing, char_spacing, version_id " +
 			"FROM font;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.add(new FontImpl(
+				namespace.add(new FontImpl(
 					row.getString(1),	// name
 					row.getInt(2),		// number
 					row.getInt(3),		// height

@@ -29,6 +29,15 @@ abstract public class BaseObjectImpl implements Storable {
 	/** SQL connection to database */
 	static protected SQLConnection store;
 
+	/** Load all objects from the database into the SONAR Namespace */
+	static void loadAll(SQLConnection s, Namespace ns) throws TMSException {
+		store = s;
+		namespace = ns;
+		GraphicImpl.loadAll();
+		FontImpl.loadAll();
+		GlyphImpl.loadAll();
+	}
+
 	/** Get the primary key name */
 	public String getKeyName() {
 		return "name";

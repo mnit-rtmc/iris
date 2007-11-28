@@ -25,13 +25,14 @@ import us.mn.state.dot.sonar.server.Namespace;
  */
 public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
-	/** Lookup all the glyphs */
-	static public void lookup(final Namespace ns) throws TMSException {
+	/** Load all the glyphs */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading DMS glyphs...");
 		store.query("SELECT name, font, code_point, graphic " +
 			"FROM glyph;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.add(new GlyphImpl(ns,
+				namespace.add(new GlyphImpl(
 					row.getString(1),	// name
 					row.getString(2),	// font
 					row.getInt(3),		// code_point
@@ -74,9 +75,9 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Lookup a font in the SONAR namespace */
-	static protected FontImpl lookupFont(Namespace ns, String f) {
+	static protected FontImpl lookupFont(String f) {
 		try {
-			return (FontImpl)ns.lookupObject("font", f);
+			return (FontImpl)namespace.lookupObject("font", f);
 		}
 		catch(NamespaceError e) {
 			return null;
@@ -84,9 +85,10 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Lookup a graphic in the SONAR namespace */
-	static protected GraphicImpl lookupGraphic(Namespace ns, String g) {
+	static protected GraphicImpl lookupGraphic(String g) {
 		try {
-			return (GraphicImpl)ns.lookupObject("graphic", g);
+			return (GraphicImpl)namespace.lookupObject("graphic",
+				g);
 		}
 		catch(NamespaceError e) {
 			return null;
@@ -94,15 +96,15 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Create a glyph from database lookup */
-	protected GlyphImpl(Namespace ns, String n, String f, int p, String g)
+	protected GlyphImpl(String n, String f, int p, String g)
 		throws TMSException
 	{
 		this(n);
-		font = lookupFont(ns, f);
+		font = lookupFont(f);
 		if(font != null)
 			font.addGlyph(p, this);
 		code_point = p;
-		graphic = lookupGraphic(ns, g);
+		graphic = lookupGraphic(g);
 	}
 
 	/** Font to which the glyph belongs */
