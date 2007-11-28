@@ -17,6 +17,8 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import us.mn.state.dot.sonar.server.Namespace;
 
 /**
@@ -107,6 +109,13 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	protected boolean hasGlyphs() throws TMSException {
 		synchronized(glyphs) {
 			return !glyphs.isEmpty();
+		}
+	}
+
+	/** Get a mapping of all the glyphs */
+	public SortedMap<Integer, GlyphImpl> getGlyphs() {
+		synchronized(glyphs) {
+			return new TreeMap<Integer, GlyphImpl>(glyphs);
 		}
 	}
 
@@ -284,7 +293,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Calculate the width (in pixels) of a line of text */
-	public int calculateWidth(String t) throws TMSException {
+	public int calculateWidth(String t) throws InvalidMessageException {
 		int w = 0;
 		for(int i = 0; i < t.length(); i++) {
 			if(i > 0)

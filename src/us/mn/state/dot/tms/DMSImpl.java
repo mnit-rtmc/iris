@@ -25,6 +25,8 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.Checker;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.ntcip.ShortErrorStatus;
@@ -952,7 +954,7 @@ return t1;
 
 	/** Calculate the X pixel position to place text */
 	protected int _calculatePixelX(MultiString.JustificationLine j,
-		PixFontImpl font, String t)
+		FontImpl font, String t) throws InvalidMessageException
 	{
 		switch(j) {
 			case LEFT:
@@ -972,12 +974,12 @@ return t1;
 
 	/** Calculate the X pixel position to place text */
 	protected int calculatePixelX(MultiString.JustificationLine j,
-		PixFontImpl font, String t)
+		FontImpl font, String t)
 	{
 		try {
 			return _calculatePixelX(j, font, t);
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch(InvalidMessageException e) {
 			// Invalid characters in string
 			return 0;
 		}
@@ -987,7 +989,7 @@ return t1;
 	public BitmapGraphic createPixelMap(MultiString multi) {
 		final BitmapGraphic g = new BitmapGraphic(signWidthPixels,
 			signHeightPixels);
-		final PixFontImpl font = getFont();
+		final FontImpl font = getFont();
 		if(font == null)
 			return g;
 		multi.parse(new MultiString.Callback() {
@@ -999,24 +1001,53 @@ return t1;
 				int x = calculatePixelX(j, font, t);
 				int y = l * (font.getHeight() +
 					font.getLineSpacing());
-				font.renderOn(g, x, y, t);
+				try {
+					font.renderOn(g, x, y, t);
+				}
+				catch(Exception e) {
+					System.err.println("createPixelMap:"+t);
+					e.printStackTrace();
+				}
 			}
 		});
 		return g;
 	}
 
+	/** Lookup the best font */
+	static protected FontImpl _lookupFont(final int h, final int w,
+		final int ls) throws NamespaceError
+	{
+		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
+			new Checker<FontImpl>()
+		{
+			public boolean check(FontImpl f) {
+				return f.matches(h, w, ls);
+			}
+		});
+	}
+
+	/** Lookup the best font */
+	static protected FontImpl lookupFont(int h, int w, int ls) {
+		try {
+			return _lookupFont(h, w, ls);
+		}
+		catch(NamespaceError e) {
+			return null;
+		}
+	}
+
 	/** Get the appropriate font for this sign */
-	public PixFontImpl getFont() {
-		return fontList.getFont(getLineHeightPixels(),
-			characterWidthPixels, 0);
+	public FontImpl getFont() {
+		return lookupFont(getLineHeightPixels(), characterWidthPixels,
+			0);
 	}
 
 	/** Calculate the width (in pixels) of a single line of text */
-	protected int calculateWidth(PixFontImpl font, String t) {
+	protected int calculateWidth(FontImpl font, String t) {
 		try {
 			return font.calculateWidth(t);
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch(InvalidMessageException e) {
 			// This will happen if a character in the text is not
 			// defined in the font
 			return -1;
@@ -1025,7 +1056,7 @@ return t1;
 
 	/** Calculate the widths of all DMS messages in an iterator */
 	protected void calculateWidths(Collection<DmsMessage> msgs) {
-		PixFontImpl font = getFont();
+		FontImpl font = getFont();
 		if(font != null) {
 			for(DmsMessage m: msgs) {
 				m.m_width = calculateWidth(font, m.message);
@@ -1357,12 +1388,12 @@ return t1;
 		for(int i = s; i > 0; i--) {
 			int ls = calculateLineSpacing(s, i);
 			if(ls != INVALID_LINE_SPACING) {
-				if(fontList.getFont(i, w, ls) != null)
+				if(lookupFont(i, w, ls) != null)
 					return i;
 			}
 		}
 		// No optimal height found; just grab a font...
-		PixFontImpl font = fontList.getFont(0, w, 0);
+		FontImpl font = lookupFont(0, w, 0);
 		if(font != null)
 			return font.getHeight();
 		else

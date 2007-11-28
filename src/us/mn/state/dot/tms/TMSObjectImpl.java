@@ -26,9 +26,10 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.ServerNotActiveException;
+import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.tms.log.LogImpl;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
-import us.mn.state.dot.tms.log.LogImpl;
 
 /**
  * The TMSObjectImpl class is an abstract class which is the base class
@@ -58,6 +59,9 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** SQL connection */
 	static SQLConnection store;
+
+	/** SONAR namespace */
+	static Namespace namespace;
 
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";

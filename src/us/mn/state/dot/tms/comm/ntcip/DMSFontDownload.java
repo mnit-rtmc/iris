@@ -15,10 +15,14 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.SortedMap;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.PixFontImpl;
-import us.mn.state.dot.tms.IndexedListImpl;
-import us.mn.state.dot.tms.PixCharacter;
+import us.mn.state.dot.tms.FontImpl;
+import us.mn.state.dot.tms.GlyphImpl;
+import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -35,16 +39,16 @@ public class DMSFontDownload extends DMSOperation {
 	static protected final int SKYLINE_VERSION_ID_HINTED = 64723;
 
 	/** Font to download to the sign */
-	protected final PixFontImpl font;
+	protected final FontImpl font;
 
 	/** Font index */
 	protected final int index;
 
-	/** Character list */
-	protected final IndexedListImpl charList;
+	/** Glyph mapping */
+	protected final SortedMap<Integer, GlyphImpl> glyphs;
 
 	/** Create a new DMS font download operation */
-	public DMSFontDownload(DMSImpl d, PixFontImpl f) {
+	public DMSFontDownload(DMSImpl d, FontImpl f) {
 		super(DOWNLOAD, d);
 		font = f;
 		// On ADDCO signs, font 1 is read-only (apparently)
@@ -52,12 +56,23 @@ public class DMSFontDownload extends DMSOperation {
 			index = 2;
 		else
 			index = 1;
-		charList = (IndexedListImpl)f.getCharacterList();
+		glyphs = f.getGlyphs();
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 		return new CheckVersionID();
+	}
+
+	/** Check if the font version ID matches */
+	protected boolean fontMatches(int v) {
+		if(v == font.getVersionID())
+			return true;
+		if(index == 1 && v == SKYLINE_VERSION_ID_NORMAL)
+			return true;
+		if(index == 2 && v == SKYLINE_VERSION_ID_HINTED)
+			return true;
+		return false;
 	}
 
 	/** Check version ID */
@@ -74,13 +89,10 @@ public class DMSFontDownload extends DMSOperation {
 			int v = version.getInteger();
 			DMS_LOG.log(dms.getId() + " Font #" + index +
 				" versionID:" + v);
-			if(v == font.getVersionID())
+			if(fontMatches(v))
 				return null;
-			if(index == 1 && v == SKYLINE_VERSION_ID_NORMAL)
-				return null;
-			if(index == 2 && v == SKYLINE_VERSION_ID_HINTED)
-				return null;
-			return new InvalidateFont();
+			else
+				return new InvalidateFont();
 		}
 	}
 
@@ -104,12 +116,12 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(new FontName(index, font.getName()));
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.add(new FontCharSpacing(index,
-				font.getCharacterSpacing()));
+				font.getCharSpacing()));
 			mess.add(new FontLineSpacing(index,
 				font.getLineSpacing()));
 			mess.setRequest();
-			if(charList.size() > 0)
-				return new AddCharacter(1);
+			if(!glyphs.isEmpty())
+				return new AddCharacter(glyphs.values());
 			else
 				return new ValidateFont();
 		}
@@ -118,27 +130,38 @@ public class DMSFontDownload extends DMSOperation {
 	/** Add a character to the font table */
 	protected class AddCharacter extends Phase {
 
-		/** Index of character in font */
-		protected final int c_num;
+		/** Iterator for remaining glyphs */
+		protected final Iterator<GlyphImpl> chars;
+
+		/** Current glyph */
+		protected GlyphImpl glyph;
+
+		/** Count of characters added */
+		protected int count = 0;
 
 		/** Create a new add character phase */
-		public AddCharacter(int c) {
-			c_num = c;
+		public AddCharacter(Collection<GlyphImpl> c) {
+			chars = c.iterator();
+			if(chars.hasNext())
+				glyph = chars.next();
 		}
 
 		/** Add a character to the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			PixCharacter c = (PixCharacter)charList.getElement(
-				c_num);
-			mess.add(new CharacterWidth(index, c_num,
-				c.getWidth()));
-			mess.add(new CharacterBitmap(index, c_num,
-				c.getBitmap()));
+			int code_point = glyph.getCodePoint();
+			Graphic graphic = glyph.getGraphic();
+			byte[] pixels = Base64.decode(graphic.getPixels());
+			mess.add(new CharacterWidth(index, code_point,
+				graphic.getWidth()));
+			mess.add(new CharacterBitmap(index, code_point,
+				pixels));
 			mess.setRequest();
-			if(c_num < charList.size()) {
-				if(c_num % 20 == 0 && !controller.isFailed())
-					controller.resetErrorCounter(id);
-				return new AddCharacter(c_num + 1);
+			count++;
+			if(count >= 20 && !controller.isFailed())
+				controller.resetErrorCounter(id);
+			if(chars.hasNext()) {
+				glyph = chars.next();
+				return this;
 			} else
 				return new ValidateFont();
 		}

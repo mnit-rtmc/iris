@@ -18,7 +18,7 @@ import us.mn.state.dot.tms.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.PixFontImpl;
+import us.mn.state.dot.tms.FontImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignTravelTime;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -61,7 +61,7 @@ public class NtcipPoller extends MessagePoller implements SignPoller,
 
 	/** Download the font to a sign controller */
 	protected void downloadFonts(DMSImpl dms, int p) {
-		PixFontImpl font = dms.getFont();
+		FontImpl font = dms.getFont();
 		if(font != null) {
 			DMSFontDownload f = new DMSFontDownload(dms, font);
 			f.setPriority(p);
