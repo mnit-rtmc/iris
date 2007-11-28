@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.Checker;
 import us.mn.state.dot.sonar.server.Namespace;
 
@@ -112,6 +113,29 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		}
 	}
 
+	/** Check if the font has any glyphs */
+	protected boolean _hasGlyphs() throws NamespaceError {
+		final FontImpl font = this;
+		SonarObject glyph = namespace.findObject(SONAR_TYPE,
+			new Checker<GlyphImpl>()
+		{
+			public boolean check(GlyphImpl g) {
+				return g.getFont() == font;
+			}
+		});
+		return glyph != null;
+	}
+
+	/** Check if the font has any glyphs */
+	protected boolean hasGlyphs() throws TMSException {
+		try {
+			return _hasGlyphs();
+		}
+		catch(NamespaceError e) {
+			throw new TMSException(e);
+		}
+	}
+
 	/** Font number (both fontIndex and fontNumber NTCIP objects) */
 	protected int number;
 
@@ -150,7 +174,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			return;
 		if(h < 4 || h > 24)
 			throw new ChangeVetoException("Invalid height");
-		if(getGlyphs().size() > 0)
+		if(hasGlyphs())
 			throw new ChangeVetoException("Glyphs exist");
 		store.update(this, "height", h);
 		setHeight(h);
@@ -175,7 +199,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			return;
 		if(w < 0 || w > 12)
 			throw new ChangeVetoException("Invalid width");
-		if(getGlyphs().size() > 0)
+		if(hasGlyphs())
 			throw new ChangeVetoException("Glyphs exist");
 		store.update(this, "width", w);
 		setWidth(w);
