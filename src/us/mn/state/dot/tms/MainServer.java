@@ -80,6 +80,11 @@ public class MainServer {
 			Namespace ns = new Namespace();
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
+			BaseObjectImpl.store = TMSObjectImpl.store;
+			BaseObjectImpl.namespace = ns;
+			GraphicImpl.lookup(ns);
+			FontImpl.lookup(ns);
+			GlyphImpl.lookup(ns);
 			Server server = new Server(ns, props);
 			TMSObjectImpl.eventLog.add(new TMSEvent("System",
 				TMSEvent.SYSTEM_RESTARTED,
