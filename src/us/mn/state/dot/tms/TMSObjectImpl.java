@@ -120,9 +120,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Tour list */
 	static TourListImpl tourList;
 
-	/** Font list */
-	static public PixFontList fontList;
-
 	/** LCS list */
 	static LCSListImpl lcsList;
 
