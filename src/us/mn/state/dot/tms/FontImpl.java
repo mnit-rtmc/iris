@@ -16,12 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.sql.ResultSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.server.Checker;
+import java.util.HashMap;
 import us.mn.state.dot.sonar.server.Namespace;
 
 /**
@@ -88,51 +83,30 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		versionID = v;
 	}
 
-	/** Get the glyphs which make up the font */
-	protected List<GlyphImpl> _getGlyphs() throws NamespaceError {
-		final LinkedList<GlyphImpl> glyphs =
-			new LinkedList<GlyphImpl>();
-		final FontImpl font = this;
-		namespace.findObject(SONAR_TYPE, new Checker<GlyphImpl>() {
-			public boolean check(GlyphImpl g) {
-				if(g.getFont() == font)
-					glyphs.add(g);
-				return false;
-			}
-		});
-		return glyphs;
-	}
+	/** Mapping of code points to glyphs */
+	protected final HashMap<Integer, GlyphImpl> glyphs =
+		new HashMap<Integer, GlyphImpl>();
 
-	/** Get the glyphs which make up the font */
-	public List<GlyphImpl> getGlyphs() throws TMSException {
-		try {
-			return _getGlyphs();
-		}
-		catch(NamespaceError e) {
-			throw new TMSException(e);
+	/** Add a glyph */
+	public void addGlyph(int p, GlyphImpl g) throws TMSException {
+		synchronized(glyphs) {
+			if(glyphs.containsKey(p))
+				throw new ChangeVetoException("Glyph exists");
+			glyphs.put(p, g);
 		}
 	}
 
-	/** Check if the font has any glyphs */
-	protected boolean _hasGlyphs() throws NamespaceError {
-		final FontImpl font = this;
-		SonarObject glyph = namespace.findObject(SONAR_TYPE,
-			new Checker<GlyphImpl>()
-		{
-			public boolean check(GlyphImpl g) {
-				return g.getFont() == font;
-			}
-		});
-		return glyph != null;
+	/** Remove a glyph */
+	public void removeGlyph(int p, GlyphImpl g) {
+		synchronized(glyphs) {
+			glyphs.remove(p);
+		}
 	}
 
 	/** Check if the font has any glyphs */
 	protected boolean hasGlyphs() throws TMSException {
-		try {
-			return _hasGlyphs();
-		}
-		catch(NamespaceError e) {
-			throw new TMSException(e);
+		synchronized(glyphs) {
+			return !glyphs.isEmpty();
 		}
 	}
 
@@ -278,21 +252,17 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Lookup the glyph associated with a code point */
-	static protected GlyphImpl lookupGlyph(List<GlyphImpl> glyphs,
-		int code_point)
-	{
-		for(GlyphImpl g: glyphs) {
-			if(g.getCodePoint() == code_point)
-				return g;
+	protected GlyphImpl getGlyph(int code_point) {
+		synchronized(glyphs) {
+			return glyphs.get(code_point);
 		}
-		return null;
 	}
 
 	/** Lookup the graphic associated with a code point */
-	static protected GraphicImpl lookupGraphic(List<GlyphImpl> glyphs,
-		int code_point) throws InvalidMessageException
+	protected GraphicImpl getGraphic(int code_point)
+		throws InvalidMessageException
 	{
-		GlyphImpl glyph = lookupGlyph(glyphs, code_point);
+		GlyphImpl glyph = getGlyph(code_point);
 		if(glyph != null) {
 			GraphicImpl graphic = (GraphicImpl)glyph.getGraphic();
 			if(graphic != null)
@@ -303,12 +273,11 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Render text onto a bitmap graphic */
 	public void renderOn(BitmapGraphic g, int x, int y, String t)
-		throws InvalidMessageException, TMSException, IOException
+		throws InvalidMessageException, IOException
 	{
-		List<GlyphImpl> glyphs = getGlyphs();
 		for(int i = 0; i < t.length(); i++) {
 			int j = t.charAt(i);
-			GraphicImpl c = lookupGraphic(glyphs, j);
+			GraphicImpl c = getGraphic(j);
 			c.renderOn(g, x, y);
 			x += c.getWidth() + charSpacing;
 		}
@@ -316,13 +285,12 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Calculate the width (in pixels) of a line of text */
 	public int calculateWidth(String t) throws TMSException {
-		List<GlyphImpl> glyphs = getGlyphs();
 		int w = 0;
 		for(int i = 0; i < t.length(); i++) {
 			if(i > 0)
 				w += charSpacing;
 			int j = t.charAt(i);
-			GraphicImpl c = lookupGraphic(glyphs, j);
+			GraphicImpl c = getGraphic(j);
 			w += c.getWidth();
 		}
 		return w;

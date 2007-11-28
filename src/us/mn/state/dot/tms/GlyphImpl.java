@@ -48,6 +48,13 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		return glyph;
 	}
 
+	/** Destroy a glyph */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		if(font != null)
+			font.removeGlyph(code_point, this);
+	}
+
 	/** Get the database table name */
 	public String getTable() {
 		return SONAR_TYPE;
@@ -87,9 +94,13 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Create a glyph from database lookup */
-	protected GlyphImpl(Namespace ns, String n, String f, int p, String g) {
+	protected GlyphImpl(Namespace ns, String n, String f, int p, String g)
+		throws TMSException
+	{
 		this(n);
 		font = lookupFont(ns, f);
+		if(font != null)
+			font.addGlyph(p, this);
 		code_point = p;
 		graphic = lookupGraphic(ns, g);
 	}
@@ -106,7 +117,11 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	public void doSetFont(Font f) throws TMSException {
 		if(f == font)
 			return;
+		if(f != null)
+			((FontImpl)f).addGlyph(code_point, this);
 		store.update(this, "font", f.getName());
+		if(font != null)
+			font.removeGlyph(code_point, this);
 		setFont(f);
 	}
 
@@ -127,6 +142,10 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	public void doSetCodePoint(int p) throws TMSException {
 		if(p == code_point)
 			return;
+		if(font != null) {
+			font.addGlyph(p, this);
+			font.removeGlyph(code_point, this);
+		}
 		store.update(this, "code_point", p);
 		setCodePoint(p);
 	}
