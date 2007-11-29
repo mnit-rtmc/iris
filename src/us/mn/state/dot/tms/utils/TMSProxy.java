@@ -191,12 +191,6 @@ public class TMSProxy {
 	/** Get the warning sign list */
 	public RemoteListModel getWarningSignList() { return warn_signs; }
 
-	/** Font list */
-	protected final RemoteListModel fonts;
-
-	/** Get the font list */
-	public RemoteListModel getFonts() { return fonts; }
-
 	/** Available device list */
 	protected final RemoteListModel devices;
 
@@ -273,7 +267,6 @@ public class TMSProxy {
 		dms_list = tms.getDMSList();
 		plans = new RemoteListModel(tms.getTimingPlanList());
 		warn_signs = new RemoteListModel(tms.getWarningSignList());
-		fonts = new RemoteListModel(tms.getFontList());
 		devices = new RemoteListModel(tms.getDeviceList());
 		camera_list = tms.getCameraList();
 		monitor_list = new RemoteListModel(tms.getMonitorList());
@@ -293,7 +286,6 @@ public class TMSProxy {
 		greenFree.dispose();
 		stations.dispose();
 		availableMeters.dispose();
-		fonts.dispose();
 		devices.dispose();
 		tour_list.dispose();
 	}

@@ -18,6 +18,9 @@ us/mn/state/dot/tms/DMS.class
 us/mn/state/dot/tms/DmsMessage.class
 us/mn/state/dot/tms/DMSList.class
 us/mn/state/dot/tms/ErrorCounter.class
+us/mn/state/dot/tms/Font.class
+us/mn/state/dot/tms/Glyph.class
+us/mn/state/dot/tms/Graphic.class
 us/mn/state/dot/tms/IndexedList.class
 us/mn/state/dot/tms/InvalidMessageException.class
 us/mn/state/dot/tms/LaneControlSignal.class
@@ -39,8 +42,6 @@ us/mn/state/dot/tms/Node.class
 us/mn/state/dot/tms/OffRamp.class
 us/mn/state/dot/tms/OnRamp.class
 us/mn/state/dot/tms/Circuit.class
-us/mn/state/dot/tms/PixCharacter.class
-us/mn/state/dot/tms/PixFont.class
 us/mn/state/dot/tms/R_Node.class
 us/mn/state/dot/tms/R_NodeMap.class
 us/mn/state/dot/tms/RampMeter.class
