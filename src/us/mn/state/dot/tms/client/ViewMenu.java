@@ -19,6 +19,7 @@ import javax.swing.JMenuItem;
 
 import us.mn.state.dot.tms.client.camera.CameraListForm;
 import us.mn.state.dot.tms.client.dms.DMSListForm;
+import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
 import us.mn.state.dot.tms.client.meter.RampMeterListForm;
 import us.mn.state.dot.tms.client.monitor.MonitorListForm;
@@ -28,7 +29,6 @@ import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.toast.DetectorListForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.MeteringHolidayForm;
-import us.mn.state.dot.tms.client.toast.PixFontListForm;
 import us.mn.state.dot.tms.client.toast.PolicyForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.SonetRingForm;
@@ -127,7 +127,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('F');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new PixFontListForm(tc));
+				desktop.show(new FontForm(st.getFonts()));
 			}
 		};
 		add(item);

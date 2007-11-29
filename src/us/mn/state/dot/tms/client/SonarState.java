@@ -25,6 +25,9 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.Graphic;
 
 /**
  * Holds the state of the SONAR client
@@ -57,6 +60,30 @@ public class SonarState extends Client {
 		return connections;
 	}
 
+	/** Cache of graphic proxies */
+	protected final TypeCache<Graphic> graphics;
+
+	/** Get the graphic type cache */
+	public TypeCache<Graphic> getGraphics() {
+		return graphics;
+	}
+
+	/** Cache of font proxies */
+	protected final TypeCache<Font> fonts;
+
+	/** Get the font type cache */
+	public TypeCache<Font> getFonts() {
+		return fonts;
+	}
+
+	/** Cache of glyph proxies */
+	protected final TypeCache<Glyph> glyphs;
+
+	/** Get the glyph type cache */
+	public TypeCache<Glyph> getGlyphs() {
+		return glyphs;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ShowHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -66,6 +93,9 @@ public class SonarState extends Client {
 		roles = new TypeCache<Role>(Role.class);
 		users = new TypeCache<User>(User.class);
 		connections = new TypeCache<Connection>(Connection.class);
+		graphics = new TypeCache<Graphic>(Graphic.class);
+		fonts = new TypeCache<Font>(Font.class);
+		glyphs = new TypeCache<Glyph>(Glyph.class);
 	}
 
 	/** Login to the SONAR server */
@@ -76,6 +106,9 @@ public class SonarState extends Client {
 		populate(roles);
 		populate(users);
 		populate(connections);
+		populate(graphics);
+		populate(fonts);
+		populate(glyphs);
 	}
 
 	/** Look up the specified user */
