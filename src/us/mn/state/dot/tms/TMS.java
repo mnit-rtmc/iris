@@ -64,9 +64,6 @@ public interface TMS extends Remote {
 	/** Get the warning sign list */
 	public SortedList getWarningSignList() throws RemoteException;
 
-	/** Get the pixel font list */
-	public IndexedList getFontList() throws RemoteException;
-
 	/** Get the available device list */
 	public SortedList getDeviceList() throws RemoteException;
 

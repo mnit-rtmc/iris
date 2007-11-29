@@ -116,8 +116,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		dmss.load( DMSImpl.class, "id" );
 		System.err.println("Loading warning signs...");
 		warn_signs.load(WarningSignImpl.class, "id");
-		System.err.println( "Loading fonts..." );
-		fonts.load( PixFontImpl.class, "index" );
 		System.err.println( "Loading cameras..." );
 		cameras.load( CameraImpl.class, "id" );
 		System.err.println( "Loading monitors..." );
@@ -382,9 +380,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Warning sign list */
 	protected final WarningSignList warn_signs;
 
-	/** Pixel font list */
-	protected final PixFontList fonts;
-
 	/** Camera list */
 	protected final CameraList cameras;
 
@@ -439,7 +434,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		holidays = new MeteringHolidayListImpl();
 		dmss = new DMSListImpl();
 		warn_signs = new WarningSignList();
-		fonts = new PixFontList();
 		cameras = new CameraList();
 		monitors = new MonitorListImpl();
 		tours = new TourListImpl();
@@ -496,9 +490,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Get the warning sign list */
 	public SortedList getWarningSignList() { return warn_signs; }
-
-	/** Get the pixel font list */
-	public IndexedList getFontList() { return fonts; }
 
 	/** Get the camera list */
 	public SortedList getCameraList() { return cameras; }
