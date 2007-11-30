@@ -387,19 +387,6 @@ GRANT SELECT ON TABLE roadway TO PUBLIC;
 SET SESSION AUTHORIZATION 'tms';
 
 --
--- TOC entry 40 (OID 19211279)
--- Name: character; Type: TABLE; Schema: public; Owner: tms
---
-
-CREATE TABLE "character" (
-    "index" integer NOT NULL,
-    width integer NOT NULL,
-    bitmap smallint[] NOT NULL
-)
-INHERITS (tms_object);
-
-
---
 -- TOC entry 41 (OID 19211285)
 -- Name: indexed_list; Type: TABLE; Schema: public; Owner: tms
 --
@@ -408,34 +395,6 @@ CREATE TABLE indexed_list (
     list integer NOT NULL
 )
 INHERITS (abstract_list);
-
-
---
--- TOC entry 42 (OID 19211288)
--- Name: character_list; Type: TABLE; Schema: public; Owner: tms
---
-
-CREATE TABLE character_list (
-    dummy_1271 boolean
-)
-INHERITS (indexed_list);
-
-
---
--- TOC entry 43 (OID 19211291)
--- Name: font; Type: TABLE; Schema: public; Owner: tms
---
-
-CREATE TABLE font (
-    "index" integer NOT NULL,
-    name text NOT NULL,
-    height integer NOT NULL,
-    "characterSpacing" integer NOT NULL,
-    "lineSpacing" integer NOT NULL,
-    characters integer NOT NULL,
-    "versionID" integer NOT NULL
-)
-INHERITS (tms_object);
 
 
 --
@@ -490,6 +449,45 @@ INHERITS (traffic_device);
 
 REVOKE ALL ON TABLE ramp_meter FROM PUBLIC;
 GRANT SELECT ON TABLE ramp_meter TO PUBLIC;
+
+
+CREATE TABLE graphic (
+	name TEXT PRIMARY KEY,
+	bpp INTEGER NOT NULL,
+	height INTEGER NOT NULL,
+	width INTEGER NOT NULL,
+	pixels TEXT NOT NULL
+);
+
+CREATE TABLE font (
+	name TEXT PRIMARY KEY,
+	number INTEGER NOT NULL,
+	height INTEGER NOT NULL,
+	width INTEGER NOT NULL,
+	line_spacing INTEGER NOT NULL,
+	char_spacing INTEGER NOT NULL,
+	version_id INTEGER NOT NULL
+);
+
+CREATE TABLE glyph (
+	name TEXT PRIMARY KEY,
+	font TEXT NOT NULL,
+	code_point INTEGER NOT NULL,
+	graphic TEXT NOT NULL
+);
+
+ALTER TABLE glyph
+	ADD CONSTRAINT fk_glyph_font FOREIGN KEY (font) REFERENCES font(name);
+ALTER TABLE glyph
+	ADD CONSTRAINT fk_glyph_graphic FOREIGN KEY (graphic)
+	REFERENCES graphic(name);
+
+REVOKE ALL ON TABLE graphic FROM PUBLIC;
+GRANT SELECT ON TABLE graphic TO PUBLIC;
+REVOKE ALL ON TABLE font FROM PUBLIC;
+GRANT SELECT ON TABLE font TO PUBLIC;
+REVOKE ALL ON TABLE glyph FROM PUBLIC;
+GRANT SELECT ON TABLE glyph TO PUBLIC;
 
 
 SET SESSION AUTHORIZATION 'tms';
@@ -2105,8 +2103,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 1532	4	0	java_lang_Integer	java.lang.Integer
 1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
 51458	4	0	stratified_plan	us.mn.state.dot.tms.StratifiedPlanImpl
-1273	4	0	font	us.mn.state.dot.tms.PixFontImpl
-1271	4	0	character_list	us.mn.state.dot.tms.PixCharacterList
 48316	4	0	segment	us.mn.state.dot.tms.SegmentImpl
 60327	4	0	metering_holiday	us.mn.state.dot.tms.MeteringHolidayImpl
 43828	4	0	node_group	us.mn.state.dot.tms.NodeGroupImpl
@@ -2120,7 +2116,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 43830	4	0	node	us.mn.state.dot.tms.NodeImpl
 48326	4	0	off_ramp	us.mn.state.dot.tms.OffRampImpl
 48329	4	0	on_ramp	us.mn.state.dot.tms.OnRampImpl
-1172	4	0	character	us.mn.state.dot.tms.PixCharacterImpl
 79334	4	0	alarm	us.mn.state.dot.tms.AlarmImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
 134	4	0	camera	us.mn.state.dot.tms.CameraImpl
@@ -2450,35 +2445,11 @@ CREATE UNIQUE INDEX roadway_pkey ON roadway USING btree (vault_oid);
 
 
 --
--- TOC entry 175 (OID 19211772)
--- Name: character_pkey; Type: INDEX; Schema: public; Owner: tms
---
-
-CREATE UNIQUE INDEX character_pkey ON "character" USING btree (vault_oid);
-
-
---
 -- TOC entry 176 (OID 19211773)
 -- Name: indexed_list_pkey; Type: INDEX; Schema: public; Owner: tms
 --
 
 CREATE UNIQUE INDEX indexed_list_pkey ON indexed_list USING btree (vault_oid);
-
-
---
--- TOC entry 177 (OID 19211774)
--- Name: character_list_pkey; Type: INDEX; Schema: public; Owner: tms
---
-
-CREATE UNIQUE INDEX character_list_pkey ON character_list USING btree (vault_oid);
-
-
---
--- TOC entry 178 (OID 19211775)
--- Name: font_pkey; Type: INDEX; Schema: public; Owner: tms
---
-
-CREATE UNIQUE INDEX font_pkey ON font USING btree (vault_oid);
 
 
 --
@@ -3317,5 +3288,3 @@ SET SESSION AUTHORIZATION 'postgres';
 --
 
 COMMENT ON SCHEMA public IS 'Standard public schema';
-
-

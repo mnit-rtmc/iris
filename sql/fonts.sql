@@ -1,617 +1,1197 @@
-COPY font (vault_oid, vault_type, vault_refs, dummy_41, "index", name, height, "characterSpacing", "lineSpacing", characters, "versionID") FROM stdin;
-1168	1273	1	\N	1	NORMAL	7	2	0	1169	36192
-1274	1273	1	\N	2	HINTED	7	0	0	1275	37200
-80464	1273	1	\N	3	MONO	7	0	0	80465	0
-\.
+INSERT INTO font (name, number, height, width, line_spacing,
+	char_spacing, version_id) VALUES ('NORMAL', 1, 7, 0, 0, 2, 36192);
+INSERT INTO font (name, number, height, width, line_spacing,
+	char_spacing, version_id) VALUES ('HINTED', 2, 7, 0, 0, 0, 37200);
+INSERT INTO font (name, number, height, width, line_spacing,
+	char_spacing, version_id) VALUES ('MONO', 3, 7, 5, 0, 0, 0);
 
-COPY character_list (vault_oid, vault_type, vault_refs, dummy_41, dummy_40, list, dummy_1271) FROM stdin;
-1169	1271	1	\N	\N	1170	\N
-1275	1271	1	\N	\N	1276	\N
-80465	1271	1	\N	\N	80466	\N
-\.
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_1', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_1', 'NORMAL', 1, 'NORMAL_1');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_2', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_2', 'NORMAL', 2, 'NORMAL_2');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_3', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_3', 'NORMAL', 3, 'NORMAL_3');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_4', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_4', 'NORMAL', 4, 'NORMAL_4');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_5', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_5', 'NORMAL', 5, 'NORMAL_5');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_6', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_6', 'NORMAL', 6, 'NORMAL_6');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_7', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_7', 'NORMAL', 7, 'NORMAL_7');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_8', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_8', 'NORMAL', 8, 'NORMAL_8');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_9', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_9', 'NORMAL', 9, 'NORMAL_9');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_10', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_10', 'NORMAL', 10, 'NORMAL_10');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_11', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_11', 'NORMAL', 11, 'NORMAL_11');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_12', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_12', 'NORMAL', 12, 'NORMAL_12');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_13', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_13', 'NORMAL', 13, 'NORMAL_13');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_14', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_14', 'NORMAL', 14, 'NORMAL_14');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_15', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_15', 'NORMAL', 15, 'NORMAL_15');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_16', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_16', 'NORMAL', 16, 'NORMAL_16');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_17', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_17', 'NORMAL', 17, 'NORMAL_17');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_18', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_18', 'NORMAL', 18, 'NORMAL_18');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_19', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_19', 'NORMAL', 19, 'NORMAL_19');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_20', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_20', 'NORMAL', 20, 'NORMAL_20');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_21', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_21', 'NORMAL', 21, 'NORMAL_21');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_22', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_22', 'NORMAL', 22, 'NORMAL_22');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_23', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_23', 'NORMAL', 23, 'NORMAL_23');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_24', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_24', 'NORMAL', 24, 'NORMAL_24');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_25', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_25', 'NORMAL', 25, 'NORMAL_25');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_26', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_26', 'NORMAL', 26, 'NORMAL_26');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_27', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_27', 'NORMAL', 27, 'NORMAL_27');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_28', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_28', 'NORMAL', 28, 'NORMAL_28');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_29', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_29', 'NORMAL', 29, 'NORMAL_29');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_30', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_30', 'NORMAL', 30, 'NORMAL_30');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_31', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_31', 'NORMAL', 31, 'NORMAL_31');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_32', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_32', 'NORMAL', 32, 'NORMAL_32');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_33', 1, 7, 3, 'SSQQ');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_33', 'NORMAL', 33, 'NORMAL_33');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_34', 1, 7, 3, 'tX8A');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_34', 'NORMAL', 34, 'NORMAL_34');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_35', 1, 7, 5, 'Ur2uqEA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_35', 'NORMAL', 35, 'NORMAL_35');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_36', 1, 7, 5, 'I+fh938=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_36', 'NORMAL', 36, 'NORMAL_36');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_37', 1, 7, 5, 'xURETGA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_37', 'NORMAL', 37, 'NORMAL_37');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_38', 1, 7, 5, 'RSiJyJ8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_38', 'NORMAL', 38, 'NORMAL_38');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_39', 1, 7, 3, 'SQAA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_39', 'NORMAL', 39, 'NORMAL_39');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_40', 1, 7, 3, 'KkiH');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_40', 'NORMAL', 40, 'NORMAL_40');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_41', 1, 7, 3, 'h5Gf');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_41', 'NORMAL', 41, 'NORMAL_41');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_42', 1, 7, 7, 'EFEUFEUEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_42', 'NORMAL', 42, 'NORMAL_42');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_43', 1, 7, 5, 'AQnxEAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_43', 'NORMAL', 43, 'NORMAL_43');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_44', 1, 7, 3, 'AASf');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_44', 'NORMAL', 44, 'NORMAL_44');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_45', 1, 7, 4, 'AA8AAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_45', 'NORMAL', 45, 'NORMAL_45');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_46', 1, 7, 3, 'AAGv');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_46', 'NORMAL', 46, 'NORMAL_46');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_47', 1, 7, 5, 'AEREQAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_47', 'NORMAL', 47, 'NORMAL_47');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_48', 1, 7, 4, 'aZiYYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_48', 'NORMAL', 48, 'NORMAL_48');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_49', 1, 7, 3, 'WSS3');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_49', 'NORMAL', 49, 'NORMAL_49');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_50', 1, 7, 4, 'aRJI7w==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_50', 'NORMAL', 50, 'NORMAL_50');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_51', 1, 7, 4, 'aRYZYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_51', 'NORMAL', 51, 'NORMAL_51');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_52', 1, 7, 5, 'EZQvh0A=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_52', 'NORMAL', 52, 'NORMAL_52');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_53', 1, 7, 4, '94UZYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_53', 'NORMAL', 53, 'NORMAL_53');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_54', 1, 7, 4, 'aY2YYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_54', 'NORMAL', 54, 'NORMAL_54');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_55', 1, 7, 4, '8BIkQA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_55', 'NORMAL', 55, 'NORMAL_55');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_56', 1, 7, 4, 'aZWYYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_56', 'NORMAL', 56, 'NORMAL_56');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_57', 1, 7, 4, 'aZYZYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_57', 'NORMAL', 57, 'NORMAL_57');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_58', 1, 7, 2, 'CH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_58', 'NORMAL', 58, 'NORMAL_58');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_59', 1, 7, 3, 'AQUA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_59', 'NORMAL', 59, 'NORMAL_59');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_60', 1, 7, 4, 'EkhCEA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_60', 'NORMAL', 60, 'NORMAL_60');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_61', 1, 7, 5, 'AD4PfwA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_61', 'NORMAL', 61, 'NORMAL_61');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_62', 1, 7, 4, 'gyEkfw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_62', 'NORMAL', 62, 'NORMAL_62');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_63', 1, 7, 4, 'aRIgIA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_63', 'NORMAL', 63, 'NORMAL_63');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_64', 1, 7, 5, 'dG9bwL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_64', 'NORMAL', 64, 'NORMAL_64');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_65', 1, 7, 4, 'aZ6Yjw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_65', 'NORMAL', 65, 'NORMAL_65');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_66', 1, 7, 4, '6J2Y3w==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_66', 'NORMAL', 66, 'NORMAL_66');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_67', 1, 7, 4, 'aYeIYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_67', 'NORMAL', 67, 'NORMAL_67');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_68', 1, 7, 4, '6JiY3w==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_68', 'NORMAL', 68, 'NORMAL_68');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_69', 1, 7, 4, '942H7w==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_69', 'NORMAL', 69, 'NORMAL_69');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_70', 1, 7, 4, '942Hfw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_70', 'NORMAL', 70, 'NORMAL_70');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_71', 1, 7, 4, 'aYe4cA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_71', 'NORMAL', 71, 'NORMAL_71');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_72', 1, 7, 4, 'mJ6Yjw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_72', 'NORMAL', 72, 'NORMAL_72');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_73', 1, 7, 1, '/g==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_73', 'NORMAL', 73, 'NORMAL_73');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_74', 1, 7, 4, 'EREZYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_74', 'NORMAL', 74, 'NORMAL_74');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_75', 1, 7, 4, 'mKuojw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_75', 'NORMAL', 75, 'NORMAL_75');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_76', 1, 7, 4, 'h4eH7w==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_76', 'NORMAL', 76, 'NORMAL_76');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_77', 1, 7, 7, 'go4dWrFkfw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_77', 'NORMAL', 77, 'NORMAL_77');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_78', 1, 7, 5, 'jXNZzSA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_78', 'NORMAL', 78, 'NORMAL_78');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_79', 1, 7, 4, 'aZiYYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_79', 'NORMAL', 79, 'NORMAL_79');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_80', 1, 7, 4, '6J2Hfw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_80', 'NORMAL', 80, 'NORMAL_80');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_81', 1, 7, 5, 'dGMayJ8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_81', 'NORMAL', 81, 'NORMAL_81');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_82', 1, 7, 4, '6J2ojw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_82', 'NORMAL', 82, 'NORMAL_82');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_83', 1, 7, 4, 'aYUZYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_83', 'NORMAL', 83, 'NORMAL_83');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_84', 1, 7, 5, '+AhCEH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_84', 'NORMAL', 84, 'NORMAL_84');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_85', 1, 7, 4, 'mJiYYA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_85', 'NORMAL', 85, 'NORMAL_85');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_86', 1, 7, 5, 'i2MVKH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_86', 'NORMAL', 86, 'NORMAL_86');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_87', 1, 7, 7, 'ggYMmbfffw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_87', 'NORMAL', 87, 'NORMAL_87');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_88', 1, 7, 5, 'i1RFRiA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_88', 'NORMAL', 88, 'NORMAL_88');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_89', 1, 7, 5, 'i1RCEH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_89', 'NORMAL', 89, 'NORMAL_89');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_90', 1, 7, 5, '90REQ98=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_90', 'NORMAL', 90, 'NORMAL_90');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_91', 1, 7, 7, 'f39/j5/Gfw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_91', 'NORMAL', 91, 'NORMAL_91');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_92', 1, 7, 7, 'AggkiRg8AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_92', 'NORMAL', 92, 'NORMAL_92');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_93', 1, 7, 7, 'ECBElEcEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_93', 'NORMAL', 93, 'NORMAL_93');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_94', 1, 7, 7, 'HgwokQggAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_94', 'NORMAL', 94, 'NORMAL_94');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_95', 1, 7, 7, '8IGDf39/fw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_95', 'NORMAL', 95, 'NORMAL_95');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_96', 1, 7, 7, 'EEEH8wQEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_96', 'NORMAL', 96, 'NORMAL_96');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_97', 1, 7, 7, 'EBAX70EEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_97', 'NORMAL', 97, 'NORMAL_97');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_98', 1, 7, 7, 'EHFUkAIEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_98', 'NORMAL', 98, 'NORMAL_98');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('NORMAL_99', 1, 7, 3, 'VQAA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('NORMAL_99', 'NORMAL', 99, 'NORMAL_99');
 
-COPY "java_util_ArrayList" (vault_oid, vault_type, vault_refs, dummy_24, dummy_23, size) FROM stdin;
-1170	38	1	\N	\N	99
-1276	38	1	\N	\N	99
-80466	38	1	\N	\N	99
-\.
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_1', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_1', 'HINTED', 1, 'HINTED_1');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_2', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_2', 'HINTED', 2, 'HINTED_2');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_3', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_3', 'HINTED', 3, 'HINTED_3');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_4', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_4', 'HINTED', 4, 'HINTED_4');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_5', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_5', 'HINTED', 5, 'HINTED_5');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_6', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_6', 'HINTED', 6, 'HINTED_6');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_7', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_7', 'HINTED', 7, 'HINTED_7');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_8', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_8', 'HINTED', 8, 'HINTED_8');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_9', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_9', 'HINTED', 9, 'HINTED_9');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_10', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_10', 'HINTED', 10, 'HINTED_10');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_11', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_11', 'HINTED', 11, 'HINTED_11');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_12', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_12', 'HINTED', 12, 'HINTED_12');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_13', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_13', 'HINTED', 13, 'HINTED_13');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_14', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_14', 'HINTED', 14, 'HINTED_14');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_15', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_15', 'HINTED', 15, 'HINTED_15');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_16', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_16', 'HINTED', 16, 'HINTED_16');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_17', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_17', 'HINTED', 17, 'HINTED_17');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_18', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_18', 'HINTED', 18, 'HINTED_18');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_19', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_19', 'HINTED', 19, 'HINTED_19');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_20', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_20', 'HINTED', 20, 'HINTED_20');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_21', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_21', 'HINTED', 21, 'HINTED_21');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_22', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_22', 'HINTED', 22, 'HINTED_22');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_23', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_23', 'HINTED', 23, 'HINTED_23');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_24', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_24', 'HINTED', 24, 'HINTED_24');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_25', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_25', 'HINTED', 25, 'HINTED_25');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_26', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_26', 'HINTED', 26, 'HINTED_26');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_27', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_27', 'HINTED', 27, 'HINTED_27');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_28', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_28', 'HINTED', 28, 'HINTED_28');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_29', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_29', 'HINTED', 29, 'HINTED_29');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_30', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_30', 'HINTED', 30, 'HINTED_30');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_31', 1, 7, 1, 'AA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_31', 'HINTED', 31, 'HINTED_31');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_32', 1, 7, 2, 'AAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_32', 'HINTED', 32, 'HINTED_32');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_33', 1, 7, 3, 'SSQQ');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_33', 'HINTED', 33, 'HINTED_33');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_34', 1, 7, 3, 'tX8A');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_34', 'HINTED', 34, 'HINTED_34');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_35', 1, 7, 7, 'KFHwR8QKAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_35', 'HINTED', 35, 'HINTED_35');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_36', 1, 7, 7, 'EHlBwE8EAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_36', 'HINTED', 36, 'HINTED_36');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_37', 1, 7, 7, 'YMcggQmCAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_37', 'HINTED', 37, 'HINTED_37');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_38', 1, 7, 6, 'IUUIVSNe');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_38', 'HINTED', 38, 'HINTED_38');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_39', 1, 7, 1, '3w==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_39', 'HINTED', 39, 'HINTED_39');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_40', 1, 7, 4, 'EkRCEA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_40', 'HINTED', 40, 'HINTED_40');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_41', 1, 7, 4, 'QhESQA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_41', 'HINTED', 41, 'HINTED_41');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_42', 1, 7, 7, 'EFEUFEUEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_42', 'HINTED', 42, 'HINTED_42');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_43', 1, 7, 5, 'AQnxEAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_43', 'HINTED', 43, 'HINTED_43');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_44', 1, 7, 3, 'AASl');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_44', 'HINTED', 44, 'HINTED_44');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_45', 1, 7, 4, 'AA8AAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_45', 'HINTED', 45, 'HINTED_45');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_46', 1, 7, 3, 'AAGv');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_46', 'HINTED', 46, 'HINTED_46');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_47', 1, 7, 7, 'AAgggQgAAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_47', 'HINTED', 47, 'HINTED_47');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_48', 1, 7, 6, 'MSSRSSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_48', 'HINTED', 48, 'HINTED_48');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_49', 1, 7, 5, 'IwhCEb8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_49', 'HINTED', 49, 'HINTED_49');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_50', 1, 7, 6, 'MSCDIQd/');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_50', 'HINTED', 50, 'HINTED_50');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_51', 1, 7, 6, 'MSCLCSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_51', 'HINTED', 51, 'HINTED_51');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_52', 1, 7, 6, 'CGKRfCCC');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_52', 'HINTED', 52, 'HINTED_52');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_53', 1, 7, 5, 'ehBgo9I=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_53', 'HINTED', 53, 'HINTED_53');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_54', 1, 7, 5, 'MlDjo9Y=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_54', 'HINTED', 54, 'HINTED_54');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_55', 1, 7, 4, '8BIkQA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_55', 'HINTED', 55, 'HINTED_55');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_56', 1, 7, 5, 'MlJko9Y=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_56', 'HINTED', 56, 'HINTED_56');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_57', 1, 7, 5, 'MlJwo9Y=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_57', 'HINTED', 57, 'HINTED_57');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_58', 1, 7, 2, 'CIA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_58', 'HINTED', 58, 'HINTED_58');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_59', 1, 7, 3, 'AQUE');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_59', 'HINTED', 59, 'HINTED_59');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_60', 1, 7, 4, 'EkhCGA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_60', 'HINTED', 60, 'HINTED_60');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_61', 1, 7, 5, 'AD4PfwA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_61', 'HINTED', 61, 'HINTED_61');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_62', 1, 7, 5, 'QQQREQA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_62', 'HINTED', 62, 'HINTED_62');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_63', 1, 7, 4, 'aRIgIA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_63', 'HINTED', 63, 'HINTED_63');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_64', 1, 7, 6, 'ORXUXQOe');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_64', 'HINTED', 64, 'HINTED_64');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_65', 1, 7, 6, 'MSSdSSR/');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_65', 'HINTED', 65, 'HINTED_65');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_66', 1, 7, 6, 'cSSbSScA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_66', 'HINTED', 66, 'HINTED_66');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_67', 1, 7, 6, 'MSQQQSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_67', 'HINTED', 67, 'HINTED_67');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_68', 1, 7, 6, 'cSSRSScA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_68', 'HINTED', 68, 'HINTED_68');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_69', 1, 7, 6, 'eQQcQQd/');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_69', 'HINTED', 69, 'HINTED_69');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_70', 1, 7, 5, 'ehDjIQA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_70', 'HINTED', 70, 'HINTED_70');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_71', 1, 7, 6, 'MSQQWSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_71', 'HINTED', 71, 'HINTED_71');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_72', 1, 7, 6, 'SSSdSSR/');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_72', 'HINTED', 72, 'HINTED_72');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_73', 1, 7, 3, 'SSST');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_73', 'HINTED', 73, 'HINTED_73');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_74', 1, 7, 5, 'EIMhSX8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_74', 'HINTED', 74, 'HINTED_74');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_75', 1, 7, 6, 'SSUYUSR/');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_75', 'HINTED', 75, 'HINTED_75');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_76', 1, 7, 5, 'QhCDId8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_76', 'HINTED', 76, 'HINTED_76');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_77', 1, 7, 9, 'QTGXyaRSSSQ=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_77', 'HINTED', 77, 'HINTED_77');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_78', 1, 7, 7, 'RMiRo8iQAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_78', 'HINTED', 78, 'HINTED_78');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_79', 1, 7, 6, 'MSSRSSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_79', 'HINTED', 79, 'HINTED_79');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_80', 1, 7, 5, 'clLjIQw=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_80', 'HINTED', 80, 'HINTED_80');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_81', 1, 7, 7, 'OIgSJUkNAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_81', 'HINTED', 81, 'HINTED_81');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_82', 1, 7, 6, 'cSSbUSR/');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_82', 'HINTED', 82, 'HINTED_82');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_83', 1, 7, 6, 'MSQMCSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_83', 'HINTED', 83, 'HINTED_83');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_84', 1, 7, 5, '+AhCEII=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_84', 'HINTED', 84, 'HINTED_84');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_85', 1, 7, 6, 'SSSRSSMA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_85', 'HINTED', 85, 'HINTED_85');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_86', 1, 7, 7, 'RIgSIoQEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_86', 'HINTED', 86, 'HINTED_86');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_87', 1, 7, 9, 'QSCPSSVTGQQ=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_87', 'HINTED', 87, 'HINTED_87');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_88', 1, 7, 7, 'RIefgYeQAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_88', 'HINTED', 88, 'HINTED_88');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_89', 1, 7, 5, 'i1RCEIE=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_89', 'HINTED', 89, 'HINTED_89');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_90', 1, 7, 7, 'fAgggQgfAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_90', 'HINTED', 90, 'HINTED_90');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_91', 1, 7, 8, 'f0AgEgoGHg==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_91', 'HINTED', 91, 'HINTED_91');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_92', 1, 7, 8, 'AQIESFBgeA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_92', 'HINTED', 92, 'HINTED_92');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_93', 1, 7, 7, 'ECBElEcEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_93', 'HINTED', 93, 'HINTED_93');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_94', 1, 7, 8, 'HgYKEiBAfw==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_94', 'HINTED', 94, 'HINTED_94');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_95', 1, 7, 8, 'eGBQSAQCAQ==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_95', 'HINTED', 95, 'HINTED_95');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_96', 1, 7, 7, 'EEEH8wQEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_96', 'HINTED', 96, 'HINTED_96');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_97', 1, 7, 7, 'EBAX70EEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_97', 'HINTED', 97, 'HINTED_97');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_98', 1, 7, 7, 'EHFUkAIEAA==');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_98', 'HINTED', 98, 'HINTED_98');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('HINTED_99', 1, 7, 3, 'VQAA');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('HINTED_99', 'HINTED', 99, 'HINTED_99');
 
-COPY "character" (vault_oid, vault_type, vault_refs, dummy_41, "index", width, bitmap) FROM stdin;
-1369	1172	1	\N	93	7	{16,32,68,-107,71,4,0}
-1372	1172	1	\N	96	7	{16,65,7,-12,4,4,0}
-1373	1172	1	\N	97	7	{16,16,23,-16,65,4,0}
-1374	1172	1	\N	98	7	{16,113,84,-111,2,4,0}
-1375	1172	1	\N	99	3	{85,0,0}
-1213	1172	1	\N	42	7	{16,81,20,20,69,4,0}
-1171	1172	1	\N	1	1	{0}
-1173	1172	1	\N	2	1	{0}
-1174	1172	1	\N	3	1	{0}
-1175	1172	1	\N	4	1	{0}
-1176	1172	1	\N	5	1	{0}
-1177	1172	1	\N	6	1	{0}
-1178	1172	1	\N	7	1	{0}
-1179	1172	1	\N	8	1	{0}
-1180	1172	1	\N	9	1	{0}
-1181	1172	1	\N	10	1	{0}
-1182	1172	1	\N	11	1	{0}
-1183	1172	1	\N	12	1	{0}
-1184	1172	1	\N	13	1	{0}
-1185	1172	1	\N	14	1	{0}
-1203	1172	1	\N	32	1	{0}
-1204	1172	1	\N	33	3	{73,36,16}
-1205	1172	1	\N	34	3	{-74,-128,0}
-1206	1172	1	\N	35	5	{82,-66,-81,-87,64}
-1207	1172	1	\N	36	5	{35,-24,-30,-8,-128}
-1208	1172	1	\N	37	5	{-58,68,68,76,96}
-1209	1172	1	\N	38	5	{69,40,-118,-55,-96}
-1210	1172	1	\N	39	3	{73,0,0}
-1211	1172	1	\N	40	3	{42,72,-120}
-1212	1172	1	\N	41	3	{-120,-110,-96}
-1214	1172	1	\N	43	5	{1,9,-14,16,0}
-1215	1172	1	\N	44	3	{0,4,-96}
-1216	1172	1	\N	45	4	{0,15,0,0}
-1217	1172	1	\N	46	3	{0,1,-80}
-1218	1172	1	\N	47	5	{0,68,68,64,0}
-1219	1172	1	\N	48	4	{105,-103,-103,96}
-1220	1172	1	\N	49	3	{89,36,-72}
-1221	1172	1	\N	50	4	{105,18,72,-16}
-1222	1172	1	\N	51	4	{105,22,25,96}
-1223	1172	1	\N	52	5	{17,-107,47,-120,64}
-1224	1172	1	\N	53	4	{-8,-122,25,96}
-1225	1172	1	\N	54	4	{105,-114,-103,96}
-1226	1172	1	\N	55	4	{-15,18,36,64}
-1227	1172	1	\N	56	4	{105,-106,-103,96}
-1228	1172	1	\N	57	4	{105,-105,25,96}
-1229	1172	1	\N	58	2	{8,-128}
-1230	1172	1	\N	59	3	{1,5,0}
-1231	1172	1	\N	60	4	{18,72,66,16}
-1232	1172	1	\N	61	5	{0,62,15,-128,0}
-1233	1172	1	\N	62	4	{-124,33,36,-128}
-1234	1172	1	\N	63	4	{105,18,32,32}
-1235	1172	1	\N	64	5	{116,111,91,-63,-64}
-1236	1172	1	\N	65	4	{105,-97,-103,-112}
-1237	1172	1	\N	66	4	{-23,-98,-103,-32}
-1238	1172	1	\N	67	4	{105,-120,-119,96}
-1239	1172	1	\N	68	4	{-23,-103,-103,-32}
-1240	1172	1	\N	69	4	{-8,-114,-120,-16}
-1241	1172	1	\N	70	4	{-8,-114,-120,-128}
-1242	1172	1	\N	71	4	{105,-120,-71,112}
-1243	1172	1	\N	72	4	{-103,-97,-103,-112}
-1245	1172	1	\N	74	4	{17,17,25,96}
-1246	1172	1	\N	75	4	{-103,-84,-87,-112}
-1247	1172	1	\N	76	4	{-120,-120,-120,-16}
-1248	1172	1	\N	77	7	{-125,-113,29,90,-78,100,-128}
-1249	1172	1	\N	78	5	{-114,115,89,-50,32}
-1250	1172	1	\N	79	4	{105,-103,-103,96}
-1251	1172	1	\N	80	4	{-23,-98,-120,-128}
-1252	1172	1	\N	81	5	{116,99,26,-55,-96}
-1253	1172	1	\N	82	4	{-23,-98,-87,-112}
-1254	1172	1	\N	83	4	{105,-122,25,96}
-1255	1172	1	\N	84	5	{-7,8,66,16,-128}
-1256	1172	1	\N	85	4	{-103,-103,-103,96}
-1257	1172	1	\N	86	5	{-116,99,21,40,-128}
-1258	1172	1	\N	87	7	{-125,6,12,-102,-72,-32,-128}
-1259	1172	1	\N	88	5	{-116,84,69,70,32}
-1260	1172	1	\N	89	5	{-116,84,66,16,-128}
-1261	1172	1	\N	90	5	{-8,68,68,67,-32}
-1262	1172	1	\N	91	7	{-128,-128,-128,-112,-96,-57,-128}
-1263	1172	1	\N	92	7	{2,8,36,-118,24,60,0}
-1264	1172	1	\N	93	7	{16,32,68,-107,71,4,0}
-1265	1172	1	\N	94	7	{30,12,40,-110,8,32,0}
-1266	1172	1	\N	95	7	{-15,-126,-124,-128,-128,-128,-128}
-1267	1172	1	\N	96	7	{16,65,7,-12,4,4,0}
-1268	1172	1	\N	97	7	{16,16,23,-16,65,4,0}
-1269	1172	1	\N	98	7	{16,113,84,-111,2,4,0}
-1270	1172	1	\N	99	3	{85,0,0}
-1277	1172	1	\N	1	1	{0}
-1278	1172	1	\N	2	1	{0}
-1279	1172	1	\N	3	1	{0}
-1280	1172	1	\N	4	1	{0}
-1281	1172	1	\N	5	1	{0}
-1282	1172	1	\N	6	1	{0}
-1283	1172	1	\N	7	1	{0}
-1284	1172	1	\N	8	1	{0}
-1285	1172	1	\N	9	1	{0}
-1286	1172	1	\N	10	1	{0}
-1287	1172	1	\N	11	1	{0}
-1288	1172	1	\N	12	1	{0}
-1289	1172	1	\N	13	1	{0}
-1290	1172	1	\N	14	1	{0}
-1291	1172	1	\N	15	1	{0}
-1292	1172	1	\N	16	1	{0}
-1293	1172	1	\N	17	1	{0}
-1294	1172	1	\N	18	1	{0}
-1295	1172	1	\N	19	1	{0}
-1296	1172	1	\N	20	1	{0}
-1297	1172	1	\N	21	1	{0}
-1298	1172	1	\N	22	1	{0}
-1299	1172	1	\N	23	1	{0}
-1300	1172	1	\N	24	1	{0}
-1301	1172	1	\N	25	1	{0}
-1302	1172	1	\N	26	1	{0}
-1303	1172	1	\N	27	1	{0}
-1304	1172	1	\N	28	1	{0}
-1305	1172	1	\N	29	1	{0}
-1306	1172	1	\N	30	1	{0}
-1307	1172	1	\N	31	1	{0}
-1321	1172	1	\N	45	4	{0,15,0,0}
-1322	1172	1	\N	46	3	{0,1,-80}
-1337	1172	1	\N	61	5	{0,62,15,-128,0}
-1186	1172	1	\N	15	1	{0}
-1187	1172	1	\N	16	1	{0}
-1188	1172	1	\N	17	1	{0}
-1189	1172	1	\N	18	1	{0}
-1190	1172	1	\N	19	1	{0}
-1191	1172	1	\N	20	1	{0}
-1192	1172	1	\N	21	1	{0}
-1193	1172	1	\N	22	1	{0}
-1194	1172	1	\N	23	1	{0}
-1195	1172	1	\N	24	1	{0}
-1196	1172	1	\N	25	1	{0}
-1197	1172	1	\N	26	1	{0}
-1198	1172	1	\N	27	1	{0}
-1199	1172	1	\N	28	1	{0}
-1200	1172	1	\N	29	1	{0}
-1201	1172	1	\N	30	1	{0}
-1202	1172	1	\N	31	1	{0}
-1308	1172	1	\N	32	2	{0,0}
-1310	1172	1	\N	34	3	{-74,-128,0}
-1314	1172	1	\N	38	6	{33,69,8,85,35,94}
-1315	1172	1	\N	39	1	{-32}
-1316	1172	1	\N	40	4	{18,68,66,16}
-1318	1172	1	\N	42	7	{16,81,20,20,69,4,0}
-1319	1172	1	\N	43	5	{1,9,-14,16,0}
-1320	1172	1	\N	44	3	{0,4,-90}
-1323	1172	1	\N	47	7	{0,8,32,-126,8,0,0}
-1328	1172	1	\N	52	6	{8,98,-110,124,32,-125}
-1329	1172	1	\N	53	5	{122,16,96,-92,-45}
-1330	1172	1	\N	54	5	{50,80,-28,-92,-41}
-1331	1172	1	\N	55	4	{-15,18,36,64}
-1317	1172	1	\N	41	4	{66,17,18,64}
-1332	1172	1	\N	56	5	{50,82,100,-92,-41}
-1333	1172	1	\N	57	5	{50,82,112,-92,-41}
-1334	1172	1	\N	58	2	{8,-127}
-1335	1172	1	\N	59	3	{1,5,4}
-1336	1172	1	\N	60	4	{18,72,66,24}
-1338	1172	1	\N	62	5	{65,4,17,17,0}
-1339	1172	1	\N	63	4	{105,18,32,32}
-1340	1172	1	\N	64	6	{57,21,-43,93,3,-97}
-1346	1172	1	\N	70	5	{122,16,-28,33,0}
-1341	1172	1	\N	65	6	{49,36,-98,73,36,-128}
-1342	1172	1	\N	66	6	{113,36,-100,73,39,0}
-1343	1172	1	\N	67	6	{49,36,16,65,35,0}
-1344	1172	1	\N	68	6	{113,36,-110,73,39,0}
-1345	1172	1	\N	69	6	{121,4,28,65,7,-128}
-1347	1172	1	\N	71	6	{49,36,16,89,35,0}
-1348	1172	1	\N	72	6	{73,36,-98,73,36,-128}
-1349	1172	1	\N	73	3	{73,36,-108}
-1350	1172	1	\N	74	5	{16,-124,33,73,-128}
-1351	1172	1	\N	75	6	{73,37,24,81,36,-128}
-1352	1172	1	\N	76	5	{66,16,-124,33,-32}
-1353	1172	1	\N	77	9	{65,49,-104,-54,-91,82,73,36}
-1354	1172	1	\N	78	7	{68,-55,-110,-92,-55,-111,0}
-1355	1172	1	\N	79	6	{49,36,-110,73,35,0}
-80467	1172	1	\N	1	5	{0,0,0,0,0}
-1356	1172	1	\N	80	5	{114,82,-28,33,12}
-1357	1172	1	\N	81	7	{56,-119,18,37,73,13,0}
-1358	1172	1	\N	82	6	{113,36,-100,81,36,-128}
-1359	1172	1	\N	83	6	{49,36,12,9,35,0}
-80468	1172	1	\N	2	5	{0,0,0,0,0}
-1360	1172	1	\N	84	5	{-7,8,66,16,-125}
-1361	1172	1	\N	85	6	{73,36,-110,73,35,0}
-80469	1172	1	\N	3	5	{0,0,0,0,0}
-1362	1172	1	\N	86	7	{68,-119,18,34,-123,4,0}
-1363	1172	1	\N	87	9	{65,32,-112,73,37,83,25,4}
-80470	1172	1	\N	4	5	{0,0,0,0,0}
-1364	1172	1	\N	88	7	{68,-120,-96,-126,-120,-111,0}
-80471	1172	1	\N	5	5	{0,0,0,0,0}
-1365	1172	1	\N	89	5	{-116,84,66,16,-126}
-80472	1172	1	\N	6	5	{0,0,0,0,0}
-1366	1172	1	\N	90	7	{124,8,32,-126,8,31,0}
-80473	1172	1	\N	7	5	{0,0,0,0,0}
-1367	1172	1	\N	91	8	{-128,64,32,18,10,6,30}
-80474	1172	1	\N	8	5	{0,0,0,0,0}
-1368	1172	1	\N	92	8	{1,2,4,72,80,96,120}
-80475	1172	1	\N	9	5	{0,0,0,0,0}
-1370	1172	1	\N	94	8	{30,6,10,18,32,64,-128}
-80476	1172	1	\N	10	5	{0,0,0,0,0}
-1371	1172	1	\N	95	8	{120,96,80,72,4,2,1}
-80477	1172	1	\N	11	5	{0,0,0,0,0}
-1309	1172	1	\N	33	3	{73,36,16}
-80478	1172	1	\N	12	5	{0,0,0,0,0}
-1311	1172	1	\N	35	7	{40,81,-15,71,-59,10,0}
-80479	1172	1	\N	13	5	{0,0,0,0,0}
-1312	1172	1	\N	36	7	{16,121,65,-63,79,4,0}
-80480	1172	1	\N	14	5	{0,0,0,0,0}
-1313	1172	1	\N	37	7	{96,-56,32,-126,9,-125,0}
-80481	1172	1	\N	15	5	{0,0,0,0,0}
-1324	1172	1	\N	48	6	{49,36,-110,73,35,0}
-80482	1172	1	\N	16	5	{0,0,0,0,0}
-1325	1172	1	\N	49	5	{35,8,66,17,-64}
-80483	1172	1	\N	17	5	{0,0,0,0,0}
-1326	1172	1	\N	50	6	{49,32,-124,33,7,-128}
-80484	1172	1	\N	18	5	{0,0,0,0,0}
-1327	1172	1	\N	51	6	{49,32,-116,9,35,0}
-80485	1172	1	\N	19	5	{0,0,0,0,0}
-1244	1172	1	\N	73	1	{-1}
-80486	1172	1	\N	20	5	{0,0,0,0,0}
-80487	1172	1	\N	21	5	{0,0,0,0,0}
-80488	1172	1	\N	22	5	{0,0,0,0,0}
-80489	1172	1	\N	23	5	{0,0,0,0,0}
-80490	1172	1	\N	24	5	{0,0,0,0,0}
-80491	1172	1	\N	25	5	{0,0,0,0,0}
-80492	1172	1	\N	26	5	{0,0,0,0,0}
-80493	1172	1	\N	27	5	{0,0,0,0,0}
-80494	1172	1	\N	28	5	{0,0,0,0,0}
-80495	1172	1	\N	29	5	{0,0,0,0,0}
-80496	1172	1	\N	30	5	{0,0,0,0,0}
-80497	1172	1	\N	31	5	{0,0,0,0,0}
-80498	1172	1	\N	32	5	{0,0,0,0,0}
-80499	1172	1	\N	33	5	{33,8,66,0,-128}
-80500	1172	1	\N	34	5	{82,-128,0,0,0}
-80501	1172	1	\N	35	5	{82,-66,-81,-87,64}
-80502	1172	1	\N	36	5	{35,-88,-30,-72,-128}
-80503	1172	1	\N	37	5	{-50,-124,68,46,96}
-80504	1172	1	\N	38	5	{34,-119,-87,-87,-96}
-80505	1172	1	\N	39	5	{33,0,0,0,0}
-80506	1172	1	\N	40	5	{17,16,-124,16,64}
-80507	1172	1	\N	41	5	{65,4,33,17,0}
-80508	1172	1	\N	42	5	{37,92,71,84,-128}
-80509	1172	1	\N	43	5	{1,9,-14,16,0}
-80510	1172	1	\N	44	5	{0,0,2,17,0}
-80511	1172	1	\N	45	5	{0,0,-32,0,0}
-80512	1172	1	\N	46	5	{0,0,0,49,-128}
-80513	1172	1	\N	47	5	{8,-124,68,34,0}
-80514	1172	1	\N	48	5	{50,82,-108,-92,-64}
-80580	1172	1	\N	65	5	{116,99,31,-58,32}
-80582	1172	1	\N	67	5	{116,97,8,69,-64}
-80583	1172	1	\N	68	5	{-12,99,24,-57,-64}
-80584	1172	1	\N	69	5	{-4,33,-24,67,-32}
-80585	1172	1	\N	70	5	{-4,33,-24,66,0}
-80586	1172	1	\N	71	5	{116,97,120,-59,-32}
-80589	1172	1	\N	74	5	{16,-124,33,73,-128}
-80591	1172	1	\N	76	5	{-124,33,8,67,-32}
-80593	1172	1	\N	78	5	{-116,115,89,-58,32}
-80596	1172	1	\N	81	5	{116,99,26,-55,-96}
-80598	1172	1	\N	83	5	{124,32,-32,-121,-64}
-80601	1172	1	\N	86	5	{-116,99,24,-88,-128}
-80602	1172	1	\N	87	5	{-116,99,26,-43,64}
-80567	1172	1	\N	52	5	{17,-107,47,-120,64}
-80572	1172	1	\N	57	5	{116,98,-16,-59,-64}
-80569	1172	1	\N	54	5	{116,97,-24,-59,-64}
-80564	1172	1	\N	49	5	{35,8,66,17,-64}
-80606	1172	1	\N	91	5	{0,0,0,0,0}
-80607	1172	1	\N	92	5	{0,0,0,0,0}
-80608	1172	1	\N	93	5	{0,0,0,0,0}
-80609	1172	1	\N	94	5	{0,0,0,0,0}
-80610	1172	1	\N	95	5	{0,0,0,0,0}
-80611	1172	1	\N	96	5	{0,0,0,0,0}
-80612	1172	1	\N	97	5	{0,0,0,0,0}
-80613	1172	1	\N	98	5	{0,0,0,0,0}
-80614	1172	1	\N	99	5	{0,0,0,0,0}
-80581	1172	1	\N	66	5	{-12,99,-24,-57,-64}
-80587	1172	1	\N	72	5	{-116,99,-8,-58,32}
-80588	1172	1	\N	73	5	{113,8,66,17,-64}
-80590	1172	1	\N	75	5	{-116,-87,-118,74,32}
-80592	1172	1	\N	77	5	{-114,-21,24,-58,32}
-80594	1172	1	\N	79	5	{116,99,24,-59,-64}
-80595	1172	1	\N	80	5	{-12,99,-24,66,0}
-80597	1172	1	\N	82	5	{-12,99,-22,74,32}
-80599	1172	1	\N	84	5	{-7,8,66,16,-128}
-80600	1172	1	\N	85	5	{-116,99,24,-59,-64}
-80603	1172	1	\N	88	5	{-116,84,69,70,32}
-80604	1172	1	\N	89	5	{-116,84,66,16,-128}
-80605	1172	1	\N	90	5	{-8,68,68,67,-32}
-80565	1172	1	\N	50	5	{116,66,100,67,-32}
-80566	1172	1	\N	51	5	{116,66,96,-59,-64}
-80568	1172	1	\N	53	5	{-4,32,-32,-59,-64}
-80570	1172	1	\N	55	5	{-8,68,66,34,0}
-80571	1172	1	\N	56	5	{116,98,-24,-59,-64}
-80573	1172	1	\N	58	5	{3,24,6,48,0}
-80574	1172	1	\N	59	5	{1,8,2,32,0}
-80575	1172	1	\N	60	5	{17,17,4,16,64}
-80576	1172	1	\N	61	5	{0,62,15,-128,0}
-80577	1172	1	\N	62	5	{65,4,17,17,0}
-80578	1172	1	\N	63	5	{100,-124,66,0,-128}
-80579	1172	1	\N	64	5	{116,107,104,32,-64}
-\.
-
-COPY vault_list ("listId", "index", "elementId") FROM stdin;
-1276	56	1333
-1276	57	1334
-1276	58	1335
-1276	59	1336
-1276	60	1337
-1276	61	1338
-1276	62	1339
-1276	63	1340
-1276	64	1341
-1276	65	1342
-1276	66	1343
-1276	67	1344
-1276	68	1345
-1276	69	1346
-1276	70	1347
-1276	71	1348
-1276	72	1349
-1276	73	1350
-1276	74	1351
-1276	75	1352
-1276	76	1353
-1276	77	1354
-1276	78	1355
-1276	79	1356
-1276	80	1357
-1276	81	1358
-1276	82	1359
-1276	83	1360
-1276	84	1361
-1276	85	1362
-1276	86	1363
-1276	87	1364
-1276	88	1365
-1276	89	1366
-1276	90	1367
-1276	91	1368
-1276	92	1369
-1276	93	1370
-1276	94	1371
-1276	95	1372
-1276	96	1373
-1276	97	1374
-80466	0	80467
-1170	2	1174
-1170	3	1175
-80466	1	80468
-80466	2	80469
-80466	3	80470
-80466	4	80471
-80466	5	80472
-80466	6	80473
-80466	7	80474
-80466	8	80475
-80466	9	80476
-80466	10	80477
-80466	11	80478
-80466	12	80479
-80466	13	80480
-80466	14	80481
-80466	15	80482
-80466	16	80483
-80466	17	80484
-80466	18	80485
-80466	19	80486
-80466	20	80487
-80466	21	80488
-80466	22	80489
-80466	23	80490
-80466	24	80491
-80466	25	80492
-80466	26	80493
-80466	27	80494
-80466	28	80495
-80466	29	80496
-80466	30	80497
-80466	31	80498
-80466	32	80499
-1276	98	1375
-80466	33	80500
-80466	34	80501
-80466	35	80502
-1170	0	1171
-1170	1	1173
-80466	36	80503
-80466	37	80504
-80466	38	80505
-80466	39	80506
-80466	40	80507
-80466	41	80508
-80466	42	80509
-80466	43	80510
-80466	44	80511
-80466	45	80512
-80466	46	80513
-80466	47	80514
-80466	48	80564
-80466	49	80565
-80466	50	80566
-80466	51	80567
-80466	52	80568
-80466	53	80569
-80466	54	80570
-80466	55	80571
-80466	56	80572
-80466	57	80573
-80466	58	80574
-80466	59	80575
-80466	60	80576
-80466	61	80577
-80466	62	80578
-80466	63	80579
-80466	64	80580
-80466	65	80581
-80466	66	80582
-80466	67	80583
-80466	68	80584
-80466	69	80585
-80466	70	80586
-80466	71	80587
-80466	72	80588
-80466	73	80589
-80466	74	80590
-80466	75	80591
-80466	76	80592
-80466	77	80593
-80466	78	80594
-80466	79	80595
-80466	80	80596
-80466	81	80597
-80466	82	80598
-80466	83	80599
-80466	84	80600
-80466	85	80601
-80466	86	80602
-80466	87	80603
-80466	88	80604
-80466	89	80605
-80466	90	80606
-80466	91	80607
-80466	92	80608
-80466	93	80609
-80466	94	80610
-80466	95	80611
-80466	96	80612
-80466	97	80613
-80466	98	80614
-1170	4	1176
-1170	5	1177
-1170	6	1178
-1170	7	1179
-1170	8	1180
-1170	9	1181
-1170	10	1182
-1170	11	1183
-1170	12	1184
-1170	13	1185
-1170	14	1186
-1170	15	1187
-1170	16	1188
-1170	17	1189
-1170	18	1190
-1170	19	1191
-1170	20	1192
-1170	21	1193
-1170	22	1194
-1170	23	1195
-1170	24	1196
-1170	25	1197
-1170	26	1198
-1170	27	1199
-1170	28	1200
-1170	29	1201
-1170	30	1202
-1170	31	1203
-1170	32	1204
-1170	33	1205
-1170	34	1206
-1170	35	1207
-1170	36	1208
-1170	37	1209
-1170	38	1210
-1170	39	1211
-1170	40	1212
-1170	41	1213
-1170	42	1214
-1170	43	1215
-1170	44	1216
-1170	45	1217
-1170	46	1218
-1170	47	1219
-1170	48	1220
-1170	49	1221
-1170	50	1222
-1170	51	1223
-1170	52	1224
-1170	53	1225
-1170	54	1226
-1170	55	1227
-1170	56	1228
-1170	57	1229
-1170	58	1230
-1170	59	1231
-1170	60	1232
-1170	61	1233
-1170	62	1234
-1170	63	1235
-1170	64	1236
-1170	65	1237
-1170	66	1238
-1170	67	1239
-1170	68	1240
-1170	69	1241
-1170	70	1242
-1170	71	1243
-1170	72	1244
-1170	73	1245
-1170	74	1246
-1170	75	1247
-1170	76	1248
-1170	77	1249
-1170	78	1250
-1170	79	1251
-1170	80	1252
-1170	81	1253
-1170	82	1254
-1170	83	1255
-1170	84	1256
-1170	85	1257
-1170	86	1258
-1170	87	1259
-1170	88	1260
-1170	89	1261
-1170	90	1262
-1170	91	1263
-1170	92	1264
-1170	93	1265
-1170	94	1266
-1170	95	1267
-1170	96	1268
-1170	97	1269
-1170	98	1270
-1276	0	1277
-1276	1	1278
-1276	2	1279
-1276	3	1280
-1276	4	1281
-1276	5	1282
-1276	6	1283
-1276	7	1284
-1276	8	1285
-1276	9	1286
-1276	10	1287
-1276	11	1288
-1276	12	1289
-1276	13	1290
-1276	14	1291
-1276	15	1292
-1276	16	1293
-1276	17	1294
-1276	18	1295
-1276	19	1296
-1276	20	1297
-1276	21	1298
-1276	22	1299
-1276	23	1300
-1276	24	1301
-1276	25	1302
-1276	26	1303
-1276	27	1304
-1276	28	1305
-1276	29	1306
-1276	30	1307
-1276	31	1308
-1276	32	1309
-1276	33	1310
-1276	34	1311
-1276	35	1312
-1276	36	1313
-1276	37	1314
-1276	38	1315
-1276	39	1316
-1276	40	1317
-1276	41	1318
-1276	42	1319
-1276	43	1320
-1276	44	1321
-1276	45	1322
-1276	46	1323
-1276	47	1324
-1276	48	1325
-1276	49	1326
-1276	50	1327
-1276	51	1328
-1276	52	1329
-1276	53	1330
-1276	54	1331
-1276	55	1332
-\.
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_1', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_1', 'MONO', 1, 'MONO_1');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_2', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_2', 'MONO', 2, 'MONO_2');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_3', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_3', 'MONO', 3, 'MONO_3');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_4', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_4', 'MONO', 4, 'MONO_4');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_5', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_5', 'MONO', 5, 'MONO_5');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_6', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_6', 'MONO', 6, 'MONO_6');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_7', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_7', 'MONO', 7, 'MONO_7');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_8', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_8', 'MONO', 8, 'MONO_8');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_9', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_9', 'MONO', 9, 'MONO_9');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_10', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_10', 'MONO', 10, 'MONO_10');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_11', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_11', 'MONO', 11, 'MONO_11');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_12', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_12', 'MONO', 12, 'MONO_12');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_13', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_13', 'MONO', 13, 'MONO_13');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_14', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_14', 'MONO', 14, 'MONO_14');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_15', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_15', 'MONO', 15, 'MONO_15');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_16', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_16', 'MONO', 16, 'MONO_16');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_17', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_17', 'MONO', 17, 'MONO_17');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_18', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_18', 'MONO', 18, 'MONO_18');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_19', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_19', 'MONO', 19, 'MONO_19');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_20', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_20', 'MONO', 20, 'MONO_20');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_21', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_21', 'MONO', 21, 'MONO_21');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_22', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_22', 'MONO', 22, 'MONO_22');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_23', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_23', 'MONO', 23, 'MONO_23');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_24', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_24', 'MONO', 24, 'MONO_24');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_25', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_25', 'MONO', 25, 'MONO_25');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_26', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_26', 'MONO', 26, 'MONO_26');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_27', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_27', 'MONO', 27, 'MONO_27');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_28', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_28', 'MONO', 28, 'MONO_28');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_29', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_29', 'MONO', 29, 'MONO_29');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_30', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_30', 'MONO', 30, 'MONO_30');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_31', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_31', 'MONO', 31, 'MONO_31');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_32', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_32', 'MONO', 32, 'MONO_32');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_33', 1, 7, 5, 'IQhCAH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_33', 'MONO', 33, 'MONO_33');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_34', 1, 7, 5, 'Un8AAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_34', 'MONO', 34, 'MONO_34');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_35', 1, 7, 5, 'Ur2uqEA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_35', 'MONO', 35, 'MONO_35');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_36', 1, 7, 5, 'I6fht38=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_36', 'MONO', 36, 'MONO_36');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_37', 1, 7, 5, 'zYNELmA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_37', 'MONO', 37, 'MONO_37');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_38', 1, 7, 5, 'IoioqJ8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_38', 'MONO', 38, 'MONO_38');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_39', 1, 7, 5, 'IQAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_39', 'MONO', 39, 'MONO_39');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_40', 1, 7, 5, 'ERCDEEA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_40', 'MONO', 40, 'MONO_40');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_41', 1, 7, 5, 'QQQhEQA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_41', 'MONO', 41, 'MONO_41');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_42', 1, 7, 5, 'JVxHVH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_42', 'MONO', 42, 'MONO_42');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_43', 1, 7, 5, 'AQnxEAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_43', 'MONO', 43, 'MONO_43');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_44', 1, 7, 5, 'AAACEQA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_44', 'MONO', 44, 'MONO_44');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_45', 1, 7, 5, 'AADfAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_45', 'MONO', 45, 'MONO_45');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_46', 1, 7, 5, 'AAAAMX8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_46', 'MONO', 46, 'MONO_46');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_47', 1, 7, 5, 'CINEIgA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_47', 'MONO', 47, 'MONO_47');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_48', 1, 7, 5, 'MlKTo78=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_48', 'MONO', 48, 'MONO_48');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_49', 1, 7, 5, 'IwhCEb8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_49', 'MONO', 49, 'MONO_49');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_50', 1, 7, 5, 'dEJkQ98=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_50', 'MONO', 50, 'MONO_50');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_51', 1, 7, 5, 'dEJgxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_51', 'MONO', 51, 'MONO_51');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_52', 1, 7, 5, 'EZQvh0A=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_52', 'MONO', 52, 'MONO_52');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_53', 1, 7, 5, '+yDfxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_53', 'MONO', 53, 'MONO_53');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_54', 1, 7, 5, 'dGHnxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_54', 'MONO', 54, 'MONO_54');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_55', 1, 7, 5, '90RCIgA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_55', 'MONO', 55, 'MONO_55');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_56', 1, 7, 5, 'dGLnxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_56', 'MONO', 56, 'MONO_56');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_57', 1, 7, 5, 'dGLvxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_57', 'MONO', 57, 'MONO_57');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_58', 1, 7, 5, 'AxgGMAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_58', 'MONO', 58, 'MONO_58');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_59', 1, 7, 5, 'AQgCIAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_59', 'MONO', 59, 'MONO_59');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_60', 1, 7, 5, 'EREEEEA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_60', 'MONO', 60, 'MONO_60');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_61', 1, 7, 5, 'AD4PfwA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_61', 'MONO', 61, 'MONO_61');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_62', 1, 7, 5, 'QQQREQA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_62', 'MONO', 62, 'MONO_62');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_63', 1, 7, 5, 'ZINCAH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_63', 'MONO', 63, 'MONO_63');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_64', 1, 7, 5, 'dGtoIL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_64', 'MONO', 64, 'MONO_64');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_65', 1, 7, 5, 'dGMfxSA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_65', 'MONO', 65, 'MONO_65');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_66', 1, 7, 5, '82Pnxr8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_66', 'MONO', 66, 'MONO_66');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_67', 1, 7, 5, 'dGEIRb8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_67', 'MONO', 67, 'MONO_67');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_68', 1, 7, 5, '82MYxr8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_68', 'MONO', 68, 'MONO_68');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_69', 1, 7, 5, '+yHnQ98=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_69', 'MONO', 69, 'MONO_69');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_70', 1, 7, 5, '+yHnQgA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_70', 'MONO', 70, 'MONO_70');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_71', 1, 7, 5, 'dGF4xN8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_71', 'MONO', 71, 'MONO_71');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_72', 1, 7, 5, 'i2P3xSA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_72', 'MONO', 72, 'MONO_72');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_73', 1, 7, 5, 'cQhCEb8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_73', 'MONO', 73, 'MONO_73');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_74', 1, 7, 5, 'EIMhSX8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_74', 'MONO', 74, 'MONO_74');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_75', 1, 7, 5, 'i6iJSiA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_75', 'MONO', 75, 'MONO_75');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_76', 1, 7, 5, 'gyEIQ98=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_76', 'MONO', 76, 'MONO_76');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_77', 1, 7, 5, 'jeoYxSA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_77', 'MONO', 77, 'MONO_77');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_78', 1, 7, 5, 'i3NZxSA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_78', 'MONO', 78, 'MONO_78');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_79', 1, 7, 5, 'dGMYxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_79', 'MONO', 79, 'MONO_79');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_80', 1, 7, 5, '82PnQgA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_80', 'MONO', 80, 'MONO_80');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_81', 1, 7, 5, 'dGMayJ8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_81', 'MONO', 81, 'MONO_81');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_82', 1, 7, 5, '82PpSiA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_82', 'MONO', 82, 'MONO_82');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_83', 1, 7, 5, 'fCDfhr8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_83', 'MONO', 83, 'MONO_83');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_84', 1, 7, 5, '+AhCEH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_84', 'MONO', 84, 'MONO_84');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_85', 1, 7, 5, 'i2MYxL8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_85', 'MONO', 85, 'MONO_85');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_86', 1, 7, 5, 'i2MYp38=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_86', 'MONO', 86, 'MONO_86');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_87', 1, 7, 5, 'i2Ma1EA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_87', 'MONO', 87, 'MONO_87');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_88', 1, 7, 5, 'i1RFRiA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_88', 'MONO', 88, 'MONO_88');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_89', 1, 7, 5, 'i1RCEH8=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_89', 'MONO', 89, 'MONO_89');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_90', 1, 7, 5, '90REQ98=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_90', 'MONO', 90, 'MONO_90');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_91', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_91', 'MONO', 91, 'MONO_91');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_92', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_92', 'MONO', 92, 'MONO_92');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_93', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_93', 'MONO', 93, 'MONO_93');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_94', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_94', 'MONO', 94, 'MONO_94');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_95', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_95', 'MONO', 95, 'MONO_95');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_96', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_96', 'MONO', 96, 'MONO_96');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_97', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_97', 'MONO', 97, 'MONO_97');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_98', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_98', 'MONO', 98, 'MONO_98');
+INSERT INTO graphic (name, bpp, height, width, pixels)
+	VALUES ('MONO_99', 1, 7, 5, 'AAAAAAA=');
+INSERT INTO glyph (name, font, code_point, graphic)
+	VALUES ('MONO_99', 'MONO', 99, 'MONO_99');
