@@ -126,10 +126,10 @@ public class FontForm extends AbstractForm {
 		DefaultListModel model = new DefaultListModel();
 		JList glyphs = new JList(model);
 		glyphs.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		glyphs.setVisibleRowCount(8);
+		glyphs.setVisibleRowCount(6);
 		glyphs.setFixedCellHeight(32);
 		glyphs.setFixedCellWidth(32);
-		for(int i = 0; i < 128; i++)
+		for(int i = 32; i < 128; i++)
 			model.addElement(String.valueOf((char)i));
 		panel.add(glyphs);
 		return panel;
