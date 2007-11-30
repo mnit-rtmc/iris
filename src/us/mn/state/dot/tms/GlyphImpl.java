@@ -100,11 +100,14 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		throws TMSException
 	{
 		this(n);
-		font = lookupFont(f);
-		if(font != null)
-			font.addGlyph(p, this);
+		if(f != null) {
+			font = lookupFont(f);
+			if(font != null)
+				font.addGlyph(p, this);
+		}
 		code_point = p;
-		graphic = lookupGraphic(g);
+		if(g != null)
+			graphic = lookupGraphic(g);
 	}
 
 	/** Font to which the glyph belongs */
