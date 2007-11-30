@@ -195,7 +195,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Default horizontal spacing between characters (in pixels) */
-	protected int charSpacing = 1;
+	protected int charSpacing = 0;
 
 	/** Set the default horizontal spacing between characters (pixels) */
 	public void setCharSpacing(int s) {
