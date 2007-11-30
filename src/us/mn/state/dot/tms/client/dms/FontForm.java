@@ -14,9 +14,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -88,6 +92,9 @@ public class FontForm extends AbstractForm {
 		f_table.setModel(f_model);
 		f_table.setAutoCreateColumnsFromModel(false);
 		f_table.setColumnModel(f_model.createColumnModel());
+		// FIXME: why isn't there a JTable.setVisibleRowCount method???
+		f_table.setPreferredScrollableViewportSize(new Dimension(500,
+			100));
 		JScrollPane pane = new JScrollPane(f_table);
 		panel.add(pane, bag);
 		if(admin) {
@@ -102,6 +109,29 @@ public class FontForm extends AbstractForm {
 				}
 			};
 		}
+		JPanel glyphs = createGlyphPanel();
+		bag.gridwidth = 2;
+		bag.gridx = 0;
+		bag.gridy = 1;
+		bag.weightx = 1;
+		bag.weighty = 1;
+		panel.add(glyphs, bag);
+		return panel;
+	}
+
+	/** Create a glyph panel */
+	protected JPanel createGlyphPanel() {
+		JPanel panel = new JPanel();
+		panel.setBorder(BORDER);
+		DefaultListModel model = new DefaultListModel();
+		JList glyphs = new JList(model);
+		glyphs.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		glyphs.setVisibleRowCount(8);
+		glyphs.setFixedCellHeight(32);
+		glyphs.setFixedCellWidth(32);
+		for(int i = 0; i < 128; i++)
+			model.addElement(String.valueOf((char)i));
+		panel.add(glyphs);
 		return panel;
 	}
 
