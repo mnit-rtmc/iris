@@ -112,7 +112,9 @@ public class FontModel extends ProxyTableModel<Font> {
 		Font f = getProxy(row);
 		switch(column) {
 			case COL_NAME:
-				cache.createObject(value.toString());
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
 				break;
 			case COL_NUMBER:
 				f.setNumber((Integer)value);
