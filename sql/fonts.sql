@@ -1,9 +1,9 @@
-INSERT INTO font (name, number, height, width, line_spacing,
-	char_spacing, version_id) VALUES ('NORMAL', 1, 7, 0, 0, 2, 36192);
-INSERT INTO font (name, number, height, width, line_spacing,
-	char_spacing, version_id) VALUES ('HINTED', 2, 7, 0, 0, 0, 37200);
-INSERT INTO font (name, number, height, width, line_spacing,
-	char_spacing, version_id) VALUES ('MONO', 3, 7, 5, 0, 0, 0);
+INSERT INTO font (name, height, width, line_spacing,
+	char_spacing, version_id) VALUES ('NORMAL', 7, 0, 0, 2, 36192);
+INSERT INTO font (name, height, width, line_spacing,
+	char_spacing, version_id) VALUES ('HINTED', 7, 0, 0, 0, 37200);
+INSERT INTO font (name, height, width, line_spacing,
+	char_spacing, version_id) VALUES ('MONO', 7, 5, 0, 0, 0);
 
 INSERT INTO graphic (name, bpp, height, width, pixels)
 	VALUES ('NORMAL_1', 1, 7, 1, 'AA==');

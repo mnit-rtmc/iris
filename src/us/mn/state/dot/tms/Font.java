@@ -28,14 +28,6 @@ public interface Font extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "font";
 
-	/** Set the font index. This is for both the fontIndex and the
-	 * fontNumber NTCIP objects. */
-	void setNumber(int n);
-
-	/** Get the font index. This is for both the fontIndex and the
-	 * fontNumber NTCIP objects. */
-	int getNumber();
-
 	/** Set the font height (pixels) */
 	void setHeight(int h);
 

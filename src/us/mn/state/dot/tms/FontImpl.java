@@ -33,19 +33,18 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Load all the fonts */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS fonts...");
-		store.query("SELECT name, number, height, width, " +
-			"line_spacing, char_spacing, version_id " +
-			"FROM font;", new ResultFactory()
+		store.query("SELECT name, height, width, line_spacing, " +
+			"char_spacing, version_id FROM font;",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new FontImpl(
 					row.getString(1),	// name
-					row.getInt(2),		// number
-					row.getInt(3),		// height
-					row.getInt(4),		// width
-					row.getInt(5),		// line_spacing
-					row.getInt(6),		// char_spacing
-					row.getInt(7)		// version_id
+					row.getInt(2),		// height
+					row.getInt(3),		// width
+					row.getInt(4),		// line_spacing
+					row.getInt(5),		// char_spacing
+					row.getInt(6)		// version_id
 				));
 			}
 		});
@@ -74,11 +73,8 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Create a new font */
-	protected FontImpl(String n, int num, int h, int w, int ls, int cs,
-		int v)
-	{
+	protected FontImpl(String n, int h, int w, int ls, int cs, int v) {
 		this(n);
-		number = num;
 		height = h;
 		width = w;
 		lineSpacing = ls;
@@ -118,30 +114,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		synchronized(glyphs) {
 			return new TreeMap<Integer, GlyphImpl>(glyphs);
 		}
-	}
-
-	/** Font number (both fontIndex and fontNumber NTCIP objects) */
-	protected int number;
-
-	/** Set the font number */
-	public void setNumber(int n) {
-		number = n;
-	}
-
-	/** Set the font number */
-	public void doSetNumber(int n) throws TMSException {
-		if(n == number)
-			return;
-		if(n < 1 || n > 8)
-			throw new ChangeVetoException("Invalid font number");
-		store.update(this, "number", n);
-		setNumber(n);
-	}
-
-	/** Get the font number. This is used for both the fontIndex and the
-	 * fontNumber NTCIP objects. */
-	public int getNumber() {
-		return number;
 	}
 
 	/** Font height (in pixels) */
