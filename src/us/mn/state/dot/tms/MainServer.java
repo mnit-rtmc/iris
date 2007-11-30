@@ -81,6 +81,7 @@ public class MainServer {
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
 			BaseObjectImpl.loadAll(TMSObjectImpl.store, ns);
+			TMSObjectImpl.namespace = ns;
 			Server server = new Server(ns, props);
 			TMSObjectImpl.eventLog.add(new TMSEvent("System",
 				TMSEvent.SYSTEM_RESTARTED,
