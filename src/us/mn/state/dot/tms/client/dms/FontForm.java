@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -30,8 +31,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.utils.ActionJob;
+import us.mn.state.dot.tms.utils.ListSelectionJob;
 
 /**
  * A form for displaying and editing DMS fonts
@@ -55,13 +59,29 @@ public class FontForm extends AbstractForm {
 	/** Font type cache */
 	protected final TypeCache<Font> cache;
 
+	/** Glyph type cache */
+	protected final TypeCache<Glyph> glyphs;
+
+	/** Graphic type cache */
+	protected final TypeCache<Graphic> graphics;
+
+	/** Selected font */
+	protected Font font;
+
+	/** Glyph list */
+	protected final JList glist = new JList();
+
 	/** Admin privileges */
 	protected final boolean admin = true;
 
 	/** Create a new font form */
-	public FontForm(TypeCache<Font> fc) {
+	public FontForm(TypeCache<Font> fc, TypeCache<Glyph> gc,
+		TypeCache<Graphic> grc)
+	{
 		super(TITLE);
 		cache = fc;
+		glyphs = gc;
+		graphics = grc;
 	}
 
 	/** Initializze the widgets in the form */
@@ -83,13 +103,12 @@ public class FontForm extends AbstractForm {
 		GridBagConstraints bag = new GridBagConstraints();
 		final ListSelectionModel s = f_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(e.getValueIsAdjusting())
-					return;
-				selectFont();
+		new ListSelectionJob(this, s) {
+			public void perform() throws IOException {
+				if(!event.getValueIsAdjusting())
+					selectFont();
 			}
-		});
+		};
 		f_table.setModel(f_model);
 		f_table.setAutoCreateColumnsFromModel(false);
 		f_table.setColumnModel(f_model.createColumnModel());
@@ -110,13 +129,13 @@ public class FontForm extends AbstractForm {
 				}
 			};
 		}
-		JPanel glyphs = createGlyphPanel();
+		JPanel gpanel = createGlyphPanel();
 		bag.gridwidth = 2;
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.weightx = 1;
 		bag.weighty = 1;
-		panel.add(glyphs, bag);
+		panel.add(gpanel, bag);
 		return panel;
 	}
 
@@ -126,21 +145,23 @@ public class FontForm extends AbstractForm {
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"ASCII character set"));
 		DefaultListModel model = new DefaultListModel();
-		JList glyphs = new JList(model);
-		glyphs.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		glyphs.setVisibleRowCount(6);
-		glyphs.setFixedCellHeight(32);
-		glyphs.setFixedCellWidth(32);
+		glist.setModel(model);
+		glist.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		glist.setVisibleRowCount(12);
+		glist.setFixedCellHeight(32);
+		glist.setFixedCellWidth(48);
 		for(int i = 32; i < 127; i++)
 			model.addElement(String.valueOf((char)i));
-		panel.add(glyphs);
+		panel.add(glist);
 		return panel;
 	}
 
 	/** Change the selected font */
-	protected void selectFont() {
+	protected void selectFont() throws IOException {
 		ListSelectionModel s = f_table.getSelectionModel();
-		Font f = f_model.getProxy(s.getMinSelectionIndex());
-		del_font.setEnabled(f != null);
+		font = f_model.getProxy(s.getMinSelectionIndex());
+		del_font.setEnabled(font != null);
+		glist.setCellRenderer(new GlyphCellRenderer(font, glyphs,
+			graphics));
 	}
 }

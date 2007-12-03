@@ -1,6 +1,7 @@
 us/mn/state/dot/tms/*Impl_Stub.class
 us/mn/state/dot/tms/AbstractList.class
 us/mn/state/dot/tms/Alarm.class
+us/mn/state/dot/tms/Base64.class
 us/mn/state/dot/tms/BitmapGraphic.class
 us/mn/state/dot/tms/Camera.class
 us/mn/state/dot/tms/ChangeVetoException.class

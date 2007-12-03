@@ -127,7 +127,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('F');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new FontForm(st.getFonts()));
+				desktop.show(new FontForm(st.getFonts(),
+					st.getGlyphs(), st.getGraphics()));
 			}
 		};
 		add(item);
