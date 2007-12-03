@@ -295,11 +295,6 @@ public class DMSPanel extends JPanel {
 		}
 	}
 
-	/** Get the distance to the base of the given line */
-	protected float getBaseLine(int l) {
-		return verticalBorder + (lineGap + charHeight) * (l + 1);
-	}
-
 	/** Paint the DMS panel onto a graphics context */
 	protected void doPaint(Graphics2D g) {
 		g.setColor(getBackground());
