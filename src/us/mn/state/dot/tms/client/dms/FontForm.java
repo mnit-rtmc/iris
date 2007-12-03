@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -122,14 +123,15 @@ public class FontForm extends AbstractForm {
 	/** Create a glyph panel */
 	protected JPanel createGlyphPanel() {
 		JPanel panel = new JPanel();
-		panel.setBorder(BORDER);
+		panel.setBorder(BorderFactory.createTitledBorder(
+			"ASCII character set"));
 		DefaultListModel model = new DefaultListModel();
 		JList glyphs = new JList(model);
 		glyphs.setLayoutOrientation(JList.HORIZONTAL_WRAP);
 		glyphs.setVisibleRowCount(6);
 		glyphs.setFixedCellHeight(32);
 		glyphs.setFixedCellWidth(32);
-		for(int i = 32; i < 128; i++)
+		for(int i = 32; i < 127; i++)
 			model.addElement(String.valueOf((char)i));
 		panel.add(glyphs);
 		return panel;
