@@ -134,8 +134,11 @@ public class GlyphEditor extends JPanel {
 	protected void setBitmap(BitmapGraphic b) {
 		gpanel.removeAll();
 		bmap = b;
-		if(b.height + b.width == 0)
+		if(b.height + b.width == 0) {
+			narrow.setEnabled(false);
+			widen.setEnabled(true);
 			return;
+		}
 		gpanel.setLayout(new GridLayout(b.height, b.width));
 		p_button = new JToggleButton[b.height * b.width];
 		for(int y = 0; y < b.height; y++) {
@@ -147,6 +150,8 @@ public class GlyphEditor extends JPanel {
 			}
 		}
 		gpanel.setMaximumSize(gpanel.getPreferredSize());
+		narrow.setEnabled(true);
+		widen.setEnabled(true);
 		revalidate();
 	}
 
@@ -190,9 +195,13 @@ public class GlyphEditor extends JPanel {
 	protected void applyPressed() {
 		updateBitmap();
 		if(bmap.width > 0) {
-			gdata.graphic.setWidth(bmap.width);
-			gdata.graphic.setPixels(Base64.encode(
-				bmap.getBitmap()));
+			if(gdata != null) {
+				gdata.graphic.setWidth(bmap.width);
+				gdata.graphic.setPixels(Base64.encode(
+					bmap.getBitmap()));
+			} else {
+				// FIXME: create a Graphic and a Glyph
+			}
 		} else {
 			gdata.glyph.destroy();
 			gdata.graphic.destroy();
