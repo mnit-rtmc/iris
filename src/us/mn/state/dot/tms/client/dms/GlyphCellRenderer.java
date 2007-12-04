@@ -72,8 +72,12 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Calculate the pitch for the current glyph */
 	protected float calculatePitch() {
-		float w = getWidth() / bitmap.width;
-		float h = getHeight() / bitmap.height;
+		float w = 0;
+		if(bitmap.width > 0)
+ 			w = getWidth() / bitmap.width;
+		float h = 0;
+		if(bitmap.height > 0)
+			h = getHeight() / bitmap.height;
 		return Math.min(w, h);
 	}
 

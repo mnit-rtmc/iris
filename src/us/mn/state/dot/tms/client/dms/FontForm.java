@@ -152,7 +152,7 @@ public class FontForm extends AbstractForm {
 		bag.gridy = 1;
 		bag.anchor = GridBagConstraints.WEST;
 		panel.add(gpanel, bag);
-		geditor = new GlyphEditor();
+		geditor = new GlyphEditor(admin);
 		bag.gridwidth = 2;
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.CENTER;

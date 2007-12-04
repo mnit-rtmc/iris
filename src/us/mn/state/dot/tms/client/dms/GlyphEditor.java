@@ -24,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.utils.ActionJob;
@@ -45,17 +46,11 @@ public class GlyphEditor extends JPanel {
 	/** Glyph data */
 	protected FontForm.GlyphData gdata;
 
-	/** Character height */
-	protected int height;
-
-	/** Character width */
-	protected int width;
+	/** Working bitmap graphic */
+	protected BitmapGraphic bmap;
 
 	/** Grid panel */
 	protected final JPanel gpanel = new JPanel();
-
-	/** Grid layout */
-	protected GridLayout grid;
 
 	/** Pixel toggle buttons */
 	protected JToggleButton[] p_button;
@@ -63,8 +58,8 @@ public class GlyphEditor extends JPanel {
 	/** "Narrow" button */
 	protected final JButton narrow = new JButton("<<");
 
-	/** "Wide" button */
-	protected final JButton wide = new JButton(">>");
+	/** "Widen" button */
+	protected final JButton widen = new JButton(">>");
 
 	/** Apply button */
 	protected final JButton apply = new JButton("Apply Changes");
@@ -79,22 +74,39 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Create a glyph editor */
-	public GlyphEditor() {
+	public GlyphEditor(boolean admin) {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			"Selected Character"));
 		add(Box.createGlue());
 		add(createGlueBox(gpanel));
-		add(Box.createVerticalStrut(TmsForm.VGAP));
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createGlue());
-		box.add(narrow);
-		box.add(Box.createGlue());
-		box.add(wide);
-		box.add(Box.createGlue());
-		add(box);
-		add(Box.createVerticalStrut(TmsForm.VGAP));
-		add(createGlueBox(apply));
+		if(admin) {
+			add(Box.createVerticalStrut(TmsForm.VGAP));
+			Box box = Box.createHorizontalBox();
+			box.add(Box.createGlue());
+			box.add(narrow);
+			new ActionJob(this, narrow) {
+				public void perform() {
+					narrowPressed();
+				}
+			};
+			box.add(Box.createGlue());
+			box.add(widen);
+			new ActionJob(this, widen) {
+				public void perform() {
+					widenPressed();
+				}
+			};
+			box.add(Box.createGlue());
+			add(box);
+			add(Box.createVerticalStrut(TmsForm.VGAP));
+			add(createGlueBox(apply));
+			new ActionJob(this, apply) {
+				public void perform() {
+					applyPressed();
+				}
+			};
+		}
 		add(Box.createGlue());
 	}
 
@@ -109,30 +121,82 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Set the glyph to edit */
-	protected void _setGlyph() {
-		height = gdata.graphic.getHeight();
-		width = gdata.graphic.getWidth();
-		grid = new GridLayout(height, width);
-		gpanel.setLayout(grid);
-		p_button = new JToggleButton[height * width];
-		for(int y = 0; y < height; y++) {
-			for(int x = 0; x < width; x++) {
-				int i = y * width + x;
-				p_button[i] = createPixelButton();
-				p_button[i].setSelected(
-					gdata.bmap.getPixel(x, y) > 0);
-				gpanel.add(p_button[i]);
-			}
-		}
-	}
-
-	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
 		gdata = g;
 		gpanel.removeAll();
 		if(gdata != null)
-			_setGlyph();
+			setBitmap(gdata.bmap);
+		else
+			setBitmap(new BitmapGraphic(0, 0));
+	}
+
+	/** Set the glyph to edit */
+	protected void setBitmap(BitmapGraphic b) {
+		gpanel.removeAll();
+		bmap = b;
+		if(b.height + b.width == 0)
+			return;
+		gpanel.setLayout(new GridLayout(b.height, b.width));
+		p_button = new JToggleButton[b.height * b.width];
+		for(int y = 0; y < b.height; y++) {
+			for(int x = 0; x < b.width; x++) {
+				int i = y * b.width + x;
+				p_button[i] = createPixelButton();
+				p_button[i].setSelected(b.getPixel(x, y) > 0);
+				gpanel.add(p_button[i]);
+			}
+		}
 		gpanel.setMaximumSize(gpanel.getPreferredSize());
 		revalidate();
+	}
+
+	/** Update the bitmap with the current pixel button state */
+	protected void updateBitmap() {
+		BitmapGraphic b = bmap;
+		for(int y = 0; y < b.height; y++) {
+			for(int x = 0; x < b.width; x++) {
+				int i = y * b.width + x;
+				int p = 0;
+				if(p_button[i].isSelected())
+					p = 1;
+				b.setPixel(x, y, p);
+			}
+		}
+	}
+
+	/** Narrow buton pressed */
+	protected void narrowPressed() {
+		if(bmap.width > 0) {
+			updateBitmap();
+			BitmapGraphic b = new BitmapGraphic(bmap.width - 1,
+				bmap.height);
+			b.copy(bmap);
+			setBitmap(b);
+		}
+	}
+
+	/** Widen buton pressed */
+	protected void widenPressed() {
+		if(bmap.width < 12) {
+			updateBitmap();
+			BitmapGraphic b = new BitmapGraphic(bmap.width + 1,
+				bmap.height);
+			b.copy(bmap);
+			setBitmap(b);
+		}
+	}
+
+	/** Apply button pressed */
+	protected void applyPressed() {
+		updateBitmap();
+		if(bmap.width > 0) {
+			gdata.graphic.setWidth(bmap.width);
+			gdata.graphic.setPixels(Base64.encode(
+				bmap.getBitmap()));
+		} else {
+			gdata.glyph.destroy();
+			gdata.graphic.destroy();
+			setGlyph(null);
+		}
 	}
 }

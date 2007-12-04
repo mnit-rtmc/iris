@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,6 +46,11 @@ public class BitmapGraphic implements Serializable {
 		System.arraycopy(b, 0, bitmap, 0, bitmap.length);
 	}
 
+	/** Get the bitmap */
+	public byte[] getBitmap() {
+		return bitmap;
+	}
+
 	/** Get the pixel index for the specified location */
 	protected int pixelIndex(int x, int y) {
 		if(x < 0 || x > width)
@@ -72,5 +77,15 @@ public class BitmapGraphic implements Serializable {
 			bitmap[by] |= bi;
 		else
 			bitmap[by] &= bi ^ 0xff;
+	}
+
+	/** Copy the common region of the specified bitmap */
+	public void copy(BitmapGraphic b) {
+		int w = Math.min(width, b.width);
+		int h = Math.min(height, b.height);
+		for(int x = 0; x < w; x++) {
+			for(int y = 0; y < h; y++)
+				setPixel(x, y, b.getPixel(x, y));
+		}
 	}
 }
