@@ -18,6 +18,9 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -30,6 +33,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
@@ -68,8 +73,15 @@ public class FontForm extends AbstractForm {
 	/** Selected font */
 	protected Font font;
 
+	/** Map of glyph data for currently selected font */
+	protected final HashMap<String, GlyphData> gmap =
+		new HashMap<String, GlyphData>();
+
 	/** Glyph list */
 	protected final JList glist = new JList();
+
+	/** Glyph editor */
+	protected GlyphEditor geditor;
 
 	/** Admin privileges */
 	protected final boolean admin = true;
@@ -101,6 +113,11 @@ public class FontForm extends AbstractForm {
 		JPanel panel = new JPanel(new GridBagLayout());
 		panel.setBorder(BORDER);
 		GridBagConstraints bag = new GridBagConstraints();
+		bag.gridwidth = 2;
+		bag.insets.left = HGAP;
+		bag.insets.right = HGAP;
+		bag.insets.top = VGAP;
+		bag.insets.bottom = VGAP;
 		final ListSelectionModel s = f_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -119,7 +136,7 @@ public class FontForm extends AbstractForm {
 		panel.add(pane, bag);
 		if(admin) {
 			del_font.setEnabled(false);
-			bag.insets.left = 6;
+			bag.gridwidth = 1;
 			panel.add(del_font, bag);
 			new ActionJob(this, del_font) {
 				public void perform() throws Exception {
@@ -130,12 +147,16 @@ public class FontForm extends AbstractForm {
 			};
 		}
 		JPanel gpanel = createGlyphPanel();
-		bag.gridwidth = 2;
+		bag.gridwidth = 1;
 		bag.gridx = 0;
 		bag.gridy = 1;
-		bag.weightx = 1;
-		bag.weighty = 1;
+		bag.anchor = GridBagConstraints.WEST;
 		panel.add(gpanel, bag);
+		geditor = new GlyphEditor();
+		bag.gridwidth = 2;
+		bag.gridx = 1;
+		bag.anchor = GridBagConstraints.CENTER;
+		panel.add(geditor, bag);
 		return panel;
 	}
 
@@ -144,6 +165,12 @@ public class FontForm extends AbstractForm {
 		JPanel panel = new JPanel();
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"ASCII character set"));
+		new ListSelectionJob(this, glist) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectGlyph();
+			}
+		};
 		DefaultListModel model = new DefaultListModel();
 		glist.setModel(model);
 		glist.setLayoutOrientation(JList.HORIZONTAL_WRAP);
@@ -156,12 +183,50 @@ public class FontForm extends AbstractForm {
 		return panel;
 	}
 
+	/** Simple glyph structure */
+	public class GlyphData {
+		public final Glyph glyph;
+		public final Graphic graphic;
+		public final BitmapGraphic bmap;
+
+		protected GlyphData(Glyph g) throws IOException {
+			glyph = g;
+			graphic = glyph.getGraphic();
+			bmap = new BitmapGraphic(graphic.getWidth(),
+				graphic.getHeight());
+			bmap.setBitmap(Base64.decode(graphic.getPixels()));
+		}
+	}
+
+	/** Lookup the glyphs in the selected font */
+	protected void lookupGlyphs(Font font) throws IOException {
+		gmap.clear();
+		Map<String, Glyph> all_glyphs = glyphs.getAll();
+		LinkedList<Glyph> glist = new LinkedList<Glyph>();
+		synchronized(all_glyphs) {
+			for(Glyph g: all_glyphs.values())
+				if(g.getFont() == font)
+					glist.add(g);
+		}
+		for(Glyph g: glist) {
+			String c = String.valueOf((char)g.getCodePoint());
+			gmap.put(c, new GlyphData(g));
+		}
+	}
+
 	/** Change the selected font */
 	protected void selectFont() throws IOException {
 		ListSelectionModel s = f_table.getSelectionModel();
 		font = f_model.getProxy(s.getMinSelectionIndex());
 		del_font.setEnabled(font != null);
-		glist.setCellRenderer(new GlyphCellRenderer(font, glyphs,
-			graphics));
+		lookupGlyphs(font);
+		glist.setCellRenderer(new GlyphCellRenderer(gmap));
+	}
+
+	/** Change the selected glyph */
+	protected void selectGlyph() {
+		Object value = glist.getSelectedValue();
+		GlyphData gdata = gmap.get(value.toString());
+		geditor.setGlyph(gdata);
 	}
 }

@@ -20,18 +20,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.Ellipse2D;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
-import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.Graphic;
 
 /**
  * Renderer for font glyphs in a Jlist
@@ -44,29 +36,11 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	static protected final int MARGIN = 16;
 
 	/** Hash of characters to bitmap graphics */
-	protected final HashMap<String, BitmapGraphic> bitmaps =
-		new HashMap<String, BitmapGraphic>();
+	protected final HashMap<String, FontForm.GlyphData> gmap;
 
 	/** Create a new glyph cell renderer */
-	public GlyphCellRenderer(Font font, TypeCache<Glyph> glyphs,
-		TypeCache<Graphic> graphics) throws IOException
-	{
-		Map<String, Glyph> gmap = glyphs.getAll();
-		LinkedList<Glyph> glist = new LinkedList<Glyph>();
-		HashMap<Integer, Graphic> cp = new HashMap<Integer, Graphic>();
-		synchronized(gmap) {
-			for(Glyph g: gmap.values())
-				if(g.getFont() == font)
-					glist.add(g);
-		}
-		for(Glyph g: glist) {
-			Graphic gr = g.getGraphic();
-			BitmapGraphic b = new BitmapGraphic(gr.getWidth(),
-				gr.getHeight());
-			b.setBitmap(Base64.decode(gr.getPixels()));
-			String c = String.valueOf((char)g.getCodePoint());
-			bitmaps.put(c, b);
-		}
+	public GlyphCellRenderer(HashMap<String, FontForm.GlyphData> gm) {
+		gmap = gm;
 		setBackground(Color.BLACK);
 	}
 
@@ -74,7 +48,11 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		bitmap = bitmaps.get(value.toString());
+		FontForm.GlyphData gdata = gmap.get(value.toString());
+		if(gdata != null)
+			bitmap = gdata.bmap;
+		else
+			bitmap = null;
 		return super.getListCellRendererComponent(list, value,
 			index, isSelected, cellHasFocus);
 	}
