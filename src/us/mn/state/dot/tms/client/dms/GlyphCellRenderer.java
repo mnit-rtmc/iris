@@ -44,11 +44,18 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 		setBackground(Color.BLACK);
 	}
 
+	/** Lookup the glyph data */
+	protected FontForm.GlyphData lookupGlyphData(String v) {
+		synchronized(gmap) {
+			return gmap.get(v);
+		}
+	}
+
 	/** Get a renderer for the specified list value */
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		FontForm.GlyphData gdata = gmap.get(value.toString());
+		FontForm.GlyphData gdata = lookupGlyphData(value.toString());
 		if(gdata != null)
 			bitmap = gdata.bmap;
 		else

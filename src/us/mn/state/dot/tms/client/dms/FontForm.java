@@ -32,6 +32,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -70,6 +71,25 @@ public class FontForm extends AbstractForm {
 	/** Graphic type cache */
 	protected final TypeCache<Graphic> graphics;
 
+	/** Proxy listener for Graphic proxies */
+	protected final ProxyListener<Graphic> gr_listener =
+		new ProxyListener<Graphic>()
+	{
+		public void proxyAdded(Graphic p) { }
+		public void proxyRemoved(Graphic p) { }
+		public void proxyChanged(Graphic p, String a) {
+			if(p.getName().startsWith(font.getName())) {
+				try {
+					if(a.equals("pixels"))
+						updateGraphic(p);
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	};
+
 	/** Selected font */
 	protected Font font;
 
@@ -100,12 +120,13 @@ public class FontForm extends AbstractForm {
 	protected void initialize() {
 		f_model = new FontModel(cache, admin);
 		add(createFontPanel());
+		graphics.addProxyListener(gr_listener);
 	}
 
-	/** Close the form */
-	protected void close() {
-		super.close();
+	/** Dispose of the form */
+	protected void dispose() {
 		f_model.dispose();
+		graphics.removeProxyListener(gr_listener);
 	}
 
 	/** Create font panel */
@@ -187,11 +208,15 @@ public class FontForm extends AbstractForm {
 	public class GlyphData {
 		public final Glyph glyph;
 		public final Graphic graphic;
-		public final BitmapGraphic bmap;
+		public BitmapGraphic bmap;
 
 		protected GlyphData(Glyph g) throws IOException {
 			glyph = g;
 			graphic = glyph.getGraphic();
+			updateBitmap();
+		}
+
+		protected void updateBitmap() throws IOException {
 			bmap = new BitmapGraphic(graphic.getWidth(),
 				graphic.getHeight());
 			bmap.setBitmap(Base64.decode(graphic.getPixels()));
@@ -200,7 +225,9 @@ public class FontForm extends AbstractForm {
 
 	/** Lookup the glyphs in the selected font */
 	protected void lookupGlyphs(Font font) throws IOException {
-		gmap.clear();
+		synchronized(gmap) {
+			gmap.clear();
+		}
 		Map<String, Glyph> all_glyphs = glyphs.getAll();
 		LinkedList<Glyph> glist = new LinkedList<Glyph>();
 		synchronized(all_glyphs) {
@@ -208,9 +235,24 @@ public class FontForm extends AbstractForm {
 				if(g.getFont() == font)
 					glist.add(g);
 		}
-		for(Glyph g: glist) {
-			String c = String.valueOf((char)g.getCodePoint());
-			gmap.put(c, new GlyphData(g));
+		synchronized(gmap) {
+			for(Glyph g: glist) {
+				String c = String.valueOf(
+					(char)g.getCodePoint());
+				gmap.put(c, new GlyphData(g));
+			}
+		}
+	}
+
+	/** Update a Graphic in the GlyphData map */
+	protected void updateGraphic(Graphic g) throws IOException {
+		synchronized(gmap) {
+			for(GlyphData gd: gmap.values()) {
+				if(gd.graphic == g) {
+					gd.updateBitmap();
+					repaint();
+				}
+			}
 		}
 	}
 
@@ -221,12 +263,22 @@ public class FontForm extends AbstractForm {
 		del_font.setEnabled(font != null);
 		lookupGlyphs(font);
 		glist.setCellRenderer(new GlyphCellRenderer(gmap));
+		selectGlyph();
+	}
+
+	/** Lookup the glyph data */
+	protected GlyphData lookupGlyphData(String v) {
+		synchronized(gmap) {
+			return gmap.get(v);
+		}
 	}
 
 	/** Change the selected glyph */
 	protected void selectGlyph() {
 		Object value = glist.getSelectedValue();
-		GlyphData gdata = gmap.get(value.toString());
-		geditor.setGlyph(gdata);
+		if(value != null) {
+			GlyphData gdata = lookupGlyphData(value.toString());
+			geditor.setGlyph(gdata);
+		}
 	}
 }
