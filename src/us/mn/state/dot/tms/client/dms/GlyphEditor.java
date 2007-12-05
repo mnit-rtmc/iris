@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.utils.ActionJob;
 import us.mn.state.dot.tms.client.toast.TmsForm;
@@ -42,6 +43,9 @@ public class GlyphEditor extends JPanel {
 
 	/** Icon to display an "on" pixel */
 	static protected final Icon PIXEL_ON = new PixelIcon(true);
+
+	/** Current font */
+	protected Font font;
 
 	/** Glyph data */
 	protected FontForm.GlyphData gdata;
@@ -64,6 +68,9 @@ public class GlyphEditor extends JPanel {
 	/** Apply button */
 	protected final JButton apply = new JButton("Apply Changes");
 
+	/** Font form */
+	protected final FontForm font_form;
+
 	/** Create a box with glue on either side of a component */
 	static protected Box createGlueBox(JComponent c) {
 		Box box = Box.createHorizontalBox();
@@ -74,7 +81,8 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Create a glyph editor */
-	public GlyphEditor(boolean admin) {
+	public GlyphEditor(FontForm form, boolean admin) {
+		font_form = form;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			"Selected Character"));
@@ -85,6 +93,7 @@ public class GlyphEditor extends JPanel {
 			Box box = Box.createHorizontalBox();
 			box.add(Box.createGlue());
 			box.add(narrow);
+			narrow.setEnabled(false);
 			new ActionJob(this, narrow) {
 				public void perform() {
 					narrowPressed();
@@ -92,6 +101,7 @@ public class GlyphEditor extends JPanel {
 			};
 			box.add(Box.createGlue());
 			box.add(widen);
+			widen.setEnabled(false);
 			new ActionJob(this, widen) {
 				public void perform() {
 					widenPressed();
@@ -101,6 +111,7 @@ public class GlyphEditor extends JPanel {
 			add(box);
 			add(Box.createVerticalStrut(TmsForm.VGAP));
 			add(createGlueBox(apply));
+			apply.setEnabled(false);
 			new ActionJob(this, apply) {
 				public void perform() {
 					applyPressed();
@@ -120,23 +131,33 @@ public class GlyphEditor extends JPanel {
 		return b;
 	}
 
+	/** Set the font which owns the glyph */
+	public void setFont(Font f) {
+		font = f;
+	}
+
 	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
 		gdata = g;
 		gpanel.removeAll();
 		if(gdata != null)
 			setBitmap(gdata.bmap);
-		else
-			setBitmap(new BitmapGraphic(0, 0));
+		else {
+			int h = 0;
+			if(font != null)
+				h = font.getHeight();
+			setBitmap(new BitmapGraphic(0, h));
+		}
+		apply.setEnabled(font != null);
 	}
 
 	/** Set the glyph to edit */
 	protected void setBitmap(BitmapGraphic b) {
 		gpanel.removeAll();
 		bmap = b;
-		if(b.height + b.width == 0) {
+		if(b.width < 1) {
 			narrow.setEnabled(false);
-			widen.setEnabled(true);
+			widen.setEnabled(font != null);
 			return;
 		}
 		gpanel.setLayout(new GridLayout(b.height, b.width));
@@ -191,21 +212,25 @@ public class GlyphEditor extends JPanel {
 		}
 	}
 
-	/** Apply button pressed */
-	protected void applyPressed() {
-		updateBitmap();
+	/** Update an existing Glyph */
+	protected void updateGlyph() {
 		if(bmap.width > 0) {
-			if(gdata != null) {
-				gdata.graphic.setWidth(bmap.width);
-				gdata.graphic.setPixels(Base64.encode(
-					bmap.getBitmap()));
-			} else {
-				// FIXME: create a Graphic and a Glyph
-			}
+			gdata.graphic.setWidth(bmap.width);
+			gdata.graphic.setPixels(Base64.encode(
+				bmap.getBitmap()));
 		} else {
 			gdata.glyph.destroy();
 			gdata.graphic.destroy();
 			setGlyph(null);
 		}
+	}
+
+	/** Apply button pressed */
+	protected void applyPressed() {
+		updateBitmap();
+		if(gdata != null)
+			updateGlyph();
+		else if(bmap.width > 0)
+			font_form.createGlyph();
 	}
 }

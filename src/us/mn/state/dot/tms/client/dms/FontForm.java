@@ -62,6 +62,14 @@ public class FontForm extends AbstractForm {
 	/** Button to delete the selected font */
 	protected final JButton del_font = new JButton("Delete Font");
 
+	/** Deferred Glyph creation data */
+	protected final HashMap<String, GlyphDeferred> deferred =
+		new HashMap<String, GlyphDeferred>();
+
+	/** Glyphs being added */
+	protected final HashMap<String, Integer> add_glyphs =
+		new HashMap<String, Integer>();
+
 	/** Font type cache */
 	protected final TypeCache<Font> cache;
 
@@ -71,6 +79,15 @@ public class FontForm extends AbstractForm {
 	/** Graphic type cache */
 	protected final TypeCache<Graphic> graphics;
 
+	/** Check if the specified Graphic is from the selected font */
+	protected boolean isFromSelectedFont(Graphic p) {
+		Font f = font;
+		if(f != null)
+			return p.getName().startsWith(f.getName());
+		else
+			return false;
+	}
+
 	/** Proxy listener for Graphic proxies */
 	protected final ProxyListener<Graphic> gr_listener =
 		new ProxyListener<Graphic>()
@@ -78,17 +95,91 @@ public class FontForm extends AbstractForm {
 		public void proxyAdded(Graphic p) { }
 		public void proxyRemoved(Graphic p) { }
 		public void proxyChanged(Graphic p, String a) {
-			if(p.getName().startsWith(font.getName())) {
-				try {
-					if(a.equals("pixels"))
-						updateGraphic(p);
-				}
-				catch(IOException e) {
-					e.printStackTrace();
-				}
+			if(isFromSelectedFont(p)) {
+				// The "pixels" attribute should be the
+				// last one changed (after width)
+				if(a.equals("pixels"))
+					updateGraphic(p);
 			}
 		}
 	};
+
+	/** Check if the specified Glyph is from the selected font */
+	protected boolean isFromSelectedFont(Glyph p) {
+		Font f = font;
+		if(f != null)
+			return p.getName().startsWith(f.getName());
+		else
+			return false;
+	}
+
+	/** Lookup a graphic by name */
+	protected Graphic lookupGraphic(String name) {
+		Map<String, Graphic> all_graphics = graphics.getAll();
+		synchronized(all_graphics) {
+			return all_graphics.get(name);
+		}
+	}
+
+	/** Get a deferred Glyph entry */
+	protected GlyphDeferred getDeferredGlyph(Glyph g) {
+		synchronized(deferred) {
+			return deferred.remove(g.getName());
+		}
+	}
+
+	/** Do deferred Glyph creation stuff */
+	protected void doDeferredGlyph(Glyph g, GlyphDeferred gd) {
+		g.setFont(gd.font);
+		g.setCodePoint(gd.code_point);
+		Graphic gr = lookupGraphic(g.getName());
+		g.setGraphic(gr);
+		gr.setBpp(1);
+		gr.setHeight(gd.font.getHeight());
+		gr.setWidth(1);
+		int b = (gd.font.getHeight() + 7) / 8;
+		gr.setPixels(Base64.encode(new byte[b]));
+	}
+
+	/** Proxy listener for Glyph proxies */
+	protected final ProxyListener<Glyph> gl_listener =
+		new ProxyListener<Glyph>()
+	{
+		public void proxyAdded(Glyph p) {
+			GlyphDeferred gd = getDeferredGlyph(p);
+			if(gd != null)
+				doDeferredGlyph(p, gd);
+			if(isFromSelectedFont(p))
+				add_glyphs.put(p.getName(), 0);
+		}
+		public void proxyRemoved(Glyph p) {
+			if(isFromSelectedFont(p)) {
+				removeGlyph(p);
+				repaint();
+			}
+		}
+		public void proxyChanged(Glyph p, String a) {
+			String key = p.getName();
+			if(add_glyphs.containsKey(key)) {
+				int c = add_glyphs.get(key);
+				if(checkAttributeAdd(a))
+					c++;
+				if(c >= 3) {
+					add_glyphs.remove(key);
+					addGlyph(p);
+					repaint();
+				} else
+					add_glyphs.put(key, c);
+			}
+		}
+	};
+
+	/** Check if an attribute change is one of three */
+	static protected boolean checkAttributeAdd(String a) {
+System.out.println("attribute: " + a);
+		return a.equals("font") || a.equals("codePoint") ||
+			a.equals("graphic");
+	}
 
 	/** Selected font */
 	protected Font font;
@@ -121,12 +212,14 @@ public class FontForm extends AbstractForm {
 		f_model = new FontModel(cache, admin);
 		add(createFontPanel());
 		graphics.addProxyListener(gr_listener);
+		glyphs.addProxyListener(gl_listener);
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
 		f_model.dispose();
 		graphics.removeProxyListener(gr_listener);
+		glyphs.removeProxyListener(gl_listener);
 	}
 
 	/** Create font panel */
@@ -142,7 +235,7 @@ public class FontForm extends AbstractForm {
 		final ListSelectionModel s = f_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
-			public void perform() throws IOException {
+			public void perform() {
 				if(!event.getValueIsAdjusting())
 					selectFont();
 			}
@@ -173,7 +266,7 @@ public class FontForm extends AbstractForm {
 		bag.gridy = 1;
 		bag.anchor = GridBagConstraints.WEST;
 		panel.add(gpanel, bag);
-		geditor = new GlyphEditor(admin);
+		geditor = new GlyphEditor(this, admin);
 		bag.gridwidth = 2;
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.CENTER;
@@ -210,21 +303,32 @@ public class FontForm extends AbstractForm {
 		public final Graphic graphic;
 		public BitmapGraphic bmap;
 
-		protected GlyphData(Glyph g) throws IOException {
+		protected GlyphData(Glyph g) {
 			glyph = g;
 			graphic = glyph.getGraphic();
 			updateBitmap();
 		}
 
-		protected void updateBitmap() throws IOException {
+		protected void updateBitmap() {
 			bmap = new BitmapGraphic(graphic.getWidth(),
 				graphic.getHeight());
-			bmap.setBitmap(Base64.decode(graphic.getPixels()));
+			try {
+				bmap.setBitmap(Base64.decode(
+					graphic.getPixels()));
+			}
+			catch(IOException e) {
+				// Oh well, the Graphic is invalid
+				// Should we throw up an error dialog?
+			}
+			catch(IndexOutOfBoundsException e) {
+				// Oh well, the Graphic is invalid
+				// Should we throw up an error dialog?
+			}
 		}
 	}
 
 	/** Lookup the glyphs in the selected font */
-	protected void lookupGlyphs(Font font) throws IOException {
+	protected void lookupGlyphs(Font font) {
 		synchronized(gmap) {
 			gmap.clear();
 		}
@@ -236,33 +340,59 @@ public class FontForm extends AbstractForm {
 					glist.add(g);
 		}
 		synchronized(gmap) {
-			for(Glyph g: glist) {
-				String c = String.valueOf(
-					(char)g.getCodePoint());
-				gmap.put(c, new GlyphData(g));
-			}
+			for(Glyph g: glist)
+				addGlyph(g);
+		}
+	}
+
+	/** Check if the currently selected font is deletable */
+	protected boolean isFontDeletable() {
+		if(font == null)
+			return false;
+		synchronized(gmap) {
+			return gmap.isEmpty();
+		}
+	}
+
+	/** Add a Glyph to the glyph map */
+	protected void addGlyph(Glyph g) {
+		synchronized(gmap) {
+			String c = String.valueOf((char)g.getCodePoint());
+			gmap.put(c, new GlyphData(g));
+			del_font.setEnabled(isFontDeletable());
+		}
+	}
+
+	/** Remove a Glyph from the glyph map */
+	protected void removeGlyph(Glyph g) {
+		synchronized(gmap) {
+			String c = String.valueOf((char)g.getCodePoint());
+			gmap.remove(c);
+			del_font.setEnabled(isFontDeletable());
 		}
 	}
 
 	/** Update a Graphic in the GlyphData map */
-	protected void updateGraphic(Graphic g) throws IOException {
+	protected void updateGraphic(Graphic g) {
 		synchronized(gmap) {
 			for(GlyphData gd: gmap.values()) {
 				if(gd.graphic == g) {
 					gd.updateBitmap();
 					repaint();
+					break;
 				}
 			}
 		}
 	}
 
 	/** Change the selected font */
-	protected void selectFont() throws IOException {
+	protected void selectFont() {
 		ListSelectionModel s = f_table.getSelectionModel();
 		font = f_model.getProxy(s.getMinSelectionIndex());
-		del_font.setEnabled(font != null);
 		lookupGlyphs(font);
+		del_font.setEnabled(isFontDeletable());
 		glist.setCellRenderer(new GlyphCellRenderer(gmap));
+		geditor.setFont(font);
 		selectGlyph();
 	}
 
@@ -279,6 +409,32 @@ public class FontForm extends AbstractForm {
 		if(value != null) {
 			GlyphData gdata = lookupGlyphData(value.toString());
 			geditor.setGlyph(gdata);
+		}
+	}
+
+	/** Glyph deferred creation data */
+	protected class GlyphDeferred {
+		public final Font font;
+		public final int code_point;
+
+		public GlyphDeferred(Font f, int c) {
+			font = f;
+			code_point = c;
+		}
+	}
+
+	/** Create a new Glyph */
+	protected void createGlyph() {
+		Object value = glist.getSelectedValue();
+		Font f = font;
+		if(value != null && f != null) {
+			int c = value.toString().codePointAt(0);
+			String name = f.getName() + "_" + c;
+			synchronized(deferred) {
+				deferred.put(name, new GlyphDeferred(f, c));
+			}
+			graphics.createObject(name);
+			glyphs.createObject(name);
 		}
 	}
 }
