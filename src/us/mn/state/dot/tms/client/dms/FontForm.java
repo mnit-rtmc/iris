@@ -294,11 +294,7 @@ public class FontForm extends AbstractForm {
 				bmap.setBitmap(Base64.decode(
 					graphic.getPixels()));
 			}
-			catch(IOException e) {
-				// Oh well, the Graphic is invalid
-				// Should we throw up an error dialog?
-			}
-			catch(IndexOutOfBoundsException e) {
+			catch(Exception e) {
 				// Oh well, the Graphic is invalid
 				// Should we throw up an error dialog?
 			}
