@@ -66,10 +66,6 @@ public class FontForm extends AbstractForm {
 	protected final HashMap<String, GlyphDeferred> deferred =
 		new HashMap<String, GlyphDeferred>();
 
-	/** Glyphs being added */
-	protected final HashMap<String, Integer> add_glyphs =
-		new HashMap<String, Integer>();
-
 	/** Font type cache */
 	protected final TypeCache<Font> cache;
 
@@ -149,8 +145,10 @@ public class FontForm extends AbstractForm {
 			GlyphDeferred gd = getDeferredGlyph(p);
 			if(gd != null)
 				doDeferredGlyph(p, gd);
-			if(isFromSelectedFont(p))
-				add_glyphs.put(p.getName(), 0);
+			if(isFromSelectedFont(p)) {
+				addGlyph(p);
+				repaint();
+			}
 		}
 		public void proxyRemoved(Glyph p) {
 			if(isFromSelectedFont(p)) {
@@ -158,28 +156,8 @@ public class FontForm extends AbstractForm {
 				repaint();
 			}
 		}
-		public void proxyChanged(Glyph p, String a) {
-			String key = p.getName();
-			if(add_glyphs.containsKey(key)) {
-				int c = add_glyphs.get(key);
-				if(checkAttributeAdd(a))
-					c++;
-				if(c >= 3) {
-					add_glyphs.remove(key);
-					addGlyph(p);
-					repaint();
-				} else
-					add_glyphs.put(key, c);
-			}
-		}
+		public void proxyChanged(Glyph p, String a) { }
 	};
-
-	/** Check if an attribute change is one of three */
-	static protected boolean checkAttributeAdd(String a) {
-System.out.println("attribute: " + a);
-		return a.equals("font") || a.equals("codePoint") ||
-			a.equals("graphic");
-	}
 
 	/** Selected font */
 	protected Font font;
