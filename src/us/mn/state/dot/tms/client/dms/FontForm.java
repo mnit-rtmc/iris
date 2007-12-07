@@ -62,10 +62,6 @@ public class FontForm extends AbstractForm {
 	/** Button to delete the selected font */
 	protected final JButton del_font = new JButton("Delete Font");
 
-	/** Deferred Glyph creation data */
-	protected final HashMap<String, GlyphDeferred> deferred =
-		new HashMap<String, GlyphDeferred>();
-
 	/** Font type cache */
 	protected final TypeCache<Font> cache;
 
@@ -117,34 +113,11 @@ public class FontForm extends AbstractForm {
 		}
 	}
 
-	/** Get a deferred Glyph entry */
-	protected GlyphDeferred getDeferredGlyph(Glyph g) {
-		synchronized(deferred) {
-			return deferred.remove(g.getName());
-		}
-	}
-
-	/** Do deferred Glyph creation stuff */
-	protected void doDeferredGlyph(Glyph g, GlyphDeferred gd) {
-		g.setFont(gd.font);
-		g.setCodePoint(gd.code_point);
-		Graphic gr = lookupGraphic(g.getName());
-		g.setGraphic(gr);
-		gr.setBpp(1);
-		gr.setHeight(gd.font.getHeight());
-		gr.setWidth(1);
-		int b = (gd.font.getHeight() + 7) / 8;
-		gr.setPixels(Base64.encode(new byte[b]));
-	}
-
 	/** Proxy listener for Glyph proxies */
 	protected final ProxyListener<Glyph> gl_listener =
 		new ProxyListener<Glyph>()
 	{
 		public void proxyAdded(Glyph p) {
-			GlyphDeferred gd = getDeferredGlyph(p);
-			if(gd != null)
-				doDeferredGlyph(p, gd);
 			if(isFromSelectedFont(p)) {
 				addGlyph(p);
 				repaint();
@@ -335,6 +308,7 @@ public class FontForm extends AbstractForm {
 			gmap.put(c, new GlyphData(g));
 			del_font.setEnabled(isFontDeletable());
 		}
+		selectGlyph();
 	}
 
 	/** Remove a Glyph from the glyph map */
@@ -367,7 +341,6 @@ public class FontForm extends AbstractForm {
 		del_font.setEnabled(isFontDeletable());
 		glist.setCellRenderer(new GlyphCellRenderer(gmap));
 		geditor.setFont(font);
-		selectGlyph();
 	}
 
 	/** Lookup the glyph data */
@@ -380,35 +353,29 @@ public class FontForm extends AbstractForm {
 	/** Change the selected glyph */
 	protected void selectGlyph() {
 		Object value = glist.getSelectedValue();
-		if(value != null) {
-			GlyphData gdata = lookupGlyphData(value.toString());
-			geditor.setGlyph(gdata);
-		}
-	}
-
-	/** Glyph deferred creation data */
-	protected class GlyphDeferred {
-		public final Font font;
-		public final int code_point;
-
-		public GlyphDeferred(Font f, int c) {
-			font = f;
-			code_point = c;
-		}
+		if(value != null)
+			geditor.setGlyph(lookupGlyphData(value.toString()));
 	}
 
 	/** Create a new Glyph */
-	protected void createGlyph() {
+	protected void createGlyph(BitmapGraphic bmap) {
 		Object value = glist.getSelectedValue();
 		Font f = font;
 		if(value != null && f != null) {
 			int c = value.toString().codePointAt(0);
 			String name = f.getName() + "_" + c;
-			synchronized(deferred) {
-				deferred.put(name, new GlyphDeferred(f, c));
-			}
-			graphics.createObject(name);
-			glyphs.createObject(name);
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("bpp", 1);
+			attrs.put("height", bmap.height);
+			attrs.put("width", bmap.width);
+			attrs.put("pixels", Base64.encode(bmap.getBitmap()));
+			graphics.createObject(name, attrs);
+			attrs.clear();
+			attrs.put("font", f);
+			attrs.put("codePoint", c);
+			attrs.put("graphic", name);
+			glyphs.createObject(name, attrs);
 		}
 	}
 }

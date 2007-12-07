@@ -138,6 +138,8 @@ public class GlyphEditor extends JPanel {
 
 	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
+		if(g == gdata)
+			return;
 		gdata = g;
 		gpanel.removeAll();
 		if(gdata != null)
@@ -230,7 +232,9 @@ public class GlyphEditor extends JPanel {
 		updateBitmap();
 		if(gdata != null)
 			updateGlyph();
-		else if(bmap.width > 0)
-			font_form.createGlyph();
+		else if(bmap.width > 0) {
+			font_form.createGlyph(bmap);
+			apply.setEnabled(false);
+		}
 	}
 }
