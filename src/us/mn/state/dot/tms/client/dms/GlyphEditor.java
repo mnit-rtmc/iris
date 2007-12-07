@@ -51,7 +51,7 @@ public class GlyphEditor extends JPanel {
 	protected FontForm.GlyphData gdata;
 
 	/** Working bitmap graphic */
-	protected BitmapGraphic bmap;
+	protected BitmapGraphic bmap = new BitmapGraphic(0, 0);
 
 	/** Grid panel */
 	protected final JPanel gpanel = new JPanel();
@@ -134,16 +134,14 @@ public class GlyphEditor extends JPanel {
 	/** Set the font which owns the glyph */
 	public void setFont(Font f) {
 		font = f;
-		if(f == null) {
-			setGlyph(null);
-			narrow.setEnabled(false);
-			widen.setEnabled(false);
-		}
+		setGlyph(null);
 	}
 
 	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
 		apply.setEnabled(font != null);
+		narrow.setEnabled(font != null && g != null);
+		widen.setEnabled(font != null);
 		if(g == gdata)
 			return;
 		gdata = g;
@@ -164,10 +162,10 @@ public class GlyphEditor extends JPanel {
 		bmap = b;
 		if(b.width < 1) {
 			narrow.setEnabled(false);
-			widen.setEnabled(font != null);
 			repaint();
 			return;
 		}
+		narrow.setEnabled(true);
 		gpanel.setLayout(new GridLayout(b.height, b.width));
 		p_button = new JToggleButton[b.height * b.width];
 		for(int y = 0; y < b.height; y++) {
@@ -179,8 +177,6 @@ public class GlyphEditor extends JPanel {
 			}
 		}
 		gpanel.setMaximumSize(gpanel.getPreferredSize());
-		narrow.setEnabled(true);
-		widen.setEnabled(true);
 		revalidate();
 	}
 

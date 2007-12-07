@@ -355,6 +355,8 @@ public class FontForm extends AbstractForm {
 		Object value = glist.getSelectedValue();
 		if(value != null)
 			geditor.setGlyph(lookupGlyphData(value.toString()));
+		else
+			geditor.setGlyph(null);
 	}
 
 	/** Create a new Glyph */
