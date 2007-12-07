@@ -56,13 +56,22 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		});
 	}
 
+	/** Store a new IRIS role */
+	public void doStore() throws TMSException {
+		store.update("INSERT INTO " + getTable() +
+			" (name, pattern, priv_r, priv_w, priv_c, priv_d) " +
+			"VALUES ('" + name + "', '" + pattern + "', " +
+			priv_r + ", " + priv_w + ", " + priv_c + ", " +
+			priv_d + ");");
+	}
+
 	/** Get the database table name */
 	public String getTable() {
 		return "role";
 	}
 
 	/** Create a new IRIS role */
-	protected IrisRoleImpl(String n) {
+	public IrisRoleImpl(String n) {
 		super(n);
 		pattern = "";
 	}
@@ -92,13 +101,6 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	/** Get the primary key */
 	public String getKey() {
 		return name;
-	}
-
-	/** Create a new IRIS role */
-	static public Role doCreate(String name) throws TMSException {
-		IrisRoleImpl role = new IrisRoleImpl(name);
-		store.create(role);
-		return role;
 	}
 
 	/** Destroy an IRIS role */

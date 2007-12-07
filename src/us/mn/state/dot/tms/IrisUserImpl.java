@@ -56,14 +56,22 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		});
 	}
 
+	/** Store an IRIS user */
+	public void doStore() throws TMSException {
+		store.update("INSERT INTO " + getTable() + " (name, dn, " +
+			"full_name) VALUES ('" + name + "', '" + dn + "', '" +
+			fullName + "');");
+	}
+
 	/** Get the database table name */
 	public String getTable() {
 		return "iris_user";
 	}
 
 	/** Create a new IRIS user */
-	protected IrisUserImpl(String n) {
+	public IrisUserImpl(String n) {
 		super(n);
+		// FIXME: validate for SQL injections
 		dn = "";
 		fullName = "";
 	}
@@ -89,16 +97,6 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	/** Get the primary key */
 	public String getKey() {
 		return name;
-	}
-
-	/** Create a new IRIS user */
-	static public User doCreate(String name) throws TMSException {
-		// FIXME: validate for SQL injections
-		IrisUserImpl user = new IrisUserImpl(name);
-		store.update("INSERT INTO iris_user (name, dn, full_name) " +
-			"VALUES ('" + name + "', '" + user.getDn() + "', '" +
-			user.getFullName() + "');");
-		return user;
 	}
 
 	/** Destroy an IRIS user */

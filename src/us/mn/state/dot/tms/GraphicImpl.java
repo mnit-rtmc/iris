@@ -43,11 +43,12 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		});
 	}
 
-	/** Create a new graphic */
-	static public Graphic doCreate(String name) throws TMSException {
-		GraphicImpl graphic = new GraphicImpl(name);
-		store.create(graphic);
-		return graphic;
+	/** Store a graphic */
+	public void doStore() throws TMSException {
+		store.update("INSERT INTO " + getTable() +
+			" (name, bpp, height, width, pixels) VALUES ('" +
+			name + "', " + bpp + ", " + height + ", " + width +
+			", '" + pixels + "');");
 	}
 
 	/** Destroy a graphic */
@@ -71,7 +72,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Create a new graphic */
-	protected GraphicImpl(String n) {
+	public GraphicImpl(String n) {
 		super(n);
 		bpp = 1;
 		height = 0;

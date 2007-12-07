@@ -42,18 +42,19 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		});
 	}
 
-	/** Create a new glyph */
-	static public Glyph doCreate(String name) throws TMSException {
-		GlyphImpl glyph = new GlyphImpl(name);
-		store.create(glyph);
-		return glyph;
+	/** Store a glyph */
+	public void doStore() throws TMSException {
+		store.update("INSERT INTO " + getTable() +
+			" (name, font, code_point, graphic) VALUES ('" +
+			name + "', '" + font.getName() + "', " + codePoint +
+			", '" + graphic.getName() + "');");
 	}
 
 	/** Destroy a glyph */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		if(font != null)
-			font.removeGlyph(code_point, this);
+			font.removeGlyph(codePoint, this);
 	}
 
 	/** Get the database table name */
@@ -67,10 +68,10 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Create a new glyph */
-	protected GlyphImpl(String n) {
+	public GlyphImpl(String n) {
 		super(n);
 		font = null;
-		code_point = 0;
+		codePoint = 0;
 		graphic = null;
 	}
 
@@ -105,7 +106,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 			if(font != null)
 				font.addGlyph(p, this);
 		}
-		code_point = p;
+		codePoint = p;
 		if(g != null)
 			graphic = lookupGraphic(g);
 	}
@@ -123,10 +124,10 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		if(f == font)
 			return;
 		if(f != null)
-			((FontImpl)f).addGlyph(code_point, this);
+			((FontImpl)f).addGlyph(codePoint, this);
 		store.update(this, "font", f.getName());
 		if(font != null)
-			font.removeGlyph(code_point, this);
+			font.removeGlyph(codePoint, this);
 		setFont(f);
 	}
 
@@ -136,20 +137,20 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Code point in the font */
-	protected int code_point;
+	protected int codePoint;
 
 	/** Set the code point */
 	public void setCodePoint(int p) {
-		code_point = p;
+		codePoint = p;
 	}
 
 	/** Set the code point */
 	public void doSetCodePoint(int p) throws TMSException {
-		if(p == code_point)
+		if(p == codePoint)
 			return;
 		if(font != null) {
 			font.addGlyph(p, this);
-			font.removeGlyph(code_point, this);
+			font.removeGlyph(codePoint, this);
 		}
 		store.update(this, "code_point", p);
 		setCodePoint(p);
@@ -157,7 +158,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
 	/** Get the code point */
 	public int getCodePoint() {
-		return code_point;
+		return codePoint;
 	}
 
 	/** Graphic image of glyph */

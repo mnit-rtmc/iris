@@ -50,11 +50,13 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		});
 	}
 
-	/** Create a new font */
-	static public Font doCreate(String name) throws TMSException {
-		FontImpl font = new FontImpl(name);
-		store.create(font);
-		return font;
+	/** Store a font */
+	public void doStore() throws TMSException {
+		store.update("INSERT INTO " + getTable() +
+			" (name, height, width, line_spacing, char_spacing, " +
+			"version_id) VALUES ('" + name + "', " + height + ", " +
+			width + ", " + lineSpacing + ", " + charSpacing +
+			", " + versionID + ");");
 	}
 
 	/** Get the database table name */
@@ -68,7 +70,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Create a new font */
-	protected FontImpl(String n) {
+	public FontImpl(String n) {
 		super(n);
 	}
 
