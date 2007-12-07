@@ -239,42 +239,6 @@ INSERT INTO graphic (name, bpp, height, width, pixels)
 	VALUES ('NORMAL_90', 1, 7, 5, '+EREQ+A=');
 INSERT INTO glyph (name, font, code_point, graphic)
 	VALUES ('NORMAL_90', 'NORMAL', 90, 'NORMAL_90');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_91', 1, 7, 7, 'gICAkKDHgA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_91', 'NORMAL', 91, 'NORMAL_91');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_92', 1, 7, 7, 'Aggkihg8AA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_92', 'NORMAL', 92, 'NORMAL_92');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_93', 1, 7, 7, 'ECBElUcEAA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_93', 'NORMAL', 93, 'NORMAL_93');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_94', 1, 7, 7, 'HgwokgggAA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_94', 'NORMAL', 94, 'NORMAL_94');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_95', 1, 7, 7, '8YKEgICAgA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_95', 'NORMAL', 95, 'NORMAL_95');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_96', 1, 7, 7, 'EEEH9AQEAA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_96', 'NORMAL', 96, 'NORMAL_96');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_97', 1, 7, 7, 'EBAX8EEEAA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_97', 'NORMAL', 97, 'NORMAL_97');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_98', 1, 7, 7, 'EHFUkQIEAA==');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_98', 'NORMAL', 98, 'NORMAL_98');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('NORMAL_99', 1, 7, 3, 'VQAA');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('NORMAL_99', 'NORMAL', 99, 'NORMAL_99');
 
 INSERT INTO graphic (name, bpp, height, width, pixels)
 	VALUES ('MONO_32', 1, 7, 5, 'AAAAAAA=');
@@ -512,39 +476,3 @@ INSERT INTO graphic (name, bpp, height, width, pixels)
 	VALUES ('MONO_90', 1, 7, 5, '+EREQ+A=');
 INSERT INTO glyph (name, font, code_point, graphic)
 	VALUES ('MONO_90', 'MONO', 90, 'MONO_90');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_91', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_91', 'MONO', 91, 'MONO_91');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_92', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_92', 'MONO', 92, 'MONO_92');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_93', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_93', 'MONO', 93, 'MONO_93');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_94', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_94', 'MONO', 94, 'MONO_94');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_95', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_95', 'MONO', 95, 'MONO_95');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_96', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_96', 'MONO', 96, 'MONO_96');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_97', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_97', 'MONO', 97, 'MONO_97');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_98', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_98', 'MONO', 98, 'MONO_98');
-INSERT INTO graphic (name, bpp, height, width, pixels)
-	VALUES ('MONO_99', 1, 7, 5, 'AAAAAAA=');
-INSERT INTO glyph (name, font, code_point, graphic)
-	VALUES ('MONO_99', 'MONO', 99, 'MONO_99');
