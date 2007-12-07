@@ -232,9 +232,7 @@ public class GlyphEditor extends JPanel {
 		updateBitmap();
 		if(gdata != null)
 			updateGlyph();
-		else if(bmap.width > 0) {
+		else if(bmap.width > 0)
 			font_form.createGlyph(bmap);
-			apply.setEnabled(false);
-		}
 	}
 }
