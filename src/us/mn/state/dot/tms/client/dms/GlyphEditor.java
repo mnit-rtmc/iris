@@ -134,23 +134,28 @@ public class GlyphEditor extends JPanel {
 	/** Set the font which owns the glyph */
 	public void setFont(Font f) {
 		font = f;
+		if(f == null) {
+			setGlyph(null);
+			narrow.setEnabled(false);
+			widen.setEnabled(false);
+		}
 	}
 
 	/** Set the glyph to edit */
 	public void setGlyph(FontForm.GlyphData g) {
+		apply.setEnabled(font != null);
 		if(g == gdata)
 			return;
 		gdata = g;
-		gpanel.removeAll();
-		if(gdata != null)
-			setBitmap(gdata.bmap);
+		if(g != null)
+			setBitmap(g.bmap);
 		else {
 			int h = 0;
 			if(font != null)
 				h = font.getHeight();
 			setBitmap(new BitmapGraphic(0, h));
 		}
-		apply.setEnabled(font != null);
+		repaint();
 	}
 
 	/** Set the glyph to edit */
@@ -160,6 +165,7 @@ public class GlyphEditor extends JPanel {
 		if(b.width < 1) {
 			narrow.setEnabled(false);
 			widen.setEnabled(font != null);
+			repaint();
 			return;
 		}
 		gpanel.setLayout(new GridLayout(b.height, b.width));

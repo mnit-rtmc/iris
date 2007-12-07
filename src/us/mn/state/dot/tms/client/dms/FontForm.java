@@ -337,10 +337,10 @@ public class FontForm extends AbstractForm {
 	protected void selectFont() {
 		ListSelectionModel s = f_table.getSelectionModel();
 		font = f_model.getProxy(s.getMinSelectionIndex());
+		geditor.setFont(font);
 		lookupGlyphs(font);
 		del_font.setEnabled(isFontDeletable());
 		glist.setCellRenderer(new GlyphCellRenderer(gmap));
-		geditor.setFont(font);
 	}
 
 	/** Lookup the glyph data */
