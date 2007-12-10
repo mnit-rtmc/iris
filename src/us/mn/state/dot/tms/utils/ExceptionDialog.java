@@ -46,6 +46,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
 
@@ -126,6 +127,12 @@ public class ExceptionDialog extends JDialog {
 		catch(ChangeVetoException ee) {
 			addText("The change has been prevented");
 			addText("for the following reason:");
+			box.add(Box.createVerticalStrut(6));
+			addText(ee.getMessage());
+		}
+		catch(SonarException ee) {
+			addText("The server reported the");
+			addText("following problem:");
 			box.add(Box.createVerticalStrut(6));
 			addText(ee.getMessage());
 		}
