@@ -142,7 +142,7 @@ public class GlyphEditor extends JPanel {
 		apply.setEnabled(font != null);
 		narrow.setEnabled(font != null && g != null);
 		widen.setEnabled(font != null);
-		if(g == gdata)
+		if(g == gdata && bmap.height > 0)
 			return;
 		gdata = g;
 		if(g != null)
