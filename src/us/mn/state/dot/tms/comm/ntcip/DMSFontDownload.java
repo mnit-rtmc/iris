@@ -157,7 +157,7 @@ public class DMSFontDownload extends DMSOperation {
 				pixels));
 			mess.setRequest();
 			count++;
-			if(count % 20 && !controller.isFailed())
+			if(count % 20 == 0 && !controller.isFailed())
 				controller.resetErrorCounter(id);
 			if(chars.hasNext()) {
 				glyph = chars.next();
