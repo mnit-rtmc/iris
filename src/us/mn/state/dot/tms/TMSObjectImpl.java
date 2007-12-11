@@ -113,10 +113,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** Camera list */
 	static SortedListImpl cameraList;
-	
-	/** Monitor list */
-	static MonitorListImpl monitorList;
-	
+
 	/** Tour list */
 	static TourListImpl tourList;
 

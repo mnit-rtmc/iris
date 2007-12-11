@@ -118,8 +118,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		warn_signs.load(WarningSignImpl.class, "id");
 		System.err.println( "Loading cameras..." );
 		cameras.load( CameraImpl.class, "id" );
-		System.err.println( "Loading monitors..." );
-		monitors.load( MonitorImpl.class, "name" );
 		System.err.println( "Loading tours..." );
 		tours.load( TourImpl.class, "name" );
 		System.err.println( "Loading lane control signals..." );
@@ -383,9 +381,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Camera list */
 	protected final CameraList cameras;
 
-	/** Monitor list */
-	protected final MonitorListImpl monitors;
-
 	/** Tour list */
 	protected final TourListImpl tours;
 
@@ -435,7 +430,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		dmss = new DMSListImpl();
 		warn_signs = new WarningSignList();
 		cameras = new CameraList();
-		monitors = new MonitorListImpl();
 		tours = new TourListImpl();
 		lcss = new LCSListImpl();
 		initialize();
@@ -493,9 +487,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Get the camera list */
 	public SortedList getCameraList() { return cameras; }
-
-	/** Get the monitor list */
-	public SortedList getMonitorList() { return monitors; }
 
 	/** Get the tour list */
 	public SortedList getTourList() { return tours; }
