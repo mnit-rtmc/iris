@@ -36,6 +36,7 @@ abstract public class BaseObjectImpl implements Storable {
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();
+		VideoMonitorImpl.loadAll();
 	}
 
 	/** Get the primary key name */
