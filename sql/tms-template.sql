@@ -579,6 +579,15 @@ REVOKE ALL ON TABLE glyph FROM PUBLIC;
 GRANT SELECT ON TABLE glyph TO PUBLIC;
 
 
+CREATE TABLE video_monitor (
+	name TEXT PRIMARY KEY,
+	description TEXT NOT NULL
+);
+
+REVOKE ALL ON TABLE video_monitor FROM PUBLIC;
+GRANT SELECT ON TABLE video_monitor TO PUBLIC;
+
+
 SET SESSION AUTHORIZATION 'tms';
 
 --
@@ -1780,18 +1789,6 @@ GRANT SELECT ON TABLE iris_det TO PUBLIC;
 SET SESSION AUTHORIZATION 'tms';
 
 --
--- TOC entry 120 (OID 19211541)
--- Name: monitor; Type: TABLE; Schema: public; Owner: tms
---
-
-CREATE TABLE monitor (
-    name text NOT NULL,
-    description text NOT NULL
-)
-INHERITS (tms_object);
-
-
---
 -- TOC entry 121 (OID 19211547)
 -- Name: traffic_device_timing_plan; Type: TABLE; Schema: public; Owner: tms
 --
@@ -2731,14 +2728,6 @@ CREATE UNIQUE INDEX alarm_pkey ON alarm USING btree (vault_oid);
 --
 
 CREATE UNIQUE INDEX detector_index ON detector USING btree ("index");
-
-
---
--- TOC entry 208 (OID 19211801)
--- Name: monitor_pkey; Type: INDEX; Schema: public; Owner: tms
---
-
-CREATE UNIQUE INDEX monitor_pkey ON monitor USING btree (vault_oid);
 
 
 --
