@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.comm.vicon;
 
 import us.mn.state.dot.tms.CameraImpl;
-import us.mn.state.dot.tms.MonitorImpl;
+import us.mn.state.dot.tms.VideoMonitorImpl;
 import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
@@ -26,14 +26,14 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
  */
 abstract public class ViconOperation extends DeviceOperation {
 
-	/** Monitor to select camera on */
-	protected final MonitorImpl monitor;
+	/** Video monitor to select camera on */
+	protected final VideoMonitorImpl monitor;
 
 	/** Camera to perform operation on */
 	protected final CameraImpl camera;
 
 	/** Create a new Vicon operation */
-	public ViconOperation(int p, MonitorImpl m, CameraImpl c) {
+	public ViconOperation(int p, VideoMonitorImpl m, CameraImpl c) {
 		super(p, c);
 		monitor = m;
 		camera = c;

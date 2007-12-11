@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.comm.vicon;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
-import us.mn.state.dot.tms.MonitorImpl;
+import us.mn.state.dot.tms.VideoMonitorImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 public class SelectMonitorCamera extends ViconOperation {
 
 	/** Create a new select monitor camera operation */
-	public SelectMonitorCamera(MonitorImpl m, CameraImpl c) {
+	public SelectMonitorCamera(VideoMonitorImpl m, CameraImpl c) {
 		super(COMMAND, m, c);
 	}
 
