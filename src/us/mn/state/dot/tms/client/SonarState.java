@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.VideoMonitor;
 
 /**
  * Holds the state of the SONAR client
@@ -84,6 +85,14 @@ public class SonarState extends Client {
 		return glyphs;
 	}
 
+	/** Cache of video monitor proxies */
+	protected final TypeCache<VideoMonitor> monitors;
+
+	/** Get the video monitor type cache */
+	public TypeCache<VideoMonitor> getVideoMonitors() {
+		return monitors;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ShowHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -96,6 +105,7 @@ public class SonarState extends Client {
 		graphics = new TypeCache<Graphic>(Graphic.class);
 		fonts = new TypeCache<Font>(Font.class);
 		glyphs = new TypeCache<Glyph>(Glyph.class);
+		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class);
 	}
 
 	/** Login to the SONAR server */
@@ -109,6 +119,7 @@ public class SonarState extends Client {
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
+		populate(monitors);
 	}
 
 	/** Look up the specified user */

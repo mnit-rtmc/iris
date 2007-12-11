@@ -22,10 +22,10 @@ import us.mn.state.dot.tms.client.dms.DMSListForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
 import us.mn.state.dot.tms.client.meter.RampMeterListForm;
-import us.mn.state.dot.tms.client.monitor.MonitorListForm;
 import us.mn.state.dot.tms.client.roads.RoadwayListForm;
 import us.mn.state.dot.tms.client.roads.StationListForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
+import us.mn.state.dot.tms.client.switcher.VideoMonitorForm;
 import us.mn.state.dot.tms.client.toast.DetectorListForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.MeteringHolidayForm;
@@ -161,7 +161,8 @@ public class ViewMenu extends JMenu {
 //		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new MonitorListForm(tc));
+				desktop.show(new VideoMonitorForm(
+					st.getVideoMonitors()));
 			}
 		};
 		add(item);
