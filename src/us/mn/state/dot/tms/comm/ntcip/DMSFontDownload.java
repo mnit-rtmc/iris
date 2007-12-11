@@ -32,12 +32,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  */
 public class DMSFontDownload extends DMSOperation {
 
-	/** Version ID returned by Skyline controllers for NORMAL font */
-	static protected final int SKYLINE_VERSION_ID_NORMAL = 288;
-
-	/** Version ID returned by Skyline controllers for HINTED font */
-	static protected final int SKYLINE_VERSION_ID_HINTED = 64723;
-
 	/** Font to download to the sign */
 	protected final FontImpl font;
 
@@ -66,13 +60,7 @@ public class DMSFontDownload extends DMSOperation {
 
 	/** Check if the font version ID matches */
 	protected boolean fontMatches(int v) {
-		if(v == font.getVersionID())
-			return true;
-		if(index == 1 && v == SKYLINE_VERSION_ID_NORMAL)
-			return true;
-		if(index == 2 && v == SKYLINE_VERSION_ID_HINTED)
-			return true;
-		return false;
+		return v == font.getVersionID();
 	}
 
 	/** Check version ID */
