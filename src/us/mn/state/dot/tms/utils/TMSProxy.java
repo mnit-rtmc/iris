@@ -205,14 +205,6 @@ public class TMSProxy {
 		return camera_list;
 	}
 
-	/** Monitor list */
-	protected final RemoteListModel monitor_list;
-
-	/** Get the monitor list */
-	public RemoteListModel getMonitorList() {
-		return monitor_list;
-	}
-
 	/** Tour list */
 	protected final RemoteListModel tour_list;
 
@@ -269,7 +261,6 @@ public class TMSProxy {
 		warn_signs = new RemoteListModel(tms.getWarningSignList());
 		devices = new RemoteListModel(tms.getDeviceList());
 		camera_list = tms.getCameraList();
-		monitor_list = new RemoteListModel(tms.getMonitorList());
 		tour_list = new RemoteListModel(tms.getTourList());
 		lcss = new RemoteListModel(tms.getLCSList());
 	}

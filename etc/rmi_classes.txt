@@ -36,7 +36,6 @@ us/mn/state/dot/tms/MeterableCd.class
 us/mn/state/dot/tms/MeteringHoliday.class
 us/mn/state/dot/tms/MeteringHolidayList.class
 us/mn/state/dot/tms/MeterPlan.class
-us/mn/state/dot/tms/Monitor.class
 us/mn/state/dot/tms/MultiString*.class
 us/mn/state/dot/tms/NodeGroup.class
 us/mn/state/dot/tms/Node.class
