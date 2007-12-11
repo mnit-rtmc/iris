@@ -1,5 +1,5 @@
 INSERT INTO font (name, height, width, line_spacing,
-	char_spacing, version_id) VALUES ('NORMAL', 7, 0, 0, 2, 0);
+	char_spacing, version_id) VALUES ('NORMAL', 7, 0, 0, 2, 15555);
 INSERT INTO font (name, height, width, line_spacing,
 	char_spacing, version_id) VALUES ('MONO', 7, 5, 0, 0, 0);
 
