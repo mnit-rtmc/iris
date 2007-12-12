@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +27,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.ServerNotActiveException;
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.Checker;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.log.LogImpl;
 import us.mn.state.dot.vault.ObjectVault;
@@ -327,5 +330,29 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Get the object key */
 	public String getKey() {
 		return getOID().toString();
+	}
+
+	/** Check if the given date/time matches any holiday */
+	protected HolidayImpl lookupHoliday(final Calendar stamp)
+		throws NamespaceError
+	{
+		return (HolidayImpl)namespace.findObject(Holiday.SONAR_TYPE,
+			new Checker<HolidayImpl>()
+		{
+			public boolean check(HolidayImpl h) {
+				return h.matches(stamp);
+			}
+		});
+	}
+
+	/** Check if the given date/time matches any holiday */
+	public boolean isHoliday(Calendar stamp) {
+		try {
+			return lookupHoliday(stamp) != null;
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+			return false;
+		}
 	}
 }

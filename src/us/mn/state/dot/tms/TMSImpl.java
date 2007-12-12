@@ -273,7 +273,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				station_map.writeStationXml();
 				int interval = calculateInterval(stamp);
 				meters.computeDemand(interval);
-				if(holidays.allowMetering(stamp)) {
+				if(!isHoliday(stamp)) {
 					meters.validateTimingPlans(interval);
 					dmss.updateTravelTimes(interval);
 				}
