@@ -22,6 +22,7 @@ us/mn/state/dot/tms/ErrorCounter.class
 us/mn/state/dot/tms/Font.class
 us/mn/state/dot/tms/Glyph.class
 us/mn/state/dot/tms/Graphic.class
+us/mn/state/dot/tms/Holiday.class
 us/mn/state/dot/tms/IndexedList.class
 us/mn/state/dot/tms/InvalidMessageException.class
 us/mn/state/dot/tms/LaneControlSignal.class
