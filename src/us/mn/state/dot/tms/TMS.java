@@ -54,10 +54,6 @@ public interface TMS extends Remote {
 	/** Get the ramp meter list */
 	public RampMeterList getRampMeterList() throws RemoteException;
 
-	/** Get the metering holiday list */
-	public MeteringHolidayList getMeteringHolidayList()
-		throws RemoteException;
-
 	/** Get the dynamic message sign list */
 	public DMSList getDMSList() throws RemoteException;
 

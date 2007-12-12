@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.DetectorList;
 import us.mn.state.dot.tms.Login;
-import us.mn.state.dot.tms.MeteringHolidayList;
 import us.mn.state.dot.tms.RampMeterList;
 import us.mn.state.dot.tms.RoadwayList;
 import us.mn.state.dot.tms.SortedList;
@@ -156,12 +155,6 @@ public class TMSProxy {
 	/** Get the available ramp meter list */
 	public RemoteListModel getAvailableMeters() { return availableMeters; }
 
-	/** Metering holiday list */
-	protected final MeteringHolidayList holidays;
-
-	/** Get the metering holiday list */
-	public MeteringHolidayList getMeteringHolidayList() { return holidays; }
-
 	/** Dynamic message sign list */
 	protected final DMSList dms_list;
 
@@ -255,7 +248,6 @@ public class TMSProxy {
 		meter_list = tms.getRampMeterList();
 		availableMeters = new RemoteListModel(
 			meter_list.getAvailableList());
-		holidays = tms.getMeteringHolidayList();
 		dms_list = tms.getDMSList();
 		plans = new RemoteListModel(tms.getTimingPlanList());
 		warn_signs = new RemoteListModel(tms.getWarningSignList());
