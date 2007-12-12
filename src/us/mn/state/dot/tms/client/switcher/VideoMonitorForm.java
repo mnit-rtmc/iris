@@ -49,9 +49,6 @@ public class VideoMonitorForm extends AbstractForm {
 	/** Video monitor type cache */
 	protected final TypeCache<VideoMonitor> cache;
 
-	/** Selected video monitor */
-	protected VideoMonitor monitor;
-
 	/** Create a new video monitor form */
 	public VideoMonitorForm(TypeCache<VideoMonitor> c) {
 		super(TITLE);
@@ -105,8 +102,7 @@ public class VideoMonitorForm extends AbstractForm {
 
 	/** Change the selected monitor */
 	protected void selectMonitor() {
-		ListSelectionModel s = m_table.getSelectionModel();
-		monitor = m_model.getProxy(s.getMinSelectionIndex());
-		del_monitor.setEnabled(true);
+		int row = m_table.getSelectedRow();
+		del_monitor.setEnabled(row >= 0 && !m_model.isLastRow(row));
 	}
 }
