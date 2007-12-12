@@ -232,7 +232,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Create the holiday name column */
 	protected TableColumn createNameColumn() {
-		TableColumn c = new TableColumn(COL_NAME, 340);
+		TableColumn c = new TableColumn(COL_NAME, 400);
 		c.setHeaderValue("Holiday Name");
 		c.setCellRenderer(new NameCellRenderer());
 		c.setCellEditor(new NameCellEditor());
