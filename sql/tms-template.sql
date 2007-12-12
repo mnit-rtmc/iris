@@ -585,6 +585,19 @@ REVOKE ALL ON TABLE video_monitor FROM PUBLIC;
 GRANT SELECT ON TABLE video_monitor TO PUBLIC;
 
 
+CREATE TABLE holiday (
+	name TEXT PRIMARY KEY,
+	month INTEGER NOT NULL,
+	day INTEGER NOT NULL,
+	week INTEGER NOT NULL,
+	weekday INTEGER NOT NULL,
+	shift INTEGER NOT NULL,
+	period INTEGER NOT NULL
+);
+
+REVOKE ALL ON TABLE holiday FROM PUBLIC;
+GRANT SELECT ON TABLE holiday TO PUBLIC;
+
 SET SESSION AUTHORIZATION 'tms';
 
 --
@@ -1344,23 +1357,6 @@ CREATE FUNCTION get_det_no(integer[]) RETURNS text
 
 
 SET SESSION AUTHORIZATION 'tms';
-
---
--- TOC entry 92 (OID 19211463)
--- Name: metering_holiday; Type: TABLE; Schema: public; Owner: tms
---
-
-CREATE TABLE metering_holiday (
-    name text NOT NULL,
-    "month" integer NOT NULL,
-    "day" integer NOT NULL,
-    week integer NOT NULL,
-    weekday integer NOT NULL,
-    shift integer NOT NULL,
-    period integer NOT NULL
-)
-INHERITS (tms_object);
-
 
 --
 -- TOC entry 93 (OID 19211469)
@@ -2187,7 +2183,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
 51458	4	0	stratified_plan	us.mn.state.dot.tms.StratifiedPlanImpl
 48316	4	0	segment	us.mn.state.dot.tms.SegmentImpl
-60327	4	0	metering_holiday	us.mn.state.dot.tms.MeteringHolidayImpl
 43828	4	0	node_group	us.mn.state.dot.tms.NodeGroupImpl
 64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
 1396	4	0	communication_line	us.mn.state.dot.tms.CommunicationLineImpl
@@ -2685,14 +2680,6 @@ CREATE UNIQUE INDEX communication_line_pkey ON communication_line USING btree (v
 --
 
 CREATE UNIQUE INDEX meterable_cd_pkey ON meterable_cd USING btree (vault_oid);
-
-
---
--- TOC entry 203 (OID 19211796)
--- Name: metering_holiday_pkey; Type: INDEX; Schema: public; Owner: tms
---
-
-CREATE UNIQUE INDEX metering_holiday_pkey ON metering_holiday USING btree (vault_oid);
 
 
 --
