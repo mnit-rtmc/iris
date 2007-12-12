@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.switcher.VideoMonitorForm;
 import us.mn.state.dot.tms.client.toast.DetectorListForm;
 import us.mn.state.dot.tms.client.toast.Icons;
-import us.mn.state.dot.tms.client.toast.MeteringHolidayForm;
+import us.mn.state.dot.tms.client.toast.HolidayForm;
 import us.mn.state.dot.tms.client.toast.PolicyForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.SonetRingForm;
@@ -111,7 +111,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('H');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new MeteringHolidayForm(tc));
+				desktop.show(new HolidayForm(st.getHolidays()));
 			}
 		};
 		add(item);

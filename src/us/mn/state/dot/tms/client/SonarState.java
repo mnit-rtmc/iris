@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.VideoMonitor;
 
 /**
@@ -59,6 +60,14 @@ public class SonarState extends Client {
 	/** Get the connection type cache */
 	public TypeCache<Connection> getConnections() {
 		return connections;
+	}
+
+	/** Cache of holiday proxies */
+	protected final TypeCache<Holiday> holidays;
+
+	/** Get the holiday type cache */
+	public TypeCache<Holiday> getHolidays() {
+		return holidays;
 	}
 
 	/** Cache of graphic proxies */
@@ -102,6 +111,7 @@ public class SonarState extends Client {
 		roles = new TypeCache<Role>(Role.class);
 		users = new TypeCache<User>(User.class);
 		connections = new TypeCache<Connection>(Connection.class);
+		holidays = new TypeCache<Holiday>(Holiday.class);
 		graphics = new TypeCache<Graphic>(Graphic.class);
 		fonts = new TypeCache<Font>(Font.class);
 		glyphs = new TypeCache<Glyph>(Glyph.class);
@@ -116,6 +126,7 @@ public class SonarState extends Client {
 		populate(roles);
 		populate(users);
 		populate(connections);
+		populate(holidays);
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
