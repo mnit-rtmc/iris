@@ -110,8 +110,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		r_nodes.load(R_NodeImpl.class, "vault_oid");
 		System.err.println( "Loading meters..." );
 		meters.load( RampMeterImpl.class, "id" );
-		System.err.println("Loading holidays...");
-		holidays.load(MeteringHolidayImpl.class, "name");
 		System.err.println( "Loading dms list..." );
 		dmss.load( DMSImpl.class, "id" );
 		System.err.println("Loading warning signs...");
@@ -369,9 +367,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Master ramp meter list */
 	protected final RampMeterListImpl meters;
 
-	/** Master metering holiday list */
-	protected final MeteringHolidayListImpl holidays;
-
 	/** Dynamic message sign list */
 	protected final DMSListImpl dmss;
 
@@ -426,7 +421,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		r_nodes = new R_NodeMapImpl();
 		plans = new TimingPlanListImpl();
 		meters = new RampMeterListImpl();
-		holidays = new MeteringHolidayListImpl();
 		dmss = new DMSListImpl();
 		warn_signs = new WarningSignList();
 		cameras = new CameraList();
@@ -475,9 +469,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Get the ramp meter list */
 	public RampMeterList getRampMeterList() { return meters; }
-
-	/** Get the metering holiday list */
-	public MeteringHolidayList getMeteringHolidayList() { return holidays; }
 
 	/** Get the dynamic message sign list */
 	public DMSList getDMSList() { return dmss; }
