@@ -33,6 +33,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Load all the fonts */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS fonts...");
+		namespace.registerType(SONAR_TYPE, FontImpl.class);
 		store.query("SELECT name, height, width, line_spacing, " +
 			"char_spacing, version_id FROM font;",
 			new ResultFactory()

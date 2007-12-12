@@ -28,6 +28,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	/** Load all the glyphs */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS glyphs...");
+		namespace.registerType(SONAR_TYPE, GlyphImpl.class);
 		store.query("SELECT name, font, code_point, graphic " +
 			"FROM glyph;", new ResultFactory()
 		{

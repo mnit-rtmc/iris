@@ -26,6 +26,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading video monitors...");
+		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, description FROM video_monitor;",
 			new ResultFactory()
 		{

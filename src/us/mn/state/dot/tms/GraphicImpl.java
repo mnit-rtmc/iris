@@ -28,6 +28,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	/** Load all the graphics */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS graphics...");
+		namespace.registerType(SONAR_TYPE, GraphicImpl.class);
 		store.query("SELECT name, bpp, height, width, pixels " +
 			"FROM graphic;", new ResultFactory()
 		{
