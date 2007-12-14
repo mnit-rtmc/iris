@@ -115,6 +115,7 @@ public class PolicyForm extends AbstractForm {
 	/** Initialise the widgets on the form */
 	protected void initialize() {
 		cache.addProxyListener(sp_listener);
+		doUpdate();
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 		add(tab);
