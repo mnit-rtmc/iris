@@ -33,6 +33,7 @@ abstract public class BaseObjectImpl implements Storable {
 	static void loadAll(SQLConnection s, Namespace ns) throws TMSException {
 		store = s;
 		namespace = ns;
+		SystemPolicyImpl.loadAll();
 		HolidayImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();

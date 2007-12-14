@@ -14,75 +14,76 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
 import java.sql.ResultSet;
-import java.util.HashMap;
 
 /**
- * The system policy is a mapping of system-wide policy parameter names to
- * integer values.
+ * A system policy is a parameter name mapped to an integer value.
  *
  * @author Douglas Lau
  */
-public class SystemPolicyImpl extends TMSObjectImpl implements SystemPolicy {
+public class SystemPolicyImpl extends BaseObjectImpl implements SystemPolicy {
 
-	/** Connection to SQL database */
-	protected final SQLConnection store;
-
-	/** Mapping of system policy parameters to values */
-	protected final HashMap<String, Integer> params =
-		new HashMap<String, Integer>();
-
-	/** Create a new system policy object */
-	public SystemPolicyImpl(SQLConnection s) throws TMSException,
-		RemoteException
-	{
-		store = s;
-		store.query("SELECT * FROM system_policy;", new ResultFactory()
+	/** Load all the system policies */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading system policy...");
+		namespace.registerType(SONAR_TYPE, SystemPolicyImpl.class);
+		store.query("SELECT name, value FROM system_policy;",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				String name = row.getString(1);
-				int value = row.getInt(2);
-				params.put(name, value);
+				namespace.add(new SystemPolicyImpl(
+					row.getString(1),	// name
+					row.getInt(2)		// value
+				));
 			}
 		});
 	}
 
-	/** Insert a new policy parameter */
-	protected void insertParameter(String name, int value)
-		throws TMSException
-	{
-		store.update("INSERT INTO system_policy " +
-			"(name, value) VALUES " + "('" + name +
-			"', '" + value + "');");
+	/** Store a system policy */
+	public void doStore() throws TMSException {
+		store.update("INSERT INTO " + getTable() + " (name, value) " +
+			"VALUES ('" + name + "', " + value + ");");
 	}
 
-	/** Update a system-wide policy parameter */
-	protected void updateParameter(String name, int value)
-		throws TMSException
-	{
-		store.update("UPDATE system_policy SET value = '" +
-			value + "' WHERE name = '" + name + "';");
+	/** Get the database table name */
+	public String getTable() {
+		return SONAR_TYPE;
 	}
 
-	/** Set a new value of a system-wide policy parameter */
-	public synchronized void setValue(String name, int value)
-		throws TMSException
-	{
-		Integer val = params.get(name);
-		if(val == null)
-			insertParameter(name, value);
-		else if(value != val)
-			updateParameter(name, value);
-		params.put(name, value);
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
 	}
 
-	/** Get the current value of a system-wide policy parameter */
-	public synchronized int getValue(String name) {
-		Integer val = params.get(name);
-		if(val == null)
-			return 0;
-		else
-			return val;
+	/** Create a new system policy */
+	public SystemPolicyImpl(String n) {
+		super(n);
+	}
+
+	/** Create a new system policy object */
+	protected SystemPolicyImpl(String n, int v) {
+		super(n);
+		value = v;
+	}
+
+	/** Policy value */
+	protected int value;
+
+	/** Set the system policy value */
+	public void setValue(int v) {
+		value = v;
+	}
+
+	/** Set the system policy value */
+	public void doSetValue(int v) throws TMSException {
+		if(v == value)
+			return;
+		store.update(this, "value", v);
+		setValue(v);
+	}
+
+	/** Get the system policy value */
+	public int getValue() {
+		return value;
 	}
 }

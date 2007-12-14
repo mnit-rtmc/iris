@@ -130,10 +130,10 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.add(new DefaultJustificationPage(
 				DefaultJustificationPage.TOP));
 			mess.add(new DefaultPageOnTime(
-				TMSObjectImpl.policy.getValue(
+				TMSObjectImpl.getPolicyValue(
 				SystemPolicy.DMS_PAGE_ON_TIME)));
 			mess.add(new DefaultPageOffTime(
-				TMSObjectImpl.policy.getValue(
+				TMSObjectImpl.getPolicyValue(
 				SystemPolicy.DMS_PAGE_OFF_TIME)));
 			mess.setRequest();
 			return new LedstarDefaults();

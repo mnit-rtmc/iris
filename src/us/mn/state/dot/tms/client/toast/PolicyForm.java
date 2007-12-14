@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Color;
-import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Hashtable;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -24,9 +24,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemPolicy;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.utils.ActionJob;
 
 /**
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.utils.ActionJob;
  *
  * @author Douglas Lau
  */
-public class PolicyForm extends TMSObjectForm {
+public class PolicyForm extends AbstractForm {
 
 	/** Frame title */
 	static private final String TITLE = "System-Wide Policy";
@@ -62,8 +62,8 @@ public class PolicyForm extends TMSObjectForm {
 		return slider;
 	}
 
-	/** System policy */
-	protected SystemPolicy policy;
+	/** System policy type cache */
+	protected final TypeCache<SystemPolicy> cache;
 
 	/** Ramp meter green time slider */
 	protected final JSlider green = createSlider(0, 30);
@@ -95,32 +95,45 @@ public class PolicyForm extends TMSObjectForm {
 	/** Apply button */
 	protected final JButton apply = new JButton("Apply Changes");
 
+	/** Proxy listener for System Policy proxies */
+	protected final ProxyListener<SystemPolicy> sp_listener =
+		new ProxyListener<SystemPolicy>()
+	{
+		public void proxyAdded(SystemPolicy p) { }
+		public void proxyRemoved(SystemPolicy p) { }
+		public void proxyChanged(SystemPolicy p, String a) {
+			doUpdate();
+		}
+	};
+
 	/** Create a new policy form */
-	public PolicyForm(TmsConnection tc) {
-		super(TITLE, tc);
+	public PolicyForm(TypeCache<SystemPolicy> c) {
+		super(TITLE);
+		cache = c;
 	}
 
 	/** Initialise the widgets on the form */
-	protected void initialize() throws RemoteException {
-		policy = tms.getPolicy();
-		obj = policy;
-		super.initialize();
+	protected void initialize() {
+		cache.addProxyListener(sp_listener);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 		add(tab);
 		tab.add("Meters", createMeterPanel());
 		tab.add("DMS", createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
-		if(admin) {
-			add(Box.createVerticalStrut(VGAP));
-			new ActionJob(this, apply) {
-				public void perform() throws Exception {
-					applyPressed();
-				}
-			};
-			add(apply);
-		}
+		add(Box.createVerticalStrut(VGAP));
+		new ActionJob(this, apply) {
+			public void perform() throws Exception {
+				applyPressed();
+			}
+		};
+		add(apply);
 		setBackground(Color.LIGHT_GRAY);
+	}
+
+	/** Dispose of the form */
+	protected void dispose() {
+		cache.removeProxyListener(sp_listener);
 	}
 
 	/** Create the ramp meter policy panel */
@@ -129,7 +142,7 @@ public class PolicyForm extends TMSObjectForm {
 		yellow.setLabelTable(TIME_LABELS);
 		min_red.setLabelTable(TIME_LABELS);
 
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
 		panel.addRow(new JLabel("System-Wide Ramp Meter"));
 		panel.setCenter();
@@ -145,7 +158,7 @@ public class PolicyForm extends TMSObjectForm {
 		pageOn.setLabelTable(TIME_LABELS);
 		pageOff.setLabelTable(TIME_LABELS);
 
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
 		panel.addRow(new JLabel("Page time (seconds)"));
 		panel.addRow("On", pageOn);
@@ -160,7 +173,7 @@ public class PolicyForm extends TMSObjectForm {
 		ring3.setLabelTable(ring3.createStandardLabels(5));
 		ring4.setLabelTable(ring4.createStandardLabels(5));
 
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
 		panel.addRow(new JLabel("Ring radii (miles)"));
 		panel.addRow("Ring 1", ring1);
@@ -170,38 +183,58 @@ public class PolicyForm extends TMSObjectForm {
 		return panel;
 	}
 
+	/** Get the value of the named policy */
+	protected int getPolicyValue(String p) {
+		SystemPolicy sp = cache.getObject(p);
+		if(sp != null)
+			return sp.getValue();
+		else
+			return 0;
+	}
+
 	/** Update the DMSListForm with the current status */
-	protected void doUpdate() throws RemoteException {
-		green.setValue(policy.getValue(SystemPolicy.METER_GREEN_TIME));
-		yellow.setValue(policy.getValue(
-			SystemPolicy.METER_YELLOW_TIME));
-		min_red.setValue(policy.getValue(
+	protected void doUpdate() {
+		green.setValue(getPolicyValue(SystemPolicy.METER_GREEN_TIME));
+		yellow.setValue(getPolicyValue(SystemPolicy.METER_YELLOW_TIME));
+		min_red.setValue(getPolicyValue(
 			SystemPolicy.METER_MIN_RED_TIME));
-		pageOn.setValue(policy.getValue(SystemPolicy.DMS_PAGE_ON_TIME));
-		pageOff.setValue(policy.getValue(
+		pageOn.setValue(getPolicyValue(SystemPolicy.DMS_PAGE_ON_TIME));
+		pageOff.setValue(getPolicyValue(
 			SystemPolicy.DMS_PAGE_OFF_TIME));
-		ring1.setValue(policy.getValue(SystemPolicy.RING_RADIUS_0));
-		ring2.setValue(policy.getValue(SystemPolicy.RING_RADIUS_1));
-		ring3.setValue(policy.getValue(SystemPolicy.RING_RADIUS_2));
-		ring4.setValue(policy.getValue(SystemPolicy.RING_RADIUS_3));
+		ring1.setValue(getPolicyValue(SystemPolicy.RING_RADIUS_0));
+		ring2.setValue(getPolicyValue(SystemPolicy.RING_RADIUS_1));
+		ring3.setValue(getPolicyValue(SystemPolicy.RING_RADIUS_2));
+		ring4.setValue(getPolicyValue(SystemPolicy.RING_RADIUS_3));
+	}
+
+	/** Set the value of the named policy */
+	protected void setPolicyValue(String p, int v) {
+		SystemPolicy sp = cache.getObject(p);
+		if(sp != null)
+			sp.setValue(v);
+		else {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("value", v);
+			cache.createObject(p, attrs);
+		}
 	}
 
 	/** Apply button pressed */
-	public void applyPressed() throws TMSException, RemoteException {
-		policy.setValue(SystemPolicy.METER_GREEN_TIME,
+	public void applyPressed() {
+		setPolicyValue(SystemPolicy.METER_GREEN_TIME,
 			green.getValue());
-		policy.setValue(SystemPolicy.METER_YELLOW_TIME,
+		setPolicyValue(SystemPolicy.METER_YELLOW_TIME,
 			yellow.getValue());
-		policy.setValue(SystemPolicy.METER_MIN_RED_TIME,
+		setPolicyValue(SystemPolicy.METER_MIN_RED_TIME,
 			min_red.getValue());
-		policy.setValue(SystemPolicy.DMS_PAGE_ON_TIME,
+		setPolicyValue(SystemPolicy.DMS_PAGE_ON_TIME,
 			pageOn.getValue());
-		policy.setValue(SystemPolicy.DMS_PAGE_OFF_TIME,
+		setPolicyValue(SystemPolicy.DMS_PAGE_OFF_TIME,
 			pageOff.getValue());
-		policy.setValue(SystemPolicy.RING_RADIUS_0, ring1.getValue());
-		policy.setValue(SystemPolicy.RING_RADIUS_1, ring2.getValue());
-		policy.setValue(SystemPolicy.RING_RADIUS_2, ring3.getValue());
-		policy.setValue(SystemPolicy.RING_RADIUS_3, ring4.getValue());
-		policy.notifyUpdate();
+		setPolicyValue(SystemPolicy.RING_RADIUS_0, ring1.getValue());
+		setPolicyValue(SystemPolicy.RING_RADIUS_1, ring2.getValue());
+		setPolicyValue(SystemPolicy.RING_RADIUS_2, ring3.getValue());
+		setPolicyValue(SystemPolicy.RING_RADIUS_3, ring4.getValue());
 	}
 }

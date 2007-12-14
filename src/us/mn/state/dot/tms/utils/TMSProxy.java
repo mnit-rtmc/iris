@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.Login;
 import us.mn.state.dot.tms.RampMeterList;
 import us.mn.state.dot.tms.RoadwayList;
 import us.mn.state.dot.tms.SortedList;
-import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TMS;
 import us.mn.state.dot.tms.TMSObject;
 
@@ -36,19 +35,8 @@ import us.mn.state.dot.tms.TMSObject;
  */
 public class TMSProxy {
 
-	/** The status level at which the proxy is fully initialized. */
-	public final static int MAX_STATUS = 21;
-
 	/** Remote TMS */
 	protected final TMS tms;
-
-	/** System-wide policy */
-	protected final SystemPolicy policy;
-
-	/** Get the system-wide policy */
-	public SystemPolicy getPolicy() {
-		return policy;
-	}
 
 	/** Remote roadway list */
 	protected final RemoteListModel roadways;
@@ -231,7 +219,6 @@ public class TMSProxy {
 	{
 		Login l = (Login)Naming.lookup("//" + server + "/login");
 		tms = l.login(user);
-		policy = tms.getPolicy();
 		roadways = new RemoteListModel(tms.getRoadwayList());
 		RoadwayList roads = (RoadwayList)roadways.getList();
 		freeways = new RemoteListModel(roads.getFreewayList());

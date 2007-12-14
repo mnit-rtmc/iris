@@ -27,8 +27,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.ServerNotActiveException;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Checker;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.log.LogImpl;
 import us.mn.state.dot.vault.ObjectVault;
@@ -68,9 +68,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";
-
-	/** System-wide policy parameters */
-	static public SystemPolicyImpl policy;
 
 	/** Communication line list */
 	static CommunicationLineList lineList;
@@ -332,8 +329,34 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		return getOID().toString();
 	}
 
-	/** Check if the given date/time matches any holiday */
-	protected HolidayImpl lookupHoliday(final Calendar stamp)
+	/** Lookup the named system policy */
+	static protected SystemPolicyImpl lookupPolicy(final String p)
+		throws NamespaceError
+	{
+		return (SystemPolicyImpl)namespace.findObject(
+			SystemPolicy.SONAR_TYPE, new Checker<SystemPolicyImpl>()
+		{
+			public boolean check(SystemPolicyImpl sp) {
+				return p.equals(sp.getName());
+			}
+		});
+	}
+
+	/** Get the value of a system policy */
+	static public int getPolicyValue(String p) {
+		try {
+			SystemPolicyImpl sp = lookupPolicy(p);
+			if(sp != null)
+				return sp.getValue();
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	/** Lookup a holiday which matches the given calendar */
+	static protected HolidayImpl lookupHoliday(final Calendar stamp)
 		throws NamespaceError
 	{
 		return (HolidayImpl)namespace.findObject(Holiday.SONAR_TYPE,
@@ -346,7 +369,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	}
 
 	/** Check if the given date/time matches any holiday */
-	public boolean isHoliday(Calendar stamp) {
+	static public boolean isHoliday(Calendar stamp) {
 		try {
 			return lookupHoliday(stamp) != null;
 		}

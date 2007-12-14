@@ -14,16 +14,17 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * The system policy is a mapping of system-wide policy parameter names to
- * integer values.
+ * A system policy is a parameter name mapped to an integer value.
  *
  * @author Douglas Lau
  */
-public interface SystemPolicy extends TMSObject {
+public interface SystemPolicy extends SonarObject {
+
+	/** SONAR type name */
+	String SONAR_TYPE = "system_policy";
 
 	/** Meter green time parameter */
 	String METER_GREEN_TIME = "meter_green_time";
@@ -53,9 +54,8 @@ public interface SystemPolicy extends TMSObject {
 	String RING_RADIUS_3 = "ring_radius_3";
 
 	/** Set a new value of a system-wide policy parameter */
-	void setValue(String name, int value) throws TMSException,
-		RemoteException;
+	void setValue(int value);
 
 	/** Get the current value of a system-wide policy parameter */
-	int getValue(String name) throws RemoteException;
+	int getValue();
 }

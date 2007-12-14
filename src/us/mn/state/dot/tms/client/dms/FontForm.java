@@ -32,6 +32,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
@@ -103,14 +105,6 @@ public class FontForm extends AbstractForm {
 			return p.getName().startsWith(f.getName());
 		else
 			return false;
-	}
-
-	/** Lookup a graphic by name */
-	protected Graphic lookupGraphic(String name) {
-		Map<String, Graphic> all_graphics = graphics.getAll();
-		synchronized(all_graphics) {
-			return all_graphics.get(name);
-		}
 	}
 
 	/** Proxy listener for Glyph proxies */
@@ -275,17 +269,21 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Lookup the glyphs in the selected font */
-	protected void lookupGlyphs(Font font) {
+	protected void lookupGlyphs(final Font font) {
 		synchronized(gmap) {
 			gmap.clear();
 		}
-		Map<String, Glyph> all_glyphs = glyphs.getAll();
-		LinkedList<Glyph> glist = new LinkedList<Glyph>();
-		synchronized(all_glyphs) {
-			for(Glyph g: all_glyphs.values())
-				if(g.getFont() == font)
-					glist.add(g);
-		}
+		final LinkedList<Glyph> glist = new LinkedList<Glyph>();
+		glyphs.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof Glyph) {
+					Glyph g = (Glyph)o;
+					if(g.getFont() == font)
+						glist.add(g);
+				}
+				return false;
+			}
+		});
 		synchronized(gmap) {
 			for(Glyph g: glist)
 				addGlyph(g);

@@ -19,13 +19,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
-import java.rmi.RemoteException;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemPolicy;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.trafmap.IncidentLayer;
 
 /**
@@ -67,17 +66,25 @@ public class DirectionalIncidentTheme extends StyledTheme {
 	/** Ellipses to paint selection rings */
 	protected final Ellipse2D[] ellipses;
 
-	/** Create a new directional incident theme */
-	public DirectionalIncidentTheme(TmsConnection tc)
-		throws RemoteException
+	/** Get the value of the named policy */
+	static protected int getPolicyValue(TypeCache<SystemPolicy> c,
+		String p)
 	{
+		SystemPolicy sp = c.getObject(p);
+		if(sp != null)
+			return sp.getValue();
+		else
+			return 0;
+	}
+
+	/** Create a new directional incident theme */
+	public DirectionalIncidentTheme(TypeCache<SystemPolicy> c) {
 		super("Incidents", IncidentLayer.TWO_WAY);
 		int[] r = new int[4];
-		SystemPolicy policy = tc.getProxy().getPolicy();
-		r[0] = policy.getValue(SystemPolicy.RING_RADIUS_0);
-		r[1] = policy.getValue(SystemPolicy.RING_RADIUS_1);
-		r[2] = policy.getValue(SystemPolicy.RING_RADIUS_2);
-		r[3] = policy.getValue(SystemPolicy.RING_RADIUS_3);
+		r[0] = getPolicyValue(c, SystemPolicy.RING_RADIUS_0);
+		r[1] = getPolicyValue(c, SystemPolicy.RING_RADIUS_1);
+		r[2] = getPolicyValue(c, SystemPolicy.RING_RADIUS_2);
+		r[3] = getPolicyValue(c, SystemPolicy.RING_RADIUS_3);
 		ellipses = createEllipses(r);
 		addStyle(STYLE);
 	}

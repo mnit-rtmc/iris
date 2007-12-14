@@ -292,9 +292,9 @@ public class Download extends ControllerOperation implements TimingTable {
 		for(int t = TimingPlan.AM; t <= TimingPlan.PM; t++) {
 			bcd.write16Bit(STARTUP_GREEN);
 			bcd.write16Bit(STARTUP_YELLOW);
-			bcd.write16Bit(TMSObjectImpl.policy.getValue(
+			bcd.write16Bit(TMSObjectImpl.getPolicyValue(
 				SystemPolicy.METER_GREEN_TIME));
-			bcd.write16Bit(TMSObjectImpl.policy.getValue(
+			bcd.write16Bit(TMSObjectImpl.getPolicyValue(
 				SystemPolicy.METER_YELLOW_TIME));
 			bcd.write16Bit(HOV_PREEMPT);
 			for(int i = 0; i < 6; i++)

@@ -164,7 +164,7 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(TmsConnection tc, Properties p, Logger l)
+	public Session(TmsConnection tc, SonarState st, Properties p, Logger l)
 		throws DdsException, IOException
 	{
 		tmsConnection = tc;
@@ -172,7 +172,8 @@ public class Session {
 		logger = l;
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer();
-		incLayer = new TmsIncidentLayer(props, logger, tmsConnection);
+		incLayer = new TmsIncidentLayer(props, logger,
+			st.getSystemPolicy());
 		camLayer = CameraHandler.createLayer(tmsConnection);
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();

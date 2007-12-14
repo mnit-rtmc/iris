@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.incidents;
 
-import java.rmi.RemoteException;
 import java.util.Properties;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tdxml.DdsException;
+import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.trafmap.IncidentLayer;
-import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
  * A map layer for displaying incidents as arrows
@@ -35,10 +35,10 @@ public class TmsIncidentLayer extends IncidentLayer {
 
 	/** Create a new TMS incdent layer */
 	public TmsIncidentLayer(Properties props, Logger logger,
-		TmsConnection tc) throws DdsException, RemoteException
+		TypeCache<SystemPolicy> c) throws DdsException
 	{
 		super(props, logger);
-		theme = new DirectionalIncidentTheme(tc);
+		theme = new DirectionalIncidentTheme(c);
 	}
 
 	/** Create a new layer state */

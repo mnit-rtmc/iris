@@ -174,7 +174,8 @@ public class IrisClient extends JFrame {
 		setTitle("IRIS: User = " + user.getName() + " (" +
 			user.getFullName() + ")");
 		tmsConnection.open(hostName, user.getFullName());
-		session = new Session(tmsConnection, props, logger);
+		session = new Session(tmsConnection,
+			userManager.getSonarState(), props, logger);
 		arrangeTabs();
 		if(user.hasPermission(IrisPermission.VIEW)) {
 			viewMenu = new ViewMenu(tmsConnection,

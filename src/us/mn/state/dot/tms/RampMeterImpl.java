@@ -647,17 +647,17 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		float cycle = SECONDS_PER_HOUR / (float)release_rate;
 		if(singleRelease)
 			cycle /= 2;
-		int green = policy.getValue(SystemPolicy.METER_GREEN_TIME);
-		int yellow = policy.getValue(SystemPolicy.METER_YELLOW_TIME);
-		int min_red = policy.getValue(SystemPolicy.METER_MIN_RED_TIME);
+		int green = getPolicyValue(SystemPolicy.METER_GREEN_TIME);
+		int yellow = getPolicyValue(SystemPolicy.METER_YELLOW_TIME);
+		int min_red = getPolicyValue(SystemPolicy.METER_MIN_RED_TIME);
 		int red_time = Math.round(cycle * 10) - (green + yellow);
 		return Math.max(red_time, min_red);
 	}
 
 	/** Calculate the release rate from a given red time */
 	public int calculateReleaseRate(int red_time) {
-		int green = policy.getValue(SystemPolicy.METER_GREEN_TIME);
-		int yellow = policy.getValue(SystemPolicy.METER_YELLOW_TIME);
+		int green = getPolicyValue(SystemPolicy.METER_GREEN_TIME);
+		int yellow = getPolicyValue(SystemPolicy.METER_YELLOW_TIME);
 		float cycle = (red_time + yellow + green) /
 			10.0f;
 		if(singleRelease)
