@@ -39,6 +39,9 @@ public class CorridorTrip implements Constants {
 		return corridor;
 	}
 
+	/** Origin/destination pair */
+	protected final ODPair od_pair;
+
 	/** Throw a BadRouteException with the specified message */
 	protected void throwException(String message) throws BadRouteException {
 		throw new BadRouteException(message + " (" +
@@ -68,6 +71,7 @@ public class CorridorTrip implements Constants {
 	/** Create a new corridor trip */
 	public CorridorTrip(Corridor c, ODPair od) throws BadRouteException {
 		corridor = c;
+		od_pair = od;
 		if(!c.getName().equals(od.getCorridor()))
 			throwException("Bad trip");
 		origin = c.calculateMilePoint(od.getOrigin());
@@ -137,6 +141,14 @@ public class CorridorTrip implements Constants {
 					low_mile);
 				hours += station_time(smile, m, avg, low_mile,
 					destination);
+
+// FIXME: temporary debugging code
+float _h = station_time(smile, m, low, origin, low_mile);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log("route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+_h = station_time(smile, m, avg, low_mile, destination);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log("route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+// FIXME: temporary debugging code
+
 			} else
 				fmile = m;
 			low[0] = low[1];

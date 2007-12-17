@@ -44,6 +44,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** ObjectVault table name */
 	static public final String tableName = "dms";
 
+	/** Travel time debug log */
+	static protected final DebugLog TRAVEL_LOG = new DebugLog("travel");
+
 	/** Get the database table name */
 	public String getTable() {
 		return tableName;
@@ -543,6 +546,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 					return null;
 				else
 					hours += h;
+
+// FIXME: temporary debugging code
+if(route1 != null) {
+	TRAVEL_LOG.log(id + ": old skool, s1: " + s1.getIndex() +
+		", s2: " + s2.getIndex() + ", mile: " + s2.getMile() +
+		", time: " + h);
+}
+
 			}
 			s1 = s2;
 		}
@@ -604,9 +615,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 protected void compareTravelTimes(TravelTime t0, TravelTime t1) {
 	if(t0 != null && t1 != null) {
 		if(t0.minutes != t1.minutes) {
-			System.err.println(id + " TRAVEL TIME: " + t0.minutes +
-				" <-> " + t1.minutes + ", " +
-				new java.util.Date());
+			TRAVEL_LOG.log(id + " TRAVEL TIME: " + t0.minutes +
+				" <-> " + t1.minutes);
 		}
 	}
 }
@@ -618,10 +628,12 @@ protected void compareTravelTimes(TravelTime t0, TravelTime t1) {
 		Route r = route1;
 		if(r != null) {
 			boolean final_dest = !isSameCorridor(r, route2);
+
+// FIXME: temporary debugging code
 TravelTime t0 = calculateTravelTime(dest1, dest2);
 TravelTime t1 = calculateTravelTime(r, final_dest);
 compareTravelTimes(t0, t1);
-return t1;
+return t0;
 //			return calculateTravelTime(r, final_dest);
 		}
 		else
@@ -635,10 +647,11 @@ return t1;
 		Route r = route2;
 		if(r != null)
 {
+	// FIXME: temporary debugging code
 	TravelTime t0 = calculateTravelTime(dest2, dest2);
 	TravelTime t1 = calculateTravelTime(r, true);
 	compareTravelTimes(t0, t1);
-	return t1;
+	return t0;
 }
 //			return calculateTravelTime(r, true);
 		else
