@@ -91,7 +91,7 @@ dms = _dms;
 
 	/** Debug a route exception */
 	protected void debugRouteException(BadRouteException e) {
-		System.err.println("Bad route: " + e.getMessage());
+		DMSImpl.TRAVEL_LOG.log("Bad route: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination */
