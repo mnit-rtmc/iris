@@ -119,8 +119,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	protected SegmentListImpl getSegmentList(RampMeterImpl meter) {
 		if(segList == null)
 			segList = meter.getSegmentList();
-		else if(segList != meter.getSegmentList())
-			System.err.println("ERROR: Segment List mismatch");
+		else if(segList != meter.getSegmentList()) {
+			System.err.println("ERROR: Segment List mismatch for " +
+				meter.getId());
+		}
 		return segList;
 	}
 
