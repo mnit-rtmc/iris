@@ -126,6 +126,21 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		return segList;
 	}
 
+	/** Corridor for this timing plan */
+	protected transient Corridor corridor;
+
+	/** Get the corridor for this timing plan */
+	protected Corridor getCorridor(RampMeterImpl meter) {
+		// FIXME: reset corridor at start of timing plan
+		if(corridor == null)
+			corridor = meter.getCorridor();
+		else if(corridor != meter.getCorridor()) {
+			System.err.println("ERROR: Corridor mismatch for " +
+				meter.getId());
+		}
+		return corridor;
+	}
+
 	/** Meter state holds stratified plan state for a meter. For each meter
 	    in the stratified plan, there will be one MeterState object. */
 	protected class MeterState {

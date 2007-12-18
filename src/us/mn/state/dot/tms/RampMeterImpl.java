@@ -792,6 +792,12 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		return location.getCorridorID();
 	}
 
+	/** Get the corridor containing the ramp meter */
+	public Corridor getCorridor() {
+		// FIXME: does not work for CD roads
+		return nodeMap.getCorridor(location.getCorridor());
+	}
+
 	/** Print a single detector as an XML element */
 	public void printXmlElement(PrintWriter out) {
 		out.print("<meter id='" + getId() + "' ");
