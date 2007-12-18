@@ -252,12 +252,14 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 	public void printStationXmlElement(PrintWriter out) {
 		if(!isActive())
 			return;
+		String n = getIndex();
+		if(n.length() < 1)
+			return;
 		if(volume == MISSING_DATA) {
-			out.println("\t<station id='" + getIndex() +
+			out.println("\t<station id='" + n +
 				"' status='fail'/>");
 		} else {
-			out.println("\t<station id='" + getIndex() +
-				"' status='ok'>");
+			out.println("\t<station id='" + n + "' status='ok'>");
 			out.println("\t\t<volume>" + volume + "</volume>");
 			out.println("\t\t<occupancy>" + occupancy +
 				"</occupancy>");
