@@ -55,8 +55,8 @@ dms = _dms;
 	}
 
 	/** Search for branching paths to a destination */
-	protected void searchPaths(float distance, LocationImpl origin,
-		LocationImpl destination) throws BadRouteException
+	protected void searchPaths(float distance, final LocationImpl origin,
+		final LocationImpl destination) throws BadRouteException
 	{
 		Corridor c = node_map.getCorridor(origin.getCorridor());
 		R_NodeImpl r_node = c.getNearestNode(origin);
@@ -95,8 +95,8 @@ dms = _dms;
 	}
 
 	/** Find all paths from an origin to a destination */
-	protected void findPaths(float distance, LocationImpl origin,
-		LocationImpl destination)
+	protected void findPaths(float distance, final LocationImpl origin,
+		final LocationImpl destination)
 	{
 		ODPair od = new ODPair(origin, destination);
 		Corridor c = node_map.getCorridor(od);
