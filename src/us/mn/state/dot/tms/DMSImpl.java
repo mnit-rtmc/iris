@@ -718,8 +718,8 @@ return t0;
 	protected Route createRoute(StationImpl s) {
 		R_NodeImpl r_node = s.getR_Node();
 		LocationImpl dest = (LocationImpl)r_node.getLocation();
-		RouteBuilder builder = new RouteBuilder(nodeMap, MAX_ROUTE_LEGS,
-			MAX_ROUTE_DISTANCE, this);
+		RouteBuilder builder = new RouteBuilder(getId(), nodeMap,
+			MAX_ROUTE_LEGS, MAX_ROUTE_DISTANCE);
 		SortedSet<Route> routes = builder.findRoutes(location, dest);
 		if(routes.size() > 0)
 			return routes.first();

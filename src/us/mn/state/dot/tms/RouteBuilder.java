@@ -28,6 +28,9 @@ public class RouteBuilder {
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static protected final float MAX_ORIGIN_DISTANCE = 1000;
 
+	/** Name to use for debugging purposes */
+	protected final String name;
+
 	/** Map of all R_Nodes */
 	protected final R_NodeMapImpl node_map;
 
@@ -43,15 +46,12 @@ public class RouteBuilder {
 	/** Set of all routes built */
 	protected final TreeSet<Route> routes = new TreeSet<Route>();
 
-// FIXME: temporary debug stuff
-protected final DMSImpl dms;
-
 	/** Create a new route builder */
-	public RouteBuilder(R_NodeMapImpl map, int l, float d, DMSImpl _dms) {
+	public RouteBuilder(String n, R_NodeMapImpl map, int l, float d) {
+		name = n;
 		node_map = map;
 		legs = l;
 		max_dist = d;
-dms = _dms;
 	}
 
 	/** Search for branching paths to a destination */
@@ -91,7 +91,7 @@ dms = _dms;
 
 	/** Debug a route exception */
 	protected void debugRouteException(BadRouteException e) {
-		DMSImpl.TRAVEL_LOG.log("Bad route: " + e.getMessage());
+		DMSImpl.TRAVEL_LOG.log(name + ": bad route: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination */
@@ -125,10 +125,10 @@ dms = _dms;
 		Route r = new Route();
 		for(ODPair od: path) {
 			Corridor c = node_map.getCorridor(od);
-			r.addTrip(new CorridorTrip(c, od, dms));
+			r.addTrip(new CorridorTrip(name, c, od));
 		}
 		Corridor c = node_map.getCorridor(odf);
-		r.addTrip(new CorridorTrip(c, odf, dms));
+		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
 	}
 
