@@ -150,9 +150,9 @@ dms = d;
 
 // FIXME: temporary debugging code
 float _h = station_time(smile, m, low, origin, low_mile);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log("dms: " + dms.getId() + "route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log(dms.getId() + ": route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
 _h = station_time(smile, m, avg, low_mile, destination);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log("dms: " + dms.getId() + "route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log(dms.getId() + ": route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
 // FIXME: temporary debugging code
 
 			} else
