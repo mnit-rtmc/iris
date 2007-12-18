@@ -43,11 +43,15 @@ public class RouteBuilder {
 	/** Set of all routes built */
 	protected final TreeSet<Route> routes = new TreeSet<Route>();
 
+// FIXME: temporary debug stuff
+protected final DMSImpl dms;
+
 	/** Create a new route builder */
-	public RouteBuilder(R_NodeMapImpl map, int l, float d) {
+	public RouteBuilder(R_NodeMapImpl map, int l, float d, DMSImpl _dms) {
 		node_map = map;
 		legs = l;
 		max_dist = d;
+dms = _dms;
 	}
 
 	/** Search for branching paths to a destination */
@@ -121,10 +125,10 @@ public class RouteBuilder {
 		Route r = new Route();
 		for(ODPair od: path) {
 			Corridor c = node_map.getCorridor(od);
-			r.addTrip(new CorridorTrip(c, od));
+			r.addTrip(new CorridorTrip(c, od, dms));
 		}
 		Corridor c = node_map.getCorridor(odf);
-		r.addTrip(new CorridorTrip(c, odf));
+		r.addTrip(new CorridorTrip(c, odf, dms));
 		routes.add(r);
 	}
 

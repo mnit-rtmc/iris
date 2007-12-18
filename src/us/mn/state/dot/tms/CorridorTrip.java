@@ -58,6 +58,9 @@ public class CorridorTrip implements Constants {
 	/** Mapping from mile point to station */
 	protected final TreeMap<Float, StationImpl> stations;
 
+// FIXME: temporary stuff
+protected final DMSImpl dms;
+
 	/** Add buffer stations into station map */
 	protected void addBufferStations() {
 		Float m = stations.firstKey();
@@ -69,9 +72,12 @@ public class CorridorTrip implements Constants {
 	}
 
 	/** Create a new corridor trip */
-	public CorridorTrip(Corridor c, ODPair od) throws BadRouteException {
+	public CorridorTrip(Corridor c, ODPair od, DMSImpl d)
+		throws BadRouteException
+	{
 		corridor = c;
 		od_pair = od;
+dms = d;
 		if(!c.getName().equals(od.getCorridor()))
 			throwException("Bad trip");
 		origin = c.calculateMilePoint(od.getOrigin());
@@ -144,9 +150,9 @@ public class CorridorTrip implements Constants {
 
 // FIXME: temporary debugging code
 float _h = station_time(smile, m, low, origin, low_mile);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log("route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log("dms: " + dms.getId() + "route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
 _h = station_time(smile, m, avg, low_mile, destination);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log("route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log("dms: " + dms.getId() + "route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
 // FIXME: temporary debugging code
 
 			} else
