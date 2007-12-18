@@ -291,7 +291,7 @@ public class Corridor {
 		float destination = calculateMilePoint(od.getDestination());
 		if(origin > destination) {
 			throw new BadRouteException("Origin (" + origin +
-				") > destination (" + destination + ")");
+				") > destin (" + destination + "), " + od);
 		}
 		return destination - origin;
 	}
