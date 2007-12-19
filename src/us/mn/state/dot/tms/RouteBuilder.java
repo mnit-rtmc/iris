@@ -28,6 +28,9 @@ public class RouteBuilder {
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static protected final float MAX_ORIGIN_DISTANCE = 1000;
 
+	/** Maximum number of R_Nodes to follow on a corridor */
+	static protected final int MAX_R_NODE_LIMIT = 100;
+
 	/** Name to use for debugging purposes */
 	protected final String name;
 
@@ -64,7 +67,7 @@ public class RouteBuilder {
 			throw new BadRouteException("Origin off mainline: " +
 				origin.getDescription());
 		}
-int i = 0;
+		int i = 0;
 		while(r_node != null) {
 			LocationImpl dest = (LocationImpl)r_node.getLocation();
 			R_NodeImpl next = null;
@@ -87,11 +90,12 @@ int i = 0;
 				}
 			}
 			r_node = next;
-i++;
-if(i > 100) {
-	System.err.println("Breaking r_node loop for " + name);
-	break;
-}
+			i++;
+			if(i > MAX_R_NODE_LIMIT) {
+				DMSImpl.TRAVEL_LOG.log(
+					"Breaking r_node loop for " + name);
+				break;
+			}
 		}
 	}
 
