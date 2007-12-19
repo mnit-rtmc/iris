@@ -612,11 +612,11 @@ if(route1 != null) {
 	}
 
 // FIXME: temporary debugging function
-protected void compareTravelTimes(TravelTime t0, TravelTime t1) {
+protected void compareTravelTimes(Integer dest, TravelTime t0, TravelTime t1) {
 	if(t0 != null && t1 != null) {
 		if(t0.minutes != t1.minutes) {
-			TRAVEL_LOG.log(id + " TRAVEL TIME: " + t0.minutes +
-				" <-> " + t1.minutes);
+			TRAVEL_LOG.log(id + " TRAVEL TIME TO " + dest + ": " +
+				t0.minutes + " != " + t1.minutes);
 		}
 	}
 }
@@ -632,7 +632,7 @@ protected void compareTravelTimes(TravelTime t0, TravelTime t1) {
 // FIXME: temporary debugging code
 TravelTime t0 = calculateTravelTime(dest1, dest2);
 TravelTime t1 = calculateTravelTime(r, final_dest);
-compareTravelTimes(t0, t1);
+compareTravelTimes(dest1, t0, t1);
 return t0;
 //			return calculateTravelTime(r, final_dest);
 		}
@@ -650,7 +650,7 @@ return t0;
 	// FIXME: temporary debugging code
 	TravelTime t0 = calculateTravelTime(dest2, dest2);
 	TravelTime t1 = calculateTravelTime(r, true);
-	compareTravelTimes(t0, t1);
+	compareTravelTimes(dest2, t0, t1);
 	return t0;
 }
 //			return calculateTravelTime(r, true);
