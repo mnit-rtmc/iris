@@ -64,6 +64,7 @@ public class RouteBuilder {
 			throw new BadRouteException("Origin off mainline: " +
 				origin.getDescription());
 		}
+int i = 0;
 		while(r_node != null) {
 			LocationImpl dest = (LocationImpl)r_node.getLocation();
 			R_NodeImpl next = null;
@@ -86,6 +87,11 @@ public class RouteBuilder {
 				}
 			}
 			r_node = next;
+i++;
+if(i > 100) {
+	System.err.println("Breaking r_node loop for " + name);
+	break;
+}
 		}
 	}
 
