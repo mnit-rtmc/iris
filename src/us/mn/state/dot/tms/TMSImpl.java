@@ -83,11 +83,9 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	}
 
 	/** Load the TMS root object from the ObjectVault */
-	void loadFromVault(Properties props) throws IOException,
-		ObjectVaultException, TMSException
+	void loadFromVault() throws ObjectVaultException, TMSException,
+		RemoteException
 	{
-		openVault(props);
-		openEventVault(props);
 		System.err.println( "Loading comm lines..." );
 		lines.load( CommunicationLineImpl.class, "index" );
 		System.err.println( "Loading node groups..." );
@@ -407,7 +405,9 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	}
 
 	/** Create a new TMS object */
-	TMSImpl() throws TMSException, RemoteException {
+	TMSImpl(Properties props) throws IOException, TMSException,
+		ObjectVaultException
+	{
 		super();
 		lines = new CommunicationLineList();
 		groups = new NodeGroupList();
@@ -425,6 +425,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		tours = new TourListImpl();
 		lcss = new LCSListImpl();
 		initialize();
+		openVault(props);
+		openEventVault(props);
 	}
 
 	/** Get the communication line list */

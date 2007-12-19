@@ -68,20 +68,20 @@ public class MainServer {
 		try {
 			redirectStdStreams();
 			Properties props = PropertyLoader.load(PROP_FILE);
-			RMISocketFactory.setSocketFactory(
-				new TmsSocketFactory());
-			TMSImpl tms = new TMSImpl();
-			tms.loadFromVault(props);
-			tms.scheduleJobs();
-			LoginImpl login = new LoginImpl(tms);
-			LocateRegistry.createRegistry(
-				Registry.REGISTRY_PORT);
-			Naming.bind("//localhost/login", login);
+			TMSImpl tms = new TMSImpl(props);
 			Namespace ns = new Namespace();
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
 			BaseObjectImpl.loadAll(TMSObjectImpl.store, ns);
 			TMSObjectImpl.namespace = ns;
+			RMISocketFactory.setSocketFactory(
+				new TmsSocketFactory());
+			tms.loadFromVault();
+			tms.scheduleJobs();
+			LoginImpl login = new LoginImpl(tms);
+			LocateRegistry.createRegistry(
+				Registry.REGISTRY_PORT);
+			Naming.bind("//localhost/login", login);
 			Server server = new Server(ns, props);
 			TMSObjectImpl.eventLog.add(new TMSEvent("System",
 				TMSEvent.SYSTEM_RESTARTED,
