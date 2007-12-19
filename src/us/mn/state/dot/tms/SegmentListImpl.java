@@ -273,17 +273,4 @@ class SegmentListImpl extends AbstractListImpl implements Storable {
 			elements[ i ] = (TMSObject)list.get( i );
 		return elements;
 	}
-
-	/** Print the corridor out as XML */
-	public synchronized void printXml(PrintWriter out) {
-		float mile = Float.NEGATIVE_INFINITY;
-		Iterator it = iterator();
-		while(it.hasNext()) {
-			SegmentImpl seg = (SegmentImpl)it.next();
-			if(seg instanceof StationSegmentImpl) {
-				StationSegmentImpl s = (StationSegmentImpl)seg;
-				mile = s.printXml(out, mile);
-			}
-		}
-	}
 }
