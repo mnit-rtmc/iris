@@ -25,6 +25,9 @@ import java.util.LinkedList;
  */
 public class Route implements Comparable<Route> {
 
+	/** Penalty (in goodness) for each trip in a route */
+	static protected final float TRIP_PENALTY = 0.25f;
+
 	/** Convert minutes to hours */
 	static protected float minutesToHours(float minutes) {
 		return minutes / 60;
@@ -68,9 +71,14 @@ public class Route implements Comparable<Route> {
 		return l;
 	}
 
+	/** Get the goodness rating (lower is better) */
+	public float getGoodness() {
+		return getLength() + TRIP_PENALTY * trips.size();
+	}
+
 	/** Compare to another route (for sorting) */
 	public int compareTo(Route o) {
-		return (int)Math.signum(getLength() - o.getLength());
+		return (int)Math.signum(getGoodness() - o.getGoodness());
 	}
 
 	/** Get the current travel time (in hours) */
