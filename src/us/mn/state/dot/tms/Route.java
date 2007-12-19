@@ -34,13 +34,22 @@ public class Route implements Comparable<Route> {
 	protected final LinkedList<CorridorTrip> trips =
 		new LinkedList<CorridorTrip>();
 
+	/** Number of turns in route */
+	protected int turns;
+
 	/** Create a new route */
 	public Route() {
+		turns = 0;
 	}
 
 	/** Add a corridor trip to the route */
 	public void addTrip(CorridorTrip trip) {
 		trips.add(trip);
+	}
+
+	/** Set the number of turns in the route */
+	public void setTurns(int t) {
+		turns = t;
 	}
 
 	/** Get the "only" corridor (if the route is just a single corridor) */
@@ -70,7 +79,7 @@ public class Route implements Comparable<Route> {
 	{
 		if(trips.isEmpty())
 			throw new BadRouteException("Route is empty");
-		float hours = minutesToHours(trips.size() - 1);
+		float hours = minutesToHours(turns);
 		for(CorridorTrip trip: trips)
 			hours += trip.getTravelTime(final_dest);
 		return hours;

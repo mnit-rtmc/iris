@@ -178,6 +178,14 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return isCorridorType() && !isCommonExit();
 	}
 
+	/** Check if this r_node should impose a "turn" penalty */
+	public boolean hasTurnPenalty() {
+		return (transition == TRANSITION_LOOP) ||
+			(transition == TRANSITION_LEG) ||
+			(transition == TRANSITION_HOV) ||
+			(transition == TRANSITION_FLYOVER);
+	}
+
 	/** Number of lanes */
 	protected int lanes;
 

@@ -37,10 +37,19 @@ public class ODPair {
 		return destination;
 	}
 
+	/** Is the destination a "turn" */
+	protected final boolean turn;
+
+	/** Check if the destination is a "turn" */
+	public boolean hasTurn() {
+		return turn;
+	}
+
 	/** Create a new O/D pair */
-	public ODPair(LocationImpl o, LocationImpl d) {
+	public ODPair(LocationImpl o, LocationImpl d, boolean t) {
 		origin = o;
 		destination = d;
+		turn = t;
 	}
 
 	/** Get a string representation */

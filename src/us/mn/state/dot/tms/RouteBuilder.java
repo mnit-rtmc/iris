@@ -79,7 +79,10 @@ public class RouteBuilder {
 				if(down.isSameCorridor(origin))
 					next = n;
 				else {
-					ODPair p = new ODPair(origin, dest);
+					boolean turn = r_node.hasTurnPenalty()
+						&& n.hasTurnPenalty();
+					ODPair p = new ODPair(origin, dest,
+						turn);
 					float d = c.calculateDistance(p);
 					if(distance + d < max_dist) {
 						path.add(p);
@@ -109,7 +112,7 @@ public class RouteBuilder {
 	protected void findPaths(float distance, final LocationImpl origin,
 		final LocationImpl destination)
 	{
-		ODPair od = new ODPair(origin, destination);
+		ODPair od = new ODPair(origin, destination, false);
 		Corridor c = node_map.getCorridor(od);
 		if(c != null) {
 			try {
@@ -134,10 +137,14 @@ public class RouteBuilder {
 	/** Build a route from the current path */
 	protected void buildRoute(ODPair odf) throws BadRouteException {
 		Route r = new Route();
+		int turns = 0;
 		for(ODPair od: path) {
 			Corridor c = node_map.getCorridor(od);
 			r.addTrip(new CorridorTrip(name, c, od));
+			if(od.hasTurn())
+				turns++;
 		}
+		r.setTurns(turns);
 		Corridor c = node_map.getCorridor(odf);
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
