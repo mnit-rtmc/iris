@@ -676,6 +676,13 @@ return t0;
 			t1 = tt1.format(travel1, over);
 		if(t1.length() == 0 && t2.length() == 0)
 			throw new InvalidMessageException("No travel times");
+		// FIXME: replace travel1, travel2, dest1, and dest2 with a
+		// single text MULTI string, which contains the whole message.
+		// This includes the "FREEWAY TIME TO:[nl] ..." There will also
+		// be a tag defined, [ttx], where x is the station name, for
+		// example, S551. This is not really a MULTI tag, but will be
+		// replaced by IRIS with the travel time from the sign to that
+		// station.
 		MultiString m = new MultiString();
 		m.addText("FREEWAY TIME TO:");
 		m.addLine();
