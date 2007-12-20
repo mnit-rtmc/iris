@@ -114,6 +114,7 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	public String getOperation() {
 		DeviceOperation o = owner;
 		if(o == null) {
+			// FIXME: status should be unrelated to operation
 			String s = status;
 			if(s == null)
 				return "None";

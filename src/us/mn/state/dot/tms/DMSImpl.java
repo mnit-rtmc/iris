@@ -751,8 +751,8 @@ return t0;
 			setTravelTime(composeTravelTimeMessage());
 		}
 		catch(InvalidMessageException e) {
-			setStatus(e.getMessage());
-			notifyStatus();
+			TRAVEL_LOG.log(e.getMessage());
+			clearTravelTime();
 		}
 	}
 
