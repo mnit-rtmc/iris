@@ -285,7 +285,7 @@ public class Corridor {
 		return stations;
 	}
 
-	/** Calculate the distance for the given O/D pair */
+	/** Calculate the distance for the given O/D pair (miles) */
 	public float calculateDistance(ODPair od) throws BadRouteException {
 		float origin = calculateMilePoint(od.getOrigin());
 		float destination = calculateMilePoint(od.getDestination());
