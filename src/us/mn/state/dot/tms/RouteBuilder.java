@@ -58,8 +58,8 @@ public class RouteBuilder {
 	}
 
 	/** Search for branching paths to a destination */
-	protected void searchPaths(float distance, final LocationImpl origin,
-		final LocationImpl destination) throws BadRouteException
+	protected void searchPaths(float distance, LocationImpl origin,
+		LocationImpl destination) throws BadRouteException
 	{
 		Corridor c = node_map.getCorridor(origin.getCorridor());
 		R_NodeImpl r_node = c.getNearestNode(origin);
@@ -69,29 +69,6 @@ public class RouteBuilder {
 		}
 		int i = 0;
 		while(r_node != null) {
-			LocationImpl dest = (LocationImpl)r_node.getLocation();
-			R_NodeImpl next = null;
-			for(R_NodeImpl n: r_node.getDownstream()) {
-				if(!r_node.isCorridorType())
-					continue;
-				LocationImpl down =
-					(LocationImpl)n.getLocation();
-				if(down.isSameCorridor(origin))
-					next = n;
-				else {
-					boolean turn = r_node.hasTurnPenalty()
-						&& n.hasTurnPenalty();
-					ODPair p = new ODPair(origin, dest,
-						turn);
-					float d = c.calculateDistance(p);
-					if(distance + d < max_dist) {
-						path.add(p);
-						findPaths(distance + d, down,
-							destination);
-						path.removeLast();
-					}
-				}
-			}
 			i++;
 			if(i > MAX_R_NODE_LIMIT) {
 				DMSImpl.TRAVEL_LOG.log(
@@ -99,8 +76,38 @@ public class RouteBuilder {
 					" at " + r_node.getOID());
 				break;
 			}
-			r_node = next;
+			r_node = findNextNode(c, r_node, distance, origin,
+				destination);
 		}
+	}
+
+	/** Find the next node on the corridor */
+	protected R_NodeImpl findNextNode(Corridor c, R_NodeImpl r_node,
+		float distance, LocationImpl origin, LocationImpl destination)
+		throws BadRouteException
+	{
+		LocationImpl dest = (LocationImpl)r_node.getLocation();
+		R_NodeImpl next = null;
+		for(R_NodeImpl n: r_node.getDownstream()) {
+			if(!r_node.isCorridorType())
+				continue;
+			LocationImpl down = (LocationImpl)n.getLocation();
+			if(down.isSameCorridor(origin))
+				next = n;
+			else {
+				boolean turn = r_node.hasTurnPenalty()
+					&& n.hasTurnPenalty();
+				ODPair p = new ODPair(origin, dest, turn);
+				float d = c.calculateDistance(p);
+				if(distance + d < max_dist) {
+					path.add(p);
+					findPaths(distance + d, down,
+						destination);
+					path.removeLast();
+				}
+			}
+		}
+		return next;
 	}
 
 	/** Debug a route exception */
