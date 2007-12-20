@@ -616,7 +616,8 @@ protected void compareTravelTimes(Integer dest, TravelTime t0, TravelTime t1) {
 	if(t0 != null && t1 != null) {
 		if(t0.minutes != t1.minutes) {
 			TRAVEL_LOG.log(id + " TRAVEL TIME TO " + dest + ": " +
-				t0.minutes + " != " + t1.minutes);
+				t0.minutes + " != " + t1.minutes + " (" +
+				Math.abs(t0.minutes - t1.minutes) + ")");
 		}
 	}
 }
