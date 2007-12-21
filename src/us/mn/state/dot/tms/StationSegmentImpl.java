@@ -43,35 +43,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 	/** Maximum freeway speed limit */
 	static public final int MAXIMUM_SPEED_LIMIT = 75;
 
-	/** Number of samples to average when speed is calm */
-	static public final int CALM_SAMPLES = 4;
-
-	/** Number of samples to average when speed is chaotic */
-	static public final int CHAOTIC_SAMPLES = 10;
-
-	/** Threshold for chaotic speed changes */
-	static public final int CHAOTIC_SPEED = 15;
-
-	/** Calculate the rolling average speed */
-	static protected float calculateRollingSpeed(float[] speed) {
-		float total = 0;
-		float count = 0;
-		int samples = CALM_SAMPLES;
-		for(int i = 0; i < samples; i++) {
-			float s = speed[i];
-			if(s != MISSING_DATA) {
-				total += s;
-				count += 1;
-				if(s < CHAOTIC_SPEED)
-					samples = speed.length;
-			}
-		}
-		if(count > 0)
-			return total / count;
-		else
-			return MISSING_DATA;
-	}
-
         /**
          * Create a new mainline station segment.
          * @param left flag for left-side ramps
@@ -100,8 +71,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 				e.printStackTrace();
 			}
 		}
-		for(int i = 0; i < avg_speed.length; i++)
-			avg_speed[i] = MISSING_DATA;
 	}
 
 	/** Get a String representation of the station */
@@ -196,21 +165,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 	/** Get the average station speed */
 	public int getSpeed() { return speed; }
 
-	/** Average station speed for previous ten samples */
-	protected transient float[] avg_speed = new float[CHAOTIC_SAMPLES];
-
-	/** Update average station speed with a new sample */
-	protected void updateAvgSpeed(float s) {
-		System.arraycopy(avg_speed, 0, avg_speed, 1,
-			avg_speed.length - 1);
-		avg_speed[0] = Math.min(s, speed_limit);
-	}
-
-	/** Get the average speed for travel time calculation */
-	public float getTravelSpeed() {
-		return calculateRollingSpeed(avg_speed);
-	}
-
 	/** Calculate the current station data */
 	public void calculateData() {
 		DetectorImpl[] dets = detectors;
@@ -254,7 +208,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		else flow = MISSING_DATA;
 		if(n_speed > 0) speed = Math.round(t_speed / n_speed);
 		else speed = MISSING_DATA;
-		updateAvgSpeed(speed);
 		notifyStatus();
 	}
 }

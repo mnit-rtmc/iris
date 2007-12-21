@@ -33,9 +33,6 @@ import us.mn.state.dot.vault.ObjectVaultException;
  */
 class SegmentListImpl extends AbstractListImpl implements Storable {
 
-	/** Number of bad consecutive stations to fail travel time */
-	static protected final int BAD_STATION_COUNT = 2;
-
 	/** ObjectVault table name */
 	static public final String tableName = "segment_list";
 
@@ -94,56 +91,6 @@ class SegmentListImpl extends AbstractListImpl implements Storable {
 	public synchronized SegmentImpl[] toArray() {
 		SegmentImpl[] array = new SegmentImpl[list.size()];
 		return (SegmentImpl [])list.toArray(array);
-	}
-
-	/** Return a station list */
-	protected synchronized List stationList(float upstream,
-		StationSegmentImpl downstream)
-	{
-		LinkedList l = new LinkedList();
-		SegmentImpl u = null;
-		Iterator it = list.iterator();
-		while(it.hasNext()) {
-			SegmentImpl s = (SegmentImpl)it.next();
-			if(!(s instanceof StationSegmentImpl)) continue;
-			if(s.getMile() == null) continue;
-			if(upstream > s.getMile().floatValue()) {
-				u = s;
-			} else {
-				if(l.isEmpty() && u != null) l.add(u);
-				l.add(s);
-				if(s.equals(downstream)) return l;
-			}
-		}
-		return null;
-	}
-
-	/** Check a route a too many bad consecutive stations */
-	protected boolean checkBadConsecutiveStations(List route) {
-		Iterator it = route.iterator();
-		int bad = 0;
-		while(it.hasNext()) {
-			StationSegmentImpl station =
-				(StationSegmentImpl)it.next();
-			if(station.getTravelSpeed() <= 0) {
-				it.remove();
-				bad++;
-			}
-			else bad = 0;
-			if(bad >= BAD_STATION_COUNT) return true;
-		}
-		if(route.isEmpty()) return true;
-		return false;
-	}
-
-	/** Return a station iterator */
-	public Iterator stationIterator(float upstream,
-		StationSegmentImpl downstream)
-	{
-		List route = stationList(upstream, downstream);
-		if(route == null) return null;
-		if(checkBadConsecutiveStations(route)) return null;
-		return route.iterator();
 	}
 
 	/** Get the direction of travel */
