@@ -47,6 +47,10 @@ public class MultiString implements Serializable {
 	static protected final Pattern TAG = Pattern.compile(
 		"\\[(nl|np|jl[2345])\\]");
 
+	/** Regular expression to match travel time tag */
+	static protected final Pattern TRAVEL_TAG = Pattern.compile(
+		"(.*?)\\[tt([A-Za-z0-9]+)\\]");
+
 	/** Line justification pattern */
 	static protected final Pattern JUST_PATTERN =
 		Pattern.compile("\\[jl[2345]\\]");
@@ -128,6 +132,27 @@ public class MultiString implements Serializable {
 					just = JustificationLine.parse(tag);
 			}
 		}
+	}
+
+	/** Travel time calculating callback interface */
+	public interface TravelCallback {
+		String calculateTime(String sid) throws InvalidMessageException;
+	}
+
+	/** Replace travel time tags with current travel time data */
+	public String replaceTravelTimes(TravelCallback cb)
+		throws InvalidMessageException
+	{
+		int end = 0;
+		StringBuilder _b = new StringBuilder();
+		Matcher m = TRAVEL_TAG.matcher(b);
+		while(m.find()) {
+			_b.append(m.group(1));
+			_b.append(cb.calculateTime(m.group(2)));
+			end = m.end();
+		}
+		_b.append(b.substring(end));
+		return _b.toString();
 	}
 
 	/** Is the MULTI string blank? */
