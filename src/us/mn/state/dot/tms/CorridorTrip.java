@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintStream;
-import java.util.Iterator;
 import java.util.TreeMap;
 
 /**
@@ -147,14 +146,6 @@ public class CorridorTrip implements Constants {
 					low_mile);
 				hours += station_time(smile, m, low, low_mile,
 					destination);
-
-// FIXME: temporary debugging code
-float _h = station_time(smile, m, avg, origin, low_mile);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log(name + ": avg: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
-_h = station_time(smile, m, low, low_mile, destination);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log(name + ": low: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
-// FIXME: temporary debugging code
-
 			} else
 				fmile = m;
 			low[0] = low[1];
