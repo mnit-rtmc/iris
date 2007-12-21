@@ -514,68 +514,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return maximumTripTime(end - start);
 	}
 
-	/** Calculate the travel time to the given destination station */
-	protected TravelTime calculateTravelTime(StationSegmentImpl station,
-		StationSegmentImpl station2)
-	{
-		RoadwayImpl freeway = (RoadwayImpl)location.getFreeway();
-		short freeDir = location.getFreeDir();
-		SegmentListImpl segs =
-			(SegmentListImpl)freeway.getSegmentList(freeDir);
-		if(segs == null)
-			return null;
-		float m = mile.floatValue();
-		Float end = station.getMile();
-		if(end == null)
-			return null;
-		Float end2 = station2.getMile();
-		if(end2 == null)
-			end2 = end;
-		Iterator it = segs.stationIterator(m, station);
-		if(it == null)
-			return null;
-		float hours = 0;
-		StationSegmentImpl s1 = null;
-		while(it.hasNext()) {
-			StationSegmentImpl s2 =
-				(StationSegmentImpl)it.next();
-			if(s1 != null) {
-				float h = s1.calculateTravelTime(m, s2,
-					end2.floatValue(), route1 != null);
-				if(h < 0)	// Check for MISSING_DATA
-					return null;
-				else
-					hours += h;
-			}
-			s1 = s2;
-		}
-		int minutes = (int)(hours * 60) + 1;
-		int max_min = maximumTripTime(m, end.floatValue());
-		return new TravelTime(minutes, max_min, false);
-	}
-
-	/** Calculate the travel time to the given destination station number */
-	protected TravelTime calculateOldTravelTime(Integer dest, Integer end) {
-		StationSegmentImpl station =
-			(StationSegmentImpl)statList.getElement(dest);
-		if(station == null)
-			return null;
-		StationSegmentImpl station2 = station;
-		if(end != null) {
-			StationSegment s = statList.getElement(end);
-			if(s instanceof StationSegmentImpl)
-				station2 = (StationSegmentImpl)s;
-		}
-		return calculateTravelTime(station, station2);
-	}
-
-	/** Calculate the travel time to the given destination station number */
-	protected TravelTime calculateTravelTime(Integer dest, Integer end) {
-		if(dest == null)
-			return null;
-		return calculateOldTravelTime(dest, end);
-	}
-
 	/** Calculate the travel time for the given route */
 	protected TravelTime calculateTravelTime(Route route,
 		boolean final_dest) throws InvalidMessageException
@@ -612,7 +550,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			boolean final_dest = !isSameCorridor(r, route2);
 			return calculateTravelTime(r, final_dest);
 		} else
-			return calculateTravelTime(dest1, dest2);
+			return null;
 	}
 
 	/** Calculate the travel time for the second destination */
@@ -623,7 +561,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		if(r != null)
 			return calculateTravelTime(r, true);
 		else
-			return calculateTravelTime(dest2, dest2);
+			return null;
 	}
 
 	/** Compose a travel time message */

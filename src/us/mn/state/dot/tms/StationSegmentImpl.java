@@ -102,8 +102,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		}
 		for(int i = 0; i < avg_speed.length; i++)
 			avg_speed[i] = MISSING_DATA;
-		for(int i = 0; i < low_speed.length; i++)
-			low_speed[i] = MISSING_DATA;
 	}
 
 	/** Get a String representation of the station */
@@ -213,24 +211,8 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		return calculateRollingSpeed(avg_speed);
 	}
 
-	/** Low station speed for previous ten samples */
-	protected transient float[] low_speed = new float[CHAOTIC_SAMPLES];
-
-	/** Update low station speed with a new sample */
-	protected void updateLowSpeed(float s) {
-		System.arraycopy(low_speed, 0, low_speed, 1,
-			low_speed.length - 1);
-		low_speed[0] = Math.min(s, speed_limit);
-	}
-
-	/** Get the low speed for travel time calculation */
-	public float getLowTravelSpeed() {
-		return calculateRollingSpeed(low_speed);
-	}
-
 	/** Calculate the current station data */
 	public void calculateData() {
-		float low = MISSING_DATA;
 		DetectorImpl[] dets = detectors;
 		float t_volume = 0;
 		int n_volume = 0;
@@ -262,8 +244,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 			if(f != MISSING_DATA) {
 				t_speed += f;
 				n_speed++;
-				if(low == MISSING_DATA) low = f;
-				else low = Math.min(f, low);
 			}
 		}
 		if(n_volume > 0) volume = t_volume / n_volume;
@@ -275,67 +255,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		if(n_speed > 0) speed = Math.round(t_speed / n_speed);
 		else speed = MISSING_DATA;
 		updateAvgSpeed(speed);
-		updateLowSpeed(low);
 		notifyStatus();
-	}
-
-	/** Calculate the travel time for one link */
-	protected float linkTravelTime(float start, float end, float speed) {
-		return (end - start) / speed;
-	}
-
-	/** Calculate the travel time from this station to the next */
-	public float calculateTravelTime(float start, StationSegmentImpl next,
-		float end_mile, boolean testing)
-	{
-		float hours = 0;
-		Float mile1 = mile;
-		Float mile2 = next.mile;
-		if(mile1 == null || mile2 == null)
-			return MISSING_DATA;
-		float m1 = mile1.floatValue();
-		float m2 = mile2.floatValue();
-		float md = (m2 - m1) / 3.0f;
-		float p1 = getTravelSpeed();
-		float p2 = next.getTravelSpeed();
-		if(start < m1)
-			start = m1;
-		if(start > end_mile - 1) {
-			p1 = getLowTravelSpeed();
-			p2 = next.getLowTravelSpeed();
-		}
-		if(p1 <= 0 || p2 <= 0)
-			return MISSING_DATA;
-		if(start < m1 + md) {
-			hours += linkTravelTime(start, m1 + md, p1);
-			start = m1 + md;
-		}
-		if(start > end_mile - 1) {
-			p1 = getLowTravelSpeed();
-			p2 = next.getLowTravelSpeed();
-		}
-		if(p1 <= 0 || p2 <= 0)
-			return MISSING_DATA;
-		if(start < m1 + 2 * md) {
-			hours += linkTravelTime(start, m1 + 2 * md,
-				(p1 + p2) / 2.0f);
-			start = m1 + 2 * md;
-		}
-		if(start > end_mile - 1) {
-			p1 = getLowTravelSpeed();
-			p2 = next.getLowTravelSpeed();
-		}
-		if(p1 <= 0 || p2 <= 0)
-			return MISSING_DATA;
-		if(start < m2) {
-			hours += linkTravelTime(start, m2, p2);
-		}
-		if(testing) {
-			DMSImpl.TRAVEL_LOG.log("TRAVEL TIME from: " +
-				getIndex() + ", speed: " + p1 + ", to: " +
-				next.getIndex() + ", speed: " + p2 +
-				", minutes: " + (hours * 60));
-		}
-		return hours;
 	}
 }
