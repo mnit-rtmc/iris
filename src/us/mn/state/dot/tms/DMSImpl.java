@@ -546,14 +546,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 					return null;
 				else
 					hours += h;
-
-// FIXME: temporary debugging code
-if(route1 != null) {
-	TRAVEL_LOG.log(id + ": old skool, s1: " + s1.getIndex() +
-		", s2: " + s2.getIndex() + ", mile: " + s2.getMile() +
-		", time: " + h);
-}
-
 			}
 			s1 = s2;
 		}
@@ -611,17 +603,6 @@ if(route1 != null) {
 		return false;
 	}
 
-// FIXME: temporary debugging function
-protected void compareTravelTimes(Integer dest, TravelTime t0, TravelTime t1) {
-	if(t0 != null && t1 != null) {
-		if(t0.minutes != t1.minutes) {
-			TRAVEL_LOG.log(id + " TRAVEL TIME TO " + dest + ": " +
-				t0.minutes + " != " + t1.minutes + " (" +
-				Math.abs(t0.minutes - t1.minutes) + ")");
-		}
-	}
-}
-
 	/** Calculate the travel time for the first destination */
 	protected TravelTime calculateTravelTime1()
 		throws InvalidMessageException
@@ -629,15 +610,8 @@ protected void compareTravelTimes(Integer dest, TravelTime t0, TravelTime t1) {
 		Route r = route1;
 		if(r != null) {
 			boolean final_dest = !isSameCorridor(r, route2);
-
-// FIXME: temporary debugging code
-TravelTime t0 = calculateTravelTime(dest1, dest2);
-TravelTime t1 = calculateTravelTime(r, final_dest);
-compareTravelTimes(dest1, t0, t1);
-return t0;
-//			return calculateTravelTime(r, final_dest);
-		}
-		else
+			return calculateTravelTime(r, final_dest);
+		} else
 			return calculateTravelTime(dest1, dest2);
 	}
 
@@ -647,14 +621,7 @@ return t0;
 	{
 		Route r = route2;
 		if(r != null)
-{
-	// FIXME: temporary debugging code
-	TravelTime t0 = calculateTravelTime(dest2, dest2);
-	TravelTime t1 = calculateTravelTime(r, true);
-	compareTravelTimes(dest2, t0, t1);
-	return t0;
-}
-//			return calculateTravelTime(r, true);
+			return calculateTravelTime(r, true);
 		else
 			return calculateTravelTime(dest2, dest2);
 	}
