@@ -143,16 +143,16 @@ public class CorridorTrip implements Constants {
 			if(avg[1] <= 0 || low[1] <= 0)
 				continue;
 			if(fmile != null) {
-				hours += station_time(smile, m, low, origin,
+				hours += station_time(smile, m, avg, origin,
 					low_mile);
-				hours += station_time(smile, m, avg, low_mile,
+				hours += station_time(smile, m, low, low_mile,
 					destination);
 
 // FIXME: temporary debugging code
-float _h = station_time(smile, m, low, origin, low_mile);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log(name + ": route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
-_h = station_time(smile, m, avg, low_mile, destination);
-if(_h > 0) DMSImpl.TRAVEL_LOG.log(name + ": route: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+float _h = station_time(smile, m, avg, origin, low_mile);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log(name + ": avg: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
+_h = station_time(smile, m, low, low_mile, destination);
+if(_h > 0) DMSImpl.TRAVEL_LOG.log(name + ": low: " + od_pair + ", station: " + s.getName() + ", mile: " + m + ", time: " + _h);
 // FIXME: temporary debugging code
 
 			} else
