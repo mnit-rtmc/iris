@@ -541,7 +541,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 				(StationSegmentImpl)it.next();
 			if(s1 != null) {
 				float h = s1.calculateTravelTime(m, s2,
-					end2.floatValue(), false);
+					end2.floatValue(), route1 != null);
 				if(h < 0)	// Check for MISSING_DATA
 					return null;
 				else

@@ -331,10 +331,10 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 			hours += linkTravelTime(start, m2, p2);
 		}
 		if(testing) {
-			System.err.println("TRAVEL TIME from: " + getIndex() +
-				", speed: " + p1 + ", to: " + next.getIndex() +
-				", speed: " + p2 + ", minutes: " +
-				(hours * 60));
+			DMSImpl.TRAVEL_LOG.log("TRAVEL TIME from: " +
+				getIndex() + ", speed: " + p1 + ", to: " +
+				next.getIndex() + ", speed: " + p2 +
+				", minutes: " + (hours * 60));
 		}
 		return hours;
 	}
