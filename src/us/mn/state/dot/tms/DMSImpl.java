@@ -464,13 +464,11 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	static class TravelTime {
 		public final int minutes;
 		public final int slow_min;
-		public final boolean compact;
 
 		/** Create a new travel time */
-		protected TravelTime(int m, int sm, boolean c) {
+		protected TravelTime(int m, int sm) {
 			minutes = m;
 			slow_min = sm;
-			compact = c;
 		}
 
 		/** Is the travel time over the maximum display time */
@@ -491,13 +489,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 					minutes + " minutes)");
 			}
 			String m = String.valueOf(minutes);
-			if(over && isOver()) {
-				if(compact)
-					m = String.valueOf(slow_min) + "+";
-				else
-					m = "OVER " + String.valueOf(slow_min);
-			} else if(compact)
-				m += " ";
+			if(over && isOver())
+				m = "OVER " + String.valueOf(slow_min);
 			return travel.replaceAll("%TIME", m);
 		}
 	}
@@ -522,7 +515,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			float hours = route.getTravelTime(final_dest);
 			int minutes = (int)(hours * 60) + 1;
 			int max_min = maximumTripTime(route.getLength());
-			return new TravelTime(minutes, max_min, false);
+			return new TravelTime(minutes, max_min);
 		}
 		catch(BadRouteException e) {
 			throw new InvalidMessageException("Bad route for " +
