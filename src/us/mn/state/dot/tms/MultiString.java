@@ -37,31 +37,32 @@ public class MultiString implements Serializable {
 			return UNDEFINED;
 		}
 
-		static protected JustificationLine parse(String tag) {
-			int j = Integer.parseInt(String.valueOf(tag.charAt(2)));
-			return fromInt(j);
+		static protected JustificationLine parse(String v) {
+			try {
+				int j = Integer.parseInt(v);
+				return fromInt(j);
+			}
+			catch(NumberFormatException e) {
+				return UNDEFINED;
+			}
 		}
 	}
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl[2345])\\]");
+		"\\[(nl|np|jl|tt)([A-Za-z0-9]*)\\]");
+
+	/** Regular expression to match MULTI tags */
+	static protected final Pattern TEXT_PATTERN = Pattern.compile(
+		"[ !#$%&()*+,-./0-9:;<=>?@A-Z]*");
 
 	/** Regular expression to match travel time tag */
 	static protected final Pattern TRAVEL_TAG = Pattern.compile(
 		"(.*?)\\[tt([A-Za-z0-9]+)\\]");
 
-	/** Line justification pattern */
-	static protected final Pattern JUST_PATTERN =
-		Pattern.compile("\\[jl[2345]\\]");
-
-	/** Text validation regex pattern */
-	static protected final Pattern TEXT_PATTERN =
-		Pattern.compile("[\\p{Upper}\\p{Digit}\\p{Blank}:,.;%-]*");
-
 	/** Validate message text */
 	static public boolean isValid(String s) {
-		for(String t: JUST_PATTERN.split(s)) {
+		for(String t: TAG.split(s)) {
 			Matcher m = TEXT_PATTERN.matcher(t);
 			if(!m.matches())
 				return false;
@@ -128,8 +129,10 @@ public class MultiString implements Serializable {
 				else if(tag.equals("np")) {
 					line = 0;
 					page++;
-				} else if(tag.startsWith("jl"))
-					just = JustificationLine.parse(tag);
+				} else if(tag.equals("jl")) {
+					String v = m.group(2);
+					just = JustificationLine.parse(v);
+				}
 			}
 		}
 	}
