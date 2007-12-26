@@ -413,9 +413,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 
 		/** Format travel time string */
-		protected String format(boolean over)
-			throws InvalidMessageException
-		{
+		protected String format(boolean over) {
 			if(over)
 				return "OVER " + String.valueOf(slow_min);
 			else
@@ -468,20 +466,21 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	{
 		// FIXME: this is not done yet.
 		//
-		// Use of the "OVER X" form is all or nothing for one sign.
-		// So, first we must calculate the times for each destination.
-		// Then, determine if the "OVER" form should be used. After
-		// that, replace the travel time tags with the selected values.
-		//
 		// If two or more destinations are on the same corridor, then
 		// only the last destination should be calculated with the
 		// last mile low speed rule.
 		//
 		MultiString m = new MultiString(travel);
-		MultiString.TravelCallback cb =
-			new MultiString.TravelCallback()
+		MultiString.TravelCallback cb = new MultiString.TravelCallback()
 		{
+			/* Use of the "OVER X" form is all or nothing for one
+			 * sign. So, first we must calculate the times for each
+			 * destination. Then, determine if the "OVER" form
+			 * should be used. After that, replace the travel time
+			 * tags with the selected values. */
 			protected boolean over = false;
+
+			/** Calculate the travel time to the given station */
 			public String calculateTime(String sid)
 				throws InvalidMessageException
 			{
@@ -493,10 +492,11 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 						"No route to " + sid);
 				}
 				TravelTime tt = calculateTravelTime(r, true);
-				if(tt.isOver() && !over)
-					over = true;
+				over |= tt.isOver();
 				return tt.format(over);
 			}
+
+			/** Check if the callback has changed formatting mode */
 			public boolean isChanged() {
 				return over;
 			}
