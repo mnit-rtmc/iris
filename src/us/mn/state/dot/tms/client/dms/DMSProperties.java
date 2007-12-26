@@ -32,6 +32,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 import javax.swing.SpinnerNumberModel;
@@ -39,7 +40,6 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsMessage;
 import us.mn.state.dot.tms.SortedList;
-import us.mn.state.dot.tms.StationSegment;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanList;
 import us.mn.state.dot.tms.TrafficDevice;
@@ -153,17 +153,8 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Message table component */
 	protected final JTable mess_table = new JTable();
 
-	/** Travel time destination 1 combo box */
-	protected final JComboBox dest1 = new JComboBox();
-
-	/** Travel time template string field for first destination */
-	protected final JTextField travel1 = new JTextField(22);
-
-	/** Travel Time destination 2 combo box */
-	protected final JComboBox dest2 = new JComboBox();
-
-	/** Travel time template string field for second destination */
-	protected final JTextField travel2 = new JTextField(22);
+	/** Travel time template string field */
+	protected final JTextArea travel = new JTextArea();
 
 	/** Make label */
 	protected final JLabel make = new JLabel();
@@ -309,9 +300,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Array of timing plans */
 	protected TimingPlan[] plans;
 
-	/** Station list model */
-	protected ListModel smodel;
-
 	/** Create a new DMS properties from */
 	public DMSProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
@@ -325,9 +313,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		ListModel model = tms.getCameras().getModel();
 		camera.setModel(new WrapperComboBoxModel(model));
 		mess_table.setColumnModel(DmsMessageModel.createColumnModel());
-		smodel = tms.getStations().getModel();
-		dest1.setModel(new WrapperComboBoxModel(smodel));
-		dest2.setModel(new WrapperComboBoxModel(smodel));
 		TimingPlanModel plan_model = new TimingPlanModel(
 			(TimingPlanList)tms.getTimingPlans().getList(), sign,
 			admin);
@@ -407,42 +392,19 @@ public class DMSProperties extends TrafficDeviceForm {
 		JPanel panel = new JPanel();
 		panel.setBorder(BORDER);
 		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		GridBagLayout gbag = new GridBagLayout();
-		JPanel p = new JPanel(gbag);
-		GridBagConstraints bag = new GridBagConstraints();
-		JLabel label = new JLabel("First Destination:");
-		bag.gridx = 0;
-		bag.gridy = 0;
-		gbag.setConstraints(label, bag);
-		p.add(label);
-		bag.gridx = 1;
-		gbag.setConstraints(dest1, bag);
-		dest1.setEnabled(admin);
-		p.add(dest1);
-		bag.gridx = 2;
-		gbag.setConstraints(travel1, bag);
-		travel1.setEnabled(admin);
-		p.add(travel1);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		label = new JLabel("Second Destination:");
-		gbag.setConstraints(label, bag);
-		p.add(label);
-		bag.gridx = 1;
-		gbag.setConstraints(dest2, bag);
-		dest2.setEnabled(admin);
-		p.add(dest2);
-		bag.gridx = 2;
-		gbag.setConstraints(travel2, bag);
-		travel2.setEnabled(admin);
-		p.add(travel2);
-		panel.add(p);
+		Box box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
+		box.add(new JLabel("Travel template:"));
+		box.add(travel);
+		box.add(Box.createHorizontalGlue());
+		travel.setEnabled(admin);
+		panel.add(box);
 		panel.add(Box.createVerticalStrut(VGAP));
 		plan_table.setAutoCreateColumnsFromModel(false);
 		plan_table.setPreferredScrollableViewportSize(
 			new Dimension(300, 200));
 		JScrollPane scroll = new JScrollPane(plan_table);
-		Box box = Box.createHorizontalBox();
+		box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(scroll);
 		box.add(Box.createHorizontalGlue());
@@ -780,16 +742,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		if(c != null)
 			camera.setSelectedItem(c.getId());
 		Float mile = sign.getMile();
-		StationSegment station = sign.getDest1();
-		Integer d1 = null;
-		if(station != null)
-			d1 = station.getIndex();
-		station = sign.getDest2();
-		Integer d2 = null;
-		if(station != null)
-			d2 = station.getIndex();
-		String t1 = sign.getTravel1();
-		String t2 = sign.getTravel2();
+		String t = sign.getTravel();
 		Color color = Color.GRAY;
 		if(sign.isActive())
 			color = OK;
@@ -827,16 +780,7 @@ public class DMSProperties extends TrafficDeviceForm {
 			milePoint.setText("");
 		else
 			milePoint.setText(mile.toString());
-		if(d1 == null)
-			dest1.setSelectedIndex(-1);
-		else
-			setSelectedDestination(dest1, d1.intValue());
-		if(d2 == null)
-			dest2.setSelectedIndex(-1);
-		else
-			setSelectedDestination(dest2, d2.intValue());
-		travel1.setText(t1);
-		travel2.setText(t2);
+		travel.setText(t);
 	}
 
 	/** Get the station index for the given item */
@@ -849,17 +793,6 @@ public class DMSProperties extends TrafficDeviceForm {
 			}
 		}
 		return -1;
-	}
-
-	/** Set the selected destination station */
-	protected void setSelectedDestination(JComboBox box, int station) {
-		for(int i = 0; i < smodel.getSize(); i++) {
-			Object item = smodel.getElementAt(i);
-			if(station == stationIndex(item)) {
-				box.setSelectedItem(item);
-				return;
-			}
-		}
 	}
 
 	/** Refresh the status of the object */
@@ -920,16 +853,7 @@ public class DMSProperties extends TrafficDeviceForm {
 			int[] table = b_table.getTableData();
 			sign.setBrightnessTable(table);
 		}
-		Integer d1 = new Integer(stationIndex(dest1.getSelectedItem()));
-		if(d1.intValue() <= 0)
-			d1 = null;
-		sign.setDest1(d1);
-		sign.setTravel1(travel1.getText());
-		Integer d2 = new Integer(stationIndex(dest2.getSelectedItem()));
-		if(d2.intValue() <= 0)
-			d2 = null;
-		sign.setDest2(d2);
-		sign.setTravel2(travel2.getText());
+		sign.setTravel(travel.getText());
 		sign.notifyUpdate();
 	}
 }

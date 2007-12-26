@@ -108,12 +108,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		deviceList.add(id, this);
 		resetTransients();
 		message = createBlankMessage(NO_OWNER);
+		s_routes = new HashMap<String, Route>();
 	}
 
 	/** Constructor needed for ObjectVault */
 	protected DMSImpl(FieldMap fields) throws RemoteException {
 		super(fields);
 		message = createBlankMessage(NO_OWNER);
+		s_routes = new HashMap<String, Route>();
 	}
 
 	/** Get the DMS poller */
@@ -276,88 +278,22 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		mile = m;
 	}
 
-	/** First travel time destination station index */
-	protected Integer dest1;
+	/** Travel time message template */
+	protected String travel;
 
-	/** Get the first travel time destination station */
-	public StationSegment getDest1() {
-		return statList.getElement(dest1);
+	/** Get the travel time message template */
+	public String getTravel() {
+		return travel;
 	}
 
-	/** Set the first travel time destination station */
-	public synchronized void setDest1(Integer i) throws TMSException {
-		if(i == null) {
-			if(dest1 == null)
-				return;
-		} else {
-			if(i.equals(dest1))
-				return;
-			if(statList.getElement(i) == null)
-				throw new ChangeVetoException(
-					"Invalid station: " + i);
-		}
-		store.update(this, "dest1", i);
-		dest1 = i;
-		route1 = null;
-	}
-
-	/** First travel time message template */
-	protected String travel1;
-
-	/** Get the first travel time message template */
-	public String getTravel1() {
-		return travel1;
-	}
-
-	/** Set the first travel time message template */
-	public synchronized void setTravel1(String t) throws TMSException {
-		if(t.equals(travel1))
+	/** Set the travel time message template */
+	public synchronized void setTravel(String t) throws TMSException {
+		if(t.equals(travel))
 			return;
 		validateTravel(t);
-		store.update(this, "travel1", t);
-		travel1 = t;
-	}
-
-	/** Second travel time destination station index */
-	protected Integer dest2;
-
-	/** Get the second travel time destination station */
-	public StationSegment getDest2() {
-		return statList.getElement(dest2);
-	}
-
-	/** Set the second travel time destination station */
-	public synchronized void setDest2(Integer i) throws TMSException {
-		if(i == null) {
-			if(dest2 == null)
-				return;
-		} else {
-			if(i.equals(dest2))
-				return;
-			if(statList.getElement(i) == null)
-				throw new ChangeVetoException(
-					"Invalid station: " + i);
-		}
-		store.update(this, "dest2", i);
-		dest2 = i;
-		route2 = null;
-	}
-
-	/** Second travel time message template */
-	protected String travel2;
-
-	/** Get the second travel time message template */
-	public String getTravel2() {
-		return travel2;
-	}
-
-	/** Set the second travel time message template */
-	public synchronized void setTravel2(String t) throws TMSException {
-		if(t.equals(travel2))
-			return;
-		validateTravel(t);
-		store.update(this, "travel2", t);
-		travel2 = t;
+		store.update(this, "travel", t);
+		travel = t;
+		s_routes.clear();
 	}
 
 	/** Array of timing plans for this sign */
@@ -477,21 +413,13 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 
 		/** Format travel time string */
-		protected String format(String travel, boolean over)
+		protected String format(boolean over)
 			throws InvalidMessageException
 		{
-			if(travel.equals(""))
-				return "";
-			if(travel.indexOf("%TIME") < 0)
-				throw new InvalidMessageException(travel);
-			if(minutes <= 0) {
-				throw new InvalidMessageException("BAD TIME (" +
-					minutes + " minutes)");
-			}
-			String m = String.valueOf(minutes);
-			if(over && isOver())
-				m = "OVER " + String.valueOf(slow_min);
-			return travel.replaceAll("%TIME", m);
+			if(over)
+				return "OVER " + String.valueOf(slow_min);
+			else
+				return String.valueOf(minutes);
 		}
 	}
 
@@ -534,60 +462,49 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return false;
 	}
 
-	/** Calculate the travel time for the first destination */
-	protected TravelTime calculateTravelTime1()
-		throws InvalidMessageException
-	{
-		Route r = route1;
-		if(r != null) {
-			boolean final_dest = !isSameCorridor(r, route2);
-			return calculateTravelTime(r, final_dest);
-		} else
-			return null;
-	}
-
-	/** Calculate the travel time for the second destination */
-	protected TravelTime calculateTravelTime2()
-		throws InvalidMessageException
-	{
-		Route r = route2;
-		if(r != null)
-			return calculateTravelTime(r, true);
-		else
-			return null;
-	}
-
 	/** Compose a travel time message */
 	protected String composeTravelTimeMessage()
 		throws InvalidMessageException
 	{
-		TravelTime tt1 = calculateTravelTime1();
-		TravelTime tt2 = calculateTravelTime2();
-		boolean over = true;
-		String t2 = "";
-		if(tt2 != null) {
-			over = tt2.isOver();
-			t2 = tt2.format(travel2, over);
-		}
-		String t1 = "";
-		if(tt1 != null)
-			t1 = tt1.format(travel1, over);
-		if(t1.length() == 0 && t2.length() == 0)
-			throw new InvalidMessageException("No travel times");
-		// FIXME: replace travel1, travel2, dest1, and dest2 with a
-		// single text MULTI string, which contains the whole message.
-		// This includes the "FREEWAY TIME TO:[nl] ..." There will also
-		// be a tag defined, [ttx], where x is the station name, for
-		// example, S551. This is not really a MULTI tag, but will be
-		// replaced by IRIS with the travel time from the sign to that
-		// station.
-		MultiString m = new MultiString();
-		m.addText("FREEWAY TIME TO:");
-		m.addLine();
-		m.addText(t1);
-		m.addLine();
-		m.addText(t2);
-		return m.toString();
+		// FIXME: this is not done yet.
+		//
+		// Use of the "OVER X" form is all or nothing for one sign.
+		// So, first we must calculate the times for each destination.
+		// Then, determine if the "OVER" form should be used. After
+		// that, replace the travel time tags with the selected values.
+		//
+		// If two or more destinations are on the same corridor, then
+		// only the last destination should be calculated with the
+		// last mile low speed rule.
+		//
+		MultiString m = new MultiString(travel);
+		MultiString.TravelCallback cb =
+			new MultiString.TravelCallback()
+		{
+			protected boolean over = false;
+			public String calculateTime(String sid)
+				throws InvalidMessageException
+			{
+				if(!s_routes.containsKey(sid))
+					s_routes.put(sid, createRoute(sid));
+				Route r = s_routes.get(sid);
+				if(r == null) {
+					throw new InvalidMessageException(
+						"No route to " + sid);
+				}
+				TravelTime tt = calculateTravelTime(r, true);
+				if(tt.isOver() && !over)
+					over = true;
+				return tt.format(over);
+			}
+			public boolean isChanged() {
+				return over;
+			}
+		};
+		String t = m.replaceTravelTimes(cb);
+		if(cb.isChanged())
+			t = m.replaceTravelTimes(cb);
+		return t;
 	}
 
 	/** Check if an interval is within an active timing plan */
@@ -614,11 +531,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return false;
 	}
 
-	/** Route to the first destination */
-	protected transient Route route1 = null;
-
-	/** Route to the second destination */
-	protected transient Route route2 = null;
+	/** Mapping of station IDs to routes */
+	protected transient HashMap<String, Route> s_routes;
 
 	/** Create one route to a travel time destination */
 	protected Route createRoute(StationImpl s) {
@@ -629,18 +543,17 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		SortedSet<Route> routes = builder.findRoutes(location, dest);
 		if(routes.size() > 0)
 			return routes.first();
-		return null;
+		else
+			return null;
 	}
 
 	/** Create one route to a travel time destination */
-	protected Route createRoute(Integer dest) {
-		if(dest != null) {
-			StationImpl s = (StationImpl)statMap.getElement(
-				"S" + dest);
-			if(s != null)
-				return createRoute(s);
-		}
-		return null;
+	protected Route createRoute(String sid) {
+		StationImpl s = (StationImpl)statMap.getElement(sid);
+		if(s != null)
+			return createRoute(s);
+		else
+			return null;
 	}
 
 	/** Update the travel times for this sign */
@@ -656,17 +569,10 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Update the travel times for this sign */
 	public void updateTravelTimes(int interval) {
-		if(isWithin(interval)) {
-			if(isTesting(interval)) {
-				if(route1 == null && route2 == null) {
-					route1 = createRoute(dest1);
-					route2 = createRoute(dest2);
-				}
-			}
+		if(isWithin(interval))
 			updateTravelTime();
-		} else {
-			route1 = null;
-			route2 = null;
+		else {
+			s_routes.clear();
 			clearTravelTime();
 		}
 	}

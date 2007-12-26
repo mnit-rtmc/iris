@@ -136,7 +136,12 @@ public class MultiString implements Serializable {
 
 	/** Travel time calculating callback interface */
 	public interface TravelCallback {
+
+		/** Calculate the travel time to a destination */
 		String calculateTime(String sid) throws InvalidMessageException;
+
+		/** Check if the callback changed state */
+		boolean isChanged();
 	}
 
 	/** Replace travel time tags with current travel time data */

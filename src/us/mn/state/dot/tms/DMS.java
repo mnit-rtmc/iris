@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2007  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,29 +44,11 @@ public interface DMS extends TrafficDevice {
 	/** Set the miles downstream of reference point */
 	public void setMile(Float m) throws TMSException, RemoteException;
 
-	/** Get the first travel time destination station */
-	public StationSegment getDest1() throws RemoteException;
+	/** Get the travel time message template */
+	public String getTravel() throws RemoteException;
 
-	/** Set the first travel time destination station */
-	public void setDest1(Integer i) throws TMSException, RemoteException;
-
-	/** Get the first travel time message template */
-	public String getTravel1() throws RemoteException;
-
-	/** Set the first travel time message template */
-	public void setTravel1(String t) throws TMSException, RemoteException;
-
-	/** Get the second travel time destination station */
-	public StationSegment getDest2() throws RemoteException;
-
-	/** Set the second travel time destination station */
-	public void setDest2(Integer i) throws TMSException, RemoteException;
-
-	/** Get the second travel time message template */
-	public String getTravel2() throws RemoteException;
-
-	/** Set the second travel time message template */
-	public void setTravel2(String t) throws TMSException, RemoteException;
+	/** Set the travel time message template */
+	public void setTravel(String t) throws TMSException, RemoteException;
 
 	/** Add a new timing plan to the sign */
 	public void addTimingPlan(int period) throws TMSException,
