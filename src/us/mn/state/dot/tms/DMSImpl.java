@@ -396,52 +396,19 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return false;
 	}
 
-	/** Inner class for holding a calculated travel time */
-	static class TravelTime {
-		public final int minutes;
-		public final int slow_min;
-
-		/** Create a new travel time */
-		protected TravelTime(int m, int sm) {
-			minutes = m;
-			slow_min = sm;
-		}
-
-		/** Is the travel time over the maximum display time */
-		public boolean isOver() {
-			return minutes > slow_min;
-		}
-
-		/** Format travel time string */
-		protected String format(boolean over) {
-			if(over)
-				return "OVER " + String.valueOf(slow_min);
-			else
-				return String.valueOf(minutes);
-		}
-	}
-
 	/** Calculate the maximum trip time to display on the sign */
 	static protected int maximumTripTime(float distance) {
-		int min_speed = MINIMUM_TRIP_SPEED;
-		float hours = distance / min_speed;
+		float hours = distance / MINIMUM_TRIP_SPEED;
 		return 5 * (int)(hours * 60 / 5 + 1); // Round up next 5 min
 	}
 
-	/** Calculate the maximum trip time to display on the sign */
-	static protected int maximumTripTime(float start, float end) {
-		return maximumTripTime(end - start);
-	}
-
 	/** Calculate the travel time for the given route */
-	protected TravelTime calculateTravelTime(Route route,
-		boolean final_dest) throws InvalidMessageException
+	protected int calculateTravelTime(Route route, boolean final_dest)
+		throws InvalidMessageException
 	{
 		try {
 			float hours = route.getTravelTime(final_dest);
-			int minutes = (int)(hours * 60) + 1;
-			int max_min = maximumTripTime(route.getLength());
-			return new TravelTime(minutes, max_min);
+			return (int)(hours * 60) + 1;
 		}
 		catch(BadRouteException e) {
 			throw new InvalidMessageException("Bad route for " +
@@ -462,15 +429,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Check if the given route is a final destination */
 	protected boolean isFinalDest(Route r) {
-		boolean f = true;
 		for(Route ro: s_routes.values()) {
 			if(ro != r && isSameCorridor(r, ro) &&
 				r.getLength() < ro.getLength())
 			{
-				f = false;
+				return false;
 			}
 		}
-		return f;
+		return true;
 	}
 
 	/** Compose a travel time message */
@@ -497,10 +463,16 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 						"No route to " + sid);
 				}
 				boolean final_dest = isFinalDest(r);
-				TravelTime tt = calculateTravelTime(r,
-					final_dest);
-				over |= tt.isOver();
-				return tt.format(over);
+				int m = calculateTravelTime(r, final_dest);
+				int slow = maximumTripTime(r.getLength());
+				if(m > slow) {
+					over = true;
+					m = slow;
+				}
+				if(over)
+					return "OVER " + String.valueOf(m);
+				else
+					return String.valueOf(m);
 			}
 
 			/** Check if the callback has changed formatting mode */
