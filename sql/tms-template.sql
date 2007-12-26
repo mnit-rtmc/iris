@@ -306,10 +306,7 @@ SET SESSION AUTHORIZATION 'tms';
 CREATE TABLE dms (
     camera integer NOT NULL,
     mile real NOT NULL,
-    dest1 integer NOT NULL,
-    travel1 text NOT NULL,
-    dest2 integer NOT NULL,
-    travel2 text NOT NULL
+    travel text NOT NULL,
 )
 INHERITS (traffic_device);
 
@@ -2009,7 +2006,7 @@ CREATE VIEW location_view AS
 --
 
 CREATE VIEW dms_view AS
-    SELECT d.id, d.notes, d.mile, d.dest1, d.travel1, d.dest2, d.travel2, l_view.northing, l_view.north_off, l_view.easting, l_view.east_off, l_view.freeway, l_view.free_dir, l_view.cross_street, l_view.cross_dir FROM dms d, location_view l_view WHERE (d."location" = l_view.vault_oid);
+    SELECT d.id, d.notes, d.mile, d.travel, l_view.northing, l_view.north_off, l_view.easting, l_view.east_off, l_view.freeway, l_view.free_dir, l_view.cross_street, l_view.cross_dir FROM dms d, location_view l_view WHERE (d."location" = l_view.vault_oid);
 
 
 --
