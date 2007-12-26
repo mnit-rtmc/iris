@@ -460,16 +460,23 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return false;
 	}
 
+	/** Check if the given route is a final destination */
+	protected boolean isFinalDest(Route r) {
+		boolean f = true;
+		for(Route ro: s_routes.values()) {
+			if(ro != r && isSameCorridor(r, ro) &&
+				r.getLength() < ro.getLength())
+			{
+				f = false;
+			}
+		}
+		return f;
+	}
+
 	/** Compose a travel time message */
 	protected String composeTravelTimeMessage()
 		throws InvalidMessageException
 	{
-		// FIXME: this is not done yet.
-		//
-		// If two or more destinations are on the same corridor, then
-		// only the last destination should be calculated with the
-		// last mile low speed rule.
-		//
 		MultiString m = new MultiString(travel);
 		MultiString.TravelCallback cb = new MultiString.TravelCallback()
 		{
@@ -484,14 +491,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			public String calculateTime(String sid)
 				throws InvalidMessageException
 			{
-				if(!s_routes.containsKey(sid))
-					s_routes.put(sid, createRoute(sid));
-				Route r = s_routes.get(sid);
+				Route r = lookupRoute(sid);
 				if(r == null) {
 					throw new InvalidMessageException(
 						"No route to " + sid);
 				}
-				TravelTime tt = calculateTravelTime(r, true);
+				boolean final_dest = isFinalDest(r);
+				TravelTime tt = calculateTravelTime(r,
+					final_dest);
 				over |= tt.isOver();
 				return tt.format(over);
 			}
@@ -554,6 +561,13 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return createRoute(s);
 		else
 			return null;
+	}
+
+	/** Lookup a route by station ID */
+	protected Route lookupRoute(String sid) {
+		if(!s_routes.containsKey(sid))
+			s_routes.put(sid, createRoute(sid));
+		return s_routes.get(sid);
 	}
 
 	/** Update the travel times for this sign */
