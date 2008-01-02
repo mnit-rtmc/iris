@@ -79,9 +79,7 @@ public class EventVault {
 		password = pwd;
 		openConnection();
 		try {
-			statement = connection.createStatement(
-				ResultSet.TYPE_SCROLL_INSENSITIVE,
-				ResultSet.CONCUR_READ_ONLY);
+			statement = connection.createStatement();
 		} catch(SQLException sqle) {
 			throw new EventVaultException(sqle);
 		}
