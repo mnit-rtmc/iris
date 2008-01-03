@@ -675,8 +675,6 @@ CREATE TABLE dms_message (
     CONSTRAINT dms_message_priority CHECK (((priority >= 1) AND (priority <= 99)))
 );
 
-GRANT SELECT ON dms_message TO PUBLIC;
-
 CREATE TABLE road_modifier (
     id smallint NOT NULL,
     modifier text NOT NULL,
@@ -905,6 +903,13 @@ CREATE VIEW dms_view AS
 	LEFT JOIN camera c ON d.camera = c.vault_oid;
 
 GRANT SELECT ON dms_view TO PUBLIC;
+
+CREATE VIEW dms_message_view AS
+	SELECT d.id AS dms, m.dms IS NULL AS global,
+	line, message, abbrev, priority
+	FROM dms d, dms_message m WHERE d.id = m.dms OR m.dms IS NULL;
+
+GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
 	SELECT m.vault_oid, m.id, m.notes, d."index" AS green_det,
