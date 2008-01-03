@@ -73,8 +73,9 @@ public class RouteBuilder {
 			if(i > MAX_R_NODE_LIMIT) {
 				DMSImpl.TRAVEL_LOG.log(
 					"Breaking r_node loop for " + name +
-					" at " + r_node.getOID() + ", dist: " +
-					distance);
+					" at " + r_node.getOID() + ", o: " +
+					origin.getDescription() + ", d: " +
+					destination.getDescription());
 				break;
 			}
 			r_node = findNextNode(c, r_node, distance, origin,
