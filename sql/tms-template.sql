@@ -675,6 +675,8 @@ CREATE TABLE dms_message (
     CONSTRAINT dms_message_priority CHECK (((priority >= 1) AND (priority <= 99)))
 );
 
+GRANT SELECT ON dms_message TO PUBLIC;
+
 CREATE TABLE road_modifier (
     id smallint NOT NULL,
     modifier text NOT NULL,
@@ -867,15 +869,6 @@ CREATE VIEW controller_alarm_view AS
 REVOKE ALL ON TABLE controller_alarm_view FROM PUBLIC;
 GRANT SELECT ON TABLE controller_alarm_view TO PUBLIC;
 
-CREATE VIEW green_detector_view AS
-	SELECT d."index" AS det_no, l.fwy AS freeway, l.free_dir,
-	l.xst AS cross_street, l.cross_dir, ramp_meter.id AS ramp_id
-	FROM detector d LEFT JOIN location_view l ON d."location" = l.vault_oid
-	JOIN ramp_meter ON d.vault_oid = ramp_meter.detector;
-
-REVOKE ALL ON TABLE green_detector_view FROM PUBLIC;
-GRANT SELECT ON TABLE green_detector_view TO PUBLIC;
-
 CREATE VIEW r_node_view AS
 	SELECT n.vault_oid, freeway, free_dir, cross_mod, cross_street,
 	cross_dir, nt.name AS node_type, n.pickable, tr.name AS transition,
@@ -914,12 +907,14 @@ CREATE VIEW dms_view AS
 GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
-	SELECT m.vault_oid, m.id, m.notes, m.detector, m."controlMode",
-	m."singleRelease", m."storage", m."maxWait", c.id AS camera,
-	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	SELECT m.vault_oid, m.id, m.notes, d."index" AS green_det,
+	m."controlMode" AS control_mode, m."singleRelease" AS single_release,
+	m."storage", m."maxWait" AS max_wait, c.id AS camera,
+	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM ramp_meter m
 	JOIN location_view l ON m."location" = l.vault_oid
+	LEFT JOIN detector d ON m.detector = d.vault_oid
 	LEFT JOIN camera c ON m.camera = c.vault_oid;
 
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
