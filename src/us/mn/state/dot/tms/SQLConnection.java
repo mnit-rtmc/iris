@@ -32,7 +32,7 @@ public class SQLConnection {
 
 	/** Pattern to match for a SQL update value */
 	static protected final Pattern SQL_VALUE =
-		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^'\\[\\]]]*");
+		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^'\\\\]]*");
 
 	/** Validate a SQL update value */
 	static protected void validateSql(String sql)
