@@ -459,8 +459,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			{
 				Route r = lookupRoute(sid);
 				if(r == null) {
-					throw new InvalidMessageException(
-						"No route to " + sid);
+					throw new InvalidMessageException(id +
+						": NO ROUTE TO " + sid);
 				}
 				boolean final_dest = isFinalDest(r);
 				int m = calculateTravelTime(r, final_dest);
