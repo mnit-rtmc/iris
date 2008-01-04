@@ -92,7 +92,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	static protected final int MAX_ROUTE_LEGS = 8;
 
 	/** Maximum route distance */
-	static protected final int MAX_ROUTE_DISTANCE = 15;
+	static protected final int MAX_ROUTE_DISTANCE = 16;
 
 	/** Notify all observers for an update */
 	public void notifyUpdate() {
