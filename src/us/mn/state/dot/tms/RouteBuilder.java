@@ -64,22 +64,29 @@ public class RouteBuilder {
 		Corridor c = node_map.getCorridor(origin.getCorridor());
 		R_NodeImpl r_node = c.getNearestNode(origin);
 		if(r_node.metersTo(origin) > MAX_ORIGIN_DISTANCE) {
-			throw new BadRouteException("Origin off mainline: " +
+			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
 				origin.getDescription());
 		}
 		int i = 0;
 		while(r_node != null) {
-			LocationImpl _l = (LocationImpl)r_node.getLocation();
-			DMSImpl.TRAVEL_LOG.log(name + ": search corridor " +
-				c.getName() + " (" + i + ") " +
-				_l.getDescription());
+			LocationImpl dest = (LocationImpl)r_node.getLocation();
+			DMSImpl.TRAVEL_LOG.log(name + ": SEARCH CORRIDOR " +
+				c.getName() + " (" + i + ", " + distance +
+				" miles) " + dest.getDescription() + ", d: " +
+				destination.getDescription());
 			i++;
 			if(i > MAX_R_NODE_LIMIT) {
-				DMSImpl.TRAVEL_LOG.log(
-					"Breaking r_node loop for " + name +
-					" at " + r_node.getOID() + ", o: " +
-					origin.getDescription() + ", d: " +
-					destination.getDescription());
+				DMSImpl.TRAVEL_LOG.log(name +
+					": BREAKING R_NODE LOOP AT " +
+					r_node.getOID());
+				break;
+			}
+			distance += c.calculateDistance(
+				new ODPair(origin, dest, false));
+			if(distance > max_dist) {
+				DMSImpl.TRAVEL_LOG.log(name +
+					": DISTANCE EXCEEDED AT " +
+					r_node.getOID());
 				break;
 			}
 			r_node = findNextNode(c, r_node, distance, origin,
@@ -103,14 +110,9 @@ public class RouteBuilder {
 			else {
 				boolean turn = r_node.hasTurnPenalty()
 					&& n.hasTurnPenalty();
-				ODPair p = new ODPair(origin, dest, turn);
-				float d = c.calculateDistance(p);
-				if(distance + d < max_dist) {
-					path.add(p);
-					findPaths(distance + d, down,
-						destination);
-					path.removeLast();
-				}
+				path.add(new ODPair(origin, dest, turn));
+				findPaths(distance, down, destination);
+				path.removeLast();
 			}
 		}
 		return next;
@@ -118,7 +120,7 @@ public class RouteBuilder {
 
 	/** Debug a route exception */
 	protected void debugRouteException(BadRouteException e) {
-		DMSImpl.TRAVEL_LOG.log(name + ": bad route: " + e.getMessage());
+		DMSImpl.TRAVEL_LOG.log(name + ": BAD ROUTE: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination */
@@ -161,6 +163,10 @@ public class RouteBuilder {
 		Corridor c = node_map.getCorridor(odf);
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
+		DMSImpl.TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
+			odf.getDestination().getDescription() + ", " +
+			r.getLength() + " miles, " + r.getTurns() +
+			" turns, goodness: " + r.getGoodness());
 	}
 
 	/** Find all the routes from an origin to a destination */

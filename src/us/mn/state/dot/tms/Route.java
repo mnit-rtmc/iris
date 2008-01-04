@@ -55,6 +55,11 @@ public class Route implements Comparable<Route> {
 		turns = t;
 	}
 
+	/** Get the number of turns in the route */
+	public int getTurns() {
+		return turns;
+	}
+
 	/** Get the "only" corridor (if the route is just a single corridor) */
 	public Corridor getOnlyCorridor() {
 		if(trips.size() == 1)
