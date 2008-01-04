@@ -57,8 +57,8 @@ public class RouteBuilder {
 		max_dist = d;
 	}
 
-	/** Search for branching paths to a destination */
-	protected void searchPaths(float distance, LocationImpl origin,
+	/** Search a corridor for branching paths to a destination */
+	protected void searchCorridor(float distance, LocationImpl origin,
 		LocationImpl destination) throws BadRouteException
 	{
 		Corridor c = node_map.getCorridor(origin.getCorridor());
@@ -69,6 +69,10 @@ public class RouteBuilder {
 		}
 		int i = 0;
 		while(r_node != null) {
+			LocationImpl _l = (LocationImpl)r_node.getLocation();
+			DMSImpl.TRAVEL_LOG.log(name + ": search corridor " +
+				c.getName() + " (" + i + ") " +
+				_l.getDescription());
 			i++;
 			if(i > MAX_R_NODE_LIMIT) {
 				DMSImpl.TRAVEL_LOG.log(
@@ -135,7 +139,7 @@ public class RouteBuilder {
 		}
 		if(path.size() < legs) {
 			try {
-				searchPaths(distance, origin, destination);
+				searchCorridor(distance, origin, destination);
 			}
 			catch(BadRouteException e) {
 				debugRouteException(e);
