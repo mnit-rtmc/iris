@@ -69,7 +69,7 @@ abstract public class MessagePoller extends Thread {
 	public void addOperation(Operation o) {
 		if(queue.isClogged()) {
 			if(o.getPriority() >= Operation.DEVICE_DATA) {
-				System.err.println("Poller DROPPING: " + o);
+				POLL_LOG.log(getName() + ", DROPPING: " + o);
 				return;
 			}
 		}
@@ -142,7 +142,7 @@ abstract public class MessagePoller extends Thread {
 			else
 				queue.add(o);
 			long el = sample_load(start);
-			POLL_LOG.log(getName() + ": " + oname +
+			POLL_LOG.log(getName() + ", " + oname +
 				" elapsed: " + el);
 		}
 	}
