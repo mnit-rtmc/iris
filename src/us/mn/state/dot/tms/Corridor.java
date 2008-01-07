@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -296,17 +296,15 @@ public class Corridor {
 		return destination - origin;
 	}
 
-	/** Get the nearest node to the given location */
-	public synchronized R_NodeImpl getNearestNode(LocationImpl loc) {
-		R_NodeImpl nearest = null;
-		double n_meters = 0;
-		for(R_NodeImpl r_node: getNodes()) {
-			double m = r_node.metersTo(loc);
-			if(nearest == null || m < n_meters) {
-				nearest = r_node;
-				n_meters = m;
-			}
+	/** Find the nearest node downstream from the given location */
+	public synchronized R_NodeImpl findDownstreamNode(LocationImpl loc)
+		throws BadRouteException
+	{
+		float m = calculateMilePoint(loc);
+		for(Float mile: n_points.keySet()) {
+			if(mile > m)
+				return n_points.get(mile);
 		}
-		return nearest;
+		throw new BadRouteException("No downstream nodes");
 	}
 }
