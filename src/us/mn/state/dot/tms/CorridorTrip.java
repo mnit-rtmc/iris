@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ public class CorridorTrip implements Constants {
 	static protected final float LOW_SPEED_DISTANCE = 1.0f;
 
 	/** Maximum allowed length of a travel time link (miles) */
-	static protected final float MAX_LINK_LENGTH = 0.5f;
+	static protected final float MAX_LINK_LENGTH = 0.6f;
 
 	/** Name to use for debugging purposes */
 	protected final String name;
