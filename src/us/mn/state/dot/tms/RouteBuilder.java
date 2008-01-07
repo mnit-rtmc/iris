@@ -70,12 +70,11 @@ public class RouteBuilder {
 		int i = 0;
 		while(r_node != null) {
 			LocationImpl dest = (LocationImpl)r_node.getLocation();
-			float dist = distance + c.calculateDistance(
-				new ODPair(origin, dest, false));
-			DMSImpl.TRAVEL_LOG.log(name + ": SEARCH CORRIDOR " +
-				c.getName() + " (" + i + ", " + dist +
-				" miles) " + dest.getDescription() + ", d: " +
-				destination.getDescription());
+			ODPair od = new ODPair(origin, dest, false);
+			float dist = distance + c.calculateDistance(od);
+			DMSImpl.TRAVEL_LOG.log(name + ": SEARCH FOR " +
+				destination.getDescription() + " (" +
+				i + ", " + dist + " miles) " + od);
 			if(dist > max_dist) {
 				DMSImpl.TRAVEL_LOG.log(name +
 					": DISTANCE EXCEEDED AT " +
