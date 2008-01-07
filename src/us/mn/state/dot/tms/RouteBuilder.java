@@ -70,10 +70,18 @@ public class RouteBuilder {
 		int i = 0;
 		while(r_node != null) {
 			LocationImpl dest = (LocationImpl)r_node.getLocation();
+			float dist = distance + c.calculateDistance(
+				new ODPair(origin, dest, false));
 			DMSImpl.TRAVEL_LOG.log(name + ": SEARCH CORRIDOR " +
-				c.getName() + " (" + i + ", " + distance +
+				c.getName() + " (" + i + ", " + dist +
 				" miles) " + dest.getDescription() + ", d: " +
 				destination.getDescription());
+			if(dist > max_dist) {
+				DMSImpl.TRAVEL_LOG.log(name +
+					": DISTANCE EXCEEDED AT " +
+					r_node.getOID());
+				break;
+			}
 			i++;
 			if(i > MAX_R_NODE_LIMIT) {
 				DMSImpl.TRAVEL_LOG.log(name +
@@ -81,15 +89,7 @@ public class RouteBuilder {
 					r_node.getOID());
 				break;
 			}
-			distance += c.calculateDistance(
-				new ODPair(origin, dest, false));
-			if(distance > max_dist) {
-				DMSImpl.TRAVEL_LOG.log(name +
-					": DISTANCE EXCEEDED AT " +
-					r_node.getOID());
-				break;
-			}
-			r_node = findNextNode(c, r_node, distance, origin,
+			r_node = findNextNode(c, r_node, dist, origin,
 				destination);
 		}
 	}
