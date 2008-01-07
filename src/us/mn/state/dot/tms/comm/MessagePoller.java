@@ -31,8 +31,8 @@ abstract public class MessagePoller extends Thread {
 	/** Interval time for load calculation is 30,000 miliseconds */
 	static protected final long INTERVAL_TIME = 30000;
 
-	/** Message poll/response timing log */
-	static protected final DebugLog TIMING_LOG = new DebugLog("timing");
+	/** Message polling log */
+	static protected final DebugLog POLL_LOG = new DebugLog("polling");
 
 	/** Thread group for all message poller threads */
 	static protected final ThreadGroup GROUP = new ThreadGroup("Poller");
@@ -142,7 +142,7 @@ abstract public class MessagePoller extends Thread {
 			else
 				queue.add(o);
 			long el = sample_load(start);
-			TIMING_LOG.log(getName() + ": " + oname +
+			POLL_LOG.log(getName() + ": " + oname +
 				" elapsed: " + el);
 		}
 	}
