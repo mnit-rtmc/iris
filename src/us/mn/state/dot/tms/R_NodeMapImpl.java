@@ -33,9 +33,6 @@ import us.mn.state.dot.vault.ObjectVaultException;
  */
 class R_NodeMapImpl extends AbstractListImpl implements R_NodeMap {
 
-	/** Maximum distance from origin to a corridor node (in meters) */
-	static protected final float MAX_ORIGIN_DISTANCE = 1000;
-
 	/** R_Node list XML file */
 	static protected final String R_NODE_XML = "r_nodes.xml";
 
