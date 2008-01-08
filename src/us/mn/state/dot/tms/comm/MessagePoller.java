@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,10 @@ abstract public class MessagePoller extends Thread {
 	public void addOperation(Operation o) {
 		if(queue.isClogged()) {
 			if(o.getPriority() >= Operation.DEVICE_DATA) {
-				POLL_LOG.log(getName() + ", DROPPING: " + o);
+				if(POLL_LOG.isOpen()) {
+					POLL_LOG.log(getName() +
+						", DROPPING: " + o);
+				}
 				return;
 			}
 		}
@@ -141,9 +144,11 @@ abstract public class MessagePoller extends Thread {
 				o.cleanup();
 			else
 				queue.add(o);
-			long el = sample_load(start);
-			POLL_LOG.log(getName() + ", " + oname +
-				" elapsed: " + el);
+			if(POLL_LOG.isOpen()) {
+				long el = sample_load(start);
+				POLL_LOG.log(getName() + ", " + oname +
+					" elapsed: " + el);
+			}
 		}
 	}
 
