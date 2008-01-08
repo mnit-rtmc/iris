@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** ObjectVault table name */
 	static public final String tableName = "dms";
-
-	/** Travel time debug log */
-	static protected final DebugLog TRAVEL_LOG = new DebugLog("travel");
 
 	/** Get the database table name */
 	public String getTable() {
@@ -548,7 +545,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			setTravelTime(composeTravelTimeMessage());
 		}
 		catch(InvalidMessageException e) {
-			TRAVEL_LOG.log(e.getMessage());
+			if(RouteBuilder.TRAVEL_LOG.isOpen())
+				RouteBuilder.TRAVEL_LOG.log(e.getMessage());
 			clearTravelTime();
 		}
 	}

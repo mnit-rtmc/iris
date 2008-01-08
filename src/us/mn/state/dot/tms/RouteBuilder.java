@@ -25,6 +25,9 @@ import java.util.TreeSet;
  */
 public class RouteBuilder {
 
+	/** Travel time debug log */
+	static protected final DebugLog TRAVEL_LOG = new DebugLog("travel");
+
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static protected final float MAX_ORIGIN_DISTANCE = 1000;
 
@@ -72,20 +75,26 @@ public class RouteBuilder {
 			LocationImpl dest = (LocationImpl)r_node.getLocation();
 			ODPair od = new ODPair(origin, dest, false);
 			float dist = distance + c.calculateDistance(od);
-			DMSImpl.TRAVEL_LOG.log(name + ": SEARCH FOR " +
-				destination.getDescription() + " (" +
-				i + ", " + dist + " miles) " + od);
+			if(TRAVEL_LOG.isOpen()) {
+				TRAVEL_LOG.log(name + ": SEARCH FOR " +
+					destination.getDescription() + " (" +
+					i + ", " + dist + " miles) " + od);
+			}
 			if(dist > max_dist) {
-				DMSImpl.TRAVEL_LOG.log(name +
-					": DISTANCE EXCEEDED AT " +
-					r_node.getOID());
+				if(TRAVEL_LOG.isOpen()) {
+					TRAVEL_LOG.log(name +
+						": DISTANCE EXCEEDED AT " +
+						r_node.getOID());
+				}
 				break;
 			}
 			i++;
 			if(i > MAX_R_NODE_LIMIT) {
-				DMSImpl.TRAVEL_LOG.log(name +
-					": BREAKING R_NODE LOOP AT " +
-					r_node.getOID());
+				if(TRAVEL_LOG.isOpen()) {
+					TRAVEL_LOG.log(name +
+						": BREAKING R_NODE LOOP AT " +
+						r_node.getOID());
+				}
 				break;
 			}
 			r_node = findNextNode(c, r_node, dist, origin,
@@ -119,7 +128,8 @@ public class RouteBuilder {
 
 	/** Debug a route exception */
 	protected void debugRouteException(BadRouteException e) {
-		DMSImpl.TRAVEL_LOG.log(name + ": BAD ROUTE: " + e.getMessage());
+		if(TRAVEL_LOG.isOpen())
+			TRAVEL_LOG.log(name + ": BAD ROUTE: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination */
@@ -162,10 +172,12 @@ public class RouteBuilder {
 		Corridor c = node_map.getCorridor(odf);
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
-		DMSImpl.TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
-			odf.getDestination().getDescription() + ", " +
-			r.getLength() + " miles, " + r.getTurns() +
-			" turns, goodness: " + r.getGoodness());
+		if(TRAVEL_LOG.isOpen()) {
+			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
+				odf.getDestination().getDescription() + ", " +
+				r.getLength() + " miles, " + r.getTurns() +
+				" turns, goodness: " + r.getGoodness());
+		}
 	}
 
 	/** Find all the routes from an origin to a destination */
