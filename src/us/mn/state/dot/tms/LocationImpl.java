@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -320,6 +320,21 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 		if(f == null || c == null)
 			return false;
 		return f.equals(loc.getFreeway()) &&
+			(f.filterDirection(free_dir) ==
+			 f.filterDirection(loc.getFreeDir())) &&
+			c.equals(loc.getCrossStreet()) &&
+			cross_dir == loc.getCrossDir() &&
+			cross_mod == loc.getCrossMod();
+	}
+
+	/** Test if another location matches (including CD roads) */
+	public boolean matchesRoot(LocationImpl loc) {
+		RoadwayImpl f = freeway;
+		RoadwayImpl of = loc.freeway;
+		RoadwayImpl c = cross_street;
+		if(f == null || of == null || c == null)
+			return false;
+		return f.matchRootName(of) &&
 			(f.filterDirection(free_dir) ==
 			 f.filterDirection(loc.getFreeDir())) &&
 			c.equals(loc.getCrossStreet()) &&

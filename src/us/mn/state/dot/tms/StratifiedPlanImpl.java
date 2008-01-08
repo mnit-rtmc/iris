@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2007  Minnesota Department of Transportation
+ * Copyright (C) 2001-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,9 @@ import java.rmi.RemoteException;
  * @author Douglas Lau
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
+
+	/** Meter debug log */
+	static protected final DebugLog METER_LOG = new DebugLog("meter");
 
 	/** ObjectVault table name */
 	static public final String tableName = "stratified_plan";
@@ -124,21 +127,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				meter.getId());
 		}
 		return segList;
-	}
-
-	/** Corridor for this timing plan */
-	protected transient Corridor corridor;
-
-	/** Get the corridor for this timing plan */
-	protected Corridor getCorridor(RampMeterImpl meter) {
-		// FIXME: reset corridor at start of timing plan
-		if(corridor == null)
-			corridor = meter.getCorridor();
-		else if(corridor != meter.getCorridor()) {
-			System.err.println("ERROR: Corridor mismatch for " +
-				meter.getId());
-		}
-		return corridor;
 	}
 
 	/** Meter state holds stratified plan state for a meter. For each meter
@@ -250,7 +238,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			SegmentListImpl sList = getSegmentList(meter);
 			if(sList == null)
 				return false;
-			LocationImpl loc = (LocationImpl)meter.getLocation();
+			final LocationImpl loc =
+				(LocationImpl)meter.getLocation();
 			RoadwayImpl xs = (RoadwayImpl)loc.getCrossStreet();
 			if(xs == null)
 				return false;
@@ -262,6 +251,30 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			passage = meterable.getDetectorSet(Detector.PASSAGE);
 			merge = meterable.getDetectorSet(Detector.MERGE);
 			bypass = meterable.getDetectorSet(Detector.BYPASS);
+
+Corridor corridor = meter.getCorridor();
+corridor.findNode(new Corridor.NodeFinder() {
+	public boolean check(R_NodeImpl r_node) {
+		LocationImpl l = (LocationImpl)r_node.getLocation();
+		if(l.matchesRoot(loc)) {
+			DetectorSet dets = r_node.getDetectorSet(
+				Detector.QUEUE);
+			METER_LOG.log(meter.getId() + ": queue: " +
+				queue.toString() + ", q: " + dets.toString());
+			dets = r_node.getDetectorSet(Detector.PASSAGE);
+			METER_LOG.log(meter.getId() + ": passage: " +
+				passage.toString() + ", p: " + dets.toString());
+			dets = r_node.getDetectorSet(Detector.MERGE);
+			METER_LOG.log(meter.getId() + ": merge: " +
+				merge.toString() + ", m: " + dets.toString());
+			dets = r_node.getDetectorSet(Detector.BYPASS);
+			METER_LOG.log(meter.getId() + ": bypass: " +
+				bypass.toString() + ", b: " + dets.toString());
+		}
+		return false;
+	}
+});
+
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();
 		}

@@ -307,4 +307,18 @@ public class Corridor {
 		}
 		throw new BadRouteException("No downstream nodes");
 	}
+
+	/** Interface to find a node on the corridor */
+	static public interface NodeFinder {
+		public boolean check(R_NodeImpl r_node);
+	}
+
+	/** Find a node using a node finder callback interface */
+	public synchronized R_NodeImpl findNode(NodeFinder finder) {
+		for(R_NodeImpl r_node: n_points.values()) {
+			if(finder.check(r_node))
+				return r_node;
+		}
+		return null;
+	}
 }
