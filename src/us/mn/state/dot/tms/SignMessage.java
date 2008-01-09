@@ -73,7 +73,7 @@ public class SignMessage implements Serializable {
 	}
 
 	/** Check if a string matches the message */
-	public boolean equals(String s) {
+	public boolean equalsString(String s) {
 		return multi.equals(s);
 	}
 

@@ -672,7 +672,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		throws InvalidMessageException
 	{
 		SignMessage m = message;
-		if(m.equals(text)) {
+		if(m.equalsString(text)) {
 			m.setDuration(SignTravelTime.MESSAGE_DURATION);
 			setMessageTimeRemaining(m);
 			return;
