@@ -98,7 +98,7 @@ public class LcsMessageSelector extends JPanel {
 	 * Signal offers a GUI to select between the available signals to send
 	 * to a LaneControlSignal.
 	 */
-	protected class SignalSelector extends JPanel {
+	static protected class SignalSelector extends JPanel {
 
 		static protected final int MODULE_SIZE = 30;
 
