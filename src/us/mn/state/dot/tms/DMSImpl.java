@@ -377,7 +377,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Set all current timing plans which affect this sign */
 	protected void setTimingPlans(TimingPlanImpl[] p) throws TMSException {
 		Arrays.sort(p);
-		if(p.equals(plans))
+		if(Arrays.equals(p, plans))
 			return;
 		plan_mapping.update("traffic_device", this, p);
 		plans = p;

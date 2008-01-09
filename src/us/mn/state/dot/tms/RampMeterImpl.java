@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -358,7 +358,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Set all current timing plans which affect this meter */
 	protected void setTimingPlans(MeterPlanImpl[] p) throws TMSException {
 		Arrays.sort(p);
-		if(p.equals(plans))
+		if(Arrays.equals(p, plans))
 			return;
 		plan_mapping.update("traffic_device", this, p);
 		plans = p;
