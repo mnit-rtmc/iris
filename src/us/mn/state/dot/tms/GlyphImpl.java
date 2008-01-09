@@ -124,8 +124,9 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	public void doSetFont(Font f) throws TMSException {
 		if(f == font)
 			return;
-		if(f != null)
-			((FontImpl)f).addGlyph(codePoint, this);
+		if(f == null)
+			throw new ChangeVetoException("Font cannot be null");
+		((FontImpl)f).addGlyph(codePoint, this);
 		store.update(this, "font", f.getName());
 		if(font != null)
 			font.removeGlyph(codePoint, this);
