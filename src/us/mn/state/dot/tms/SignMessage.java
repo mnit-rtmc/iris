@@ -74,7 +74,7 @@ public class SignMessage implements Serializable {
 
 	/** Check if a string matches the message */
 	public boolean equalsString(String s) {
-		return multi.equals(s);
+		return multi.equalsString(s);
 	}
 
 	/** Calculate a hash code for the message */
