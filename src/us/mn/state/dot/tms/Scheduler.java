@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import java.util.TreeSet;
  *
  * @author Douglas Lau
  */
-public class Scheduler extends Thread {
+public final class Scheduler extends Thread {
 
 	/** Job identifier */
 	static protected long jobId = 0;

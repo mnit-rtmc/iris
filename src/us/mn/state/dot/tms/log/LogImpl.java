@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.log;
 
 import java.util.Calendar;
-
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -23,7 +22,7 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  */
-public class LogImpl implements Log {
+public final class LogImpl implements Log {
 
 	/** Number of days to keep records when purging comm line events */
 	static protected final int COMM_LINE_PURGE_THRESHOLD = 7;

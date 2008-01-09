@@ -62,7 +62,6 @@ abstract public class MessagePoller extends Thread {
 		super(GROUP, "Poller: " + name);
 		setDaemon(true);
 		messenger = m;
-		start();
 	}
 
 	/** Add an operation to the message poller */

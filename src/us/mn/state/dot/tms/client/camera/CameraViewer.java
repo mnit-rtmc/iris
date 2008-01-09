@@ -51,7 +51,7 @@ import us.mn.state.dot.video.client.VideoMonitor;
  *
  * @author Douglas Lau
  */
-public class CameraViewer extends JPanel implements TmsSelectionListener {
+public final class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** The number of frames to process (for streaming) */
 	static protected final int STREAM_DURATION = 300;
