@@ -708,8 +708,7 @@ corridor.findNode(new Corridor.NodeFinder() {
 				if(state.done)
 					continue;
 				RampMeterImpl meter = state.meter;
-				int r = Math.round(rate *
-					meter.getDemand() / demand);
+				int r = rate * meter.getDemand() / demand;
 				state.prop = r;
 				rate -= r;
 				demand -= meter.getDemand();

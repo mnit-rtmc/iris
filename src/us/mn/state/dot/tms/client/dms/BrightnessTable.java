@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2005  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.client.dms;
 
@@ -285,8 +281,8 @@ public class BrightnessTable extends JPanel {
 
 	/** Paint the current photocell level */
 	protected void paintPhotocellLevel(Graphics g) {
-		int p = _bottom - Math.round(_height *
-			photocellLevel / maxPhotocellLevel);
+		int p = _bottom -
+			(_height * photocellLevel / maxPhotocellLevel);
 		g.setColor(Color.white);
 		g.drawLine(_left, p, _right, p);
 		int[] xl = { _left, _left + A_SIZE, _left + A_SIZE };
