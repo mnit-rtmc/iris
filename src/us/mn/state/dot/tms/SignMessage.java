@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,11 @@ public class SignMessage implements Serializable {
 	/** Check if a string matches the message */
 	public boolean equals(String s) {
 		return multi.equals(s);
+	}
+
+	/** Calculate a hash code for the message */
+	public int hashCode() {
+		return multi.hashCode();
 	}
 
 	/** Is the message blank? */
