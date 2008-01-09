@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,8 +60,8 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 	private final String[] streamUrls;
 	
 	/** The number of frames to process (for streaming) */
-	private final int STREAM_DURATION = 300;
-	
+	static protected final int STREAM_DURATION = 300;
+
 	/** The video stream request parameter wrapper */
 	private final Client client = new Client();
 	
