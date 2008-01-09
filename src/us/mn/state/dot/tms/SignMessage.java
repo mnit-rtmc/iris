@@ -68,10 +68,13 @@ public class SignMessage implements Serializable {
 		if(o instanceof SignMessage) {
 			SignMessage m = (SignMessage)o;
 			return multi.equals(m.multi);
-		} else if(o instanceof String) {
-			return multi.equals(o);
 		} else
 			return false;
+	}
+
+	/** Check if a string matches the message */
+	public boolean equals(String s) {
+		return multi.equals(s);
 	}
 
 	/** Is the message blank? */
