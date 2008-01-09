@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,7 +144,7 @@ public class DmsMessageModel extends AbstractTableModel {
 	/** Fill a row with a timing plan's values */
 	protected Object[] fillRow(Object[] row, DmsMessage m) {
 		row[COL_LINE] = new Short(m.line);
-		row[COL_GLOBAL] = new Boolean(m.dms == null);
+		row[COL_GLOBAL] = Boolean.valueOf(m.dms == null);
 		row[COL_MESSAGE] = m.message;
 		row[COL_ABBREV] = m.abbrev;
 		row[COL_PRIORITY] = new Short(m.priority);

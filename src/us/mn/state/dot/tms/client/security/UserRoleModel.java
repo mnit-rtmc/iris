@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
  * @author Douglas Lau
  */
 public class UserRoleModel extends ProxyTableModel<Role> {
-
-	/** True object */
-	static protected final Boolean TRUE = new Boolean(true);
-
-	/** False object */
-	static protected final Boolean FALSE = new Boolean(false);
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
@@ -85,9 +79,9 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 		if(user != null) {
 			for(Role r: user.getRoles())
 				if(r == role)
-					return TRUE;
+					return true;
 		}
-		return FALSE;
+		return false;
 	}
 
 	/** Get the class of the specified column */

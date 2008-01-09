@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -207,11 +207,11 @@ public class TimingPlanModel extends AbstractTableModel {
 		throws RemoteException
 	{
 		row[COL_TYPE] = p.getPlanType();
-		row[COL_ASSOCIATED] = new Boolean(dms.hasTimingPlan(p));
+		row[COL_ASSOCIATED] = Boolean.valueOf(dms.hasTimingPlan(p));
 		row[COL_START] = time_string(p.getStartTime());
 		row[COL_STOP] = time_string(p.getStopTime());
-		row[COL_ACTIVE] = new Boolean(p.isActive());
-		row[COL_TESTING] = new Boolean(p.isTesting());
+		row[COL_ACTIVE] = Boolean.valueOf(p.isActive());
+		row[COL_TESTING] = Boolean.valueOf(p.isTesting());
 		return row;
 	}
 
