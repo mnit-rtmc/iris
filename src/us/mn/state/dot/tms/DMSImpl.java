@@ -733,7 +733,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Set the message from information read from the controller */
 	public void setMessageFromController(String text, int time) {
-		if(message.equals(text))
+		if(message.equalsString(text))
 			return;
 		MultiString multi = new MultiString(text);
 		BitmapGraphic bitmap = createPixelMap(multi);
