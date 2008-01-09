@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,32 +31,32 @@ import java.util.Vector;
  */
 public class EventVault {
 
+	/** Misc constants */
+	static private final int NOT_FOUND = -1;
+
+	/** Database connection driver */
+	static private final String DRIVER = "jdbc:postgresql";
+
 	/** The IP address of the machine hosting the database */
-	private String hostIP;
+	private final String hostIP;
 
 	/** Port to connect on */
-	private String port;
+	private final String port;
 
 	/** The name of the database containing event data */
-	private String dbName;
+	private final String dbName;
 
 	/** The account name used to gain access to the database */
-	private String userName;
+	private final String userName;
 
 	/** The password associated with the user name */
-	private String password;
+	private final String password;
 
 	/** The database connection object */
 	private Connection connection = null;
 
 	/** Statement used in database transactions */
 	private Statement statement;
-
-	/** Database connection driver */
-	private String driver = "jdbc:postgresql";
-
-	/** Misc constants */
-	private final int NOT_FOUND = -1;
 
 	/**
 	 * Constructor for the EventVault object
@@ -427,9 +427,10 @@ public class EventVault {
 		try {
 			Class.forName("org.postgresql.Driver");
 			connection = DriverManager.getConnection(
-				driver + "://" + hostIP + ":" + port + "/" +
+				DRIVER + "://" + hostIP + ":" + port + "/" +
 				dbName, userName, password);
-			System.out.println("Opened  connection to " + dbName + " database.");
+			System.out.println("Opened connection to " + dbName +
+				" database.");
 		} catch(ClassNotFoundException cnfe) {
 			throw new EventVaultException(cnfe);
 		} catch(SQLException sqle) {
