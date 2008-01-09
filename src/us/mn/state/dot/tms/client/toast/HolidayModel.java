@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2007  Minnesota Department of Transportation
+ * Copyright (C) 2003-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -321,7 +321,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** Inner class for editing cells in the name column */
-	protected class NameCellEditor extends AbstractCellEditor
+	static protected class NameCellEditor extends AbstractCellEditor
 		implements TableCellEditor
 	{
 		protected final JTextField text = new JTextField();
