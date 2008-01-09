@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,30 +152,5 @@ public class Base64 {
 			bos.write(c, 0, c.length);
 		}
 		return bos.toByteArray();
-	}
-
-	/** Round-trip encode then decode data, comparing the results */
-	static protected void round_trip(byte[] m) throws IOException {
-		String v = encode(m);
-		byte[] b = decode(v);
-		if(!java.util.Arrays.equals(b, m))
-			throw new IOException("Round trip: " + m);
-	}
-
-	/** Test Base64 encoding */
-	static public void main(String[] args) {
-		try {
-			for(int l = 1; l < 80; l++) {
-				byte[] m = new byte[l];
-				for(int i = 0; i < 256; i++) {
-					for(int j = 0; j < l; j++)
-						m[j] = (byte)i;
-					round_trip(m);
-				}
-			}
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
 	}
 }
