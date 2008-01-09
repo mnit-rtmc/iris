@@ -269,7 +269,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Set the miles downstream of reference point */
 	public synchronized void setMile(Float m) throws TMSException {
-		if(m == mile)
+		if(m.equals(mile))
 			return;
 		store.update(this, "mile", m);
 		mile = m;
