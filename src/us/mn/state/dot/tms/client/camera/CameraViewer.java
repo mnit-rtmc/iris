@@ -53,18 +53,9 @@ import us.mn.state.dot.video.client.VideoMonitor;
  */
 public class CameraViewer extends JPanel implements TmsSelectionListener {
 
-	/** Properties for configuring the video client */
-	private final Properties videoProps;
-	
-	/** The base URLs of the backend video stream servers */
-	private final String[] streamUrls;
-	
 	/** The number of frames to process (for streaming) */
 	static protected final int STREAM_DURATION = 300;
 
-	/** The video stream request parameter wrapper */
-	private final Client client = new Client();
-	
 	/** Range of PTZ values */
 	static protected final int PTZ_RANGE = 63;
 
@@ -81,6 +72,15 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 	static protected final Scheduler NETWORKER = new Scheduler(
 		AbstractJob.HANDLER);
 
+	/** Properties for configuring the video client */
+	private final Properties videoProps;
+
+	/** The base URLs of the backend video stream servers */
+	private final String[] streamUrls;
+
+	/** The video stream request parameter wrapper */
+	private final Client client = new Client();
+
 	/** Displays the name of the selected camera */
 	protected final JTextField txtId = new JTextField();
 
@@ -89,7 +89,7 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** Streaming video viewer */
 	protected final VideoMonitor monitor = new VideoMonitor();
-	
+
 	/** Button used to play videoe */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
 
@@ -97,7 +97,7 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final JButton stop = new JButton(Icons.getIcon("stop"));
 
 	/** Panel for controlling camera PTZ */
-//	protected final PTZPanel ptz_panel = new PTZPanel();
+	protected final PTZPanel ptz_panel = new PTZPanel();
 
 	/** Panel for the video controls */
 	protected final JPanel videoControls =
@@ -307,13 +307,12 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 			txtLocation.setText(loc.getDescription());
 			play.setEnabled(camera.isActive());
 			stop.setEnabled(camera.isActive());
-/*			if(camera.isActive())
+			if(camera.isActive())
 				ptz_panel.setCamera(camera);
 			else
 				ptz_panel.setEnabled(false);
 		} else
-			ptz_panel.setEnabled(false); */
-		}
+			ptz_panel.setEnabled(false);
 	}
 
 	/** Refresh the status of the device */
@@ -341,7 +340,7 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 		monitor.setImageFactory(new RepeaterImageFactory(client,
 			streamUrls[client.getArea()]), STREAM_DURATION);
 	}
-	
+
 	/** Stop video streaming */
 	protected void stopPressed() {
 		monitor.setImageFactory(null, 0);
@@ -353,6 +352,6 @@ public class CameraViewer extends JPanel implements TmsSelectionListener {
 		txtLocation.setText("");
 		play.setEnabled(false);
 		stop.setEnabled(false);
-//		ptz_panel.setEnabled(false);
+		ptz_panel.setEnabled(false);
 	}
 }
