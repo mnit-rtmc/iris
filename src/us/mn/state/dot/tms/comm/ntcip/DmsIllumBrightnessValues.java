@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2002  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
@@ -39,9 +35,8 @@ public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
 		try {
 			int levels = table.length / 3;
 			dos.writeByte(levels);
-			for(int i = 0; i < levels * 3; i++) {
+			for(int i = 0; i < levels * 3; i++)
 				dos.writeShort(table[i]);
-			}
 			brightness = bos.toByteArray();
 		}
 		catch(IOException e) {
@@ -72,14 +67,12 @@ public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
 
 	/** Get the brightness table */
 	public int[] getTable() {
-		StringBuffer buffer = new StringBuffer();
 		ByteArrayInputStream bis = new ByteArrayInputStream(brightness);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
 			int[] table = new int[3 * dis.readByte()];
-			for(int i = 0; i < table.length; i++) {
+			for(int i = 0; i < table.length; i++)
 				table[i] = dis.readUnsignedShort();
-			}
 			return table;
 		}
 		catch(IOException e) {

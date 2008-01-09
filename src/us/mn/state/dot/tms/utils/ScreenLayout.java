@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,6 @@ public class ScreenLayout implements LayoutManager {
 		Point p = Screen.getLocation(parent);
 		Rectangle rect = new Rectangle(bounds);
 		rect.translate(p.x, p.y);
-		int m = Math.min(screens.length, comps.length);
 		for(int i = 0; i < comps.length; i++) {
 			Component c = comps[i];
 			if(i < screens.length) {
