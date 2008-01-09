@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,25 +27,25 @@ import java.io.IOException;
 abstract public class Operation {
 
 	/** Constant definition for urgent priority (system shut-down) */
-	static public int URGENT = 0;
+	static public final int URGENT = 0;
 
 	/** Constant definition for command priority (overrides, etc.) */
-	static public int COMMAND = 1;
+	static public final int COMMAND = 1;
 
 	/** Constant definition for 30-second data priority */
-	static public int DATA_30_SEC = 2;
+	static public final int DATA_30_SEC = 2;
 
 	/** Constant definition for download priority */
-	static public int DOWNLOAD = 3;
+	static public final int DOWNLOAD = 3;
 
 	/** Constant definition for 5-minute data priority */
-	static public int DATA_5_MIN = 4;
+	static public final int DATA_5_MIN = 4;
 
 	/** Constant definition for device data priority */
-	static public int DEVICE_DATA = 5;
+	static public final int DEVICE_DATA = 5;
 
 	/** Constant definition for diagnostic priority */
-	static public int DIAGNOSTIC = 6;
+	static public final int DIAGNOSTIC = 6;
 
 	/** Priority of the operation */
 	protected int priority;
