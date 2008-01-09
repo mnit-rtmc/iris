@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,11 @@ public class MultiString implements Serializable {
 	/** Test if the MULTI string is equal to another string */
 	public boolean equals(Object o) {
 		return toString().equals(o.toString());
+	}
+
+	/** Calculate a hash code for the MULTI string */
+	public int hashCode() {
+		return toString().hashCode();
 	}
 
 	/** Create an empty MULTI string */
