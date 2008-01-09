@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,10 +45,7 @@ public class InitializeCanoga extends ControllerOperation {
 
 	/** Begin the sensor initialization operation */
 	public void begin() {
-		if(restart)
-			phase = new QuerySerialNumber();
-		else
-			phase = new QuerySerialNumber();
+		phase = new QuerySerialNumber();
 	}
 
 	/** Phase to query the serial number */
