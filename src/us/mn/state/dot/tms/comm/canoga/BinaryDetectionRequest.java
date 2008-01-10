@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ public class BinaryDetectionRequest extends Request {
 	}
 
 	/** Class for vehicle detection events */
-	static protected class DetectionEvent {
+	static protected final class DetectionEvent {
 
 		protected final int duration;	// milliseconds
 		protected final int start;	// millisecond stamp
@@ -114,6 +114,11 @@ public class BinaryDetectionRequest extends Request {
 					(count == other.count);
 			} else
 				return false;
+		}
+
+		/** Calculate a hash code for the detection event */
+		public int hashCode() {
+			return (duration << 16) ^ (start ^ count);
 		}
 
 		/** Get a string representation of the detection event */
