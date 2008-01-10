@@ -934,8 +934,10 @@ corridor.findNode(new Corridor.NodeFinder() {
 		throws IOException
 	{
 		File dir = new File(DATA_PATH + File.separator + date);
-		if(!dir.exists())
-			dir.mkdir();
+		if(!dir.exists()) {
+			if(!dir.mkdir())
+				throw new IOException("mkdir failed: " + dir);
+		}
 		log_name = new File(dir.getCanonicalPath() + File.separator +
 			meter.getCorridorID() + '.' + createTime(startTime) +
 			'-' + createTime(stopTime) + ".xml");

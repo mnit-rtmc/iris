@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,8 @@ abstract public class XmlWriter {
 		finally {
 			out.close();
 		}
-		temp.renameTo(file);
+		if(!temp.renameTo(file))
+			throw new IOException("rename failed: " + file);
 	}
 
 	/** Print the XML to a print writer */

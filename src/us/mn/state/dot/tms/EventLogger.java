@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,11 +49,15 @@ public class EventLogger {
 		String d = date(stamp);
 		File year = new File(DATA_PATH + File.separator +
 			d.substring(0, 4));
-		if(!year.exists())
-			year.mkdir();
+		if(!year.exists()) {
+			if(!year.mkdir())
+				throw new IOException("mkdir failed: " + year);
+		}
 		File dir = new File(year.getPath() + File.separator + d);
-		if(!dir.exists())
-			dir.mkdir();
+		if(!dir.exists()) {
+			if(!dir.mkdir())
+				throw new IOException("mkdir failed: " + dir);
+		}
 		return dir;
 	}
 
