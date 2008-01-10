@@ -101,6 +101,11 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 			return false;
 	}
 
+	/** Calculate a hash code */
+	public int hashCode() {
+		return name.hashCode();
+	}
+
 	/** Get the primary key name */
 	public String getKeyName() {
 		return "name";
