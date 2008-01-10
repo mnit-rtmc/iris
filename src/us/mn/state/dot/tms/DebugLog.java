@@ -58,6 +58,17 @@ public class DebugLog {
 		return w;
 	}
 
+	/** Check if the debug log is open for writing */
+	public boolean isOpen() {
+		try {
+			return canWrite();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
+
 	/** Log a message in the debug log file */
 	public synchronized void log(String m) {
 		try {
@@ -67,10 +78,5 @@ public class DebugLog {
 		catch(IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/** Check if the debug log is open for writing */
-	public boolean isOpen() {
-		return pw != null;
 	}
 }
