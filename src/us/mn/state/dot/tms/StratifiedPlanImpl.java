@@ -252,28 +252,31 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			merge = meterable.getDetectorSet(Detector.MERGE);
 			bypass = meterable.getDetectorSet(Detector.BYPASS);
 
+final DetectorSet _q = new DetectorSet();
+final DetectorSet _p = new DetectorSet();
+final DetectorSet _m = new DetectorSet();
+final DetectorSet _b = new DetectorSet();
 Corridor corridor = meter.getCorridor();
 corridor.findNode(new Corridor.NodeFinder() {
 	public boolean check(R_NodeImpl r_node) {
 		LocationImpl l = (LocationImpl)r_node.getLocation();
 		if(l.matchesRoot(loc)) {
-			DetectorSet dets = r_node.getDetectorSet(
-				Detector.QUEUE);
-			METER_LOG.log(meter.getId() + ": queue: " +
-				queue.toString() + ", q: " + dets.toString());
-			dets = r_node.getDetectorSet(Detector.PASSAGE);
-			METER_LOG.log(meter.getId() + ": passage: " +
-				passage.toString() + ", p: " + dets.toString());
-			dets = r_node.getDetectorSet(Detector.MERGE);
-			METER_LOG.log(meter.getId() + ": merge: " +
-				merge.toString() + ", m: " + dets.toString());
-			dets = r_node.getDetectorSet(Detector.BYPASS);
-			METER_LOG.log(meter.getId() + ": bypass: " +
-				bypass.toString() + ", b: " + dets.toString());
+			_q.addDetectors(r_node.getDetectorSet(Detector.QUEUE));
+			_p.addDetectors(r_node.getDetectorSet(Detector.PASSAGE));
+			_m.addDetectors(r_node.getDetectorSet(Detector.MERGE));
+			_b.addDetectors(r_node.getDetectorSet(Detector.BYPASS));
 		}
 		return false;
 	}
 });
+METER_LOG.log(meter.getId() + ": queue: " + queue.toString() + ", q: " +
+	_q.toString());
+METER_LOG.log(meter.getId() + ": passage: " + passage.toString() + ", p: " +
+	_p.toString());
+METER_LOG.log(meter.getId() + ": merge: " + merge.toString() + ", m: " +
+	_m.toString());
+METER_LOG.log(meter.getId() + ": bypass: " + bypass.toString() + ", b: " +
+	_b.toString());
 
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();
