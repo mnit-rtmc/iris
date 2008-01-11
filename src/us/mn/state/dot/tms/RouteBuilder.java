@@ -44,7 +44,7 @@ public class RouteBuilder {
 	protected final int legs;
 
 	/** Maximum route distance */
-	protected final float max_dist;
+	protected float max_dist;
 
 	/** Working path */
 	protected final LinkedList<ODPair> path = new LinkedList<ODPair>();
@@ -83,8 +83,8 @@ public class RouteBuilder {
 			if(dist > max_dist) {
 				if(TRAVEL_LOG.isOpen()) {
 					TRAVEL_LOG.log(name +
-						": DISTANCE EXCEEDED AT " +
-						r_node.getOID());
+						": MAX DISTANCE (" + max_dist +
+						") EXCEEDED");
 				}
 				break;
 			}
@@ -172,11 +172,16 @@ public class RouteBuilder {
 		Corridor c = node_map.getCorridor(odf);
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
+		max_dist = Math.min(max_dist, r.getGoodness());
 		if(TRAVEL_LOG.isOpen()) {
 			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
 				odf.getDestination().getDescription() + ", " +
 				r.getLength() + " miles, " + r.getTurns() +
 				" turns, goodness: " + r.getGoodness());
+			if(max_dist == r.getGoodness()) {
+				TRAVEL_LOG.log(name + ": LOWERED MAX DIST TO " +
+					max_dist);
+			}
 		}
 	}
 
