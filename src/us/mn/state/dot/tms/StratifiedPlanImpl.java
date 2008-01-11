@@ -259,6 +259,8 @@ final DetectorSet _b = new DetectorSet();
 Corridor corridor = meter.getCorridor();
 corridor.findNode(new Corridor.NodeFinder() {
 	public boolean check(R_NodeImpl r_node) {
+		if(r_node.getNodeType() != R_Node.TYPE_ENTRANCE)
+			return false;
 		LocationImpl l = (LocationImpl)r_node.getLocation();
 		if(l.matchesRoot(loc)) {
 			_q.addDetectors(r_node.getDetectorSet(Detector.QUEUE));
