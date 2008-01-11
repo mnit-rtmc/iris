@@ -404,8 +404,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public DetectorSet getDetectorSet(short type) {
 		DetectorImpl[] dets = detectors;	// Avoid race
 		DetectorSet set = new DetectorSet();
-		for(int i = 0; i < dets.length; i++) {
-			DetectorImpl d = dets[i];
+		for(DetectorImpl d: dets) {
 			if(type == d.getLaneType())
 				set.addDetector(d);
 		}
