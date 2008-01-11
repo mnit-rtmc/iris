@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.LinkedList;
+import java.util.TreeSet;
 
 /**
  * A detector set is a logical grouping of detectors
@@ -35,9 +35,9 @@ public class DetectorSet implements Constants {
 	/** Density considered "full" for space capacity calculation */
 	static protected final int FULL_DENSITY = 32;
 
-	/** Linked list of detectors in the detector set */
-	protected final LinkedList<DetectorImpl> detectors =
-		new LinkedList<DetectorImpl>();
+	/** Set of detectors */
+	protected final TreeSet<DetectorImpl> detectors =
+		new TreeSet<DetectorImpl>();
 
 	/** Add a detector to the detector set */
 	public void addDetector(DetectorImpl det) {
@@ -47,6 +47,11 @@ public class DetectorSet implements Constants {
 	/** Get the number of detectors in the detector set */
 	public int size() {
 		return detectors.size();
+	}
+
+	/** Check if another detector set is the same */
+	public boolean isSame(DetectorSet other) {
+		return detectors.equals(other.detectors);
 	}
 
 	/** Add all the detectors from a given segment */

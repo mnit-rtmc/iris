@@ -269,14 +269,15 @@ corridor.findNode(new Corridor.NodeFinder() {
 		return false;
 	}
 });
-METER_LOG.log(meter.getId() + ": queue: " + queue.toString() + ", q: " +
-	_q.toString());
-METER_LOG.log(meter.getId() + ": passage: " + passage.toString() + ", p: " +
-	_p.toString());
-METER_LOG.log(meter.getId() + ": merge: " + merge.toString() + ", m: " +
-	_m.toString());
-METER_LOG.log(meter.getId() + ": bypass: " + bypass.toString() + ", b: " +
-	_b.toString());
+
+if(!queue.isSame(_q)) METER_LOG.log(meter.getId() + ": queue: " +
+	queue.toString() + ", q: " + _q.toString());
+if(!passage.isSame(_p)) METER_LOG.log(meter.getId() + ": passage: " +
+	passage.toString() + ", p: " + _p.toString());
+if(!merge.isSame(_m)) METER_LOG.log(meter.getId() + ": merge: " +
+	merge.toString() + ", m: " + _m.toString());
+if(!bypass.isSame(_b)) METER_LOG.log(meter.getId() + ": bypass: " +
+	bypass.toString() + ", b: " + _b.toString());
 
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();

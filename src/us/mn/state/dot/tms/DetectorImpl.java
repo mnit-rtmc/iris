@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.log.Log;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector, Constants,
-	Comparable, Storable
+	Comparable<DetectorImpl>, Storable
 {
 	/** ObjectVault table name */
 	static public final String tableName = "detector";
@@ -114,9 +114,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		return buffer.toString();
 	}
 
-	/** Compare for sorting by lane number (segment stuff) */
-	public int compareTo(Object o) {
-		DetectorImpl other = (DetectorImpl)o;
+	/** Compare for sorting by lane number */
+	public int compareTo(DetectorImpl other) {
 		int l = laneNumber - other.laneNumber;
 		if(l == 0)
 			return index - other.index;
