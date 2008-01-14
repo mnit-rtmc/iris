@@ -99,6 +99,17 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 			 f.filterDirection(other.free_dir));
 	}
 
+	/** Check if the location is on the CD road for a corridor */
+	public boolean isMatchingCD(Corridor c) {
+		RoadwayImpl f = freeway;
+		RoadwayImpl of = c.getFreeway();
+		if(f == null || of == null)
+			return false;
+		return (f != of) && f.matchRootName(of) &&
+			(f.filterDirection(free_dir) ==
+			 f.filterDirection(c.getFreeDir()));
+	}
+
 	/** Get a description of the cross-street location */
 	public String getCrossDescription() {
 		RoadwayImpl c = cross_street;

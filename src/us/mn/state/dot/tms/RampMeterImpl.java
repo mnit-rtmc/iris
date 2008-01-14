@@ -794,7 +794,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
-		// FIXME: does not work for CD roads
 		return nodeMap.getCorridor(location.getCorridor());
 	}
 

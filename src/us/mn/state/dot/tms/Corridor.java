@@ -316,8 +316,29 @@ public class Corridor {
 	/** Find a node using a node finder callback interface */
 	public synchronized R_NodeImpl findNode(NodeFinder finder) {
 		for(R_NodeImpl r_node: n_points.values()) {
+			R_NodeImpl n = checkNode(finder, r_node);
+			if(n != null)
+				return n;
+		}
+		return null;
+	}
+
+	/** Check a node and any downstream CD road using a finder interface */
+	protected R_NodeImpl checkNode(NodeFinder finder, R_NodeImpl r_node) {
+		while(r_node != null) {
 			if(finder.check(r_node))
 				return r_node;
+			r_node = findNextCD(r_node);
+		}
+		return null;
+	}
+
+	/** Find the next downstream CD node */
+	protected R_NodeImpl findNextCD(R_NodeImpl r_node) {
+		for(R_NodeImpl down: r_node.getDownstream()) {
+			LocationImpl loc = (LocationImpl)down.getLocation();
+			if(loc.isMatchingCD(this))
+				return down;
 		}
 		return null;
 	}
