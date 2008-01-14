@@ -172,6 +172,8 @@ public class RouteBuilder {
 		Corridor c = node_map.getCorridor(odf);
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
+		// NOTE: this optimisation will prevent us from finding some
+		// secondary routes; we're only interested in the best route.
 		max_dist = Math.min(max_dist, r.getGoodness());
 		if(TRAVEL_LOG.isOpen()) {
 			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
