@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,9 +13,9 @@
  * GNU General Public License for more details.
  */
 #include <stdio.h>
-#include <sys/types.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/wait.h>
-#include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 /*
@@ -26,7 +26,7 @@
 
 int pid;
 
-int handle_signal(int sig_num) {
+void handle_signal(int sig_num) {
 	kill(pid, sig_num);
 	exit(1);
 }
@@ -43,7 +43,7 @@ int main(int argc, char *args[]) {
 	if(fargs == NULL)
 		goto fail;
 	memcpy(fargs, args + 1, argc * sizeof(char **));
-	signal(SIGTERM, (void *)handle_signal);
+	signal(SIGTERM, handle_signal);
 	while(1) {
 		pid = fork();
 		if(pid < 0)
