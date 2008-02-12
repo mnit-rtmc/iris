@@ -175,10 +175,10 @@ public class CorridorTrip implements Constants {
 		if(first)
 			throwException("No speed data");
 		else {
-			pmile += MAX_LINK_LENGTH;
-			if(pmile < destination)
+			float mm = pmile + MAX_LINK_LENGTH;
+			if(mm < destination)
 				throwException("End < destin");
-			tt.nextStation(pmile + MAX_LINK_LENGTH, avg, low);
+			tt.nextStation(mm, avg, low);
 		}
 	}
 
