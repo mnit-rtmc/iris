@@ -148,37 +148,37 @@ public class CorridorTrip implements Constants {
 	protected void findTripSpeeds(TripTimer tt) throws BadRouteException {
 		float avg = 0;
 		float low = 0;
-		float mile = 0;
+		float pmile = 0;
 		boolean first = true;
 
-		for(Float m: stations.keySet()) {
-			if(checkLinkLength(m, origin))
+		for(Float mile: stations.keySet()) {
+			if(checkLinkLength(mile, origin))
 				continue;
-			if(checkLinkLength(destination, m))
+			if(checkLinkLength(destination, mile))
 				break;
-			StationImpl s = stations.get(m);
+			StationImpl s = stations.get(mile);
 			avg = s.getTravelSpeed(false);
 			low = s.getTravelSpeed(true);
 			if(avg > 0 && low > 0) {
 				if(first) {
-					float mm = m - MAX_LINK_LENGTH;
+					float mm = mile - MAX_LINK_LENGTH;
 					if(mm > origin)
 						throwException("Start > origin");
 					tt.firstStation(mm, avg, low);
 					first = false;
-				} else if(checkLinkLength(mile, m))
+				} else if(checkLinkLength(pmile, mile))
 					throwException("Link too long: " + s);
-				tt.nextStation(m, avg, low);
+				tt.nextStation(mile, avg, low);
 			}
-			mile = m;
+			pmile = mile;
 		}
 		if(first)
 			throwException("No speed data");
 		else {
-			mile += MAX_LINK_LENGTH;
-			if(mile < destination)
+			pmile += MAX_LINK_LENGTH;
+			if(pmile < destination)
 				throwException("End < destin");
-			tt.nextStation(mile + MAX_LINK_LENGTH, avg, low);
+			tt.nextStation(pmile + MAX_LINK_LENGTH, avg, low);
 		}
 	}
 
