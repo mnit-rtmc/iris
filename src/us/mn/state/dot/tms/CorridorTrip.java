@@ -156,21 +156,21 @@ public class CorridorTrip implements Constants {
 				continue;
 			if(checkLinkLength(destination, m))
 				break;
-			mile = m;
 			StationImpl s = stations.get(m);
 			avg = s.getTravelSpeed(false);
 			low = s.getTravelSpeed(true);
 			if(avg > 0 && low > 0) {
 				if(first) {
-					float mm = mile - MAX_LINK_LENGTH;
+					float mm = m - MAX_LINK_LENGTH;
 					if(mm > origin)
 						throwException("Start > origin");
 					tt.firstStation(mm, avg, low);
 					first = false;
 				} else if(checkLinkLength(mile, m))
 					throwException("Link too long: " + s);
-				tt.nextStation(mile, avg, low);
+				tt.nextStation(m, avg, low);
 			}
+			mile = m;
 		}
 		if(first)
 			throwException("No speed data");
