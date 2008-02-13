@@ -106,12 +106,12 @@ public class CorridorTrip implements Constants {
 		return h;
 	}
 
-	/** Trip timer */
+	/** Trip timer calculates travel times between consecutive stations */
 	protected class TripTimer {
 
 		float low_mile = destination;
-		float[] low = { MISSING_DATA, MISSING_DATA };
-		float[] avg = { MISSING_DATA, MISSING_DATA };
+		float[] low = new float[2];
+		float[] avg = new float[2];
 		float smile = 0;
 		float hours = 0;
 
