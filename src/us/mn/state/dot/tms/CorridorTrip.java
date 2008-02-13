@@ -170,8 +170,8 @@ public class CorridorTrip implements Constants {
 					throwException("Link too long: " + s);
 				else
 					tt.nextStation(mile, avg, low);
+				pmile = mile;
 			}
-			pmile = mile;
 		}
 		if(first)
 			throwException("No speed data");
