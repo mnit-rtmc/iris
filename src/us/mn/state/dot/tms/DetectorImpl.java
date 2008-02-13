@@ -280,6 +280,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		return laneType == CD_LANE;
 	}
 
+	/** Is this a station or CD detector? */
+	public boolean isStationOrCD() {
+		return isStation() || isCD();
+	}
+
 	/** Is this a ramp detector? (merge, queue, exit, bypass) */
 	public boolean isRamp() {
 		return isRampType(laneType);

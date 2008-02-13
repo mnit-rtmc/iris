@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,7 +199,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 		int n_speed = 0;
 		for(int i = 0; i < dets.length; i++) {
 			DetectorImpl det = dets[i];
-			if(!det.isStation())
+			if(!det.isStationOrCD())
 				continue;
 			float f = det.getVolume();
 			if(f != MISSING_DATA) {
