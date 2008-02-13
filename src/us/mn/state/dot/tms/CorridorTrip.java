@@ -144,8 +144,8 @@ public class CorridorTrip implements Constants {
 		return (end - start) > (3 * MAX_LINK_LENGTH);
 	}
 
-	/** Find the speeds for a trip timer */
-	protected void findTripSpeeds(TripTimer tt) throws BadRouteException {
+	/** Find the trip time (in hours) */
+	protected float findTripTime(TripTimer tt) throws BadRouteException {
 		float avg = 0;
 		float low = 0;
 		float pmile = 0;
@@ -181,15 +181,14 @@ public class CorridorTrip implements Constants {
 				throwException("End < destin");
 			tt.nextStation(mm, avg, low);
 		}
+		return tt.hours;
 	}
 
 	/** Get the current travel time (in hours) */
 	public float getTravelTime(boolean final_dest)
 		throws BadRouteException
 	{
-		TripTimer tt = new TripTimer(final_dest);
-		findTripSpeeds(tt);
-		return tt.hours;
+		return findTripTime(new TripTimer(final_dest));
 	}
 
 	/** Print the trip to a print stream */
