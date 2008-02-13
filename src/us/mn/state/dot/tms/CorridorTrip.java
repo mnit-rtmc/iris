@@ -168,7 +168,8 @@ public class CorridorTrip implements Constants {
 					first = false;
 				} else if(checkLinkLength(pmile, mile))
 					throwException("Link too long: " + s);
-				tt.nextStation(mile, avg, low);
+				else
+					tt.nextStation(mile, avg, low);
 			}
 			pmile = mile;
 		}
