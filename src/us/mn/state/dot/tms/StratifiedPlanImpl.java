@@ -284,12 +284,13 @@ if(!bypass.isSame(_b)) METER_LOG.log(meter.getId() + ": bypass: " +
 if(queue.isSame(_q) && passage.isSame(_p) && merge.isSame(_m) && bypass.isSame(_b))
 	;
 else {
+	METER_LOG.log("LOOKING FOR : " + loc.getDescription());
 	corridor.findNode(new Corridor.NodeFinder() {
 		public boolean check(R_NodeImpl r_node) {
 			if(r_node.getNodeType() != R_Node.TYPE_ENTRANCE)
 				return false;
 			LocationImpl l = (LocationImpl)r_node.getLocation();
-			METER_LOG.log("location: " + l.toString());
+			METER_LOG.log("location: " + l.getDescription());
 			if(l.matchesRoot(loc))
 				METER_LOG.log("location MATCHES");
 			return false;
