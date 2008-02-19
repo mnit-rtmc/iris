@@ -47,7 +47,7 @@ import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.warning.WarningSignHandler;
 
 // agency specific imports
-import gov.ca.dot.d10.tms.client.incidents.D10IncidentLayer;
+//import gov.ca.dot.d10.tms.client.incidents.D10IncidentLayer;
 
 /**
  * A session is one IRIS login session.
@@ -177,14 +177,12 @@ public class Session {
 		gpoly = createStationLayer();
 
         // create D10 agency specific incident layer
-        if( true )
-		    incLayer = new D10IncidentLayer(props, logger,
-			    st.getSystemPolicy());
+	    //incLayer = new D10IncidentLayer(props, logger,
+		//    st.getSystemPolicy());
 
         // create Mn/DOT incident layer
-        else
-		    incLayer = new TmsIncidentLayer(props, logger,
-			    st.getSystemPolicy());
+        incLayer = new TmsIncidentLayer(props, logger,
+		    st.getSystemPolicy());
 
 		camLayer = CameraHandler.createLayer(tmsConnection);
 		vlayer = new ViewLayer();
