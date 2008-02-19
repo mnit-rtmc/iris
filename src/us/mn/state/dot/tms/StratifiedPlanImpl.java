@@ -281,6 +281,22 @@ if(!merge.isSame(_m)) METER_LOG.log(meter.getId() + ": merge: " +
 if(!bypass.isSame(_b)) METER_LOG.log(meter.getId() + ": bypass: " +
 	bypass.toString() + ", b: " + _b.toString());
 
+if(queue.isSame(_q) && passage.isSame(_p) && merge.isSame(_m) && bypass.isSame(_b))
+	;
+else {
+	corridor.findNode(new Corridor.NodeFinder() {
+		public boolean check(R_NodeImpl r_node) {
+			if(r_node.getNodeType() != R_Node.TYPE_ENTRANCE)
+				return false;
+			LocationImpl l = (LocationImpl)r_node.getLocation();
+			METER_LOG.log("location: " + l.toString());
+			if(l.matchesRoot(loc))
+				METER_LOG.log("location MATCHES");
+			return false;
+		}
+	});
+}
+
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();
 		}
