@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.util.Properties;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tdxml.DdsException;
+import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.trafmap.IncidentLayer;
 
@@ -35,7 +35,7 @@ public class TmsIncidentLayer extends IncidentLayer {
 
 	/** Create a new TMS incdent layer */
 	public TmsIncidentLayer(Properties props, Logger logger,
-		TypeCache<SystemPolicy> c) throws DdsException
+		TypeCache<SystemPolicy> c) throws TdxmlException
 	{
 		super(props, logger);
 		theme = new DirectionalIncidentTheme(c);

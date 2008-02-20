@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.Theme;
-import us.mn.state.dot.tdxml.DdsException;
+import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.StationLayer;
@@ -98,7 +98,7 @@ public class Session {
 
 	/** Create the station layer */
 	protected StationLayer createStationLayer() throws IOException,
-		DdsException
+		TdxmlException
 	{
 		StationLayer layer = new StationLayer(props, logger);
 		final StationList s_list = (StationList)(tmsConnection.getProxy(
@@ -168,7 +168,7 @@ public class Session {
 
 	/** Create a new session */
 	public Session(TmsConnection tc, SonarState st, Properties p, Logger l)
-		throws DdsException, IOException
+		throws TdxmlException, IOException
 	{
 		tmsConnection = tc;
 		props = p;

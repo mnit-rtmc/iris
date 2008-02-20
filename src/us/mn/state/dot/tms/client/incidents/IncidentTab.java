@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public class IncidentTab extends IrisTab {
 
 	/** Create the side bar component */
 	protected JPanel createSideBar() {
-		incidentClient.addDdsListener(model);
+		incidentClient.addTdxmlListener(model);
 		JList incidents = new JList(model);
 		incidents.getSelectionModel().setSelectionMode(
 			ListSelectionModel.SINGLE_SELECTION);
@@ -71,7 +71,7 @@ public class IncidentTab extends IrisTab {
 
 	/** Dispose of the incident tab */
 	public void dispose() {
-		incidentClient.removeDdsListener(model);
+		incidentClient.removeTdxmlListener(model);
 	}
 
 	/** Get the tab panel */

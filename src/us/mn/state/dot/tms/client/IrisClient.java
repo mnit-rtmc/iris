@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
-import us.mn.state.dot.tdxml.DdsException;
+import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.security.LoginListener;
@@ -167,8 +167,8 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Set the logged in user */
-	protected void setUser(IrisUser user) throws IOException, DdsException,
-		NotBoundException
+	protected void setUser(IrisUser user) throws IOException,
+		TdxmlException, NotBoundException
 	{
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +
