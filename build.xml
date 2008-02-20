@@ -243,6 +243,8 @@
 				 includes="iris-client.keystore"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/client/**/*"/>
+			<fileset dir="${build.classes}"
+				 includes="gov/ca/dot/d10/tms/client/**/*"/>
 			<fileset dir="${build.dir}" includes="images/*"/>
 		</jar>
 	</target>
