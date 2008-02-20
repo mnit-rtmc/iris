@@ -291,8 +291,13 @@ else {
 				return false;
 			LocationImpl l = (LocationImpl)r_node.getLocation();
 			METER_LOG.log("location: " + l.getDescription());
-			if(l.matchesRoot(loc))
+			if(l.matchesRoot(loc)) {
 				METER_LOG.log("location MATCHES");
+				METER_LOG.log("  queue: " + r_node.getDetectorSet(Detector.QUEUE));
+				METER_LOG.log("  passage: " + r_node.getDetectorSet(Detector.PASSAGE));
+				METER_LOG.log("  merge: " + r_node.getDetectorSet(Detector.MERGE));
+				METER_LOG.log("  bypass: " + r_node.getDetectorSet(Detector.BYPASS));
+			}
 			return false;
 		}
 	});
