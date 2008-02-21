@@ -284,7 +284,8 @@ if(!bypass.isSame(_b)) METER_LOG.log(meter.getId() + ": bypass: " +
 if(queue.isSame(_q) && passage.isSame(_p) && merge.isSame(_m) && bypass.isSame(_b))
 	;
 else {
-	METER_LOG.log("LOOKING FOR : " + loc.getDescription());
+	METER_LOG.log("LOOKING FOR: " + loc.getDescription());
+	METER_LOG.log("  CORRIDOR: " + corridor.getName());
 	corridor.findNode(new Corridor.NodeFinder() {
 		public boolean check(R_NodeImpl r_node) {
 			if(r_node.getNodeType() != R_Node.TYPE_ENTRANCE)
