@@ -330,10 +330,15 @@ public class Corridor {
 
 	/** Check a node and any downstream CD road using a finder interface */
 	protected R_NodeImpl checkNode(NodeFinder finder, R_NodeImpl r_node) {
-		while(r_node != null) {
-			if(finder.check(r_node))
-				return r_node;
-			r_node = findNextCD(r_node);
+		if(finder.check(r_node))
+			return r_node;
+		if(r_node.isCDExit()) {
+			R_NodeImpl cd = findNextCD(r_node);
+			while(cd != null) {
+				if(finder.check(cd))
+					return cd;
+				cd = findNextCD(cd);
+			}
 		}
 		return null;
 	}
