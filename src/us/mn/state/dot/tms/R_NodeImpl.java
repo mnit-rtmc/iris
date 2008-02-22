@@ -244,7 +244,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	}
 
 	/** Staiton ID */
-	protected String station_id;
+	protected String station_id = "";
 
 	/** Get the staiton ID */
 	static protected String getStationID(String sid) {
