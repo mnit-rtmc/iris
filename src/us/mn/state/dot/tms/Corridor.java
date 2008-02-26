@@ -320,6 +320,8 @@ public class Corridor {
 
 	/** Find a node using a node finder callback interface */
 	public synchronized R_NodeImpl findNode(NodeFinder finder) {
+		if(n_points.isEmpty())
+			calculateNodeMilePoints();
 		for(R_NodeImpl r_node: n_points.values()) {
 			R_NodeImpl n = checkNode(finder, r_node);
 			if(n != null)
