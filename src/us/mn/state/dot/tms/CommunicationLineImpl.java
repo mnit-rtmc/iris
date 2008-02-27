@@ -169,7 +169,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	}
 
 	/** Communication protocol */
-	protected short protocol = PROTO_MNDOT_5;
+	protected short protocol = PROTO_NTCIP_C;   // TCP based
 
 	/** Check if a Mn/DOT protocol change should be vetoed */
 	protected void checkMndotProtocolChange(short p) throws TMSException {
