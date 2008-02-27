@@ -81,7 +81,7 @@ CREATE TABLE lane_type (
 COPY lane_type (id, description, dcode) FROM stdin;
 0		
 1	Mainline	
-2	Auxilliary	A
+2	Auxiliary	A
 3	CD Lane	CD
 4	Reversible	R
 5	Merge	M
