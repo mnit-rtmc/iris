@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ public interface Detector extends Device {
 	/** Mainline lane type */
 	public short MAINLINE = 1;
 
-	/** Auxilliary lane type */
-	public short AUXILLIARY = 2;
+	/** Auxiliary lane type */
+	public short AUXILIARY = 2;
 
 	/** Collector/Distributor lane type */
 	public short CD_LANE = 3;
@@ -70,7 +70,7 @@ public interface Detector extends Device {
 
 	/** Lane class constant strings */
 	public String[] LANE_TYPE = {
-		" ", "Mainline", "Auxilliary", "CD Lane", "Reversible",
+		" ", "Mainline", "Auxiliary", "CD Lane", "Reversible",
 		"Merge", "Queue", "Exit", "Bypass", "Passage", "Velocity",
 		"Omnibus", "Green", "Wrong Way"
 	};
@@ -109,7 +109,7 @@ public interface Detector extends Device {
 	public int[] SAMPLE_THRESHOLD = {
 		0,
 		SAMPLE_4_HOURS,	// mainline
-		SAMPLE_1_DAY,	// auxilliary
+		SAMPLE_1_DAY,	// auxiliary
 		SAMPLE_4_HOURS,	// CD lane
 		SAMPLE_3_DAYS,	// reversible
 		SAMPLE_12_HOURS,// merge

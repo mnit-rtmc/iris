@@ -259,7 +259,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Get the lane type */
 	public short getLaneType() { return laneType; }
 
-	/** Is this a mailline detector? (auxilliary, cd, etc.) */
+	/** Is this a mailline detector? (auxiliary, cd, etc.) */
 	public boolean isMainline() {
 		return isMainlineType(laneType);
 	}
@@ -269,9 +269,9 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		return (laneType == MAINLINE) && !hov;
 	}
 
-	/** Is the given lane type a mainline? (auxilliary, cd, etc.) */
+	/** Is the given lane type a mainline? (auxiliary, cd, etc.) */
 	static public boolean isMainlineType(int t) {
-		return t == MAINLINE || t == AUXILLIARY || t == CD_LANE ||
+		return t == MAINLINE || t == AUXILIARY || t == CD_LANE ||
 			t == REVERSIBLE || t == VELOCITY;
 	}
 
