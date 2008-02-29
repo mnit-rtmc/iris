@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,11 +153,13 @@ public class R_NodeDetectorModel extends AbstractTableModel {
 	/** Lookup a detector by ID */
 	protected Detector lookupDetector(Integer did) throws RemoteException {
 		try {
-			return (Detector)det_list.getElement(did);
+			if(did != null)
+				return (Detector)det_list.getElement(did);
 		}
 		catch(IndexOutOfBoundsException e) {
-			return null;
+			// Fall through here
 		}
+		return null;
 	}
 
 	/** Add a new row to the table */
