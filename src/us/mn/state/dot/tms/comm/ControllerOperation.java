@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -70,7 +71,8 @@ abstract public class ControllerOperation extends Operation {
 		controller.logException(id, s);
 		// FIXME: this is a bit fragile
 		boolean r = (e instanceof SerialIOException) ||
-			(e instanceof SocketTimeoutException);
+			(e instanceof SocketTimeoutException) ||
+			(e instanceof EOFException);
 		if(r && controller.retry(id))
 			return;
 		else
