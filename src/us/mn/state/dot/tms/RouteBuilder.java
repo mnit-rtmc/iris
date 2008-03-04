@@ -64,7 +64,17 @@ public class RouteBuilder {
 	protected void searchCorridor(float distance, LocationImpl origin,
 		LocationImpl destination) throws BadRouteException
 	{
-		Corridor c = node_map.getCorridor(origin.getCorridor());
+		String cid = origin.getCorridor();
+		if(cid == null) {
+			TRAVEL_LOG.log(name + ": BAD ORIGIN: " +
+				origin.getOID());
+			return;
+		}
+		Corridor c = node_map.getCorridor(cid);
+		if(c == null) {
+			TRAVEL_LOG.log(name + ": MISSING CORRIDOR: " + cid);
+			return;
+		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
 		if(r_node.metersTo(origin) > MAX_ORIGIN_DISTANCE) {
 			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
