@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.StationSegment;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.meter.RampMeterProperties;
 import us.mn.state.dot.tms.utils.ActionJob;
