@@ -333,6 +333,7 @@ public class Corridor {
 	public synchronized String getLinkedCDRoad() {
 		if(n_points.isEmpty())
 			calculateNodeMilePoints();
+		// FIXME: there may be more than one linked CD road
 		for(R_NodeImpl r_node: n_points.values()) {
 			if(r_node.isCD()) {
 				LocationImpl l =
