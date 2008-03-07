@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -238,15 +238,14 @@ class R_NodeMapImpl extends AbstractListImpl implements R_NodeMap {
 
 	/** Lookup the named corridor */
 	public synchronized Corridor getCorridor(String c) {
-		return corridors.get(c);
+		if(c != null)
+			return corridors.get(c);
+		else
+			return null;
 	}
 
 	/** Lookup the corridor for an O/D pair */
 	protected Corridor getCorridor(ODPair od) {
-		String c = od.getCorridor();
-		if(c != null)
-			return getCorridor(c);
-		else
-			return null;
+		return getCorridor(od.getCorridor());
 	}
 }
