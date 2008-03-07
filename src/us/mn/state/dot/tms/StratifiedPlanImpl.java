@@ -256,8 +256,7 @@ final DetectorSet _q = new DetectorSet();
 final DetectorSet _p = new DetectorSet();
 final DetectorSet _m = new DetectorSet();
 final DetectorSet _b = new DetectorSet();
-Corridor corridor = meter.getCorridor();
-corridor.findNode(new Corridor.NodeFinder() {
+Corridor.NodeFinder finder = new Corridor.NodeFinder() {
 	public boolean check(R_NodeImpl r_node) {
 		if(r_node.getNodeType() != R_Node.TYPE_ENTRANCE)
 			return false;
@@ -270,7 +269,15 @@ corridor.findNode(new Corridor.NodeFinder() {
 		}
 		return false;
 	}
-});
+};
+Corridor corridor = meter.getCorridor();
+corridor.findNode(finder);
+String cd = corridor.getLinkedCDRoad();
+if(cd != null) {
+	Corridor cd_road = nodeMap.getCorridor(cd);
+	if(cd_road != null)
+		cd_road.findNode(finder);
+}
 
 if(!queue.isSame(_q)) METER_LOG.log(meter.getId() + ": queue: " +
 	queue.toString() + ", q: " + _q.toString());

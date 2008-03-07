@@ -173,9 +173,9 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return isExit() && (transition == TRANSITION_COMMON);
 	}
 
-	/** Check if this r_node is an exit to a CD road */
-	public boolean isCDExit() {
-		return isExit() && (transition == TRANSITION_CD);
+	/** Check if this r_node links to a CD road */
+	public boolean isCD() {
+		return transition == TRANSITION_CD;
 	}
 
 	/** Check if this r_node has a link to the downstream r_node */

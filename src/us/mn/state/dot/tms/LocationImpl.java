@@ -89,6 +89,21 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 		return b.toString();
 	}
 
+	/** Get the linked freeway corridor */
+	public String getLinkedCorridor() {
+		RoadwayImpl f = cross_street;
+		if(f == null)
+			return null;
+		StringBuilder b = new StringBuilder();
+		b.append(f.getName());
+		short fd = f.filterDirection(cross_dir);
+		if(fd > 0 && fd < DIRECTION.length) {
+			b.append(' ');
+			b.append(DIRECTION[fd]);
+		}
+		return b.toString();
+	}
+
 	/** Check if another location is on the same corridor */
 	public boolean isSameCorridor(LocationImpl other) {
 		RoadwayImpl f = freeway;
@@ -97,17 +112,6 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 		return (f == other.freeway) &&
 			(f.filterDirection(free_dir) ==
 			 f.filterDirection(other.free_dir));
-	}
-
-	/** Check if the location is on the CD road for a corridor */
-	public boolean isMatchingCD(Corridor c) {
-		RoadwayImpl f = freeway;
-		RoadwayImpl of = c.getFreeway();
-		if(f == null || of == null)
-			return false;
-		return (f != of) && f.matchRootName(of) &&
-			(f.filterDirection(free_dir) ==
-			 f.filterDirection(c.getFreeDir()));
 	}
 
 	/** Get a description of the cross-street location */
