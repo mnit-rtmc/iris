@@ -840,37 +840,33 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Print the detectors associated with a ramp meter */
 	protected void printMeterDetectors(PrintWriter out) {
-		StringBuffer passage = new StringBuffer();
-		StringBuffer merge = new StringBuffer();
-		StringBuffer queue = new StringBuffer();
-		StringBuffer bypass = new StringBuffer();
-		Detector[] dets = getDetectors();
-		for(int i = 0; i < dets.length; i++) {
-			DetectorImpl det = (DetectorImpl)dets[i];
-			String index = " D" + det.getIndex();
-			short lane = det.getLaneType();
-			if(lane == Detector.PASSAGE)
-				passage.append(index);
-			if(lane == Detector.MERGE)
-				merge.append(index);
-			if(lane == Detector.QUEUE)
-				queue.append(index);
-			if(lane == Detector.BYPASS)
-				bypass.append(index);
-		}
-		printAttribute("passage", passage, out);
-		printAttribute("merge", merge, out);
-		printAttribute("queue", queue, out);
-		printAttribute("bypass", bypass, out);
+		DetectorSet ds = getDetectorSet();
+//		printAttribute(out, "green",
+//			ds.getDetectorSet(Detector.GREEN));
+		printAttribute(out, "passage",
+			ds.getDetectorSet(Detector.PASSAGE));
+		printAttribute(out, "merge",
+			ds.getDetectorSet(Detector.MERGE));
+		printAttribute(out, "queue",
+			ds.getDetectorSet(Detector.QUEUE));
+		printAttribute(out, "bypass",
+			ds.getDetectorSet(Detector.BYPASS));
 	}
 
-	/** Print all the meter detectors for a specified lane type */
-	protected void printAttribute(String attr, StringBuffer value,
-		PrintWriter out)
+	/** Print a meter detector set attribute */
+	protected void printAttribute(PrintWriter out, String attr,
+		DetectorSet ds)
 	{
-		if(value.length() > 0) {
+		if(ds.size() > 0) {
+			StringBuilder b = new StringBuilder();
+			Detector[] dets = ds.toArray();
+			for(Detector d: dets) {
+				DetectorImpl det = (DetectorImpl)d;
+				b.append(" D");
+				b.append(det.getIndex());
+			}
 			out.print(attr + "='");
-			out.print(value.toString().trim());
+			out.print(b.toString().trim());
 			out.print("' ");
 		}
 	}
