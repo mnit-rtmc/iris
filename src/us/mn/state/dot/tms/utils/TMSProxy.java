@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -229,7 +229,7 @@ public class TMSProxy {
 		available = new RemoteListModel(dets.getAvailableList());
 		mainFree = new RemoteListModel(dets.getMainFreeList());
 		greenFree = new RemoteListModel(dets.getGreenFreeList());
-		stations = new RemoteListModel(tms.getStationList());
+		stations = new RemoteListModel(tms.getStationMap());
 		segments = new RemoteListModel(tms.getSegmentMap());
 		r_nodes = new RemoteListModel(tms.getR_NodeMap());
 		meter_list = tms.getRampMeterList();

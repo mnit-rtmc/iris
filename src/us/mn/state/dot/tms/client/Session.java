@@ -28,8 +28,8 @@ import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
-import us.mn.state.dot.tms.StationList;
-import us.mn.state.dot.tms.StationSegment;
+import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.StationMap;
 import us.mn.state.dot.tms.client.camera.CameraHandler;
 import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSHandler;
@@ -101,11 +101,11 @@ public class Session {
 		TdxmlException
 	{
 		StationLayer layer = new StationLayer(props, logger);
-		final StationList s_list = (StationList)(tmsConnection.getProxy(
+		final StationMap s_list = (StationMap)(tmsConnection.getProxy(
 			).getStations().getList());
 		layer.setLabels(new StationLayer.Labeller() {
-			public String getLabel(Integer i) throws IOException {
-				StationSegment s = s_list.getElement(i);
+			public String getLabel(String sid) throws IOException {
+				Station s = s_list.getElement(sid);
 				if(s != null)
 					return s.getLabel();
 				else
