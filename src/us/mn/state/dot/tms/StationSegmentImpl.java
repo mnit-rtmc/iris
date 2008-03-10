@@ -65,12 +65,6 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 		super.initTransients();
 		if(index.intValue() == 0)
 			index = null;
-		if(index != null) {
-			try { statList.add(index, this); }
-			catch(TMSException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/** Get a String representation of the station */
@@ -111,12 +105,8 @@ public class StationSegmentImpl extends SegmentImpl implements StationSegment,
 			if(i.intValue() <= 0) throw new ChangeVetoException(
 				"Station index must be positive");
 		} else if(index == null) return;
-		synchronized(statList) {
-			if(i != null) statList.add(i, this);
-			store.update(this, "index", i);
-			if(index != null) statList.remove(index);
-			index = i;
-		}
+		store.update(this, "index", i);
+		index = i;
 	}
 
 	/** Station speed limit */

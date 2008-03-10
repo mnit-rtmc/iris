@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -261,7 +261,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			public void perform() {
 				detectors.calculateFakeFlows();
 				detectors.writeSampleXml();
-				stations.calculateData(stamp);
 				station_map.calculateData(stamp);
 				station_map.writeSampleXml();
 				station_map.writeStationXml();
@@ -346,9 +345,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	protected final DetectorListImpl detectors;
 
 	/** Master station list */
-	protected final StationListImpl stations;
-
-	/** Master station list */
 	protected final StationMapImpl station_map;
 
 	/** Master segment map */
@@ -390,7 +386,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		groupList = groups;
 		roadList = roadways;
 		detList = detectors;
-		statList = stations;
 		statMap = station_map;
 		segMap = segments;
 		nodeMap = r_nodes;
@@ -413,7 +408,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		groups = new NodeGroupList();
 		roadways = new RoadwayListImpl();
 		detectors = new DetectorListImpl();
-		stations = new StationListImpl();
 		station_map = new StationMapImpl();
 		segments = new SegmentMapImpl();
 		r_nodes = new R_NodeMapImpl();
@@ -440,9 +434,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Get the detector list */
 	public IndexedList getDetectorList() { return detectors; }
-
-	/** Get the station list */
-	public StationList getStationList() { return stations; }
 
 	/** Get the station map */
 	public StationMap getStationMap() {
