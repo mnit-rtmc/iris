@@ -72,7 +72,6 @@ us/mn/state/dot/tms/SignTravelTime.class
 us/mn/state/dot/tms/SortedList.class
 us/mn/state/dot/tms/StationMap.class
 us/mn/state/dot/tms/Station.class
-us/mn/state/dot/tms/StationSegment.class
 us/mn/state/dot/tms/StatusTable.class
 us/mn/state/dot/tms/SystemPolicy.class
 us/mn/state/dot/tms/TimingPlan.class

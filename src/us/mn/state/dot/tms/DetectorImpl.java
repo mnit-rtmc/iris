@@ -223,8 +223,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public int getIndex() { return index; }
 
 	/** Get the station which contains this detector */
-	public StationSegment getStation() {
-		return statList.getStation(this);
+	public Station getStation() {
+		return statMap.getStation(this);
 	}
 
 	/** Get the ramp meter which contains this detector */

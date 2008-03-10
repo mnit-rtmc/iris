@@ -182,7 +182,7 @@ public interface Detector extends Device {
 	public String getFakeDetector() throws RemoteException;
 
 	/** Get the station which contains this detector */
-	public StationSegment getStation() throws RemoteException;
+	public Station getStation() throws RemoteException;
 
 	/** Get the ramp meter which contains this detector */
 	public RampMeter getMeter() throws RemoteException;
