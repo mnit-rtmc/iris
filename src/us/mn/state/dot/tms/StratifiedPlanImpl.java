@@ -236,37 +236,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		/** Find the detectors for a given ramp meter */
 		protected boolean findDetectors() {
 			DetectorSet ds = meter.getDetectorSet();
-			DetectorSet _q = ds.getDetectorSet(Detector.QUEUE);
-			DetectorSet _p = ds.getDetectorSet(Detector.PASSAGE);
-			DetectorSet _m = ds.getDetectorSet(Detector.MERGE);
-			DetectorSet _b = ds.getDetectorSet(Detector.BYPASS);
-// --------------------------------------------------
-SegmentListImpl sList = getSegmentList(meter);
-if(sList == null)
-	return false;
-LocationImpl loc = (LocationImpl)meter.getLocation();
-RoadwayImpl xs = (RoadwayImpl)loc.getCrossStreet();
-if(xs == null)
-	return false;
-short xd = loc.getCrossDir();
-MeterableImpl meterable = sList.findMeterable(xs, xd);
-if(meterable == null)
-	return false;
-queue = meterable.getDetectorSet(Detector.QUEUE);
-passage = meterable.getDetectorSet(Detector.PASSAGE);
-merge = meterable.getDetectorSet(Detector.MERGE);
-bypass = meterable.getDetectorSet(Detector.BYPASS);
-// --------------------------------------------------
-
-if(!queue.isSame(_q)) METER_LOG.log(meter.getId() + ": queue: " +
-	queue.toString() + ", q: " + _q.toString());
-if(!passage.isSame(_p)) METER_LOG.log(meter.getId() + ": passage: " +
-	passage.toString() + ", p: " + _p.toString());
-if(!merge.isSame(_m)) METER_LOG.log(meter.getId() + ": merge: " +
-	merge.toString() + ", m: " + _m.toString());
-if(!bypass.isSame(_b)) METER_LOG.log(meter.getId() + ": bypass: " +
-	bypass.toString() + ", b: " + _b.toString());
-
+			queue = ds.getDetectorSet(Detector.QUEUE);
+			passage = ds.getDetectorSet(Detector.PASSAGE);
+			merge = ds.getDetectorSet(Detector.MERGE);
+			bypass = ds.getDetectorSet(Detector.BYPASS);
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();
 		}
