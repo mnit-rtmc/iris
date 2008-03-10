@@ -405,14 +405,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return detectors;
 	}
 
-	/** Get the detector set for the given detector type */
-	public DetectorSet getDetectorSet(short type) {
+	/** Get the detector set for the r_node */
+	public DetectorSet getDetectorSet() {
 		DetectorImpl[] dets = detectors;	// Avoid race
 		DetectorSet set = new DetectorSet();
-		for(DetectorImpl d: dets) {
-			if(type == d.getLaneType())
-				set.addDetector(d);
-		}
+		for(DetectorImpl d: dets)
+			set.addDetector(d);
 		return set;
 	}
 

@@ -787,6 +787,30 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			return new Detector[0];
 	}
 
+	/** Get the detector set associated with the ramp meter */
+	public DetectorSet getDetectorSet() {
+		final DetectorSet ds = new DetectorSet();
+		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
+			public boolean check(R_NodeImpl n) {
+				if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
+					return false;
+				LocationImpl l = (LocationImpl)n.getLocation();
+				if(l.matchesRoot(location))
+					ds.addDetectors(n.getDetectorSet());
+				return false;
+			}
+		};
+		Corridor corridor = getCorridor();
+		corridor.findNode(finder);
+		String cd = corridor.getLinkedCDRoad();
+		if(cd != null) {
+			Corridor cd_road = nodeMap.getCorridor(cd);
+			if(cd_road != null)
+				cd_road.findNode(finder);
+		}
+		return ds;
+	}
+
 	/** Get the ID of the corridor containing the ramp meter */
 	public String getCorridorID() {
 		return location.getCorridorID();

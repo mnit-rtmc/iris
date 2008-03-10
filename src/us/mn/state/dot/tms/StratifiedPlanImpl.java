@@ -235,49 +235,28 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
 		/** Find the detectors for a given ramp meter */
 		protected boolean findDetectors() {
-			SegmentListImpl sList = getSegmentList(meter);
-			if(sList == null)
-				return false;
-			final LocationImpl loc =
-				(LocationImpl)meter.getLocation();
-			RoadwayImpl xs = (RoadwayImpl)loc.getCrossStreet();
-			if(xs == null)
-				return false;
-			short xd = loc.getCrossDir();
-			MeterableImpl meterable = sList.findMeterable(xs, xd);
-			if(meterable == null)
-				return false;
-			queue = meterable.getDetectorSet(Detector.QUEUE);
-			passage = meterable.getDetectorSet(Detector.PASSAGE);
-			merge = meterable.getDetectorSet(Detector.MERGE);
-			bypass = meterable.getDetectorSet(Detector.BYPASS);
-
-final DetectorSet _q = new DetectorSet();
-final DetectorSet _p = new DetectorSet();
-final DetectorSet _m = new DetectorSet();
-final DetectorSet _b = new DetectorSet();
-Corridor.NodeFinder finder = new Corridor.NodeFinder() {
-	public boolean check(R_NodeImpl r_node) {
-		if(r_node.getNodeType() != R_Node.TYPE_ENTRANCE)
-			return false;
-		LocationImpl l = (LocationImpl)r_node.getLocation();
-		if(l.matchesRoot(loc)) {
-			_q.addDetectors(r_node.getDetectorSet(Detector.QUEUE));
-			_p.addDetectors(r_node.getDetectorSet(Detector.PASSAGE));
-			_m.addDetectors(r_node.getDetectorSet(Detector.MERGE));
-			_b.addDetectors(r_node.getDetectorSet(Detector.BYPASS));
-		}
-		return false;
-	}
-};
-Corridor corridor = meter.getCorridor();
-corridor.findNode(finder);
-String cd = corridor.getLinkedCDRoad();
-if(cd != null) {
-	Corridor cd_road = nodeMap.getCorridor(cd);
-	if(cd_road != null)
-		cd_road.findNode(finder);
-}
+			DetectorSet ds = meter.getDetectorSet();
+			DetectorSet _q = ds.getDetectorSet(Detector.QUEUE);
+			DetectorSet _p = ds.getDetectorSet(Detector.PASSAGE);
+			DetectorSet _m = ds.getDetectorSet(Detector.MERGE);
+			DetectorSet _b = ds.getDetectorSet(Detector.BYPASS);
+// --------------------------------------------------
+SegmentListImpl sList = getSegmentList(meter);
+if(sList == null)
+	return false;
+LocationImpl loc = (LocationImpl)meter.getLocation();
+RoadwayImpl xs = (RoadwayImpl)loc.getCrossStreet();
+if(xs == null)
+	return false;
+short xd = loc.getCrossDir();
+MeterableImpl meterable = sList.findMeterable(xs, xd);
+if(meterable == null)
+	return false;
+queue = meterable.getDetectorSet(Detector.QUEUE);
+passage = meterable.getDetectorSet(Detector.PASSAGE);
+merge = meterable.getDetectorSet(Detector.MERGE);
+bypass = meterable.getDetectorSet(Detector.BYPASS);
+// --------------------------------------------------
 
 if(!queue.isSame(_q)) METER_LOG.log(meter.getId() + ": queue: " +
 	queue.toString() + ", q: " + _q.toString());

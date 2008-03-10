@@ -190,4 +190,14 @@ public class DetectorSet implements Constants {
 			buf.setCharAt(buf.length() - 1, '\'');
 		return buf.toString();
 	}
+
+	/** Get the detector set for the given detector type */
+	public DetectorSet getDetectorSet(short type) {
+		DetectorSet set = new DetectorSet();
+		for(DetectorImpl d: detectors) {
+			if(type == d.getLaneType())
+				set.addDetector(d);
+		}
+		return set;
+	}
 }
