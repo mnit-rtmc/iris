@@ -304,7 +304,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Is the given lane type an on-ramp? (merge, queue, bypass ) */
 	static public boolean isOnRampType(int t) {
 		return t == MERGE || t == QUEUE || t == BYPASS ||
-			t == PASSAGE || t == OMNIBUS;
+			t == PASSAGE || t == OMNIBUS || t == GREEN;
 	}
 
 	/** Is this an offRamp detector? */
