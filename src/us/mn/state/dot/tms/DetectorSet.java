@@ -200,4 +200,9 @@ public class DetectorSet implements Constants {
 		}
 		return set;
 	}
+
+	/** Convert a detector set to an array of detectors */
+	public Detector[] toArray() {
+		return detectors.toArray(new Detector[0]);
+	}
 }

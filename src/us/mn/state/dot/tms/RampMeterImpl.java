@@ -773,20 +773,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			return (SegmentListImpl)freeway.getSegmentList(freeDir);
 	}
 
-	/** Get the detectors in the associated meterable segment */
-	public Detector[] getSegmentDetectors() {
-		SegmentListImpl sList = getSegmentList();
-		if(sList == null)
-			return new Detector[0];
-		RoadwayImpl cross = (RoadwayImpl)location.getCrossStreet();
-		short crossDir = location.getCrossDir();
-		MeterableImpl meterable = sList.findMeterable(cross, crossDir);
-		if(meterable != null)
-			return meterable.getDetectors();
-		else
-			return new Detector[0];
-	}
-
 	/** Get the detector set associated with the ramp meter */
 	public DetectorSet getDetectorSet() {
 		final DetectorSet ds = new DetectorSet();
@@ -809,6 +795,11 @@ public class RampMeterImpl extends TrafficDeviceImpl
 				cd_road.findNode(finder);
 		}
 		return ds;
+	}
+
+	/** Get the detectors associated with the ramp meter */
+	public Detector[] getDetectors() {
+		return getDetectorSet().toArray();
 	}
 
 	/** Get the ID of the corridor containing the ramp meter */
@@ -853,7 +844,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		StringBuffer merge = new StringBuffer();
 		StringBuffer queue = new StringBuffer();
 		StringBuffer bypass = new StringBuffer();
-		Detector[] dets = getSegmentDetectors();
+		Detector[] dets = getDetectors();
 		for(int i = 0; i < dets.length; i++) {
 			DetectorImpl det = (DetectorImpl)dets[i];
 			String index = " D" + det.getIndex();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ public class MeterDataForm extends AbstractForm {
 		Plotlet plot = new Plotlet(factory, Integer.toString(index));
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));
-		for(Detector det: proxy.meter.getSegmentDetectors())
+		for(Detector det: proxy.meter.getDetectors())
 			plot.addDetector(Integer.toString(det.getIndex()));
 		add(plot);
 	}
