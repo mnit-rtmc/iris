@@ -787,12 +787,14 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			}
 		};
 		Corridor corridor = getCorridor();
-		corridor.findNode(finder);
-		String cd = corridor.getLinkedCDRoad();
-		if(cd != null) {
-			Corridor cd_road = nodeMap.getCorridor(cd);
-			if(cd_road != null)
-				cd_road.findNode(finder);
+		if(corridor != null) {
+			corridor.findNode(finder);
+			String cd = corridor.getLinkedCDRoad();
+			if(cd != null) {
+				Corridor cd_road = nodeMap.getCorridor(cd);
+				if(cd_road != null)
+					cd_road.findNode(finder);
+			}
 		}
 		return ds;
 	}
