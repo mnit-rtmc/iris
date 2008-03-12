@@ -31,9 +31,6 @@ import java.rmi.RemoteException;
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
-	/** Meter debug log */
-	static protected final DebugLog METER_LOG = new DebugLog("meter");
-
 	/** ObjectVault table name */
 	static public final String tableName = "stratified_plan";
 

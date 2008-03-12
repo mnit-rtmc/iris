@@ -44,6 +44,9 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		return tableName;
 	}
 
+	/** Meter debug log */
+	static protected final DebugLog METER_LOG = new DebugLog("meter");
+
 	/** Date instance for compute current minute */
 	static protected final Date DATE = new Date();
 
@@ -165,6 +168,19 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			return ((Controller170Impl)c).isFailedBeyondThreshold();
 		else
 			return false;
+	}
+
+	/** Green count detector */
+	protected transient DetectorImpl green_det;
+
+	/** Lookup the green count detector */
+	protected void lookupGreenDetector() {
+		Detector[] g = getDetectorSet().getDetectorSet(
+			Detector.GREEN).toArray();
+		if(g.length > 0)
+			green_det = (DetectorImpl)g[0];
+		else
+			green_det = null;
 	}
 
 	/** Green count detector */
@@ -453,8 +469,10 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			throw new ChangeVetoException("Police panel: " + id);
 		shouldMeter = true;
 		MeterPoller mp = getMeterPoller();
-		if(mp != null)
+		if(mp != null) {
+			lookupGreenDetector();
 			mp.startMetering(this);
+		}
 	}
 
 	/** Stop metering this ramp meter */
@@ -502,7 +520,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Update the 30-second green count */
 	public void updateGreenCount(Calendar stamp, int g) throws IOException {
-		DetectorImpl det = detector;
+		DetectorImpl det = green_det;
 		if(det != null) {
 			if(singleRelease) {
 				if((g % 2) != 0)
@@ -512,14 +530,15 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			if(g == 0 && isMetering())
 				return;
 			det.storeData30Second(stamp, g, MISSING_DATA);
-		}
+		} else
+			METER_LOG.log("No green det for " + id);
 	}
 
 	/** Update the 5-minute green count */
 	public void updateGreenCount5(Calendar stamp, int g)
 		throws IOException
 	{
-		DetectorImpl det = detector;
+		DetectorImpl det = green_det;
 		if(det != null) {
 			if(singleRelease) {
 				if((g % 2) != 0)
@@ -527,7 +546,8 @@ public class RampMeterImpl extends TrafficDeviceImpl
 				g /= 2;
 			}
 			det.storeData5Minute(stamp, g, MISSING_DATA);
-		}
+		} else
+			METER_LOG.log("No green det for " + id);
 	}
 
 	/** Determine whether a queue exists at the ramp meter */
