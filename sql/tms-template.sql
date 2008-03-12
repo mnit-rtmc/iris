@@ -199,7 +199,6 @@ REVOKE ALL ON TABLE detector FROM PUBLIC;
 GRANT SELECT ON TABLE detector TO PUBLIC;
 
 CREATE TABLE ramp_meter (
-    detector integer NOT NULL,
     "controlMode" integer NOT NULL,
     "singleRelease" boolean NOT NULL,
     "storage" integer NOT NULL,
@@ -912,14 +911,13 @@ CREATE VIEW dms_message_view AS
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
-	SELECT m.vault_oid, m.id, m.notes, d."index" AS green_det,
+	SELECT m.vault_oid, m.id, m.notes,
 	m."controlMode" AS control_mode, m."singleRelease" AS single_release,
 	m."storage", m."maxWait" AS max_wait, c.id AS camera,
 	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM ramp_meter m
 	JOIN location_view l ON m."location" = l.vault_oid
-	LEFT JOIN detector d ON m.detector = d.vault_oid
 	LEFT JOIN camera c ON m.camera = c.vault_oid;
 
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
