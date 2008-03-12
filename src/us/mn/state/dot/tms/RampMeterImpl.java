@@ -822,9 +822,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		int w = getMaxWait();
 		if(w != DEFAULT_MAX_WAIT)
 			out.print("max_wait='" + w + "' ");
-		DetectorImpl green = (DetectorImpl)getDetector();
-		if(green != null)
-			out.print("green='D" + green.getIndex() + "' ");
 		printMeterDetectors(out);
 		out.println("/>");
 	}
@@ -843,8 +840,8 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Print the detectors associated with a ramp meter */
 	protected void printMeterDetectors(PrintWriter out) {
 		DetectorSet ds = getDetectorSet();
-//		printAttribute(out, "green",
-//			ds.getDetectorSet(Detector.GREEN));
+		printAttribute(out, "green",
+			ds.getDetectorSet(Detector.GREEN));
 		printAttribute(out, "passage",
 			ds.getDetectorSet(Detector.PASSAGE));
 		printAttribute(out, "merge",
