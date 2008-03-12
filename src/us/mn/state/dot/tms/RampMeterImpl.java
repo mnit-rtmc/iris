@@ -88,7 +88,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		RemoteException
 	{
 		super(id);
-		detector = null;
 		controlMode = MODE_UNAVAILABLE;
 		singleRelease = false;
 		plans = new MeterPlanImpl[0];
@@ -181,49 +180,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			green_det = (DetectorImpl)g[0];
 		else
 			green_det = null;
-	}
-
-	/** Green count detector */
-	protected DetectorImpl detector;
-
-	/** Set the green count detector */
-	public void setDetector(int i) throws TMSException {
-		DetectorImpl det = null;
-		if(i > 0) {
-			det = (DetectorImpl)detList.getElement(i);
-			if(det == null)
-				throw new ChangeVetoException("Not found");
-			if(det.getLaneType() != Detector.GREEN)
-				throw new ChangeVetoException("Bad detector");
-		}
-		int index = setDetector(det);
-		if(index > 0)
-			detList.update(index);
-		if(i > 0)
-			detList.update(i);
-	}
-
-	/** Set the green count detector. This is the low-level version which
-	    does not acquire any locks. */
-	protected synchronized int setDetector(DetectorImpl det)
-		throws TMSException
-	{
-		if(det == detector)
-			return 0;
-		if(det == null)
-			store.update(this, "detector", "0");
-		else
-			store.update(this, "detector", det.getOID());
-		int index = 0;
-		if(detector != null)
-			index = detector.getIndex();
-		detector = det;
-		return index;
-	}
-
-	/** Get the green count detector */
-	public Detector getDetector() {
-		return detector;
 	}
 
 	/** Ramp meter control mode (MODE_STANDBY, MODE_CENTRAL, etc.) */

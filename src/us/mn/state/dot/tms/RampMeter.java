@@ -29,12 +29,6 @@ public interface RampMeter extends TrafficDevice {
 	/** Absolute maximum release rate (vehicles per hour) */
 	public int MAX_RELEASE_RATE = 1714;
 
-	/** Set the green count detector */
-	public void setDetector(int i) throws TMSException, RemoteException;
-
-	/** Get the green count detector */
-	public Detector getDetector() throws RemoteException;
-
 	/** Unavailable meter control mode should be selected to disable
 	 * metering for any reason. */
 	public int MODE_UNAVAILABLE = 0;

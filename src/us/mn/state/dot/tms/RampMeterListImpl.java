@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2005  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
@@ -90,17 +86,6 @@ class RampMeterListImpl extends SortedListImpl implements RampMeterList {
 		super.remove( key );
 		deviceList.remove( key );
 		available.remove( key );
-	}
-
-	/** Get the ramp meter with the associated detector */
-	public synchronized RampMeterImpl getMeter( DetectorImpl det ) {
-		if( det == null ) return null;
-		Iterator it = iterator();
-		while( it.hasNext() ) {
-			RampMeterImpl meter = (RampMeterImpl)it.next();
-			if( meter.getDetector() == det ) return meter;
-		}
-		return null;
 	}
 
 	/** Compute all ramp meter demand values */

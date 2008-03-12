@@ -60,9 +60,8 @@ public class MeterDataForm extends AbstractForm {
 	protected void doInit() throws RemoteException, MalformedURLException,
 		InstantiationException
 	{
-		int index = proxy.meter.getDetector().getIndex();
 		HttpDataFactory factory = getDataFactory();
-		Plotlet plot = new Plotlet(factory, Integer.toString(index));
+		Plotlet plot = new Plotlet(factory);
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));
 		for(Detector det: proxy.meter.getDetectors())

@@ -80,12 +80,6 @@ public class TMSProxy {
 	/** Get the free mainline detector list */
 	public RemoteListModel getMainFree() { return mainFree; }
 
-	/** Free green count detector list */
-	protected final RemoteListModel greenFree;
-
-	/** Get the free green count detector list */
-	public RemoteListModel getGreenFree() { return greenFree; }
-
 	/** Station list */
 	protected final RemoteListModel stations;
 
@@ -228,7 +222,6 @@ public class TMSProxy {
 		detectors = new RemoteListModel(dets);
 		available = new RemoteListModel(dets.getAvailableList());
 		mainFree = new RemoteListModel(dets.getMainFreeList());
-		greenFree = new RemoteListModel(dets.getGreenFreeList());
 		stations = new RemoteListModel(tms.getStationMap());
 		segments = new RemoteListModel(tms.getSegmentMap());
 		r_nodes = new RemoteListModel(tms.getR_NodeMap());
@@ -253,7 +246,6 @@ public class TMSProxy {
 		detectors.dispose();
 		available.dispose();
 		mainFree.dispose();
-		greenFree.dispose();
 		stations.dispose();
 		availableMeters.dispose();
 		devices.dispose();

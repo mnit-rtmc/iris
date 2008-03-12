@@ -205,17 +205,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		return true;
 	}
 
-	/** Is the detector free to be linked to a ramp meter? */
-	public boolean isFreeGreen() {
-		if(abandoned || isActive())
-			return false;
-		if(laneType != GREEN)
-			return false;
-		if(getMeter() != null)
-			return false;
-		return super.isAvailable();
-	}
-
 	/** Detector index */
 	protected final int index;
 
@@ -225,11 +214,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Get the station which contains this detector */
 	public Station getStation() {
 		return statMap.getStation(this);
-	}
-
-	/** Get the ramp meter which contains this detector */
-	public RampMeter getMeter() {
-		return meterList.getMeter(this);
 	}
 
 	/** Lane type */
@@ -243,8 +227,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			throw new ChangeVetoException("Invalid lane type");
 		if(!isMainlineType(t) && getStation() != null)
 			throw new ChangeVetoException("Station link exists");
-		if(t != GREEN && getMeter() != null)
-			throw new ChangeVetoException("Meter link exists");
 		_setLaneType(t);
 	}
 

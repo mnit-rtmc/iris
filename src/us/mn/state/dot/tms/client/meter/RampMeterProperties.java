@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,13 +70,6 @@ public class RampMeterProperties extends TrafficDeviceForm {
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
-
-	/** Greeen count detector lookup button */
-	protected final JButton greenButton =
-		new JButton("Green count detector");
-
-	/** Green count detector selection component */
-	protected final JComboBox greenCount = new JComboBox();
 
 	/** Field for Storage length (in feet). */
 	protected final JTextField storage = new JTextField();
@@ -166,9 +159,6 @@ public class RampMeterProperties extends TrafficDeviceForm {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getMeterList();
 		meter = (RampMeter)s.getElement(id);
-		ComboBoxModel greens = new WrapperComboBoxModel(
-			tms.getGreenFree().getModel());
-		greenCount.setModel(greens);
 		ListModel cameraModel = tms.getCameras().getModel();
 		camera.setModel(new WrapperComboBoxModel(cameraModel));
 		setDevice(meter);
@@ -185,13 +175,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 
 	/** Create ramp meter setup panel */
 	protected JPanel createSetupPanel() {
-		new ActionJob(this, greenButton) {
-			public void perform() throws Exception {
-				greenPressed();
-			}
-		};
 		FormPanel panel = new FormPanel(admin);
-		panel.addRow(greenButton, greenCount);
 		panel.addRow("Storage (feet)", storage);
 		panel.addRow("Max Wait (seconds)", wait);
 		panel.addRow("Control mode", controlMode);
@@ -426,16 +410,6 @@ public class RampMeterProperties extends TrafficDeviceForm {
 		TrafficDevice c = meter.getCamera();
 		if(c != null)
 			camera.setSelectedItem(c.getId());
-		Detector gc = meter.getDetector();
-		if(gc != null) {
-			greenButton.setEnabled(true);
-			greenCount.getModel().setSelectedItem(
-				String.valueOf(gc.getIndex()));
-		}
-		else {
-			greenButton.setEnabled(false);
-			greenCount.setSelectedItem(null);
-		}
 		wait.setText("" + meter.getMaxWait());
 		storage.setText("" + meter.getStorage());
 		singleRelease.setSelected(meter.isSingleRelease());
@@ -530,33 +504,14 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	protected void applyPressed() throws Exception {
 		int det = 0;
 		try {
-			String d =
-				(String)greenCount.getSelectedItem();
-			if(d != null)
-				det = Integer.parseInt(d.trim());
-		}
-		catch(NumberFormatException e) {}
-		try {
 			super.applyPressed();
 			meter.checkStratifiedPlans();
 			meter.setCamera((String)camera.getSelectedItem());
-			meter.setDetector(det);
 			meter.setSingleRelease(singleRelease.isSelected());
 			meter.setControlMode(controlMode.getSelectedIndex());
 			meter.setMaxWait(Integer.parseInt(wait.getText()));
 			meter.setStorage(Integer.parseInt(storage.getText()));
 		}
 		finally { meter.notifyUpdate(); }
-	}
-
-	/** Called when the green count detector lookup button is pressed */
-	protected void greenPressed() throws Exception {
-		Detector det = meter.getDetector();
-		if(det == null)
-			greenButton.setEnabled(false);
-		else {
-			connection.getDesktop().show(
-				new DetectorForm(connection, det.getIndex()));
-		}
 	}
 }

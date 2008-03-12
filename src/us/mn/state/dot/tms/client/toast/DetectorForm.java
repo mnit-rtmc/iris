@@ -33,7 +33,6 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.meter.RampMeterProperties;
 import us.mn.state.dot.tms.utils.ActionJob;
 import us.mn.state.dot.tms.utils.TMSProxy;
 
@@ -80,9 +79,6 @@ public class DetectorForm extends TMSObjectForm {
 
 	/** Controller button */
 	protected final JButton controller = new JButton( "Controller" );
-
-	/** Meter button */
-	protected final JButton meter = new JButton("Meter");
 
 	/** Station button */
 	protected final JButton station = new JButton("Station");
@@ -147,13 +143,6 @@ public class DetectorForm extends TMSObjectForm {
 			}
 		};
 		box.add(Box.createHorizontalStrut(HGAP));
-		box.add(meter);
-		new ActionJob(this, meter) {
-			public void perform() throws Exception {
-				meterPressed();
-			}
-		};
-		box.add(Box.createHorizontalStrut(HGAP));
 		box.add(station);
 		new ActionJob(this, station) {
 			public void perform() throws Exception {
@@ -187,7 +176,6 @@ public class DetectorForm extends TMSObjectForm {
 		name.setText(detector.getLabel(false));
 		notes.setText(detector.getNotes());
 		controller.setEnabled(detector.getController() != null);
-		meter.setEnabled(detector.getMeter() != null);
 		station.setEnabled(detector.getStation() != null);
 		lane.setSelectedIndex(detector.getLaneType());
 		number.setValue(detector.getLaneNumber());
@@ -229,16 +217,6 @@ public class DetectorForm extends TMSObjectForm {
 			connection.getDesktop().show(ControllerForm.create(
 				connection, c, c.getOID().toString()));
 		}
-	}
-
-	/** Meter lookup button pressed */
-	protected void meterPressed() throws Exception {
-		RampMeter m = detector.getMeter();
-		if(m == null)
-			meter.setEnabled(false);
-		else
-			connection.getDesktop().show(
-				new RampMeterProperties(connection, m.getId()));
 	}
 
 	/** Station lookup button pressed */

@@ -183,7 +183,4 @@ public interface Detector extends Device {
 
 	/** Get the station which contains this detector */
 	public Station getStation() throws RemoteException;
-
-	/** Get the ramp meter which contains this detector */
-	public RampMeter getMeter() throws RemoteException;
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,12 +51,6 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 	/** Get a list of the free mainline detectors */
 	public SortedList getMainFreeList() { return mainFree; }
 
-	/** Free green count detector list (not assigned to a ramp meter) */
-	protected transient SubsetList greenFree;
-
-	/** Get a list of the free green count detectors */
-	public SortedList getGreenFreeList() { return greenFree; }
-
 	/** Initialize the subset lists */
 	protected void initialize() throws RemoteException {
 		available = new SubsetList( new DeviceFilter() );
@@ -64,12 +58,6 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 			public boolean allow( TMSObjectImpl obj ) {
 				DetectorImpl det = (DetectorImpl)obj;
 				return det.isFreeMainline();
-			}
-		} );
-		greenFree = new SubsetList( new DeviceFilter() {
-			public boolean allow( TMSObjectImpl obj ) {
-				DetectorImpl det = (DetectorImpl)obj;
-				return det.isFreeGreen();
 			}
 		} );
 	}
@@ -92,7 +80,6 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 			list.add((TMSObjectImpl)vault.load(it.next()));
 		available.addFiltered(this);
 		mainFree.addFiltered(this);
-		greenFree.addFiltered(this);
 		// This must happen last for fake detector lookups
 		for(TMSObjectImpl object: list) {
 			DetectorImpl det = (DetectorImpl)object;
@@ -114,7 +101,6 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 		notifyAdd( index, det.toString() );
 		available.update( det );
 		mainFree.update( det );
-		greenFree.update( det );
 		return det;
 	}
 
@@ -123,7 +109,6 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 		DetectorImpl det = (DetectorImpl)super.update( index );
 		available.update( det );
 		mainFree.update( det );
-		greenFree.update( det );
 		return det;
 	}
 
@@ -136,7 +121,6 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 		super.removeLast();
 		available.remove( s );
 		mainFree.remove( s );
-		greenFree.remove( s );
 	}
 
 	/** Get a thread-safe iterator over the list */
