@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class MeterDataAction extends TrafficDeviceAction {
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() {
-		desktop.add(new MeterDataForm(proxy));
+	protected void do_perform() throws Exception {
+		desktop.show(new MeterDataForm(proxy));
 	}
 }
