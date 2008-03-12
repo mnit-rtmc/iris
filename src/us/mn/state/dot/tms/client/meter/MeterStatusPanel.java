@@ -242,7 +242,7 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	public void refreshUpdate() {
 		final MeterProxy p = proxy;
 		dataButton.setAction(new MeterDataAction(p,
-			connection.getDesktop()));
+			connection.getDesktop(), connection.getDataFactory()));
 		shrink.setAction(new ShrinkQueueAction(p));
 		grow.setAction(new GrowQueueAction(p));
 		meter_on.setAction(new TurnOnAction(p));

@@ -111,7 +111,7 @@ public class IrisClient extends JFrame {
 			}
 		});
 		userManager = new UserManager(desktop, props);
-		tmsConnection = new TmsConnection(desktop, userManager);
+		tmsConnection = new TmsConnection(desktop, userManager, props);
 		hostName = props.getProperty( "TMSIpAddress" ) + ":" +
 			props.getProperty("TMSPort");
 		layout = new ScreenLayout(desktop);

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
+import us.mn.state.dot.data.DataFactory;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
 
@@ -32,11 +33,15 @@ public class MeterDataAction extends TrafficDeviceAction {
 	/** Desktop to put the plotlet */
 	protected final SmartDesktop desktop;
 
+	/** Traffic data factory */
+	protected final DataFactory factory;
+
 	/** Create a new meter data action */
-	public MeterDataAction(MeterProxy p, SmartDesktop d) {
+	public MeterDataAction(MeterProxy p, SmartDesktop d, DataFactory f) {
 		super(p);
 		proxy = p;
 		desktop = d;
+		factory = f;
 		putValue(Action.NAME, "Data");
 		putValue(Action.SHORT_DESCRIPTION, "Plot meter data.");
 		putValue(Action.LONG_DESCRIPTION,
@@ -45,6 +50,6 @@ public class MeterDataAction extends TrafficDeviceAction {
 
 	/** Actually perform the action */
 	protected void do_perform() throws Exception {
-		desktop.show(new MeterDataForm(proxy));
+		desktop.show(new MeterDataForm(proxy, factory));
 	}
 }
