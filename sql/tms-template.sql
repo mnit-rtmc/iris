@@ -188,7 +188,6 @@ CREATE TABLE detector (
     "laneType" smallint NOT NULL,
     "laneNumber" smallint NOT NULL,
     abandoned boolean NOT NULL,
-    hov boolean NOT NULL,
     "forceFail" boolean NOT NULL,
     "fieldLength" real NOT NULL,
     fake text NOT NULL
@@ -935,7 +934,7 @@ CREATE VIEW camera_view AS
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
-	smallint, boolean, boolean) RETURNS text AS
+	smallint, boolean) RETURNS text AS
 '	DECLARE
 		fwy ALIAS FOR $1;
 		fdir ALIAS FOR $2;
@@ -944,8 +943,7 @@ CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 		xmod ALIAS FOR $5;
 		l_type ALIAS FOR $6;
 		lane_number ALIAS FOR $7;
-		hov ALIAS FOR $8;
-		abandoned ALIAS FOR $9;
+		abandoned ALIAS FOR $8;
 		xmd varchar(2);
 		ltyp varchar(2);
 		lnum varchar(2);
@@ -964,9 +962,6 @@ CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 			xmd = xmod;
 		END IF;
 		suffix = '''';
-		IF hov THEN
-			suffix = ''H'';
-		END IF;
 		IF abandoned THEN
 			suffix = ''-ABND'';
 		END IF;
@@ -989,10 +984,10 @@ LANGUAGE plpgsql;
 CREATE VIEW detector_view AS
 	SELECT d."index" AS det_id, ld.line, c."drop", d.pin,
 	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
-		d."laneType", d."laneNumber", d.hov, d.abandoned) AS label,
+		d."laneType", d."laneNumber", d.abandoned) AS label,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	boolean_converter(d.hov) AS hov, d."laneNumber" AS lane_number,
-	d."fieldLength" AS field_length, ln.description AS lane_type,
+	d."laneNumber" AS lane_number, d."fieldLength" AS field_length,
+	ln.description AS lane_type,
 	boolean_converter(d.abandoned) AS abandoned,
 	boolean_converter(d."forceFail") AS force_fail,
 	boolean_converter(c.active) AS active, d.fake, d.notes
@@ -1141,6 +1136,8 @@ COPY lane_type (id, description, dcode) FROM stdin;
 11	Omnibus	O
 12	Green	G
 13	Wrong Way	Y
+14	HOV	H
+15	HOT	HT
 \.
 
 COPY road_modifier (id, modifier, mod) FROM stdin;

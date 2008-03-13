@@ -50,7 +50,7 @@ public interface Detector extends Device {
 	/** Exit lane type */
 	public short EXIT = 7;
 
-	/** Bypass (HOV) lane type */
+	/** Meter bypass (HOV) lane type */
 	public short BYPASS = 8;
 
 	/** Passage lane type */
@@ -68,17 +68,24 @@ public interface Detector extends Device {
 	/** Wrong way (exit) lane type */
 	public short WRONG_WAY = 13;
 
+	/** High-Occupancy-Vehicle (HOV) lane type */
+	short HOV = 14;
+
+	/** High Occupancy / Toll (HOT) lane type */
+	short HOT = 15;
+
 	/** Lane class constant strings */
 	public String[] LANE_TYPE = {
 		" ", "Mainline", "Auxiliary", "CD Lane", "Reversible",
 		"Merge", "Queue", "Exit", "Bypass", "Passage", "Velocity",
-		"Omnibus", "Green", "Wrong Way"
+		"Omnibus", "Green", "Wrong Way", "HOV", "HOT"
 	};
 
 	/** Lane strings to use for detector names */
 	public String[] LANE_SUFFIX = {
 		"", "",
-		"A", "CD", "R", "M", "Q", "X", "B", "P", "V", "O", "G", "Y"
+		"A", "CD", "R", "M", "Q", "X", "B", "P", "V", "O", "G", "Y",
+		"H", "HT"
 	};
 
 	/** Number of samples in 3 minutes */
@@ -120,7 +127,9 @@ public interface Detector extends Device {
 		SAMPLE_4_HOURS,	// velocity
 		SAMPLE_3_DAYS,	// omnibus
 		SAMPLE_3_DAYS,	// green
-		SAMPLE_8_HOURS	// wrong way
+		SAMPLE_8_HOURS,	// wrong way
+		SAMPLE_8_HOURS,	// HOV
+		SAMPLE_8_HOURS	// HOT
 	};
 
 	/** Set the lane type */
@@ -146,13 +155,6 @@ public interface Detector extends Device {
 
 	/** Get the abandoned status */
 	public boolean isAbandoned() throws RemoteException;
-
-	/** Set the HOV status */
-	public void setHov( boolean hov ) throws TMSException,
-		RemoteException;
-
-	/** Get the HOV status */
-	public boolean isHov() throws RemoteException;
 
 	/** Set the Force Fail status */
 	public void setForceFail( boolean forceFail ) throws TMSException,

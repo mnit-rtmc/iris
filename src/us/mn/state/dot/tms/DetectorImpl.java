@@ -168,8 +168,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 				if(laneNumber > 0)
 					buffer.append(laneNumber);
 			}
-			if(hov && laneType != BYPASS)
-				buffer.append("H");
 			if(abandoned)
 				buffer.append("-ABND");
 		}
@@ -248,13 +246,14 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Is this a station detector? (mainline, non-HOV) */
 	public boolean isStation() {
-		return (laneType == MAINLINE) && !hov;
+		return laneType == MAINLINE;
 	}
 
 	/** Is the given lane type a mainline? (auxiliary, cd, etc.) */
 	static public boolean isMainlineType(int t) {
 		return t == MAINLINE || t == AUXILIARY || t == CD_LANE ||
-			t == REVERSIBLE || t == VELOCITY;
+			t == REVERSIBLE || t == VELOCITY ||
+			t == HOV || t == HOT;
 	}
 
 	/** Is this a CD lane detector? */
@@ -305,8 +304,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			DetectorImpl d = (DetectorImpl)o;
 			return location.matches(d.location) &&
 				laneNumber == d.laneNumber &&
-				!d.isVelocity() && d.isMainline() &&
-				hov == d.hov;
+				!d.isVelocity() && d.isMainline();
 		}
 		return false;
 	}
@@ -338,20 +336,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Get the abandoned status */
 	public boolean isAbandoned() { return abandoned; }
-
-	/** HOV status flag */
-	protected boolean hov;
-
-	/** Set the HOV status */
-	public synchronized void setHov(boolean h) throws TMSException {
-		if(h == hov)
-			return;
-		store.update(this, "hov", h);
-		hov = h;
-	}
-
-	/** Get the HOV status */
-	public boolean isHov() { return hov; }
 
 	/** Force Fail status flag */
 	protected boolean forceFail;
@@ -555,8 +539,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Get the volume "no hit" threshold */
 	protected int getNoHitThreshold() {
-		if(hov && laneType == MAINLINE)
-			return SAMPLE_8_HOURS;
 		if(isRamp()) {
 			RoadwayImpl freeway =
 				(RoadwayImpl)location.getFreeway();
@@ -724,8 +706,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			out.print("label='" + l + "' ");
 		if(cat > MAINLINE)
 			out.print("category='" + LANE_SUFFIX[cat] + "' ");
-		else if(isHov())
-			out.print("category='H' ");
 		if(lane > 0)
 			out.print("lane='" + lane + "' ");
 		if(field != DEFAULT_FIELD_LENGTH)

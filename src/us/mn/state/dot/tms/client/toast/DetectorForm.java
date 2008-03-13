@@ -71,9 +71,6 @@ public class DetectorForm extends TMSObjectForm {
 	/** Lane number spinner */
 	protected final JSpinner number = new JSpinner(num_model);
 
-	/** HOV check box */
-	protected final JCheckBox hov = new JCheckBox();
-
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
@@ -159,7 +156,6 @@ public class DetectorForm extends TMSObjectForm {
 		FormPanel panel = new FormPanel(admin);
 		panel.add("Lane", lane);
 		panel.addRow(number);
-		panel.addRow("HOV", hov);
 		panel.addRow("Avg field length", field);
 		panel.add(new JLabel("Fake"));
 		panel.setWidth(3);
@@ -179,7 +175,6 @@ public class DetectorForm extends TMSObjectForm {
 		station.setEnabled(detector.getStation() != null);
 		lane.setSelectedIndex(detector.getLaneType());
 		number.setValue(detector.getLaneNumber());
-		hov.setSelected(detector.isHov());
 		field.setText(String.valueOf(detector.getFieldLength()));
 		fake.setText(detector.getFakeDetector());
 		abandoned.setSelected(detector.isAbandoned());
@@ -197,7 +192,6 @@ public class DetectorForm extends TMSObjectForm {
 			detector.setLaneNumber(
 				((Number)number.getValue()).shortValue());
 			detector.setNotes(notes.getText());
-			detector.setHov(hov.isSelected());
 			detector.setFieldLength(afl);
 			detector.setAbandoned(abandoned.isSelected());
 			detector.setForceFail(forceFail.isSelected());
