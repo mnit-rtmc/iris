@@ -396,7 +396,12 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Calculate the maximum trip time to display on the sign */
 	static protected int maximumTripTime(float distance) {
 		float hours = distance / MINIMUM_TRIP_SPEED;
-		return 5 * (int)(hours * 60 / 5 + 1); // Round up next 5 min
+		return Math.round(hours * 60);
+	}
+
+	/** Round up to the next 5 minutes */
+	static protected int roundUp5Min(int minutes) {
+		return ((minutes - 1) / 5 + 1) * 5;
 	}
 
 	/** Calculate the travel time for the given route */
@@ -411,6 +416,21 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			throw new InvalidMessageException("Bad route for " +
 				id + ": " + e.getMessage());
 		}
+	}
+
+	/** Are all the routes confined to the same single corridor */
+	protected boolean isSingleCorridor() {
+		Corridor cor = null;
+		for(Route r: s_routes.values()) {
+			Corridor c = r.getOnlyCorridor();
+			if(c == null)
+				return false;
+			if(cor == null)
+				cor = c;
+			else if(c != cor)
+				return false;
+		}
+		return cor != null;
 	}
 
 	/** Are two routes confined to the same single corridor */
@@ -443,12 +463,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		MultiString m = new MultiString(travel);
 		MultiString.TravelCallback cb = new MultiString.TravelCallback()
 		{
-			/* Use of the "OVER X" form is all or nothing for one
-			 * sign. So, first we must calculate the times for each
-			 * destination. Then, determine if the "OVER" form
-			 * should be used. After that, replace the travel time
-			 * tags with the selected values. */
-			protected boolean over = false;
+			/* If all routes are on the same corridor, when the
+			 * "OVER X" form is used, it must be used for all
+			 * destinations. So, first we must calculate the times
+			 * for each destination. Then, determine if the "OVER"
+			 * form should be used. After that, replace the travel
+			 * time tags with the selected values. */
+			protected boolean any_over = false;
+			protected boolean all_over = false;
 
 			/** Calculate the travel time to the given station */
 			public String calculateTime(String sid)
@@ -462,19 +484,22 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 				boolean final_dest = isFinalDest(r);
 				int m = calculateTravelTime(r, final_dest);
 				int slow = maximumTripTime(r.getLength());
-				if(m > slow) {
-					over = true;
+				boolean over = m > slow;
+				if(over) {
+					any_over = true;
 					m = slow;
 				}
-				if(over)
+				if(over || all_over) {
+					m = roundUp5Min(m);
 					return "OVER " + String.valueOf(m);
-				else
+				} else
 					return String.valueOf(m);
 			}
 
 			/** Check if the callback has changed formatting mode */
 			public boolean isChanged() {
-				return over;
+				all_over = any_over && isSingleCorridor();
+				return all_over;
 			}
 		};
 		String t = m.replaceTravelTimes(cb);
