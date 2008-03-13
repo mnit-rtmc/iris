@@ -425,10 +425,8 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			throw new ChangeVetoException("Police panel: " + id);
 		shouldMeter = true;
 		MeterPoller mp = getMeterPoller();
-		if(mp != null) {
-			lookupGreenDetector();
+		if(mp != null)
 			mp.startMetering(this);
-		}
 	}
 
 	/** Stop metering this ramp meter */
@@ -792,6 +790,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Print a single detector as an XML element */
 	public void printXmlElement(PrintWriter out) {
+		lookupGreenDetector();
 		out.print("<meter id='" + getId() + "' ");
 		out.print("label='" + getLabel() + "' ");
 		out.print("storage='" + getStorage() + "' ");

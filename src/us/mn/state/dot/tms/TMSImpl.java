@@ -204,8 +204,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	protected void writeXmlConfiguration() throws IOException {
 		System.err.println("Writing TMS XML files @ " + new Date());
 		detectors.writeXml();
-		meters.writeXml();
 		r_nodes.writeXml();
+		meters.writeXml();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 
