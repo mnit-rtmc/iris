@@ -24,49 +24,49 @@ import java.rmi.RemoteException;
 public interface Detector extends Device {
 
 	/** Get the detector index */
-	public int getIndex() throws RemoteException;
+	int getIndex() throws RemoteException;
 
 	/** Undefined lane type */
-	public short NONE = 0;
+	short NONE = 0;
 
 	/** Mainline lane type */
-	public short MAINLINE = 1;
+	short MAINLINE = 1;
 
 	/** Auxiliary lane type */
-	public short AUXILIARY = 2;
+	short AUXILIARY = 2;
 
 	/** Collector/Distributor lane type */
-	public short CD_LANE = 3;
+	short CD_LANE = 3;
 
 	/** Reversible lane type */
-	public short REVERSIBLE = 4;
+	short REVERSIBLE = 4;
 
 	/** Merge lane type */
-	public short MERGE = 5;
+	short MERGE = 5;
 
 	/** Queue detector lane type */
-	public short QUEUE = 6;
+	short QUEUE = 6;
 
 	/** Exit lane type */
-	public short EXIT = 7;
+	short EXIT = 7;
 
 	/** Meter bypass (HOV) lane type */
-	public short BYPASS = 8;
+	short BYPASS = 8;
 
 	/** Passage lane type */
-	public short PASSAGE = 9;
+	short PASSAGE = 9;
 
 	/** Velocity (mainline) lane type */
-	public short VELOCITY = 10;
+	short VELOCITY = 10;
 
 	/** Omnibus (ok, bus) lane type */
-	public short OMNIBUS = 11;
+	short OMNIBUS = 11;
 
 	/** Green count lane type */
-	public short GREEN = 12;
+	short GREEN = 12;
 
 	/** Wrong way (exit) lane type */
-	public short WRONG_WAY = 13;
+	short WRONG_WAY = 13;
 
 	/** High-Occupancy-Vehicle (HOV) lane type */
 	short HOV = 14;
@@ -75,45 +75,45 @@ public interface Detector extends Device {
 	short HOT = 15;
 
 	/** Lane class constant strings */
-	public String[] LANE_TYPE = {
+	String[] LANE_TYPE = {
 		" ", "Mainline", "Auxiliary", "CD Lane", "Reversible",
 		"Merge", "Queue", "Exit", "Bypass", "Passage", "Velocity",
 		"Omnibus", "Green", "Wrong Way", "HOV", "HOT"
 	};
 
 	/** Lane strings to use for detector names */
-	public String[] LANE_SUFFIX = {
+	String[] LANE_SUFFIX = {
 		"", "",
 		"A", "CD", "R", "M", "Q", "X", "B", "P", "V", "O", "G", "Y",
 		"H", "HT"
 	};
 
 	/** Number of samples in 3 minutes */
-	public int SAMPLE_3_MINUTES = 6;
+	int SAMPLE_3_MINUTES = 6;
 
 	/** Number of samples in 20 minutes */
-	public int SAMPLE_20_MINUTES = 40;
+	int SAMPLE_20_MINUTES = 40;
 
 	/** Number of samples in 30 minutes */
-	public int SAMPLE_30_MINUTES = 60;
+	int SAMPLE_30_MINUTES = 60;
 
 	/** Number of samples in 4 hours */
-	public int SAMPLE_4_HOURS = 480;
+	int SAMPLE_4_HOURS = 480;
 
 	/** Number of samples in 8 hours */
-	public int SAMPLE_8_HOURS = 960;
+	int SAMPLE_8_HOURS = 960;
 
 	/** Number of samples in 12 hours */
-	public int SAMPLE_12_HOURS = 1440;
+	int SAMPLE_12_HOURS = 1440;
 
 	/** Number of samples in 1 day */
-	public int SAMPLE_1_DAY = 2880;
+	int SAMPLE_1_DAY = 2880;
 
 	/** Number of samples in 3 days */
-	public int SAMPLE_3_DAYS = SAMPLE_1_DAY * 3;
+	int SAMPLE_3_DAYS = SAMPLE_1_DAY * 3;
 
 	/** 30-second samples to check for "no hit" failure, by type */
-	public int[] SAMPLE_THRESHOLD = {
+	int[] SAMPLE_THRESHOLD = {
 		0,
 		SAMPLE_4_HOURS,	// mainline
 		SAMPLE_1_DAY,	// auxiliary
@@ -133,56 +133,53 @@ public interface Detector extends Device {
 	};
 
 	/** Set the lane type */
-	public void setLaneType( short t ) throws TMSException,
-		RemoteException;
+	void setLaneType(short t) throws TMSException, RemoteException;
 
 	/** Get the lane type */
-	public short getLaneType() throws RemoteException;
+	short getLaneType() throws RemoteException;
 
 	/** Is this a station detector? (mainline, non-HOV) */
-	public boolean isStation() throws RemoteException;
+	boolean isStation() throws RemoteException;
 
 	/** Set the lane number */
-	public void setLaneNumber( short laneNumber ) throws TMSException,
+	void setLaneNumber(short laneNumber) throws TMSException,
 		RemoteException;
 
 	/** Get the lane number */
-	public short getLaneNumber() throws RemoteException;
+	short getLaneNumber() throws RemoteException;
 
 	/** Set the abandoned status */
-	public void setAbandoned( boolean abandoned ) throws TMSException,
+	void setAbandoned(boolean abandoned) throws TMSException,
 		RemoteException;
 
 	/** Get the abandoned status */
-	public boolean isAbandoned() throws RemoteException;
+	boolean isAbandoned() throws RemoteException;
 
 	/** Set the Force Fail status */
-	public void setForceFail( boolean forceFail ) throws TMSException,
+	void setForceFail(boolean forceFail) throws TMSException,
 		RemoteException;
 
 	/** Get the Force Fail status */
-	public boolean getForceFail() throws RemoteException;
+	boolean getForceFail() throws RemoteException;
 
 	/** Set the average field length */
-	public void setFieldLength( float field ) throws TMSException,
-		RemoteException;
+	void setFieldLength(float field) throws TMSException, RemoteException;
 
 	/** Get the average field length */
-	public float getFieldLength() throws RemoteException;
+	float getFieldLength() throws RemoteException;
 
-	/** Get the String representation of this detector.*/
-	public String getLabel() throws RemoteException;
+	/** Get the String representation of this detector */
+	String getLabel() throws RemoteException;
 
 	/** Get the detector label */
-	public String getLabel(boolean statName) throws RemoteException;
+	String getLabel(boolean statName) throws RemoteException;
 
 	/** Set the fake detector */
-	public void setFakeDetector(String f) throws TMSException,
-		RemoteException;
+	void setFakeDetector(String f) throws TMSException, RemoteException;
 
 	/** Get the fake detector */
-	public String getFakeDetector() throws RemoteException;
+	String getFakeDetector() throws RemoteException;
 
 	/** Get the station which contains this detector */
-	public Station getStation() throws RemoteException;
+	Station getStation() throws RemoteException;
 }
