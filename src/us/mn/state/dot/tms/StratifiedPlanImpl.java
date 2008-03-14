@@ -546,6 +546,30 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			addDownstream(segment.getDetectorSet());
 		}
 
+		/** Add an entrance to the zone */
+		protected boolean addEntrance(DetectorSet ds, boolean cd_merge)
+		{
+			boolean q = (ds.getDetectorSet(
+				Detector.QUEUE)).isDefined();
+			entrance.addDetectors(ds.getDetectorSet(
+				Detector.BYPASS));
+			entrance.addDetectors(ds.getDetectorSet(
+				Detector.MAINLINE));
+			entrance.addDetectors(ds.getDetectorSet(
+				Detector.OMNIBUS));
+			DetectorSet passage = ds.getDetectorSet(
+				Detector.PASSAGE);
+			if(passage.isDefined())
+				entrance.addDetectors(passage);
+			else if(q || !cd_merge) {
+				entrance.addDetectors(ds.getDetectorSet(
+					Detector.MERGE));
+				entrance.addDetectors(ds.getDetectorSet(
+					Detector.EXIT));
+			}
+			return q;
+		}
+
 		/** Add a meterable entrance to the zone
 		 * @param meterable Segment to add to the zone
 		 * @param cd_merge True if segment is an a CD lane
@@ -553,25 +577,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected boolean addEntrance(MeterableImpl meterable,
 			boolean cd_merge)
 		{
-			boolean q = (meterable.getDetectorSet(
-				Detector.QUEUE)).isDefined();
-			entrance.addDetectors(
-				meterable.getDetectorSet(Detector.BYPASS));
-			entrance.addDetectors(
-				meterable.getDetectorSet(Detector.MAINLINE));
-			entrance.addDetectors(
-				meterable.getDetectorSet(Detector.OMNIBUS));
-			DetectorSet passage =
-				meterable.getDetectorSet(Detector.PASSAGE);
-			if(passage.isDefined())
-				entrance.addDetectors(passage);
-			else if(q || !cd_merge) {
-				entrance.addDetectors(meterable.getDetectorSet(
-					Detector.MERGE));
-				entrance.addDetectors(meterable.getDetectorSet(
-					Detector.EXIT));
-			}
-			return q;
+			return addEntrance(meterable.getDetectorSet(),
+				cd_merge);
 		}
 
 		/** Scan upstream for meterable segments on the CD road.
