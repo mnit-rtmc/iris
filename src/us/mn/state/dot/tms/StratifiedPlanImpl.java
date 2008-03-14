@@ -426,19 +426,19 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected final String id;
 
 		/** Mainline upstream detectors */
-		protected final DetectorSet upstream;
+		protected final DetectorSet upstream = new DetectorSet();
 
 		/** Entrance (on-ramp; passage, bypass or merge) detectors */
-		protected final DetectorSet entrance;
+		protected final DetectorSet entrance = new DetectorSet();
 
 		/** Exit (off-ramp) detectors */
-		protected final DetectorSet exit;
+		protected final DetectorSet exit = new DetectorSet();
 
 		/** Mainline detectors within the zone */
-		protected final DetectorSet mainline;
+		protected final DetectorSet mainline = new DetectorSet();
 
 		/** Downstream mainline detectors */
-		protected final DetectorSet downstream;
+		protected final DetectorSet downstream = new DetectorSet();
 
 		/** List of ramp meter states within the zone */
 		protected final LinkedList<MeterState> meters =
@@ -469,11 +469,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected Zone(String id, SegmentImpl[] segs, int start,
 			int stop) throws RemoteException
 		{
-			upstream = new DetectorSet();
-			entrance = new DetectorSet();
-			exit = new DetectorSet();
-			mainline = new DetectorSet();
-			downstream = new DetectorSet();
 			this.id = id;
 			addUpstream(segs[start]);
 			for(int i = start; i <= stop; i++) {
