@@ -467,7 +467,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
 		/** Create a new zone */
 		protected Zone(String id, SegmentImpl[] segs, int start,
-			int stop) throws RemoteException
+			int stop)
 		{
 			this.id = id;
 			addUpstream(segs[start]);
@@ -840,14 +840,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	protected boolean createZone(String id, SegmentImpl[] segs, int start,
 		int stop)
 	{
-		try {
-			Zone zone = new Zone(id, segs, start, stop);
-			if(zone.isDefined()) {
-				zones.add(zone);
-				return true;
-			}
+		Zone zone = new Zone(id, segs, start, stop);
+		if(zone.isDefined()) {
+			zones.add(zone);
+			return true;
 		}
-		catch(RemoteException e) {}
 		return false;
 	}
 
