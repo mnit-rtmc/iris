@@ -466,6 +466,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected boolean valid;
 
 		/** Create a new zone */
+		protected Zone(String id) {
+			this.id = id;
+		}
+
+		/** Create a new zone */
 		protected Zone(String id, SegmentImpl[] segs, int start,
 			int stop)
 		{
@@ -499,10 +504,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		}
 
 		/** Add an upstream station to the zone */
-		protected void addUpstream(SegmentImpl segment) {
-			Detector[] dets = segment.getDetectors();
-			for(int i = 0; i < dets.length; i++) {
-				DetectorImpl det = (DetectorImpl)dets[i];
+		protected void addUpstream(DetectorSet ds) {
+			for(DetectorImpl det: ds.toArray()) {
 				if(det.isStation())
 					upstream.addDetector(det);
 				else
@@ -510,26 +513,37 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 
+		/** Add an upstream station to the zone */
+		protected void addUpstream(SegmentImpl segment) {
+			addUpstream(segment.getDetectorSet());
+		}
+
 		/** Add a mainline station to the zone */
-		protected void addMainline(SegmentImpl segment) {
-			Detector[] dets = segment.getDetectors();
-			for(int i = 0; i < dets.length; i++) {
-				DetectorImpl det = (DetectorImpl)dets[i];
+		protected void addMainline(DetectorSet ds) {
+			for(DetectorImpl det: ds.toArray()) {
 				if(det.isStation())
 					mainline.addDetector(det);
 			}
 		}
 
+		/** Add a mainline station to the zone */
+		protected void addMainline(SegmentImpl segment) {
+			addMainline(segment.getDetectorSet());
+		}
+
 		/** Add a downstream station to the zone */
-		protected void addDownstream(SegmentImpl segment) {
-			Detector[] dets = segment.getDetectors();
-			for(int i = 0; i < dets.length; i++) {
-				DetectorImpl det = (DetectorImpl)dets[i];
+		protected void addDownstream(DetectorSet ds) {
+			for(DetectorImpl det: ds.toArray()) {
 				if(det.isStation())
 					downstream.addDetector(det);
 				else
 					exit.addDetector(det);
 			}
+		}
+
+		/** Add a downstream station to the zone */
+		protected void addDownstream(SegmentImpl segment) {
+			addDownstream(segment.getDetectorSet());
 		}
 
 		/** Add a meterable entrance to the zone

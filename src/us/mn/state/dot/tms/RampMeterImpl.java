@@ -174,10 +174,10 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Lookup the green count detector */
 	protected void lookupGreenDetector() {
-		Detector[] g = getDetectorSet().getDetectorSet(
+		DetectorImpl[] g = getDetectorSet().getDetectorSet(
 			Detector.GREEN).toArray();
 		if(g.length > 0)
-			green_det = (DetectorImpl)g[0];
+			green_det = g[0];
 		else
 			green_det = null;
 	}
@@ -775,7 +775,11 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the detectors associated with the ramp meter */
 	public Detector[] getDetectors() {
-		return getDetectorSet().toArray();
+		DetectorImpl[] dets = getDetectorSet().toArray();
+		Detector[] ds = new Detector[dets.length];
+		for(int i = 0; i < dets.length; i++)
+			ds[i] = dets[i];
+		return ds;
 	}
 
 	/** Get the ID of the corridor containing the ramp meter */
@@ -833,9 +837,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	{
 		if(ds.size() > 0) {
 			StringBuilder b = new StringBuilder();
-			Detector[] dets = ds.toArray();
-			for(Detector d: dets) {
-				DetectorImpl det = (DetectorImpl)d;
+			for(DetectorImpl det: ds.toArray()) {
 				b.append(" D");
 				b.append(det.getIndex());
 			}

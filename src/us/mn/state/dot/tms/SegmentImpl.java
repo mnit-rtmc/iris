@@ -142,6 +142,15 @@ abstract class SegmentImpl extends TMSObjectImpl implements Segment, Storable {
 		return set;
 	}
 
+	/** Get a set of all segment detectors */
+	public DetectorSet getDetectorSet() {
+		DetectorImpl[] dets = detectors;	// Avoid race
+		DetectorSet set = new DetectorSet();
+		for(DetectorImpl d: dets)
+			set.addDetector(d);
+		return set;
+	}
+
 	/** Does this segment have the specified detector? */
 	public boolean hasDetector(DetectorImpl det) {
 		DetectorImpl[] dets = detectors;	// Avoid race
