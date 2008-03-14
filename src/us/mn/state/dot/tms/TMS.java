@@ -39,9 +39,6 @@ public interface TMS extends Remote {
 	/** Get the station map */
 	public StationMap getStationMap() throws RemoteException;
 
-	/** Get the segment map */
-	public SegmentMap getSegmentMap() throws RemoteException;
-
 	/** Get the r_node map */
 	public R_NodeMap getR_NodeMap() throws RemoteException;
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,7 +154,6 @@ class SegmentListImpl extends AbstractListImpl implements Storable {
 		catch(ObjectVaultException e) {
 			throw new TMSException(e);
 		}
-		segMap.add(segment.getOID(), segment);
 		list.add(index, segment);
 		revalidate(index);
 		notifyAdd(index, segment);
@@ -177,7 +176,6 @@ class SegmentListImpl extends AbstractListImpl implements Storable {
 			StationSegmentImpl station = (StationSegmentImpl)seg;
 			station.setIndex(null);
 		}
-		segMap.remove(seg.getOID());
 		try { vault.remove(list, index, getUserName()); }
 		catch(ObjectVaultException e) {
 			throw new TMSException(e);

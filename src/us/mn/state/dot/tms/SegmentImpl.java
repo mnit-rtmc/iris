@@ -199,7 +199,6 @@ abstract class SegmentImpl extends TMSObjectImpl implements Segment, Storable {
 		}
 		detectors = (DetectorImpl[])dets.toArray(new DetectorImpl[0]);
 		Arrays.sort(detectors);
-		segMap.add(getOID(), this);
 	}
 
 	/** Validate the segment from the previous segment's values */

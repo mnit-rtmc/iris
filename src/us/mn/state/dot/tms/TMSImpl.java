@@ -347,9 +347,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Master station list */
 	protected final StationMapImpl station_map;
 
-	/** Master segment map */
-	protected final SegmentMapImpl segments;
-
 	/** Master r_node map */
 	protected final R_NodeMapImpl r_nodes;
 
@@ -387,7 +384,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		roadList = roadways;
 		detList = detectors;
 		statMap = station_map;
-		segMap = segments;
 		nodeMap = r_nodes;
 		planList = plans;
 		meterList = meters;
@@ -409,7 +405,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		roadways = new RoadwayListImpl();
 		detectors = new DetectorListImpl();
 		station_map = new StationMapImpl();
-		segments = new SegmentMapImpl();
 		r_nodes = new R_NodeMapImpl();
 		plans = new TimingPlanListImpl();
 		meters = new RampMeterListImpl();
@@ -438,11 +433,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Get the station map */
 	public StationMap getStationMap() {
 		return station_map;
-	}
-
-	/** Get the segment map */
-	public SegmentMap getSegmentMap() {
-		return segments;
 	}
 
 	/** Get the r_node map */

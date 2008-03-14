@@ -86,14 +86,6 @@ public class TMSProxy {
 	/** Get the station list */
 	public RemoteListModel getStations() { return stations; }
 
-	/** Segment list */
-	protected final RemoteListModel segments;
-
-	/** Get the segment list */
-	public RemoteListModel getSegments() {
-		return segments;
-	}
-
 	/** R_Node list */
 	protected final RemoteListModel r_nodes;
 
@@ -223,7 +215,6 @@ public class TMSProxy {
 		available = new RemoteListModel(dets.getAvailableList());
 		mainFree = new RemoteListModel(dets.getMainFreeList());
 		stations = new RemoteListModel(tms.getStationMap());
-		segments = new RemoteListModel(tms.getSegmentMap());
 		r_nodes = new RemoteListModel(tms.getR_NodeMap());
 		meter_list = tms.getRampMeterList();
 		availableMeters = new RemoteListModel(

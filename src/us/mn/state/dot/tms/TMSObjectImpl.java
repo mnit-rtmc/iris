@@ -84,9 +84,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Station map */
 	static StationMapImpl statMap;
 
-	/** Segment map */
-	static SegmentMapImpl segMap;
-
 	/** R_Node map */
 	static R_NodeMapImpl nodeMap;
 

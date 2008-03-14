@@ -62,10 +62,6 @@ us/mn/state/dot/tms/Scheduler??.class
 us/mn/state/dot/tms/Scheduler?ExceptionHandler.class
 us/mn/state/dot/tms/Scheduler?Job.class
 us/mn/state/dot/tms/Segment.class
-us/mn/state/dot/tms/SegmentList.class
-us/mn/state/dot/tms/SegmentMap.class
-us/mn/state/dot/tms/SegmentType.class
-us/mn/state/dot/tms/SegmentValidator.class
 us/mn/state/dot/tms/SignAlert.class
 us/mn/state/dot/tms/SignMessage.class
 us/mn/state/dot/tms/SignTravelTime.class
