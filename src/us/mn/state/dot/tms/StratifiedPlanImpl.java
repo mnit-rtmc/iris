@@ -615,7 +615,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				exit.isNotBad() && mainline.isFlowing() &&
 				meters.size() > 0)
 			{
-				// FIXME: set A filter constant by zone?
 				A += K * (upstream.getFlow() - A);
 				U += K * (entrance.getFlow() - U);
 				X += K * (exit.getFlow() - X);
