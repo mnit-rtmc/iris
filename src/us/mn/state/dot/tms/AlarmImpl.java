@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,9 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 {
 	/** ObjectVault table name */
 	static public final String tableName = "alarm";
+
+	/** Alarm debug log */
+	static protected final DebugLog ALARM_LOG = new DebugLog("alarm");
 
 	/** Get the database table name */
 	public String getTable() {
@@ -108,7 +111,7 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	public void setState(boolean s) {
 		if(s != state) {
 			String m = s ? "TRIGGERED" : "CLEARED";
-			System.err.println("ALARM " + m + " on " + controller +
+			ALARM_LOG.log("ALARM " + m + " on " + controller +
 				" pin " + pin + ": " + notes);
 		}
 		state = s;
