@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
+import us.mn.state.dot.sched.Job;
 
 /**
  * AbstractListImpl is a collection class which keeps track of a set of
@@ -55,7 +56,7 @@ abstract class AbstractListImpl extends TMSObjectImpl implements AbstractList {
 
 	/** Subscribe a listener to this list */
 	public Object[] subscribe(final RemoteList listener) {
-		WORKER.addJob(new Scheduler.Job(0) {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				subscribers.add(listener);
 			}
@@ -65,7 +66,7 @@ abstract class AbstractListImpl extends TMSObjectImpl implements AbstractList {
 
 	/** Unsubscribe a listener from this list */
 	public final void unsubscribe(final RemoteList listener) {
-		WORKER.addJob(new Scheduler.Job(0) {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				subscribers.remove(listener);
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.utils.ActionJob;
 
 /**
  * TrafficDeviceForm is a form for entering and editing Traffic device records

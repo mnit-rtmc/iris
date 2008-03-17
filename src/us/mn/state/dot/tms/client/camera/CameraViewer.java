@@ -30,15 +30,14 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import us.mn.state.dot.log.TmsLogFactory;
-import us.mn.state.dot.tms.Scheduler;
+import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.toast.Icons;
-import us.mn.state.dot.tms.utils.AbstractJob;
-import us.mn.state.dot.tms.utils.ActionJob;
 import us.mn.state.dot.video.AbstractImageFactory;
 import us.mn.state.dot.video.Camera;
 import us.mn.state.dot.video.Client;
@@ -69,8 +68,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	static protected final int BUTTON_NEXT = 11;
 
 	/** Network worker thread */
-	static protected final Scheduler NETWORKER = new Scheduler(
-		AbstractJob.HANDLER);
+	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
 
 	/** Properties for configuring the video client */
 	private final Properties videoProps;

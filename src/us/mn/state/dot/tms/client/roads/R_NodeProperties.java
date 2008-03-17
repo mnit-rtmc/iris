@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.R_Node;
@@ -44,7 +45,6 @@ import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.TMSObjectForm;
-import us.mn.state.dot.tms.utils.ActionJob;
 
 /**
  * R_NodeProperties is a form for viewing and editing roadway node parameters.

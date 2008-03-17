@@ -21,6 +21,7 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import javax.comm.SerialPort;
+import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.comm.KillThread;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.Operation;

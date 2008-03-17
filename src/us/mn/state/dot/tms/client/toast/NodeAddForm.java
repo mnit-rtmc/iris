@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.toast;
 import javax.swing.JButton;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.NodeGroup;
-import us.mn.state.dot.tms.utils.ActionJob;
 
 /**
  * NodeAddForm is a Swing dialog for adding a node

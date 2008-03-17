@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2005  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,14 +11,11 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
+import us.mn.state.dot.sched.Job;
 
 /**
  * The RemoteListImpl class keeps track of a list of remote objects
@@ -49,7 +46,7 @@ abstract public class RemoteListImpl extends RemoteObserverImpl
 	 * in the constructor. */
 	public final void initialize() {
 		final RemoteListImpl rli = this;
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws RemoteException {
 				Object[] elem = list.subscribe(rli);
 				if(elem != null) {
@@ -77,7 +74,7 @@ abstract public class RemoteListImpl extends RemoteObserverImpl
 	 * - called by the RMI server (do not use this method)
 	 */
 	public final void add(final int index, final Object element) {
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				doAdd(index, element);
 			}
@@ -92,7 +89,7 @@ abstract public class RemoteListImpl extends RemoteObserverImpl
 	 * - called by the RMI server (do not use this method)
 	 */
 	public final void remove(final int index) {
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				doRemove(index);
 			}
@@ -106,7 +103,7 @@ abstract public class RemoteListImpl extends RemoteObserverImpl
 	 * - called by the RMI server (do not use this method)
 	 */
 	public final void set(final int index, final Object element) {
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				doSet(index, element);
 			}

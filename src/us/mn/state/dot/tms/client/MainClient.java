@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@ import java.net.ProxySelector;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Properties;
-
+import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
 import us.mn.state.dot.util.HTTPProxySelector;
 
@@ -122,6 +123,12 @@ public class MainClient {
 		bindSocket();
 		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
+		Scheduler.setHandler(new ExceptionHandler() {
+			public boolean handle(Exception e) {
+				new ExceptionDialog(e).setVisible(true);
+				return true;
+			}
+		});
 		c.setVisible(true);
 	}
 

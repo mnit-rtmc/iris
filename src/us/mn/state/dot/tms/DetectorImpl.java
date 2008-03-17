@@ -20,10 +20,11 @@ import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.log.DetectorMalfunctionEvent;
 import us.mn.state.dot.tms.log.Log;
+import us.mn.state.dot.vault.FieldMap;
+import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * Detector for traffic data sampling
@@ -688,7 +689,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		final String det_id = Integer.toString(index);
 		final String line = formatEvent(stamp, duration, headway,
 			speed);
-		TMSImpl.FLUSH.addJob(new Scheduler.Job(0) {
+		TMSImpl.FLUSH.addJob(new Job() {
 			public void perform() throws IOException {
 				EventLogger.print(stamp, det_id, line);
 			}

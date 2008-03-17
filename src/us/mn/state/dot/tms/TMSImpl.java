@@ -21,6 +21,9 @@ import java.util.Properties;
 import java.util.Iterator;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.log.LogImpl;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
@@ -157,7 +160,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		TIMER.addJob(new TimerJobSigns());
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
-		TIMER.addJob(new Scheduler.Job(Calendar.HOUR, 1) {
+		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() {
 				lines.poll1Hour();
 				System.out.println(new Date());
@@ -165,19 +168,19 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				Profile.printThreads(System.out);
 			}
 		} );
-		TIMER.addJob(new Scheduler.Job(Calendar.DATE, 1) {
+		TIMER.addJob(new Job(Calendar.DATE, 1) {
 			public void perform() {
 				lines.poll1Day();
 			}
 		} );
-		TIMER.addJob(new Scheduler.Job(Calendar.DATE, 1,
+		TIMER.addJob(new Job(Calendar.DATE, 1,
 			Calendar.HOUR, 20)
 		{
 			public void perform() throws IOException {
 				writeXmlConfiguration();
 			}
 		});
-		TIMER.addJob(new Scheduler.Job(Calendar.DATE, 1,
+		TIMER.addJob(new Job(Calendar.DATE, 1,
 			Calendar.HOUR, 4)
 		{
 			public void perform() {
@@ -186,14 +189,14 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				lines.download();
 			}
 		} );
-		TIMER.addJob(new Scheduler.Job(500) {
+		TIMER.addJob(new Job(500) {
 			public void perform() {
 				System.err.println( "Performing download to"
 					+ " all controllers @ " + new Date() );
 				lines.download();
 			}
 		} );
-		TIMER.addJob(new Scheduler.Job(1000) {
+		TIMER.addJob(new Job(1000) {
 			public void perform() throws IOException {
 				writeXmlConfiguration();
 			}
@@ -217,13 +220,13 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	}
 
 	/** Sign polling timer job */
-	protected class TimerJobSigns extends Scheduler.Job {
+	protected class TimerJobSigns extends Job {
 
 		/** Job completer */
 		protected final Completer comp;
 
 		/** Job to be performed on each completion */
-		protected final Scheduler.Job job = new Scheduler.Job(0) {
+		protected final Job job = new Job() {
 			public void perform() {
 				dmss.notifyStatus();
 				warn_signs.notifyStatus();
@@ -248,7 +251,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	}
 
 	/** 30-second timer job */
-	protected class TimerJob30Sec extends Scheduler.Job {
+	protected class TimerJob30Sec extends Job {
 
 		/** Job completer */
 		protected final Completer comp;
@@ -257,7 +260,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		protected Calendar stamp;
 
 		/** Job to be performed on completion */
-		protected final Scheduler.Job job = new Scheduler.Job(0) {
+		protected final Job job = new Job() {
 			public void perform() {
 				detectors.calculateFakeFlows();
 				detectors.writeSampleXml();
@@ -296,7 +299,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	}
 
 	/** 5-minute timer job */
-	protected class TimerJob5Min extends Scheduler.Job {
+	protected class TimerJob5Min extends Job {
 
 		/** Job completer */
 		protected final Completer comp;
@@ -305,7 +308,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		protected Calendar stamp;
 
 		/** Job to be performed on completion */
-		protected final Scheduler.Job job = new Scheduler.Job(500) {
+		protected final Job job = new Job(500) {
 			public void perform() {
 				detectors.flush(stamp);
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.client;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
-import us.mn.state.dot.tms.utils.ActionJob;
 
 /** 
  * the FileMenu class provides the File menu for the IrisClient.

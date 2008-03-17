@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,10 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.AbstractJob;
 
 /**
  * Table model for controller alarms

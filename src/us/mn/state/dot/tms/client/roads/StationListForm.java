@@ -19,11 +19,11 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.AbstractListForm;
-import us.mn.state.dot.tms.utils.ActionJob;
-import us.mn.state.dot.tms.utils.ListSelectionJob;
 
 /**
  * Swing dialog to view list of TMS stations

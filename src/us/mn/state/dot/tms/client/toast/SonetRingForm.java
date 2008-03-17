@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,20 +33,19 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-
+import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.TreeSelectionJob;
 import us.mn.state.dot.tms.Circuit;
 import us.mn.state.dot.tms.CommunicationLine;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.Node;
 import us.mn.state.dot.tms.NodeGroup;
-import us.mn.state.dot.tms.Scheduler;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.utils.AbstractJob;
-import us.mn.state.dot.tms.utils.ActionJob;
-import us.mn.state.dot.tms.utils.TreeSelectionJob;
 
 /**
  * SonetRingForm is a Swing dialog for viewing the sonet system.
@@ -148,7 +147,7 @@ public class SonetRingForm extends TMSObjectForm {
 				editPressed();
 			}
 		};
-		AbstractJob.addJob(new Scheduler.Job(Calendar.SECOND, 30) {
+		AbstractJob.addJob(new Job(Calendar.SECOND, 30) {
 			public void perform() throws RemoteException {
 				updateStatus(activeTree);
 				activeTree.repaint();
@@ -166,7 +165,7 @@ public class SonetRingForm extends TMSObjectForm {
 		tree.setCellRenderer( new TreeIconRenderer() );
 		tree.setSelectionRow( 0 );
 		// Expande the root node after the selection stuff happens...
-		AbstractJob.addJob(new Scheduler.Job(500) {
+		AbstractJob.addJob(new Job(500) {
 			public void perform() {
 				tree.expandRow(0);
 			}

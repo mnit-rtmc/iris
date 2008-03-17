@@ -22,9 +22,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.IndexedList;
-import us.mn.state.dot.tms.utils.AbstractJob;
 
 /**
  * Table model for roadway node detectors

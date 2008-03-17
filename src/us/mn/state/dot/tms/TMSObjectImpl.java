@@ -27,6 +27,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.rmi.server.ServerNotActiveException;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
@@ -190,7 +192,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** Add an observer */
 	public final void addObserver(final RemoteObserver o) {
-		WORKER.addJob(new Scheduler.Job(0) {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				observers.add(o);
 			}
@@ -199,7 +201,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** Delete an observer */
 	public final void deleteObserver(final RemoteObserver o) {
-		WORKER.addJob(new Scheduler.Job(0) {
+		WORKER.addJob(new Job() {
 			public void perform() {
 				observers.remove(o);
 			}
@@ -269,7 +271,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	protected void scheduleNotify(final LinkedList<Remote> o_list,
 		final Notifier n)
 	{
-		WORKER.addJob(new Scheduler.Job(0) {
+		WORKER.addJob(new Job() {
 			public void perform() throws RemoteException {
 				doNotify(o_list, n);
 			}

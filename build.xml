@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ant build file for iris project -->
-<!-- Copyright 2007 Mn/DOT -->
+<!-- Copyright 2007-2008 Mn/DOT -->
 <project name="iris" default="dist" basedir=".">
 	<property file="project.properties"/>
 	<property file="${user.home}/.ant.properties"/>
@@ -24,6 +24,8 @@
 	<property name="manifest.server" value="server-MANIFEST.MF"/>
 	<property name="manifest.client" value="client-MANIFEST.MF"/>
 	<property name="vault.jar" value="vault-${vault.version}.jar"/>
+	<property name="scheduler.jar"
+		  value="scheduler-${scheduler.version}.jar"/>
 	<property name="sonar.server.jar"
 		  value="sonar-server-${sonar.version}.jar"/>
 	<property name="sonar.client.jar"
@@ -73,6 +75,9 @@
 			<param name="file.dep" value="mail.jar"/>
 		</antcall>
 		<antcall target="check-dep">
+			<param name="file.dep" value="${scheduler.jar}"/>
+		</antcall>
+		<antcall target="check-dep">
 			<param name="file.dep" value="${vault.jar}"/>
 		</antcall>
 		<antcall target="check-dep">
@@ -120,6 +125,8 @@
 			<fileset dir="${bin.dir}" />
 			<filterset begintoken="@@" endtoken="@@">
 				<filter token="VERSION" value="${version}"/>
+				<filter token="SCHEDULER.VERSION"
+				        value="${scheduler.version}"/>
 				<filter token="VAULT.VERSION"
 					value="${vault.version}"/>
 				<filter token="SONAR.VERSION"
@@ -217,6 +224,7 @@
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
 				<include name="postgresql.jar"/>
+				<include name="${scheduler.jar}"/>
 				<include name="${vault.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>
@@ -279,6 +287,7 @@
 			<fileset dir="${lib.dir}">
 				<include name="activation.jar"/>
 				<include name="mail.jar"/>
+				<include name="${scheduler.jar}"/>
 				<include name="${datatools.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>

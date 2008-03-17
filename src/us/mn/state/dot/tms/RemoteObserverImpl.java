@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2005  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,16 +11,14 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
 import java.rmi.NoSuchObjectException;
 import java.rmi.server.UnicastRemoteObject;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 
 /**
  * RemoteObserverImpl is a simple implementation of the RemoteObserver
@@ -46,7 +44,7 @@ abstract public class RemoteObserverImpl extends UnicastRemoteObject
 
 	/** Update the observed object */
 	public final void update() {
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				doUpdate();
 			}
@@ -58,7 +56,7 @@ abstract public class RemoteObserverImpl extends UnicastRemoteObject
 
 	/** Status change for the observed object */
 	public final void status() {
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				doStatus();
 			}
@@ -70,7 +68,7 @@ abstract public class RemoteObserverImpl extends UnicastRemoteObject
 
 	/** Delete the observed object */
 	public final void delete() {
-		RWORKER.addJob(new Scheduler.Job(0) {
+		RWORKER.addJob(new Job() {
 			public void perform() throws Exception {
 				doDelete();
 			}

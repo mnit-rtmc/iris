@@ -28,12 +28,12 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.utils.ActionJob;
 import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**

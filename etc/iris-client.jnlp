@@ -16,6 +16,7 @@
 	<jar href="lib/iris-client-@@VERSION@@.jar"/>
 	<jar href="lib/iris-rmi-@@VERSION@@.jar"/>
 	<jar href="lib/iris-utils-@@VERSION@@.jar"/>
+	<jar href="lib/scheduler-@@SCHEDULER.VERSION@@.jar"/>
 	<jar href="lib/sonar-client-@@SONAR.VERSION@@.jar"/>
 	<jar href="lib/MapBean-@@MAPBEAN.VERSION@@.jar"/>
 	<jar href="lib/tms-log-@@TMSLOG.VERSION@@.jar"/>

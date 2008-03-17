@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,8 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ItemJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Circuit;
 import us.mn.state.dot.tms.CommunicationLine;
@@ -60,8 +61,6 @@ import us.mn.state.dot.tms.client.dms.DMSProperties;
 import us.mn.state.dot.tms.client.lcs.LcsProperties;
 import us.mn.state.dot.tms.client.meter.RampMeterProperties;
 import us.mn.state.dot.tms.client.warning.WarningSignProperties;
-import us.mn.state.dot.tms.utils.ActionJob;
-import us.mn.state.dot.tms.utils.ItemJob;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records

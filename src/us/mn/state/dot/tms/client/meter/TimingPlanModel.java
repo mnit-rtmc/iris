@@ -22,9 +22,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import javax.swing.table.AbstractTableModel;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.MeterPlan;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.utils.AbstractJob;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
 
 /**

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,13 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Roadway;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 import us.mn.state.dot.tms.client.proxy.Vector;
-import us.mn.state.dot.tms.utils.ActionJob;
-import us.mn.state.dot.tms.utils.ListSelectionJob;
 
 /**
  * CorridorList is a graphical freeway corridor list.

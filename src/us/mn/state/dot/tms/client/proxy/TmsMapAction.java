@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import us.mn.state.dot.tms.utils.AbstractJob;
+import us.mn.state.dot.sched.AbstractJob;
 
 /**
  * TmsMapAction is an abstract action which is associated with one type

@@ -42,6 +42,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.MeterPlan;
 import us.mn.state.dot.tms.RampMeter;
@@ -52,7 +53,6 @@ import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.ActionJob;
 import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**

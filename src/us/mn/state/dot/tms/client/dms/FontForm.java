@@ -32,6 +32,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -42,8 +44,6 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.utils.ActionJob;
-import us.mn.state.dot.tms.utils.ListSelectionJob;
 
 /**
  * A form for displaying and editing DMS fonts

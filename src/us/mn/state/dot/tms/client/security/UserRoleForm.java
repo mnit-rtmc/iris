@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,12 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.utils.ActionJob;
 
 /**
  * A form for displaying and editing the users and roles

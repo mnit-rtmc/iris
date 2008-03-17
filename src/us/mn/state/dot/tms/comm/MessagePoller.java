@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import us.mn.state.dot.tms.Completer;
+import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DebugLog;
 
