@@ -167,9 +167,8 @@
 	        description="Compile all of the source files for the project">
 		<javac srcdir="${build.src}"
 		       destdir="${build.classes}"
-		       debug="off"
+		       debug="${debug}"
 		       deprecation="on"
-		       optimize="on"
 		       source="1.5"
 		       target="1.5">
 			<classpath refid="classpath"/>
