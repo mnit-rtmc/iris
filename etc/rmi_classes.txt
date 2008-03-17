@@ -57,10 +57,6 @@ us/mn/state/dot/tms/RemoteObserverImpl.class
 us/mn/state/dot/tms/RemoteObserverImpl??.class
 us/mn/state/dot/tms/Roadway.class
 us/mn/state/dot/tms/RoadwayList.class
-us/mn/state/dot/tms/Scheduler.class
-us/mn/state/dot/tms/Scheduler??.class
-us/mn/state/dot/tms/Scheduler?ExceptionHandler.class
-us/mn/state/dot/tms/Scheduler?Job.class
 us/mn/state/dot/tms/Segment.class
 us/mn/state/dot/tms/SignAlert.class
 us/mn/state/dot/tms/SignMessage.class
