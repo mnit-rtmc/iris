@@ -376,7 +376,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			buf.append(release);
 			if(control != null) {
 				buf.append("' Z='");
-				buf.append(control.id);
+				buf.append(control.getId());
 			}
 			if(warning && (!congested) &&
 				meter.isActive() && !meter.isFailed())
@@ -422,8 +422,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	/** Zone is one individual zone within the stratified plan */
 	protected class Zone {
 
-		/** Zone ID */
-		protected final String id;
+		/** Layer number */
+		protected final int layer;
+
+		/** Zone number within layer */
+		protected final int znum;
 
 		/** Mainline upstream detectors */
 		protected final DetectorSet upstream = new DetectorSet();
@@ -466,15 +469,17 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected boolean valid;
 
 		/** Create a new zone */
-		protected Zone(String id) {
-			this.id = id;
+		protected Zone(int l, int n) {
+			layer = l;
+			znum = n;
 		}
 
 		/** Create a new zone */
-		protected Zone(String id, SegmentImpl[] segs, int start,
+		protected Zone(int l, int n, SegmentImpl[] segs, int start,
 			int stop)
 		{
-			this.id = id;
+			layer = l;
+			znum = n;
 			addUpstream(segs[start]);
 			for(int i = start; i <= stop; i++) {
 				SegmentImpl seg = segs[i];
@@ -496,6 +501,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				}
 			}
 			addDownstream(segs[stop]);
+		}
+
+		/** Get the zone ID */
+		public String getId() {
+			return "Z" + layer + '~' + znum;
 		}
 
 		/** Test if the zone is properly defined */
@@ -740,7 +750,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected void print(PrintStream stream) {
 			StringBuffer buf = new StringBuffer();
 			buf.append("  <zone id='");
-			buf.append(id);
+			buf.append(getId());
 			buf.append("' upstream=");
 			buf.append(upstream);
 			if(entrance.isDefined()) {
@@ -772,7 +782,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected void printState(PrintStream stream) {
 			StringBuffer buf = new StringBuffer();
 			buf.append("    <zone_state id='");
-			buf.append(id);
+			buf.append(getId());
 			if(valid) {
 				buf.append("' M='");
 				buf.append(M);
@@ -845,8 +855,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					continue;
 				stations++;
 				if(stations == layer) {
-					if(createZone("Z" + layer + '~' + znum,
-						segs, start, stop))
+					if(createZone(layer, znum, segs, start,
+						stop))
 					{
 						znum++;
 					}
@@ -857,10 +867,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	}
 
 	/** Create a zone and add it to the zone list */
-	protected boolean createZone(String id, SegmentImpl[] segs, int start,
-		int stop)
+	protected boolean createZone(int layer, int znum, SegmentImpl[] segs,
+		int start, int stop)
 	{
-		Zone zone = new Zone(id, segs, start, stop);
+		Zone zone = new Zone(layer, znum, segs, start, stop);
 		if(zone.isDefined()) {
 			zones.add(zone);
 			return true;
