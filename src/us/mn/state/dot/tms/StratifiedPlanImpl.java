@@ -22,6 +22,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.TreeSet;
 import java.rmi.RemoteException;
 
 /**
@@ -420,13 +421,24 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	protected transient boolean flushing;
 
 	/** Zone is one individual zone within the stratified plan */
-	protected class Zone {
+	protected class Zone implements Comparable<Zone> {
 
 		/** Layer number */
 		protected final int layer;
 
 		/** Zone number within layer */
 		protected final int znum;
+
+		/** Count of stations in the zone */
+		protected int n_stations;
+
+		/** Compare for sorting by layer/number */
+		public int compareTo(Zone ozone) {
+			if(layer != ozone.layer)
+				return layer - ozone.layer;
+			else
+				return znum - ozone.znum;
+		}
 
 		/** Mainline upstream detectors */
 		protected final DetectorSet upstream = new DetectorSet();
@@ -472,6 +484,22 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected Zone(int l, int n) {
 			layer = l;
 			znum = n;
+			n_stations = 0;
+		}
+
+		/** Add a mainline station to the zone */
+		protected void addStation(DetectorSet ds) {
+			addMainline(ds);
+			if(n_stations == 0)
+				addUpstream(ds);
+			if(n_stations == znum)
+				addDownstream(ds);
+			n_stations++;
+		}
+
+		/** Is the zone completely defined? */
+		protected boolean isComplete() {
+			return n_stations > znum;
 		}
 
 		/** Create a new zone */
@@ -483,6 +511,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			addUpstream(segs[start]);
 			for(int i = start; i <= stop; i++) {
 				SegmentImpl seg = segs[i];
+				DetectorSet ds = seg.getDetectorSet();
 				if(seg instanceof StationSegmentImpl)
 					addMainline(seg);
 				else if(seg instanceof OnRampImpl) {
@@ -492,12 +521,12 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					if(ramp.isFromCd())
 						scanUpstreamCD(segs, i, start);
 					else
-						addEntrance(ramp, false);
+						addEntrance(ds, false);
 				} else if(seg instanceof OffRampImpl) {
 					OffRampImpl ramp = (OffRampImpl)seg;
 					if(ramp.isFromCd())
 						continue;
-					exit.addDetectors(seg);
+					addExit(ds);
 				}
 			}
 			addDownstream(segs[stop]);
@@ -580,15 +609,9 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			return q;
 		}
 
-		/** Add a meterable entrance to the zone
-		 * @param meterable Segment to add to the zone
-		 * @param cd_merge True if segment is an a CD lane
-		 * @return True if there are queue detectors on the segment */
-		protected boolean addEntrance(MeterableImpl meterable,
-			boolean cd_merge)
-		{
-			return addEntrance(meterable.getDetectorSet(),
-				cd_merge);
+		/** Add an exit to the zone */
+		protected void addExit(DetectorSet ds) {
+			exit.addDetectors(ds);
 		}
 
 		/** Scan upstream for meterable segments on the CD road.
@@ -610,14 +633,15 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		 * @return True means stop scanning upstream */
 		protected boolean checkSegment(SegmentImpl seg, boolean before)
 		{
+			DetectorSet ds = seg.getDetectorSet();
 			if(seg instanceof OnRampImpl) {
 				OnRampImpl ramp = (OnRampImpl)seg;
-				if(ramp.isFromCd() && addEntrance(ramp, true))
+				if(ramp.isFromCd() && addEntrance(ds, true))
 					return true;
 				if(ramp.isToCd())
-					addEntrance(ramp, false);
+					addEntrance(ds, false);
 			} else if(seg instanceof MeterableImpl) {
-				if(addEntrance((MeterableImpl)seg, true))
+				if(addEntrance(ds, true))
 					return true;
 			} else if(seg instanceof OffRampImpl) {
 				OffRampImpl ramp = (OffRampImpl)seg;
@@ -627,7 +651,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					return true;
 				}
 				if(ramp.isFromCd())
-					exit.addDetectors(seg);
+					addExit(ds);
 			}
 			return false;
 		}
@@ -841,6 +865,57 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		SegmentImpl[] segs = sList.toArray();
 		for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
 			createLayer(segs, layer);
+
+if(testing) {
+	ZoneBuilder zone_builder = new ZoneBuilder();
+	Corridor c = meter.getCorridor();
+	c.findNode(zone_builder);
+}
+	}
+
+	/** Inner class to build zones */
+	protected class ZoneBuilder implements Corridor.NodeFinder {
+		TreeSet<Zone> _zones = new TreeSet<Zone>();
+		int znum = 0;
+		protected void addStation(DetectorSet ds) {
+			znum++;
+			for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
+				_zones.add(new Zone(layer, znum));
+			for(Zone z: _zones) {
+				if(!z.isComplete())
+					z.addStation(ds);
+			}
+		}
+		protected void addEntranse(DetectorSet ds) {
+			for(Zone z: _zones) {
+				if(!z.isComplete())
+					z.addEntrance(ds, false);
+			}
+		}
+		protected void addExit(DetectorSet ds) {
+			for(Zone z: _zones) {
+				if(!z.isComplete())
+					z.addExit(ds);
+			}
+		}
+		public boolean check(R_NodeImpl n) {
+			DetectorSet ds = n.getDetectorSet();
+			if(n.getNodeType() == R_Node.TYPE_STATION)
+				addStation(ds);
+			else if(n.getNodeType() == R_Node.TYPE_ENTRANCE)
+				addEntranse(ds);
+			else if(n.getNodeType() == R_Node.TYPE_EXIT)
+				addExit(ds);
+			return false;
+		}
+		public LinkedList<Zone> getZoneList() {
+			LinkedList<Zone> zl = new LinkedList<Zone>();
+			for(Zone z: _zones) {
+				if(z.isComplete())
+					zl.add(z);
+			}
+			return zl;
+		}
 	}
 
 	/** Create a layer of zones and add them to the zone list */
