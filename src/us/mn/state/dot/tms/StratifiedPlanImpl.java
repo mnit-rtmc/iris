@@ -32,6 +32,18 @@ import java.rmi.RemoteException;
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
+static protected final PrintStream ZONE_DEBUG;
+static {
+	PrintStream ps = null;
+	try {
+		ps =new PrintStream(new FileOutputStream("/var/log/tms/zones"));
+	}
+	catch(IOException e) {
+		e.printStackTrace();
+	}
+	ZONE_DEBUG = ps;
+};
+
 	/** ObjectVault table name */
 	static public final String tableName = "stratified_plan";
 
@@ -870,6 +882,9 @@ if(testing) {
 	ZoneBuilder zone_builder = new ZoneBuilder();
 	Corridor c = meter.getCorridor();
 	c.findNode(zone_builder);
+	LinkedList<Zone> _zones = zone_builder.getList();
+	for(Zone z: _zones)
+		z.print(ZONE_DEBUG);
 }
 	}
 
@@ -908,7 +923,7 @@ if(testing) {
 				addExit(ds);
 			return false;
 		}
-		public LinkedList<Zone> getZoneList() {
+		public LinkedList<Zone> getList() {
 			LinkedList<Zone> zl = new LinkedList<Zone>();
 			for(Zone z: _zones) {
 				if(z.isComplete())
