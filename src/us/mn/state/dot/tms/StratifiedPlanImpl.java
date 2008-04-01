@@ -504,14 +504,14 @@ static {
 			addMainline(ds);
 			if(n_stations == 0)
 				addUpstream(ds);
-			if(n_stations == znum)
+			if(n_stations == layer)
 				addDownstream(ds);
 			n_stations++;
 		}
 
 		/** Is the zone completely defined? */
 		protected boolean isComplete() {
-			return n_stations > znum;
+			return n_stations > layer;
 		}
 
 		/** Create a new zone */
@@ -915,6 +915,10 @@ if(testing) {
 		}
 		public boolean check(R_NodeImpl n) {
 			DetectorSet ds = n.getDetectorSet();
+			if(ds.size() == 0) {
+				// FIXME: follow links for missing detection
+				return false;
+			}
 			if(n.getNodeType() == R_Node.TYPE_STATION)
 				addStation(ds);
 			else if(n.getNodeType() == R_Node.TYPE_ENTRANCE)
