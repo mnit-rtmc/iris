@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,13 +28,16 @@ import us.mn.state.dot.tms.client.security.ProxyTableModel;
 public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
+	static protected final int COLUMN_COUNT = 3;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
 
 	/** Description column number */
 	static protected final int COL_DESCRIPTION = 1;
+
+	/** Restricted column number */
+	static protected final int COL_RESTRICTED = 2;
 
 	/** Create a new video monitor table model */
 	public VideoMonitorModel(TypeCache<VideoMonitor> c) {
@@ -56,13 +59,18 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return m.getName();
 			case COL_DESCRIPTION:
 				return m.getDescription();
+			case COL_RESTRICTED:
+				return m.getRestricted();
 		}
 		return null;
 	}
 
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
-		return String.class;
+		if(column == COL_RESTRICTED)
+			return Boolean.class;
+		else
+			return String.class;
 	}
 
 	/** Check if the specified row is the last row in the table */
@@ -93,6 +101,9 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 			case COL_DESCRIPTION:
 				m.setDescription(value.toString());
 				break;
+			case COL_RESTRICTED:
+				m.setRestricted((Boolean)value);
+				break;
 		}
 	}
 
@@ -101,6 +112,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 200, "Video Monitor"));
 		m.addColumn(createColumn(COL_DESCRIPTION, 300, "Description"));
+		m.addColumn(createColumn(COL_RESTRICTED, 120, "Restricted"));
 		return m;
 	}
 }

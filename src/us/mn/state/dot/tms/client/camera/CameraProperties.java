@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.rmi.RemoteException;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -48,6 +49,9 @@ public class CameraProperties extends TrafficDeviceForm {
 	/** Video stream NVR host (and port) */
 	protected final JTextField nvr = new JTextField("", 20);
 
+	/** Checkbox to allow publishing camera images */
+	protected final JCheckBox publish = new JCheckBox();
+
 	/** Remote camera object */
 	protected Camera camera;
 
@@ -71,6 +75,7 @@ public class CameraProperties extends TrafficDeviceForm {
 		panel.addRow("Encoder", encoder);
 		panel.addRow("Encoder Channel", encoder_channel);
 		panel.addRow("NVR", nvr);
+		panel.addRow("Publish", publish);
 		return panel;
 	}
 
@@ -80,6 +85,7 @@ public class CameraProperties extends TrafficDeviceForm {
 		encoder.setText(camera.getEncoder());
 		encoder_channel.setValue(camera.getEncoderChannel());
 		nvr.setText(camera.getNvr());
+		publish.setSelected(camera.getPublish());
 	}
 
 	/** Apply button is pressed */
@@ -90,6 +96,7 @@ public class CameraProperties extends TrafficDeviceForm {
 			Number c = (Number)encoder_channel.getValue();
 			camera.setEncoderChannel(c.intValue());
 			camera.setNvr(nvr.getText());
+			camera.setPublish(publish.isSelected());
 		}
 		finally {
 			camera.notifyUpdate();
