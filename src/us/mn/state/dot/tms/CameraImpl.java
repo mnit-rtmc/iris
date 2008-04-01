@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,6 +104,22 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 		return nvr;
 	}
 
+	/** Flag to allow publishing camera images */
+	protected boolean publish;
+
+	/** Set flag to allow publishing camera images */
+	public synchronized void setPublish(boolean p) throws TMSException {
+		if(p == publish)
+			return;
+		store.update(this, "publish", p);
+		publish = p;
+	}
+
+	/** Get flag to allow publishing camera images */
+	public boolean getPublish() {
+		return publish;
+	}
+
 	/** Get the integer id of the camera */
 	public int getUID() {
 		try {
@@ -154,6 +170,5 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 			CameraPoller cp = (CameraPoller)mp;
 			cp.sendPTZ(this, p, t, z);
 		}
-
 	}
 }

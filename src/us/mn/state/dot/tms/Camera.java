@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,12 @@ public interface Camera extends TrafficDevice {
 
 	/** Get the video NVR host name (and port) */
 	String getNvr() throws RemoteException;
+
+	/** Set flag to allow publishing camera images */
+	void setPublish(boolean p) throws TMSException, RemoteException;
+
+	/** Get flag to allow publishing camera images */
+	boolean getPublish() throws RemoteException;
 
 	/** Get the side of the road that the camera is on */
 	short getRoadSide() throws RemoteException;

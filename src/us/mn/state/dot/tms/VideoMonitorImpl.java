@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,13 +27,14 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading video monitors...");
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
-		store.query("SELECT name, description FROM video_monitor;",
-			new ResultFactory()
+		store.query("SELECT name, description, restricted " +
+			"FROM video_monitor;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new VideoMonitorImpl(
 					row.getString(1),	// name
-					row.getString(2)	// description
+					row.getString(2),	// description
+					row.getBoolean(3)	// restricted
 				));
 			}
 		});
@@ -42,8 +43,8 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	/** Store a video monitor */
 	public void doStore() throws TMSException {
 		store.update("INSERT INTO " + getTable() +
-			" (name, description) VALUES ('" + name + "', '" +
-			description + "');");
+			" (name, description, restricted) VALUES ('" + name +
+			"', '" + description + "', '" + restricted + "');");
 	}
 
 	/** Get the database table name */
@@ -62,9 +63,10 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Create a new video monitor */
-	protected VideoMonitorImpl(String n, String d) {
+	protected VideoMonitorImpl(String n, String d, boolean r) {
 		this(n);
 		description = d;
+		restricted = r;
 	}
 
 	/** Get the integer id of the video monitor */
@@ -96,5 +98,26 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	/** Get the video monitor description */
 	public String getDescription() {
 		return description;
+	}
+
+	/** Flag to restrict publishing camera images */
+	protected boolean restricted;
+
+	/** Set flag to restrict publishing camera images */
+	public void setRestricted(boolean r) {
+		restricted = r;
+	}
+
+	/** Set flag to restrict publishing camera images */
+	public void doSetRestricted(boolean r) throws TMSException {
+		if(r == restricted)
+			return;
+		store.update(this, "restricted", r);
+		setRestricted(r);
+	}
+
+	/** Get flag to restrict publishing camera images */
+	public boolean getRestricted() {
+		return restricted;
 	}
 }

@@ -335,7 +335,8 @@ GRANT SELECT ON TABLE glyph TO PUBLIC;
 
 CREATE TABLE video_monitor (
 	name TEXT PRIMARY KEY,
-	description TEXT NOT NULL
+	description TEXT NOT NULL,
+	restricted boolean NOT NULL
 );
 
 REVOKE ALL ON TABLE video_monitor FROM PUBLIC;
@@ -436,7 +437,8 @@ GRANT SELECT ON TABLE add_remove_device_log TO PUBLIC;
 CREATE TABLE camera (
     encoder text NOT NULL,
     encoder_channel integer NOT NULL,
-    nvr text NOT NULL
+    nvr text NOT NULL,
+    publish boolean NOT NULL
 )
 INHERITS (traffic_device);
 
@@ -923,7 +925,7 @@ GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
 	SELECT c.id, ld.line, ld."drop", ctr.active, c.notes,
-	c.encoder, c.encoder_channel, c.nvr,
+	c.encoder, c.encoder_channel, c.nvr, c.publish,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM camera c
