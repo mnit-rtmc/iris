@@ -1186,15 +1186,17 @@ COPY r_node_transition (n_transition, name) FROM stdin;
 COPY role (name, pattern, priv_r, priv_w, priv_c, priv_d) FROM stdin;
 admin		f	f	f	f
 alert		f	f	f	f
-incidents		f	f	f	f
-view	.*	t	f	f	f
 dms	dms/.*/message	f	t	f	f
-tiger	dms/VT.*	f	t	t	f
+font	font/.*	f	t	t	t
+glyph	glyph/.*	f	t	t	t
+graphic	graphic/.*	f	t	t	t
+incidents		f	f	f	f
 activate	.*/.*/active	f	t	f	f
 meter	meter/.*/metering	f	t	f	f
 lcs	lcs/.*/signals	f	t	f	f
 user_admin	user/.*	t	t	t	t
 role_admin	role/.*	t	t	t	t
+view	.*	t	f	f	f
 \.
 
 CREATE UNIQUE INDEX vault_object_vault_oid_key ON vault_object USING btree (vault_oid);
