@@ -62,11 +62,11 @@ public class MainClient {
 	}
 
 	/** Read the IRIS property file */
-	static protected Properties readPropertyFile(String prop_file)
+	static protected Properties readPropertyFile(URL url)
 		throws IOException
 	{
 		Properties props = new Properties();
-		props.load(createURL(prop_file).openStream());
+		props.load(url.openStream());
 		return props;
 	}
 
@@ -97,7 +97,8 @@ public class MainClient {
 	static protected IrisClient createClient(String[] args)
 		throws Exception
 	{
-		Properties props = readPropertyFile(getPropertyFile(args));
+		URL url = createURL(getPropertyFile(args));
+		Properties props = readPropertyFile(url);
 		updateSystemProperties(props);
 		return new IrisClient(props);
 	}
