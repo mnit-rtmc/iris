@@ -51,19 +51,22 @@ public class MainClient {
 		socket = new ServerSocket(1099, 0);
 	}
 
+	/** Create a URL for the specified property file */
+	static protected URL createURL(String prop_file) throws IOException {
+		String workingDir = System.getProperty("user.dir");
+		File file = new File(workingDir, prop_file);
+		if(file.exists())
+			return file.toURI().toURL();
+		else
+			return new URL(prop_file);
+	}
+
 	/** Read the IRIS property file */
 	static protected Properties readPropertyFile(String prop_file)
 		throws IOException
 	{
-		String workingDir = System.getProperty("user.dir");
-		File file = new File(workingDir, prop_file);
-		URL url = null;
-		if(file.exists())
-			url = file.toURI().toURL();
-		else
-			url = new URL(prop_file);
 		Properties props = new Properties();
-		props.load(url.openStream());
+		props.load(createURL(prop_file).openStream());
 		return props;
 	}
 
