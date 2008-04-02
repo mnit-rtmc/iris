@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!DOCTYPE tms_config SYSTEM "tms_config.dtd">
-<tms_config>
+<tms_config sytem='RTMC'>
 	&r_nodes;
 	&ramp_meters;
 	&detectors;

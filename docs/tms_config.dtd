@@ -1,4 +1,5 @@
 <!ELEMENT tms_config (corridor | meter | detector)*>
+<!ATTLIST tms_config system CDATA #REQUIRED>
 <!ATTLIST tms_config time_stamp CDATA #REQUIRED>
 <!ENTITY r_nodes SYSTEM "r_nodes.xml">
 <!ELEMENT corridor (r_node)*>
