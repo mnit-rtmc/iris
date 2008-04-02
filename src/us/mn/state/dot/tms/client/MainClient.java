@@ -59,7 +59,7 @@ public class MainClient {
 		File file = new File(workingDir, prop_file);
 		URL url = null;
 		if(file.exists())
-			url = file.toURL();
+			url = file.toURI().toURL();
 		else
 			url = new URL(prop_file);
 		Properties props = new Properties();
