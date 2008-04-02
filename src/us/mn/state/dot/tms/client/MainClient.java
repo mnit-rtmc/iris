@@ -70,6 +70,14 @@ public class MainClient {
 		return props;
 	}
 
+	/** Get the name of the property file to use */
+	static protected String getPropertyFile(String[] args) {
+		if(args.length > 0)
+			return args[0];
+		else
+			return DEFAULT_PROPERTIES;
+	}
+
 	/** Set a system property if it's defined in a property set */
 	static protected void setSystemProperty(String name, Properties props) {
 		String value = props.getProperty(name);
@@ -83,14 +91,6 @@ public class MainClient {
 		setSystemProperty("email_sender", props);
 		setSystemProperty("email_recipient", props);
 		ProxySelector.setDefault(new HTTPProxySelector(props));
-	}
-
-	/** Get the name of the property file to use */
-	static protected String getPropertyFile(String[] args) {
-		if(args.length > 0)
-			return args[0];
-		else
-			return DEFAULT_PROPERTIES;
 	}
 
 	/** Create the IRIS client */
