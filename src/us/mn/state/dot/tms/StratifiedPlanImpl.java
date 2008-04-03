@@ -514,6 +514,11 @@ static {
 			return n_stations > layer;
 		}
 
+		/** Is the zone valid? */
+		protected boolean isValid() {
+			return isComplete() && entrance.size() > 0;
+		}
+
 		/** Create a new zone */
 		protected Zone(int l, int n, SegmentImpl[] segs, int start,
 			int stop)
@@ -930,7 +935,7 @@ if(testing) {
 		public LinkedList<Zone> getList() {
 			LinkedList<Zone> zl = new LinkedList<Zone>();
 			for(Zone z: _zones) {
-				if(z.isComplete())
+				if(z.isValid())
 					zl.add(z);
 			}
 			return zl;
