@@ -338,11 +338,6 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Get the abandoned status */
 	public boolean isAbandoned() { return abandoned; }
 
-	/** Check if the detector is polling */
-	public boolean isPolling() {
-		return isActive() && !isAbandoned();
-	}
-
 	/** Force Fail status flag */
 	protected boolean forceFail;
 
