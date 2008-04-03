@@ -16,13 +16,10 @@ package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
 import java.net.URL;
-import java.net.MalformedURLException;
 import java.rmi.NotBoundException;
 import java.util.Properties;
+import javax.xml.parsers.ParserConfigurationException;
 import us.mn.state.dot.data.DataFactory;
-import us.mn.state.dot.data.HttpDataFactory;
-import us.mn.state.dot.data.SystemConfig;
-import us.mn.state.dot.data.TmsConfig;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.security.UserManager;
@@ -52,17 +49,6 @@ public class TmsConnection {
 	/** Currently login user */
 	protected final UserManager userManager;
 
-	/** Create a new traffic data factory */
-	static protected DataFactory createDataFactory(Properties props)
-		throws MalformedURLException, InstantiationException
-	{
-		String cfg_url = props.getProperty("datatools.config.url");
-		String trafdat_url = props.getProperty("datatools.trafdat.url");
-		SystemConfig[] cfgs = new SystemConfig[1];
-		cfgs[0] = new TmsConfig("IRIS", new URL(cfg_url));
-		return new HttpDataFactory(trafdat_url, cfgs);
-	}
-
 	/** Traffic data factory */
 	protected final DataFactory factory;
 
@@ -73,12 +59,12 @@ public class TmsConnection {
 
 	/** Create a new TmsConnection that is closed */
 	public TmsConnection(SmartDesktop desktop, UserManager userManager,
-		Properties props) throws MalformedURLException,
-		InstantiationException
+		Properties props) throws IOException,
+		ParserConfigurationException
 	{
 		this.desktop = desktop;
 		this.userManager = userManager;
-		factory = createDataFactory(props);
+		factory = DataFactory.create(props);
 	}
 
 	/** Get the desktop used by the client */
