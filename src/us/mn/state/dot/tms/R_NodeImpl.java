@@ -409,8 +409,10 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public DetectorSet getDetectorSet() {
 		DetectorImpl[] dets = detectors;	// Avoid race
 		DetectorSet set = new DetectorSet();
-		for(DetectorImpl d: dets)
-			set.addDetector(d);
+		for(DetectorImpl d: dets) {
+			if(d.isPolling())
+				set.addDetector(d);
+		}
 		return set;
 	}
 
