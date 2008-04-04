@@ -921,8 +921,10 @@ if(testing) {
 		}
 		public boolean check(R_NodeImpl n) {
 			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION)
+			if(nt == R_Node.TYPE_INTERSECTION) {
 				removeInvalidZones();
+				return false;
+			}
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() == 0) {
 // FIXME: follow links for missing detection
