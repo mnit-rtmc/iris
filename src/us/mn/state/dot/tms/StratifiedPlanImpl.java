@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
@@ -32,17 +33,8 @@ import java.rmi.RemoteException;
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
-static protected final PrintStream ZONE_DEBUG;
-static {
-	PrintStream ps = null;
-	try {
-		ps =new PrintStream(new FileOutputStream("/var/log/tms/zones"));
-	}
-	catch(IOException e) {
-		e.printStackTrace();
-	}
-	ZONE_DEBUG = ps;
-};
+	/** Zone debug log */
+	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
 
 	/** ObjectVault table name */
 	static public final String tableName = "stratified_plan";
@@ -876,27 +868,36 @@ static {
 	/** Create all the layers for this stratified timing plan */
 	protected void createAllLayers(RampMeterImpl meter) {
 		zones.clear();
+
+if(testing) {
+		ZoneBuilder zone_builder = new ZoneBuilder();
+		Corridor c = meter.getCorridor();
+		c.findNode(zone_builder);
+		LinkedList<Zone> _zones = zone_builder.getList();
+		zones.addAll(_zones);
+} else {
 		SegmentListImpl sList = getSegmentList(meter);
 		if(sList == null)
 			return;
 		SegmentImpl[] segs = sList.toArray();
 		for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
 			createLayer(segs, layer);
-
-if(testing) {
-	ZoneBuilder zone_builder = new ZoneBuilder();
-	Corridor c = meter.getCorridor();
-	c.findNode(zone_builder);
-	LinkedList<Zone> _zones = zone_builder.getList();
-	for(Zone z: _zones)
-		z.print(ZONE_DEBUG);
 }
+
 	}
 
 	/** Inner class to build zones */
 	protected class ZoneBuilder implements Corridor.NodeFinder {
 		TreeSet<Zone> _zones = new TreeSet<Zone>();
 		int znum = 0;
+		protected void removeInvalidZones() {
+			Iterator<Zone> it = _zones.iterator();
+			while(it.hasNext()) {
+				Zone z = it.next();
+				if(!z.isValid())
+					it.remove();
+			}
+		}
 		protected void addStation(DetectorSet ds) {
 			znum++;
 			for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
@@ -919,16 +920,24 @@ if(testing) {
 			}
 		}
 		public boolean check(R_NodeImpl n) {
+			int nt = n.getNodeType();
+			if(nt == R_Node.TYPE_INTERSECTION)
+				removeInvalidZones();
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() == 0) {
-				// FIXME: follow links for missing detection
+// FIXME: follow links for missing detection
+LocationImpl loc = (LocationImpl)n.getLocation();
+if(nt == R_Node.TYPE_ENTRANCE)
+	ZONE_LOG.log("Missing entrance detection @ " + loc.getDescription());
+if(nt == R_Node.TYPE_EXIT)
+	ZONE_LOG.log("Missing exit detection @ " + loc.getDescription());
 				return false;
 			}
-			if(n.getNodeType() == R_Node.TYPE_STATION)
+			if(nt == R_Node.TYPE_STATION)
 				addStation(ds);
-			else if(n.getNodeType() == R_Node.TYPE_ENTRANCE)
+			else if(nt == R_Node.TYPE_ENTRANCE)
 				addEntranse(ds);
-			else if(n.getNodeType() == R_Node.TYPE_EXIT)
+			else if(nt == R_Node.TYPE_EXIT)
 				addExit(ds);
 			return false;
 		}
