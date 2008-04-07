@@ -907,7 +907,7 @@ if(testing) {
 					z.addStation(ds);
 			}
 		}
-		protected void addEntranse(DetectorSet ds) {
+		protected void addEntrance(DetectorSet ds) {
 			for(Zone z: _zones) {
 				if(!z.isComplete())
 					z.addEntrance(ds, false);
@@ -938,7 +938,7 @@ if(nt == R_Node.TYPE_EXIT)
 			if(nt == R_Node.TYPE_STATION)
 				addStation(ds);
 			else if(nt == R_Node.TYPE_ENTRANCE)
-				addEntranse(ds);
+				addEntrance(ds);
 			else if(nt == R_Node.TYPE_EXIT)
 				addExit(ds);
 			return false;
