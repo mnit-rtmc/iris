@@ -187,7 +187,7 @@ public class Corridor {
 		}
 	}
 
-	/** Get the list of r_nodes linked with downstream nodes */
+	/** Link each node with the next downstream node in the corridor */
 	protected void linkDownstream() {
 		Iterator<R_NodeImpl> down = r_nodes.iterator();
 		// Throw away first r_node in downstream iterator
