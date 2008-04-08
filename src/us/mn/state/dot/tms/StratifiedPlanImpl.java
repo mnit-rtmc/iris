@@ -874,8 +874,10 @@ if(testing) {
 		Corridor c = meter.getCorridor();
 		c.findNode(zone_builder);
 		LinkedList<Zone> _zones = zone_builder.getList();
-		zones.addAll(_zones);
-} else {
+//		zones.addAll(_zones);
+}
+// else
+{
 		SegmentListImpl sList = getSegmentList(meter);
 		if(sList == null)
 			return;
