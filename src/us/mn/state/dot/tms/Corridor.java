@@ -201,27 +201,27 @@ public class Corridor {
 
 	/** Get the list of r_nodes linked with downstream nodes */
 	protected List<R_NodeImpl> getNodesLinked() {
-		List<R_NodeImpl> r_nodes = getNodes();
-		Iterator<R_NodeImpl> down = r_nodes.iterator();
+		List<R_NodeImpl> nodes = getNodes();
+		Iterator<R_NodeImpl> down = nodes.iterator();
 		// Throw away first r_node in downstream iterator
 		if(down.hasNext())
 			down.next();
-		for(R_NodeImpl r_node: r_nodes) {
+		for(R_NodeImpl r_node: nodes) {
 			if(down.hasNext()) {
 				R_NodeImpl d = down.next();
 				if(r_node.hasDownstreamLink())
 					r_node.addDownstream(d);
 			}
 		}
-		return r_nodes;
+		return nodes;
 	}
 
 	/** Print out the corridor to an XML file */
 	public synchronized void printXml(PrintWriter out) {
 		out.println("<corridor route='" + freeway.getName() +
 			"' dir='" + Roadway.DIRECTION[free_dir] + "'>");
-		List<R_NodeImpl> r_nodes = getNodesLinked();
-		for(R_NodeImpl r_node: r_nodes)
+		List<R_NodeImpl> nodes = getNodesLinked();
+		for(R_NodeImpl r_node: nodes)
 			r_node.printXml(out);
 		out.println("</corridor>");
 	}
