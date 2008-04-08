@@ -190,24 +190,6 @@ class SegmentListImpl extends AbstractListImpl implements Storable {
 		return (TMSObject)list.get(index);
 	}
 
-	/** Find the meterable segment with the specified cross street */
-	public synchronized MeterableImpl findMeterable(RoadwayImpl xStreet,
-		short xDir)
-	{
-		ListIterator li = list.listIterator();
-		while(li.hasNext()) {
-			SegmentImpl segment = (SegmentImpl)li.next();
-			LocationImpl loc = (LocationImpl)segment.getLocation();
-			if(segment instanceof MeterableImpl &&
-				xStreet.equals(loc.getCrossStreet()) &&
-				xDir == loc.getCrossDir())
-			{
-				return (MeterableImpl)segment;
-			}
-		}
-		return null;
-	}
-
 	/** Subscribe a listener to this list */
 	public synchronized Object[] subscribe( RemoteList listener ) {
 		super.subscribe( listener );
