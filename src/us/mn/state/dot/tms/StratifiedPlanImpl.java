@@ -33,6 +33,9 @@ import java.rmi.RemoteException;
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
+	/** Maximum length to branch for an exit */
+	static protected final int MAX_BRANCH_LENGTH = 20;
+
 	/** Zone debug log */
 	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
 
@@ -921,6 +924,49 @@ if(testing) {
 					z.addExit(ds);
 			}
 		}
+		protected void followEntrance(R_NodeImpl n) {
+LocationImpl loc = (LocationImpl)n.getLocation();
+ZONE_LOG.log("Missing entrance detection @ " + loc.getDescription());
+		}
+		protected void addEntranceAsExit(DetectorSet ds) {
+			addExit(ds.getDetectorSet(Detector.BYPASS));
+			DetectorSet s = ds.getDetectorSet(Detector.QUEUE);
+			if(s.size() > 0) {
+				addExit(s);
+				return;
+			}
+			s = ds.getDetectorSet(Detector.PASSAGE);
+			if(s.size() > 0) {
+				addExit(s);
+				return;
+			}
+			addExit(ds.getDetectorSet(Detector.MERGE));
+		}
+		protected void followExit(R_NodeImpl n) {
+			LocationImpl branch = (LocationImpl)n.getLocation();
+			for(int i = 0; i < MAX_BRANCH_LENGTH; i++) {
+				n = n.followBranch(branch);
+				if(n == null)
+					break;
+				int nt = n.getNodeType();
+				if(nt == R_Node.TYPE_INTERSECTION)
+					break;
+				DetectorSet ds = n.getDetectorSet();
+				if(ds.size() == 0)
+					continue;
+				if(nt == R_Node.TYPE_STATION) {
+					addExit(ds);
+					return;
+				} else if(nt == R_Node.TYPE_ENTRANCE) {
+					if(i == 0) {
+						addEntranceAsExit(ds);
+						return;
+					}
+				} else if(nt == R_Node.TYPE_EXIT)
+					addExit(ds);
+			}
+ZONE_LOG.log("Missing exit detection @ " + branch.getDescription());
+		}
 		public boolean check(R_NodeImpl n) {
 			int nt = n.getNodeType();
 			if(nt == R_Node.TYPE_INTERSECTION) {
@@ -929,12 +975,10 @@ if(testing) {
 			}
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() == 0) {
-// FIXME: follow links for missing detection
-LocationImpl loc = (LocationImpl)n.getLocation();
-if(nt == R_Node.TYPE_ENTRANCE)
-	ZONE_LOG.log("Missing entrance detection @ " + loc.getDescription());
-if(nt == R_Node.TYPE_EXIT)
-	ZONE_LOG.log("Missing exit detection @ " + loc.getDescription());
+ 				if(nt == R_Node.TYPE_ENTRANCE)
+					followEntrance(n);
+				if(nt == R_Node.TYPE_EXIT)
+					followExit(n);
 				return false;
 			}
 			if(nt == R_Node.TYPE_STATION)

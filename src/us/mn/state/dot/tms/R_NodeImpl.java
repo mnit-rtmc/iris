@@ -514,6 +514,16 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return downstream;
 	}
 
+	/** Follow the a branch downstream */
+	public R_NodeImpl followBranch(LocationImpl loc) {
+		for(R_NodeImpl d: downstream) {
+			LocationImpl l = (LocationImpl)d.getLocation();
+			if(l.branchMatches(loc))
+				return d;
+		}
+		return null;
+	}
+
 	/** Print the r_node as an XML element */
 	public void printXml(PrintWriter out) {
 		out.print("\t<r_node ");
