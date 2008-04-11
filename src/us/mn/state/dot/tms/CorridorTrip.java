@@ -157,10 +157,12 @@ public class CorridorTrip implements Constants {
 			if(checkLinkLength(destination, mile))
 				break;
 			StationImpl s = stations.get(mile);
-			avg = s.getTravelSpeed(false);
-			low = s.getTravelSpeed(true);
-			if(avg <= 0 || low <= 0)
+			float _avg = s.getTravelSpeed(false);
+			float _low = s.getTravelSpeed(true);
+			if(_avg <= 0 || _low <= 0)
 				continue;
+			avg = _avg;
+			low = _low;
 			if(first) {
 				float mm = mile - MAX_LINK_LENGTH;
 				if(mm > origin)
@@ -175,12 +177,12 @@ public class CorridorTrip implements Constants {
 		}
 		if(first)
 			throwException("No speed data");
+		else if(avg <= 0 || low <= 0)
+			throwException("Missing destin data");
 		else if(pmile < destination) {
 			float mm = pmile + MAX_LINK_LENGTH;
 			if(mm < destination)
 				throwException("End < destin");
-			if(avg <= 0 || low <= 0)
-				throwException("Missing destin data");
 			tt.nextStation(mm, avg, low);
 		}
 		return tt.hours;
