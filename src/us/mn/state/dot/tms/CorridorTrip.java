@@ -179,6 +179,8 @@ public class CorridorTrip implements Constants {
 			float mm = pmile + MAX_LINK_LENGTH;
 			if(mm < destination)
 				throwException("End < destin");
+			if(avg <= 0 || low <= 0)
+				throwException("Missing destin data");
 			tt.nextStation(mm, avg, low);
 		}
 		return tt.hours;
