@@ -271,6 +271,8 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	protected void _setStationID(String s) throws TMSException,
 		RemoteException
 	{
+		if(statMap.getElement(s) != null)
+			throw new ChangeVetoException("Duplicate ID: " + s);
 		StationImpl station = createStation(s);
 		store.update(this, "station_id", s);
 		try {
