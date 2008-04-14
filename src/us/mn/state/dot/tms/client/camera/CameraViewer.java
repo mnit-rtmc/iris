@@ -55,11 +55,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** The number of frames to process (for streaming) */
 	static protected final int STREAM_DURATION = 300;
 
-	/** Range of PTZ values */
-	static protected final int PTZ_RANGE = 63;
-
 	/** Dead zone needed for too-precise joystick drivers */
-	static protected final int AXIS_DEADZONE = 3;
+	static protected final float AXIS_DEADZONE = 3f / 64;
 
 	/** Button number to select previous camera */
 	static protected final int BUTTON_PREVIOUS = 10;
@@ -193,33 +190,37 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		});
 	}
 
-	/** Map a float value to an integer range */
-	static protected int map_float(float value, int range) {
-		int v = Math.round(value * range);
-		if(Math.abs(v) < AXIS_DEADZONE)
+	/** Filter an axis to remove slop around the joystick dead zone */
+	static protected float filter_deadzone(float v) {
+		if(Math.abs(v) <= AXIS_DEADZONE)
 			return 0;
 		else
 			return v;
 	}
 
+	/** Check if current reading is not close to previous reading */
+	static protected boolean axis_update(float c, float p) {
+		return (c != 0) || (c == 0 && p != 0);
+	}
+
 	/** Pan value from last poll */
-	protected int pan;
+	protected float pan;
 
 	/** Tilt value from last poll */
-	protected int tilt;
+	protected float tilt;
 
 	/** Zoom value from last poll */
-	protected int zoom;
+	protected float zoom;
 
 	/** Poll the joystick and send PTZ command to server */
 	protected void pollJoystick() throws RemoteException {
 		CameraProxy proxy = selected;	// Avoid race
 		if(proxy != null) {
-			int p = map_float(joystick.getPan(), PTZ_RANGE);
-			int t = -map_float(joystick.getTilt(), PTZ_RANGE);
-			int z = map_float(joystick.getZoom(), PTZ_RANGE);
-			if(p != 0 || p != pan || t != 0 || t != tilt ||
-				z != 0 || z != zoom)
+			float p = filter_deadzone(joystick.getPan());
+			float t = -filter_deadzone(joystick.getTilt());
+			float z = filter_deadzone(joystick.getZoom());
+			if(axis_update(p, pan) || axis_update(t, tilt) ||
+			   axis_update(z, zoom))
 			{
 				proxy.camera.move(p, t, z);
 				pan = p;

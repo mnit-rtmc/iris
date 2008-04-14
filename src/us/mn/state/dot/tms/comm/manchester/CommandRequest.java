@@ -62,7 +62,7 @@ public class CommandRequest extends Request {
 
 	/** Encode a speed value for pan/tilt command */
 	static byte encodeSpeed(int v) {
-		return (Math.abs(v) - 1) << 1;
+		return (byte)((Math.abs(v) - 1) << 1);
 	}
 
 	/** Encode a pan command packet */

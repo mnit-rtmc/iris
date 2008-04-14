@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,19 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
  */
 public class MoveCamera extends DeviceOperation {
 
+	/** Range of PTZ values */
+	static protected final int PTZ_RANGE = 8;
+
+	/** Clamp a float value to the range of (-1, 1) */
+	static protected float clamp_float(float value) {
+		return Math.max(-1, Math.min(value, 1));
+	}
+
+	/** Map a float value to an integer range */
+	static protected int map_float(float value, int range) {
+		return Math.round(clamp_float(value) * range);
+	}
+
 	/** The direction (and speed) to pan the camera */
 	protected final int pan;
 
@@ -36,11 +49,11 @@ public class MoveCamera extends DeviceOperation {
 	protected final int zoom;
 
 	/** Create a new operation to move a camera */
-	public MoveCamera(CameraImpl c, int p, int t, int z) {
+	public MoveCamera(CameraImpl c, float p, float t, float z) {
 		super(COMMAND, c);
-		pan = p;
-		tilt = t;
-		zoom = z;
+		pan = map_float(p, PTZ_RANGE);
+		tilt = map_float(t, PTZ_RANGE);
+		zoom = map_float(z, PTZ_RANGE);
 	}
 
 	/** Begin the operation */

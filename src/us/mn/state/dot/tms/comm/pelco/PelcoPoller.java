@@ -73,7 +73,7 @@ public class PelcoPoller extends MessagePoller implements CameraPoller {
 	}
 
 	/** Send a PTZ camera move command */
-	public void sendPTZ(CameraImpl c, int p, int t, int z) {
+	public void sendPTZ(CameraImpl c, float p, float t, float z) {
 		new MoveCamera(c, p, t, z).start();
 	}
 
