@@ -31,9 +31,6 @@ import javax.swing.SwingUtilities;
  */
 public final class JoystickThread extends Thread {
 
-	/** Location of joystick polling script on Linux */
-	static protected final String JOY_LINUX = "/usr/local/bin/joystick.py";
-
 	/** Location of joystick polling script on Windows */
 	static protected final String JOY_WINDOWS =
 		"C:\\Python24\\python.exe C:\\Python24\\Scripts\\pygame_joy.py";
@@ -65,7 +62,9 @@ public final class JoystickThread extends Thread {
 	protected Process createJoystickProcess() throws IOException {
 		Runtime runtime = Runtime.getRuntime();
 		try {
-			return runtime.exec(JOY_LINUX);
+			JoyLinux joy = new JoyLinux();
+System.out.println("EXEC: " + joy.getCommand());
+			return runtime.exec(joy.getCommand());
 		}
 		catch(IOException e) {
 			return runtime.exec(JOY_WINDOWS);
