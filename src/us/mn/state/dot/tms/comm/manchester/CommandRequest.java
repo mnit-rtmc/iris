@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ public class CommandRequest extends Request {
 	static protected final int EX_TILT_UP_FULL = 8;
 	static protected final int EX_PAN_RIGHT_FULL = 9;
 
-	/** Requested pan value (-6 to 6) (7 means turbo) */
+	/** Requested pan value (-7 to 7) (8 means turbo) */
 	protected final int pan;
 
-	/** Requested tilt value (-6 to 6) (7 means turbo) */
+	/** Requested tilt value (-7 to 7) (8 means turbo) */
 	protected final int tilt;
 
 	/** Requested zoom value (-1 to 1) */
@@ -60,15 +60,20 @@ public class CommandRequest extends Request {
 		return packet;
 	}
 
+	/** Encode a speed value for pan/tilt command */
+	static byte encodeSpeed(int v) {
+		return (Math.abs(v) - 1) << 1;
+	}
+
 	/** Encode a pan command packet */
 	protected byte[] encodePanPacket(int drop) {
 		byte[] packet = getAddressedPacket(drop);
-		if(Math.abs(pan) < 7) {
+		if(Math.abs(pan) < 8) {
 			if(pan < 0)
 				packet[1] |= 0x20;
 			else
 				packet[1] |= 0x30;
-			packet[1] |= Math.abs(pan) << 1;
+			packet[1] |= encodeSpeed(pan);
 			packet[2] |= 0x02;
 		} else {
 			if(pan < 0)
@@ -82,10 +87,10 @@ public class CommandRequest extends Request {
 	/** Encode a tilt command packet */
 	protected byte[] encodeTiltPacket(int drop) {
 		byte[] packet = getAddressedPacket(drop);
-		if(Math.abs(tilt) < 7) {
+		if(Math.abs(tilt) < 8) {
 			if(tilt > 0)
 				packet[1] |= 0x10;
-			packet[1] |= Math.abs(tilt) << 1;
+			packet[1] |= encodeSpeed(tilt);
 			packet[2] |= 0x02;
 		} else {
 			if(tilt < 0)
@@ -110,8 +115,10 @@ public class CommandRequest extends Request {
 	public byte[] format(int drop) throws IOException {
 		drop--;		// receiver address is zero-relative
 		ByteArrayOutputStream bo = new ByteArrayOutputStream();
-		bo.write(encodePanPacket(drop));
-		bo.write(encodeTiltPacket(drop));
+		if(pan != 0)
+			bo.write(encodePanPacket(drop));
+		if(tilt != 0)
+			bo.write(encodeTiltPacket(drop));
 		if(zoom != 0)
 			bo.write(encodeZoomPacket(drop));
 		return bo.toByteArray();
