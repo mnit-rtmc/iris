@@ -198,11 +198,6 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 			return v;
 	}
 
-	/** Check if current reading is not close to previous reading */
-	static protected boolean axis_update(float c, float p) {
-		return (c != 0) || (c == 0 && p != 0);
-	}
-
 	/** Pan value from last poll */
 	protected float pan;
 
@@ -219,8 +214,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 			float p = filter_deadzone(joystick.getPan());
 			float t = -filter_deadzone(joystick.getTilt());
 			float z = filter_deadzone(joystick.getZoom());
-			if(axis_update(p, pan) || axis_update(t, tilt) ||
-			   axis_update(z, zoom))
+			if(p != 0 || pan != 0 || t != 0 || tilt != 0 ||
+			   z != 0 || zoom != 0)
 			{
 				proxy.camera.move(p, t, z);
 				pan = p;
