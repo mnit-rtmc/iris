@@ -192,10 +192,15 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** Filter an axis to remove slop around the joystick dead zone */
 	static protected float filter_deadzone(float v) {
-		if(Math.abs(v) <= AXIS_DEADZONE)
+		float av = Math.abs(v);
+		if(av > AXIS_DEADZONE) {
+			float fv = (av - AXIS_DEADZONE) / (1 - AXIS_DEADZONE);
+			if(v < 0)
+				return -fv;
+			else
+				return fv;
+		} else
 			return 0;
-		else
-			return v;
 	}
 
 	/** Pan value from last poll */

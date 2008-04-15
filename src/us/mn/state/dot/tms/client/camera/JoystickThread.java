@@ -63,7 +63,6 @@ public final class JoystickThread extends Thread {
 		Runtime runtime = Runtime.getRuntime();
 		try {
 			JoyLinux joy = new JoyLinux();
-System.out.println("EXEC: " + joy.getCommand());
 			return runtime.exec(joy.getCommand());
 		}
 		catch(IOException e) {
