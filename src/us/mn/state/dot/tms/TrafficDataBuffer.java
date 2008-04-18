@@ -31,6 +31,9 @@ import java.util.Date;
  */
 abstract public class TrafficDataBuffer implements Constants {
 
+	/** Traffic data debug log */
+	static protected final DebugLog TRAFFIC_LOG = new DebugLog("traffic");
+
 	/** Path where traffic data files are stored */
 	static protected final String DATA_PATH = "/data/traffic";
 
@@ -81,11 +84,6 @@ abstract public class TrafficDataBuffer implements Constants {
 		return cal.get(Calendar.HOUR_OF_DAY) * 120 +
 			cal.get(Calendar.MINUTE) * 2 +
 			cal.get(Calendar.SECOND) / 30;
-	}
-
-	/** Print out a debugging message */
-	static protected void debug(String m) {
-		System.err.println("TDB " + m);
 	}
 
 	/** Create a file (path) for the given time stamp */
@@ -260,7 +258,8 @@ abstract public class TrafficDataBuffer implements Constants {
 
 	/** Truncate the file before the specified record stamp */
 	protected void truncateFile(File f, int r, int o) throws IOException {
-		debug("Truncating " + f + " @ record: " + r + " offset: " + o);
+		TRAFFIC_LOG.log("Truncating " + f + " @ record: " + r +
+			" offset: " + o);
 		RandomAccessFile raf = new RandomAccessFile(f, "rw");
 		try { raf.setLength(r * recordSize()); }
 		finally { raf.close(); }
