@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.comm.smartsensor;
 
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -93,9 +92,8 @@ public class GetBinnedSamples extends ControllerOperation {
 			speed = bs.getSpeed();
 			SAMPLE_LOG.log(bs.toString());
 			if(stamp.before(oldest) || stamp.after(newest)) {
-				System.err.println("BAD TIMESTAMP: " +
-					stamp.getTime() + " for " + controller +
-					" @ " + new Date());
+				SAMPLE_LOG.log("BAD TIMESTAMP: " +
+					stamp.getTime() + " for " + controller);
 				throw new DownloadRequestException(
 					controller.toString());
 			}
