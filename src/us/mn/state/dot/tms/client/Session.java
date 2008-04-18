@@ -154,7 +154,7 @@ public class Session {
 	/** Add the camera tab */
 	protected void addCameraTab() throws RemoteException {
 		tabs.add(new CameraTab((CameraHandler)camLayer.getHandler(),
-			tmsConnection.isAdmin(), props));
+			tmsConnection.isAdmin(), props, logger));
 	}
 
 	/** Add the roadway tab */

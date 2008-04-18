@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -70,6 +71,9 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Properties for configuring the video client */
 	private final Properties videoProps;
 
+	/** Message logger */
+	protected final Logger logger;
+
 	/** The base URLs of the backend video stream servers */
 	private final String[] streamUrls;
 
@@ -108,9 +112,12 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final JoystickThread joystick = new JoystickThread();
 
 	/** Create a new camera viewer */
-	public CameraViewer(CameraHandler h, boolean admin, Properties p) {
+	public CameraViewer(CameraHandler h, boolean admin, Properties p,
+		Logger l)
+	{
 		super(new GridBagLayout());
 		videoProps = p;
+		logger = l;
 		streamUrls = AbstractImageFactory.createBackendUrls(p, 1);
 		handler = h;
 		handler.getSelectionModel().addTmsSelectionListener( this );
@@ -337,7 +344,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		camera.setId(c.getId());
 		client.setCamera(camera);
 		monitor.setImageFactory(new RepeaterImageFactory(client,
-			streamUrls[client.getArea()]), STREAM_DURATION);
+			streamUrls[client.getArea()], logger, null),
+			STREAM_DURATION);
 	}
 
 	/** Stop video streaming */
