@@ -387,15 +387,4 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 		return (cross_mod == other.cross_mod) &&
 			f.matchRootName(of) && c.matchRootName(oc);
 	}
-
-	/** Test if a branched node matches a location */
-	public boolean branchMatches(LocationImpl other) {
-		RoadwayImpl f = freeway;
-		RoadwayImpl oc = other.cross_street;
-		if(f == null || oc == null)
-			return false;
-		return (f.filterDirection(free_dir) ==
-			oc.filterDirection(other.cross_dir)) &&
-			f.matchRootName(oc);
-	}
 }

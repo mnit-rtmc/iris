@@ -33,9 +33,6 @@ import java.rmi.RemoteException;
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
-	/** Maximum length to branch for an exit */
-	static protected final int MAX_BRANCH_LENGTH = 20;
-
 	/** Zone debug log */
 	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
 
@@ -621,6 +618,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			return q;
 		}
 
+		/** Add an entrance (with all detectors) to the zone */
+		protected void addEntranceAll(DetectorSet ds) {
+			entrance.addDetectors(ds);
+		}
+
 		/** Add an exit to the zone */
 		protected void addExit(DetectorSet ds) {
 			exit.addDetectors(ds);
@@ -918,6 +920,12 @@ if(testing) {
 					z.addEntrance(ds, false);
 			}
 		}
+		protected void addEntranceAll(DetectorSet ds) {
+			for(Zone z: _zones) {
+				if(!z.isComplete())
+					z.addEntranceAll(ds);
+			}
+		}
 		protected void addExit(DetectorSet ds) {
 			for(Zone z: _zones) {
 				if(!z.isComplete())
@@ -952,26 +960,12 @@ if(testing) {
 		}
 		protected void followExit(R_NodeImpl n) {
 			LocationImpl branch = (LocationImpl)n.getLocation();
-			for(int i = 0; i < MAX_BRANCH_LENGTH; i++) {
-				n = n.followBranch(branch);
-				if(n == null)
-					break;
-				int nt = n.getNodeType();
-				if(nt == R_Node.TYPE_INTERSECTION)
-					break;
-				DetectorSet ds = n.getDetectorSet();
-				if(ds.size() == 0)
-					continue;
-				if(nt == R_Node.TYPE_STATION) {
-					addExit(ds);
+			Corridor c = n.getLinkedCorridor();
+			if(c != null) {
+				Corridor.NodeFinder nf =
+					new ExitFollower(this, branch);
+				if(c.findNode(nf) != null)
 					return;
-				} else if(nt == R_Node.TYPE_ENTRANCE) {
-					if(i == 0) {
-						addEntranceAsExit(ds);
-						return;
-					}
-				} else if(nt == R_Node.TYPE_EXIT)
-					addExit(ds);
 			}
 			ZONE_LOG.log("Missing exit detection @ " +
 				branch.getDescription());
@@ -1039,14 +1033,16 @@ if(testing) {
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
 			int nt = n.getNodeType();
-			DetectorSet ds = n.getDetectorSet();
-			if(nt == R_Node.TYPE_STATION) {
-				zone_builder.addEntrance(ds);
+			if(nt == R_Node.TYPE_INTERSECTION)
 				return true;
-			} else if(nt == R_Node.TYPE_ENTRANCE)
-				zone_builder.addEntrance(ds);
-			else if(nt == R_Node.TYPE_EXIT)
-				zone_builder.addExit(ds);
+			DetectorSet ds = n.getDetectorSet();
+			if(ds.size() > 0) {
+				if(nt == R_Node.TYPE_STATION) {
+					zone_builder.addEntranceAll(ds);
+					return true;
+				} else if(nt == R_Node.TYPE_ENTRANCE)
+					zone_builder.addEntrance(ds);
+			}
 			return false;
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
@@ -1057,7 +1053,66 @@ if(testing) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {
-					zone_builder.addEntrance(ds);
+					zone_builder.addEntranceAll(ds);
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+	/** Inner class to add exits to zones */
+	protected class ExitFollower implements Corridor.NodeFinder {
+
+		/** Zone builder for the current corridor */
+		protected final ZoneBuilder zone_builder;
+
+		/** Location of the exit node onto corridor */
+		protected final LocationImpl branch;
+
+		/** Have we found the matching entrance node to branch? */
+		protected boolean found;
+
+		protected ExitFollower(ZoneBuilder zb, LocationImpl b) {
+			zone_builder = zb;
+			branch = b;
+			found = false;
+		}
+		public boolean check(R_NodeImpl n) {
+			if(found)
+				return check_found(n);
+			else
+				return check_not_found(n);
+		}
+		protected boolean check_found(R_NodeImpl n) {
+			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+				return true;
+			else
+				return check_found_inside(n);
+		}
+		protected boolean check_found_inside(R_NodeImpl n) {
+			int nt = n.getNodeType();
+			if(nt == R_Node.TYPE_INTERSECTION)
+				return true;
+			DetectorSet ds = n.getDetectorSet();
+			if(ds.size() > 0) {
+				if(nt == R_Node.TYPE_STATION) {
+					zone_builder.addExit(ds);
+					return true;
+				} else if(nt == R_Node.TYPE_EXIT)
+					zone_builder.addExit(ds);
+			}
+			return false;
+		}
+		protected boolean check_not_found(R_NodeImpl n) {
+			if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
+				return false;
+			LocationImpl loc = (LocationImpl)n.getLocation();
+			if(loc.rampMatches(branch)) {
+				found = true;
+				DetectorSet ds = n.getDetectorSet();
+				if(ds.size() > 0) {
+					zone_builder.addEntranceAsExit(ds);
 					return true;
 				}
 			}
