@@ -516,6 +516,11 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return downstream;
 	}
 
+	/** Get the linked corridor for an entrance or exit */
+	public Corridor getLinkedCorridor() {
+		return nodeMap.getCorridor(location.getLinkedCorridor());
+	}
+
 	/** Follow the a branch downstream */
 	public R_NodeImpl followBranch(LocationImpl loc) {
 		for(R_NodeImpl d: downstream) {

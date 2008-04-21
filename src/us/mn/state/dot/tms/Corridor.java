@@ -316,6 +316,23 @@ public class Corridor {
 		return null;
 	}
 
+	/** Get a reversed list of nodes in the corridor */
+	protected List<R_NodeImpl> getReversedList() {
+		LinkedList<R_NodeImpl> rev = new LinkedList<R_NodeImpl>();
+		for(R_NodeImpl r_node: n_points.values())
+			rev.addFirst(r_node);
+		return rev;
+	}
+
+	/** Find a node using a node finder callback (reverse order) */
+	public R_NodeImpl findNodeReverse(NodeFinder finder) {
+		for(R_NodeImpl r_node: getReversedList()) {
+			if(finder.check(r_node))
+				return r_node;
+		}
+		return null;
+	}
+
 	/** Get the ID of a linked CD road */
 	public String getLinkedCDRoad() {
 		// FIXME: there may be more than one linked CD road

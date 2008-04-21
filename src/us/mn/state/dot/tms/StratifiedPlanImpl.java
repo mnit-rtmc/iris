@@ -924,10 +924,6 @@ if(testing) {
 					z.addExit(ds);
 			}
 		}
-		protected void followEntrance(R_NodeImpl n) {
-LocationImpl loc = (LocationImpl)n.getLocation();
-ZONE_LOG.log("Missing entrance detection @ " + loc.getDescription());
-		}
 		protected void addEntranceAsExit(DetectorSet ds) {
 			addExit(ds.getDetectorSet(Detector.BYPASS));
 			DetectorSet s = ds.getDetectorSet(Detector.QUEUE);
@@ -941,6 +937,18 @@ ZONE_LOG.log("Missing entrance detection @ " + loc.getDescription());
 				return;
 			}
 			addExit(ds.getDetectorSet(Detector.MERGE));
+		}
+		protected void followEntrance(R_NodeImpl n) {
+			LocationImpl branch = (LocationImpl)n.getLocation();
+			Corridor c = n.getLinkedCorridor();
+			if(c != null) {
+				Corridor.NodeFinder nf =
+					new EntranceFollower(this, branch);
+				if(c.findNodeReverse(nf) != null)
+					return;
+			}
+			ZONE_LOG.log("Missing entrance detection @ " +
+				branch.getDescription());
 		}
 		protected void followExit(R_NodeImpl n) {
 			LocationImpl branch = (LocationImpl)n.getLocation();
@@ -965,7 +973,8 @@ ZONE_LOG.log("Missing entrance detection @ " + loc.getDescription());
 				} else if(nt == R_Node.TYPE_EXIT)
 					addExit(ds);
 			}
-ZONE_LOG.log("Missing exit detection @ " + branch.getDescription());
+			ZONE_LOG.log("Missing exit detection @ " +
+				branch.getDescription());
 		}
 		public boolean check(R_NodeImpl n) {
 			int nt = n.getNodeType();
@@ -996,6 +1005,63 @@ ZONE_LOG.log("Missing exit detection @ " + branch.getDescription());
 					zl.add(z);
 			}
 			return zl;
+		}
+	}
+
+	/** Inner class to add entrances to zones */
+	protected class EntranceFollower implements Corridor.NodeFinder {
+
+		/** Zone builder for the current corridor */
+		protected final ZoneBuilder zone_builder;
+
+		/** Location of the entrance node onto corridor */
+		protected final LocationImpl branch;
+
+		/** Have we found the matching exit node to branch? */
+		protected boolean found;
+
+		protected EntranceFollower(ZoneBuilder zb, LocationImpl b) {
+			zone_builder = zb;
+			branch = b;
+			found = false;
+		}
+		public boolean check(R_NodeImpl n) {
+			if(found)
+				return check_found(n);
+			else
+				return check_not_found(n);
+		}
+		protected boolean check_found(R_NodeImpl n) {
+			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+				return true;
+			else
+				return check_found_inside(n);
+		}
+		protected boolean check_found_inside(R_NodeImpl n) {
+			int nt = n.getNodeType();
+			DetectorSet ds = n.getDetectorSet();
+			if(nt == R_Node.TYPE_STATION) {
+				zone_builder.addEntrance(ds);
+				return true;
+			} else if(nt == R_Node.TYPE_ENTRANCE)
+				zone_builder.addEntrance(ds);
+			else if(nt == R_Node.TYPE_EXIT)
+				zone_builder.addExit(ds);
+			return false;
+		}
+		protected boolean check_not_found(R_NodeImpl n) {
+			if(n.getNodeType() != R_Node.TYPE_EXIT)
+				return false;
+			LocationImpl loc = (LocationImpl)n.getLocation();
+			if(loc.rampMatches(branch)) {
+				found = true;
+				DetectorSet ds = n.getDetectorSet();
+				if(ds.size() > 0) {
+					zone_builder.addEntrance(ds);
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
