@@ -878,8 +878,7 @@ if(testing) {
 		ZoneBuilder zone_builder = new ZoneBuilder();
 		Corridor c = meter.getCorridor();
 		c.findNode(zone_builder);
-		LinkedList<Zone> _zones = zone_builder.getList();
-//		zones.addAll(_zones);
+//		zones.addAll(zone_builder.getList());
 }
 // else
 {
