@@ -878,10 +878,8 @@ if(testing) {
 		ZoneBuilder zone_builder = new ZoneBuilder();
 		Corridor c = meter.getCorridor();
 		c.findNode(zone_builder);
-//		zones.addAll(zone_builder.getList());
-}
-// else
-{
+		zones.addAll(zone_builder.getList());
+} else {
 		SegmentListImpl sList = getSegmentList(meter);
 		if(sList == null)
 			return;
