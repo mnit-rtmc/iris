@@ -919,7 +919,7 @@ if(testing) {
 					z.addEntrance(ds, false);
 			}
 		}
-		protected void addEntranceAll(DetectorSet ds) {
+		protected void addExitAsEntrance(DetectorSet ds) {
 			for(Zone z: _zones) {
 				if(!z.isComplete())
 					z.addEntranceAll(ds);
@@ -1036,11 +1036,11 @@ if(testing) {
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_Node.TYPE_STATION) {
-					zone_builder.addEntranceAll(ds);
-					return true;
-				} else if(nt == R_Node.TYPE_ENTRANCE)
+				if(nt == R_Node.TYPE_ENTRANCE) {
 					zone_builder.addEntrance(ds);
+					if(n.getLanes() == 0)
+						return true;
+				}
 			}
 			return false;
 		}
@@ -1052,7 +1052,7 @@ if(testing) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {
-					zone_builder.addEntranceAll(ds);
+					zone_builder.addExitAsEntrance(ds);
 					return true;
 				}
 			}
