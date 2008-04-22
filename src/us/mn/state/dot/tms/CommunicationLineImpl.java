@@ -445,6 +445,11 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			status = e.getMessage();
 			return;
 		}
+        // the iris installation might not have the java serial port jar installed
+		catch(NoClassDefFoundError e) {
+			status = "RS232 not supported.";
+            return;
+		}
 		notifyStatus();
 	}
 
