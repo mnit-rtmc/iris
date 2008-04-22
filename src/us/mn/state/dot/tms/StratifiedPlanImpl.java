@@ -919,7 +919,7 @@ if(testing) {
 					z.addEntrance(ds, false);
 			}
 		}
-		protected void addExitAsEntrance(DetectorSet ds) {
+		protected void addEntranceAll(DetectorSet ds) {
 			for(Zone z: _zones) {
 				if(!z.isComplete())
 					z.addEntranceAll(ds);
@@ -1041,8 +1041,16 @@ if(testing) {
 					if(n.getLanes() == 0)
 						return true;
 				}
+				if(nt == R_Node.TYPE_STATION && is_not_CD(n)) {
+					zone_builder.addEntranceAll(ds);
+					return true;
+				}
 			}
 			return false;
+		}
+		protected boolean is_not_CD(R_NodeImpl n) {
+			LocationImpl loc = (LocationImpl)n.getLocation();
+			return !loc.matchesRoot(branch);
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
 			if(n.getNodeType() != R_Node.TYPE_EXIT)
@@ -1052,7 +1060,7 @@ if(testing) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {
-					zone_builder.addExitAsEntrance(ds);
+					zone_builder.addEntranceAll(ds);
 					return true;
 				}
 			}
