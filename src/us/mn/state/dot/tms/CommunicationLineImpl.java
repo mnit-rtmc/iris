@@ -17,10 +17,14 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import javax.comm.SerialPort;
+import java.lang.NoClassDefFoundError;
+
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.comm.KillThread;
 import us.mn.state.dot.tms.comm.Messenger;
@@ -30,6 +34,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SerialMessenger;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.SocketMessenger;
+import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.comm.mndot.MndotPoller;
@@ -38,6 +43,9 @@ import us.mn.state.dot.tms.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
+import us.mn.state.dot.tms.comm.dmslite.DmsLitePoller;
+import us.mn.state.dot.tms.comm.sdrms.SdrmsPoller;
+import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -63,6 +71,10 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	/** Create a new communication line */
 	public CommunicationLineImpl(int i) throws RemoteException {
 		super();
+
+        // sanity checks
+        assert PROTOCOLS.length==NUM_OF_PROTOCOLS;
+
 		index = i;
 		port = "/dev/ttyD" + (index - 1);
 		circuits = new LinkedList<CircuitImpl>();
@@ -74,6 +86,10 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		throws RemoteException
 	{
 		super();
+
+        // sanity checks
+        assert PROTOCOLS.length==NUM_OF_PROTOCOLS;
+
 		index = fields.getInt("index");
 		port = (String)fields.get("port");
 		bitRate = fields.getInt("bitRate");
@@ -291,7 +307,18 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		return new SocketMessenger(a, p);
 	}
 
-	/** Create a messenger */
+	/** Create an http file messenger */
+	protected Messenger createHttpFileMessenger() throws IOException {
+        URL u;
+        try {
+            u=new URL(port);
+        } catch (MalformedURLException e) {
+            throw new IOException("INVALID URL SPECIFIED:"+e);
+        }
+		return new HttpFileMessenger(u);
+	}
+
+	/** Create a serial or socket messenger */
 	protected Messenger createMessenger(int threshold, int parity)
 		throws IOException
 	{
@@ -351,6 +378,24 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		return new ManchesterPoller(String.valueOf(index), messenger);
 	}
 
+	/** Create a DMS Lite poller */
+	protected MessagePoller createDmsLitePoller() throws IOException {
+		messenger = createSocketMessenger();
+		return new DmsLitePoller(String.valueOf(index), messenger);
+	}
+
+	/** Create a SDRMS poller */
+	protected MessagePoller createSdrmsPoller() throws IOException {
+		messenger = createSocketMessenger();
+		return new SdrmsPoller(String.valueOf(index), messenger);
+	}
+
+	/** Create a CAWS poller */
+	protected MessagePoller createCawsPoller() throws IOException {
+		messenger = createHttpFileMessenger();
+		return new CawsPoller(String.valueOf(index), messenger);
+	}
+
 	/** Try to open the communication line */
 	protected MessagePoller createPoller() throws IOException {
 		switch(protocol) {
@@ -371,6 +416,12 @@ final class CommunicationLineImpl extends TMSObjectImpl
 				return createPelcoPoller();
 			case PROTO_MANCHESTER:
 				return createManchesterPoller();
+            case PROTO_DMSLITE:
+                return createDmsLitePoller();
+            case PROTO_SDRMS:
+                return createSdrmsPoller();
+            case PROTO_CAWS:
+                return createCawsPoller();
 			default:
 				throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -464,6 +515,9 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			case PROTO_VICON:
 			case PROTO_PELCO:
 			case PROTO_MANCHESTER:
+            case PROTO_DMSLITE:         // Caltrans D10
+            case PROTO_SDRMS:           // Caltrans D10
+            case PROTO_CAWS:            // Caltrans D10
 				c = new ControllerImpl(circuit, drop);
 				break;
 			default:
@@ -552,8 +606,9 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	public synchronized void download() {
 		MessagePoller p = poller;	// Avoid NPE races
 		if(p != null) {
-			for(ControllerImpl c: controllers.values())
+			for(ControllerImpl c: controllers.values()) {
 				p.download(c, false);
+            }
 		}
 	}
 
