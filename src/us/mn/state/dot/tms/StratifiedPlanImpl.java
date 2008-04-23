@@ -534,10 +534,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		}
 
 		/** Add an entrance to the zone */
-		protected boolean addEntrance(DetectorSet ds, boolean cd_merge)
-		{
-			boolean q = (ds.getDetectorSet(
-				Detector.QUEUE)).isDefined();
+		protected void addEntrance(DetectorSet ds) {
 			entrance.addDetectors(ds.getDetectorSet(
 				Detector.BYPASS));
 			entrance.addDetectors(ds.getDetectorSet(
@@ -548,13 +545,12 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				Detector.PASSAGE);
 			if(passage.isDefined())
 				entrance.addDetectors(passage);
-			else if(q || !cd_merge) {
+			else {
 				entrance.addDetectors(ds.getDetectorSet(
 					Detector.MERGE));
 				entrance.addDetectors(ds.getDetectorSet(
 					Detector.EXIT));
 			}
-			return q;
 		}
 
 		/** Add an entrance (with all detectors) to the zone */
@@ -800,7 +796,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected void addEntrance(DetectorSet ds) {
 			for(Zone z: _zones) {
 				if(!z.isComplete())
-					z.addEntrance(ds, false);
+					z.addEntrance(ds);
 			}
 		}
 		protected void addEntranceAll(DetectorSet ds) {
