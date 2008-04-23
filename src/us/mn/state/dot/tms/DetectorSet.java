@@ -54,12 +54,6 @@ public class DetectorSet implements Constants {
 		return detectors.equals(other.detectors);
 	}
 
-	/** Add all the detectors from a given segment */
-	public void addDetectors(SegmentImpl seg) {
-		for(Detector d: seg.getDetectors())
-			detectors.add((DetectorImpl)d);
-	}
-
 	/** Add all the detectors from another detector set */
 	public void addDetectors(DetectorSet other) {
 		if(other == null)

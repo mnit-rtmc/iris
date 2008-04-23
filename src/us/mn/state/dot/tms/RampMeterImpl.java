@@ -746,16 +746,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		return camera;
 	}
 
-	/** Get the segment list for this meter */
-	public SegmentListImpl getSegmentList() {
-		RoadwayImpl freeway = (RoadwayImpl)location.getFreeway();
-		short freeDir = location.getFreeDir();
-		if(freeway == null)
-			return null;
-		else
-			return (SegmentListImpl)freeway.getSegmentList(freeDir);
-	}
-
 	/** Get the detector set associated with the ramp meter */
 	public DetectorSet getDetectorSet() {
 		final DetectorSet ds = new DetectorSet();

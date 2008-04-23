@@ -94,13 +94,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		RemoteException
 	{
 		super(period);
-		segList = null;
 	}
 
 	/** Create a stratified timing plan */
 	protected StratifiedPlanImpl() throws RemoteException {
 		super();
-		segList = null;
 	}
 
 	/** Get the plan type */
@@ -115,20 +113,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	public void setTarget(RampMeter m, int t) throws TMSException {
 		if(t != RampMeter.MAX_RELEASE_RATE)
 			throw new ChangeVetoException("Invalid target rate");
-	}
-
-	/** Segment list for this timing plan */
-	protected transient SegmentListImpl segList;
-
-	/** Get the segment list for this timing plan */
-	protected SegmentListImpl getSegmentList(RampMeterImpl meter) {
-		if(segList == null)
-			segList = meter.getSegmentList();
-		else if(segList != meter.getSegmentList()) {
-			System.err.println("ERROR: Segment List mismatch for " +
-				meter.getId());
-		}
-		return segList;
 	}
 
 	/** Meter state holds stratified plan state for a meter. For each meter
@@ -511,36 +495,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			return isComplete() && entrance.size() > 0;
 		}
 
-		/** Create a new zone */
-		protected Zone(int l, int n, SegmentImpl[] segs, int start,
-			int stop)
-		{
-			layer = l;
-			znum = n;
-			addUpstream(segs[start]);
-			for(int i = start; i <= stop; i++) {
-				SegmentImpl seg = segs[i];
-				DetectorSet ds = seg.getDetectorSet();
-				if(seg instanceof StationSegmentImpl)
-					addMainline(seg);
-				else if(seg instanceof OnRampImpl) {
-					OnRampImpl ramp = (OnRampImpl)seg;
-					if(ramp.isToCd())
-						continue;
-					if(ramp.isFromCd())
-						scanUpstreamCD(segs, i, start);
-					else
-						addEntrance(ds, false);
-				} else if(seg instanceof OffRampImpl) {
-					OffRampImpl ramp = (OffRampImpl)seg;
-					if(ramp.isFromCd())
-						continue;
-					addExit(ds);
-				}
-			}
-			addDownstream(segs[stop]);
-		}
-
 		/** Get the zone ID */
 		public String getId() {
 			return "Z" + layer + '~' + znum;
@@ -561,22 +515,12 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 
-		/** Add an upstream station to the zone */
-		protected void addUpstream(SegmentImpl segment) {
-			addUpstream(segment.getDetectorSet());
-		}
-
 		/** Add a mainline station to the zone */
 		protected void addMainline(DetectorSet ds) {
 			for(DetectorImpl det: ds.toArray()) {
 				if(det.isStation())
 					mainline.addDetector(det);
 			}
-		}
-
-		/** Add a mainline station to the zone */
-		protected void addMainline(SegmentImpl segment) {
-			addMainline(segment.getDetectorSet());
 		}
 
 		/** Add a downstream station to the zone */
@@ -587,11 +531,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				else
 					exit.addDetector(det);
 			}
-		}
-
-		/** Add a downstream station to the zone */
-		protected void addDownstream(SegmentImpl segment) {
-			addDownstream(segment.getDetectorSet());
 		}
 
 		/** Add an entrance to the zone */
@@ -626,48 +565,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		/** Add an exit to the zone */
 		protected void addExit(DetectorSet ds) {
 			exit.addDetectors(ds);
-		}
-
-		/** Scan upstream for meterable segments on the CD road.
-		 * @param segs Array of segments for this freeway
-		 * @param end End segment of CD, scan upstream from here
-		 * @param start Start segment of zone */
-		protected void scanUpstreamCD(SegmentImpl[] segs, int end,
-			int start)
-		{
-			for(int i = end; i > 0; i--) {
-				if(checkSegment(segs[i], i < start))
-					break;
-			}
-		}
-
-		/** Check segment for upstream CD detectors.
-		 * @param seg Segment to check
-		 * @param before True if before the upstream zone segment
-		 * @return True means stop scanning upstream */
-		protected boolean checkSegment(SegmentImpl seg, boolean before)
-		{
-			DetectorSet ds = seg.getDetectorSet();
-			if(seg instanceof OnRampImpl) {
-				OnRampImpl ramp = (OnRampImpl)seg;
-				if(ramp.isFromCd() && addEntrance(ds, true))
-					return true;
-				if(ramp.isToCd())
-					addEntrance(ds, false);
-			} else if(seg instanceof MeterableImpl) {
-				if(addEntrance(ds, true))
-					return true;
-			} else if(seg instanceof OffRampImpl) {
-				OffRampImpl ramp = (OffRampImpl)seg;
-				if(ramp.isToCd()) {
-					if(before)
-						entrance.addDetectors(seg);
-					return true;
-				}
-				if(ramp.isFromCd())
-					addExit(ds);
-			}
-			return false;
 		}
 
 		/** Add a meter if it's within the zone */
@@ -873,21 +770,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	/** Create all the layers for this stratified timing plan */
 	protected void createAllLayers(RampMeterImpl meter) {
 		zones.clear();
-
-if(testing) {
 		ZoneBuilder zone_builder = new ZoneBuilder();
 		Corridor c = meter.getCorridor();
 		c.findNode(zone_builder);
 		zones.addAll(zone_builder.getList());
-} else {
-		SegmentListImpl sList = getSegmentList(meter);
-		if(sList == null)
-			return;
-		SegmentImpl[] segs = sList.toArray();
-		for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
-			createLayer(segs, layer);
-}
-
 	}
 
 	/** Inner class to build zones */
@@ -1123,41 +1009,6 @@ if(testing) {
 			}
 			return false;
 		}
-	}
-
-	/** Create a layer of zones and add them to the zone list */
-	protected void createLayer(SegmentImpl[] segs, int layer) {
-		int znum = 1;
-		for(int start = 0; start < segs.length; start++) {
-			if(!(segs[start] instanceof StationSegment))
-				continue;
-			int stations = 0;
-			for(int stop = start + 1; stop < segs.length; stop++) {
-				if(!(segs[stop] instanceof StationSegment))
-					continue;
-				stations++;
-				if(stations == layer) {
-					if(createZone(layer, znum, segs, start,
-						stop))
-					{
-						znum++;
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	/** Create a zone and add it to the zone list */
-	protected boolean createZone(int layer, int znum, SegmentImpl[] segs,
-		int start, int stop)
-	{
-		Zone zone = new Zone(layer, znum, segs, start, stop);
-		if(zone.isDefined()) {
-			zones.add(zone);
-			return true;
-		}
-		return false;
 	}
 
 	/** Validate the timing plan for the start time */
