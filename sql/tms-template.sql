@@ -170,8 +170,6 @@ CREATE TABLE roadway (
     abbreviated text NOT NULL,
     "type" smallint NOT NULL,
     direction smallint NOT NULL,
-    segment1 integer NOT NULL,
-    segment2 integer NOT NULL
 )
 INHERITS (tms_object);
 
@@ -445,17 +443,6 @@ INHERITS (traffic_device);
 REVOKE ALL ON TABLE camera FROM PUBLIC;
 GRANT SELECT ON TABLE camera TO PUBLIC;
 
-CREATE TABLE segment_list (
-    list integer NOT NULL,
-    direction smallint NOT NULL,
-    "startingLanes" integer NOT NULL,
-    freeway integer NOT NULL
-)
-INHERITS (abstract_list);
-
-REVOKE ALL ON TABLE segment_list FROM PUBLIC;
-GRANT SELECT ON TABLE segment_list TO PUBLIC;
-
 CREATE TABLE stratified_plan (
     dummy_48294 boolean
 )
@@ -463,49 +450,6 @@ INHERITS (meter_plan);
 
 REVOKE ALL ON TABLE stratified_plan FROM PUBLIC;
 GRANT SELECT ON TABLE stratified_plan TO PUBLIC;
-
-CREATE TABLE segment (
-    "left" boolean NOT NULL,
-    delta integer NOT NULL,
-    "cdDelta" integer NOT NULL,
-    mile real,
-    notes text,
-    "location" integer NOT NULL
-)
-INHERITS (tms_object);
-
-CREATE TABLE station_segment (
-    "index" integer NOT NULL,
-    speed_limit integer NOT NULL
-)
-INHERITS (segment);
-
-REVOKE ALL ON TABLE station_segment FROM PUBLIC;
-GRANT SELECT ON TABLE station_segment TO PUBLIC;
-
-CREATE TABLE off_ramp (
-    "toCd" boolean NOT NULL,
-    "fromCd" boolean NOT NULL,
-    "rampLanes" integer NOT NULL
-)
-INHERITS (segment);
-
-CREATE TABLE meterable (
-    "hovBypass" boolean NOT NULL
-)
-INHERITS (segment);
-
-CREATE TABLE on_ramp (
-    "toCd" boolean NOT NULL,
-    "fromCd" boolean NOT NULL,
-    "rampLanes" integer NOT NULL
-)
-INHERITS (meterable);
-
-CREATE TABLE meterable_cd (
-    dummy_50048 boolean
-)
-INHERITS (meterable);
 
 CREATE TABLE lcs_module (
     "sfoRed" integer NOT NULL,
@@ -706,11 +650,6 @@ CREATE TABLE alarm (
     notes text NOT NULL
 )
 INHERITS (tms_object);
-
-CREATE TABLE segment_detector (
-    segment integer,
-    detector integer
-);
 
 CREATE TABLE traffic_device_timing_plan (
     traffic_device text,
@@ -1055,28 +994,22 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 59	4	0	traffic_device	us.mn.state.dot.tms.TrafficDeviceImpl
 64	4	0	java_util_AbstractMap	java.util.AbstractMap
 43417	4	0	meter_plan	us.mn.state.dot.tms.MeterPlanImpl
-48330	4	0	meterable	us.mn.state.dot.tms.MeterableImpl
 1395	4	0	java_util_TreeMap	java.util.TreeMap
 52732	4	0	lcs_module	us.mn.state.dot.tms.LCSModuleImpl
 52736	4	0	lcs	us.mn.state.dot.tms.LaneControlSignalImpl
 1532	4	0	java_lang_Integer	java.lang.Integer
 1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
 51458	4	0	stratified_plan	us.mn.state.dot.tms.StratifiedPlanImpl
-48316	4	0	segment	us.mn.state.dot.tms.SegmentImpl
 43828	4	0	node_group	us.mn.state.dot.tms.NodeGroupImpl
 64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
 1396	4	0	communication_line	us.mn.state.dot.tms.CommunicationLineImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
-50057	4	0	meterable_cd	us.mn.state.dot.tms.MeterableCd
 1535	4	0	controller	us.mn.state.dot.tms.ControllerImpl
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
 43830	4	0	node	us.mn.state.dot.tms.NodeImpl
-48326	4	0	off_ramp	us.mn.state.dot.tms.OffRampImpl
-48329	4	0	on_ramp	us.mn.state.dot.tms.OnRampImpl
 79334	4	0	alarm	us.mn.state.dot.tms.AlarmImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
 134	4	0	camera	us.mn.state.dot.tms.CameraImpl
-48317	4	0	station_segment	us.mn.state.dot.tms.StationSegmentImpl
 43832	4	0	circuit	us.mn.state.dot.tms.CircuitImpl
 1534	4	0	controller_170	us.mn.state.dot.tms.Controller170Impl
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
@@ -1250,17 +1183,7 @@ CREATE UNIQUE INDEX simple_plan_pkey ON simple_plan USING btree (vault_oid);
 
 CREATE UNIQUE INDEX circuit_pkey ON circuit USING btree (vault_oid);
 
-CREATE UNIQUE INDEX segment_list_pkey ON segment_list USING btree (vault_oid);
-
 CREATE UNIQUE INDEX stratified_plan_pkey ON stratified_plan USING btree (vault_oid);
-
-CREATE UNIQUE INDEX segment_pkey ON segment USING btree (vault_oid);
-
-CREATE UNIQUE INDEX off_ramp_pkey ON off_ramp USING btree (vault_oid);
-
-CREATE UNIQUE INDEX meterable_pkey ON meterable USING btree (vault_oid);
-
-CREATE UNIQUE INDEX on_ramp_pkey ON on_ramp USING btree (vault_oid);
 
 CREATE UNIQUE INDEX lcs_module_pkey ON lcs_module USING btree (vault_oid);
 
@@ -1275,8 +1198,6 @@ CREATE UNIQUE INDEX controller_pkey ON controller USING btree (vault_oid);
 CREATE UNIQUE INDEX controller_170_pkey ON controller_170 USING btree (vault_oid);
 
 CREATE UNIQUE INDEX communication_line_pkey ON communication_line USING btree (vault_oid);
-
-CREATE UNIQUE INDEX meterable_cd_pkey ON meterable_cd USING btree (vault_oid);
 
 CREATE UNIQUE INDEX dms_id_index ON dms USING btree (id);
 
@@ -1317,9 +1238,6 @@ ALTER TABLE ONLY "location"
 
 ALTER TABLE ONLY "location"
     ADD CONSTRAINT fk_cross_mod FOREIGN KEY (cross_mod) REFERENCES road_modifier(id);
-
-ALTER TABLE ONLY segment_detector
-    ADD CONSTRAINT "$1" FOREIGN KEY (detector) REFERENCES detector("index");
 
 ALTER TABLE ONLY r_node_detector
     ADD CONSTRAINT "$2" FOREIGN KEY (detector) REFERENCES detector("index");

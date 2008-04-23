@@ -64,8 +64,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			props.getProperty("UserName"),
 			props.getProperty("Password")
 		);
-		SegmentImpl.mapping = new TableMapping(store, "segment",
-			"detector");
 		R_NodeImpl.mapping = new TableMapping(store, "r_node",
 			"detector");
 		TrafficDeviceImpl.plan_mapping = new TableMapping(store,
