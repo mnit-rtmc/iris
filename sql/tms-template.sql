@@ -1066,7 +1066,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 43828	4	0	node_group	us.mn.state.dot.tms.NodeGroupImpl
 64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
 1396	4	0	communication_line	us.mn.state.dot.tms.CommunicationLineImpl
-48190	4	0	segment_list	us.mn.state.dot.tms.SegmentListImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
 50057	4	0	meterable_cd	us.mn.state.dot.tms.MeterableCd
 1535	4	0	controller	us.mn.state.dot.tms.ControllerImpl
