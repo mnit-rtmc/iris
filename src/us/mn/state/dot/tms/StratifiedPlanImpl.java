@@ -538,8 +538,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			entrance.addDetectors(ds.getDetectorSet(
 				Detector.BYPASS));
 			entrance.addDetectors(ds.getDetectorSet(
-				Detector.MAINLINE));
-			entrance.addDetectors(ds.getDetectorSet(
 				Detector.OMNIBUS));
 			DetectorSet passage = ds.getDetectorSet(
 				Detector.PASSAGE);
@@ -550,12 +548,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					Detector.MERGE));
 				entrance.addDetectors(ds.getDetectorSet(
 					Detector.EXIT));
+				entrance.addDetectors(ds.getDetectorSet(
+					Detector.MAINLINE));
+				entrance.addDetectors(ds.getDetectorSet(
+					Detector.AUXILIARY));
 			}
-		}
-
-		/** Add an entrance (with all detectors) to the zone */
-		protected void addEntranceAll(DetectorSet ds) {
-			entrance.addDetectors(ds);
 		}
 
 		/** Add an exit to the zone */
@@ -799,12 +796,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					z.addEntrance(ds);
 			}
 		}
-		protected void addEntranceAll(DetectorSet ds) {
-			for(Zone z: _zones) {
-				if(!z.isComplete())
-					z.addEntranceAll(ds);
-			}
-		}
 		protected void addExit(DetectorSet ds) {
 			for(Zone z: _zones) {
 				if(!z.isComplete())
@@ -922,7 +913,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 						return true;
 				}
 				if(nt == R_Node.TYPE_STATION && is_not_CD(n)) {
-					zone_builder.addEntranceAll(ds);
+					zone_builder.addEntrance(ds);
 					return true;
 				}
 			}
@@ -940,7 +931,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {
-					zone_builder.addEntranceAll(ds);
+					zone_builder.addEntrance(ds);
 					return true;
 				}
 			}
