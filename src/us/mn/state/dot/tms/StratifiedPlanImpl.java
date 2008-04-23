@@ -756,6 +756,31 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		return ent;
 	}
 
+	/** Create a set of exit detectors for a zone */
+	static protected DetectorSet createExitSet(DetectorSet ds) {
+		DetectorSet exit = ds.getDetectorSet(Detector.EXIT);
+		if(exit.size() > 0)
+			return exit;
+		exit.addDetectors(ds.getDetectorSet(Detector.MAINLINE));
+		exit.addDetectors(ds.getDetectorSet(Detector.AUXILIARY));
+		exit.addDetectors(ds.getDetectorSet(Detector.CD_LANE));
+		if(exit.size() > 0)
+			return exit;
+		exit.addDetectors(ds.getDetectorSet(Detector.BYPASS));
+		DetectorSet q = ds.getDetectorSet(Detector.QUEUE);
+		if(q.size() > 0) {
+			exit.addDetectors(q);
+			return exit;
+		}
+		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		if(p.size() > 0) {
+			exit.addDetectors(p);
+			return exit;
+		}
+		exit.addDetectors(ds.getDetectorSet(Detector.MERGE));
+		return exit;
+	}
+
 	/** Linked list of zones in this timing plan */
 	protected transient final LinkedList<Zone> zones =
 		new LinkedList<Zone>();
@@ -798,24 +823,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 		protected void addExit(DetectorSet ds) {
+			DetectorSet exit = createExitSet(ds);
 			for(Zone z: _zones) {
 				if(!z.isComplete())
-					z.addExit(ds);
+					z.addExit(exit);
 			}
-		}
-		protected void addEntranceAsExit(DetectorSet ds) {
-			addExit(ds.getDetectorSet(Detector.BYPASS));
-			DetectorSet s = ds.getDetectorSet(Detector.QUEUE);
-			if(s.size() > 0) {
-				addExit(s);
-				return;
-			}
-			s = ds.getDetectorSet(Detector.PASSAGE);
-			if(s.size() > 0) {
-				addExit(s);
-				return;
-			}
-			addExit(ds.getDetectorSet(Detector.MERGE));
 		}
 		protected void followEntrance(R_NodeImpl n) {
 			LocationImpl branch = (LocationImpl)n.getLocation();
@@ -991,7 +1003,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {
-					zone_builder.addEntranceAsExit(ds);
+					zone_builder.addExit(ds);
 					return true;
 				}
 			}
