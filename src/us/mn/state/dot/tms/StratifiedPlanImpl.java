@@ -535,24 +535,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
 		/** Add an entrance to the zone */
 		protected void addEntrance(DetectorSet ds) {
-			entrance.addDetectors(ds.getDetectorSet(
-				Detector.BYPASS));
-			entrance.addDetectors(ds.getDetectorSet(
-				Detector.OMNIBUS));
-			DetectorSet passage = ds.getDetectorSet(
-				Detector.PASSAGE);
-			if(passage.isDefined())
-				entrance.addDetectors(passage);
-			else {
-				entrance.addDetectors(ds.getDetectorSet(
-					Detector.MERGE));
-				entrance.addDetectors(ds.getDetectorSet(
-					Detector.EXIT));
-				entrance.addDetectors(ds.getDetectorSet(
-					Detector.MAINLINE));
-				entrance.addDetectors(ds.getDetectorSet(
-					Detector.AUXILIARY));
-			}
+			entrance.addDetectors(ds);
 		}
 
 		/** Add an exit to the zone */
@@ -756,6 +739,23 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		}
 	}
 
+	/** Create a set of entrance detectors for a zone */
+	static protected DetectorSet createEntranceSet(DetectorSet ds) {
+		DetectorSet ent = ds.getDetectorSet(Detector.BYPASS);
+		ent.addDetectors(ds.getDetectorSet(Detector.OMNIBUS));
+		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		if(p.isDefined())
+			ent.addDetectors(p);
+		else
+			ent.addDetectors(ds.getDetectorSet(Detector.MERGE));
+		if(ent.size() > 0)
+			return ent;
+		ent.addDetectors(ds.getDetectorSet(Detector.EXIT));
+		ent.addDetectors(ds.getDetectorSet(Detector.MAINLINE));
+		ent.addDetectors(ds.getDetectorSet(Detector.AUXILIARY));
+		return ent;
+	}
+
 	/** Linked list of zones in this timing plan */
 	protected transient final LinkedList<Zone> zones =
 		new LinkedList<Zone>();
@@ -791,9 +791,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 		protected void addEntrance(DetectorSet ds) {
+			DetectorSet ent = createEntranceSet(ds);
 			for(Zone z: _zones) {
 				if(!z.isComplete())
-					z.addEntrance(ds);
+					z.addEntrance(ent);
 			}
 		}
 		protected void addExit(DetectorSet ds) {
