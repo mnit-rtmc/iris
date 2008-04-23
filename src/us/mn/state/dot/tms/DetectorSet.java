@@ -62,6 +62,14 @@ public class DetectorSet implements Constants {
 			detectors.add(det);
 	}
 
+	/** Add the detectors of the given type from another detector set */
+	public void addDetectors(DetectorSet other, short type) {
+		for(DetectorImpl d: other.detectors) {
+			if(type == d.getLaneType())
+				addDetector(d);
+		}
+	}
+
 	/** Remove all the detectors from another detector set */
 	public boolean removeDetectors(DetectorSet other) {
 		boolean match = false;
@@ -188,10 +196,7 @@ public class DetectorSet implements Constants {
 	/** Get the detector set for the given detector type */
 	public DetectorSet getDetectorSet(short type) {
 		DetectorSet set = new DetectorSet();
-		for(DetectorImpl d: detectors) {
-			if(type == d.getLaneType())
-				set.addDetector(d);
-		}
+		set.addDetectors(this, type);
 		return set;
 	}
 

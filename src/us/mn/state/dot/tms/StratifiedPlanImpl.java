@@ -742,17 +742,17 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	/** Create a set of entrance detectors for a zone */
 	static protected DetectorSet createEntranceSet(DetectorSet ds) {
 		DetectorSet ent = ds.getDetectorSet(Detector.BYPASS);
-		ent.addDetectors(ds.getDetectorSet(Detector.OMNIBUS));
+		ent.addDetectors(ds, Detector.OMNIBUS);
 		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
 		if(p.isDefined())
 			ent.addDetectors(p);
 		else
-			ent.addDetectors(ds.getDetectorSet(Detector.MERGE));
+			ent.addDetectors(ds, Detector.MERGE);
 		if(ent.size() > 0)
 			return ent;
-		ent.addDetectors(ds.getDetectorSet(Detector.EXIT));
-		ent.addDetectors(ds.getDetectorSet(Detector.MAINLINE));
-		ent.addDetectors(ds.getDetectorSet(Detector.AUXILIARY));
+		ent.addDetectors(ds, Detector.EXIT);
+		ent.addDetectors(ds, Detector.MAINLINE);
+		ent.addDetectors(ds, Detector.AUXILIARY);
 		return ent;
 	}
 
@@ -761,12 +761,12 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		DetectorSet exit = ds.getDetectorSet(Detector.EXIT);
 		if(exit.size() > 0)
 			return exit;
-		exit.addDetectors(ds.getDetectorSet(Detector.MAINLINE));
-		exit.addDetectors(ds.getDetectorSet(Detector.AUXILIARY));
-		exit.addDetectors(ds.getDetectorSet(Detector.CD_LANE));
+		exit.addDetectors(ds, Detector.MAINLINE);
+		exit.addDetectors(ds, Detector.AUXILIARY);
+		exit.addDetectors(ds, Detector.CD_LANE);
 		if(exit.size() > 0)
 			return exit;
-		exit.addDetectors(ds.getDetectorSet(Detector.BYPASS));
+		exit.addDetectors(ds, Detector.BYPASS);
 		DetectorSet q = ds.getDetectorSet(Detector.QUEUE);
 		if(q.size() > 0) {
 			exit.addDetectors(q);
@@ -777,7 +777,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			exit.addDetectors(p);
 			return exit;
 		}
-		exit.addDetectors(ds.getDetectorSet(Detector.MERGE));
+		exit.addDetectors(ds, Detector.MERGE);
 		return exit;
 	}
 
