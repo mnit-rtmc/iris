@@ -264,6 +264,8 @@ public class FontImpl extends BaseObjectImpl implements Font {
       * @param x Horizontal position to start rendering
       * @param y Vertical position to strat rendering
       * @param t String to render
+      * @throws InvalidMessageException if the message contains chars that don't exist.
+      * @throws IOException 
       */
 	public void renderOn(BitmapGraphic g, int x, int y, String t)
 		throws InvalidMessageException, IOException
