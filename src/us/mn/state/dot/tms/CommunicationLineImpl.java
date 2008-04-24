@@ -44,7 +44,6 @@ import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.comm.dmslite.DmsLitePoller;
-import us.mn.state.dot.tms.comm.sdrms.SdrmsPoller;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
@@ -384,12 +383,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		return new DmsLitePoller(String.valueOf(index), messenger);
 	}
 
-	/** Create a SDRMS poller */
-	protected MessagePoller createSdrmsPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new SdrmsPoller(String.valueOf(index), messenger);
-	}
-
 	/** Create a CAWS poller */
 	protected MessagePoller createCawsPoller() throws IOException {
 		messenger = createHttpFileMessenger();
@@ -418,8 +411,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 				return createManchesterPoller();
             case PROTO_DMSLITE:
                 return createDmsLitePoller();
-            case PROTO_SDRMS:
-                return createSdrmsPoller();
             case PROTO_CAWS:
                 return createCawsPoller();
 			default:
@@ -521,7 +512,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			case PROTO_PELCO:
 			case PROTO_MANCHESTER:
             case PROTO_DMSLITE:         // Caltrans D10
-            case PROTO_SDRMS:           // Caltrans D10
             case PROTO_CAWS:            // Caltrans D10
 				c = new ControllerImpl(circuit, drop);
 				break;

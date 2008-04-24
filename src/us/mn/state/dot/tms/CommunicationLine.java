@@ -48,6 +48,9 @@ public interface CommunicationLine extends TMSObject {
 	/** Get the bit rate */
 	public int getBitRate() throws RemoteException;
 
+    /** number of different protocols (for sanity checking) */
+    public int NUM_OF_PROTOCOLS = 11;
+
 	/** NTCIP Class B serial communication protocol */
 	public int PROTO_NTCIP_B = 0;
 
@@ -75,6 +78,12 @@ public interface CommunicationLine extends TMSObject {
 	/** Manchester camera control protocol */
 	public int PROTO_MANCHESTER = 8;
 
+	/** DMS Lite protocol */
+	public int PROTO_DMSLITE = 9;
+
+	/** CAWS protocol */
+	public int PROTO_CAWS = 10;
+
 	/** Protocol string constants */
 	public String[] PROTOCOLS = {
 		"NTCIP Class B",
@@ -85,7 +94,9 @@ public interface CommunicationLine extends TMSObject {
 		"Vicon",
 		"Pelco D",
 		"NTCIP Class C",
-		"Manchester"
+		"Manchester",
+        "DMS Lite",         // Caltrans D10
+        "CAWS",             // Caltrans D10
 	};
 
 	/** Set the communication protocol */
