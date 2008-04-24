@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -55,11 +56,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** The number of frames to process (for streaming) */
 	static protected final int STREAM_DURATION = 300;
 
-	/** Range of PTZ values */
-	static protected final int PTZ_RANGE = 63;
-
 	/** Dead zone needed for too-precise joystick drivers */
-	static protected final int AXIS_DEADZONE = 3;
+	static protected final float AXIS_DEADZONE = 3f / 64;
 
 	/** Button number to select previous camera */
 	static protected final int BUTTON_PREVIOUS = 10;
@@ -72,6 +70,9 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** Properties for configuring the video client */
 	private final Properties videoProps;
+
+	/** Message logger */
+	protected final Logger logger;
 
 	/** The base URLs of the backend video stream servers */
 	private final String[] streamUrls;
@@ -111,9 +112,12 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final JoystickThread joystick = new JoystickThread();
 
 	/** Create a new camera viewer */
-	public CameraViewer(CameraHandler h, boolean admin, Properties p) {
+	public CameraViewer(CameraHandler h, boolean admin, Properties p,
+		Logger l)
+	{
 		super(new GridBagLayout());
 		videoProps = p;
+		logger = l;
 		streamUrls = AbstractImageFactory.createBackendUrls(p, 1);
 		handler = h;
 		handler.getSelectionModel().addTmsSelectionListener( this );
@@ -193,33 +197,37 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		});
 	}
 
-	/** Map a float value to an integer range */
-	static protected int map_float(float value, int range) {
-		int v = Math.round(value * range);
-		if(Math.abs(v) < AXIS_DEADZONE)
+	/** Filter an axis to remove slop around the joystick dead zone */
+	static protected float filter_deadzone(float v) {
+		float av = Math.abs(v);
+		if(av > AXIS_DEADZONE) {
+			float fv = (av - AXIS_DEADZONE) / (1 - AXIS_DEADZONE);
+			if(v < 0)
+				return -fv;
+			else
+				return fv;
+		} else
 			return 0;
-		else
-			return v;
 	}
 
 	/** Pan value from last poll */
-	protected int pan;
+	protected float pan;
 
 	/** Tilt value from last poll */
-	protected int tilt;
+	protected float tilt;
 
 	/** Zoom value from last poll */
-	protected int zoom;
+	protected float zoom;
 
 	/** Poll the joystick and send PTZ command to server */
 	protected void pollJoystick() throws RemoteException {
 		CameraProxy proxy = selected;	// Avoid race
 		if(proxy != null) {
-			int p = map_float(joystick.getPan(), PTZ_RANGE);
-			int t = -map_float(joystick.getTilt(), PTZ_RANGE);
-			int z = map_float(joystick.getZoom(), PTZ_RANGE);
-			if(p != 0 || p != pan || t != 0 || t != tilt ||
-				z != 0 || z != zoom)
+			float p = filter_deadzone(joystick.getPan());
+			float t = -filter_deadzone(joystick.getTilt());
+			float z = filter_deadzone(joystick.getZoom());
+			if(p != 0 || pan != 0 || t != 0 || tilt != 0 ||
+			   z != 0 || zoom != 0)
 			{
 				proxy.camera.move(p, t, z);
 				pan = p;
@@ -336,7 +344,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		camera.setId(c.getId());
 		client.setCamera(camera);
 		monitor.setImageFactory(new RepeaterImageFactory(client,
-			streamUrls[client.getArea()]), STREAM_DURATION);
+			streamUrls[client.getArea()], logger, null),
+			STREAM_DURATION);
 	}
 
 	/** Stop video streaming */

@@ -54,5 +54,5 @@ public interface Camera extends TrafficDevice {
 	short getRoadSide() throws RemoteException;
 
 	/** Command the camera to pan, tilt or zoom */
-	void move(int p, int t, int z) throws RemoteException;
+	void move(float p, float t, float z) throws RemoteException;
 }

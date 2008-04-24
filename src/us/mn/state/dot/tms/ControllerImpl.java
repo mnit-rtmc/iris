@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -309,7 +309,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	}
 
 	/** Get an active DMS for the controller */
-	public synchronized DMSImpl getActiveSign() {
+	public DMSImpl getActiveSign() {
 		if(isActive()) {
 			DeviceImpl d = getDeviceImpl();
 			if(d instanceof DMSImpl)

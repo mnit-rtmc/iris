@@ -64,8 +64,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			props.getProperty("UserName"),
 			props.getProperty("Password")
 		);
-		SegmentImpl.mapping = new TableMapping(store, "segment",
-			"detector");
 		R_NodeImpl.mapping = new TableMapping(store, "r_node",
 			"detector");
 		TrafficDeviceImpl.plan_mapping = new TableMapping(store,
@@ -101,7 +99,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		loadAlarms();
 		System.err.println("Loading detectors...");
 		detectors.load(DetectorImpl.class, "index");
-		// Roadways must be after detectors until segment lists go away
 		System.err.println("Loading roadways...");
 		roadways.load(RoadwayImpl.class, "name");
 		System.err.println("Loading r_nodes...");

@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 import java.rmi.RemoteException;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 import us.mn.state.dot.tms.comm.MessagePoller;
@@ -78,7 +79,15 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		int s = getStatusCode();
 		if(s != status_code) {
 			status_code = s;
-			meterList.update(id);
+			final String meter_id = id;
+			WORKER.addJob(new Job() {
+				public void perform() {
+					// NOTE: this grabs the RampMeterList
+					// lock, so must be done on the WORKER
+					// thread to avoid deadlocks
+					meterList.update(meter_id);
+				}
+			});
 		}
 		super.notifyStatus();
 	}
@@ -735,16 +744,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Get verification camera */
 	public TrafficDevice getCamera() {
 		return camera;
-	}
-
-	/** Get the segment list for this meter */
-	public SegmentListImpl getSegmentList() {
-		RoadwayImpl freeway = (RoadwayImpl)location.getFreeway();
-		short freeDir = location.getFreeDir();
-		if(freeway == null)
-			return null;
-		else
-			return (SegmentListImpl)freeway.getSegmentList(freeDir);
 	}
 
 	/** Get the detector set associated with the ramp meter */
