@@ -38,6 +38,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * Dynamic Message Sign
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
@@ -646,19 +647,33 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Currently displayed message */
 	protected transient SignMessage message;
 
-	/** Set a new message on the sign */
-	public void setMessage(String owner, String text, int duration)
+	/** Set a new message on the sign, all pages rendered */
+	public void setMessage(String owner, String text, int duration) // rename to setNewMessage() ??
 		throws InvalidMessageException
 	{
 		MultiString multi = new MultiString(text);
-		BitmapGraphic bitmap = createPixelMap(multi);
-		sendMessage(new SignMessage(owner, multi, bitmap, duration));
+		BitmapGraphic[] bitmaps = createPixelMaps(multi);
+		sendMessage(new SignMessage(owner, multi, bitmaps, duration));
 	}
 
-	/** Update graphic for the current message */
+	/** Set a new message on the sign */
+	public void setNewMessage(SignMessage argmess) throws InvalidMessageException {
+		sendMessage(argmess);
+	}
+
+	/** Update graphic for all pages for the current message */
 	public void updateMessageGraphic() {
 		SignMessage m = message;	// Avoid races
-		m.setBitmap(createPixelMap(m.getMulti()));
+		m.setBitmaps(createPixelMaps(m.getMulti()));
+	}
+
+	/** 
+     * Update graphic using a new bitmap. This is used by DMS that return bitmaps
+     * (and possibly no text) on status querries.
+     */
+	public void updateMessageGraphic(BitmapGraphic bm) {
+		SignMessage m = message;	// Avoid races
+		m.setBitmap(bm);
 	}
 
 	/** Set a new alert on the sign */
@@ -670,7 +685,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			message instanceof SignTravelTime))
 		{
 			MultiString multi = new MultiString(text);
+            // note: this renders only the 1st page of the message
 			BitmapGraphic bitmap = createPixelMap(multi);
+			//BitmapGraphic[] bitmaps = createPixelMaps(multi);
 			sendMessage(new SignAlert(owner, multi, bitmap,
 				SignMessage.DURATION_INFINITE));
 		}
@@ -703,7 +720,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return;
 		}
 		MultiString multi = new MultiString(text);
+        // note: this renders only the 1st page of the message
 		BitmapGraphic bitmap = createPixelMap(multi);
+		//BitmapGraphic[] bitmaps = createPixelMaps(multi);
 		sendMessage(new SignTravelTime(multi, bitmap));
 	}
 
@@ -736,6 +755,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Set the sign message (called after a message has been
 	 * successfully activated) */
 	public void setMessage(SignMessage m) {
+
 		// If the new message is different from the old message
 		// then log it.  Required to prevent double-logging
 		// when users double-click the send.
@@ -756,13 +776,16 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		message = m;
 	}
 
-	/** Set the message from information read from the controller */
+	/** 
+      * Set the message from information read from the controller.
+      * All pages are rendered.
+      */
 	public void setMessageFromController(String text, int time) {
 		if(message.equalsString(text))
 			return;
 		MultiString multi = new MultiString(text);
-		BitmapGraphic bitmap = createPixelMap(multi);
-		setMessage(new SignMessage(NO_OWNER, multi, bitmap, time));
+		BitmapGraphic[] bitmaps = createPixelMaps(multi);
+		setMessage(new SignMessage(NO_OWNER, multi, bitmaps, time));
 	}
 
 	/** Log a message */
@@ -819,8 +842,36 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 	}
 
-	/** Create a pixel map of the message */
-	public BitmapGraphic createPixelMap(MultiString multi) {
+	/** 
+     * Create a pixel map of the message for the 1st page within the MultiString message.
+     */
+    public BitmapGraphic createPixelMap(final MultiString multi) {
+        return createPixelMap(0,multi);
+    }
+
+	/** 
+     * Create a pixel map of the message for all pages within the MultiString message.
+     */
+	public BitmapGraphic[] createPixelMaps(final MultiString multi) {
+        if (multi==null) {
+            throw new IllegalArgumentException("null arg.");
+        }
+        int n=multi.getNumPages();
+        BitmapGraphic[] bm=new BitmapGraphic[n];
+        for (int i=0; i<n; ++i) {
+            bm[i]=this.createPixelMap(i,multi);
+        }
+		return bm;
+	}
+
+	/** 
+     * Create a pixel map of the message for the specified page within the MultiString message.
+     * @param pg Page number within MultiString to render, zero based.
+     * @param multi MultiString to render.
+     * @return BitmapGraphic containing rendered MultiString page.
+     */
+	public BitmapGraphic createPixelMap(final int pg,final MultiString multi) {
+
 		final BitmapGraphic g = new BitmapGraphic(signWidthPixels,
 			signHeightPixels);
 		final FontImpl font = getFont();
@@ -830,7 +881,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			public void addText(int p, int l,
 				MultiString.JustificationLine j, String t)
 			{
-				if(p > 0)
+				if(p!=pg)
 					return;
 				int x = calculatePixelX(j, font, t);
 				int y = l * (font.getHeight() +
@@ -872,8 +923,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get the appropriate font for this sign */
 	public FontImpl getFont() {
-		return lookupFont(getLineHeightPixels(), characterWidthPixels,
-			0);
+		return lookupFont(getLineHeightPixels(), characterWidthPixels,0);
 	}
 
 	/** Calculate the width (in pixels) of a single line of text */
