@@ -147,6 +147,7 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 	/** Filter the freeway direction which matches the given direction */
 	public short filterDirection(short d) {
 		if(direction == EAST_WEST) {
+			// FIXME: add secondary direction
 			// The special cases are for I-494, which is an
 			// East-West freeway, but has a North-South portion
 			if(d == SOUTH)
