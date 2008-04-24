@@ -116,7 +116,7 @@ public class Session {
 	}
 
 	/** Add the DMS tab */
-	protected void addDMSTab() throws RemoteException {
+	protected void addDMSTab(final SonarState st) throws RemoteException {
 		TmsMapLayer dmsLayer = DMSHandler.createLayer(tmsConnection);
 		Layer warnLayer = WarningSignHandler.createLayer(tmsConnection);
 		List<LayerState> lstates = createBaseLayers();
@@ -126,7 +126,7 @@ public class Session {
 		lstates.add(dmsLayer.createState());
 		lstates.add(warnLayer.createState());
 		tabs.add(new DMSTab(lstates, vlayer,
-			(DMSHandler)dmsLayer.getHandler()));
+			(DMSHandler)dmsLayer.getHandler(),st));
 	}
 
 	/** Add the meter tab */
@@ -154,7 +154,7 @@ public class Session {
 	/** Add the camera tab */
 	protected void addCameraTab() throws RemoteException {
 		tabs.add(new CameraTab((CameraHandler)camLayer.getHandler(),
-			tmsConnection.isAdmin(), props));
+			tmsConnection.isAdmin(), props, logger));
 	}
 
 	/** Add the roadway tab */
@@ -188,7 +188,7 @@ public class Session {
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
 		if(user.hasPermission(IrisPermission.DMS_TAB))
-			addDMSTab();
+			addDMSTab(st);
 		if(user.hasPermission(IrisPermission.METER_TAB))
 			addMeterTab();
 		if(user.hasPermission(IrisPermission.MAIN_TAB))

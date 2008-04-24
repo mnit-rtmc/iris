@@ -252,11 +252,21 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			GraphicImpl graphic = (GraphicImpl)glyph.getGraphic();
 			if(graphic != null)
 				return graphic;
+		    throw new InvalidMessageException("Invalid graphic");
 		}
-		throw new InvalidMessageException("Invalid code point");
+		throw new InvalidMessageException("Invalid code point: "+code_point);
 	}
 
-	/** Render text onto a bitmap graphic */
+	/** 
+      * Render text onto a bitmap graphic.
+      *
+      * @param g BitmapGraphic to render into.
+      * @param x Horizontal position to start rendering
+      * @param y Vertical position to strat rendering
+      * @param t String to render
+      * @throws InvalidMessageException if the message contains chars that don't exist.
+      * @throws IOException 
+      */
 	public void renderOn(BitmapGraphic g, int x, int y, String t)
 		throws InvalidMessageException, IOException
 	{

@@ -271,6 +271,8 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	protected void _setStationID(String s) throws TMSException,
 		RemoteException
 	{
+		if(statMap.getElement(s) != null)
+			throw new ChangeVetoException("Duplicate ID: " + s);
 		StationImpl station = createStation(s);
 		store.update(this, "station_id", s);
 		try {
@@ -409,8 +411,10 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	public DetectorSet getDetectorSet() {
 		DetectorImpl[] dets = detectors;	// Avoid race
 		DetectorSet set = new DetectorSet();
-		for(DetectorImpl d: dets)
-			set.addDetector(d);
+		for(DetectorImpl d: dets) {
+			if(!d.isAbandoned())
+				set.addDetector(d);
+		}
 		return set;
 	}
 
@@ -510,6 +514,11 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	/** Get a list of the downstream nodes */
 	public List<R_NodeImpl> getDownstream() {
 		return downstream;
+	}
+
+	/** Get the linked corridor for an entrance or exit */
+	public Corridor getLinkedCorridor() {
+		return nodeMap.getCorridor(location.getLinkedCorridor());
 	}
 
 	/** Print the r_node as an XML element */

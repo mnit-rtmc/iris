@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,15 +53,6 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 	protected RoadwayImpl( FieldMap fields ) throws RemoteException {
 		super();
 		name = (String)fields.get( "name" );
-	}
-	
-	/** Initialize segment lists. Called after Roadway is loaded from the
-	 *  database. */
-	public void initTransients() throws TMSException, RemoteException {
-		if(segment1 != null)
-			segment1.initTransients();
-		if(segment2 != null)
-			segment2.initTransients();
 	}
 
 	/** Get a String representation of this roadway */
@@ -121,7 +112,6 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 	{
 		if(t == type)
 			return;
-		updateSegmentLists(t, direction);
 		store.update(this, "type", t);
 		type = t;
 	}
@@ -145,7 +135,6 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 	{
 		if(d == direction)
 			return;
-		updateSegmentLists(type, d);
 		store.update(this, "direction", d);
 		direction = d;
 	}
@@ -153,72 +142,6 @@ class RoadwayImpl extends TMSObjectImpl implements Roadway, Storable {
 	/** Get the direction */
 	public short getDirection() {
 		return direction;
-	}
-
-	/** Segment list for the NORTH / EAST direction */
-	protected SegmentListImpl segment1 = null;
-
-	/** Segment list for the SOUTH / WEST direction */
-	protected SegmentListImpl segment2 = null;
-
-	/** Is this roadway deletable? */
-	public boolean isDeletable() throws TMSException {
-		if(segment1 != null || segment2 != null)
-			return false;
-		return super.isDeletable();
-	}
-
-	/** Update segment lists */
-	protected void updateSegmentLists(short t, short d)
-		throws TMSException, RemoteException
-	{
-		boolean before = type == FREEWAY && direction > NONE;
-		boolean after = t == FREEWAY && d > NONE;
-		if(before == after)
-			return;
-		SegmentListImpl seg1 = null;
-		SegmentListImpl seg2 = null;
-		if(before) {
-			seg1 = destroySegmentList(segment1);
-			seg2 = destroySegmentList(segment2);
-		}
-		if(seg1 == null)
-			store.update(this, "segment1", "0");
-		else
-			store.update(this, "segment1", seg1.getOID());
-		if(seg2 == null)
-			store.update(this, "segment2", "0");
-		else
-			store.update(this, "segment2", seg2.getOID());
-		segment1 = seg1;
-		segment2 = seg2;
-	}
-
-	/** Destroy a segment list */
-	protected SegmentListImpl destroySegmentList(SegmentListImpl s)
-		throws TMSException
-	{
-		if(s != null && !s.isDeletable())
-			throw new ChangeVetoException("Cannot delete object");
-		return null;
-	}
-
-	/** Get a segment list for the specified direction */
-	public SegmentListImpl getSegmentList(short d) {
-		d = filterDirection(d);
-		if(direction == NORTH_SOUTH) {
-			if(d == NORTH)
-				return segment1;
-			if(d == SOUTH)
-				return segment2;
-		}
-		if(direction == EAST_WEST) {
-			if(d == EAST)
-				return segment1;
-			if(d == WEST)
-				return segment2;
-		}
-		return null;
 	}
 
 	/** Filter the freeway direction which matches the given direction */

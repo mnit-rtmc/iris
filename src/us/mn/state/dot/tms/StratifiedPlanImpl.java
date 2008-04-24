@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
@@ -32,17 +33,8 @@ import java.rmi.RemoteException;
  */
 public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
-static protected final PrintStream ZONE_DEBUG;
-static {
-	PrintStream ps = null;
-	try {
-		ps =new PrintStream(new FileOutputStream("/var/log/tms/zones"));
-	}
-	catch(IOException e) {
-		e.printStackTrace();
-	}
-	ZONE_DEBUG = ps;
-};
+	/** Zone debug log */
+	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
 
 	/** ObjectVault table name */
 	static public final String tableName = "stratified_plan";
@@ -102,13 +94,11 @@ static {
 		RemoteException
 	{
 		super(period);
-		segList = null;
 	}
 
 	/** Create a stratified timing plan */
 	protected StratifiedPlanImpl() throws RemoteException {
 		super();
-		segList = null;
 	}
 
 	/** Get the plan type */
@@ -123,20 +113,6 @@ static {
 	public void setTarget(RampMeter m, int t) throws TMSException {
 		if(t != RampMeter.MAX_RELEASE_RATE)
 			throw new ChangeVetoException("Invalid target rate");
-	}
-
-	/** Segment list for this timing plan */
-	protected transient SegmentListImpl segList;
-
-	/** Get the segment list for this timing plan */
-	protected SegmentListImpl getSegmentList(RampMeterImpl meter) {
-		if(segList == null)
-			segList = meter.getSegmentList();
-		else if(segList != meter.getSegmentList()) {
-			System.err.println("ERROR: Segment List mismatch for " +
-				meter.getId());
-		}
-		return segList;
 	}
 
 	/** Meter state holds stratified plan state for a meter. For each meter
@@ -514,34 +490,9 @@ static {
 			return n_stations > layer;
 		}
 
-		/** Create a new zone */
-		protected Zone(int l, int n, SegmentImpl[] segs, int start,
-			int stop)
-		{
-			layer = l;
-			znum = n;
-			addUpstream(segs[start]);
-			for(int i = start; i <= stop; i++) {
-				SegmentImpl seg = segs[i];
-				DetectorSet ds = seg.getDetectorSet();
-				if(seg instanceof StationSegmentImpl)
-					addMainline(seg);
-				else if(seg instanceof OnRampImpl) {
-					OnRampImpl ramp = (OnRampImpl)seg;
-					if(ramp.isToCd())
-						continue;
-					if(ramp.isFromCd())
-						scanUpstreamCD(segs, i, start);
-					else
-						addEntrance(ds, false);
-				} else if(seg instanceof OffRampImpl) {
-					OffRampImpl ramp = (OffRampImpl)seg;
-					if(ramp.isFromCd())
-						continue;
-					addExit(ds);
-				}
-			}
-			addDownstream(segs[stop]);
+		/** Is the zone valid? */
+		protected boolean isValid() {
+			return isComplete() && entrance.size() > 0;
 		}
 
 		/** Get the zone ID */
@@ -564,22 +515,12 @@ static {
 			}
 		}
 
-		/** Add an upstream station to the zone */
-		protected void addUpstream(SegmentImpl segment) {
-			addUpstream(segment.getDetectorSet());
-		}
-
 		/** Add a mainline station to the zone */
 		protected void addMainline(DetectorSet ds) {
 			for(DetectorImpl det: ds.toArray()) {
 				if(det.isStation())
 					mainline.addDetector(det);
 			}
-		}
-
-		/** Add a mainline station to the zone */
-		protected void addMainline(SegmentImpl segment) {
-			addMainline(segment.getDetectorSet());
 		}
 
 		/** Add a downstream station to the zone */
@@ -592,80 +533,14 @@ static {
 			}
 		}
 
-		/** Add a downstream station to the zone */
-		protected void addDownstream(SegmentImpl segment) {
-			addDownstream(segment.getDetectorSet());
-		}
-
 		/** Add an entrance to the zone */
-		protected boolean addEntrance(DetectorSet ds, boolean cd_merge)
-		{
-			boolean q = (ds.getDetectorSet(
-				Detector.QUEUE)).isDefined();
-			entrance.addDetectors(ds.getDetectorSet(
-				Detector.BYPASS));
-			entrance.addDetectors(ds.getDetectorSet(
-				Detector.MAINLINE));
-			entrance.addDetectors(ds.getDetectorSet(
-				Detector.OMNIBUS));
-			DetectorSet passage = ds.getDetectorSet(
-				Detector.PASSAGE);
-			if(passage.isDefined())
-				entrance.addDetectors(passage);
-			else if(q || !cd_merge) {
-				entrance.addDetectors(ds.getDetectorSet(
-					Detector.MERGE));
-				entrance.addDetectors(ds.getDetectorSet(
-					Detector.EXIT));
-			}
-			return q;
+		protected void addEntrance(DetectorSet ds) {
+			entrance.addDetectors(ds);
 		}
 
 		/** Add an exit to the zone */
 		protected void addExit(DetectorSet ds) {
 			exit.addDetectors(ds);
-		}
-
-		/** Scan upstream for meterable segments on the CD road.
-		 * @param segs Array of segments for this freeway
-		 * @param end End segment of CD, scan upstream from here
-		 * @param start Start segment of zone */
-		protected void scanUpstreamCD(SegmentImpl[] segs, int end,
-			int start)
-		{
-			for(int i = end; i > 0; i--) {
-				if(checkSegment(segs[i], i < start))
-					break;
-			}
-		}
-
-		/** Check segment for upstream CD detectors.
-		 * @param seg Segment to check
-		 * @param before True if before the upstream zone segment
-		 * @return True means stop scanning upstream */
-		protected boolean checkSegment(SegmentImpl seg, boolean before)
-		{
-			DetectorSet ds = seg.getDetectorSet();
-			if(seg instanceof OnRampImpl) {
-				OnRampImpl ramp = (OnRampImpl)seg;
-				if(ramp.isFromCd() && addEntrance(ds, true))
-					return true;
-				if(ramp.isToCd())
-					addEntrance(ds, false);
-			} else if(seg instanceof MeterableImpl) {
-				if(addEntrance(ds, true))
-					return true;
-			} else if(seg instanceof OffRampImpl) {
-				OffRampImpl ramp = (OffRampImpl)seg;
-				if(ramp.isToCd()) {
-					if(before)
-						entrance.addDetectors(seg);
-					return true;
-				}
-				if(ramp.isFromCd())
-					addExit(ds);
-			}
-			return false;
 		}
 
 		/** Add a meter if it's within the zone */
@@ -864,6 +739,48 @@ static {
 		}
 	}
 
+	/** Create a set of entrance detectors for a zone */
+	static protected DetectorSet createEntranceSet(DetectorSet ds) {
+		DetectorSet ent = ds.getDetectorSet(Detector.BYPASS);
+		ent.addDetectors(ds, Detector.OMNIBUS);
+		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		if(p.isDefined())
+			ent.addDetectors(p);
+		else
+			ent.addDetectors(ds, Detector.MERGE);
+		if(ent.size() > 0)
+			return ent;
+		ent.addDetectors(ds, Detector.EXIT);
+		ent.addDetectors(ds, Detector.MAINLINE);
+		ent.addDetectors(ds, Detector.AUXILIARY);
+		return ent;
+	}
+
+	/** Create a set of exit detectors for a zone */
+	static protected DetectorSet createExitSet(DetectorSet ds) {
+		DetectorSet exit = ds.getDetectorSet(Detector.EXIT);
+		if(exit.size() > 0)
+			return exit;
+		exit.addDetectors(ds, Detector.MAINLINE);
+		exit.addDetectors(ds, Detector.AUXILIARY);
+		exit.addDetectors(ds, Detector.CD_LANE);
+		if(exit.size() > 0)
+			return exit;
+		exit.addDetectors(ds, Detector.BYPASS);
+		DetectorSet q = ds.getDetectorSet(Detector.QUEUE);
+		if(q.size() > 0) {
+			exit.addDetectors(q);
+			return exit;
+		}
+		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		if(p.size() > 0) {
+			exit.addDetectors(p);
+			return exit;
+		}
+		exit.addDetectors(ds, Detector.MERGE);
+		return exit;
+	}
+
 	/** Linked list of zones in this timing plan */
 	protected transient final LinkedList<Zone> zones =
 		new LinkedList<Zone>();
@@ -871,27 +788,24 @@ static {
 	/** Create all the layers for this stratified timing plan */
 	protected void createAllLayers(RampMeterImpl meter) {
 		zones.clear();
-		SegmentListImpl sList = getSegmentList(meter);
-		if(sList == null)
-			return;
-		SegmentImpl[] segs = sList.toArray();
-		for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
-			createLayer(segs, layer);
-
-if(testing) {
-	ZoneBuilder zone_builder = new ZoneBuilder();
-	Corridor c = meter.getCorridor();
-	c.findNode(zone_builder);
-	LinkedList<Zone> _zones = zone_builder.getList();
-	for(Zone z: _zones)
-		z.print(ZONE_DEBUG);
-}
+		ZoneBuilder zone_builder = new ZoneBuilder();
+		Corridor c = meter.getCorridor();
+		c.findNode(zone_builder);
+		zones.addAll(zone_builder.getList());
 	}
 
 	/** Inner class to build zones */
 	protected class ZoneBuilder implements Corridor.NodeFinder {
 		TreeSet<Zone> _zones = new TreeSet<Zone>();
 		int znum = 0;
+		protected void removeInvalidZones() {
+			Iterator<Zone> it = _zones.iterator();
+			while(it.hasNext()) {
+				Zone z = it.next();
+				if(!z.isValid())
+					it.remove();
+			}
+		}
 		protected void addStation(DetectorSet ds) {
 			znum++;
 			for(int layer = 1; layer <= TOTAL_LAYERS; layer++)
@@ -901,75 +815,200 @@ if(testing) {
 					z.addStation(ds);
 			}
 		}
-		protected void addEntranse(DetectorSet ds) {
+		protected void addEntrance(DetectorSet ds) {
+			DetectorSet ent = createEntranceSet(ds);
 			for(Zone z: _zones) {
 				if(!z.isComplete())
-					z.addEntrance(ds, false);
+					z.addEntrance(ent);
 			}
 		}
 		protected void addExit(DetectorSet ds) {
+			DetectorSet exit = createExitSet(ds);
 			for(Zone z: _zones) {
 				if(!z.isComplete())
-					z.addExit(ds);
+					z.addExit(exit);
 			}
 		}
+		protected void followEntrance(R_NodeImpl n) {
+			LocationImpl branch = (LocationImpl)n.getLocation();
+			Corridor c = n.getLinkedCorridor();
+			if(c != null) {
+				Corridor.NodeFinder nf =
+					new EntranceFollower(this, branch);
+				if(c.findNodeReverse(nf) != null)
+					return;
+			}
+			ZONE_LOG.log("Missing entrance detection @ " +
+				branch.getDescription());
+		}
+		protected void followExit(R_NodeImpl n) {
+			LocationImpl branch = (LocationImpl)n.getLocation();
+			Corridor c = n.getLinkedCorridor();
+			if(c != null) {
+				Corridor.NodeFinder nf =
+					new ExitFollower(this, branch);
+				if(c.findNode(nf) != null)
+					return;
+			}
+			ZONE_LOG.log("Missing exit detection @ " +
+				branch.getDescription());
+		}
 		public boolean check(R_NodeImpl n) {
-			DetectorSet ds = n.getDetectorSet();
-			if(ds.size() == 0) {
-				// FIXME: follow links for missing detection
+			int nt = n.getNodeType();
+			if(nt == R_Node.TYPE_INTERSECTION) {
+				removeInvalidZones();
 				return false;
 			}
-			if(n.getNodeType() == R_Node.TYPE_STATION)
+			DetectorSet ds = n.getDetectorSet();
+			if(ds.size() == 0) {
+ 				if(nt == R_Node.TYPE_ENTRANCE)
+					followEntrance(n);
+				if(nt == R_Node.TYPE_EXIT)
+					followExit(n);
+				return false;
+			}
+			if(nt == R_Node.TYPE_STATION)
 				addStation(ds);
-			else if(n.getNodeType() == R_Node.TYPE_ENTRANCE)
-				addEntranse(ds);
-			else if(n.getNodeType() == R_Node.TYPE_EXIT)
+			else if(nt == R_Node.TYPE_ENTRANCE)
+				addEntrance(ds);
+			else if(nt == R_Node.TYPE_EXIT)
 				addExit(ds);
 			return false;
 		}
 		public LinkedList<Zone> getList() {
 			LinkedList<Zone> zl = new LinkedList<Zone>();
 			for(Zone z: _zones) {
-				if(z.isComplete())
+				if(z.isValid())
 					zl.add(z);
 			}
 			return zl;
 		}
 	}
 
-	/** Create a layer of zones and add them to the zone list */
-	protected void createLayer(SegmentImpl[] segs, int layer) {
-		int znum = 1;
-		for(int start = 0; start < segs.length; start++) {
-			if(!(segs[start] instanceof StationSegment))
-				continue;
-			int stations = 0;
-			for(int stop = start + 1; stop < segs.length; stop++) {
-				if(!(segs[stop] instanceof StationSegment))
-					continue;
-				stations++;
-				if(stations == layer) {
-					if(createZone(layer, znum, segs, start,
-						stop))
-					{
-						znum++;
-					}
-					break;
+	/** Inner class to add entrances to zones */
+	protected class EntranceFollower implements Corridor.NodeFinder {
+
+		/** Zone builder for the current corridor */
+		protected final ZoneBuilder zone_builder;
+
+		/** Location of the entrance node onto corridor */
+		protected final LocationImpl branch;
+
+		/** Have we found the matching exit node to branch? */
+		protected boolean found;
+
+		protected EntranceFollower(ZoneBuilder zb, LocationImpl b) {
+			zone_builder = zb;
+			branch = b;
+			found = false;
+		}
+		public boolean check(R_NodeImpl n) {
+			if(found)
+				return check_found(n);
+			else
+				return check_not_found(n);
+		}
+		protected boolean check_found(R_NodeImpl n) {
+			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+				return true;
+			else
+				return check_found_inside(n);
+		}
+		protected boolean check_found_inside(R_NodeImpl n) {
+			int nt = n.getNodeType();
+			if(nt == R_Node.TYPE_INTERSECTION)
+				return true;
+			DetectorSet ds = n.getDetectorSet();
+			if(ds.size() > 0) {
+				if(nt == R_Node.TYPE_ENTRANCE) {
+					zone_builder.addEntrance(ds);
+					if(n.getLanes() == 0)
+						return true;
+				}
+				if(nt == R_Node.TYPE_STATION && is_not_CD(n)) {
+					zone_builder.addEntrance(ds);
+					return true;
 				}
 			}
+			return false;
+		}
+		protected boolean is_not_CD(R_NodeImpl n) {
+			LocationImpl loc = (LocationImpl)n.getLocation();
+			return !loc.matchesRoot(branch);
+		}
+		protected boolean check_not_found(R_NodeImpl n) {
+			if(n.getNodeType() != R_Node.TYPE_EXIT)
+				return false;
+			LocationImpl loc = (LocationImpl)n.getLocation();
+			if(loc.rampMatches(branch)) {
+				found = true;
+				DetectorSet ds = n.getDetectorSet();
+				if(ds.size() > 0) {
+					zone_builder.addEntrance(ds);
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 
-	/** Create a zone and add it to the zone list */
-	protected boolean createZone(int layer, int znum, SegmentImpl[] segs,
-		int start, int stop)
-	{
-		Zone zone = new Zone(layer, znum, segs, start, stop);
-		if(zone.isDefined()) {
-			zones.add(zone);
-			return true;
+	/** Inner class to add exits to zones */
+	protected class ExitFollower implements Corridor.NodeFinder {
+
+		/** Zone builder for the current corridor */
+		protected final ZoneBuilder zone_builder;
+
+		/** Location of the exit node onto corridor */
+		protected final LocationImpl branch;
+
+		/** Have we found the matching entrance node to branch? */
+		protected boolean found;
+
+		protected ExitFollower(ZoneBuilder zb, LocationImpl b) {
+			zone_builder = zb;
+			branch = b;
+			found = false;
 		}
-		return false;
+		public boolean check(R_NodeImpl n) {
+			if(found)
+				return check_found(n);
+			else
+				return check_not_found(n);
+		}
+		protected boolean check_found(R_NodeImpl n) {
+			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+				return true;
+			else
+				return check_found_inside(n);
+		}
+		protected boolean check_found_inside(R_NodeImpl n) {
+			int nt = n.getNodeType();
+			if(nt == R_Node.TYPE_INTERSECTION)
+				return true;
+			DetectorSet ds = n.getDetectorSet();
+			if(ds.size() > 0) {
+				if(nt == R_Node.TYPE_STATION) {
+					zone_builder.addExit(ds);
+					return true;
+				} else if(nt == R_Node.TYPE_EXIT)
+					zone_builder.addExit(ds);
+			}
+			return false;
+		}
+		protected boolean check_not_found(R_NodeImpl n) {
+			if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
+				return false;
+			LocationImpl loc = (LocationImpl)n.getLocation();
+			if(loc.rampMatches(branch)) {
+				found = true;
+				DetectorSet ds = n.getDetectorSet();
+				if(ds.size() > 0) {
+					zone_builder.addExit(ds);
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	/** Validate the timing plan for the start time */

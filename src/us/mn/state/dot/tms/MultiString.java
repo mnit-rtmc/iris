@@ -25,6 +25,13 @@ import java.util.regex.Pattern;
  */
 public class MultiString implements Serializable {
 
+    /** consts */
+    public final String NEWLINE="[nl]";
+    public final String NEWPAGE="[np]";
+
+	/** MULTI string buffer */
+	protected final StringBuilder b = new StringBuilder();
+
 	/** Line Justification enumeration */
 	public enum JustificationLine {
 		UNDEFINED, OTHER, LEFT, CENTER, RIGHT, FULL;
@@ -70,9 +77,6 @@ public class MultiString implements Serializable {
 		return true;
 	}
 
-	/** MULTI string buffer */
-	protected final StringBuilder b = new StringBuilder();
-
 	/** Test if the MULTI string is equal to another MULTI string */
 	public boolean equals(Object o) {
 		if(o instanceof MultiString)
@@ -107,12 +111,12 @@ public class MultiString implements Serializable {
 
 	/** Add a new line */
 	public void addLine() {
-		b.append("[nl]");
+		b.append(NEWLINE);
 	}
 
 	/** Add a new page */
 	public void addPage() {
-		b.append("[np]");
+		b.append(NEWPAGE);
 	}
 
 	/** Get the value of the MULTI string */
@@ -188,4 +192,58 @@ public class MultiString implements Serializable {
 		});
 		return _b.toString().trim().equals("");
 	}
+
+	/** return the number of pages in the multistring */
+//FIXME: Doug, can you verify I've got this right?
+	public int getNumPages() {
+        String ms=b.toString();
+        if (ms==null || ms.length()==0) {
+            return(0);
+        }
+        int np=this.countSubstrings(ms,NEWPAGE);
+        if (!ms.endsWith(NEWPAGE)) {
+            ++np;
+        }
+        return np;
+	}
+
+    /**
+     *  Count the number of occurrences of one string within another.
+     *  This method is case sensitive.
+     *
+     *  @return The number of occurrences of searchfor within searched.
+     */
+    static public int countSubstrings(String searched, String searchfor) {
+        if ((searched == null) || (searchfor == null)) {
+            return (0);
+        }
+
+        if ((searched.length() == 0) || (searchfor.length() == 0)) {
+            return (0);
+        }
+
+        int num  = 0;
+        int from = 0;
+
+        for (int i = 0; i < searched.length(); ) {
+            int j;
+
+            try {
+                j = searched.indexOf(searchfor, i);
+            } catch (NullPointerException ex) {
+                return (0);
+            }
+
+            if (j < 0) {
+                return (num);
+            }
+
+            ++num;
+            i = j + searchfor.length();
+        }
+
+        return (num);
+    }
+
 }
+

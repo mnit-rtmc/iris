@@ -162,4 +162,20 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 	protected void printTravelXmlTail(PrintWriter out) {
 		out.println("</device_status>");
 	}
+
+    /** toString */
+    public String toString() {
+        String ret="DMSListImpl: len="+this.map.size()+"\n";
+
+		Iterator<String> it = map.keySet().iterator();
+		for(int index = 0; it.hasNext(); index++) {
+			String id = it.next();
+            DMSImpl dms=(DMSImpl)map.get(id);
+            if (dms==null) {
+                continue;
+            }
+            ret+="DMSList["+index+"]:"+"Id="+dms.getId()+", isActive()="+dms.isActive()+", notes="+dms.getNotes()+"\n";
+		}
+        return ret;
+    }
 }

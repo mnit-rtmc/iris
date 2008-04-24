@@ -81,8 +81,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			fake_det = createFakeDetector(fake);
 		}
 		catch(ChangeVetoException e) {
-			System.err.println("Invalid FAKE Detector: " +
-				index + " (" + fake + ")");
+			DET_LOG.log("Invalid FAKE Detector: " + index +
+				" (" + fake + ")");
 			fake = "";
 			fake_det = null;
 		}

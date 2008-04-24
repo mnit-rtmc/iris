@@ -84,11 +84,11 @@ public class Corridor {
 	}
 
 	/** Add a roadway node to the corridor */
-	public synchronized void addNode(R_NodeImpl r_node) {
-		if(r_node.hasLocation()) {
+	public void addNode(R_NodeImpl r_node) {
+		assert r_nodes.isEmpty();
+		assert n_points.isEmpty();
+		if(r_node.hasLocation())
 			unsorted.add(r_node);
-			n_points.clear();
-		}
 	}
 
 	/** Find the nearest unsorted node to the given node */
@@ -175,9 +175,9 @@ public class Corridor {
 	}
 
 	/** Sort the roadway nodes for the corridor */
-	protected void sort() {
-		if(r_nodes.isEmpty())
-			beginList();
+	protected void sortNodes() {
+		assert r_nodes.isEmpty();
+		beginList();
 		while(!unsorted.isEmpty())
 			linkNearestNode();
 		// Reverse the list if necessary
@@ -187,21 +187,8 @@ public class Corridor {
 		}
 	}
 
-	/** Get the list of r_nodes for the corridor */
-	protected List<R_NodeImpl> getNodes() {
-		if(unsorted.size() > 0) {
-			if(r_nodes.size() > 0) {
-				unsorted.addAll(r_nodes);
-				r_nodes.clear();
-			}
-			sort();
-		}
-		return r_nodes;
-	}
-
-	/** Get the list of r_nodes linked with downstream nodes */
-	protected List<R_NodeImpl> getNodesLinked() {
-		List<R_NodeImpl> r_nodes = getNodes();
+	/** Link each node with the next downstream node in the corridor */
+	protected void linkDownstream() {
 		Iterator<R_NodeImpl> down = r_nodes.iterator();
 		// Throw away first r_node in downstream iterator
 		if(down.hasNext())
@@ -213,14 +200,12 @@ public class Corridor {
 					r_node.addDownstream(d);
 			}
 		}
-		return r_nodes;
 	}
 
 	/** Print out the corridor to an XML file */
-	public synchronized void printXml(PrintWriter out) {
+	public void printXml(PrintWriter out) {
 		out.println("<corridor route='" + freeway.getName() +
 			"' dir='" + Roadway.DIRECTION[free_dir] + "'>");
-		List<R_NodeImpl> r_nodes = getNodesLinked();
 		for(R_NodeImpl r_node: r_nodes)
 			r_node.printXml(out);
 		out.println("</corridor>");
@@ -231,9 +216,10 @@ public class Corridor {
 
 	/** Calculate the mile points for all nodes on the corridor */
 	protected void calculateNodeMilePoints() {
+		assert n_points.isEmpty();
 		float miles = 0;
 		R_NodeImpl previous = null;
-		for(R_NodeImpl n: getNodes()) {
+		for(R_NodeImpl n: r_nodes) {
 			if(previous != null)
 				miles += metersToMiles(previous.metersTo(n));
 			while(n_points.containsKey(miles))
@@ -243,12 +229,17 @@ public class Corridor {
 		}
 	}
 
+	/** Arrange the nodes in the corridor */
+	public void arrangeNodes() {
+		sortNodes();
+		linkDownstream();
+		calculateNodeMilePoints();
+	}
+
 	/** Calculate the mile point for a location */
-	public synchronized float calculateMilePoint(LocationImpl loc)
+	public float calculateMilePoint(LocationImpl loc)
 		throws BadRouteException
 	{
-		if(n_points.isEmpty())
-			calculateNodeMilePoints();
 		if(n_points.isEmpty())
 			throw new BadRouteException("No nodes on corridor");
 		R_NodeImpl nearest = null;
@@ -274,9 +265,7 @@ public class Corridor {
 	}
 
 	/** Create a mapping from mile points to stations */
-	public synchronized TreeMap<Float, StationImpl> createStationMap() {
-		if(n_points.isEmpty())
-			calculateNodeMilePoints();
+	public TreeMap<Float, StationImpl> createStationMap() {
 		TreeMap<Float, StationImpl> stations =
 			new TreeMap<Float, StationImpl>();
 		for(Float m: n_points.keySet()) {
@@ -302,7 +291,7 @@ public class Corridor {
 	}
 
 	/** Find the nearest node downstream from the given location */
-	public synchronized R_NodeImpl findDownstreamNode(LocationImpl loc)
+	public R_NodeImpl findDownstreamNode(LocationImpl loc)
 		throws BadRouteException
 	{
 		float m = calculateMilePoint(loc);
@@ -319,9 +308,7 @@ public class Corridor {
 	}
 
 	/** Find a node using a node finder callback interface */
-	public synchronized R_NodeImpl findNode(NodeFinder finder) {
-		if(n_points.isEmpty())
-			calculateNodeMilePoints();
+	public R_NodeImpl findNode(NodeFinder finder) {
 		for(R_NodeImpl r_node: n_points.values()) {
 			if(finder.check(r_node))
 				return r_node;
@@ -329,10 +316,25 @@ public class Corridor {
 		return null;
 	}
 
+	/** Get a reversed list of nodes in the corridor */
+	protected List<R_NodeImpl> getReversedList() {
+		LinkedList<R_NodeImpl> rev = new LinkedList<R_NodeImpl>();
+		for(R_NodeImpl r_node: n_points.values())
+			rev.addFirst(r_node);
+		return rev;
+	}
+
+	/** Find a node using a node finder callback (reverse order) */
+	public R_NodeImpl findNodeReverse(NodeFinder finder) {
+		for(R_NodeImpl r_node: getReversedList()) {
+			if(finder.check(r_node))
+				return r_node;
+		}
+		return null;
+	}
+
 	/** Get the ID of a linked CD road */
-	public synchronized String getLinkedCDRoad() {
-		if(n_points.isEmpty())
-			calculateNodeMilePoints();
+	public String getLinkedCDRoad() {
 		// FIXME: there may be more than one linked CD road
 		for(R_NodeImpl r_node: n_points.values()) {
 			if(r_node.isCD()) {

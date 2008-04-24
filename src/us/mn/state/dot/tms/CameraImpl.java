@@ -164,7 +164,7 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	}
 
 	/** Command the camera pan, tilt or zoom */
-	public void move(int p, int t, int z) {
+	public void move(float p, float t, float z) {
 		MessagePoller mp = getPoller();
 		if(mp instanceof CameraPoller) {
 			CameraPoller cp = (CameraPoller)mp;

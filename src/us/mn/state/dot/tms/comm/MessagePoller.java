@@ -185,11 +185,8 @@ abstract public class MessagePoller extends Thread {
 		throws MessengerException;
 
 	/** Respond to a download request from a controller */
-	protected void download(Operation o) {
-		if(o instanceof ControllerOperation) {
-			ControllerOperation co = (ControllerOperation)o;
-			download(co.getController(), false, co.getPriority());
-		}
+	protected void download(ControllerOperation o) {
+		download(o.getController(), false, o.getPriority());
 	}
 
 	/** Perform a controller download */

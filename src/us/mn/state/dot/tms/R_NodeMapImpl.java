@@ -217,6 +217,8 @@ class R_NodeMapImpl extends AbstractListImpl implements R_NodeMap {
 				c.addNode(r_node);
 			}
 		}
+		for(Corridor c: corridors.values())
+			c.arrangeNodes();
 	}
 
 	/** Write the r_node configuration in XML format */

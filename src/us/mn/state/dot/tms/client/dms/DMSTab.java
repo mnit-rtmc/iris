@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.MapTab;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * The DMSTab class provides the GUI for working with DMS objects.
@@ -43,10 +44,10 @@ public class DMSTab extends MapTab {
 
 	/** Create a new DMS tab */
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
-		DMSHandler handler)
+		DMSHandler handler,final SonarState st)
 	{
 		super("DMS", "Operate Dynamic Message Signs");
-		dispatcher = new DMSDispatcher(handler);
+		dispatcher = new DMSDispatcher(handler,st);
 		chooser = new DmsStatusSummary(handler);
 		map.addLayers(lstates);
 		tabPanel = createSideBar();
