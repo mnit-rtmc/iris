@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -163,19 +163,19 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		out.println("</device_status>");
 	}
 
-    /** toString */
-    public String toString() {
-        String ret="DMSListImpl: len="+this.map.size()+"\n";
-
+	/** toString */
+	public String toString() {
+		String ret = "DMSListImpl: len=" + map.size() + "\n";
 		Iterator<String> it = map.keySet().iterator();
 		for(int index = 0; it.hasNext(); index++) {
 			String id = it.next();
-            DMSImpl dms=(DMSImpl)map.get(id);
-            if (dms==null) {
-                continue;
-            }
-            ret+="DMSList["+index+"]:"+"Id="+dms.getId()+", isActive()="+dms.isActive()+", notes="+dms.getNotes()+"\n";
+			DMSImpl dms = (DMSImpl)map.get(id);
+			if(dms == null)
+				continue;
+			ret += "DMSList[" + index + "]:" + "Id=" + dms.getId() +
+				", isActive()=" + dms.isActive() + ", notes=" +
+				dms.getNotes() + "\n";
 		}
-        return ret;
-    }
+		return ret;
+	}
 }
