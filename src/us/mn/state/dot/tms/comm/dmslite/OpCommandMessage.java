@@ -12,17 +12,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.dmslite;
 
-//~--- non-JDK imports --------------------------------------------------------
+
+
+package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.MultiString;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.IOException;
 
@@ -34,207 +33,278 @@ import java.io.IOException;
  */
 public class OpCommandMessage extends OpDms {
 
-    /** Maximum message priority */
-    static protected final int MAX_MESSAGE_PRIORITY = 255;
+	/** Maximum message priority */
+	static protected final int MAX_MESSAGE_PRIORITY = 255;
 
-    /** Flag to avoid phase loops */
-    protected boolean modify = true;
+	/** Flag to avoid phase loops */
+	protected boolean modify = true;
 
-    /** Sign message */
-    protected final SignMessage m_message;
+	/** Sign message */
+	protected final SignMessage m_message;
 
-    /** Message CRC */
+	/**
+	 * Message CRC
+	 *
+	 * @param d
+	 * @param m
+	 */
 
-    // protected int messageCRC;
+	// protected int messageCRC;
 
-    /** Create a new DMS command message object */
-    public OpCommandMessage(DMSImpl d, SignMessage m) {
-        super(COMMAND, d);
-        m_message = m;
-        System.err.println("dmslite.OpCommandMessage.OpCommandMessage() called. Msg="+m+",numpages="+m_message.getNumPages());
-    }
+	/** Create a new DMS command message object */
+	public OpCommandMessage(DMSImpl d, SignMessage m) {
+		super(COMMAND, d);
+		m_message = m;
+		System.err.println("dmslite.OpCommandMessage.OpCommandMessage() called. Msg=" + m
+						   + ",numpages=" + m_message.getNumPages());
+	}
 
-    /** Create the first real phase of the operation */
-    protected Phase phaseOne() {
-        int np=m_message.getNumPages();
-        if (np<=0) {
-            return null;
-        } else if (np==1) {
-            return new PhaseSendOnePageMessage();
-        } else if (np==2) {
-            return new PhaseSendTwoPageMessage();
-        }
-        System.err.println("WARNING: bogus number of pages ("+np+") in dmslite.OpCommandMessage.OpCommandMessage(). Ignored.");
-        return null;
-    }
+	/**
+	 * Create the first real phase of the operation
+	 *
+	 * @return
+	 */
+	protected Phase phaseOne() {
+		int np = m_message.getNumPages();
 
-    /**
-     * Phase to send a one page message.
-     * Note, the type of exception throw here determines
-     * if the messenger reopens the connection on failure.
-     *
-     * @see MessagePoller#doPoll()
-     * @see Messenger#handleException()
-     * @see Messenger#shouldReopen()
-     */
-    protected class PhaseSendOnePageMessage extends Phase {
+		if (np <= 0) {
+			return null;
+		} else if (np == 1) {
+			return new PhaseSendOnePageMessage();
+		} else if (np == 2) {
+			return new PhaseSendTwoPageMessage();
+		}
 
-        /** Set the status to modify request */
-        protected Phase poll(AddressedMessage argmess) throws IOException {
-            System.err.println("dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg) called.");
-            assert argmess instanceof Message : "wrong message type";
+		System.err.println(
+			"WARNING: bogus number of pages (" + np
+			+ ") in dmslite.OpCommandMessage.OpCommandMessage(). Ignored.");
 
-            Message mess = (Message) argmess;
+		return null;
+	}
 
-            // sanity check
-            if (m_message.getBitmap().getBitmap().length!=300) {
-                System.err.println("WARNING: message wrong size in PhaseSendOnePageMessage.");
-                return null;
-            }
+	/**
+	 * Phase to send a one page message.
+	 * Note, the type of exception throw here determines
+	 * if the messenger reopens the connection on failure.
+	 *
+	 * @see MessagePoller#doPoll()
+	 * @see Messenger#handleException()
+	 * @see Messenger#shouldReopen()
+	 */
+	protected class PhaseSendOnePageMessage extends Phase {
 
-            // build req msg and expected response
-            // e.g. <DmsLite><SetSnglPgReqMsg><Address>1</Address><MsgText>...</MsgText><Owner>Bob</Owner><Msg>...</Msg></SetSnglPgReqMsg></DmsLite>
-            final String reqname="SetSnglPgReqMsg";
-            final String resname="SetSnglPgRespMsg";
-            mess.setName(reqname);
-            mess.setReqMsgName(reqname);
-            mess.setRespMsgName(resname);
-            String addr=new Integer((int)m_dms.getController().getDrop()).toString();
-            ReqRes rr1 = new ReqRes("Address", addr, new String[] { "IsValid" });
-            mess.add(rr1);
+		/**
+		 * Set the status to modify request
+		 *
+		 * @param argmess
+		 *
+		 * @return
+		 *
+		 * @throws IOException
+		 */
+		protected Phase poll(AddressedMessage argmess) throws IOException {
+			System.err.println(
+				"dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg) called.");
+			assert argmess instanceof Message : "wrong message type";
 
-            // MsgText
-            mess.add(new ReqRes("MsgText", m_message.getMulti().toString(), new String[0]));
+			Message mess = (Message) argmess;
 
-            // Owner
-            mess.add(new ReqRes("Owner", m_message.getOwner(), new String[0]));
+			// sanity check
+			if (m_message.getBitmap().getBitmap().length != 300) {
+				System.err.println(
+					"WARNING: message wrong size in PhaseSendOnePageMessage.");
 
-            // msg
-            byte[] bitmaparray = m_message.getBitmap().getBitmap();
-            String msg         = Convert.toHexString(Convert.reverseByte(bitmaparray));
-            mess.add(new ReqRes("Msg", msg, new String[0]));
+				return null;
+			}
 
-            // send msg
-            mess.getRequest();
+			// build req msg and expected response
+			// e.g. <DmsLite><SetSnglPgReqMsg><Address>1</Address><MsgText>...</MsgText><Owner>Bob</Owner><Msg>...</Msg></SetSnglPgReqMsg></DmsLite>
+			final String reqname = "SetSnglPgReqMsg";
+			final String resname = "SetSnglPgRespMsg";
 
-            // parse resp msg
-            {
-                // get valid flag
-                boolean valid;
-                try {
-                    valid = new Boolean(rr1.getResVal("IsValid"));
-                    System.err.println("dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): parsed msg values: IsValid:"
-                                       + valid + ".");
-                } catch (IllegalArgumentException ex) {
-                    System.err.println("dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received in OpQueryDms:" + ex);
-                    throw ex;
-                }
+			mess.setName(reqname);
+			mess.setReqMsgName(reqname);
+			mess.setRespMsgName(resname);
 
-                // parse rest of response
-                if (valid) {
+			String addr = new Integer((int) m_dms.getController().getDrop()).toString();
+			ReqRes rr1  = new ReqRes("Address", addr, new String[] { "IsValid" });
 
-                    // set new message
-                    m_dms.setActiveMessage(m_message);
-                } else {
-                    System.err.println("OpQueryDms: invalid response from cmsserver received, ignored.");
-                }
-            }
+			mess.add(rr1);
 
-            // this operation is complete
-            return null;
-        }
-    }
+			// MsgText
+			mess.add(new ReqRes("MsgText", m_message.getMulti().toString(),
+								new String[0]));
 
-    /**
-     * Phase to send a two page message.
-     * Note, the type of exception throw here determines
-     * if the messenger reopens the connection on failure.
-     *
-     * @see MessagePoller#doPoll()
-     * @see Messenger#handleException()
-     * @see Messenger#shouldReopen()
-     */
-    protected class PhaseSendTwoPageMessage extends Phase {
+			// Owner
+			mess.add(new ReqRes("Owner", m_message.getOwner(), new String[0]));
 
-        /** Set the status to modify request */
-        protected Phase poll(AddressedMessage argmess) throws IOException {
-            System.err.println("dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg) called.");
-            assert argmess instanceof Message : "wrong message type";
+			// msg
+			byte[] bitmaparray = m_message.getBitmap().getBitmap();
+			String msg         = Convert.toHexString(Convert.reverseByte(bitmaparray));
 
-            Message mess = (Message) argmess;
+			mess.add(new ReqRes("Msg", msg, new String[0]));
 
-            // sanity check
-            if (m_message.getBitmap().getBitmap().length!=600) {
-                System.err.println("WARNING: message wrong size in PhaseSendTwoPageMessage: m_message.length="+m_message.getBitmap().getBitmap().length);
-                //return null;
-            }
+			// send msg
+			mess.getRequest();
 
-            // build req msg and expected response
-            // <DmsLite><SetMultPgReqMsg><Address>1</Address><MsgText>...</MsgText><Owner>Bob</Owner><Msg>...</Msg></SetMultPgReqMsg></DmsLite>
-            ReqRes rr1;            
-            {
-                final String reqname="SetMultPgReqMsg";
-                final String resname="SetMultPgRespMsg";
-                mess.setName(reqname);
-                mess.setReqMsgName(reqname);
-                mess.setRespMsgName(resname);
-                String addr=new Integer((int)m_dms.getController().getDrop()).toString();
-                rr1 = new ReqRes("Address", addr, new String[] { "IsValid" });
-                mess.add(rr1);
-            }
+			// parse resp msg
+			{
 
-            // MsgText
-            mess.add(new ReqRes("MsgText", m_message.getMulti().toString(), new String[0]));
+				// get valid flag
+				boolean valid;
 
-            // Owner
-            mess.add(new ReqRes("Owner", m_message.getOwner(), new String[0]));
+				try {
+					valid = new Boolean(rr1.getResVal("IsValid"));
+					System.err.println(
+						"dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): parsed msg values: IsValid:"
+						+ valid + ".");
+				} catch (IllegalArgumentException ex) {
+					System.err.println(
+						"dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received in OpQueryDms:"
+						+ ex);
 
-            // msg (the bitmap)
-            {
-                // pg 1
-                BitmapGraphic bg1 = m_message.getBitmap(0);
-                assert bg1!=null;
-                byte[] bitmaparraypg1 = bg1.getBitmap();
-                String msgpg1      = Convert.toHexString(Convert.reverseByte(bitmaparraypg1));
+					throw ex;
+				}
 
-                // pg 2
-                BitmapGraphic bg2 = m_message.getBitmap(1);
-                assert bg2!=null;
-                byte[] bitmaparraypg2 = bg2.getBitmap();
-                String msgpg2      = Convert.toHexString(Convert.reverseByte(bitmaparraypg2));
-                mess.add(new ReqRes("Msg", msgpg1+msgpg2, new String[0]));
-            }
+				// parse rest of response
+				if (valid) {
 
-            // send msg
-            mess.getRequest();
+					// set new message
+					m_dms.setActiveMessage(m_message);
+				} else {
+					System.err.println(
+						"OpQueryDms: invalid response from cmsserver received, ignored.");
+				}
+			}
 
-            // parse resp msg
-            {
-                // get valid flag
-                boolean valid;
-                try {
-                    valid = new Boolean(rr1.getResVal("IsValid"));
-                    System.err.println("dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): parsed msg values: IsValid:"
-                                       + valid + ".");
-                } catch (IllegalArgumentException ex) {
-                    System.err.println("dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): Malformed XML received in OpQueryDms:" + ex);
+			// this operation is complete
+			return null;
+		}
+	}
 
-                    throw ex;
-                }
 
-                // parse rest of response
-                if (valid) {
+	/**
+	 * Phase to send a two page message.
+	 * Note, the type of exception throw here determines
+	 * if the messenger reopens the connection on failure.
+	 *
+	 * @see MessagePoller#doPoll()
+	 * @see Messenger#handleException()
+	 * @see Messenger#shouldReopen()
+	 */
+	protected class PhaseSendTwoPageMessage extends Phase {
 
-                    // set new message
-                    m_dms.setActiveMessage(m_message);
+		/**
+		 * Set the status to modify request
+		 *
+		 * @param argmess
+		 *
+		 * @return
+		 *
+		 * @throws IOException
+		 */
+		protected Phase poll(AddressedMessage argmess) throws IOException {
+			System.err.println(
+				"dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg) called.");
+			assert argmess instanceof Message : "wrong message type";
 
-                } else {
-                    System.err.println("OpQueryDms: invalid response from cmsserver received, ignored.");
-                }
-            }
+			Message mess = (Message) argmess;
 
-            // this operation is complete
-            return null;
-        }
-    }
+			// sanity check
+			if (m_message.getBitmap().getBitmap().length != 600) {
+				System.err.println(
+					"WARNING: message wrong size in PhaseSendTwoPageMessage: m_message.length="
+					+ m_message.getBitmap().getBitmap().length);
+
+				// return null;
+			}
+
+			// build req msg and expected response
+			// <DmsLite><SetMultPgReqMsg><Address>1</Address><MsgText>...</MsgText><Owner>Bob</Owner><Msg>...</Msg></SetMultPgReqMsg></DmsLite>
+			ReqRes rr1;
+
+			{
+				final String reqname = "SetMultPgReqMsg";
+				final String resname = "SetMultPgRespMsg";
+
+				mess.setName(reqname);
+				mess.setReqMsgName(reqname);
+				mess.setRespMsgName(resname);
+
+				String addr =
+					new Integer((int) m_dms.getController().getDrop()).toString();
+
+				rr1 = new ReqRes("Address", addr, new String[] { "IsValid" });
+				mess.add(rr1);
+			}
+
+			// MsgText
+			mess.add(new ReqRes("MsgText", m_message.getMulti().toString(),
+								new String[0]));
+
+			// Owner
+			mess.add(new ReqRes("Owner", m_message.getOwner(), new String[0]));
+
+			// msg (the bitmap)
+			{
+
+				// pg 1
+				BitmapGraphic bg1 = m_message.getBitmap(0);
+
+				assert bg1 != null;
+
+				byte[] bitmaparraypg1 = bg1.getBitmap();
+				String msgpg1         =
+					Convert.toHexString(Convert.reverseByte(bitmaparraypg1));
+
+				// pg 2
+				BitmapGraphic bg2 = m_message.getBitmap(1);
+
+				assert bg2 != null;
+
+				byte[] bitmaparraypg2 = bg2.getBitmap();
+				String msgpg2         =
+					Convert.toHexString(Convert.reverseByte(bitmaparraypg2));
+
+				mess.add(new ReqRes("Msg", msgpg1 + msgpg2, new String[0]));
+			}
+
+			// send msg
+			mess.getRequest();
+
+			// parse resp msg
+			{
+
+				// get valid flag
+				boolean valid;
+
+				try {
+					valid = new Boolean(rr1.getResVal("IsValid"));
+					System.err.println(
+						"dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): parsed msg values: IsValid:"
+						+ valid + ".");
+				} catch (IllegalArgumentException ex) {
+					System.err.println(
+						"dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): Malformed XML received in OpQueryDms:"
+						+ ex);
+
+					throw ex;
+				}
+
+				// parse rest of response
+				if (valid) {
+
+					// set new message
+					m_dms.setActiveMessage(m_message);
+
+				} else {
+					System.err.println(
+						"OpQueryDms: invalid response from cmsserver received, ignored.");
+				}
+			}
+
+			// this operation is complete
+			return null;
+		}
+	}
 }
