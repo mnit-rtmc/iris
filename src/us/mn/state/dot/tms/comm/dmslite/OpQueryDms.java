@@ -217,7 +217,7 @@ public class OpQueryDms extends OpDms {
                     }
                     
                     // set new message
-                    m_dms.setMessage(sm);
+                    m_dms.setActiveMessage(sm);
                 }
 
             } else {

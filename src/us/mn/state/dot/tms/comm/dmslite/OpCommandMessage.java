@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
-
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 //~--- non-JDK imports --------------------------------------------------------
@@ -137,7 +134,7 @@ public class OpCommandMessage extends OpDms {
                 if (valid) {
 
                     // set new message
-                    m_dms.setMessage(m_message);
+                    m_dms.setActiveMessage(m_message);
                 } else {
                     System.err.println("OpQueryDms: invalid response from cmsserver received, ignored.");
                 }
@@ -229,7 +226,7 @@ public class OpCommandMessage extends OpDms {
                 if (valid) {
 
                     // set new message
-                    m_dms.setMessage(m_message);
+                    m_dms.setActiveMessage(m_message);
 
                 } else {
                     System.err.println("OpQueryDms: invalid response from cmsserver received, ignored.");

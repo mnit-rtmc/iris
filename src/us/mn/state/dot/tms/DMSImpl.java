@@ -657,10 +657,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** Set a new message on the sign */
-	public void setNewMessage(SignMessage argmess)
-		throws InvalidMessageException
-	{
-		sendMessage(argmess);
+	public void setMessage(SignMessage m) throws InvalidMessageException {
+		sendMessage(m);
 	}
 
 	/** Update graphic for all pages for the current message */
@@ -753,7 +751,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Set the active sign message (called after a message has been
 	 * successfully activated) */
-	public void setMessage(SignMessage m) {
+	public void setActiveMessage(SignMessage m) {
 		// If the new message is different from the old message
 		// then log it.  Required to prevent double-logging
 		// when users double-click the send.
@@ -783,7 +781,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return;
 		MultiString multi = new MultiString(text);
 		BitmapGraphic[] bitmaps = createPixelMaps(multi);
-		setMessage(new SignMessage(NO_OWNER, multi, bitmaps, time));
+		setActiveMessage(new SignMessage(NO_OWNER, multi, bitmaps,
+			time));
 	}
 
 	/** Log a message */

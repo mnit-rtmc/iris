@@ -284,7 +284,7 @@ public class D10CmsMsg {
             System.err.println("D10CmsMsg.activate(): will activate CMS "+this.getIrisCmsId()+":"+this);
             try {
                 //dms.setMessage(owner,"MSG TEXT",SignMessage.DURATION_INFINITE); //FIXME: use actual msg txt
-                dms.setNewMessage(this.toSignMessage(dms));
+                dms.setMessage(this.toSignMessage(dms));
                 dms.updateMessageGraphic(); //FIXME: move to dmsimpl called method?
             } catch (InvalidMessageException e) {
                 System.err.println("D10CmsMsg.activate(): exception:"+e);
