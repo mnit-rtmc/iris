@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import javax.comm.SerialPort;
-import java.lang.NoClassDefFoundError;
 
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.comm.KillThread;
