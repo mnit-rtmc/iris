@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,9 +48,6 @@ public interface CommunicationLine extends TMSObject {
 	/** Get the bit rate */
 	public int getBitRate() throws RemoteException;
 
-    /** number of different protocols (for sanity checking) */
-    public int NUM_OF_PROTOCOLS = 11;
-
 	/** NTCIP Class B serial communication protocol */
 	public int PROTO_NTCIP_B = 0;
 
@@ -95,8 +92,8 @@ public interface CommunicationLine extends TMSObject {
 		"Pelco D",
 		"NTCIP Class C",
 		"Manchester",
-        "DMS Lite",         // Caltrans D10
-        "CAWS",             // Caltrans D10
+		"DMS Lite",	// Caltrans D10
+		"CAWS",		// Caltrans D10
 	};
 
 	/** Set the communication protocol */

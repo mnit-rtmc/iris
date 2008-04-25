@@ -69,10 +69,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	/** Create a new communication line */
 	public CommunicationLineImpl(int i) throws RemoteException {
 		super();
-
-        // sanity checks
-        assert PROTOCOLS.length==NUM_OF_PROTOCOLS;
-
 		index = i;
 		port = "/dev/ttyD" + (index - 1);
 		circuits = new LinkedList<CircuitImpl>();
@@ -84,10 +80,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		throws RemoteException
 	{
 		super();
-
-        // sanity checks
-        assert PROTOCOLS.length==NUM_OF_PROTOCOLS;
-
 		index = fields.getInt("index");
 		port = (String)fields.get("port");
 		bitRate = fields.getInt("bitRate");
@@ -402,10 +394,10 @@ final class CommunicationLineImpl extends TMSObjectImpl
 				return createPelcoPoller();
 			case PROTO_MANCHESTER:
 				return createManchesterPoller();
-            case PROTO_DMSLITE:
-                return createDmsLitePoller();
-            case PROTO_CAWS:
-                return createCawsPoller();
+			case PROTO_DMSLITE:
+				return createDmsLitePoller();
+			case PROTO_CAWS:
+				return createCawsPoller();
 			default:
 				throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -429,10 +421,11 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			status = e.getMessage();
 			return;
 		}
-        // the iris installation might not have the java serial port jar installed
+		// the iris installation might not have the java serial port
+		// jar installed
 		catch(NoClassDefFoundError e) {
 			status = "RS232 not supported.";
-            return;
+			return;
 		}
 		notifyStatus();
 	}
@@ -504,8 +497,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			case PROTO_VICON:
 			case PROTO_PELCO:
 			case PROTO_MANCHESTER:
-            case PROTO_DMSLITE:         // Caltrans D10
-            case PROTO_CAWS:            // Caltrans D10
+			case PROTO_DMSLITE:
+			case PROTO_CAWS:
 				c = new ControllerImpl(circuit, drop);
 				break;
 			default:
@@ -594,9 +587,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	public synchronized void download() {
 		MessagePoller p = poller;	// Avoid NPE races
 		if(p != null) {
-			for(ControllerImpl c: controllers.values()) {
+			for(ControllerImpl c: controllers.values())
 				p.download(c, false);
-            }
 		}
 	}
 
