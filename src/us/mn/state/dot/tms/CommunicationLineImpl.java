@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
@@ -308,13 +307,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 
 	/** Create an http file messenger */
 	protected Messenger createHttpFileMessenger() throws IOException {
-        URL u;
-        try {
-            u=new URL(port);
-        } catch (MalformedURLException e) {
-            throw new IOException("INVALID URL SPECIFIED:"+e);
-        }
-		return new HttpFileMessenger(u);
+		return new HttpFileMessenger(new URL(port));
 	}
 
 	/** Create a serial or socket messenger */
