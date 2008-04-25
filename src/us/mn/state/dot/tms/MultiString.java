@@ -195,43 +195,19 @@ public class MultiString implements Serializable {
 		return _b.toString().trim().equals("");
 	}
 
-	/** return the number of pages in the multistring */
-	public int getNumPages() {
-		String ms = b.toString();
-		if(ms == null || ms.length() == 0)
-			return 0;
-		int np = countSubstrings(ms, NEWPAGE);
-		if(!ms.endsWith(NEWPAGE))
-			np++;
-		return np;
+	/** Parsing callback to count the number of pages */
+	protected class PageCallback implements Callback {
+		int num_pages = 0;
+		public void addText(int p, int l, JustificationLine j, String t)
+		{
+			num_pages = Math.max(p + 1, num_pages);
+		}
 	}
 
-	/**
-	 * Count the number of occurrences of one string within another.
-	 * This method is case sensitive.
-	 *
-	 * @return The number of occurrences of searchfor within searched.
-	 */
-	static public int countSubstrings(String searched, String searchfor) {
-		if((searched == null) || (searchfor == null))
-			return 0;
-		if((searched.length() == 0) || (searchfor.length() == 0))
-			return 0;
-		int num  = 0;
-		int from = 0;
-		for(int i = 0; i < searched.length(); ) {
-			int j;
-			try {
-				j = searched.indexOf(searchfor, i);
-			}
-			catch(NullPointerException ex) {
-				return 0;
-			}
-			if(j < 0)
-				return num;
-			num++;
-			i = j + searchfor.length();
-		}
-		return num;
+	/** Get the number of pages in the multistring */
+	public int getNumPages() {
+		PageCallback pc = new PageCallback();
+		parse(pc);
+		return pc.num_pages;
 	}
 }
