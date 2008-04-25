@@ -35,42 +35,42 @@ public class SignMessage implements Serializable {
 	protected final MultiString multi;
 
 	/** 
-     * Create a new sign message. Use this constructor to create a message
-     * with a single or multiple page of text, and a single page BitmapGraphic.
-     *
-     * @param o Message owner.
-     * @param m Message text as a MultiString. 
-     * @param b Message BitmapGraphic for the first page.
-     * @param d Message duration in mins. Use 0 for a blank message. 
-     **/
+	 * Create a new sign message. Use this constructor to create a message
+	 * with a single or multiple page of text, and a single page
+	 * BitmapGraphic.
+	 *
+	 * @param o Message owner.
+	 * @param m Message text as a MultiString. 
+	 * @param b Message BitmapGraphic for the first page.
+	 * @param d Message duration in mins. Use 0 for a blank message. 
+	 **/
 	public SignMessage(String o, MultiString m, BitmapGraphic b, int d) {
 		if(o == null || m == null)
 			throw new NullPointerException();
 		this.owner = o;
 		this.multi = m;
-        this.setBitmap(0,b);
+		setBitmap(0, b);
 		this.deployTime = new Date();
 		this.durationMins = d;
 	}
 
 	/** 
-     * Create a new sign message. Use this constructor to create a message
-     * with a single or multiple page of text, and single or multiple 
-     * BitmapGraphics.
-     *
-     * @param o Message owner.
-     * @param m Message text as a MultiString. 
-     * @param b Message BitmapGraphic[] for all pages in order.
-     * @param d Message duration in mins. Use 0 for a blank message. 
-     **/
-	public SignMessage(final String o,final MultiString m,final  BitmapGraphic[] b,final  int d) {
+	 * Create a new sign message. Use this constructor to create a message
+	 * with a single or multiple page of text, and single or multiple 
+	 * BitmapGraphics.
+	 *
+	 * @param o Message owner.
+	 * @param m Message text as a MultiString. 
+	 * @param b Message BitmapGraphic[] for all pages in order.
+	 * @param d Message duration in mins. Use 0 for a blank message. 
+	 **/
+	public SignMessage(String o, MultiString m, BitmapGraphic[] b, int d) {
 		if(o == null || m == null || b == null)
 			throw new NullPointerException();
 		this.owner = o;
 		this.multi = m;
-        for (int i=0; i<b.length; ++i) {
-            this.setBitmap(i,b[i]);
-        }
+		for(int i = 0; i < b.length; i++)
+			setBitmap(i, b[i]);
 		this.deployTime = new Date();
 		this.durationMins = d;
 	}
@@ -103,9 +103,9 @@ public class SignMessage implements Serializable {
 	}
 
 	/** 
-     * Set the message duration.
-     * @param d Message duration in minutes.
-     */
+	 * Set the message duration.
+	 * @param d Message duration in minutes.
+	 */
 	public void setDuration(int d) {
 		durationMins = d;
 	}
@@ -138,62 +138,58 @@ public class SignMessage implements Serializable {
 	}
 
 	/** Bitmaps for each page, accessed by page number (zero based) */
-    protected HashMap<Integer,BitmapGraphic> bitmaps=new HashMap<Integer,BitmapGraphic>(2);
+	protected final HashMap<Integer, BitmapGraphic> bitmaps =
+		new HashMap<Integer, BitmapGraphic>(2);
 
 	/** 
-     * Get the message BitmapGraphic of the 1st page.
-     * @return b BitmapGraphic, will return null if a bitmap has not been set.
-     */
+	 * Get the message BitmapGraphic of the 1st page.
+	 * @return b BitmapGraphic, will return null if a bitmap has not been
+	 * set.
+	 */
 	public BitmapGraphic getBitmap() {
-		return this.getBitmap(0);
+		return getBitmap(0);
 	}
 
 	/** 
-     * Get the message BitmapGraphic of the specified page. 
-     * @param pg Page number of the returned BitmapGraphic, 0 based number.
-     * @return b BitmapGraphic to get for the specified page. Will return null if
-     *           a bitmap has not been set.
-     */
+	 * Get the message BitmapGraphic of the specified page. 
+	 * @param pg Page number of the returned BitmapGraphic, 0 based number.
+	 * @return b BitmapGraphic to get for the specified page. Will return
+	 *           null if a bitmap has not been set.
+	 */
 	public BitmapGraphic getBitmap(int pg) {
-        BitmapGraphic bm=this.bitmaps.get(pg);
-		return bm;
+		return bitmaps.get(pg);
 	}
 
 	/** 
-     * Get a blank bitmap the same size as the message bitmap.
-     * @return Empty BitmapGraphic the same size as the message's bitmap.
-     */
+	 * Get a blank bitmap the same size as the message bitmap.
+	 * @return Empty BitmapGraphic the same size as the message's bitmap.
+	 */
 	public BitmapGraphic getBlankBitmap() {
-        BitmapGraphic ret=null;
-        BitmapGraphic b=this.bitmaps.get(0);
-        if (b!=null) {
-            ret=new BitmapGraphic(b.width,b.height);
-        }
-		return ret;
+		BitmapGraphic b = bitmaps.get(0);
+		if(b != null)
+			return new BitmapGraphic(b.width, b.height);
+		else
+			return null;
 	}
 
 	/** Set the message BitmapGraphic of the 1st page */
 	public void setBitmap(BitmapGraphic b) {
-		this.setBitmap(0,b);
+		setBitmap(0, b);
 	}
 
 	/** Set the message BitmapGraphic for multiple pages */
 	public void setBitmaps(BitmapGraphic[] b) {
-        if (b==null) {
-            throw new IllegalArgumentException("null arg in setBitmaps");
-        }
-        for (int i=0; i<b.length; ++i) {
-            this.setBitmap(i,b[i]);
-        }
+		for(int i = 0; i < b.length; i++)
+			setBitmap(i, b[i]);
 	}
 
 	/** 
-     * Set the message BitmapGraphic of the specified page.
-     * @param pg Page number of the returned BitmapGraphic, 0 based number.
-     * @param b BitmapGraphic to set for the specified page.
-     */
-	public void setBitmap(int pg,BitmapGraphic b) {
-		this.bitmaps.put(pg,b);
+	 * Set the message BitmapGraphic of the specified page.
+	 * @param pg Page number of the returned BitmapGraphic, 0 based number.
+	 * @param b BitmapGraphic to set for the specified page.
+	 */
+	public void setBitmap(int pg, BitmapGraphic b) {
+		bitmaps.put(pg, b);
 	}
 
 	/** toString() returns the message as a MultiString */
@@ -205,5 +201,4 @@ public class SignMessage implements Serializable {
 	public int getNumPages() {
 		return multi.getNumPages();
 	}
-
 }
