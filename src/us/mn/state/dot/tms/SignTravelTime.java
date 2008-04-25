@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2006  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Map;
+
 /**
  * SignTravelTime is a class which encapsulates all the properties of a single
  * travel time message on a dynamic message sign (DMS).
@@ -26,7 +28,7 @@ public class SignTravelTime extends SignMessage {
 	static public final int MESSAGE_DURATION = 2;
 
 	/** Create a new sign travel time message */
-	public SignTravelTime(MultiString m, BitmapGraphic b) {
+	public SignTravelTime(MultiString m, Map<Integer, BitmapGraphic> b) {
 		super("IRIS", m, b, MESSAGE_DURATION);
 	}
 }

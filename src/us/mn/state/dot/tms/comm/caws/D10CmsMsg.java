@@ -22,6 +22,7 @@ package us.mn.state.dot.tms.comm.caws;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import java.rmi.RemoteException;
@@ -316,11 +317,12 @@ public class D10CmsMsg {
 
         // create bitmap
 		//BitmapGraphic bitmap = new BitmapGraphic(dms.getSignWidthPixels(),dms.getSignHeightPixels());
-		BitmapGraphic bitmap = dms.createPixelMap(multi);
+		Map<Integer, BitmapGraphic> bitmaps =
+			dms.createPixelMaps(multi);
 
         // create signmessage
         String owner="CAWS";
-		SignMessage sm=new SignMessage(owner, multi, bitmap,SignMessage.DURATION_INFINITE);
+		SignMessage sm=new SignMessage(owner, multi, bitmaps,SignMessage.DURATION_INFINITE);
 		return sm;
     }
 

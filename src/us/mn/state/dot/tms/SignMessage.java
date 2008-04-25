@@ -16,7 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * SignMessage is a class which encapsulates all the properties of a single
@@ -31,6 +32,16 @@ import java.util.HashMap;
  */
 public class SignMessage implements Serializable {
 
+	/** Create a one page map of graphics */
+	static protected TreeMap<Integer, BitmapGraphic> createSinglePage(
+		BitmapGraphic b)
+	{
+		TreeMap<Integer, BitmapGraphic> maps =
+			new TreeMap<Integer, BitmapGraphic>();
+		maps.put(0, b);
+		return maps;
+	}
+
 	/** Message MULTI string, contains message text for all pages */
 	protected final MultiString multi;
 
@@ -43,15 +54,9 @@ public class SignMessage implements Serializable {
 	 * @param m Message text as a MultiString. 
 	 * @param b Message BitmapGraphic for the first page.
 	 * @param d Message duration in mins. Use 0 for a blank message. 
-	 **/
+	 */
 	public SignMessage(String o, MultiString m, BitmapGraphic b, int d) {
-		if(o == null || m == null)
-			throw new NullPointerException();
-		this.owner = o;
-		this.multi = m;
-		setBitmap(0, b);
-		this.deployTime = new Date();
-		this.durationMins = d;
+		this(o, m, createSinglePage(b), d);
 	}
 
 	/** 
@@ -61,16 +66,17 @@ public class SignMessage implements Serializable {
 	 *
 	 * @param o Message owner.
 	 * @param m Message text as a MultiString. 
-	 * @param b Message BitmapGraphic[] for all pages in order.
+	 * @param b Message Map of BitmapGraphic for all pages.
 	 * @param d Message duration in mins. Use 0 for a blank message. 
-	 **/
-	public SignMessage(String o, MultiString m, BitmapGraphic[] b, int d) {
+	 */
+	public SignMessage(String o, MultiString m,
+		Map<Integer, BitmapGraphic> b, int d)
+	{
 		if(o == null || m == null || b == null)
 			throw new NullPointerException();
 		this.owner = o;
 		this.multi = m;
-		for(int i = 0; i < b.length; i++)
-			setBitmap(i, b[i]);
+		bitmaps = new TreeMap<Integer, BitmapGraphic>(b);
 		this.deployTime = new Date();
 		this.durationMins = d;
 	}
@@ -138,8 +144,7 @@ public class SignMessage implements Serializable {
 	}
 
 	/** Bitmaps for each page, accessed by page number (zero based) */
-	protected final HashMap<Integer, BitmapGraphic> bitmaps =
-		new HashMap<Integer, BitmapGraphic>(2);
+	protected final TreeMap<Integer, BitmapGraphic> bitmaps;
 
 	/** 
 	 * Get the message BitmapGraphic of the 1st page.
@@ -178,9 +183,9 @@ public class SignMessage implements Serializable {
 	}
 
 	/** Set the message BitmapGraphic for multiple pages */
-	public void setBitmaps(BitmapGraphic[] b) {
-		for(int i = 0; i < b.length; i++)
-			setBitmap(i, b[i]);
+	public void setBitmaps(Map<Integer, BitmapGraphic> b) {
+		bitmaps.clear();
+		bitmaps.putAll(b);
 	}
 
 	/** 

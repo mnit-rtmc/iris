@@ -21,8 +21,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import us.mn.state.dot.sonar.Checker;
@@ -652,8 +654,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		throws InvalidMessageException
 	{
 		MultiString multi = new MultiString(text);
-		BitmapGraphic[] bitmaps = createPixelMaps(multi);
-		sendMessage(new SignMessage(owner, multi, bitmaps, duration));
+		sendMessage(new SignMessage(owner, multi,
+			createPixelMaps(multi), duration));
 	}
 
 	/** Set a new message on the sign */
@@ -684,9 +686,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			message instanceof SignTravelTime))
 		{
 			MultiString multi = new MultiString(text);
-		        // note: this renders only the 1st page of the message
-			BitmapGraphic bitmap = createPixelMap(multi);
-			sendMessage(new SignAlert(owner, multi, bitmap,
+			sendMessage(new SignAlert(owner, multi,
+				createPixelMaps(multi),
 				SignMessage.DURATION_INFINITE));
 		}
 	}
@@ -718,9 +719,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return;
 		}
 		MultiString multi = new MultiString(text);
-		// note: this renders only the 1st page of the message
-		BitmapGraphic bitmap = createPixelMap(multi);
-		sendMessage(new SignTravelTime(multi, bitmap));
+		sendMessage(new SignTravelTime(multi, createPixelMaps(multi)));
 	}
 
 	/** Clear a travel time message */
@@ -780,9 +779,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		if(message.equalsString(text))
 			return;
 		MultiString multi = new MultiString(text);
-		BitmapGraphic[] bitmaps = createPixelMaps(multi);
-		setActiveMessage(new SignMessage(NO_OWNER, multi, bitmaps,
-			time));
+		setActiveMessage(new SignMessage(NO_OWNER, multi, 
+			createPixelMaps(multi), time));
 	}
 
 	/** Log a message */
@@ -840,60 +838,44 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** 
-	 * Create a pixel map of the message for the 1st page within the
-	 * MultiString message.
-	 */
-	public BitmapGraphic createPixelMap(MultiString multi) {
-		return createPixelMap(0, multi);
-	}
-
-	/** 
 	 * Create a pixel map of the message for all pages within the
 	 * MultiString message.
 	 */
-	public BitmapGraphic[] createPixelMaps(MultiString multi) {
-		int n = multi.getNumPages();
-		BitmapGraphic[] bm = new BitmapGraphic[n];
-		for(int i = 0; i < n; i++)
-			bm[i] = createPixelMap(i, multi);
-		return bm;
+	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi) {
+		PixelMapBuilder builder = new PixelMapBuilder();
+		multi.parse(builder);
+		return builder.pixmaps;
 	}
 
-	/** 
-	 * Create a pixel map of the message for the specified page within the
-	 * MultiString message.
-	 * @param pg Page number within MultiString to render, zero based.
-	 * @param multi MultiString to render.
-	 * @return BitmapGraphic containing rendered MultiString page.
-	 */
-	public BitmapGraphic createPixelMap(final int pg,
-		final MultiString multi)
-	{
-		final BitmapGraphic g = new BitmapGraphic(signWidthPixels,
-			signHeightPixels);
+	/** Inner class for building pixel maps */
+	protected class PixelMapBuilder implements MultiString.Callback {
 		final FontImpl font = getFont();
-		if(font == null)
+		final TreeMap<Integer, BitmapGraphic> pixmaps =
+			new TreeMap<Integer, BitmapGraphic>();
+
+		private BitmapGraphic getBitmap(int p) {
+			if(pixmaps.containsKey(p))
+				return pixmaps.get(p);
+			BitmapGraphic g = new BitmapGraphic(signWidthPixels,
+				signHeightPixels);
+			pixmaps.put(p, g);
 			return g;
-		// FIXME: create a class to create a bitmap for each page
-		multi.parse(new MultiString.Callback() {
-			public void addText(int p, int l,
-				MultiString.JustificationLine j, String t)
-			{
-				if(p != pg)
-					return;
-				int x = calculatePixelX(j, font, t);
-				int y = l * (font.getHeight() +
-					font.getLineSpacing());
-				try {
-					font.renderOn(g, x, y, t);
-				}
-				catch(Exception e) {
-					System.err.println("createPixelMap:"+t);
-					e.printStackTrace();
-				}
+		}
+
+		public void addText(int p, int l,
+			MultiString.JustificationLine j, String t)
+		{
+			BitmapGraphic g = getBitmap(p);
+			int x = calculatePixelX(j, font, t);
+			int y = l * (font.getHeight() + font.getLineSpacing());
+			try {
+				font.renderOn(g, x, y, t);
 			}
-		});
-		return g;
+			catch(Exception e) {
+				System.err.println("PixelMapBuilder:" + t);
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/** Lookup the best font */
