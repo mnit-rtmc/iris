@@ -84,11 +84,11 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected final MessageSelector messageSelector = new MessageSelector();
 
 	/** Create a new DMS dispatcher */
-	public DMSDispatcher(DMSHandler handler,final SonarState st) {
+	public DMSDispatcher(DMSHandler handler, final SonarState st) {
 		super( new GridBagLayout() );
 		userName = handler.getUser().getName();
 		selectionModel = handler.getSelectionModel();
-        pnlSign = new DMSPanel(st.getSystemPolicy());
+		pnlSign = new DMSPanel(st.getSystemPolicy());
 		setBorder(BorderFactory.createTitledBorder(
 			"Selected Dynamic Message Sign"));
 		GridBagConstraints bag = new GridBagConstraints();
