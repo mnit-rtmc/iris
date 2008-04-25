@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,10 +44,10 @@ public class DMSTab extends MapTab {
 
 	/** Create a new DMS tab */
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
-		DMSHandler handler,final SonarState st)
+		DMSHandler handler, final SonarState st)
 	{
 		super("DMS", "Operate Dynamic Message Signs");
-		dispatcher = new DMSDispatcher(handler,st);
+		dispatcher = new DMSDispatcher(handler, st);
 		chooser = new DmsStatusSummary(handler);
 		map.addLayers(lstates);
 		tabPanel = createSideBar();
