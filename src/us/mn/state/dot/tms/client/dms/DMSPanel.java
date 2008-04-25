@@ -353,15 +353,21 @@ public class DMSPanel extends JPanel {
 		if(np <= 1) {
 			displayBlankPage = false;
 			pagenumber = 0;
-			return;
+		} else if(doTick(np)) {
+			bufferDirty = true;
+			repaint();
 		}
-		boolean repaint = false;
+	}
+
+	/** Update the timer for one tick.
+	 * @return True if panel needs repainting */
+	protected boolean doTick(int num_pages) {
 		pageTimeCounterMS += timerTickLengthMS;
 		if(displayBlankPage) {
 			if(pageTimeCounterMS >= offTimeMS) {
 				displayBlankPage = false;
 				pageTimeCounterMS = 0;
-				repaint = true;
+				return true;
 			}
 		} else {
 			if(pageTimeCounterMS >= onTimeMS) {
@@ -369,15 +375,12 @@ public class DMSPanel extends JPanel {
 					displayBlankPage = true;
 				pageTimeCounterMS = 0;
 				pagenumber++;
-				if(pagenumber >= m.getNumPages())
+				if(pagenumber >= num_pages)
 					pagenumber = 0;
-				repaint = true;
+				return true;
 			}
 		}
-		if(repaint) {
-			bufferDirty = true;
-			repaint();
-		}
+		return false;
 	}
 
 	/** Paint the DMS panel onto a graphics context */
