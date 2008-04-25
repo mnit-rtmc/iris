@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -254,19 +254,21 @@ public class FontImpl extends BaseObjectImpl implements Font {
 				return graphic;
 		    throw new InvalidMessageException("Invalid graphic");
 		}
-		throw new InvalidMessageException("Invalid code point: "+code_point);
+		throw new InvalidMessageException("Invalid code point: " +
+			code_point);
 	}
 
 	/** 
-      * Render text onto a bitmap graphic.
-      *
-      * @param g BitmapGraphic to render into.
-      * @param x Horizontal position to start rendering
-      * @param y Vertical position to strat rendering
-      * @param t String to render
-      * @throws InvalidMessageException if the message contains chars that don't exist.
-      * @throws IOException 
-      */
+	 * Render text onto a bitmap graphic.
+	 *
+	 * @param g BitmapGraphic to render into.
+	 * @param x Horizontal position to start rendering
+	 * @param y Vertical position to strat rendering
+	 * @param t String to render
+	 * @throws InvalidMessageException if the message contains chars that
+	 *                                 don't exist.
+	 * @throws IOException 
+	 */
 	public void renderOn(BitmapGraphic g, int x, int y, String t)
 		throws InvalidMessageException, IOException
 	{
