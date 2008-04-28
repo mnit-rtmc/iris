@@ -16,11 +16,13 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import javax.comm.SerialPort;
+
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.comm.KillThread;
 import us.mn.state.dot.tms.comm.Messenger;
@@ -30,6 +32,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SerialMessenger;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.SocketMessenger;
+import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.comm.mndot.MndotPoller;
@@ -38,6 +41,8 @@ import us.mn.state.dot.tms.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
+import us.mn.state.dot.tms.comm.dmslite.DmsLitePoller;
+import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -286,12 +291,16 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		String[] s = port.split(":");
 		if(s.length != 2)
 			throw new IOException("INVALID SOCKET ADDRESS");
-		InetAddress a = InetAddress.getByName(s[0]);
 		int p = parseTcpPort(s[1]);
-		return new SocketMessenger(a, p);
+		return new SocketMessenger(new InetSocketAddress(s[0], p));
 	}
 
-	/** Create a messenger */
+	/** Create an http file messenger */
+	protected Messenger createHttpFileMessenger() throws IOException {
+		return new HttpFileMessenger(new URL(port));
+	}
+
+	/** Create a serial or socket messenger */
 	protected Messenger createMessenger(int threshold, int parity)
 		throws IOException
 	{
@@ -351,6 +360,18 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		return new ManchesterPoller(String.valueOf(index), messenger);
 	}
 
+	/** Create a DMS Lite poller */
+	protected MessagePoller createDmsLitePoller() throws IOException {
+		messenger = createSocketMessenger();
+		return new DmsLitePoller(String.valueOf(index), messenger);
+	}
+
+	/** Create a CAWS poller */
+	protected MessagePoller createCawsPoller() throws IOException {
+		messenger = createHttpFileMessenger();
+		return new CawsPoller(String.valueOf(index), messenger);
+	}
+
 	/** Try to open the communication line */
 	protected MessagePoller createPoller() throws IOException {
 		switch(protocol) {
@@ -371,6 +392,10 @@ final class CommunicationLineImpl extends TMSObjectImpl
 				return createPelcoPoller();
 			case PROTO_MANCHESTER:
 				return createManchesterPoller();
+			case PROTO_DMSLITE:
+				return createDmsLitePoller();
+			case PROTO_CAWS:
+				return createCawsPoller();
 			default:
 				throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -392,6 +417,12 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		catch(IOException e) {
 			close();
 			status = e.getMessage();
+			return;
+		}
+		// the iris installation might not have the java serial port
+		// jar installed
+		catch(NoClassDefFoundError e) {
+			status = "RS232 not supported.";
 			return;
 		}
 		notifyStatus();
@@ -464,6 +495,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			case PROTO_VICON:
 			case PROTO_PELCO:
 			case PROTO_MANCHESTER:
+			case PROTO_DMSLITE:
+			case PROTO_CAWS:
 				c = new ControllerImpl(circuit, drop);
 				break;
 			default:

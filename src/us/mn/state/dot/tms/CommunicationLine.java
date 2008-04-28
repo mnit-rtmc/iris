@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,12 @@ public interface CommunicationLine extends TMSObject {
 	/** Manchester camera control protocol */
 	public int PROTO_MANCHESTER = 8;
 
+	/** DMS Lite protocol */
+	public int PROTO_DMSLITE = 9;
+
+	/** CAWS protocol */
+	public int PROTO_CAWS = 10;
+
 	/** Protocol string constants */
 	public String[] PROTOCOLS = {
 		"NTCIP Class B",
@@ -85,7 +91,9 @@ public interface CommunicationLine extends TMSObject {
 		"Vicon",
 		"Pelco D",
 		"NTCIP Class C",
-		"Manchester"
+		"Manchester",
+		"DMS Lite",	// Caltrans D10
+		"CAWS",		// Caltrans D10
 	};
 
 	/** Set the communication protocol */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +25,27 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import javax.swing.Timer;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.SystemPolicy;
+import us.mn.state.dot.tms.TMSObjectImpl;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.client.ProxyListener;
 
 /**
  * Scale GUI representation of a DMS with pixel resolution.
+ * Multipage messages are displayed sequentially using the
+ * system properties for DMS message on-time and off-time
+ * (blank time). On-time and off-time values are read from
+ * the system policy.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSPanel extends JPanel {
 
@@ -62,6 +75,9 @@ public class DMSPanel extends JPanel {
 
 	/** Default number of lines */
 	static protected final int LINE_COUNT = 3;
+
+	/** Time counter for amount of time message has been displayed */
+	static protected final int timerTickLengthMS = 100;
 
 	/** Currently displayed sign */
 	protected DMSProxy proxy;
@@ -123,16 +139,46 @@ public class DMSPanel extends JPanel {
 	/** Flag that determines if buffer needs repainting */
 	protected boolean bufferDirty = false;
 
+	/** 
+	 * Display state. True to display actual page, false to display a blank
+	 * page. For single page messages it is always false.
+	 */
+	protected boolean displayBlankPage = false;
+
+	/** current page number to render */
+	protected int pagenumber = 0;
+
+	/** time counter for amount of time message has been displayed */
+	protected int pageTimeCounterMS = 0;
+
+	/** multipage message on time, read from system policies */
+	protected int onTimeMS = 2000;
+
+	/** multipage message off time, read from system policies */
+	protected int offTimeMS = 0;
+
+	/** System policy type cache */
+	protected final TypeCache<SystemPolicy> cache;
+
 	/** Create a new DMS panel */
-	public DMSPanel() {
+	public DMSPanel(TypeCache<SystemPolicy> c) {
 		super(true);
 		_setSign(null);
+		cache = c;
+		cache.addProxyListener(sp_listener);
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
 				repaint();
 			}
 		});
+		readSystemDMSPageTimes();
+		Timer pt = new Timer(timerTickLengthMS, new ActionListener() { 
+			public void actionPerformed(ActionEvent e) {
+				pageTimerTick();
+			} 
+		});
+		pt.start();
 	}
 
 	/** Calculate the height of the gap between lines (mm) */
@@ -295,6 +341,48 @@ public class DMSPanel extends JPanel {
 		}
 	}
 
+	/** 
+	 * Page timer tick. Called periodically to change the sign contents
+	 * for multipage signs.
+	 */
+	protected void pageTimerTick() {
+		SignMessage m = message;	// Avoid NPE race
+		if(m == null)
+			return;
+		int np = m.getNumPages();
+		if(np <= 1) {
+			displayBlankPage = false;
+			pagenumber = 0;
+		} else if(doTick(np)) {
+			bufferDirty = true;
+			repaint();
+		}
+	}
+
+	/** Update the timer for one tick.
+	 * @return True if panel needs repainting */
+	protected boolean doTick(int num_pages) {
+		pageTimeCounterMS += timerTickLengthMS;
+		if(displayBlankPage) {
+			if(pageTimeCounterMS >= offTimeMS) {
+				displayBlankPage = false;
+				pageTimeCounterMS = 0;
+				return true;
+			}
+		} else {
+			if(pageTimeCounterMS >= onTimeMS) {
+				if(offTimeMS > 0)
+					displayBlankPage = true;
+				pageTimeCounterMS = 0;
+				pagenumber++;
+				if(pagenumber >= num_pages)
+					pagenumber = 0;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Paint the DMS panel onto a graphics context */
 	protected void doPaint(Graphics2D g) {
 		g.setColor(getBackground());
@@ -306,7 +394,8 @@ public class DMSPanel extends JPanel {
 			RenderingHints.VALUE_ANTIALIAS_ON);
 		SignMessage m = message;	// Avoid NPE race
 		if(m != null) {
-			BitmapGraphic b = m.getBitmap();
+			BitmapGraphic b = displayBlankPage ?
+				m.getBlankBitmap() : m.getBitmap(pagenumber);
 			if(b != null)
 				paintPixels(g, b);
 		}
@@ -357,5 +446,41 @@ public class DMSPanel extends JPanel {
 	/** Get the minimum size of the sign panel */
 	public Dimension getMinimumSize() {
 		return new Dimension(SIGN_WIDTH / 36, SIGN_HEIGHT / 36);
+	}
+
+	/** 
+	 * Read the system DMS page on and off times. These are the amount of
+	 * time each page is displayed and blanked for multipage messages.
+	 */
+	protected void readSystemDMSPageTimes() {
+		// note: the retrieve values are in 1/10 seconds and converted
+		// to MS
+		onTimeMS = 100 * getPolicyValue(SystemPolicy.DMS_PAGE_ON_TIME);
+		offTimeMS = 100 *getPolicyValue(SystemPolicy.DMS_PAGE_OFF_TIME);
+	}
+
+	/** Get the value of the named policy */
+	protected int getPolicyValue(String p) {
+		SystemPolicy sp = cache.getObject(p);
+		if(sp != null)
+			return sp.getValue();
+		else
+			return 0;
+	}
+
+	/** Proxy listener for System Policy proxies */
+	protected final ProxyListener<SystemPolicy> sp_listener =
+		new ProxyListener<SystemPolicy>()
+	{
+		public void proxyAdded(SystemPolicy p) { }
+		public void proxyRemoved(SystemPolicy p) { }
+		public void proxyChanged(SystemPolicy p, String a) {
+			readSystemDMSPageTimes();
+		}
+	};
+
+	/** Dispose of the form */
+	protected void dispose() {
+		cache.removeProxyListener(sp_listener);
 	}
 }

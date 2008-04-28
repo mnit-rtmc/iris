@@ -2,3 +2,6 @@
 (^|/)\.hg($|/)
 (^|/)lib($|/)
 (^|/)build($|/)
+(^|/)iris-server-*
+(^|/)iris-client-*
+

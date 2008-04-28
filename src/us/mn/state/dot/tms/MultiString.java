@@ -25,6 +25,12 @@ import java.util.regex.Pattern;
  */
 public class MultiString implements Serializable {
 
+	/** New line MULTI tag */
+	static public final String NEWLINE = "[nl]";
+
+	/** New page MULTI tag */
+	static public final String NEWPAGE = "[np]";
+
 	/** Line Justification enumeration */
 	public enum JustificationLine {
 		UNDEFINED, OTHER, LEFT, CENTER, RIGHT, FULL;
@@ -107,12 +113,12 @@ public class MultiString implements Serializable {
 
 	/** Add a new line */
 	public void addLine() {
-		b.append("[nl]");
+		b.append(NEWLINE);
 	}
 
 	/** Add a new page */
 	public void addPage() {
-		b.append("[np]");
+		b.append(NEWPAGE);
 	}
 
 	/** Get the value of the MULTI string */
@@ -187,5 +193,21 @@ public class MultiString implements Serializable {
 			}
 		});
 		return _b.toString().trim().equals("");
+	}
+
+	/** Parsing callback to count the number of pages */
+	protected class PageCallback implements Callback {
+		int num_pages = 0;
+		public void addText(int p, int l, JustificationLine j, String t)
+		{
+			num_pages = Math.max(p + 1, num_pages);
+		}
+	}
+
+	/** Get the number of pages in the multistring */
+	public int getNumPages() {
+		PageCallback pc = new PageCallback();
+		parse(pc);
+		return pc.num_pages;
 	}
 }

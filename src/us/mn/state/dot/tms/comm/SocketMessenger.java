@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.net.Socket;
 
 /**
@@ -27,10 +27,7 @@ import java.net.Socket;
 public class SocketMessenger extends Messenger {
 
 	/** Address to connect */
-	protected final InetAddress address;
-
-	/** TCP port number */
-	protected final int port;
+	protected final SocketAddress address;
 
 	/** TCP socket */
 	protected Socket socket;
@@ -46,15 +43,15 @@ public class SocketMessenger extends Messenger {
 	}
 
 	/** Create a new socket messenger */
-	public SocketMessenger(InetAddress a, int p) {
+	public SocketMessenger(SocketAddress a) {
 		address = a;
-		port = p;
 	}
 
 	/** Open the socket messenger */
 	public void open() throws IOException {
-		socket = new Socket(address, port);
+		socket = new Socket();
 		socket.setSoTimeout(timeout);
+		socket.connect(address, timeout);
 		input = socket.getInputStream();
 		output = socket.getOutputStream();
 	}

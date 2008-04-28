@@ -21,8 +21,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import us.mn.state.dot.sonar.Checker;
@@ -38,6 +40,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * Dynamic Message Sign
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
@@ -646,19 +649,32 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Currently displayed message */
 	protected transient SignMessage message;
 
-	/** Set a new message on the sign */
+	/** Set a new message on the sign, all pages rendered */
 	public void setMessage(String owner, String text, int duration)
 		throws InvalidMessageException
 	{
 		MultiString multi = new MultiString(text);
-		BitmapGraphic bitmap = createPixelMap(multi);
-		sendMessage(new SignMessage(owner, multi, bitmap, duration));
+		sendMessage(new SignMessage(owner, multi,
+			createPixelMaps(multi), duration));
 	}
 
-	/** Update graphic for the current message */
+	/** Set a new message on the sign */
+	public void setMessage(SignMessage m) throws InvalidMessageException {
+		sendMessage(m);
+	}
+
+	/** Update graphic for all pages for the current message */
 	public void updateMessageGraphic() {
 		SignMessage m = message;	// Avoid races
-		m.setBitmap(createPixelMap(m.getMulti()));
+		m.setBitmaps(createPixelMaps(m.getMulti()));
+	}
+
+	/** 
+	 * Update graphic using a new bitmap. This is used by DMS that return
+	 * bitmaps (and possibly no text) on status querries.
+	 */
+	public void updateMessageGraphic(BitmapGraphic bm) {
+		message.setBitmap(bm);
 	}
 
 	/** Set a new alert on the sign */
@@ -670,8 +686,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			message instanceof SignTravelTime))
 		{
 			MultiString multi = new MultiString(text);
-			BitmapGraphic bitmap = createPixelMap(multi);
-			sendMessage(new SignAlert(owner, multi, bitmap,
+			sendMessage(new SignAlert(owner, multi,
+				createPixelMaps(multi),
 				SignMessage.DURATION_INFINITE));
 		}
 	}
@@ -703,8 +719,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return;
 		}
 		MultiString multi = new MultiString(text);
-		BitmapGraphic bitmap = createPixelMap(multi);
-		sendMessage(new SignTravelTime(multi, bitmap));
+		sendMessage(new SignTravelTime(multi, createPixelMaps(multi)));
 	}
 
 	/** Clear a travel time message */
@@ -733,9 +748,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		setMessageTimeRemaining(createBlankMessage(owner));
 	}
 
-	/** Set the sign message (called after a message has been
+	/** Set the active sign message (called after a message has been
 	 * successfully activated) */
-	public void setMessage(SignMessage m) {
+	public void setActiveMessage(SignMessage m) {
 		// If the new message is different from the old message
 		// then log it.  Required to prevent double-logging
 		// when users double-click the send.
@@ -756,13 +771,16 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		message = m;
 	}
 
-	/** Set the message from information read from the controller */
+	/** 
+	 * Set the message from information read from the controller.
+	 * All pages are rendered.
+	 */
 	public void setMessageFromController(String text, int time) {
 		if(message.equalsString(text))
 			return;
 		MultiString multi = new MultiString(text);
-		BitmapGraphic bitmap = createPixelMap(multi);
-		setMessage(new SignMessage(NO_OWNER, multi, bitmap, time));
+		setActiveMessage(new SignMessage(NO_OWNER, multi, 
+			createPixelMaps(multi), time));
 	}
 
 	/** Log a message */
@@ -819,32 +837,45 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 	}
 
-	/** Create a pixel map of the message */
-	public BitmapGraphic createPixelMap(MultiString multi) {
-		final BitmapGraphic g = new BitmapGraphic(signWidthPixels,
-			signHeightPixels);
+	/** 
+	 * Create a pixel map of the message for all pages within the
+	 * MultiString message.
+	 */
+	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi) {
+		PixelMapBuilder builder = new PixelMapBuilder();
+		multi.parse(builder);
+		return builder.pixmaps;
+	}
+
+	/** Inner class for building pixel maps */
+	protected class PixelMapBuilder implements MultiString.Callback {
 		final FontImpl font = getFont();
-		if(font == null)
+		final TreeMap<Integer, BitmapGraphic> pixmaps =
+			new TreeMap<Integer, BitmapGraphic>();
+
+		private BitmapGraphic getBitmap(int p) {
+			if(pixmaps.containsKey(p))
+				return pixmaps.get(p);
+			BitmapGraphic g = new BitmapGraphic(signWidthPixels,
+				signHeightPixels);
+			pixmaps.put(p, g);
 			return g;
-		multi.parse(new MultiString.Callback() {
-			public void addText(int p, int l,
-				MultiString.JustificationLine j, String t)
-			{
-				if(p > 0)
-					return;
-				int x = calculatePixelX(j, font, t);
-				int y = l * (font.getHeight() +
-					font.getLineSpacing());
-				try {
-					font.renderOn(g, x, y, t);
-				}
-				catch(Exception e) {
-					System.err.println("createPixelMap:"+t);
-					e.printStackTrace();
-				}
+		}
+
+		public void addText(int p, int l,
+			MultiString.JustificationLine j, String t)
+		{
+			BitmapGraphic g = getBitmap(p);
+			int x = calculatePixelX(j, font, t);
+			int y = l * (font.getHeight() + font.getLineSpacing());
+			try {
+				font.renderOn(g, x, y, t);
 			}
-		});
-		return g;
+			catch(Exception e) {
+				System.err.println("PixelMapBuilder:" + t);
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/** Lookup the best font */
@@ -872,8 +903,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get the appropriate font for this sign */
 	public FontImpl getFont() {
-		return lookupFont(getLineHeightPixels(), characterWidthPixels,
-			0);
+		return lookupFont(getLineHeightPixels(),characterWidthPixels,0);
 	}
 
 	/** Calculate the width (in pixels) of a single line of text */

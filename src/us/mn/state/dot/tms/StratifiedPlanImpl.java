@@ -1101,8 +1101,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			stream.close();
 		}
 		catch(IOException e) {
-			System.err.println("XML " + meter.getCorridorID() +
-				": " + e.getMessage());
+			System.err.println("XML setup: " +
+				meter.getCorridorID() + ": " + e.getMessage());
 		}
 		zone_change = false;
 	}
@@ -1151,7 +1151,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			stream.close();
 		}
 		catch(IOException e) {
-			System.err.println("XML: " + e.getMessage());
+			System.err.println("XML states: " + e.getMessage());
 		}
 	}
 

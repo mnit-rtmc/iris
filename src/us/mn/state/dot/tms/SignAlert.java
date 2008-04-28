@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2006  Minnesota Department of Transportation
+ * Copyright (C) 2003-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Map;
+
 /**
  * SignAlert is a class which encapsulates all the properties of a single
  * alert on a dynamic message sign (DMS).
@@ -23,7 +25,9 @@ package us.mn.state.dot.tms;
 public class SignAlert extends SignMessage {
 
 	/** Create a new sign alert */
-	public SignAlert(String o, MultiString m, BitmapGraphic b, int d) {
+	public SignAlert(String o, MultiString m, Map<Integer, BitmapGraphic> b,
+		int d)
+	{
 		super(o, m, b, d);
 	}
 }
