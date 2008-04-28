@@ -16,7 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
@@ -291,9 +291,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		String[] s = port.split(":");
 		if(s.length != 2)
 			throw new IOException("INVALID SOCKET ADDRESS");
-		InetAddress a = InetAddress.getByName(s[0]);
 		int p = parseTcpPort(s[1]);
-		return new SocketMessenger(a, p);
+		return new SocketMessenger(new InetSocketAddress(s[0], p));
 	}
 
 	/** Create an http file messenger */
