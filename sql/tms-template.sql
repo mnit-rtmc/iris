@@ -35,6 +35,17 @@ CREATE SEQUENCE tms_log_seq
     CACHE 1
     CYCLE;
 
+CREATE TABLE direction (
+	id smallint PRIMARY KEY,
+	direction character varying(4) NOT NULL,
+	dir character varying(4) NOT NULL
+);
+
+CREATE TABLE road_class (
+	id integer PRIMARY KEY,
+	description VARCHAR(12) NOT NULL,
+	grade CHAR NOT NULL
+);
 
 CREATE TABLE vault_object (
     vault_oid integer NOT NULL,
@@ -165,16 +176,25 @@ CREATE TABLE "java_util_TreeMap" (
 )
 INHERITS ("java_util_AbstractMap");
 
-CREATE TABLE roadway (
-    name text NOT NULL,
-    abbreviated text NOT NULL,
-    "type" smallint NOT NULL,
-    direction smallint NOT NULL,
-)
-INHERITS (tms_object);
+CREATE TABLE road (
+	name VARCHAR(20) PRIMARY KEY,
+	abbrev VARCHAR(6) NOT NULL,
+	r_class smallint,
+	direction smallint,
+	alt_dir smallint
+);
 
-REVOKE ALL ON TABLE roadway FROM PUBLIC;
-GRANT SELECT ON TABLE roadway TO PUBLIC;
+ALTER TABLE road
+	ADD CONSTRAINT fk_r_class FOREIGN KEY (r_class)
+	REFERENCES road_class(id);
+ALTER TABLE road
+	ADD CONSTRAINT fk_direction FOREIGN KEY (direction)
+	REFERENCES direction(id);
+ALTER TABLE road
+	ADD CONSTRAINT fk_alt_dir FOREIGN KEY (alt_dir)
+	REFERENCES direction(id);
+
+REVOKE ALL ON TABLE road FROM PUBLIC;
 
 CREATE TABLE indexed_list (
     list integer NOT NULL
@@ -353,15 +373,6 @@ CREATE TABLE holiday (
 
 REVOKE ALL ON TABLE holiday FROM PUBLIC;
 GRANT SELECT ON TABLE holiday TO PUBLIC;
-
-CREATE TABLE direction (
-    id smallint NOT NULL,
-    direction character varying(4) NOT NULL,
-    dir character varying(4) NOT NULL
-);
-
-REVOKE ALL ON TABLE direction FROM PUBLIC;
-GRANT SELECT ON TABLE direction TO PUBLIC;
 
 CREATE TABLE timing_plan (
     "startTime" integer NOT NULL,
@@ -629,9 +640,9 @@ REVOKE ALL ON TABLE road_modifier FROM PUBLIC;
 GRANT SELECT ON TABLE road_modifier TO PUBLIC;
 
 CREATE TABLE "location" (
-    freeway integer NOT NULL,
+    freeway VARCHAR(20),
     free_dir smallint NOT NULL,
-    cross_street integer NOT NULL,
+    cross_street VARCHAR(20),
     cross_dir smallint NOT NULL,
     cross_mod smallint NOT NULL,
     easting integer NOT NULL,
@@ -642,7 +653,13 @@ CREATE TABLE "location" (
 INHERITS (tms_object);
 
 REVOKE ALL ON TABLE "location" FROM PUBLIC;
-GRANT SELECT ON TABLE "location" TO PUBLIC;
+
+ALTER TABLE "location"
+	ADD CONSTRAINT fk_freeway FOREIGN KEY (freeway)
+	REFERENCES road(name);
+ALTER TABLE "location"
+	ADD CONSTRAINT fk_cross_street FOREIGN KEY (cross_street)
+	REFERENCES road(name);
 
 CREATE TABLE alarm (
     controller integer NOT NULL,
@@ -773,22 +790,39 @@ GRANT SELECT ON TABLE "simple" TO PUBLIC;
 CREATE VIEW stratified AS
     SELECT rm.id, hour_min(sp."startTime") AS start_time, hour_min(sp."stopTime") AS stop_time, sp.active FROM ((ramp_meter rm JOIN traffic_device_timing_plan tp ON ((rm.id = tp.traffic_device))) JOIN stratified_plan sp ON ((tp.timing_plan = sp.vault_oid)));
 
-REVOKE ALL ON TABLE stratified FROM PUBLIC;
 GRANT SELECT ON TABLE stratified TO PUBLIC;
 
+CREATE VIEW road_view AS
+	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
+	adir.direction AS alt_dir
+	FROM road
+	LEFT JOIN road_class rcl ON road.r_class = rcl.id
+	LEFT JOIN direction dir ON road.direction = dir.id
+	LEFT JOIN direction adir ON road.alt_dir = adir.id;
+
+GRANT SELECT ON road_view TO PUBLIC;
+
 CREATE VIEW location_view AS
-	SELECT l.vault_oid, f.abbreviated AS fwy, f.name AS freeway,
+	SELECT l.vault_oid, f.abbrev AS fwy, l.freeway,
 	f_dir.direction AS free_dir, f_dir.dir AS fdir,
-	m.modifier AS cross_mod, m.mod AS xmod, c.abbreviated as xst,
-	c.name AS cross_street, c_dir.direction AS cross_dir,
+	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
+	l.cross_street, c_dir.direction AS cross_dir,
 	l.easting, l.east_off, l.northing, l.north_off
-	FROM "location" l LEFT JOIN roadway f ON l.freeway = f.vault_oid
+	FROM "location" l
+	LEFT JOIN road f ON l.freeway = f.name
 	LEFT JOIN road_modifier m ON l.cross_mod = m.id
-	LEFT JOIN roadway c ON l.cross_street = c.vault_oid
+	LEFT JOIN road c ON l.cross_street = c.name
 	LEFT JOIN direction f_dir ON l.free_dir = f_dir.id
 	LEFT JOIN direction c_dir ON l.cross_dir = c_dir.id;
 
 GRANT SELECT ON location_view TO PUBLIC;
+
+CREATE VIEW device_location_view AS
+	SELECT d.vault_oid, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir
+	FROM device d JOIN location_view l ON d."location" = l.vault_oid;
+
+GRANT SELECT ON device_location_view TO PUBLIC;
 
 CREATE VIEW line_drop_view AS
 	SELECT c.vault_oid, l."index" AS line, c."drop"
@@ -1015,7 +1049,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
 84656	4	0	r_node	us.mn.state.dot.tms.R_NodeImpl
 37	4	0	vault_list	us.mn.state.dot.vault.ListElement
-75	4	0	roadway	us.mn.state.dot.tms.RoadwayImpl
 68616	4	0	location	us.mn.state.dot.tms.LocationImpl
 2065	4	0	detector	us.mn.state.dot.tms.DetectorImpl
 4	4	52	vault_types	us.mn.state.dot.vault.Type
@@ -1034,6 +1067,16 @@ COPY direction (id, direction, dir) FROM stdin;
 4	WB	W
 5	N-S	N-S
 6	E-W	E-W
+\.
+
+COPY road_class (id, description, grade) FROM stdin;
+1	residential	A
+2	business	B
+3	collector	C
+4	arterial	D
+5	expressway	E
+6	freeway	F
+7	CD road	
 \.
 
 COPY cabinet_types ("index", name) FROM stdin;
@@ -1169,8 +1212,6 @@ CREATE UNIQUE INDEX "java_util_AbstractMap_pkey" ON "java_util_AbstractMap" USIN
 
 CREATE UNIQUE INDEX "java_util_TreeMap_pkey" ON "java_util_TreeMap" USING btree (vault_oid);
 
-CREATE UNIQUE INDEX roadway_pkey ON roadway USING btree (vault_oid);
-
 CREATE UNIQUE INDEX indexed_list_pkey ON indexed_list USING btree (vault_oid);
 
 CREATE UNIQUE INDEX detector_pkey ON detector USING btree (vault_oid);
@@ -1208,12 +1249,6 @@ CREATE UNIQUE INDEX alarm_pkey ON alarm USING btree (vault_oid);
 CREATE UNIQUE INDEX detector_index ON detector USING btree ("index");
 
 CREATE UNIQUE INDEX r_node_pkey ON r_node USING btree (vault_oid);
-
-ALTER TABLE ONLY direction
-    ADD CONSTRAINT direction_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY lane_type_description
-    ADD CONSTRAINT lane_type_description_pkey PRIMARY KEY (lane_type_id);
 
 ALTER TABLE ONLY time_plan_log
     ADD CONSTRAINT time_plan_log_pkey PRIMARY KEY (event_id);
