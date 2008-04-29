@@ -87,10 +87,10 @@ public interface Road extends SonarObject {
 	String getAbbrev();
 
 	/** Set the roadway class */
-	void setRClass(Short c);
+	void setRClass(short c);
 
 	/** Get the roadway class */
-	Short getRClass();
+	short getRClass();
 
 	/** Set direction */
 	void setDirection(short d);
