@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -179,14 +179,26 @@ public class SQLConnection {
 	public void update(Storable s, String field, Object value)
 		throws TMSException
 	{
-		String v = valueAsString(value);
-		validateSql(v);
 		// FIXME: throw an exception if field is mixed case or contains
 		// spaces, etc. Then we can get rid of the quotes around the
 		// field name.
+		if(value == null) {
+			updateNull(s, field);
+			return;
+		}
+		String v = valueAsString(value);
+		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = '" + v + "' WHERE " + s.getKeyName() +
 			" = '" + s.getKey() + "';");
+	}
+
+	/** Update one field with a NULL value */
+	protected void updateNull(Storable s, String field) throws TMSException
+	{
+		update("UPDATE " + s.getTable() + " SET \"" + field +
+			"\" = NULL WHERE " + s.getKeyName() + " = '" +
+			s.getKey() + "';");
 	}
 
 	/** Create one storable record */
