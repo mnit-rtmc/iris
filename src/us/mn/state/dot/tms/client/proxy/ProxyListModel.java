@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
-import javax.swing.DefaultListModel;
+import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.SonarObject;
@@ -30,7 +30,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
  * @author Douglas Lau
  */
 public class ProxyListModel<T extends SonarObject>
-	extends DefaultListModel implements ProxyListener<T>
+	extends AbstractListModel implements ProxyListener<T>
 {
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
@@ -117,11 +117,20 @@ public class ProxyListModel<T extends SonarObject>
 		});
 	}
 
-	/** Get the count of rows */
-	public int getRowCount() {
+	/** Get the size (for ListModel) */
+	public int getSize() {
 		synchronized(proxies) {
 			return proxies.size();
 		}
+	}
+
+	/** Get the element at the specified index (for ListModel) */
+	public Object getElementAt(int index) {
+		T proxy = getProxy(index);
+		if(proxy != null)
+			return proxy.getName();
+		else
+			return null;
 	}
 
 	/** Get the proxy at the specified row */
