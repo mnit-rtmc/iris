@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ public interface Location extends TMSObject {
 	/** Get a description of the cross-street location */
 	public String getCrossDescription() throws RemoteException;
 
-	/** Set the freeway location */
+	/** Set the freeway name */
 	public void setFreeway(String name) throws TMSException,
 		RemoteException;
 
-	/** Get the freeway locaiton */
-	public Roadway getFreeway() throws RemoteException;
+	/** Get the freeway name */
+	public String getFreeway() throws RemoteException;
 
 	/** Set the freeway direction */
 	public void setFreeDir(short d) throws TMSException, RemoteException;
@@ -45,12 +45,12 @@ public interface Location extends TMSObject {
 	/** Get the freeway direction */
 	public short getFreeDir() throws RemoteException;
 
-	/** Set the cross-street location */
+	/** Set the cross-street name */
 	public void setCrossStreet(String name) throws TMSException,
 		RemoteException;
 
-	/** Get the cross-street location */
-	public Roadway getCrossStreet() throws RemoteException;
+	/** Get the cross-street name */
+	public String getCrossStreet() throws RemoteException;
 
 	/** Set the cross street direction */
 	public void setCrossDir(short d) throws TMSException, RemoteException;

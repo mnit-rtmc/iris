@@ -531,11 +531,9 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		String sid = getStationID();
 		if(sid.length() > 0)
 			out.print("station_id='" + sid + "' ");
-		RoadwayImpl xs = (RoadwayImpl)location.getCrossStreet();
-		if(xs != null) {
-			out.print("label='" + replaceEntities(xs.getName()) +
-				"' ");
-		}
+		String xs = location.getCrossStreet();
+		if(xs != null)
+			out.print("label='" + replaceEntities(xs) + "' ");
 		out.print("easting='" + getTrueEasting() + "' ");
 		out.print("northing='" + getTrueNorthing() + "' ");
 		int l = getLanes();

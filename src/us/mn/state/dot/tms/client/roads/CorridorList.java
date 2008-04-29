@@ -35,7 +35,7 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.Roadway;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 import us.mn.state.dot.tms.client.proxy.Vector;
@@ -171,16 +171,16 @@ public class CorridorList extends JPanel {
 	{
 		short dir = first.getLocation().getFreeDir();
 		switch(dir) {
-			case Roadway.NORTH:
+			case Road.NORTH:
 				return first.loc.getTrueNorthing() <
 					last.loc.getTrueNorthing();
-			case Roadway.SOUTH:
+			case Road.SOUTH:
 				return first.loc.getTrueNorthing() >
 					last.loc.getTrueNorthing();
-			case Roadway.EAST:
+			case Road.EAST:
 				return first.loc.getTrueEasting() <
 					last.loc.getTrueEasting();
-			case Roadway.WEST:
+			case Road.WEST:
 				return first.loc.getTrueEasting() >
 					last.loc.getTrueEasting();
 		}

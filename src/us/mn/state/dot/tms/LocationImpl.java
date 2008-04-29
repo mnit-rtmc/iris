@@ -39,10 +39,10 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Get a description of the location */
 	public String getDescription() {
-		RoadwayImpl f = freeway;
+		String f = freeway;
 		StringBuffer b = new StringBuffer();
 		if(f != null) {
-			String free = f.getName() + " " + DIRECTION[free_dir];
+			String free = f + " " + DIRECTION[free_dir];
 			b.append(free.trim());
 		}
 		String c = getCrossDescription();
@@ -59,11 +59,11 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Get the freeway corridor ID */
 	public String getCorridorID() {
-		RoadwayImpl f = freeway;
+		RoadImpl f = lookupFreeway();
 		if(f == null)
 			return "null";
 		StringBuilder b = new StringBuilder();
-		String ab = f.getAbbreviated();
+		String ab = f.getAbbrev();
 		if(ab != null)
 			b.append(ab);
 		else
@@ -76,7 +76,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Get the freeway corridor */
 	public String getCorridor() {
-		RoadwayImpl f = freeway;
+		RoadImpl f = lookupFreeway();
 		if(f == null)
 			return null;
 		StringBuilder b = new StringBuilder();
@@ -91,7 +91,7 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Get the linked freeway corridor */
 	public String getLinkedCorridor() {
-		RoadwayImpl f = cross_street;
+		RoadImpl f = lookupCrossStreet();
 		if(f == null)
 			return null;
 		StringBuilder b = new StringBuilder();
@@ -106,49 +106,48 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Check if another location is on the same corridor */
 	public boolean isSameCorridor(LocationImpl other) {
-		RoadwayImpl f = freeway;
+		RoadImpl f = lookupFreeway();
 		if(f == null)
 			return false;
-		return (f == other.freeway) &&
+		return (f == other.lookupFreeway()) &&
 			(f.filterDirection(free_dir) ==
 			 f.filterDirection(other.free_dir));
 	}
 
 	/** Get a description of the cross-street location */
 	public String getCrossDescription() {
-		RoadwayImpl c = cross_street;
+		String c = cross_street;
 		if(c != null) {
 			String cross = MODIFIER[cross_mod] + " " +
-				c.getName() + " " + DIRECTION[cross_dir];
+				c + " " + DIRECTION[cross_dir];
 			return cross.trim();
 		} else
 			return null;
 	}
 
 	/** Freeway location */
-	protected RoadwayImpl freeway;
+	protected String freeway;
 
 	/** Set the freeway location */
-	public void setFreeway(String name) throws TMSException {
-		setFreeway((RoadwayImpl)roadList.getElement(name));
-	}
-
-	/** Set the freeway location */
-	protected synchronized void setFreeway(RoadwayImpl f)
-		throws TMSException
-	{
+	public synchronized void setFreeway(String f) throws TMSException {
 		if(f == freeway)
 			return;
-		if(f == null)
-			store.update(this, "freeway", "0");
-		else
-			store.update(this, "freeway", f.getOID());
+		store.update(this, "freeway", f);
 		freeway = f;
 	}
 
 	/** Get the freeway locaiton */
-	public Roadway getFreeway() {
+	public String getFreeway() {
 		return freeway;
+	}
+
+	/** Lookup the freeway road */
+	public RoadImpl lookupFreeway() {
+		String f = freeway;
+		if(f != null)
+			return lookupRoad(f);
+		else
+			return null;
 	}
 
 	/** Freeway direction */
@@ -170,29 +169,28 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 	}
 
 	/** Nearest cross-street */
-	protected RoadwayImpl cross_street;
+	protected String cross_street;
 
 	/** Set the cross-street location */
-	public void setCrossStreet(String name) throws TMSException {
-		setCrossStreet((RoadwayImpl)roadList.getElement(name));
-	}
-
-	/** Set the cross-street location */
-	protected synchronized void setCrossStreet(RoadwayImpl x)
-		throws TMSException
-	{
+	public synchronized void setCrossStreet(String x) throws TMSException {
 		if(x == cross_street)
 			return;
-		if(x == null)
-			store.update(this, "cross_street", "0");
-		else
-			store.update(this, "cross_street", x.getOID());
+		store.update(this, "cross_street", x);
 		cross_street = x;
 	}
 
 	/** Get the cross-street location */
-	public Roadway getCrossStreet() {
+	public String getCrossStreet() {
 		return cross_street;
+	}
+
+	/** Lookup the cross street */
+	public RoadImpl lookupCrossStreet() {
+		String x = cross_street;
+		if(x != null)
+			return lookupRoad(x);
+		else
+			return null;
 	}
 
 	/** Cross street direction */
@@ -330,39 +328,39 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Test if another location matches */
 	public boolean matches(LocationImpl loc) {
-		RoadwayImpl f = freeway;
-		RoadwayImpl c = cross_street;
+		RoadImpl f = lookupFreeway();
+		RoadImpl c = lookupCrossStreet();
 		if(f == null || c == null)
 			return false;
-		return f.equals(loc.getFreeway()) &&
+		return f.equals(loc.lookupFreeway()) &&
 			(f.filterDirection(free_dir) ==
 			 f.filterDirection(loc.getFreeDir())) &&
-			c.equals(loc.getCrossStreet()) &&
+			c.equals(loc.lookupCrossStreet()) &&
 			cross_dir == loc.getCrossDir() &&
 			cross_mod == loc.getCrossMod();
 	}
 
 	/** Test if another location matches (including CD roads) */
 	public boolean matchesRoot(LocationImpl loc) {
-		RoadwayImpl f = freeway;
-		RoadwayImpl of = loc.freeway;
-		RoadwayImpl c = cross_street;
+		RoadImpl f = lookupFreeway();
+		RoadImpl of = loc.lookupFreeway();
+		RoadImpl c = lookupCrossStreet();
 		if(f == null || of == null || c == null)
 			return false;
 		return f.matchRootName(of) &&
 			(f.filterDirection(free_dir) ==
 			 f.filterDirection(loc.getFreeDir())) &&
-			c.equals(loc.getCrossStreet()) &&
+			c.equals(loc.lookupCrossStreet()) &&
 			cross_dir == loc.getCrossDir() &&
 			cross_mod == loc.getCrossMod();
 	}
 
 	/** Test if another location has freeway/cross-street swapped */
 	protected boolean isSwapped(LocationImpl other) {
-		RoadwayImpl f = freeway;
-		RoadwayImpl c = cross_street;
-		RoadwayImpl of = other.freeway;
-		RoadwayImpl oc = other.cross_street;
+		RoadImpl f = lookupFreeway();
+		RoadImpl c = lookupCrossStreet();
+		RoadImpl of = other.lookupFreeway();
+		RoadImpl oc = other.lookupCrossStreet();
 		if(f == null || c == null || of == null || oc == null)
 			return false;
 		return (cross_mod == other.cross_mod) &&
@@ -378,10 +376,10 @@ public class LocationImpl extends TMSObjectImpl implements Location, Cloneable,
 
 	/** Test if an access node matches a ramp location */
 	public boolean accessMatches(LocationImpl other) {
-		RoadwayImpl f = freeway;
-		RoadwayImpl c = cross_street;
-		RoadwayImpl of = other.freeway;
-		RoadwayImpl oc = other.cross_street;
+		RoadImpl f = lookupFreeway();
+		RoadImpl c = lookupCrossStreet();
+		RoadImpl of = other.lookupFreeway();
+		RoadImpl oc = other.lookupCrossStreet();
 		if(f == null || c == null || of == null || oc == null)
 			return false;
 		return (cross_mod == other.cross_mod) &&

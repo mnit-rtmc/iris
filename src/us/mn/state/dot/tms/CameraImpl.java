@@ -133,20 +133,20 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	/** Get the side of the road that the camera is on */
 	public short getRoadSide() {
 		switch(location.free_dir) {
-			case Roadway.EAST:
-				return Roadway.SOUTH;
-			case Roadway.WEST:
-				return Roadway.NORTH;
-			case Roadway.NORTH:
-				return Roadway.EAST;
-			case Roadway.SOUTH:
-				return Roadway.WEST;
-			case Roadway.EAST_WEST:
-			case Roadway.NORTH_SOUTH:
+			case Road.EAST:
+				return Road.SOUTH;
+			case Road.WEST:
+				return Road.NORTH;
+			case Road.NORTH:
+				return Road.EAST;
+			case Road.SOUTH:
+				return Road.WEST;
+			case Road.EAST_WEST:
+			case Road.NORTH_SOUTH:
 				//FIXME: add a value for cameras in the median
-				return Roadway.NONE;
+				return Road.NONE;
 		}
-		return Roadway.NONE;
+		return Road.NONE;
 	}
 
 	/** Get the current status code */

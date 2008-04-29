@@ -9,6 +9,7 @@ CREATE TABLE road_class (
 );
 
 COPY road_class (id, description, grade) FROM stdin;
+0		
 1	residential	A
 2	business	B
 3	collector	C
@@ -21,17 +22,14 @@ COPY road_class (id, description, grade) FROM stdin;
 CREATE TABLE road (
 	name VARCHAR(20) PRIMARY KEY,
 	abbrev VARCHAR(6) NOT NULL,
-	r_class smallint,
-	direction smallint,
-	alt_dir smallint
+	r_class smallint NOT NULL,
+	direction smallint NOT NULL,
+	alt_dir smallint NOT NULL
 );
 
-INSERT INTO road (name, abbrev, r_class, direction)
-	(SELECT substring(name FOR 20), abbreviated, "type", direction
+INSERT INTO road (name, abbrev, r_class, direction, alt_dir)
+	(SELECT substring(name FOR 20), abbreviated, "type", direction, 0
 	FROM roadway);
-
-UPDATE road SET r_class = NULL WHERE r_class = 0;
-UPDATE road SET direction = NULL WHERE direction = 0;
 
 ALTER TABLE road
 	ADD CONSTRAINT fk_r_class FOREIGN KEY (r_class)

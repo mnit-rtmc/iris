@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.DetectorList;
 import us.mn.state.dot.tms.Login;
 import us.mn.state.dot.tms.RampMeterList;
-import us.mn.state.dot.tms.RoadwayList;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TMS;
 import us.mn.state.dot.tms.TMSObject;
@@ -37,18 +36,6 @@ public class TMSProxy {
 
 	/** Remote TMS */
 	protected final TMS tms;
-
-	/** Remote roadway list */
-	protected final RemoteListModel roadways;
-
-	/** Get the remote roadway list */
-	public RemoteListModel getRoadways() { return roadways; }
-
-	/** Remote freeway list */
-	protected final RemoteListModel freeways;
-
-	/** Get the remote freeway list */
-	public RemoteListModel getFreeways() { return freeways; }
 
 	/** Communication line list */
 	protected final RemoteListModel lines;
@@ -205,9 +192,6 @@ public class TMSProxy {
 	{
 		Login l = (Login)Naming.lookup("//" + server + "/login");
 		tms = l.login(user);
-		roadways = new RemoteListModel(tms.getRoadwayList());
-		RoadwayList roads = (RoadwayList)roadways.getList();
-		freeways = new RemoteListModel(roads.getFreewayList());
 		lines = new RemoteListModel(tms.getLineList());
 		groups = new RemoteListModel(tms.getNodeGroupList());
 		DetectorList dets = (DetectorList)tms.getDetectorList();
@@ -230,8 +214,6 @@ public class TMSProxy {
 
 	/** Dispose of all proxied lists */
 	public void dispose() {
-		roadways.dispose();
-		freeways.dispose();
 		lines.dispose();
 		groups.dispose();
 		detectors.dispose();

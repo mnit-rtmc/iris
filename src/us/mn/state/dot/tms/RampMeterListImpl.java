@@ -108,13 +108,13 @@ class RampMeterListImpl extends SortedListImpl implements RampMeterList {
 
 	/** Find a stratified timing plan from the same freeway/direction */
 	public synchronized StratifiedPlanImpl findStratifiedPlan(
-		RoadwayImpl freeway, short freeDir, int period)
+		RoadImpl freeway, short freeDir, int period)
 	{
 		Iterator it = iterator();
 		while(it.hasNext()) {
 			RampMeterImpl meter = (RampMeterImpl)it.next();
 			LocationImpl loc = (LocationImpl)meter.getLocation();
-			RoadwayImpl f = (RoadwayImpl)loc.getFreeway();
+			RoadImpl f = loc.lookupFreeway();
 			short fd = loc.getFreeDir();
 			if(f == freeway &&
 				(freeway.filterDirection(fd) ==

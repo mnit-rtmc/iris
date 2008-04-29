@@ -23,7 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.tms.Roadway;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.device.TmsJList;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
@@ -46,8 +46,8 @@ public class LcsChooser extends JPanel {
 	/** Create a new LCS chooser */
 	public LcsChooser(LcsHandler handler) {
 		super(new GridLayout(1, 2));
-		add(createLcsList(handler, Roadway.WEST));
-		add(createLcsList(handler, Roadway.EAST));
+		add(createLcsList(handler, Road.WEST));
+		add(createLcsList(handler, Road.EAST));
 		handler.addRefreshListener(new RefreshListener() {
 			public void dataChanged() {
 				repaint();

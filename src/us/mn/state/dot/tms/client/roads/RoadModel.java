@@ -1,0 +1,159 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2008  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.client.roads;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.client.security.ProxyTableModel;
+
+/**
+ * Table model for roads
+ *
+ * @author Douglas Lau
+ */
+public class RoadModel extends ProxyTableModel<Road> {
+
+	/** Count of columns in table model */
+	static protected final int COLUMN_COUNT = 5;
+
+	/** Name column number */
+	static protected final int COL_NAME = 0;
+
+	/** Abbreviation column number */
+	static protected final int COL_ABBREV = 1;
+
+	/** Restricted column number */
+	static protected final int COL_R_CLASS = 2;
+
+	/** Direction column number */
+	static protected final int COL_DIRECTION = 3;
+
+	/** Alternate directino column number */
+	static protected final int COL_ALT_DIR = 4;
+
+	/** Create a new road table model */
+	public RoadModel(TypeCache<Road> c) {
+		super(c, true);
+	}
+
+	/** Get the count of columns in the table */
+	public int getColumnCount() {
+		return COLUMN_COUNT;
+	}
+
+	/** Get the value at the specified cell */
+	public Object getValueAt(int row, int column) {
+		Road r = getProxy(row);
+		if(r == null)
+			return null;
+		switch(column) {
+			case COL_NAME:
+				return r.getName();
+			case COL_ABBREV:
+				return r.getAbbrev();
+			case COL_R_CLASS:
+				return Road.R_CLASS[r.getRClass()];
+			case COL_DIRECTION:
+				return TMSObject.DIRECTION[r.getDirection()];
+			case COL_ALT_DIR:
+				return TMSObject.DIRECTION[r.getAltDir()];
+		}
+		return null;
+	}
+
+	/** Check if the specified row is the last row in the table */
+	public boolean isLastRow(int row) {
+		synchronized(proxies) {
+			return row == proxies.size();
+		}
+	}
+
+	/** Check if the specified cell is editable */
+	public boolean isCellEditable(int row, int column) {
+		if(isLastRow(row))
+			return column == COL_NAME;
+		if(column == COL_NAME)
+			return false;
+		return true;
+	}
+
+	/** Set the value at the specified cell */
+	public void setValueAt(Object value, int row, int column) {
+		Road r = getProxy(row);
+		switch(column) {
+			case COL_NAME:
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+				break;
+			case COL_ABBREV:
+				r.setAbbrev(value.toString());
+				break;
+			case COL_R_CLASS:
+				r.setRClass((Short)value);
+				break;
+			case COL_DIRECTION:
+				r.setDirection((Short)value);
+				break;
+			case COL_ALT_DIR:
+				r.setAltDir((Short)value);
+				break;
+		}
+	}
+
+	/** Create the road class column */
+	protected TableColumn createRClassColumn() {
+		TableColumn c = new TableColumn(COL_R_CLASS, 160);
+		c.setHeaderValue("Road Class");
+		JComboBox combo = new JComboBox(Road.R_CLASS);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Create the direction column */
+	protected TableColumn createDirectionColumn() {
+		TableColumn c = new TableColumn(COL_DIRECTION, 80);
+		c.setHeaderValue("Direction");
+		JComboBox combo = new JComboBox(TMSObject.DIRECTION);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Create the alternate direction column */
+	protected TableColumn createAltDirColumn() {
+		TableColumn c = new TableColumn(COL_ALT_DIR, 80);
+		c.setHeaderValue("Alt Dir");
+		JComboBox combo = new JComboBox(TMSObject.DIRECTION);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Create the table column model */
+	public TableColumnModel createColumnModel() {
+		TableColumnModel m = new DefaultTableColumnModel();
+		m.addColumn(createColumn(COL_NAME, 200, "Road"));
+		m.addColumn(createColumn(COL_ABBREV, 80, "Abbrev"));
+		m.addColumn(createRClassColumn());
+		m.addColumn(createDirectionColumn());
+		m.addColumn(createAltDirColumn());
+		return m;
+	}
+}

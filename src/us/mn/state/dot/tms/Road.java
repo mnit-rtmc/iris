@@ -87,19 +87,19 @@ public interface Road extends SonarObject {
 	String getAbbrev();
 
 	/** Set the roadway class */
-	void setRClass(short c) throws TMSException;
+	void setRClass(Short c);
 
 	/** Get the roadway class */
-	short getRClass();
+	Short getRClass();
 
 	/** Set direction */
-	void setDirection(short d) throws TMSException;
+	void setDirection(short d);
 
 	/** Get direction */
 	short getDirection();
 
 	/** Set alternate direction */
-	void setAltDir(short a) throws TMSException;
+	void setAltDir(short a);
 
 	/** Get alternate direction */
 	short getAltDir();

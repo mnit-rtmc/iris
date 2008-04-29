@@ -49,7 +49,7 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 		});
 	}
 
-	/** Store a video monitor */
+	/** Store a road */
 	public void doStore() throws TMSException {
 		store.update("INSERT INTO " + getTable() +
 			" (name, abbrev, r_class, direction, alt_dir) VALUES " +

@@ -30,9 +30,6 @@ public interface TMS extends Remote {
 	/** Get the node group list */
 	public IndexedList getNodeGroupList() throws RemoteException;
 
-	/** Get the roadway list */
-	public RoadwayList getRoadwayList() throws RemoteException;
-
 	/** Get the detector list */
 	public IndexedList getDetectorList() throws RemoteException;
 

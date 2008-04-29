@@ -179,9 +179,9 @@ INHERITS ("java_util_AbstractMap");
 CREATE TABLE road (
 	name VARCHAR(20) PRIMARY KEY,
 	abbrev VARCHAR(6) NOT NULL,
-	r_class smallint,
-	direction smallint,
-	alt_dir smallint
+	r_class smallint NOT NULL,
+	direction smallint NOT NULL,
+	alt_dir smallint NOT NULL
 );
 
 ALTER TABLE road
@@ -1070,6 +1070,7 @@ COPY direction (id, direction, dir) FROM stdin;
 \.
 
 COPY road_class (id, description, grade) FROM stdin;
+0		
 1	residential	A
 2	business	B
 3	collector	C

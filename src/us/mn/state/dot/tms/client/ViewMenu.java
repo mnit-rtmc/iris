@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.client.dms.DMSListForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
 import us.mn.state.dot.tms.client.meter.RampMeterListForm;
-import us.mn.state.dot.tms.client.roads.RoadwayListForm;
+import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.roads.StationListForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.switcher.VideoMonitorForm;
@@ -78,7 +78,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('R');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RoadwayListForm(tc));
+				desktop.show(new RoadForm(st.getRoads()));
 			}
 		};
 		add(item);

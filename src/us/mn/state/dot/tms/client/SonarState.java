@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,10 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Holds the state of the SONAR client
@@ -111,6 +113,22 @@ public class SonarState extends Client {
 		return monitors;
 	}
 
+	/** Cache of road proxies */
+	protected final TypeCache<Road> roads;
+
+	/** Get the road type cache */
+	public TypeCache<Road> getRoads() {
+		return roads;
+	}
+
+	/** Road proxy list model */
+	protected final ProxyListModel<Road> road_model;
+
+	/** Get the road list model */
+	public ProxyListModel<Road> getRoadModel() {
+		return road_model;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ShowHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -126,6 +144,8 @@ public class SonarState extends Client {
 		fonts = new TypeCache<Font>(Font.class);
 		glyphs = new TypeCache<Glyph>(Glyph.class);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class);
+		roads = new TypeCache<Road>(Road.class);
+		road_model = new ProxyListModel<Road>(roads);
 	}
 
 	/** Login to the SONAR server */
@@ -142,6 +162,7 @@ public class SonarState extends Client {
 		populate(fonts);
 		populate(glyphs);
 		populate(monitors);
+		populate(roads);
 	}
 
 	/** Look up the specified user */
