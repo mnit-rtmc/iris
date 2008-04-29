@@ -86,7 +86,6 @@ public class RoadForm extends AbstractForm {
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
-		table.setRowHeight(22);
 		JScrollPane pane = new JScrollPane(table);
 		panel.add(pane, bag);
 		del_road.setEnabled(false);

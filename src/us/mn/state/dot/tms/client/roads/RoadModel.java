@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
@@ -49,6 +50,20 @@ public class RoadModel extends ProxyTableModel<Road> {
 	/** Alternate directino column number */
 	static protected final int COL_ALT_DIR = 4;
 
+	/** List of all possible road class values */
+	static LinkedList<String> R_CLASS = new LinkedList<String>();
+	static {
+		for(String r: Road.R_CLASS)
+			R_CLASS.add(r);
+	}
+
+	/** List of all possible direction values */
+	static LinkedList<String> DIRECTION = new LinkedList<String>();
+	static {
+		for(String d: TMSObject.DIR_LONG)
+			DIRECTION.add(d);
+	}
+
 	/** Create a new road table model */
 	public RoadModel(TypeCache<Road> c) {
 		super(c, true);
@@ -70,11 +85,11 @@ public class RoadModel extends ProxyTableModel<Road> {
 			case COL_ABBREV:
 				return r.getAbbrev();
 			case COL_R_CLASS:
-				return Road.R_CLASS[r.getRClass()];
+				return R_CLASS.get(r.getRClass());
 			case COL_DIRECTION:
-				return TMSObject.DIRECTION[r.getDirection()];
+				return DIRECTION.get(r.getDirection());
 			case COL_ALT_DIR:
-				return TMSObject.DIRECTION[r.getAltDir()];
+				return DIRECTION.get(r.getAltDir());
 		}
 		return null;
 	}
@@ -108,20 +123,20 @@ public class RoadModel extends ProxyTableModel<Road> {
 				r.setAbbrev(value.toString());
 				break;
 			case COL_R_CLASS:
-				r.setRClass((Short)value);
+				r.setRClass((short)R_CLASS.indexOf(value));
 				break;
 			case COL_DIRECTION:
-				r.setDirection((Short)value);
+				r.setDirection((short)DIRECTION.indexOf(value));
 				break;
 			case COL_ALT_DIR:
-				r.setAltDir((Short)value);
+				r.setAltDir((short)DIRECTION.indexOf(value));
 				break;
 		}
 	}
 
 	/** Create the road class column */
 	protected TableColumn createRClassColumn() {
-		TableColumn c = new TableColumn(COL_R_CLASS, 160);
+		TableColumn c = new TableColumn(COL_R_CLASS, 120);
 		c.setHeaderValue("Road Class");
 		JComboBox combo = new JComboBox(Road.R_CLASS);
 		c.setCellEditor(new DefaultCellEditor(combo));
@@ -130,18 +145,18 @@ public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create the direction column */
 	protected TableColumn createDirectionColumn() {
-		TableColumn c = new TableColumn(COL_DIRECTION, 80);
+		TableColumn c = new TableColumn(COL_DIRECTION, 120);
 		c.setHeaderValue("Direction");
-		JComboBox combo = new JComboBox(TMSObject.DIRECTION);
+		JComboBox combo = new JComboBox(DIRECTION.toArray());
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
 	}
 
 	/** Create the alternate direction column */
 	protected TableColumn createAltDirColumn() {
-		TableColumn c = new TableColumn(COL_ALT_DIR, 80);
+		TableColumn c = new TableColumn(COL_ALT_DIR, 120);
 		c.setHeaderValue("Alt Dir");
-		JComboBox combo = new JComboBox(TMSObject.DIRECTION);
+		JComboBox combo = new JComboBox(DIRECTION.toArray());
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
 	}
