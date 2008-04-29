@@ -104,7 +104,6 @@ public class SQLConnection {
 
 	/** Create a database statement */
 	protected Statement createStatement() throws TMSException {
-		System.err.println("SQLConnection.createStatement()");
 		try {
 			return _createStatement();
 		}
