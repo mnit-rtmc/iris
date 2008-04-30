@@ -40,7 +40,8 @@ import us.mn.state.dot.tms.comm.SocketMessenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPoller {
+public class DmsLitePoller extends MessagePoller
+	implements SignPoller, DMSPoller {
 
 	/** Field description */
 	static public final int MAX_ADDRESS = 255;
@@ -51,7 +52,7 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	static public final int MIN_ADDRESS = 1;
 
 	/**
-	 * Create a new dmslite poller 
+	 * Create a new dmslite poller
 	 *
 	 * @param n
 	 * @param m
@@ -71,14 +72,16 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	 *
 	 * @throws MessengerException
 	 */
-	public AddressedMessage createMessage(ControllerImpl c) throws MessengerException {
+	public AddressedMessage createMessage(ControllerImpl c)
+		throws MessengerException {
 		System.err.println("DmsLitePoller.createMessage() called.");
 
-		return new Message(messenger.getOutputStream(c), messenger.getInputStream(c));
+		return new Message(messenger.getOutputStream(c),
+				   messenger.getInputStream(c));
 	}
 
 	/**
-	 * Check if a drop address is valid 
+	 * Check if a drop address is valid
 	 *
 	 * @param drop
 	 *
@@ -89,17 +92,18 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Download the font to a sign controller 
+	 * Download the font to a sign controller
 	 *
 	 * @param dms
 	 * @param p
 	 */
 	protected void downloadFonts(DMSImpl dms, int p) {
-		System.err.println("DmsLitePoller.downloadFonts() called, ignored.");
+		System.err.println(
+		    "DmsLitePoller.downloadFonts() called, ignored.");
 	}
 
 	/**
-	 * Perform a controller download. Called: when IRIS server is shutting down, etc. 
+	 * Perform a controller download. Called: when IRIS server is shutting down, etc.
 	 *
 	 * @param c
 	 * @param reset
@@ -127,7 +131,7 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Perform a sign status poll. Called every 30 seconds. 
+	 * Perform a sign status poll. Called every 30 seconds.
 	 *
 	 * @param c
 	 * @param comp
@@ -138,17 +142,16 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 		if (true) {
 			DMSImpl dms = c.getActiveSign();
 
-			if (dms != null) {
+			if (dms != null)
 				new OpQueryDms(dms).start();
-			} else {
+			else
 				System.err.println(
-					"DmsLitePoller.pollSigns(): c.getActiveSign() is null.");
-			}
+				    "DmsLitePoller.pollSigns(): c.getActiveSign() is null.");
 		}
 	}
 
 	/**
-	 * Perform a 30-second poll 
+	 * Perform a 30-second poll
 	 *
 	 * @param c
 	 * @param comp
@@ -158,7 +161,7 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Perform a 5-minute poll 
+	 * Perform a 5-minute poll
 	 *
 	 * @param c
 	 * @param comp
@@ -178,14 +181,15 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Start a test for the given controller 
+	 * Start a test for the given controller
 	 *
 	 * @param c
 	 *
 	 * @return
 	 */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-		System.err.println("DmsLitePoller.startTest() called, ignored.");
+		System.err.println(
+		    "DmsLitePoller.startTest() called, ignored.");
 
 		// DiagnosticOperation test = new DiagnosticNtcip(c);
 		// test.start();
@@ -200,30 +204,33 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	 * @param dms
 	 */
 	public void queryConfiguration(DMSImpl dms) {
-		System.err.println("DmsLitePoller.queryConfiguration() called.");
+		System.err.println(
+		    "DmsLitePoller.queryConfiguration() called.");
 		new OpDmsQueryConfig(dms).start();
 	}
 
 	/**
-	 * Send a new message to the sign 
+	 * Send a new message to the sign
 	 *
 	 * @param dms
 	 * @param m
 	 *
 	 * @throws InvalidMessageException
 	 */
-	public void sendMessage(DMSImpl dms, SignMessage m) throws InvalidMessageException {
+	public void sendMessage(DMSImpl dms, SignMessage m)
+		throws InvalidMessageException {
 		System.err.println("DmsLitePoller.sendMessage() called.");
-		System.err.println("DmsLitePoller.sendMessage(), SignMessage multistring="
-						   + m.getMulti().toString() + ",bitmap len="
-						   + m.getBitmap().getBitmap().length + ", bitmap="
-						   + Convert.toHexString(m.getBitmap().getBitmap()));
+		System.err.println(
+		    "DmsLitePoller.sendMessage(), SignMessage multistring="
+		    + m.getMulti().toString() + ",bitmap len="
+		    + m.getBitmap().getBitmap().length + ", bitmap="
+		    + Convert.toHexString(m.getBitmap().getBitmap()));
 
 		// was bitmap rendered? If not, it's probably because a GetDMSConfig message has
 		// not been received yet, so the DMS physical properties are not yet valid.
 		if (m.getBitmap().getBitmap().length <= 0) {
 			System.err.println(
-				"DmsLitePoller.sendMessage(): bitmap has a zero length. Message ignored.");
+			    "DmsLitePoller.sendMessage(): bitmap has a zero length. Message ignored.");
 
 			return;
 		}
@@ -254,8 +261,9 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	 * @param m
 	 */
 	public void setMessageTimeRemaining(DMSImpl dms, SignMessage m) {
-		System.err.println("DmsLitePoller.setMessageTimeRemaining() called, duration:"
-						   + m.getDuration());
+		System.err.println(
+		    "DmsLitePoller.setMessageTimeRemaining() called, duration:"
+		    + m.getDuration());
 
 		// blank the sign
 		if (m.getDuration() <= 0) {
@@ -266,8 +274,8 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 
 			// FIXME: add support for changing ontime for message
 			System.err.println(
-				"ERROR: DmsLitePoller.setMessageTimeRemaining(): called with non zero duration ("
-				+ m.getDuration() + "). Ignored.");
+			    "ERROR: DmsLitePoller.setMessageTimeRemaining(): called with non zero duration ("
+			    + m.getDuration() + "). Ignored.");
 		}
 
 		/*
@@ -282,13 +290,14 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Set manual brightness level (null for photocell control) 
+	 * Set manual brightness level (null for photocell control)
 	 *
 	 * @param dms
 	 * @param l
 	 */
 	public void setBrightnessLevel(DMSImpl dms, Integer l) {
-		System.err.println("DmsLitePoller.setBrightnessLevel() called, ignored.");
+		System.err.println(
+		    "DmsLitePoller.setBrightnessLevel() called, ignored.");
 
 		/*
 		 *       if(l != null) {
@@ -301,29 +310,31 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Activate a pixel test 
+	 * Activate a pixel test
 	 *
 	 * @param dms
 	 */
 	public void testPixels(DMSImpl dms) {
-		System.err.println("DmsLitePoller.testPixels() called, ignored.");
+		System.err.println(
+		    "DmsLitePoller.testPixels() called, ignored.");
 
 		// new DMSPixelTest(dms).start();
 	}
 
 	/**
-	 * Activate a lamp test 
+	 * Activate a lamp test
 	 *
 	 * @param dms
 	 */
 	public void testLamps(DMSImpl dms) {
-		System.err.println("DmsLitePoller.testLamps() called, ignored.");
+		System.err.println(
+		    "DmsLitePoller.testLamps() called, ignored.");
 
 		// new DMSLampTest(dms).start();
 	}
 
 	/**
-	 * Activate a fan test 
+	 * Activate a fan test
 	 *
 	 * @param dms
 	 */
@@ -334,7 +345,7 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	}
 
 	/**
-	 * Set Ledstar pixel configuration 
+	 * Set Ledstar pixel configuration
 	 *
 	 * @param dms
 	 * @param ldcPotBase
@@ -342,9 +353,11 @@ public class DmsLitePoller extends MessagePoller implements SignPoller, DMSPolle
 	 * @param pixelCurrentHigh
 	 * @param badPixelLimit
 	 */
-	public void setLedstarPixel(DMSImpl dms, int ldcPotBase, int pixelCurrentLow,
-								int pixelCurrentHigh, int badPixelLimit) {
-		System.err.println("DmsLitePoller.setLedstarPixel() called, ignored.");
+	public void setLedstarPixel(DMSImpl dms, int ldcPotBase,
+				    int pixelCurrentLow, int pixelCurrentHigh,
+				    int badPixelLimit) {
+		System.err.println(
+		    "DmsLitePoller.setLedstarPixel() called, ignored.");
 
 		// new DMSSetLedstarPixel(dms, ldcPotBase, pixelCurrentLow,
 		// pixelCurrentHigh, badPixelLimit).start();
