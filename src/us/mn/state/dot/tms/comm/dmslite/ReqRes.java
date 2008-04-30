@@ -17,16 +17,12 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import org.xml.sax.SAXException;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -55,25 +51,59 @@ public class ReqRes {
     private String[] m_resnames;
     private String[] m_resvals;
 
-    /**
-     * Constructor.
-     */
-    ReqRes(String reqname, String reqval, String[] resnames) {
+	/**
+	 * Constructor for a request that contains no associated responses.
+	 *
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 */
+	ReqRes(String reqname, String reqval) {
 
-        // check args
-        if ((reqname == null) || (reqval == null) || (resnames == null)) {
-            throw new IllegalArgumentException("invalid args in ReqRes constructor.");
-        }
+		String[] resnames = new String[0];
 
-        m_reqname  = reqname;
-        m_reqval   = reqval;
-        m_resnames = resnames;
-        m_resvals  = new String[resnames.length];
+		// check args
+		if((reqname == null) || (reqval == null)
+			|| (resnames == null)) {
+			throw new IllegalArgumentException(
+			    "invalid args in ReqRes constructor.");
+		}
 
-        for (int i = 0; i < resnames.length; ++i) {
-            m_resvals[i] = "";
-        }
-    }
+		m_reqname = reqname;
+		m_reqval = reqval;
+		m_resnames = resnames;
+		m_resvals = new String[resnames.length];
+
+		for(int i = 0; i < resnames.length; ++i) {
+			m_resvals[i] = "";
+		}
+
+	}
+
+	/**
+	 * Constructor for a request that contains associated responses.
+	 *
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 * @param resnames Names of all associated response fields (may be zero length if none).
+	 */
+	ReqRes(String reqname, String reqval, String[] resnames) {
+
+		// check args
+		if((reqname == null) || (reqval == null)
+			|| (resnames == null)) {
+			throw new IllegalArgumentException(
+			    "invalid args in ReqRes constructor.");
+		}
+
+		m_reqname = reqname;
+		m_reqval = reqval;
+		m_resnames = resnames;
+		m_resvals = new String[resnames.length];
+
+		for(int i = 0; i < resnames.length; ++i) {
+			m_resvals[i] = "";
+		}
+	}
 
     /** get request name */
     public String getReqName() {

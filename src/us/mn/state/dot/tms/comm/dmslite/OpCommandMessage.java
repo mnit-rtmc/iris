@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Operation to command a new message on a DMS.
@@ -55,8 +57,9 @@ public class OpCommandMessage extends OpDms {
 	public OpCommandMessage(DMSImpl d, SignMessage m) {
 		super(COMMAND, d);
 		m_message = m;
-		System.err.println("dmslite.OpCommandMessage.OpCommandMessage() called. Msg=" + m
-						   + ",numpages=" + m_message.getNumPages());
+		System.err.println(
+		    "dmslite.OpCommandMessage.OpCommandMessage() called. Msg="
+		    + m + ",numpages=" + m_message.getNumPages());
 	}
 
 	/**
@@ -76,10 +79,34 @@ public class OpCommandMessage extends OpDms {
 		}
 
 		System.err.println(
-			"WARNING: bogus number of pages (" + np
-			+ ") in dmslite.OpCommandMessage.OpCommandMessage(). Ignored.");
+		    "WARNING: bogus number of pages (" + np
+		    + ") in dmslite.OpCommandMessage.OpCommandMessage(). Ignored.");
 
 		return null;
+	}
+
+	/** 
+	  * Calculate message on time, which is the time now. In the future,
+	  * if IRIS supports specifying a start time, this may be calculated 
+	  * to be some future time.
+	  *
+	  * @return On time
+	  */
+	protected Calendar calcMsgOnTime()
+	{
+		return(new GregorianCalendar());
+	}
+
+	/** Calculate message off time, which is the start time + duration.
+	 *  This method should not be called if duration is infinite.
+	 */
+	protected Calendar calcMsgOffTime(Calendar ontime)
+	{
+		int mins=this.m_message.getDuration();
+		assert mins!=SignMessage.DURATION_INFINITE;
+		Calendar offtime=(Calendar)ontime.clone();
+		offtime.add(Calendar.MINUTE,mins);
+		return(offtime);
 	}
 
 	/**
@@ -102,23 +129,38 @@ public class OpCommandMessage extends OpDms {
 		 *
 		 * @throws IOException
 		 */
-		protected Phase poll(AddressedMessage argmess) throws IOException {
+		protected Phase poll(AddressedMessage argmess)
+			throws IOException {
 			System.err.println(
-				"dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg) called.");
-			assert argmess instanceof Message : "wrong message type";
+			    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg) called.");
+			assert argmess instanceof Message :
+			       "wrong message type";
 
 			Message mess = (Message) argmess;
 
 			// sanity check
 			if (m_message.getBitmap().getBitmap().length != 300) {
 				System.err.println(
-					"WARNING: message wrong size in PhaseSendOnePageMessage.");
+				    "WARNING: message wrong size in PhaseSendOnePageMessage.");
 
 				return null;
 			}
 
-			// build req msg and expected response
-			// e.g. <DmsLite><SetSnglPgReqMsg><Address>1</Address><MsgText>...</MsgText><Owner>Bob</Owner><Msg>...</Msg></SetSnglPgReqMsg></DmsLite>
+			/*  build req msg and expected response
+			 *     <DmsLite>
+			 *        <SetSnglPgReqMsg>
+			 *           <Address>...</Address>
+			 *           <MsgText>...</MsgText>             multistring cms message text
+			 *           <UseOnTime>...</UseOnTime>         true to use on time, else now
+			 *           <OnTime>...</OnTime>             	message on time
+			 *           <UseOffTime>...</UseOffTime>       true to use off time, else indefinite
+		 	 *           <OffTime>...</OffTime>           	message off time
+			 *           <Owner>...</Owner>                 the message author
+			 *           <Msg>...</Msg>                     this is the bitmap
+			 *        </SetSnglPgReqMsg>
+			 *     </DmsLite>
+			 */
+
 			final String reqname = "SetSnglPgReqMsg";
 			final String resname = "SetSnglPgRespMsg";
 
@@ -126,23 +168,43 @@ public class OpCommandMessage extends OpDms {
 			mess.setReqMsgName(reqname);
 			mess.setRespMsgName(resname);
 
-			String addr = new Integer((int) m_dms.getController().getDrop()).toString();
-			ReqRes rr1  = new ReqRes("Address", addr, new String[] { "IsValid" });
+			String addr =
+				new Integer((int) m_dms.getController()
+					.getDrop()).toString();
+			ReqRes rr1 = new ReqRes("Address", addr,
+						new String[] { "IsValid" });
 
 			mess.add(rr1);
 
 			// MsgText
-			mess.add(new ReqRes("MsgText", m_message.getMulti().toString(),
-								new String[0]));
+			mess.add(new ReqRes("MsgText",
+					    m_message.getMulti().toString()));
+
+			// UseOnTime, always true
+			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
+
+			// OnTime
+			Calendar ontime=calcMsgOnTime();
+			mess.add(new ReqRes("OnTime",Time.CalendarToXML(ontime)));
+
+			// UseOffTime
+			boolean useofftime=m_message.getDuration()!=SignMessage.DURATION_INFINITE;
+			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
+
+			// OffTime, only used if duration is not infinite
+			String offtime= (useofftime ? Time.CalendarToXML(calcMsgOffTime(ontime)) : "");
+			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
-			mess.add(new ReqRes("Owner", m_message.getOwner(), new String[0]));
+			mess.add(new ReqRes("Owner", m_message.getOwner()));
 
 			// msg
 			byte[] bitmaparray = m_message.getBitmap().getBitmap();
-			String msg         = Convert.toHexString(Convert.reverseByte(bitmaparray));
+			String msg         = Convert.toHexString(
+						 Convert.reverseByte(
+							 bitmaparray));
 
-			mess.add(new ReqRes("Msg", msg, new String[0]));
+			mess.add(new ReqRes("Msg", msg));
 
 			// send msg
 			mess.getRequest();
@@ -154,14 +216,15 @@ public class OpCommandMessage extends OpDms {
 				boolean valid;
 
 				try {
-					valid = new Boolean(rr1.getResVal("IsValid"));
+					valid = new Boolean(
+					    rr1.getResVal("IsValid"));
 					System.err.println(
-						"dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): parsed msg values: IsValid:"
-						+ valid + ".");
+					    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): parsed msg values: IsValid:"
+					    + valid + ".");
 				} catch (IllegalArgumentException ex) {
 					System.err.println(
-						"dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received in OpQueryDms:"
-						+ ex);
+					    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received in OpQueryDms:"
+					    + ex);
 
 					throw ex;
 				}
@@ -173,7 +236,7 @@ public class OpCommandMessage extends OpDms {
 					m_dms.setActiveMessage(m_message);
 				} else {
 					System.err.println(
-						"OpQueryDms: invalid response from cmsserver received, ignored.");
+					    "OpQueryDms: invalid response from cmsserver received, ignored.");
 				}
 			}
 
@@ -203,26 +266,45 @@ public class OpCommandMessage extends OpDms {
 		 *
 		 * @throws IOException
 		 */
-		protected Phase poll(AddressedMessage argmess) throws IOException {
+		protected Phase poll(AddressedMessage argmess)
+			throws IOException {
 			System.err.println(
-				"dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg) called.");
-			assert argmess instanceof Message : "wrong message type";
+			    "dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg) called.");
+			assert argmess instanceof Message :
+			       "wrong message type";
 
 			Message mess = (Message) argmess;
 
 			// sanity check
 			if (m_message.getBitmap().getBitmap().length != 600) {
 				System.err.println(
-					"WARNING: message wrong size in PhaseSendTwoPageMessage: m_message.length="
-					+ m_message.getBitmap().getBitmap().length);
+				    "WARNING: message wrong size in PhaseSendTwoPageMessage: m_message.length="
+				    + m_message.getBitmap().getBitmap().length);
 
 				// return null;
 			}
 
-			// build req msg and expected response
-			// <DmsLite><SetMultPgReqMsg><Address>1</Address><MsgText>...</MsgText><Owner>Bob</Owner><Msg>...</Msg></SetMultPgReqMsg></DmsLite>
-			ReqRes rr1;
+			    /**
+			     * Return a newly created SignViewOperation using a dmslite xml msg string.
+			     * The xml string is expected to be in the following format.
+			     *
+			     *    <DmsLite>
+			     *       <SetMultiplePageReqMsg>
+			     *          <Address>...</Address>
+			     *          <MsgText>...</MsgText>                  multistring cms message text
+			     *          <UseOnTime>...</UseOnTime>         	true to use on time, else now
+			     *          <OnTime>...</OnTime>             	message on time
+			     *          <UseOffTime>...</UseOffTime>       	true to use off time, else indefinite
+			     *          <OffTime>...</OffTime>           	message off time
+			     *          <DisplayTimeMS>...<DisplayTimeMS>       message display time
+			     *          <Owner>...</Owner>                      the message author
+			     *          <Msg>...</Msg>
+			     *       </SetMultiplePageReqMsg>
+			     *    </DmsLite>
+			     */
 
+
+			ReqRes rr1;
 			{
 				final String reqname = "SetMultPgReqMsg";
 				final String resname = "SetMultPgRespMsg";
@@ -232,18 +314,38 @@ public class OpCommandMessage extends OpDms {
 				mess.setRespMsgName(resname);
 
 				String addr =
-					new Integer((int) m_dms.getController().getDrop()).toString();
+					new Integer((int) m_dms.getController()
+						.getDrop()).toString();
 
-				rr1 = new ReqRes("Address", addr, new String[] { "IsValid" });
+				rr1 = new ReqRes("Address", addr,
+						 new String[] { "IsValid" });
 				mess.add(rr1);
 			}
 
 			// MsgText
-			mess.add(new ReqRes("MsgText", m_message.getMulti().toString(),
-								new String[0]));
+			mess.add(new ReqRes("MsgText",
+					    m_message.getMulti().toString()));
+
+			// UseOnTime, always true
+			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
+
+			// OnTime
+			Calendar ontime=calcMsgOnTime();
+			mess.add(new ReqRes("OnTime",Time.CalendarToXML(ontime)));
+
+			// UseOffTime
+			boolean useofftime=m_message.getDuration()!=SignMessage.DURATION_INFINITE;
+			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
+
+			// OffTime, only used if duration is not infinite
+			String offtime= (useofftime ? Time.CalendarToXML(calcMsgOffTime(ontime)) : "");
+			mess.add(new ReqRes("OffTime",offtime));
+
+			// DisplayTimeMS
+			mess.add(new ReqRes("DisplayTimeMS", "2000")); //FIXME 
 
 			// Owner
-			mess.add(new ReqRes("Owner", m_message.getOwner(), new String[0]));
+			mess.add(new ReqRes("Owner", m_message.getOwner()));
 
 			// msg (the bitmap)
 			{
@@ -255,7 +357,9 @@ public class OpCommandMessage extends OpDms {
 
 				byte[] bitmaparraypg1 = bg1.getBitmap();
 				String msgpg1         =
-					Convert.toHexString(Convert.reverseByte(bitmaparraypg1));
+					Convert.toHexString(
+					    Convert.reverseByte(
+						    bitmaparraypg1));
 
 				// pg 2
 				BitmapGraphic bg2 = m_message.getBitmap(1);
@@ -264,9 +368,11 @@ public class OpCommandMessage extends OpDms {
 
 				byte[] bitmaparraypg2 = bg2.getBitmap();
 				String msgpg2         =
-					Convert.toHexString(Convert.reverseByte(bitmaparraypg2));
+					Convert.toHexString(
+					    Convert.reverseByte(
+						    bitmaparraypg2));
 
-				mess.add(new ReqRes("Msg", msgpg1 + msgpg2, new String[0]));
+				mess.add(new ReqRes("Msg", msgpg1 + msgpg2));
 			}
 
 			// send msg
@@ -279,14 +385,15 @@ public class OpCommandMessage extends OpDms {
 				boolean valid;
 
 				try {
-					valid = new Boolean(rr1.getResVal("IsValid"));
+					valid = new Boolean(
+					    rr1.getResVal("IsValid"));
 					System.err.println(
-						"dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): parsed msg values: IsValid:"
-						+ valid + ".");
+					    "dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): parsed msg values: IsValid:"
+					    + valid + ".");
 				} catch (IllegalArgumentException ex) {
 					System.err.println(
-						"dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): Malformed XML received in OpQueryDms:"
-						+ ex);
+					    "dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): Malformed XML received in OpQueryDms:"
+					    + ex);
 
 					throw ex;
 				}
@@ -299,7 +406,7 @@ public class OpCommandMessage extends OpDms {
 
 				} else {
 					System.err.println(
-						"OpQueryDms: invalid response from cmsserver received, ignored.");
+					    "OpQueryDms: invalid response from cmsserver received, ignored.");
 				}
 			}
 
