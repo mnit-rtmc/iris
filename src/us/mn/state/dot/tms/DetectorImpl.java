@@ -131,8 +131,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Get the detector label */
 	public String getLabel(boolean statName) {
-		RoadwayImpl freeway = (RoadwayImpl)location.getFreeway();
-		RoadwayImpl cross = (RoadwayImpl)location.getCrossStreet();
+		RoadImpl freeway = location.lookupFreeway();
+		RoadImpl cross = location.lookupCrossStreet();
 		if(freeway == null || cross == null) {
 			if(isActive())
 				return "INVALID";
@@ -143,16 +143,16 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		short crossDir = location.getCrossDir();
 		short crossMod = location.getCrossMod();
 		StringBuffer buffer = new StringBuffer();
-		buffer.append(freeway.getAbbreviated());
+		buffer.append(freeway.getAbbrev());
 		buffer.append("/");
 		if(crossDir > 0)
 			buffer.append(DIRECTION[crossDir]);
 		buffer.append(MOD_SHORT[crossMod]);
-		buffer.append(cross.getAbbreviated());
+		buffer.append(cross.getAbbrev());
 		buffer.append(DIR_FREEWAY[freeDir]);
 		if( !statName ) {
 			if(laneType == REVERSIBLE) {
-				if(freeDir == Roadway.EAST_WEST) {
+				if(freeDir == Road.EAST_WEST) {
 					if(laneNumber == 1)
 						buffer.append('S');
 					if(laneNumber == 2)
@@ -541,12 +541,10 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Get the volume "no hit" threshold */
 	protected int getNoHitThreshold() {
 		if(isRamp()) {
-			RoadwayImpl freeway =
-				(RoadwayImpl)location.getFreeway();
+			RoadImpl freeway = location.lookupFreeway();
 			if(freeway != null && REV.equals(freeway.getName()))
 				return SAMPLE_3_DAYS;
-			RoadwayImpl cross =
-				(RoadwayImpl)location.getCrossStreet();
+			RoadImpl cross = location.lookupCrossStreet();
 			if(cross != null && REV.equals(cross.getName()))
 				return SAMPLE_3_DAYS;
 		}

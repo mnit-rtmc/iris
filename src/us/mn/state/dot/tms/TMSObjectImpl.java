@@ -77,9 +77,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Node group list */
 	static NodeGroupList groupList;
 
-	/** Roadway list */
-	static RoadwayListImpl roadList;
-
 	/** Detector list */
 	static public DetectorListImpl detList;
 
@@ -323,6 +320,18 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Get the object key */
 	public String getKey() {
 		return getOID().toString();
+	}
+
+	/** Lookup a road in the SONAR namespace */
+	static protected RoadImpl lookupRoad(final String r) {
+		try {
+			return (RoadImpl)namespace.lookupObject(Road.SONAR_TYPE,
+				r);
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/** Lookup the named system policy */

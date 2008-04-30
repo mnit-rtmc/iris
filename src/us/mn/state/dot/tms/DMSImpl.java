@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -866,15 +867,26 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			MultiString.JustificationLine j, String t)
 		{
 			BitmapGraphic g = getBitmap(p);
-			int x = calculatePixelX(j, font, t);
-			int y = l * (font.getHeight() + font.getLineSpacing());
+			if(font == null) {
+				log("No font");
+				return;
+			}
 			try {
+				int x = calculatePixelX(j, font, t);
+				int y = l * (font.getHeight() +
+					font.getLineSpacing());
 				font.renderOn(g, x, y, t);
 			}
-			catch(Exception e) {
-				System.err.println("PixelMapBuilder:" + t);
-				e.printStackTrace();
+			catch(InvalidMessageException e) {
+				log("missing code point: " + t);
 			}
+			catch(IOException e) {
+				log("Invalid Base64 data");
+			}
+		}
+
+		protected void log(String m) {
+			System.err.println("PixelMapBuilder " + id + ":" + m);
 		}
 	}
 

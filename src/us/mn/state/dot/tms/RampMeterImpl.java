@@ -253,9 +253,9 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	public void addStratifiedTimingPlan(int period) throws TMSException,
 		RemoteException
 	{
-		RoadwayImpl freeway = (RoadwayImpl)location.getFreeway();
-		short freeDir = location.getFreeDir();
+		RoadImpl freeway = location.lookupFreeway();
 		if(freeway != null) {
+			short freeDir = location.getFreeDir();
 			MeterPlanImpl plan = meterList.findStratifiedPlan(
 				freeway, freeDir, period);
 			if(plan == null)
@@ -308,11 +308,11 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Ensure stratified plans are for the right corridor */
 	public void checkStratifiedPlans() throws TMSException {
-		RoadwayImpl freeway = (RoadwayImpl)location.getFreeway();
-		short freeDir = location.getFreeDir();
 		StratifiedPlanImpl am_plan = null;
 		StratifiedPlanImpl pm_plan = null;
+		RoadImpl freeway = location.lookupFreeway();
 		if(freeway != null) {
+			short freeDir = location.getFreeDir();
 			am_plan = meterList.findStratifiedPlan(freeway,
 				freeDir, TimingPlan.AM);
 			pm_plan = meterList.findStratifiedPlan(freeway,
@@ -809,9 +809,9 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		StringBuffer b = new StringBuffer();
 		b.append(DIRECTION[location.getCrossDir()]);
 		b.append(' ');
-		RoadwayImpl x = (RoadwayImpl)location.getCrossStreet();
+		String x = location.getCrossStreet();
 		if(x != null)
-			b.append(x.getName());
+			b.append(x);
 		return replaceEntities(b.toString().trim());
 	}
 

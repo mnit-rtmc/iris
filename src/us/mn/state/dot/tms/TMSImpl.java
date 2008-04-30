@@ -99,8 +99,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		loadAlarms();
 		System.err.println("Loading detectors...");
 		detectors.load(DetectorImpl.class, "index");
-		System.err.println("Loading roadways...");
-		roadways.load(RoadwayImpl.class, "name");
 		System.err.println("Loading r_nodes...");
 		// NOTE: must be called after detList is populated
 		r_nodes.load(R_NodeImpl.class, "vault_oid");
@@ -338,9 +336,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Master node group list */
 	protected final NodeGroupList groups;
 
-	/** Master roadway list */
-	protected final RoadwayListImpl roadways;
-
 	/** Master detector list */
 	protected final DetectorListImpl detectors;
 
@@ -381,7 +376,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		// This is an ugly hack, but it works
 		lineList = lines;
 		groupList = groups;
-		roadList = roadways;
 		detList = detectors;
 		statMap = station_map;
 		nodeMap = r_nodes;
@@ -402,7 +396,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		super();
 		lines = new CommunicationLineList();
 		groups = new NodeGroupList();
-		roadways = new RoadwayListImpl();
 		detectors = new DetectorListImpl();
 		station_map = new StationMapImpl();
 		r_nodes = new R_NodeMapImpl();
@@ -423,9 +416,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Get the node group list */
 	public IndexedList getNodeGroupList() { return groups; }
-
-	/** Get the roadway list */
-	public RoadwayList getRoadwayList() { return roadways; }
 
 	/** Get the detector list */
 	public IndexedList getDetectorList() { return detectors; }

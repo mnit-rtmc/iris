@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.rmi.RemoteException;
 import us.mn.state.dot.tms.LaneControlSignal;
-import us.mn.state.dot.tms.Roadway;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.device.DeviceHandlerImpl;
@@ -58,9 +58,9 @@ public class LcsHandler extends DeviceHandlerImpl {
 	/** Get the model containing LaneControlSignals for given direction */
 	public NamedListModel getDirectionModel(short direction) {
 		switch(direction) {
-			case Roadway.EAST:
+			case Road.EAST:
 				return eastModel;
-			case Roadway.WEST:
+			case Road.WEST:
 				return westModel;
 			default:
 				return null;

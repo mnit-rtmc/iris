@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,60 +14,47 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Roadway
+ * Road interface
  *
  * @author Douglas Lau
  */
-public interface Roadway extends TMSObject {
+public interface Road extends SonarObject {
 
-	/** Get the name */
-	String getName() throws RemoteException;
+	/** SONAR type name */
+	String SONAR_TYPE = "road";
 
-	/** Set the abbreviated name */
-	void setAbbreviated(String abbreviated) throws TMSException,
-		RemoteException;
-
-	/** Get the abbreviated name */
-	String getAbbreviated() throws RemoteException;
-
-	/** Undefined roadway type / direction */
+	/** Undefined road class / direction */
 	short NONE = 0;
 
-	/** Residential (A) roadway type */
+	/** Residential (A) roadway class */
 	short RESIDENTIAL = 1;
 
-	/** Business (B) roadway type */
+	/** Business (B) roadway class */
 	short BUSINESS = 2;
 
-	/** Collector (C) roadway type */
+	/** Collector (C) roadway class */
 	short COLLECTOR = 3;
 
-	/** Arterial (D) roadway type */
+	/** Arterial (D) roadway class */
 	short ARTERIAL = 4;
 
-	/** Expressway (E) roadway type */
+	/** Expressway (E) roadway class */
 	short EXPRESSWAY = 5;
 
-	/** Freeway (F) roadway type */
+	/** Freeway (F) roadway class */
 	short FREEWAY = 6;
 
-	/** Collector-Distributor roadway type */
+	/** Collector-Distributor roadway class */
 	short CD_ROAD = 7;
 
-	/** Roadway types */
-	String[] TYPES = {
+	/** Roadway classes */
+	String[] R_CLASS = {
 		" ", "Residential", "Business", "Collector", "Arterial",
 		"Expressway", "Freeway", "CD Road"
 	};
-
-	/** Set the roadway type */
-	void setType(short t) throws TMSException, RemoteException;
-
-	/** Get the roadway type */
-	short getType() throws RemoteException;
 
 	/** North direction */
 	short NORTH = 1;
@@ -93,9 +80,27 @@ public interface Roadway extends TMSObject {
 	/** Outer Loop direction */
 	short OUTER_LOOP = 8;
 
+	/** Set the abbreviated name */
+	void setAbbrev(String a);
+
+	/** Get the abbreviated name */
+	String getAbbrev();
+
+	/** Set the roadway class */
+	void setRClass(short c);
+
+	/** Get the roadway class */
+	short getRClass();
+
 	/** Set direction */
-	void setDirection(short d) throws TMSException, RemoteException;
+	void setDirection(short d);
 
 	/** Get direction */
-	short getDirection() throws RemoteException;
+	short getDirection();
+
+	/** Set alternate direction */
+	void setAltDir(short a);
+
+	/** Get alternate direction */
+	short getAltDir();
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.rmi.RemoteException;
 import us.mn.state.dot.tms.Location;
-import us.mn.state.dot.tms.Roadway;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.TmsObjectProxy;
@@ -58,10 +58,10 @@ public class LocationProxy extends TmsObjectProxy implements Location {
 		if(corridor == null)
 			corridor = "";
 		cross_desc = location.getCrossDescription();
-		freeway = new RoadwayProxy(location.getFreeway());
+		freeway = location.getFreeway();
 		free_dir = location.getFreeDir();
 		cross_mod = location.getCrossMod();
-		cross_street = new RoadwayProxy(location.getCrossStreet());
+		cross_street = location.getCrossStreet();
 		cross_dir = location.getCrossDir();
 		easting = location.getEasting();
 		east_off = location.getEastOffset();
@@ -91,7 +91,7 @@ public class LocationProxy extends TmsObjectProxy implements Location {
 	}
 
 	/** Cached freeway */
-	protected RoadwayProxy freeway;
+	protected String freeway;
 
 	/** Set the freeway */
 	public void setFreeway(String id) throws TMSException, RemoteException {
@@ -99,7 +99,7 @@ public class LocationProxy extends TmsObjectProxy implements Location {
 	}
 
 	/** Get the freeway */
-	public Roadway getFreeway() {
+	public String getFreeway() {
 		return freeway;
 	}
 
@@ -122,7 +122,7 @@ public class LocationProxy extends TmsObjectProxy implements Location {
 	}
 
 	/** Cached cross street */
-	protected RoadwayProxy cross_street;
+	protected String cross_street;
 
 	/** Set the cross-street location */
 	public void setCrossStreet(String name) throws TMSException,
@@ -132,7 +132,7 @@ public class LocationProxy extends TmsObjectProxy implements Location {
 	}
 
 	/** Get the cross-street */
-	public Roadway getCrossStreet() {
+	public String getCrossStreet() {
 		return cross_street;
 	}
 
@@ -251,13 +251,13 @@ public class LocationProxy extends TmsObjectProxy implements Location {
 	/** Get the default angle (radians) */
 	public double getDefaultAngle() {
 		switch(free_dir) {
-			case Roadway.NORTH:
+			case Road.NORTH:
 				return RAD_NORTH;
-			case Roadway.SOUTH:
+			case Road.SOUTH:
 				return RAD_SOUTH;
-			case Roadway.EAST:
+			case Road.EAST:
 				return RAD_EAST;
-			case Roadway.WEST:
+			case Road.WEST:
 				return RAD_WEST;
 		}
 		return RAD_NORTH;

@@ -28,9 +28,8 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.tms.Location;
-import us.mn.state.dot.tms.Roadway;
 import us.mn.state.dot.tms.TMSObject;
-import us.mn.state.dot.tms.utils.TMSProxy;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * LocationPanel is a Swing panel for viewing and editing object locations.
@@ -47,8 +46,8 @@ public class LocationPanel extends FormPanel {
 	/** Remote location object */
 	protected final Location loc;
 
-	/** TMS proxy object */
-	protected final TMSProxy tms;
+	/** Sonar state object */
+	protected final SonarState state;
 
 	/** Freeway combobox */
 	protected final JComboBox freeBox = new JComboBox();
@@ -85,18 +84,18 @@ public class LocationPanel extends FormPanel {
 	protected final JButton select = new JButton("Select Point");
 
 	/** Create a new location panel */
-	public LocationPanel(boolean enable, Location l, TMSProxy t) {
+	public LocationPanel(boolean enable, Location l, SonarState st) {
 		super(enable);
 		loc = l;
-		tms = t;
+		state = st;
 	}
 
 	/** Initialize the location panel */
 	public void initialize() throws RemoteException {
 		freeBox.setModel(new WrapperComboBoxModel(
-			tms.getFreeways().getModel()));
+			state.getRoadModel()));
 		crossBox.setModel(new WrapperComboBoxModel(
-			tms.getRoadways().getModel()));
+			state.getRoadModel()));
 		add("Freeway", freeBox);
 		setWidth(2);
 		addRow(freeDir);
@@ -145,18 +144,10 @@ public class LocationPanel extends FormPanel {
 
 	/** Update the location panel */
 	public void doUpdate() throws RemoteException {
-		Roadway freeway = loc.getFreeway();
-		if(freeway != null)
-			freeBox.setSelectedItem(freeway.getName());
-		else
-			freeBox.setSelectedItem(null);
+		freeBox.setSelectedItem(loc.getFreeway());
 		freeDir.setSelectedIndex(loc.getFreeDir());
 		crossMod.setSelectedIndex(loc.getCrossMod());
-		Roadway xstreet = loc.getCrossStreet();
-		if(xstreet != null)
-			crossBox.setSelectedItem(xstreet.getName());
-		else
-			crossBox.setSelectedItem(null);
+		crossBox.setSelectedItem(loc.getCrossStreet());
 		crossDir.setSelectedIndex(loc.getCrossDir());
 		easting.setValue(loc.getEasting());
 		eastOff.setValue(loc.getEastOffset());

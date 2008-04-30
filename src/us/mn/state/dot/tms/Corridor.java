@@ -49,10 +49,10 @@ public class Corridor {
 	protected final boolean order_down_up;
 
 	/** Corridor freeway */
-	protected final RoadwayImpl freeway;
+	protected final String freeway;
 
 	/** Get the corridor freeway */
-	public RoadwayImpl getFreeway() {
+	public String getFreeway() {
 		return freeway;
 	}
 
@@ -79,7 +79,7 @@ public class Corridor {
 	public Corridor(boolean order, LocationImpl loc) {
 		name = loc.getCorridor();
 		order_down_up = order;
-		freeway = (RoadwayImpl)loc.getFreeway();
+		freeway = loc.getFreeway();
 		free_dir = loc.getFreeDir();
 	}
 
@@ -125,22 +125,22 @@ public class Corridor {
 		R_NodeImpl first = r_nodes.getFirst();
 		R_NodeImpl last = r_nodes.getLast();
 		switch(free_dir) {
-			case Roadway.NORTH:
+			case Road.NORTH:
 				return first.getTrueNorthing() <
 					last.getTrueNorthing();
-			case Roadway.SOUTH:
+			case Road.SOUTH:
 				return first.getTrueNorthing() >
 					last.getTrueNorthing();
-			case Roadway.EAST:
+			case Road.EAST:
 				return first.getTrueEasting() <
 					last.getTrueEasting();
-			case Roadway.WEST:
+			case Road.WEST:
 				return first.getTrueEasting() >
 					last.getTrueEasting();
-			case Roadway.INNER_LOOP:
+			case Road.INNER_LOOP:
 				// FIXME: this might be tricky
 				return false;
-			case Roadway.OUTER_LOOP:
+			case Road.OUTER_LOOP:
 				// FIXME: this might be tricky
 				return false;
 		}
@@ -204,8 +204,8 @@ public class Corridor {
 
 	/** Print out the corridor to an XML file */
 	public void printXml(PrintWriter out) {
-		out.println("<corridor route='" + freeway.getName() +
-			"' dir='" + Roadway.DIRECTION[free_dir] + "'>");
+		out.println("<corridor route='" + freeway + "' dir='" +
+			TMSObject.DIRECTION[free_dir] + "'>");
 		for(R_NodeImpl r_node: r_nodes)
 			r_node.printXml(out);
 		out.println("</corridor>");

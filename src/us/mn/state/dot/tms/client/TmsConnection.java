@@ -77,6 +77,11 @@ public class TmsConnection {
 		return tms;
 	}
 
+	/** Get the SONAR state */
+	public SonarState getSonarState() {
+		return userManager.getSonarState();
+	}
+
 	/** Get the user information for the user who owns the connection */
 	public IrisUser getUser() {
 		return userManager.getUser();

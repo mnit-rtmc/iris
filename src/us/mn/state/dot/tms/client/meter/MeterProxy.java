@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.device.LogDeviceAction;
 import us.mn.state.dot.tms.client.device.TrafficDeviceProxy;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
-import us.mn.state.dot.tms.client.proxy.RoadwayProxy;
 
 /**
  * The MeterProxy class provides a proxy representation of a RampMeter object.
@@ -92,7 +91,7 @@ public class MeterProxy extends TrafficDeviceProxy {
 	/** Get a string location of the ramp meter */
 	public String getLocationString() {
 		StringBuffer l = new StringBuffer();
-		String f = ((RoadwayProxy)loc.getFreeway()).getName();
+		String f = loc.getFreeway();
 		String c = loc.getCrossDescription();
 		if(c.length() > 0) {
 			l.append(c);
