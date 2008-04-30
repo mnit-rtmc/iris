@@ -866,9 +866,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			MultiString.JustificationLine j, String t)
 		{
 			BitmapGraphic g = getBitmap(p);
-			int x = calculatePixelX(j, font, t);
-			int y = l * (font.getHeight() + font.getLineSpacing());
+			if(font == null) {
+				System.err.println("PixelMapBuilder: no font");
+				return;
+			}
 			try {
+				int x = calculatePixelX(j, font, t);
+				int y = l * (font.getHeight() +
+					font.getLineSpacing());
 				font.renderOn(g, x, y, t);
 			}
 			catch(Exception e) {
