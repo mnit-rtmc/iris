@@ -221,7 +221,7 @@ public class OpQueryDms extends OpDms {
                 }
 
             } else {
-                System.err.println("OpQueryDms: invalid response from cmsserver received, ignored.");
+                System.err.println("OpQueryDms: response from cmsserver received, ignored because Xml valid field is false.");
             }
 
             // this operation is complete
