@@ -102,7 +102,8 @@ abstract public class MessagePoller extends Thread {
 					doPoll((ControllerOperation)o);
 				}
 				catch(IOException e) {
-					e.printStackTrace();
+					POLL_LOG.log(getName() + " exception: "+
+						e.getMessage());
 				}
 			}
 		}
