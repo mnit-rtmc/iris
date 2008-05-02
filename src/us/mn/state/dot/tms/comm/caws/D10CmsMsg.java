@@ -170,7 +170,7 @@ public class D10CmsMsg
 					   + m_ontime);
 		}
 
-		this.checkValid();
+		this.setValid(true);
 	}
 
 	/**
@@ -242,14 +242,9 @@ public class D10CmsMsg
 		return (date);
 	}
 
-	/** determine if message is valid */
-	private boolean checkValid() {
-		m_valid = true;
-
-		// check
-		m_valid = m_valid && true;    // FIXME: add checks
-
-		return (m_valid);
+	/** set valid */
+	private void setValid(boolean v) {
+		m_valid = v;
 	}
 
 	/** return true if the CMS message is valid else false */
@@ -270,7 +265,7 @@ public class D10CmsMsg
 			ret = MSGTYPE.TWOPAGEMSG;
 		} else {
 			System.err.println(
-			    "Warning: unknown D10 message description encountered ("
+			    "D10CmsMsg.getMsgType: Warning: unknown D10 message description encountered ("
 			    + m_desc + ").");
 			ret = MSGTYPE.BLANK;
 		}
@@ -287,8 +282,25 @@ public class D10CmsMsg
 	public void activate(DMSImpl dms) {
 		System.err.println("D10CmsMsg.activate(" + dms
 				   + ") called, msg=" + this);
-		if(dms == null) {
-			return;
+		if(shouldSendMessage(dms)) {
+			sendMessage(dms);
+		}
+	}
+
+	/**
+	 * decide if a caws message should be sent to a DMS.
+	 *
+	 * @params dms The associated DMS.
+	 * @return true to send the message.
+	 */
+	protected boolean shouldSendMessage(DMSImpl dms) {
+		if (dms == null) {
+			return(false);
+		}
+
+		// the target DMS must be deployed or available
+		if (dms.getStatusCode()!=DMS.STATUS_DEPLOYED && dms.getStatusCode()!=DMS.STATUS_AVAILABLE) {
+			return(false);
 		}
 
 		SignMessage curmsg = dms.getMessage();
@@ -299,15 +311,19 @@ public class D10CmsMsg
 		if((newmsgtype != MSGTYPE.BLANK) && curmsg.isBlank()) {
 			sendmsg = true;
 
-		// existing message owned by CAWS
+		// existing message on DMS owned by CAWS?
 		} else if(!curmsg.isBlank() && curmsg.getOwner().equals(CAWS)) {
-			sendmsg = true;
-		}
 
-		// send message
-		if(sendmsg) {
-			this.sendMessage(dms);
+			// new message is different from message on sign
+			SignMessage newmsg=this.toSignMessage(dms);
+			if (curmsg!=null && newmsg!=null) {
+				System.err.println("D10CmsMsg.shouldSendMessage(): curmsg.equals(newmsg):"+curmsg.equals(newmsg)+", curmsg="+curmsg+", newmsg="+newmsg);
+				if (!curmsg.equals(newmsg)) {
+					sendmsg=true;
+				}
+			}
 		}
+		return sendmsg;
 	}
 
 	/**
@@ -326,9 +342,10 @@ public class D10CmsMsg
 			    + this.getIrisCmsId() + " for DMS=" + dms + ".");
 			dms.clearMessage(CAWS);
 
-			// 1 or 2 pg msg
+		// 1 or 2 pg msg
 		} else if((newmsgtype == MSGTYPE.ONEPAGEMSG)
 			|| (newmsgtype == MSGTYPE.TWOPAGEMSG)) {
+
 			System.err.println(
 			    "D10CmsMsg.sendMessage(): will activate DMS "
 			    + this.getIrisCmsId() + ":" + this);
@@ -337,10 +354,10 @@ public class D10CmsMsg
 				dms.updateMessageGraphic();
 			} catch (InvalidMessageException e) {
 				System.err.println(
-				    "D10CmsMsg.sendMessage(): exception:" + e);
+				"D10CmsMsg.sendMessage(): exception:" + e);
 			}
 
-			// error
+		// error
 		} else {
 			assert false :
 			       "D10CmsMsg.activate(): ERROR--unknown MSGTYPE.";
