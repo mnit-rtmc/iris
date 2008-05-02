@@ -70,7 +70,7 @@ public class OpQueryDms extends OpDms {
      * @returns A SignMessage that contains the text of the message and a rendered bitmap.
      */
     private SignMessage createSignMessage(String owner,String argmulti,byte[] argbitmap) {
-        System.err.println("D10CmsMsg.createSignMessage() called: m_dms.width="+m_dms.getSignWidthPixels()+", argbitmap.len="+argbitmap.length+".");
+        System.err.println("OpQueryDms.createSignMessage() called: m_dms.width="+m_dms.getSignWidthPixels()+", argbitmap.len="+argbitmap.length+".");
 
         assert owner!=null;
         assert argmulti!=null;
@@ -122,7 +122,7 @@ public class OpQueryDms extends OpDms {
 
         /** Query current message */
         protected Phase poll(AddressedMessage argmess) throws IOException {
-            System.err.println("dmslite.OpQueryDms.PhaseQueryCurrentMessage.poll(msg) called.");
+            System.err.println("OpQueryDms.PhaseQueryCurrentMessage.poll(msg) called.");
             assert argmess instanceof Message : "wrong message type";
 
             Message mess = (Message) argmess;
@@ -177,11 +177,11 @@ public class OpQueryDms extends OpDms {
                     bitmap = rr.getResVal("Bitmap");
 
                     System.err.println(
-                        "dmslite.OpQueryDms.PhaseQueryCurrentMessage.poll(msg) parsed msg values: IsValid:" + valid
+                        "OpQueryDms.PhaseQueryCurrentMessage.poll(msg) parsed msg values: IsValid:" + valid
                         +", MsgTextAvailable:"+msgtextavailable+", MsgText:"+msgtext+ ", OnTime:" + ont + ", OffTime:" + offt + ", bitmap:" + bitmap);
                 }
             } catch (IllegalArgumentException ex) {
-                System.err.println("Malformed XML received in OpQueryDms:" + ex);
+                System.err.println("OpQueryDms.PhaseQueryCurrentMessage: Malformed XML received:" + ex);
                 throw ex;
             }
 
