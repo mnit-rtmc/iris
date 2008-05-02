@@ -54,7 +54,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 		int samples = speed_samples(DEFAULT_SPEED_LIMIT);
 		for(int i = 0; i < samples; i++) {
 			float s = speeds[i];
-			if(s != MISSING_DATA) {
+			if(s > 0) {
 				total += s;
 				count += 1;
 				samples = Math.max(samples, speed_samples(s));
@@ -217,7 +217,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 				n_flow++;
 			}
 			f = det.getSpeed();
-			if(f != MISSING_DATA) {
+			if(f > 0) {
 				t_speed += f;
 				n_speed++;
 				if(low == MISSING_DATA)
@@ -243,7 +243,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 		out.print("\t<sample sensor='" + name);
 		if(f > MISSING_DATA)
 			out.print("' flow='" + f);
-		if(s > MISSING_DATA)
+		if(s > 0)
 			out.print("' speed='" + s);
 		out.println("'/>");
 	}
