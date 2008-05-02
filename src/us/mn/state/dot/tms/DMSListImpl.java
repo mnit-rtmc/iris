@@ -173,7 +173,7 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 			if(dms == null)
 				continue;
 			ret += "DMSList[" + index + "]:" + "Id=" + dms.getId() +
-				", isActive()=" + dms.isActive() + ", notes=" +
+				", getStatusCode()="+dms.getStatusCode()+", notes=" +
 				dms.getNotes() + "\n";
 		}
 		return ret;
