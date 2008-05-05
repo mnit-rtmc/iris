@@ -121,11 +121,7 @@ public class OpDmsBlank extends OpDms {
 
             // update dms
             if (isValid) {
-                String owner="bubba";        //FIXME
-//mtod here
                 m_dms.setActiveMessage(m_mess);
-                //m_dms.clearMessage(owner);
-                //m_dms.setActiveMessage(m_mess);
             }
 
             // done
