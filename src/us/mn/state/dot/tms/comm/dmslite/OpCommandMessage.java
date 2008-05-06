@@ -200,10 +200,7 @@ public class OpCommandMessage extends OpDms {
 
 			// msg
 			byte[] bitmaparray = m_message.getBitmap().getBitmap();
-			String msg         = Convert.toHexString(
-						 Convert.reverseByte(
-							 bitmaparray));
-
+			String msg = prepareBitmap(bitmaparray);
 			mess.add(new ReqRes("Msg", msg));
 
 			// send msg
@@ -245,6 +242,13 @@ public class OpCommandMessage extends OpDms {
 		}
 	}
 
+	/** prepare a bitmap to send via xml */
+	protected String prepareBitmap(byte[] a)
+	{
+		//String s=Convert.toHexString(Convert.reverseByte(a));
+		String s=Convert.toHexString(a);
+		return(s);
+	}
 
 	/**
 	 * Phase to send a two page message.
@@ -349,28 +353,17 @@ public class OpCommandMessage extends OpDms {
 
 			// msg (the bitmap)
 			{
-
 				// pg 1
 				BitmapGraphic bg1 = m_message.getBitmap(0);
-
 				assert bg1 != null;
-
 				byte[] bitmaparraypg1 = bg1.getBitmap();
-				String msgpg1         =
-					Convert.toHexString(
-					    Convert.reverseByte(
-						    bitmaparraypg1));
+				String msgpg1 = prepareBitmap(bitmaparraypg1);
 
 				// pg 2
 				BitmapGraphic bg2 = m_message.getBitmap(1);
-
 				assert bg2 != null;
-
 				byte[] bitmaparraypg2 = bg2.getBitmap();
-				String msgpg2         =
-					Convert.toHexString(
-					    Convert.reverseByte(
-						    bitmaparraypg2));
+				String msgpg2 = prepareBitmap(bitmaparraypg2);
 
 				mess.add(new ReqRes("Msg", msgpg1 + msgpg2));
 			}

@@ -122,6 +122,7 @@ public class OpDmsBlank extends OpDms {
             // update dms
             if (isValid) {
                 m_dms.setActiveMessage(m_mess);
+System.err.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX "+m_mess); //mtodhere
             }
 
             // done

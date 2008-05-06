@@ -17,9 +17,6 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
-//~--- non-JDK imports --------------------------------------------------------
-
-//debug:
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.MultiString;
@@ -30,10 +27,7 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageMultiString;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
 
-//~--- JDK imports ------------------------------------------------------------
-
 import java.io.IOException;
-
 import java.util.Date;
 
 /**
@@ -201,7 +195,7 @@ public class OpQueryDms extends OpDms {
 
                     // have bitmap
                     if (usebitmap) {
-                        byte[] bm = Convert.reverseByte(Convert.hexStringToByteArray(bitmap));
+                        byte[] bm = Convert.hexStringToByteArray(bitmap);
 
                         //System.err.println("OpQueryDms: hex string length=" + bitmap.length() + ", byte[] length=" + bm.length);
                         BitmapGraphic bmg = new BitmapGraphic(96, 25);  //FIXME: use sign dims
