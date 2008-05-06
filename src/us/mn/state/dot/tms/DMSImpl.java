@@ -1341,6 +1341,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			int wp = signWidthPixels;	// Avoid race
 			if(w > 0 && wp > 0)
 				return Math.round(w / wp);
+		} else {
+			System.err.println("Error: unknown sign type in DMSImpl.getEstimatedHorizontalPitch()");
 		}
 		return DEFAULT_PITCH;
 	}
