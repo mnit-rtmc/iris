@@ -208,6 +208,8 @@ public class MultiString implements Serializable {
 	public int getNumPages() {
 		PageCallback pc = new PageCallback();
 		parse(pc);
-		return pc.num_pages;
+		int n = pc.num_pages;
+		assert n>=0 && n<=2 : "page num calc wrong? Calculated "+n+" pages for message="+b;
+		return n;
 	}
 }
