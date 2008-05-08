@@ -252,7 +252,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			GraphicImpl graphic = (GraphicImpl)glyph.getGraphic();
 			if(graphic != null)
 				return graphic;
-		    throw new InvalidMessageException("Invalid graphic");
+			throw new InvalidMessageException("Invalid graphic");
 		}
 		throw new InvalidMessageException("Invalid code point: " +
 			code_point);
