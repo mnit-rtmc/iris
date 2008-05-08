@@ -73,7 +73,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	protected boolean isListed(SignGroup group) {
 		if(!group.getLocal())
 			return true;
-		return isSignGroupMember(group);
+		return dms_id.equals(group.getName());
 	}
 
 	/** Add a new proxy to the table model */
@@ -190,7 +190,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 		case COL_NAME:
 			String v = value.toString().trim();
 			if(v.length() > 0)
-				createSignGroup(v, false);
+				createSignGroup(v, v.equals(dms_id));
 			break;
 		case COL_MEMBER:
 			if(g != null) {
