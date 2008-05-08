@@ -37,22 +37,6 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		super();
 	}
 
-	/** Load the contents of the list from the ObjectVault */
-	void load(Class c, String keyField) throws ObjectVaultException,
-		TMSException, RemoteException
-	{
-		library = new DmsMessageLibrary(store);
-		super.load(c, keyField);
-	}
-
-	/** DMS message library for all signs */
-	protected DmsMessageLibrary library;
-
-	/** Get the DMS message library */
-	public DmsMessageLibrary getLibrary() {
-		return library;
-	}
-
 	/** Add a dynamic message sign to the list */
 	public synchronized TMSObject add( String key ) throws TMSException,
 		RemoteException

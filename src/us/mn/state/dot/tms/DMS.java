@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,21 +60,6 @@ public interface DMS extends TrafficDevice {
 
 	/** Check if a timing plan is associated with this sign */
 	public boolean hasTimingPlan(TimingPlan plan) throws RemoteException;
-
-	/** Get the full message library for the sign */
-	public DmsMessage[] getMessages() throws RemoteException;
-
-	/** Insert one entry into the message library */
-	public DmsMessage insertMessage(boolean global, short line)
-		throws TMSException, RemoteException;
-
-	/** Update one entry in the message library */
-	public void updateMessage(DmsMessage m) throws TMSException,
-		RemoteException;
-
-	/** Delete one entry from the message library */
-	public void deleteMessage(DmsMessage m) throws TMSException,
-		RemoteException;
 
 	/** Set the message displayed on the sign */
 	public void setMessage(String owner, String text, int duration)

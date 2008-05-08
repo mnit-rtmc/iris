@@ -15,21 +15,14 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.GridLayout;
-
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingConstants;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
-
-import us.mn.state.dot.tms.DmsMessage;
+import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
@@ -40,20 +33,11 @@ import us.mn.state.dot.tms.SignMessage;
  */
 public class MessageSelector extends JPanel {
 
-	static protected final Color HIGHLIGHT = new Color(204, 204, 255);
-
-	static protected DmsMessage makeMessage(String m) {
-		return new DmsMessage(0, null, (short)0, m, "", (short)50);
-	}
-
-	static protected final DmsMessage PROTOTYPE =
-		makeMessage("MESSAGES AS WIDE AS THIS");
-
-	static protected final DmsMessage BLANK = makeMessage("");
-
 	protected SignMessage lastMessage = null;
 
-	protected final DmsMessageCellRenderer renderer;
+	/** Cell renderer for sign text in combo boxes */
+	protected final SignTextCellRenderer renderer =
+		new SignTextCellRenderer();
 
 	/** Tab pane to hold pages */
 	protected final JTabbedPane tab = new JTabbedPane();
@@ -72,7 +56,6 @@ public class MessageSelector extends JPanel {
 
 	/** Create a new message selector */
 	public MessageSelector() {
-		renderer = new DmsMessageCellRenderer();
 		add(tab);
 		initializeWidgets(0, 1);
 	}
@@ -95,7 +78,7 @@ public class MessageSelector extends JPanel {
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
-			cmbLine[i].setPrototypeDisplayValue(PROTOTYPE);
+//			cmbLine[i].setPrototypeDisplayValue(PROTOTYPE);
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
 		}
@@ -124,7 +107,7 @@ public class MessageSelector extends JPanel {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
 		for(int i = 0; i < cmbLine.length; i++) {
-			DmsMessage dm =
+/*			DmsMessage dm =
 				(DmsMessage)cmbLine[i].getSelectedItem();
 			if(dm != null && dm != BLANK) {
 				if(dm.m_width <= width)
@@ -132,7 +115,7 @@ public class MessageSelector extends JPanel {
 				else
 					mess[i] = dm.abbrev;
 				m = i + 1;
-			} else
+			} else */
 				mess[i] = "";
 		}
 		if(m == 0)
@@ -175,11 +158,11 @@ public class MessageSelector extends JPanel {
 	protected void setLineSelection(int i, String m) {
 		ComboBoxModel model = cmbLine[i].getModel();
 		for(int j = 0; j < model.getSize(); j++) {
-			DmsMessage dm = (DmsMessage)model.getElementAt(j);
+/*			DmsMessage dm = (DmsMessage)model.getElementAt(j);
 			if(m.equals(dm.message) || m.equals(dm.abbrev)) {
 				cmbLine[i].setSelectedItem(dm);
 				break;
-			}
+			} */
 		}
 	}
 
@@ -201,18 +184,18 @@ public class MessageSelector extends JPanel {
 	public void updateModel(DMSProxy proxy) {
 		lastMessage = null;
 		width = proxy.getSignWidthPixels();
-		DmsMessage[] mess = proxy.getMessages();
+/*		DmsMessage[] mess = proxy.getMessages();
 		int nl = proxy.getTextLines();
 		int np = calculateSignPages(mess, nl);
 		initializeWidgets(nl, np);
 		for(int l = 0; l < cmbLine.length; l++) {
 			cmbLine[l].setModel(createMessageModel(mess, l + 1));
 			cmbLine[l].setEnabled(true);
-		}
+		} */
 	}
 
 	/** Calculate the number of pages for the sign */
-	protected int calculateSignPages(DmsMessage[] mess, int nl) {
+/*	protected int calculateSignPages(DmsMessage[] mess, int nl) {
 		int np = 1;
 		for(int i = 0; i < mess.length; i++) {
 			DmsMessage dm = mess[i];
@@ -220,10 +203,10 @@ public class MessageSelector extends JPanel {
 				np = Math.max(np, (dm.line - 1) / nl + 1);
 		}
 		return np;
-	}
+	} */
 
 	/** Create the message model for one sign line */
-	protected ComboBoxModel createMessageModel(DmsMessage[] mess, int l) {
+/*	protected ComboBoxModel createMessageModel(DmsMessage[] mess, int l) {
 		int w = width;
 		DefaultComboBoxModel model = new DefaultComboBoxModel();
 		model.addElement(BLANK);
@@ -240,31 +223,5 @@ public class MessageSelector extends JPanel {
 			}
 		}
 		return model;
-	}
-
-	/** Cell renderer used for DMS messages */
-	class DmsMessageCellRenderer extends BasicComboBoxRenderer {
-
-		public Component getListCellRendererComponent(JList list,
-			Object value, int index, boolean isSelected,
-			boolean cellHasFocus)
-		{
-			DmsMessage dm = (DmsMessage)value;
-			String v = "";
-			short p = 50;
-			if(dm != null) {
-				if(dm.m_width <= width)
-					v = dm.message;
-				else
-					v = dm.abbrev;
-				p = dm.priority;
-			}
-			JLabel r = (JLabel)super.getListCellRendererComponent(
-				list, v, index, isSelected, cellHasFocus);
-			r.setHorizontalAlignment(SwingConstants.CENTER);
-			if(p != 50 && !isSelected)
-				r.setBackground(HIGHLIGHT);
-			return r;
-		}
-	}
+	} */
 }

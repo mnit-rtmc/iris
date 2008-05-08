@@ -25,11 +25,14 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -129,6 +132,30 @@ public class SonarState extends Client {
 		return road_model;
 	}
 
+	/** Cache of sign groups */
+	protected final TypeCache<SignGroup> sign_groups;
+
+	/** Get the sign group cache */
+	public TypeCache<SignGroup> getSignGroups() {
+		return sign_groups;
+	}
+
+	/** Cache of DMS sign groups */
+	protected final TypeCache<DmsSignGroup> dms_sign_groups;
+
+	/** Get the DMS sign group cache */
+	public TypeCache<DmsSignGroup> getDmsSignGroups() {
+		return dms_sign_groups;
+	}
+
+	/** Cache of sign text */
+	protected final TypeCache<SignText> sign_text;
+
+	/** Get the sign text cache */
+	public TypeCache<SignText> getSignText() {
+		return sign_text;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ShowHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -146,6 +173,10 @@ public class SonarState extends Client {
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class);
 		roads = new TypeCache<Road>(Road.class);
 		road_model = new ProxyListModel<Road>(roads);
+		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
+		dms_sign_groups = new TypeCache<DmsSignGroup>(
+			DmsSignGroup.class);
+		sign_text = new TypeCache<SignText>(SignText.class);
 	}
 
 	/** Login to the SONAR server */
@@ -163,6 +194,9 @@ public class SonarState extends Client {
 		populate(glyphs);
 		populate(monitors);
 		populate(roads);
+		populate(sign_groups);
+		populate(dms_sign_groups);
+		populate(sign_text);
 	}
 
 	/** Look up the specified user */

@@ -135,6 +135,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	/** Create a new holiday table model */
 	public HolidayModel(TypeCache<Holiday> c) {
 		super(c, true);
+		initialize();
 	}
 
 	/** Get the count of columns in the table */

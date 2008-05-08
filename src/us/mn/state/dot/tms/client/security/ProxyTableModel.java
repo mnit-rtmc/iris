@@ -74,6 +74,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public ProxyTableModel(TypeCache<T> c, boolean a) {
 		cache = c;
 		admin = a;
+	}
+
+	/** Initialize the proxy table model. This cannot be done in the
+	 * constructor because subclasses may not be fully constructed. */
+	public void initialize() {
 		cache.addProxyListener(this);
 	}
 

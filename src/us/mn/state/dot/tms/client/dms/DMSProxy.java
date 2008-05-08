@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
-import us.mn.state.dot.tms.DmsMessage;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -145,7 +144,6 @@ public class DMSProxy extends TrafficDeviceProxy {
 			camera_id = camera.getId();
 		text_lines = dms.getTextLines();
 		line_height = dms.getLineHeightPixels();
-		messages = dms.getMessages();
 
 		signWidth = dms.getSignWidth();
 		signHeight = dms.getSignHeight();
@@ -157,12 +155,6 @@ public class DMSProxy extends TrafficDeviceProxy {
 		characterWidth = dms.getCharacterWidthPixels();
 		horizontalPitch = dms.getHorizontalPitch();
 		verticalPitch = dms.getVerticalPitch();
-	}
-
-	protected DmsMessage[] messages;
-
-	public DmsMessage[] getMessages() {
-		return messages;
 	}
 
 	protected int signWidth;

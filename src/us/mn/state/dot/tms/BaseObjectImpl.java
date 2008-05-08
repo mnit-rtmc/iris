@@ -40,6 +40,9 @@ abstract public class BaseObjectImpl implements Storable {
 		GlyphImpl.loadAll();
 		VideoMonitorImpl.loadAll();
 		RoadImpl.loadAll();
+		SignGroupImpl.loadAll();
+		DmsSignGroupImpl.loadAll();
+		SignTextImpl.loadAll();
 	}
 
 	/** Get the primary key name */

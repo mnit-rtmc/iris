@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -590,55 +588,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 	}
 
-	/** Get the full message library for the sign */
-	public DmsMessage[] getMessages() {
-		TreeSet<DmsMessage> tree = new TreeSet<DmsMessage>();
-		HashMap<Integer, DmsMessage> map =
-			dmsList.getLibrary().getMessages();
-		synchronized(map) {
-			for(DmsMessage m: map.values()) {
-				if(m.dms == null || id.equals(m.dms)) {
-					try {
-						tree.add((DmsMessage)m.clone());
-					}
-					catch(CloneNotSupportedException e) {
-						// This should never happen ...
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		calculateWidths(tree);
-		return (DmsMessage[])tree.toArray(new DmsMessage[0]);
-	}
-
-	/** Insert one entry into the message library */
-	public DmsMessage insertMessage(boolean global, short line)
-		throws TMSException
-	{
-		DmsMessageLibrary l = dmsList.getLibrary();
-		if(global)
-			return l.insert(null, line);
-		else
-			return l.insert(id, line);
-	}
-
-	/** Update one entry in the message library */
-	public void updateMessage(DmsMessage m) throws TMSException {
-		validateText(m.message);
-		if(m.message.length() > 24)
-			throw new ChangeVetoException("Message too wide");
-		validateText(m.abbrev);
-		if(m.abbrev.length() > 12)
-			throw new ChangeVetoException("Abbreviation too wide");
-		dmsList.getLibrary().update(m);
-	}
-
-	/** Delete one entry from the message library */
-	public void deleteMessage(DmsMessage m) throws TMSException {
-		dmsList.getLibrary().remove(m);
-	}
-
 	/** Create a blank message for the sign */
 	protected SignMessage createBlankMessage(String owner) {
 		MultiString multi = new MultiString();
@@ -927,17 +876,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			// This will happen if a character in the text is not
 			// defined in the font
 			return -1;
-		}
-	}
-
-	/** Calculate the widths of all DMS messages in an iterator */
-	protected void calculateWidths(Collection<DmsMessage> msgs) {
-		FontImpl font = getFont();
-		if(font != null) {
-			for(DmsMessage m: msgs) {
-				m.m_width = calculateWidth(font, m.message);
-				m.a_width = calculateWidth(font, m.abbrev);
-			}
 		}
 	}
 

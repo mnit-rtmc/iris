@@ -67,6 +67,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 	/** Create a new road table model */
 	public RoadModel(TypeCache<Road> c) {
 		super(c, true);
+		initialize();
 	}
 
 	/** Get the count of columns in the table */
