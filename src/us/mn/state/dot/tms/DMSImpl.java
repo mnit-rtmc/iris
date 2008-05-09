@@ -867,18 +867,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return lookupFont(getLineHeightPixels(),characterWidthPixels,0);
 	}
 
-	/** Calculate the width (in pixels) of a single line of text */
-	protected int calculateWidth(FontImpl font, String t) {
-		try {
-			return font.calculateWidth(t);
-		}
-		catch(InvalidMessageException e) {
-			// This will happen if a character in the text is not
-			// defined in the font
-			return -1;
-		}
-	}
-
 	/** Test if the sign status is unavailable */
 	public boolean isUnavailable() {
 		return pixelFailureCount >= BAD_PIXEL_LIMIT ||
