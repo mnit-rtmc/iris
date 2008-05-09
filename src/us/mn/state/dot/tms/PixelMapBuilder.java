@@ -68,7 +68,7 @@ public class PixelMapBuilder implements MultiString.Callback {
 			render(bg, t, x, y);
 		}
 		catch(InvalidMessageException e) {
-			log("Missing code point: " + t);
+			log(e.getMessage() + ": " + t);
 		}
 		catch(IOException e) {
 			log("Invalid Base64 glyph data");
@@ -88,13 +88,24 @@ public class PixelMapBuilder implements MultiString.Callback {
 	protected int calculatePixelX(MultiString.JustificationLine j,
 		String t) throws InvalidMessageException
 	{
+		int x = _calculatePixelX(j, t);
+		if(x < 0)
+			throw new InvalidMessageException("Message too long");
+		else
+			return x;
+	}
+
+	/** Calculate the X pixel position to place text */
+	protected int _calculatePixelX(MultiString.JustificationLine j,
+		String t) throws InvalidMessageException
+	{
 		switch(j) {
 		case LEFT:
 			return 0;
 		case CENTER:
 			int w = width / c_width;
 			int r = calculateWidth(t) / c_width;
-			return c_width * Math.max(0, (w - r) / 2);
+			return c_width * (w - r) / 2;
 		case RIGHT:
 			return width - calculateWidth(t) - 1;
 		default:
@@ -142,11 +153,13 @@ public class PixelMapBuilder implements MultiString.Callback {
 	protected void render(BitmapGraphic bg, Graphic g, int x, int y)
 		throws IOException
 	{
+		int w = g.getWidth();
+		int h = g.getHeight();
 		byte[] bitmap = Base64.decode(g.getPixels());
-		BitmapGraphic c = new BitmapGraphic(width, height);
+		BitmapGraphic c = new BitmapGraphic(w, h);
 		c.setBitmap(bitmap);
-		for(int yy = 0; yy < height; yy++) {
-			for(int xx = 0; xx < width; xx++) {
+		for(int yy = 0; yy < h; yy++) {
+			for(int xx = 0; xx < w; xx++) {
 				int p = c.getPixel(xx, yy);
 				bg.setPixel(x + xx, y + yy, p);
 			}
@@ -156,5 +169,10 @@ public class PixelMapBuilder implements MultiString.Callback {
 	/** Log an error message */
 	protected void log(String m) {
 		System.err.println("PixelMapBuilder:" + m);
+	}
+
+	/** Get the pixmap graphics */
+	public TreeMap<Integer, BitmapGraphic> getPixmaps() {
+		return pixmaps;
 	}
 }

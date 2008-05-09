@@ -772,7 +772,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 				}
 			});
 		multi.parse(builder);
-		return builder.pixmaps;
+		return builder.getPixmaps();
 	}
 
 	/** Lookup the best font */

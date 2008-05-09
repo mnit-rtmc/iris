@@ -19,6 +19,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
+import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -43,8 +44,15 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SortedList;
@@ -526,12 +534,85 @@ vp_mm = 70;
 
 	/** Select a new sign text message */
 	protected void selectSignText() {
+		SignText st = getSelectedSignText();
 		pixel_panel.setPhysicalDimensions(h_pix * hp_mm, v_pix * vp_mm,
 			0, 0, hp_mm, vp_mm);
 		pixel_panel.setLogicalDimensions(h_pix, v_pix, c_pix, 0);
 		pixel_panel.verifyDimensions();
-		// FIXME: set bitmap graphic for selected sign text
-		delete_text.setEnabled(getSelectedSignText() != null);
+		if(st != null)
+			pixel_panel.setGraphic(renderMessage(st));
+		delete_text.setEnabled(st != null);
+	}
+
+	/** Render a message to a bitmap graphic */
+	protected BitmapGraphic renderMessage(SignText st) {
+		MultiString multi = new MultiString(st.getMessage());
+		TreeMap<Integer, BitmapGraphic> pages = renderPages(multi);
+		if(pages.containsKey(0))
+			return pages.get(0);
+		else
+			return null;
+	}
+
+	/** Render the pages of a text message */
+	protected TreeMap<Integer, BitmapGraphic> renderPages(
+		final MultiString multi)
+	{
+		final Font font = lookupFont();
+		if(font == null)
+			return new TreeMap<Integer, BitmapGraphic>();
+		PixelMapBuilder builder = new PixelMapBuilder(h_pix,
+			v_pix, c_pix, font, new PixelMapBuilder.GlyphFinder()
+		{
+			public Graphic lookupGraphic(int cp)
+				throws InvalidMessageException
+			{
+				Graphic g = lookupGlyph(font, cp);
+				if(g != null)
+					return g;
+				else
+					throw new InvalidMessageException(
+						"Invalid code point");
+			}
+		});
+		multi.parse(builder);
+		return builder.getPixmaps();
+	}
+
+	/** Lookup a font for the sign */
+	protected Font lookupFont() {
+		TypeCache<Font> fonts = state.getFonts();
+		return fonts.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof Font) {
+					Font f = (Font)o;
+					if(f.getWidth() == c_pix &&
+					   f.getHeight() == v_pix)
+						return true;
+				}
+				return false;
+			}
+		});
+	}
+
+	/** Lookup a glyph in the specified font */
+	protected Graphic lookupGlyph(final Font f, final int cp) {
+		TypeCache<Glyph> glyphs = state.getGlyphs();
+		Glyph g = glyphs.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof Glyph) {
+					Glyph g = (Glyph)o;
+					if(g.getFont() == f &&
+					   g.getCodePoint() == cp)
+						return true;
+				}
+				return false;
+			}
+		});
+		if(g != null)
+			return g.getGraphic();
+		else
+			return null;
 	}
 
 	/** Get the selected sign text message */
