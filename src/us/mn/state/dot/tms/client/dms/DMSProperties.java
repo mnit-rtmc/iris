@@ -19,7 +19,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
-
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -153,6 +153,9 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Button to delete sign text message */
 	protected final JButton delete_text = new JButton("Delete Message");
+
+	/** Sign pixel panel */
+	protected final SignPixelPanel pixel_panel = new SignPixelPanel();
 
 	/** Travel time template string field */
 	protected final JTextArea travel = new JTextArea();
@@ -313,11 +316,29 @@ public class DMSProperties extends TrafficDeviceForm {
 			connection.isAdmin());
 	}
 
+	protected int h_pix;
+	protected int v_pix;
+	protected int c_pix;
+	protected int hp_mm;
+	protected int vp_mm;
+
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = tms.getDMSList();
 		sign = (DMS)s.getElement(id);
+
+		h_pix = sign.getSignWidthPixels();
+		v_pix = sign.getLineHeightPixels();
+		c_pix = sign.getCharacterWidthPixels();
+		hp_mm = sign.getHorizontalPitch();
+		vp_mm = sign.getVerticalPitch();
+h_pix = 125;
+v_pix = 7;
+c_pix = 0;
+hp_mm = 70;
+vp_mm = 70;
+
 		ListModel model = tms.getCameras().getModel();
 		camera.setModel(new WrapperComboBoxModel(model));
 		TimingPlanModel plan_model = new TimingPlanModel(
@@ -371,6 +392,9 @@ public class DMSProperties extends TrafficDeviceForm {
 		bag.insets.left = 5;
 		bag.insets.right = 5;
 		bag.insets.bottom = 5;
+		bag.weightx = 1;
+		bag.weighty = 1;
+		bag.fill = GridBagConstraints.BOTH;
 		initGroupTable();
 		JScrollPane scroll = new JScrollPane(group_table);
 		bag.gridx = 0;
@@ -381,6 +405,9 @@ public class DMSProperties extends TrafficDeviceForm {
 		bag.gridx = 1;
 		bag.gridy = 0;
 		panel.add(scroll, bag);
+		bag.weightx = 0;
+		bag.weighty = 0;
+		bag.fill = GridBagConstraints.NONE;
 		if(admin) {
 			bag.gridx = 0;
 			bag.gridy = 1;
@@ -391,6 +418,17 @@ public class DMSProperties extends TrafficDeviceForm {
 			panel.add(delete_text, bag);
 			addDeleteActions();
 		}
+		bag.gridx = 0;
+		bag.gridy = 2;
+		bag.gridwidth = 2;
+		pixel_panel.setMinimumSize(new Dimension(540, 40));
+		pixel_panel.setPreferredSize(new Dimension(540, 40));
+		pixel_panel.setSize(new Dimension(540, 40));
+		JPanel pnl = new JPanel();
+		pnl.setBorder(BorderFactory.createTitledBorder(
+			"Message Preview"));
+		pnl.add(pixel_panel);
+		panel.add(pnl, bag);
 		return panel;
 	}
 
@@ -488,6 +526,11 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Select a new sign text message */
 	protected void selectSignText() {
+		pixel_panel.setPhysicalDimensions(h_pix * hp_mm, v_pix * vp_mm,
+			0, 0, hp_mm, vp_mm);
+		pixel_panel.setLogicalDimensions(h_pix, v_pix, c_pix, 0);
+		pixel_panel.verifyDimensions();
+		// FIXME: set bitmap graphic for selected sign text
 		delete_text.setEnabled(getSelectedSignText() != null);
 	}
 

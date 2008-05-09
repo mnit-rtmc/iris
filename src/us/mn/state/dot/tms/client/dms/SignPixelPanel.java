@@ -81,7 +81,6 @@ public class SignPixelPanel extends JPanel {
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
-				repaint();
 			}
 		});
 	}
@@ -107,6 +106,7 @@ public class SignPixelPanel extends JPanel {
 		t.translate(tx, ty);
 		t.scale(scale, scale);
 		transform = t;
+		repaint();
 	}
 
 	/** Set the physical sign dimensions */
