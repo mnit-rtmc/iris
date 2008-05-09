@@ -5,6 +5,7 @@ us/mn/state/dot/tms/Base64.class
 us/mn/state/dot/tms/BitmapGraphic.class
 us/mn/state/dot/tms/Camera.class
 us/mn/state/dot/tms/ChangeVetoException.class
+us/mn/state/dot/tms/Circuit.class
 us/mn/state/dot/tms/CommunicationLine.class
 us/mn/state/dot/tms/Constants.class
 us/mn/state/dot/tms/Controller.class
@@ -36,7 +37,7 @@ us/mn/state/dot/tms/MeterPlan.class
 us/mn/state/dot/tms/MultiString*.class
 us/mn/state/dot/tms/NodeGroup.class
 us/mn/state/dot/tms/Node.class
-us/mn/state/dot/tms/Circuit.class
+us/mn/state/dot/tms/PixelMapBuilder*.class
 us/mn/state/dot/tms/R_Node.class
 us/mn/state/dot/tms/R_NodeMap.class
 us/mn/state/dot/tms/RampMeter.class

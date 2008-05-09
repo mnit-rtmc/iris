@@ -754,89 +754,25 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return signHeightPixels / getLineHeightPixels();
 	}
 
-	/** Calculate the X pixel position to place text */
-	protected int _calculatePixelX(MultiString.JustificationLine j,
-		FontImpl font, String t) throws InvalidMessageException
-	{
-		switch(j) {
-			case LEFT:
-				return 0;
-			case CENTER:
-				int c = Math.max(1, characterWidthPixels);
-				int w = signWidthPixels / c;
-				int r = font.calculateWidth(t) / c;
-				return c * Math.max(0, (w - r) / 2);
-			case RIGHT:
-				return signWidthPixels - font.calculateWidth(t)
-					- 1;
-			default:
-				return 0;
-		}
-	}
-
-	/** Calculate the X pixel position to place text */
-	protected int calculatePixelX(MultiString.JustificationLine j,
-		FontImpl font, String t)
-	{
-		try {
-			return _calculatePixelX(j, font, t);
-		}
-		catch(InvalidMessageException e) {
-			// Invalid characters in string
-			return 0;
-		}
-	}
-
 	/** 
 	 * Create a pixel map of the message for all pages within the
 	 * MultiString message.
 	 */
 	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi) {
-		PixelMapBuilder builder = new PixelMapBuilder();
+		final FontImpl font = getFont();
+		if(font == null)
+			return new TreeMap<Integer, BitmapGraphic>();
+		PixelMapBuilder builder = new PixelMapBuilder(signWidthPixels,
+			signHeightPixels, characterWidthPixels, font,
+			new PixelMapBuilder.GlyphFinder() {
+				public Graphic lookupGraphic(int cp)
+					throws InvalidMessageException
+				{
+					return font.getGraphic(cp);
+				}
+			});
 		multi.parse(builder);
 		return builder.pixmaps;
-	}
-
-	/** Inner class for building pixel maps */
-	protected class PixelMapBuilder implements MultiString.Callback {
-		final FontImpl font = getFont();
-		final TreeMap<Integer, BitmapGraphic> pixmaps =
-			new TreeMap<Integer, BitmapGraphic>();
-
-		private BitmapGraphic getBitmap(int p) {
-			if(pixmaps.containsKey(p))
-				return pixmaps.get(p);
-			BitmapGraphic g = new BitmapGraphic(signWidthPixels,
-				signHeightPixels);
-			pixmaps.put(p, g);
-			return g;
-		}
-
-		public void addText(int p, int l,
-			MultiString.JustificationLine j, String t)
-		{
-			BitmapGraphic g = getBitmap(p);
-			if(font == null) {
-				log("No font");
-				return;
-			}
-			try {
-				int x = calculatePixelX(j, font, t);
-				int y = l * (font.getHeight() +
-					font.getLineSpacing());
-				font.renderOn(g, x, y, t);
-			}
-			catch(InvalidMessageException e) {
-				log("missing code point: " + t);
-			}
-			catch(IOException e) {
-				log("Invalid Base64 data");
-			}
-		}
-
-		protected void log(String m) {
-			System.err.println("PixelMapBuilder " + id + ":" + m);
-		}
 	}
 
 	/** Lookup the best font */
