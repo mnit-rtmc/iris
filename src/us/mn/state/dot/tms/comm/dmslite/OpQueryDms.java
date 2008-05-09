@@ -53,7 +53,6 @@ public class OpQueryDms extends OpDms {
         if (m_dms.getSignWidthPixels()<=0) {
             return null;
         }
-
         return new PhaseQueryCurrentMessage();
     }
 

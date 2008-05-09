@@ -17,12 +17,8 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.IOException;
 
@@ -86,7 +82,7 @@ public class OpDmsQueryConfig extends OpDms {
 
             String drop = Integer.toString(dms.getController().getDrop());
             ReqRes rr   = new ReqRes("Address", drop, new String[] {
-                "IsValid", "model", "make", "version", "type", "horizBorder", "vertBorder", "horizPitch", "vertPitch",
+                "IsValid", "signAccess", "model", "make", "version", "type", "horizBorder", "vertBorder", "horizPitch", "vertPitch",
                 "signHeight", "signWidth", "characterHeightPixels", "characterWidthPixels", "signHeightPixels",
                 "signWidthPixels"
             });
@@ -99,6 +95,7 @@ public class OpDmsQueryConfig extends OpDms {
             // parse resp msg
             boolean isValid               = false;
             String  model                 = "";
+	    String  signAccess		  = "";
             String  make                  = "";
             String  version               = "";
             String  type                  = "";
@@ -118,6 +115,7 @@ public class OpDmsQueryConfig extends OpDms {
 
                 // valid message received?
                 if (isValid) {
+		    signAccess		  = rr.getResVal("signAccess");
                     model                 = rr.getResVal("model");
                     make                  = rr.getResVal("make");
                     version               = rr.getResVal("version");
@@ -146,6 +144,7 @@ public class OpDmsQueryConfig extends OpDms {
             // these values are displayed in the DMS dialog, Configuration tab
             if (isValid) {
                 dms.setModel(model);
+                dms.setSignAccess(signAccess);		// wizard, modem
                 dms.setMake(make);
                 dms.setVersion(version);
                 dms.setSignType(type);
@@ -155,7 +154,6 @@ public class OpDmsQueryConfig extends OpDms {
                 dms.setVerticalPitch(vertPitch);
 
                 // values not set for these
-                dms.setSignAccess("sign access");
                 dms.setSignLegend("sign legend");
                 dms.setBeaconType("beacon type");
                 dms.setSignTechnology("sign technology");

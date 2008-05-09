@@ -82,10 +82,6 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Check if a drop address is valid
-	 *
-	 * @param drop
-	 *
-	 * @return
 	 */
 	public boolean isAddressValid(int drop) {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
@@ -93,9 +89,6 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Download the font to a sign controller
-	 *
-	 * @param dms
-	 * @param p
 	 */
 	protected void downloadFonts(DMSImpl dms, int p) {
 		System.err.println(
@@ -104,10 +97,6 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Perform a controller download. Called: when IRIS server is shutting down, etc.
-	 *
-	 * @param c
-	 * @param reset
-	 * @param p
 	 */
 	public void download(ControllerImpl c, boolean reset, int p) {
 		System.err.println("DmsLitePoller.download() called, ignored.");
@@ -132,39 +121,30 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Perform a sign status poll. Called every 30 seconds.
-	 *
-	 * @param c
-	 * @param comp
 	 */
 	public void pollSigns(ControllerImpl c, Completer comp) {
 		System.err.println("DmsLitePoller.pollSigns() called.");
 
-		if (true) {
-			DMSImpl dms = c.getActiveSign();
+		DMSImpl dms = c.getActiveSign();
+		if (dms == null)
+			return;
 
-			if (dms != null)
-				new OpQueryDms(dms).start();
-			else
-				System.err.println(
-				    "DmsLitePoller.pollSigns(): c.getActiveSign() is null.");
+		// don't poll signs connected by modem
+		if (dms.getSignAccess().equalsIgnoreCase("modem")) {
+			return;
 		}
+
+		// start operation
+		new OpQueryDms(dms).start();
 	}
 
-	/**
-	 * Perform a 30-second poll
-	 *
-	 * @param c
-	 * @param comp
-	 */
+	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
 		System.err.println("DmsLitePoller.Second() called, ignored.");
 	}
 
 	/**
 	 * Perform a 5-minute poll
-	 *
-	 * @param c
-	 * @param comp
 	 */
 	public void poll5Minute(ControllerImpl c, Completer comp) {
 		System.err.println("DmsLitePoller.Minute() called.");
@@ -269,7 +249,7 @@ public class DmsLitePoller extends MessagePoller
 		if (m.getDuration() <= 0) {
 			new OpDmsBlank(dms, m).start();
 
-			// error
+		// error
 		} else {
 
 			// FIXME: add support for changing ontime for message
@@ -291,40 +271,28 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Set manual brightness level (null for photocell control)
-	 *
-	 * @param dms
-	 * @param l
 	 */
 	public void setBrightnessLevel(DMSImpl dms, Integer l) {
 		System.err.println(
 		    "DmsLitePoller.setBrightnessLevel() called, ignored.");
-
-		/*
-		 *       if(l != null) {
-		 *               // FIXME: combine these into one operation
-		 *               new DMSManualBrightness(dms, l).start();
-		 *               new DMSBrightnessControl(dms, true).start();
-		 *       } else
-		 *               new DMSBrightnessControl(dms, false).start();
-		 */
 	}
 
 	/**
-	 * Activate a pixel test
-	 *
-	 * @param dms
+	 * Activate a pixel test, which performs a dms query.
 	 */
 	public void testPixels(DMSImpl dms) {
 		System.err.println(
-		    "DmsLitePoller.testPixels() called, ignored.");
+		    "DmsLitePoller.testPixels() called, performing query operation.");
 
-		// new DMSPixelTest(dms).start();
+		if (dms == null)
+			return;
+
+		// start operation
+		new OpQueryDms(dms).start();
 	}
 
 	/**
 	 * Activate a lamp test
-	 *
-	 * @param dms
 	 */
 	public void testLamps(DMSImpl dms) {
 		System.err.println(
@@ -335,8 +303,6 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Activate a fan test
-	 *
-	 * @param dms
 	 */
 	public void testFans(DMSImpl dms) {
 		System.err.println("DmsLitePoller.testFans() called, ignored.");

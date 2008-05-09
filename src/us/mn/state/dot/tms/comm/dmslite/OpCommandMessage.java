@@ -220,7 +220,7 @@ public class OpCommandMessage extends OpDms {
 					    + valid + ".");
 				} catch (IllegalArgumentException ex) {
 					System.err.println(
-					    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received in OpQueryDms:"
+					    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received:"
 					    + ex);
 
 					throw ex;
@@ -228,12 +228,11 @@ public class OpCommandMessage extends OpDms {
 
 				// parse rest of response
 				if (valid) {
-
 					// set new message
 					m_dms.setActiveMessage(m_message);
 				} else {
 					System.err.println(
-					    "OpQueryDms: invalid response from cmsserver received, ignored.");
+					    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): invalid response from cmsserver received, ignored.");
 				}
 			}
 
@@ -385,7 +384,7 @@ public class OpCommandMessage extends OpDms {
 					    + valid + ".");
 				} catch (IllegalArgumentException ex) {
 					System.err.println(
-					    "dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): Malformed XML received in OpQueryDms:"
+					    "dmslite.OpCommandMessage.PhaseSendTwoPageMessage.poll(msg): Malformed XML received:"
 					    + ex);
 
 					throw ex;
@@ -399,7 +398,7 @@ public class OpCommandMessage extends OpDms {
 
 				} else {
 					System.err.println(
-					    "OpQueryDms: invalid response from cmsserver received, ignored.");
+					    "dmslite.OpCommandMessage.PhaseSendOnePageMessage.poll(msg): invalid response from cmsserver received, ignored.");
 				}
 			}
 
