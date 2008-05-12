@@ -23,9 +23,67 @@ CREATE TABLE sign_text (
 );
 
 -- do not leave this in migrate script
-INSERT INTO sign_group (name, local) VALUES ('125_Pix_Wide', false);
-INSERT INTO sign_group (name, local) VALUES ('10_Char_Wide', false);
-INSERT INTO sign_group (name, local) VALUES ('12_Char_Wide', false);
+INSERT INTO sign_group (name, local) VALUES ('PIXEL 125 WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('CHAR 10 WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('CHAR 12 WIDE', false);
+
+CREATE TEMP SEQUENCE __a_seq MINVALUE 0;
+CREATE TEMP SEQUENCE __b_seq MINVALUE 0;
+CREATE TEMP SEQUENCE __c_seq MINVALUE 0;
+
+INSERT INTO sign_text (name, sign_group, line, message, priority)
+	(SELECT 'PIXEL 125 WIDE_' || trim(both FROM to_char(nextval('__a_seq'),
+	'999')), 'PIXEL 125 WIDE', line, message, priority FROM dms_message
+	WHERE dms IS NULL AND char_length(message) > 0 AND line < 4);
+
+INSERT INTO sign_text (name, sign_group, line, message, priority)
+	(SELECT 'CHAR 12 WIDE_' || trim(both FROM to_char(nextval('__b_seq'),
+	'999')), 'CHAR 12 WIDE', line, abbrev, priority FROM dms_message
+	WHERE dms IS NULL AND char_length(abbrev) > 0);
+
+INSERT INTO sign_text (name, sign_group, line, message, priority)
+	(SELECT 'CHAR 12 WIDE_' || trim(both FROM to_char(nextval('__b_seq'),
+	'999')), 'CHAR 12 WIDE', line, message, priority FROM dms_message
+	WHERE dms IS NULL AND char_length(message) > 0 AND
+	char_length(message) <= 12);
+
+INSERT INTO sign_text (name, sign_group, line, message, priority)
+	(SELECT 'CHAR 10 WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
+	'999')), 'CHAR 10 WIDE', line, abbrev, priority FROM dms_message
+	WHERE dms IS NULL AND char_length(abbrev) > 0 AND
+	char_length(abbrev) <= 10);
+
+INSERT INTO sign_text (name, sign_group, line, message, priority)
+	(SELECT 'CHAR 10 WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
+	'999')), 'CHAR 10 WIDE', line, abbrev, priority FROM dms_message
+	WHERE dms IS NULL AND char_length(message) > 0 AND
+	char_length(message) <= 10);
+
+CREATE FUNCTION copy_sign_text(TEXT) RETURNS bool AS '
+	DECLARE dms_id ALIAS FOR $1;
+		b INTEGER;
+	BEGIN
+		INSERT INTO sign_group (name, local) VALUES (dms_id, true);
+		INSERT INTO dms_sign_group (name, dms, sign_group)
+		VALUES (dms_id || ''_'' || dms_id, dms_id, dms_id);
+		INSERT INTO dms_sign_group (name, dms, sign_group)
+		VALUES (''PIXEL 125 WIDE_'' || dms_id, dms_id,
+		''PIXEL 125 WIDE'');
+		CREATE TEMP SEQUENCE __d_seq MINVALUE 0;
+		INSERT INTO sign_text (name,sign_group, line, message, priority)
+		(SELECT dms_id || ''_'' || trim(both FROM
+		to_char(nextval(''__d_seq''), ''999'')), dms_id, line, message,
+		priority
+		FROM dms_message
+		WHERE dms = dms_id AND char_length(message) > 0);
+		DROP SEQUENCE __d_seq;
+		RETURN true;
+	END;'
+LANGUAGE PLPGSQL;
+
+SELECT count(copy_sign_text(id)) AS Local_Sign_Groups FROM dms;
+
+DROP FUNCTION copy_sign_text(TEXT);
 
 DROP VIEW dms_message_view;
 DROP TABLE dms_message;
