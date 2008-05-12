@@ -541,6 +541,8 @@ vp_mm = 70;
 		pixel_panel.verifyDimensions();
 		if(st != null)
 			pixel_panel.setGraphic(renderMessage(st));
+		else
+			pixel_panel.setGraphic(null);
 		delete_text.setEnabled(st != null);
 	}
 

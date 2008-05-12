@@ -30,7 +30,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 
 	/** Sign message text validation regex pattern */
 	static protected final Pattern MESS_PATTERN = Pattern.compile(
-		"[A-Z !#$%&()*+,-./:;<=>?@]*");
+		"[0-9A-Z !#$%&()*+,-./:;<=>?@]*");
 
 	/** Validate a message string */
 	static protected void validateMessage(String t)
@@ -39,6 +39,8 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		Matcher m = MESS_PATTERN.matcher(t);
 		if(!m.matches())
 			throw new ChangeVetoException("Invalid message: " + t);
+		if(t.length() > 24)
+			throw new ChangeVetoException("Message too wide");
 	}
 
 	/** Load all the sign text */
@@ -62,6 +64,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 
 	/** Store a sign text message */
 	public void doStore() throws TMSException {
+		validateMessage(message);
 		store.update("INSERT INTO " + getTable() +
 			" (name, sign_group, line, message, priority) VALUES " +
 			"('" + name + "', '" + sign_group + "', '" + line +
@@ -141,8 +144,6 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		if(m.equals(message))
 			return;
 		validateMessage(m);
-		if(m.length() > 24)
-			throw new ChangeVetoException("Message too wide");
 		store.update(this, "message", m);
 		setMessage(m);
 	}
