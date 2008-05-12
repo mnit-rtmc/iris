@@ -55,7 +55,7 @@ INSERT INTO sign_text (name, sign_group, line, message, priority)
 
 INSERT INTO sign_text (name, sign_group, line, message, priority)
 	(SELECT 'CHAR 10 WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
-	'999')), 'CHAR 10 WIDE', line, abbrev, priority FROM dms_message
+	'999')), 'CHAR 10 WIDE', line, message, priority FROM dms_message
 	WHERE dms IS NULL AND char_length(message) > 0 AND
 	char_length(message) <= 10);
 
