@@ -61,7 +61,7 @@ public class OpQueryDms extends OpDms
 	}
 
 	/**
-	 * Create a SignMessage.
+	 * Create a SignMessage if we have a bitmap and no message text.
 	 *
 	 * @params owner message owner.
 	 * @params argmulti A String in the MultiString format.
@@ -91,11 +91,13 @@ public class OpQueryDms extends OpDms
 			System.arraycopy(argbitmap, 0, nbm, 0, 300);
 			argbitmap = nbm;
 		}
+		//Map<Integer, BitmapGraphic> bm=
 
-		// sanity check
-		// FIXME: remove this?
 		int height = m_dms.getSignHeightPixels();
 		int width = m_dms.getSignWidthPixels();
+
+		// sanity check
+		/*
 		int len = ((width * height + 7) / 8) * numpages;
 		if(len != argbitmap.length) {
 			System.err.println(
@@ -103,6 +105,7 @@ public class OpQueryDms extends OpDms
 			    + len + ",length()=" + argbitmap.length
 			    + ", numpages=" + numpages);
 		}
+		*/
 
 		// create SignMessage
 		MultiString multi = new MultiString(argmulti);
@@ -112,12 +115,11 @@ public class OpQueryDms extends OpDms
 		} catch (IndexOutOfBoundsException ex) {
 			System.err.println(
 			    "OpQueryDms.createSignMessage(): ERROR, could not set the bitmap, bitmaplen="
-			    + argbitmap.length);
+			    + argbitmap.length+", ex="+ex);
 		}
 
 		SignMessage sm =
-			new SignMessage(owner, multi, bitmap, SignMessage
-				.DURATION_INFINITE);    // FIXME: duration from cmsserver?
+			new SignMessage(owner, multi, bitmap, dura);
 
 		return sm;
 	}
@@ -152,6 +154,18 @@ public class OpQueryDms extends OpDms
 		    "OpQueryDms.calcMsgDuration: duration (mins)=" + d
 		    + ", ontime=" + ontime + ", offtime=" + offtime);
 		return (d);
+	}
+
+	/** create a blank message */
+	protected SignMessage buildBlankMsg(String owner)
+	{
+		MultiString multi = new MultiString();
+		BitmapGraphic bbm =
+			new BitmapGraphic(
+		    		m_dms.getSignWidthPixels(), 
+				m_dms.getSignHeightPixels());
+		SignMessage sm = new SignMessage(owner,multi,bbm,0);
+		return(sm);
 	}
 
 	/**
@@ -252,51 +266,31 @@ public class OpQueryDms extends OpDms
 
 			// process response
 			if(valid) {
-
 				// System.err.println("OpQueryDms: valid response from cmsserver received.");
 
 				// calc message duration
-				int duramins =
-					OpQueryDms.calcMsgDuration(useont,
-								   useofft,
-								   ont, offt);
+				int duramins=OpQueryDms.calcMsgDuration(useont, useofft, ont, offt);
 
 				// have text
 				if(msgtextavailable) {
-					m_dms.setMessageFromController(
-					    msgtext, duramins);
+					m_dms.setMessageFromController(msgtext, duramins);
 
-					// don't have text
-					// note, the MsgText field is still assumed to contain a multistring with a message
-					// indicating a missing one or two page message.
+				// don't have text
+				// note, the MsgText field is still assumed to contain a multistring with a message
+				// indicating a missing one or two page message.
 				} else {
 					SignMessage sm;
 
 					// have bitmap
 					if(usebitmap) {
-						byte[] bm =
-							Convert
-							.hexStringToByteArray(
-							    bitmap);
+						byte[] bm=Convert.hexStringToByteArray(bitmap);
 
 						// System.err.println("OpQueryDms: hex string length=" + bitmap.length() + ", byte[] length=" + bm.length);
-						sm = createSignMessage(
-							owner, msgtext, bm,
-							duramins);
+						sm = createSignMessage(owner, msgtext, bm, duramins);
 
-						// don't have bitmap, therefore CMS is blank
+					// don't have bitmap, therefore CMS is blank
 					} else {
-						MultiString multi =
-							new MultiString();
-						BitmapGraphic bbm =
-							new BitmapGraphic(
-							    m_dms
-							    .getSignWidthPixels(), m_dms
-							    .getSignHeightPixels());
-						sm = new SignMessage(owner,
-								     multi,
-								     bbm,
-								     duramins);
+						sm=buildBlankMsg(owner);
 					}
 
 					// set new message
