@@ -345,7 +345,8 @@ public class OpCommandMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// DisplayTimeMS
-			mess.add(new ReqRes("DisplayTimeMS", "2000")); //FIXME 
+			int MSG_DISPLAY_MSG_TIME_MS = 2000; //FIXME: use system value specified via dialog box
+			mess.add(new ReqRes("DisplayTimeMS", new Integer(MSG_DISPLAY_MSG_TIME_MS).toString()));
 
 			// Owner
 			mess.add(new ReqRes("Owner", m_message.getOwner()));
