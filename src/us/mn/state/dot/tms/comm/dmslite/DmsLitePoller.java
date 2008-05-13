@@ -147,17 +147,7 @@ public class DmsLitePoller extends MessagePoller
 	 * Perform a 5-minute poll
 	 */
 	public void poll5Minute(ControllerImpl c, Completer comp) {
-		System.err.println("DmsLitePoller.Minute() called.");
-
-		if (false) {
-			DMSImpl dms = c.getActiveSign();
-
-			if (dms != null) {
-				new OpDmsQueryStatus(dms).start();
-			}
-		}
-
-		return;
+		System.err.println("DmsLitePoller.Minute() called, ignored.");
 	}
 
 	/**
