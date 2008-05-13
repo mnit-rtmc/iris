@@ -81,11 +81,14 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	/** The currently selected DMS */
 	protected DMSProxy selectedSign = null;
 
-	protected final MessageSelector messageSelector = new MessageSelector();
+	/** Message selector widget */
+	protected final MessageSelector messageSelector;
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSHandler handler, final SonarState st) {
 		super( new GridBagLayout() );
+		messageSelector = new MessageSelector(st.getDmsSignGroups(),
+			st.getSignText());
 		userName = handler.getUser().getName();
 		selectionModel = handler.getSelectionModel();
 		pnlSign = new DMSPanel(st.getSystemPolicy());

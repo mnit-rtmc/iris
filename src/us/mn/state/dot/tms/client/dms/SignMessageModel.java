@@ -16,9 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.TreeSet;
-import javax.swing.AbstractListModel;
-import javax.swing.ComboBoxModel;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -53,7 +50,6 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		dms_id = dms;
 		dms_sign_groups = d;
 		sign_text = t;
-		dms_sign_groups.addProxyListener(this);
 		listener = new ProxyListener<SignText>() {
 			public void proxyAdded(SignText proxy) {
 				if(isMember(proxy.getSignGroup()))
@@ -68,6 +64,11 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 					changeSignText(proxy);
 			}
 		};
+	}
+
+	/** Initialize the sign message model */
+	public void initialize() {
+		dms_sign_groups.addProxyListener(this);
 		sign_text.addProxyListener(listener);
 	}
 
@@ -147,6 +148,14 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		}
 	}
 
+	/** Get the maximum line number */
+	public short getMaxLine() {
+		short m = 0;
+		for(short i: lines.keySet())
+			m = (short)Math.max(i, m);
+		return m;
+	}
+
 	/** Add a sign message to the model */
 	protected void addSignText(SignText t) {
 		short line = t.getLine();
@@ -156,6 +165,8 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
 	/** Remove a sign message from the model */
 	protected void removeSignText(SignText t) {
+Thread th = Thread.currentThread();
+System.err.println(th.getName());
 		short line = t.getLine();
 		LineModel m = getLineModel(line);
 		m.remove(t);
@@ -165,74 +176,5 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	protected void changeSignText(SignText t) {
 		for(LineModel m: lines.values())
 			m.change(t);
-	}
-
-	/** Model for a sign text line combo box */
-	protected class LineModel extends AbstractListModel
-		implements ComboBoxModel
-	{
-		final TreeSet<SignText> items = new TreeSet<SignText>(
-			new SignTextComparator());
-
-		public Object getElementAt(int index) {
-			int i = 0;
-			for(SignText t: items) {
-				if(i == index)
-					return t;
-				i++;
-			}
-			return null;
-		}
-
-		public int getSize() {
-			return items.size();
-		}
-
-		protected Object selected;
-
-		public Object getSelectedItem() {
-			return selected;
-		}
-
-		public void setSelectedItem(Object s) {
-			selected = s;
-		}
-
-		protected int find(SignText t) {
-			int i = 0;
-			for(SignText st: items) {
-				if(st.equals(t))
-					return i;
-				i++;
-			}
-			return -1;
-		}
-
-		protected void add(SignText t) {
-			items.add(t);
-			int i = find(t);
-			assert i >= 0;
-			fireIntervalAdded(this, i, i);
-		}
-
-		protected void remove(SignText t) {
-			int i = find(t);
-			if(i >= 0) {
-				items.remove(t);
-				fireIntervalRemoved(this, i, i);
-			}
-		}
-
-		protected void change(SignText t) {
-			int i0 = find(t);
-			if(i0 >= 0) {
-				items.remove(t);
-				items.add(t);
-				int i1 = find(t);
-				assert i1 >= 0;
-				fireContentsChanged(this, Math.min(i0, i1),
-					Math.max(i0, i1));
-			}
-		}
 	}
 }

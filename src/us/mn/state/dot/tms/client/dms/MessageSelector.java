@@ -22,6 +22,8 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 
@@ -39,8 +41,17 @@ public class MessageSelector extends JPanel {
 	protected final SignTextCellRenderer renderer =
 		new SignTextCellRenderer();
 
+	/** DMS sign group type cache */
+	protected final TypeCache<DmsSignGroup> dms_sign_groups;
+
+	/** Sign text type cache */
+	protected final TypeCache<SignText> sign_text;
+
 	/** Tab pane to hold pages */
 	protected final JTabbedPane tab = new JTabbedPane();
+
+	/** Sign message model */
+	protected SignMessageModel mess_model;
 
 	/** Number of pages on the currently selected sign */
 	protected int n_pages;
@@ -51,11 +62,12 @@ public class MessageSelector extends JPanel {
 	/** Number of lines on the currently selected sign */
 	protected int n_lines;
 
-	/** Pixel width of the currently selected sign */
-	protected int width;
-
 	/** Create a new message selector */
-	public MessageSelector() {
+	public MessageSelector(TypeCache<DmsSignGroup> d,
+		TypeCache<SignText> t)
+	{
+		dms_sign_groups = d;
+		sign_text = t;
 		add(tab);
 		initializeWidgets(0, 1);
 	}
@@ -78,7 +90,6 @@ public class MessageSelector extends JPanel {
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
-//			cmbLine[i].setPrototypeDisplayValue(PROTOTYPE);
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
 		}
@@ -93,6 +104,7 @@ public class MessageSelector extends JPanel {
 			tab.removeTabAt(p);
 	}
 
+	/** Create a new page panel */
 	protected JPanel createPage(int p) {
 		JPanel panel = new JPanel(new GridLayout(n_lines, 1, 6, 6));
 		panel.setBackground(Color.BLACK);
@@ -107,20 +119,16 @@ public class MessageSelector extends JPanel {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
 		for(int i = 0; i < cmbLine.length; i++) {
-/*			DmsMessage dm =
-				(DmsMessage)cmbLine[i].getSelectedItem();
-			if(dm != null && dm != BLANK) {
-				if(dm.m_width <= width)
-					mess[i] = dm.message;
-				else
-					mess[i] = dm.abbrev;
+			SignText st = (SignText)cmbLine[i].getSelectedItem();
+			if(st != null) {
+				mess[i] = st.getMessage();
 				m = i + 1;
-			} else */
+			} else
 				mess[i] = "";
 		}
 		if(m == 0)
 			return null;
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0)
@@ -157,13 +165,7 @@ public class MessageSelector extends JPanel {
 	/** Set the selected message for a message line combo box */
 	protected void setLineSelection(int i, String m) {
 		ComboBoxModel model = cmbLine[i].getModel();
-		for(int j = 0; j < model.getSize(); j++) {
-/*			DmsMessage dm = (DmsMessage)model.getElementAt(j);
-			if(m.equals(dm.message) || m.equals(dm.abbrev)) {
-				cmbLine[i].setSelectedItem(dm);
-				break;
-			} */
-		}
+		model.setSelectedItem(m);
 	}
 
 	/** Clear the combobox selections */
@@ -183,45 +185,35 @@ public class MessageSelector extends JPanel {
 	/** Update the message combo box models */
 	public void updateModel(DMSProxy proxy) {
 		lastMessage = null;
-		width = proxy.getSignWidthPixels();
-/*		DmsMessage[] mess = proxy.getMessages();
+		createMessageModel(proxy.getId());
+		int ml = mess_model.getMaxLine();
 		int nl = proxy.getTextLines();
-		int np = calculateSignPages(mess, nl);
+if(nl == 0) nl = 3;
+		int np = calculateSignPages(ml, nl);
 		initializeWidgets(nl, np);
-		for(int l = 0; l < cmbLine.length; l++) {
-			cmbLine[l].setModel(createMessageModel(mess, l + 1));
-			cmbLine[l].setEnabled(true);
-		} */
+		for(short i = 0; i < cmbLine.length; i++) {
+			cmbLine[i].setModel(mess_model.getLineModel(
+				(short)(i + 1)));
+			cmbLine[i].setEnabled(true);
+		}
+	}
+
+	/** Create a new message model */
+	protected void createMessageModel(String dms_id) {
+		SignMessageModel mm = new SignMessageModel(dms_id,
+			dms_sign_groups, sign_text);
+		mm.initialize();
+		SignMessageModel omm = mess_model;
+		mess_model = mm;
+		if(omm != null)
+			omm.dispose();
 	}
 
 	/** Calculate the number of pages for the sign */
-/*	protected int calculateSignPages(DmsMessage[] mess, int nl) {
-		int np = 1;
-		for(int i = 0; i < mess.length; i++) {
-			DmsMessage dm = mess[i];
-			if(nl > 0 && dm.dms != null)
-				np = Math.max(np, (dm.line - 1) / nl + 1);
-		}
-		return np;
-	} */
-
-	/** Create the message model for one sign line */
-/*	protected ComboBoxModel createMessageModel(DmsMessage[] mess, int l) {
-		int w = width;
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		model.addElement(BLANK);
-		for(int i = 0; i < mess.length; i++) {
-			DmsMessage dm = mess[i];
-			if(dm.line == l) {
-				if(dm.m_width < 0 || dm.a_width < 0)
-					continue;
-				if(dm.m_width == 0 || dm.m_width > w) {
-					if(dm.a_width == 0 || dm.a_width > w)
-						continue;
-				}
-				model.addElement(dm);
-			}
-		}
-		return model;
-	} */
+	protected int calculateSignPages(int ml, int nl) {
+		if(nl > 0)
+			return Math.max(1, (ml - 1) / nl + 1);
+		else
+			return 1;
+	}
 }
