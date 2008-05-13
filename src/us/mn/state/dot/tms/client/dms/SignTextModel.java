@@ -83,30 +83,7 @@ public class SignTextModel extends ProxyTableModel<SignText> {
 
 	/** Create an empty set of proxies */
 	protected TreeSet<SignText> createProxySet() {
-		return new TreeSet<SignText>(
-			new Comparator<SignText>() {
-				public int compare(SignText t0, SignText t1) {
-					Short s0 = t0.getLine();
-					Short s1 = t1.getLine();
-					int c = s0.compareTo(s1);
-					if(c != 0)
-						return c;
-					s0 = t0.getPriority();
-					s1 = t1.getPriority();
-					c = s0.compareTo(s1);
-					if(c != 0)
-						return c;
-					return t0.getMessage().compareTo(
-						t1.getMessage());
-				}
-				public boolean equals(Object o) {
-					return o == this;
-				}
-				public int hashCode() {
-					return super.hashCode();
-				}
-			}
-		);
+		return new TreeSet<SignText>(new SignTextComparator());
 	}
 
 	/** Add a new proxy to the table model */
