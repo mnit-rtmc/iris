@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.tms.SignText;
 
 /**
@@ -79,30 +80,43 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 
 	protected void add(SignText t) {
 		items.add(t);
-		int i = find(t);
+		final int i = find(t);
 		assert i >= 0;
-		fireIntervalAdded(this, i, i);
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				fireIntervalAdded(this, i, i);
+			}
+		});
 	}
 
 	protected void remove(SignText t) {
-		int i = find(t);
+		final int i = find(t);
 		if(i >= 0) {
 			items.remove(t);
 			if(t.equals(selected))
 				selected = null;
-			fireIntervalRemoved(this, i, i);
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireIntervalRemoved(this, i, i);
+				}
+			});
 		}
 	}
 
 	protected void change(SignText t) {
-		int i0 = find(t);
+		final int i0 = find(t);
 		if(i0 >= 0) {
 			items.remove(t);
 			items.add(t);
-			int i1 = find(t);
+			final int i1 = find(t);
 			assert i1 >= 0;
-			fireContentsChanged(this, Math.min(i0, i1),
-				Math.max(i0, i1));
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireContentsChanged(this,
+						Math.min(i0, i1),
+						Math.max(i0, i1));
+				}
+			});
 		}
 	}
 }
