@@ -165,8 +165,6 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
 	/** Remove a sign message from the model */
 	protected void removeSignText(SignText t) {
-Thread th = Thread.currentThread();
-System.err.println(th.getName());
 		short line = t.getLine();
 		LineModel m = getLineModel(line);
 		m.remove(t);
