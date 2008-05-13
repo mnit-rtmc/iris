@@ -28,6 +28,8 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.Date;
 
 /**
@@ -59,10 +61,13 @@ public class OpQueryDms extends OpDms {
     /** 
      * Create a SignMessage.
      *
+     * @params owner message owner.
      * @params argmulti A String in the MultiString format.
+     * @params argbitmap Bitmap associated with message text.
+     * @params dura message duration in mins.
      * @returns A SignMessage that contains the text of the message and a rendered bitmap.
      */
-    private SignMessage createSignMessage(String owner,String argmulti,byte[] argbitmap) {
+    private SignMessage createSignMessage(String owner,String argmulti,byte[] argbitmap,int dura) {
         System.err.println("OpQueryDms.createSignMessage() called: m_dms.width="+m_dms.getSignWidthPixels()+", argbitmap.len="+argbitmap.length+".");
 
         assert owner!=null;
@@ -90,8 +95,8 @@ public class OpQueryDms extends OpDms {
         }
 
         // create SignMessage
-		MultiString multi = new MultiString(argmulti);
-		BitmapGraphic bitmap = new BitmapGraphic(width,height);
+	MultiString multi = new MultiString(argmulti);
+	BitmapGraphic bitmap = new BitmapGraphic(width,height);
         try {
             bitmap.setBitmap(argbitmap);
         } catch (IndexOutOfBoundsException ex) {
@@ -100,6 +105,35 @@ public class OpQueryDms extends OpDms {
 		SignMessage sm=new SignMessage(owner, multi, bitmap,SignMessage.DURATION_INFINITE); //FIXME: duration from cmsserver?
 
 		return sm;
+    }
+
+    /**
+     * Calculate message duration
+     *
+     * @params useont true to use on time
+     * @params useofft true to use off time else infinite message
+     * @params ontime message on time
+     * @params offtime message off time
+     * @returns The duration of the message in minutes, which is always >= 0.
+     */
+    private static int calcMsgDuration(boolean useont,boolean useofft,Date ontime, Date offtime) {
+	if (!useofft)
+		return SignMessage.DURATION_INFINITE;
+	if (ontime==null || offtime==null)
+		return SignMessage.DURATION_INFINITE;
+
+	// convert to calendars
+	Calendar a=new GregorianCalendar();
+	a.setTime(ontime);
+	Calendar b=new GregorianCalendar();
+	b.setTime(offtime);
+
+	// calc diff in secs
+	int d=b.compareTo(a);
+	d=(d<0 ? 0 : d/1000);
+
+	System.err.println("OpQueryDms.calcMsgDuration: duration (mins)="+d+", ontime="+ontime+", offtime="+offtime);
+	return(d);
     }
 
     /**
@@ -182,9 +216,12 @@ public class OpQueryDms extends OpDms {
             if (valid) {
                 //System.err.println("OpQueryDms: valid response from cmsserver received.");
 
+		// calc message duration
+	        int duramins=OpQueryDms.calcMsgDuration(useont,useofft,ont,offt);
+
                 // have text
                 if (msgtextavailable) {
-                    m_dms.setMessageFromController(msgtext, SignMessage.DURATION_INFINITE); //FIXME: calculate duration using on/off time
+                    m_dms.setMessageFromController(msgtext,duramins);
 
                 // don't have text
                 // note, the MsgText field is still assumed to contain a multistring with a message 
@@ -195,18 +232,15 @@ public class OpQueryDms extends OpDms {
                     // have bitmap
                     if (usebitmap) {
                         byte[] bm = Convert.hexStringToByteArray(bitmap);
-
                         //System.err.println("OpQueryDms: hex string length=" + bitmap.length() + ", byte[] length=" + bm.length);
-                        BitmapGraphic bmg = new BitmapGraphic(96, 25);  //FIXME: use sign dims
-                        //FIXME: calc duration
-                        sm=createSignMessage(owner,msgtext, bm); 
+                        sm=createSignMessage(owner,msgtext, bm, duramins); 
 
                     // don't have bitmap, therefore CMS is blank
                     } else {
 		                MultiString multi = new MultiString();
 		                BitmapGraphic bbm = new BitmapGraphic(m_dms.getSignWidthPixels(),
 			                m_dms.getSignHeightPixels());
-		                sm=new SignMessage(owner, multi, bbm, 0);
+		                sm=new SignMessage(owner, multi, bbm, duramins);
                     }
                     
                     // set new message
