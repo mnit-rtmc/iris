@@ -441,6 +441,10 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 					scans[i]);
 				if(speed != null)
 					det.storeSpeed30Second(stamp, speed[i]);
+			// warn if expected lane doesn't exist
+			} else {
+				int dn=i+1;
+				System.err.println("Warning: expected detector missing (#"+dn+") from controller ("+this.getLabel()+").");
 			}
 		}
 	}

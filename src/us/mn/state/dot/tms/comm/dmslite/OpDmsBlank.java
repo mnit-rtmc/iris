@@ -14,13 +14,9 @@
  */
 package us.mn.state.dot.tms.comm.dmslite;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.IOException;
 
@@ -85,6 +81,9 @@ public class OpDmsBlank extends OpDms {
                 return (null);
             }
 
+	    // set message attributes as a function of the operation
+	    setMsgAttributes(mess);
+
             // build message: <DmsLite><SetBlankMsgReqMsg><Address>1</Address><Owner>bob</Owner></SetBlankMsgReqMsg></DmsLite>
 
             // build req msg
@@ -122,7 +121,6 @@ public class OpDmsBlank extends OpDms {
             // update dms
             if (isValid) {
                 m_dms.setActiveMessage(m_mess);
-System.err.println("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX "+m_mess); //mtodhere
             }
 
             // done

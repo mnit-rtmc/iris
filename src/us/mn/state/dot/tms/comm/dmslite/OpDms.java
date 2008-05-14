@@ -17,18 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
-
-//~--- non-JDK imports --------------------------------------------------------
 
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.DeviceOperation;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.IOException;
 
@@ -39,6 +33,11 @@ import java.io.IOException;
  * @author Michael Darter
  */
 abstract public class OpDms extends DeviceOperation {
+
+   // timeout for DMS messages
+   static final int TIMEOUT_DMS_DEFAULT_MS = 1000*30;
+   static final int TIMEOUT_DMS_MODEM_MS = 1000*45*5;
+   static final int TIMEOUT_DMS_WIZARD_MS = 1000*30;
 
     /** DMS debug log */
     static protected final DebugLog DMS_LOG = new DebugLog("dms");
@@ -56,7 +55,6 @@ abstract public class OpDms extends DeviceOperation {
     public void handleException(IOException e) {
         if (e instanceof ChecksumException) {
             ChecksumException ce = (ChecksumException) e;
-
             DMS_LOG.log(m_dms.getId() + " (" + toString() + "), " + ce.getScannedData());
         }
 
@@ -68,4 +66,32 @@ abstract public class OpDms extends DeviceOperation {
         m_dms.setReset(success);
         super.cleanup();
     }
+
+    /** return the timeout for this operation */
+    public int calcTimeoutMS() {
+	assert m_dms!=null : "m_dms is null in OpDms.getTimeoutMS()";
+	String a=m_dms.getSignAccess();
+	int ms=TIMEOUT_DMS_DEFAULT_MS;
+	if (a.toLowerCase().contains("modem")) {
+        	ms=TIMEOUT_DMS_MODEM_MS;
+		//System.err.println("connection type is modem:"+a+", dms="+m_dms.toString());
+	} else if (a.toLowerCase().contains("wizard")) {
+        	ms=TIMEOUT_DMS_WIZARD_MS;
+		System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString());
+	} else {
+        	ms=TIMEOUT_DMS_DEFAULT_MS;
+		// unknown sign type, this happens when the first 
+	        // OpDmsQueryConfig message is being sent, so a 
+	        // default timeout should be assigned.
+		//System.err.println("OpDms.calcTimeoutMS(): unknown sign access type:"+a+", dms="+m_dms.toString());
+	}
+        return ms;
+    }
+
+    /** set message attributes which are a function of the operation, sign, etc. */
+    public void setMsgAttributes(Message m) {
+ 	m.setTimeoutMS(this.calcTimeoutMS());
+   }
+
 }
+
