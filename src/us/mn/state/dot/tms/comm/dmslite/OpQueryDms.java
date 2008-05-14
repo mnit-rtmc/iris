@@ -132,28 +132,32 @@ public class OpQueryDms extends OpDms
 	 * @params ontime message on time
 	 * @params offtime message off time
 	 * @returns The duration of the message in minutes, which is always >= 0.
+	 * @throws IllegalArgumentException if invalid args.
 	 */
 	private static int calcMsgDuration(boolean useont, boolean useofft,
-					   Date ontime, Date offtime) {
-		if(!useofft)
-			return SignMessage.DURATION_INFINITE;
-		if((ontime == null) || (offtime == null))
-			return SignMessage.DURATION_INFINITE;
+					   Calendar ontime, Calendar offtime) {
 
-		// convert to calendars
-		Calendar a = new GregorianCalendar();
-		a.setTime(ontime);
-		Calendar b = new GregorianCalendar();
-		b.setTime(offtime);
+		if(ontime == null) {
+			throw new IllegalArgumentException("invalid null ontime in calcMsgDuration.");
+		}
+		if(offtime == null) {
+			throw new IllegalArgumentException("invalid null offtime in calcMsgDuration.");
+		}
+		if(!useont) {
+			throw new IllegalArgumentException("must have ontime in calcMsgDuration.");
+		}
+		if(!useofft) {
+			return SignMessage.DURATION_INFINITE;
+		}
 
-		// calc diff in secs
-		int d = b.compareTo(a);
-		d = ((d < 0) ? 0 : d / 1000);
+		// calc diff in mins
+		int ms = offtime.compareTo(ontime);
+		int m = ((ms < 0) ? 0 : ms / 1000 / 60);
 
 		System.err.println(
-		    "OpQueryDms.calcMsgDuration: duration (mins)=" + d
+		    "OpQueryDms.calcMsgDuration: duration (mins)=" + m
 		    + ", ontime=" + ontime + ", offtime=" + offtime);
-		return (d);
+		return (m);
 	}
 
 	/** create a blank message */
@@ -215,9 +219,9 @@ public class OpQueryDms extends OpDms
 			String msgtext = "";
 			String owner = "";
 			boolean useont = false;
-			Date ont = new Date();
+			Calendar ont = new GregorianCalendar();
 			boolean useofft = false;
-			Date offt = new Date();
+			Calendar offt = new GregorianCalendar();
 			boolean usebitmap = false;
 			String bitmap = "";
 
@@ -234,17 +238,14 @@ public class OpQueryDms extends OpDms
 					useont = new Boolean(
 					    rr.getResVal("UseOnTime"));
 					if(useont) {
-						ont = Time.XMLtoDate(
-							rr.getResVal("OnTime"));
+						ont.setTime(Time.XMLtoDate(rr.getResVal("OnTime")));
 					}
 
 					// offtime
 					useofft = new Boolean(
 					    rr.getResVal("UseOffTime"));
 					if(useofft) {
-						offt = Time.XMLtoDate(
-							rr.getResVal(
-								"OffTime"));
+						offt.setTime(Time.XMLtoDate(rr.getResVal("OffTime")));
 					}
 
 					// bitmap
@@ -270,6 +271,21 @@ public class OpQueryDms extends OpDms
 			// process response
 			if(valid) {
 				// System.err.println("OpQueryDms: valid response from cmsserver received.");
+
+				// error checking: have on time? if not, create new ontime
+				if (!useont) {
+					useont=true;
+					ont=new GregorianCalendar();
+					System.err.println("NOTE: DmsLite.OpQueryDms.PhaseQueryCurrentMessage():"+
+						" no ontime specified, assuming now.");
+				}
+
+				// error checking: valid off time?
+				if (useont && useofft && offt.compareTo(ont)<=0) {
+					useofft=false;
+					System.err.println("NOTE: DmsLite.OpQueryDms.PhaseQueryCurrentMessage():"+
+						" offtime <= ontime, so off time ignored.");
+				}
 
 				// calc message duration
 				int duramins=OpQueryDms.calcMsgDuration(useont, useofft, ont, offt);
