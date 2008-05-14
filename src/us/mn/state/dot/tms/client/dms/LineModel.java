@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
@@ -27,13 +28,16 @@ import us.mn.state.dot.tms.SignText;
  */
 public class LineModel extends AbstractListModel implements ComboBoxModel {
 
+	/** Set of items in the line model */
 	protected final TreeSet<SignText> items =
 		new TreeSet<SignText>(new SignTextComparator());
 
+	/** Create a new line model */
 	protected LineModel() {
 		items.add(new BlankSignText());
 	}
 
+	/** Get the element at the specified index */
 	public Object getElementAt(int index) {
 		int i = 0;
 		for(SignText t: items) {
@@ -44,22 +48,30 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 		return null;
 	}
 
+	/** Get the number of elements in the model */
 	public int getSize() {
 		return items.size();
 	}
 
-	protected Object selected;
+	/** Selected item */
+	protected SignText selected;
 
+	/** Get the selected item */
 	public Object getSelectedItem() {
 		return selected;
 	}
 
+	/** Set the selected item */
 	public void setSelectedItem(Object s) {
 		if(s instanceof String)
-			s = lookupMessage((String)s);
-		selected = s;
+			selected = lookupMessage((String)s);
+		else if(s instanceof SignText)
+			selected = (SignText)s;
+		else
+			selected = null;
 	}
 
+	/** Lookup a sign text message */
 	protected SignText lookupMessage(String t) {
 		for(SignText st: items) {
 			if(st.getMessage().equals(t))
@@ -68,6 +80,7 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 		return null;
 	}
 
+	/** Find the index of an item */
 	protected int find(SignText t) {
 		int i = 0;
 		for(SignText st: items) {
@@ -78,6 +91,7 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 		return -1;
 	}
 
+	/** Add a sign text to the model */
 	protected void add(SignText t) {
 		items.add(t);
 		final int i = find(t);
@@ -89,6 +103,7 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 		});
 	}
 
+	/** Remove a sign text from the model */
 	protected void remove(SignText t) {
 		final int i = find(t);
 		if(i >= 0) {
@@ -103,10 +118,10 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 		}
 	}
 
+	/** Change a sign text in the model */
 	protected void change(SignText t) {
-		final int i0 = find(t);
+		final int i0 = preChangeRow(t);
 		if(i0 >= 0) {
-			items.remove(t);
 			items.add(t);
 			final int i1 = find(t);
 			assert i1 >= 0;
@@ -118,5 +133,19 @@ public class LineModel extends AbstractListModel implements ComboBoxModel {
 				}
 			});
 		}
+	}
+
+	/** Find and remove a sign text from the model */
+	protected int preChangeRow(SignText t) {
+		// we cannot trust the TreeSet to remove the item,
+		// because the sort order may have changed
+		Iterator<SignText> it = items.iterator();
+		for(int i = 0; it.hasNext(); i++) {
+			if(t.equals(it.next())) {
+				it.remove();
+				return i;
+			}
+		}
+		return -1;
 	}
 }
