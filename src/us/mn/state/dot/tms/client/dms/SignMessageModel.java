@@ -100,7 +100,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
 	/** Is the DMS a member of the specified group? */
 	protected boolean isMember(SignGroup g) {
-		return groups.contains(g.getName());
+		return g != null && groups.contains(g.getName());
 	}
 
 	/** Add the DMS to a sign group */
