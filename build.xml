@@ -266,7 +266,7 @@
 				<include name="iris-client.properties"/>
 			</fileset>
 			<fileset dir="${build.etc}">
-				<include name="iris-client.jnlp"/>
+				<include name="*.jnlp"/>
 				<include name="iris.sh"/>
 				<include name="iris.bat"/>
 			</fileset>

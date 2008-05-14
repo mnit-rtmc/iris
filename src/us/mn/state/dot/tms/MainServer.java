@@ -25,6 +25,7 @@ import java.rmi.server.RMISocketFactory;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
+import java.util.TimeZone;
 import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.sonar.server.Server;
@@ -67,6 +68,7 @@ public class MainServer {
 	static public void main(String[] args) {
 		try {
 			redirectStdStreams();
+			sanityChecks();
 			Properties props = PropertyLoader.load(PROP_FILE);
 			TMSImpl tms = new TMSImpl(props);
 			Namespace ns = new Namespace();
@@ -93,4 +95,16 @@ public class MainServer {
 			e.printStackTrace();
 		}
 	}
+
+	/** perform sanity and debug checks */
+	static public void sanityChecks() {
+
+		// does the default time zone support DST?
+		if (!TimeZone.getDefault().useDaylightTime()) {
+			System.err.println("Warning: the default time zone ("+
+			TimeZone.getDefault().getDisplayName()+
+			") doesn't support DST. Specify the time zone via the command line.");
+		}
+	}
+
 }

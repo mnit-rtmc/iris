@@ -25,8 +25,8 @@
 	<jar href="lib/Shapes-@@SHAPES.VERSION@@.jar"/>
 	<jar href="lib/datatools-@@DATATOOLS.VERSION@@.jar"/>
 	<jar href="lib/video-client-@@VIDEOCLIENT.VERSION@@.jar"/>
-	<jar href="lib/mail.jar"/>
-	<jar href="lib/activation.jar"/>
+	<extension name="mail" href="mail.jnlp"/>
+	<extension name="activation" href="activation.jnlp"/>
     </resources>
     <security>
        <all-permissions/>

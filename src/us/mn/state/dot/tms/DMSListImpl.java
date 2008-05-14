@@ -134,15 +134,6 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 	}
 
 	/** Print the body of the travel time XML file */
-	protected void printTravelXmlBody(PrintWriter out, int interval) {
-		Iterator<TMSObjectImpl> it = iterator();
-		while(it.hasNext()) {
-			DMSImpl dms = (DMSImpl)it.next();
-			dms.updateTravelTimes(interval);
-		}
-	}
-
-	/** Print the tail of the travel time XML file */
 	protected void printTravelXmlTail(PrintWriter out) {
 		out.println("</device_status>");
 	}
@@ -157,7 +148,7 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 			if(dms == null)
 				continue;
 			ret += "DMSList[" + index + "]:" + "Id=" + dms.getId() +
-				", isActive()=" + dms.isActive() + ", notes=" +
+				", getStatusCode()="+dms.getStatusCode()+", notes=" +
 				dms.getNotes() + "\n";
 		}
 		return ret;

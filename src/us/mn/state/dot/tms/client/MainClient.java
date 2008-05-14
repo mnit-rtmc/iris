@@ -20,6 +20,7 @@ import java.net.ProxySelector;
 import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Properties;
+import java.util.TimeZone;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
@@ -124,6 +125,7 @@ public class MainClient {
 	 * @param args Arguments passed to the application.
 	 */
 	static protected void execute(final String[] args) throws Exception {
+		sanityChecks();
 		bindSocket();
 		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
@@ -149,4 +151,16 @@ public class MainClient {
 			new ExceptionDialog(e).setVisible(true);
 		}
 	}
+
+	/** perform sanity and debug checks */
+	static public void sanityChecks() {
+
+		// does the default time zone support DST?
+		if (!TimeZone.getDefault().useDaylightTime()) {
+			System.err.println("Warning: the default time zone ("+
+			TimeZone.getDefault().getDisplayName()+
+			") doesn't support DST. Specify the time zone via the command line.");
+		}
+	}
+
 }
