@@ -790,7 +790,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		zones.clear();
 		ZoneBuilder zone_builder = new ZoneBuilder();
 		Corridor c = meter.getCorridor();
-		c.findNode(zone_builder);
+		if(c != null)
+			c.findNode(zone_builder);
 		zones.addAll(zone_builder.getList());
 	}
 
