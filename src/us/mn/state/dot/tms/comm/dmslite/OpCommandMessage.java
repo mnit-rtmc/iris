@@ -44,15 +44,6 @@ public class OpCommandMessage extends OpDms {
 	/** Sign message */
 	protected final SignMessage m_message;
 
-	/**
-	 * Message CRC
-	 *
-	 * @param d
-	 * @param m
-	 */
-
-	// protected int messageCRC;
-
 	/** Create a new DMS command message object */
 	public OpCommandMessage(DMSImpl d, SignMessage m) {
 		super(COMMAND, d);
@@ -142,9 +133,11 @@ public class OpCommandMessage extends OpDms {
 			if (m_message.getBitmap().getBitmap().length != 300) {
 				System.err.println(
 				    "WARNING: message wrong size in PhaseSendOnePageMessage.");
-
 				return null;
 			}
+
+			// set message attributes as a function of the operation
+			setMsgAttributes(mess);
 
 			/*  build req msg and expected response
 			 *     <DmsLite>
@@ -287,25 +280,27 @@ public class OpCommandMessage extends OpDms {
 				// return null;
 			}
 
-			    /**
-			     * Return a newly created SignViewOperation using a dmslite xml msg string.
-			     * The xml string is expected to be in the following format.
-			     *
-			     *    <DmsLite>
-			     *       <SetMultiplePageReqMsg>
-			     *          <Address>...</Address>
-			     *          <MsgText>...</MsgText>                  multistring cms message text
-			     *          <UseOnTime>...</UseOnTime>         	true to use on time, else now
-			     *          <OnTime>...</OnTime>             	message on time
-			     *          <UseOffTime>...</UseOffTime>       	true to use off time, else indefinite
-			     *          <OffTime>...</OffTime>           	message off time
-			     *          <DisplayTimeMS>...<DisplayTimeMS>       message display time
-			     *          <Owner>...</Owner>                      the message author
-			     *          <Msg>...</Msg>
-			     *       </SetMultiplePageReqMsg>
-			     *    </DmsLite>
-			     */
+			// set message attributes as a function of the operation
+			setMsgAttributes(mess);
 
+			/**
+			* Return a newly created SignViewOperation using a dmslite xml msg string.
+			* The xml string is expected to be in the following format.
+			*
+			*    <DmsLite>
+			*       <SetMultiplePageReqMsg>
+			*          <Address>...</Address>
+			*          <MsgText>...</MsgText>                  multistring cms message text
+			*          <UseOnTime>...</UseOnTime>         	true to use on time, else now
+			*          <OnTime>...</OnTime>             	message on time
+			*          <UseOffTime>...</UseOffTime>       	true to use off time, else indefinite
+			*          <OffTime>...</OffTime>           	message off time
+			*          <DisplayTimeMS>...<DisplayTimeMS>       message display time
+			*          <Owner>...</Owner>                      the message author
+			*          <Msg>...</Msg>
+			*       </SetMultiplePageReqMsg>
+			*    </DmsLite>
+			*/
 
 			ReqRes rr1;
 			{

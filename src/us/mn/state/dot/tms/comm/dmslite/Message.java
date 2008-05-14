@@ -42,13 +42,14 @@ public class Message implements AddressedMessage
     	// xml tag
 	static final String DMSLITEMSGTAG = "DmsLite";
 
-    	// max wait time for DMS response
-	static final int TIMEOUT_DMS_MS = 1000* 20;
+    	// default max wait time for DMS response
+	static final int DEFAULT_TIMEOUT_DMS_MS = 1000*30;
 
 	// fields
 	private String m_name = "DmsLiteMsg";
 	private String m_reqmsgname = "";
 	private String m_respmsgname = "";
+	private int m_dmsTimeoutMS=DEFAULT_TIMEOUT_DMS_MS;
 
 	/** List of objects set or get with this message */
 	protected final LinkedList<Object> m_objlist = new LinkedList<Object>();
@@ -61,6 +62,12 @@ public class Message implements AddressedMessage
 		m_is = new TokenStreamReader(
 		    is, 1024, 16384, 1000);    // buffer size, max cap, sleep time
 		System.err.println("dmslite.Message.Message() called.");
+	}
+
+	/** set timeout value in MS */
+	public void setTimeoutMS(int ms) {
+		m_dmsTimeoutMS=(ms<=0 ? DEFAULT_TIMEOUT_DMS_MS : ms);
+		System.err.println("DmsLite.Message.setTimeoutMS("+ms+") called.");
 	}
 
 	/** set message name */
@@ -134,7 +141,7 @@ public class Message implements AddressedMessage
 		String token;
 
 		try {
-			token = m_is.readToken(TIMEOUT_DMS_MS,
+			token = m_is.readToken(m_dmsTimeoutMS,
 					       "<" + DMSLITEMSGTAG + ">",
 					       "</" + DMSLITEMSGTAG + ">");
 		} catch (IllegalStateException ex) {
@@ -149,7 +156,7 @@ public class Message implements AddressedMessage
 		if(token == null) {
 			System.err.println(
 			    "dmslite.Message.getRequest(): timed out waiting for CMS (timeout is "
-			    + TIMEOUT_DMS_MS / 1000 + " secs).");
+			    + m_dmsTimeoutMS / 1000 + " secs).");
 
 		// parse response
 		} else {

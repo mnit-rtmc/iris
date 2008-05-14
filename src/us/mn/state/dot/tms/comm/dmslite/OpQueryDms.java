@@ -189,6 +189,9 @@ public class OpQueryDms extends OpDms
 
 			Message mess = (Message) argmess;
 
+			// set message attributes as a function of the operation
+			setMsgAttributes(mess);
+
 			// build req msg and expected response
 			mess.setName("StatusReqMsg");
 			mess.setReqMsgName("StatusReqMsg");

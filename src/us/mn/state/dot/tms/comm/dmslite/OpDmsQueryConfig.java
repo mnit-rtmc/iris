@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.DMSImpl;
@@ -71,6 +69,9 @@ public class OpDmsQueryConfig extends OpDms {
             assert argmess instanceof Message : "wrong message type";
 
             Message mess = (Message) argmess;
+
+	    // set message attributes as a function of the operation
+	    setMsgAttributes(mess);
 
             // build req msg
             String reqname = "GetDmsConfigReqMsg";
