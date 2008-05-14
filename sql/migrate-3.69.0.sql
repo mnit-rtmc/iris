@@ -24,6 +24,7 @@ CREATE TABLE sign_text (
 
 -- do not leave this in migrate script
 INSERT INTO sign_group (name, local) VALUES ('PIXEL 125 WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('PIXEL 70 WIDE', false);
 INSERT INTO sign_group (name, local) VALUES ('CHAR 10 WIDE', false);
 INSERT INTO sign_group (name, local) VALUES ('CHAR 12 WIDE', false);
 
