@@ -66,10 +66,8 @@ public class DmsLitePoller extends MessagePoller
 	 * Create a new message for the specified controller. Called
 	 * by parent MessagePoller.doPoll().
 	 *
-	 * @param c
-	 *
-	 * @return
-	 *
+	 * @param c Associated controller.
+	 * @return A newly created Message.
 	 * @throws MessengerException
 	 */
 	public AddressedMessage createMessage(ControllerImpl c)
@@ -100,23 +98,6 @@ public class DmsLitePoller extends MessagePoller
 	 */
 	public void download(ControllerImpl c, boolean reset, int p) {
 		System.err.println("DmsLitePoller.download() called, ignored.");
-
-		/*
-		 *       DMSImpl dms = c.getActiveSign();
-		 *       if(dms != null) {
-		 *               if(reset) {
-		 *       System.err.println("DmsLitePoller.download(): reset requested by caller.");
-		 *                       //DMSReset r = new DMSReset(dms);
-		 *                       //r.setPriority(p);
-		 *                       //r.start();
-		 *               }
-		 *               //if(dms.hasProportionalFonts())
-		 *               //      downloadFonts(dms, p);
-		 *               OpDmsDefaultDownload o = new OpDmsDefaultDownload(dms);
-		 *               o.setPriority(p);
-		 *               o.start();
-		 *       }
-		 */
 	}
 
 	/**
