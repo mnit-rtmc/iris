@@ -44,9 +44,4 @@ public class SignTextComparator implements Comparator<SignText> {
 	public boolean equals(Object o) {
 		return o == this;
 	}
-
-	/** Get the hash code */
-	public int hashCode() {
-		return super.hashCode();
-	}
 }
