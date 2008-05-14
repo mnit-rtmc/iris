@@ -87,3 +87,11 @@ DROP FUNCTION copy_sign_text(TEXT);
 
 DROP VIEW dms_message_view;
 DROP TABLE dms_message;
+
+CREATE VIEW sign_text_view AS
+	SELECT dms, local, line, message, priority
+	FROM dms_sign_group
+	JOIN sign_group ON dms_sign_group.sign_group = sign_group.name
+	JOIN sign_text ON sign_group.name = sign_text.sign_group;
+
+GRANT SELECT ON sign_text_view TO PUBLIC;
