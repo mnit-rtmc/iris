@@ -26,10 +26,11 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
 
 import java.io.IOException;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Operation to query the current message on a DMS.
@@ -60,8 +61,63 @@ public class OpQueryDms extends OpDms
 		return new PhaseQueryCurrentMessage();
 	}
 
+	/** return true if the bitmap is blank or null */
+	public static boolean isBitmapBlank(byte[] b) {
+		if (b==null)
+			return true;
+		for (int i=0; i<b.length; ++i)
+			if (b[i]!=0)
+				return false;
+		return true;
+	}
+
+	/** calculate the number of pages in a bitmap */
+	protected int calcNumPages(byte[] bm) {
+
+		// calc size of 1 page
+		int lenpg=m_dms.getSignWidthPixels()*m_dms.getSignHeightPixels()/8;
+		if (lenpg<=0) {
+			return(0);
+		}
+
+		// calculate number of pages based on bitmap length
+		int npgs=bm.length/lenpg;
+		//System.err.println("OpQueryDms.calcnumPages(): bm.length="+bm.length+",lenpg="+lenpg+",npgs="+npgs);
+		if (npgs*lenpg!=bm.length) {
+			return(0);
+		}
+
+		return npgs;
+	}
+
 	/**
-	 * Create a SignMessage if we have a bitmap and no message text.
+	 * create message text given a bitmap.
+	 * 
+	 * @returns If bitmap is not blank: "[nl]???" for 1 page,
+	 *          If bitmap is not blank: "[nl]???[np][nl]???" for 2 pages,
+	 *          If bitmap is blank, then an empty string is returned.
+	 */
+	protected static String createMessageTextUsingBitmap(int numpages,byte[] bm) {
+
+		/** text for a single page */
+		final String UNKNOWN_PG_TEXT = "[nl]???[np]";
+
+		// is bitmap blank or null?
+		if (OpQueryDms.isBitmapBlank(bm)) {
+			return("");
+		}
+
+		// build message
+		String msg="";
+		for (int i=0; i<numpages; ++i) {
+			msg+=UNKNOWN_PG_TEXT;
+		}
+	
+		return (msg);
+	}
+
+	/**
+	 * Create a SignMessage using a bitmap.
 	 *
 	 * @params owner message owner.
 	 * @params argmulti A String in the MultiString format.
@@ -69,57 +125,36 @@ public class OpQueryDms extends OpDms
 	 * @params dura message duration in mins.
 	 * @returns A SignMessage that contains the text of the message and a rendered bitmap.
 	 */
-	private SignMessage createSignMessage(String owner, String argmulti,
-		byte[] argbitmap, int dura) {
-		System.err.println(
-		    "OpQueryDms.createSignMessage() called: m_dms.width="
-		    + m_dms.getSignWidthPixels() + ", argbitmap.len="
-		    + argbitmap.length + ".");
+	private SignMessage createSignMessageWithBitmap(String owner, byte[] argbitmap, int dura) 
+	{
+		//System.err.println(
+		//    "OpQueryDms.createSignMessageWithBitmap() called: m_dms.width="
+		//    + m_dms.getSignWidthPixels() + ", argbitmap.len="
+		//    + argbitmap.length + ".");
 
 		assert owner != null;
-		assert argmulti != null;
 		assert argbitmap != null;
 
-		int numpages = new MultiString(argmulti).getNumPages();
-		System.err.println("OpQueryDms.createSignMessage(): numpages="
-				   + numpages);
+		// calc number of pages
+		int numpgs=this.calcNumPages(argbitmap);
+		System.err.println("OpQueryDms.createSignMessageWithBitmap(): numpages=" + numpgs);
 
-		// force bitmap to be 1 page
-		// FIXME: remove this?
-		if(numpages > 1) {
-			byte[] nbm = new byte[300];
-			System.arraycopy(argbitmap, 0, nbm, 0, 300);
-			argbitmap = nbm;
+		// create multistring
+		MultiString multi = new MultiString(OpQueryDms.createMessageTextUsingBitmap(numpgs,argbitmap));
+
+		// create multipage bitmap
+		TreeMap<Integer, BitmapGraphic> bitmaps = new TreeMap<Integer, BitmapGraphic>();
+		for (int pg=0; pg<numpgs; ++pg) {
+			int pglen=m_dms.getSignHeightPixels() * m_dms.getSignWidthPixels()/8;
+			byte[] nbm = new byte[pglen];
+			System.arraycopy(argbitmap, pg*pglen, nbm, 0, pglen);
+			BitmapGraphic bm=new BitmapGraphic(m_dms.getSignWidthPixels(),m_dms.getSignHeightPixels());
+			bm.setBitmap(nbm);
+			bitmaps.put(pg, bm);
 		}
-		//Map<Integer, BitmapGraphic> bm=
-
-		int height = m_dms.getSignHeightPixels();
-		int width = m_dms.getSignWidthPixels();
-
-		// sanity check
-		/*
-		int len = ((width * height + 7) / 8) * numpages;
-		if(len != argbitmap.length) {
-			System.err.println(
-			    "OpQueryDms.createSignMessage(): ERROR, length mismatch: len="
-			    + len + ",length()=" + argbitmap.length
-			    + ", numpages=" + numpages);
-		}
-		*/
 
 		// create SignMessage
-		MultiString multi = new MultiString(argmulti);
-		BitmapGraphic bitmap = new BitmapGraphic(width, height);
-		try {
-			bitmap.setBitmap(argbitmap);
-		} catch (IndexOutOfBoundsException ex) {
-			System.err.println(
-			    "OpQueryDms.createSignMessage(): ERROR, could not set the bitmap, bitmaplen="
-			    + argbitmap.length+", ex="+ex);
-		}
-
-		SignMessage sm =
-			new SignMessage(owner, multi, bitmap, dura);
+		SignMessage sm = new SignMessage(owner, multi, bitmaps, dura);
 
 		return sm;
 	}
@@ -161,7 +196,7 @@ public class OpQueryDms extends OpDms
 	}
 
 	/** create a blank message */
-	protected SignMessage buildBlankMsg(String owner)
+	protected SignMessage createBlankMsg(String owner)
 	{
 		MultiString multi = new MultiString();
 		BitmapGraphic bbm =
@@ -249,8 +284,7 @@ public class OpQueryDms extends OpDms
 					}
 
 					// bitmap
-					usebitmap = new Boolean(
-					    rr.getResVal("UseBitmap"));
+					usebitmap = new Boolean(rr.getResVal("UseBitmap"));
 					bitmap = rr.getResVal("Bitmap");
 
 					System.err.println(
@@ -295,21 +329,18 @@ public class OpQueryDms extends OpDms
 					m_dms.setMessageFromController(msgtext, duramins);
 
 				// don't have text
-				// note, the MsgText field is still assumed to contain a multistring with a message
-				// indicating a missing one or two page message.
 				} else {
 					SignMessage sm;
 
 					// have bitmap
 					if(usebitmap) {
 						byte[] bm=Convert.hexStringToByteArray(bitmap);
-
 						// System.err.println("OpQueryDms: hex string length=" + bitmap.length() + ", byte[] length=" + bm.length);
-						sm = createSignMessage(owner, msgtext, bm, duramins);
+						sm = createSignMessageWithBitmap(owner, bm, duramins);
 
 					// don't have bitmap, therefore CMS is blank
 					} else {
-						sm=buildBlankMsg(owner);
+						sm=createBlankMsg(owner);
 					}
 
 					// set new message
