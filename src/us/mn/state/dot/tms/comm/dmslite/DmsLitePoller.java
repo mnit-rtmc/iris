@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.sched.Completer;
@@ -43,20 +41,11 @@ import us.mn.state.dot.tms.comm.SocketMessenger;
 public class DmsLitePoller extends MessagePoller
 	implements SignPoller, DMSPoller {
 
-	/** Field description */
+	/** valid address range (inclusive) */
 	static public final int MAX_ADDRESS = 255;
-
-	// consts
-
-	/** Field description */
 	static public final int MIN_ADDRESS = 1;
 
-	/**
-	 * Create a new dmslite poller
-	 *
-	 * @param n
-	 * @param m
-	 */
+	/** Create a new dmslite poller */
 	public DmsLitePoller(String n, Messenger m) {
 		super(n, m);
 		assert m instanceof SocketMessenger;
@@ -77,30 +66,22 @@ public class DmsLitePoller extends MessagePoller
 				   messenger.getInputStream(c));
 	}
 
-	/**
-	 * Check if a drop address is valid
-	 */
+	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
 	}
 
-	/**
-	 * Download the font to a sign controller
-	 */
+	/** Download the font to a sign controller */
 	protected void downloadFonts(DMSImpl dms, int p) {
 		System.err.println("DmsLitePoller.downloadFonts() called, ignored.");
 	}
 
-	/**
-	 * Perform a controller download. Called: when IRIS server is shutting down, etc.
-	 */
+	/** Perform a controller download. Called: when IRIS server is shutting down, etc. */
 	public void download(ControllerImpl c, boolean reset, int p) {
 		System.err.println("DmsLitePoller.download() called, ignored.");
 	}
 
-	/**
-	 * Perform a sign status poll. Called every 30 seconds.
-	 */
+	/** Perform a sign status poll. Called every 30 seconds */
 	public void pollSigns(ControllerImpl c, Completer comp) {
 		System.err.println("DmsLitePoller.pollSigns() called.");
 
@@ -122,20 +103,12 @@ public class DmsLitePoller extends MessagePoller
 		System.err.println("DmsLitePoller.poll30Second() called, ignored.");
 	}
 
-	/**
-	 * Perform a 5-minute poll
-	 */
+	/** Perform a 5-minute poll */
 	public void poll5Minute(ControllerImpl c, Completer comp) {
 		System.err.println("DmsLitePoller.poll5Minute() called, ignored.");
 	}
 
-	/**
-	 * Start a test for the given controller
-	 *
-	 * @param c
-	 *
-	 * @return
-	 */
+	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
 		System.err.println("DmsLitePoller.startTest() called, ignored.");
 		return null;
@@ -144,8 +117,6 @@ public class DmsLitePoller extends MessagePoller
 	/**
 	 * Query the DMS configuration. This method is called at the successful
 	 * completion of each operation.
-	 *
-	 * @param dms
 	 */
 	public void queryConfiguration(DMSImpl dms) {
 		System.err.println("DmsLitePoller.queryConfiguration() called.");
@@ -154,10 +125,6 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Send a new message to the sign
-	 *
-	 * @param dms
-	 * @param m
-	 *
 	 * @throws InvalidMessageException
 	 */
 	public void sendMessage(DMSImpl dms, SignMessage m)
@@ -177,30 +144,13 @@ public class DmsLitePoller extends MessagePoller
 			return;
 		}
 
-		// create operation
 		OpCommandMessage cmd = new OpCommandMessage(dms, m);
-
-		// needed?
-
-		/*
-		 * if (m instanceof SignTravelTime) {
-		 *   // Avoid race with user/alert messages
-		 *   if (dms.acquire(cmd) != cmd) {
-		 *       return;
-		 *   }
-		 * }
-		 */
-
-		// start operation
 		cmd.start();
 	}
 
 	/**
 	 * Set the time remaining for the currently displayed message. This is
 	 * called when the "clear" button in the IRIS client is pressed.
-	 *
-	 * @param dms
-	 * @param m
 	 */
 	public void setMessageTimeRemaining(DMSImpl dms, SignMessage m) {
 		System.err.println(
@@ -210,24 +160,12 @@ public class DmsLitePoller extends MessagePoller
 		// blank the sign
 		if (m.getDuration() <= 0) {
 			new OpDmsBlank(dms, m).start();
-
-		// error
-		} else {
-			// FIXME: add support for changing ontime for message
-			System.err.println(
-			    "ERROR: DmsLitePoller.setMessageTimeRemaining(): called with non zero duration ("
-			    + m.getDuration() + "). Ignored.");
+			return;
 		}
 
-		/*
-		 *       DMSSetTimeRemaining cmd = new DMSSetTimeRemaining(dms, m);
-		 *       if(m instanceof SignTravelTime) {
-		 *               // Avoid races with user/alert messages
-		 *               if(dms.acquire(cmd) != cmd)
-		 *                       return;
-		 *       }
-		 *       cmd.start();
-		 */
+		// should never get here
+		System.err.println(
+		    "ERROR: DmsLitePoller.setMessageTimeRemaining(): should never get here, duration="+m.getDuration());
 	}
 
 	/**
@@ -256,10 +194,7 @@ public class DmsLitePoller extends MessagePoller
 	 * Activate a lamp test
 	 */
 	public void testLamps(DMSImpl dms) {
-		System.err.println(
-		    "DmsLitePoller.testLamps() called, ignored.");
-
-		// new DMSLampTest(dms).start();
+		System.err.println("DmsLitePoller.testLamps() called, ignored.");
 	}
 
 	/**
@@ -267,26 +202,14 @@ public class DmsLitePoller extends MessagePoller
 	 */
 	public void testFans(DMSImpl dms) {
 		System.err.println("DmsLitePoller.testFans() called, ignored.");
-
-		// new DMSFanTest(dms).start();
 	}
 
 	/**
 	 * Set Ledstar pixel configuration
-	 *
-	 * @param dms
-	 * @param ldcPotBase
-	 * @param pixelCurrentLow
-	 * @param pixelCurrentHigh
-	 * @param badPixelLimit
 	 */
 	public void setLedstarPixel(DMSImpl dms, int ldcPotBase,
 				    int pixelCurrentLow, int pixelCurrentHigh,
 				    int badPixelLimit) {
-		System.err.println(
-		    "DmsLitePoller.setLedstarPixel() called, ignored.");
-
-		// new DMSSetLedstarPixel(dms, ldcPotBase, pixelCurrentLow,
-		// pixelCurrentHigh, badPixelLimit).start();
+		System.err.println("DmsLitePoller.setLedstarPixel() called, ignored.");
 	}
 }
