@@ -21,14 +21,10 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.IOException;
 
@@ -79,13 +75,16 @@ public class OpProcessCawsMsgs extends ControllerOperation {
             // parse the response
             byte[] bmsgs = mess.getDmsMsgs();
 
-            System.err.println("OpProcessCawsMsgs.PhaseReadMsgFile.poll(), received " + bmsgs.length
-                               + " bytes of cms messages.");
+	    // nothing?
+	    if (bmsgs==null || bmsgs.length<=0) {
+		    System.err.println("OpProcessCawsMsgs.PhaseReadMsgFile.poll(), missing or zero length caws file.");
+		    return null;
+	    }
 
             // create and activate messages
+            System.err.println("OpProcessCawsMsgs.PhaseReadMsgFile.poll(), received " + bmsgs.length +
+            	" bytes of cms messages.");
             new D10CmsMsgs(bmsgs).activate();
-
-            // done
             return null;
         }
     }
