@@ -73,7 +73,6 @@ public class DmsLitePoller extends MessagePoller
 	public AddressedMessage createMessage(ControllerImpl c)
 		throws MessengerException {
 		System.err.println("DmsLitePoller.createMessage() called.");
-
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream(c));
 	}
@@ -89,8 +88,7 @@ public class DmsLitePoller extends MessagePoller
 	 * Download the font to a sign controller
 	 */
 	protected void downloadFonts(DMSImpl dms, int p) {
-		System.err.println(
-		    "DmsLitePoller.downloadFonts() called, ignored.");
+		System.err.println("DmsLitePoller.downloadFonts() called, ignored.");
 	}
 
 	/**
@@ -121,14 +119,14 @@ public class DmsLitePoller extends MessagePoller
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		System.err.println("DmsLitePoller.Second() called, ignored.");
+		System.err.println("DmsLitePoller.poll30Second() called, ignored.");
 	}
 
 	/**
 	 * Perform a 5-minute poll
 	 */
 	public void poll5Minute(ControllerImpl c, Completer comp) {
-		System.err.println("DmsLitePoller.Minute() called, ignored.");
+		System.err.println("DmsLitePoller.poll5Minute() called, ignored.");
 	}
 
 	/**
@@ -139,12 +137,7 @@ public class DmsLitePoller extends MessagePoller
 	 * @return
 	 */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-		System.err.println(
-		    "DmsLitePoller.startTest() called, ignored.");
-
-		// DiagnosticOperation test = new DiagnosticNtcip(c);
-		// test.start();
-		// return test;
+		System.err.println("DmsLitePoller.startTest() called, ignored.");
 		return null;
 	}
 
@@ -155,8 +148,7 @@ public class DmsLitePoller extends MessagePoller
 	 * @param dms
 	 */
 	public void queryConfiguration(DMSImpl dms) {
-		System.err.println(
-		    "DmsLitePoller.queryConfiguration() called.");
+		System.err.println("DmsLitePoller.queryConfiguration() called.");
 		new OpDmsQueryConfig(dms).start();
 	}
 
@@ -171,8 +163,7 @@ public class DmsLitePoller extends MessagePoller
 	public void sendMessage(DMSImpl dms, SignMessage m)
 		throws InvalidMessageException {
 		System.err.println("DmsLitePoller.sendMessage() called.");
-		System.err.println(
-		    "DmsLitePoller.sendMessage(), SignMessage multistring="
+		System.err.println("DmsLitePoller.sendMessage(), SignMessage multistring="
 		    + m.getMulti().toString() + ",bitmap len="
 		    + m.getBitmap().getBitmap().length + ", bitmap="
 		    + Convert.toHexString(m.getBitmap().getBitmap()));
@@ -222,7 +213,6 @@ public class DmsLitePoller extends MessagePoller
 
 		// error
 		} else {
-
 			// FIXME: add support for changing ontime for message
 			System.err.println(
 			    "ERROR: DmsLitePoller.setMessageTimeRemaining(): called with non zero duration ("

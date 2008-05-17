@@ -171,28 +171,28 @@ public class OpQueryDms extends OpDms
 	 */
 	private static int calcMsgDuration(boolean useont, boolean useofft,
 					   Calendar ontime, Calendar offtime) {
+		System.err.println("OpQueryDms.calcMsgDuration:  useontime=" + useont + ",  ontime="+ontime.getTime());
+		System.err.println("OpQueryDms.calcMsgDuration: useofftime=" + useofft + ", offtime="+offtime.getTime());
 
-		if(ontime == null) {
-			throw new IllegalArgumentException("invalid null ontime in calcMsgDuration.");
-		}
-		if(offtime == null) {
-			throw new IllegalArgumentException("invalid null offtime in calcMsgDuration.");
-		}
 		if(!useont) {
 			throw new IllegalArgumentException("must have ontime in calcMsgDuration.");
 		}
 		if(!useofft) {
 			return SignMessage.DURATION_INFINITE;
 		}
+		if(ontime == null) {
+			throw new IllegalArgumentException("invalid null ontime in calcMsgDuration.");
+		}
+		if(offtime == null) {
+			throw new IllegalArgumentException("invalid null offtime in calcMsgDuration.");
+		}
 
 		// calc diff in mins
-		int ms = offtime.compareTo(ontime);
-		int m = ((ms < 0) ? 0 : ms / 1000 / 60);
+		long delta=offtime.getTimeInMillis()-ontime.getTimeInMillis();
+		long m = ((delta < 0) ? 0 : delta / 1000 / 60);
 
-		System.err.println(
-		    "OpQueryDms.calcMsgDuration: duration (mins)=" + m
-		    + ", ontime=" + ontime + ", offtime=" + offtime);
-		return (m);
+		System.err.println("OpQueryDms.calcMsgDuration: duration (mins)=" + m);
+		return ((int)m);
 	}
 
 	/** create a blank message */
@@ -291,8 +291,8 @@ public class OpQueryDms extends OpDms
 					    "OpQueryDms.PhaseQueryCurrentMessage.poll(msg) parsed msg values: IsValid:"
 					    + valid + ", MsgTextAvailable:"
 					    + msgtextavailable + ", MsgText:"
-					    + msgtext + ", OnTime:" + ont
-					    + ", OffTime:" + offt + ", bitmap:"
+					    + msgtext + ", OnTime:" + ont.getTime() 
+					    + ", OffTime:" + offt.getTime() + ", bitmap:"
 					    + bitmap);
 				}
 			} catch (IllegalArgumentException ex) {
