@@ -97,22 +97,13 @@ abstract public class MessagePoller extends Thread {
 			Operation o = queue.next();
 			if(o instanceof KillThread)
 				break;
-			if(o instanceof ControllerOperation) {
-				try {
-					doPoll((ControllerOperation)o);
-				}
-				catch(IOException e) {
-					POLL_LOG.log(getName() + " exception: "+
-						e.getMessage());
-				}
-			}
+			if(o instanceof ControllerOperation)
+				doPoll((ControllerOperation)o);
 		}
 	}
 
 	/** Perform one poll for an operation */
-	protected synchronized void doPoll(final ControllerOperation o)
-		throws IOException
-	{
+	protected synchronized void doPoll(final ControllerOperation o) {
 		final String oname = o.toString();
 		long start = System.currentTimeMillis();
 		try {
@@ -133,7 +124,15 @@ abstract public class MessagePoller extends Thread {
 		}
 		catch(IOException e) {
 			o.handleException(e);
-			messenger.handleException(e);
+			try {
+				messenger.handleException(e);
+			}
+			catch(IOException e2) {
+				POLL_LOG.log(getName() + " second: " +
+					e2.getMessage());
+				POLL_LOG.log(getName() + " first: " +
+					e.getMessage());
+			}
 		}
 		catch(NumberFormatException e) {
 			o.handleException(new IOException(
