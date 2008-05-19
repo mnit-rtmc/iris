@@ -231,7 +231,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 		/** Create a new sign polling timer job */
 		protected TimerJobSigns() {
-			super(Calendar.SECOND, 30, Calendar.SECOND, 4);
+			// note: mtod, add internationalization call here
+			super(Calendar.SECOND, (false ? 30 : 60), Calendar.SECOND, 4);
 			comp = new Completer("Sign Poll", TIMER, job);
 		}
 
