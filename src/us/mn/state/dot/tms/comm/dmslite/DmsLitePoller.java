@@ -81,7 +81,7 @@ public class DmsLitePoller extends MessagePoller
 		System.err.println("DmsLitePoller.download() called, ignored.");
 	}
 
-	/** Perform a sign status poll. Called every 30 seconds */
+	/** Perform a sign status poll. Called every 60 seconds, via TimerJobSigns */
 	public void pollSigns(ControllerImpl c, Completer comp) {
 		System.err.println("DmsLitePoller.pollSigns() called.");
 

@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageMemoryType;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageMultiString;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
+import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.Controller;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -239,7 +241,7 @@ public class OpQueryDms extends OpDms
 				new Integer((int) m_dms.getController()
 					.getDrop()).toString();
 			ReqRes rr = new ReqRes("Address", addr, new String[] {
-				"IsValid", "MsgTextAvailable", "MsgText",
+				"IsValid", "ErrMsg", "MsgTextAvailable", "MsgText",
 				"Owner", "UseOnTime", "OnTime", "UseOffTime",
 				"OffTime", "UseBitmap", "Bitmap"
 			});
@@ -250,6 +252,7 @@ public class OpQueryDms extends OpDms
 
 			// parse resp msg
 			boolean valid = false;
+			String errmsg = "";
 			boolean msgtextavailable = false;
 			String msgtext = "";
 			String owner = "";
@@ -263,6 +266,7 @@ public class OpQueryDms extends OpDms
 			// get valid flag
 			try {
 				valid = new Boolean(rr.getResVal("IsValid"));
+				errmsg = rr.getResVal("ErrMsg");
 				if(valid) {
 					msgtextavailable = new Boolean(
 					    rr.getResVal("MsgTextAvailable"));
@@ -345,11 +349,14 @@ public class OpQueryDms extends OpDms
 
 					// set new message
 					m_dms.setActiveMessage(sm);
+					m_dms.setStatus("OK");
 				}
 
+			// valid flag is false
 			} else {
 				System.err.println(
-				    "OpQueryDms: response from cmsserver received, ignored because Xml valid field is false.");
+				    "OpQueryDms: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
+				m_dms.setStatus(errmsg);
 			}
 
 			// this operation is complete
