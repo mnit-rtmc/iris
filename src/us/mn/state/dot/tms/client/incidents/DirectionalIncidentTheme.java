@@ -79,7 +79,7 @@ public class DirectionalIncidentTheme extends StyledTheme {
 
 	/** Create a new directional incident theme */
 	public DirectionalIncidentTheme(TypeCache<SystemPolicy> c) {
-		super("Incidents", IncidentLayer.TWO_WAY);
+		super("Incidents", new Style("default", null, Color.BLACK), IncidentLayer.TWO_WAY);
 		int[] r = new int[4];
 		r[0] = getPolicyValue(c, SystemPolicy.RING_RADIUS_0);
 		r[1] = getPolicyValue(c, SystemPolicy.RING_RADIUS_1);

@@ -62,7 +62,7 @@ abstract public class TrafficDeviceTheme extends StyledTheme {
 
 	/** Create a new traffic device theme */
 	protected TrafficDeviceTheme(String n, Shape s) {
-		super(n, s);
+		super(n, new Style("default", null, Color.BLACK), s);
 	}
 
 	/** Map of status code to styles */
