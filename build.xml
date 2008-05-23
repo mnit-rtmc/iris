@@ -212,12 +212,13 @@
 
 	<!-- Create the iris server distribution -->
 	<target name="server"
-		depends="server-jar,rmi-jar"
+		depends="server-jar,rmi-jar,utils-jar"
 		description="Create the iris server distribution">
 		<copy todir="${dist.server}">
 			<fileset dir="${build.lib}">
 				<include name="${server.jar}"/>
 				<include name="${rmi.jar}"/>
+				<include name="${utils.jar}"/>
 			</fileset>
 		</copy>
 		<copy todir="${dist.server}">

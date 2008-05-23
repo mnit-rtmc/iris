@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.log.TMSEvent;
+import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * This is the main class to start the IRIS server.
@@ -70,6 +71,7 @@ public class MainServer {
 			redirectStdStreams();
 			sanityChecks();
 			Properties props = PropertyLoader.load(PROP_FILE);
+			Agency.readProps(props);
 			TMSImpl tms = new TMSImpl(props);
 			Namespace ns = new Namespace();
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
@@ -88,7 +90,7 @@ public class MainServer {
 			TMSObjectImpl.eventLog.add(new TMSEvent("System",
 				TMSEvent.SYSTEM_RESTARTED,
 				Calendar.getInstance()));
-			System.err.println("IRIS Server active");
+			System.err.println("IRIS Server active for "+Agency.getId()+".");
 			server.join();
 		}
 		catch(Exception e) {

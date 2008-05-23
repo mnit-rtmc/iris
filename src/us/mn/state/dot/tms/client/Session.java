@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSHandler;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
-import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
@@ -45,9 +44,11 @@ import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.warning.WarningSignHandler;
+import us.mn.state.dot.tms.utils.Agency;
 
 // agency specific imports
-//import gov.ca.dot.d10.tms.client.incidents.D10IncidentLayer;
+import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
+import gov.ca.dot.d10.tms.client.incidents.D10IncidentLayer;
 
 /**
  * A session is one IRIS login session.
@@ -176,13 +177,17 @@ public class Session {
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer();
 
-		// create D10 agency specific incident layer
-		//incLayer = new D10IncidentLayer(props, logger,
-		//    st.getSystemPolicy());
-
-		// create Mn/DOT incident layer
-		incLayer = new TmsIncidentLayer(props, logger,
-		    st.getSystemPolicy());
+		// create agency specific incident layer
+		if (Agency.isId(Agency.MNDOT))
+			incLayer = new TmsIncidentLayer(props, logger,
+		    		st.getSystemPolicy());
+		else if (Agency.isId(Agency.CALTRANS_D10))
+			incLayer = new D10IncidentLayer(props, logger,
+			st.getSystemPolicy());
+		else {
+			assert false : "unknown agencyid";
+			incLayer=null;
+		}
 
 		camLayer = CameraHandler.createLayer(tmsConnection);
 		vlayer = new ViewLayer();

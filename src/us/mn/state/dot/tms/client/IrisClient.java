@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.utils.Screen;
 import us.mn.state.dot.tms.utils.ScreenLayout;
+import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * The Main class for IrisClient.
@@ -114,6 +115,7 @@ public class IrisClient extends JFrame {
 		tmsConnection = new TmsConnection(desktop, userManager, props);
 		hostName = props.getProperty( "TMSIpAddress" ) + ":" +
 			props.getProperty("TMSPort");
+		Agency.readProps(props);
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
 		buildMenus( userManager );
@@ -218,3 +220,4 @@ public class IrisClient extends JFrame {
 			p.removeTabs();
 	}
 }
+
