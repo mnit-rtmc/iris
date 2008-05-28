@@ -127,4 +127,16 @@ abstract public class Operation {
 		abstract protected Phase poll(AddressedMessage mess)
 			throws IOException, DeviceContentionException;
 	}
+
+	/** 
+	  * Get a human readable description of the operation, which
+	  * is the name of the operation class. 
+	  */
+	public String getOperationDescription() {
+		String name = this.getClass().getName();
+		int i = name.lastIndexOf('.');
+		if(i >= 0)
+			return name.substring(i + 1);
+		return name;
+	}
 }

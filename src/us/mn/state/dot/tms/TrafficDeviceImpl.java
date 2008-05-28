@@ -113,21 +113,13 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	/** Get a description of the current device operation */
 	public String getOperation() {
 		DeviceOperation o = owner;
-		if(o == null) {
+		String s = "";
+		if (o == null)
 			// FIXME: status should be unrelated to operation
-			String s = status;
-			if(s == null)
-				return "None";
-			else
-				return s;
-		} else {
-			String name = o.getClass().getName();
-			int i = name.lastIndexOf('.');
-			if(i >= 0)
-				return name.substring(i + 1);
-			else
-				return name;
-		}
+			s = (status==null ? "None" : status);
+		else
+			s = o.getOperationDescription();
+		return s;
 	}
 
 	/** Get the current status code */
