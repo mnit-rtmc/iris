@@ -33,6 +33,9 @@ import us.mn.state.dot.tms.client.device.LogDeviceAction;
 import us.mn.state.dot.tms.client.device.TrafficDeviceProxy;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 
+import us.mn.state.dot.tms.utils.I18NMessages;
+
+
 /**
  * The DMSProxy class provides a proxy representation of a DMS object.
  *
@@ -46,7 +49,7 @@ public class DMSProxy extends TrafficDeviceProxy {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return PROXY_TYPE;
+		return (I18NMessages.i18nMessages.getString ("MesgSignLabel"));
 	}
 
 	/** The DMS that this proxy represents */

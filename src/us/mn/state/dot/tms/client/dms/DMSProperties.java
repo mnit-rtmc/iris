@@ -50,6 +50,8 @@ import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.TMSProxy;
 
+import us.mn.state.dot.tms.utils.I18NMessages;
+
 /**
  * This is a form for viewing and editing the properties of a dynamic message
  * sign (DMS).
@@ -247,11 +249,14 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Pixel test activation button */
 	protected final JButton pixelTest = new JButton("Pixel test");
 
+	/** Status test activation button */
+	//protected final JButton statusTest = new JButton("Status test");  mtod
+
 	/** Lamp test activation button */
 //	protected final JButton lampTest = new JButton("Lamp test");
 
 	/** Fan test activation button */
-	protected final JButton fanTest = new JButton("Fan test");
+	protected final JButton fanTest = new JButton(I18NMessages.i18nMessages.getString ("OK"));
 
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();

@@ -34,6 +34,8 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.SonetRingForm;
 import us.mn.state.dot.tms.client.tour.TourListForm;
 import us.mn.state.dot.tms.client.warning.WarningSignListForm;
+import us.mn.state.dot.tms.utils.I18NMessages;
+
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
@@ -115,8 +117,14 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("DMS", Icons.getIcon("drum-inactive"));
-		item.setMnemonic('D');
+		item = new JMenuItem(I18NMessages.i18nMessages.getString ("MesgSignLabel"), Icons.getIcon("drum-inactive"));
+
+        if (I18NMessages.i18nMessages.getString ("MesgSignLabel") == "DMS")
+            item.setMnemonic('D');
+        else
+            if (I18NMessages.i18nMessages.getString ("MesgSignLabel") == "CMS")
+                item.setMnemonic('C');
+        
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new DMSListForm(tc));
