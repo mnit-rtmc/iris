@@ -25,6 +25,7 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.log.LogImpl;
+import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -150,9 +151,16 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 	}
 
+	/** determine agency specific polling time */
+	public static int getAgencyPollTimerJobSigns() {
+		if (Agency.isId(Agency.CALTRANS_D10))
+			return(60);
+		return(30);
+	}
+
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
-		TIMER.addJob(new TimerJobSigns());
+		TIMER.addJob(new TimerJobSigns(TMSImpl.getAgencyPollTimerJobSigns()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
@@ -230,9 +238,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		};
 
 		/** Create a new sign polling timer job */
-		protected TimerJobSigns() {
-			// note: mtod, add internationalization call here
-			super(Calendar.SECOND, (false ? 30 : 60), Calendar.SECOND, 4);
+		protected TimerJobSigns(int intervalSecs) {
+			super(Calendar.SECOND, intervalSecs, Calendar.SECOND, 4);
 			comp = new Completer("Sign Poll", TIMER, job);
 		}
 
