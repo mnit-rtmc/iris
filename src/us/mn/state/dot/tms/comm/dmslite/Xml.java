@@ -13,27 +13,16 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
-
-//~--- non-JDK imports --------------------------------------------------------
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
 import org.xml.sax.SAXException;
-
-//~--- JDK imports ------------------------------------------------------------
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.StringReader;
-
 import java.nio.charset.Charset;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,12 +35,10 @@ import javax.xml.parsers.ParserConfigurationException;
  * @since       1.0
  * @see
  */
-public class Xml {
+final public class Xml {
 
-    /** Constructor. Should never be called */
-    private Xml() {
-        assert false : "Don't call Xml constructor.";
-    }
+    /** Constructor */
+    private Xml() {}
 
     /** test */
     public static boolean test() {
@@ -87,15 +74,14 @@ public class Xml {
                 System.err.println("Exeption=" + ex);
             }
         }
-        System.err.println("Test case 3");
+        System.err.println("Test case 3: bogus expected tag name");
         {
             try {
                 Pair[] p = Xml.parseTagAndChildren("tnx", "<tn><a>a</a><b>b</b></tn>");
-
                 ok = false;
             } catch (IOException ex) {
                 ok = ok && true;
-                System.err.println("Exeption=" + ex);
+                System.err.println("Expected exeption=" + ex);
             }
         }
         System.err.println("Test case 4");
@@ -108,6 +94,7 @@ public class Xml {
                 ok = false;
             }
         }
+
         System.err.println("test() results: " + ok);
 
         return (ok);
@@ -126,19 +113,37 @@ public class Xml {
     }
 
     /** append the xml tag containing a value */
+    public static StringBuilder addXmlTag(StringBuilder doc, String name, int value) {
+        return (Xml.addXmlTag(doc, name, new StringBuilder(Integer.toString(value))));
+    }
+
+    /** append the xml tag containing a value */
     public static StringBuilder addXmlTag(StringBuilder doc, String name, boolean value) {
         return (Xml.addXmlTag(doc, name, new StringBuilder(Boolean.toString(value))));
     }
 
-    /** append the xml tag containing a value */
+    /**
+     * The root addXmlTag method, which appends the xml tag containing a value
+     * with the specified name.
+     *
+     * @returns String in the form: <name>value</name>
+     */
     public static StringBuilder addXmlTag(StringBuilder doc, String name, StringBuilder value) {
-        if (value.length() == 0) {
-            Xml.addXmlEmptyTag(doc, name);
-        } else {
+
+        // sanity check
+        assert name != null : "Argument name is null in Xml.addXmlTag()";
+        assert value != null : "Argument vlaue is null in Xml.addXmlTag()";
+
+	// note: addXmlEmptyTag() is not called below to facilitate
+	// testing and valdation via python scripts. mtod 05/16/08.
+
+        //if (value.length() == 0) {
+        //    Xml.addXmlEmptyTag(doc, name);
+        //} else {
             Xml.addXmlTagOpen(doc, name);
             doc.append(value);
             Xml.addXmlTagClose(doc, name);
-        }
+        //}
 
         return (doc);
     }
@@ -193,7 +198,7 @@ public class Xml {
         NodeList children = e.getChildNodes();
         Node     c        = children.item(0);
 
-        return (Element) c;
+        return ((Element) c);
     }
 
     /**
@@ -258,14 +263,20 @@ public class Xml {
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            System.err.println("Exception:" + ex);
+            System.err.println("SEVERE Exception:" + ex);
+            throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("Exception:" + ex);
+            System.err.println("SEVERE Exception:" + ex);
+            throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("Exception:" + ex);
+            System.err.println("SEVERE Exception:" + ex);
+	    throw ex;
         }
 
-        assert ret != null : "return should not be null";
+	// postcond
+        assert ret != null : "postcond: should not return null in "+
+		"parseTagsAndChildren(), lev1name="+lev1name+
+		",lev2name="+lev2name+",xml="+xml;
 
         return (ret);
     }
@@ -326,20 +337,21 @@ public class Xml {
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            System.err.println("Exception:" + ex);
-
+            System.err.println("SEVERE Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("Exception:" + ex);
-
+            System.err.println("SEVERE Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("Exception:" + ex);
-
-            throw new IOException(ex.toString());
+            System.err.println("SEVERE Exception:" + ex);
+            throw ex;
         }
 
-        assert ret != null : "return should not be null";
+	// postcond
+        assert ret != null : "postcond: should not return null in "+
+		"parseTagsAndChildren(), tagname="+tagname+
+		",xml="+xml;
+
 
         return (ret);
     }
@@ -387,11 +399,11 @@ public class Xml {
 
             ret = topelem2.getNodeName();
         } catch (ParserConfigurationException ex) {
-            System.err.println("Exception:" + ex);
+            System.err.println("SEVERE Exception:" + ex);
         } catch (SAXException ex) {
-            System.err.println("Exception:" + ex);
+            System.err.println("SEVERE Exception:" + ex);
         } catch (IOException ex) {
-            System.err.println("Exception:" + ex);
+            System.err.println("SEVERE Exception:" + ex);
         }
 
         return (ret);

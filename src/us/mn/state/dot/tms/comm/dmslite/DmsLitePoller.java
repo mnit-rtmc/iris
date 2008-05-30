@@ -95,7 +95,7 @@ public class DmsLitePoller extends MessagePoller
 		}
 
 		// start operation
-		new OpQueryDms(dms).start();
+		new OpQueryMsg(dms).start();
 	}
 
 	/** Perform a 30-second poll */
@@ -120,7 +120,7 @@ public class DmsLitePoller extends MessagePoller
 	 */
 	public void queryConfiguration(DMSImpl dms) {
 		System.err.println("DmsLitePoller.queryConfiguration() called.");
-		new OpDmsQueryConfig(dms).start();
+		new OpQueryConfig(dms).start();
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class DmsLitePoller extends MessagePoller
 			return;
 		}
 
-		OpCommandMessage cmd = new OpCommandMessage(dms, m);
+		OpMessage cmd = new OpMessage(dms, m);
 		cmd.start();
 	}
 
@@ -159,7 +159,7 @@ public class DmsLitePoller extends MessagePoller
 
 		// blank the sign
 		if (m.getDuration() <= 0) {
-			new OpDmsBlank(dms, m).start();
+			new OpBlank(dms, m).start();
 			return;
 		}
 
@@ -182,12 +182,9 @@ public class DmsLitePoller extends MessagePoller
 	public void testPixels(DMSImpl dms) {
 		System.err.println(
 		    "DmsLitePoller.testPixels() called, performing query operation.");
-
 		if (dms == null)
 			return;
-
-		// start operation
-		new OpQueryDms(dms).start();
+		new OpQueryMsg(dms).start();
 	}
 
 	/**
@@ -201,7 +198,11 @@ public class DmsLitePoller extends MessagePoller
 	 * Activate a fan test
 	 */
 	public void testFans(DMSImpl dms) {
-		System.err.println("DmsLitePoller.testFans() called, ignored.");
+		System.err.println(
+		    "DmsLitePoller.testFans() called, performing reset operation.");
+		if (dms == null)
+			return;
+		new OpReset(dms).start();
 	}
 
 	/**

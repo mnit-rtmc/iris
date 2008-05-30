@@ -77,6 +77,17 @@ public class SString {
         ok = ok && (new String("\"abcd\" ").compareTo(SString.removeEnclosingQuotes("\"abcd\" ")) == 0);
         ok = ok && (new String("x").compareTo(SString.removeEnclosingQuotes("\"x\"")) == 0);
 
+	// truncate
+	ok = ok && truncate(null,0).equals("");
+	ok = ok && truncate(null,5).equals("");
+	ok = ok && truncate("",0).equals("");
+	ok = ok && truncate("",3).equals("");
+	ok = ok && truncate("abcdef",0).equals("");
+	ok = ok && truncate("abcdef",1).equals("a");
+	ok = ok && truncate("abcdef",2).equals("ab");
+	ok = ok && truncate("abcdef",3).equals("abc");
+	ok = ok && truncate("abcdef",35).equals("abcdef");
+
         return (ok);
     }
 
@@ -178,4 +189,25 @@ public class SString {
 
         return (s);
     }
+
+    /**
+     *  return a string truncated to the specified maximum length (inclusive).
+     *  @param maxlen maximum number of chars in returned string.
+     */
+    public static String truncate(String arg,int maxlen) {
+	arg = (arg==null ? "" : arg);
+	maxlen = (maxlen<0 ? 0 : maxlen);
+	maxlen = (maxlen>arg.length() ? arg.length() : maxlen);
+	String ret="";
+	if (maxlen<=0)
+		return "";
+	try {
+		ret=arg.substring(0,maxlen);
+	} catch(Exception ex) {
+		// ignore except
+	}
+
+	return ret;	
+    }
+
 }

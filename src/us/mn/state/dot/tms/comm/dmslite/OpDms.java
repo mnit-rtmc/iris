@@ -23,8 +23,15 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.MultiString;
 
 import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 /**
  * Operation to be performed on a dynamic message sign
@@ -34,64 +41,116 @@ import java.io.IOException;
  */
 abstract public class OpDms extends DeviceOperation {
 
-   // timeout for DMS messages
-   static final int TIMEOUT_DMS_DEFAULT_MS = 1000*30;
-   static final int TIMEOUT_DMS_MODEM_MS = 1000*45*5;
-   static final int TIMEOUT_DMS_WIZARD_MS = 1000*30;
+	// timeout for DMS messages
+	static final int TIMEOUT_DMS_DEFAULT_MS = 1000*50;
+	static final int TIMEOUT_DMS_MODEM_MS = 1000*45*5; //FIXME mtod
+	static final int TIMEOUT_DMS_WIZARD_MS = 1000*50;
 
-    /** DMS debug log */
-    static protected final DebugLog DMS_LOG = new DebugLog("dms");
+	/** DMS debug log */
+	static protected final DebugLog DMS_LOG = new DebugLog("dms");
 
-    /** DMS to operate */
-    protected final DMSImpl m_dms;
+	/** DMS to operate */
+	protected final DMSImpl m_dms;
 
-    /** Create a new DMS operation */
-    public OpDms(int p, DMSImpl d) {
-        super(p, d);
-        m_dms = d;
-    }
-
-    /** Log exceptions in the DMS debug log */
-    public void handleException(IOException e) {
-        if (e instanceof ChecksumException) {
-            ChecksumException ce = (ChecksumException) e;
-            DMS_LOG.log(m_dms.getId() + " (" + toString() + "), " + ce.getScannedData());
-        }
-
-        super.handleException(e);
-    }
-
-    /** Cleanup the operation */
-    public void cleanup() {
-        m_dms.setReset(success);
-        super.cleanup();
-    }
-
-    /** return the timeout for this operation */
-    public int calcTimeoutMS() {
-	assert m_dms!=null : "m_dms is null in OpDms.getTimeoutMS()";
-	String a=m_dms.getSignAccess();
-	int ms=TIMEOUT_DMS_DEFAULT_MS;
-	if (a.toLowerCase().contains("modem")) {
-        	ms=TIMEOUT_DMS_MODEM_MS;
-		//System.err.println("connection type is modem:"+a+", dms="+m_dms.toString());
-	} else if (a.toLowerCase().contains("wizard")) {
-        	ms=TIMEOUT_DMS_WIZARD_MS;
-		System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString());
-	} else {
-        	ms=TIMEOUT_DMS_DEFAULT_MS;
-		// unknown sign type, this happens when the first 
-	        // OpDmsQueryConfig message is being sent, so a 
-	        // default timeout should be assigned.
-		//System.err.println("OpDms.calcTimeoutMS(): unknown sign access type:"+a+", dms="+m_dms.toString());
+	/** Create a new DMS operation */
+	public OpDms(int p, DMSImpl d) {
+		super(p, d);
+		m_dms = d;
 	}
-        return ms;
-    }
 
-    /** set message attributes which are a function of the operation, sign, etc. */
-    public void setMsgAttributes(Message m) {
- 	m.setTimeoutMS(this.calcTimeoutMS());
-   }
+	/** 
+	* Log exceptions in the DMS debug log. This method should be called by
+	* operations that fail.
+	*/
+	public void handleException(IOException e) {
+		if (e instanceof ChecksumException) {
+		    ChecksumException ce = (ChecksumException) e;
+		    DMS_LOG.log(m_dms.getId() + " (" + toString() + "), " + ce.getScannedData());
+		}
+
+		super.handleException(e);
+	}
+
+	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successfull */
+	public void cleanup() {
+		System.err.println("dmslite.OpDms.cleanup() called, success="+success);
+		m_dms.setReset(success);
+		super.cleanup();
+	}
+
+	/** return the timeout for this operation */
+	public int calcTimeoutMS() {
+		assert m_dms!=null : "m_dms is null in OpDms.getTimeoutMS()";
+		String a=m_dms.getSignAccess();
+		int ms=TIMEOUT_DMS_DEFAULT_MS;
+		if (a.toLowerCase().contains("modem")) {
+			ms=TIMEOUT_DMS_MODEM_MS;
+			//System.err.println("connection type is modem:"+a+", dms="+m_dms.toString());
+		} else if (a.toLowerCase().contains("wizard")) {
+			ms=TIMEOUT_DMS_WIZARD_MS;
+			System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString());
+		} else {
+			ms=TIMEOUT_DMS_DEFAULT_MS;
+			// unknown sign type, this happens when the first 
+			// OpDmsQueryConfig message is being sent, so a 
+			// default timeout should be assigned.
+			//System.err.println("OpDms.calcTimeoutMS(): unknown sign access type:"+a+", dms="+m_dms.toString());
+		}
+		return ms;
+	}
+
+	/** set message attributes which are a function of the operation, sign, etc. */
+	public void setMsgAttributes(Message m) {
+		m.setTimeoutMS(this.calcTimeoutMS());
+	}
+
+	/**
+	  * handle a failed operation.
+	  * @return true if the operation should be retried else false.
+	  */
+	protected boolean flagFailureShouldRetry(String errmsg)
+	{
+	 	String msg=m_dms.getId()+" error: "+errmsg;
+
+		// trigger error handling, changes status if necessary
+		handleException(new IOException(msg));
+
+		// enforce id length restriction due to database column size
+		final int DB_COLUMN_MAX_LEN=30;
+		String id=SString.truncate(msg,DB_COLUMN_MAX_LEN);
+
+		// retry?
+		ControllerImpl con=(ControllerImpl)m_dms.getController();
+		boolean retry=(con!=null && con.retry(id));
+		return retry;
+	}
+
+	/* reset error counter for DMS */
+	protected void resetErrorCounter()
+	{
+	 	String id=m_dms.getId();
+		ControllerImpl i=(ControllerImpl)m_dms.getController();
+		if (i!=null) {
+			i.resetErrorCounter(id);
+			System.err.println("OpQueryDms.resetErrorCounter(): reset comm counter");
+		}
+	}
+
+	/** generate a unique operation id, which is a long, returned as a string */
+	public static String generateId() {
+		return new Long(new GregorianCalendar().getTimeInMillis()).toString();
+	}
+
+	/** create a blank message */
+	public static SignMessage createBlankMsg(DMSImpl dms,String owner)
+	{
+		MultiString multi = new MultiString();
+		BitmapGraphic bbm = new BitmapGraphic(
+	    		dms.getSignWidthPixels(), 
+			dms.getSignHeightPixels());
+		SignMessage sm = new SignMessage(owner,multi,bbm,0);
+		return(sm);
+	}
 
 }
 

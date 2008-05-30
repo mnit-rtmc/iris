@@ -214,4 +214,10 @@ public class TokenStreamReader {
 
         return (ok);
     }
+
+    /** init buffer */
+    public void initBuffer() {
+        m_pb.init();
+    }
+
 }

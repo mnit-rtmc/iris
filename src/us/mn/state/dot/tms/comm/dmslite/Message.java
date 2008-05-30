@@ -131,8 +131,8 @@ public class Message implements AddressedMessage
 		byte[] array = this.buildReqMsg();
 
 		// send message
-		System.err.print("Writing " + array.length
-				 + " bytes to cmsserver....");
+		System.err.print("Writing " + array.length+" bytes to cmsserver....");
+		m_is.initBuffer();
 		m_os.write(array);
 		m_os.flush();
 		System.err.println("write done.");
@@ -142,12 +142,10 @@ public class Message implements AddressedMessage
 
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,
-					       "<" + DMSLITEMSGTAG + ">",
-					       "</" + DMSLITEMSGTAG + ">");
+		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
 		} catch (IllegalStateException ex) {
 			throw new IllegalStateException(
-			    "Capacity exceeded in dmslite.Message.getRequest(): "
-			    + ex);
+			    "SEVERE error: capacity exceeded in dmslite.Message.getRequest(): "+ex);
 		} catch (IOException ex) {
 			throw new IOException("CMS disconnected:" + ex);
 		}
@@ -155,7 +153,7 @@ public class Message implements AddressedMessage
 		// timed out?
 		if(token == null) {
 			System.err.println(
-			    "dmslite.Message.getRequest(): timed out waiting for CMS (timeout is "
+			    "SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS (timeout is "
 			    + m_dmsTimeoutMS / 1000 + " secs).");
 
 		// parse response
@@ -169,14 +167,10 @@ public class Message implements AddressedMessage
 				assert i instanceof ReqRes;
 
 				ReqRes rr = (ReqRes) i;
-
-				rr.parseRes(DMSLITEMSGTAG,
-					    this.getRespMsgName(),
-					    token);    // throws IOException
+				rr.parseRes(DMSLITEMSGTAG,this.getRespMsgName(),
+			    		token);    // throws IOException on error
 			}
 		}
-
-		// getRequest(PUBLIC);
 	}
 
 	/** Send a set request message */
@@ -202,8 +196,7 @@ public class Message implements AddressedMessage
 			       "dmslite.Message() arg must be a ReqRes";
 
 			// System.err.println("will add:"+i);
-			Xml.addXmlTag(children, ((ReqRes) i).getReqName(),
-				      ((ReqRes) i).getReqVal());
+			Xml.addXmlTag(children, ((ReqRes) i).getReqName(),((ReqRes) i).getReqVal());
 		}
 
 		// enclose child tags in message tag
