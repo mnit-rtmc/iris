@@ -64,6 +64,12 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** Button number to select next camera */
 	static protected final int BUTTON_NEXT = 11;
+	
+	/** The property value for true */
+	static protected final String PROPERTY_TRUE = "true";
+	
+	/** The property name for on screen ptz control */
+	static protected final String PROPERTY_ON_SCREEN_PTZ = "on.screen.ptz";
 
 	/** Network worker thread */
 	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
@@ -155,8 +161,9 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		videoControls.add(stop);
 		add(videoControls, bag);
 		bag.gridy = 4;
-//		if(admin)
-//			add(ptz_panel, bag);
+		if (p.getProperty(PROPERTY_ON_SCREEN_PTZ, "").equalsIgnoreCase(PROPERTY_TRUE)) {
+			add(ptz_panel, bag);
+		}
 		new ActionJob(NETWORKER, play) {
 			public void perform() throws Exception {
 				playPressed(selected);
