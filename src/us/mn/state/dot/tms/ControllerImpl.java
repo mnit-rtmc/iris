@@ -616,7 +616,11 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		updateNowCounters();
 	}
 
-	/** Should a poll be tried again? */
+	/** Should a poll be tried again? This method is called after 
+	  * a failure and bumps the error counter.
+	  * @param id The ID of the device that failed.
+	  * @return true if the operation should be retried. 
+	  */
 	public final boolean retry( String id ) {
 		if(isFailed())
 			return false;
