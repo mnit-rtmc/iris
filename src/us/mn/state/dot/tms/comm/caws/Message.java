@@ -17,14 +17,10 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
-//~--- non-JDK imports --------------------------------------------------------
-
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.ParsingException;
-
-//~--- JDK imports ------------------------------------------------------------
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -46,7 +42,9 @@ import java.util.LinkedList;
  * @author Michael Darter
  */
 public class Message implements AddressedMessage {
-    private byte[] m_msgs = new byte[0];    // dms messages received from caws
+
+    /** dms messages received from caws */ 
+    private byte[] m_msgs = new byte[0];
 
     // consts
     // fields

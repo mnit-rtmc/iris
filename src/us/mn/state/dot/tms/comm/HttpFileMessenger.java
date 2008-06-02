@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
 import java.io.InputStream;
-
+import java.util.ArrayList;
 import java.net.URL;
 import java.net.URLConnection;
 
@@ -69,32 +69,36 @@ public class HttpFileMessenger extends Messenger
 			int pl = c.getContentLength();
 
 			// System.err.println("HttpFileMessenger.read(), content len="+pl);
-			long d = c.getDate();
-
+			long fdate = c.getDate();
 			// System.err.println("HttpFileMessenger.read(), date="+d);
 
-			// read
+			// read until eof
 			in = c.getInputStream();
-			ret = new byte[pl];
-			int len = in.read(ret);
-			assert len == pl :
-			       "length mismatch in HttpFileMessenger.read()";
+			ArrayList<Byte> al=new ArrayList(pl);
+			while(true) {
+				int b = in.read(); // throws IOException on error
+				if (b<0)
+					break; // eof
+				al.add(new Byte((byte)b));
+			}
+
+			// create byte[]
+			ret = new byte[al.size()];
+			for (int i=0; i<ret.length; ++i)
+				ret[i]=(byte)(al.get(i));
 
 			// for( int i=0; i<len; ++i ) System.err.print(ret[i]+" "+(char)ret[i]+","); System.err.println(" ");
 			System.err.println("HttpFileMessenger.read(), read "
-					   + len + " bytes, date=" + d + ".");
-			return (ret);
+					   + al.size() + " bytes, file date=" + fdate + ".");
 		} catch (IOException e) {
 			System.err.println(
 			    "HttpFileMessenger.read(), caught exception: " + e);
 		} finally {
 			try {
-				if(in != null) {
+				if (in!= null)
 					in.close();
-				}
 			} catch (IOException ex) {}
 		}
-
-		return (ret);
+		return ret;
 	}
 }

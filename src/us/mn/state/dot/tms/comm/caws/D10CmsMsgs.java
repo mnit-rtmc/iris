@@ -17,8 +17,6 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
-//~--- JDK imports ------------------------------------------------------------
-
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 
@@ -51,7 +49,7 @@ public class D10CmsMsgs {
         m_msgs = new LinkedList<D10CmsMsg>();
 
         // cycle through each line, which is terminated by '\n'
-        String          msgs    = byteArrayToString(argmsgs);
+        String msgs = byteArrayToString(argmsgs);
         StringTokenizer lineTok = new StringTokenizer(msgs, "\n");
 
         while (lineTok.hasMoreTokens()) {
