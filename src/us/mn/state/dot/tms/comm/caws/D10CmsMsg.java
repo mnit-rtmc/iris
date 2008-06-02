@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 
 import java.rmi.RemoteException;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -280,11 +279,9 @@ public class D10CmsMsg
 	 *  @param dms Activate the message on this DMS.
 	 */
 	public void activate(DMSImpl dms) {
-		System.err.println("D10CmsMsg.activate(" + dms
-				   + ") called, msg=" + this);
-		if(shouldSendMessage(dms)) {
-			sendMessage(dms);
-		}
+		//System.err.println("D10CmsMsg.activate("+dms+") called, msg=" + this);
+		if(shouldSendMessage(dms))
+			this.sendMessage(dms);
 	}
 
 	/**
@@ -347,7 +344,7 @@ public class D10CmsMsg
 			    + this.getIrisCmsId() + " for DMS=" + dms + ".");
 			dms.clearMessage(CAWS);
 
-			// 1 or 2 pg msg
+		// 1 or 2 pg msg
 		} else if((newmsgtype == MSGTYPE.ONEPAGEMSG)
 			|| (newmsgtype == MSGTYPE.TWOPAGEMSG)) {
 
@@ -362,7 +359,7 @@ public class D10CmsMsg
 				    "D10CmsMsg.sendMessage(): exception:" + e);
 			}
 
-			// error
+		// error
 		} else {
 			assert false :
 			       "D10CmsMsg.activate(): ERROR--unknown MSGTYPE.";

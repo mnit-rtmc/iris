@@ -64,8 +64,8 @@ public class D10CmsMsgs {
      * activate the messages.
      */
     public void activate() {
-        System.err.println("D10CmsMsgs.activate() called.");
-        System.err.println("D10CmsMsgs.activate(). list="+TMSObjectImpl.dmsList);
+        //System.err.println("D10CmsMsgs.activate() called.");
+        //System.err.println("D10CmsMsgs.activate(). list="+TMSObjectImpl.dmsList);
 
         // sanity check
         if (m_msgs == null) {
@@ -85,7 +85,7 @@ public class D10CmsMsgs {
             }
             assert tmsobj instanceof DMSImpl : "Expected DMSImpl, received:"+tmsobj;
             DMSImpl dms=(DMSImpl)tmsobj;
-            System.err.println("D10CmsMsgs.activate(): irisCmsId="+irisCmsId+", dms.getId()="+dms.getId()+", getPin()="+dms.getPin()+",notes="+dms.getNotes());
+            //System.err.println("D10CmsMsgs.activate(): irisCmsId="+irisCmsId+", dms.getId()="+dms.getId()+", getPin()="+dms.getPin()+",notes="+dms.getNotes());
 
             // activate message
             m.activate(dms);
