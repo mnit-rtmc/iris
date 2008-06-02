@@ -242,7 +242,7 @@ public class OpQueryMsg extends OpDms
 			// send msg
 			mess.add(rr0);
 			mess.add(rr1);
-			mess.getRequest();
+            		mess.getRequest();	// throws IOException
 
 			// parse resp msg
 			long id = 0;

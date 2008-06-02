@@ -110,7 +110,7 @@ public class OpBlank extends OpDms {
             mess.add(rr2);
 
             // send msg
-            mess.getRequest();
+            mess.getRequest();	// throws IOException
 
             // response: <DmsLite><SetBlankMsgRespMsg><Id></Id><IsValid>true</IsValid><ErrMsg></ErrMsg></SetBlankMsgRespMsg></DmsLite>
 

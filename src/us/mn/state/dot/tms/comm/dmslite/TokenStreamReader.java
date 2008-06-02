@@ -17,15 +17,11 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
-//~--- JDK imports ------------------------------------------------------------
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.net.SocketTimeoutException;
-
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -98,8 +94,7 @@ public class TokenStreamReader {
         while (true) {
 
             // read
-            System.err.println("TokenStreamReader.readToken(): waiting for bytes to read.");
-
+            //System.err.println("TokenStreamReader.readToken(): waiting for bytes to read.");
             try {
                 numread = m_inps.read(fragment, 0, fragment.length);
             } catch (SocketTimeoutException ex) {

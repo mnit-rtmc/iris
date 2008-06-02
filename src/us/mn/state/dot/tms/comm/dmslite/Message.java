@@ -122,7 +122,7 @@ public class Message implements AddressedMessage
 	/**
 	 * Send a get request message
 	 *
-	 * @throws IOException if received response is malformed.
+	 * @throws IOException if received response is malformed or timed out.
 	 */
 	public void getRequest() throws IOException {
 		System.err.println("dmslite.Message.getRequest() called.");
@@ -144,7 +144,7 @@ public class Message implements AddressedMessage
 			token = m_is.readToken(m_dmsTimeoutMS,
 		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
 		} catch (IllegalStateException ex) {
-			throw new IllegalStateException(
+			throw new IOException(
 			    "SEVERE error: capacity exceeded in dmslite.Message.getRequest(): "+ex);
 		} catch (IOException ex) {
 			throw new IOException("CMS disconnected:" + ex);
@@ -155,6 +155,7 @@ public class Message implements AddressedMessage
 			System.err.println(
 			    "SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS (timeout is "
 			    + m_dmsTimeoutMS / 1000 + " secs).");
+			throw new IOException("SEVERE error: timed out waiting for CMS.");
 
 		// parse response
 		} else {

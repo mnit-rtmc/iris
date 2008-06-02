@@ -103,7 +103,7 @@ public class OpQueryConfig extends OpDms
 			mess.add(rr1);
 
 			// send msg
-			mess.getRequest();
+            		mess.getRequest();	// throws IOException
 
 			// parse resp msg
 			long id = 0;

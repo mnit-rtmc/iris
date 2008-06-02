@@ -202,7 +202,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("Msg", msg));
 
 			// send msg
-			mess.getRequest();
+            		mess.getRequest();	// throws IOException
 
 			// parse resp msg
 			{
@@ -390,7 +390,7 @@ public class OpMessage extends OpDms {
 			}
 
 			// send msg
-			mess.getRequest();
+            		mess.getRequest();	// throws IOException
 
 			// parse resp msg
 			{
