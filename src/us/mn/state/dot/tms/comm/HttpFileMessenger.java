@@ -12,12 +12,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
+import java.io.InputStream;
+
 import java.net.URL;
 import java.net.URLConnection;
-import java.io.InputStream;
 
 /**
  * A HttpFileMessenger is a class which reads a file from a URL using http.
@@ -26,69 +28,73 @@ import java.io.InputStream;
  * @author Michael Darter
  * @created April 8, 2008
  */
-public class HttpFileMessenger extends Messenger {
+public class HttpFileMessenger extends Messenger
+{
+	/** URL to read */
+	private URL m_url;
 
-    /** URL to read */
-    private URL m_url;
-
-	/** 
-      * constructor 
-      * @args url The URL of the file to read.
-      */
+	/**
+	 *  constructor
+	 *  @args url The URL of the file to read.
+	 */
 	public HttpFileMessenger(URL url) {
-        System.err.println("HttpFileMessenger.HttpFileMessenger("+url+") called.");
-		m_url=url;
+		System.err.println("HttpFileMessenger.HttpFileMessenger(" + url
+				   + ") called.");
+		m_url = url;
 		input = null;
 		output = null;
 	}
 
 	/** Set the receive timeout */
-	public synchronized void setTimeout(int t) throws IOException {
-	}
+	public synchronized void setTimeout(int t) throws IOException {}
 
 	/** Open the messenger */
-	public void open() throws IOException {
-	}
+	public void open() throws IOException {}
 
 	/** Close the messenger */
-	public synchronized void close() {
-	}
+	public synchronized void close() {}
 
-	/** 
-      * read the url.
-      * @returns byte[] containing contents of read file.
-      */
+	/**
+	 *  read the url.
+	 *  @returns byte[] containing contents of read file.
+	 */
 	public byte[] read() {
-        System.err.println("HttpFileMessenger.read() called.");
-        InputStream in=null;
-        byte[] ret=new byte[0];
-        try {
-            // open 
-            URLConnection c=m_url.openConnection();
-            int pl=c.getContentLength();
-            //System.err.println("HttpFileMessenger.read(), content len="+pl);
-            long d=c.getDate();
-            //System.err.println("HttpFileMessenger.read(), date="+d);
+		System.err.println("HttpFileMessenger.read() called.");
+		InputStream in = null;
+		byte[] ret = new byte[0];
+		try {
 
-            // read
-            in=c.getInputStream();
-            ret=new byte[pl];
-            int len=in.read(ret);
-            assert len==pl : "length mismatch in HttpFileMessenger.read()";
-            //for( int i=0; i<len; ++i ) System.err.print(ret[i]+" "+(char)ret[i]+","); System.err.println(" ");
-            System.err.println("HttpFileMessenger.read(), read "+len+" bytes, date="+d+".");
-            return(ret);
-        } catch (IOException e) {
-            System.err.println("HttpFileMessenger.read(), caught exception: "+e);
-        } finally {
-            try {
-                if (in!=null) {
-                    in.close();
-                }
-            } catch (IOException ex) {
-            }
-        }
-        return(ret);
+			// open
+			URLConnection c = m_url.openConnection();
+			int pl = c.getContentLength();
+
+			// System.err.println("HttpFileMessenger.read(), content len="+pl);
+			long d = c.getDate();
+
+			// System.err.println("HttpFileMessenger.read(), date="+d);
+
+			// read
+			in = c.getInputStream();
+			ret = new byte[pl];
+			int len = in.read(ret);
+			assert len == pl :
+			       "length mismatch in HttpFileMessenger.read()";
+
+			// for( int i=0; i<len; ++i ) System.err.print(ret[i]+" "+(char)ret[i]+","); System.err.println(" ");
+			System.err.println("HttpFileMessenger.read(), read "
+					   + len + " bytes, date=" + d + ".");
+			return (ret);
+		} catch (IOException e) {
+			System.err.println(
+			    "HttpFileMessenger.read(), caught exception: " + e);
+		} finally {
+			try {
+				if(in != null) {
+					in.close();
+				}
+			} catch (IOException ex) {}
+		}
+
+		return (ret);
 	}
 }
-
