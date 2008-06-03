@@ -35,7 +35,7 @@ public class DMSHandler extends DeviceHandlerImpl {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return (I18NMessages.i18nMessages.getString ("MesgSignLabel"));
+		return (I18NMessages.get("MesgSignLabel"));
 	}
 
 	/** Create a new DMS handler */

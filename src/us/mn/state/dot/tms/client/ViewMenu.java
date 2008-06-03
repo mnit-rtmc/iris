@@ -117,14 +117,14 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem(I18NMessages.i18nMessages.getString ("MesgSignLabel"), Icons.getIcon("drum-inactive"));
 
-        if (I18NMessages.i18nMessages.getString ("MesgSignLabel") == "DMS")
-            item.setMnemonic('D');
-        else
-            if (I18NMessages.i18nMessages.getString ("MesgSignLabel") == "CMS")
-                item.setMnemonic('C');
-        
+		// get DMS menu item name
+		String dmsmenuitem=I18NMessages.get("MesgSignLabel");
+		item = new JMenuItem(dmsmenuitem, Icons.getIcon("drum-inactive"));
+		// use 1st char as mnemonic
+		if (dmsmenuitem.length()>0)
+			item.setMnemonic(dmsmenuitem.charAt(0));
+
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new DMSListForm(tc));

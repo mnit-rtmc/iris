@@ -49,7 +49,7 @@ public class DMSProxy extends TrafficDeviceProxy {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return (I18NMessages.i18nMessages.getString ("MesgSignLabel"));
+		return (I18NMessages.get("MesgSignLabel"));
 	}
 
 	/** The DMS that this proxy represents */
