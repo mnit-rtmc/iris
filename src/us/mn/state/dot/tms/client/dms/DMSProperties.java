@@ -49,7 +49,6 @@ import us.mn.state.dot.tms.client.toast.TMSObjectForm;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.TMSProxy;
-
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -122,7 +121,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	};
 
 	/** Frame title */
-	static protected final String TITLE = "DMS: ";
+	static protected String TITLE = I18NMessages.get("DMSPropertiesTitle")+": ";
 
 	/** Remote dynamic message sign interface */
 	protected DMS sign;
@@ -256,7 +255,7 @@ public class DMSProperties extends TrafficDeviceForm {
 //	protected final JButton lampTest = new JButton("Lamp test");
 
 	/** Fan test activation button */
-	protected final JButton fanTest = new JButton(I18NMessages.i18nMessages.getString ("OK"));
+	protected final JButton fanTest = new JButton("Fan test");
 
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();

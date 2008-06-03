@@ -41,7 +41,8 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  */
 public class DMSListForm extends SortedListForm {
 
-	// note: frame title comes from I18N bundle
+	/** Frame title */
+	static protected String TITLE = I18NMessages.get("DMSListFormTitle")+": ";
 
 	/** Add title */
 	static protected final String ADD_TITLE = "Add DMS";
@@ -60,7 +61,7 @@ public class DMSListForm extends SortedListForm {
 
 	/** Create a new DMSListForm */
 	public DMSListForm(TmsConnection tc) {
-		super(I18NMessages.get("DMSListFormTitle"), tc, tc.getProxy().getDMSListModel(),
+		super(TITLE, tc, tc.getProxy().getDMSListModel(),
 			Icons.getIcon("drum-inactive"));
 		signList = (DMSList)obj;
 	}

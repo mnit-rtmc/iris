@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -90,7 +91,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		selectionModel = handler.getSelectionModel();
 		pnlSign = new DMSPanel(st.getSystemPolicy());
 		setBorder(BorderFactory.createTitledBorder(
-			"Selected Dynamic Message Sign"));
+			I18NMessages.get("DMSDispatcherGroupBoxTitle")));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.anchor = GridBagConstraints.EAST;
