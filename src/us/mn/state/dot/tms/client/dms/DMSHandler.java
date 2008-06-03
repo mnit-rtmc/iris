@@ -23,6 +23,8 @@ import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 import us.mn.state.dot.tms.utils.TMSProxy;
 
+import us.mn.state.dot.tms.utils.I18NMessages;
+
 /**
  * The DMSHandler class provides proxies for DMS objects.
  *
@@ -33,7 +35,7 @@ public class DMSHandler extends DeviceHandlerImpl {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return DMSProxy.PROXY_TYPE;
+		return (I18NMessages.i18nMessages.getString ("MesgSignLabel"));
 	}
 
 	/** Create a new DMS handler */

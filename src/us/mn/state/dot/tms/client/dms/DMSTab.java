@@ -21,6 +21,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * The DMSTab class provides the GUI for working with DMS objects.
@@ -46,7 +47,9 @@ public class DMSTab extends MapTab {
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
 		DMSHandler handler, final SonarState st)
 	{
-		super("DMS", "Operate Dynamic Message Signs");
+		super(I18NMessages.i18nMessages.getString ("MesgSignMenuLabel"),
+                                                   I18NMessages.i18nMessages.getString ("MesgSignMenuHoverText"));
+              
 		dispatcher = new DMSDispatcher(handler, st);
 		chooser = new DmsStatusSummary(handler);
 		map.addLayers(lstates);

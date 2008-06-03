@@ -41,6 +41,8 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.utils.Screen;
 import us.mn.state.dot.tms.utils.ScreenLayout;
 import us.mn.state.dot.tms.utils.Agency;
+import us.mn.state.dot.tms.utils.I18NMessages;
+
 
 /**
  * The Main class for IrisClient.
@@ -90,6 +92,7 @@ public class IrisClient extends JFrame {
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
 		setName( "IRIS" );
+        I18NMessages.initialize (props);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];

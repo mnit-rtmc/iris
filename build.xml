@@ -11,11 +11,13 @@
 	<property name="images.dir" value="images"/>
 	<property name="bin.dir" value="bin"/>
 	<property name="lib.dir" value="lib"/>
+ 	<property name="MessagesBundle.dir" value="etc/MessagesBundle"/>
 	<property name="docs.dir" value="docs"/>
 	<property name="build.dir" value="build"/>
 	<property name="build.etc" value="${build.dir}/etc"/>
 	<property name="build.src" value="${build.dir}/src"/>
 	<property name="build.lib" value="${build.dir}/lib"/>
+	<property name="build.MessagesBundle" value="${build.dir}/MessagesBundle"/>
 	<property name="build.images" value="${build.dir}/images"/>
 	<property name="build.classes" value="${build.dir}/classes"/>
 	<property name="build.javadocs" value="${build.dir}/javadocs"/>
@@ -159,6 +161,12 @@
 
 		<mkdir dir="${build.classes}"/>
 		<mkdir dir="${build.lib}"/>
+		<mkdir dir="${build.MessagesBundle}"/>
+		<copy todir="${build.MessagesBundle}">
+			<fileset dir="${MessagesBundle.dir}">
+				<include name="*.properties"/>
+			</fileset>
+		</copy>
 	</target>
 
 	<!-- Compile the source code -->
@@ -253,6 +261,8 @@
 				 includes="us/mn/state/dot/tms/client/**/*"/>
 			<fileset dir="${build.classes}"
 				 includes="gov/ca/dot/d10/tms/client/**/*"/>
+			<fileset dir="${build.dir}"
+				 includes="MessagesBundle/*"/>
 			<fileset dir="${build.dir}" includes="images/*"/>
 		</jar>
 	</target>
