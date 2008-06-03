@@ -20,70 +20,74 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 
 /**
- * Class description
+ * Convenience class to handle I18N messages.
  *
  *
- * @version    Initial release, 08/05/19
- * @author     p.w.wong    
+ * @version    Initial release, 06/03/08
+ * @author     p.w.wong, AHMCT
  */
 public class I18NMessages
 {
-	static public ResourceBundle i18nMessages;
+	/** base name for resource bundles */
+	private static final String BASENAME="MessagesBundle.MessagesBundle";
+
+	/** the resource bundle */
+	static private ResourceBundle m_i18NMessages=null;
+
+	/** class can't be instantiated */
+	private I18NMessages() {}
 
 	/**
-	 * Method description
+	 * Read resource bundle and assign to public static field.
+	 * This method should be called once at program startup.
 	 *
-	 *
-	 * @param props
+	 * @param props Opened property file which contains the 
+	 * 		language, country, and variant.
 	 */
 	static public void initialize(Properties props) {
-		Locale currentLocale;
 
-		System.out.println("Opening I18N resources; Language "
-				   + props.getProperty("language")
-				   + " Country " + props.getProperty("country")
-				   + " Variant "
-				   + props.getProperty("variant"));
+		String l=PropertyFile.get(props,"language");
+		String c=PropertyFile.get(props,"country");
+		String v=PropertyFile.get(props,"variant");
 
-		if((props.getProperty("variant") != null)
-			&& (props.getProperty("language") != null)
-			&& (props.getProperty("country") != null)) {
-			currentLocale =
-				new Locale(props.getProperty("language"),
-					   props.getProperty("country"),
-					   props.getProperty("variant"));
-			i18nMessages = ResourceBundle.getBundle(
-				"MessagesBundle.MessagesBundle", currentLocale);
-		} else if((props.getProperty("variant") == null)
-			&& (props.getProperty("language") != null)
-			&& (props.getProperty("country") != null)) {
-			currentLocale =
-				new Locale(props.getProperty("language"),
-					   props.getProperty("country"));
-			i18nMessages = ResourceBundle.getBundle(
-				"MessagesBundle.MessagesBundle", currentLocale);
-		} else if((props.getProperty("country") == null)
-			&& (props.getProperty("language") != null)) {
-			currentLocale =
-				new Locale(props.getProperty("language"));
-			i18nMessages = ResourceBundle.getBundle(
-				"MessagesBundle.MessagesBundle", currentLocale);
-		} else {
-			i18nMessages = ResourceBundle.getBundle(
-				"MessagesBundle.MessagesBundle");
+		System.err.println("Opening I18N resources: Language=" +
+			l + ", Country=" + c + ", Variant=" + v);
+
+		// load bundle using: lang, country, variant
+		try {
+			Locale loc=null;
+			if (v!=null && l!=null && c!=null) {
+				loc = new Locale(l,c,v);
+				m_i18NMessages = ResourceBundle.getBundle(
+					BASENAME, loc);
+			}
+		} catch (Exception ex) {
+			System.err.println("Error, could not load message bundle: "+ex);
+			m_i18NMessages=null;
 		}
-
-		System.out.println("For " + i18nMessages.getString("DOT")
-				   + " district "
-				   + i18nMessages.getString("District"));
-
+		if (m_i18NMessages==null) {
+			System.err.println("Error: failed to open I18N resource bundle: "+
+			BASENAME+"_"+l+"_"+c+"_"+v);
+		}
 	}
 
-	/**
-	 * Method description
-	 *
-	 */
-	static public void PrintJunk() {
-		System.out.println("XXX printjunk");
+	/** get string using id */
+	static public String get(String id) {
+		String s="Undefined I18N string";
+		if (id==null || id.length()==0)
+			return s;
+		if (m_i18NMessages==null) {
+			System.err.println("Error: load message bundle not loaded.");
+			return "Message bundle not read";
+		}
+		try {
+			s=m_i18NMessages.getString(id);
+		} catch (Exception ex) {
+			System.err.println(
+				"Error: attempting to read id ("+id+
+				") from bundle, ex="+ex);
+		}
+		return s;
 	}
 }
+
