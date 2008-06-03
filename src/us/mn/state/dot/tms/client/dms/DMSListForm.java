@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.client.toast.AddForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SortedListForm;
 import us.mn.state.dot.tms.client.toast.TmsForm;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * DMSListForm
@@ -40,8 +41,7 @@ import us.mn.state.dot.tms.client.toast.TmsForm;
  */
 public class DMSListForm extends SortedListForm {
 
-	/** Frame title */
-	static private final String TITLE = "Dynamic Message Signs";
+	// note: frame title comes from I18N bundle
 
 	/** Add title */
 	static protected final String ADD_TITLE = "Add DMS";
@@ -60,7 +60,7 @@ public class DMSListForm extends SortedListForm {
 
 	/** Create a new DMSListForm */
 	public DMSListForm(TmsConnection tc) {
-		super(TITLE, tc, tc.getProxy().getDMSListModel(),
+		super(I18NMessages.get("DMSListFormTitle"), tc, tc.getProxy().getDMSListModel(),
 			Icons.getIcon("drum-inactive"));
 		signList = (DMSList)obj;
 	}
@@ -87,7 +87,7 @@ public class DMSListForm extends SortedListForm {
 		label.setForeground(TmsForm.ERROR);
 		lay.setConstraints(label, bag);
 		panel.add(label);
-		label = new JLabel("all active Dynamic Message Signs.");
+		label = new JLabel("all active "+I18NMessages.get("DMSListFormAlertText")+".");
 		label.setForeground(TmsForm.ERROR);
 		lay.setConstraints(label, bag);
 		panel.add(label);
