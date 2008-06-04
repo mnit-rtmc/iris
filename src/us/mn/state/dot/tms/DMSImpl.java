@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -590,55 +588,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 	}
 
-	/** Get the full message library for the sign */
-	public DmsMessage[] getMessages() {
-		TreeSet<DmsMessage> tree = new TreeSet<DmsMessage>();
-		HashMap<Integer, DmsMessage> map =
-			dmsList.getLibrary().getMessages();
-		synchronized(map) {
-			for(DmsMessage m: map.values()) {
-				if(m.dms == null || id.equals(m.dms)) {
-					try {
-						tree.add((DmsMessage)m.clone());
-					}
-					catch(CloneNotSupportedException e) {
-						// This should never happen ...
-						e.printStackTrace();
-					}
-				}
-			}
-		}
-		calculateWidths(tree);
-		return (DmsMessage[])tree.toArray(new DmsMessage[0]);
-	}
-
-	/** Insert one entry into the message library */
-	public DmsMessage insertMessage(boolean global, short line)
-		throws TMSException
-	{
-		DmsMessageLibrary l = dmsList.getLibrary();
-		if(global)
-			return l.insert(null, line);
-		else
-			return l.insert(id, line);
-	}
-
-	/** Update one entry in the message library */
-	public void updateMessage(DmsMessage m) throws TMSException {
-		validateText(m.message);
-		if(m.message.length() > 24)
-			throw new ChangeVetoException("Message too wide");
-		validateText(m.abbrev);
-		if(m.abbrev.length() > 12)
-			throw new ChangeVetoException("Abbreviation too wide");
-		dmsList.getLibrary().update(m);
-	}
-
-	/** Delete one entry from the message library */
-	public void deleteMessage(DmsMessage m) throws TMSException {
-		dmsList.getLibrary().remove(m);
-	}
-
 	/** Create a blank message for the sign */
 	protected SignMessage createBlankMessage(String owner) {
 		MultiString multi = new MultiString();
@@ -805,89 +754,25 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return signHeightPixels / getLineHeightPixels();
 	}
 
-	/** Calculate the X pixel position to place text */
-	protected int _calculatePixelX(MultiString.JustificationLine j,
-		FontImpl font, String t) throws InvalidMessageException
-	{
-		switch(j) {
-			case LEFT:
-				return 0;
-			case CENTER:
-				int c = Math.max(1, characterWidthPixels);
-				int w = signWidthPixels / c;
-				int r = font.calculateWidth(t) / c;
-				return c * Math.max(0, (w - r) / 2);
-			case RIGHT:
-				return signWidthPixels - font.calculateWidth(t)
-					- 1;
-			default:
-				return 0;
-		}
-	}
-
-	/** Calculate the X pixel position to place text */
-	protected int calculatePixelX(MultiString.JustificationLine j,
-		FontImpl font, String t)
-	{
-		try {
-			return _calculatePixelX(j, font, t);
-		}
-		catch(InvalidMessageException e) {
-			// Invalid characters in string
-			return 0;
-		}
-	}
-
 	/** 
 	 * Create a pixel map of the message for all pages within the
 	 * MultiString message.
 	 */
 	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi) {
-		PixelMapBuilder builder = new PixelMapBuilder();
-		multi.parse(builder);
-		return builder.pixmaps;
-	}
-
-	/** Inner class for building pixel maps */
-	protected class PixelMapBuilder implements MultiString.Callback {
 		final FontImpl font = getFont();
-		final TreeMap<Integer, BitmapGraphic> pixmaps =
-			new TreeMap<Integer, BitmapGraphic>();
-
-		private BitmapGraphic getBitmap(int p) {
-			if(pixmaps.containsKey(p))
-				return pixmaps.get(p);
-			BitmapGraphic g = new BitmapGraphic(signWidthPixels,
-				signHeightPixels);
-			pixmaps.put(p, g);
-			return g;
-		}
-
-		public void addText(int p, int l,
-			MultiString.JustificationLine j, String t)
-		{
-			BitmapGraphic g = getBitmap(p);
-			if(font == null) {
-				log("No font");
-				return;
-			}
-			try {
-				int x = calculatePixelX(j, font, t);
-				int y = l * (font.getHeight() +
-					font.getLineSpacing());
-				font.renderOn(g, x, y, t);
-			}
-			catch(InvalidMessageException e) {
-				log("missing code point: " + t);
-			}
-			catch(IOException e) {
-				log("Invalid Base64 data");
-			}
-		}
-
-		protected void log(String m) {
-			System.err.println("PixelMapBuilder " + id + ":" + m);
-		}
+		if(font == null)
+			return new TreeMap<Integer, BitmapGraphic>();
+		PixelMapBuilder builder = new PixelMapBuilder(signWidthPixels,
+			signHeightPixels, characterWidthPixels, font,
+			new PixelMapBuilder.GlyphFinder() {
+				public Graphic lookupGraphic(int cp)
+					throws InvalidMessageException
+				{
+					return font.getGraphic(cp);
+				}
+			});
+		multi.parse(builder);
+		return builder.getPixmaps();
 	}
 
 	/** Lookup the best font */
@@ -916,29 +801,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Get the appropriate font for this sign */
 	public FontImpl getFont() {
 		return lookupFont(getLineHeightPixels(),characterWidthPixels,0);
-	}
-
-	/** Calculate the width (in pixels) of a single line of text */
-	protected int calculateWidth(FontImpl font, String t) {
-		try {
-			return font.calculateWidth(t);
-		}
-		catch(InvalidMessageException e) {
-			// This will happen if a character in the text is not
-			// defined in the font
-			return -1;
-		}
-	}
-
-	/** Calculate the widths of all DMS messages in an iterator */
-	protected void calculateWidths(Collection<DmsMessage> msgs) {
-		FontImpl font = getFont();
-		if(font != null) {
-			for(DmsMessage m: msgs) {
-				m.m_width = calculateWidth(font, m.message);
-				m.a_width = calculateWidth(font, m.abbrev);
-			}
-		}
 	}
 
 	/** Test if the sign status is unavailable */
@@ -1341,8 +1203,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			int wp = signWidthPixels;	// Avoid race
 			if(w > 0 && wp > 0)
 				return Math.round(w / wp);
-		} else {
-			System.err.println("Error: unknown sign type in DMSImpl.getEstimatedHorizontalPitch()");
 		}
 		return DEFAULT_PITCH;
 	}

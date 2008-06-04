@@ -19,7 +19,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
-
+import java.util.TreeMap;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -35,15 +36,30 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-
+import javax.swing.table.DefaultTableModel;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsMessage;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanList;
 import us.mn.state.dot.tms.TrafficDevice;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TMSObjectForm;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
@@ -129,30 +145,26 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
 
-	/** Mile Point field */
-	protected final JTextField milePoint = new JTextField(10);
+	/** Sign group model */
+	protected final SignGroupModel sign_group_model;
 
-	/** Message table model */
-	protected DmsMessageModel mess_model;
+	/** Sign text model */
+	protected SignTextModel sign_text_model;
 
-	/** Model for message line number spinner */
-	protected final SpinnerNumberModel spin_model =
-		new SpinnerNumberModel(1, 1, 6, 1);
+	/** Sign group table component */
+	protected final JTable group_table = new JTable();
 
-	/** Message line number spinner */
-	protected final JSpinner line_spin = new JSpinner(spin_model);
+	/** Button to delete a sign group */
+	protected final JButton delete_group = new JButton("Delete Group");
 
-	/** Message global checkbox */
-	protected final JCheckBox global = new JCheckBox("Global");
+	/** Sign text table component */
+	protected final JTable sign_text_table = new JTable();
 
-	/** Button to insert a message */
-	protected final JButton insert_mess = new JButton("Insert");
+	/** Button to delete sign text message */
+	protected final JButton delete_text = new JButton("Delete Message");
 
-	/** Button to delete a message */
-	protected final JButton delete_mess = new JButton("Delete");
-
-	/** Message table component */
-	protected final JTable mess_table = new JTable();
+	/** Sign pixel panel */
+	protected final SignPixelPanel pixel_panel = new SignPixelPanel();
 
 	/** Travel time template string field */
 	protected final JTextArea travel = new JTextArea();
@@ -301,22 +313,46 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Form object */
 	protected final TMSObjectForm form = this;
 
+	/** Sonar state */
+	protected final SonarState state;
+
 	/** Array of timing plans */
 	protected TimingPlan[] plans;
 
 	/** Create a new DMS properties from */
 	public DMSProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
+		state = tc.getSonarState();
+		sign_group_model = new SignGroupModel(id,
+			state.getDmsSignGroups(), state.getSignGroups(),
+			connection.isAdmin());
 	}
+
+	protected int h_pix;
+	protected int v_pix;
+	protected int c_pix;
+	protected int hp_mm;
+	protected int vp_mm;
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = tms.getDMSList();
 		sign = (DMS)s.getElement(id);
+
+		h_pix = sign.getSignWidthPixels();
+		v_pix = sign.getLineHeightPixels();
+		c_pix = sign.getCharacterWidthPixels();
+		hp_mm = sign.getHorizontalPitch();
+		vp_mm = sign.getVerticalPitch();
+h_pix = 125;
+v_pix = 7;
+c_pix = 0;
+hp_mm = 70;
+vp_mm = 70;
+
 		ListModel model = tms.getCameras().getModel();
 		camera.setModel(new WrapperComboBoxModel(model));
-		mess_table.setColumnModel(DmsMessageModel.createColumnModel());
 		TimingPlanModel plan_model = new TimingPlanModel(
 			(TimingPlanList)tms.getTimingPlans().getList(), sign,
 			admin);
@@ -325,7 +361,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		b_table = new BrightnessTable(sign, admin);
 		setDevice(sign);
 		super.initialize();
-		location.addRow("Milepoint", milePoint);
 		location.addRow("Camera", camera);
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
@@ -335,60 +370,264 @@ public class DMSProperties extends TrafficDeviceForm {
 		tab.add("Status", createStatusPanel());
 	}
 
-	/** Add an action to the delete button */
-	protected void addDeleteAction() {
-		new ActionJob(this, delete_mess) {
+	/** Dispose of the form */
+	protected void dispose() {
+		sign_group_model.dispose();
+		if(sign_text_model != null)
+			sign_text_model.dispose();
+		super.dispose();
+	}
+
+	/** Add a actions for the delete buttons */
+	protected void addDeleteActions() {
+		new ActionJob(this, delete_group) {
+			public void perform() {
+				SignGroup group = getSelectedGroup();
+				if(group != null)
+					group.destroy();
+			}
+		};
+		new ActionJob(this, delete_text) {
 			public void perform() throws Exception {
-				int r = mess_table.getSelectedRow();
-				if(r < 0)
-					return;
-				DmsMessage m = mess_model.getRowMessage(r);
-				sign.deleteMessage(m);
-				mess_model = new DmsMessageModel(sign,
-					connection.isAdmin(),
-					connection.isTiger());
-				mess_table.setModel(mess_model);
-				sign.notifyUpdate();
+				SignText sign_text = getSelectedSignText();
+				if(sign_text != null)
+					sign_text.destroy();
 			}
 		};
 	}
 
 	/** Create the message panel */
 	protected JPanel createMessagePanel() {
-		JPanel panel = new JPanel();
-		panel.setBorder(BORDER);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		mess_table.setAutoCreateColumnsFromModel(false);
-		JScrollPane scroll = new JScrollPane(mess_table);
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		box.add(scroll);
-		box.add(Box.createHorizontalGlue());
-		if(connection.isAdmin() || connection.isTiger()) {
-			JPanel vbox = new JPanel(new GridBagLayout());
-			GridBagConstraints bag = new GridBagConstraints();
-			bag.insets.top = 10;
+		JPanel panel = new JPanel(new GridBagLayout());
+		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets.top = 5;
+		bag.insets.left = 5;
+		bag.insets.right = 5;
+		bag.insets.bottom = 5;
+		bag.weightx = 1;
+		bag.weighty = 1;
+		bag.fill = GridBagConstraints.BOTH;
+		initGroupTable();
+		JScrollPane scroll = new JScrollPane(group_table);
+		bag.gridx = 0;
+		bag.gridy = 0;
+		panel.add(scroll, bag);
+		initSignTextTable();
+		scroll = new JScrollPane(sign_text_table);
+		bag.gridx = 1;
+		bag.gridy = 0;
+		panel.add(scroll, bag);
+		bag.weightx = 0;
+		bag.weighty = 0;
+		bag.fill = GridBagConstraints.NONE;
+		if(admin) {
 			bag.gridx = 0;
-			vbox.add(line_spin, bag);
-			if(admin)
-				vbox.add(global, bag);
-			vbox.add(insert_mess, bag);
-			new ActionJob(this, insert_mess) {
-				public void perform() throws Exception {
-					boolean g = global.isSelected();
-					Number l = (Number)line_spin.getValue();
-					sign.insertMessage(g, l.shortValue());
-					sign.notifyUpdate();
-				}
-			};
-			if(admin) {
-				vbox.add(delete_mess, bag);
-				addDeleteAction();
-			}
-			box.add(vbox);
+			bag.gridy = 1;
+			delete_group.setEnabled(false);
+			panel.add(delete_group, bag);
+			bag.gridx = 1;
+			delete_text.setEnabled(false);
+			panel.add(delete_text, bag);
+			addDeleteActions();
 		}
-		panel.add(box);
+		bag.gridx = 0;
+		bag.gridy = 2;
+		bag.gridwidth = 2;
+		pixel_panel.setMinimumSize(new Dimension(540, 40));
+		pixel_panel.setPreferredSize(new Dimension(540, 40));
+		pixel_panel.setSize(new Dimension(540, 40));
+		JPanel pnl = new JPanel();
+		pnl.setBorder(BorderFactory.createTitledBorder(
+			"Message Preview"));
+		pnl.add(pixel_panel);
+		panel.add(pnl, bag);
 		return panel;
+	}
+
+	/** Initialize the sign group table */
+	protected void initGroupTable() {
+		final ListSelectionModel s = group_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, s) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectGroup();
+			}
+		};
+		group_table.setAutoCreateColumnsFromModel(false);
+		group_table.setColumnModel(SignGroupModel.createColumnModel());
+		group_table.setModel(sign_group_model);
+		group_table.setPreferredScrollableViewportSize(
+			new Dimension(260, 200));
+	}
+
+	/** Select a new sign group */
+	protected void selectGroup() {
+		SignGroup group = getSelectedGroup();
+		if(group != null) {
+			if(sign_text_model != null)
+				sign_text_model.dispose();
+			sign_text_model = new SignTextModel(group,
+				state.getSignText(), connection.isAdmin());
+			sign_text_table.setModel(sign_text_model);
+			delete_group.setEnabled(isGroupDeletable(group));
+		} else {
+			sign_text_table.setModel(new DefaultTableModel());
+			delete_group.setEnabled(false);
+		}
+	}
+
+	/** Check if a sign group is deletable */
+	protected boolean isGroupDeletable(SignGroup group) {
+		return !(hasMembers(group) || hasSignText(group));
+	}
+
+	/** Check if a sign group has any members */
+	protected boolean hasMembers(final SignGroup group) {
+		TypeCache<DmsSignGroup> dms_sign_groups =
+			state.getDmsSignGroups();
+		return null != dms_sign_groups.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof DmsSignGroup) {
+					DmsSignGroup g = (DmsSignGroup)o;
+					if(g.getSignGroup() == group)
+						return true;
+				}
+				return false;
+			}
+		});
+	}
+
+	/** Check if a sign group has any sign text messages */
+	protected boolean hasSignText(final SignGroup group) {
+		TypeCache<SignText> sign_text = state.getSignText();
+		return null != sign_text.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof SignText) {
+					SignText t = (SignText)o;
+					if(t.getSignGroup() == group)
+						return true;
+				}
+				return false;
+			}
+		});
+	}
+
+	/** Get the selected sign group */
+	protected SignGroup getSelectedGroup() {
+		ListSelectionModel s = group_table.getSelectionModel();
+		return sign_group_model.getProxy(s.getMinSelectionIndex());
+	}
+
+	/** Initialize the sign text table */
+	protected void initSignTextTable() {
+		final ListSelectionModel s =sign_text_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, s) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectSignText();
+			}
+		};
+		sign_text_table.setAutoCreateColumnsFromModel(false);
+		sign_text_table.setColumnModel(
+			SignTextModel.createColumnModel());
+		sign_text_table.setPreferredScrollableViewportSize(
+			new Dimension(280, 200));
+	}
+
+	/** Select a new sign text message */
+	protected void selectSignText() {
+		SignText st = getSelectedSignText();
+		pixel_panel.setPhysicalDimensions(h_pix * hp_mm, v_pix * vp_mm,
+			0, 0, hp_mm, vp_mm);
+		pixel_panel.setLogicalDimensions(h_pix, v_pix, c_pix, 0);
+		pixel_panel.verifyDimensions();
+		if(st != null)
+			pixel_panel.setGraphic(renderMessage(st));
+		else
+			pixel_panel.setGraphic(null);
+		delete_text.setEnabled(st != null);
+	}
+
+	/** Render a message to a bitmap graphic */
+	protected BitmapGraphic renderMessage(SignText st) {
+		MultiString multi = new MultiString(st.getMessage());
+		TreeMap<Integer, BitmapGraphic> pages = renderPages(multi);
+		if(pages.containsKey(0))
+			return pages.get(0);
+		else
+			return null;
+	}
+
+	/** Render the pages of a text message */
+	protected TreeMap<Integer, BitmapGraphic> renderPages(
+		final MultiString multi)
+	{
+		final Font font = lookupFont();
+		if(font == null)
+			return new TreeMap<Integer, BitmapGraphic>();
+		PixelMapBuilder builder = new PixelMapBuilder(h_pix,
+			v_pix, c_pix, font, new PixelMapBuilder.GlyphFinder()
+		{
+			public Graphic lookupGraphic(int cp)
+				throws InvalidMessageException
+			{
+				Graphic g = lookupGlyph(font, cp);
+				if(g != null)
+					return g;
+				else
+					throw new InvalidMessageException(
+						"Invalid code point");
+			}
+		});
+		multi.parse(builder);
+		return builder.getPixmaps();
+	}
+
+	/** Lookup a font for the sign */
+	protected Font lookupFont() {
+		TypeCache<Font> fonts = state.getFonts();
+		return fonts.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof Font) {
+					Font f = (Font)o;
+					if(f.getWidth() == c_pix &&
+					   f.getHeight() == v_pix)
+						return true;
+				}
+				return false;
+			}
+		});
+	}
+
+	/** Lookup a glyph in the specified font */
+	protected Graphic lookupGlyph(final Font f, final int cp) {
+		TypeCache<Glyph> glyphs = state.getGlyphs();
+		Glyph g = glyphs.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof Glyph) {
+					Glyph g = (Glyph)o;
+					if(g.getFont() == f &&
+					   g.getCodePoint() == cp)
+						return true;
+				}
+				return false;
+			}
+		});
+		if(g != null)
+			return g.getGraphic();
+		else
+			return null;
+	}
+
+	/** Get the selected sign text message */
+	protected SignText getSelectedSignText() {
+		SignTextModel m = sign_text_model;
+		if(m == null)
+			return null;
+		ListSelectionModel s = sign_text_table.getSelectionModel();
+		return m.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Create the travel time panel */
@@ -739,13 +978,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the sign */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		mess_model = new DmsMessageModel(sign, connection.isAdmin(),
-			connection.isTiger());
-		mess_table.setModel(mess_model);
 		TrafficDevice c = sign.getCamera();
 		if(c != null)
 			camera.setSelectedItem(c.getId());
-		Float mile = sign.getMile();
 		String t = sign.getTravel();
 		Color color = Color.GRAY;
 		if(sign.isActive())
@@ -780,10 +1015,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		ambientTemp.setForeground(color);
 		housingTemp.setForeground(color);
 		b_table.doUpdate();
-		if(mile == null)
-			milePoint.setText("");
-		else
-			milePoint.setText(mile.toString());
 		travel.setText(t);
 	}
 
@@ -849,10 +1080,8 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Apply button is pressed */
 	protected void applyPressed() throws Exception {
-		Float m = new Float(milePoint.getText());
 		super.applyPressed();
 		sign.setCamera((String)camera.getSelectedItem());
-		sign.setMile(m);
 		if(b_table.isModified()) {
 			int[] table = b_table.getTableData();
 			sign.setBrightnessTable(table);

@@ -52,6 +52,7 @@ public class FontModel extends ProxyTableModel<Font> {
 	/** Create a new font table model */
 	public FontModel(TypeCache<Font> c, boolean a) {
 		super(c, a);
+		initialize();
 	}
 
 	/** Get the count of columns in the table */

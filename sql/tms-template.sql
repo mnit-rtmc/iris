@@ -613,21 +613,26 @@ INHERITS (traffic_device);
 REVOKE ALL ON TABLE warning_sign FROM PUBLIC;
 GRANT SELECT ON TABLE warning_sign TO PUBLIC;
 
-CREATE SEQUENCE dms_message_seq
-    INCREMENT BY 1
-    NO MAXVALUE
-    NO MINVALUE
-    CACHE 1;
+CREATE TABLE sign_group (
+	name VARCHAR(16) PRIMARY KEY,
+	local BOOLEAN NOT NULL
+);
 
-CREATE TABLE dms_message (
-    id integer DEFAULT nextval('dms_message_seq'::text) NOT NULL,
-    dms text,
-    line smallint NOT NULL,
-    message character varying(24) DEFAULT ''::character varying NOT NULL,
-    abbrev character varying(12) DEFAULT ''::character varying NOT NULL,
-    priority smallint DEFAULT 50 NOT NULL,
-    CONSTRAINT dms_message_line CHECK (((line >= 1) AND (line <= 6))),
-    CONSTRAINT dms_message_priority CHECK (((priority >= 1) AND (priority <= 99)))
+CREATE TABLE dms_sign_group (
+	name VARCHAR(24) PRIMARY KEY,
+	dms text NOT NULL REFERENCES dms(id),
+	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group
+);
+
+CREATE TABLE sign_text (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group,
+	line smallint NOT NULL,
+	message VARCHAR(24) NOT NULL,
+	priority smallint NOT NULL,
+	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
+	CONSTRAINT sign_text_priority CHECK
+		((priority >= 1) AND (priority <= 99))
 );
 
 CREATE TABLE road_modifier (
@@ -877,12 +882,13 @@ CREATE VIEW dms_view AS
 
 GRANT SELECT ON dms_view TO PUBLIC;
 
-CREATE VIEW dms_message_view AS
-	SELECT d.id AS dms, m.dms IS NULL AS global,
-	line, message, abbrev, priority
-	FROM dms d, dms_message m WHERE d.id = m.dms OR m.dms IS NULL;
+CREATE VIEW sign_text_view AS
+	SELECT dms, local, line, message, priority
+	FROM dms_sign_group
+	JOIN sign_group ON dms_sign_group.sign_group = sign_group.name
+	JOIN sign_text ON sign_group.name = sign_text.sign_group;
 
-GRANT SELECT ON dms_message_view TO PUBLIC;
+GRANT SELECT ON sign_text_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
 	SELECT m.vault_oid, m.id, m.notes,
@@ -1254,9 +1260,6 @@ CREATE UNIQUE INDEX r_node_pkey ON r_node USING btree (vault_oid);
 ALTER TABLE ONLY time_plan_log
     ADD CONSTRAINT time_plan_log_pkey PRIMARY KEY (event_id);
 
-ALTER TABLE ONLY dms_message
-    ADD CONSTRAINT dms_message_pkey PRIMARY KEY (id);
-
 ALTER TABLE ONLY road_modifier
     ADD CONSTRAINT road_modifier_pkey PRIMARY KEY (id);
 
@@ -1505,27 +1508,4 @@ CREATE CONSTRAINT TRIGGER "<unnamed>"
     FOR EACH ROW
     EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
 
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON dms_message
-    FROM dms
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'dms_message', 'dms', 'UNSPECIFIED', 'dms', 'id');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON dms
-    FROM dms_message
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_cascade_del"('<unnamed>', 'dms_message', 'dms', 'UNSPECIFIED', 'dms', 'id');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON dms
-    FROM dms_message
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'dms_message', 'dms', 'UNSPECIFIED', 'dms', 'id');
-
 SELECT pg_catalog.setval('tms_log_seq', 8284, true);
-
-SELECT pg_catalog.setval('dms_message_seq', 4768, true);

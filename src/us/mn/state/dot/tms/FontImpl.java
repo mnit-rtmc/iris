@@ -252,45 +252,10 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			GraphicImpl graphic = (GraphicImpl)glyph.getGraphic();
 			if(graphic != null)
 				return graphic;
-		    throw new InvalidMessageException("Invalid graphic");
+			throw new InvalidMessageException("Invalid graphic");
 		}
 		throw new InvalidMessageException("Invalid code point: " +
 			code_point);
-	}
-
-	/** 
-	 * Render text onto a bitmap graphic.
-	 *
-	 * @param g BitmapGraphic to render into.
-	 * @param x Horizontal position to start rendering
-	 * @param y Vertical position to strat rendering
-	 * @param t String to render
-	 * @throws InvalidMessageException if the message contains chars that
-	 *                                 don't exist.
-	 * @throws IOException 
-	 */
-	public void renderOn(BitmapGraphic g, int x, int y, String t)
-		throws InvalidMessageException, IOException
-	{
-		for(int i = 0; i < t.length(); i++) {
-			int j = t.charAt(i);
-			GraphicImpl c = getGraphic(j);
-			c.renderOn(g, x, y);
-			x += c.getWidth() + charSpacing;
-		}
-	}
-
-	/** Calculate the width (in pixels) of a line of text */
-	public int calculateWidth(String t) throws InvalidMessageException {
-		int w = 0;
-		for(int i = 0; i < t.length(); i++) {
-			if(i > 0)
-				w += charSpacing;
-			int j = t.charAt(i);
-			GraphicImpl c = getGraphic(j);
-			w += c.getWidth();
-		}
-		return w;
 	}
 
 	/** Test if the font matches a specified character height/width */

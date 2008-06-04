@@ -74,6 +74,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public ProxyTableModel(TypeCache<T> c, boolean a) {
 		cache = c;
 		admin = a;
+	}
+
+	/** Initialize the proxy table model. This cannot be done in the
+	 * constructor because subclasses may not be fully constructed. */
+	public void initialize() {
 		cache.addProxyListener(this);
 	}
 
@@ -121,12 +126,32 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Change a proxy in the table model */
 	public void proxyChanged(T proxy, String attrib) {
-		final int row = getRow(proxy);
+		int pre_row, post_row;
+		synchronized(proxies) {
+			pre_row = preChangeRow(proxy);
+			if(pre_row < 0)
+				return;
+			post_row = doProxyAdded(proxy);
+		}
+		final int r0 = Math.min(pre_row, post_row);
+		final int r1 = Math.max(pre_row, post_row);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				fireTableRowsUpdated(row, row);
+				fireTableRowsUpdated(r0, r1);
 			}
 		});
+	}
+
+	/** Find and remove a proxy which may not be in proper sort order */
+	protected int preChangeRow(T proxy) {
+		Iterator<T> it = proxies.iterator();
+		for(int i = 0; it.hasNext(); i++) {
+			if(proxy.equals(it.next())) {
+				it.remove();
+				return i;
+			}
+		}
+		return -1;
 	}
 
 	/** Get the count of rows in the table */

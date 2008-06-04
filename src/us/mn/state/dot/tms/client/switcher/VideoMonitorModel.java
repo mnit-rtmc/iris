@@ -42,6 +42,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	/** Create a new video monitor table model */
 	public VideoMonitorModel(TypeCache<VideoMonitor> c) {
 		super(c, true);
+		initialize();
 	}
 
 	/** Get the count of columns in the table */

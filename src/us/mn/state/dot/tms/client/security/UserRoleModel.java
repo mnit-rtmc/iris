@@ -43,6 +43,7 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 	/** Create a new user-role table model */
 	public UserRoleModel(TypeCache<Role> c, boolean a) {
 		super(c, a);
+		initialize();
 	}
 
 	/** Set the roles for a new user */
