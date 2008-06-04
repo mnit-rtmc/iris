@@ -43,6 +43,11 @@ public class OpBlank extends OpDms {
         m_mess = mess;
     }
 
+    /** return description of operation, which is displayed in the client */
+    public String getOperationDescription() {
+	return "Blanking the sign";
+    }
+
     /** Create the first phase of the operation */
     protected Phase phaseOne() {
         return new PhaseSetBlank();
