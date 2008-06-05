@@ -105,7 +105,7 @@ public class PixelMapBuilder implements MultiString.Callback {
 		case CENTER:
 			int w = width / c_width;
 			int r = calculateWidth(t) / c_width;
-			return c_width * (w - r) / 2;
+			return (w - r) / 2 * c_width;
 		case RIGHT:
 			return width - calculateWidth(t) - 1;
 		default:
