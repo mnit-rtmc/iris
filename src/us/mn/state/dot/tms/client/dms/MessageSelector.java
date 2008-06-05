@@ -188,6 +188,7 @@ public class MessageSelector extends JPanel {
 		createMessageModel(proxy.getId());
 		int ml = mess_model.getMaxLine();
 		int nl = proxy.getTextLines();
+// FIXME: should this be here?
 if(nl == 0) nl = 3;
 		int np = calculateSignPages(ml, nl);
 		initializeWidgets(nl, np);
@@ -212,7 +213,7 @@ if(nl == 0) nl = 3;
 	/** Calculate the number of pages for the sign */
 	protected int calculateSignPages(int ml, int nl) {
 		if(nl > 0)
-			return Math.max(1, (ml - 1) / nl + 1);
+			return 1 + Math.max(0, (ml - 1) / nl);
 		else
 			return 1;
 	}
