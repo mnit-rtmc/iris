@@ -464,7 +464,7 @@ vp_mm = 70;
 			if(sign_text_model != null)
 				sign_text_model.dispose();
 			sign_text_model = new SignTextModel(group,
-				state.getSignText(), connection.isAdmin());
+				state.getSignText(), true);
 			sign_text_table.setModel(sign_text_model);
 			delete_group.setEnabled(isGroupDeletable(group));
 		} else {
