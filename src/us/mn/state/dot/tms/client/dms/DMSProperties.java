@@ -329,6 +329,8 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected int c_pix;
 	protected int hp_mm;
 	protected int vp_mm;
+	protected int h_mm;
+	protected int hb_mm;
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
@@ -341,11 +343,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		c_pix = sign.getCharacterWidthPixels();
 		hp_mm = sign.getHorizontalPitch();
 		vp_mm = sign.getVerticalPitch();
-h_pix = 125;
-v_pix = 7;
-c_pix = 0;
-hp_mm = 70;
-vp_mm = 70;
+		h_mm = sign.getSignWidth();
+		hb_mm = sign.getHorizontalBorder();
 
 		ListModel model = tms.getCameras().getModel();
 		camera.setModel(new WrapperComboBoxModel(model));
@@ -535,8 +534,8 @@ vp_mm = 70;
 	/** Select a new sign text message */
 	protected void selectSignText() {
 		SignText st = getSelectedSignText();
-		pixel_panel.setPhysicalDimensions(h_pix * hp_mm, v_pix * vp_mm,
-			0, 0, hp_mm, vp_mm);
+		pixel_panel.setPhysicalDimensions(h_mm, v_pix * vp_mm,
+			hb_mm, 0, hp_mm, vp_mm);
 		pixel_panel.setLogicalDimensions(h_pix, v_pix, c_pix, 0);
 		pixel_panel.verifyDimensions();
 		if(st != null)
@@ -1072,6 +1071,15 @@ vp_mm = 70;
 			con_manual.setSelected(true);
 		else
 			con_photocell.setSelected(true);
+
+		h_pix = sign.getSignWidthPixels();
+		v_pix = sign.getLineHeightPixels();
+		c_pix = sign.getCharacterWidthPixels();
+		hp_mm = sign.getHorizontalPitch();
+		vp_mm = sign.getVerticalPitch();
+		h_mm = sign.getSignWidth();
+		hb_mm = sign.getHorizontalBorder();
+		selectSignText();
 	}
 
 	/** Apply button is pressed */
