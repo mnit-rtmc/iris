@@ -130,20 +130,35 @@ public class DmsLitePoller extends MessagePoller
 	public void sendMessage(DMSImpl dms, SignMessage m)
 		throws InvalidMessageException {
 		System.err.println("DmsLitePoller.sendMessage() called.");
-		System.err.println("DmsLitePoller.sendMessage(), SignMessage multistring="
-		    + m.getMulti().toString() + ",bitmap len="
-		    + m.getBitmap().getBitmap().length + ", bitmap="
-		    + Convert.toHexString(m.getBitmap().getBitmap()));
 
+		// sanity checks
+		if (dms==null || m==null) {
+			System.err.println("Warning: DmsLitePoller.sendMessage(): null args in sendMessage("+dms+","+m+"), ignored.");
+			return;
+		}
+		if (m.getBitmap()==null) {
+			System.err.println("Warning: DmsLitePoller.sendMessage(): bitmap is null, ignored.");
+			return;
+		}
+		if (m.getBitmap().getBitmap()==null) {
+			System.err.println("Warning: DmsLitePoller.sendMessage():m.getBitmap().getBitmap() is null, ignored.");
+			return;
+		}
 		// was bitmap rendered? If not, it's probably because a GetDMSConfig message has
 		// not been received yet, so the DMS physical properties are not yet valid.
 		if (m.getBitmap().getBitmap().length <= 0) {
-			System.err.println(
-			    "DmsLitePoller.sendMessage(): bitmap has a zero length. Message ignored.");
-
+			System.err.println("Warning: DmsLitePoller.sendMessage(): m.getBitmap().getBitmap().length<=0, ignored.");
 			return;
 		}
 
+		System.err.println("DmsLitePoller.sendMessage(), SignMessage multistring="
+			+ m.getMulti().toString());
+		System.err.println("DmsLitePoller.sendMessage(), bitmap len="
+			+m.getBitmap().getBitmap().length);
+		System.err.println("DmsLitePoller.sendMessage(), bitmap="
+		    + Convert.toHexString(m.getBitmap().getBitmap()));
+
+		// finally, send message
 		OpMessage cmd = new OpMessage(dms, m);
 		cmd.start();
 	}

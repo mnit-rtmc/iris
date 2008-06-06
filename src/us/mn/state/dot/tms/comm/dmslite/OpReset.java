@@ -127,6 +127,9 @@ public class OpReset extends OpDms
 				handleException(new IOException(errmsg));
 			}
 
+			// update 
+			complete(mess);
+
 			// process response
 			if(valid) {
 

@@ -152,5 +152,10 @@ abstract public class OpDms extends DeviceOperation {
 		return(sm);
 	}
 
+	/** update iris status, called after operation complete */
+	public void complete(Message m) {
+		m_dms.setHeatTapeStatus(new Integer(m.getCompletionTimeMS()).toString()+" ms");
+	}
+
 }
 

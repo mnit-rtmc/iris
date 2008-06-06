@@ -309,6 +309,9 @@ public class OpQueryMsg extends OpDms
 				handleException(new IOException(errmsg));
 			}
 
+			// update 
+			complete(mess);
+
 			// process response
 			if(valid) {
 				// error checking: have on time? if not, create new ontime

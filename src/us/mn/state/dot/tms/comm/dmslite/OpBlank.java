@@ -160,6 +160,9 @@ public class OpBlank extends OpDms
 				handleException(new IOException(errmsg));
 			}
 
+			// update 
+			complete(mess);
+
 			// update dms
 			if(valid) {
 				m_dms.setActiveMessage(m_mess);

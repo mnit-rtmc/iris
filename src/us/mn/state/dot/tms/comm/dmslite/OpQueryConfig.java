@@ -137,6 +137,9 @@ public class OpQueryConfig extends OpDms
 				if (!valid && errmsg.length()<1)
 					errmsg="request failed";
 
+				// update 
+				complete(mess);
+
 				// valid message received?
 				if(valid) {
 					signAccess = rr1.getResVal("signAccess");

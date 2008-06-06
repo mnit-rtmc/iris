@@ -236,6 +236,9 @@ public class OpMessage extends OpDms {
 					handleException(new IOException(errmsg));
 				}
 
+				// update 
+				complete(mess);
+
 				// parse rest of response
 				if (valid) {
 					// set new message
@@ -421,6 +424,9 @@ public class OpMessage extends OpDms {
 					errmsg=ex.getMessage();
 					handleException(new IOException(errmsg));
 				}
+
+				// update 
+				complete(mess);
 
 				// parse rest of response
 				if (valid) {

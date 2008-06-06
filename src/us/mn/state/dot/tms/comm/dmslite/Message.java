@@ -50,6 +50,7 @@ public class Message implements AddressedMessage
 	private String m_reqmsgname = "";
 	private String m_respmsgname = "";
 	private int m_dmsTimeoutMS=DEFAULT_TIMEOUT_DMS_MS;
+	private int m_completiontimeMS=0;
 
 	/** List of objects set or get with this message */
 	protected final LinkedList<Object> m_objlist = new LinkedList<Object>();
@@ -100,6 +101,16 @@ public class Message implements AddressedMessage
 		return (m_respmsgname);
 	}
 
+	/** set completion time in MS */
+	public void setCompletionTimeMS(int ms) {
+		m_completiontimeMS=ms;
+	}
+
+	/** get completion time in MS */
+	public int getCompletionTimeMS() {
+		return(m_completiontimeMS);
+	}
+
 	/**
 	 * Add an object to this message. The object must be a Pair with the car
 	 * being a String representing the name of the element, and the cdr being
@@ -131,6 +142,7 @@ public class Message implements AddressedMessage
 		byte[] array = this.buildReqMsg();
 
 		// send message
+		long starttime=Time.getCurTimeUTCinMillis();
 		System.err.print("Writing " + array.length+" bytes to cmsserver....");
 		m_is.initBuffer();
 		m_os.write(array);
@@ -139,10 +151,10 @@ public class Message implements AddressedMessage
 
 		// read response
 		String token;
-
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,
 		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
+			this.setCompletionTimeMS((int)Time.calcTimeDeltaMS(starttime));
 		} catch (IllegalStateException ex) {
 			throw new IOException(
 			    "SEVERE error: capacity exceeded in dmslite.Message.getRequest(): "+ex);
@@ -153,8 +165,8 @@ public class Message implements AddressedMessage
 		// timed out?
 		if(token == null) {
 			System.err.println(
-			    "SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS (timeout is "
-			    + m_dmsTimeoutMS / 1000 + " secs).");
+			    "SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
+			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs).");
 			throw new IOException("SEVERE error: timed out waiting for CMS.");
 
 		// parse response
