@@ -123,7 +123,8 @@ public class MessageSelector extends JPanel {
 			SignText st = (SignText)cmbLine[i].getSelectedItem();
 			if(st != null) {
 				mess[i] = st.getMessage();
-				m = i + 1;
+				if(mess[i].length() > 0)
+					m = i + 1;
 			} else
 				mess[i] = "";
 		}
