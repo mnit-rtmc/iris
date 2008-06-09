@@ -128,8 +128,15 @@ public class MessageSelector extends JPanel {
 			} else
 				mess[i] = "";
 		}
-		if(m == 0)
+		if(m > 0)
+			return buildMulti(mess, m).toString();
+		else
 			return null;
+
+	}
+
+	/** Build a MULTI string from an array of line strings */
+	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
@@ -140,7 +147,7 @@ public class MessageSelector extends JPanel {
 			}
 			multi.addText(mess[i]);
 		}
-		return multi.toString();
+		return multi;
 	}
 
 	/** Set the currently selected message */
