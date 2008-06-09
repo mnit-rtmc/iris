@@ -23,40 +23,46 @@ CREATE TABLE sign_text (
 );
 
 -- do not leave this in migrate script
-INSERT INTO sign_group (name, local) VALUES ('PIXEL 125 WIDE', false);
-INSERT INTO sign_group (name, local) VALUES ('PIXEL 70 WIDE', false);
-INSERT INTO sign_group (name, local) VALUES ('CHAR 10 WIDE', false);
-INSERT INTO sign_group (name, local) VALUES ('CHAR 12 WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('PIXEL_125_WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('PIXEL_70_WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('CHAR_10_WIDE', false);
+INSERT INTO sign_group (name, local) VALUES ('CHAR_12_WIDE', false);
 
 CREATE TEMP SEQUENCE __a_seq MINVALUE 0;
 CREATE TEMP SEQUENCE __b_seq MINVALUE 0;
 CREATE TEMP SEQUENCE __c_seq MINVALUE 0;
+CREATE TEMP SEQUENCE __d_seq MINVALUE 0;
 
 INSERT INTO sign_text (name, sign_group, line, message, priority)
-	(SELECT 'PIXEL 125 WIDE_' || trim(both FROM to_char(nextval('__a_seq'),
-	'999')), 'PIXEL 125 WIDE', line, message, priority FROM dms_message
+	(SELECT 'PIXEL_125_WIDE_' || trim(both FROM to_char(nextval('__a_seq'),
+	'999')), 'PIXEL_125_WIDE', line, message, priority FROM dms_message
 	WHERE dms IS NULL AND char_length(message) > 0 AND line < 4);
 
 INSERT INTO sign_text (name, sign_group, line, message, priority)
-	(SELECT 'CHAR 12 WIDE_' || trim(both FROM to_char(nextval('__b_seq'),
-	'999')), 'CHAR 12 WIDE', line, abbrev, priority FROM dms_message
+	(SELECT 'PIXEL_70_WIDE_' || trim(both FROM to_char(nextval('__b_seq'),
+	'999')), 'PIXEL_70_WIDE', line, message, priority FROM dms_message
+	WHERE dms IS NULL AND char_length(message) > 0);
+
+INSERT INTO sign_text (name, sign_group, line, message, priority)
+	(SELECT 'CHAR_12_WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
+	'999')), 'CHAR_12_WIDE', line, abbrev, priority FROM dms_message
 	WHERE dms IS NULL AND char_length(abbrev) > 0);
 
 INSERT INTO sign_text (name, sign_group, line, message, priority)
-	(SELECT 'CHAR 12 WIDE_' || trim(both FROM to_char(nextval('__b_seq'),
-	'999')), 'CHAR 12 WIDE', line, message, priority FROM dms_message
+	(SELECT 'CHAR_12_WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
+	'999')), 'CHAR_12_WIDE', line, message, priority FROM dms_message
 	WHERE dms IS NULL AND char_length(message) > 0 AND
 	char_length(message) <= 12);
 
 INSERT INTO sign_text (name, sign_group, line, message, priority)
-	(SELECT 'CHAR 10 WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
-	'999')), 'CHAR 10 WIDE', line, abbrev, priority FROM dms_message
+	(SELECT 'CHAR_10_WIDE_' || trim(both FROM to_char(nextval('__d_seq'),
+	'999')), 'CHAR_10_WIDE', line, abbrev, priority FROM dms_message
 	WHERE dms IS NULL AND char_length(abbrev) > 0 AND
 	char_length(abbrev) <= 10);
 
 INSERT INTO sign_text (name, sign_group, line, message, priority)
-	(SELECT 'CHAR 10 WIDE_' || trim(both FROM to_char(nextval('__c_seq'),
-	'999')), 'CHAR 10 WIDE', line, message, priority FROM dms_message
+	(SELECT 'CHAR_10_WIDE_' || trim(both FROM to_char(nextval('__d_seq'),
+	'999')), 'CHAR_10_WIDE', line, message, priority FROM dms_message
 	WHERE dms IS NULL AND char_length(message) > 0 AND
 	char_length(message) <= 10);
 
@@ -68,16 +74,16 @@ CREATE FUNCTION copy_sign_text(TEXT) RETURNS bool AS '
 		INSERT INTO dms_sign_group (name, dms, sign_group)
 		VALUES (dms_id || ''_'' || dms_id, dms_id, dms_id);
 		INSERT INTO dms_sign_group (name, dms, sign_group)
-		VALUES (''PIXEL 125 WIDE_'' || dms_id, dms_id,
-		''PIXEL 125 WIDE'');
-		CREATE TEMP SEQUENCE __d_seq MINVALUE 0;
+		VALUES (''PIXEL_125_WIDE_'' || dms_id, dms_id,
+		''PIXEL_125_WIDE'');
+		CREATE TEMP SEQUENCE __e_seq MINVALUE 0;
 		INSERT INTO sign_text (name,sign_group, line, message, priority)
 		(SELECT dms_id || ''_'' || trim(both FROM
-		to_char(nextval(''__d_seq''), ''999'')), dms_id, line, message,
+		to_char(nextval(''__e_seq''), ''999'')), dms_id, line, message,
 		priority
 		FROM dms_message
 		WHERE dms = dms_id AND char_length(message) > 0);
-		DROP SEQUENCE __d_seq;
+		DROP SEQUENCE __e_seq;
 		RETURN true;
 	END;'
 LANGUAGE PLPGSQL;

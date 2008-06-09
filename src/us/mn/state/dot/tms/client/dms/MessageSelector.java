@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 
@@ -122,23 +123,31 @@ public class MessageSelector extends JPanel {
 			SignText st = (SignText)cmbLine[i].getSelectedItem();
 			if(st != null) {
 				mess[i] = st.getMessage();
-				m = i + 1;
+				if(mess[i].length() > 0)
+					m = i + 1;
 			} else
 				mess[i] = "";
 		}
-		if(m == 0)
+		if(m > 0)
+			return buildMulti(mess, m).toString();
+		else
 			return null;
-		StringBuilder b = new StringBuilder();
+
+	}
+
+	/** Build a MULTI string from an array of line strings */
+	protected MultiString buildMulti(String[] mess, int m) {
+		MultiString multi = new MultiString();
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0)
-					b.append("[np]");
+					multi.addPage();
 				else
-					b.append("[nl]");
+					multi.addLine();
 			}
-			b.append(mess[i]);
+			multi.addText(mess[i]);
 		}
-		return b.toString();
+		return multi;
 	}
 
 	/** Set the currently selected message */
@@ -188,6 +197,7 @@ public class MessageSelector extends JPanel {
 		createMessageModel(proxy.getId());
 		int ml = mess_model.getMaxLine();
 		int nl = proxy.getTextLines();
+// FIXME: should this be here?
 if(nl == 0) nl = 3;
 		int np = calculateSignPages(ml, nl);
 		initializeWidgets(nl, np);
@@ -212,7 +222,7 @@ if(nl == 0) nl = 3;
 	/** Calculate the number of pages for the sign */
 	protected int calculateSignPages(int ml, int nl) {
 		if(nl > 0)
-			return Math.max(1, (ml - 1) / nl + 1);
+			return 1 + Math.max(0, (ml - 1) / nl);
 		else
 			return 1;
 	}
