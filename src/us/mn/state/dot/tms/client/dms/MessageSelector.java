@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 
@@ -128,17 +129,17 @@ public class MessageSelector extends JPanel {
 		}
 		if(m == 0)
 			return null;
-		StringBuilder b = new StringBuilder();
+		MultiString multi = new MultiString();
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0)
-					b.append("[np]");
+					multi.addPage();
 				else
-					b.append("[nl]");
+					multi.addLine();
 			}
-			b.append(mess[i]);
+			multi.addText(mess[i]);
 		}
-		return b.toString();
+		return multi.toString();
 	}
 
 	/** Set the currently selected message */
