@@ -51,7 +51,7 @@ public class OpQueryMsg extends OpDms
 
 	/** return description of operation, which is displayed in the client */
 	public String getOperationDescription() {
-		return "Retrieving existing sign message";
+		return "Retrieving message";
 	}
 
 	/** Create the first real phase of the operation */
