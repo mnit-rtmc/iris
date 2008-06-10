@@ -48,6 +48,12 @@ public interface DMSPoller {
 	/** Activate a fan test */
 	void testFans(DMSImpl dms);
 
+	/** reset the sign */
+	void reset(DMSImpl dms);
+
+	/** get the sign message */
+	void getSignMessage(DMSImpl dms);
+
 	/** Set Ledstar pixel configuration */
 	void setLedstarPixel(DMSImpl dms, int ldcPotBase, int pixelCurrentLow,
 		int pixelCurentHigh, int badPixelLimit);

@@ -1385,6 +1385,20 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			p.testFans(this);
 	}
 
+	/** reset the dms */
+	public void reset() {
+		DMSPoller p = getDMSPoller();
+		if(p != null)
+			p.reset(this);
+	}
+
+	/** get the current sign message */
+	public void getSignMessage() {
+		DMSPoller p = getDMSPoller();
+		if(p != null)
+			p.getSignMessage(this);
+	}
+
 	/** Fan status */
 	protected transient String fan_status;
 

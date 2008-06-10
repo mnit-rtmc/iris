@@ -173,4 +173,16 @@ public class NtcipPoller extends MessagePoller implements SignPoller,
 		new DMSSetLedstarPixel(dms, ldcPotBase, pixelCurrentLow,
 			pixelCurrentHigh, badPixelLimit).start();
 	}
+
+	/** reset the dms, called from DMSImpl.reset(), via button on dms status tab. */
+	public void reset(DMSImpl dms) {
+		// ignored
+	}
+
+	/** get the sign message, called from DMSImpl.getSignMessage(). */
+	public void getSignMessage(DMSImpl dms) {
+		if(dms != null)
+			new DMSQueryMessage(dms).start();
+	}
+
 }

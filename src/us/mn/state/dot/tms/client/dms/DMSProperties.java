@@ -270,6 +270,12 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Fan test activation button */
 	protected final JButton fanTest = new JButton("Fan test");
 
+	/** Get sign status button */
+	protected final JButton getStatusButton = new JButton("Get status");
+
+	/** Reset sign button */
+	protected final JButton resetButton = new JButton("Reset");
+
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
 
@@ -885,6 +891,25 @@ public class DMSProperties extends TrafficDeviceForm {
 				sign.testFans();
 			}
 		};
+
+		// get status button
+		lay.setConstraints(getStatusButton, bag);
+		panel.add(getStatusButton);
+		new ActionJob(this, getStatusButton) {
+			public void perform() throws Exception {
+				sign.getSignMessage();
+			}
+		};
+
+		// reset button
+		lay.setConstraints(resetButton, bag);
+		panel.add(resetButton);
+		new ActionJob(this, resetButton) {
+			public void perform() throws Exception {
+				sign.reset();
+			}
+		};
+
 		bag.gridx = 2;
 		bag.gridy = 0;
 		bag.anchor = GridBagConstraints.EAST;

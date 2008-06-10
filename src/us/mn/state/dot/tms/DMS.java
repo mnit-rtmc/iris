@@ -192,6 +192,12 @@ public interface DMS extends TrafficDevice {
 	/** Activate a fan test */
 	public void testFans() throws RemoteException;
 
+	/** Activate a dms reset operation */
+	public void reset() throws RemoteException;
+
+	/** Activate a get sign message status operation */
+	public void getSignMessage() throws RemoteException;
+
 	/** Get the fan status */
 	public String getFanStatus() throws RemoteException;
 

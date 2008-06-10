@@ -181,44 +181,55 @@ public class DmsLitePoller extends MessagePoller
 
 		// should never get here
 		System.err.println(
-		    "ERROR: DmsLitePoller.setMessageTimeRemaining(): should never get here, duration="+m.getDuration());
+		    "WARNING: DmsLitePoller.setMessageTimeRemaining(): should never get here, duration="+m.getDuration());
 	}
 
 	/**
 	 * Set manual brightness level (null for photocell control)
 	 */
 	public void setBrightnessLevel(DMSImpl dms, Integer l) {
-		System.err.println(
-		    "DmsLitePoller.setBrightnessLevel() called, ignored.");
 	}
 
 	/**
 	 * Activate a pixel test, which performs a dms query.
 	 */
 	public void testPixels(DMSImpl dms) {
-		System.err.println(
-		    "DmsLitePoller.testPixels() called, performing query operation.");
-		if (dms == null)
-			return;
-		new OpQueryMsg(dms).start();
 	}
 
 	/**
 	 * Activate a lamp test
 	 */
 	public void testLamps(DMSImpl dms) {
-		System.err.println("DmsLitePoller.testLamps() called, ignored.");
 	}
 
 	/**
 	 * Activate a fan test
 	 */
 	public void testFans(DMSImpl dms) {
+	}
+
+	/** 
+	 * Reset the dms, called from DMSImpl.reset(), via button on 
+	 * the dms status tab. 
+	 */
+	public void reset(DMSImpl dms) {
 		System.err.println(
-		    "DmsLitePoller.testFans() called, performing reset operation.");
+		    "DmsLitePoller.reset() called, performing reset operation.");
 		if (dms == null)
 			return;
 		new OpReset(dms).start();
+	}
+
+	/** 
+	 * Get the sign message, called from DMSImpl.getSignMessage(), 
+	 * via button on the dms status tab. 
+	 */
+	public void getSignMessage(DMSImpl dms) {
+		System.err.println(
+		    "DmsLitePoller.getSignMessage() called, performing operation.");
+		if (dms == null)
+			return;
+		new OpQueryMsg(dms).start();
 	}
 
 	/**
