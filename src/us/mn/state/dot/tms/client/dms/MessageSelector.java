@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * Gui for selecting messages for DMS.
@@ -91,6 +92,7 @@ public class MessageSelector extends JPanel {
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
+			cmbLine[i].setEditable(areMessagesEditable());
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
 		}
@@ -103,6 +105,17 @@ public class MessageSelector extends JPanel {
 		}
 		for(p = n_pages; p < tab.getTabCount(); p++)
 			tab.removeTabAt(p);
+	}
+
+	/** 
+	 * Determine if message line comboboxes are editable.
+	 * This is a function of agency.
+	 */
+	protected boolean areMessagesEditable() {
+		boolean editable = false;
+		if (Agency.isId(Agency.CALTRANS_D10))
+			editable=true;
+		return editable;
 	}
 
 	/** Create a new page panel */
