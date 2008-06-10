@@ -37,19 +37,24 @@ public class Agency {
 	private Agency() {}
 
 	/** read and validate agency id and agency name properties */
-	public static void readProps(Properties props) {
+	public static boolean readProps(Properties props) {
 		m_agencyid = props.getProperty("agencyid");
 		assert m_agencyid!=null : "Error: property file: agencyid must be defined.";
 		m_agencyname = props.getProperty("agencyname");
 		assert m_agencyname!=null : "Error: property file: agencyname must be defined.";
-		Agency.validate();
 		System.err.println("The agency id is: "+getId()+".");
+		return Agency.validate();
 	}
 
 	/** validate */
-	protected static void validate() {
-		if (!(getId().equals(MNDOT) || getId().equals(CALTRANS_D10)))
-			System.err.println("Error: unknown or no agencyid defined: "+getId());
+	protected static boolean validate() {
+		boolean ok=false;
+		ok = ok || getId().equals(MNDOT);
+		ok = ok || getId().equals(CALTRANS_D10);
+		if (!ok)
+			System.err.println("Error: unknown or no agencyid defined: "+
+				getId()+". Use "+MNDOT+", or "+CALTRANS_D10+".");
+		return ok;
 	}
 
 	/** return the agency id */
