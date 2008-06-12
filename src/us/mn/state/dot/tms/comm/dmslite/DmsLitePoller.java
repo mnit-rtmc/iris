@@ -77,9 +77,24 @@ public class DmsLitePoller extends MessagePoller
 		System.err.println("DmsLitePoller.downloadFonts() called, ignored.");
 	}
 
-	/** Perform a controller download. Called: when IRIS server is shutting down, etc. */
+	/** 
+	 * Perform a controller download. Called when the IRIS server is shutting down, 
+	 * when the 'reset' button is pressed on the controller status tab. 
+	 */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		System.err.println("DmsLitePoller.download() called, ignored.");
+		DMSImpl dms = c.getActiveSign();
+		if (dms == null)
+			return;
+
+		// reset button pressed
+		if (reset) {
+			this.reset(dms);
+
+		// download button pressed
+		} else {
+			// start operation
+			new OpQueryMsg(dms).start();
+		}
 	}
 
 	/** Perform a sign status poll. Called every 60 seconds, via TimerJobSigns */
@@ -111,7 +126,6 @@ public class DmsLitePoller extends MessagePoller
 
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-		System.err.println("DmsLitePoller.startTest() called, ignored.");
 		return null;
 	}
 
