@@ -26,6 +26,7 @@ import us.mn.state.dot.map.Theme;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
+import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.Camera;
@@ -36,6 +37,7 @@ import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSHandler;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
+import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
@@ -52,6 +54,7 @@ import us.mn.state.dot.tms.utils.Agency;
 // agency specific imports
 import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
 import gov.ca.dot.d10.tms.client.incidents.D10IncidentLayer;
+import gov.ca.dot.d10.tms.client.rwis.D10RwisLayer;
 
 /**
  * A session is one IRIS login session.
@@ -80,6 +83,9 @@ public class Session {
 
 	/** Incident layer */
 	protected final TmsIncidentLayer incLayer;
+
+	/** RWIS layer */
+	protected final RwisLayer rwisLayer;
 
 	/** Location manager */
 	protected final GeoLocManager loc_manager;
@@ -140,6 +146,7 @@ public class Session {
 		lstates.add(gpoly.createState());
 		lstates.add(camLayer.createState());
 		lstates.add(incLayer.createState());
+		lstates.add(rwisLayer.createState());
 		lstates.add(dmsLayer.createState());
 		lstates.add(warnLayer.createState());
 		tabs.add(new DMSTab(lstates, vlayer,
@@ -161,6 +168,11 @@ public class Session {
 	/** Add the incident tab */
 	protected void addIncidentTab() throws RemoteException {
 		tabs.add(new IncidentTab(incLayer));
+	}
+
+	/** Add the rwis tab */
+	protected void addRwisTab() throws RemoteException {
+		tabs.add(new RwisTab(rwisLayer));
 	}
 
 	/** Add the LCS tab */
@@ -204,6 +216,7 @@ public class Session {
 			incLayer=null;
 		}
 
+		rwisLayer = new D10RwisLayer(props,logger,st.getSystemPolicy());
 		loc_manager = new GeoLocManager(st.getGeoLocs());
 		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
 			loc_manager);
@@ -220,6 +233,8 @@ public class Session {
 			addMeterTab();
 		if(user.hasPermission(IrisPermission.MAIN_TAB))
 			addIncidentTab();
+		if(true || user.hasPermission(IrisPermission.RWIS_TAB)) //FIXME
+			addRwisTab();
 		if(user.hasPermission(IrisPermission.LCS_TAB))
 			addLcsTab();
 		addCameraTab(st, user);
@@ -233,5 +248,6 @@ public class Session {
 			tab.dispose();
 		gpoly.dispose();
 		incLayer.dispose();
+		rwisLayer.dispose();
 	}
 }
