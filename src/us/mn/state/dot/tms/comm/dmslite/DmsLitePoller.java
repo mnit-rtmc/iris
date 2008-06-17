@@ -106,12 +106,26 @@ public class DmsLitePoller extends MessagePoller
 			return;
 
 		// don't poll signs connected by modem
-		if (dms.getSignAccess().equalsIgnoreCase("modem")) {
+		if (containsIgnoreCase(dms.getSignAccess(),"modem")) {
 			return;
 		}
 
 		// start operation
 		new OpQueryMsg(dms).start();
+	}
+
+	/**
+	 *  Does a string contain another string?
+	 *  @param arg1 string 1
+	 *  @param arg2 string 2
+	 *  @return true if string1 contains string2, case insensitive.
+	 */
+	private static boolean containsIgnoreCase(String arg1,String arg2) {
+		if (arg1==null || arg2==null)
+			return false;
+		if (arg1.length()<=0 || arg2.length()<=0)
+			return false;
+		return arg1.toLowerCase().contains(arg2.toLowerCase());
 	}
 
 	/** Perform a 30-second poll */
