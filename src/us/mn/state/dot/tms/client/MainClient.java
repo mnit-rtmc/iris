@@ -161,6 +161,16 @@ public class MainClient {
 			TimeZone.getDefault().getDisplayName()+
 			") doesn't support DST. Specify the time zone via the command line.");
 		}
+
+		// flag if assertions on or off
+		if(true) {
+			//ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
+			boolean assertsEnabled = false;
+			assert assertsEnabled = true;    // Intentional side-effect
+			String msg = "Assertions are turned " + (assertsEnabled ? "on" : "off") + ".";
+			System.err.println(msg);
+		}
+
 	}
 
 }
