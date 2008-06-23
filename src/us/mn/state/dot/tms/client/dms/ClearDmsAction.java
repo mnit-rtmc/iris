@@ -18,6 +18,7 @@ import java.rmi.RemoteException;
 import javax.swing.Action;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * Action to clear the selected DMS.
@@ -33,7 +34,9 @@ public class ClearDmsAction extends TrafficDeviceAction {
 	/** Create a new action to clear the selected DMS */
 	public ClearDmsAction(DMSProxy p, String user) {
 		super(p);
-		putValue(Action.NAME, "Clear");
+		// note: this tag is also used in DMSDispatcher
+		putValue(Action.NAME,I18NMessages.get(
+			"DMSDispatcher.clearButton"));
 		putValue(Action.SHORT_DESCRIPTION, "Blank the sign.");
 		putValue(Action.LONG_DESCRIPTION,
 			"Remove any message from the sign.");

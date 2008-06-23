@@ -70,8 +70,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	/** Button used to send a message to the DMS */
 	protected final JButton btnSend = new JButton("Send");
 
-	/** Button used to clear the DMS */
-	protected final JButton btnClear = new JButton("Clear");
+	/** Button used to clear the DMS. Text also set in ClearDmsAction */
+	protected final JButton btnClear = 
+		new JButton(I18NMessages.get("DMSDispatcher.clearButton"));
 
 	protected final TmsSelectionModel selectionModel;
 
