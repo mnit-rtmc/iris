@@ -261,9 +261,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Pixel test activation button */
 	protected final JButton pixelTest = new JButton("Pixel test");
 
-	/** Status test activation button */
-	//protected final JButton statusTest = new JButton("Status test");  mtod
-
 	/** Lamp test activation button */
 //	protected final JButton lampTest = new JButton("Lamp test");
 
@@ -274,7 +271,8 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected final JButton getStatusButton = new JButton("Get status");
 
 	/** Reset sign button */
-	protected final JButton resetButton = new JButton("Reset");
+	protected final JButton resetButton = 
+		new JButton(I18NMessages.get("DMSProperties.ResetButton"));
 
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
