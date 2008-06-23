@@ -259,16 +259,19 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected final JTable power_table = new JTable();
 
 	/** Pixel test activation button */
-	protected final JButton pixelTest = new JButton("Pixel test");
+	protected final JButton pixelTest =
+		new JButton(I18NMessages.get("DMSProperties.pixelTestButton"));
 
 	/** Lamp test activation button */
 //	protected final JButton lampTest = new JButton("Lamp test");
 
 	/** Fan test activation button */
-	protected final JButton fanTest = new JButton("Fan test");
+	protected final JButton fanTest =
+		new JButton(I18NMessages.get("DMSProperties.fanTestButton"));
 
 	/** Get sign status button */
-	protected final JButton getStatusButton = new JButton("Get status");
+	protected final JButton getStatusButton = 
+		new JButton(I18NMessages.get("DMSProperties.getStatusButton"));
 
 	/** Reset sign button */
 	protected final JButton resetButton = 
