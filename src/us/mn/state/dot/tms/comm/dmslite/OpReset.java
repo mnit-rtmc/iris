@@ -52,7 +52,7 @@ public class OpReset extends OpDms
 
 	/** return description of operation, which is displayed in the client */
 	public String getOperationDescription() {
-		return "Resetting the CMS";
+		return "Reinitializing the CMS";
 	}
 
 	/** Create the first real phase of the operation */
