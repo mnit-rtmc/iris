@@ -72,7 +72,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Button used to clear the DMS. Text also set in ClearDmsAction */
 	protected final JButton btnClear = 
-		new JButton(I18NMessages.get("DMSDispatcher.clearButton"));
+		new JButton(I18NMessages.get("DMSDispatcher.ClearButton"));
 
 	protected final TmsSelectionModel selectionModel;
 
@@ -94,7 +94,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		selectionModel = handler.getSelectionModel();
 		pnlSign = new DMSPanel(st.getSystemPolicy());
 		setBorder(BorderFactory.createTitledBorder(
-			I18NMessages.get("DMSDispatcherGroupBoxTitle")));
+			I18NMessages.get("DMSDispatcher.GroupBoxTitle")));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.anchor = GridBagConstraints.EAST;

@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
 public class DMSListForm extends SortedListForm {
 
 	/** Frame title */
-	static protected String TITLE = I18NMessages.get("DMSListFormTitle")+": ";
+	static protected String TITLE = I18NMessages.get("DMSListForm.Title")+": ";
 
 	/** Add title */
 	static protected final String ADD_TITLE = "Add DMS";
@@ -88,7 +88,7 @@ public class DMSListForm extends SortedListForm {
 		label.setForeground(TmsForm.ERROR);
 		lay.setConstraints(label, bag);
 		panel.add(label);
-		label = new JLabel("all active "+I18NMessages.get("DMSListFormAlertText")+".");
+		label = new JLabel("all active "+I18NMessages.get("DMSListForm.AlertText")+".");
 		label.setForeground(TmsForm.ERROR);
 		lay.setConstraints(label, bag);
 		panel.add(label);

@@ -138,7 +138,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	};
 
 	/** Frame title */
-	static protected String TITLE = I18NMessages.get("DMSPropertiesTitle")+": ";
+	static protected String TITLE = I18NMessages.get("DMSProperties.Title")+": ";
 
 	/** Remote dynamic message sign interface */
 	protected DMS sign;
@@ -260,18 +260,18 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Pixel test activation button */
 	protected final JButton pixelTest =
-		new JButton(I18NMessages.get("DMSProperties.pixelTestButton"));
+		new JButton(I18NMessages.get("DMSProperties.PixelTestButton"));
 
 	/** Lamp test activation button */
 //	protected final JButton lampTest = new JButton("Lamp test");
 
 	/** Fan test activation button */
 	protected final JButton fanTest =
-		new JButton(I18NMessages.get("DMSProperties.fanTestButton"));
+		new JButton(I18NMessages.get("DMSProperties.FanTestButton"));
 
 	/** Get sign status button */
 	protected final JButton getStatusButton = 
-		new JButton(I18NMessages.get("DMSProperties.getStatusButton"));
+		new JButton(I18NMessages.get("DMSProperties.GetStatusButton"));
 
 	/** Reset sign button */
 	protected final JButton resetButton = 
