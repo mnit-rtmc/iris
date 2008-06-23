@@ -131,10 +131,10 @@ public class DMSListForm extends SortedListForm {
 		bag.weightx = 0;
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.NONE;
-		final JButton send = new JButton("Send");
+		final JButton send = new JButton(I18NMessages.get("DMSListForm.SendButton"));
 		lay.setConstraints(send, bag);
 		panel.add(send);
-		final JButton clear = new JButton("Clear");
+		final JButton clear = new JButton(I18NMessages.get("DMSListForm.ClearButton"));
 		lay.setConstraints(clear, bag);
 		panel.add(clear);
 		new ActionJob(this, send) {
