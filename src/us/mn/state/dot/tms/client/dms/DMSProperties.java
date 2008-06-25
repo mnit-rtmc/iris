@@ -894,6 +894,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		};
 
 		// get status button
+		getStatusButton.setToolTipText(
+			I18NMessages.get("DMSProperties.GetStatusButton.ToolTip"));
 		lay.setConstraints(getStatusButton, bag);
 		panel.add(getStatusButton);
 		new ActionJob(this, getStatusButton) {
@@ -903,6 +905,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		};
 
 		// reset button
+		resetButton.setToolTipText(
+			I18NMessages.get("DMSProperties.ResetButton.ToolTip"));
 		lay.setConstraints(resetButton, bag);
 		panel.add(resetButton);
 		new ActionJob(this, resetButton) {
