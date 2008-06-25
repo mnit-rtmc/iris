@@ -37,7 +37,8 @@ public class ClearDmsAction extends TrafficDeviceAction {
 		// note: this tag is also used in DMSDispatcher
 		putValue(Action.NAME,I18NMessages.get(
 			"DMSDispatcher.ClearButton"));
-		putValue(Action.SHORT_DESCRIPTION, "Blank the sign.");
+		putValue(Action.SHORT_DESCRIPTION,
+			I18NMessages.get("DMSDispatcher.ClearButton.ToolTip"));
 		putValue(Action.LONG_DESCRIPTION,
 			"Remove any message from the sign.");
 		userName = user;

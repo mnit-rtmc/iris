@@ -164,7 +164,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 				sendMessage();
 			}
 		};
-		btnSend.setToolTipText(I18NMessages.get("DMSDispatcher.SendButton.ToolTip"));
+		btnSend.setToolTipText(I18NMessages.get(
+			"DMSDispatcher.SendButton.ToolTip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(btnSend);
