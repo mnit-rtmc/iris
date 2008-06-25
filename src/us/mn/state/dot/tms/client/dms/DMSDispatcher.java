@@ -68,7 +68,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected final JComboBox cmbExpire = new JComboBox();
 
 	/** Button used to send a message to the DMS */
-	protected final JButton btnSend = new JButton("Send");
+	protected final JButton btnSend = 
+		new JButton(I18NMessages.get("DMSDispatcher.SendButton"));
 
 	/** Button used to clear the DMS. Text also set in ClearDmsAction */
 	protected final JButton btnClear = 
@@ -163,6 +164,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 				sendMessage();
 			}
 		};
+		btnSend.setToolTipText(I18NMessages.get("DMSDispatcher.SendButton.ToolTip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(btnSend);
