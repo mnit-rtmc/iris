@@ -135,10 +135,10 @@ public class OpMessage extends OpDms {
 			Message mess = (Message) argmess;
 
 			// sanity check
-			if (m_message.getBitmap().getBitmap().length != 300) {
+			if (m_message.getBitmap(0).length()!=300) {
 				System.err.println(
-				    "WARNING: message wrong size in PhaseSendOnePageMessage.");
-				return null;
+				    "WARNING: bitmap pg 1 wrong size in PhaseSendOnePageMessage: m_message.length="
+				    + m_message.getBitmap(0).length()+", msg="+m_message.toString());
 			}
 
 			// set message attributes as a function of the operation
@@ -297,12 +297,15 @@ public class OpMessage extends OpDms {
 			Message mess = (Message) argmess;
 
 			// sanity check
-			if (m_message.getBitmap().getBitmap().length != 600) {
+			if (m_message.getBitmap(0).length()!=300) {
 				System.err.println(
-				    "WARNING: message wrong size in PhaseSendTwoPageMessage: m_message.length="
-				    + m_message.getBitmap().getBitmap().length);
-
-				// return null;
+				    "WARNING: bitmap pg 1 wrong size in PhaseSendTwoPageMessage: m_message.length="
+				    + m_message.getBitmap(0).length()+", msg="+m_message.toString());
+			}
+			if (m_message.getBitmap(1).length()!=300) {
+				System.err.println(
+				    "WARNING: bitmap pg 2 wrong size in PhaseSendTwoPageMessage: m_message.length="
+				    + m_message.getBitmap(1).length()+", msg="+m_message.toString());
 			}
 
 			// set message attributes as a function of the operation
