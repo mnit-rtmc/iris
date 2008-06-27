@@ -102,9 +102,8 @@ public class OpQueryMsg extends OpDms
 	/**
 	 * create message text given a bitmap, with no message text or owner.
 	 * 
-	 * @returns If bitmap is not blank: "[nl]SOCCS Message[np]" for the 1st page
-	 *          and blank pages thereafter. If bitmap is blank, then an empty 
-	 * 	    string is returned.
+	 * @returns If bitmap is not blank: "[nl]SOCCS Message[np]" for each 
+ 	 * 	    page. If bitmap is blank, then "" is returned.
 	 */
 	protected static String createMessageTextUsingBitmap(int numpages,byte[] bm) {
 
@@ -119,14 +118,9 @@ public class OpQueryMsg extends OpDms
 
 		// build message
 		String msg="";
-		for (int i=0; i<numpages; ++i) {
-			if (i==0)
-				msg+=UNKNOWN_PG_TEXT;
-			else
-				msg+="[np]";
-		}
-	
-		return (msg);
+		for (int i=0; i<numpages; ++i)
+			msg+=UNKNOWN_PG_TEXT;
+		return msg;
 	}
 
 	/**
