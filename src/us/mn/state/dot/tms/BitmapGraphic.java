@@ -51,6 +51,11 @@ public class BitmapGraphic implements Serializable {
 		return bitmap;
 	}
 
+	/** Get the bitmap length in bytes */
+	public int length() {
+		return (bitmap==null ? 0 : bitmap.length);
+	}
+
 	/** Get the pixel index for the specified location */
 	protected int pixelIndex(int x, int y) {
 		if(x < 0 || x > width)
