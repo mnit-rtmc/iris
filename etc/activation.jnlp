@@ -3,14 +3,13 @@
       codebase="http://@@IRIS-WEBSTART.HOST@@/iris-client"
       href="activation.jnlp">
 <information>
-<title>Activation</title>
-<vendor>Sun Microsystems, Inc.</vendor>
-<offline-allowed/>
+	<title>Activation</title>
+	<vendor>Sun Microsystems, Inc.</vendor>
+	<offline-allowed/>
 </information>
 <offline-allowed/>
 <resources>
-<jar href="lib/activation.jar"/>
+	<jar href="lib/activation.jar"/>
 </resources>
 <component-desc/>
 </jnlp>
-
