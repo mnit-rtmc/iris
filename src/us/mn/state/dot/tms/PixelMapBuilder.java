@@ -67,6 +67,9 @@ public class PixelMapBuilder implements MultiString.Callback {
 			int y = l * (font.getHeight() + font.getLineSpacing());
 			render(bg, t, x, y);
 		}
+		catch(IndexOutOfBoundsException e) {
+			log("Message text too long: " + t);
+		}
 		catch(InvalidMessageException e) {
 			log(e.getMessage() + ": " + t);
 		}
