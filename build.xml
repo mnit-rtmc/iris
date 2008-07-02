@@ -284,13 +284,18 @@
 			<fileset dir="${docs.dir}">
 				<include name="index.html"/>
 			</fileset>
-			<fileset dir="${images.dir}">
-				<include name="iris.gif"/>
-			</fileset>
 		</copy>
 		<chmod file="${dist.client}/iris.sh" perm="ugo+x"/>
 		<fixcrlf srcDir="${dist.client}" eol="crlf" includes="*.bat"/>
 		<fixcrlf srcDir="${dist.client}" eol="lf" includes="*.sh"/>
+
+		<mkdir dir="${dist.client/images}"/>
+		<copy todir="${dist.client}/images">
+			<fileset dir="${images.dir}">
+				<include name="iris.gif"/>
+				<include name="iris_icon.png"/>
+			</fileset>
+		</copy>
 
 		<mkdir dir="${dist.client}/lib"/>
 		<copy todir="${dist.client}/lib">
