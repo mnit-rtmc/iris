@@ -8,7 +8,7 @@
 	<vendor>MN/DOT</vendor>
 	<homepage href="index.html"/>
 	<description>Intelligent Roadway Information System</description>
-	<icon href="images/iris.png"/>
+	<icon href="images/iris_icon.png"/>
 	<offline/>
     </information>
     <resources>

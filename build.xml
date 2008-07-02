@@ -289,7 +289,7 @@
 		<fixcrlf srcDir="${dist.client}" eol="crlf" includes="*.bat"/>
 		<fixcrlf srcDir="${dist.client}" eol="lf" includes="*.sh"/>
 
-		<mkdir dir="${dist.client/images}"/>
+		<mkdir dir="${dist.client}/images}"/>
 		<copy todir="${dist.client}/images">
 			<fileset dir="${images.dir}">
 				<include name="iris.gif"/>
