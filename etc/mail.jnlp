@@ -2,14 +2,17 @@
 <jnlp spec="1.0"
       codebase="http://@@IRIS-WEBSTART.HOST@@/iris-client"
       href="mail.jnlp">
-<information>
-	<title>Mail</title>
-	<vendor>Sun Microsystems, Inc.</vendor>
-	<offline-allowed/>
-</information>
-<offline-allowed/>
-<resources>
-	<jar href="lib/mail.jar"/>
-</resources>
-<component-desc/>
+    <information>
+        <title>Mail</title>
+        <vendor>Sun Microsystems, Inc.</vendor>
+        <offline-allowed/>
+    </information>
+    <offline-allowed/>
+    <resources>
+        <jar href="lib/mail.jar"/>
+    </resources>
+    <security>
+        <all-permissions/>
+    </security>
+    <component-desc/>
 </jnlp>
