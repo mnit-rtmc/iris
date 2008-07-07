@@ -116,6 +116,14 @@ public class SonarState extends Client {
 		return monitors;
 	}
 
+	/** VideoMonitor proxy list model */
+	protected final ProxyListModel<VideoMonitor> monitor_model;
+
+	/** Get the VideoMonitor list model */
+	public ProxyListModel<VideoMonitor> getMonitorModel() {
+		return monitor_model;
+	}
+
 	/** Cache of road proxies */
 	protected final TypeCache<Road> roads;
 
@@ -171,6 +179,7 @@ public class SonarState extends Client {
 		fonts = new TypeCache<Font>(Font.class);
 		glyphs = new TypeCache<Glyph>(Glyph.class);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class);
+		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
 		roads = new TypeCache<Road>(Road.class);
 		road_model = new ProxyListModel<Road>(roads);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);

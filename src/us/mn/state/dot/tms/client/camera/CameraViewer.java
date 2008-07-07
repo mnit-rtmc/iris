@@ -19,32 +19,37 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import us.mn.state.dot.log.TmsLogFactory;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.toast.Icons;
-import us.mn.state.dot.video.AbstractImageFactory;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.video.AbstractDataSource;
 import us.mn.state.dot.video.Camera;
 import us.mn.state.dot.video.Client;
-import us.mn.state.dot.video.RepeaterImageFactory;
+import us.mn.state.dot.video.HttpDataSource;
 import us.mn.state.dot.video.VideoException;
-import us.mn.state.dot.video.client.VideoMonitor;
 
 /**
  * GUI for viewing camera images
@@ -92,10 +97,14 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Camera location */
 	protected final JTextField txtLocation = new JTextField();
 
+	/** Video output selection ComboBox */
+	protected final JComboBox cmbOutput = new JComboBox();
+	
 	/** Streaming video viewer */
-	protected final VideoMonitor monitor = new VideoMonitor();
+	protected final us.mn.state.dot.video.client.VideoMonitor monitor =
+		new us.mn.state.dot.video.client.VideoMonitor();
 
-	/** Button used to play videoe */
+	/** Button used to play video */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
 
 	/** Button used to stop video */
@@ -118,13 +127,13 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final JoystickThread joystick = new JoystickThread();
 
 	/** Create a new camera viewer */
-	public CameraViewer(CameraHandler h, boolean admin, Properties p,
-		Logger l)
+	public CameraViewer(CameraHandler h, Properties p,
+		Logger l, final SonarState st)
 	{
 		super(new GridBagLayout());
 		videoProps = p;
 		logger = l;
-		streamUrls = AbstractImageFactory.createBackendUrls(p, 1);
+		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
 		handler = h;
 		handler.getSelectionModel().addTmsSelectionListener( this );
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
@@ -133,6 +142,10 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.anchor = GridBagConstraints.EAST;
 		add(new JLabel("ID"), bag);
+		bag.gridx = 2;
+		add(new JLabel("Output"), bag);
+		bag.gridx = 0;
+		bag.gridy = 1;
 		add(new JLabel("Location"), bag);
 		bag.gridx = 1;
 		bag.gridy = 0;
@@ -140,12 +153,15 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		bag.weightx = 1;
 		txtId.setEditable(false);
 		add(txtId, bag);
+		bag.gridx = 3;
+		add(createOutputCombo(st), bag);
+		bag.gridx = 1;
 		bag.gridy = 1;
 		txtLocation.setEditable(false);
 		add(txtLocation, bag);
 		bag.gridx = 0;
 		bag.gridy = 2;
-		bag.gridwidth = 2;
+		bag.gridwidth = 4;
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.BOTH;
 		add(monitor, bag);
@@ -154,7 +170,6 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		monitor.setLabelVisible(false);
 		bag.gridy = 3;
 		bag.fill = GridBagConstraints.NONE;
-		bag.gridwidth = 2;
 		play.setToolTipText("Play");
 		stop.setToolTipText("Stop");
 		videoControls.add(play);
@@ -350,14 +365,14 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		Camera camera = new Camera();
 		camera.setId(c.getId());
 		client.setCamera(camera);
-		monitor.setImageFactory(new RepeaterImageFactory(client,
-			streamUrls[client.getArea()], logger, null),
+		monitor.setDataSource(new HttpDataSource(client,
+			new URL(streamUrls[client.getArea()])),
 			STREAM_DURATION);
 	}
 
 	/** Stop video streaming */
 	protected void stopPressed() {
-		monitor.setImageFactory(null, 0);
+		monitor.setDataSource(null, 0);
 	}
 
 	/** Clear all of the fields */
@@ -367,5 +382,12 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		play.setEnabled(false);
 		stop.setEnabled(false);
 		ptz_panel.setEnabled(false);
+	}
+
+	/** Create the video output selection combo box */
+	private JComboBox createOutputCombo(final SonarState st){
+		JComboBox box = new JComboBox();
+		box.setModel(new WrapperComboBoxModel(st.getMonitorModel()));
+		return box;
 	}
 }

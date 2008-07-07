@@ -153,9 +153,9 @@ public class Session {
 	}
 
 	/** Add the camera tab */
-	protected void addCameraTab() throws RemoteException {
+	protected void addCameraTab(final SonarState st) throws RemoteException {
 		tabs.add(new CameraTab((CameraHandler)camLayer.getHandler(),
-			tmsConnection.isAdmin(), props, logger));
+			props, logger, st));
 	}
 
 	/** Add the roadway tab */
@@ -200,7 +200,7 @@ public class Session {
 			addIncidentTab();
 		if(user.hasPermission(IrisPermission.LCS_TAB))
 			addLcsTab();
-		addCameraTab();
+		addCameraTab(st);
 		if(user.hasPermission(IrisPermission.ADMINISTRATOR))
 			addRoadwayTab();
 	}
