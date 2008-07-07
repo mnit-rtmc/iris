@@ -26,8 +26,6 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -36,13 +34,14 @@ import javax.swing.JTextField;
 
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.video.AbstractDataSource;
@@ -98,7 +97,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final JTextField txtLocation = new JTextField();
 
 	/** Video output selection ComboBox */
-	protected final JComboBox cmbOutput = new JComboBox();
+	protected final JComboBox cmbOutput;
 	
 	/** Streaming video viewer */
 	protected final us.mn.state.dot.video.client.VideoMonitor monitor =
@@ -126,11 +125,14 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Joystick polling thread */
 	protected final JoystickThread joystick = new JoystickThread();
 
+	protected final TypeCache<VideoMonitor> monitors;
+	
 	/** Create a new camera viewer */
 	public CameraViewer(CameraHandler h, Properties p,
 		Logger l, final SonarState st)
 	{
 		super(new GridBagLayout());
+		monitors = st.getVideoMonitors();
 		videoProps = p;
 		logger = l;
 		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
@@ -154,9 +156,12 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		txtId.setEditable(false);
 		add(txtId, bag);
 		bag.gridx = 3;
-		add(createOutputCombo(st), bag);
+		bag.weightx = 0.5;
+		cmbOutput = createOutputCombo(st);
+		add(cmbOutput, bag);
 		bag.gridx = 1;
 		bag.gridy = 1;
+		bag.weightx = 1;
 		txtLocation.setEditable(false);
 		add(txtLocation, bag);
 		bag.gridx = 0;
@@ -351,7 +356,14 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 			return;
 		}
 		try {
-			playPressed(camera);
+			Object o = cmbOutput.getSelectedItem();
+			if(o == null){
+				playPressed(camera);
+			}else{
+				us.mn.state.dot.tms.VideoMonitor mon =
+					monitors.getObject((String)o);
+				//FIXME: do the actual switching here
+			}
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -366,7 +378,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		camera.setId(c.getId());
 		client.setCamera(camera);
 		monitor.setDataSource(new HttpDataSource(client,
-			new URL(streamUrls[client.getArea()])),
+			new URL(streamUrls[client.getArea()] + "?id=" + client.getCameraId())),
 			STREAM_DURATION);
 	}
 
