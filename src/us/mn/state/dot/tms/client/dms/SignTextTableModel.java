@@ -114,7 +114,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	/** Priority for adding a new row */
 	protected Short priority;
 
-	/** Create a new sign text table model */
+	/** Create a new sign text table model 
+	 *  @param a True if admin else false.
+	 */
 	public SignTextTableModel(SignGroup g, TypeCache<SignText> c, boolean a) {
 		super(c, a);
 		group = g;
