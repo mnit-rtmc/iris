@@ -20,17 +20,15 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.Controller170Impl;
-import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ControllerOperation;
 
 /**
  * Operation to query the status of a ramp meter
  *
  * @author Douglas Lau
  */
-public class QueryMeterStatus extends ControllerOperation
+public class QueryMeterStatus extends Controller170Operation
 	implements TimingTable
 {
 	/** Police panel bit from verify data from 170 */
@@ -59,15 +57,6 @@ public class QueryMeterStatus extends ControllerOperation
 		return is.read16Bit();
 	}
 
-	/** 170 controller */
-	protected final Controller170Impl c170;
-
-	/** Ramp meter being queried */
-	protected final RampMeterImpl meter1;
-
-	/** Ramp meter being queried */
-	protected final RampMeterImpl meter2;
-
 	/** 30-Second completer */
 	protected final Completer completer;
 
@@ -77,9 +66,6 @@ public class QueryMeterStatus extends ControllerOperation
 	/** Create a new query meter status operatoin */
 	public QueryMeterStatus(Controller170Impl c, Completer comp) {
 		super(DATA_30_SEC, c);
-		c170 = c;
-		meter1 = (RampMeterImpl)c170.getMeter1();
-		meter2 = (RampMeterImpl)c170.getMeter2();
 		completer = comp;
 		completer.up();
 	}

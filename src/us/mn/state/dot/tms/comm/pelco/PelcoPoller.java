@@ -55,11 +55,8 @@ public class PelcoPoller extends MessagePoller implements CameraPoller {
 
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		if(c.isActive()) {
-			TrafficDeviceImpl d = (TrafficDeviceImpl)c.getDevice();
-			if(d != null)
-				c.resetErrorCounter(d.getId());
-		}
+		if(c.isActive())
+			c.resetErrorCounter();
 	}
 
 	/** Perform a 30-second poll */

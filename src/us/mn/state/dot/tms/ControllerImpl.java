@@ -202,79 +202,30 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	protected transient HashMap<Integer, ControllerIO> io_pins =
 		new HashMap<Integer, ControllerIO>();
 
-	/** I/O pin for first traffic device */
-	static protected final int DEVICE_PIN = 1;
-
-	/** Set the (first) traffic device */
-	public void setDevice(String id) throws TMSException {
-		DeviceImpl od = getDeviceImpl();
-		if(od instanceof DetectorImpl)
-			return;
-		DeviceImpl d = (DeviceImpl)deviceList.getElement(id);
-		if(d == null && id != null) {
-			if(od == null || !id.equals(od.getId())) {
-				throw new ChangeVetoException(
-					"Device unavailable: " + id);
-			}
-			return;
-		}
-		setIO(DEVICE_PIN, d);
+	/** Get all controller I/O pins */
+	public synchronized ControllerIO[] getIO() {
+		ControllerIO[] io = new ControllerIO[ALL_PINS];
+		for(int i: io_pins.keySet())
+			io[i] = io_pins.get(i);
+		return io;
 	}
 
 	/** Assign an IO to the specified controller I/O pin */
-	protected synchronized void setIO(int p, ControllerIO io)
+	public synchronized void setIO(int pin, ControllerIO io)
 		throws TMSException
 	{
-		if(p < 1)
-			throw new ChangeVetoException("Invalid pin: " + p);
-		Integer pin = new Integer(p);
+		if(pin < 1 || pin > ALL_PINS)
+			throw new ChangeVetoException("Invalid pin: " + pin);
 		ControllerIO old_io = io_pins.get(pin);
-		if(checkIO(io, old_io, p))
-			return;
 		if(old_io != null) {
-			if(io != old_io)
-				old_io.setController(null);
-			io_pins.remove(pin);
+			if(io != null)
+				throw new ChangeVetoException(
+					"Pin " + pin + " already assigned");
+			else
+				io_pins.remove(pin);
 		}
-		if(io != null) {
-			if(io != old_io)
-				io.setController(this);
-			io.setPin(p);
+		if(io != null)
 			io_pins.put(pin, io);
-		}
-	}
-
-	/** Check if IO does not need to be changed */
-	protected boolean checkIO(ControllerIO io, ControllerIO old_io, int p)
-		throws TMSException
-	{
-		if(io != null) {
-			if(io == old_io)
-				return p == io.getPin();
-			else if(old_io != null) {
-				throw new ChangeVetoException("Pin " + p +
-					" already assigned");
-			}
-		}
-		return io == old_io;
-	}
-
-	/** Get the (first) traffic device */
-	protected synchronized DeviceImpl getDeviceImpl() {
-		ControllerIO io = io_pins.get(DEVICE_PIN);
-		if(io instanceof DeviceImpl)
-			return (DeviceImpl)io;
-		else
-			return null;
-	}
-
-	/** Get the (first) traffic device */
-	public TrafficDevice getDevice() {
-		Device d = getDeviceImpl();
-		if(d instanceof TrafficDevice)
-			return (TrafficDevice)d;
-		else
-			return null;
 	}
 
 	/** Set all controller devices to failed status */
@@ -299,57 +250,39 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		return false;
 	}
 
-	/** Get the meter number on the controller */
-	public int getMeterNumber(RampMeterImpl meter) {
-		if(isActive()) {
-			if(meter == getDevice())
-				return 1;
-		}
-		return 0;
-	}
-
 	/** Get an active DMS for the controller */
-	public DMSImpl getActiveSign() {
+	public synchronized DMSImpl getActiveSign() {
 		if(isActive()) {
-			DeviceImpl d = getDeviceImpl();
-			if(d instanceof DMSImpl)
-				return (DMSImpl)d;
+			for(ControllerIO io: io_pins.values()) {
+				if(io instanceof DMSImpl)
+					return (DMSImpl)io;
+			}
 		}
 		return null;
 	}
 
-	/** Assign a detector to an input */
-	protected void setDetector(int input, DetectorImpl d)
-		throws TMSException
-	{
-		setIO(input, d);
-	}
-
-	/** Assign a detector input to a detector index */
-	public void setDetector(int input, int index) throws TMSException {
-		if(index > 0) {
-			DetectorImpl d =
-				(DetectorImpl)detList.getElement(index);
-			if(!d.isAvailable()) {
-				throw new ChangeVetoException(
-					"Detector already assigned");
+	/** Get the first traffic device ID */
+	protected synchronized String getFirstDeviceId() {
+		for(ControllerIO io: io_pins.values()) {
+			if(io instanceof TrafficDeviceImpl) {
+				TrafficDeviceImpl d = (TrafficDeviceImpl)io;
+				return d.getId();
 			}
-			setDetector(input, d);
-		} else
-			setDetector(input, null);
+		}
+		return null;
 	}
 
 	/** Get a detector by its I/O pin number */
-	protected synchronized Detector getDetectorAtPin(int pin) {
+	protected synchronized DetectorImpl getDetectorAtPin(int pin) {
 		ControllerIO io = io_pins.get(pin);
-		if(io instanceof Detector)
-			return (Detector)io;
+		if(io instanceof DetectorImpl)
+			return (DetectorImpl)io;
 		else
 			return null;
 	}
 
 	/** Get a data detector (first is detector 1) */
-	public Detector getDetector(int input) {
+	public DetectorImpl getDetector(int input) {
 		return getDetectorAtPin(input);
 	}
 
@@ -375,12 +308,9 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 
 	/** Find a matching detector for the specified input */
 	public int getSpeedPair(int input) {
-		Detector d = getDetector(input);
-		if(d instanceof DetectorImpl) {
-			DetectorImpl v = (DetectorImpl)d;
-			if(v.isVelocity())
-				return getSpeedPair(v);
-		}
+		DetectorImpl d = getDetector(input);
+		if(d.isVelocity())
+			return getSpeedPair(d);
 		return 0;
 	}
 
@@ -435,7 +365,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		int[] scans, int[] speed)
 	{
 		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = (DetectorImpl)getDetector(i + 1);
+			DetectorImpl det = getDetector(i + 1);
 			if(det != null) {
 				det.storeData30Second(stamp, volume[i],
 					scans[i]);
@@ -450,7 +380,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		int[] scan) throws IOException
 	{
 		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = (DetectorImpl)getDetector(i + 1);
+			DetectorImpl det = getDetector(i + 1);
 			if(det != null)
 				det.storeData5Minute(stamp, volume[i], scan[i]);
 		}
@@ -460,7 +390,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	public void logEvent(Calendar stamp, int io_pin, int duration,
 		int headway, int speed)
 	{
-		DetectorImpl det = (DetectorImpl)getDetector(io_pin);
+		DetectorImpl det = getDetector(io_pin);
 		if(det != null)
 			det.logEvent(stamp, duration, headway, speed);
 	}
@@ -636,6 +566,15 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		errorCounter = 0;
 		if(failed)
 			logFailMessage("Comm RESTORED", id);
+	}
+
+	/** Reset the error counter */
+	public void resetErrorCounter() {
+		String id = getFirstDeviceId();
+		if(id != null)
+			resetErrorCounter(id);
+		else
+			resetErrorCounter(toString());
 	}
 
 	/** Get the message poller */

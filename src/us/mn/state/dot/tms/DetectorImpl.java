@@ -185,9 +185,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	}
 
 	/** Set the controller for this device */
-	public void setController(ControllerImpl c) throws TMSException {
+	public void setController(Controller c) throws TMSException {
 		super.setController(c);
-		try { detList.update(index); }
+		try {
+			detList.update(index);
+		}
 		catch(IndexOutOfBoundsException e) {
 			// During startup, detList is still empty
 		}

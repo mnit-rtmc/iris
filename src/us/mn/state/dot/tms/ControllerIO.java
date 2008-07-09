@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,12 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
+
+import java.rmi.RemoteException;
 
 /**
  * ControllerIO is an input/output connected to a controller (alarm or device)
@@ -26,11 +24,14 @@ package us.mn.state.dot.tms;
 public interface ControllerIO {
 
 	/** Set the controller for the I/O */
-	public void setController(ControllerImpl c) throws TMSException;
+	void setController(Controller c) throws TMSException, RemoteException;
+
+	/** Get the controller for the I/O */
+	Controller getController() throws RemoteException;
 
 	/** Set the controller I/O pin number */
-	public void setPin(int p) throws TMSException;
+	void setPin(int p) throws TMSException, RemoteException;
 
 	/** Get the controller I/O pin number */
-	public int getPin();
+	int getPin() throws RemoteException;
 }

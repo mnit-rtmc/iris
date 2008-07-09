@@ -48,11 +48,14 @@ import us.mn.state.dot.tms.Circuit;
 import us.mn.state.dot.tms.CommunicationLine;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Controller170;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.ErrorCounter;
 import us.mn.state.dot.tms.LaneControlSignal;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.SortedList;
+import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -164,6 +167,12 @@ public class ControllerForm extends TMSObjectForm {
 	/** Detector remove button */
 	protected final JButton remove = new JButton("Remove");
 
+	/** Available device list */
+	protected SortedList devices;
+
+	/** Available detector list */
+	protected SortedList avail;
+
 	/** Available detector combo box */
 	protected final JComboBox availBox = new JComboBox();
 
@@ -184,14 +193,16 @@ public class ControllerForm extends TMSObjectForm {
 	protected void initialize() throws RemoteException {
 		location = new LocationPanel(admin, contr.getLocation(),
 			connection.getSonarState());
+		devices = (SortedList)tms.getDevices().getList();
 		deviceBox.setModel(new WrapperComboBoxModel(
 			tms.getDevices().getModel()));
 		circuitBox.setModel(circuitModel);
 		Circuit circuit = contr.getCircuit();
 		circuitBox.setSelectedItem( circuit.getId() );
+		avail = (SortedList)tms.getAvailable().getList();
 		availBox.setModel(new WrapperComboBoxModel(
 			tms.getAvailable().getModel()));
-		for(int input = 1; input < 25; input++)
+		for(int inp = 0; inp < Controller170.DETECTOR_INPUTS; inp++)
 			model.addElement("");
 		alarm_table.setAutoCreateColumnsFromModel(false);
 		alarm_table.setColumnModel(AlarmModel.createColumnModel());
@@ -403,7 +414,7 @@ public class ControllerForm extends TMSObjectForm {
 		notes.setText(contr.getNotes());
 		mile.setText(String.valueOf(contr.getMile()));
 		active.setSelected(contr.isActive());
-		TrafficDevice device = contr.getDevice();
+		TrafficDevice device = getDevice();
 		if( device != null ) {
 			deviceButton.setEnabled( true );
 			deviceBox.getModel().setSelectedItem( device.getId() );
@@ -418,28 +429,33 @@ public class ControllerForm extends TMSObjectForm {
 			circuitButton.setEnabled( false );
 			circuitBox.setSelectedItem( null );
 		}
-		for(int input = 1; input < 25; input++)
-			model.set(input - 1, getInputLabel(input));
+		for(int inp = 0; inp < Controller170.DETECTOR_INPUTS; inp++) {
+			int pin = getDetectorPin(inp);
+			Detector det = lookupDetector(pin);
+			if(det != null) {
+				model.set(inp, getInputLabel(inp, det));
+				assigned[inp] = true;
+			} else
+				assigned[inp] = false;
+		}
 		alarm_model = new AlarmModel(contr, admin);
 		alarm_table.setModel(alarm_model);
 		updateButtons();
 	}
 
 	/** Get the label for a particular detector input */
-	protected String getInputLabel(int input) throws RemoteException {
-		StringBuffer buf = new StringBuffer(20);
-		buf.append(input).append("> ");
+	protected String getInputLabel(int inp, Detector det)
+		throws RemoteException
+	{
+		StringBuilder buf = new StringBuilder(20);
+		buf.append(inp + 1);
+		buf.append("> ");
 		while(buf.length() < 4)
 			buf.insert(0, " ");
-		Detector det = contr.getDetector(input);
-		if(det != null) {
-			assigned[input] = true;
-			int index = det.getIndex();
-			buf.append(index);
-			buf.append(" - ");
-			buf.append(det.getLabel(false));
-		} else
-			assigned[input] = false;
+		int index = det.getIndex();
+		buf.append(index);
+		buf.append(" - ");
+		buf.append(det.getLabel(false));
 		return buf.toString();
 	}
 
@@ -474,6 +490,28 @@ public class ControllerForm extends TMSObjectForm {
 			contr.testCommunications(true);
 	}
 
+	/** Get the selected controller IO device */
+	protected ControllerIO getSelectedDevice() throws Exception {
+		String d = (String)deviceBox.getSelectedItem();
+		if(d == null)
+			return null;
+		TMSObject o = devices.getElement(d);
+		if(o instanceof ControllerIO)
+			return (ControllerIO)o;
+		else
+			return null;
+	}
+
+	/** Set the selected device */
+	protected void setSelectedDevice() throws Exception {
+		ControllerIO cio = getSelectedDevice();
+		if(cio != null) {
+			cio.setController(null);
+			cio.setPin(Controller.DEVICE_PIN);
+			cio.setController(contr);
+		}
+	}
+
 	/** Called when the 'apply' button is pressed */
 	protected void applyPressed() throws Exception {
 		if(admin) {
@@ -484,16 +522,26 @@ public class ControllerForm extends TMSObjectForm {
 			contr.setCircuit((String)circuitBox.getSelectedItem());
 			contr.setDrop(
 				((Number)drop_address.getValue()).shortValue());
-			contr.setDevice((String)deviceBox.getSelectedItem());
+			setSelectedDevice();
 		}
 		contr.setActive(active.isSelected());
 		contr.notifyUpdate();
 		contr.getLine().notifyUpdate();
 	}
 
+	/** Get the first device */
+	protected TrafficDevice getDevice() throws RemoteException {
+		ControllerIO[] io_pins = contr.getIO();
+		ControllerIO io = io_pins[Controller.DEVICE_PIN];
+		if(io instanceof TrafficDevice)
+			return (TrafficDevice)io;
+		else
+			return null;
+	}
+
 	/** Called when device lookup button is pressed */
 	protected void devicePressed() throws Exception {
-		TrafficDevice device = contr.getDevice();
+		TrafficDevice device = getDevice();
 		if(device == null) {
 			deviceButton.setEnabled(false);
 			return;
@@ -522,39 +570,80 @@ public class ControllerForm extends TMSObjectForm {
 		connection.getDesktop().show(new SonetRingForm(connection));
 	}
 
+	/** Get the selected detector */
+	protected Detector getSelectedDetector() throws RemoteException {
+		String det = (String)availBox.getSelectedItem();
+		if(det == null)
+			return null;
+		try {
+			int index = Integer.parseInt(det.trim());
+			TMSObject o = avail.getElement(String.valueOf(index));
+			if(o instanceof Detector)
+				return (Detector)o;
+			else
+				return null;
+		}
+		catch(NumberFormatException e) {
+			return null;
+		}
+	}
+
 	/** Called when the 'assign' button is pressed */
 	protected void assignPressed() throws Exception {
 		disableButtons();
 		try {
-			String det = (String)availBox.getSelectedItem();
+			int pin = getSelectedPin();
+			if(pin < 0)
+				return;
+			Detector det = getSelectedDetector();
 			if(det == null)
 				return;
-			int index = Integer.parseInt(det.trim());
-			int input = inputs.getSelectedIndex() + 1;
-			if(input < 1)
-				return;
-			contr.setDetector(input, index);
+			det.setPin(pin);
+			det.setController(contr);
 			contr.notifyUpdate();
-		}
-		catch(NumberFormatException e) {
-			// Ignore
 		}
 		finally {
 			updateButtons();
 		}
 	}
 
+	/** Get the selected pin for a detector input */
+	protected int getSelectedPin() {
+		int inp = inputs.getSelectedIndex();
+		if(inp >= 0)
+			return getDetectorPin(inp);
+		else
+			return inp;
+	}
+
+	/** Get the pin for the given detector input */
+	protected int getDetectorPin(int inp) {
+		return inp + 1;
+	}
+
+	/** Lookup a detector on a controller */
+	protected Detector lookupDetector(int pin) throws RemoteException {
+		ControllerIO[] io_pins = contr.getIO();
+		ControllerIO io = io_pins[pin];
+		if(io instanceof Detector)
+			return (Detector)io;
+		else
+			return null;
+	}
+
 	/** Called when the 'edit' button is pressed */
 	protected void editPressed() throws Exception {
 		disableButtons();
 		try {
-			if(inputs.isSelectionEmpty())
+			int pin = getSelectedPin();
+			if(pin < 0)
 				return;
-			int inp = inputs.getSelectedIndex() + 1;
-			Detector det = contr.getDetector(inp);
-			int index = det.getIndex();
-			connection.getDesktop().show(
-				new DetectorForm(connection, index));
+			Detector det = lookupDetector(pin);
+			if(det != null) {
+				int index = det.getIndex();
+				connection.getDesktop().show(
+					new DetectorForm(connection, index));
+			}
 		}
 		finally {
 			updateButtons();
@@ -565,13 +654,14 @@ public class ControllerForm extends TMSObjectForm {
 	protected void removePressed() throws Exception {
 		disableButtons();
 		try {
-			int input = inputs.getSelectedIndex() + 1;
-			if(input < 1) {
-				updateButtons();
+			int inp = inputs.getSelectedIndex();
+			if(inp < 0)
 				return;
+			Detector det = lookupDetector(inp + 1);
+			if(det != null) {
+				det.setController(null);
+				contr.notifyUpdate();
 			}
-			contr.setDetector(input, 0);
-			contr.notifyUpdate();
 		}
 		finally {
 			updateButtons();
@@ -590,8 +680,8 @@ public class ControllerForm extends TMSObjectForm {
 		disableButtons();
 		if(inputs.isSelectionEmpty())
 			return;
-		int input = inputs.getSelectedIndex() + 1;
-		if(assigned[input]) {
+		int inp = inputs.getSelectedIndex();
+		if(assigned[inp]) {
 			edit.setEnabled(true);
 			remove.setEnabled(true);
 		} else {

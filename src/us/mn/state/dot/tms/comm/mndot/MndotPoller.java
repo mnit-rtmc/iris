@@ -90,18 +90,12 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		Controller170Impl c170 = check170(c);
 		if(c170 == null)
 			return;
-		TrafficDeviceImpl device = (TrafficDeviceImpl)c170.getDevice();
-		if(device != null) {
-			if(device instanceof LaneControlSignalImpl) {
-				LaneControlSignalImpl lcs =
-					(LaneControlSignalImpl)device;
-				new LCSQuerySignal(lcs, comp).start();
-			}
-			else if(device instanceof WarningSignImpl) {
-				WarningSignImpl warn = (WarningSignImpl)device;
-				new WarningStatus(warn, comp).start();
-			}
-		}
+		LaneControlSignalImpl lcs = c170.getActiveLcs();
+		if(lcs != null)
+			new LCSQuerySignal(lcs, comp).start();
+		WarningSignImpl warn = c170.getActiveWarningSign();
+		if(warn != null)
+			new WarningStatus(warn, comp).start();
 	}
 
 	/** Perform a 30-second poll */
@@ -133,9 +127,22 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		return test;
 	}
 
+	/** Get the meter number on the controller. This does not belong in the
+	 * RampMeterImpl class because it only applies to the Mndot protocol. */
+	static protected int getMeterNumber(RampMeterImpl meter) {
+		if(meter.isActive()) {
+			int pin = meter.getPin();
+			if(pin == 2)
+				return 1;
+			if(pin == 3)
+				return 2;
+		}
+		return 0;
+	}
+
 	/** Send a new metering rate */
 	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
-		int n = meter.getMeterNumber();
+		int n = getMeterNumber(meter);
 		if(n > 0)
 			new SetMeterRate(meter, n, rate).start();
 	}
@@ -160,7 +167,7 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 
 	/** Send a new release rate (vehicles per hour) */
 	public void sendReleaseRate(RampMeterImpl meter, int rate) {
-		int n = meter.getMeterNumber();
+		int n = getMeterNumber(meter);
 		if(n > 0) {
 			// Workaround for errors in rx only (good tx)
 			if(meter.isFailedBeyondThreshold())

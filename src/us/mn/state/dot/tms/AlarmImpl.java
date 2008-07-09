@@ -54,17 +54,41 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	/** Controller associated with this alarm */
 	protected ControllerImpl controller;
 
+	/** Update the controller and/or pin */
+	protected void updateController(ControllerImpl c, int p)
+		throws TMSException
+	{
+		if(controller != null)
+			controller.setIO(pin, null);
+		try {
+			if(c != null)
+				c.setIO(p, this);
+		}
+		catch(TMSException e) {
+			if(controller != null)
+				controller.setIO(pin, this);
+			throw e;
+		}
+	}
+
 	/** Set the controller of the alarm */
 	public synchronized void setController(ControllerImpl c)
 		throws TMSException
 	{
 		if(c == controller)
 			return;
+		updateController(c, pin);
 		if(c == null)
 			store.update(this, "controller", "0");
 		else
 			store.update(this, "controller", c.getOID());
 		controller = c;
+	}
+
+	/** Set the controller of the alarm */
+	public void setController(Controller c) throws TMSException {
+		ControllerImpl ctr = lineList.findController(c);
+		setController(ctr);
 	}
 
 	/** Get the controller to which this alarm is assigned */
@@ -79,6 +103,7 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	public synchronized void setPin(int p) throws TMSException {
 		if(p == pin)
 			return;
+		updateController(controller, p);
 		store.update(this, "pin", p);
 		pin = p;
 	}

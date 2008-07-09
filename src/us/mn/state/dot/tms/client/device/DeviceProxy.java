@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,23 @@ abstract public class DeviceProxy extends TmsMapProxy implements Device {
 	/** Get the controller to which this device is attached */
 	public Controller getController() throws RemoteException {
 		return device.getController();
+	}
+
+	/** Set the device controller */
+	public void setController(Controller c) throws TMSException,
+		RemoteException
+	{
+		device.setController(c);
+	}
+
+	/** Get the I/O pin */
+	public int getPin() throws RemoteException {
+		return device.getPin();
+	}
+
+	/** Set the I/O pin */
+	public void setPin(int p) throws TMSException, RemoteException {
+		device.setPin(p);
 	}
 
 	/** Get the device location */

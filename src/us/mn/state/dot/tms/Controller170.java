@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
@@ -29,6 +25,12 @@ public interface Controller170 extends Controller {
 
 	/** Minutes before communication is failed */
 	public int COMM_FAIL_THRESHOLD = 3;
+
+	/** I/O pin for first traffic device */
+	int DEVICE_1_PIN = 2;
+
+	/** I/O pin for second ramp meter */
+	int METER_2_PIN = 3;
 
 	/** Total number of detector inputs on a 170 controller */
 	public int DETECTOR_INPUTS = 24;
@@ -91,11 +93,4 @@ public interface Controller170 extends Controller {
 
 	/** Get the cabinet type */
 	public short getCabinet() throws RemoteException;
-
-	/** Set ramp meter 2 */
-	public void setMeter2( String id ) throws TMSException,
-		RemoteException;
-
-	/** Get ramp meter 2 */
-	public RampMeter getMeter2() throws RemoteException;
 }

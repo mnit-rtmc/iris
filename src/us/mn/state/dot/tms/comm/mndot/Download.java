@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import us.mn.state.dot.tms.Controller170;
 import us.mn.state.dot.tms.Controller170Impl;
-import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.StratifiedPlanImpl;
@@ -216,13 +215,15 @@ public class Download extends ControllerOperation implements TimingTable {
 
 		/** Set the timing table for the first ramp meter */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			Device device = c170.getDevice();
-			if(device instanceof RampMeterImpl) {
+			RampMeterImpl meter =
+				Controller170Operation.lookupMeter1(c170);
+			if(meter != null) {
 				sendTimingTables(mess,
-					Address.METER_1_TIMING_TABLE,
-					(RampMeterImpl)device);
+					Address.METER_1_TIMING_TABLE, meter);
 				return new ClearVerifies1();
-			} else if(device instanceof WarningSignImpl) {
+			}
+			WarningSignImpl warn = c170.getActiveWarningSign();
+			if(warn != null) {
 				sendWarningSignTiming(mess,
 					Address.METER_1_TIMING_TABLE);
 			}
@@ -248,7 +249,8 @@ public class Download extends ControllerOperation implements TimingTable {
 
 		/** Set the timing table for the second ramp meter */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			RampMeterImpl meter = (RampMeterImpl)c170.getMeter2();
+			RampMeterImpl meter =
+				Controller170Operation.lookupMeter2(c170);
 			if(meter != null) {
 				sendTimingTables(mess,
 					Address.METER_2_TIMING_TABLE, meter);

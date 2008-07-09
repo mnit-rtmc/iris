@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,63 +72,26 @@ public class Controller170Impl extends ControllerImpl
 		}
 	}
 
-	/** I/O pin for first traffic device */
-	static protected final int DEVICE_PIN = 2;
-
-	/** Set the (first) traffic device */
-	public void setDevice(String id) throws TMSException {
-		DeviceImpl d = (DeviceImpl)deviceList.getElement(id);
-		if(d == null && id != null) {
-			d = (DeviceImpl)getDevice();
-			if(d == null || !id.equals(d.getId())) {
-				throw new ChangeVetoException(
-					"Device unavailable: " + id);
+	/** Get an active LCS for the controller */
+	public LaneControlSignalImpl getActiveLcs() {
+		if(isActive()) {
+			for(ControllerIO io: io_pins.values()) {
+				if(io instanceof LaneControlSignalImpl)
+					return (LaneControlSignalImpl)io;
 			}
 		}
-		setIO(DEVICE_PIN, d);
+		return null;
 	}
 
-	/** Get the (first) traffic device */
-	public synchronized TrafficDevice getDevice() {
-		ControllerIO io = io_pins.get(DEVICE_PIN);
-		if(io instanceof TrafficDevice)
-			return (TrafficDevice)io;
-		else
-			return null;
-	}
-
-	/** Get the first ramp meter */
-	public RampMeter getMeter1() {
-		TrafficDevice d = getDevice();
-		if(d instanceof RampMeter)
-			return (RampMeter)d;
-		else
-			return null;
-	}
-
-	/** I/O pin for second ramp meter */
-	static protected final int METER_2_PIN = 3;
-
-	/** Set the second ramp meter */
-	public void setMeter2(String id) throws TMSException {
-		RampMeterImpl m = (RampMeterImpl)availableMeters.getElement(id);
-		if(m == null && id != null) {
-			m = (RampMeterImpl)getMeter2();
-			if(m == null || !id.equals(m.getId())) {
-				throw new ChangeVetoException(
-					"Meter unavailable: " + id);
+	/** Get an active warning sign for the controller */
+	public WarningSignImpl getActiveWarningSign() {
+		if(isActive()) {
+			for(ControllerIO io: io_pins.values()) {
+				if(io instanceof WarningSignImpl)
+					return (WarningSignImpl)io;
 			}
 		}
-		setIO(METER_2_PIN, m);
-	}
-
-	/** Get the second ramp meter */
-	public synchronized RampMeter getMeter2() {
-		ControllerIO io = io_pins.get(METER_2_PIN);
-		if(io instanceof RampMeter)
-			return (RampMeter)io;
-		else
-			return null;
+		return null;
 	}
 
 	/** Assign a detector to an input */
@@ -139,7 +102,7 @@ public class Controller170Impl extends ControllerImpl
 	}
 
 	/** Get a data detector (input from 1 to 24) */
-	public Detector getDetector(int input) {
+	public DetectorImpl getDetector(int input) {
 		return getDetectorAtPin(input + DETECTOR_PIN_OFFSET);
 	}
 
@@ -152,17 +115,6 @@ public class Controller170Impl extends ControllerImpl
 				bitmap[d / 8] |= 1 << (d % 8);
 		}
 		return bitmap;
-	}
-
-	/** Get the meter number on the controller */
-	public int getMeterNumber(RampMeterImpl meter) {
-		if(isActive()) {
-			if(meter == getDevice())
-				return 1;
-			else if(meter == getMeter2())
-				return 2;
-		}
-		return 0;
 	}
 
 	/** Check if the controller has been failed beyond threshold time */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2007  Minnesota Department of Transportation
+ * Copyright (C) 2001-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -248,15 +248,9 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		return true;
 	}
 
-	/**
-	 * Set the controller to which this LCS is assigned
-	 *
-	 * @param c                Controller
-	 * @exception TMSException  If there is an error accessing
-	 * the database.
-	 */
-	public void setController(ControllerImpl c) throws TMSException {
-		super.setController( c );
+	/** Set the controller to which this LCS is assigned */
+	public void setController(Controller c) throws TMSException {
+		super.setController(c);
 		if(c == null)
 			deviceList.add(id, this);
 		else

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,12 @@ import java.rmi.RemoteException;
  * @author Douglas Lau
  */
 public interface Controller extends TMSObject {
+
+	/** All I/O pins */
+	int ALL_PINS = 104;
+
+	/** I/O pin for first traffic device */
+	int DEVICE_PIN = 1;
 
 	/** Get controller label (Line x drop y) */
 	public String getLabel() throws RemoteException;
@@ -64,27 +70,8 @@ public interface Controller extends TMSObject {
 	/** Get the milepoint */
 	public float getMile() throws RemoteException;
 
-	/** Set traffic device */
-	public void setDevice(String id) throws TMSException, RemoteException;
-
-	/** Get traffic device */
-	public TrafficDevice getDevice() throws RemoteException;
-
-	/** Set a data detector */
-	public void setDetector(int input, int det) throws TMSException,
-		RemoteException;
-
-	/** Get a data detector */
-	public Detector getDetector(int input) throws RemoteException;
-
-	/** Add an alarm to the controller */
-	public Alarm addAlarm(int pin) throws TMSException, RemoteException;
-
-	/** Remove an alarm from the controller */
-	public void removeAlarm(int pin) throws TMSException, RemoteException;
-
-	/** Get an alarm from the controller */
-	public Alarm getAlarm(int pin) throws RemoteException;
+	/** Get all the Input/Output devices */
+	ControllerIO[] getIO() throws RemoteException;
 
 	/** Get the failure status */
 	public boolean isFailed() throws RemoteException;

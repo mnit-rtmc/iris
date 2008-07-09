@@ -21,7 +21,10 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Controller170;
+import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.meter.RampMeterProperties;
 
@@ -75,11 +78,31 @@ public class Controller170Form extends ControllerForm {
 		return panel;
 	}
 
+	/** Get the first device */
+	protected TrafficDevice getDevice() throws RemoteException {
+		ControllerIO[] io_pins = c170.getIO();
+		ControllerIO io = io_pins[Controller170.DEVICE_1_PIN];
+		if(io instanceof TrafficDevice)
+			return (TrafficDevice)io;
+		else
+			return null;
+	}
+
+	/** Get the second ramp meter */
+	protected RampMeter getMeter2() throws RemoteException {
+		ControllerIO[] io_pins = c170.getIO();
+		ControllerIO io = io_pins[Controller170.METER_2_PIN];
+		if(io instanceof RampMeter)
+			return (RampMeter)io;
+		else
+			return null;
+	}
+
 	/** Update the form with the current state of the controller */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
 		cabinet.setSelectedIndex(c170.getCabinet());
-		RampMeter meter = c170.getMeter2();
+		RampMeter meter = getMeter2();
 		if( meter != null ) {
 			meterButton.setEnabled( true );
 			// NOTE: must call the model's method directly
@@ -91,18 +114,34 @@ public class Controller170Form extends ControllerForm {
 		}
 	}
 
+	/** Set the selected device */
+	protected void setSelectedDevice() throws Exception {
+		Object d = deviceBox.getSelectedItem();
+		if(d instanceof ControllerIO) {
+			ControllerIO cio = (ControllerIO)d;
+			cio.setController(null);
+			cio.setPin(Controller170.DEVICE_1_PIN);
+			cio.setController(contr);
+		}
+		Object m = meterBox.getSelectedItem();
+		if(m instanceof RampMeter) {
+			RampMeter meter = (RampMeter)m;
+			meter.setController(null);
+			meter.setPin(Controller170.METER_2_PIN);
+			meter.setController(c170);
+		}
+	}
+
 	/** Called when the 'apply' button is pressed */
 	protected void applyPressed() throws Exception {
-		if(admin) {
+		if(admin)
 			c170.setCabinet((short)cabinet.getSelectedIndex());
-			c170.setMeter2((String)meterBox.getSelectedItem());
-		}
 		super.applyPressed();
 	}
 
 	/** Called when the meter lookup button is pressed */
 	protected void meterPressed() throws Exception {
-		RampMeter meter = c170.getMeter2();
+		RampMeter meter = getMeter2();
 		if(meter == null)
 			meterButton.setEnabled(false);
 		else {
@@ -110,5 +149,10 @@ public class Controller170Form extends ControllerForm {
 				new RampMeterProperties(connection,
 				meter.getId()));
 		}
+	}
+
+	/** Get the pin for the given detector input */
+	protected int getDetectorPin(int inp) {
+		return inp + Controller170.DETECTOR_PIN_OFFSET;
 	}
 }

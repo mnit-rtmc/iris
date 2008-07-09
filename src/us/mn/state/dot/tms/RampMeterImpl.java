@@ -139,7 +139,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	}
 
 	/** Set the controller for this device */
-	public void setController(ControllerImpl c) throws TMSException {
+	public void setController(Controller c) throws TMSException {
 		super.setController(c);
 		if(c == null) {
 			deviceList.add(id, this);
@@ -148,15 +148,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			deviceList.remove(id);
 			availableMeters.remove(id);
 		}
-	}
-
-	/** Get the meter number on the controller */
-	public int getMeterNumber() {
-		ControllerImpl c = controller;	// Avoid races
-		if(c != null)
-			return c.getMeterNumber(this);
-		else
-			return 0;
 	}
 
 	/** Get the meter poller */

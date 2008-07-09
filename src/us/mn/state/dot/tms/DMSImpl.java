@@ -152,7 +152,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** Set the controller to which this DMS is assigned */
-	public void setController(ControllerImpl c) throws TMSException {
+	public void setController(Controller c) throws TMSException {
 		super.setController(c);
 		if(c == null)
 			deviceList.add(id, this);

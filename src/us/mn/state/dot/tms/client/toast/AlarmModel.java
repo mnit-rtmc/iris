@@ -23,6 +23,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -77,9 +78,10 @@ public class AlarmModel extends AbstractTableModel {
 	/** Create a new alarm table model */
 	public AlarmModel(Controller c, boolean a) throws RemoteException {
 		controller = c;
+		ControllerIO[] io_pins = c.getIO();
 		for(int i = 0; i < 10; i++) {
 			int pin = ALARM_PIN + i;
-			Alarm alarm = controller.getAlarm(pin);
+			Alarm alarm = (Alarm)io_pins[pin];
 			alarms[i] = alarm;
 			String notes = null;
 			if(alarm != null)
@@ -127,38 +129,6 @@ public class AlarmModel extends AbstractTableModel {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		return admin && column == COL_NOTES;
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(final Object value, final int row, int column) {
-		if(column == COL_NOTES) {
-			final String notes = ((String)value).trim();
-			new AbstractJob() {
-				public void perform() throws Exception {
-					setNotes(row, notes);
-				}
-			}.addToScheduler();
-			Object[] r = rows.get(row);
-			r[COL_NOTES] = notes;
-			fireTableCellUpdated(row, column);
-		}
-	}
-
-	/** Set the notes for an alarm */
-	protected void setNotes(int row, String notes) throws TMSException,
-		RemoteException
-	{
-		int pin = ALARM_PIN + row;
-		if(notes.length() < 1) {
-			controller.removeAlarm(pin);
-			alarms[row] = null;
-			return;
-		}
-		Alarm a = alarms[row];
-		if(a == null)
-			a = controller.addAlarm(pin);
-		a.setNotes(notes);
-		alarms[row] = a;
+		return false;
 	}
 }

@@ -19,7 +19,6 @@ import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.Controller170Impl;
-import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -35,6 +34,12 @@ public class Data5Minute extends IntervalData {
 
 	/** 170 controller */
 	protected final Controller170Impl c170;
+
+	/** Ramp meter being queried */
+	protected final RampMeterImpl meter1;
+
+	/** Ramp meter being queried */
+	protected final RampMeterImpl meter2;
 
 	/** 5-minute completer */
 	protected final Completer completer;
@@ -55,6 +60,8 @@ public class Data5Minute extends IntervalData {
 	public Data5Minute(Controller170Impl c, Completer comp) {
 		super(DATA_5_MIN, c);
 		c170 = c;
+		meter1 = Controller170Operation.lookupMeter1(c170);
+		meter2 = Controller170Operation.lookupMeter2(c170);
 		completer = comp;
 		completer.up();
 		long s = System.currentTimeMillis();
@@ -123,9 +130,9 @@ public class Data5Minute extends IntervalData {
 			}
 			processData(rec);
 			controller.storeData5Minute(stamp, volume, scans);
-			updateGreenCount(c170.getMeter1(),
+			updateGreenCount(meter1,
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
-			updateGreenCount(c170.getMeter2(),
+			updateGreenCount(meter2,
 				rec[Address.OFF_GREEN_METER_2] & 0xFF);
 			if(recs > 0 && Calendar.getInstance().before(newest))
 				return this;
@@ -141,10 +148,10 @@ public class Data5Minute extends IntervalData {
 	}
 
 	/** Update meter with the most recent 5-minute green count */
-	protected void updateGreenCount(RampMeter m, int g) throws IOException {
-		if(m instanceof RampMeterImpl) {
-			RampMeterImpl meter = (RampMeterImpl)m;
+	protected void updateGreenCount(RampMeterImpl meter, int g)
+		throws IOException
+	{
+		if(meter != null)
 			meter.updateGreenCount5(stamp, g);
-		}
 	}
 }

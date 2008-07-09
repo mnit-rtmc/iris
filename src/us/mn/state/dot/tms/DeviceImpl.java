@@ -92,18 +92,42 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	protected ControllerImpl controller;
 
 	/** Set the controller of the device */
-	public synchronized void setController(ControllerImpl c)
+	protected synchronized void setController(ControllerImpl c)
 		throws TMSException
 	{
 		if(c == controller)
 			return;
 		if(c != null && controller != null)
 			throw new ChangeVetoException("Device has controller");
+		updateController(c, pin);
 		if(c == null)
 			store.update(this, "controller", "0");
 		else
 			store.update(this, "controller", c.getOID());
 		controller = c;
+	}
+
+	/** Update the controller and/or pin */
+	protected void updateController(ControllerImpl c, int p)
+		throws TMSException
+	{
+		if(controller != null)
+			controller.setIO(pin, null);
+		try {
+			if(c != null)
+				c.setIO(p, this);
+		}
+		catch(TMSException e) {
+			if(controller != null)
+				controller.setIO(pin, this);
+			throw e;
+		}
+	}
+
+	/** Set the controller of the device */
+	public void setController(Controller c) throws TMSException {
+		ControllerImpl ctr = lineList.findController(c);
+		setController(ctr);
 	}
 
 	/** Get the controller to which this device is assigned */
@@ -127,6 +151,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	public synchronized void setPin(int p) throws TMSException {
 		if(p == pin)
 			return;
+		updateController(controller, p);
 		store.update(this, "pin", p);
 		pin = p;
 	}

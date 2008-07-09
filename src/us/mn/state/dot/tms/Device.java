@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,10 @@ import java.rmi.RemoteException;
  *
  * @author Douglas Lau
  */
-public interface Device extends TMSObject {
+public interface Device extends TMSObject, ControllerIO {
 
 	/** Get the active status */
 	public boolean isActive() throws RemoteException;
-
-	/** Get the controller to which this device is attached */
-	public Controller getController() throws RemoteException;
 
 	/** Get the failure status */
 	public boolean isFailed() throws RemoteException;
