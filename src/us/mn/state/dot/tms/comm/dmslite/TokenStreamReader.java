@@ -13,16 +13,15 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
 import java.net.SocketTimeoutException;
-import java.util.Date;
+
 import java.util.GregorianCalendar;
 
 /**
@@ -31,188 +30,199 @@ import java.util.GregorianCalendar;
  * @author Michael Darter
  * @company AHMCT, UCD
  */
-public class TokenStreamReader {
+public class TokenStreamReader
+{
+	// fields
+	final private BufferedReader m_inps;
+	private ParseBuffer m_pb;
+	final private int m_sleeptime;
 
-    // fields
-    private BufferedReader m_inps;
-    private ParseBuffer    m_pb;
-    private int            m_sleeptime;
+	/**
+	 * Constructor.
+	 *
+	 * @param inps input stream to wrap.
+	 */
+	public TokenStreamReader(InputStream inps, int initsize,
+				 int maxcapacity, int sleeptime) {
+		if((inps == null) || (initsize <= 0) || (maxcapacity <= 0) || (sleeptime <= 0))
+			throw new IllegalArgumentException("Illegal argument in TokenStreamReader constructor.");
 
-    /**
-     * Constructor.
-     *
-     * @param inps input stream to wrap.
-     * @param maxsize The maximum allowed size the buffer grows to.
-     */
-    public TokenStreamReader(InputStream inps, int initsize, int maxcapacity, int sleeptime) {
-        if ((inps == null) || (initsize <= 0) || (maxcapacity <= 0) || (sleeptime <= 0)) {
-            throw new IllegalArgumentException("Illegal argument in TokenStreamReader constructor.");
-        }
+		m_inps = new BufferedReader(new InputStreamReader(inps));
+		m_pb = createParseBuffer(initsize, maxcapacity);
+		m_sleeptime = sleeptime;
+	}
 
-        m_inps      = new BufferedReader(new InputStreamReader(inps));
-        m_pb        = new ParseBuffer(initsize, maxcapacity);
-        m_sleeptime = sleeptime;
-    }
+	/** Close the stream */
+	public void close() throws IOException {
+		m_inps.close();
+	}
 
-    /** Close the stream */
-    public void close() throws IOException {
-        m_inps.close();    // FIXME: also close InputStreamReader()?
-    }
+	/** return the buffer */
+	public String getBuffer() {
+		return new String(m_pb.toString());
+	}
 
-    /**
-     * Read a token with the specified starting and ending. Any characters read
-     * before the token are discarded. This method returns when a token is read.
-     *
-     * @param timeout Maximum time to wait for a response in MS. Zero means wait forever.
-     * @param tokenstart Start of token.
-     * @param tokenend End of token.
-     *
-     * @return Null if timed out.
-     *
-     * @throws IllegalStateException if maximum capacity is exceeded.
-     * @throws IOException if endpoint disconnects.
-     */
-    public String readToken(int timeout, String tokenstart, String tokenend) throws IllegalStateException, IOException {
+	/** reset buffer */
+	public void resetBuffer() {
+		m_pb.init();
+	}
 
-        // check args
-        if ((timeout < 0) || (tokenstart == null) || (tokenend == null)) {
-            throw new IllegalArgumentException("Invalid argument in readToken()");
-        }
+	/** create a new parse buffer */
+	private static ParseBuffer createParseBuffer(int size,int maxsize) {
+		return new ParseBuffer(size,maxsize);
+	}
 
-        int    numread  = 0;
-        char[] fragment = new char[512];
-        String token    = null;
+	/**
+	 * Read a token with the specified starting and ending. Any characters read
+	 * before the token are discarded. This method returns when a token is read.
+	 *
+	 * @param timeout Maximum time to wait for a response in MS. Zero means wait forever.
+	 * @param tokenstart Start of token.
+	 * @param tokenend End of token.
+	 * @return Null if timed out, only if the specified arg timeout>0.
+	 * @throws IllegalStateException if maximum capacity is exceeded.
+	 * @throws IOException if endpoint disconnects.
+	 */
+	public String readToken(int timeout, String tokenstart, String tokenend)
+		throws IllegalStateException, IOException {
 
-        // timeout?
-        long start = 0;
+		// check args
+		if((timeout < 0) || (tokenstart == null)
+			|| (tokenend == null)) {
+			throw new IllegalArgumentException(
+			    "Invalid argument in readToken()");
+		}
 
-        if (timeout > 0) {
-            start = TokenStreamReader.getCurTimeUTCinMillis();
-        }
+		int numread = 0;
+		char[] fragment = new char[512];
+		String token = null;
 
-        // read bytes until token discovered
-        while (true) {
+		// timeout?
+		long start = 0;
+		if(timeout > 0) {
+			start = TokenStreamReader.getCurTimeUTCinMillis();
+		}
 
-            // read
-            //System.err.println("TokenStreamReader.readToken(): waiting for bytes to read.");
-            try {
-                numread = m_inps.read(fragment, 0, fragment.length);
-            } catch (SocketTimeoutException ex) {
+		// read bytes until token discovered
+		while(true) {
 
-                // Log.finest("TokenStreamReader.readToken(): ignored SocketTimeoutException:"+ex);
-                // check if timed out
-                if (this.timedOut(start, timeout)) {
-                    return (null);
-                }
+			// read
+			//System.err.println("Waiting for bytes to read.");
+			try {
+				numread = m_inps.read(fragment, 0,fragment.length);
+			} catch (SocketTimeoutException ex) {
 
-                try {
-                    Thread.sleep(m_sleeptime);
-                } catch (InterruptedException ex2) {}
+				// Log.finest("Ignored SocketTimeoutException:"+ex);
+				// check if timed out
+				if(this.timedOut(start, timeout)) {
+					return (null);
+				}
 
-                continue;
-            } catch (IOException ex) {
-                System.err.println("TokenStreamReader.readToken(): client disconnected.");
+				try {
+					Thread.sleep(m_sleeptime);
+				} catch (InterruptedException ex2) {}
 
-                throw new IOException("client disconnected");
-            }
+				continue;
+			} catch (IOException ex) {
+				//System.err.println("Client disconnected.");
+				throw ex;
+			}
 
-            System.err.println("TokenStreamReader.readToken(): read bytes from iris:" + numread);
+			//System.err.println("Read " + numread + " bytes from client.");
 
-            // bytes received
-            if (numread > 0) {
+			// bytes received
+			if(numread > 0) {
 
-                // add to existing parse buffer, throws except if cap exceeded
-                m_pb.append(fragment);
+				// add to existing parse buffer, throws IllegalStateException if cap exceeded
+				// Log.finest("parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
+				// Log.finest("Adding "+numread+" chars to existing ParseBuffer.");
+				m_pb.append(numread, fragment);
 
-                // is a complete token in buffer? if yes, extract it,
-                // and delete text in buffer preceeding token, if any.
-                token = m_pb.getToken(ParseBuffer.ExtractType.DDK, tokenstart, tokenend);
+				// Log.finest("parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
 
-                // read again with no sleep
-                if (token == null) {
-                    continue;
+				// is a complete token in buffer? if yes, extract it,
+				// and delete text in buffer preceeding token, if any.
+				token = m_pb.getToken(ParseBuffer.ExtractType.DDK,
+					tokenstart, tokenend);
 
-                    // found token
-                } else {
-                    System.err.println("TokenStreamReader.readToken(): found complete token:" + token);
+				// Log.finest("Extracted token, length now "+m_pb.length()+".");
 
-                    return (token);
-                }
+				// read again with no sleep
+				if(token == null) {
+					continue;
 
-                // disconnect
-            } else if (numread < 0) {
-                System.err.println("TokenStreamReader.readToken(): client disconnected (numread<0).");
+					// found token
+				} else {
 
-                throw new IOException("client disconnected");
-            }
+					// Log.finest("Found complete token:"+token);
+					return (token);
+				}
 
-            // check if timed out
-            if (this.timedOut(start, timeout)) {
-                return (null);
-            }
+				// disconnect
+			} else if(numread < 0) {
 
-            // sleep and read again
-            try {
-                Thread.sleep(m_sleeptime);
-            } catch (InterruptedException ex) {}
-        }
+				// Log.finer("Client disconnected (numread<0).");
+				throw new IOException("client disconnected");
+			}
 
-        // unreachable
-    }
+			// check if timed out
+			if(this.timedOut(start, timeout)) {
+				return (null);
+			}
 
-    /**
-     *      Return true if a timeout occured else false.
-     */
-    private boolean timedOut(long start, int timeout) {
+			// sleep and read again
+			try {
+				Thread.sleep(m_sleeptime);
+			} catch (InterruptedException ex) {}
+		}
 
-        // timeout used?
-        if (timeout <= 0) {
-            return (false);
-        }
+		// unreachable
+	}
 
-        if (TokenStreamReader.calcTimeDeltaMS(start) + m_sleeptime > timeout) {
-            System.err.println("TokenStreamReader.timeout(): timed out, waited " + timeout / 1000 + " secs.");
+	/**
+	 *      Return true if a timeout occurred else false.
+	 */
+	private boolean timedOut(long start, int timeout) {
 
-            return (true);
-        }
+		// timeout used?
+		if(timeout <= 0) {
+			return (false);
+		}
 
-        return (false);
-    }
+		if(TokenStreamReader.calcTimeDeltaMS(start) + m_sleeptime > timeout) {
+			// Log.finer("Timed out, waited "+timeout/1000+" secs.");
+			return (true);
+		}
 
-    /**
-     *      calc time difference between now (UTC since 1970)
-     *  and given start time in MS.
-     */
-    private static long calcTimeDeltaMS(long startInUTC) {
-        java.util.Date d = new GregorianCalendar().getTime();
-        long           t = d.getTime() - startInUTC;
+		return (false);
+	}
 
-        return (t);
-    }
+	/**
+	 *  calc time difference between now (UTC since 1970)
+	 *  and given start time in MS.
+	 */
+	private static long calcTimeDeltaMS(long startInUTC) {
+		java.util.Date d = new GregorianCalendar().getTime();
+		long t = d.getTime() - startInUTC;
 
-    /**
-     *  get current time in MS (UTC) since Jan 1st 1970 00:00:00.
-     */
-    private static long getCurTimeUTCinMillis() {
-        java.util.Date d = new GregorianCalendar().getTime();
+		return (t);
+	}
 
-        return (d.getTime());
-    }
+	/**
+	 *  get current time in MS (UTC) since Jan 1st 1970 00:00:00.
+	 */
+	private static long getCurTimeUTCinMillis() {
+		java.util.Date d = new GregorianCalendar().getTime();
+		return (d.getTime());
+	}
 
-    /**
-     *  test methods.
-     */
-    static public boolean test() {
-        boolean ok = true;
-
-        System.err.println("TokenStreamReader.test() done, return=" + ok);
-
-        return (ok);
-    }
-
-    /** init buffer */
-    public void initBuffer() {
-        m_pb.init();
-    }
-
+	/**
+	 *  test methods.
+	 */
+	static public boolean test() {
+		boolean ok = true;
+		//System.err.println("Test done, return=" + ok);
+		return (ok);
+	}
 }
+
