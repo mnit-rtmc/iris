@@ -149,8 +149,8 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Sign group model */
 	protected final SignGroupModel sign_group_model;
 
-	/** Sign text model */
-	protected SignTextModel sign_text_model;
+	/** Sign text table model */
+	protected SignTextTableModel sign_text_model;
 
 	/** Sign group table component */
 	protected final JTable group_table = new JTable();
@@ -474,7 +474,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		if(group != null) {
 			if(sign_text_model != null)
 				sign_text_model.dispose();
-			sign_text_model = new SignTextModel(group,
+			sign_text_model = new SignTextTableModel(group,
 				state.getSignText(), true);
 			sign_text_table.setModel(sign_text_model);
 			delete_group.setEnabled(isGroupDeletable(group));
@@ -538,7 +538,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		};
 		sign_text_table.setAutoCreateColumnsFromModel(false);
 		sign_text_table.setColumnModel(
-			SignTextModel.createColumnModel());
+			SignTextTableModel.createColumnModel());
 		sign_text_table.setPreferredScrollableViewportSize(
 			new Dimension(280, 200));
 	}
@@ -643,7 +643,7 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Get the selected sign text message */
 	protected SignText getSelectedSignText() {
-		SignTextModel m = sign_text_model;
+		SignTextTableModel m = sign_text_model;
 		if(m == null)
 			return null;
 		ListSelectionModel s = sign_text_table.getSelectionModel();

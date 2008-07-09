@@ -17,12 +17,14 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.GridLayout;
 import javax.swing.BorderFactory;
+import javax.swing.ComboBoxEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
@@ -64,12 +66,16 @@ public class MessageSelector extends JPanel {
 	/** Number of lines on the currently selected sign */
 	protected int n_lines;
 
+	/** Tms connection */
+	protected TmsConnection m_tmsConnection;
+
 	/** Create a new message selector */
 	public MessageSelector(TypeCache<DmsSignGroup> d,
-		TypeCache<SignText> t)
+		TypeCache<SignText> t, TmsConnection tmsConnection)
 	{
 		dms_sign_groups = d;
 		sign_text = t;
+		m_tmsConnection=tmsConnection;
 		add(tab);
 		initializeWidgets(0, 1);
 	}
@@ -92,6 +98,8 @@ public class MessageSelector extends JPanel {
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
+			final ComboBoxEditor cbe=new MsgComboBoxEditor();
+			cmbLine[i].setEditor(cbe);
 			cmbLine[i].setEditable(areMessagesEditable());
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
@@ -133,19 +141,30 @@ public class MessageSelector extends JPanel {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
 		for(int i = 0; i < cmbLine.length; i++) {
-			SignText st = (SignText)cmbLine[i].getSelectedItem();
-			if(st != null) {
-				mess[i] = st.getMessage();
-				if(mess[i].length() > 0)
-					m = i + 1;
-			} else
-				mess[i] = "";
+			mess[i] = getMessageFromCB(i);
+			if(mess[i].length() > 0)
+				m = i + 1;
 		}
+		String ret=null;
 		if(m > 0)
-			return buildMulti(mess, m).toString();
-		else
-			return null;
+			ret=buildMulti(mess, m).toString();
+		return ret;
 
+	}
+
+	/** get text from combobox line */
+	protected String getMessageFromCB(int line) {
+		assert line>=0 && line<cmbLine.length;
+		Object o = cmbLine[line].getSelectedItem();
+		if(o==null)
+			return("");
+		if (o instanceof SignText )
+			return ((SignText)o).getMessage();
+		else if (o instanceof String )
+			return (String)o;
+
+		assert false : "unknown type in getMessageFromCB()";
+		return "";
 	}
 
 	/** Build a MULTI string from an array of line strings */
@@ -224,7 +243,7 @@ if(nl == 0) nl = 3;
 	/** Create a new message model */
 	protected void createMessageModel(String dms_id) {
 		SignMessageModel mm = new SignMessageModel(dms_id,
-			dms_sign_groups, sign_text);
+			dms_sign_groups, sign_text,m_tmsConnection);
 		mm.initialize();
 		SignMessageModel omm = mess_model;
 		mess_model = mm;

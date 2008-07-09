@@ -109,10 +109,10 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	protected final SignGroup group;
 
 	/** Line for adding a new row */
-	protected Short line;
+	protected Short m_line;
 
 	/** Priority for adding a new row */
-	protected Short priority;
+	protected Short m_priority;
 
 	/** Create a new sign text table model 
 	 *  @param a True if admin else false.
@@ -135,9 +135,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 			return getValue(t, column);
 		switch(column) {
 		case COL_LINE:
-			return line;
+			return m_line;
 		case COL_PRIORITY:
-			return priority;
+			return m_priority;
 		}
 		return null;
 	}
@@ -196,7 +196,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	protected void addRow(Object value, int column) {
 		switch(column) {
 		case COL_LINE:
-			line = asShort(value);
+			m_line = asShort(value);
 			break;
 		case COL_MESSAGE:
 			String v = formatMessage(value);
@@ -204,30 +204,40 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				createSignText(v);
 			break;
 		case COL_PRIORITY:
-			priority = asShort(value);
+			m_priority = asShort(value);
 			break;
 		}
 	}
 
-	/** Create a new sign text message */
+	/** Create a new sign text message using the current line and priority values */
 	protected void createSignText(String message) {
+		if(m_line == null)
+			m_line = 1;
+		if(m_priority == null)
+			m_priority = 50;
+		createSignText(m_line,message,m_priority);
+		m_line = null;
+		m_priority = null;
+	}
+
+	/** Create a new sign text message using the specified args */
+	protected void createSignText(short line,String message,short priority) {
+		// validate args
+		if(message==null || line<=0) {
+			return;
+		}
+
 		String name = createName();
 		if(name == null) {
 			// FIXME: display a warning?
 			return;
 		}
-		if(line == null)
-			line = 1;
-		if(priority == null)
-			priority = 50;
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_group", group);
-		attrs.put("line", line);
+		attrs.put("line", new Short(line));
 		attrs.put("message", message);
-		attrs.put("priority", priority);
+		attrs.put("priority", new Short(priority));
 		cache.createObject(name, attrs);
-		line = null;
-		priority = null;
 	}
 
 	/** 
