@@ -93,7 +93,12 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	/** Listener for DMS sign group proxies */
 	protected final ProxyListener<DmsSignGroup> listener;
 
-	/** Create a new sign group table model */
+	/** 
+	 * Create a new sign group table model 
+	 * @param dms DMS id.
+	 * @param d Sonar type cache
+	 * @param a True if user has admin privileges.
+	 */
 	public SignGroupModel(String dms, TypeCache<DmsSignGroup> d,
 		TypeCache<SignGroup> g, boolean a)
 	{
