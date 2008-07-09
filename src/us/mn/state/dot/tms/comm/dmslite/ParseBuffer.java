@@ -31,14 +31,14 @@ package us.mn.state.dot.tms.comm.dmslite;
 final public class ParseBuffer
 {
 	// fields
-	private char[] m_buffer = new char[0];    // buffer
-	private final int m_allocsize;            // allocated buffer size
-	private int m_emptySpot;    // index of first empty spot in buffer
-	private final int m_maxsize;              // maximum size allowed
+	private char[] m_buffer = new char[0];	// buffer
+	private final int m_allocsize;		// allocated buffer size
+	private int m_emptySpot;		// index of first empty spot in buffer
+	private final int m_maxsize;		// maximum size allowed
 
 	// types
 	public enum ExtractType {
-		KDK,                              // keep left most chunk, delete middle, keep right most chunk
+		KDK,    // keep left most chunk, delete middle, keep right most chunk
 		DDK,    // delete left most chunk, delete middle, keep right most chunk
 		KKK,    // keep left, middle, right
 	}
@@ -64,7 +64,6 @@ final public class ParseBuffer
 
 	/** initialize the buffer */
 	public void init() {
-
 		m_buffer = new char[m_allocsize];
 		m_emptySpot = 0;
 	}
@@ -157,7 +156,7 @@ final public class ParseBuffer
 		{
 
 			// create
-			//log.info("T1");
+			//Log.info("T1");
 
 			ParseBuffer b = new ParseBuffer(5, 10);
 
@@ -168,7 +167,7 @@ final public class ParseBuffer
 			}
 
 			// append
-			//log.info("T2");
+			//Log.info("T2");
 			b.append(new char[] { 'a', 'b', 'c' });
 			ok = ok && (b.length() == 3) && (b.capacity() == 5);
 			ok = ok && (b.toString().compareTo("abc") == 0);
@@ -178,7 +177,7 @@ final public class ParseBuffer
 			}
 
 			// 2nd append
-			//log.info("T3");
+			//Log.info("T3");
 			b.append(new char[] { 'd', 'e', 'f' });
 			ok = ok && (b.length() == 6) && (b.capacity() == 6);
 			ok = ok && (b.toString().compareTo("abcdef") == 0);
@@ -188,7 +187,7 @@ final public class ParseBuffer
 			}
 
 			// exceed capacity
-			//log.info("T4");
+			//Log.info("T4");
 
 			boolean ok2 = false;
 
@@ -208,7 +207,7 @@ final public class ParseBuffer
 			}
 
 			// append nothing
-			//log.info("T5");
+			//Log.info("T5");
 			b.append(new char[0]);
 			ok = ok && (b.length() == 6) && (b.capacity() == 6);
 			ok = ok && (b.toString().compareTo("abcdef") == 0);
@@ -220,7 +219,7 @@ final public class ParseBuffer
 
 		// get token
 		{
-			//log.info("T6");
+			//Log.info("T6");
 
 			ParseBuffer zb = new ParseBuffer(5, 10);
 
@@ -241,7 +240,7 @@ final public class ParseBuffer
 
 		// extract token
 		{
-			//log.info("T7");
+			//Log.info("T7");
 
 			ParseBuffer b = new ParseBuffer(5, 10);
 
@@ -262,7 +261,7 @@ final public class ParseBuffer
 
 		// extract token
 		{
-			//log.info("T8");
+			//Log.info("T8");
 
 			ParseBuffer x1 = new ParseBuffer(2, 10);
 
@@ -289,7 +288,7 @@ final public class ParseBuffer
 
 		// extract token-overlap
 		{
-			//log.info("T9");
+			//Log.info("T9");
 
 			ParseBuffer x1 = new ParseBuffer(2, 10);
 
@@ -319,7 +318,7 @@ final public class ParseBuffer
 
 		// extract token-all
 		{
-			//log.info("T10");
+			//Log.info("T10");
 
 			ParseBuffer x1 = new ParseBuffer(2, 10);
 
@@ -346,7 +345,7 @@ final public class ParseBuffer
 
 		// remove chunk
 		{
-			//log.info("T11");
+			//Log.info("T11");
 
 			ParseBuffer x1;
 
@@ -384,7 +383,7 @@ final public class ParseBuffer
 
 		// append with specified length
 		{
-			//log.info("T12");
+			//Log.info("T12");
 
 			ParseBuffer b = new ParseBuffer(10, 10);
 
@@ -402,7 +401,7 @@ final public class ParseBuffer
 
 		// test init
 		{
-			//log.info("T13");
+			//Log.info("T13");
 
 			ParseBuffer b = new ParseBuffer(10, 10);
 
@@ -421,7 +420,7 @@ final public class ParseBuffer
 			}
 		}
 
-		//log.info("ParseBuffer.test() done, return=" + ok);
+		//Log.info("ParseBuffer.test() done, return=" + ok);
 
 		return (ok);
 	}
@@ -504,8 +503,7 @@ final public class ParseBuffer
 	 * @params start Start of location (inclusive).
 	 * @params end End of location (exclusive).
 	 */
-	public void removeChunk(ParseBuffer.ExtractType et, int start,
-				int end) {
+	public void removeChunk(ParseBuffer.ExtractType et, int start,	int end) {
 
 		// Log.finest("before remove: m_buffer="+this.toString()+", len="+this.length()+",cap="+this.capacity());
 		if(et == ExtractType.KKK) {
@@ -588,7 +586,6 @@ final public class ParseBuffer
 	/** return the length of buffer */
 	public int length() {
 		assert(m_emptySpot >= 0) && (m_emptySpot <= m_buffer.length);
-
 		return (m_emptySpot);
 	}
 
@@ -652,3 +649,4 @@ final public class ParseBuffer
 		// Log.finest("new length="+this.length());
 	}
 }
+
