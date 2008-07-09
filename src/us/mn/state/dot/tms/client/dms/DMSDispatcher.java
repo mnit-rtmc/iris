@@ -32,6 +32,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
