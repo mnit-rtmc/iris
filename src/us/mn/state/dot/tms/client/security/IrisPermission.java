@@ -49,6 +49,8 @@ public class IrisPermission implements Permission {
 		new IrisPermission("METER_TAB");
 	static public final IrisPermission MAIN_TAB =
 		new IrisPermission("MAIN_TAB");
+	static public final IrisPermission RWIS_TAB =
+		new IrisPermission("RWIS_TAB");
 	static public final IrisPermission LCS_TAB =
 		new IrisPermission("LCS_TAB");
 	static public final IrisPermission ALERT =

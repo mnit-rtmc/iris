@@ -53,6 +53,7 @@ public class RwisTab extends IrisTab {
 
 	/** Create the side bar component */
 	protected JPanel createSideBar() {
+/*
 		incidentClient.addTdxmlListener(model);
 		JList incidents = new JList(model);
 		incidents.getSelectionModel().setSelectionMode(
@@ -63,8 +64,9 @@ public class RwisTab extends IrisTab {
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		spIncidents.setBorder(BorderFactory.createTitledBorder(
 			"Weather Stations"));
+*/
 		JPanel sidePanel = new JPanel(new BorderLayout());
-		sidePanel.add(spIncidents, BorderLayout.CENTER);
+//		sidePanel.add(spIncidents, BorderLayout.CENTER);
 		return sidePanel;
 	}
 

@@ -42,6 +42,7 @@ abstract public class TrafficDeviceAction extends AbstractAction {
 			new AbstractJob() {
 				public void perform() throws Exception {
 					do_perform();
+					System.out.println("TrafficDeviceAction.actionPerformed: Job scheduled/executed");
 				}
 			}.addToScheduler();
 		}
