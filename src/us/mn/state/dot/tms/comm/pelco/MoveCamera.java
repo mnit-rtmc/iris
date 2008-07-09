@@ -36,7 +36,7 @@ public class MoveCamera extends Device2Operation {
 
 	/** Map a float value to an integer range */
 	static protected int map_float(float value, int range) {
-		return Math.round(clamp_float(value) * range);
+		return Math.round(clamp_float(value) * (range - 1));
 	}
 
 	/** The direction (and speed) to pan the camera */

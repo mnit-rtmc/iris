@@ -42,35 +42,35 @@ public class PTZPanel extends JPanel {
 
 	/** Button used to pan left */
 	protected final PTZButton left = new PTZButton("\u2190", "Pan left",
-		-60, 0, 0);
+		-1, 0, 0);
 
 	/** Button used to pan right */
 	protected final PTZButton right = new PTZButton("\u2192", "Pan right",
-		60, 0, 0);
+		1, 0, 0);
 
 	/** Button used to tilt up */
 	protected final PTZButton up = new PTZButton("\u2191", "Tilt up",
-		0, 60, 0);
+		0, 1, 0);
 
 	/** Button used to tilt down */
 	protected final PTZButton down = new PTZButton("\u2193", "Tilt down",
-		0, -60, 0);
+		0, -1, 0);
 
 	/** Button used to tilt up and pan left */
 	protected final PTZButton up_left = new PTZButton("\u2196",
-		"Pan left and up", -60, 60, 0);
+		"Pan left and up", -1, 1, 0);
 
 	/** Button used to tilt up and pan right */
 	protected final PTZButton up_right = new PTZButton("\u2197",
-		"Pan right and up", 60, 60, 0);
+		"Pan right and up", 1, 1, 0);
 
 	/** Button used to tilt down and pan left */
 	protected final PTZButton down_left = new PTZButton("\u2199",
-		"Pan left and down", -60, -60, 0);
+		"Pan left and down", -1, -1, 0);
 
 	/** Button used to tilt down and pan right */
 	protected final PTZButton down_right = new PTZButton("\u2198",
-		"Pan right and down", 60, -60, 0);
+		"Pan right and down", 1, -1, 0);
 
 	/** Button used to zoom in */
 	protected final PTZButton zoom_in = new PTZButton("\u21BB", "Zoom in",

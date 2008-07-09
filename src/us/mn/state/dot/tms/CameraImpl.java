@@ -213,4 +213,23 @@ public class CameraImpl extends Device2Impl implements Camera {
 			cp.sendPTZ(this, p, t, z);
 		}
 	}
+
+	/** Command the camera to set the preset */
+	public void setPreset(int preset) {
+		MessagePoller mp = getPoller();
+		if(mp instanceof CameraPoller) {
+			CameraPoller cp = (CameraPoller)mp;
+			cp.sendSetPreset(this, preset);
+		}
+	}
+
+	/** Command the camera to goto the preset */
+	public void goToPreset(int preset) {
+		MessagePoller mp = getPoller();
+		if(mp instanceof CameraPoller) {
+			CameraPoller cp = (CameraPoller)mp;
+			cp.sendGoToPreset(this, preset);
+		}
+	}
+
 }

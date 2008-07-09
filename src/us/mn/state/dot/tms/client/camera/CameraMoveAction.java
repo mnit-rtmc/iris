@@ -27,17 +27,17 @@ import us.mn.state.dot.tms.client.sonar.ProxyAction;
 public class CameraMoveAction extends ProxyAction<Camera> {
 
 	/** The direction (and speed) to pan the camera */
-	protected final int pan;
+	protected final float pan;
 
 	/** The direction (and speed) to tilt the camera */
-	protected final int tilt;
+	protected final float tilt;
 
 	/** The direction to zoom the camera */
-	protected final int zoom;
+	protected final float zoom;
 
 	/** Create a new action to move the camera. */
 	public CameraMoveAction(Camera c, String name, String description,
-		int p, int t, int z)
+		float p, float t, float z)
 	{
 		super(c);
 		putValue(Action.NAME, name);

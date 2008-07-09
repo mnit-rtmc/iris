@@ -56,10 +56,25 @@ public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
 	/** The number of frames to process (for streaming) */
-	static protected final int STREAM_DURATION = 300;
+	static protected final int STREAM_DURATION = 900;
 
 	/** Dead zone needed for too-precise joystick drivers */
 	static protected final float AXIS_DEADZONE = 3f / 64;
+
+	/** Button number to select preset 1 */
+	static protected final int BUTTON_PRESET_1 = 0;
+
+	/** Button number to select preset 2 */
+	static protected final int BUTTON_PRESET_2 = 1;
+
+	/** Button number to select preset 3 */
+	static protected final int BUTTON_PRESET_3 = 2;
+
+	/** Button number to select preset 4*/
+	static protected final int BUTTON_PRESET_4 = 3;
+
+	/** Button number to select preset 5 */
+	static protected final int BUTTON_PRESET_5= 4;
 
 	/** Button number to select previous camera */
 	static protected final int BUTTON_PREVIOUS = 10;
@@ -127,7 +142,7 @@ public class CameraViewer extends JPanel
 	protected final JButton stop = new JButton(Icons.getIcon("stop"));
 
 	/** Panel for controlling camera PTZ */
-	protected final PTZPanel ptz_panel = new PTZPanel();
+	protected final CameraControl ptz_panel = new CameraControl();
 
 	/** Panel for the video controls */
 	protected final JPanel videoControls =
@@ -245,6 +260,16 @@ public class CameraViewer extends JPanel
 						selectNextCamera();
 					else if(ev.button == BUTTON_PREVIOUS)
 						selectPreviousCamera();
+					else if(ev.button == BUTTON_PRESET_1)
+						selectCameraPreset(1);
+					else if(ev.button == BUTTON_PRESET_2)
+						selectCameraPreset(2);
+					else if(ev.button == BUTTON_PRESET_3)
+						selectCameraPreset(3);
+					else if(ev.button == BUTTON_PRESET_4)
+						selectCameraPreset(4);
+					else if(ev.button == BUTTON_PRESET_5)
+						selectCameraPreset(5);
 				}
 			}
 		});
@@ -302,6 +327,13 @@ public class CameraViewer extends JPanel
 		Camera camera = selected;	// Avoid race
 		if(camera != null)
 			selectCamera(parseUID(camera.getName()) - 1);
+	}
+
+	/** Command current camera to goto preset location */
+	protected void selectCameraPreset(int preset) {
+		Camera proxy = selected;	// Avoid race
+		if(proxy != null)
+			proxy.goToPreset(preset);
 	}
 
 	/** Select the camera by number */

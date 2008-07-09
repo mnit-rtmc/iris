@@ -74,6 +74,16 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 		new MoveCamera(c, p, t, z).start();
 	}
 
+	/** Send a PTZ set camera preset command */
+	public void sendSetPreset(CameraImpl c, int preset) {
+
+	}
+
+	/** Send a PTZ goto camera preset command */
+	public void sendGoToPreset(CameraImpl c, int preset) {
+	
+	}
+
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
 		return null; // no diagmnostic testing can be done

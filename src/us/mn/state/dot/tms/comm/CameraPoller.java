@@ -26,4 +26,10 @@ public interface CameraPoller {
 
 	/** Send a PTZ camera move command */
 	void sendPTZ(CameraImpl c, float p, float t, float z);
+
+	/** Send a PTZ set camera preset command */
+	void sendSetPreset(CameraImpl c, int preset);
+
+	/** Send a PTZ goto camera preset command */
+	void sendGoToPreset(CameraImpl c, int preset);
 }

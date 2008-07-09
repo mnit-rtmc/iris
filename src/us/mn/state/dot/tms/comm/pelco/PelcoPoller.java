@@ -73,6 +73,16 @@ public class PelcoPoller extends MessagePoller implements CameraPoller {
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
 		new MoveCamera(c, p, t, z).start();
 	}
+	
+	/** Send a PTZ set camera preset command */
+	public void sendSetPreset(CameraImpl c, int preset) {
+		new SetCameraPreset(c, preset).start();
+	}
+
+	/** Send a PTZ goto camera preset command */
+	public void sendGoToPreset(CameraImpl c, int preset) {
+		new GoToCameraPreset(c, preset).start();
+	}
 
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
