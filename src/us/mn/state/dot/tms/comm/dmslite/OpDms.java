@@ -69,7 +69,7 @@ abstract public class OpDms extends DeviceOperation {
 
 	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successfull */
 	public void cleanup() {
-		System.err.println("dmslite.OpDms.cleanup() called, success="+success);
+		//System.err.println("dmslite.OpDms.cleanup() called, success="+success);
 		m_dms.setReset(success);
 		super.cleanup();
 	}
@@ -81,7 +81,7 @@ abstract public class OpDms extends DeviceOperation {
 		int ms=TIMEOUT_DMS_DEFAULT_MS;
 		if (a.toLowerCase().contains("modem")) {
 			ms=TIMEOUT_DMS_MODEM_MS;
-			//System.err.println("connection type is modem:"+a+", dms="+m_dms.toString());
+			System.err.println("connection type is modem:"+a+", dms="+m_dms.toString());
 		} else if (a.toLowerCase().contains("wizard")) {
 			ms=TIMEOUT_DMS_WIZARD_MS;
 			System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString());
@@ -126,7 +126,7 @@ abstract public class OpDms extends DeviceOperation {
 	 	String id=m_dms.getId();
 		if(controller != null) {
 			controller.resetErrorCounter(id);
-			System.err.println("OpQueryDms.resetErrorCounter(): reset comm counter");
+			//System.err.println("OpQueryDms.resetErrorCounter(): reset comm counter");
 		}
 	}
 
