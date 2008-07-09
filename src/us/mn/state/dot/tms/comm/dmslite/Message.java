@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
+import us.mn.state.dot.tms.utils.SString;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -144,7 +145,7 @@ public class Message implements AddressedMessage
 		// send message
 		long starttime=Time.getCurTimeUTCinMillis();
 		System.err.print("Writing " + array.length+" bytes to cmsserver....");
-		m_is.initBuffer();
+		m_is.resetBuffer();
 		m_os.write(array);
 		m_os.flush();
 		System.err.println("write done.");
@@ -164,10 +165,12 @@ public class Message implements AddressedMessage
 
 		// timed out?
 		if(token == null) {
-			System.err.println(
-			    "SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
-			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs).");
-			throw new IOException("SEVERE error: timed out waiting for CMS.");
+			String err="";
+			err+="SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
+			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs). ";
+			err+="Sent operation="+SString.byteArrayToString(array);
+			System.err.println(err);
+			throw new IOException(err);
 
 		// parse response
 		} else {
