@@ -21,6 +21,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -45,11 +46,11 @@ public class DMSTab extends MapTab {
 
 	/** Create a new DMS tab */
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
-		DMSHandler handler, final SonarState st)
+		DMSHandler handler, final SonarState st,TmsConnection tmsConnection)
 	{
 		super(I18NMessages.get("MesgSignMenuLabel"),
 			I18NMessages.get("MesgSignMenuHoverText"));
-		dispatcher = new DMSDispatcher(handler, st);
+		dispatcher = new DMSDispatcher(handler, st, tmsConnection);
 		chooser = new DmsStatusSummary(handler);
 		map.addLayers(lstates);
 		tabPanel = createSideBar();

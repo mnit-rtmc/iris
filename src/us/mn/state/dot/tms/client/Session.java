@@ -150,7 +150,7 @@ public class Session {
 		lstates.add(dmsLayer.createState());
 		lstates.add(warnLayer.createState());
 		tabs.add(new DMSTab(lstates, vlayer,
-			(DMSHandler)dmsLayer.getHandler(),st));
+			(DMSHandler)dmsLayer.getHandler(),st,tmsConnection));
 	}
 
 	/** Add the meter tab */
