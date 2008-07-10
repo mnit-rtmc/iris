@@ -23,14 +23,25 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * Provides an about form for the IRIS client.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class About extends AbstractForm {
+
+	/** 1st title line */
+	final static String m_title1="IRIS -- Intelligent Roadway Information System v. @@VERSION@@";
+
+	/** 2nd title line (optional) */
+	final static String m_title2=I18NMessages.get("AboutForm.Title2");
+
+	/** 3rd title line (optional) */
+	final static String m_title3=I18NMessages.get("AboutForm.Title3");
 
 	/** Create a new About form */
 	public About() {
@@ -58,17 +69,44 @@ public class About extends AbstractForm {
 		topPanel.add(Box.createHorizontalGlue());
 		topPanel.add(tmcLogo);
 		topPanel.add(Box.createHorizontalStrut(10));
-		JLabel label = new JLabel(
-			"IRIS -- Intelligent Roadway Information System v. @@VERSION@@");
-		label.setFont(new Font("Dialog", 1, 18));
+
 		JPanel centerPanel = new JPanel();
 		centerPanel.setLayout(new BoxLayout(centerPanel,
-			BoxLayout.X_AXIS));
+			BoxLayout.Y_AXIS));
 		centerPanel.add(Box.createHorizontalStrut(10));
-		centerPanel.add(label);
+
+		// title 1
+		JLabel label1 = new JLabel(m_title1);
+		label1.setHorizontalTextPosition(JLabel.CENTER);
+		label1.setFont(new Font("Dialog", 1, 18));
+		label1.setAlignmentX(centerPanel.CENTER_ALIGNMENT);
+		centerPanel.add(label1);
+
+		// optional title 2
+		if (useTitle(m_title2)) {
+			JLabel label = new JLabel(m_title2);
+			label.setAlignmentX(centerPanel.CENTER_ALIGNMENT);
+			label.setFont(new Font("Dialog", 1, 16));
+			centerPanel.add(label);
+		}
+
+		// optional title 3
+		if (useTitle(m_title3)) {
+			JLabel label = new JLabel(m_title3);
+			label.setAlignmentX(centerPanel.CENTER_ALIGNMENT);
+			label.setFont(new Font("Dialog", 1, 16));
+			centerPanel.add(label);
+		}
+
 		centerPanel.add(Box.createHorizontalStrut(10));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(topPanel);
 		add(centerPanel);
 	}
+
+	/** return true to use an optional title else false */
+	private boolean useTitle(String t) {
+		return t!=null && t.length()>0;
+	}
 }
+
