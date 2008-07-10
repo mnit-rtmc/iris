@@ -55,4 +55,12 @@ public interface Camera extends TrafficDevice {
 
 	/** Command the camera to pan, tilt or zoom */
 	void move(float p, float t, float z) throws RemoteException;
+
+	/** Not published camera status code */
+	public int STATUS_NOT_PUBLISHED = 11;
+
+	/** String descriptions of status codes */
+	public String[] STATUS = {
+		"Inactive", "Available", "Not Published"
+	};
 }
