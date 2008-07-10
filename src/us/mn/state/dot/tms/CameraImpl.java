@@ -151,6 +151,8 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 
 	/** Get the current status code */
 	public int getStatusCode() {
+		if(!publish || getEncoder() == null)
+			return STATUS_NOT_PUBLISHED;
 		if(isActive())
 			return STATUS_AVAILABLE;
 		else

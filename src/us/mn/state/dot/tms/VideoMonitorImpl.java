@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
 
+import us.mn.state.dot.tms.comm.vicon.SelectMonitorCamera;
+
 /**
  * A video monitor output from a video switch
  *
@@ -71,8 +73,12 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Get the integer id of the video monitor */
 	public int getUID() {
+		String id = name;
+		while(!Character.isDigit(id.charAt(0))){
+			id = id.substring(1);
+		}
 		try {
-			return Integer.parseInt(name.substring(1));
+			return Integer.parseInt(id);
 		}
 		catch(NumberFormatException e) {
 			return 0;
