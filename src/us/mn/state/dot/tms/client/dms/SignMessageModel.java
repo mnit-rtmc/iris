@@ -153,10 +153,73 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	  * @param priority line priority
 	  */
 	protected void createSignText(SignGroup sg,short line,String message,short priority) {
+		//System.err.println("SignMessageModel.createSignText("+line+","+message+","+priority+") called. admin="+m_tmsConnection.isAdmin());
 		if (sg==null || line<1 || message==null || message.length()<=0)
 			return;
-		SignTextTableModel sttm=new SignTextTableModel(sg,sign_text,m_tmsConnection.isAdmin());
-		sttm.createSignText(line,message,priority);
+		String name = createUniqueSignTextName(sg);
+		if(name == null)
+			return;
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("sign_group", sg);
+		attrs.put("line", new Short(line));
+		attrs.put("message", message);
+		attrs.put("priority", new Short(priority));
+		sign_text.createObject(name, attrs);
+		//System.err.println("SignMessageModel.createSignText() returning.");
+	}
+
+	/** 
+	 * Create a HashSet which contains all SignText names for this sign.
+	 * @return A HashSet with entries as SignText names, e.g. V1_23
+	 */
+	private HashSet<String> createSignTextNameSet(SignGroup sg) {
+		if (sg==null)
+			return null;
+
+		final String sgname=sg.getName();
+		final HashSet<String> names=new HashSet<String>();
+
+		// cycle through all SignTexts
+		sign_text.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof SignText) {
+					SignText st = (SignText)o;
+					if(!st.getSignGroup().getName().equals(sgname))
+						return false;
+					names.add(st.getName());
+				}
+				return false;
+			}
+		});
+		return names;
+	}
+
+	/** Create a SignText name given a sign group name and unique id */
+	private String buildSignTextName(String sign_group_name,int id) {
+		if (sign_group_name==null)
+			return "";
+		return sign_group_name + "_" + id;
+	}
+
+	/** 
+	 * Create a SignText name, which is in this form: 
+	 *    sign_group.name + "_" + uniqueid
+	 *    where uniqueid is a sequential integer.
+	 * @return A unique string for a new SignText entry, e.g. V1_23
+	 */
+	private String createUniqueSignTextName(SignGroup sg) {
+		if (sg==null || sg.getName()==null)
+			return null;
+		final HashSet<String> names=createSignTextNameSet(sg);
+		for(int i = 0; i<10000; i++) {
+			String n = buildSignTextName(sg.getName(),i);
+			if(!names.contains(n))
+				return n;
+		}
+		String msg="Warning: something is wrong in SignMessageModel.createUniqueSignTextName().";
+		System.err.println(msg);
+		assert false : msg;
+		return null;
 	}
 
 	/** 
@@ -249,6 +312,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
 	/** Add a sign message to the model, called by listener when sign_text changes */
 	protected void addSignText(SignText t) {
+		//System.err.println("SignMessageModel.addSignText("+t.getMessage()+") called. Line="+t.getLine());
 		short line = t.getLine();
 		SignTextComboBoxModel m = getLineModel(line);
 		m.add(t);
@@ -256,6 +320,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
 	/** Remove a sign message from the model, called by listener when sign_text changes */
 	protected void removeSignText(SignText t) {
+		//System.err.println("SignMessageModel.removeSignText("+t.getMessage()+") called. Line="+t.getLine());
 		short line = t.getLine();
 		SignTextComboBoxModel m = getLineModel(line);
 		m.remove(t);
@@ -263,7 +328,18 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
 	/** Change a sign message in the model, called by listener when sign_text changes */
 	protected void changeSignText(SignText t) {
+		//System.err.println("SignMessageModel.changeSignText("+t.getMessage()+") called. Line="+t.getLine());
+
+		// note: this didn't work, the new value wasn't being added back to the cbox
+		//       after the old value was deleted.
+		//for(SignTextComboBoxModel m: lines.values())
+		//	m.change(t);
+
+		// iterate through all combobox models because the line
+		// may have changed, moving it between comboboxes
 		for(SignTextComboBoxModel m: lines.values())
-			m.change(t);
+			m.remove(t);
+		// add to associated model
+		this.addSignText(t);
 	}
 }

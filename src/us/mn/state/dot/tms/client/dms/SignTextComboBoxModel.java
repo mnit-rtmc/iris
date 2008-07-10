@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.SignGroup;
  */
 public class SignTextComboBoxModel extends AbstractListModel implements ComboBoxModel {
 
-	/** Set of items in the line model */
+	/** Set of sorted SignText items in the line model */
 	protected final TreeSet<SignText> m_items =
 		new TreeSet<SignText>(new SignTextComparator());
 
@@ -174,6 +174,8 @@ public class SignTextComboBoxModel extends AbstractListModel implements ComboBox
 
 	/** Add a SignText to the model */
 	protected void add(SignText t) {
+		//System.err.println("SignTextComboBoxModel.add("+t.getMessage()+") called.");
+
 		// fails if item already exists in list
 		if (!m_items.add(t))
 			return;
@@ -201,13 +203,22 @@ public class SignTextComboBoxModel extends AbstractListModel implements ComboBox
 		}
 	}
 
-	/** Change a sign text in the model */
+	/** 
+	  * Change a sign text in the model. This is done by removing
+	    and inserting the specified SignText.
+	  */
 	protected void change(SignText t) {
 		final int i0 = preChangeRow(t);
 		if(i0 >= 0) {
-			m_items.add(t);
+			// FIXME: note: problem: after the above line executed, the add() call below was apparently 
+			//              succesful, but the fireContentsChanged() call wasn't working.
+			final boolean added=m_items.add(t);
 			final int i1 = find(t);
-			assert i1 >= 0;
+			if (!added || i1<0) {
+				assert added : "WARNING: could not add SignText to TreeSet, t="+t.getMessage()+", i1="+i1+", added="+added;
+				return;
+			}
+			//System.err.println("SignTextComboBoxModel.change("+t.getMessage()+"): added to model: t="+t.getMessage()+", i1="+i1+", added="+added);
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					fireContentsChanged(this,
@@ -218,17 +229,28 @@ public class SignTextComboBoxModel extends AbstractListModel implements ComboBox
 		}
 	}
 
-	/** Find and remove a sign text from the model */
+	/** 
+	 * Find and remove a sign text from the model 
+	 * @return The index of the removed SignText or -1 if nothing removed.
+	 */
 	protected int preChangeRow(SignText t) {
+		//System.err.println("SignTextComboBoxModel.preChangeRow("+t.getMessage()+") called. ");
+
 		// we cannot trust the TreeSet to remove the item,
 		// because the sort order may have changed
 		Iterator<SignText> it = m_items.iterator();
+		int ret=-1;
 		for(int i = 0; it.hasNext(); i++) {
-			if(t.equals(it.next())) {
+			SignText st=it.next();
+			//System.err.println("SignTextComboBoxModel.preChangeRow(): st="+st.getMessage()+", i="+i);
+			if(t.equals(st)) {
+				//System.err.println("SignTextComboBoxModel.preChangeRow(): removing st="+st.getMessage()+", i="+i);
 				it.remove();
-				return i;
+				ret=i;
+				break;
 			}
 		}
-		return -1;
+		//System.err.println("SignTextComboBoxModel.preChangeRow(): returning "+ret);
+		return ret;
 	}
 }
