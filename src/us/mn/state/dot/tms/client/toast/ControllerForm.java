@@ -432,11 +432,8 @@ public class ControllerForm extends TMSObjectForm {
 		for(int inp = 0; inp < Controller170.DETECTOR_INPUTS; inp++) {
 			int pin = getDetectorPin(inp);
 			Detector det = lookupDetector(pin);
-			if(det != null) {
-				model.set(inp, getInputLabel(inp, det));
-				assigned[inp] = true;
-			} else
-				assigned[inp] = false;
+			model.set(inp, getInputLabel(inp, det));
+			assigned[inp] = det != null;
 		}
 		alarm_model = new AlarmModel(contr, admin);
 		alarm_table.setModel(alarm_model);
@@ -452,10 +449,12 @@ public class ControllerForm extends TMSObjectForm {
 		buf.append("> ");
 		while(buf.length() < 4)
 			buf.insert(0, " ");
-		int index = det.getIndex();
-		buf.append(index);
-		buf.append(" - ");
-		buf.append(det.getLabel(false));
+		if(det != null) {
+			int index = det.getIndex();
+			buf.append(index);
+			buf.append(" - ");
+			buf.append(det.getLabel(false));
+		}
 		return buf.toString();
 	}
 
