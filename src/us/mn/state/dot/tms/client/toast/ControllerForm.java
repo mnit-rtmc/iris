@@ -653,10 +653,10 @@ public class ControllerForm extends TMSObjectForm {
 	protected void removePressed() throws Exception {
 		disableButtons();
 		try {
-			int inp = inputs.getSelectedIndex();
-			if(inp < 0)
+			int pin = getSelectedPin();
+			if(pin < 0)
 				return;
-			Detector det = lookupDetector(inp + 1);
+			Detector det = lookupDetector(pin);
 			if(det != null) {
 				det.setController(null);
 				contr.notifyUpdate();
