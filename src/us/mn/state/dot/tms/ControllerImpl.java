@@ -319,34 +319,6 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		return 0;
 	}
 
-	/** Add an alarm to the controller */
-	public Alarm addAlarm(int pin) throws TMSException, RemoteException {
-		AlarmImpl alarm = new AlarmImpl();
-		try {
-			vault.save(alarm, "IRIS");
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
-		setIO(pin, alarm);
-		return alarm;
-	}
-
-	/** Remove an alarm from the controller */
-	public void removeAlarm(int pin) throws TMSException {
-		AlarmImpl alarm = (AlarmImpl)getAlarm(pin);
-		if(alarm != null) {
-			setIO(pin, null);
-			alarm.notifyDelete();
-			try {
-				vault.delete(alarm, "IRIS");
-			}
-			catch(ObjectVaultException e) {
-				throw new TMSException(e);
-			}
-		}
-	}
-
 	/** Get an alarm from the controller */
 	public synchronized Alarm getAlarm(int pin) {
 		ControllerIO io = io_pins.get(pin);
