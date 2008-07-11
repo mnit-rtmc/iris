@@ -103,7 +103,10 @@ public class SignMessage implements Serializable {
 	/** Duration of this message, in minutes */
 	protected int durationMins;
 
-	/** Get the message duration */
+	/*
+	 * Get the message duration.
+	 * @return message duration in minutes.
+	 */
 	public int getDuration() {
 		return durationMins;
 	}
