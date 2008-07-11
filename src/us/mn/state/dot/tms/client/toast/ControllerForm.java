@@ -503,12 +503,22 @@ public class ControllerForm extends TMSObjectForm {
 
 	/** Set the selected device */
 	protected void setSelectedDevice() throws Exception {
+		TrafficDevice device = getDevice();
 		ControllerIO cio = getSelectedDevice();
-		if(cio != null) {
-			cio.setController(null);
-			cio.setPin(Controller.DEVICE_PIN);
-			cio.setController(contr);
+		if(cio != device) {
+			if(device != null)
+				device.setController(null);
+			if(cio != null) {
+				cio.setController(null);
+				cio.setPin(getDevicePin());
+				cio.setController(contr);
+			}
 		}
+	}
+
+	/** Get the I/O pin for the first device */
+	protected int getDevicePin() {
+		return Controller.DEVICE_PIN;
 	}
 
 	/** Called when the 'apply' button is pressed */

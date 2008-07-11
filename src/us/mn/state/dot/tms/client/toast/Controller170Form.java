@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Controller170;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.meter.RampMeterProperties;
@@ -114,21 +115,36 @@ public class Controller170Form extends ControllerForm {
 		}
 	}
 
+	/** Get the I/O pin for the first device */
+	protected int getDevicePin() {
+		return Controller170.DEVICE_1_PIN;
+	}
+
+	/** Get the selected ramp meter (second) */
+	protected RampMeter getSelectedMeter2() throws Exception {
+		String d = (String)meterBox.getSelectedItem();
+		if(d == null)
+			return null;
+		TMSObject o = devices.getElement(d);
+		if(o instanceof RampMeter)
+			return (RampMeter)o;
+		else
+			return null;
+	}
+
 	/** Set the selected device */
 	protected void setSelectedDevice() throws Exception {
-		Object d = deviceBox.getSelectedItem();
-		if(d instanceof ControllerIO) {
-			ControllerIO cio = (ControllerIO)d;
-			cio.setController(null);
-			cio.setPin(Controller170.DEVICE_1_PIN);
-			cio.setController(contr);
-		}
-		Object m = meterBox.getSelectedItem();
-		if(m instanceof RampMeter) {
-			RampMeter meter = (RampMeter)m;
-			meter.setController(null);
-			meter.setPin(Controller170.METER_2_PIN);
-			meter.setController(c170);
+		super.setSelectedDevice();
+		RampMeter meter = getMeter2();
+		ControllerIO cio = getSelectedMeter2();
+		if(cio != meter) {
+			if(meter != null)
+				meter.setController(null);
+			if(cio != null) {
+				cio.setController(null);
+				cio.setPin(Controller170.METER_2_PIN);
+				cio.setController(contr);
+			}
 		}
 	}
 
