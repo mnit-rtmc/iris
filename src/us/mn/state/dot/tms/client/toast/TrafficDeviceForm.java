@@ -78,9 +78,12 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 		new ActionJob(this, controller) {
 			public void perform() throws Exception {
 				Controller c = device.getController();
-				connection.getDesktop().show(
-					ControllerForm.create(connection, c,
-						c.getOID().toString()));
+				if(c != null) {
+					String oid = c.getOID().toString();
+					connection.getDesktop().show(
+						ControllerForm.create(
+						connection, c, oid));
+				}
 			}
 		};
 		tab.add("Location", location);
