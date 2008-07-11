@@ -281,9 +281,14 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 			return null;
 	}
 
-	/** Get a data detector (first is detector 1) */
-	public DetectorImpl getDetector(int input) {
-		return getDetectorAtPin(input);
+	/** Get a data detector (input from 0 to 23) */
+	public DetectorImpl getDetector(int inp) {
+		return getDetectorAtPin(getDetectorPin(inp));
+	}
+
+	/** Get the I/O pin for a detector input (0 to 23) */
+	public int getDetectorPin(int inp) {
+		return inp + 1;
 	}
 
 	/** Check whether this controller has any active detectors */
@@ -307,8 +312,8 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	}
 
 	/** Find a matching detector for the specified input */
-	public int getSpeedPair(int input) {
-		DetectorImpl d = getDetector(input);
+	public int getSpeedPair(int inp) {
+		DetectorImpl d = getDetector(inp);
 		if(d.isVelocity())
 			return getSpeedPair(d);
 		return 0;
@@ -365,7 +370,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		int[] scans, int[] speed)
 	{
 		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = getDetector(i + 1);
+			DetectorImpl det = getDetector(i);
 			if(det != null) {
 				det.storeData30Second(stamp, volume[i],
 					scans[i]);
@@ -380,17 +385,17 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		int[] scan) throws IOException
 	{
 		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = getDetector(i + 1);
+			DetectorImpl det = getDetector(i);
 			if(det != null)
 				det.storeData5Minute(stamp, volume[i], scan[i]);
 		}
 	}
 
 	/** Log a vehicle detection event */
-	public void logEvent(Calendar stamp, int io_pin, int duration,
+	public void logEvent(Calendar stamp, int inp, int duration,
 		int headway, int speed)
 	{
-		DetectorImpl det = getDetector(io_pin);
+		DetectorImpl det = getDetector(inp);
 		if(det != null)
 			det.logEvent(stamp, duration, headway, speed);
 	}

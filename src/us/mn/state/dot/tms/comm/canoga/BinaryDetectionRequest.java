@@ -163,7 +163,7 @@ public class BinaryDetectionRequest extends Request {
 
 		/** Log the current event in the detection log */
 		public void log_event(Calendar stamp, ControllerImpl controller,
-			int det, DetectionEvent prev, int speed)
+			int inp, DetectionEvent prev, int speed)
 		{
 			int headway = calculateElapsed(prev.start, start);
 			int c = prev.count + 1;
@@ -171,9 +171,9 @@ public class BinaryDetectionRequest extends Request {
 				c += 1;
 				headway = 0;
 				speed = 0;
-				controller.logEvent(stamp, det, 0, 0, 0);
+				controller.logEvent(stamp, inp, 0, 0, 0);
 			}
-			controller.logEvent(stamp, det, duration, headway,
+			controller.logEvent(stamp, inp, duration, headway,
 				speed);
 		}
 
@@ -231,25 +231,23 @@ public class BinaryDetectionRequest extends Request {
 
 	/** Log a new vehicle detection event */
 	protected void logEvents(ControllerImpl controller, Calendar stamp,
-		int i)
+		int inp)
 	{
-		int det = i + 1;
-		DetectionEvent pe = p_events[i];
-		DetectionEvent ce = c_events[i];
+		DetectionEvent pe = p_events[inp];
+		DetectionEvent ce = c_events[inp];
 		if(pe == null || (ce.is_reset() && !ce.equals(pe))) {
-			controller.logEvent(null, det, 0, 0, 0);
+			controller.logEvent(null, inp, 0, 0, 0);
 			return;
 		}
 		if(!ce.equals(pe)) {
 			int speed = 0;
-			int sp = controller.getSpeedPair(det);
+			int sp = controller.getSpeedPair(inp);
 			if(sp > 0 && sp <= 4) {
-				DetectorImpl d = (DetectorImpl)
-					controller.getDetector(det);
+				DetectorImpl d = controller.getDetector(inp);
 				speed = ce.calculateSpeed(c_events[sp - 1],
 					d.getFieldLength());
 			}
-			ce.log_event(stamp, controller, det, pe, speed);
+			ce.log_event(stamp, controller, inp, pe, speed);
 		}
 	}
 

@@ -36,7 +36,7 @@ public interface Controller170 extends Controller {
 	public int DETECTOR_INPUTS = 24;
 
 	/** I/O pin offset for 170 controller detector inputs */
-	public int DETECTOR_PIN_OFFSET = 38;
+	public int DETECTOR_PIN_OFFSET = 39;
 
 	/** Reserved cabinet type string */
 	public String RESERVED = "RESERVED";

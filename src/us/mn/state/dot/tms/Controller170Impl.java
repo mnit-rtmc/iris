@@ -94,25 +94,18 @@ public class Controller170Impl extends ControllerImpl
 		return null;
 	}
 
-	/** Assign a detector to an input */
-	protected void setDetector(int input, DetectorImpl d)
-		throws TMSException
-	{
-		setIO(input + DETECTOR_PIN_OFFSET, d);
-	}
-
-	/** Get a data detector (input from 1 to 24) */
-	public DetectorImpl getDetector(int input) {
-		return getDetectorAtPin(input + DETECTOR_PIN_OFFSET);
+	/** Get the I/O pin for a detector input (0 to 23) */
+	public int getDetectorPin(int inp) {
+		return inp + DETECTOR_PIN_OFFSET;
 	}
 
 	/** Get the queue detector bitmap */
 	public byte[] getQueueBitmap() {
 		byte[] bitmap = new byte[DETECTOR_INPUTS / 8];
-		for(int d = 0; d < DETECTOR_INPUTS; d++) {
-			DetectorImpl det = (DetectorImpl)getDetector(d + 1);
+		for(int inp = 0; inp < DETECTOR_INPUTS; inp++) {
+			DetectorImpl det = getDetector(inp);
 			if(det != null && det.getLaneType() == Detector.QUEUE)
-				bitmap[d / 8] |= 1 << (d % 8);
+				bitmap[inp / 8] |= 1 << (inp % 8);
 		}
 		return bitmap;
 	}
