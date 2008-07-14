@@ -34,6 +34,7 @@ import javax.swing.JTextField;
 
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -210,6 +211,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 				}
 			}
 		};
+		Connection c = st.lookupConnection(st.getConnection());
+		client.setSonarSessionId(c.getSessionId());
 		client.setRate(30);
 		t.setDaemon(true);
 		t.start();
@@ -400,7 +403,9 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo(final SonarState st){
 		JComboBox box = new JComboBox();
-		FilteredMonitorModel m = new FilteredMonitorModel(st);
+		String userName = handler.getUser().getName();
+		FilteredMonitorModel m =
+			new FilteredMonitorModel(st.lookupUser(userName), st);
 		box.setModel(new WrapperComboBoxModel(m));
 		return box;
 	}
