@@ -34,6 +34,8 @@ import javax.swing.JTextField;
 
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -41,6 +43,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
+import us.mn.state.dot.tms.client.UserMonitorModel;
 import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
@@ -399,7 +402,9 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo(final SonarState st){
 		JComboBox box = new JComboBox();
-		box.setModel(new WrapperComboBoxModel(st.getMonitorModel()));
+		UserMonitorModel m = new UserMonitorModel(handler, st);
+		box.setModel(new WrapperComboBoxModel(m));
 		return box;
 	}
+
 }
