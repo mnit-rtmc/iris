@@ -59,6 +59,11 @@ public class ProxyListModel<T extends SonarObject>
 	/** Create a new proxy list model */
 	public ProxyListModel(TypeCache<T> c) {
 		cache = c;
+	}
+
+	/** Initialize the proxy list model. This cannot be done in the
+	 * constructor because subclasses may not be fully constructed. */
+	public void initialize() {
 		cache.addProxyListener(this);
 	}
 
