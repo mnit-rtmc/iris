@@ -400,9 +400,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo(final SonarState st){
 		JComboBox box = new JComboBox();
-		FilteredMonitorModel m = new FilteredMonitorModel(handler, st);
+		FilteredMonitorModel m = new FilteredMonitorModel(st);
 		box.setModel(new WrapperComboBoxModel(m));
 		return box;
 	}
-
 }

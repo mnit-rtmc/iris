@@ -4,7 +4,6 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.VideoMonitor;
-import us.mn.state.dot.tms.client.device.DeviceHandler;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /** A FilteredMonitorModel is a ProxyListModel filtered to just the
@@ -16,11 +15,8 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 
 	protected SonarState state = null;
 	
-	protected DeviceHandler handler = null;
-	
-	public FilteredMonitorModel(DeviceHandler h, SonarState st){
+	public FilteredMonitorModel(SonarState st){
 		super(st.getVideoMonitors());
-		this.handler = h;
 		this.state = st;
 		this.user = getUser();
 	}
