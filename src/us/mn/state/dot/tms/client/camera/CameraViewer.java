@@ -364,6 +364,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 			if(o == null){
 				playPressed(camera);
 			}else{
+				stopPressed();
 				us.mn.state.dot.tms.VideoMonitor mon =
 					monitors.getObject((String)o);
 				//FIXME: do the actual switching here
@@ -407,6 +408,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		FilteredMonitorModel m =
 			new FilteredMonitorModel(st.lookupUser(userName), st);
 		box.setModel(new WrapperComboBoxModel(m));
+		if(m.getSize()>1) box.setSelectedIndex(1);
 		return box;
 	}
 }
