@@ -87,6 +87,8 @@ abstract public class RemoteObserverImpl extends UnicastRemoteObject
 		catch(NoSuchObjectException e) {
 			System.err.println("ERROR: RemoteObserverImpl." +
 				"dispose() " + e.getMessage());
+			System.err.println("\tClass: " + getClass().getName());
+			rmi_exported = false;
 		}
 	}
 
