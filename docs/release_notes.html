@@ -1,0 +1,64 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Mn/DOT IRIS Release Notes</title>
+</head>
+
+<body>
+<h1>Mn/DOT IRIS Release Notes</h1>
+<dl>
+	<dt>3.71.0 (14 July 2008)</dt>
+	<dd><ul>
+		<li>
+			RMI changes in Controller, interfaces to prepare for
+			conversion to SONAR.
+			Iris client and server must be upgraded together.
+		</li>
+		<li>
+			SONAR dependency updated to 1.7.1.
+		</li>
+		<li>
+			SONAR authentication properties have changed.
+			Old properties "ldap.host", "ldap.port" and "ldap.ssl"
+			are gone.
+			New porperty "sonar.ldap.urls" is a whitespace-seperated
+			list of LDAP server URLs for authenticting.
+			If a user authentication fails using the first URL,
+			the next LDAP server will be checked, etc.
+		</li>
+		<li>
+			There is a new property in iris-server.properties file:
+			"sonar.session.file" controls location of session file.
+			This file is updated whenever a user logs in or out
+			of IRIS.
+			It will be used for authenticating streaming video
+			clients in the camera tab.
+		</li>
+		<li>
+			Some work has been done to enable restricting camera
+			images on the fly.
+			This work is ongoing.
+		</li>
+		<li>
+			Video client dependency updated to 1.30.
+		</li>
+		<li>
+			Video client properties have changed.
+			Property "app.name" is no longer required.
+			Property "backend.host0" has changed to
+			"video.backend.host0".
+			Property "backend.port0" has changed to
+			"video.backend.port0".
+		</li>
+		<li>
+			Log dependency updated to new version.
+		</li>
+	</ul></dd>
+</dl>
+
+</body>
+</html>

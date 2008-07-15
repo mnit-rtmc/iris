@@ -314,7 +314,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	/** Find a matching detector for the specified input */
 	public int getSpeedPair(int inp) {
 		DetectorImpl d = getDetector(inp);
-		if(d.isVelocity())
+		if(d != null && d.isVelocity())
 			return getSpeedPair(d);
 		return 0;
 	}
