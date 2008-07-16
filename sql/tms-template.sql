@@ -2,31 +2,14 @@
 -- PostgreSQL database dump
 --
 
-SET client_encoding = 'SQL_ASCII';
+SET client_encoding = 'UTF8';
 SET check_function_bodies = false;
+
+CREATE PROCEDURAL LANGUAGE plpgsql;
 
 SET SESSION AUTHORIZATION 'tms';
 
 SET search_path = public, pg_catalog;
-
-CREATE FUNCTION plpgsql_call_handler() RETURNS language_handler
-    AS '/usr/lib/pgsql/plpgsql.so', 'plpgsql_call_handler'
-    LANGUAGE c;
-
-
-SET SESSION AUTHORIZATION DEFAULT;
-
-CREATE TRUSTED PROCEDURAL LANGUAGE plpgsql HANDLER plpgsql_call_handler;
-
-
-SET SESSION AUTHORIZATION 'postgres';
-
-REVOKE ALL ON SCHEMA public FROM PUBLIC;
-GRANT ALL ON SCHEMA public TO PUBLIC;
-COMMENT ON SCHEMA public IS 'Standard public schema';
-
-
-SET SESSION AUTHORIZATION 'tms';
 
 CREATE SEQUENCE tms_log_seq
     INCREMENT BY 1
@@ -35,10 +18,35 @@ CREATE SEQUENCE tms_log_seq
     CACHE 1
     CYCLE;
 
+CREATE TABLE iris_user (
+	name VARCHAR(15) PRIMARY KEY,
+	dn text NOT NULL,
+	full_name VARCHAR(31) NOT NULL
+);
+
+CREATE TABLE role (
+	name VARCHAR(15) PRIMARY KEY,
+	pattern VARCHAR(31) DEFAULT ''::VARCHAR NOT NULL,
+	priv_r boolean DEFAULT false NOT NULL,
+	priv_w boolean DEFAULT false NOT NULL,
+	priv_c boolean DEFAULT false NOT NULL,
+	priv_d boolean DEFAULT false NOT NULL
+);
+
+CREATE TABLE iris_user_role (
+	iris_user VARCHAR(15) NOT NULL REFERENCES iris_user(name),
+	role VARCHAR(15) NOT NULL REFERENCES role(name)
+);
+
+CREATE TABLE system_policy (
+	name character varying PRIMARY KEY,
+	value integer NOT NULL
+);
+
 CREATE TABLE direction (
 	id smallint PRIMARY KEY,
-	direction character varying(4) NOT NULL,
-	dir character varying(4) NOT NULL
+	direction VARCHAR(4) NOT NULL,
+	dir VARCHAR(4) NOT NULL
 );
 
 CREATE TABLE road_class (
@@ -47,185 +55,23 @@ CREATE TABLE road_class (
 	grade CHAR NOT NULL
 );
 
-CREATE TABLE vault_object (
-    vault_oid integer NOT NULL,
-    vault_type integer NOT NULL,
-    vault_refs smallint DEFAULT 1 NOT NULL
+CREATE TABLE road_modifier (
+	id smallint PRIMARY KEY,
+	modifier text NOT NULL,
+	mod VARCHAR(2) NOT NULL
 );
 
-REVOKE ALL ON TABLE vault_object FROM PUBLIC;
-GRANT SELECT ON TABLE vault_object TO PUBLIC;
-
-SET SESSION AUTHORIZATION 'tms';
-
-CREATE TABLE vault_types (
-    "table" text NOT NULL,
-    "className" text NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE vault_counter (
-    id integer NOT NULL,
-    logging boolean NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE vault_log_entry (
-    redo text NOT NULL,
-    undo text NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE vault_list (
-    "listId" integer NOT NULL,
-    "index" integer NOT NULL,
-    "elementId" integer NOT NULL
-);
-
-REVOKE ALL ON TABLE vault_list FROM PUBLIC;
-GRANT SELECT ON TABLE vault_list TO PUBLIC;
-
-CREATE TABLE "java_util_AbstractCollection" (
-    dummy_24 boolean
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_util_AbstractList" (
-    dummy_23 boolean
-)
-INHERITS ("java_util_AbstractCollection");
-
-CREATE TABLE vault_transaction (
-    stamp timestamp with time zone NOT NULL,
-    "user" text NOT NULL,
-    entries integer NOT NULL,
-    "lastId" integer NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_lang_Number" (
-    dummy_30 boolean
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_lang_Integer" (
-    value integer NOT NULL
-)
-INHERITS ("java_lang_Number");
-
-CREATE TABLE "java_util_ArrayList" (
-    size integer NOT NULL
-)
-INHERITS ("java_util_AbstractList");
-
-CREATE TABLE tms_object (
-    dummy_41 boolean
-)
-INHERITS (vault_object);
-
-REVOKE ALL ON TABLE tms_object FROM PUBLIC;
-GRANT SELECT ON TABLE tms_object TO PUBLIC;
-
-CREATE TABLE abstract_list (
-    dummy_40 boolean
-)
-INHERITS (tms_object);
-
-CREATE TABLE device (
-    controller integer NOT NULL,
-    pin integer NOT NULL,
-    notes text NOT NULL,
-    "location" integer NOT NULL
-)
-INHERITS (tms_object);
-
-REVOKE ALL ON TABLE device FROM PUBLIC;
-GRANT SELECT ON TABLE device TO PUBLIC;
-
-CREATE TABLE traffic_device (
-    id text NOT NULL
-)
-INHERITS (device);
-
-REVOKE ALL ON TABLE traffic_device FROM PUBLIC;
-GRANT SELECT ON TABLE traffic_device TO PUBLIC;
-
-CREATE TABLE dms (
-    camera integer NOT NULL,
-    mile real NOT NULL,
-    travel text NOT NULL
-)
-INHERITS (traffic_device);
-
-REVOKE ALL ON TABLE dms FROM PUBLIC;
-GRANT SELECT ON TABLE dms TO PUBLIC;
-
-CREATE TABLE vault_map (
-    "mapId" integer NOT NULL,
-    "keyId" integer NOT NULL,
-    "valueId" integer NOT NULL
-);
-
-CREATE TABLE "java_util_AbstractMap" (
-    dummy_64 boolean
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_util_TreeMap" (
-    comparator integer NOT NULL
-)
-INHERITS ("java_util_AbstractMap");
+GRANT SELECT ON TABLE road_modifier TO PUBLIC;
 
 CREATE TABLE road (
 	name VARCHAR(20) PRIMARY KEY,
 	abbrev VARCHAR(6) NOT NULL,
-	r_class smallint NOT NULL,
-	direction smallint NOT NULL,
-	alt_dir smallint NOT NULL
+	r_class smallint NOT NULL REFERENCES road_class(id),
+	direction smallint NOT NULL REFERENCES direction(id),
+	alt_dir smallint NOT NULL REFERENCES direction(id)
 );
 
-ALTER TABLE road
-	ADD CONSTRAINT fk_r_class FOREIGN KEY (r_class)
-	REFERENCES road_class(id);
-ALTER TABLE road
-	ADD CONSTRAINT fk_direction FOREIGN KEY (direction)
-	REFERENCES direction(id);
-ALTER TABLE road
-	ADD CONSTRAINT fk_alt_dir FOREIGN KEY (alt_dir)
-	REFERENCES direction(id);
-
 REVOKE ALL ON TABLE road FROM PUBLIC;
-
-CREATE TABLE indexed_list (
-    list integer NOT NULL
-)
-INHERITS (abstract_list);
-
-CREATE TABLE detector (
-    "index" integer NOT NULL,
-    "laneType" smallint NOT NULL,
-    "laneNumber" smallint NOT NULL,
-    abandoned boolean NOT NULL,
-    "forceFail" boolean NOT NULL,
-    "fieldLength" real NOT NULL,
-    fake text NOT NULL
-)
-INHERITS (device);
-
-REVOKE ALL ON TABLE detector FROM PUBLIC;
-GRANT SELECT ON TABLE detector TO PUBLIC;
-
-CREATE TABLE ramp_meter (
-    "controlMode" integer NOT NULL,
-    "singleRelease" boolean NOT NULL,
-    "storage" integer NOT NULL,
-    "maxWait" integer NOT NULL,
-    camera integer NOT NULL
-)
-INHERITS (traffic_device);
-
-REVOKE ALL ON TABLE ramp_meter FROM PUBLIC;
-GRANT SELECT ON TABLE ramp_meter TO PUBLIC;
 
 CREATE FUNCTION graphic_bpp(TEXT) RETURNS INTEGER AS '
 	DECLARE n ALIAS FOR $1;
@@ -343,13 +189,9 @@ ALTER TABLE font
 		(graphic_height(graphic_glyph(name)) = height AND
 		(width = 0 OR graphic_width(graphic_glyph(name)) = width)));
 
-REVOKE ALL ON TABLE graphic FROM PUBLIC;
 GRANT SELECT ON TABLE graphic TO PUBLIC;
-REVOKE ALL ON TABLE font FROM PUBLIC;
 GRANT SELECT ON TABLE font TO PUBLIC;
-REVOKE ALL ON TABLE glyph FROM PUBLIC;
 GRANT SELECT ON TABLE glyph TO PUBLIC;
-
 
 CREATE TABLE video_monitor (
 	name TEXT PRIMARY KEY,
@@ -357,9 +199,7 @@ CREATE TABLE video_monitor (
 	restricted boolean NOT NULL
 );
 
-REVOKE ALL ON TABLE video_monitor FROM PUBLIC;
 GRANT SELECT ON TABLE video_monitor TO PUBLIC;
-
 
 CREATE TABLE holiday (
 	name TEXT PRIMARY KEY,
@@ -371,8 +211,232 @@ CREATE TABLE holiday (
 	period INTEGER NOT NULL
 );
 
-REVOKE ALL ON TABLE holiday FROM PUBLIC;
 GRANT SELECT ON TABLE holiday TO PUBLIC;
+
+CREATE TABLE geo_loc (
+	name VARCHAR(20) PRIMARY KEY,
+	freeway VARCHAR(20) REFERENCES road(name),
+	free_dir smallint REFERENCES direction(id),
+	cross_street VARCHAR(20) REFERENCES road(name),
+	cross_dir smallint REFERENCES direction(id),
+	cross_mod smallint REFERENCES road_modifier(id),
+	easting integer,
+	east_off integer,
+	northing integer,
+	north_off integer
+);
+
+CREATE TABLE lane_type (
+	id smallint PRIMARY KEY,
+	description text NOT NULL,
+	dcode VARCHAR(2) NOT NULL
+);
+
+CREATE TABLE r_node_type (
+	n_type integer PRIMARY KEY,
+	name text NOT NULL
+);
+
+CREATE TABLE r_node_transition (
+	n_transition integer PRIMARY KEY,
+	name text NOT NULL
+);
+
+CREATE TABLE cabinet_types (
+	"index" integer PRIMARY KEY,
+	name text NOT NULL
+);
+
+GRANT SELECT ON TABLE cabinet_types TO PUBLIC;
+
+
+
+
+
+
+CREATE TABLE vault_object (
+    vault_oid integer NOT NULL,
+    vault_type integer NOT NULL,
+    vault_refs smallint DEFAULT 1 NOT NULL
+);
+
+REVOKE ALL ON TABLE vault_object FROM PUBLIC;
+GRANT SELECT ON TABLE vault_object TO PUBLIC;
+
+CREATE TABLE vault_types (
+    "table" text NOT NULL,
+    "className" text NOT NULL
+)
+INHERITS (vault_object);
+
+CREATE TABLE vault_counter (
+    id integer NOT NULL,
+    logging boolean NOT NULL
+)
+INHERITS (vault_object);
+
+CREATE TABLE vault_log_entry (
+    redo text NOT NULL,
+    undo text NOT NULL
+)
+INHERITS (vault_object);
+
+CREATE TABLE vault_list (
+    "listId" integer NOT NULL,
+    "index" integer NOT NULL,
+    "elementId" integer NOT NULL
+);
+
+REVOKE ALL ON TABLE vault_list FROM PUBLIC;
+GRANT SELECT ON TABLE vault_list TO PUBLIC;
+
+CREATE TABLE "java_util_AbstractCollection" (
+    dummy_24 boolean
+)
+INHERITS (vault_object);
+
+CREATE TABLE "java_util_AbstractList" (
+    dummy_23 boolean
+)
+INHERITS ("java_util_AbstractCollection");
+
+CREATE TABLE vault_transaction (
+    stamp timestamp with time zone NOT NULL,
+    "user" text NOT NULL,
+    entries integer NOT NULL,
+    "lastId" integer NOT NULL
+)
+INHERITS (vault_object);
+
+CREATE TABLE "java_lang_Number" (
+    dummy_30 boolean
+)
+INHERITS (vault_object);
+
+CREATE TABLE "java_lang_Integer" (
+    value integer NOT NULL
+)
+INHERITS ("java_lang_Number");
+
+CREATE TABLE "java_util_ArrayList" (
+    size integer NOT NULL
+)
+INHERITS ("java_util_AbstractList");
+
+CREATE TABLE tms_object (
+    dummy_41 boolean
+)
+INHERITS (vault_object);
+
+REVOKE ALL ON TABLE tms_object FROM PUBLIC;
+GRANT SELECT ON TABLE tms_object TO PUBLIC;
+
+CREATE TABLE abstract_list (
+    dummy_40 boolean
+)
+INHERITS (tms_object);
+
+CREATE TABLE device (
+    controller integer NOT NULL,
+    pin integer NOT NULL,
+    notes text NOT NULL,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
+)
+INHERITS (tms_object);
+
+REVOKE ALL ON TABLE device FROM PUBLIC;
+GRANT SELECT ON TABLE device TO PUBLIC;
+
+CREATE TABLE traffic_device (
+    id text NOT NULL
+)
+INHERITS (device);
+
+REVOKE ALL ON TABLE traffic_device FROM PUBLIC;
+GRANT SELECT ON TABLE traffic_device TO PUBLIC;
+
+CREATE TABLE dms (
+    camera integer NOT NULL,
+    mile real NOT NULL,
+    travel text NOT NULL
+)
+INHERITS (traffic_device);
+
+REVOKE ALL ON TABLE dms FROM PUBLIC;
+GRANT SELECT ON TABLE dms TO PUBLIC;
+
+CREATE UNIQUE INDEX dms_pkey ON dms USING btree (vault_oid);
+CREATE UNIQUE INDEX dms_id_index ON dms USING btree (id);
+
+CREATE TABLE sign_group (
+	name VARCHAR(16) PRIMARY KEY,
+	local BOOLEAN NOT NULL
+);
+
+CREATE TABLE dms_sign_group (
+	name VARCHAR(24) PRIMARY KEY,
+	dms text NOT NULL REFERENCES dms(id),
+	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group
+);
+
+CREATE TABLE sign_text (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group,
+	line smallint NOT NULL,
+	message VARCHAR(24) NOT NULL,
+	priority smallint NOT NULL,
+	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
+	CONSTRAINT sign_text_priority CHECK
+		((priority >= 1) AND (priority <= 99))
+);
+
+
+CREATE TABLE vault_map (
+    "mapId" integer NOT NULL,
+    "keyId" integer NOT NULL,
+    "valueId" integer NOT NULL
+);
+
+CREATE TABLE "java_util_AbstractMap" (
+    dummy_64 boolean
+)
+INHERITS (vault_object);
+
+CREATE TABLE "java_util_TreeMap" (
+    comparator integer NOT NULL
+)
+INHERITS ("java_util_AbstractMap");
+
+CREATE TABLE indexed_list (
+    list integer NOT NULL
+)
+INHERITS (abstract_list);
+
+CREATE TABLE detector (
+    "index" integer NOT NULL,
+    "laneType" smallint NOT NULL,
+    "laneNumber" smallint NOT NULL,
+    abandoned boolean NOT NULL,
+    "forceFail" boolean NOT NULL,
+    "fieldLength" real NOT NULL,
+    fake text NOT NULL
+)
+INHERITS (device);
+
+REVOKE ALL ON TABLE detector FROM PUBLIC;
+GRANT SELECT ON TABLE detector TO PUBLIC;
+
+CREATE TABLE ramp_meter (
+    "controlMode" integer NOT NULL,
+    "singleRelease" boolean NOT NULL,
+    "storage" integer NOT NULL,
+    "maxWait" integer NOT NULL,
+    camera integer NOT NULL
+)
+INHERITS (traffic_device);
+
+REVOKE ALL ON TABLE ramp_meter FROM PUBLIC;
+GRANT SELECT ON TABLE ramp_meter TO PUBLIC;
 
 CREATE TABLE timing_plan (
     "startTime" integer NOT NULL,
@@ -403,20 +467,6 @@ INHERITS (tms_object);
 
 REVOKE ALL ON TABLE circuit FROM PUBLIC;
 GRANT SELECT ON TABLE circuit TO PUBLIC;
-
-CREATE TABLE cabinet_types (
-    "index" integer NOT NULL,
-    name text NOT NULL
-);
-
-REVOKE ALL ON TABLE cabinet_types FROM PUBLIC;
-GRANT SELECT ON TABLE cabinet_types TO PUBLIC;
-
-CREATE TABLE lane_type (
-	id smallint PRIMARY KEY,
-	description text NOT NULL,
-	dcode varchar(2) NOT NULL
-);
 
 CREATE TABLE time_plan_log (
     event_id integer DEFAULT nextval('tms_log_seq'::text) NOT NULL,
@@ -494,7 +544,7 @@ CREATE TABLE node (
     id text NOT NULL,
     node_group integer NOT NULL,
     notes text,
-    "location" integer NOT NULL
+    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
 )
 INHERITS (tms_object);
 
@@ -510,7 +560,7 @@ CREATE TABLE controller (
     notes text NOT NULL,
     mile real NOT NULL,
     circuit integer NOT NULL,
-    "location" integer NOT NULL
+    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
 )
 INHERITS (tms_object);
 
@@ -613,59 +663,6 @@ INHERITS (traffic_device);
 REVOKE ALL ON TABLE warning_sign FROM PUBLIC;
 GRANT SELECT ON TABLE warning_sign TO PUBLIC;
 
-CREATE TABLE sign_group (
-	name VARCHAR(16) PRIMARY KEY,
-	local BOOLEAN NOT NULL
-);
-
-CREATE TABLE dms_sign_group (
-	name VARCHAR(24) PRIMARY KEY,
-	dms text NOT NULL REFERENCES dms(id),
-	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group
-);
-
-CREATE TABLE sign_text (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group,
-	line smallint NOT NULL,
-	message VARCHAR(24) NOT NULL,
-	priority smallint NOT NULL,
-	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
-	CONSTRAINT sign_text_priority CHECK
-		((priority >= 1) AND (priority <= 99))
-);
-
-CREATE TABLE road_modifier (
-    id smallint NOT NULL,
-    modifier text NOT NULL,
-    mod varchar(2) NOT NULL
-);
-
-REVOKE ALL ON TABLE road_modifier FROM PUBLIC;
-GRANT SELECT ON TABLE road_modifier TO PUBLIC;
-
-CREATE TABLE "location" (
-    freeway VARCHAR(20),
-    free_dir smallint NOT NULL,
-    cross_street VARCHAR(20),
-    cross_dir smallint NOT NULL,
-    cross_mod smallint NOT NULL,
-    easting integer NOT NULL,
-    east_off integer NOT NULL,
-    northing integer NOT NULL,
-    north_off integer NOT NULL
-)
-INHERITS (tms_object);
-
-REVOKE ALL ON TABLE "location" FROM PUBLIC;
-
-ALTER TABLE "location"
-	ADD CONSTRAINT fk_freeway FOREIGN KEY (freeway)
-	REFERENCES road(name);
-ALTER TABLE "location"
-	ADD CONSTRAINT fk_cross_street FOREIGN KEY (cross_street)
-	REFERENCES road(name);
-
 CREATE TABLE alarm (
     controller integer NOT NULL,
     pin integer NOT NULL,
@@ -681,14 +678,6 @@ CREATE TABLE traffic_device_timing_plan (
 REVOKE ALL ON TABLE traffic_device_timing_plan FROM PUBLIC;
 GRANT SELECT ON TABLE traffic_device_timing_plan TO PUBLIC;
 
-CREATE TABLE system_policy (
-    name character varying NOT NULL,
-    value integer NOT NULL
-);
-
-REVOKE ALL ON TABLE system_policy FROM PUBLIC;
-GRANT SELECT ON TABLE system_policy TO PUBLIC;
-
 CREATE TABLE r_node_detector (
     r_node integer NOT NULL,
     detector integer NOT NULL
@@ -697,18 +686,8 @@ CREATE TABLE r_node_detector (
 REVOKE ALL ON TABLE r_node_detector FROM PUBLIC;
 GRANT SELECT ON TABLE r_node_detector TO PUBLIC;
 
-CREATE TABLE r_node_type (
-    n_type integer NOT NULL,
-    name text NOT NULL
-);
-
-CREATE TABLE r_node_transition (
-    n_transition integer NOT NULL,
-    name text NOT NULL
-);
-
 CREATE TABLE r_node (
-    "location" integer NOT NULL,
+    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
     node_type integer NOT NULL,
     pickable boolean NOT NULL,
     transition integer NOT NULL,
@@ -724,25 +703,6 @@ INHERITS (tms_object);
 REVOKE ALL ON TABLE r_node FROM PUBLIC;
 GRANT SELECT ON TABLE r_node TO PUBLIC;
 
-CREATE TABLE role (
-    name character varying(15) NOT NULL,
-    pattern character varying(31) DEFAULT ''::character varying NOT NULL,
-    priv_r boolean DEFAULT false NOT NULL,
-    priv_w boolean DEFAULT false NOT NULL,
-    priv_c boolean DEFAULT false NOT NULL,
-    priv_d boolean DEFAULT false NOT NULL
-);
-
-CREATE TABLE iris_user (
-    name character varying(15) NOT NULL,
-    dn text NOT NULL,
-    full_name character varying(31) NOT NULL
-);
-
-CREATE TABLE iris_user_role (
-    iris_user character varying(15) NOT NULL,
-    role character varying(15) NOT NULL
-);
 
 CREATE FUNCTION get_next_oid() RETURNS integer
     AS '
@@ -807,27 +767,26 @@ CREATE VIEW road_view AS
 
 GRANT SELECT ON road_view TO PUBLIC;
 
-CREATE VIEW location_view AS
-	SELECT l.vault_oid, f.abbrev AS fwy, l.freeway,
+CREATE VIEW geo_loc_view AS
+	SELECT l.name, f.abbrev AS fwy, l.freeway,
 	f_dir.direction AS free_dir, f_dir.dir AS fdir,
 	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
 	l.cross_street, c_dir.direction AS cross_dir,
 	l.easting, l.east_off, l.northing, l.north_off
-	FROM "location" l
+	FROM geo_loc l
 	LEFT JOIN road f ON l.freeway = f.name
 	LEFT JOIN road_modifier m ON l.cross_mod = m.id
 	LEFT JOIN road c ON l.cross_street = c.name
 	LEFT JOIN direction f_dir ON l.free_dir = f_dir.id
 	LEFT JOIN direction c_dir ON l.cross_dir = c_dir.id;
+GRANT SELECT ON geo_loc_view TO PUBLIC;
 
-GRANT SELECT ON location_view TO PUBLIC;
-
-CREATE VIEW device_location_view AS
+CREATE VIEW device_loc_view AS
 	SELECT d.vault_oid, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
 	l.cross_dir
-	FROM device d JOIN location_view l ON d."location" = l.vault_oid;
-
-GRANT SELECT ON device_location_view TO PUBLIC;
+	FROM device d
+	JOIN geo_loc_view l ON d.geo_loc = l.name;
+GRANT SELECT ON device_loc_view TO PUBLIC;
 
 CREATE VIEW line_drop_view AS
 	SELECT c.vault_oid, l."index" AS line, c."drop"
@@ -849,37 +808,33 @@ CREATE VIEW r_node_view AS
 	SELECT n.vault_oid, freeway, free_dir, cross_mod, cross_street,
 	cross_dir, nt.name AS node_type, n.pickable, tr.name AS transition,
 	n.lanes, n.attach_side, n.shift, n.station_id, n.speed_limit, n.notes
-	FROM r_node n, location_view l, r_node_type nt, r_node_transition tr
-	WHERE n."location" = l.vault_oid AND nt.n_type = n.node_type AND
-	tr.n_transition = n.transition;
-
-REVOKE ALL ON TABLE r_node_view FROM PUBLIC;
-GRANT SELECT ON TABLE r_node_view TO PUBLIC;
+	FROM r_node n
+	JOIN geo_loc_view l ON n.geo_loc = l.name
+	JOIN r_node_type nt ON n.node_type = nt.n_type
+	JOIN r_node_transition tr ON n.transition = tr.n_transition;
+GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW freeway_station_view AS
 	SELECT station_id, freeway, free_dir, cross_mod, cross_street,
 	speed_limit
-	FROM r_node r, location_view l
-	WHERE r.location = l.vault_oid AND station_id != '';
-
+	FROM r_node r, geo_loc_view l
+	WHERE r.geo_loc = l.name AND station_id != '';
 GRANT SELECT ON freeway_station_view TO PUBLIC;
 
-CREATE VIEW controller_location AS
+CREATE VIEW controller_loc_view AS
 	SELECT c.vault_oid, c."drop", c.active, c.notes, c.mile, c.circuit,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir
-	FROM controller c, location_view l WHERE c."location" = l.vault_oid;
-
-REVOKE ALL ON TABLE controller_location FROM PUBLIC;
-GRANT SELECT ON TABLE controller_location TO PUBLIC;
+	FROM controller c
+	JOIN geo_loc_view l ON c.geo_loc = l.name;
+GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
 	SELECT d.id, d.notes, c.id AS camera, d.mile, d.travel,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.east_off, l.northing, l.north_off
 	FROM dms d
-	JOIN location_view l ON d."location" = l.vault_oid
+	JOIN geo_loc_view l ON d.geo_loc = l.name
 	LEFT JOIN camera c ON d.camera = c.vault_oid;
-
 GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW sign_text_view AS
@@ -897,9 +852,8 @@ CREATE VIEW ramp_meter_view AS
 	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM ramp_meter m
-	JOIN location_view l ON m."location" = l.vault_oid
+	JOIN geo_loc_view l ON m.geo_loc = l.name
 	LEFT JOIN camera c ON m.camera = c.vault_oid;
-
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
@@ -908,10 +862,9 @@ CREATE VIEW camera_view AS
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM camera c
-	JOIN location_view l ON c."location" = l.vault_oid
+	JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN line_drop_view ld ON c.controller = ld.vault_oid
 	LEFT JOIN controller ctr ON c.controller = ctr.vault_oid;
-
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
@@ -973,20 +926,19 @@ CREATE VIEW detector_view AS
 	boolean_converter(d."forceFail") AS force_fail,
 	boolean_converter(c.active) AS active, d.fake, d.notes
 	FROM detector d
-	LEFT JOIN location_view l ON d."location" = l.vault_oid
+	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
 	LEFT JOIN lane_type ln ON d."laneType" = ln.id
 	LEFT JOIN controller c ON d.controller = c.vault_oid
 	LEFT JOIN line_drop_view ld ON d.controller = ld.vault_oid;
-
 GRANT SELECT ON detector_view TO PUBLIC;
 
 CREATE VIEW circuit_node_view AS
 	SELECT c.vault_oid, c.id, cl."index" AS line, cl."bitRate",
 	l.freeway, l.cross_street
-	FROM circuit c, communication_line cl, node n, location_view l
-	WHERE c.line = cl.vault_oid AND c.node = n.vault_oid AND
-		n."location" = l.vault_oid;
-
+	FROM circuit c
+	JOIN communication_line cl ON c.line = cl.vault_oid
+	JOIN node n ON c.node = n.vault_oid
+	JOIN geo_loc_view l ON n.geo_loc = l.name;
 GRANT SELECT ON circuit_node_view TO PUBLIC;
 
 CREATE VIEW controller_device_view AS
@@ -994,8 +946,8 @@ CREATE VIEW controller_device_view AS
 	trim(l.freeway || ' ' || l.free_dir) AS freeway,
 	trim(trim(' @' FROM l.cross_mod || ' ' || l.cross_street)
 		|| ' ' || l.cross_dir) AS cross_street
-	FROM traffic_device d, location_view l WHERE d."location" = l.vault_oid;
-
+	FROM traffic_device d
+	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
@@ -1008,7 +960,7 @@ CREATE VIEW controller_report AS
 	d2.freeway AS "to (meter2)", c.notes, cn."bitRate",
 	cn.freeway || ' & ' || cn.cross_street AS node_location
 	FROM controller c
-	LEFT JOIN location_view l ON c."location" = l.vault_oid
+	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN circuit_node_view cn ON c.circuit = cn.vault_oid
 	LEFT JOIN controller_170 c1 ON c.vault_oid = c1.vault_oid
 	LEFT JOIN cabinet_types ct ON c1.cabinet = ct."index"
@@ -1016,9 +968,7 @@ CREATE VIEW controller_report AS
 		d1.pin = 2 AND d1.controller = c.vault_oid
 	LEFT JOIN controller_device_view d2 ON
 		d2.pin = 3 AND d2.controller = c.vault_oid;
-
 GRANT SELECT ON controller_report TO PUBLIC;
-
 
 COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM stdin;
 3	4	0	vault_object	java.lang.Object
@@ -1055,7 +1005,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
 84656	4	0	r_node	us.mn.state.dot.tms.R_NodeImpl
 37	4	0	vault_list	us.mn.state.dot.vault.ListElement
-68616	4	0	location	us.mn.state.dot.tms.LocationImpl
 2065	4	0	detector	us.mn.state.dot.tms.DetectorImpl
 4	4	52	vault_types	us.mn.state.dot.vault.Type
 \.
@@ -1213,8 +1162,6 @@ CREATE UNIQUE INDEX device_pkey ON device USING btree (vault_oid);
 
 CREATE UNIQUE INDEX traffic_device_pkey ON traffic_device USING btree (vault_oid);
 
-CREATE UNIQUE INDEX dms_pkey ON dms USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_util_AbstractMap_pkey" ON "java_util_AbstractMap" USING btree (vault_oid);
 
 CREATE UNIQUE INDEX "java_util_TreeMap_pkey" ON "java_util_TreeMap" USING btree (vault_oid);
@@ -1247,8 +1194,6 @@ CREATE UNIQUE INDEX controller_170_pkey ON controller_170 USING btree (vault_oid
 
 CREATE UNIQUE INDEX communication_line_pkey ON communication_line USING btree (vault_oid);
 
-CREATE UNIQUE INDEX dms_id_index ON dms USING btree (id);
-
 CREATE UNIQUE INDEX warning_sign_pkey ON warning_sign USING btree (vault_oid);
 
 CREATE UNIQUE INDEX alarm_pkey ON alarm USING btree (vault_oid);
@@ -1260,35 +1205,11 @@ CREATE UNIQUE INDEX r_node_pkey ON r_node USING btree (vault_oid);
 ALTER TABLE ONLY time_plan_log
     ADD CONSTRAINT time_plan_log_pkey PRIMARY KEY (event_id);
 
-ALTER TABLE ONLY road_modifier
-    ADD CONSTRAINT road_modifier_pkey PRIMARY KEY (id);
-
-ALTER TABLE ONLY role
-    ADD CONSTRAINT role_pkey PRIMARY KEY (name);
-
-ALTER TABLE ONLY iris_user
-    ADD CONSTRAINT iris_user_pkey PRIMARY KEY (name);
-
-ALTER TABLE ONLY "location"
-    ADD CONSTRAINT fk_free_dir FOREIGN KEY (free_dir) REFERENCES direction(id);
-
-ALTER TABLE ONLY "location"
-    ADD CONSTRAINT fk_cross_dir FOREIGN KEY (cross_dir) REFERENCES direction(id);
-
-ALTER TABLE ONLY "location"
-    ADD CONSTRAINT fk_cross_mod FOREIGN KEY (cross_mod) REFERENCES road_modifier(id);
-
 ALTER TABLE ONLY r_node_detector
     ADD CONSTRAINT "$2" FOREIGN KEY (detector) REFERENCES detector("index");
 
 ALTER TABLE ONLY r_node_detector
     ADD CONSTRAINT "$1" FOREIGN KEY (r_node) REFERENCES r_node(vault_oid);
-
-ALTER TABLE ONLY iris_user_role
-    ADD CONSTRAINT "$1" FOREIGN KEY (iris_user) REFERENCES iris_user(name);
-
-ALTER TABLE ONLY iris_user_role
-    ADD CONSTRAINT "$2" FOREIGN KEY (role) REFERENCES role(name);
 
 CREATE CONSTRAINT TRIGGER "<unnamed>"
     AFTER INSERT OR UPDATE ON node
