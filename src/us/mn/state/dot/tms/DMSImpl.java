@@ -117,6 +117,12 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		s_routes = new HashMap<String, Route>();
 	}
 
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
+	}
+
 	/** Get the DMS poller */
 	protected DMSPoller getDMSPoller() {
 		if(isActive()) {

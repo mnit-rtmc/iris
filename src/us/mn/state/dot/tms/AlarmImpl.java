@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
+import java.util.Map;
 import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
@@ -39,6 +40,12 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	/** Create a new alarm */
 	public AlarmImpl() throws RemoteException {
 		notes = "";
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Initialize the controller for this alarm */

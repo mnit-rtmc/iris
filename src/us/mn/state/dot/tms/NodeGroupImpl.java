@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Map;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -47,6 +48,12 @@ class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter,
 	/** Create a node group from an ObjectVault field map */
 	protected NodeGroupImpl(FieldMap fields) throws RemoteException {
 		index = fields.getInt("index");
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Get a string representation */

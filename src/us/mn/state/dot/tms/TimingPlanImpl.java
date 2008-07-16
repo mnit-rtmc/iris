@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
+import java.util.Map;
 
 /**
  * Timing plan for operating a traffic management device
@@ -69,6 +70,12 @@ public class TimingPlanImpl extends TMSObjectImpl implements TimingPlan,
 	/** Create a timing plan */
 	protected TimingPlanImpl() throws RemoteException {
 		super();
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Compare for sorting plan arrays */

@@ -20,6 +20,7 @@ import java.rmi.RemoteException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Map;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.log.DetectorMalfunctionEvent;
 import us.mn.state.dot.tms.log.Log;
@@ -70,6 +71,12 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		last_scans = MISSING_DATA;
 		last_speed = MISSING_DATA;
 		data_cache = new DataCache(getKey());
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Initialize the transient state */

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import us.mn.state.dot.vault.FieldMap;
 
@@ -59,6 +60,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Table mapping for r_node_detector relation */
 	static public TableMapping mapping;
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
+	}
 
 	/** Node location */
 	protected final LocationImpl location;

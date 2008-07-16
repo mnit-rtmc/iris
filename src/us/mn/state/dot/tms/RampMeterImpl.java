@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Set;
 import java.rmi.RemoteException;
 import us.mn.state.dot.sched.Job;
@@ -122,6 +123,12 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		demand = MIN_RELEASE_RATE;
 		releaseRate = MAX_RELEASE_RATE;
 		lock = null;
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Initialize the transient state */

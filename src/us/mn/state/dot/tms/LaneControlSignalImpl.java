@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
 import java.util.Calendar;
+import java.util.Map;
 import us.mn.state.dot.tms.log.Log;
 import us.mn.state.dot.tms.log.SignStatusEvent;
 import us.mn.state.dot.tms.comm.mndot.LCSCommandMessage;
@@ -77,6 +78,12 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		super( fields );
 		modules = ( LCSModuleImpl[] ) fields.get( "modules" );
 		turnOff = true;
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Set the verification camera */

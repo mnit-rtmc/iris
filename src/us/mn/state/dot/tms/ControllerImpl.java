@@ -66,6 +66,12 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		location = (LocationImpl)fields.get("location");
 	}
 
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
+	}
+
 	/** Initialize the transient fields */
 	public void initTransients() {
 		version = UNKNOWN;

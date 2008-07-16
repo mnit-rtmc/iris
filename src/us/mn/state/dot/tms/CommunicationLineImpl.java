@@ -20,6 +20,7 @@ import java.net.InetSocketAddress;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.TreeMap;
 import javax.comm.SerialPort;
 
@@ -86,6 +87,12 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		timeout = fields.getInt("timeout");
 		circuits = new LinkedList<CircuitImpl>();
 		open();
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Get a string representation */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Comparator;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -60,6 +61,12 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 		node_group = (NodeGroupImpl)fields.get("node_group");
 		id = (String)fields.get("id");
 		location = (LocationImpl)fields.get("location");
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Initialize the transient fields */

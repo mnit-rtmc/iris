@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Map;
 
 import us.mn.state.dot.vault.FieldMap;
 
@@ -60,6 +61,12 @@ public class TourImpl extends TMSObjectImpl implements Tour, Storable {
 	protected TourImpl(FieldMap fields) throws RemoteException {
 		super();
 		name = (String)fields.get("name");
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/**

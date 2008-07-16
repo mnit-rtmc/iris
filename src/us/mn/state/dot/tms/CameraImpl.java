@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
+import java.util.Map;
 import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.vault.FieldMap;
@@ -45,6 +46,12 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	/** Create a camera from an ObjectVault field map */
 	protected CameraImpl(FieldMap fields) throws RemoteException {
 		super(fields);
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Set the controller to which this camera is assigned */

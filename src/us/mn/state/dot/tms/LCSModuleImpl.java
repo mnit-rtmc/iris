@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.rmi.RemoteException;
+import java.util.Map;
 
 /**
  * The LCSModuleImpl is the implementation of the LCSModule remote interface.
@@ -31,6 +32,12 @@ public class LCSModuleImpl extends TMSObjectImpl implements LCSModule,
 	/** Get the database table name */
 	public String getTable() {
 		return tableName;
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		// FIXME: implement this for SONAR
+		return null;
 	}
 
 	/** Constant for number of special function outputs */
