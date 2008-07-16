@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A sign group is an arbitrary collection of dynamic message signs (DMS).
@@ -39,10 +41,12 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 		});
 	}
 
-	/** Store a group */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() + " (name, local) " +
-			"VALUES ('" + name + "', '" + local + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("local", local);
+		return map;
 	}
 
 	/** Get the database table name */

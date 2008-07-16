@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import us.mn.state.dot.sonar.server.Namespace;
 
 /**
@@ -44,12 +46,15 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		});
 	}
 
-	/** Store a graphic */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, bpp, height, width, pixels) VALUES ('" +
-			name + "', " + bpp + ", " + height + ", " + width +
-			", '" + pixels + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("bpp", bpp);
+		map.put("height", height);
+		map.put("width", width);
+		map.put("pixels", pixels);
+		return map;
 	}
 
 	/** Destroy a graphic */

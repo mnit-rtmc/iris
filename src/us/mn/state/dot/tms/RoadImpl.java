@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -49,12 +51,15 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 		});
 	}
 
-	/** Store a road */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, abbrev, r_class, direction, alt_dir) VALUES " +
-			"('" + name + "', '" + abbrev + "', '" + r_class +
-			"', '" + direction + "', '" + alt_dir + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("abbrev", abbrev);
+		map.put("r_class", r_class);
+		map.put("direction", direction);
+		map.put("alt_dir", alt_dir);
+		return map;
 	}
 
 	/** Get the database table name */

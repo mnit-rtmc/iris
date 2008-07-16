@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A system policy is a parameter name mapped to an integer value.
@@ -39,10 +41,12 @@ public class SystemPolicyImpl extends BaseObjectImpl implements SystemPolicy {
 		});
 	}
 
-	/** Store a system policy */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() + " (name, value) " +
-			"VALUES ('" + name + "', " + value + ");");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("value", value);
+		return map;
 	}
 
 	/** Get the database table name */

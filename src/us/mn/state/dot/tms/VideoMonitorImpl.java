@@ -15,7 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
-
+import java.util.HashMap;
+import java.util.Map;
 import us.mn.state.dot.tms.comm.vicon.SelectMonitorCamera;
 
 /**
@@ -42,11 +43,13 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		});
 	}
 
-	/** Store a video monitor */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, description, restricted) VALUES ('" + name +
-			"', '" + description + "', '" + restricted + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("description", description);
+		map.put("restricted", restricted);
+		return map;
 	}
 
 	/** Get the database table name */

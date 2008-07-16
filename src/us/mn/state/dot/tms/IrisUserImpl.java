@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Role;
@@ -56,11 +58,13 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		});
 	}
 
-	/** Store an IRIS user */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() + " (name, dn, " +
-			"full_name) VALUES ('" + name + "', '" + dn + "', '" +
-			fullName + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("dn", dn);
+		map.put("full_name", fullName);
+		return map;
 	}
 
 	/** Get the database table name */

@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -202,9 +203,28 @@ public class SQLConnection {
 
 	/** Create one storable record */
 	public void create(Storable s) throws TMSException {
-		validateSql(s.getKey());
-		update("INSERT INTO " + s.getTable() + " (" + s.getKeyName() +
-			") VALUES ('" + s.getKey() + "');");
+		Map<String, Object> columns = s.getColumns();
+		StringBuilder keys = new StringBuilder();
+		StringBuilder values = new StringBuilder();
+		for(Map.Entry<String, Object> e: columns.entrySet()) {
+			Object value = e.getValue();
+			if(value != null) {
+				String key = e.getKey();
+				validateSql(key);
+				keys.append('"');
+				keys.append(key);
+				keys.append("\",");
+				String val = value.toString();
+				validateSql(val);
+				values.append("'");
+				values.append(val);
+				values.append("',");
+			}
+		}
+		keys.setLength(keys.length() - 1);
+		values.setLength(values.length() - 1);
+		update("INSERT INTO " + s.getTable() + " (" + keys +
+			") VALUES (" + values + ");");
 	}
 
 	/** Destroy one storable record */

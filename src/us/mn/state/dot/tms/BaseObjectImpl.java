@@ -74,6 +74,11 @@ abstract public class BaseObjectImpl implements Storable {
 		return name;
 	}
 
+	/** Store an object */
+	public void doStore() throws TMSException {
+		store.create(this);
+	}
+
 	/** Destroy an object */
 	public void destroy() {
 		// Handled by doDestroy() method

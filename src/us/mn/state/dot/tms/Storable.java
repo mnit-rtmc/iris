@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Map;
+
 /**
  * Interface for objects which are storable by a SQLConnection.
  *
@@ -22,11 +24,14 @@ package us.mn.state.dot.tms;
 public interface Storable {
 
 	/** Get the database table name */
-	public String getTable();
+	String getTable();
 
 	/** Get the primary key name */
-	public String getKeyName();
+	String getKeyName();
 
 	/** Get the primary key */
-	public String getKey();
+	String getKey();
+
+	/** Get a mapping of the columns */
+	Map<String, Object> getColumns();
 }

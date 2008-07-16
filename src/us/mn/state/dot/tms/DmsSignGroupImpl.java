@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
 
@@ -43,11 +45,13 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 		});
 	}
 
-	/** Store a DMS sign group */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, dms, sign_group) VALUES " + "('" + name +
-			"', '" + dms + "', '" + sign_group + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("dms", dms);
+		map.put("sign_group", sign_group);
+		return map;
 	}
 
 	/** Get the database table name */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2007  Minnesota Department of Transportation
+ * Copyright (C) 2003-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A holiday is a date which ramp meters (and travel times) are not deployed.
@@ -46,13 +48,17 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday {
 		});
 	}
 
-	/** Store a holiday */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, month, day, week, weekday, shift, period) " +
-			"VALUES ('" + name + "', " + month + ", " +
-			day + ", " + week + ", " + weekday + ", " + shift +
-			", " + period + ");");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("month", month);
+		map.put("day", day);
+		map.put("week", week);
+		map.put("weekday", weekday);
+		map.put("shift", shift);
+		map.put("period", period);
+		return map;
 	}
 
 	/** Get the database table name */

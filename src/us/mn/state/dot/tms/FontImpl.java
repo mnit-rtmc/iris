@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.server.Namespace;
@@ -51,13 +52,16 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		});
 	}
 
-	/** Store a font */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, height, width, line_spacing, char_spacing, " +
-			"version_id) VALUES ('" + name + "', " + height + ", " +
-			width + ", " + lineSpacing + ", " + charSpacing +
-			", " + versionID + ");");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("height", height);
+		map.put("width", width);
+		map.put("line_spacing", lineSpacing);
+		map.put("char_spacing", charSpacing);
+		map.put("version_id", versionID);
+		return map;
 	}
 
 	/** Get the database table name */

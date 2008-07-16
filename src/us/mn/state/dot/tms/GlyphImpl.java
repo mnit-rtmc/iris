@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
 
@@ -43,12 +45,14 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		});
 	}
 
-	/** Store a glyph */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, font, code_point, graphic) VALUES ('" +
-			name + "', '" + font.getName() + "', " + codePoint +
-			", '" + graphic.getName() + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("font", font.getName());
+		map.put("code_point", codePoint);
+		map.put("graphic", graphic.getName());
+		return map;
 	}
 
 	/** Destroy a glyph */

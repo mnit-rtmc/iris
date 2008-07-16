@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import us.mn.state.dot.sonar.NamespaceError;
@@ -62,13 +64,15 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		});
 	}
 
-	/** Store a sign text message */
-	public void doStore() throws TMSException {
-		validateMessage(message);
-		store.update("INSERT INTO " + getTable() +
-			" (name, sign_group, line, message, priority) VALUES " +
-			"('" + name + "', '" + sign_group + "', '" + line +
-			"', '" + message + "', '" + priority + "');");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("sign_group", sign_group);
+		map.put("line", line);
+		map.put("message", message);
+		map.put("priority", priority);
+		return map;
 	}
 
 	/** Get the database table name */

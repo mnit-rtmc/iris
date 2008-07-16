@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Role;
@@ -56,13 +58,16 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		});
 	}
 
-	/** Store a new IRIS role */
-	public void doStore() throws TMSException {
-		store.update("INSERT INTO " + getTable() +
-			" (name, pattern, priv_r, priv_w, priv_c, priv_d) " +
-			"VALUES ('" + name + "', '" + pattern + "', " +
-			priv_r + ", " + priv_w + ", " + priv_c + ", " +
-			priv_d + ");");
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("pattern", pattern);
+		map.put("priv_r", priv_r);
+		map.put("priv_w", priv_w);
+		map.put("priv_c", priv_c);
+		map.put("priv_d", priv_d);
+		return map;
 	}
 
 	/** Get the database table name */
