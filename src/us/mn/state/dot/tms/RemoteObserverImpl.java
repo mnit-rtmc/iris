@@ -29,6 +29,9 @@ import us.mn.state.dot.sched.Scheduler;
 abstract public class RemoteObserverImpl extends UnicastRemoteObject
 	implements RemoteObserver
 {
+	/** RMI debug log */
+	static protected final DebugLog RMI_LOG = new DebugLog("rmi");
+
 	/** Worker thread */
 	static protected final Scheduler RWORKER = new Scheduler(
 		"Remote Worker");
@@ -85,9 +88,9 @@ abstract public class RemoteObserverImpl extends UnicastRemoteObject
 				rmi_exported = !unexportObject(this, true);
 		}
 		catch(NoSuchObjectException e) {
-			System.err.println("ERROR: RemoteObserverImpl." +
-				"dispose() " + e.getMessage());
-			System.err.println("\tClass: " + getClass().getName());
+			RMI_LOG.log("ERROR: RemoteObserverImpl.dispose() " +
+				e.getMessage());
+			RMI_LOG.log("\tClass: " + getClass().getName());
 			rmi_exported = false;
 		}
 	}
