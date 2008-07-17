@@ -19,10 +19,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
 import org.xml.sax.SAXException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+
 import java.nio.charset.Charset;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -56,9 +60,10 @@ final public class Xml {
                 ok = ok && ((String) (p[1].cdr())).compareTo("b") == 0;
             } catch (IOException ex) {
                 ok = false;
-                System.err.println("Exeption=" + ex);
+                //Log.fine("Exeption=" + ex);
             }
         }
+
         System.err.println("Test case 2");
         {
             try {
@@ -71,9 +76,10 @@ final public class Xml {
                 ok = ok && ((String) (p[1].cdr())).compareTo("b") == 0;
             } catch (IOException ex) {
                 ok = false;
-                System.err.println("Exeption=" + ex);
+                //Log.fine("Exeption=" + ex);
             }
         }
+
         System.err.println("Test case 3: bogus expected tag name");
         {
             try {
@@ -81,17 +87,38 @@ final public class Xml {
                 ok = false;
             } catch (IOException ex) {
                 ok = ok && true;
-                System.err.println("Expected exeption=" + ex);
+                //Log.fine("Expected exeption=" + ex);
             }
         }
+
         System.err.println("Test case 4");
         {
             try {
                 String tag = Xml.readSecondTagName("tag1", "<tag1><tag2>value</tag2></tag1>");
-
                 ok = ok && (tag.compareTo("tag2") == 0);
             } catch (IOException ex) {
                 ok = false;
+            }
+        }
+
+        System.err.println("Test case 4A: bogus xml code that contains non-escaped & chars.");
+        {
+            try {
+                String tag = Xml.readSecondTagName("tag1", "<tag1><tag2>value & value</tag2></tag1>");
+                ok = false;
+            } catch (IOException ex) {
+                ok = true;
+            }
+        }
+
+        System.err.println("Test case 5: bogus level 2 name");
+        {
+            try {
+                Pair[] p = Xml.parseTagsAndChildren("DmsLite", "SetInitRespMsg","<DmsLite><SetTimeRespMsg><IsValid>false</IsValid><ErrMsg>SignView response invalid code (0x0D)</ErrMsg></SetTimeRespMsg></DmsLite>");
+                ok = false;
+            } catch (IOException ex) {
+                ok = ok && true;
+                //Log.fine("Expected exeption=" + ex);
             }
         }
 
@@ -213,7 +240,7 @@ final public class Xml {
             throw new IllegalArgumentException("invalid args in Xml.parseRes()");
         }
 
-        System.err.println("lev1name=" + lev1name + ", lev2name=" + lev2name + ", xml=" + xml);
+        //Log.finest("lev1name=" + lev1name + ", lev2name=" + lev2name + ", xml=" + xml);
 
         Pair[] ret = null;
 
@@ -233,7 +260,7 @@ final public class Xml {
                     throw new IOException("Didn't find tag:" + lev1name + " in xml:" + xml);
                 }
 
-                System.err.println("1st level (" + lev1name + ") num children=" + list.getLength());
+                //Log.finest("1st level (" + lev1name + ") num children=" + list.getLength());
                 topelem1 = (Element) list.item(0);
             }
 
@@ -247,7 +274,7 @@ final public class Xml {
             // cycle through children, adding to container
             NodeList children = topelem2.getChildNodes();
 
-            System.err.println("2nd level (" + lev2name + ") num children=" + children.getLength());
+            //Log.finest("2nd level (" + lev2name + ") num children=" + children.getLength());
             ret = new Pair[children.getLength()];
 
             for (int c = 0; c < children.getLength(); c++) {
@@ -256,21 +283,21 @@ final public class Xml {
                 String v     = child.getTextContent();
 
                 // create pair
-                System.err.println("name=" + n + "," + "value=" + v);
+                //Log.finest("name=" + n + "," + "value=" + v);
 
                 Pair p = new Pair(n, v);
 
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("SEVERE Exception:" + ex);
-	    throw ex;
+            System.err.println("Exception:" + ex);
+            throw ex;
         }
 
 	// postcond
@@ -293,7 +320,7 @@ final public class Xml {
             throw new IllegalArgumentException("invalid args in Xml.parseTagAndChildren()");
         }
 
-        System.err.println("tagname=" + tagname + ", xml=" + xml);
+        //Log.finest("tagname=" + tagname + ", xml=" + xml);
 
         Pair[] ret = null;
 
@@ -315,13 +342,13 @@ final public class Xml {
                 }
 
                 topelem = (Element) list.item(0);
-                System.err.println("tagname=" + tagname + ", num children=" + list.getLength());
+                //Log.finest("tagname=" + tagname + ", num children=" + list.getLength());
             }
 
             // cycle through children, adding to container
             NodeList children = topelem.getChildNodes();
 
-            System.err.println("2nd level num children=" + children.getLength());
+            //Log.finest("2nd level num children=" + children.getLength());
             ret = new Pair[children.getLength()];
 
             for (int c = 0; c < children.getLength(); c++) {
@@ -330,26 +357,26 @@ final public class Xml {
                 String v     = child.getTextContent();
 
                 // create pair
-                System.err.println("name=" + n + "," + "value=" + v);
+                //Log.finest("name=" + n + "," + "value=" + v);
 
                 Pair p = new Pair(n, v);
 
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
             throw ex;
         }
 
 	// postcond
         assert ret != null : "postcond: should not return null in "+
-		"parseTagsAndChildren(), tagname="+tagname+
+		"parseTagAndChildren(), tagname="+tagname+
 		",xml="+xml;
 
 
@@ -399,11 +426,14 @@ final public class Xml {
 
             ret = topelem2.getNodeName();
         } catch (ParserConfigurationException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
+            throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
+            throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("SEVERE Exception:" + ex);
+            System.err.println("Exception:" + ex);
+            throw new IOException(ex.toString());
         }
 
         return (ret);
