@@ -42,7 +42,8 @@ public class BitmapGraphic implements Serializable {
 	/** Set the bitmap */
 	public void setBitmap(byte[] b) {
 		if(b.length != bitmap.length)
-			throw new IndexOutOfBoundsException();
+			throw new IndexOutOfBoundsException("b="+b+
+			", bitmap.length="+bitmap.length);
 		System.arraycopy(b, 0, bitmap, 0, bitmap.length);
 	}
 
@@ -59,9 +60,9 @@ public class BitmapGraphic implements Serializable {
 	/** Get the pixel index for the specified location */
 	protected int pixelIndex(int x, int y) {
 		if(x < 0 || x > width)
-			throw new IndexOutOfBoundsException();
+			throw new IndexOutOfBoundsException("x="+x+", width="+width);
 		if(y < 0 || y > height)
-			throw new IndexOutOfBoundsException();
+			throw new IndexOutOfBoundsException("y="+y+", height="+height);
 		return (y * width) + x;
 	}
 
