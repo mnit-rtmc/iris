@@ -191,7 +191,9 @@ public class DmsLitePoller extends MessagePoller
 
 	/**
 	 * Set the time remaining for the currently displayed message. This is
-	 * called when the "clear" button in the IRIS client is pressed.
+	 * called when:
+	 * 	-The "clear" button in the IRIS client is pressed.
+	 *	-An existing travel time message 
 	 */
 	public void setMessageTimeRemaining(DMSImpl dms, SignMessage m) {
 		//System.err.println("DmsLitePoller.setMessageTimeRemaining() called, duration:"
@@ -203,10 +205,13 @@ public class DmsLitePoller extends MessagePoller
 			return;
 		}
 
+		// Note: in the future, check for SV170 firmware version, if start and stop
+		//       times are supported, adjust the CMS stop time and send the message.
+
 		// should never get here
 		String msg="WARNING: DmsLitePoller.setMessageTimeRemaining(): should never get here, duration="+m.getDuration();
 		System.err.println(msg);
-		assert false : msg;
+		//assert false : msg;
 	}
 
 	/**
