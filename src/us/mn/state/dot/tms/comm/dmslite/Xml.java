@@ -122,32 +122,69 @@ final public class Xml {
             }
         }
 
-        System.err.println("test() results: " + ok);
+        System.err.println("Test case 6: creating xml");
+        {
+		StringBuilder x=new StringBuilder();
+		x=addXmlDocHeader(x);
+		x=addXmlTag(x,"name1","value1");
+		x=addXmlTag(x,"name2<>&","value2 & value 3 < value 4 > value5");
+		String expected="<?xml version=\"1.0\"?><name1>value1</name1><name2>value2 &amp; value 3 &lt; value 4 &gt; value5</name2>";
+		ok=ok && x.toString().equals(expected);
+		if (!ok) {
+			System.err.println(x);
+			System.err.println(expected);
+		}
+        }
 
+        System.err.println("test() results: " + ok);
         return (ok);
     }
 
     /** append the Xml doc start tag */
     public static StringBuilder addXmlDocHeader(StringBuilder doc) {
         doc.append("<?xml version=\"1.0\"?>");
-
-        return (doc);
+        return doc;
     }
 
     /** append the xml tag containing a value */
-    public static StringBuilder addXmlTag(StringBuilder doc, String name, String value) {
-        return (Xml.addXmlTag(doc, name, new StringBuilder(value)));
+    public static StringBuilder addXmlTag(StringBuilder doc, String argname, String argvalue) {
+	String name=Xml.validateElementName(argname);
+	String value=Xml.validateElementValue(argvalue);
+        return Xml.addXmlTag(doc, name, new StringBuilder(value));
     }
 
     /** append the xml tag containing a value */
     public static StringBuilder addXmlTag(StringBuilder doc, String name, int value) {
-        return (Xml.addXmlTag(doc, name, new StringBuilder(Integer.toString(value))));
+        return Xml.addXmlTag(doc, name, new StringBuilder(Integer.toString(value)));
     }
 
     /** append the xml tag containing a value */
     public static StringBuilder addXmlTag(StringBuilder doc, String name, boolean value) {
-        return (Xml.addXmlTag(doc, name, new StringBuilder(Boolean.toString(value))));
+        return Xml.addXmlTag(doc, name, new StringBuilder(Boolean.toString(value)));
     }
+
+    /** given an xml element name return it validated */
+    public static String validateElementName(String e) {
+	if (e==null || e.length()<=0)
+		return "";
+	e=e.replace("&","");
+	e=e.replace("<","");
+	e=e.replace(">","");
+        return e;
+    }
+
+    /** 
+     *  given an xml element value, return it validated.
+     */
+    public static String validateElementValue(String v) {
+	if (v==null || v.length()<=0)
+		return "";
+	v=v.replace("&","&amp;");
+	v=v.replace("<","&lt;");
+	v=v.replace(">","&gt;");
+        return v;
+    }
+
 
     /**
      * The root addXmlTag method, which appends the xml tag containing a value
