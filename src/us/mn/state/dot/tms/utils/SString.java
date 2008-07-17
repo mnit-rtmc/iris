@@ -112,5 +112,20 @@ public class SString {
 		}
 		return s;
 	}
+
+	/**
+	 *  Return a string with the enclosing double quotes removed.
+	 *  This method assumes the first and last chars are \" and
+	 *  if not the string is returned unmodified.
+	 */
+	static public String removeEnclosingQuotes(String s) {
+		if(s == null)
+			return (null);
+		if((s.length() >= 2) && (s.charAt(0) == '\"')
+			&& (s.charAt(s.length() - 1) == '\"'))
+			return (s.substring(1, s.length() - 1));
+		return (s);
+	}
+
 }
 
