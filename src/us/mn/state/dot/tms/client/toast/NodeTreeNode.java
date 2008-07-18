@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,12 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import us.mn.state.dot.tms.Circuit;
 import us.mn.state.dot.tms.ErrorCounter;
-import us.mn.state.dot.tms.Location;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Node;
 import us.mn.state.dot.tms.NodeGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
@@ -62,8 +64,10 @@ public class NodeTreeNode extends TreeNode {
 	protected void doStatus() throws RemoteException {
 		ErrorCounter ec = (ErrorCounter)node;
 		cnt = ec.getCounters();
-		Location loc = node.getLocation();
-		str = "Node " + node.getId() + ": " + loc.getDescription();
+		GeoLoc loc = SonarState.singleton.lookupGeoLoc(
+			node.getGeoLoc());
+		str = "Node " + node.getId() + ": " +
+			GeoLocHelper.getDescription(loc);
 	}
 
 	/** Add a child node */

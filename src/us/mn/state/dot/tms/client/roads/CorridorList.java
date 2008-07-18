@@ -34,9 +34,10 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
+import us.mn.state.dot.tms.client.proxy.GeoTransform;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 import us.mn.state.dot.tms.client.proxy.Vector;
 
@@ -165,24 +166,36 @@ public class CorridorList extends JPanel {
 		}
 	}
 
+	/** Compare the Northing of two R_Nodes */
+	static protected boolean compareNorthing(R_NodeProxy n0,
+		R_NodeProxy n1)
+	{
+		return GeoLocHelper.getTrueNorthing(n0.loc) <
+			GeoLocHelper.getTrueNorthing(n1.loc);
+	}
+
+	/** Compare the Easting of two R_Nodes */
+	static protected boolean compareEasting(R_NodeProxy n0,
+		R_NodeProxy n1)
+	{
+		return GeoLocHelper.getTrueEasting(n0.loc) <
+			GeoLocHelper.getTrueEasting(n1.loc);
+	}
+
 	/** Check if a list of roadway nodes is reversed */
 	static protected boolean isListReversed(R_NodeProxy first,
 		R_NodeProxy last)
 	{
-		short dir = first.getLocation().getFreeDir();
+		short dir = first.getGeoLoc().getFreeDir();
 		switch(dir) {
 			case Road.NORTH:
-				return first.loc.getTrueNorthing() <
-					last.loc.getTrueNorthing();
+				return compareNorthing(first, last);
 			case Road.SOUTH:
-				return first.loc.getTrueNorthing() >
-					last.loc.getTrueNorthing();
+				return compareNorthing(last, first);
 			case Road.EAST:
-				return first.loc.getTrueEasting() <
-					last.loc.getTrueEasting();
+				return compareEasting(first, last);
 			case Road.WEST:
-				return first.loc.getTrueEasting() >
-					last.loc.getTrueEasting();
+				return compareEasting(last, first);
 		}
 		return false;
 	}
@@ -227,17 +240,17 @@ public class CorridorList extends JPanel {
 
 	/** Set the tangent angles for all the roadway nodes in a list */
 	static protected void setTangentAngles(List<R_NodeProxy> node_t) {
-		LocationProxy loc, loc_a, loc_b;
+		GeoTransform loc, loc_a, loc_b;
 		for(int i = 0; i < node_t.size(); i++) {
 			if(i == 0)
-				loc_a = node_t.get(0).getLocation();
+				loc_a = node_t.get(0).getGeoTransform();
 			else
-				loc_a = node_t.get(i - 1).getLocation();
-			loc = node_t.get(i).getLocation();
+				loc_a = node_t.get(i - 1).getGeoTransform();
+			loc = node_t.get(i).getGeoTransform();
 			if(i == node_t.size() - 1)
-				loc_b = node_t.get(i).getLocation();
+				loc_b = node_t.get(i).getGeoTransform();
 			else
-				loc_b = node_t.get(i + 1).getLocation();
+				loc_b = node_t.get(i + 1).getGeoTransform();
 			if(loc_a != loc_b) {
 				Vector va = loc_a.getVector();
 				Vector vb = loc_b.getVector();

@@ -206,8 +206,8 @@ class R_NodeMapImpl extends AbstractListImpl implements R_NodeMap {
 		for(TMSObjectImpl n: map.values()) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
 			findDownstreamLinks(r_node);
-			LocationImpl loc = (LocationImpl)r_node.getLocation();
-			String cid = loc.getCorridor();
+			GeoLoc loc = r_node.lookupGeoLoc();
+			String cid = GeoLocHelper.getCorridor(loc);
 			if(cid != null) {
 				Corridor c = corridors.get(cid);
 				if(c == null) {

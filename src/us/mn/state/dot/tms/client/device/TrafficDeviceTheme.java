@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.tms.TrafficDevice;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 
 /**
  * Theme for traffic devices on map
@@ -117,9 +116,7 @@ abstract public class TrafficDeviceTheme extends StyledTheme {
 	public String getTip(MapObject o) {
 		if(o instanceof TrafficDeviceProxy) {
 			TrafficDeviceProxy proxy = (TrafficDeviceProxy)o;
-			LocationProxy loc = (LocationProxy)proxy.getLocation();
-			return proxy.getId() + " - " +
-				loc.getDescription();
+			return proxy.getId() + " - " + proxy.getDescription();
 		} else
 			return null;
 	}

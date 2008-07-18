@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,10 @@ public interface R_Node extends TMSObject {
 	int TRANSITION_FLYOVER = 7;
 
 	/** Get the location */
-	Location getLocation() throws RemoteException;
+	String getGeoLoc() throws RemoteException;
+
+	/** Set the location */
+	void setGeoLoc(String l) throws TMSException, RemoteException;
 
 	/** Get the node type */
 	int getNodeType() throws RemoteException;

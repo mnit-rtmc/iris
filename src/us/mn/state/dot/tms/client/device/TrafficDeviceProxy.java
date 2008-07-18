@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ abstract public class TrafficDeviceProxy extends DeviceProxy
 
 	/** Get a short description of the traffic device */
 	public String getShortDescription() {
-		String l = loc.getDescription();
+		String l = getDescription();
 		if(l.length() > 0)
 			return id + " - " + l;
 		else

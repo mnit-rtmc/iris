@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.video.AbstractDataSource;
@@ -335,9 +334,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	public void refreshUpdate() {
 		CameraProxy camera = selected;	// Avoid NPE
 		if(camera != null) {
-			LocationProxy loc = (LocationProxy)camera.getLocation();
 			txtId.setText(camera.getId());
-			txtLocation.setText(loc.getDescription());
+			txtLocation.setText(camera.getDescription());
 			play.setEnabled(camera.isActive());
 			stop.setEnabled(camera.isActive());
 			if(camera.isActive())

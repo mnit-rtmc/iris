@@ -139,7 +139,10 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 
 	/** Get the side of the road that the camera is on */
 	public short getRoadSide() {
-		switch(location.free_dir) {
+		GeoLoc loc = lookupGeoLoc();
+		if(loc == null)
+			return Road.NONE;
+		switch(loc.getFreeDir()) {
 			case Road.EAST:
 				return Road.SOUTH;
 			case Road.WEST:

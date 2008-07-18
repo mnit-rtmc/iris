@@ -159,14 +159,14 @@ public class DetectorSet implements Constants {
 	public boolean isFlowing() {
 		float d_this = 0;
 		float d_last = 0;
-		String xStreet = null;
+		Road xStreet = null;
 		for(DetectorImpl det: detectors) {
 			float d = det.getDensity();
 			if(d < 0)
 				continue;
-			LocationImpl loc = (LocationImpl)det.getLocation();
+			GeoLoc loc = det.lookupGeoLoc();
 			if(xStreet != null &&
-				xStreet.equals(loc.getCrossStreet()))
+				xStreet == loc.getCrossStreet())
 			{
 				d_this = Math.max(d_this, d);
 			} else {

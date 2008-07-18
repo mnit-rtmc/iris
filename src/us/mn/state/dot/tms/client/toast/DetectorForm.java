@@ -129,7 +129,7 @@ public class DetectorForm extends TMSObjectForm {
 
 	/** Create the Location panel */
 	protected JPanel createLocationPanel() throws RemoteException {
-		location = new LocationPanel(admin, detector.getLocation(),
+		location = new LocationPanel(admin, detector.getGeoLoc(),
 			connection.getSonarState());
 		location.initialize();
 		location.addNote(notes);

@@ -87,12 +87,6 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 		alt_dir = ad;
 	}
 
-	/** Test if another road starts with the same name */
-	public boolean matchRootName(RoadImpl other) {
-		return name.startsWith(other.name) ||
-			other.name.startsWith(name);
-	}
-
 	/** Abbreviated name (for detector and station names) */
 	protected String abbrev;
 
@@ -188,47 +182,5 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 	/** Get the alternate direction */
 	public short getAltDir() {
 		return alt_dir;
-	}
-
-	/** Filter for alternate directions on a North-South road */
-	protected short filterNorthSouth(short d) {
-		if(alt_dir == EAST) {
-			if(d == EAST)
-				return NORTH;
-			if(d == WEST)
-				return SOUTH;
-		} else if(alt_dir == WEST) {
-			if(d == WEST)
-				return NORTH;
-			if(d == EAST)
-				return SOUTH;
-		}
-		return d;
-	}
-
-	/** Filter for alternate directions on an East-West road */
-	protected short filterEastWest(short d) {
-		if(alt_dir == NORTH) {
-			if(d == NORTH)
-				return EAST;
-			if(d == SOUTH)
-				return WEST;
-		} else if(alt_dir == SOUTH) {
-			if(d == SOUTH)
-				return EAST;
-			if(d == NORTH)
-				return WEST;
-		}
-		return d;
-	}
-
-	/** Filter the freeway direction which matches the given direction */
-	public short filterDirection(short d) {
-		if(direction == NORTH_SOUTH)
-			return filterNorthSouth(d);
-		else if(direction == EAST_WEST)
-			return filterEastWest(d);
-		else
-			return d;
 	}
 }

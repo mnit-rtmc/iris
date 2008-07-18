@@ -61,13 +61,13 @@ public class RouteBuilder {
 	}
 
 	/** Search a corridor for branching paths to a destination */
-	protected void searchCorridor(float distance, LocationImpl origin,
-		LocationImpl destination) throws BadRouteException
+	protected void searchCorridor(float distance, GeoLoc origin,
+		GeoLoc destination) throws BadRouteException
 	{
-		String cid = origin.getCorridor();
+		String cid = GeoLocHelper.getCorridor(origin);
 		if(cid == null) {
 			TRAVEL_LOG.log(name + ": BAD ORIGIN: " +
-				origin.getOID());
+				origin.getName());
 			return;
 		}
 		Corridor c = node_map.getCorridor(cid);
@@ -78,17 +78,18 @@ public class RouteBuilder {
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
 		if(r_node.metersTo(origin) > MAX_ORIGIN_DISTANCE) {
 			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
-				origin.getDescription());
+				GeoLocHelper.getDescription(origin));
 		}
 		int i = 0;
 		while(r_node != null) {
-			LocationImpl dest = (LocationImpl)r_node.getLocation();
+			GeoLoc dest = r_node.lookupGeoLoc();
 			ODPair od = new ODPair(origin, dest, false);
 			float dist = distance + c.calculateDistance(od);
 			if(TRAVEL_LOG.isOpen()) {
 				TRAVEL_LOG.log(name + ": SEARCH FOR " +
-					destination.getDescription() + " (" +
-					i + ", " + dist + " miles) " + od);
+					GeoLocHelper.getDescription(destination)
+					+ " (" + i + ", " + dist + " miles) " +
+					od);
 			}
 			if(dist > max_dist) {
 				if(TRAVEL_LOG.isOpen()) {
@@ -114,16 +115,16 @@ public class RouteBuilder {
 
 	/** Find the next node on the corridor */
 	protected R_NodeImpl findNextNode(Corridor c, R_NodeImpl r_node,
-		float distance, LocationImpl origin, LocationImpl destination)
+		float distance, GeoLoc origin, GeoLoc destination)
 		throws BadRouteException
 	{
-		LocationImpl dest = (LocationImpl)r_node.getLocation();
+		GeoLoc dest = r_node.lookupGeoLoc();
 		R_NodeImpl next = null;
 		for(R_NodeImpl n: r_node.getDownstream()) {
 			if(!r_node.isCorridorType())
 				continue;
-			LocationImpl down = (LocationImpl)n.getLocation();
-			if(down.isSameCorridor(origin))
+			GeoLoc down = n.lookupGeoLoc();
+			if(GeoLocHelper.isSameCorridor(down, origin))
 				next = n;
 			else {
 				boolean turn = r_node.hasTurnPenalty()
@@ -143,8 +144,8 @@ public class RouteBuilder {
 	}
 
 	/** Find all paths from an origin to a destination */
-	protected void findPaths(float distance, final LocationImpl origin,
-		final LocationImpl destination)
+	protected void findPaths(float distance, final GeoLoc origin,
+		final GeoLoc destination)
 	{
 		ODPair od = new ODPair(origin, destination, false);
 		Corridor c = node_map.getCorridor(od);
@@ -186,8 +187,9 @@ public class RouteBuilder {
 		// secondary routes; we're only interested in the best route.
 		max_dist = Math.min(max_dist, r.getGoodness());
 		if(TRAVEL_LOG.isOpen()) {
+			GeoLoc dest = odf.getDestination();
 			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
-				odf.getDestination().getDescription() + ", " +
+				GeoLocHelper.getDescription(dest) + ", " +
 				r.getLength() + " miles, " + r.getTurns() +
 				" turns, goodness: " + r.getGoodness());
 			if(max_dist == r.getGoodness()) {
@@ -198,7 +200,7 @@ public class RouteBuilder {
 	}
 
 	/** Find all the routes from an origin to a destination */
-	public SortedSet<Route> findRoutes(LocationImpl o, LocationImpl d) {
+	public SortedSet<Route> findRoutes(GeoLoc o, GeoLoc d) {
 		routes.clear();
 		path.clear();
 		findPaths(0, o, d);

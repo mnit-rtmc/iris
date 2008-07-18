@@ -126,7 +126,7 @@ public class R_NodeProperties extends TMSObjectForm {
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
 		det_list = (IndexedList)tms.getDetectors().getList();
-		location = new LocationPanel(admin, r_node.getLocation(),
+		location = new LocationPanel(admin, r_node.getGeoLoc(),
 			connection.getSonarState());
 		det_table.setAutoCreateColumnsFromModel(false);
 		det_table.setColumnModel(

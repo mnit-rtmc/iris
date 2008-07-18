@@ -56,7 +56,7 @@ final class NodeForm extends TMSObjectForm {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
-		location = new LocationPanel(admin, node.getLocation(),
+		location = new LocationPanel(admin, node.getGeoLoc(),
 			connection.getSonarState());
 		notes.setText(node.getNotes());
 		super.initialize();

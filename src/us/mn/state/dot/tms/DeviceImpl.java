@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,13 +38,13 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 
 	/** Create a new device */
 	public DeviceImpl() throws RemoteException {
-		location = new LocationImpl();
+		geo_loc = null;
 		notes = "";
 	}
 
 	/** Constructor needed for ObjectVault */
 	protected DeviceImpl(FieldMap fields) throws RemoteException {
-		location = (LocationImpl)fields.get("location");
+		// hmmm
 	}
 
 	/** Initialize the controller for this device */
@@ -171,11 +171,24 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	}
 
 	/** Device location */
-	protected final LocationImpl location;
+	protected String geo_loc;
+
+	/** Set the controller location */
+	public synchronized void setGeoLoc(String l) throws TMSException {
+		if(l == geo_loc)
+			return;
+		store.update(this, "geo_loc", l);
+		geo_loc = l;
+	}
 
 	/** Get the device location */
-	public Location getLocation() {
-		return location;
+	public String getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Lookup the geo location */
+	public GeoLocImpl lookupGeoLoc() {
+		return lookupGeoLoc(geo_loc);
 	}
 
 	/** Administrator notes for this device */

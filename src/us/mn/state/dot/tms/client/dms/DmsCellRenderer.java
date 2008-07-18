@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 
 /**
  * This class renders DMSs in a JList within the DmsStatusSummary.
@@ -168,9 +167,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Set the DMS to be displayed */
 	protected void setDms(DMSProxy proxy) {
-		LocationProxy loc = (LocationProxy)proxy.getLocation();
 		lblID.setText(proxy.getId());
-		lblLocation.setText(loc.getDescription());
+		lblLocation.setText(proxy.getDescription());
 		lblCamera.setText(proxy.getCameraId());
 		SignMessage message = proxy.getMessage();
 		if(message != null && !message.isBlank()) {

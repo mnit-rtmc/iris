@@ -69,7 +69,7 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		location = new LocationPanel(admin, device.getLocation(),
+		location = new LocationPanel(admin, device.getGeoLoc(),
 			connection.getSonarState());
 		location.initialize();
 		location.addNote(notes);

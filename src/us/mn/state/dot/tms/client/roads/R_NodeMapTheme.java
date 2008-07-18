@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class R_NodeMapTheme extends StyledTheme {
 	public Style getStyle(MapObject o) {
 		if(o instanceof R_NodeProxy) {
 			R_NodeProxy n = (R_NodeProxy)o;
-			if(!n.getLocation().hasGPS())
+			if(!n.hasGPS())
 				return NO_GPS;
 //			if(n.hasMismatch())
 //				return MISMATCH;

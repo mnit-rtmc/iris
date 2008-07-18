@@ -23,7 +23,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
 import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
@@ -130,12 +129,12 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 	}
 
 	/** Get a filtered list of detectors matching a location */
-	public synchronized List<DetectorImpl> getFiltered(LocationImpl loc) {
+	public synchronized List<DetectorImpl> getFiltered(GeoLoc loc) {
 		LinkedList<DetectorImpl> r = new LinkedList<DetectorImpl>();
 		Iterator it = list.iterator();
 		while(it.hasNext()) {
 			DetectorImpl d = (DetectorImpl)it.next();
-			if(loc.matches((LocationImpl)d.getLocation()))
+			if(GeoLocHelper.matches(loc, d.lookupGeoLoc()))
 				r.add(d);
 		}
 		return r;

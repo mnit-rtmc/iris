@@ -76,10 +76,10 @@ public class Corridor {
 		new TreeMap<Float, R_NodeImpl>();
 
 	/** Create a new corridor */
-	public Corridor(boolean order, LocationImpl loc) {
-		name = loc.getCorridor();
+	public Corridor(boolean order, GeoLoc loc) {
+		name = GeoLocHelper.getCorridor(loc);
 		order_down_up = order;
-		freeway = loc.getFreeway();
+		freeway = loc.getFreeway().getName();
 		free_dir = loc.getFreeDir();
 	}
 
@@ -237,7 +237,7 @@ public class Corridor {
 	}
 
 	/** Calculate the mile point for a location */
-	public float calculateMilePoint(LocationImpl loc)
+	public float calculateMilePoint(GeoLoc loc)
 		throws BadRouteException
 	{
 		if(n_points.isEmpty())
@@ -291,7 +291,7 @@ public class Corridor {
 	}
 
 	/** Find the nearest node downstream from the given location */
-	public R_NodeImpl findDownstreamNode(LocationImpl loc)
+	public R_NodeImpl findDownstreamNode(GeoLoc loc)
 		throws BadRouteException
 	{
 		float m = calculateMilePoint(loc);
@@ -338,9 +338,8 @@ public class Corridor {
 		// FIXME: there may be more than one linked CD road
 		for(R_NodeImpl r_node: n_points.values()) {
 			if(r_node.isCD()) {
-				LocationImpl l =
-					(LocationImpl)r_node.getLocation();
-				String c = l.getLinkedCorridor();
+				GeoLoc l = r_node.lookupGeoLoc();
+				String c = GeoLocHelper.getLinkedCorridor(l);
 				if(c != null)
 					return c;
 			}

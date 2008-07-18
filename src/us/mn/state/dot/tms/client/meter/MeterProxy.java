@@ -19,6 +19,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -90,23 +91,7 @@ public class MeterProxy extends TrafficDeviceProxy {
 
 	/** Get a string location of the ramp meter */
 	public String getLocationString() {
-		StringBuffer l = new StringBuffer();
-		String f = loc.getFreeway();
-		String c = loc.getCrossDescription();
-		if(c.length() > 0) {
-			l.append(c);
-			if(f.length() > 0)
-				l.append(" to ");
-		}
-		if(f.length() > 0) {
-			l.append(f);
-			l.append(' ');
-			l.append(RampMeter.DIRECTION[loc.getFreeDir()]);
-		}
-		if(l.length() > 0)
-			return l.toString();
-		else
-			return "Unknown location";
+		return GeoLocHelper.getMeterDescription(loc);
 	}
 
 	/** Update the ramp meter status information */

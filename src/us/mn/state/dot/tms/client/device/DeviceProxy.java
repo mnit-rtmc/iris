@@ -16,12 +16,13 @@ package us.mn.state.dot.tms.client.device;
 
 import java.awt.geom.AffineTransform;
 import java.rmi.RemoteException;
-
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Device;
-import us.mn.state.dot.tms.Location;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
+import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.GeoTransform;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 
 /**
@@ -36,8 +37,14 @@ abstract public class DeviceProxy extends TmsMapProxy implements Device {
 	/** The device being proxied */
 	private final Device device;
 
+	/** Device location name */
+	protected String geo_loc;
+
 	/** Device location */
-	protected LocationProxy loc;
+	protected GeoLoc loc;
+
+	/** Device transform */
+	protected GeoTransform trans;
 
 	/** The cached active value */
 	private boolean active;
@@ -49,7 +56,6 @@ abstract public class DeviceProxy extends TmsMapProxy implements Device {
 	public DeviceProxy(Device device) {
 		super( device );
 		this.device = device;
-		loc = null;
 	}
 
 	/** Refresh the status information */
@@ -60,9 +66,9 @@ abstract public class DeviceProxy extends TmsMapProxy implements Device {
 
 	/** Refresh the update information */
 	public void updateUpdateInfo() throws RemoteException {
-		if(loc == null)
-			loc = new LocationProxy(device.getLocation());
-		loc.updateUpdateInfo();
+		geo_loc = device.getGeoLoc();
+		loc = SonarState.singleton.lookupGeoLoc(geo_loc);
+		trans = new GeoTransform(loc);
 	}
 
 	/** Get the controller to which this device is attached */
@@ -88,23 +94,43 @@ abstract public class DeviceProxy extends TmsMapProxy implements Device {
 	}
 
 	/** Get the device location */
-	public Location getLocation() {
-		return loc;
+	public String getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Set the device location */
+	public void setGeoLoc(String l) {
+		// FIXME
+	}
+
+	/** Get the geo location description */
+	public String getDescription() {
+		return GeoLocHelper.getDescription(loc);
+	}
+
+	/** Get the cross street description */
+	public String getCrossDescription() {
+		return GeoLocHelper.getCrossDescription(loc);
+	}
+
+	/** Get the freeway direction */
+	public short getFreeDir() {
+		return loc.getFreeDir();
 	}
 
 	/** Check if the location is valid */
 	public boolean hasLocation() {
-		return !loc.isZero();
+		return !GeoLocHelper.isNull(loc);
 	}
 
 	/** Get the transform to render as a map object */
 	public AffineTransform getTransform() {
-		return loc.getTransform();
+		return trans.getTransform();
 	}
 
 	/** Get the inverse transform */
 	public AffineTransform getInverseTransform() {
-		return loc.getInverseTransform();
+		return trans.getInverseTransform();
 	}
 
 	/** Get the active status */

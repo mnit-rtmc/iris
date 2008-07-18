@@ -52,7 +52,7 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 		if(!m.matches()) throw
 			new ChangeVetoException("Invalid Node ID: " + i);
 		id = i;
-		location = new LocationImpl();
+		geo_loc = null;
 		notes = "";
 	}
 
@@ -60,7 +60,6 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 	protected NodeImpl(FieldMap fields) throws RemoteException {
 		node_group = (NodeGroupImpl)fields.get("node_group");
 		id = (String)fields.get("id");
-		location = (LocationImpl)fields.get("location");
 	}
 
 	/** Get a mapping of the columns */
@@ -84,7 +83,7 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 
 	/** Get a string representation of the node */
 	public String toString() {
-		return id + ": " + location.toString();
+		return id + ": " + GeoLocHelper.getDescription(lookupGeoLoc());
 	}
 
 	/** Node group for this node */
@@ -100,11 +99,24 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 	public String getId() { return id; }
 
 	/** Node location */
-	protected final LocationImpl location;
+	protected String geo_loc;
+
+	/** Set the controller location */
+	public synchronized void setGeoLoc(String l) throws TMSException {
+		if(l == geo_loc)
+			return;
+		store.update(this, "geo_loc", l);
+		geo_loc = l;
+	}
 
 	/** Get the node location */
-	public Location getLocation() {
-		return location;
+	public String getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Lookup the geo location */
+	public GeoLocImpl lookupGeoLoc() {
+		return lookupGeoLoc(geo_loc);
 	}
 
 	/** Array of circuits within this node */

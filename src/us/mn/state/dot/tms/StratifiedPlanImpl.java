@@ -831,7 +831,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 		protected void followEntrance(R_NodeImpl n) {
-			LocationImpl branch = (LocationImpl)n.getLocation();
+			GeoLoc branch = n.lookupGeoLoc();
 			Corridor c = n.getLinkedCorridor();
 			if(c != null) {
 				Corridor.NodeFinder nf =
@@ -840,10 +840,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					return;
 			}
 			ZONE_LOG.log("Missing entrance detection @ " +
-				branch.getDescription());
+				GeoLocHelper.getDescription(branch));
 		}
 		protected void followExit(R_NodeImpl n) {
-			LocationImpl branch = (LocationImpl)n.getLocation();
+			GeoLoc branch = n.lookupGeoLoc();
 			Corridor c = n.getLinkedCorridor();
 			if(c != null) {
 				Corridor.NodeFinder nf =
@@ -852,7 +852,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 					return;
 			}
 			ZONE_LOG.log("Missing exit detection @ " +
-				branch.getDescription());
+				GeoLocHelper.getDescription(branch));
 		}
 		public boolean check(R_NodeImpl n) {
 			int nt = n.getNodeType();
@@ -893,12 +893,12 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected final ZoneBuilder zone_builder;
 
 		/** Location of the entrance node onto corridor */
-		protected final LocationImpl branch;
+		protected final GeoLoc branch;
 
 		/** Have we found the matching exit node to branch? */
 		protected boolean found;
 
-		protected EntranceFollower(ZoneBuilder zb, LocationImpl b) {
+		protected EntranceFollower(ZoneBuilder zb, GeoLoc b) {
 			zone_builder = zb;
 			branch = b;
 			found = false;
@@ -934,14 +934,14 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			return false;
 		}
 		protected boolean is_not_CD(R_NodeImpl n) {
-			LocationImpl loc = (LocationImpl)n.getLocation();
-			return !loc.matchesRoot(branch);
+			GeoLoc loc = n.lookupGeoLoc();
+			return !GeoLocHelper.matchesRoot(loc, branch);
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
 			if(n.getNodeType() != R_Node.TYPE_EXIT)
 				return false;
-			LocationImpl loc = (LocationImpl)n.getLocation();
-			if(loc.rampMatches(branch)) {
+			GeoLoc loc = n.lookupGeoLoc();
+			if(GeoLocHelper.rampMatches(loc, branch)) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {
@@ -960,12 +960,12 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected final ZoneBuilder zone_builder;
 
 		/** Location of the exit node onto corridor */
-		protected final LocationImpl branch;
+		protected final GeoLoc branch;
 
 		/** Have we found the matching entrance node to branch? */
 		protected boolean found;
 
-		protected ExitFollower(ZoneBuilder zb, LocationImpl b) {
+		protected ExitFollower(ZoneBuilder zb, GeoLoc b) {
 			zone_builder = zb;
 			branch = b;
 			found = false;
@@ -999,8 +999,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected boolean check_not_found(R_NodeImpl n) {
 			if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
 				return false;
-			LocationImpl loc = (LocationImpl)n.getLocation();
-			if(loc.rampMatches(branch)) {
+			GeoLoc loc = n.lookupGeoLoc();
+			if(GeoLocHelper.rampMatches(loc, branch)) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
 				if(ds.size() > 0) {

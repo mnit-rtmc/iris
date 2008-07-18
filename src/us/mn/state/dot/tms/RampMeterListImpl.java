@@ -106,20 +106,27 @@ class RampMeterListImpl extends SortedListImpl implements RampMeterList {
 		}
 	}
 
+	/** Test if a meter is on the specified corridor */
+	static protected boolean matchesCorridor(Road freeway, short fd,
+		RampMeterImpl meter)
+	{
+		GeoLoc loc = meter.lookupGeoLoc();
+		Road f = loc.getFreeway();
+		if(freeway == null || f == null)
+			return false;
+		return (freeway == f) &&
+			(GeoLocHelper.filterDirection(fd, f) ==
+			 GeoLocHelper.filterDirection(loc.getFreeDir(), f));
+	}
+
 	/** Find a stratified timing plan from the same freeway/direction */
-	public synchronized StratifiedPlanImpl findStratifiedPlan(
-		RoadImpl freeway, short freeDir, int period)
+	public synchronized StratifiedPlanImpl findStratifiedPlan(Road freeway,
+		short freeDir, int period)
 	{
 		Iterator it = iterator();
 		while(it.hasNext()) {
 			RampMeterImpl meter = (RampMeterImpl)it.next();
-			LocationImpl loc = (LocationImpl)meter.getLocation();
-			RoadImpl f = loc.lookupFreeway();
-			short fd = loc.getFreeDir();
-			if(f == freeway &&
-				(freeway.filterDirection(fd) ==
-				freeway.filterDirection(freeDir)))
-			{
+			if(matchesCorridor(freeway, freeDir, meter)) {
 				StratifiedPlanImpl plan =
 					meter.findStratifiedPlan(period);
 				if(plan != null)

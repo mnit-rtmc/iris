@@ -322,11 +322,13 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		return getOID().toString();
 	}
 
-	/** Lookup a road in the SONAR namespace */
-	static protected RoadImpl lookupRoad(final String r) {
+	/** Lookup a geo location in the SONAR namespace */
+	static protected GeoLocImpl lookupGeoLoc(final String l) {
+		if(l == null)
+			return null;
 		try {
-			return (RoadImpl)namespace.lookupObject(Road.SONAR_TYPE,
-				r);
+			return (GeoLocImpl)namespace.lookupObject(
+				GeoLoc.SONAR_TYPE, l);
 		}
 		catch(NamespaceError e) {
 			e.printStackTrace();

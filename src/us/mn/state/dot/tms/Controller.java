@@ -56,7 +56,10 @@ public interface Controller extends TMSObject {
 	public boolean isActive() throws RemoteException;
 
 	/** Get the controller location */
-	public Location getLocation() throws RemoteException;
+	String getGeoLoc() throws RemoteException;
+
+	/** Set the controller location */
+	void setGeoLoc(String l) throws TMSException, RemoteException;
 
 	/** Get the administrator notes */
 	public String getNotes() throws RemoteException;

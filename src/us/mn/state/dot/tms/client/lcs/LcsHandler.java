@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.device.DeviceHandlerImpl;
 import us.mn.state.dot.tms.client.device.NamedListModel;
 import us.mn.state.dot.tms.client.device.TrafficDeviceProxy;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 
@@ -82,10 +81,9 @@ public class LcsHandler extends DeviceHandlerImpl {
 
 	/** Get the status list model for the specified traffic device */
 	protected NamedListModel getStatusModel(TrafficDeviceProxy proxy) {
-		if(proxy.isActive()) {
-			LocationProxy loc = (LocationProxy)proxy.getLocation();
-			return getDirectionModel(loc.getFreeDir());
-		} else
+		if(proxy.isActive())
+			return getDirectionModel(proxy.getFreeDir());
+		else
 			return null;
 	}
 

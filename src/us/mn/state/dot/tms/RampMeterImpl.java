@@ -251,9 +251,10 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	public void addStratifiedTimingPlan(int period) throws TMSException,
 		RemoteException
 	{
-		RoadImpl freeway = location.lookupFreeway();
+		GeoLoc loc = lookupGeoLoc();
+		Road freeway = loc.getFreeway();
 		if(freeway != null) {
-			short freeDir = location.getFreeDir();
+			short freeDir = loc.getFreeDir();
 			MeterPlanImpl plan = meterList.findStratifiedPlan(
 				freeway, freeDir, period);
 			if(plan == null)
@@ -308,9 +309,10 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	public void checkStratifiedPlans() throws TMSException {
 		StratifiedPlanImpl am_plan = null;
 		StratifiedPlanImpl pm_plan = null;
-		RoadImpl freeway = location.lookupFreeway();
+		GeoLoc loc = lookupGeoLoc();
+		Road freeway = loc.getFreeway();
 		if(freeway != null) {
-			short freeDir = location.getFreeDir();
+			short freeDir = loc.getFreeDir();
 			am_plan = meterList.findStratifiedPlan(freeway,
 				freeDir, TimingPlan.AM);
 			pm_plan = meterList.findStratifiedPlan(freeway,
@@ -746,13 +748,14 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the detector set associated with the ramp meter */
 	public DetectorSet getDetectorSet() {
+		final GeoLoc loc = lookupGeoLoc();
 		final DetectorSet ds = new DetectorSet();
 		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
 			public boolean check(R_NodeImpl n) {
 				if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
 					return false;
-				LocationImpl l = (LocationImpl)n.getLocation();
-				if(l.matchesRoot(location))
+				GeoLoc l = n.lookupGeoLoc();
+				if(GeoLocHelper.matchesRoot(l, loc))
 					ds.addDetectors(n.getDetectorSet());
 				return false;
 			}
@@ -781,12 +784,14 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the ID of the corridor containing the ramp meter */
 	public String getCorridorID() {
-		return location.getCorridorID();
+		GeoLoc loc = lookupGeoLoc();
+		return GeoLocHelper.getCorridorID(loc);
 	}
 
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
-		return nodeMap.getCorridor(location.getCorridor());
+		GeoLoc loc = lookupGeoLoc();
+		return nodeMap.getCorridor(GeoLocHelper.getCorridor(loc));
 	}
 
 	/** Print a single detector as an XML element */
@@ -804,12 +809,13 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the label of a ramp meter */
 	protected String getLabel() {
+		GeoLoc loc = lookupGeoLoc();
 		StringBuffer b = new StringBuffer();
-		b.append(DIRECTION[location.getCrossDir()]);
+		b.append(DIRECTION[loc.getCrossDir()]);
 		b.append(' ');
-		String x = location.getCrossStreet();
+		Road x = loc.getCrossStreet();
 		if(x != null)
-			b.append(x);
+			b.append(x.getName());
 		return replaceEntities(b.toString().trim());
 	}
 

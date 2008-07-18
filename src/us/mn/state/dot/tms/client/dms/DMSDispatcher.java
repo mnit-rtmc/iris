@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -278,9 +277,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	public void refreshUpdate() {
 		DMSProxy proxy = selectedSign;	// Avoid NPE race
 		if(proxy != null) {
-			LocationProxy loc = (LocationProxy)proxy.getLocation();
 			txtId.setText(proxy.getId());
-			txtLocation.setText(loc.getDescription());
+			txtLocation.setText(proxy.getDescription());
 			txtCamera.setText(proxy.getCameraId());
 			messageSelector.updateModel(proxy);
 		}

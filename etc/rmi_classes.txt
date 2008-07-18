@@ -23,6 +23,8 @@ us/mn/state/dot/tms/DMSList.class
 us/mn/state/dot/tms/ErrorCounter.class
 us/mn/state/dot/tms/Font.class
 us/mn/state/dot/tms/Glyph.class
+us/mn/state/dot/tms/GeoLoc.class
+us/mn/state/dot/tms/GeoLocHelper.class
 us/mn/state/dot/tms/Graphic.class
 us/mn/state/dot/tms/Holiday.class
 us/mn/state/dot/tms/IndexedList.class
@@ -31,7 +33,6 @@ us/mn/state/dot/tms/LaneControlSignal.class
 us/mn/state/dot/tms/LCSList.class
 us/mn/state/dot/tms/LCSModule.class
 us/mn/state/dot/tms/LocalDataFactory*.class
-us/mn/state/dot/tms/Location.class
 us/mn/state/dot/tms/Login.class
 us/mn/state/dot/tms/MessageList.class
 us/mn/state/dot/tms/MeterPlan.class

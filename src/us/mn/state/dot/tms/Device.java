@@ -31,7 +31,10 @@ public interface Device extends TMSObject, ControllerIO {
 	public boolean isFailed() throws RemoteException;
 
 	/** Get the device location */
-	public Location getLocation() throws RemoteException;
+	String getGeoLoc() throws RemoteException;
+
+	/** Set the device location */
+	void setGeoLoc(String l) throws TMSException, RemoteException;
 
 	/** Get the administrator notes */
 	public String getNotes() throws RemoteException;

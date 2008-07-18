@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +22,18 @@ package us.mn.state.dot.tms;
 public class ODPair {
 
 	/** Origin location */
-	protected final LocationImpl origin;
+	protected final GeoLoc origin;
 
 	/** Get the origin location */
-	public LocationImpl getOrigin() {
+	public GeoLoc getOrigin() {
 		return origin;
 	}
 
 	/** Destination location */
-	protected final LocationImpl destination;
+	protected final GeoLoc destination;
 
 	/** Get the destination location */
-	public LocationImpl getDestination() {
+	public GeoLoc getDestination() {
 		return destination;
 	}
 
@@ -46,7 +46,7 @@ public class ODPair {
 	}
 
 	/** Create a new O/D pair */
-	public ODPair(LocationImpl o, LocationImpl d, boolean t) {
+	public ODPair(GeoLoc o, GeoLoc d, boolean t) {
 		origin = o;
 		destination = d;
 		turn = t;
@@ -54,14 +54,14 @@ public class ODPair {
 
 	/** Get a string representation */
 	public String toString() {
-		return "o: " + origin.getDescription() + ", d: " +
-			destination.getDescription();
+		return "o: " + GeoLocHelper.getDescription(origin) + ", d: " +
+			GeoLocHelper.getDescription(destination);
 	}
 
 	/** Get the corridor name (if O/D on same corridor) */
 	public String getCorridor() {
-		if(origin.isSameCorridor(destination))
-			return origin.getCorridor();
+		if(GeoLocHelper.isSameCorridor(origin, destination))
+			return GeoLocHelper.getCorridor(origin);
 		else
 			return null;
 	}

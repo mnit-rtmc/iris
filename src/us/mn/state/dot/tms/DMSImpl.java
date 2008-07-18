@@ -546,10 +546,11 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Create one route to a travel time destination */
 	protected Route createRoute(StationImpl s) {
 		R_NodeImpl r_node = s.getR_Node();
-		LocationImpl dest = (LocationImpl)r_node.getLocation();
+		GeoLoc dest = r_node.lookupGeoLoc();
 		RouteBuilder builder = new RouteBuilder(getId(), nodeMap,
 			MAX_ROUTE_LEGS, MAX_ROUTE_DISTANCE);
-		SortedSet<Route> routes = builder.findRoutes(location, dest);
+		GeoLoc loc = lookupGeoLoc();
+		SortedSet<Route> routes = builder.findRoutes(loc, dest);
 		if(routes.size() > 0)
 			return routes.first();
 		else

@@ -68,26 +68,39 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	}
 
 	/** Node location */
-	protected final LocationImpl location;
+	protected String geo_loc;
+
+	/** Set the controller location */
+	public synchronized void setGeoLoc(String l) throws TMSException {
+		if(l == geo_loc)
+			return;
+		store.update(this, "geo_loc", l);
+		geo_loc = l;
+	}
 
 	/** Get the location */
-	public Location getLocation() {
-		return location;
+	public String getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Lookup the geo location */
+	public GeoLocImpl lookupGeoLoc() {
+		return lookupGeoLoc(geo_loc);
 	}
 
 	/** Check if the location is valid */
 	public boolean hasLocation() {
-		return !location.isZero();
+		return !GeoLocHelper.isNull(lookupGeoLoc());
 	}
 
 	/** Calculate the distance to another roadway node (in meters) */
 	public double metersTo(R_NodeImpl other) {
-		return location.metersTo(other.location);
+		return metersTo(other.lookupGeoLoc());
 	}
 
 	/** Calculate the distance to another location (in meters) */
-	public double metersTo(LocationImpl loc) {
-		return location.metersTo(loc);
+	public double metersTo(GeoLoc loc) {
+		return GeoLocHelper.metersTo(lookupGeoLoc(), loc);
 	}
 
 	/** Node type */
@@ -365,7 +378,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Get all detectors with a matching location */
 	public Detector[] getMatchingDetectors() {
-		List<DetectorImpl> dets = detList.getFiltered(location);
+		List<DetectorImpl> dets = detList.getFiltered(lookupGeoLoc());
 		Iterator<DetectorImpl> it = dets.iterator();
 		while(it.hasNext()) {
 			DetectorImpl det = it.next();
@@ -437,12 +450,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Create a new r_node */
 	public R_NodeImpl() throws RemoteException {
-		location = new LocationImpl();
+		geo_loc = null;
 	}
 
 	/** Create an r_node from an ObjectVault field map */
 	protected R_NodeImpl(FieldMap fields) throws RemoteException {
-		location = (LocationImpl)fields.get("location");
+		// hmmmm
 	}
 
 	/** Initialize transient fields */
@@ -473,24 +486,26 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Get the true UTM Northing (without offset) */
 	protected int getTrueNorthing() {
-		return location.getTrueNorthing();
+		return GeoLocHelper.getTrueNorthing(lookupGeoLoc());
 	}
 
 	/** Get the true UTM Easting (without offset) */
 	protected int getTrueEasting() {
-		return location.getTrueEasting();
+		return GeoLocHelper.getTrueEasting(lookupGeoLoc());
 	}
 
 	/** Test if an other r_node is a matching entrance */
 	protected boolean isMatchingEntrance(R_NodeImpl other) {
 		return other.isEntrance() &&
-			location.rampMatches(other.location);
+			GeoLocHelper.rampMatches(lookupGeoLoc(),
+			other.lookupGeoLoc());
 	}
 
 	/** Test if an other r_node is a matching access */
 	protected boolean isMatchingAccess(R_NodeImpl other) {
 		return other.isAccess() &&
-			location.accessMatches(other.location);
+			GeoLocHelper.accessMatches(lookupGeoLoc(),
+			other.lookupGeoLoc());
 	}
 
 	/** Test if an other r_node links with this (exit) r_node */
@@ -501,7 +516,8 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	/** Test if an other r_node links with this (access) r_node */
 	public boolean isAccessLink(R_NodeImpl other) {
 		return other.isEntrance() &&
-			location.accessMatches(other.location);
+			GeoLocHelper.accessMatches(lookupGeoLoc(),
+			other.lookupGeoLoc());
 	}
 
 	/** Downstream roadway nodes */
@@ -525,7 +541,8 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Get the linked corridor for an entrance or exit */
 	public Corridor getLinkedCorridor() {
-		return nodeMap.getCorridor(location.getLinkedCorridor());
+		return nodeMap.getCorridor(GeoLocHelper.getLinkedCorridor(
+			lookupGeoLoc()));
 	}
 
 	/** Print the r_node as an XML element */
@@ -538,11 +555,16 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		String sid = getStationID();
 		if(sid.length() > 0)
 			out.print("station_id='" + sid + "' ");
-		String xs = location.getCrossStreet();
-		if(xs != null)
-			out.print("label='" + replaceEntities(xs) + "' ");
-		out.print("easting='" + getTrueEasting() + "' ");
-		out.print("northing='" + getTrueNorthing() + "' ");
+		GeoLoc loc = lookupGeoLoc();
+		if(loc != null) {
+			Road x = loc.getCrossStreet();
+			if(x != null) {
+				String xs = replaceEntities(x.getName());
+				out.print("label='" + xs + "' ");
+			}
+			out.print("easting='" + getTrueEasting() + "' ");
+			out.print("northing='" + getTrueNorthing() + "' ");
+		}
 		int l = getLanes();
 		if(l != 0)
 			out.print("lanes='" + l + "' ");

@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
@@ -43,6 +44,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Douglas Lau
  */
 public class SonarState extends Client {
+
+	/** FIXME: this is a temporary hack */
+	static public SonarState singleton;
 
 	/** Cache of role proxies */
 	protected final TypeCache<Role> roles;
@@ -140,6 +144,14 @@ public class SonarState extends Client {
 		return road_model;
 	}
 
+	/** Cache of geo locations */
+	protected final TypeCache<GeoLoc> geo_locs;
+
+	/** Get the geo location cache */
+	public TypeCache<GeoLoc> getGeoLocs() {
+		return geo_locs;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -182,10 +194,12 @@ public class SonarState extends Client {
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
 		roads = new TypeCache<Road>(Road.class);
 		road_model = new ProxyListModel<Road>(roads);
+		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class);
 		sign_text = new TypeCache<SignText>(SignText.class);
+		singleton = this;
 	}
 
 	/** Login to the SONAR server */
@@ -203,6 +217,7 @@ public class SonarState extends Client {
 		populate(glyphs);
 		populate(monitors);
 		populate(roads);
+		populate(geo_locs);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
@@ -224,5 +239,15 @@ public class SonarState extends Client {
 				// Do nothing
 			}
 		}
+	}
+
+	/** Lookup the specified road */
+	public Road lookupRoad(String name) {
+		return roads.getObject(name);
+	}
+
+	/** Lookup a geo location */
+	public GeoLoc lookupGeoLoc(String name) {
+		return geo_locs.getObject(name);
 	}
 }

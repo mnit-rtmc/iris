@@ -138,17 +138,18 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Get the detector label */
 	public String getLabel(boolean statName) {
-		RoadImpl freeway = location.lookupFreeway();
-		RoadImpl cross = location.lookupCrossStreet();
+		GeoLoc loc = lookupGeoLoc();
+		Road freeway = loc.getFreeway();
+		Road cross = loc.getCrossStreet();
 		if(freeway == null || cross == null) {
 			if(isActive())
 				return "INVALID";
 			else
 				return "FUTURE";
 		}
-		short freeDir = location.getFreeDir();
-		short crossDir = location.getCrossDir();
-		short crossMod = location.getCrossMod();
+		short freeDir = loc.getFreeDir();
+		short crossDir = loc.getCrossDir();
+		short crossMod = loc.getCrossMod();
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(freeway.getAbbrev());
 		buffer.append("/");
@@ -310,9 +311,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Test if the given detector is a speed pair with this detector */
 	public boolean isSpeedPair(Object o) {
+		GeoLoc loc = lookupGeoLoc();
 		if(o instanceof DetectorImpl) {
 			DetectorImpl d = (DetectorImpl)o;
-			return location.matches(d.location) &&
+			GeoLoc oloc = d.lookupGeoLoc();
+			return GeoLocHelper.matches(loc, oloc) &&
 				laneNumber == d.laneNumber &&
 				!d.isVelocity() && d.isMainline();
 		}
@@ -549,11 +552,12 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Get the volume "no hit" threshold */
 	protected int getNoHitThreshold() {
+		GeoLoc loc = lookupGeoLoc();
 		if(isRamp()) {
-			RoadImpl freeway = location.lookupFreeway();
+			Road freeway = loc.getFreeway();
 			if(freeway != null && REV.equals(freeway.getName()))
 				return SAMPLE_3_DAYS;
-			RoadImpl cross = location.lookupCrossStreet();
+			Road cross = loc.getCrossStreet();
 			if(cross != null && REV.equals(cross.getName()))
 				return SAMPLE_3_DAYS;
 		}

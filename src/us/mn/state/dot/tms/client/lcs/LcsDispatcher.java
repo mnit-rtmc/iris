@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 
 /**
  * GUI for controlling a LaneControlSignal object.
@@ -159,10 +158,9 @@ public class LcsDispatcher extends JPanel implements TmsSelectionListener {
 	public void refreshUpdate() {
 		LcsProxy lcs = selectedLcs;	// Avoid NPE
 		if(lcs != null) {
-			LocationProxy loc = (LocationProxy)lcs.getLocation();
 			txtCamera.setText(lcs.getCameraId());
 			txtId.setText(lcs.getId());
-			txtLocation.setText(loc.getDescription());
+			txtLocation.setText(lcs.getDescription());
 		}
 	}
 

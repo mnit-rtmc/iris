@@ -25,9 +25,10 @@ import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.tms.Location;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.SonarState;
 
@@ -38,13 +39,22 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class LocationPanel extends FormPanel {
 
-	/** Get the int value of a spinner */
+	/** Get the Integer value of a spinner */
 	static protected int getSpinnerInt(JSpinner s) {
-		return ((Number)s.getValue()).intValue();
+		return (Integer)s.getValue();
 	}
 
-	/** Remote location object */
-	protected final Location loc;
+	/** Get the Integer value of a spinner */
+	static protected Integer getSpinnerInteger(JSpinner s) {
+		int i = getSpinnerInt(s);
+		if(i != 0)
+			return i;
+		else
+			return null;
+	}
+
+	/** Location object */
+	protected final GeoLoc loc;
 
 	/** Sonar state object */
 	protected final SonarState state;
@@ -84,10 +94,10 @@ public class LocationPanel extends FormPanel {
 	protected final JButton select = new JButton("Select Point");
 
 	/** Create a new location panel */
-	public LocationPanel(boolean enable, Location l, SonarState st) {
+	public LocationPanel(boolean enable, String l, SonarState st) {
 		super(enable);
-		loc = l;
 		state = st;
+		loc = st.lookupGeoLoc(l);
 	}
 
 	/** Initialize the location panel */
@@ -143,7 +153,7 @@ public class LocationPanel extends FormPanel {
 	}
 
 	/** Update the location panel */
-	public void doUpdate() throws RemoteException {
+	public void doUpdate() {
 		freeBox.setSelectedItem(loc.getFreeway());
 		freeDir.setSelectedIndex(loc.getFreeDir());
 		crossMod.setSelectedIndex(loc.getCrossMod());
@@ -157,15 +167,17 @@ public class LocationPanel extends FormPanel {
 
 	/** Apply button is pressed */
 	public void applyPressed() throws Exception {
-		loc.setFreeway((String)freeBox.getSelectedItem());
+		Road f = state.lookupRoad((String)freeBox.getSelectedItem());
+		Road c = state.lookupRoad((String)crossBox.getSelectedItem());
+		Integer x = getSpinnerInteger(easting);
+		Integer xO = getSpinnerInteger(eastOff);
+		Integer y = getSpinnerInteger(northing);
+		Integer yO = getSpinnerInteger(northOff);
+		loc.setFreeway(f);
 		loc.setFreeDir((short)freeDir.getSelectedIndex());
 		loc.setCrossMod((short)crossMod.getSelectedIndex());
-		loc.setCrossStreet((String)crossBox.getSelectedItem());
+		loc.setCrossStreet(c);
 		loc.setCrossDir((short)crossDir.getSelectedIndex());
-		int x = getSpinnerInt(easting);
-		int xO = getSpinnerInt(eastOff);
-		int y = getSpinnerInt(northing);
-		int yO = getSpinnerInt(northOff);
 		loc.setEasting(x);
 		loc.setEastOffset(xO);
 		loc.setNorthing(y);

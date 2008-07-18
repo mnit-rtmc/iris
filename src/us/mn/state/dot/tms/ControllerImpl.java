@@ -56,14 +56,13 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		drop = d;
 		version = UNKNOWN;
 		counters = new int[ TYPES.length ][ PERIODS.length ];
-		location = new LocationImpl();
+		geo_loc = null;
 		notes = "";
 	}
 
 	/** Create a controller from an ObjectVault field map */
 	protected ControllerImpl( FieldMap fields ) throws RemoteException {
-		super();
-		location = (LocationImpl)fields.get("location");
+		// hmmmm
 	}
 
 	/** Get a mapping of the columns */
@@ -169,11 +168,24 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	public boolean isActive() { return active; }
 
 	/** Controller location */
-	protected final LocationImpl location;
+	protected String geo_loc;
+
+	/** Set the controller location */
+	public synchronized void setGeoLoc(String l) throws TMSException {
+		if(l == geo_loc)
+			return;
+		store.update(this, "geo_loc", l);
+		geo_loc = l;
+	}
 
 	/** Get the controller location */
-	public Location getLocation() {
-		return location;
+	public String getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Lookup the geo location */
+	public GeoLocImpl lookupGeoLoc() {
+		return lookupGeoLoc(geo_loc);
 	}
 
 	/** Administrator notes for this controller */

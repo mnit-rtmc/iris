@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,12 @@ import java.awt.geom.Rectangle2D;
 import java.rmi.RemoteException;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
+import us.mn.state.dot.tms.client.proxy.GeoTransform;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 
@@ -46,8 +49,14 @@ public class R_NodeProxy extends TmsMapProxy {
 	/** Object ID */
 	protected final Integer oid;
 
-	/** Location of the roadway node */
-	protected final LocationProxy loc;
+	/** Device location name */
+	protected String geo_loc;
+
+	/** Device location */
+	protected GeoLoc loc;
+
+	/** Device transform */
+	protected GeoTransform trans;
 
 	/** Roadway node type */
 	protected int node_type;
@@ -109,13 +118,12 @@ public class R_NodeProxy extends TmsMapProxy {
 		super(n);
 		r_node = n;
 		oid = r_node.getOID();
-		loc = new LocationProxy(r_node.getLocation());
 		updateUpdateInfo();
 	}
 
 	/** Get a string representation of the node */
 	public String toString() {
-		return oid + " - " + loc.getDescription();
+		return oid + " - " + GeoLocHelper.getDescription(loc);
 	}
 
 	/** Update the proxy status information */
@@ -125,7 +133,9 @@ public class R_NodeProxy extends TmsMapProxy {
 
 	/** Update the proxy update information */
 	public void updateUpdateInfo() throws RemoteException {
-		loc.updateUpdateInfo();
+		geo_loc = r_node.getGeoLoc();
+		loc = SonarState.singleton.lookupGeoLoc(geo_loc);
+		trans = new GeoTransform(loc);
 		node_type = r_node.getNodeType();
 		pickable = r_node.isPickable();
 		transition = r_node.getTransition();
@@ -134,39 +144,47 @@ public class R_NodeProxy extends TmsMapProxy {
 		shift = r_node.getShift();
 		station_id = r_node.getStationID();
 		notes = r_node.getNotes();
-		xStreet = loc.getCrossDescription();
+		xStreet = GeoLocHelper.getCrossDescription(loc);
 	}
 
 	/** Get location */
-	public LocationProxy getLocation() {
+	public GeoLoc getGeoLoc() {
 		return loc;
 	}
 
 	/** Check if the location is valid */
 	public boolean hasLocation() {
-		return !loc.isZero();
+		return !GeoLocHelper.isNull(loc);
 	}
 
 	/** Calculate the distance to another roadway node */
 	public double distanceTo(R_NodeProxy other) {
-		int x = loc.getTrueEasting() - other.loc.getTrueEasting();
-		int y = loc.getTrueNorthing() - other.loc.getTrueNorthing();
-		return Math.hypot(x, y);
+		return GeoLocHelper.metersTo(loc, other.loc);
 	}
 
 	/** Get the corridor which contains the roadway node */
 	public String getCorridor() {
-		return loc.getCorridor();
+		return GeoLocHelper.getCorridor(loc);
+	}
+
+	/** Check if the location has a "true" GPS reading */
+	public boolean hasGPS() {
+		return GeoLocHelper.hasGPS(loc);
+	}
+
+	/** Get the geo transform */
+	public GeoTransform getGeoTransform() {
+		return trans;
 	}
 
 	/** Get the transform to render as a map object */
 	public AffineTransform getTransform() {
-		return loc.getTransform();
+		return trans.getTransform();
 	}
 
 	/** Get the inverse transform */
 	public AffineTransform getInverseTransform() {
-		return loc.getInverseTransform();
+		return trans.getInverseTransform();
 	}
 
 	/** Get the extent of the roadway node */
@@ -178,7 +196,7 @@ public class R_NodeProxy extends TmsMapProxy {
 
 	/** Get the union of the nodes extent with the given extent */
 	public Rectangle2D getUnion(Rectangle2D e) {
-		if(loc.isZero())
+		if(GeoLocHelper.isNull(loc))
 			return e;
 		else if(e == null)
 			return getExtent();

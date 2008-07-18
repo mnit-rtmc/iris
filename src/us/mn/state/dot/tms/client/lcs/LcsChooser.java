@@ -26,7 +26,6 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.device.TmsJList;
-import us.mn.state.dot.tms.client.proxy.LocationProxy;
 import us.mn.state.dot.tms.client.proxy.RefreshListener;
 
 /**
@@ -120,9 +119,8 @@ public class LcsChooser extends JPanel {
 		}
 
 		protected void renderLcs(LcsProxy lcs) {
-			LocationProxy loc = (LocationProxy)lcs.getLocation();
 			id.setText(lcs.getId() + " - " +
-				loc.getCrossDescription());
+				lcs.getCrossDescription());
 			lcsPanel.setLcs(lcs);
 		}
 	}

@@ -191,7 +191,7 @@ public class ControllerForm extends TMSObjectForm {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
-		location = new LocationPanel(admin, contr.getLocation(),
+		location = new LocationPanel(admin, contr.getGeoLoc(),
 			connection.getSonarState());
 		devices = (SortedList)tms.getDevices().getList();
 		deviceBox.setModel(new WrapperComboBoxModel(
