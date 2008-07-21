@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.utils.SDMS;
 
 /**
  * Model for sign text messages. This object is instantiated and contained by
@@ -152,17 +153,26 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	  * @param message Line text.
 	  * @param priority line priority
 	  */
-	protected void createSignText(SignGroup sg,short line,String message,short priority) {
-		//System.err.println("SignMessageModel.createSignText("+line+","+message+","+priority+") called. admin="+m_tmsConnection.isAdmin());
-		if (sg==null || line<1 || message==null || message.length()<=0)
+	protected void createSignText(SignGroup sg,short line,String messarg,short priority) {
+		//System.err.println("SignMessageModel.createSignText("+line+","+messarg+","+priority+") called. admin="+m_tmsConnection.isAdmin());
+		if (sg==null || line<1 || messarg==null || messarg.length()<=0)
 			return;
+
+		// FIXME: this shouldn't go here
+		if(messarg.toLowerCase().equals("soccs message"))
+			return;
+
+		// validate message
+		String mess=SDMS.getValidText(messarg);
+
+		// insert into library
 		String name = createUniqueSignTextName(sg);
 		if(name == null)
 			return;
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("sign_group", sg);
 		attrs.put("line", new Short(line));
-		attrs.put("message", message);
+		attrs.put("message", mess);
 		attrs.put("priority", new Short(priority));
 		sign_text.createObject(name, attrs);
 		//System.err.println("SignMessageModel.createSignText() returning.");
