@@ -36,6 +36,7 @@ public class DebugLog {
 	/** Create a new debug log */
 	public DebugLog(String name) {
 		file = new File(LOG_FILE_DIR + name);
+		log("IRIS @@VERSION@@ restarted");
 	}
 
 	/** File to log debugging information */
