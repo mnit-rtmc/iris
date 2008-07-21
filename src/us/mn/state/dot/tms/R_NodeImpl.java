@@ -94,12 +94,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	}
 
 	/** Calculate the distance to another roadway node (in meters) */
-	public double metersTo(R_NodeImpl other) {
+	public Double metersTo(R_NodeImpl other) {
 		return metersTo(other.lookupGeoLoc());
 	}
 
 	/** Calculate the distance to another location (in meters) */
-	public double metersTo(GeoLoc loc) {
+	public Double metersTo(GeoLoc loc) {
 		return GeoLocHelper.metersTo(lookupGeoLoc(), loc);
 	}
 
@@ -485,12 +485,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	}
 
 	/** Get the true UTM Northing (without offset) */
-	protected int getTrueNorthing() {
+	protected Integer getTrueNorthing() {
 		return GeoLocHelper.getTrueNorthing(lookupGeoLoc());
 	}
 
 	/** Get the true UTM Easting (without offset) */
-	protected int getTrueEasting() {
+	protected Integer getTrueEasting() {
 		return GeoLocHelper.getTrueEasting(lookupGeoLoc());
 	}
 
