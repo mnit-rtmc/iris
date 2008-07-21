@@ -101,6 +101,11 @@ public class OpQueryMsg extends OpDms
 
 	/**
 	 * create message text given a bitmap, with no message text or owner.
+	 * It is important to create message text for the message because
+	 * the cmsserver can return a message containing a bitmap but with
+	 * no message text. IRIS requires both a bitmap and message text,
+	 * so this method constructs message text so IRIS will think it's a
+	 * message, rather than a blank sign.
 	 * 
 	 * @returns If bitmap is not blank: "[nl]SOCCS Message[np]" for each 
  	 * 	    page. If bitmap is blank, then "" is returned.
@@ -112,7 +117,7 @@ public class OpQueryMsg extends OpDms
 			return("");
 		}
 
-		/** default text if no bitmap */
+		// default text if no bitmap
 		final String TEXT = "SOCCS Message";
 		final String UNKNOWN_PG_TEXT = "[nl]"+TEXT+"[np]";
 
@@ -137,17 +142,18 @@ public class OpQueryMsg extends OpDms
 		//System.err.println(
 		//    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
 		//    + m_dms.getSignWidthPixels() + ", argbitmap.len="
-		//    + argbitmap.length + ".");
+		//    + argbitmap.length + ", owner="+owner+".");
 
 		assert owner != null;
 		assert argbitmap != null;
 
 		// calc number of pages
 		int numpgs=this.calcNumPages(argbitmap);
-		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): numpages=" + numpgs);
+		//System.err.println("OpQueryMsg.createSignMessageWithBitmap(): numpages=" + numpgs);
 
 		// create multistring
 		MultiString multi = new MultiString(OpQueryMsg.createMessageTextUsingBitmap(numpgs,argbitmap));
+		//System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
 
 		// create multipage bitmap
 		TreeMap<Integer, BitmapGraphic> bitmaps = new TreeMap<Integer, BitmapGraphic>();
