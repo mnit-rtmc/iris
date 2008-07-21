@@ -96,7 +96,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** determine agency specific polling time in seconds */
 	public static int getAgencyPollTimerJobSigns() {
 		if (Agency.isId(Agency.CALTRANS_D10))
-			return(60*30);	// 30 mins
+			return(60*20);	// 20 mins
 		return(30);
 	}
 
