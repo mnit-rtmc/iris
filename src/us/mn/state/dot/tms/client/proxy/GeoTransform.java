@@ -94,9 +94,17 @@ public class GeoTransform {
 
 	/** Update the traffic device transform */
 	protected void updateTransform() {
-		transform.setToTranslation(
-			loc.getEasting() + loc.getEastOffset(),
-			loc.getNorthing() + loc.getNorthOffset());
+		int easting = 0;
+		int northing = 0;
+		if(loc.getEasting() != null)
+			easting += loc.getEasting();
+		if(loc.getEastOffset() != null)
+			easting += loc.getEastOffset();
+		if(loc.getNorthing() != null)
+			northing += loc.getNorthing();
+		if(loc.getNorthOffset() != null)
+			northing += loc.getNorthOffset();
+		transform.setToTranslation(easting, northing);
 		transform.rotate(getTangent());
 	}
 
