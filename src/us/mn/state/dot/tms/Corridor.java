@@ -212,7 +212,12 @@ public class Corridor {
 	}
 
 	/** Adjustment for r_node milepoints falling on exact same spot */
-	static protected final float MILES_EPSILON = 0.0001f;
+	static protected float calculateEpsilon(float v) {
+		if(v != 0)
+			return v * 0.0000001f;
+		else
+			return 0.0000001f;
+	}
 
 	/** Calculate the mile points for all nodes on the corridor */
 	protected void calculateNodeMilePoints() {
@@ -223,7 +228,7 @@ public class Corridor {
 			if(previous != null)
 				miles += metersToMiles(previous.metersTo(n));
 			while(n_points.containsKey(miles))
-				miles += MILES_EPSILON;
+				miles += calculateEpsilon(miles);
 			n_points.put(miles, n);
 			previous = n;
 		}
