@@ -105,8 +105,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		String x, short xd, short xm, Integer e, Integer eo,
 		Integer nr, Integer no) throws NamespaceError
 	{
-		this(n, (Road)ns.lookupObject("road", f), fd,
-			(Road)ns.lookupObject("road", x), xd, xm,
+		this(n, (Road)ns.getObject("road", f), fd,
+			(Road)ns.getObject("road", x), xd, xm,
 			e, eo, nr, no);
 	}
 
