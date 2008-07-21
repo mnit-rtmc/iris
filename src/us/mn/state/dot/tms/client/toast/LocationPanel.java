@@ -154,10 +154,18 @@ public class LocationPanel extends FormPanel {
 
 	/** Update the location panel */
 	public void doUpdate() {
-		freeBox.setSelectedItem(loc.getFreeway());
+		Road f = loc.getFreeway();
+		if(f != null)
+			freeBox.setSelectedItem(f.getName());
+		else
+			freeBox.setSelectedItem(null);
 		freeDir.setSelectedIndex(loc.getFreeDir());
 		crossMod.setSelectedIndex(loc.getCrossMod());
-		crossBox.setSelectedItem(loc.getCrossStreet());
+		Road x = loc.getCrossStreet();
+		if(x != null)
+			crossBox.setSelectedItem(x.getName());
+		else
+			crossBox.setSelectedItem(null);
 		crossDir.setSelectedIndex(loc.getCrossDir());
 		easting.setValue(loc.getEasting());
 		eastOff.setValue(loc.getEastOffset());
