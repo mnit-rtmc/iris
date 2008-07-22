@@ -57,9 +57,11 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("freeway", freeway.getName());
+		if(freeway != null)
+			map.put("freeway", freeway.getName());
 		map.put("free_dir", free_dir);
-		map.put("cross_street", cross_street.getName());
+		if(cross_street != null)
+			map.put("cross_street", cross_street.getName());
 		map.put("cross_dir", cross_dir);
 		map.put("cross_mod", cross_mod);
 		map.put("easting", easting);
