@@ -222,7 +222,8 @@ public class GeoLocHelper {
 
 	/** Check if the coordinates are GPS data */
 	static public boolean hasGPS(GeoLoc l) {
-		return l.getNorthing() != null && l.getEasting() != null;
+		return l != null && l.getNorthing() != null &&
+			l.getEasting() != null;
 	}
 
 	/** Calculate the distance between two locations (in meters) */
