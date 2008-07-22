@@ -173,7 +173,10 @@ public class GeoLocHelper {
 
 	/** Get the freeway corridor */
 	static public String getCorridor(GeoLoc l) {
-		return getCorridor(l.getFreeway(), l.getFreeDir());
+		if(l != null)
+			return getCorridor(l.getFreeway(), l.getFreeDir());
+		else
+			return null;
 	}
 
 	/** Get the linked freeway corridor */
