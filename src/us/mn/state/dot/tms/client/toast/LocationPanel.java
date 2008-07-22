@@ -154,6 +154,8 @@ public class LocationPanel extends FormPanel {
 
 	/** Update the location panel */
 	public void doUpdate() {
+		if(loc == null)
+			return;
 		Road f = loc.getFreeway();
 		if(f != null)
 			freeBox.setSelectedItem(f.getName());
@@ -167,14 +169,24 @@ public class LocationPanel extends FormPanel {
 		else
 			crossBox.setSelectedItem(null);
 		crossDir.setSelectedIndex(loc.getCrossDir());
-		easting.setValue(loc.getEasting());
-		eastOff.setValue(loc.getEastOffset());
-		northing.setValue(loc.getNorthing());
-		northOff.setValue(loc.getNorthOffset());
+		easting.setValue(asInt(loc.getEasting()));
+		eastOff.setValue(asInt(loc.getEastOffset()));
+		northing.setValue(asInt(loc.getNorthing()));
+		northOff.setValue(asInt(loc.getNorthOffset()));
+	}
+
+	/** Get an int to use for a spinner model */
+	static protected int asInt(Integer i) {
+		if(i != null)
+			return i;
+		else
+			return 0;
 	}
 
 	/** Apply button is pressed */
 	public void applyPressed() throws Exception {
+		if(loc == null)
+			return;
 		Road f = state.lookupRoad((String)freeBox.getSelectedItem());
 		Road c = state.lookupRoad((String)crossBox.getSelectedItem());
 		Integer x = getSpinnerInteger(easting);

@@ -28,13 +28,15 @@ public class GeoLocHelper {
 
 	/** Get a description of the location */
 	static public String getDescription(GeoLoc l) {
-		Road f = l.getFreeway();
 		StringBuilder b = new StringBuilder();
-		if(f != null) {
-			short fd = l.getFreeDir();
-			String free = f.getName() + " " +
-				TMSObject.DIRECTION[fd];
-			b.append(free.trim());
+		if(l != null) {
+			Road f = l.getFreeway();
+			if(f != null) {
+				short fd = l.getFreeDir();
+				String free = f.getName() + " " +
+					TMSObject.DIRECTION[fd];
+				b.append(free.trim());
+			}
 		}
 		String c = getCrossDescription(l);
 		if(c != null) {
@@ -50,15 +52,18 @@ public class GeoLocHelper {
 
 	/** Get a description of the cross-street location */
 	static public String getCrossDescription(GeoLoc l) {
-		Road x = l.getCrossStreet();
-		if(x != null) {
-			short xd = l.getCrossDir();
-			short xm = l.getCrossMod();
-			String cross = TMSObject.MODIFIER[xm] + " " +
-				x.getName() + " " + TMSObject.DIRECTION[xd];
-			return cross.trim();
-		} else
-			return null;
+		if(l != null) {
+			Road x = l.getCrossStreet();
+			if(x != null) {
+				short xd = l.getCrossDir();
+				short xm = l.getCrossMod();
+				String cross = TMSObject.MODIFIER[xm] +
+					" " + x.getName() + " " +
+					TMSObject.DIRECTION[xd];
+				return cross.trim();
+			}
+		}
+		return null;
 	}
 
 	/** Get a description of a ramp meter location */
@@ -67,14 +72,16 @@ public class GeoLocHelper {
 		String c = getCrossDescription(l);
 		if(c != null)
 			b.append(c);
-		Road f = l.getFreeway();
-		if(f != null) {
-			if(b.length() > 0)
-				b.append(" to ");
-			short fd = l.getFreeDir();
-			String free = f.getName() + " " +
-				TMSObject.DIRECTION[fd];
-			b.append(free.trim());
+		if(l != null) {
+			Road f = l.getFreeway();
+			if(f != null) {
+				if(b.length() > 0)
+					b.append(" to ");
+				short fd = l.getFreeDir();
+				String free = f.getName() + " " +
+					TMSObject.DIRECTION[fd];
+				b.append(free.trim());
+			}
 		}
 		if(b.length() > 0)
 			return b.toString();
@@ -187,6 +194,8 @@ public class GeoLocHelper {
 
 	/** Get the true easting */
 	static public Integer getTrueEasting(GeoLoc l) {
+		if(l == null)
+			return null;
 		Integer x = l.getEasting();
 		if(x != null)
 			return x;
@@ -196,6 +205,8 @@ public class GeoLocHelper {
 
 	/** Get the true northing */
 	static public Integer getTrueNorthing(GeoLoc l) {
+		if(l == null)
+			return null;
 		Integer y = l.getNorthing();
 		if(y != null)
 			return y;

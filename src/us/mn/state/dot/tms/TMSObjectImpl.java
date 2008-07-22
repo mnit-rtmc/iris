@@ -327,7 +327,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		if(l == null)
 			return null;
 		try {
-			return (GeoLocImpl)namespace.lookupObject(
+			return (GeoLocImpl)namespace.getObject(
 				GeoLoc.SONAR_TYPE, l);
 		}
 		catch(NamespaceError e) {

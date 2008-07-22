@@ -791,6 +791,8 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
 		GeoLoc loc = lookupGeoLoc();
+		if(loc == null)
+			return null;
 		return nodeMap.getCorridor(GeoLocHelper.getCorridor(loc));
 	}
 
@@ -809,13 +811,15 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the label of a ramp meter */
 	protected String getLabel() {
+		StringBuilder b = new StringBuilder();
 		GeoLoc loc = lookupGeoLoc();
-		StringBuffer b = new StringBuffer();
-		b.append(DIRECTION[loc.getCrossDir()]);
-		b.append(' ');
-		Road x = loc.getCrossStreet();
-		if(x != null)
-			b.append(x.getName());
+		if(loc != null) {
+			b.append(DIRECTION[loc.getCrossDir()]);
+			b.append(' ');
+			Road x = loc.getCrossStreet();
+			if(x != null)
+				b.append(x.getName());
+		}
 		return replaceEntities(b.toString().trim());
 	}
 

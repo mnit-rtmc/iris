@@ -139,6 +139,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Get the detector label */
 	public String getLabel(boolean statName) {
 		GeoLoc loc = lookupGeoLoc();
+		if(loc == null)
+			return "FUTURE";
 		Road freeway = loc.getFreeway();
 		Road cross = loc.getCrossStreet();
 		if(freeway == null || cross == null) {

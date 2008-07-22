@@ -51,14 +51,18 @@ public class GeoTransform {
 
 	/** Get the vector from the origin */
 	public Vector getVector() {
-		int x = GeoLocHelper.getTrueEasting(loc);
-		int y = GeoLocHelper.getTrueNorthing(loc);
-		return new Vector(x, y);
+		if(loc != null) {
+			int x = GeoLocHelper.getTrueEasting(loc);
+			int y = GeoLocHelper.getTrueNorthing(loc);
+			return new Vector(x, y);
+		} else
+			return new Vector(0, 0);
 	}
 
 	/** Get the default angle (radians) */
 	public double getDefaultAngle() {
-		switch(loc.getFreeDir()) {
+		if(loc != null) {
+			switch(loc.getFreeDir()) {
 			case Road.NORTH:
 				return RAD_NORTH;
 			case Road.SOUTH:
@@ -67,6 +71,7 @@ public class GeoTransform {
 				return RAD_EAST;
 			case Road.WEST:
 				return RAD_WEST;
+			}
 		}
 		return RAD_NORTH;
 	}
@@ -94,6 +99,8 @@ public class GeoTransform {
 
 	/** Update the traffic device transform */
 	protected void updateTransform() {
+		if(loc == null)
+			return;
 		int easting = 0;
 		int northing = 0;
 		if(loc.getEasting() != null)
