@@ -50,13 +50,19 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	static public final int RETRY_THRESHOLD = 3;
 
 	/** Create a new Controller */
-	public ControllerImpl(CircuitImpl c, short d) throws RemoteException {
+	public ControllerImpl(CircuitImpl c, short d) throws TMSException,
+		RemoteException
+	{
 		super();
 		circuit = c;
 		drop = d;
 		version = UNKNOWN;
 		counters = new int[ TYPES.length ][ PERIODS.length ];
-		geo_loc = null;
+		// FIXME: geo_loc should be guaranteed unique
+		geo_loc = "ctl_" + circuit.getId() + "_" + d;
+		GeoLocImpl loc = new GeoLocImpl(geo_loc);
+		loc.doStore();
+		MainServer.server.addObject(loc);
 		notes = "";
 	}
 

@@ -536,6 +536,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 			throw new ChangeVetoException("No controller: " + drop);
 		if(!c.isDeletable())
 			throw new ChangeVetoException("Cannot delete object");
+		GeoLocImpl geo_loc = c.lookupGeoLoc();
 		try {
 			vault.delete(c, getUserName());
 		}
@@ -544,6 +545,8 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		}
 		controllers.remove(d);
 		c.notifyDelete();
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		return c;
 	}
 

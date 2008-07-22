@@ -36,7 +36,7 @@ public class Controller170Impl extends ControllerImpl
 
 	/** Create a new 170 controller */
 	public Controller170Impl(CircuitImpl c, short d)
-		throws RemoteException
+		throws TMSException, RemoteException
 	{
 		super(c, d);
 	}
