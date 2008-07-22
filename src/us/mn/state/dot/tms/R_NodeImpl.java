@@ -21,6 +21,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import us.mn.state.dot.vault.FieldMap;
 
@@ -448,9 +449,20 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return false;
 	}
 
+	/** Random number generator for R_Node names */
+	static protected final Random RAND = new Random();
+
+	/** Create a new name */
+	static protected String createName() {
+		return "rnd_" + RAND.nextInt();
+	}
+
 	/** Create a new r_node */
-	public R_NodeImpl() throws RemoteException {
-		geo_loc = null;
+	public R_NodeImpl() throws TMSException, RemoteException {
+		geo_loc = createName();
+		GeoLocImpl loc = new GeoLocImpl(geo_loc);
+		loc.doStore();
+		MainServer.server.addObject(loc);
 	}
 
 	/** Create an r_node from an ObjectVault field map */

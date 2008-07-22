@@ -104,12 +104,15 @@ class R_NodeMapImpl extends AbstractListImpl implements R_NodeMap {
 			throw new ChangeVetoException("Invalid OID: " + oid);
 		if(!r_node.isDeletable())
 			throw new ChangeVetoException("Cannot delete r_node");
+		GeoLocImpl geo_loc = r_node.lookupGeoLoc();
 		try {
 			vault.delete(r_node, getUserName());
 		}
 		catch(ObjectVaultException e) {
 			throw new TMSException(e);
 		}
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		Iterator<Integer> it = map.keySet().iterator();
 		for(int i = 0; it.hasNext(); i++) {
 			Integer search = it.next();
