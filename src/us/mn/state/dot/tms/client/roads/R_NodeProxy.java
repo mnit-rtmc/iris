@@ -164,7 +164,11 @@ public class R_NodeProxy extends TmsMapProxy {
 
 	/** Get the corridor which contains the roadway node */
 	public String getCorridor() {
-		return GeoLocHelper.getCorridor(loc);
+		String c = GeoLocHelper.getCorridor(loc);
+		if(c != null)
+			return c;
+		else
+			return "";
 	}
 
 	/** Check if the location has a "true" GPS reading */
@@ -187,11 +191,36 @@ public class R_NodeProxy extends TmsMapProxy {
 		return trans.getInverseTransform();
 	}
 
+	/** Get the adjusted easting */
+	protected Integer getEasting() {
+		if(loc.getEasting() != null) {
+			int easting = loc.getEasting();
+			if(loc.getEastOffset() != null)
+				easting += loc.getEastOffset();
+			return easting;
+		} else
+			return loc.getEastOffset();
+	}
+
+	/** Get the adjusted northing */
+	protected Integer getNorthing() {
+		if(loc.getNorthing() != null) {
+			int northing = loc.getNorthing();
+			if(loc.getNorthOffset() != null)
+				northing += loc.getNorthOffset();
+			return northing;
+		} else
+			return loc.getNorthOffset();
+	}
+
 	/** Get the extent of the roadway node */
 	protected Rectangle2D getExtent() {
-		float x = loc.getEasting() + loc.getEastOffset();
-		float y = loc.getNorthing() + loc.getNorthOffset();
-		return new Rectangle2D.Float(x - 500, y - 500, 1000, 1000);
+		Integer x = getEasting();
+		Integer y = getNorthing();
+		if(x == null || y == null)
+			return null;
+		else
+			return new Rectangle2D.Float(x-500, y-500, 1000, 1000);
 	}
 
 	/** Get the union of the nodes extent with the given extent */
