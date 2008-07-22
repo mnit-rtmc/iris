@@ -45,14 +45,17 @@ public class NodeImpl extends TMSObjectImpl implements Node, ErrorCounter,
 
 	/** Create a new node */
 	public NodeImpl(NodeGroupImpl group, String i)
-		throws ChangeVetoException, RemoteException
+		throws TMSException, RemoteException
 	{
 		node_group = group;
 		Matcher m = ID_PATTERN.matcher(i);
 		if(!m.matches()) throw
 			new ChangeVetoException("Invalid Node ID: " + i);
 		id = i;
-		geo_loc = null;
+		geo_loc = "nod_" + id;
+		GeoLocImpl loc = new GeoLocImpl(geo_loc);
+		loc.doStore();
+		MainServer.server.addObject(loc);
 		notes = "";
 	}
 

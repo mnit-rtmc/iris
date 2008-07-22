@@ -145,6 +145,7 @@ class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter,
 			throw new ChangeVetoException("Node not found");
 		if(!nod.isDeletable())
 			throw new ChangeVetoException("Node not deletable");
+		GeoLocImpl geo_loc = nod.lookupGeoLoc();
 		try {
 			vault.delete(nod, getUserName());
 		}
@@ -160,6 +161,8 @@ class NodeGroupImpl extends TMSObjectImpl implements NodeGroup, ErrorCounter,
 				ns[j++] = n;
 		}
 		nodes = ns;
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 	}
 
 	/** Check if the group contains a specified node ID */

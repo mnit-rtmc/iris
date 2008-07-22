@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,9 @@ public class MainServer {
 		System.err.println(msg);
 	}
 
+	/** SONAR server */
+	static public Server server;
+
 	/** Start the server and register it with the RMI registry */
 	static public void main(String[] args) {
 		try {
@@ -86,7 +89,7 @@ public class MainServer {
 			LocateRegistry.createRegistry(
 				Registry.REGISTRY_PORT);
 			Naming.bind("//localhost/login", login);
-			Server server = new Server(ns, props);
+			server = new Server(ns, props);
 			TMSObjectImpl.eventLog.add(new TMSEvent("System",
 				TMSEvent.SYSTEM_RESTARTED,
 				Calendar.getInstance()));
