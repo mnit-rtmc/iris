@@ -11,6 +11,32 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.72.0 (23 July 2008)</dt>
+	<dd><ul>
+		<li>
+			Location objects converted to SONAR.
+			This involves database changes and RMI updates.
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update databsae:
+			<code>psql tms &lt; migrate-3.72.sql</code>
+		</li>
+		<li>
+			Since geo_loc is a new SONAR type, the roles must be
+			modified to give administrators permission to change
+			these objects.
+			One possibility is a role called "geo_loc" with a
+			pattern of "geo_loc/.*".
+		</li>
+		<li>
+			SONAR dependency updated to 1.7.3.
+		</li>
+		<li>
+			Video monitor combo box added to camera tab.
+			This will allow switching cameras in an analog video
+			switch through IRIS.
+			This work in ongoing.
+		</li>
+	</ul></dd>
 	<dt>3.71.0 (14 July 2008)</dt>
 	<dd><ul>
 		<li>
