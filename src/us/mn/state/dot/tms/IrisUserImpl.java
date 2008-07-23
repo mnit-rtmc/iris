@@ -67,6 +67,11 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		return map;
 	}
 
+	/** Store an object */
+	public void doStore() throws TMSException {
+		store.create(this);
+	}
+
 	/** Get the database table name */
 	public String getTable() {
 		return "iris_user";

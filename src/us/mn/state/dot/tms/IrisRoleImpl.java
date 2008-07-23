@@ -70,6 +70,11 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		return map;
 	}
 
+	/** Store an object */
+	public void doStore() throws TMSException {
+		store.create(this);
+	}
+
 	/** Get the database table name */
 	public String getTable() {
 		return "role";
