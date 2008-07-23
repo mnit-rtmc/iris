@@ -34,9 +34,11 @@ import javax.swing.JTextField;
 
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.FilteredMonitorModel;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
@@ -208,6 +210,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 				}
 			}
 		};
+		Connection c = st.lookupConnection(st.getConnection());
+		client.setSonarSessionId(c.getSessionId());
 		client.setRate(30);
 		t.setDaemon(true);
 		t.start();
@@ -358,6 +362,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 			if(o == null){
 				playPressed(camera);
 			}else{
+				stopPressed();
 				us.mn.state.dot.tms.VideoMonitor mon =
 					monitors.getObject((String)o);
 				//FIXME: do the actual switching here
@@ -397,7 +402,11 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo(final SonarState st){
 		JComboBox box = new JComboBox();
-		box.setModel(new WrapperComboBoxModel(st.getMonitorModel()));
+		String userName = handler.getUser().getName();
+		FilteredMonitorModel m =
+			new FilteredMonitorModel(st.lookupUser(userName), st);
+		box.setModel(new WrapperComboBoxModel(m));
+		if(m.getSize()>1) box.setSelectedIndex(1);
 		return box;
 	}
 }

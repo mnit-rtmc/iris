@@ -192,8 +192,10 @@ public class SonarState extends Client {
 		glyphs = new TypeCache<Glyph>(Glyph.class);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
+		monitor_model.initialize();
 		roads = new TypeCache<Road>(Road.class);
 		road_model = new ProxyListModel<Road>(roads);
+		road_model.initialize();
 		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
@@ -249,5 +251,23 @@ public class SonarState extends Client {
 	/** Lookup a geo location */
 	public GeoLoc lookupGeoLoc(String name) {
 		return geo_locs.getObject(name);
+	}
+
+	/** Look up the specified connection */
+	public Connection lookupConnection(String name) {
+		Map<String, Connection> conn_map = connections.getAll();
+		while(true) {
+			synchronized(conn_map) {
+				Connection c = conn_map.get(name);
+				if(c != null)
+					return c;
+			}
+			try {
+				Thread.sleep(100);
+			}
+			catch(InterruptedException e) {
+				// Do nothing
+			}
+		}
 	}
 }
