@@ -1002,7 +1002,10 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return signAccess;
 	}
 
-	/** Sign type description */
+	/** 
+	  * Sign type description, must contain "Full" or "Line"
+	  * to distinguish between types of signs.
+	  */
 	protected transient String signType;
 
 	/** Set sign type description */
