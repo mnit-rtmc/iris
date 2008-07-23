@@ -65,6 +65,7 @@ public class PixelMapBuilder implements MultiString.Callback {
 		try {
 			int x = calculatePixelX(j, t);
 			int y = l * (font.getHeight() + font.getLineSpacing());
+System.err.println("PixelMapBuilder.addText(): bg="+bg+", t="+t+", x="+x+", y="+y);
 			render(bg, t, x, y);
 		}
 		catch(IndexOutOfBoundsException e) {
@@ -106,9 +107,23 @@ public class PixelMapBuilder implements MultiString.Callback {
 		case LEFT:
 			return 0;
 		case CENTER:
-			int w = width / c_width;
-			int r = calculateWidth(t) / c_width;
-			return (w - r) / 2 * c_width;
+   			// note: round(a/b) = (a+b/2)/b. This eliminates
+			// rounding error when dividing by 2.
+			// this code has no rounding errors.
+			int a = Math.max(0,width - calculateWidth(t));
+			return (a+1)/2;
+
+//FIXME: Doug, remove unnecessary comments below
+
+			// original code is below. Note: line 120, dividing by 2 and then multipling by c_width magnifies rounding error.
+			// instead, at least, multiply by c_width and then divide by 2, using the above formula (a+1)/2.
+			// I wasn't sure if you were trying to force chars into block positions...so I left this code if you were.
+			//int w = width / c_width;
+			//int r = calculateWidth(t) / c_width;
+			//int cx = (w - r) / 2 * c_width;
+			//better: int cx = (w - r) * c_width/2;
+			//best: int cx = ((w - r) * c_width + 1)/2; // no rounding error
+			//return cx;
 		case RIGHT:
 			return width - calculateWidth(t) - 1;
 		default:
