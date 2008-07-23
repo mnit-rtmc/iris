@@ -83,7 +83,10 @@ class RampMeterListImpl extends SortedListImpl implements RampMeterList {
 
 	/** Remove a ramp meter from the list */
 	public synchronized void remove( String key ) throws TMSException {
+		GeoLocImpl geo_loc = lookupDeviceLoc(key);
 		super.remove( key );
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		deviceList.remove( key );
 		available.remove( key );
 	}

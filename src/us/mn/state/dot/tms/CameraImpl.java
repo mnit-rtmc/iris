@@ -37,8 +37,7 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	}
 
 	/** Create a new camera with a string id */
-	public CameraImpl(String i) throws ChangeVetoException, RemoteException
-	{
+	public CameraImpl(String i) throws TMSException, RemoteException {
 		super(i);
 		deviceList.add(i, this);
 	}

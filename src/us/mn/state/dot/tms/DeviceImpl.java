@@ -37,8 +37,11 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	}
 
 	/** Create a new device */
-	public DeviceImpl() throws RemoteException {
-		geo_loc = null;
+	public DeviceImpl(String name) throws TMSException, RemoteException {
+		geo_loc = name;
+		GeoLocImpl loc = new GeoLocImpl(name);
+		loc.doStore();
+		MainServer.server.addObject(loc);
 		notes = "";
 	}
 

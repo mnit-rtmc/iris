@@ -65,7 +65,10 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 
 	/** Remove a dynamic message sign from the list */
 	public synchronized void remove( String key ) throws TMSException {
+		GeoLocImpl geo_loc = lookupDeviceLoc(key);
 		super.remove( key );
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		deviceList.remove( key );
 	}
 

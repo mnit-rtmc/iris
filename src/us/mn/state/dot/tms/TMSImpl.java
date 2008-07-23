@@ -119,6 +119,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		devices.addFiltered(lcss);
 		devices.addFiltered(meters);
 		devices.addFiltered(dmss);
+		devices.addFiltered(warn_signs);
 	}
 
 	/** Load all the circuits from the database */

@@ -116,8 +116,11 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 		if( list.isEmpty() ) throw new
 			ChangeVetoException( "List is empty" );
 		DetectorImpl det = (DetectorImpl)list.get( list.size() - 1 );
+		GeoLocImpl geo_loc = det.lookupGeoLoc();
 		String s = det.getId();
 		super.removeLast();
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		available.remove( s );
 		mainFree.remove( s );
 	}

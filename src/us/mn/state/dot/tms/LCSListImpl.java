@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2004  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
@@ -26,7 +22,6 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * List of LaneControlSignals in the TMS.
  *
  * @author    <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
- * @created   May 24, 2002
  */
 public class LCSListImpl extends SortedListImpl implements LCSList {
 
@@ -87,7 +82,10 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 	 * @exception RemoteException  If there is an RMI exception
 	 */
 	public synchronized void remove( String key ) throws TMSException {
+		GeoLocImpl geo_loc = lookupDeviceLoc(key);
 		super.remove( key );
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		deviceList.remove( key );
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,5 +120,15 @@ abstract class SortedListImpl extends AbstractListImpl implements SortedList {
 		for(int i = 0; it.hasNext(); i++)
 			list[i] = it.next();
 		return list;
+	}
+
+	/** Lookup the geo location for a device ID */
+	protected GeoLocImpl lookupDeviceLoc(String id) {
+		TMSObject o = getElement(id);
+		if(o instanceof DeviceImpl) {
+			DeviceImpl device = (DeviceImpl)o;
+			return device.lookupGeoLoc();
+		} else
+			return null;
 	}
 }

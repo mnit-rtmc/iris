@@ -38,9 +38,7 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign,
 	}
 
 	/** Create a new warning sign */
-	public WarningSignImpl(String i) throws ChangeVetoException,
-		RemoteException
-	{
+	public WarningSignImpl(String i) throws TMSException, RemoteException {
 		super(i);
 		deviceList.add(id, this);
 	}

@@ -94,7 +94,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	}
 
 	/** Create a new ramp meter */
-	public RampMeterImpl(String id) throws ChangeVetoException,
+	public RampMeterImpl(String id) throws TMSException,
 		RemoteException
 	{
 		super(id);

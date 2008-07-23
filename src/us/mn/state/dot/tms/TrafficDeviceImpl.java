@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,10 +40,10 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 		Pattern.compile("[A-Z][A-Z0-9]{1,9}");
 
 	/** Create a new traffic device */
-	public TrafficDeviceImpl(String i) throws ChangeVetoException,
+	public TrafficDeviceImpl(String i) throws TMSException,
 		RemoteException
 	{
-		super();
+		super(i);
 		Matcher m = ID_PATTERN.matcher(i);
 		if(!m.matches())
 			throw new ChangeVetoException("Invalid ID: " + i);

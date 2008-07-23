@@ -59,7 +59,7 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	 * @param lanes                Number of lanes
 	 */
 	public LaneControlSignalImpl(String id, int lanes)
-		throws ChangeVetoException, RemoteException
+		throws TMSException, RemoteException
 	{
 		super( id );
 		modules = new LCSModuleImpl[lanes];

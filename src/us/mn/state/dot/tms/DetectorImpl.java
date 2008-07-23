@@ -47,8 +47,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	static protected final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Create a new detector */
-	public DetectorImpl( int i ) throws RemoteException {
-		super();
+	public DetectorImpl(int i) throws TMSException, RemoteException {
+		super("D" + i);
 		index = i;
 		fieldLength = DEFAULT_FIELD_LENGTH;
 		fake = "";

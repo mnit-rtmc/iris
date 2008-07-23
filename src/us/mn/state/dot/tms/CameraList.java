@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,10 @@ public class CameraList extends SortedListImpl {
 
 	/** Remove a camera from the list */
 	public synchronized void remove(String key) throws TMSException {
+		GeoLocImpl geo_loc = lookupDeviceLoc(key);
 		super.remove(key);
+		if(geo_loc != null)
+			MainServer.server.removeObject(geo_loc);
 		deviceList.remove(key);
 	}
 }
