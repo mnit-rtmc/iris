@@ -22,7 +22,6 @@ import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
-import javax.comm.SerialPort;
 
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.comm.KillThread;
@@ -30,7 +29,6 @@ import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.Operation;
 import us.mn.state.dot.tms.comm.ProtocolException;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.comm.SerialMessenger;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.SocketMessenger;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
@@ -162,16 +160,7 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	public synchronized void setBitRate(int b) throws TMSException {
 		if(b == bitRate)
 			return;
-		try {
-			if(messenger instanceof SerialMessenger) {
-				SerialMessenger sm = (SerialMessenger)messenger;
-				sm.setBaudRate(b);
-			}
-		}
-		catch(IOException e) {
-			status = e.getMessage();
-			return;
-		}
+		// Serial ports no longer supported
 		store.update(this, "bitRate", b);
 		bitRate = b;
 	}
@@ -277,12 +266,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 	/** Communication messenger */
 	protected transient Messenger messenger;
 
-	/** Check if the port device is a serial port */
-	protected boolean isSerialPort() {
-		// Note: this is linux-specific
-		return port.startsWith("/");
-	}
-
 	/** Parse a TCP port */
 	protected int parseTcpPort(String p) throws IOException {
 		try {
@@ -307,16 +290,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		return new HttpFileMessenger(new URL(port));
 	}
 
-	/** Create a serial or socket messenger */
-	protected Messenger createMessenger(int threshold, int parity)
-		throws IOException
-	{
-		if(isSerialPort())
-			return new SerialMessenger(port, threshold, parity);
-		else
-			return createSocketMessenger();
-	}
-
 	/** Create an NTCIP Class C poller */
 	protected MessagePoller createNtcipCPoller() throws IOException {
 		messenger = createSocketMessenger();
@@ -325,45 +298,45 @@ final class CommunicationLineImpl extends TMSObjectImpl
 
 	/** Create an NTCIP Class B poller */
 	protected MessagePoller createNtcipBPoller() throws IOException {
-		messenger = createMessenger(1024, SerialPort.PARITY_NONE);
+		messenger = createSocketMessenger();
 		HDLCMessenger hdlc = new HDLCMessenger(messenger);
 		return new NtcipPoller(String.valueOf(index), hdlc);
 	}
 
 	/** Create a Mn/DOT poller */
 	protected MessagePoller createMndotPoller() throws IOException {
-		messenger = createMessenger(127, SerialPort.PARITY_EVEN);
+		messenger = createSocketMessenger();
 		return new MndotPoller(String.valueOf(index), messenger,
 			protocol);
 	}
 
 	/** Create a SmartSensor poller */
 	protected MessagePoller createSmartSensorPoller() throws IOException {
-		messenger = createMessenger(0, SerialPort.PARITY_NONE);
+		messenger = createSocketMessenger();
 		return new SmartSensorPoller(String.valueOf(index), messenger);
 	}
 
 	/** Create a Canoga poller */
 	protected MessagePoller createCanogaPoller() throws IOException {
-		messenger = createMessenger(0, SerialPort.PARITY_NONE);
+		messenger = createSocketMessenger();
 		return new CanogaPoller(String.valueOf(index), messenger);
 	}
 
 	/** Create a Vicon poller */
 	protected MessagePoller createViconPoller() throws IOException {
-		messenger = createMessenger(0, SerialPort.PARITY_NONE);
+		messenger = createSocketMessenger();
 		return new ViconPoller(String.valueOf(index), messenger);
 	}
 
 	/** Create a Pelco poller */
 	protected MessagePoller createPelcoPoller() throws IOException {
-		messenger = createMessenger(0, SerialPort.PARITY_NONE);
+		messenger = createSocketMessenger();
 		return new PelcoPoller(String.valueOf(index), messenger);
 	}
 
 	/** Create a Manchester poller */
 	protected MessagePoller createManchesterPoller() throws IOException {
-		messenger = createMessenger(0, SerialPort.PARITY_NONE);
+		messenger = createSocketMessenger();
 		return new ManchesterPoller(String.valueOf(index), messenger);
 	}
 
@@ -413,10 +386,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		try {
 			poller = createPoller();
 			poller.start();
-			if(messenger instanceof SerialMessenger) {
-				SerialMessenger sm = (SerialMessenger)messenger;
-				sm.setBaudRate(bitRate);
-			}
 			messenger.setTimeout(timeout);
 			messenger.open();
 			status = "OK";
@@ -424,12 +393,6 @@ final class CommunicationLineImpl extends TMSObjectImpl
 		catch(IOException e) {
 			close();
 			status = e.getMessage();
-			return;
-		}
-		// the iris installation might not have the java serial port
-		// jar installed
-		catch(NoClassDefFoundError e) {
-			status = "RS232 not supported.";
 			return;
 		}
 		notifyStatus();
