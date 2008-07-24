@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.ControllerImpl;
 
 /**
  * A Messenger is a class which can poll a field controller and get the
- * response. Subclasses are SerialMessenger, HDLCMessenger, etc.
+ * response. Subclasses are SocketMessenger, HDLCMessenger, etc.
  *
  * @author Douglas Lau
  */
