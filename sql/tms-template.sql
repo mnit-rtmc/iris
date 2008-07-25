@@ -242,15 +242,40 @@ CREATE TABLE r_node_transition (
 	name text NOT NULL
 );
 
-CREATE TABLE cabinet_types (
-	"index" integer PRIMARY KEY,
-	name text NOT NULL
+CREATE TABLE comm_link (
+	name VARCHAR(20) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
+	url VARCHAR(64) NOT NULL,
+	protocol smallint NOT NULL,
+	timeout integer NOT NULL
 );
 
-GRANT SELECT ON TABLE cabinet_types TO PUBLIC;
+CREATE TABLE cabinet_style (
+	name VARCHAR(20) PRIMARY KEY,
+	dip smallint
+);
 
+CREATE TABLE cabinet (
+	name VARCHAR(20) PRIMARY KEY,
+	style VARCHAR(20) REFERENCES cabinet_style(name),
+	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	mile real
+);
 
+CREATE TABLE controller (
+	name VARCHAR(20) PRIMARY KEY,
+	drop_id smallint NOT NULL,
+	comm_link VARCHAR(20) NOT NULL REFERENCES comm_link(name),
+	cabinet VARCHAR(20) REFERENCES cabinet(name),
+	active boolean NOT NULL,
+	notes text NOT NULL
+);
 
+CREATE TABLE alarm (
+	name VARCHAR(20) PRIMARY KEY,
+	controller VARCHAR(20) REFERENCES controller(name),
+	pin integer NOT NULL
+);
 
 
 
@@ -337,15 +362,14 @@ CREATE TABLE abstract_list (
 INHERITS (tms_object);
 
 CREATE TABLE device (
-    controller integer NOT NULL,
+    controller VARCHAR(20) NOT NULL REFERENCES controller(name),
     pin integer NOT NULL,
     notes text NOT NULL,
     geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
 )
 INHERITS (tms_object);
 
-REVOKE ALL ON TABLE device FROM PUBLIC;
-GRANT SELECT ON TABLE device TO PUBLIC;
+GRANT SELECT ON device TO PUBLIC;
 
 CREATE TABLE traffic_device (
     id text NOT NULL
@@ -458,16 +482,6 @@ INHERITS (meter_plan);
 REVOKE ALL ON TABLE simple_plan FROM PUBLIC;
 GRANT SELECT ON TABLE simple_plan TO PUBLIC;
 
-CREATE TABLE circuit (
-    id text NOT NULL,
-    line integer NOT NULL,
-    node integer NOT NULL
-)
-INHERITS (tms_object);
-
-REVOKE ALL ON TABLE circuit FROM PUBLIC;
-GRANT SELECT ON TABLE circuit TO PUBLIC;
-
 CREATE TABLE time_plan_log (
     event_id integer DEFAULT nextval('tms_log_seq'::text) NOT NULL,
     vault_oid integer,
@@ -539,54 +553,6 @@ CREATE TABLE detector_fieldlength_log (
 
 REVOKE ALL ON TABLE detector_fieldlength_log FROM PUBLIC;
 GRANT SELECT ON TABLE detector_fieldlength_log TO PUBLIC;
-
-CREATE TABLE node (
-    id text NOT NULL,
-    node_group integer NOT NULL,
-    notes text,
-    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
-)
-INHERITS (tms_object);
-
-CREATE TABLE node_group (
-    "index" integer NOT NULL,
-    description text NOT NULL
-)
-INHERITS (tms_object);
-
-CREATE TABLE controller (
-    "drop" smallint NOT NULL,
-    active boolean NOT NULL,
-    notes text NOT NULL,
-    mile real NOT NULL,
-    circuit integer NOT NULL,
-    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
-)
-INHERITS (tms_object);
-
-REVOKE ALL ON TABLE controller FROM PUBLIC;
-GRANT SELECT ON TABLE controller TO PUBLIC;
-
-CREATE TABLE controller_170 (
-    cabinet smallint NOT NULL
-)
-INHERITS (controller);
-
-REVOKE ALL ON TABLE controller_170 FROM PUBLIC;
-GRANT SELECT ON TABLE controller_170 TO PUBLIC;
-
-CREATE TABLE communication_line (
-    "index" integer NOT NULL,
-    description text NOT NULL,
-    port text NOT NULL,
-    "bitRate" integer NOT NULL,
-    protocol smallint NOT NULL,
-    timeout integer NOT NULL
-)
-INHERITS (tms_object);
-
-REVOKE ALL ON TABLE communication_line FROM PUBLIC;
-GRANT SELECT ON TABLE communication_line TO PUBLIC;
 
 CREATE FUNCTION time_plan_log() RETURNS "trigger"
     AS '
@@ -662,13 +628,6 @@ INHERITS (traffic_device);
 
 REVOKE ALL ON TABLE warning_sign FROM PUBLIC;
 GRANT SELECT ON TABLE warning_sign TO PUBLIC;
-
-CREATE TABLE alarm (
-    controller integer NOT NULL,
-    pin integer NOT NULL,
-    notes text NOT NULL
-)
-INHERITS (tms_object);
 
 CREATE TABLE traffic_device_timing_plan (
     traffic_device text,
@@ -788,21 +747,10 @@ CREATE VIEW device_loc_view AS
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON device_loc_view TO PUBLIC;
 
-CREATE VIEW line_drop_view AS
-	SELECT c.vault_oid, l."index" AS line, c."drop"
-	FROM circuit cir, controller c, communication_line l
-	WHERE c.circuit = cir.vault_oid AND l.vault_oid = cir.line;
-
-REVOKE ALL ON TABLE line_drop_view FROM PUBLIC;
-GRANT SELECT ON TABLE line_drop_view TO PUBLIC;
-
-CREATE VIEW controller_alarm_view AS
-	SELECT l.line, l."drop", a.pin, a.notes
-	FROM line_drop_view l, alarm a
-	WHERE l.vault_oid = a.controller;
-
-REVOKE ALL ON TABLE controller_alarm_view FROM PUBLIC;
-GRANT SELECT ON TABLE controller_alarm_view TO PUBLIC;
+CREATE VIEW alarm_view AS
+	SELECT a.name, a.controller, a.pin, c.comm_link, c.drop_id
+	FROM alarm a LEFT JOIN controller c ON a.controller = c.name;
+GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW r_node_view AS
 	SELECT n.vault_oid, freeway, free_dir, cross_mod, cross_street,
@@ -822,10 +770,11 @@ CREATE VIEW freeway_station_view AS
 GRANT SELECT ON freeway_station_view TO PUBLIC;
 
 CREATE VIEW controller_loc_view AS
-	SELECT c.vault_oid, c."drop", c.active, c.notes, c.mile, c.circuit,
+	SELECT c.name, c.drop_id, c.comm_link, c.cabinet, c.active, c.notes,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir
 	FROM controller c
-	JOIN geo_loc_view l ON c.geo_loc = l.name;
+	LEFT JOIN cabinet cab ON c.cabinet = cab.name
+	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
@@ -857,14 +806,13 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
-	SELECT c.id, ld.line, ld."drop", ctr.active, c.notes,
+	SELECT c.id, ctr.comm_link, ctr.drop_id, ctr.active, c.notes,
 	c.encoder, c.encoder_channel, c.nvr, c.publish,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM camera c
 	JOIN geo_loc_view l ON c.geo_loc = l.name
-	LEFT JOIN line_drop_view ld ON c.controller = ld.vault_oid
-	LEFT JOIN controller ctr ON c.controller = ctr.vault_oid;
+	LEFT JOIN controller ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
@@ -916,7 +864,7 @@ CREATE FUNCTION boolean_converter(boolean) RETURNS text AS
 LANGUAGE plpgsql;
 
 CREATE VIEW detector_view AS
-	SELECT d."index" AS det_id, ld.line, c."drop", d.pin,
+	SELECT d."index" AS det_id, c.comm_link, c.drop_id, d.pin,
 	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
 		d."laneType", d."laneNumber", d.abandoned) AS label,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
@@ -928,18 +876,8 @@ CREATE VIEW detector_view AS
 	FROM detector d
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
 	LEFT JOIN lane_type ln ON d."laneType" = ln.id
-	LEFT JOIN controller c ON d.controller = c.vault_oid
-	LEFT JOIN line_drop_view ld ON d.controller = ld.vault_oid;
+	LEFT JOIN controller c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
-
-CREATE VIEW circuit_node_view AS
-	SELECT c.vault_oid, c.id, cl."index" AS line, cl."bitRate",
-	l.freeway, l.cross_street
-	FROM circuit c
-	JOIN communication_line cl ON c.line = cl.vault_oid
-	JOIN node n ON c.node = n.vault_oid
-	JOIN geo_loc_view l ON n.geo_loc = l.name;
-GRANT SELECT ON circuit_node_view TO PUBLIC;
 
 CREATE VIEW controller_device_view AS
 	SELECT d.id, d.controller, d.pin,
@@ -951,23 +889,20 @@ CREATE VIEW controller_device_view AS
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
-	SELECT cn.id AS circuit, cn.line, c."drop", c.mile,
+	SELECT c.comm_link, c.drop_id, cab.mile,
 	trim(l.freeway || ' ' || l.free_dir) || ' ' || l.cross_mod || ' ' ||
 		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
-	ct.name AS "type", d1.id AS "id (meter1)",
+	cab.style AS "type", d1.id AS "id (meter1)",
 	d1.cross_street AS "from (meter1)", d1.freeway AS "to (meter1)",
 	d2.id AS meter2, d2.cross_street AS "from (meter2)",
-	d2.freeway AS "to (meter2)", c.notes, cn."bitRate",
-	cn.freeway || ' & ' || cn.cross_street AS node_location
+	d2.freeway AS "to (meter2)", c.notes
 	FROM controller c
-	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
-	LEFT JOIN circuit_node_view cn ON c.circuit = cn.vault_oid
-	LEFT JOIN controller_170 c1 ON c.vault_oid = c1.vault_oid
-	LEFT JOIN cabinet_types ct ON c1.cabinet = ct."index"
+	LEFT JOIN cabinet cab ON c.cabinet = cab.name
+	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d1 ON
-		d1.pin = 2 AND d1.controller = c.vault_oid
+		d1.pin = 2 AND d1.controller = c.name
 	LEFT JOIN controller_device_view d2 ON
-		d2.pin = 3 AND d2.controller = c.vault_oid;
+		d2.pin = 3 AND d2.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
 
 COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM stdin;
@@ -990,18 +925,11 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 1532	4	0	java_lang_Integer	java.lang.Integer
 1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
 51458	4	0	stratified_plan	us.mn.state.dot.tms.StratifiedPlanImpl
-43828	4	0	node_group	us.mn.state.dot.tms.NodeGroupImpl
 64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
-1396	4	0	communication_line	us.mn.state.dot.tms.CommunicationLineImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
-1535	4	0	controller	us.mn.state.dot.tms.ControllerImpl
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
-43830	4	0	node	us.mn.state.dot.tms.NodeImpl
-79334	4	0	alarm	us.mn.state.dot.tms.AlarmImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
 134	4	0	camera	us.mn.state.dot.tms.CameraImpl
-43832	4	0	circuit	us.mn.state.dot.tms.CircuitImpl
-1534	4	0	controller_170	us.mn.state.dot.tms.Controller170Impl
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
 84656	4	0	r_node	us.mn.state.dot.tms.R_NodeImpl
 37	4	0	vault_list	us.mn.state.dot.vault.ListElement
@@ -1035,23 +963,20 @@ COPY road_class (id, description, grade) FROM stdin;
 7	CD road	
 \.
 
-COPY cabinet_types ("index", name) FROM stdin;
-0	336
-1	334Z
-2	334D
-3	334Z-94
-4	Drum
-5	334DZ
-6	334
-7	334Z-99
-8	Reserved
-9	S334Z
-10	Prehistoric
-11	334Z-00
-12	Reserved
-13	Reserved
-14	Reserved
-15	334ZP
+COPY cabinet_style (name, dip) FROM stdin;
+336	0
+334Z	1
+334D	2
+334Z-94	3
+Drum	4
+334DZ	5
+334	6
+334Z-99	7
+S334Z	9
+Prehistoric	10
+334Z-00	11
+334Z-05	13
+334ZP	15
 \.
 
 COPY lane_type (id, description, dcode) FROM stdin;
@@ -1176,27 +1101,13 @@ CREATE UNIQUE INDEX timing_plan_pkey ON timing_plan USING btree (vault_oid);
 
 CREATE UNIQUE INDEX simple_plan_pkey ON simple_plan USING btree (vault_oid);
 
-CREATE UNIQUE INDEX circuit_pkey ON circuit USING btree (vault_oid);
-
 CREATE UNIQUE INDEX stratified_plan_pkey ON stratified_plan USING btree (vault_oid);
 
 CREATE UNIQUE INDEX lcs_module_pkey ON lcs_module USING btree (vault_oid);
 
 CREATE UNIQUE INDEX lcs_pkey ON lcs USING btree (vault_oid);
 
-CREATE UNIQUE INDEX node_pkey ON node USING btree (vault_oid);
-
-CREATE UNIQUE INDEX node_group_pkey ON node_group USING btree (vault_oid);
-
-CREATE UNIQUE INDEX controller_pkey ON controller USING btree (vault_oid);
-
-CREATE UNIQUE INDEX controller_170_pkey ON controller_170 USING btree (vault_oid);
-
-CREATE UNIQUE INDEX communication_line_pkey ON communication_line USING btree (vault_oid);
-
 CREATE UNIQUE INDEX warning_sign_pkey ON warning_sign USING btree (vault_oid);
-
-CREATE UNIQUE INDEX alarm_pkey ON alarm USING btree (vault_oid);
 
 CREATE UNIQUE INDEX detector_index ON detector USING btree ("index");
 
@@ -1210,90 +1121,6 @@ ALTER TABLE ONLY r_node_detector
 
 ALTER TABLE ONLY r_node_detector
     ADD CONSTRAINT "$1" FOREIGN KEY (r_node) REFERENCES r_node(vault_oid);
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON node
-    FROM node_group
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'node', 'node_group', 'FULL', 'node_group', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON node_group
-    FROM node
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'node', 'node_group', 'FULL', 'node_group', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON node_group
-    FROM node
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'node', 'node_group', 'FULL', 'node_group', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON circuit
-    FROM node
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'circuit', 'node', 'FULL', 'node', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON node
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'circuit', 'node', 'FULL', 'node', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON node
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'circuit', 'node', 'FULL', 'node', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON controller
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'controller', 'circuit', 'FULL', 'circuit', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON circuit
-    FROM controller
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'controller', 'circuit', 'FULL', 'circuit', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON circuit
-    FROM controller
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'controller', 'circuit', 'FULL', 'circuit', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON circuit
-    FROM communication_line
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON communication_line
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON communication_line
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
 
 CREATE TRIGGER time_plan_log_trig
     AFTER UPDATE ON simple_plan
@@ -1344,89 +1171,5 @@ CREATE TRIGGER remove_camera_trig
     AFTER DELETE ON camera
     FOR EACH ROW
     EXECUTE PROCEDURE remove_camera();
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON node
-    FROM node_group
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'node', 'node_group', 'FULL', 'node_group', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON node_group
-    FROM node
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'node', 'node_group', 'FULL', 'node_group', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON node_group
-    FROM node
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'node', 'node_group', 'FULL', 'node_group', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON circuit
-    FROM node
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'circuit', 'node', 'FULL', 'node', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON node
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'circuit', 'node', 'FULL', 'node', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON node
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'circuit', 'node', 'FULL', 'node', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON controller
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'controller', 'circuit', 'FULL', 'circuit', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON circuit
-    FROM controller
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'controller', 'circuit', 'FULL', 'circuit', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON circuit
-    FROM controller
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'controller', 'circuit', 'FULL', 'circuit', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER INSERT OR UPDATE ON circuit
-    FROM communication_line
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_check_ins"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER DELETE ON communication_line
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_del"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
-
-CREATE CONSTRAINT TRIGGER "<unnamed>"
-    AFTER UPDATE ON communication_line
-    FROM circuit
-    NOT DEFERRABLE INITIALLY IMMEDIATE
-    FOR EACH ROW
-    EXECUTE PROCEDURE "RI_FKey_noaction_upd"('<unnamed>', 'circuit', 'communication_line', 'FULL', 'line', 'vault_oid');
 
 SELECT pg_catalog.setval('tms_log_seq', 8284, true);
