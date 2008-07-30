@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -232,7 +232,7 @@ public class OpQueryMsg extends OpDms
 			mess.setName("StatusReqMsg");
 			mess.setReqMsgName("StatusReqMsg");
 			mess.setRespMsgName("StatusRespMsg");
-			String addr = new Integer((int) m_dms.getController().getDrop()).toString();
+			String addr = Integer.toString(controller.getDrop());
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", "MsgText",

@@ -93,7 +93,7 @@ public class OpReset extends OpDms
 			mess.add(rr0);
 
 			// everything else
-			String addr = new Integer((int) m_dms.getController().getDrop()).toString();
+			String addr = Integer.toString(controller.getDrop());
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {"IsValid", "ErrMsg"});
 			mess.add(rr1);
 

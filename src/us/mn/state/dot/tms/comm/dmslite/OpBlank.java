@@ -113,8 +113,7 @@ public class OpBlank extends OpDms
 			mess.add(rr0);
 
 			// drop
-			String drop = Integer.toString(
-					  m_dms.getController().getDrop());
+			String drop = Integer.toString(controller.getDrop());
 			ReqRes rr1 = new ReqRes("Address", drop,
 						new String[] { "IsValid",
 				"ErrMsg" });

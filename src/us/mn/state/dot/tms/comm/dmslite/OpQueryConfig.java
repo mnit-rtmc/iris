@@ -89,7 +89,7 @@ public class OpQueryConfig extends OpDms
 			mess.setReqMsgName(reqname);
 			mess.setRespMsgName(resname);
 
-			String drop = Integer.toString(dms.getController().getDrop());
+			String drop = Integer.toString(controller.getDrop());
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
 			ReqRes rr1 = new ReqRes("Address", drop, new String[] {
 				"IsValid", "ErrMsg", "signAccess", "model", "make",

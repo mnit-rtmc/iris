@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2005  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 package us.mn.state.dot.tms.comm.dmslite;
@@ -120,8 +116,7 @@ abstract public class OpDms extends DeviceOperation {
 		String id=SString.truncate(msg,DB_COLUMN_MAX_LEN);
 
 		// retry?
-		ControllerImpl con=(ControllerImpl)m_dms.getController();
-		boolean retry=(con!=null && con.retry(id));
+		boolean retry = (controller != null && controller.retry(id));
 		return retry;
 	}
 
@@ -129,9 +124,8 @@ abstract public class OpDms extends DeviceOperation {
 	protected void resetErrorCounter()
 	{
 	 	String id=m_dms.getId();
-		ControllerImpl i=(ControllerImpl)m_dms.getController();
-		if (i!=null) {
-			i.resetErrorCounter(id);
+		if(controller != null) {
+			controller.resetErrorCounter(id);
 			System.err.println("OpQueryDms.resetErrorCounter(): reset comm counter");
 		}
 	}

@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -169,7 +167,7 @@ public class OpMessage extends OpDms {
 			mess.setReqMsgName(reqname);
 			mess.setRespMsgName(resname);
 
-			String addr = new Integer((int) m_dms.getController().getDrop()).toString();
+			String addr = Integer.toString(controller.getDrop());
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
 			ReqRes rr1 = new ReqRes("Address", addr,new String[] { "IsValid", "ErrMsg" });
 			mess.add(rr0);
@@ -345,7 +343,7 @@ public class OpMessage extends OpDms {
 				mess.add(rr0);
 
 				// drop
-				String addr = new Integer((int) m_dms.getController().getDrop()).toString();
+				String addr = Integer.toString(controller.getDrop());
 				rr1 = new ReqRes("Address", addr,new String[] { "IsValid", "ErrMsg" });
 				mess.add(rr1);
 			}
