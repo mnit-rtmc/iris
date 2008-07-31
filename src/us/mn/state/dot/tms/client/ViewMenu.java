@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.HolidayForm;
 import us.mn.state.dot.tms.client.toast.PolicyForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.tour.TourListForm;
 import us.mn.state.dot.tms.client.warning.WarningSignListForm;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -161,14 +160,6 @@ public class ViewMenu extends JMenu {
 			public void perform() throws Exception {
 				desktop.show(new VideoMonitorForm(
 					st.getVideoMonitors()));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Tours");
-		item.setMnemonic('T');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new TourListForm(tc));
 			}
 		};
 		add(item);

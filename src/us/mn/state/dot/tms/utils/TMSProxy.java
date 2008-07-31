@@ -147,14 +147,6 @@ public class TMSProxy {
 		return camera_list;
 	}
 
-	/** Tour list */
-	protected final RemoteListModel tour_list;
-
-	/** Get the tour list */
-	public RemoteListModel getTourList() {
-		return tour_list;
-	}
-
 	/** Camera list model */
 	protected RemoteListModel cameras;
 
@@ -194,7 +186,6 @@ public class TMSProxy {
 		warn_signs = new RemoteListModel(tms.getWarningSignList());
 		devices = new RemoteListModel(tms.getDeviceList());
 		camera_list = tms.getCameraList();
-		tour_list = new RemoteListModel(tms.getTourList());
 		lcss = new RemoteListModel(tms.getLCSList());
 	}
 
@@ -206,7 +197,6 @@ public class TMSProxy {
 		stations.dispose();
 		availableMeters.dispose();
 		devices.dispose();
-		tour_list.dispose();
 	}
 
 	/** Get a TMSObject */

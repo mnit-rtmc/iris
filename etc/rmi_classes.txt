@@ -66,7 +66,6 @@ us/mn/state/dot/tms/TimingPlanList.class
 us/mn/state/dot/tms/TMS.class
 us/mn/state/dot/tms/TMSException.class
 us/mn/state/dot/tms/TMSObject.class
-us/mn/state/dot/tms/Tour.class
 us/mn/state/dot/tms/TrafficDevice.class
 us/mn/state/dot/tms/VideoMonitor.class
 us/mn/state/dot/tms/WarningSign.class

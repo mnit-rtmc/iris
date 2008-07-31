@@ -51,9 +51,6 @@ public interface TMS extends Remote {
 	/** Get the camera list */
 	public SortedList getCameraList() throws RemoteException;
 
-	/** Get the tour list */
-	public SortedList getTourList() throws RemoteException;
-
 	/** Get the lane control signal list */
 	public SortedList getLCSList() throws RemoteException;
 
