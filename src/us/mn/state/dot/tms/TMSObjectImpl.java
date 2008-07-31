@@ -32,7 +32,6 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
-import us.mn.state.dot.tms.log.LogImpl;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -71,12 +70,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";
 
-	/** Communication line list */
-	static CommunicationLineList lineList;
-
-	/** Node group list */
-	static NodeGroupList groupList;
-
 	/** Detector list */
 	static public DetectorListImpl detList;
 
@@ -112,9 +105,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** LCS list */
 	static LCSListImpl lcsList;
-
-	/** Event Log */
-	static LogImpl eventLog;
 
 	/** Mapping of host names to user names */
 	static private final HashMap<String, String> users =
@@ -383,6 +373,20 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		catch(NamespaceError e) {
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+	/** Lookup a controller in the SONAR namespace */
+	static protected ControllerImpl lookupController(final String c) {
+		if(c == null)
+			return null;
+		try {
+			return (ControllerImpl)namespace.getObject(
+				Controller.SONAR_TYPE, c);
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 }

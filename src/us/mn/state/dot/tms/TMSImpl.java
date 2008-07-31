@@ -24,8 +24,11 @@ import java.rmi.server.UnicastRemoteObject;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.tms.log.LogImpl;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.utils.Agency;
+import us.mn.state.dot.tms.comm.MessagePoller;
+import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -71,33 +74,10 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			"traffic_device", "timing_plan");
 	}
 
-	/** Open the EventVault */
-	static protected void openEventVault(Properties props)
-		throws TMSException
-	{
-		eventLog = new LogImpl(
-			props.getProperty("HostName"),
-			props.getProperty("Port"),
-			"log", // database name
-			props.getProperty("UserName"),
-			props.getProperty("Password")
-		);
-	}
-
 	/** Load the TMS root object from the ObjectVault */
 	void loadFromVault() throws ObjectVaultException, TMSException,
 		RemoteException
 	{
-		System.err.println( "Loading comm lines..." );
-		lines.load( CommunicationLineImpl.class, "index" );
-		System.err.println( "Loading node groups..." );
-		groups.load( NodeGroupImpl.class, "index" );
-		System.err.println("Loading circuits...");
-		loadCircuits();
-		System.err.println("Loading controllers...");
-		loadControllers();
-		System.err.println("Loading alarms...");
-		loadAlarms();
 		System.err.println("Loading detectors...");
 		detectors.load(DetectorImpl.class, "index");
 		System.err.println("Loading r_nodes...");
@@ -122,36 +102,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		devices.addFiltered(warn_signs);
 	}
 
-	/** Load all the circuits from the database */
-	protected void loadCircuits() throws ObjectVaultException {
-		Iterator it = vault.lookup(CircuitImpl.class, "id");
-		while(it.hasNext()) {
-			CircuitImpl c = (CircuitImpl)vault.load(it.next());
-			c.initTransients();
-		}
-	}
-
-	/** Load all the controllers from the database */
-	protected void loadControllers() throws ObjectVaultException {
-		Iterator it = vault.lookup(ControllerImpl.class, "circuit");
-		while(it.hasNext()) {
-			ControllerImpl c = (ControllerImpl)vault.load(
-				it.next());
-			c.initTransients();
-		}
-	}
-
-	/** Load all the controller alarms */
-	protected void loadAlarms() throws TMSException, ObjectVaultException,
-		RemoteException
-	{
-		Iterator it = vault.lookup(AlarmImpl.class, "vault_oid");
-		while(it.hasNext()) {
-			AlarmImpl a = (AlarmImpl)vault.load(it.next());
-			a.initTransients();
-		}
-	}
-
 	/** determine agency specific polling time */
 	public static int getAgencyPollTimerJobSigns() {
 		if (Agency.isId(Agency.CALTRANS_D10))
@@ -165,16 +115,16 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
-			public void perform() {
-				lines.poll1Hour();
+			public void perform() throws Exception {
+				poll1Hour();
 				System.out.println(new Date());
 				Profile.printMemory(System.out);
 				Profile.printThreads(System.out);
 			}
 		} );
 		TIMER.addJob(new Job(Calendar.DATE, 1) {
-			public void perform() {
-				lines.poll1Day();
+			public void perform() throws Exception {
+				poll1Day();
 			}
 		} );
 		TIMER.addJob(new Job(Calendar.DATE, 1,
@@ -187,17 +137,17 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		TIMER.addJob(new Job(Calendar.DATE, 1,
 			Calendar.HOUR, 4)
 		{
-			public void perform() {
+			public void perform() throws Exception {
 				System.err.println( "Performing download to"
 					+ " all controllers @ " + new Date() );
-				lines.download();
+				download();
 			}
 		} );
 		TIMER.addJob(new Job(500) {
-			public void perform() {
+			public void perform() throws Exception {
 				System.err.println( "Performing download to"
 					+ " all controllers @ " + new Date() );
-				lines.download();
+				download();
 			}
 		} );
 		TIMER.addJob(new Job(1000) {
@@ -245,12 +195,16 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 
 		/** Perform the sign poll job */
-		public void perform() {
+		public void perform() throws Exception {
 			if(!comp.checkComplete())
 				return;
 			comp.reset(Calendar.getInstance());
-			lines.pollSigns(comp);
-			comp.makeReady();
+			try {
+				pollSigns(comp);
+			}
+			finally {
+				comp.makeReady();
+			}
 		}
 	}
 
@@ -278,8 +232,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 					dmss.updateTravelTimes(interval);
 				}
 				meters.notifyStatus();
-				groups.notifyStatus();
-				lines.notifyStatus();
 			}
 		};
 
@@ -290,15 +242,19 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 
 		/** Perform the 30-second timer job */
-		public void perform() {
+		public void perform() throws Exception {
 			if(!comp.checkComplete())
 				return;
 			Calendar s = Calendar.getInstance();
 			s.add(Calendar.SECOND, -30);
 			stamp = s;
 			comp.reset(stamp);
-			lines.poll30Second(comp);
-			comp.makeReady();
+			try {
+				poll30Second(comp);
+			}
+			finally {
+				comp.makeReady();
+			}
 		}
 	}
 
@@ -325,25 +281,23 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 
 		/** Perform the 5-minute timer job */
-		public void perform() {
+		public void perform() throws Exception {
 			if(!comp.checkComplete()) {
-				lines.print(System.err);
+				// FIXME: print some error msg
 				return;
 			}
 			stamp = Calendar.getInstance();
 			Calendar s = (Calendar)stamp.clone();
 			s.add(Calendar.MINUTE, -5);
 			comp.reset(s);
-			lines.poll5Minute(comp);
-			comp.makeReady();
+			try {
+				poll5Minute(comp);
+			}
+			finally {
+				comp.makeReady();
+			}
 		}
 	}
-
-	/** Master communication line list */
-	protected final CommunicationLineList lines;
-
-	/** Master node group list */
-	protected final NodeGroupList groups;
 
 	/** Master detector list */
 	protected final DetectorListImpl detectors;
@@ -383,8 +337,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		devices = new SubsetList( new DeviceFilter() );
 
 		// This is an ugly hack, but it works
-		lineList = lines;
-		groupList = groups;
 		detList = detectors;
 		statMap = station_map;
 		nodeMap = r_nodes;
@@ -403,8 +355,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		ObjectVaultException
 	{
 		super();
-		lines = new CommunicationLineList();
-		groups = new NodeGroupList();
 		detectors = new DetectorListImpl();
 		station_map = new StationMapImpl();
 		r_nodes = new R_NodeMapImpl();
@@ -417,14 +367,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
-		openEventVault(props);
 	}
-
-	/** Get the communication line list */
-	public IndexedList getLineList() { return lines; }
-
-	/** Get the node group list */
-	public IndexedList getNodeGroupList() { return groups; }
 
 	/** Get the detector list */
 	public IndexedList getDetectorList() { return detectors; }
@@ -470,5 +413,91 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			return (TMSObject)obj;
 		else
 			return null;
+	}
+
+	/** Download to all controllers */
+	static protected void download() throws NamespaceError {
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				c.setDownload(false);
+				return false;
+			}
+		});
+	}
+
+	/** Poll all controllers 30 second interval */
+	static protected void poll30Second(final Completer comp)
+		throws NamespaceError
+	{
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				MessagePoller p = c.getPoller();
+				if(p != null)
+					p.poll30Second(c, comp);
+				return false;
+			}
+		});
+	}
+
+	/** Poll all controllers 5 minute interval */
+	static protected void poll5Minute(final Completer comp)
+		throws NamespaceError
+	{
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				MessagePoller p = c.getPoller();
+				if(p != null)
+					p.poll5Minute(c, comp);
+				return false;
+			}
+		});
+	}
+
+	/** Poll all controllers for 1 hour interval */
+	static protected void poll1Hour() throws NamespaceError {
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				c.resetPeriod(ErrorCounter.PERIOD_1_HOUR);
+				return false;
+			}
+		});
+	}
+
+	/** Poll all controllers for 1 day interval */
+	static protected void poll1Day() throws NamespaceError {
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				c.resetPeriod(ErrorCounter.PERIOD_1_DAY);
+				return false;
+			}
+		});
+	}
+
+	/** Poll all controllers for sign status */
+	static protected void pollSigns(final Completer comp)
+		throws NamespaceError
+	{
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				MessagePoller p = c.getPoller();
+				if(p instanceof SignPoller) {
+					SignPoller sp = (SignPoller)p;
+					sp.pollSigns(c, comp);
+				}
+				return false;
+			}
+		});
 	}
 }

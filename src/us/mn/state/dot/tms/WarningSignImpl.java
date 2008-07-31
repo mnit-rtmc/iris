@@ -55,7 +55,7 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign,
 	}
 
 	/** Set the controller to which this sign is assigned */
-	public void setController(Controller c) throws TMSException {
+	public void setController(String c) throws TMSException {
 		super.setController(c);
 		if(c == null)
 			deviceList.add(id, this);

@@ -17,8 +17,8 @@ package us.mn.state.dot.tms;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Map;
-import us.mn.state.dot.tms.log.Log;
-import us.mn.state.dot.tms.log.SignStatusEvent;
+import us.mn.state.dot.tms.event.EventType;
+import us.mn.state.dot.tms.event.SignStatusEvent;
 import us.mn.state.dot.tms.comm.mndot.LCSCommandMessage;
 import us.mn.state.dot.vault.FieldMap;
 
@@ -216,7 +216,7 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 
 	/** Process the field verification data */
 	public void processVerifyData(int verifyData) {
-		processVerifyData(verifyData, Log.IRIS);
+		processVerifyData(verifyData, null);
 	}
 
 	/** Send a command packet with the desired state of this device */
@@ -232,7 +232,7 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 				desiredStates[i] = LCSModule.DARK;
 		}
 		try {
-			setSignals(desiredStates, Log.IRIS);
+			setSignals(desiredStates, null);
 			turnOff = false;
 		} catch(ChangeVetoException e) {
 			// Should never happen
@@ -256,7 +256,7 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	}
 
 	/** Set the controller to which this LCS is assigned */
-	public void setController(Controller c) throws TMSException {
+	public void setController(String c) throws TMSException {
 		super.setController(c);
 		if(c == null)
 			deviceList.add(id, this);
@@ -302,9 +302,6 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	 * @param user  The person who changed the state of the LCS
 	 */
 	private void logStatusChange( String user ) {
-		ControllerImpl c = (ControllerImpl)getController();
-		if(c == null)
-			return;
 		String message = "";
 		String moduleState;
 		for ( int i = 0; i < modules.length; i++ ) {
@@ -322,22 +319,21 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 				moduleState = "UNDEFINED";
 			message = message + moduleState + " ";
 		}
-		int changeStatus;
-		String description = null;
-		if ( modules[0].getState() == LCSModule.DARK ) {
-			changeStatus = SignStatusEvent.TURNED_OFF;
-			description = SignStatusEvent.SIGN_CLEARED;
-		} else {
-			changeStatus = SignStatusEvent.TURNED_ON;
-			description = SignStatusEvent.SIGN_DEPLOYED;
-		}
-		SignStatusEvent sse = new SignStatusEvent(user, description,
-			changeStatus, "Lane Control Sign", getId(), message,
-			Calendar.getInstance());
+		SignStatusEvent sse = new SignStatusEvent(getEventType(),
+			getId(), message, user);
 		try {
-			eventLog.add(sse);
-		} catch(Exception e) {
+			sse.doStore();
+		}
+		catch(Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/** Get the event type */
+	protected EventType getEventType() {
+		if(modules[0].getState() == LCSModule.DARK)
+			return EventType.DMS_CLEARED;
+		else
+			return EventType.DMS_DEPLOYED;
 	}
 }

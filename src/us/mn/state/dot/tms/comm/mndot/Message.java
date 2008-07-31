@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import us.mn.state.dot.tms.CommunicationLine;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
 
@@ -81,7 +81,7 @@ public class Message implements AddressedMessage {
 	/** Get the drop from the response drop/status byte */
 	protected int getDrop(byte[] buf) {
 		byte drop_stat = buf[Request.OFF_DROP_CAT];
-		if(protocol == CommunicationLine.PROTO_MNDOT_5)
+		if(protocol == CommLink.PROTO_MNDOT_5)
 			return (drop_stat & 0xFF) >> 3;
 		else
 			return (drop_stat & 0xFF) >> 4;
@@ -90,7 +90,7 @@ public class Message implements AddressedMessage {
 	/** Get the stat from the response drop/status byte */
 	protected int getStat(byte[] buf) {
 		byte drop_stat = buf[Request.OFF_DROP_CAT];
-		if(protocol == CommunicationLine.PROTO_MNDOT_5)
+		if(protocol == CommLink.PROTO_MNDOT_5)
 			return drop_stat & 0x07;
 		else
 			return drop_stat & 0x0F;
@@ -109,7 +109,7 @@ public class Message implements AddressedMessage {
 
 	/** Make the initical drop/category byte */
 	protected byte dropCat(int cat) {
-		if(protocol == CommunicationLine.PROTO_MNDOT_5)
+		if(protocol == CommLink.PROTO_MNDOT_5)
 			return (byte)(drop << 3 | cat);
 		else
 			return (byte)(drop << 4 | cat);

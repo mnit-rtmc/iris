@@ -77,13 +77,14 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 		location.addRow(controller);
 		new ActionJob(this, controller) {
 			public void perform() throws Exception {
-				Controller c = device.getController();
-				if(c != null) {
-					String oid = c.getOID().toString();
-					connection.getDesktop().show(
-						ControllerForm.create(
-						connection, c, oid));
-				}
+// FIXME: do SONAR linkup
+//				Controller c = device.getController();
+//				if(c != null) {
+//					String oid = c.getOID().toString();
+//					connection.getDesktop().show(
+//						ControllerForm.create(
+//						connection, c, oid));
+//				}
 			}
 		};
 		tab.add("Location", location);

@@ -22,8 +22,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.tms.log.DetectorMalfunctionEvent;
-import us.mn.state.dot.tms.log.Log;
+import us.mn.state.dot.tms.event.DetFailEvent;
+import us.mn.state.dot.tms.event.EventType;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -195,7 +195,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	}
 
 	/** Set the controller for this device */
-	public void setController(Controller c) throws TMSException {
+	public void setController(String c) throws TMSException {
 		super.setController(c);
 		try {
 			detList.update(index);
@@ -531,7 +531,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	}
 
 	/** Force fail detector and log the cause */
-	protected void malfunction(String description) {
+	protected void malfunction(EventType event_type) {
 		if(forceFail)
 			return;
 		try {
@@ -542,11 +542,13 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			e.printStackTrace();
 			return;
 		}
-		DetectorMalfunctionEvent ev = new DetectorMalfunctionEvent(
-			Log.IRIS, description, Log.DETECTOR, getId(),
-			Calendar.getInstance());
-		try{ eventLog.add(ev); }
-		catch(TMSException e) { e.printStackTrace(); }
+		DetFailEvent ev = new DetFailEvent(event_type, getId());
+		try {
+			ev.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Reversible lane name */
@@ -578,11 +580,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Test the detector volume data with error detecting algorithms */
 	protected void testVolume(int volume) {
 		if(volume > MAX_VOLUME)
-			malfunction(DetectorMalfunctionEvent.CHATTER);
+			malfunction(EventType.DET_CHATTER);
 		if(volume == 0) {
 			no_hits++;
 			if(no_hits > getNoHitThreshold())
-				malfunction(DetectorMalfunctionEvent.NO_HITS);
+				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
 	}
@@ -592,7 +594,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		if(scans >= MAX_SCANS) {
 			locked_on++;
 			if(locked_on > getLockedOnThreshold())
-				malfunction(DetectorMalfunctionEvent.LOCKED_ON);
+				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;
 	}

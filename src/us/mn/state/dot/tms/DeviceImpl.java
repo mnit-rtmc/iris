@@ -75,7 +75,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 		if(c == null)
 			return false;
 		else
-			return c.isActive();
+			return c.getActive();
 	}
 
 	/** Is the device available for a controller? */
@@ -104,9 +104,9 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 			throw new ChangeVetoException("Device has controller");
 		updateController(c, pin);
 		if(c == null)
-			store.update(this, "controller", "0");
+			store.update(this, "controller", null);
 		else
-			store.update(this, "controller", c.getOID());
+			store.update(this, "controller", c.getName());
 		controller = c;
 	}
 
@@ -128,13 +128,22 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	}
 
 	/** Set the controller of the device */
-	public void setController(Controller c) throws TMSException {
-		ControllerImpl ctr = lineList.findController(c);
+	public void setController(String c) throws TMSException {
+		ControllerImpl ctr = lookupController(c);
 		setController(ctr);
 	}
 
 	/** Get the controller to which this device is assigned */
-	public Controller getController() {
+	public String getController() {
+		ControllerImpl c = controller;
+		if(c != null)
+			return c.getName();
+		else
+			return null;
+	}
+
+	/** Get the controller to which this device is assigned */
+	public ControllerImpl getControllerImpl() {
 		return controller;
 	}
 

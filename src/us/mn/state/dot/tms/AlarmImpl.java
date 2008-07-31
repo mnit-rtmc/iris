@@ -86,21 +86,25 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 			return;
 		updateController(c, pin);
 		if(c == null)
-			store.update(this, "controller", "0");
+			store.update(this, "controller", null);
 		else
-			store.update(this, "controller", c.getOID());
+			store.update(this, "controller", c.getName());
 		controller = c;
 	}
 
 	/** Set the controller of the alarm */
-	public void setController(Controller c) throws TMSException {
-		ControllerImpl ctr = lineList.findController(c);
+	public void setController(String c) throws TMSException {
+		ControllerImpl ctr = lookupController(c);
 		setController(ctr);
 	}
 
 	/** Get the controller to which this alarm is assigned */
-	public Controller getController() {
-		return controller;
+	public String getController() {
+		ControllerImpl c = controller;
+		if(c != null)
+			return c.getName();
+		else
+			return null;
 	}
 
 	/** Controller I/O pin number */

@@ -16,8 +16,11 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
-import us.mn.state.dot.tms.Controller170;
-import us.mn.state.dot.tms.Controller170Impl;
+import us.mn.state.dot.tms.Cabinet;
+import us.mn.state.dot.tms.CabinetStyle;
+import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DetectorImpl;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.StratifiedPlanImpl;
@@ -26,31 +29,27 @@ import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TMSObjectImpl;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.DownloadRequestException;
+import us.mn.state.dot.tms.comm.MeterPoller;
 
 /**
  * Download configuration data to a 170 controller
  *
  * @author Douglas Lau
  */
-public class Download extends ControllerOperation implements TimingTable {
-
-	/** 170 Controller to download to */
-	protected final Controller170Impl c170;
+public class Download extends Controller170Operation implements TimingTable {
 
 	/** Flag to perform a level-1 restart */
 	protected final boolean restart;
 
 	/** Create a new download operation */
-	public Download(Controller170Impl c) {
+	public Download(ControllerImpl c) {
 		this(c, false);
 	}
 
 	/** Create a new download operation */
-	public Download(Controller170Impl c, boolean r) {
-		super(DOWNLOAD, c, c.toString());
-		c170 = c;
+	public Download(ControllerImpl c, boolean r) {
+		super(DOWNLOAD, c);
 		restart = r;
 		controller.setSetup("OK");
 	}
@@ -101,21 +100,39 @@ public class Download extends ControllerOperation implements TimingTable {
 			byte[] data = new byte[1];
 			mess.add(new MemoryRequest(Address.CABINET_TYPE, data));
 			mess.getRequest();
-			c170.checkCabinetType(data[0]);
+			checkCabinetStyle(data[0]);
 			return new QueryPromVersion();
 		}
+	}
+
+	/** Check the dip switch settings against the selected cabinet style */
+	protected void checkCabinetStyle(int dips) {
+		Integer d = lookupDips();
+		if(d != null && d != dips)
+			controller.setSetup("CABINET STYLE " + dips);
+	}
+
+	/** Lookup the correct dip switch setting to the controller */
+	protected Integer lookupDips() {
+		Cabinet cab = controller.getCabinet();
+		if(cab != null) {
+			CabinetStyle style = cab.getStyle();
+			if(style != null)
+				return style.getDip();
+		}
+		return null;
 	}
 
 	/** Set the controller firmware version */
 	protected void setVersion(int major, int minor) {
 		String v = Integer.toString(major) + "." +
 			Integer.toString(minor);
-		c170.setVersion(v);
+		controller.setVersion(v);
 		if(major < 4 || (major == 4 && minor < 2) ||
 			(major == 5 && minor < 4))
 		{
 			System.err.println("BUGGY 170 firmware! (version " +
-				v + ") at " + c170.toString());
+				v + ") at " + controller.toString());
 		}
 	}
 
@@ -191,7 +208,7 @@ public class Download extends ControllerOperation implements TimingTable {
 
 		/** Set the comm fail time */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			byte[] data = {Controller170.COMM_FAIL_THRESHOLD};
+			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
 			mess.add(new MemoryRequest(Address.COMM_FAIL, data));
 			mess.setRequest();
 			return new QueueBitmap();
@@ -203,11 +220,22 @@ public class Download extends ControllerOperation implements TimingTable {
 
 		/** Set the queue detector bitmap */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			byte[] data = c170.getQueueBitmap();
+			byte[] data = getQueueBitmap();
 			mess.add(new MemoryRequest(Address.QUEUE_BITMAP, data));
 			mess.setRequest();
 			return new SetTimingTable1();
 		}
+	}
+
+	/** Get the queue detector bitmap */
+	public byte[] getQueueBitmap() {
+		byte[] bitmap = new byte[DETECTOR_INPUTS / 8];
+		for(int inp = 0; inp < DETECTOR_INPUTS; inp++) {
+			DetectorImpl det = controller.getDetector(inp);
+			if(det != null && det.getLaneType() == Detector.QUEUE)
+				bitmap[inp / 8] |= 1 << (inp % 8);
+		}
+		return bitmap;
 	}
 
 	/** Phase to set the timing table for the first ramp meter */
@@ -215,14 +243,13 @@ public class Download extends ControllerOperation implements TimingTable {
 
 		/** Set the timing table for the first ramp meter */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			RampMeterImpl meter =
-				Controller170Operation.lookupMeter1(c170);
-			if(meter != null) {
+			if(meter1 != null) {
 				sendTimingTables(mess,
-					Address.METER_1_TIMING_TABLE, meter);
+					Address.METER_1_TIMING_TABLE, meter1);
 				return new ClearVerifies1();
 			}
-			WarningSignImpl warn = c170.getActiveWarningSign();
+			WarningSignImpl warn =
+				controller.getActiveWarningSign();
 			if(warn != null) {
 				sendWarningSignTiming(mess,
 					Address.METER_1_TIMING_TABLE);
@@ -249,11 +276,9 @@ public class Download extends ControllerOperation implements TimingTable {
 
 		/** Set the timing table for the second ramp meter */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			RampMeterImpl meter =
-				Controller170Operation.lookupMeter2(c170);
-			if(meter != null) {
+			if(meter2 != null) {
 				sendTimingTables(mess,
-					Address.METER_2_TIMING_TABLE, meter);
+					Address.METER_2_TIMING_TABLE, meter2);
 				return new ClearVerifies2();
 			} else
 				return null;

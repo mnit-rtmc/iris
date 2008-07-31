@@ -31,7 +31,8 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.ntcip.ShortErrorStatus;
-import us.mn.state.dot.tms.log.SignStatusEvent;
+import us.mn.state.dot.tms.event.EventType;
+import us.mn.state.dot.tms.event.SignStatusEvent;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -158,7 +159,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** Set the controller to which this DMS is assigned */
-	public void setController(Controller c) throws TMSException {
+	public void setController(String c) throws TMSException {
 		super.setController(c);
 		if(c == null)
 			deviceList.add(id, this);
@@ -713,16 +714,13 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		// when users double-click the send.
 		if(m.isBlank()) {
 			if(!message.isBlank()) {
-				logMessage(SignStatusEvent.SIGN_CLEARED,
-					SignStatusEvent.TURNED_OFF, "",
-					id, m.getOwner());
+				logMessage(EventType.DMS_CLEARED, id, null,
+					m.getOwner());
 			}
 		} else {
 			if(!message.equals(m)) {
-				logMessage(SignStatusEvent.SIGN_DEPLOYED,
-					SignStatusEvent.TURNED_OFF,
-					m.getMulti().toString(), id,
-					m.getOwner());
+				logMessage(EventType.DMS_DEPLOYED, id,
+					m.getMulti().toString(), m.getOwner());
 			}
 		}
 		message = m;
@@ -741,13 +739,16 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** Log a message */
-	protected void logMessage( String desc, int changeStatus,
-		String text, String id, String owner )
+	protected void logMessage(EventType et, String id, String text, 
+		String owner)
 	{
-		SignStatusEvent sse = new SignStatusEvent(owner, desc,
-			changeStatus, "DMS", id, text, Calendar.getInstance());
-		try { eventLog.add( sse ); }
-		catch(TMSException tmse) { tmse.printStackTrace(); }
+		SignStatusEvent sse = new SignStatusEvent(et, id, text, owner);
+		try {
+			sse.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Get current sign messasge

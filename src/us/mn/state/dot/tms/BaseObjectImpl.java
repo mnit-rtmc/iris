@@ -41,6 +41,10 @@ abstract public class BaseObjectImpl implements Storable {
 		VideoMonitorImpl.loadAll();
 		RoadImpl.loadAll();
 		GeoLocImpl.loadAll();
+		CommLinkImpl.loadAll();
+		CabinetStyleImpl.loadAll();
+		CabinetImpl.loadAll();
+		ControllerImpl.loadAll();
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
 		SignTextImpl.loadAll();

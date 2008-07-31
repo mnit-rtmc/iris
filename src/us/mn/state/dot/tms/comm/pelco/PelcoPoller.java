@@ -55,7 +55,7 @@ public class PelcoPoller extends MessagePoller implements CameraPoller {
 
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		if(c.isActive())
+		if(c.getActive())
 			c.resetErrorCounter();
 	}
 

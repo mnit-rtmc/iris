@@ -146,7 +146,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	}
 
 	/** Set the controller for this device */
-	public void setController(Controller c) throws TMSException {
+	public void setController(String c) throws TMSException {
 		super.setController(c);
 		if(c == null) {
 			deviceList.add(id, this);
@@ -167,13 +167,13 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		return null;
 	}
 
-	/** Check if the meter has been failed beyond threshold time */
-	public boolean isFailedBeyondThreshold() {
+	/** Get the number of milliseconds the controller has been failed */
+	public long getFailMillis() {
 		ControllerImpl c = controller;	// Avoid races
-		if(c instanceof Controller170Impl)
-			return ((Controller170Impl)c).isFailedBeyondThreshold();
+		if(c.isFailed())
+			return c.getFailMillis();
 		else
-			return false;
+			return Long.MAX_VALUE;
 	}
 
 	/** Green count detector */

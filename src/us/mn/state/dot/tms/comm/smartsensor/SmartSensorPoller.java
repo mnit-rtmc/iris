@@ -52,7 +52,7 @@ public class SmartSensorPoller extends MessagePoller {
 
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		if(c.isActive()) {
+		if(c.getActive()) {
 			InitializeSensor o = new InitializeSensor(c, reset);
 			o.setPriority(p);
 			o.start();

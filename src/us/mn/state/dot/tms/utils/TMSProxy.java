@@ -37,18 +37,6 @@ public class TMSProxy {
 	/** Remote TMS */
 	protected final TMS tms;
 
-	/** Communication line list */
-	protected final RemoteListModel lines;
-
-	/** Get the communication line list */
-	public RemoteListModel getLines() { return lines; }
-
-	/** Node group list */
-	protected final RemoteListModel groups;
-
-	/** Get the node group list */
-	public RemoteListModel getGroups() { return groups; }
-
 	/** Detector list */
 	protected final RemoteListModel detectors;
 
@@ -192,8 +180,6 @@ public class TMSProxy {
 	{
 		Login l = (Login)Naming.lookup("//" + server + "/login");
 		tms = l.login(user);
-		lines = new RemoteListModel(tms.getLineList());
-		groups = new RemoteListModel(tms.getNodeGroupList());
 		DetectorList dets = (DetectorList)tms.getDetectorList();
 		detectors = new RemoteListModel(dets);
 		available = new RemoteListModel(dets.getAvailableList());
@@ -214,8 +200,6 @@ public class TMSProxy {
 
 	/** Dispose of all proxied lists */
 	public void dispose() {
-		lines.dispose();
-		groups.dispose();
 		detectors.dispose();
 		available.dispose();
 		mainFree.dispose();

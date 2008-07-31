@@ -72,15 +72,15 @@ abstract public class DeviceProxy extends TmsMapProxy implements Device {
 	}
 
 	/** Get the controller to which this device is attached */
-	public Controller getController() throws RemoteException {
+	public String getController() throws RemoteException {
 		return device.getController();
 	}
 
 	/** Set the device controller */
-	public void setController(Controller c) throws TMSException,
+	public void setController(String c) throws TMSException,
 		RemoteException
 	{
-		device.setController(c);
+//		device.setController(c);
 	}
 
 	/** Get the I/O pin */

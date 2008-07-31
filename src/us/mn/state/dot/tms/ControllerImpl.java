@@ -15,212 +15,257 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
+import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.log.CommunicationLineEvent;
-import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
+import us.mn.state.dot.tms.event.CommEvent;
+import us.mn.state.dot.tms.event.EventType;
 
 /**
- * The ControllerImpl class represents a generic traffic controller.
- * Subclasses such as Controller170Impl are defined for particular types of
- * controllers.
+ * A controller represents a field device controller.
  *
  * @author Douglas Lau
  */
-public class ControllerImpl extends TMSObjectImpl implements Controller,
-	ErrorCounter, Storable
+public class ControllerImpl extends BaseObjectImpl implements Controller,
+	ErrorCounter
 {
-	/** ObjectVault table name */
-	static public final String tableName = "controller";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
-
 	/** Communication failure retry threshold */
 	static public final int RETRY_THRESHOLD = 3;
 
-	/** Create a new Controller */
-	public ControllerImpl(CircuitImpl c, short d) throws TMSException,
-		RemoteException
-	{
-		super();
-		circuit = c;
-		drop = d;
-		version = UNKNOWN;
-		counters = new int[ TYPES.length ][ PERIODS.length ];
-		// FIXME: geo_loc should be guaranteed unique
-		geo_loc = "ctl_" + circuit.getId() + "_" + d;
-		GeoLocImpl loc = new GeoLocImpl(geo_loc);
-		loc.doStore();
-		MainServer.server.addObject(loc);
-		notes = "";
-	}
-
-	/** Create a controller from an ObjectVault field map */
-	protected ControllerImpl( FieldMap fields ) throws RemoteException {
-		// hmmmm
+	/** Load all the controllers */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading controllers...");
+		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
+		store.query("SELECT name, cabinet, comm_link, drop_id, " +
+			"active, notes FROM " + SONAR_TYPE  + ";",
+			new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new ControllerImpl(namespace,
+					row.getString(1),	// name
+					row.getString(2),	// cabinet
+					row.getString(3),	// comm_link
+					row.getShort(4),	// drop_id
+					row.getBoolean(5),	// active
+					row.getString(6)	// notes
+				));
+			}
+		});
 	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
-		return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		if(cabinet != null)
+			map.put("cabinet", cabinet.getName());
+		if(comm_link != null)
+			map.put("comm_link", comm_link.getName());
+		map.put("drop_id", drop_id);
+		map.put("active", active);
+		map.put("notes", notes);
+		return map;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new controller */
+	public ControllerImpl(String n) {
+		super(n);
+	}
+
+	/** Create a new controller */
+	protected ControllerImpl(String n, Cabinet c, CommLink l, short d,
+		boolean a, String nt)
+	{
+		this(n);
+		cabinet = c;
+		comm_link = l;
+		drop_id = d;
+		active = a;
+		notes = nt;
+	}
+
+	/** Create a new controller */
+	protected ControllerImpl(Namespace ns, String n, String c, String l,
+		short d, boolean a, String nt) throws NamespaceError
+	{
+		this(n, (Cabinet)ns.getObject(Cabinet.SONAR_TYPE, c),
+			(CommLink)ns.getObject(CommLink.SONAR_TYPE, l),
+			d, a, nt);
 	}
 
 	/** Initialize the transient fields */
-	public void initTransients() {
-		version = UNKNOWN;
+	public void initTransients() throws TMSException {
+		// FIXME: make sure this gets called
+		version = Constants.UNKNOWN;
 		counters = new int[TYPES.length][PERIODS.length];
-		circuit.putController(this);
+		CommLinkImpl link = (CommLinkImpl)comm_link;
+		if(link != null)
+			link.putController(drop_id, this);
 	}
 
 	/** Create a string representation of the controller */
 	public String toString() {
-		CommunicationLineImpl line =
-			(CommunicationLineImpl)circuit.getLine();
-		return "(" + line.getIndex() + ":" + drop + ")";
+		CommLink l = comm_link;
+		return "(" + l.getName() + ":" + drop_id + ")";
 	}
 
 	/** Get controller label */
 	public String getLabel() {
-		CommunicationLineImpl line =
-			(CommunicationLineImpl)circuit.getLine();
-		StringBuffer buf = new StringBuffer();
-		buf.append( "Line " );
-		buf.append(line.getIndex());
-		buf.append( " drop " );
-		buf.append( drop );
-		return buf.toString();
+		CommLink l = comm_link;
+		StringBuilder b = new StringBuilder();
+		b.append("Link ");
+		b.append(l.getName());
+		b.append(" drop ");
+		b.append(drop_id);
+		return b.toString();
 	}
 
-	/** Circuit */
-	protected CircuitImpl circuit;
+	/** Controller cabinet */
+	protected Cabinet cabinet;
 
-	/** Get the circuit */
-	public Circuit getCircuit() { return circuit; }
+	/** Set the controller cabinet */
+	public void setCabinet(Cabinet c) {
+		cabinet = c;
+	}
 
-	/** Set the circuit for this controller */
-	protected synchronized void setCircuit(CircuitImpl c)
-		throws TMSException
-	{
-		if(c == circuit)
+	/** Set the controller cabinet */
+	public void doSetCabinet(Cabinet c) throws TMSException {
+		if(c == cabinet)
 			return;
-		CommunicationLineImpl line = (CommunicationLineImpl)c.getLine();
-		if(line != getLine() && line.getController(drop) != null)
-			throw new ChangeVetoException("Duplicate drop address");
-		store.update(this, "circuit", c.getOID());
-		circuit.pullController(this);
-		circuit = c;
-		circuit.putController(this);
+		if(c != null)
+			store.update(this, "cabinet", c.getName());
+		else
+			store.update(this, "cabinet", null);
+		setCabinet(c);
 	}
 
-	/** Set the circuit for this controller */
-	public void setCircuit(String id) throws TMSException {
-		if(id.equals(circuit.getId()))
+	/** Get the controller cabinet */
+	public Cabinet getCabinet() {
+		return cabinet;
+	}
+
+	/** Put this controller into a comm link */
+	protected void putCommLink(int d, CommLink l) throws TMSException {
+		CommLinkImpl link = (CommLinkImpl)l;
+		if(link != null)
+			link.putController(d, this);
+	}
+
+	/** Pull this controller from a comm link */
+	protected void pullCommLink(CommLink l) {
+		CommLinkImpl link = (CommLinkImpl)l;
+		if(link != null)
+			link.pullController(this);
+	}
+
+	/** Comm link */
+	protected CommLink comm_link;
+
+	/** Set the comm link for this controller */
+	public void setCommLink(CommLink c) {
+		comm_link = c;
+	}
+
+	/** Set the comm link for this controller */
+	public void doSetCommLink(CommLink c) throws TMSException {
+		if(c == comm_link)
 			return;
-		CircuitImpl c = groupList.findCircuit(id);
-		if(c == null)
-			throw new ChangeVetoException("Invalid circuit ID");
-		setCircuit(c);
+		putCommLink(drop_id, c);
+		if(c != null)
+			store.update(this, "comm_link", c.getName());
+		else
+			store.update(this, "comm_link", null);
+		pullCommLink(comm_link);
+		setCommLink(c);
 	}
 
-	/** Get the communication line */
-	public final CommunicationLine getLine() {
-		return circuit.getLine();
+	/** Get the comm link */
+	public CommLink getCommLink() {
+		return comm_link;
 	}
 
 	/** Drop address */
-	protected short drop;
-
-	/** Get the drop address */
-	public short getDrop() { return drop; }
+	protected short drop_id;
 
 	/** Set the drop address */
-	public synchronized void setDrop(short d) throws TMSException {
-		if(d == drop)
+	public void setDrop(short d) {
+		drop_id = d;
+	}
+
+	/** Set the drop address */
+	public void doSetDrop(short d) throws TMSException {
+		if(d == drop_id)
 			return;
-		CommunicationLineImpl line = (CommunicationLineImpl)getLine();
-		if(line.getController(d) != null)
-			throw new ChangeVetoException("Duplicate drop address");
-		store.update(this, "drop", d);
-		circuit.pullController(this);
-		drop = d;
-		circuit.putController(this);
+		putCommLink(d, comm_link);
+		store.update(this, "drop_id", d);
+		pullCommLink(comm_link);
+		setDrop(d);
+	}
+
+	/** Get the drop address */
+	public short getDrop() {
+		return drop_id;
 	}
 
 	/** Active status flag */
 	protected boolean active;
 
 	/** Set the active status */
-	public synchronized void setActive(boolean a) throws TMSException {
+	public void setActive(boolean a) {
+		active = a;
+	}
+
+	/** Set the active status */
+	public void doSetActive(boolean a) throws TMSException {
 		if(a == active)
 			return;
 		store.update(this, "active", a);
-		active = a;
+		setActive(a);
 		updateNowCounters();
 	}
 
 	/** Get the active status */
-	public boolean isActive() { return active; }
-
-	/** Controller location */
-	protected String geo_loc;
-
-	/** Set the controller location */
-	public synchronized void setGeoLoc(String l) throws TMSException {
-		if(l == geo_loc)
-			return;
-		store.update(this, "geo_loc", l);
-		geo_loc = l;
-	}
-
-	/** Get the controller location */
-	public String getGeoLoc() {
-		return geo_loc;
-	}
-
-	/** Lookup the geo location */
-	public GeoLocImpl lookupGeoLoc() {
-		return lookupGeoLoc(geo_loc);
+	public boolean getActive() {
+		return active;
 	}
 
 	/** Administrator notes for this controller */
 	protected String notes;
 
-	/** Get the administrator notes */
-	public String getNotes() { return notes; }
-
 	/** Set the administrator notes */
-	public synchronized void setNotes(String n) throws TMSException {
-		if(n.equals(notes))
-			return;
-		store.update(this, "notes", n);
+	public void setNotes(String n) {
 		notes = n;
 	}
 
-	/** Milepoint on freeway */
-	protected float mile;
-
-	/** Set the milepoint */
-	public synchronized void setMile(float m) throws TMSException {
-		if(m == mile)
+	/** Set the administrator notes */
+	public void doSetNotes(String n) throws TMSException {
+		if(n.equals(notes))
 			return;
-		store.update(this, "mile", m);
-		mile = m;
+		store.update(this, "notes", n);
+		setNotes(n);
 	}
 
-	/** Get the milepoint */
-	public float getMile() { return mile; }
+	/** Get the administrator notes */
+	public String getNotes() {
+		return notes;
+	}
 
 	/** Mapping of all controller I/O pins */
 	protected transient HashMap<Integer, ControllerIO> io_pins =
@@ -253,7 +298,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	}
 
 	/** Set all controller devices to failed status */
-	public synchronized void failDevices() {
+	protected synchronized void failDevices() {
 		for(ControllerIO io: io_pins.values()) {
 			if(io instanceof TrafficDeviceImpl) {
 				TrafficDeviceImpl t = (TrafficDeviceImpl)io;
@@ -265,7 +310,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 
 	/** Determine whether this controller has an active ramp meter */
 	public synchronized boolean hasActiveMeter() {
-		if(isActive()) {
+		if(getActive()) {
 			for(ControllerIO io: io_pins.values()) {
 				if(io instanceof RampMeterImpl)
 					return true;
@@ -276,10 +321,32 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 
 	/** Get an active DMS for the controller */
 	public synchronized DMSImpl getActiveSign() {
-		if(isActive()) {
+		if(getActive()) {
 			for(ControllerIO io: io_pins.values()) {
 				if(io instanceof DMSImpl)
 					return (DMSImpl)io;
+			}
+		}
+		return null;
+	}
+
+	/** Get an active LCS for the controller */
+	public synchronized LaneControlSignalImpl getActiveLcs() {
+		if(getActive()) {
+			for(ControllerIO io: io_pins.values()) {
+				if(io instanceof LaneControlSignalImpl)
+					return (LaneControlSignalImpl)io;
+			}
+		}
+		return null;
+	}
+
+	/** Get an active warning sign for the controller */
+	public synchronized WarningSignImpl getActiveWarningSign() {
+		if(getActive()) {
+			for(ControllerIO io: io_pins.values()) {
+				if(io instanceof WarningSignImpl)
+					return (WarningSignImpl)io;
 			}
 		}
 		return null;
@@ -317,7 +384,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 
 	/** Check whether this controller has any active detectors */
 	public synchronized boolean hasActiveDetector() {
-		if(isActive()) {
+		if(getActive()) {
 			for(ControllerIO io: io_pins.values()) {
 				if(io instanceof DetectorImpl)
 					return true;
@@ -400,16 +467,20 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	protected transient String version;
 
 	/** Set the controller firmware version */
-	public void setVersion(String v) { version = v; }
+	public void setVersion(String v) {
+		version = v;
+	}
 
 	/** Get the controller firmware version */
-	public String getVersion() { return version; }
+	public String getVersion() {
+		return version;
+	}
 
 	/** Add an operation to be performed */
 	public void addOperation(ControllerOperation o) {
-		CommunicationLineImpl line =
-			(CommunicationLineImpl)circuit.getLine();
-		line.addOperation(o);
+		CommLinkImpl link = (CommLinkImpl)comm_link;
+		if(link != null)
+			link.addOperation(o);
 	}
 
 	/** Flag if counters have been initialized */
@@ -450,11 +521,11 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	/** Update the counters for the 'now' period */
 	protected final void updateNowCounters() {
 		synchronized(counters) {
-			if(isActive() && !isFailed())
+			if(getActive() && !isFailed())
 				counters[TYPE_GOOD][PERIOD_NOW] = 1;
 			else
 				counters[TYPE_GOOD][PERIOD_NOW] = 0;
-			if(isActive() && isFailed())
+			if(getActive() && isFailed())
 				counters[TYPE_FAIL][PERIOD_NOW] = 1;
 			else
 				counters[TYPE_FAIL][PERIOD_NOW] = 0;
@@ -462,42 +533,49 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	}
 
 	/** Controller communication status */
-	protected transient String status = UNKNOWN;
+	protected transient String status = Constants.UNKNOWN;
 
 	/** Get the controller communication status */
-	public String getStatus() { return status; }
+	public String getStatus() {
+		return status;
+	}
 
 	/** Controller setup configuration state */
-	protected transient String setup = UNKNOWN;
+	protected transient String setup = Constants.UNKNOWN;
 
 	/** Get the controller setup configuration state */
-	public String getSetup() { return setup; }
+	public String getSetup() {
+		return setup;
+	}
 
 	/** Set the controller setup configuration state */
 	public void setSetup(String s) {
 		if(s == null)
-			setup = UNKNOWN;
+			setup = Constants.UNKNOWN;
 		else
 			setup = s;
 	}
 
+	/** Get the comm link name */
+	protected String getLinkName() {
+		CommLinkImpl link = (CommLinkImpl)comm_link;
+		if(link != null)
+			return link.getName();
+		else
+			return null;
+	}
+
 	/** Log an exception */
 	public void logException(String id, String message) {
-		CommunicationLineImpl line =
-			(CommunicationLineImpl)circuit.getLine();
 		status = message;
 		if(!isFailed()) {
-			CommunicationLineEvent e = new CommunicationLineEvent();
-			e.setEventDescription(
-				CommunicationLineEvent.COMM_ERROR);
-			e.setEventCalendar(Calendar.getInstance());
-			e.setEventRemarks(status);
-			e.setDeviceId(id);
-			e.setLine(line.getIndex());
-			e.setDrop(drop);
-			try{ eventLog.add(e); }
-			catch(TMSException tmse) {
-				tmse.printStackTrace();
+			CommEvent ev = new CommEvent(EventType.COMM_ERROR,
+				getLinkName(), drop_id, id);
+			try {
+				ev.doStore();
+			}
+			catch(TMSException e) {
+				e.printStackTrace();
 			}
 		}
 	}
@@ -514,7 +592,9 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	protected transient Date failTime = new Date();
 
 	/** Get the time stamp of the most recent comm failure */
-	public Date getFailTime() { return failTime; }
+	public String getFailTime() {
+		return failTime.toString();
+	}
 
 	/** Get the number of milliseconds the controller has been failed */
 	public long getFailMillis() {
@@ -525,20 +605,13 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	}
 
 	/** Log a FAILURE class message */
-	protected final void logFailMessage( String message, String id ) {
-		CommunicationLineImpl line =
-			(CommunicationLineImpl)circuit.getLine();
-		CommunicationLineEvent event = new CommunicationLineEvent();
-//		event.setEventDescription( Log.DESCRIPTION_COMM_FAILED );
-		event.setEventDescription( message );
-		event.setEventCalendar( Calendar.getInstance() );
-		event.setEventRemarks( "" );
-		event.setDeviceId( id );
-		event.setLine(line.getIndex());
-		event.setDrop( drop );
-		try{ eventLog.add( event ); }
-		catch(TMSException tmse) {
-			tmse.printStackTrace();
+	protected final void logFailMessage(EventType event, String id) {
+		CommEvent ev = new CommEvent(event, getLinkName(), drop_id, id);
+		try {
+			ev.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
 		};
 		updateNowCounters();
 	}
@@ -554,7 +627,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		errorCounter++;
 		if(isFailed()) {
 			failTime = new Date();
-			logFailMessage("Comm FAILED", id);
+			logFailMessage(EventType.COMM_FAILED, id);
 			return false;
 		}
 		return true;
@@ -566,7 +639,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 		status = "OK";
 		errorCounter = 0;
 		if(failed)
-			logFailMessage("Comm RESTORED", id);
+			logFailMessage(EventType.COMM_RESTORED, id);
 	}
 
 	/** Reset the error counter */
@@ -578,15 +651,28 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 			resetErrorCounter(toString());
 	}
 
+	/** Complete a controller operation */
+	public void completeOperation(String id, boolean success) {
+		if(success) {
+			resetErrorCounter(id);
+			incrementCounter(ErrorCounter.TYPE_GOOD);
+		} else {
+			failDevices();
+			incrementCounter(ErrorCounter.TYPE_FAIL);
+		}
+	}
+
 	/** Get the message poller */
 	public MessagePoller getPoller() {
-		CommunicationLineImpl line =
-			(CommunicationLineImpl)circuit.getLine();
-		return line.getPoller();
+		CommLinkImpl link = (CommLinkImpl)comm_link;
+		if(link != null)
+			return link.getPoller();
+		else
+			return null;
 	}
 
 	/** Perform a controller download */
-	public void download(boolean reset) {
+	public void setDownload(boolean reset) {
 		MessagePoller p = getPoller();
 		if(p != null)
 			p.download(this, reset);
@@ -596,7 +682,7 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 	protected transient DiagnosticOperation test;
 
 	/** Test the communications to this controller */
-	public synchronized void testCommunications(boolean on_off) {
+	public synchronized void setTest(boolean on_off) {
 		MessagePoller p = getPoller();
 		if(on_off) {
 			if(test == null) {
@@ -608,5 +694,15 @@ public class ControllerImpl extends TMSObjectImpl implements Controller,
 			test.stopTesting();
 			test = null;
 		}
+	}
+
+	/** Get the testing status flag */
+	public boolean getTest() {
+		return test != null;
+	}
+
+	/** Notify SONAR clients of status changes */
+	public void notifyStatus() {
+		// FIXME: how should this work?
 	}
 }

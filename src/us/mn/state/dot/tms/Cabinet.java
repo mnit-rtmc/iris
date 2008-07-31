@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,24 +14,33 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * ControllerIO is an input/output connected to a controller (alarm or device)
+ * Cabinet
  *
  * @author Douglas Lau
  */
-public interface ControllerIO {
+public interface Cabinet extends SonarObject {
 
-	/** Set the controller for the I/O */
-	void setController(String c) throws TMSException, RemoteException;
+	/** SONAR type name */
+	String SONAR_TYPE = "cabinet";
 
-	/** Get the controller for the I/O */
-	String getController() throws RemoteException;
+	/** Set the cabinet style */
+	void setStyle(CabinetStyle s);
 
-	/** Set the controller I/O pin number */
-	void setPin(int p) throws TMSException, RemoteException;
+	/** Get the cabinet style */
+	CabinetStyle getStyle();
 
-	/** Get the controller I/O pin number */
-	int getPin() throws RemoteException;
+	/** Set the controller location */
+	void setGeoLoc(GeoLoc l);
+
+	/** Get the controller location */
+	GeoLoc getGeoLoc();
+
+	/** Set the milepoint */
+	void setMile(Float m);
+
+	/** Get the milepoint */
+	Float getMile();
 }

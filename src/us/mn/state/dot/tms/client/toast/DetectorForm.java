@@ -205,6 +205,7 @@ public class DetectorForm extends TMSObjectForm {
 
 	/** Controller lookup button pressed */
 	protected void controllerPressed() throws Exception {
+/* FIXME: do SONAR thing
 		Controller c = detector.getController();
 		if(c == null)
 			controller.setEnabled(false);
@@ -212,6 +213,7 @@ public class DetectorForm extends TMSObjectForm {
 			connection.getDesktop().show(ControllerForm.create(
 				connection, c, c.getOID().toString()));
 		}
+*/
 	}
 
 	/** Station lookup button pressed */

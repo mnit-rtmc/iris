@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.Controller170Impl;
+import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -31,7 +31,7 @@ public class Data30Second extends IntervalData {
 	protected final Completer completer;
 
 	/** Create a new 30-second data operation */
-	public Data30Second(Controller170Impl c, Completer comp) {
+	public Data30Second(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
 		completer.up();

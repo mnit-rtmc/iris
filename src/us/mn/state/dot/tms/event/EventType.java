@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,18 +12,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.log;
+package us.mn.state.dot.tms.event;
 
 /**
- * Interface for the log object
+ * This enumeration contains events in the event_type table.
  *
- * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
+ * @author Douglas Lau
  */
-public interface Log {
+public enum EventType {
+	DMS_DEPLOYED(91), DMS_CLEARED(92),
+	LCS_DEPLOYED(89), LCS_CLEARED(90),
+	DET_CHATTER(96), DET_LOCKED_ON(95), DET_NO_HITS(94),
+	COMM_ERROR(8), COMM_FAILED(65), COMM_RESTORED(9);
 
-	/** Device Type used in Event Vault */
-	String DETECTOR = "Detector";
+	public final int id;
 
-	/** User name for events logged by IRIS */
-	String IRIS = "IRIS";
+	private EventType(int i) {
+		id = i;
+	}
 }

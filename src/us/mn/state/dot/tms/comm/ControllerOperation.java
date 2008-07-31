@@ -18,7 +18,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.ErrorCounter;
 
 /**
  * An operation which is performed on a field controller.
@@ -81,13 +80,6 @@ abstract public class ControllerOperation extends Operation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success) {
-			controller.resetErrorCounter(id);
-			controller.incrementCounter(ErrorCounter.TYPE_GOOD);
-		} else {
-			controller.failDevices();
-			controller.incrementCounter(ErrorCounter.TYPE_FAIL);
-		}
-		controller.notifyStatus();
+		controller.completeOperation(id, success);
 	}
 }

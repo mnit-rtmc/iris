@@ -15,8 +15,7 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.CommunicationLine;
-import us.mn.state.dot.tms.Controller170Impl;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.LaneControlSignalImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
@@ -39,7 +38,7 @@ import us.mn.state.dot.tms.comm.WarningSignPoller;
 public class MndotPoller extends MessagePoller implements MeterPoller,
 	WarningSignPoller
 {
-	/** CommunicationLine protocol (4-bit or 5-bit) */
+	/** CommLink protocol (4-bit or 5-bit) */
 	protected final int protocol;
 
 	/** Create a new Mn/DOT 170 poller */
@@ -60,26 +59,15 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	public boolean isAddressValid(int drop) {
 		if(drop < 1 || drop > 31)
 			return false;
-		if(drop > 15 && protocol != CommunicationLine.PROTO_MNDOT_5)
+		if(drop > 15 && protocol != CommLink.PROTO_MNDOT_5)
 			return false;
 		return true;
 	}
 
-	/** Check that a controller is an active 170 controller */
-	static protected Controller170Impl check170(ControllerImpl c) {
-		if(c instanceof Controller170Impl) {
-			Controller170Impl c170 = (Controller170Impl)c;
-			if(c170.isActive())
-				return c170;
-		}
-		return null;
-	}
-
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		Controller170Impl c170 = check170(c);
-		if(c170 != null) {
-			Download d = new Download(c170, reset);
+		if(c.getActive()) {
+			Download d = new Download(c, reset);
 			d.setPriority(p);
 			d.start();
 		}
@@ -87,37 +75,30 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 
 	/** Perform a 30-second poll */
 	public void pollSigns(ControllerImpl c, Completer comp) {
-		Controller170Impl c170 = check170(c);
-		if(c170 == null)
-			return;
-		LaneControlSignalImpl lcs = c170.getActiveLcs();
-		if(lcs != null)
-			new LCSQuerySignal(lcs, comp).start();
-		WarningSignImpl warn = c170.getActiveWarningSign();
-		if(warn != null)
-			new WarningStatus(warn, comp).start();
+		if(c.getActive()) {
+			LaneControlSignalImpl lcs = c.getActiveLcs();
+			if(lcs != null)
+				new LCSQuerySignal(lcs, comp).start();
+			WarningSignImpl warn = c.getActiveWarningSign();
+			if(warn != null)
+				new WarningStatus(warn, comp).start();
+		}
 	}
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		Controller170Impl c170 = check170(c);
-		if(c170 == null)
-			return;
-		if(c170.hasActiveDetector())
-			new Data30Second(c170, comp).start();
-		if(c170.hasActiveMeter())
-			new QueryMeterStatus(c170, comp).start();
+		if(c.hasActiveDetector())
+			new Data30Second(c, comp).start();
+		if(c.hasActiveMeter())
+			new QueryMeterStatus(c, comp).start();
 	}
 
 	/** Perform a 5-minute poll */
 	public void poll5Minute(ControllerImpl c, Completer comp) {
-		Controller170Impl c170 = check170(c);
-		if(c170 == null)
-			return;
-		if(c170.hasActiveDetector() || c170.hasActiveMeter())
-			new Data5Minute(c170, comp).start();
-		if(c170.hasAlarm())
-			new QueryAlarms(c170).start();
+		if(c.hasActiveDetector() || c.hasActiveMeter())
+			new Data5Minute(c, comp).start();
+		if(c.hasAlarm())
+			new QueryAlarms(c).start();
 	}
 
 	/** Start a test for the given controller */
@@ -170,7 +151,7 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		int n = getMeterNumber(meter);
 		if(n > 0) {
 			// Workaround for errors in rx only (good tx)
-			if(meter.isFailedBeyondThreshold())
+			if(meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS)
 				setLocal(meter);
 			else {
 				int r = meter.calculateRedTime(rate);

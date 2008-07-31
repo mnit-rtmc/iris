@@ -24,12 +24,6 @@ import java.rmi.RemoteException;
  */
 public interface TMS extends Remote {
 
-	/** Get the communication line list */
-	public IndexedList getLineList() throws RemoteException;
-
-	/** Get the node group list */
-	public IndexedList getNodeGroupList() throws RemoteException;
-
 	/** Get the detector list */
 	public IndexedList getDetectorList() throws RemoteException;
 

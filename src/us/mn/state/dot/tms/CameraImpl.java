@@ -54,7 +54,7 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	}
 
 	/** Set the controller to which this camera is assigned */
-	public void setController(Controller c) throws TMSException {
+	public void setController(String c) throws TMSException {
 		super.setController(c);
 		if(c == null)
 			deviceList.add(id, this);

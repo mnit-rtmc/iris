@@ -62,7 +62,7 @@ public class CanogaPoller extends MessagePoller {
 
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		if(c.isActive()) {
+		if(c.getActive()) {
 			InitializeCanoga o = new InitializeCanoga(c, reset);
 			o.setPriority(p);
 			o.start();

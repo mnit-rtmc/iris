@@ -29,7 +29,6 @@ import java.util.TimeZone;
 import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.sonar.server.Server;
-import us.mn.state.dot.tms.log.TMSEvent;
 import us.mn.state.dot.tms.utils.Agency;
 
 /**
@@ -90,9 +89,6 @@ public class MainServer {
 				Registry.REGISTRY_PORT);
 			Naming.bind("//localhost/login", login);
 			server = new Server(ns, props);
-			TMSObjectImpl.eventLog.add(new TMSEvent("System",
-				TMSEvent.SYSTEM_RESTARTED,
-				Calendar.getInstance()));
 			System.err.println("IRIS Server active for "+Agency.getId()+".");
 			server.join();
 		}

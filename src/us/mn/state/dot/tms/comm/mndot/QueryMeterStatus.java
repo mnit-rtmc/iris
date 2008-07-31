@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.Controller170Impl;
+import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -64,7 +64,7 @@ public class QueryMeterStatus extends Controller170Operation
 	protected final LinkedList<Phase> phases = new LinkedList<Phase>();
 
 	/** Create a new query meter status operatoin */
-	public QueryMeterStatus(Controller170Impl c, Completer comp) {
+	public QueryMeterStatus(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
 		completer.up();

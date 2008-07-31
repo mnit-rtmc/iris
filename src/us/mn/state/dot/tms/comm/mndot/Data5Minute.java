@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.Controller170Impl;
+import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -31,15 +31,6 @@ public class Data5Minute extends IntervalData {
 
 	/** Maximum number of records to read with "BAD TIMESTAMP" errors */
 	static protected final int MAX_BAD_RECORDS = 5;
-
-	/** 170 controller */
-	protected final Controller170Impl c170;
-
-	/** Ramp meter being queried */
-	protected final RampMeterImpl meter1;
-
-	/** Ramp meter being queried */
-	protected final RampMeterImpl meter2;
 
 	/** 5-minute completer */
 	protected final Completer completer;
@@ -57,11 +48,8 @@ public class Data5Minute extends IntervalData {
 	protected int n_bad = 0;
 
 	/** Create a new 5-minute data operation */
-	public Data5Minute(Controller170Impl c, Completer comp) {
+	public Data5Minute(ControllerImpl c, Completer comp) {
 		super(DATA_5_MIN, c);
-		c170 = c;
-		meter1 = Controller170Operation.lookupMeter1(c170);
-		meter2 = Controller170Operation.lookupMeter2(c170);
 		completer = comp;
 		completer.up();
 		long s = System.currentTimeMillis();
