@@ -98,27 +98,14 @@ INSERT INTO controller (name, drop_id, comm_link, cabinet, active, notes)
 	(SELECT name, drop_id, comm_link, cabinet, active, notes
 	FROM ctl_temp);
 
-CREATE TEMP TABLE temp_alarm (
-	name VARCHAR(20),
-	controller VARCHAR(20),
-	pin integer
-);
-
-CREATE TEMP SEQUENCE __a_seq MINVALUE 0;
-INSERT INTO temp_alarm (name, controller, pin)
-	(SELECT notes::VARCHAR(17) || '_' || nextval('__a_seq'),
-		'ctl_' || controller, pin FROM alarm);
-
-DROP TABLE alarm;
-
-CREATE TABLE alarm (
-	name VARCHAR(20) PRIMARY KEY,
-	controller VARCHAR(20) REFERENCES controller(name),
-	pin integer NOT NULL
-);
-
-INSERT INTO alarm (name, controller, pin)
-	(SELECT name, controller, pin FROM temp_alarm);
+ALTER TABLE alarm ADD COLUMN ctl VARCHAR(20);
+UPDATE alarm SET ctl = 'ctl_' || controller;
+ALTER TABLE alarm DROP COLUMN controller;
+ALTER TABLE alarm ADD COLUMN controller VARCHAR(20);
+ALTER TABLE alarm ADD CONSTRAINT fk_alarm_controller
+	FOREIGN KEY (controller) REFERENCES controller(name);
+UPDATE alarm SET controller = ctl;
+ALTER TABLE alarm DROP COLUMN ctl;
 
 ALTER TABLE device ADD COLUMN ctl VARCHAR(20);
 UPDATE device SET ctl = 'ctl_' || controller;
@@ -158,11 +145,6 @@ CREATE VIEW controller_device_view AS
 	FROM traffic_device d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON controller_device_view TO PUBLIC;
-
-CREATE VIEW alarm_view AS
-	SELECT a.name, a.controller, a.pin, c.comm_link, c.drop_id
-	FROM alarm a LEFT JOIN controller c ON a.controller = c.name;
-GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
 	SELECT c.id, ctr.comm_link, ctr.drop_id, ctr.active, c.notes,
@@ -208,7 +190,6 @@ CREATE VIEW controller_report AS
 GRANT SELECT ON controller_report TO PUBLIC;
 
 DELETE FROM vault_types WHERE "table" = 'station';
-DELETE FROM vault_types WHERE "table" = 'alarm';
 DELETE FROM vault_types WHERE "table" = 'controller';
 DELETE FROM vault_types WHERE "table" = 'controller_170';
 DELETE FROM vault_types WHERE "table" = 'circuit';

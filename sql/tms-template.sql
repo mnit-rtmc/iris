@@ -271,12 +271,6 @@ CREATE TABLE controller (
 	notes text NOT NULL
 );
 
-CREATE TABLE alarm (
-	name VARCHAR(20) PRIMARY KEY,
-	controller VARCHAR(20) REFERENCES controller(name),
-	pin integer NOT NULL
-);
-
 
 
 CREATE TABLE vault_object (
@@ -629,6 +623,13 @@ INHERITS (traffic_device);
 REVOKE ALL ON TABLE warning_sign FROM PUBLIC;
 GRANT SELECT ON TABLE warning_sign TO PUBLIC;
 
+CREATE TABLE alarm (
+    controller VARCHAR(20) NOT NULL REFERENCES controller(name),
+    pin integer NOT NULL,
+    notes text NOT NULL
+)
+INHERITS (tms_object);
+
 CREATE TABLE traffic_device_timing_plan (
     traffic_device text,
     timing_plan integer
@@ -746,11 +747,6 @@ CREATE VIEW device_loc_view AS
 	FROM device d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON device_loc_view TO PUBLIC;
-
-CREATE VIEW alarm_view AS
-	SELECT a.name, a.controller, a.pin, c.comm_link, c.drop_id
-	FROM alarm a LEFT JOIN controller c ON a.controller = c.name;
-GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW r_node_view AS
 	SELECT n.vault_oid, freeway, free_dir, cross_mod, cross_street,
@@ -928,6 +924,7 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
+79334	4	0	alarm	us.mn.state.dot.tms.AlarmImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
 134	4	0	camera	us.mn.state.dot.tms.CameraImpl
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
