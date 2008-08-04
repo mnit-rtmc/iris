@@ -30,7 +30,7 @@ public class PixelMapBuilder implements MultiString.Callback {
 	/** Pixel height of sign */
 	protected final int height;
 
-	/** Pixel width of characters */
+	/** Pixel width of characters, where 0 indicates a variable width font */
 	protected final int c_width;
 
 	/** Font to render text */
@@ -43,11 +43,19 @@ public class PixelMapBuilder implements MultiString.Callback {
 	protected final TreeMap<Integer, BitmapGraphic> pixmaps =
 		new TreeMap<Integer, BitmapGraphic>();
 
-	/** Create a new pixel map builder */
+	/** 
+	 * Create a new pixel map builder 
+	 * @param w Sign width in pixels.
+	 * @param h Sign height in pixels.
+	 * @param cw Character width in pixels for fixed width fonts, 
+	 *           else 0 for proportional fonts.
+	 * @param f Character font.
+	 * @param gf GlyphFinder.
+	 */
 	public PixelMapBuilder(int w, int h, int cw, Font f, GlyphFinder gf) {
 		width = w;
 		height = h;
-		c_width = Math.max(1, cw);
+		c_width = cw;
 		font = f;
 		finder = gf;
 	}
@@ -65,7 +73,6 @@ public class PixelMapBuilder implements MultiString.Callback {
 		try {
 			int x = calculatePixelX(j, t);
 			int y = l * (font.getHeight() + font.getLineSpacing());
-System.err.println("PixelMapBuilder.addText(): bg="+bg+", t="+t+", x="+x+", y="+y);
 			render(bg, t, x, y);
 		}
 		catch(IndexOutOfBoundsException e) {
@@ -107,23 +114,11 @@ System.err.println("PixelMapBuilder.addText(): bg="+bg+", t="+t+", x="+x+", y="+
 		case LEFT:
 			return 0;
 		case CENTER:
-   			// note: round(a/b) = (a+b/2)/b. This eliminates
-			// rounding error when dividing by 2.
-			// this code has no rounding errors.
-			int a = Math.max(0,width - calculateWidth(t));
-			return (a+1)/2;
-
-//FIXME: Doug, remove unnecessary comments below
-
-			// original code is below. Note: line 120, dividing by 2 and then multipling by c_width magnifies rounding error.
-			// instead, at least, multiply by c_width and then divide by 2, using the above formula (a+1)/2.
-			// I wasn't sure if you were trying to force chars into block positions...so I left this code if you were.
-			//int w = width / c_width;
-			//int r = calculateWidth(t) / c_width;
-			//int cx = (w - r) / 2 * c_width;
-			//better: int cx = (w - r) * c_width/2;
-			//best: int cx = ((w - r) * c_width + 1)/2; // no rounding error
-			//return cx;
+			// determine centering mode: block or bit oriented.
+			final int pseudo_c_width = (c_width<=0 ? 1 : c_width);
+			final int w = width / pseudo_c_width;
+			final int r = calculateWidth(t) / pseudo_c_width;
+			return (w - r) / 2 * pseudo_c_width;
 		case RIGHT:
 			return width - calculateWidth(t) - 1;
 		default:
