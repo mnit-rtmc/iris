@@ -18,6 +18,8 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import us.mn.state.dot.tms.DmsSignMatrixType;
+
 /**
  * Ntcip DmsSignType object
  *
@@ -46,11 +48,26 @@ public class DmsSignType extends DmsSignCfg implements ASN1Integer {
 	/** Get the integer value */
 	public int getInteger() { return type; }
 
-	/** Get the object value */
+	/** Get the object value as a String */
 	public String getValue() {
 		StringBuffer buffer = new StringBuffer();
 		if(( type & 0x80) != 0) buffer.append("Portable ");
 		buffer.append(TYPE[type & 0x07]);
 		return buffer.toString();
 	}
+
+	/** Get the object value as a DmsSignMatrixType */
+	public DmsSignMatrixType getValueEnum() {
+//FIXME: hi Doug, I'm guessing here...
+		String v=(getValue()==null ? "" : getValue().toLowerCase());
+		if (v.contains("character"))
+			return DmsSignMatrixType.CHARACTER;
+		else if (v.contains("line"))
+			return DmsSignMatrixType.LINE;
+		else if (v.contains("cms"))
+			return DmsSignMatrixType.FULL;
+		System.err.println("WARNING: unknown ntcip sign type encountered: "+v);
+		return DmsSignMatrixType.FULL;
+	}
+
 }

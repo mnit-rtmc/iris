@@ -212,7 +212,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		model = UNKNOWN;
 		version = UNKNOWN;
 		signAccess = UNKNOWN;
-		signType = UNKNOWN;
+		signMatrixType = DmsSignMatrixType.CHARACTER;
 		signHeight = 0;
 		signWidth = 0;
 		horizontalBorder = 0;
@@ -1006,16 +1006,21 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	  * Sign type description, must contain "Full" or "Line"
 	  * to distinguish between types of signs.
 	  */
-	protected transient String signType;
+	protected transient DmsSignMatrixType signMatrixType;
 
-	/** Set sign type description */
-	public void setSignType(String t) {
-		signType = t;
+	/** Set sign type */
+	public void setSignMatrixType(DmsSignMatrixType t) {
+		signMatrixType = t;
 	}
 
-	/** Get sign type description */
-	public String getSignType() {
-		return signType;
+	/** Get sign matrix type as an int (via enum) */
+	public int getSignMatrixType() {
+		return signMatrixType.toInt();
+	}
+
+	/** Get sign matrix type as a String (via enum) */
+	public String getSignMatrixTypeDescription() {
+		return signMatrixType.toString();
 	}
 
 	/** Sign height (mm) */
@@ -1203,8 +1208,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get an estimate of the horizontal pitch (mm) */
 	public int getEstimatedHorizontalPitch() {
-		// FIXME: this is fragile
-		if(signType.contains("Full") || signType.contains("Line")) {
+		if(signMatrixType==DmsSignMatrixType.FULL || signMatrixType==DmsSignMatrixType.LINE) {
 			float w = signWidth - horizontalBorder / 2.0f;
 			int wp = signWidthPixels;	// Avoid race
 			if(w > 0 && wp > 0)
@@ -1228,8 +1232,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get an estimate of the vertical pitch (mm) */
 	public int getEstimatedVerticalPitch() {
-		// FIXME: this is fragile
-		if(signType.contains("Full")) {
+		if(signMatrixType==DmsSignMatrixType.FULL) {
 			float h = signHeight - verticalBorder / 2.0f;
 			int hp = signHeightPixels;	// Avoid race
 			if(h > 0 && hp > 0)

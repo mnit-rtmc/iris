@@ -83,8 +83,11 @@ public interface DMS extends TrafficDevice {
 	/** Get sign access description */
 	public String getSignAccess() throws RemoteException;
 
-	/** Get sign type description */
-	public String getSignType() throws RemoteException;
+	/** Get sign matrix type as int  */
+	public int getSignMatrixType() throws RemoteException;
+
+	/** Get sign matrix type as a String */
+	public String getSignMatrixTypeDescription() throws RemoteException;
 
 	/** Get sign height (mm) */
 	public int getSignHeight() throws RemoteException;

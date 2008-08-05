@@ -1078,7 +1078,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		model.setText(sign.getModel());
 		version.setText(sign.getVersion());
 		access.setText(sign.getSignAccess());
-		type.setText(sign.getSignType());
+		type.setText(sign.getSignMatrixTypeDescription());
 		height.setText(formatMM(sign.getSignHeight()));
 		pHeight.setText(formatPixels(sign.getSignHeightPixels()));
 		width.setText(formatMM(sign.getSignWidth()));

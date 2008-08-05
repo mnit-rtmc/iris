@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DmsSignMatrixType;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 import java.io.IOException;
@@ -113,7 +114,7 @@ public class OpQueryConfig extends OpDms
 			String signAccess = "";
 			String make = "";
 			String version = "";
-			String type = "";
+			DmsSignMatrixType type = DmsSignMatrixType.FULL;
 			int horizBorder = 0;
 			int vertBorder = 0;
 			int horizPitch = 0;
@@ -146,7 +147,14 @@ public class OpQueryConfig extends OpDms
 					model = rr1.getResVal("model");
 					make = rr1.getResVal("make");
 					version = rr1.getResVal("version");
-					type = rr1.getResVal("type");
+
+					// determine matrix type
+					String stype = rr1.getResVal("type");
+					if (stype.toLowerCase().contains("full"))
+						type = DmsSignMatrixType.FULL;
+					else
+						System.err.println("SEVERE: Unknown matrix type read ("+stype+")");
+
 					horizBorder = Convert.stringToInt(
 						rr1.getResVal("horizBorder"));
 					vertBorder = Convert.stringToInt(
@@ -190,7 +198,7 @@ public class OpQueryConfig extends OpDms
 				dms.setSignAccess(signAccess);    // wizard, modem
 				dms.setMake(make);
 				dms.setVersion(version);
-				dms.setSignType(type);
+				dms.setSignMatrixType(type);
 				dms.setHorizontalBorder(horizBorder);    // in mm
 				dms.setVerticalBorder(vertBorder);    // in mm
 				dms.setHorizontalPitch(horizPitch);
