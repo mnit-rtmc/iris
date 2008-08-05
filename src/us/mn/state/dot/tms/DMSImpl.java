@@ -799,7 +799,11 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Lookup the best font */
 	static protected FontImpl lookupFont(int h, int w, int ls) {
 		try {
-			return _lookupFont(h, w, ls);
+			FontImpl f = _lookupFont(h, w, ls);
+			if(f != null || w == 0)
+				return f;
+			else
+				return _lookupFont(h, 0, ls);
 		}
 		catch(NamespaceError e) {
 			return null;

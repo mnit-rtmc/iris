@@ -587,11 +587,24 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Lookup a font for the sign */
 	protected Font lookupFont() {
 		TypeCache<Font> fonts = state.getFonts();
-		return fonts.find(new Checker() {
+		Font f = fonts.find(new Checker() {
 			public boolean check(SonarObject o) {
 				if(o instanceof Font) {
 					Font f = (Font)o;
 					if(f.getWidth() == c_pix &&
+					   f.getHeight() == v_pix)
+						return true;
+				}
+				return false;
+			}
+		});
+		if(f != null || c_pix == 0)
+			return f;
+		return fonts.find(new Checker() {
+			public boolean check(SonarObject o) {
+				if(o instanceof Font) {
+					Font f = (Font)o;
+					if(f.getWidth() == 0 &&
 					   f.getHeight() == v_pix)
 						return true;
 				}
