@@ -556,21 +556,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 			setup = s;
 	}
 
-	/** Get the comm link name */
-	protected String getLinkName() {
-		CommLinkImpl link = (CommLinkImpl)comm_link;
-		if(link != null)
-			return link.getName();
-		else
-			return null;
-	}
-
 	/** Log an exception */
 	public void logException(String id, String message) {
 		status = message;
 		if(!isFailed()) {
 			CommEvent ev = new CommEvent(EventType.COMM_ERROR,
-				getLinkName(), drop_id, id);
+				getName(), id);
 			try {
 				ev.doStore();
 			}
@@ -606,7 +597,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 
 	/** Log a FAILURE class message */
 	protected final void logFailMessage(EventType event, String id) {
-		CommEvent ev = new CommEvent(event, getLinkName(), drop_id, id);
+		CommEvent ev = new CommEvent(event, getName(), id);
 		try {
 			ev.doStore();
 		}

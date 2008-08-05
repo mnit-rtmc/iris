@@ -7,6 +7,9 @@ SET check_function_bodies = false;
 
 CREATE PROCEDURAL LANGUAGE plpgsql;
 
+CREATE SCHEMA event;
+ALTER SCHEMA event OWNER TO tms;
+
 SET SESSION AUTHORIZATION 'tms';
 
 SET search_path = public, pg_catalog;
@@ -859,6 +862,14 @@ CREATE FUNCTION boolean_converter(boolean) RETURNS text AS
 	END;'
 LANGUAGE plpgsql;
 
+CREATE VIEW detector_label_view AS
+	SELECT d."index" AS det_id,
+	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
+		d."laneType", d."laneNumber", d.abandoned) AS label
+	FROM detector d
+	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name;
+GRANT SELECT ON detector_label_view TO PUBLIC;
+
 CREATE VIEW detector_view AS
 	SELECT d."index" AS det_id, c.comm_link, c.drop_id, d.pin,
 	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
@@ -1170,3 +1181,110 @@ CREATE TRIGGER remove_camera_trig
     EXECUTE PROCEDURE remove_camera();
 
 SELECT pg_catalog.setval('tms_log_seq', 8284, true);
+
+
+SET search_path = event, public, pg_catalog;
+
+CREATE SEQUENCE event.event_id_seq;
+
+CREATE TABLE event.event_description (
+	event_desc_id integer PRIMARY KEY,
+	description text NOT NULL
+);
+
+CREATE TABLE event.comm_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	controller VARCHAR(20) NOT NULL REFERENCES controller(name)
+		ON DELETE CASCADE,
+	device_id VARCHAR(20)
+);
+
+CREATE TABLE event.detector_event (
+	event_id integer DEFAULT nextval('event_id_seq') NOT NULL,
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id integer REFERENCES detector("index")
+);
+
+CREATE TABLE event.sign_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20),
+	message text,
+	iris_user VARCHAR(15) REFERENCES iris_user(name)
+);
+
+SET search_path = public, event, pg_catalog;
+
+CREATE VIEW comm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description,
+		e.controller, c.comm_link, c.drop_id
+	FROM comm_event e
+	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id
+	LEFT JOIN controller c ON e.controller = c.name;
+GRANT SELECT ON comm_event_view TO PUBLIC;
+
+CREATE VIEW detector_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
+	FROM detector_event e
+	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON e.device_id = dl.det_id;
+GRANT SELECT ON detector_event_view TO PUBLIC;
+
+CREATE FUNCTION event.message_line(text, integer) RETURNS text AS
+'DECLARE
+	message ALIAS FOR $1;
+	line ALIAS FOR $2;
+	word text;
+	wstop int2;
+BEGIN
+	word := message;
+
+	FOR w in 1..(line-1) LOOP
+		wstop := strpos(word, ''[nl]'');
+		IF wstop > 0 THEN
+			word := SUBSTR(word, wstop + 4);
+		ELSE
+			word := '''';
+		END IF;
+	END LOOP;
+	wstop := strpos(word, ''[nl]'');
+	IF wstop > 0 THEN
+		word := SUBSTR(word, 0, wstop);
+	END IF;
+	RETURN word;
+END;' LANGUAGE plpgsql;
+
+CREATE VIEW sign_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id,
+		message_line(e.message, 1) AS line1,
+		message_line(e.message, 2) AS line2,
+		message_line(e.message, 3) AS line3,
+		e.iris_user
+	FROM sign_event e
+	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON sign_event_view TO PUBLIC;
+
+CREATE VIEW recent_sign_event_view AS
+	SELECT * FROM sign_event_view
+	WHERE (CURRENT_TIMESTAMP - event_date) < interval '90 days';
+GRANT SELECT ON recent_sign_event_view TO PUBLIC;
+
+COPY event.event_description (event_desc_id, description) FROM stdin;
+8	Comm ERROR
+9	Comm RESTORED
+65	Comm FAILED
+89	LCS DEPLOYED
+90	LCS CLEARED
+91	Sign DEPLOYED
+92	Sign CLEARED
+94	NO HITS
+95	LOCKED ON
+96	CHATTER
+\.

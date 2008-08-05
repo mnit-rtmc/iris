@@ -24,20 +24,16 @@ import java.util.Map;
  */
 public class CommEvent extends BaseEvent {
 
-	/** Comm link affected by this event */
-	protected final String comm_link;
-
-	/** Drop address (if drop specific) */
-	protected final int drop_id;
+	/** Controller affected by this event */
+	protected final String controller;
 
 	/** Device ID (if device specific) */
 	protected final String device_id;
 
 	/** Create a new comm event */
-	public CommEvent(EventType e, String l, int d, String dev) {
+	public CommEvent(EventType e, String c, String dev) {
 		super(e);
-		comm_link = l;
-		drop_id = d;
+		controller = c;
 		device_id = dev;
 	}
 
@@ -51,8 +47,7 @@ public class CommEvent extends BaseEvent {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_type", event_type.id);
 		map.put("event_date", event_date);
-		map.put("comm_link", comm_link);
-		map.put("drop_id", drop_id);
+		map.put("controller", controller);
 		map.put("device_id", device_id);
 		return map;
 	}
