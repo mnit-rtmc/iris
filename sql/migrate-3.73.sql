@@ -20,7 +20,7 @@ INSERT INTO comm_link (name, description, url, protocol, timeout)
 
 CREATE TABLE cabinet_style (
 	name VARCHAR(20) PRIMARY KEY,
-	dip smallint
+	dip integer
 );
 
 UPDATE cabinet_types SET name = '334Z-05' WHERE "index" = 13;

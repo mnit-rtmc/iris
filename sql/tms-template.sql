@@ -255,7 +255,7 @@ CREATE TABLE comm_link (
 
 CREATE TABLE cabinet_style (
 	name VARCHAR(20) PRIMARY KEY,
-	dip smallint
+	dip integer
 );
 
 CREATE TABLE cabinet (
