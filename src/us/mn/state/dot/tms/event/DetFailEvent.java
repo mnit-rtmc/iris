@@ -35,7 +35,7 @@ public class DetFailEvent extends BaseEvent {
 
 	/** Get the database table name */
 	public String getTable() {
-		return "events.detector_event";
+		return "event.detector_event";
 	}
 
 	/** Get a mapping of the columns */

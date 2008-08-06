@@ -39,7 +39,7 @@ public class CommEvent extends BaseEvent {
 
 	/** Get the database table name */
 	public String getTable() {
-		return "events.comm_event";
+		return "event.comm_event";
 	}
 
 	/** Get a mapping of the columns */

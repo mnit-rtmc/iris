@@ -43,7 +43,7 @@ public class SignStatusEvent extends BaseEvent {
 
 	/** Get the database table name */
 	public String getTable() {
-		return "events.sign_event";
+		return "event.sign_event";
 	}
 
 	/** Get a mapping of the columns */
