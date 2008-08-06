@@ -373,17 +373,16 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		new TreeMap<Integer, ControllerImpl>();
 
 	/** Put a controller on the link */
-	public synchronized void putController(int d, Controller c)
+	public synchronized void putController(int d, ControllerImpl c)
 		throws ChangeVetoException
 	{
 		if(controllers.containsKey(d))
 			throw new ChangeVetoException("Drop " + d + " exists");
-		ControllerImpl ctr = (ControllerImpl)c;
-		controllers.put(d, ctr);
+		controllers.put(d, c);
 	}
 
 	/** Pull a controller from the link */
-	public synchronized void pullController(Controller c) {
+	public synchronized void pullController(ControllerImpl c) {
 		Integer d = new Integer(c.getDrop());
 		controllers.remove(d);
 	}

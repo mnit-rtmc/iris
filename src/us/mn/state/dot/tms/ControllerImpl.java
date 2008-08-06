@@ -91,7 +91,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 
 	/** Create a new controller */
 	protected ControllerImpl(String n, Cabinet c, CommLink l, short d,
-		boolean a, String nt)
+		boolean a, String nt) throws TMSException
 	{
 		this(n);
 		cabinet = c;
@@ -99,11 +99,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 		drop_id = d;
 		active = a;
 		notes = nt;
+		initTransients();
 	}
 
 	/** Create a new controller */
 	protected ControllerImpl(Namespace ns, String n, String c, String l,
-		short d, boolean a, String nt) throws NamespaceError
+		short d, boolean a, String nt) throws NamespaceError,
+		TMSException
 	{
 		this(n, (Cabinet)ns.getObject(Cabinet.SONAR_TYPE, c),
 			(CommLink)ns.getObject(CommLink.SONAR_TYPE, l),
@@ -111,8 +113,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Initialize the transient fields */
-	public void initTransients() throws TMSException {
-		// FIXME: make sure this gets called
+	protected void initTransients() throws TMSException {
 		version = Constants.UNKNOWN;
 		counters = new int[TYPES.length][PERIODS.length];
 		CommLinkImpl link = (CommLinkImpl)comm_link;
