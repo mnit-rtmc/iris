@@ -127,5 +127,11 @@ public class SString {
 		return (s);
 	}
 
+	/** return true if the specified string is enclosed by another string */
+	public static boolean enclosedBy(String s,String e) {
+		if (s==null || e==null)
+			return false;
+		return s.startsWith(e) && s.endsWith(e);
+	}
 }
 
