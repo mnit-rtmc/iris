@@ -38,7 +38,6 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.VideoMonitor;
-import us.mn.state.dot.tms.client.FilteredMonitorModel;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;

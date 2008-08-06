@@ -1,11 +1,29 @@
-package us.mn.state.dot.tms.client;
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2008  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
-/** A FilteredMonitorModel is a ProxyListModel filtered to just the
+/**
+ * A FilteredMonitorModel is a ProxyListModel filtered to just the
  * VideoMonitors for which the user can set the camera attribute.
+ *
+ * @author Tim Johnson
  */
 public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 	
