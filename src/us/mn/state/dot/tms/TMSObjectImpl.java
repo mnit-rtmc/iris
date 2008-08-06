@@ -375,7 +375,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** Lookup a controller in the SONAR namespace */
 	static protected ControllerImpl lookupController(final String c) {
-		if(c == null)
+		if(c == null || c.equals(""))
 			return null;
 		try {
 			return (ControllerImpl)namespace.getObject(

@@ -106,31 +106,15 @@ INSERT INTO controller (name, drop_id, comm_link, cabinet, active, notes)
 ALTER TABLE alarm ADD COLUMN ctl VARCHAR(20);
 UPDATE alarm SET ctl = 'ctl_' || controller;
 ALTER TABLE alarm DROP COLUMN controller;
-ALTER TABLE alarm ADD COLUMN controller VARCHAR(20);
-ALTER TABLE alarm ADD CONSTRAINT fk_alarm_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
+ALTER TABLE alarm ADD COLUMN controller VARCHAR(20) NOT NULL;
 UPDATE alarm SET controller = ctl;
 ALTER TABLE alarm DROP COLUMN ctl;
 
 ALTER TABLE device ADD COLUMN ctl VARCHAR(20);
 UPDATE device SET ctl = 'ctl_' || controller;
-UPDATE device SET ctl = NULL WHERE controller = 0;
+UPDATE device SET ctl = '' WHERE controller = 0;
 ALTER TABLE device DROP COLUMN controller;
-ALTER TABLE device ADD COLUMN controller VARCHAR(20);
-ALTER TABLE device ADD CONSTRAINT fk_device_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
-ALTER TABLE detector ADD CONSTRAINT fk_detector_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
-ALTER TABLE dms ADD CONSTRAINT fk_dms_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
-ALTER TABLE ramp_meter ADD CONSTRAINT fk_meter_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
-ALTER TABLE camera ADD CONSTRAINT fk_camera_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
-ALTER TABLE lcs ADD CONSTRAINT fk_lcs_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
-ALTER TABLE warning_sign ADD CONSTRAINT fk_warning_sign_controller
-	FOREIGN KEY (controller) REFERENCES controller(name);
+ALTER TABLE device ADD COLUMN controller VARCHAR(20) NOT NULL;
 UPDATE device SET controller = ctl;
 ALTER TABLE device DROP COLUMN ctl;
 

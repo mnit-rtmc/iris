@@ -860,7 +860,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Set the error status */
 	public void setErrorStatus(ShortErrorStatus s) {
 		error_status = s;
-		ControllerImpl c = controller;	// Avoid races
+		ControllerImpl c = getControllerImpl();
 		if(c != null)
 			c.setSetup(s.getValue());
 	}
@@ -988,7 +988,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Set the version */
 	public void setVersion(String v) {
 		version = v;
-		ControllerImpl c = controller;	// Avoid races
+		ControllerImpl c = getControllerImpl();
 		if(c != null)
 			c.setVersion(version);
 	}

@@ -53,58 +53,53 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 		TMSException, RemoteException
 	{
 		super.initTransients();
-		ControllerImpl c = controller;
+		ControllerImpl c = getControllerImpl();
 		if(c != null)
 			c.setIO(pin, this);
 	}
 
 	/** Controller associated with this alarm */
-	protected ControllerImpl controller;
+	protected String controller;
 
 	/** Update the controller and/or pin */
-	protected void updateController(ControllerImpl c, int p)
-		throws TMSException
+	protected void updateController(ControllerImpl oc, ControllerImpl c,
+		int p) throws TMSException
 	{
-		if(controller != null)
-			controller.setIO(pin, null);
+		if(oc != null)
+			oc.setIO(pin, null);
 		try {
 			if(c != null)
 				c.setIO(p, this);
 		}
 		catch(TMSException e) {
-			if(controller != null)
-				controller.setIO(pin, this);
+			if(oc != null)
+				oc.setIO(pin, this);
 			throw e;
 		}
 	}
 
 	/** Set the controller of the alarm */
-	public synchronized void setController(ControllerImpl c)
-		throws TMSException
-	{
-		if(c == controller)
+	public synchronized void setController(String c) throws TMSException {
+		if(c == null && controller == null)
 			return;
-		updateController(c, pin);
-		if(c == null)
-			store.update(this, "controller", null);
-		else
-			store.update(this, "controller", c.getName());
+		if(c != null && c.equals(controller))
+			return;
+		if(c != null && controller != null)
+			throw new ChangeVetoException("Alarm has controller");
+		updateController(lookupController(controller),
+			lookupController(c), pin);
+		store.update(this, "controller", c);
 		controller = c;
-	}
-
-	/** Set the controller of the alarm */
-	public void setController(String c) throws TMSException {
-		ControllerImpl ctr = lookupController(c);
-		setController(ctr);
 	}
 
 	/** Get the controller to which this alarm is assigned */
 	public String getController() {
-		ControllerImpl c = controller;
-		if(c != null)
-			return c.getName();
-		else
-			return null;
+		return controller;
+	}
+
+	/** Get the controller to which this alarm is assigned */
+	public ControllerImpl getControllerImpl() {
+		return lookupController(controller);
 	}
 
 	/** Controller I/O pin number */
@@ -114,7 +109,8 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 	public synchronized void setPin(int p) throws TMSException {
 		if(p == pin)
 			return;
-		updateController(controller, p);
+		ControllerImpl c = getControllerImpl();
+		updateController(c, c, p);
 		store.update(this, "pin", p);
 		pin = p;
 	}

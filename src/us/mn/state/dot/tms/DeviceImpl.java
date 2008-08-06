@@ -55,7 +55,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 		TMSException, RemoteException
 	{
 		try {
-			ControllerImpl c = controller;
+			ControllerImpl c = getControllerImpl();
 			if(c != null)
 				c.setIO(pin, this);
 		}
@@ -71,7 +71,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 
 	/** Get the active status */
 	public boolean isActive() {
-		ControllerImpl c = controller;	// Avoid race
+		ControllerImpl c = getControllerImpl();
 		if(c == null)
 			return false;
 		else
@@ -80,7 +80,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 
 	/** Is the device available for a controller? */
 	public boolean isAvailable() {
-		return controller == null;
+		return getControllerImpl() == null;
 	}
 
 	/** Is this object deletable? */
@@ -92,64 +92,52 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	}
 
 	/** Controller associated with this traffic device */
-	protected ControllerImpl controller;
-
-	/** Set the controller of the device */
-	protected synchronized void setController(ControllerImpl c)
-		throws TMSException
-	{
-		if(c == controller)
-			return;
-		if(c != null && controller != null)
-			throw new ChangeVetoException("Device has controller");
-		updateController(c, pin);
-		if(c == null)
-			store.update(this, "controller", null);
-		else
-			store.update(this, "controller", c.getName());
-		controller = c;
-	}
+	protected String controller;
 
 	/** Update the controller and/or pin */
-	protected void updateController(ControllerImpl c, int p)
-		throws TMSException
+	protected void updateController(ControllerImpl oc, ControllerImpl c,
+		int p) throws TMSException
 	{
-		if(controller != null)
-			controller.setIO(pin, null);
+		if(oc != null)
+			oc.setIO(pin, null);
 		try {
 			if(c != null)
 				c.setIO(p, this);
 		}
 		catch(TMSException e) {
-			if(controller != null)
-				controller.setIO(pin, this);
+			if(oc != null)
+				oc.setIO(pin, this);
 			throw e;
 		}
 	}
 
 	/** Set the controller of the device */
-	public void setController(String c) throws TMSException {
-		ControllerImpl ctr = lookupController(c);
-		setController(ctr);
+	public synchronized void setController(String c) throws TMSException {
+		if(c == null && controller == null)
+			return;
+		if(c != null && c.equals(controller))
+			return;
+		if(c != null && controller != null)
+			throw new ChangeVetoException("Device has controller");
+		updateController(lookupController(controller),
+			lookupController(c), pin);
+		store.update(this, "controller", c);
+		controller = c;
 	}
 
 	/** Get the controller to which this device is assigned */
 	public String getController() {
-		ControllerImpl c = controller;
-		if(c != null)
-			return c.getName();
-		else
-			return null;
+		return controller;
 	}
 
 	/** Get the controller to which this device is assigned */
 	public ControllerImpl getControllerImpl() {
-		return controller;
+		return lookupController(controller);
 	}
 
 	/** Get the message poller */
 	public MessagePoller getPoller() {
-		ControllerImpl c = controller;	// Avoid race
+		ControllerImpl c = getControllerImpl();
 		if(c != null)
 			return c.getPoller();
 		else
@@ -163,7 +151,8 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	public synchronized void setPin(int p) throws TMSException {
 		if(p == pin)
 			return;
-		updateController(controller, p);
+		ControllerImpl c = getControllerImpl();
+		updateController(c, c, p);
 		store.update(this, "pin", p);
 		pin = p;
 	}
@@ -175,7 +164,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 
 	/** Get the failure status */
 	public boolean isFailed() {
-		ControllerImpl c = controller;	// Avoid race
+		ControllerImpl c = getControllerImpl();
 		if(c == null)
 			return true;
 		else

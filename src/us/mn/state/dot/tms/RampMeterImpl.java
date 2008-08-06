@@ -169,7 +169,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the number of milliseconds the controller has been failed */
 	public long getFailMillis() {
-		ControllerImpl c = controller;	// Avoid races
+		ControllerImpl c = getControllerImpl();
 		if(c.isFailed())
 			return c.getFailMillis();
 		else
