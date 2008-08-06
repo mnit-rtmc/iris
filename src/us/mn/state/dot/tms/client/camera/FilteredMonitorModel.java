@@ -26,19 +26,23 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Tim Johnson
  */
 public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
-	
-	protected User user = null;
 
-	public FilteredMonitorModel(User u, SonarState st){
+	/** SONAR User for permission checks */
+	protected final User user;
+
+	/** Create a new filtered monitor model */
+	public FilteredMonitorModel(User u, SonarState st) {
 		super(st.getVideoMonitors());
-		this.user = u;
+		user = u;
 		initialize();
 	}
 
-	protected String createUpdateString(VideoMonitor proxy){
-		return VideoMonitor.SONAR_TYPE + "/" + proxy.getName() + "/camera";
+	/** Create a SONAR name to check for allowed updates */
+	protected String createUpdateString(VideoMonitor proxy) {
+		return VideoMonitor.SONAR_TYPE + "/" + proxy.getName() +
+			"/camera";
 	}
-	
+
 	/** Add a new proxy to the list model */
 	public void proxyAdded(VideoMonitor proxy) {
 		if(user.canUpdate(createUpdateString(proxy)))
@@ -49,10 +53,9 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 	public void proxyChanged(VideoMonitor proxy, String attrib) {
 		boolean exists = proxies.contains(proxy);
 		boolean canUpdate = user.canUpdate(createUpdateString(proxy));
-		if(canUpdate && !exists){
+		if(canUpdate && !exists)
 			super.proxyAdded(proxy);
-		}else if(!canUpdate && exists){
+		else if(!canUpdate && exists)
 			super.proxyRemoved(proxy);
-		}
 	}
 }
