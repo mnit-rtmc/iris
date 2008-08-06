@@ -213,7 +213,7 @@
 				 excludesfile="${etc.dir}/rmi_classes.txt">
 				<include name="us/mn/state/dot/tms/*.class"/>
 				<include name="us/mn/state/dot/tms/comm/**/*"/>
-				<include name="us/mn/state/dot/tms/log/**/*"/>
+				<include name="us/mn/state/dot/tms/event/**/*"/>
 			</fileset>
 		</jar>
 	</target>
