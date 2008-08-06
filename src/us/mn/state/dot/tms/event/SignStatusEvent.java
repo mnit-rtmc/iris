@@ -49,7 +49,7 @@ public class SignStatusEvent extends BaseEvent {
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_type", event_type.id);
+		map.put("event_desc_id", event_type.id);
 		map.put("event_date", event_date);
 		map.put("device_id", device_id);
 		map.put("message", message);

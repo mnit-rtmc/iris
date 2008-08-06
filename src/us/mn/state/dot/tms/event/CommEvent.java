@@ -45,7 +45,7 @@ public class CommEvent extends BaseEvent {
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("event_type", event_type.id);
+		map.put("event_desc_id", event_type.id);
 		map.put("event_date", event_date);
 		map.put("controller", controller);
 		map.put("device_id", device_id);
