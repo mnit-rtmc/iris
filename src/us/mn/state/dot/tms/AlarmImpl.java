@@ -80,11 +80,11 @@ public class AlarmImpl extends TMSObjectImpl implements Alarm, ControllerIO,
 
 	/** Set the controller of the alarm */
 	public synchronized void setController(String c) throws TMSException {
-		if(c == null && controller == null)
+		if(c == null)
+			c = "";
+		if(c.equals(controller))
 			return;
-		if(c != null && c.equals(controller))
-			return;
-		if(c != null && controller != null)
+		if(!c.equals("") && !controller.equals(""))
 			throw new ChangeVetoException("Alarm has controller");
 		updateController(lookupController(controller),
 			lookupController(c), pin);

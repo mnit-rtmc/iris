@@ -113,11 +113,11 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 
 	/** Set the controller of the device */
 	public synchronized void setController(String c) throws TMSException {
-		if(c == null && controller == null)
+		if(c == null)
+			c = "";
+		if(c.equals(controller))
 			return;
-		if(c != null && c.equals(controller))
-			return;
-		if(c != null && controller != null)
+		if(!c.equals("") && !controller.equals(""))
 			throw new ChangeVetoException("Device has controller");
 		updateController(lookupController(controller),
 			lookupController(c), pin);

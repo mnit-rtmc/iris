@@ -106,7 +106,7 @@ INSERT INTO controller (name, drop_id, comm_link, cabinet, active, notes)
 ALTER TABLE alarm ADD COLUMN ctl VARCHAR(20);
 UPDATE alarm SET ctl = 'ctl_' || controller;
 ALTER TABLE alarm DROP COLUMN controller;
-ALTER TABLE alarm ADD COLUMN controller VARCHAR(20) NOT NULL;
+ALTER TABLE alarm ADD COLUMN controller VARCHAR(20);
 UPDATE alarm SET controller = ctl;
 ALTER TABLE alarm DROP COLUMN ctl;
 
@@ -114,7 +114,7 @@ ALTER TABLE device ADD COLUMN ctl VARCHAR(20);
 UPDATE device SET ctl = 'ctl_' || controller;
 UPDATE device SET ctl = '' WHERE controller = 0;
 ALTER TABLE device DROP COLUMN controller;
-ALTER TABLE device ADD COLUMN controller VARCHAR(20) NOT NULL;
+ALTER TABLE device ADD COLUMN controller VARCHAR(20);
 UPDATE device SET controller = ctl;
 ALTER TABLE device DROP COLUMN ctl;
 
