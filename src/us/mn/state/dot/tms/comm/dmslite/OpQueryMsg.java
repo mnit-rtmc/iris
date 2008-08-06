@@ -102,13 +102,13 @@ public class OpQueryMsg extends OpDms
 	/**
 	 * create message text given a bitmap, with no message text or owner.
 	 * It is important to create message text for the message because
-	 * the cmsserver can return a message containing a bitmap but with
+	 * the cmsserver returns a message containing a bitmap but with
 	 * no message text. IRIS requires both a bitmap and message text,
 	 * so this method constructs message text so IRIS will think it's a
 	 * message, rather than a blank sign.
 	 * 
-	 * @returns If bitmap is not blank: "[nl]SOCCS Message[np]" for each 
- 	 * 	    page. If bitmap is blank, then "" is returned.
+	 * @returns If bitmap is not blank, a page indicating it is an other
+	 *          system message. If bitmap is blank, then "" is returned.
 	 */
 	protected static String createMessageTextUsingBitmap(int numpages,byte[] bm) {
 
@@ -118,8 +118,10 @@ public class OpQueryMsg extends OpDms
 		}
 
 		// default text if no bitmap
-		final String TEXT = "SOCCS Message";
-		final String UNKNOWN_PG_TEXT = "[nl]"+TEXT+"[np]";
+		final String TEXT1 = "OTHER[nl]";
+		final String TEXT2 = "SYSTEM[nl]";
+		final String TEXT3 = "MESSAGE[nl]";
+		final String UNKNOWN_PG_TEXT = TEXT1+TEXT2+TEXT3+"[np]";
 
 		// build message
 		String msg="";
