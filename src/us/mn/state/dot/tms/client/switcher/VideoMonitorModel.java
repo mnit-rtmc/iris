@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.VideoMonitor;
-import us.mn.state.dot.tms.client.security.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for video monitors

@@ -23,7 +23,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.client.security.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for sign groups.

@@ -31,7 +31,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Holiday;
-import us.mn.state.dot.tms.client.security.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for holidays

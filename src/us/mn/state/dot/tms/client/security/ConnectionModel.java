@@ -19,6 +19,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for IRIS connections

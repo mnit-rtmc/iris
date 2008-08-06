@@ -19,7 +19,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.client.security.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for DMS fonts
