@@ -158,8 +158,8 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		if (sg==null || line<1 || messarg==null || messarg.length()<=0)
 			return;
 
-		// FIXME: this shouldn't go here
-		if(messarg.toLowerCase().equals("soccs message"))
+		// FIXME: this is a hack, see comments in method
+		if(SDMS.ignoreLineHack(messarg))
 			return;
 
 		// validate message

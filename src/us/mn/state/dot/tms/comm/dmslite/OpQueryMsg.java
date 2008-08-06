@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.utils.SDMS;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -117,10 +118,10 @@ public class OpQueryMsg extends OpDms
 			return("");
 		}
 
-		// default text if no bitmap
-		final String TEXT1 = "OTHER[nl]";
-		final String TEXT2 = "SYSTEM[nl]";
-		final String TEXT3 = "MESSAGE[nl]";
+		// default text if no bitmap, see comments in method for why this is a hack
+		final String TEXT1 = SDMS.flagIgnoredSignLineHack("OTHER")+"[nl]";
+		final String TEXT2 = SDMS.flagIgnoredSignLineHack("SYSTEM")+"[nl]";
+		final String TEXT3 = SDMS.flagIgnoredSignLineHack("MESSAGE")+"[nl]";
 		final String UNKNOWN_PG_TEXT = TEXT1+TEXT2+TEXT3+"[np]";
 
 		// build message

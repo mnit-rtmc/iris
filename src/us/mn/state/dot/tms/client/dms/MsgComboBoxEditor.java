@@ -109,8 +109,8 @@ public class MsgComboBoxEditor implements ComboBoxEditor
 			txt="";
 		}
 
-		// FIXME: this shouldn't go here
-		if(txt.toLowerCase().equals("soccs message"))
+		// FIXME: this is a hack, see comments in method
+		if(SDMS.ignoreLineHack(txt))
 			txt = "";
 
 		// validate text
