@@ -215,11 +215,14 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Parse a TCP port */
 	protected int parseTcpPort(String p) throws IOException {
 		try {
-			return Integer.parseInt(p);
+			int i = Integer.parseInt(p);
+			if(i >= 0 && i <= 65535)
+				return i;
 		}
 		catch(NumberFormatException e) {
-			throw new IOException("INVALID TCP PORT: " + p);
+			// Fall out
 		}
+		throw new IOException("INVALID TCP PORT: " + p);
 	}
 
 	/** Create a socket messenger */
@@ -338,7 +341,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		catch(IOException e) {
 			close();
 			status = e.getMessage();
-			return;
 		}
 	}
 
