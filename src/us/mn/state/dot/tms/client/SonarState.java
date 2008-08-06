@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
@@ -78,6 +79,14 @@ public class SonarState extends Client {
 	/** Get the system policy type cache */
 	public TypeCache<SystemPolicy> getSystemPolicy() {
 		return system_policy;
+	}
+
+	/** Cache of comm link proxies */
+	protected final TypeCache<CommLink> comm_links;
+
+	/** Get the comm link type cache */
+	public TypeCache<CommLink> getCommLinks() {
+		return comm_links;
 	}
 
 	/** Cache of holiday proxies */
@@ -186,6 +195,7 @@ public class SonarState extends Client {
 		users = new TypeCache<User>(User.class);
 		connections = new TypeCache<Connection>(Connection.class);
 		system_policy = new TypeCache<SystemPolicy>(SystemPolicy.class);
+		comm_links = new TypeCache<CommLink>(CommLink.class);
 		holidays = new TypeCache<Holiday>(Holiday.class);
 		graphics = new TypeCache<Graphic>(Graphic.class);
 		fonts = new TypeCache<Font>(Font.class);
@@ -213,6 +223,7 @@ public class SonarState extends Client {
 		populate(users);
 		populate(connections);
 		populate(system_policy);
+		populate(comm_links);
 		populate(holidays);
 		populate(graphics);
 		populate(fonts);
