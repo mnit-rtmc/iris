@@ -14,14 +14,11 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import java.awt.GridBagConstraints;
 import java.awt.geom.Point2D;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.GeoLoc;
