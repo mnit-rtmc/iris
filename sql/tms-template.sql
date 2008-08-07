@@ -269,7 +269,7 @@ CREATE TABLE controller (
 	name VARCHAR(20) PRIMARY KEY,
 	drop_id smallint NOT NULL,
 	comm_link VARCHAR(20) NOT NULL REFERENCES comm_link(name),
-	cabinet VARCHAR(20) REFERENCES cabinet(name),
+	cabinet VARCHAR(20) NOT NULL REFERENCES cabinet(name),
 	active boolean NOT NULL,
 	notes text NOT NULL
 );
