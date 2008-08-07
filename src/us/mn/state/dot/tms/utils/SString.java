@@ -133,5 +133,19 @@ public class SString {
 			return false;
 		return s.startsWith(e) && s.endsWith(e);
 	}
+
+	/**
+	 *  Convert an int to string with the specified number
+	 *  of digits, prefixing with zeros as necessary.
+	 *  e.g. (4,2) returns '04', (666,2) returns 666.
+	 */
+	public static String intToString(int i, int numdigs) {
+		String s = String.valueOf(i);
+		int numzerostoadd = numdigs - s.length();
+		if(numzerostoadd > 0)
+			for(int j = 0; j < numzerostoadd; ++j)
+				s = "0" + s;
+		return (s);
+	}
 }
 
