@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.GridBagConstraints;
 import java.awt.geom.Point2D;
-import java.rmi.RemoteException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -101,7 +100,7 @@ public class LocationPanel extends FormPanel {
 	}
 
 	/** Initialize the location panel */
-	public void initialize() throws RemoteException {
+	public void initialize() {
 		freeBox.setModel(new WrapperComboBoxModel(
 			state.getRoadModel()));
 		crossBox.setModel(new WrapperComboBoxModel(
