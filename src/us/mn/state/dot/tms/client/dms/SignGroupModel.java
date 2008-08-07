@@ -168,13 +168,6 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 			return Boolean.class;
 	}
 
-	/** Check if the specified row is the last row */
-	protected boolean isLastRow(int row) {
-		synchronized(proxies) {
-			return row == proxies.size();
-		}
-	}
-
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
 		if(column == COL_MEMBER)

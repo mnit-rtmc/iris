@@ -74,13 +74,6 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 			return String.class;
 	}
 
-	/** Check if the specified row is the last row in the table */
-	public boolean isLastRow(int row) {
-		synchronized(proxies) {
-			return row == proxies.size();
-		}
-	}
-
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
 		if(isLastRow(row))
