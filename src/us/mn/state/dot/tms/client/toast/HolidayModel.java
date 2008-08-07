@@ -20,11 +20,9 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -228,7 +226,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	protected TableColumn createNameColumn() {
 		TableColumn c = new TableColumn(COL_NAME, 400);
 		c.setHeaderValue("Holiday Name");
-		c.setCellRenderer(new NameCellRenderer());
 		c.setCellEditor(new NameCellEditor());
 		return c;
 	}
@@ -298,20 +295,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		m.addColumn(createShiftColumn());
 		m.addColumn(createPeriodColumn());
 		return m;
-	}
-
-	/** Inner class for rendering cells in the name column */
-	protected class NameCellRenderer extends DefaultTableCellRenderer {
-		protected final JButton button = new JButton("Add Holiday");
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			if(isLastRow(row))
-				return button;
-			return super.getTableCellRendererComponent(table, value,
-				isSelected, hasFocus, row, column);
-		}
 	}
 
 	/** Inner class for editing cells in the name column */
