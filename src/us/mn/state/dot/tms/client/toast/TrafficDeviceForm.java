@@ -72,7 +72,7 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 		location = new LocationPanel(admin, device.getGeoLoc(),
 			connection.getSonarState());
 		location.initialize();
-		location.addNote(notes);
+		location.addRow("Notes", notes);
 		location.setCenter();
 		location.addRow(controller);
 		new ActionJob(this, controller) {

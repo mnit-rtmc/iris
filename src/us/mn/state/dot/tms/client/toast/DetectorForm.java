@@ -132,7 +132,7 @@ public class DetectorForm extends TMSObjectForm {
 		location = new LocationPanel(admin, detector.getGeoLoc(),
 			connection.getSonarState());
 		location.initialize();
-		location.addNote(notes);
+		location.addRow("Notes", notes);
 		Box box = new Box(BoxLayout.X_AXIS);
 		box.add(controller);
 		new ActionJob(this, controller) {

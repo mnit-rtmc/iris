@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ import java.awt.GridBagLayout;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * FormPanel is a panel for viewing and editing forms. It provides a simpler
@@ -112,5 +114,19 @@ public class FormPanel extends JPanel {
 	/** Add a component with a label on the left side */
 	public void addRow(String name, JComponent comp) {
 		addRow(new JLabel(name), comp);
+	}
+
+	/** Add a text area component with a label on the left side */
+	public void addRow(String name, JTextArea area) {
+		add(new JLabel(name));
+		setWest();
+		setWidth(GridBagConstraints.REMAINDER);
+		bag.weightx = 1;
+		bag.weighty = 1;
+		area.setWrapStyleWord(true);
+		area.setLineWrap(true);
+		addRow(new JScrollPane(area,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 	}
 }

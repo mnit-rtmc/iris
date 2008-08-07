@@ -157,7 +157,7 @@ public class R_NodeProperties extends TMSObjectForm {
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
 		location.addSelectPointButton(map);
-		location.addNote(notes);
+		location.addRow("Notes", notes);
 		return location;
 	}
 

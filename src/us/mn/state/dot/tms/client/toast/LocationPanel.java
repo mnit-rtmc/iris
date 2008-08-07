@@ -135,22 +135,6 @@ public class LocationPanel extends FormPanel {
 		}
 	}
 
-	/** Add a notes text pane */
-	public void addNote(JTextArea notes) {
-		notes.setWrapStyleWord(true);
-		notes.setLineWrap(true);
-		JScrollPane note_pane = new JScrollPane(notes,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		add(new JLabel("Notes"));
-		bag.anchor = GridBagConstraints.WEST;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.gridwidth = 4;
-		bag.weightx = 1;
-		bag.weighty = 1;
-		addRow(note_pane);
-	}
-
 	/** Update the location panel */
 	public void doUpdate() {
 		if(loc == null)
