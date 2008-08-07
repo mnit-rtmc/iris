@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.utils.SDMS;
+import us.mn.state.dot.tms.utils.STime;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -287,13 +288,13 @@ public class OpQueryMsg extends OpDms
 					// ontime
 					useont = new Boolean(rr1.getResVal("UseOnTime"));
 					if(useont) {
-						ont.setTime(Time.XMLtoDate(rr1.getResVal("OnTime")));
+						ont.setTime(STime.XMLtoDate(rr1.getResVal("OnTime")));
 					}
 
 					// offtime
 					useofft = new Boolean(rr1.getResVal("UseOffTime"));
 					if(useofft) {
-						offt.setTime(Time.XMLtoDate(rr1.getResVal("OffTime")));
+						offt.setTime(STime.XMLtoDate(rr1.getResVal("OffTime")));
 					}
 
 					// bitmap

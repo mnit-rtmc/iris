@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
 import us.mn.state.dot.tms.utils.SString;
+import us.mn.state.dot.tms.utils.STime;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -143,7 +144,7 @@ public class Message implements AddressedMessage
 		byte[] array = this.buildReqMsg();
 
 		// send message
-		long starttime=Time.getCurTimeUTCinMillis();
+		long starttime=STime.getCurTimeUTCinMillis();
 		System.err.print("Writing " + array.length+" bytes to cmsserver....");
 		m_is.resetBuffer();
 		m_os.write(array);
@@ -155,7 +156,7 @@ public class Message implements AddressedMessage
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,
 		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
-			this.setCompletionTimeMS((int)Time.calcTimeDeltaMS(starttime));
+			this.setCompletionTimeMS((int)STime.calcTimeDeltaMS(starttime));
 		} catch (IllegalStateException ex) {
 			throw new IOException(
 			    "SEVERE error: capacity exceeded in dmslite.Message.getRequest(): "+ex);
@@ -181,7 +182,6 @@ public class Message implements AddressedMessage
 			// fill in returned fields for each ReqRes using received xml string
 			for(Object i : m_objlist) {
 				assert i instanceof ReqRes;
-
 				ReqRes rr = (ReqRes) i;
 				rr.parseRes(DMSLITEMSGTAG,this.getRespMsgName(),
 			    		token);    // throws IOException on error

@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.utils.STime;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -181,14 +182,14 @@ public class OpMessage extends OpDms {
 
 			// OnTime
 			Calendar ontime=calcMsgOnTime();
-			mess.add(new ReqRes("OnTime",Time.CalendarToXML(ontime)));
+			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
 			boolean useofftime=m_message.getDuration()!=SignMessage.DURATION_INFINITE;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
-			String offtime= (useofftime ? Time.CalendarToXML(calcMsgOffTime(ontime)) : "");
+			String offtime= (useofftime ? STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
@@ -359,14 +360,14 @@ public class OpMessage extends OpDms {
 
 			// OnTime
 			Calendar ontime=calcMsgOnTime();
-			mess.add(new ReqRes("OnTime",Time.CalendarToXML(ontime)));
+			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
 			boolean useofftime=m_message.getDuration()!=SignMessage.DURATION_INFINITE;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
-			String offtime= (useofftime ? Time.CalendarToXML(calcMsgOffTime(ontime)) : "");
+			String offtime= (useofftime ? STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// DisplayTimeMS

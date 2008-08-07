@@ -43,6 +43,36 @@ public class SString {
 		ok = ok & union("abcdefg","aceg").equals("aceg");
 		ok = ok & union("abcdefg","0123aceg123").equals("aceg");
 
+		// truncate
+		ok = ok && truncate(null,0).equals("");
+		ok = ok && truncate(null,5).equals("");
+		ok = ok && truncate("",0).equals("");
+		ok = ok && truncate("",3).equals("");
+		ok = ok && truncate("abcdef",0).equals("");
+		ok = ok && truncate("abcdef",1).equals("a");
+		ok = ok && truncate("abcdef",2).equals("ab");
+		ok = ok && truncate("abcdef",3).equals("abc");
+		ok = ok && truncate("abcdef",35).equals("abcdef");
+
+		// toRightField
+		// ok=ok && new String("").compareTo(SString.toRightField(null,""))==0;
+		// ok=ok && new String("").compareTo(SString.toRightField("",null))==0;
+		// ok=ok && new String("").compareTo(SString.toRightField(null,null))==0;
+		ok = ok && (new String("").compareTo(SString.toRightField("", "")) == 0);
+		ok = ok && (new String("1234a").compareTo(SString.toRightField("12345", "a")) == 0);
+		ok = ok && (new String("1abcd").compareTo(SString.toRightField("12345", "abcd")) == 0);
+		ok = ok && (new String("12345").compareTo(SString.toRightField("12345", "")) == 0);
+		ok = ok && (new String("abcdef").compareTo(SString.toRightField("123456", "abcdef")) == 0);
+		// ok=ok && new String("12345").compareTo(SString.toRightField("12345","abcdef"))==0;
+
+		// removeEnclosingQuotes
+		ok = ok && (new String("abcd").compareTo(SString.removeEnclosingQuotes("abcd")) == 0);
+		ok = ok && (new String("abcd").compareTo(SString.removeEnclosingQuotes("\"abcd\"")) == 0);
+		ok = ok && (new String("").compareTo(SString.removeEnclosingQuotes("")) == 0);
+		ok = ok && (null == SString.removeEnclosingQuotes(null));
+		ok = ok && (new String("\"abcd\" ").compareTo(SString.removeEnclosingQuotes("\"abcd\" ")) == 0);
+		ok = ok && (new String("x").compareTo(SString.removeEnclosingQuotes("\"x\"")) == 0);
+
 		return (ok);
 	}
 
@@ -147,5 +177,84 @@ public class SString {
 				s = "0" + s;
 		return (s);
 	}
+
+	/**
+	 *  return a string truncated to the specified maximum length (inclusive).
+	 *  @param maxlen maximum number of chars in returned string.
+	 */
+	public static String truncate(String arg,int maxlen) {
+		arg = (arg==null ? "" : arg);
+		maxlen = (maxlen<0 ? 0 : maxlen);
+		maxlen = (maxlen>arg.length() ? arg.length() : maxlen);
+		String ret="";
+		if (maxlen<=0)
+			return "";
+		try {
+			ret=arg.substring(0,maxlen);
+		} catch(Exception ex) {
+			// ignore except
+		}
+		return ret;	
+	}
+
+	/**
+	 *  Given a filled field and string, return a string 
+	 *  containing the field with the string right justified.
+	 *  e.g. ("0000","XY") returns "00XY".
+	 */
+	static public String toRightField(String f, String s) {
+		if (!((f != null) && (s != null)))
+			throw new IllegalArgumentException("SString.toRightField: arg f or s is null.");
+		if (!(f.length() >= s.length()))
+	    		throw new IllegalArgumentException("SString.toRightField: arg length problem:" + f + "," + s);
+		int end = f.length() - s.length();
+		String ret = f.substring(0, end) + s;
+		return (ret);
+	}
+
+	/**
+	 *   return a hexstring given an integer. This method is like the Java
+	 *   method but converts the string to upper case.
+	 */
+	static public String toHexString(int i) {
+		String hex = Integer.toHexString(i);
+		hex = hex.toUpperCase();
+		return (hex);
+	}
+
+	/** convert string to int */
+	public static int stringToInt(String s) {
+		if (s == null)
+		    return (0);
+		int i = 0;
+		try {
+		    i = Integer.parseInt(s);
+		} catch (Exception e) {}
+		return i;
+	}
+
+	/**
+	*  convert string to double.
+	*/
+	public static double stringToDouble(String s) {
+		if (s == null)
+		    return (0);
+		double d = 0;
+		try {
+		    d = Double.parseDouble(s);
+		} catch (Exception e) {}
+		return d;
+	}
+
+	/** convert int to string */
+	public static String intToString(int i) {
+		return String.valueOf(i);
+	}
+
+	/** convert int to string */
+	public static String longToString(long i) {
+		return String.valueOf(i);
+	}
+
 }
 

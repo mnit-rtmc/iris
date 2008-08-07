@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
 import java.io.IOException;
