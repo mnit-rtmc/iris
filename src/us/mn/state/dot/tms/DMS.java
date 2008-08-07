@@ -210,6 +210,9 @@ public interface DMS extends TrafficDevice {
 	/** Get sign face heat tape status */
 	public String getHeatTapeStatus() throws RemoteException;
 
+	/** Get user note */
+	public String getUserNote() throws RemoteException;
+
 	/** Set the time (in minutes) to heat the sign housing */
 	public void setHousingHeatTime(int minutes) throws RemoteException;
 

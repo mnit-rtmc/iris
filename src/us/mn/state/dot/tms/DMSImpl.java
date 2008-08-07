@@ -1455,6 +1455,19 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return 0;
 	}
 
+	/** text note */
+	protected transient String user_note;
+
+	/** Set the user note */
+	public void setUserNote(String s) {
+		user_note = s;
+	}
+
+	/** Get the user note */
+	public String getUserNote() {
+		return user_note;
+	}
+
 	/** Start a Ledstar pixel configuration operation */
 	protected void startLedstarPixel() {
 		DMSPoller p = getDMSPoller();

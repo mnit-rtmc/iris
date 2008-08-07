@@ -298,6 +298,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Housing temperature label */
 	protected final JLabel housingTemp = new JLabel();
 
+	/** Note */
+	protected final JLabel dms_note = new JLabel();
+
 	/** Brightness table */
 	protected BrightnessTable b_table;
 
@@ -946,6 +949,9 @@ public class DMSProperties extends TrafficDeviceForm {
 		label = new JLabel("Operation:");
 		lay.setConstraints(label, bag);
 		panel.add(label);
+label = new JLabel("Note:");
+lay.setConstraints(label, bag);
+panel.add(label);
 		bag.gridx = 3;
 		bag.gridy = 0;
 		bag.anchor = GridBagConstraints.WEST;
@@ -972,6 +978,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		lay.setConstraints(operation, bag);
 		panel.add(operation);
 		operation.setForeground(Color.BLACK);
+lay.setConstraints(dms_note, bag);
+panel.add(dms_note);
 		pane.add(panel);
 		return pane;
 	}
@@ -1055,6 +1063,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		cabinetTemp.setForeground(color);
 		ambientTemp.setForeground(color);
 		housingTemp.setForeground(color);
+		dms_note.setForeground(color);
 		b_table.doUpdate();
 		travel.setText(t);
 	}
@@ -1111,6 +1120,7 @@ public class DMSProperties extends TrafficDeviceForm {
 			sign.getMaxAmbientTemp()));
 		housingTemp.setText(formatTemp(sign.getMinHousingTemp(),
 			sign.getMaxHousingTemp()));
+		dms_note.setText(sign.getUserNote());
 		operation.setText(sign.getOperation());
 		b_table.doStatus();
 		if(sign.isManualBrightness())
