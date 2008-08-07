@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.client.meter.RampMeterListForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.roads.StationListForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
+import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
 import us.mn.state.dot.tms.client.toast.DetectorListForm;
 import us.mn.state.dot.tms.client.toast.Icons;
@@ -63,6 +64,15 @@ public class ViewMenu extends JMenu {
 			public void perform() throws Exception {
 				desktop.show(new PolicyForm(
 					st.getSystemPolicy()));
+			}
+		};
+		add(item);
+		item = new JMenuItem("Cabinet Styles");
+		item.setMnemonic('s');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new CabinetStyleForm(
+					st.getCabinetStyles()));
 			}
 		};
 		add(item);
