@@ -65,8 +65,9 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TMSObjectForm;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.TMSProxy;
+import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * This is a form for viewing and editing the properties of a dynamic message
@@ -258,24 +259,20 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Power supply status table */
 	protected final JTable power_table = new JTable();
 
-	/** Pixel test activation button */
-	protected final JButton pixelTest =
-		new JButton(I18NMessages.get("DMSProperties.PixelTestButton"));
+	/** Pixel test activation button (optional) */
+	protected final JButton pixelTest;
 
-	/** Lamp test activation button */
-//	protected final JButton lampTest = new JButton("Lamp test");
+	/** Lamp test activation button (optional) */
+	protected final JButton lampTest;
 
-	/** Fan test activation button */
-	protected final JButton fanTest =
-		new JButton(I18NMessages.get("DMSProperties.FanTestButton"));
+	/** Fan test activation button (optional) */
+	protected final JButton fanTest;
 
-	/** Get sign status button */
-	protected final JButton getStatusButton = 
-		new JButton(I18NMessages.get("DMSProperties.GetStatusButton"));
+	/** Get sign status button (optional) */
+	protected final JButton getStatusButton;
 
-	/** Reset sign button */
-	protected final JButton resetButton = 
-		new JButton(I18NMessages.get("DMSProperties.ResetButton"));
+	/** Reset sign button (optional) */
+	protected final JButton resetButton;
 
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
@@ -337,6 +334,36 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign_group_model = new SignGroupModel(id,
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
+
+		// pixel test button is (optional)
+		if (!Agency.isId(Agency.CALTRANS_D10))
+			pixelTest = new JButton(I18NMessages.get("DMSProperties.PixelTestButton"));
+		else
+			pixelTest = null;
+
+		// lamp test button is (optional)
+		if (false)
+			lampTest = new JButton("Lamp test");
+		else
+			lampTest = null;
+
+		// fan test button is (optional)
+		if (!Agency.isId(Agency.CALTRANS_D10))
+			fanTest = new JButton(I18NMessages.get("DMSProperties.FanTestButton"));
+		else
+			fanTest = null;
+
+		// get status button (optional)
+		if (Agency.isId(Agency.CALTRANS_D10))
+			getStatusButton = new JButton(I18NMessages.get("DMSProperties.GetStatusButton"));
+		else
+			getStatusButton = null;
+
+		// reset button (optional)
+		if (Agency.isId(Agency.CALTRANS_D10))
+			resetButton = new JButton(I18NMessages.get("DMSProperties.ResetButton"));
+		else
+			resetButton = null;
 	}
 
 	protected int h_pix;
@@ -873,50 +900,67 @@ public class DMSProperties extends TrafficDeviceForm {
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 1;
 		bag.gridy = 0;
-		lay.setConstraints(pixelTest, bag);
-		panel.add(pixelTest);
-		new ActionJob(this, pixelTest) {
-			public void perform() throws Exception {
-				sign.testPixels();
-			}
-		};
+
+		// pixelTest button (optional)
+		if( pixelTest!=null ) {
+			lay.setConstraints(pixelTest, bag);
+			panel.add(pixelTest);
+			new ActionJob(this, pixelTest) {
+				public void perform() throws Exception {
+					sign.testPixels();
+				}
+			};
+		}
+
 		bag.gridy = GridBagConstraints.RELATIVE;
-/*		lay.setConstraints(lampTest, bag);
-		panel.add(lampTest);
-		new ActionJob(this, lampTest) {
-			public void perform() throws Exception {
-				sign.testLamps();
-			}
-		}; */
-		lay.setConstraints(fanTest, bag);
-		panel.add(fanTest);
-		new ActionJob(this, fanTest) {
-			public void perform() throws Exception {
-				sign.testFans();
-			}
-		};
 
-		// get status button
-		getStatusButton.setToolTipText(
-			I18NMessages.get("DMSProperties.GetStatusButton.ToolTip"));
-		lay.setConstraints(getStatusButton, bag);
-		panel.add(getStatusButton);
-		new ActionJob(this, getStatusButton) {
-			public void perform() throws Exception {
-				sign.getSignMessage();
-			}
-		};
+		// lamp test button (optional)
+		if( lampTest!=null ) {
+			lay.setConstraints(lampTest, bag);
+			panel.add(lampTest);
+			new ActionJob(this, lampTest) {
+				public void perform() throws Exception {
+					sign.testLamps();
+				}
+			};
+		}
 
-		// reset button
-		resetButton.setToolTipText(
-			I18NMessages.get("DMSProperties.ResetButton.ToolTip"));
-		lay.setConstraints(resetButton, bag);
-		panel.add(resetButton);
-		new ActionJob(this, resetButton) {
-			public void perform() throws Exception {
-				sign.reset();
-			}
-		};
+		// fanTest button (optional)
+		if( fanTest!=null ) {
+			lay.setConstraints(fanTest, bag);
+			panel.add(fanTest);
+			new ActionJob(this, fanTest) {
+				public void perform() throws Exception {
+					sign.testFans();
+				}
+			};
+		}
+
+		// get status button (optional)
+		if( getStatusButton!=null ) {
+			getStatusButton.setToolTipText(
+				I18NMessages.get("DMSProperties.GetStatusButton.ToolTip"));
+			lay.setConstraints(getStatusButton, bag);
+			panel.add(getStatusButton);
+			new ActionJob(this, getStatusButton) {
+				public void perform() throws Exception {
+					sign.getSignMessage();
+				}
+			};
+		}
+
+		// reset button (optional)
+		if( resetButton!=null ) {
+			resetButton.setToolTipText(
+				I18NMessages.get("DMSProperties.ResetButton.ToolTip"));
+			lay.setConstraints(resetButton, bag);
+			panel.add(resetButton);
+			new ActionJob(this, resetButton) {
+				public void perform() throws Exception {
+					sign.reset();
+				}
+			};
+		}
 
 		bag.gridx = 2;
 		bag.gridy = 0;
