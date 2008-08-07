@@ -949,9 +949,9 @@ public class DMSProperties extends TrafficDeviceForm {
 		label = new JLabel("Operation:");
 		lay.setConstraints(label, bag);
 		panel.add(label);
-label = new JLabel("Note:");
-lay.setConstraints(label, bag);
-panel.add(label);
+		label = new JLabel("Note:");
+		lay.setConstraints(label, bag);
+		panel.add(label);
 		bag.gridx = 3;
 		bag.gridy = 0;
 		bag.anchor = GridBagConstraints.WEST;
@@ -978,8 +978,8 @@ panel.add(label);
 		lay.setConstraints(operation, bag);
 		panel.add(operation);
 		operation.setForeground(Color.BLACK);
-lay.setConstraints(dms_note, bag);
-panel.add(dms_note);
+		lay.setConstraints(dms_note, bag);
+		panel.add(dms_note);
 		pane.add(panel);
 		return pane;
 	}
