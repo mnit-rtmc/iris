@@ -193,8 +193,7 @@ public class SQLConnection {
 			updateNull(s, field);
 			return;
 		}
-		String v0 = valueAsString(value);
-		String v = escapeDelimiters(v0);
+		String v = escapeDelimiters(valueAsString(value));
 		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = '" + v + "' WHERE " + s.getKeyName() +
@@ -225,14 +224,16 @@ public class SQLConnection {
 				String val = value.toString();
 				validateSql(val);
 				values.append("'");
-				values.append(val);
+				values.append(escapeDelimiters(val));
 				values.append("',");
 			}
 		}
 		keys.setLength(keys.length() - 1);
 		values.setLength(values.length() - 1);
-		update("INSERT INTO " + s.getTable() + " (" + keys +
-			") VALUES (" + values + ");");
+		String sql="INSERT INTO " + s.getTable() + " (" + keys +
+			") VALUES (" + values + ");";
+		//System.err.println("SQLConnection.create(): sql="+sql);
+		update(sql);
 	}
 
 	/** Destroy one storable record */
