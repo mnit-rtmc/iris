@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.utils.STime;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -148,8 +149,8 @@ abstract public class OpDms extends DeviceOperation {
 
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
-		m_dms.setHeatTapeStatus(new Integer(m.getCompletionTimeMS()).toString()+" ms");
+		String user_note="last operation at "+STime.getCurTimeShortString()+", "+new Integer(m.getCompletionTimeMS()).toString()+" ms.";
+		m_dms.setUserNote(user_note);
 	}
-
 }
 
