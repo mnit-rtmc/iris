@@ -33,7 +33,7 @@ public class SQLConnection {
 
 	/** Pattern to match for a SQL update value */
 	static protected final Pattern SQL_VALUE =
-		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^'\\\\]]*");
+		Pattern.compile("[[\\p{Graph}\\p{Blank}\n]&&[^\\\\]]*");
 
 	/** Validate a SQL update value */
 	static protected void validateSql(String sql)
@@ -42,6 +42,13 @@ public class SQLConnection {
 		Matcher m = SQL_VALUE.matcher(sql);
 		if(!m.matches()) throw
 			new ChangeVetoException("Invalid SQL value: " + sql);
+	}
+
+	/** passed an sql statement, escape special characters */
+	static protected String escapeDelimiters(String sqlarg) {   
+		sqlarg = (sqlarg==null ? "" : sqlarg);
+		String sql = sqlarg.replace ("'", "''");
+		return sql;
 	}
 
 	/** Location of database server */
@@ -186,7 +193,8 @@ public class SQLConnection {
 			updateNull(s, field);
 			return;
 		}
-		String v = valueAsString(value);
+		String v0 = valueAsString(value);
+		String v = escapeDelimiters(v0);
 		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = '" + v + "' WHERE " + s.getKeyName() +

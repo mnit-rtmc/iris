@@ -32,7 +32,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 
 	/** Sign message text validation regex pattern */
 	static protected final Pattern MESS_PATTERN = Pattern.compile(
-		"[0-9A-Z !#$%&()*+,-./:;<=>?@]*");
+		"[0-9A-Z !#$%&()*+,-./:;<=>?'@]*");
 
 	/** Validate a message string */
 	static protected void validateMessage(String t)
