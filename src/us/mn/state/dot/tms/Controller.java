@@ -65,11 +65,8 @@ public interface Controller extends SonarObject {
 	/** Get the controller communication status */
 	String getStatus();
 
-	/** Get the time stamp of the most recent comm failure */
-	String getFailTime();
-
-	/** Get the controller setup configuration state */
-	String getSetup();
+	/** Get the controller error status */
+	String getError();
 
 	/** Get the controller firmware version */
 	String getVersion();

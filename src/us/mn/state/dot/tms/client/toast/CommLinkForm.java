@@ -26,6 +26,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 
 /**
@@ -47,33 +48,49 @@ public class CommLinkForm extends AbstractForm {
 	/** Table to hold the comm link list */
 	protected final JTable table = new JTable();
 
+	/** Table model for controllers */
+	protected ControllerModel cmodel;
+
+	/** Table to hold controllers */
+	protected final JTable ctable = new JTable();
+
 	/** Button to delete the selected comm link */
 	protected final JButton del_button = new JButton("Delete Comm Link");
 
 	/** Comm Link type cache */
 	protected final TypeCache<CommLink> cache;
 
+	/** Controller type cache */
+	protected final TypeCache<Controller> ccache;
+
 	/** Create a new comm link form */
-	public CommLinkForm(TypeCache<CommLink> c) {
+	public CommLinkForm(TypeCache<CommLink> c, TypeCache<Controller> cc) {
 		super(TITLE);
 		cache = c;
+		ccache = cc;
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		model = new CommLinkModel(cache);
+		cmodel = new ControllerModel(ccache);
 		add(createCommLinkPanel());
+
+		// FIXME: JPanels don't like to layout properly
+		Dimension d = getPreferredSize();
+		setMinimumSize(new Dimension(d.width, d.height + 30));
+		setPreferredSize(new Dimension(d.width, d.height + 30));
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
 		model.dispose();
+		cmodel.dispose();
 	}
 
 	/** Create comm link panel */
 	protected JPanel createCommLinkPanel() {
 		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets.left = HGAP;
 		bag.insets.right = HGAP;
@@ -105,6 +122,26 @@ public class CommLinkForm extends AbstractForm {
 					model.deleteRow(row);
 			}
 		};
+		bag.gridx = 0;
+		bag.gridy = 1;
+		bag.gridwidth = 2;
+		final ListSelectionModel cs = ctable.getSelectionModel();
+		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, cs) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectController();
+			}
+		};
+		ctable.setModel(cmodel);
+		ctable.setAutoCreateColumnsFromModel(false);
+		ctable.setColumnModel(cmodel.createColumnModel());
+		ctable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		ctable.setRowHeight(ROW_HEIGHT);
+		ctable.setPreferredScrollableViewportSize(new Dimension(
+			ctable.getPreferredSize().width, ROW_HEIGHT * 12));
+		pane = new JScrollPane(ctable);
+		panel.add(pane, bag);
 		return panel;
 	}
 
@@ -112,5 +149,10 @@ public class CommLinkForm extends AbstractForm {
 	protected void selectCommLink() {
 		int row = table.getSelectedRow();
 		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
+	}
+
+	/** Change the selected controller */
+	protected void selectController() {
+		// FIXME
 	}
 }

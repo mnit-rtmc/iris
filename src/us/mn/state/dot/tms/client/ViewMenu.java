@@ -81,7 +81,8 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new CommLinkForm(
-					st.getCommLinks()));
+					st.getCommLinks(),
+					st.getControllers()));
 			}
 		};
 		add(item);

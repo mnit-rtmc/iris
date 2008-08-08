@@ -86,7 +86,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add("Setup", createSetupPanel());
 		tab.add("Cabinet", createCabinetPanel());
 		tab.add("I/O", createIOPanel());
-		tab.add("Status", createStatusPanel());
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
 		location.initialize();
@@ -117,12 +116,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the I/O panel */
 	protected JPanel createIOPanel() {
 		FormPanel panel = new FormPanel(admin);
-		return panel;
-	}
-
-	/** Create the controller status panel */
-	protected JPanel createStatusPanel() {
-		JPanel panel = new JPanel();
 		return panel;
 	}
 

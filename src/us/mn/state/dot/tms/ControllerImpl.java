@@ -542,19 +542,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Controller setup configuration state */
-	protected transient String setup = Constants.UNKNOWN;
-
-	/** Get the controller setup configuration state */
-	public String getSetup() {
-		return setup;
-	}
+	protected transient String setup = "";
 
 	/** Set the controller setup configuration state */
 	public void setSetup(String s) {
 		if(s == null)
-			setup = Constants.UNKNOWN;
+			setup = "";
 		else
 			setup = s;
+		// FIXME: notify error attribute
 	}
 
 	/** Log an exception */
@@ -583,9 +579,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	/** Time stamp of most recent comm failure */
 	protected transient Date failTime = new Date();
 
-	/** Get the time stamp of the most recent comm failure */
-	public String getFailTime() {
-		return failTime.toString();
+	/** Get the controller error status */
+	public String getError() {
+		if(isFailed())
+			return "FAIL @ " + failTime.toString();
+		else
+			return setup;
 	}
 
 	/** Get the number of milliseconds the controller has been failed */
@@ -620,15 +619,17 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 		if(isFailed()) {
 			failTime = new Date();
 			logFailMessage(EventType.COMM_FAILED, id);
+			// FIXME: notify error attribute
 			return false;
 		}
+		// FIXME: notify error attribute
 		return true;
 	}
 
 	/** Reset the error counter */
 	public final void resetErrorCounter( String id ) {
 		boolean failed = isFailed();
-		status = "OK";
+		status = "";
 		errorCounter = 0;
 		if(failed)
 			logFailMessage(EventType.COMM_RESTORED, id);
