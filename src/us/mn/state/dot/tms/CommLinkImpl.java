@@ -338,11 +338,17 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			poller.start();
 			messenger.setTimeout(timeout);
 			messenger.open();
-			status = "OK";
+			status = "";
 		}
 		catch(IOException e) {
 			close();
 			status = e.getMessage();
+		}
+		finally {
+			if(MainServer.server == null)
+				return;
+			MainServer.server.setAttribute(this, "status",
+				new String[] { status });
 		}
 	}
 

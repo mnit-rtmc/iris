@@ -35,6 +35,9 @@ import us.mn.state.dot.tms.client.toast.AbstractForm;
  */
 public class CommLinkForm extends AbstractForm {
 
+	/** Comm link table row height */
+	static protected final int ROW_HEIGHT = 24;
+
 	/** Frame title */
 	static protected final String TITLE = "Comm Links";
 
@@ -61,7 +64,7 @@ public class CommLinkForm extends AbstractForm {
 		model = new CommLinkModel(cache);
 		add(createCommLinkPanel());
 		Dimension d = new Dimension(table.getPreferredSize().width,
-			table.getPreferredScrollableViewportSize().height / 3);
+			ROW_HEIGHT * 8);
 		table.setPreferredScrollableViewportSize(d);
 	}
 
@@ -91,6 +94,7 @@ public class CommLinkForm extends AbstractForm {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setRowHeight(ROW_HEIGHT);
 		JScrollPane pane = new JScrollPane(table);
 		panel.add(pane, bag);
 		del_button.setEnabled(false);

@@ -18,10 +18,13 @@ import java.awt.Component;
 import java.util.LinkedList;
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
@@ -38,7 +41,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 5;
+	static protected final int COLUMN_COUNT = 6;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
@@ -49,11 +52,14 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	/** URL column number */
 	static protected final int COL_URL = 2;
 
+	/** Link connection status */
+	static protected final int COL_STATUS = 3;
+
 	/** Protocol column number */
-	static protected final int COL_PROTOCOL = 3;
+	static protected final int COL_PROTOCOL = 4;
 
 	/** Timeout column number */
-	static protected final int COL_TIMEOUT = 4;
+	static protected final int COL_TIMEOUT = 5;
 
 	/** List of all possible protocol selections */
 	static protected final LinkedList<String> PROTOCOLS =
@@ -86,6 +92,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return c.getDescription();
 			case COL_URL:
 				return c.getUrl();
+			case COL_STATUS:
+				return c.getStatus();
 			case COL_PROTOCOL:
 				return PROTOCOLS.get(c.getProtocol());
 			case COL_TIMEOUT:
@@ -97,6 +105,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
+		if(column == COL_STATUS)
+			return false;
 		if(isLastRow(row))
 			return column == COL_NAME;
 		else
@@ -128,6 +138,14 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		}
 	}
 
+	/** Create the status column */
+	protected TableColumn createStatusColumn() {
+		TableColumn c = new TableColumn(COL_STATUS, 44);
+		c.setHeaderValue("Status");
+		c.setCellRenderer(new StatusCellRenderer());
+		return c;
+	}
+
 	/** Create the protocol column */
 	protected TableColumn createProtocolColumn() {
 		TableColumn c = new TableColumn(COL_PROTOCOL, 140);
@@ -143,6 +161,28 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		c.setHeaderValue("Timeout");
 		c.setCellEditor(new TimeoutEditor());
 		return c;
+	}
+
+	/** Renderer for link status in a table cell */
+	public class StatusCellRenderer extends DefaultTableCellRenderer {
+		protected final Icon ok = Icons.getIcon("comm_link");
+		protected final Icon fail = Icons.getIcon("comm_link_fail");
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			JLabel label =
+				(JLabel)super.getTableCellRendererComponent(
+				table, "", isSelected, hasFocus, row,
+				column);
+			if(value == null)
+				label.setIcon(null);
+			else if("".equals(value))
+				label.setIcon(ok);
+			else
+				label.setIcon(fail);
+			return label;
+		}
 	}
 
 	/** Editor for timeout values in a table cell */
@@ -170,6 +210,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		m.addColumn(createColumn(COL_NAME, 90, "Comm Link"));
 		m.addColumn(createColumn(COL_DESCRIPTION, 220, "Description"));
 		m.addColumn(createColumn(COL_URL, 280, "URL"));
+		m.addColumn(createStatusColumn());
 		m.addColumn(createProtocolColumn());
 		m.addColumn(createTimeoutColumn());
 		return m;

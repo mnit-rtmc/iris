@@ -155,6 +155,7 @@
 		<copy todir="${build.images}">
 			<fileset dir="${images.dir}">
 				<include name="*.gif"/>
+				<include name="*.png"/>
 				<include name="*.jpg"/>
 			</fileset>
 		</copy>
