@@ -57,7 +57,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		cache.addProxyListener(this);
 	}
 
-	/** Get the SONAR state */
+	/** Get the SONAR type cache */
 	abstract protected TypeCache<T> getTypeCache(SonarState st);
 
 	/** A new proxy has been added */

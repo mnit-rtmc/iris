@@ -25,8 +25,10 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
@@ -90,12 +92,28 @@ public class SonarState extends Client {
 		return cabinet_styles;
 	}
 
+	/** Cache of cabinet proxies */
+	protected final TypeCache<Cabinet> cabinets;
+
+	/** Get the cabinet type cache */
+	public TypeCache<Cabinet> getCabinets() {
+		return cabinets;
+	}
+
 	/** Cache of comm link proxies */
 	protected final TypeCache<CommLink> comm_links;
 
 	/** Get the comm link type cache */
 	public TypeCache<CommLink> getCommLinks() {
 		return comm_links;
+	}
+
+	/** Cache of controller proxies */
+	protected final TypeCache<Controller> controllers;
+
+	/** Get the controller type cache */
+	public TypeCache<Controller> getControllers() {
+		return controllers;
 	}
 
 	/** Cache of holiday proxies */
@@ -206,7 +224,9 @@ public class SonarState extends Client {
 		system_policy = new TypeCache<SystemPolicy>(SystemPolicy.class);
 		cabinet_styles = new TypeCache<CabinetStyle>(
 			CabinetStyle.class);
+		cabinets = new TypeCache<Cabinet>(Cabinet.class);
 		comm_links = new TypeCache<CommLink>(CommLink.class);
+		controllers = new TypeCache<Controller>(Controller.class);
 		holidays = new TypeCache<Holiday>(Holiday.class);
 		graphics = new TypeCache<Graphic>(Graphic.class);
 		fonts = new TypeCache<Font>(Font.class);
@@ -234,15 +254,17 @@ public class SonarState extends Client {
 		populate(users);
 		populate(connections);
 		populate(system_policy);
-		populate(cabinet_styles);
+		populate(roads);
+		populate(geo_locs);
 		populate(comm_links);
+		populate(cabinet_styles);
+		populate(cabinets);
+		populate(controllers);
 		populate(holidays);
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
 		populate(monitors);
-		populate(roads);
-		populate(geo_locs);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);

@@ -61,7 +61,7 @@ public class CommLinkForm extends AbstractForm {
 		model = new CommLinkModel(cache);
 		add(createCommLinkPanel());
 		Dimension d = new Dimension(table.getPreferredSize().width,
-			table.getPreferredScrollableViewportSize().height);
+			table.getPreferredScrollableViewportSize().height / 3);
 		table.setPreferredScrollableViewportSize(d);
 	}
 
