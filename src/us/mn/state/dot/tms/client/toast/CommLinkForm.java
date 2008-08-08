@@ -63,9 +63,6 @@ public class CommLinkForm extends AbstractForm {
 	protected void initialize() {
 		model = new CommLinkModel(cache);
 		add(createCommLinkPanel());
-		Dimension d = new Dimension(table.getPreferredSize().width,
-			ROW_HEIGHT * 8);
-		table.setPreferredScrollableViewportSize(d);
 	}
 
 	/** Dispose of the form */
@@ -95,6 +92,8 @@ public class CommLinkForm extends AbstractForm {
 		table.setColumnModel(model.createColumnModel());
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setRowHeight(ROW_HEIGHT);
+		table.setPreferredScrollableViewportSize(new Dimension(
+			table.getPreferredSize().width, ROW_HEIGHT * 8));
 		JScrollPane pane = new JScrollPane(table);
 		panel.add(pane, bag);
 		del_button.setEnabled(false);
