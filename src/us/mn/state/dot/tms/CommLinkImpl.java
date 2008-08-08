@@ -162,6 +162,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public void doSetProtocol(short p) throws TMSException {
 		if(p == protocol)
 			return;
+		if(p < 0 || p >= PROTOCOLS.length)
+			throw new ChangeVetoException("Invalid protocol: " + p);
 		store.update(this, "protocol", p);
 		close();
 		setProtocol(p);
