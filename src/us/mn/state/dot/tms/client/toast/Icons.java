@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,13 +83,26 @@ public class Icons {
 	static protected final WeakHashMap<String, ImageIcon> map =
 		new WeakHashMap<String, ImageIcon>();
 
+	/** Lookup a resource */
+	static protected URL lookupResource(String resource) {
+		return Icons.class.getResource(resource);
+	}
+
+	/** Lookup an image resource */
+	static protected URL lookupImageResource(String key) {
+		URL url = lookupResource("/images/" + key + ".gif");
+		if(url != null)
+			return url;
+		else
+			return lookupResource("/images/" + key + ".png");
+	}
+
 	/** Get a requested ImageIcon resource */
 	static protected ImageIcon getImageIcon(String key) {
 		ImageIcon icon = map.get(key);
 		if(icon != null)
 			return icon;
-		String resource = "/images/" + key + ".gif";
-		URL url = new Icons().getClass().getResource(resource);
+		URL url = lookupImageResource(key);
 		if(url != null) {
 			icon = new ImageIcon(url);
 			map.put(key, icon);
