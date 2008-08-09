@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
@@ -298,14 +299,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 			io_pins.put(pin, io);
 	}
 
-	/** Set all controller devices to failed status */
-	protected synchronized void failDevices() {
+	/** Get a list of all traffic devices on the controller */
+	protected synchronized LinkedList<TrafficDeviceImpl> getDevices() {
+		LinkedList<TrafficDeviceImpl> devices =
+			new LinkedList<TrafficDeviceImpl>();
 		for(ControllerIO io: io_pins.values()) {
-			if(io instanceof TrafficDeviceImpl) {
-				TrafficDeviceImpl t = (TrafficDeviceImpl)io;
-				t.setStatus(null);
-				t.notifyStatus();
-			}
+			if(io instanceof TrafficDeviceImpl)
+				devices.add((TrafficDeviceImpl)io);
+		}
+		return devices;
+	}
+
+	/** Set all controller devices to failed status */
+	protected void failDevices() {
+		for(TrafficDeviceImpl device: getDevices()) {
+			device.setStatus(null);
+			device.notifyStatus();
 		}
 	}
 
@@ -534,7 +543,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Controller communication status */
-	protected transient String status = "";
+	protected transient String status = Constants.UNKNOWN;
 
 	/** Get the controller communication status */
 	public String getStatus() {
