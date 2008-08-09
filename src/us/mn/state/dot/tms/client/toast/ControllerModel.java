@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.awt.Color;
 import java.awt.Component;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -132,8 +133,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 
 	/** Renderer for link status in a table cell */
 	public class StatusCellRenderer extends DefaultTableCellRenderer {
-		protected final Icon ok = Icons.getIcon("comm_link");
-		protected final Icon fail = Icons.getIcon("comm_link_fail");
+		protected final Icon ok = new ControllerIcon(Color.BLUE);
+		protected final Icon fail = new ControllerIcon(Color.GRAY);
 		public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus,
 			int row, int column)

@@ -349,6 +349,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				return;
 			MainServer.server.setAttribute(this, "status",
 				new String[] { status });
+			// FIXME: queue a flush on all connections
 		}
 	}
 
