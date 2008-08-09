@@ -74,6 +74,9 @@ public class CommLinkForm extends AbstractForm {
 	/** Failed controller table model */
 	protected FailedControllerModel fmodel;
 
+	/** Button to delete the selected controller */
+	protected final JButton del_ctr = new JButton("Delete Controller");
+
 	/** Button to go to a failed controller */
 	protected final JButton go_button = new JButton("Go");
 
@@ -172,8 +175,29 @@ public class CommLinkForm extends AbstractForm {
 		ctable.setAutoCreateColumnsFromModel(false);
 		ctable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		ctable.setRowHeight(ROW_HEIGHT);
+		// NOTE: the width of the controller table is the same as the
+		// comm link table on purpose.
+		ctable.setPreferredScrollableViewportSize(new Dimension(
+			table.getPreferredSize().width, ROW_HEIGHT * 16));
 		pane = new JScrollPane(ctable);
 		panel.add(pane, bag);
+		bag.gridwidth = 1;
+		bag.gridx = 0;
+		bag.gridy = 3;
+		bag.anchor = GridBagConstraints.WEST;
+		bag.fill = GridBagConstraints.NONE;
+		panel.add(new JLabel("Seleccted Controller:"), bag);
+		bag.gridx = 2;
+		bag.anchor = GridBagConstraints.EAST;
+		del_ctr.setEnabled(false);
+		panel.add(del_ctr, bag);
+		new ActionJob(this, del_ctr) {
+			public void perform() throws Exception {
+				int row = cs.getMinSelectionIndex();
+				if(row >= 0)
+					cmodel.deleteRow(row);
+			}
+		};
 		return panel;
 	}
 
@@ -186,6 +210,7 @@ public class CommLinkForm extends AbstractForm {
 		else
 			link_status.setText("");
 		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
+		del_ctr.setEnabled(false);
 		ControllerModel old_model = cmodel;
 		cmodel = new ControllerModel(ccache, cl);
 		ctable.setModel(cmodel);
@@ -196,7 +221,9 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Change the selected controller */
 	protected void selectController() {
-		// FIXME
+		int row = ctable.getSelectedRow();
+		Controller c = cmodel.getProxy(row);
+		del_ctr.setEnabled(row >= 0 && !cmodel.isLastRow(row));
 	}
 
 	/** Create the failed controller panel */
@@ -205,16 +232,13 @@ public class CommLinkForm extends AbstractForm {
 		panel.setBorder(BORDER);
 		final ListSelectionModel s = ftable.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectFailedController();
-			}
-		};
 		ftable.setModel(fmodel);
 		ftable.setAutoCreateColumnsFromModel(false);
 		ftable.setColumnModel(fmodel.createColumnModel());
+		ftable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		ftable.setRowHeight(ROW_HEIGHT);
+		ftable.setPreferredScrollableViewportSize(new Dimension(
+			ftable.getPreferredSize().width, ROW_HEIGHT * 26));
 		JScrollPane pane = new JScrollPane(ftable);
 		panel.add(pane);
 		new ActionJob(this, go_button) {
@@ -230,11 +254,6 @@ public class CommLinkForm extends AbstractForm {
 		});
 		panel.add(go_button);
 		return panel;
-	}
-
-	/** Change the selected failed controller */
-	protected void selectFailedController() {
-		// FIXME
 	}
 
 	/** Go to the failed controller (on the main tab) */

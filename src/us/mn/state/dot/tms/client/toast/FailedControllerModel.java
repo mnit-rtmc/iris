@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -31,19 +32,22 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class FailedControllerModel extends ProxyTableModel<Controller> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 4;
+	static protected final int COLUMN_COUNT = 5;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
 
+	/** Location column number */
+	static protected final int COL_LOCATION = 1;
+
 	/** Comm Link column number */
-	static protected final int COL_COMM_LINK = 1;
+	static protected final int COL_COMM_LINK = 2;
 
 	/** Drop address column number */
-	static protected final int COL_DROP = 2;
+	static protected final int COL_DROP = 3;
 
 	/** Error detail */
-	static protected final int COL_ERROR = 3;
+	static protected final int COL_ERROR = 4;
 
 	/** Create an empty set of proxies */
 	protected TreeSet<Controller> createProxySet() {
@@ -142,6 +146,9 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 		switch(column) {
 			case COL_NAME:
 				return c.getName();
+			case COL_LOCATION:
+				return GeoLocHelper.getDescription(
+					c.getCabinet().getGeoLoc());
 			case COL_COMM_LINK:
 				return c.getCommLink().getName();
 			case COL_DROP:
@@ -162,6 +169,7 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 90, "Controller"));
+		m.addColumn(createColumn(COL_LOCATION, 200, "Location"));
 		m.addColumn(createColumn(COL_COMM_LINK, 120, "Comm Link"));
 		m.addColumn(createColumn(COL_DROP, 60, "Drop"));
 		m.addColumn(createColumn(COL_ERROR, 240, "Error Detail"));

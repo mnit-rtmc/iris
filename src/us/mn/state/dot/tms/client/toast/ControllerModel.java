@@ -28,6 +28,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -40,26 +41,32 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	/** Color to display inactive controllers */
 	static protected final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
 
+	/** Color to display available devices */
+	static protected final Color COLOR_AVAILABLE = new Color(96, 96, 255);
+
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 6;
+	static protected final int COLUMN_COUNT = 7;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
 
+	/** Location column number */
+	static protected final int COL_LOCATION = 1;
+
 	/** Drop address column number */
-	static protected final int COL_DROP = 1;
+	static protected final int COL_DROP = 2;
 
 	/** Active column number */
-	static protected final int COL_ACTIVE = 2;
+	static protected final int COL_ACTIVE = 3;
 
 	/** Communication status */
-	static protected final int COL_STATUS = 3;
+	static protected final int COL_STATUS = 4;
 
 	/** Error detail */
-	static protected final int COL_ERROR = 4;
+	static protected final int COL_ERROR = 5;
 
 	/** Firmware version */
-	static protected final int COL_VERSION = 5;
+	static protected final int COL_VERSION = 6;
 
 	/** Comm link to match controllers */
 	protected final CommLink comm_link;
@@ -129,6 +136,9 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		switch(column) {
 			case COL_NAME:
 				return c.getName();
+			case COL_LOCATION:
+				return GeoLocHelper.getDescription(
+					c.getCabinet().getGeoLoc());
 			case COL_DROP:
 				return c.getDrop();
 			case COL_ACTIVE:
@@ -180,7 +190,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 
 	/** Renderer for link status in a table cell */
 	public class StatusCellRenderer extends DefaultTableCellRenderer {
-		protected final Icon ok = new ControllerIcon(Color.BLUE);
+		protected final Icon ok = new ControllerIcon(
+			COLOR_AVAILABLE);
 		protected final Icon fail = new ControllerIcon(Color.GRAY);
 		protected final Icon inactive = new ControllerIcon(
 			COLOR_INACTIVE);
@@ -211,6 +222,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 90, "Controller"));
+		m.addColumn(createColumn(COL_LOCATION, 200, "Location"));
 		m.addColumn(createColumn(COL_DROP, 60, "Drop"));
 		m.addColumn(createColumn(COL_ACTIVE, 50, "Active"));
 		m.addColumn(createStatusColumn());
