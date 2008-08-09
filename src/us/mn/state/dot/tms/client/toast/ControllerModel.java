@@ -49,11 +49,11 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	/** Communication status */
 	static protected final int COL_STATUS = 3;
 
-	/** Firmware version */
-	static protected final int COL_VERSION = 4;
-
 	/** Error detail */
-	static protected final int COL_ERROR = 5;
+	static protected final int COL_ERROR = 4;
+
+	/** Firmware version */
+	static protected final int COL_VERSION = 5;
 
 	/** Create a new controller table model */
 	public ControllerModel(TypeCache<Controller> c) {
@@ -160,8 +160,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		m.addColumn(createColumn(COL_DROP, 60, "Drop"));
 		m.addColumn(createColumn(COL_ACTIVE, 50, "Active"));
 		m.addColumn(createStatusColumn());
-		m.addColumn(createColumn(COL_VERSION, 120, "Version"));
 		m.addColumn(createColumn(COL_ERROR, 240, "Error Detail"));
+		m.addColumn(createColumn(COL_VERSION, 120, "Version"));
 		return m;
 	}
 }
