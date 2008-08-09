@@ -189,7 +189,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Get the row for the specified proxy */
-	protected int getRow(T proxy) {
+	public int getRow(T proxy) {
 		synchronized(proxies) {
 			Iterator<T> it = proxies.iterator();
 			for(int i = 0; it.hasNext(); i++) {
