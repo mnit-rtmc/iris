@@ -114,7 +114,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
-		version = Constants.UNKNOWN;
+		version = "";
 		counters = new int[TYPES.length][PERIODS.length];
 		CommLinkImpl link = (CommLinkImpl)comm_link;
 		if(link != null)
@@ -534,7 +534,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Controller communication status */
-	protected transient String status = Constants.UNKNOWN;
+	protected transient String status = "";
 
 	/** Get the controller communication status */
 	public String getStatus() {

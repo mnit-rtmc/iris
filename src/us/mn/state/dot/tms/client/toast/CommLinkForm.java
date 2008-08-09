@@ -18,6 +18,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -54,6 +55,9 @@ public class CommLinkForm extends AbstractForm {
 	/** Table to hold controllers */
 	protected final JTable ctable = new JTable();
 
+	/** Comm link status */
+	protected final JLabel link_status = new JLabel();
+
 	/** Button to delete the selected comm link */
 	protected final JButton del_button = new JButton("Delete Comm Link");
 
@@ -73,7 +77,6 @@ public class CommLinkForm extends AbstractForm {
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		model = new CommLinkModel(cache);
-		cmodel = new ControllerModel(ccache);
 		add(createCommLinkPanel());
 
 		// FIXME: JPanels don't like to layout properly
@@ -85,7 +88,8 @@ public class CommLinkForm extends AbstractForm {
 	/** Dispose of the form */
 	protected void dispose() {
 		model.dispose();
-		cmodel.dispose();
+		if(cmodel != null)
+			cmodel.dispose();
 	}
 
 	/** Create comm link panel */
@@ -96,6 +100,7 @@ public class CommLinkForm extends AbstractForm {
 		bag.insets.right = HGAP;
 		bag.insets.top = VGAP;
 		bag.insets.bottom = VGAP;
+		bag.gridwidth = 3;
 		final ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -113,6 +118,15 @@ public class CommLinkForm extends AbstractForm {
 			table.getPreferredSize().width, ROW_HEIGHT * 8));
 		JScrollPane pane = new JScrollPane(table);
 		panel.add(pane, bag);
+		bag.gridwidth = 1;
+		bag.gridx = 0;
+		bag.gridy = 1;
+		bag.anchor = GridBagConstraints.WEST;
+		panel.add(new JLabel("Seleccted Comm Link:"), bag);
+		bag.gridx = 1;
+		panel.add(link_status, bag);
+		bag.gridx = 2;
+		bag.anchor = GridBagConstraints.EAST;
 		del_button.setEnabled(false);
 		panel.add(del_button, bag);
 		new ActionJob(this, del_button) {
@@ -123,8 +137,10 @@ public class CommLinkForm extends AbstractForm {
 			}
 		};
 		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.gridwidth = 2;
+		bag.gridy = 2;
+		bag.gridwidth = 3;
+		bag.anchor = GridBagConstraints.CENTER;
+		bag.fill = GridBagConstraints.BOTH;
 		final ListSelectionModel cs = ctable.getSelectionModel();
 		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, cs) {
@@ -133,13 +149,9 @@ public class CommLinkForm extends AbstractForm {
 					selectController();
 			}
 		};
-		ctable.setModel(cmodel);
 		ctable.setAutoCreateColumnsFromModel(false);
-		ctable.setColumnModel(cmodel.createColumnModel());
 		ctable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		ctable.setRowHeight(ROW_HEIGHT);
-		ctable.setPreferredScrollableViewportSize(new Dimension(
-			ctable.getPreferredSize().width, ROW_HEIGHT * 12));
 		pane = new JScrollPane(ctable);
 		panel.add(pane, bag);
 		return panel;
@@ -148,7 +160,18 @@ public class CommLinkForm extends AbstractForm {
 	/** Change the selected comm link */
 	protected void selectCommLink() {
 		int row = table.getSelectedRow();
+		CommLink cl = model.getProxy(row);
+		if(cl != null)
+			link_status.setText(cl.getStatus());
+		else
+			link_status.setText("");
 		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
+		ControllerModel old_model = cmodel;
+		cmodel = new ControllerModel(ccache, cl);
+		ctable.setModel(cmodel);
+		ctable.setColumnModel(cmodel.createColumnModel());
+		if(old_model != null)
+			old_model.dispose();
 	}
 
 	/** Change the selected controller */

@@ -117,11 +117,13 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Remove a proxy from the table model */
 	public void proxyRemoved(T proxy) {
 		final int row = doProxyRemoved(proxy);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireTableRowsDeleted(row, row);
-			}
-		});
+		if(row >= 0) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireTableRowsDeleted(row, row);
+				}
+			});
+		}
 	}
 
 	/** Change a proxy in the table model */
@@ -173,6 +175,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Get the proxy at the specified row */
 	public T getProxy(int row) {
+		if(row < 0)
+			return null;
 		synchronized(proxies) {
 			Iterator<T> it = proxies.iterator();
 			for(int i = 0; it.hasNext(); i++) {

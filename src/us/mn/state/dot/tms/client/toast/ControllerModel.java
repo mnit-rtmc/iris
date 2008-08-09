@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.Comparator;
+import java.util.TreeSet;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -24,6 +26,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
@@ -33,6 +36,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class ControllerModel extends ProxyTableModel<Controller> {
+
+	/** Color to display inactive controllers */
+	static protected final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 6;
@@ -55,10 +61,51 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	/** Firmware version */
 	static protected final int COL_VERSION = 5;
 
+	/** Comm link to match controllers */
+	protected final CommLink comm_link;
+
+	/** Create an empty set of proxies */
+	protected TreeSet<Controller> createProxySet() {
+		return new TreeSet<Controller>(
+			new Comparator<Controller>() {
+				public int compare(Controller a, Controller b) {
+					Short aa = Short.valueOf(a.getDrop());
+					Short bb = Short.valueOf(b.getDrop());
+					return aa.compareTo(bb);
+				}
+				public boolean equals(Object o) {
+					return o == this;
+				}
+				public int hashCode() {
+					return super.hashCode();
+				}
+			}
+		);
+	}
+
 	/** Create a new controller table model */
-	public ControllerModel(TypeCache<Controller> c) {
+	public ControllerModel(TypeCache<Controller> c, CommLink cl) {
 		super(c, true);
+		comm_link = cl;
 		initialize();
+	}
+
+	/** Add a new proxy to the table model */
+	public void proxyAdded(Controller proxy) {
+		if(proxy.getCommLink() == comm_link)
+			super.proxyAdded(proxy);
+	}
+
+	/** Remove a proxy from the table model */
+	public void proxyRemoved(Controller proxy) {
+		if(proxy.getCommLink() == comm_link)
+			super.proxyRemoved(proxy);
+	}
+
+	/** Change a proxy in the table model */
+	public void proxyChanged(Controller proxy, String attrib) {
+		if(proxy.getCommLink() == comm_link)
+			super.proxyChanged(proxy, attrib);
 	}
 
 	/** Get the count of columns in the table */
@@ -135,6 +182,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	public class StatusCellRenderer extends DefaultTableCellRenderer {
 		protected final Icon ok = new ControllerIcon(Color.BLUE);
 		protected final Icon fail = new ControllerIcon(Color.GRAY);
+		protected final Icon inactive = new ControllerIcon(
+			COLOR_INACTIVE);
 		public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus,
 			int row, int column)
@@ -147,8 +196,13 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				label.setIcon(null);
 			else if("".equals(value))
 				label.setIcon(ok);
-			else
-				label.setIcon(fail);
+			else {
+				Controller c = getProxy(row);
+				if(c != null && c.getActive())
+					label.setIcon(fail);
+				else
+					label.setIcon(inactive);
+			}
 			return label;
 		}
 	}
