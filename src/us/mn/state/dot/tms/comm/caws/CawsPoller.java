@@ -13,11 +13,7 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.caws;
-
-//~--- non-JDK imports --------------------------------------------------------
 
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -39,64 +35,65 @@ import us.mn.state.dot.tms.comm.SignPoller;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class CawsPoller extends MessagePoller implements SignPoller {
+public class CawsPoller extends MessagePoller implements SignPoller
+{
+	/** the only valid drop address */
+	static public final int VALID_DROP_ADDRESS = 1;
 
-    /** the only valid drop address */
-    static public final int VALID_DROP_ADDRESS = 1;
+	/** Create a new poller */
+	public CawsPoller(String n, Messenger m) {
+		super(n, m);
 
-    /** Create a new poller */
-    public CawsPoller(String n, Messenger m) {
-        super(n, m);
+		// System.err.println("CawsPoller.CawsPoller() called.");
+		assert m instanceof HttpFileMessenger;
+	}
 
-        // System.err.println("CawsPoller.CawsPoller() called.");
-        assert m instanceof HttpFileMessenger;
-    }
+	/** Create a new message for the specified controller, called by MessagePoller.doPoll(). */
+	public AddressedMessage createMessage(ControllerImpl c) {
 
-    /** Create a new message for the specified controller, called by MessagePoller.doPoll(). */
-    public AddressedMessage createMessage(ControllerImpl c) {
+		// System.err.println("CawsPoller.createMessage() called.");
+		return new Message(messenger);
+	}
 
-        // System.err.println("CawsPoller.createMessage() called.");
-        return new Message(messenger);
-    }
+	/** Check if a drop address is valid */
+	public boolean isAddressValid(int drop) {
+		return (drop == VALID_DROP_ADDRESS);
+	}
 
-    /** Check if a drop address is valid */
-    public boolean isAddressValid(int drop) {
-        return (drop == VALID_DROP_ADDRESS);
-    }
+	/**
+	 * Perform a controller download. This method is also called
+	 * when the user presses the 'download' button on the controller
+	 * dialog in the status tab.
+	 */
+	public void download(ControllerImpl c, boolean reset, int p) {
+		System.err.println("CawsPoller.download() called, reset="
+				   + reset);
+	}
 
-    /**
-     * Perform a controller download. This method is also called
-     * when the user presses the 'download' button on the controller
-     * dialog in the status tab.
-     */
-    public void download(ControllerImpl c, boolean reset, int p) {
-        System.err.println("CawsPoller.download() called, reset=" + reset);
-    }
+	/** Perform a sign status poll. Defined in SignPoller interface. */
+	public void pollSigns(ControllerImpl c, Completer comp) {}
 
-    /** Perform a sign status poll. Defined in SignPoller interface. */
-    public void pollSigns(ControllerImpl c, Completer comp) {}
+	/** Perform a 30-second poll */
+	public void poll30Second(ControllerImpl c, Completer comp) {
+		System.err.println("CawsPoller.poll30Second() called.");
 
-    /** Perform a 30-second poll */
-    public void poll30Second(ControllerImpl c, Completer comp) {
-        System.err.println("CawsPoller.poll30Second() called.");
+		// retrieve caws CMS messages
+		new OpProcessCawsMsgs(c).start();
+	}
 
-        // retrieve caws CMS messages
-        new OpProcessCawsMsgs(c).start();
-    }
+	/** Perform a 5-minute poll */
+	public void poll5Minute(ControllerImpl c, Completer comp) {}
 
-    /** Perform a 5-minute poll */
-    public void poll5Minute(ControllerImpl c, Completer comp) {}
+	/**
+	 * Start a test for the given controller.  This method is activated
+	 * when the user clicks the checkbox 'test communication' on the
+	 * the controller dialog in the status tab.
+	 *
+	 * @see us.mn.state.dot.tms.ControllerImpl#testCommunications
+	 */
+	public DiagnosticOperation startTest(ControllerImpl c) {
 
-    /**
-     * Start a test for the given controller.  This method is activated
-     * when the user clicks the checkbox 'test communication' on the
-     * the controller dialog in the status tab.
-     *
-     * @see us.mn.state.dot.tms.ControllerImpl#testCommunications
-     */
-    public DiagnosticOperation startTest(ControllerImpl c) {
-
-        // System.err.println("CawsPoller.startTest() called.");
-        return null;
-    }
+		// System.err.println("CawsPoller.startTest() called.");
+		return null;
+	}
 }

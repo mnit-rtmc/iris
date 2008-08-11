@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.caws;
 
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -41,59 +39,60 @@ import java.util.LinkedList;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class Message implements AddressedMessage {
+public class Message implements AddressedMessage
+{
+	/** dms messages received from caws */
+	private byte[] m_msgs = new byte[0];
 
-    /** dms messages received from caws */ 
-    private byte[] m_msgs = new byte[0];
+	// consts
+	// fields
+	private HttpFileMessenger m_mess;    // associated file messenger
 
-    // consts
-    // fields
-    private HttpFileMessenger m_mess;    // associated file messenger
+	/** Create a new message */
+	public Message(Messenger mess) {
+		if(!(mess instanceof HttpFileMessenger)) {
+			throw new IllegalArgumentException(
+			    "wrong type of messenger arg.");
+		}
 
-    /** Create a new message */
-    public Message(Messenger mess) {
-        if (!(mess instanceof HttpFileMessenger)) {
-            throw new IllegalArgumentException("wrong type of messenger arg.");
-        }
+		m_mess = (HttpFileMessenger) mess;
+	}
 
-        m_mess = (HttpFileMessenger) mess;
-    }
+	/**
+	 * Add an object to this message.
+	 * Defined in AddressedMessage interface.
+	 */
+	public void add(Object mo) {}
 
-    /**
-     * Add an object to this message.
-     * Defined in AddressedMessage interface.
-     */
-    public void add(Object mo) {}
+	/**
+	 * Send a get request message.
+	 * Defined in AddressedMessage interface.
+	 *
+	 * @throws IOException if received response is malformed.
+	 */
+	public void getRequest() throws IOException {
+		System.err.println("caws.Message.getRequest() called.");
 
-    /**
-     * Send a get request message.
-     * Defined in AddressedMessage interface.
-     *
-     * @throws IOException if received response is malformed.
-     */
-    public void getRequest() throws IOException {
-        System.err.println("caws.Message.getRequest() called.");
+		// read http file
+		m_msgs = m_mess.read();
+	}
 
-        // read http file
-        m_msgs = m_mess.read();
-    }
+	/**
+	 * Send a set request message.
+	 * Defined in AddressedMessage interface.
+	 */
+	public void setRequest(String community) throws IOException {}
 
-    /**
-     * Send a set request message.
-     * Defined in AddressedMessage interface.
-     */
-    public void setRequest(String community) throws IOException {}
+	/**
+	 * Send an set request message.
+	 * Defined in AddressedMessage interface.
+	 */
+	public void setRequest() throws IOException {}
 
-    /**
-     * Send an set request message.
-     * Defined in AddressedMessage interface.
-     */
-    public void setRequest() throws IOException {}
-
-    /**
-     * get the DMS messages received.
-     */
-    public byte[] getDmsMsgs() {
-        return (m_msgs);
-    }
+	/**
+	 * get the DMS messages received.
+	 */
+	public byte[] getDmsMsgs() {
+		return (m_msgs);
+	}
 }

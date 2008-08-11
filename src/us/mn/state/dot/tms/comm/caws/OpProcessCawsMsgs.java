@@ -17,8 +17,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
-
 package us.mn.state.dot.tms.comm.caws;
 
 import us.mn.state.dot.tms.ControllerImpl;
@@ -35,57 +33,62 @@ import java.io.IOException;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class OpProcessCawsMsgs extends ControllerOperation {
+public class OpProcessCawsMsgs extends ControllerOperation
+{
+	/** This operation; needed for inner Phase classes */
+	protected final OpProcessCawsMsgs operation;
 
-    /** This operation; needed for inner Phase classes */
-    protected final OpProcessCawsMsgs operation;
+	/** Create a new device operation */
+	protected OpProcessCawsMsgs(ControllerImpl c) {
+		super(DATA_30_SEC, c);
+		operation = this;
+	}
 
-    /** Create a new device operation */
-    protected OpProcessCawsMsgs(ControllerImpl c) {
-        super(DATA_30_SEC, c);
-        operation = this;
-    }
+	/** Begin the operation */
+	public final void begin() {
+		phase = new PhaseReadMsgFile();
+	}
 
-    /** Begin the operation */
-    public final void begin() {
-        phase = new PhaseReadMsgFile();
-    }
+	/** Cleanup the operation */
+	public void cleanup() {
+		super.cleanup();
+	}
 
-    /** Cleanup the operation */
-    public void cleanup() {
-        super.cleanup();
-    }
+	/** Phase to read the caws dms message file */
+	protected class PhaseReadMsgFile extends Phase
+	{
+		/**
+		 * Execute the phase.
+		 * @throws IOException received from getRequest call.
+		 */
+		protected Phase poll(AddressedMessage argmess)
+			throws IOException {
+			System.err.println(
+			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll() called.");
+			assert argmess instanceof Message :
+			       "wrong message type";
 
-    /** Phase to read the caws dms message file */
-    protected class PhaseReadMsgFile extends Phase {
+			Message mess = (Message) argmess;
 
-        /**
-         * Execute the phase.
-         * @throws IOException received from getRequest call.
-         */
-        protected Phase poll(AddressedMessage argmess) throws IOException {
-            System.err.println("OpProcessCawsMsgs.PhaseReadMsgFile.poll() called.");
-            assert argmess instanceof Message : "wrong message type";
+			// send msg
+			mess.getRequest();
 
-            Message mess = (Message) argmess;
+			// parse the response
+			byte[] bmsgs = mess.getDmsMsgs();
 
-            // send msg
-            mess.getRequest();
+			// nothing?
+			if((bmsgs == null) || (bmsgs.length <= 0)) {
+				System.err.println(
+				    "OpProcessCawsMsgs.PhaseReadMsgFile.poll(), missing or zero length caws file.");
+				return null;
+			}
 
-            // parse the response
-            byte[] bmsgs = mess.getDmsMsgs();
-
-	    // nothing?
-	    if (bmsgs==null || bmsgs.length<=0) {
-		    System.err.println("OpProcessCawsMsgs.PhaseReadMsgFile.poll(), missing or zero length caws file.");
-		    return null;
-	    }
-
-            // create and activate messages
-            System.err.println("OpProcessCawsMsgs.PhaseReadMsgFile.poll(), received " + bmsgs.length +
-            	" bytes of cms messages.");
-            new D10CmsMsgs(bmsgs).activate();
-            return null;
-        }
-    }
+			// create and activate messages
+			System.err.println(
+			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll(), received "
+			    + bmsgs.length + " bytes of cms messages.");
+			new D10CmsMsgs(bmsgs).activate();
+			return null;
+		}
+	}
 }

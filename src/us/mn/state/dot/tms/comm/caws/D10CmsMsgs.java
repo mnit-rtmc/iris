@@ -13,105 +13,108 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.caws;
-
-import java.util.LinkedList;
-import java.util.StringTokenizer;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSListImpl;
-import us.mn.state.dot.tms.TMSObjectImpl;
 import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.TMSObjectImpl;
+
+import java.util.LinkedList;
+import java.util.StringTokenizer;
 
 /**
  * CAWS D10CmsMsgs. This is a collection of CMS messages.
  *
  * @author Michael Darter
  */
-public class D10CmsMsgs {
+public class D10CmsMsgs
+{
+	// fields
+	LinkedList<D10CmsMsg> m_msgs = null;
 
-    // fields
-    LinkedList<D10CmsMsg> m_msgs = null;
+	/** constructor */
+	public D10CmsMsgs(byte[] bmsgs) {
+		System.err.println("D10CmsMsgs.D10CmsMsgs() called.");
+		this.parse(bmsgs);
+	}
 
-    /** constructor */
-    public D10CmsMsgs(byte[] bmsgs) {
-        System.err.println("D10CmsMsgs.D10CmsMsgs() called.");
-        this.parse(bmsgs);
-    }
+	/**
+	 * parse a byte array of messages and add each cms message to the container.
+	 */
+	private void parse(byte[] argmsgs) {
+		m_msgs = new LinkedList<D10CmsMsg>();
 
-    /**
-     * parse a byte array of messages and add each cms message to the container.
-     */
-    private void parse(byte[] argmsgs) {
-        m_msgs = new LinkedList<D10CmsMsg>();
+		// cycle through each line, which is terminated by '\n'
+		String msgs = byteArrayToString(argmsgs);
+		StringTokenizer lineTok = new StringTokenizer(msgs, "\n");
 
-        // cycle through each line, which is terminated by '\n'
-        String msgs = byteArrayToString(argmsgs);
-        StringTokenizer lineTok = new StringTokenizer(msgs, "\n");
+		while(lineTok.hasMoreTokens()) {
+			String line = lineTok.nextToken();
+			D10CmsMsg cmsmsg = new D10CmsMsg(line);
 
-        while (lineTok.hasMoreTokens()) {
-            String    line   = lineTok.nextToken();
-            D10CmsMsg cmsmsg = new D10CmsMsg(line);
+			this.m_msgs.add(cmsmsg);
+		}
+	}
 
-            this.m_msgs.add(cmsmsg);
-        }
-    }
+	/**
+	 * activate the messages.
+	 */
+	public void activate() {
 
-    /**
-     * activate the messages.
-     */
-    public void activate() {
-        //System.err.println("D10CmsMsgs.activate() called.");
-        //System.err.println("D10CmsMsgs.activate(). list="+TMSObjectImpl.dmsList);
+		// System.err.println("D10CmsMsgs.activate() called.");
+		// System.err.println("D10CmsMsgs.activate(). list="+TMSObjectImpl.dmsList);
 
-        // sanity check
-        if (m_msgs == null) {
-            return;
-        }
+		// sanity check
+		if(m_msgs == null) {
+			return;
+		}
 
-        // activate each msg
-        DMSListImpl list=TMSObjectImpl.dmsList;     // list of all DMS
-        for (D10CmsMsg m : m_msgs) {
+		// activate each msg
+		DMSListImpl list = TMSObjectImpl.dmsList;    // list of all DMS
+		for(D10CmsMsg m : m_msgs) {
 
-            // get the iris cms id, e.g. "V30"
-            String irisCmsId=m.getIrisCmsId();
-            TMSObject tmsobj=list.getElement(irisCmsId);
-            if (tmsobj==null) {
-                //System.err.println("D10CmsMsgs.activate(): did not find DMSImpl for CMS id from CAWS ("+irisCmsId+"). CAWS CMS message ignored.");
-                continue;
-            }
-            assert tmsobj instanceof DMSImpl : "Expected DMSImpl, received:"+tmsobj;
-            DMSImpl dms=(DMSImpl)tmsobj;
-            //System.err.println("D10CmsMsgs.activate(): irisCmsId="+irisCmsId+", dms.getId()="+dms.getId()+", getPin()="+dms.getPin()+",notes="+dms.getNotes());
+			// get the iris cms id, e.g. "V30"
+			String irisCmsId = m.getIrisCmsId();
+			TMSObject tmsobj = list.getElement(irisCmsId);
+			if(tmsobj == null) {
 
-            // activate message
-            m.activate(dms);
-        }
-    }
+				// System.err.println("D10CmsMsgs.activate(): did not find DMSImpl for CMS id from CAWS ("+irisCmsId+"). CAWS CMS message ignored.");
+				continue;
+			}
 
-    /**
-     * convert byte[] to char[] using specific encoding.
-     *
-     * @returns An empty string on error.
-     */
-    public static String byteArrayToString(byte[] b) {
-        String s = "";
+			assert tmsobj instanceof DMSImpl :
+			       "Expected DMSImpl, received:" + tmsobj;
+			DMSImpl dms = (DMSImpl) tmsobj;
 
-        if (b == null) {
-            return (s);
-        }
+			// System.err.println("D10CmsMsgs.activate(): irisCmsId="+irisCmsId+", dms.getId()="+dms.getId()+", getPin()="+dms.getPin()+",notes="+dms.getNotes());
 
-        int len = b.length;
+			// activate message
+			m.activate(dms);
+		}
+	}
 
-        try {
-            s = new String(b, 0, len, "ISO-8859-1");
-        } catch (Exception UnsupportedEncodingException) {
-            s = "";
-        }
+	/**
+	 * convert byte[] to char[] using specific encoding.
+	 *
+	 * @returns An empty string on error.
+	 */
+	public static String byteArrayToString(byte[] b) {
+		String s = "";
 
-        return (s);
-    }
+		if(b == null) {
+			return (s);
+		}
+
+		int len = b.length;
+
+		try {
+			s = new String(b, 0, len, "ISO-8859-1");
+		} catch (Exception UnsupportedEncodingException) {
+			s = "";
+		}
+
+		return (s);
+	}
 }
