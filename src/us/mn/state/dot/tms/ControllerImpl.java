@@ -34,9 +34,7 @@ import us.mn.state.dot.tms.event.EventType;
  *
  * @author Douglas Lau
  */
-public class ControllerImpl extends BaseObjectImpl implements Controller,
-	ErrorCounter
-{
+public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Communication failure retry threshold */
 	static public final int RETRY_THRESHOLD = 3;
 
@@ -116,7 +114,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		version = "";
-		counters = new int[TYPES.length][PERIODS.length];
 		CommLinkImpl link = (CommLinkImpl)comm_link;
 		if(link != null)
 			link.putController(drop_id, this);
@@ -493,53 +490,19 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 			link.addOperation(o);
 	}
 
-	/** Flag if counters have been initialized */
-	protected transient boolean init_count;
-
-	/** Poll/fail counter array */
-	protected transient int[][] counters;
-
-	/** Get the counter array */
-	public int[][] getCounters() {
-		synchronized(counters) {
-			if(!init_count) {
-				updateNowCounters();
-				init_count = true;
-			}
-			return counters;
-		}
-	}
-
 	/** Increment a counter */
-	public final void incrementCounter(int counter) {
-		synchronized(counters) {
-			for(int p = 0; p < PERIODS.length; p++) {
-				if(p != PERIOD_NOW)
-					counters[counter][p]++;
-			}
-		}
+	public void incrementCounter(int counter) {
+		// FIXME
 	}
 
 	/** Reset all counters for one time period */
-	public final void resetPeriod(int period) {
-		synchronized(counters) {
-			for(int t = 0; t < TYPES.length; t++)
-				counters[t][period] = 0;
-		}
+	public void resetPeriod(int period) {
+		// FIXME
 	}
 
 	/** Update the counters for the 'now' period */
 	protected final void updateNowCounters() {
-		synchronized(counters) {
-			if(getActive() && !isFailed())
-				counters[TYPE_GOOD][PERIOD_NOW] = 1;
-			else
-				counters[TYPE_GOOD][PERIOD_NOW] = 0;
-			if(getActive() && isFailed())
-				counters[TYPE_FAIL][PERIOD_NOW] = 1;
-			else
-				counters[TYPE_FAIL][PERIOD_NOW] = 0;
-		}
+		// FIXME
 	}
 
 	/** Controller communication status */
@@ -636,7 +599,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller,
 	}
 
 	/** Reset the error counter */
-	public final void resetErrorCounter( String id ) {
+	public void resetErrorCounter(String id) {
 		boolean failed = isFailed();
 		status = "";
 		errorCounter = 0;
