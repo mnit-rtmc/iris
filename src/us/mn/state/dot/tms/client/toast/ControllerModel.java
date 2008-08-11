@@ -18,11 +18,14 @@ import java.awt.Color;
 import java.awt.Component;
 import java.util.Comparator;
 import java.util.TreeSet;
+import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -172,11 +175,38 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 //					cache.createObject(v);
 				break;
 			case COL_DROP:
-//				c.setDrop(v);
+				c.setDrop(((Number)value).shortValue());
 				break;
 			case COL_ACTIVE:
 				c.setActive((Boolean)value);
 				break;
+		}
+	}
+
+	/** Create the drop column */
+	protected TableColumn createDropColumn() {
+		TableColumn c = new TableColumn(COL_DROP, 60);
+		c.setHeaderValue("Drop");
+		c.setCellEditor(new DropCellEditor());
+		return c;
+	}
+
+	/** Editor for drop addresses in a table cell */
+	protected class DropCellEditor extends AbstractCellEditor
+		implements TableCellEditor
+	{
+		protected final DropNumberModel model =
+			new DropNumberModel(comm_link, cache);
+		protected final JSpinner spinner = new JSpinner(model);
+
+		public Component getTableCellEditorComponent(JTable table,
+			Object value, boolean isSelected, int row, int column)
+		{
+			spinner.setValue(value);
+			return spinner;
+		}
+		public Object getCellEditorValue() {
+			return spinner.getValue();
 		}
 	}
 
@@ -189,7 +219,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Renderer for link status in a table cell */
-	public class StatusCellRenderer extends DefaultTableCellRenderer {
+	protected class StatusCellRenderer extends DefaultTableCellRenderer {
 		protected final Icon ok = new ControllerIcon(
 			COLOR_AVAILABLE);
 		protected final Icon fail = new ControllerIcon(Color.GRAY);
@@ -223,7 +253,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 90, "Controller"));
 		m.addColumn(createColumn(COL_LOCATION, 200, "Location"));
-		m.addColumn(createColumn(COL_DROP, 60, "Drop"));
+		m.addColumn(createDropColumn());
 		m.addColumn(createColumn(COL_ACTIVE, 50, "Active"));
 		m.addColumn(createStatusColumn());
 		m.addColumn(createColumn(COL_ERROR, 240, "Error Detail"));

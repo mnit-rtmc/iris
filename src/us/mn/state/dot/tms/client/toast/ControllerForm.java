@@ -26,6 +26,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
@@ -48,11 +49,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JComboBox comm_link = new JComboBox();
 
 	/** Model for drop address spinner */
-	protected final SpinnerNumberModel drop_model =
-		new SpinnerNumberModel(1, 1, 1024, 1);
+	protected DropNumberModel drop_model;
 
 	/** Drop address spinner */
-	protected final JSpinner drop_id = new JSpinner(drop_model);
+	protected final JSpinner drop_id = new JSpinner();
 
 	/** Controller notes text */
 	protected final JTextArea notes = new JTextArea();
@@ -92,13 +92,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		super.initialize();
 		link_model.initialize();
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
-		updateAttribute(null);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Setup", createSetupPanel());
 		tab.add("Cabinet", createCabinetPanel());
 		tab.add("I/O", createIOPanel());
 		add(tab);
+		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -113,6 +113,15 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		FormPanel panel = new FormPanel(admin);
 		panel.addRow("Comm Link", comm_link);
 		panel.addRow("Drop", drop_id);
+		new ChangeJob(this, drop_id) {
+			public void perform() {
+				Number n = (Number)drop_id.getValue();
+				short d = n.shortValue();
+				// Avoid ping-pong looping...
+				if(d != proxy.getDrop())
+					proxy.setDrop(d);
+			}
+		};
 		panel.addRow("Notes", notes);
 		new FocusJob(notes) {
 			public void perform() {
@@ -153,9 +162,16 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
-		if(a == null || a.equals("comm_link"))
-			comm_link.setSelectedItem(proxy.getCommLink());
-		if(a == null || a.equals("drop_id"))
+		if(a == null || a.equals("comm_link")) {
+			if(comm_link.getSelectedItem() != proxy.getCommLink()) {
+				comm_link.setSelectedItem(proxy.getCommLink());
+				drop_model = new DropNumberModel(
+					proxy.getCommLink(), getTypeCache(
+					connection.getSonarState()));
+				drop_id.setModel(drop_model);
+			}
+		}
+		if(a == null || a.equals("drop"))
 			drop_id.setValue(proxy.getDrop());
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
