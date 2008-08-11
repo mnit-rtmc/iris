@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -110,6 +111,7 @@ public class CommLinkForm extends AbstractForm {
 		tab.add("All Links", createCommLinkPanel());
 		tab.add("Failed Controllers", createFailedControllerPanel());
 		add(tab);
+		setBackground(Color.LIGHT_GRAY);
 
 		// FIXME: JPanels don't like to layout properly
 		Dimension d = getPreferredSize();
