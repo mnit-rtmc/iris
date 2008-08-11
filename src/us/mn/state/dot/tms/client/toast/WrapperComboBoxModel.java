@@ -29,12 +29,24 @@ import javax.swing.event.ListDataListener;
 public class WrapperComboBoxModel extends AbstractListModel
 	implements ComboBoxModel
 {
+	/** Blank entry in combo box */
+	static public final String BLANK = " ";
+
 	/** Underlying list model */
-	private final ListModel model;
+	protected final ListModel model;
+
+	/** Are blank selections allowed? */
+	protected final boolean blanks;
 
 	/** Create a new WrapperComboBoxModel */
 	public WrapperComboBoxModel(ListModel m) {
+		this(m, true);
+	}
+
+	/** Create a new WrapperComboBoxModel */
+	public WrapperComboBoxModel(ListModel m, boolean b) {
 		model = m;
+		blanks = b;
 	}
 
 	/** Add a list data listener */
@@ -49,9 +61,6 @@ public class WrapperComboBoxModel extends AbstractListModel
 		super.removeListDataListener(l);
 	}
 
-	/** Blank entry in combo box */
-	static public final String BLANK = " ";
-
 	/** Get an element from the list model */
 	public Object getElementAt(int index) {
 		try {
@@ -61,9 +70,12 @@ public class WrapperComboBoxModel extends AbstractListModel
 						return extra;
 					index--;
 				}
-				if(index == 0)
-					return BLANK;
-				return model.getElementAt(index - 1);
+				if(blanks) {
+					if(index == 0)
+						return BLANK;
+					return model.getElementAt(index - 1);
+				} else
+					return model.getElementAt(index);
 			}
 		}
 		catch(ArrayIndexOutOfBoundsException e) {
@@ -73,20 +85,19 @@ public class WrapperComboBoxModel extends AbstractListModel
 
 	/** Get the size of the model */
 	public int getSize() {
+		int b = blanks ? 1 : 0;
+		int e = extra != null ? 1 : 0;
 		synchronized(model) {
-			if(extra != null)
-				return model.getSize() + 2;
-			else
-				return model.getSize() + 1;
+			return model.getSize() + b + e;
 		}
 	}
 
 	/** Selected item in the list */
-	private Object selected = null;
+	protected Object selected = null;
 
 	/** Extra item is an item which is not in the underlying list model,
-	  * but was selected with setSelectedItem() */
-	private Object extra = null;
+	 * but was selected with setSelectedItem() */
+	protected Object extra = null;
 
 	/** Set the selected item */
 	public void setSelectedItem(Object s) {

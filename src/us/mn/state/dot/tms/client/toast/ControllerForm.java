@@ -25,10 +25,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records
@@ -68,9 +72,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Reset button */
 	protected final JButton reset = new JButton("Reset");
 
+	/** Comm Link list model */
+	protected final ProxyListModel<CommLink> link_model;
+
 	/** Create a new controller form */
 	public ControllerForm(TmsConnection tc, Controller c) {
 		super(TITLE, tc, c);
+		TypeCache<CommLink> links = tc.getSonarState().getCommLinks();
+		link_model = new ProxyListModel<CommLink>(links);
 	}
 
 	/** Get the SONAR type cache */
@@ -81,6 +90,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
+		link_model.initialize();
+		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
+		updateAttribute(null);
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Setup", createSetupPanel());
@@ -88,7 +100,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add("I/O", createIOPanel());
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
-		location.initialize();
+	}
+
+	/** Dispose of the form */
+	protected void dispose() {
+		link_model.dispose();
+		super.dispose();
 	}
 
 	/** Create the controller setup panel */
@@ -97,9 +114,23 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.addRow("Comm Link", comm_link);
 		panel.addRow("Drop", drop_id);
 		panel.addRow("Notes", notes);
-		panel.addRow("Active", active);
+		new FocusJob(notes) {
+			public void perform() {
+				if(wasLost())
+					proxy.setNotes(notes.getText());
+			}
+		};
+		panel.add("Active", active);
+		// Add a third column to the grid bag so the drop spinner
+		// does not extend across the whole form
+		panel.addRow(new javax.swing.JLabel());
 		active.setEnabled(connection.isAdmin() ||
 			connection.isActivate());
+		new ActionJob(this, active) {
+			public void perform() {
+				proxy.setActive(active.isSelected());
+			}
+		};
 		return panel;
 	}
 
@@ -108,10 +139,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		location = new LocationPanel(admin,
 			proxy.getCabinet().getGeoLoc(),
 			connection.getSonarState());
+		location.initialize();
 		location.addRow("Milepoint", mile);
 		location.addRow("Style", cab_style);
-//		return location;
-		return new FormPanel(admin);
+		return location;
 	}
 
 	/** Create the I/O panel */
@@ -122,6 +153,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
-		// FIXME: update the specified attribute
+		if(a == null || a.equals("comm_link"))
+			comm_link.setSelectedItem(proxy.getCommLink());
+		if(a == null || a.equals("drop_id"))
+			drop_id.setValue(proxy.getDrop());
+		if(a == null || a.equals("notes"))
+			notes.setText(proxy.getNotes());
+		if(a == null || a.equals("active"))
+			active.setSelected(proxy.getActive());
+		// FIXME: update the other attributes
 	}
 }
