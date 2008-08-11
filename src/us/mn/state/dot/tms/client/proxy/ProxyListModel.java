@@ -131,11 +131,7 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Get the element at the specified index (for ListModel) */
 	public Object getElementAt(int index) {
-		T proxy = getProxy(index);
-		if(proxy != null)
-			return proxy.getName();
-		else
-			return null;
+		return getProxy(index);
 	}
 
 	/** Get the proxy at the specified row */

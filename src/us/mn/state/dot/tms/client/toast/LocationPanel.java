@@ -90,10 +90,15 @@ public class LocationPanel extends FormPanel {
 	protected final JButton select = new JButton("Select Point");
 
 	/** Create a new location panel */
-	public LocationPanel(boolean enable, String l, SonarState st) {
+	public LocationPanel(boolean enable, GeoLoc l, SonarState st) {
 		super(enable);
+		loc = l;
 		state = st;
-		loc = st.lookupGeoLoc(l);
+	}
+
+	/** Create a new location panel */
+	public LocationPanel(boolean enable, String l, SonarState st) {
+		this(enable, st.lookupGeoLoc(l), st);
 	}
 
 	/** Initialize the location panel */
@@ -138,14 +143,14 @@ public class LocationPanel extends FormPanel {
 			return;
 		Road f = loc.getFreeway();
 		if(f != null)
-			freeBox.setSelectedItem(f.getName());
+			freeBox.setSelectedItem(f);
 		else
 			freeBox.setSelectedItem(null);
 		freeDir.setSelectedIndex(loc.getFreeDir());
 		crossMod.setSelectedIndex(loc.getCrossMod());
 		Road x = loc.getCrossStreet();
 		if(x != null)
-			crossBox.setSelectedItem(x.getName());
+			crossBox.setSelectedItem(x);
 		else
 			crossBox.setSelectedItem(null);
 		crossDir.setSelectedIndex(loc.getCrossDir());
