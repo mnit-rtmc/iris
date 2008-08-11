@@ -96,28 +96,6 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 			super.proxyRemoved(proxy);
 	}
 
-	/** Change a proxy in the table model */
-	public void proxyChanged(Controller proxy, String attrib) {
-		int pre_row, post_row;
-		synchronized(proxies) {
-			pre_row = preChangeRow(proxy);
-			post_row = postChangeRow(proxy);
-		}
-		if(post_row < 0)
-			post_row = pre_row;
-		if(pre_row < 0)
-			pre_row = post_row;
-		if(pre_row >= 0) {
-			final int r0 = Math.min(pre_row, post_row);
-			final int r1 = Math.max(pre_row, post_row);
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					fireTableRowsUpdated(r0, r1);
-				}
-			});
-		}
-	}
-
 	/** Add a Controller proxy if it is failed */
 	protected int postChangeRow(Controller proxy) {
 		if(isFailed(proxy))

@@ -131,17 +131,33 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		int pre_row, post_row;
 		synchronized(proxies) {
 			pre_row = preChangeRow(proxy);
-			if(pre_row < 0)
-				return;
-			post_row = doProxyAdded(proxy);
+			post_row = postChangeRow(proxy);
 		}
-		final int r0 = Math.min(pre_row, post_row);
-		final int r1 = Math.max(pre_row, post_row);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireTableRowsUpdated(r0, r1);
-			}
-		});
+		if(pre_row >= 0 && post_row < 0) {
+			final int r = pre_row;
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireTableRowsDeleted(r, r);
+				}
+			});
+		}
+		if(pre_row < 0 && post_row >= 0) {
+			final int r = post_row;
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireTableRowsInserted(r, r);
+				}
+			});
+		}
+		if(pre_row >= 0 && post_row >= 0) {
+			final int r0 = Math.min(pre_row, post_row);
+			final int r1 = Math.max(pre_row, post_row);
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireTableRowsUpdated(r0, r1);
+				}
+			});
+		}
 	}
 
 	/** Find and remove a proxy which may not be in proper sort order */
@@ -154,6 +170,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 			}
 		}
 		return -1;
+	}
+
+	/** Handle a proxy after a change has happened */
+	protected int postChangeRow(T proxy) {
+		return doProxyAdded(proxy);
 	}
 
 	/** Get the count of rows in the table */

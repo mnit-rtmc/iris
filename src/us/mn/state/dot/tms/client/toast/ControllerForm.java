@@ -112,6 +112,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(admin);
 		panel.addRow("Comm Link", comm_link);
+		new ActionJob(this, comm_link) {
+			public void perform() {
+				CommLink c =
+					(CommLink)comm_link.getSelectedItem();
+				if(c != proxy.getCommLink())
+					proxy.setCommLink(c);
+			}
+		};
 		panel.addRow("Drop", drop_id);
 		new ChangeJob(this, drop_id) {
 			public void perform() {
@@ -162,14 +170,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
-		if(a == null || a.equals("comm_link")) {
-			if(comm_link.getSelectedItem() != proxy.getCommLink()) {
-				comm_link.setSelectedItem(proxy.getCommLink());
-				drop_model = new DropNumberModel(
-					proxy.getCommLink(), getTypeCache(
-					connection.getSonarState()));
-				drop_id.setModel(drop_model);
-			}
+		if(a == null || a.equals("commLink")) {
+			comm_link.setSelectedItem(proxy.getCommLink());
+			drop_model = new DropNumberModel(
+				proxy.getCommLink(), getTypeCache(
+				connection.getSonarState()), proxy.getDrop());
+			drop_id.setModel(drop_model);
 		}
 		if(a == null || a.equals("drop"))
 			drop_id.setValue(proxy.getDrop());

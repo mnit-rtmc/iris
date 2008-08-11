@@ -112,10 +112,12 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 			super.proxyRemoved(proxy);
 	}
 
-	/** Change a proxy in the table model */
-	public void proxyChanged(Controller proxy, String attrib) {
+	/** Add a Controller proxy if it is failed */
+	protected int postChangeRow(Controller proxy) {
 		if(proxy.getCommLink() == comm_link)
-			super.proxyChanged(proxy, attrib);
+			return doProxyAdded(proxy);
+		else
+			return -1;
 	}
 
 	/** Get the count of columns in the table */
@@ -196,7 +198,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		implements TableCellEditor
 	{
 		protected final DropNumberModel model =
-			new DropNumberModel(comm_link, cache);
+			new DropNumberModel(comm_link, cache, 1);
 		protected final JSpinner spinner = new JSpinner(model);
 
 		public Component getTableCellEditorComponent(JTable table,

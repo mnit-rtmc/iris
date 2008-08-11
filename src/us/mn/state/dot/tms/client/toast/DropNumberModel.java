@@ -38,8 +38,8 @@ public class DropNumberModel extends SpinnerNumberModel {
 	protected final TypeCache<Controller> cache;
 
 	/** Create a new drop number model */
-	public DropNumberModel(CommLink cl, TypeCache<Controller> cc) {
-		super(1, 1, MAX_DROP_ID, 1);
+	public DropNumberModel(CommLink cl, TypeCache<Controller> cc, int d) {
+		super(d, 1, MAX_DROP_ID, 1);
 		comm_link = cl;
 		cache = cc;
 	}
