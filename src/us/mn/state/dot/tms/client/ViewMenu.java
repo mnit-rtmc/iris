@@ -80,7 +80,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CommLinkForm(
+				desktop.show(new CommLinkForm(tc,
 					st.getCommLinks(),
 					st.getControllers()));
 			}

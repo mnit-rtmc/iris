@@ -30,7 +30,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	extends AbstractForm implements ProxyListener<T>
 {
 	/** SONAR object proxy */
-	protected final SonarObject proxy;
+	protected final T proxy;
 
 	/** TMS connection */
 	protected final TmsConnection connection;

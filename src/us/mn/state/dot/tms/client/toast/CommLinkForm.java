@@ -33,6 +33,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
  * A form for displaying and editing comm links
@@ -74,11 +75,17 @@ public class CommLinkForm extends AbstractForm {
 	/** Failed controller table model */
 	protected FailedControllerModel fmodel;
 
+	/** Button to show controller properties */
+	protected final JButton ctr_props = new JButton("Properties");
+
 	/** Button to delete the selected controller */
 	protected final JButton del_ctr = new JButton("Delete Controller");
 
 	/** Button to go to a failed controller */
 	protected final JButton go_button = new JButton("Go");
+
+	/** TMS connection */
+	protected final TmsConnection connection;
 
 	/** Comm Link type cache */
 	protected final TypeCache<CommLink> cache;
@@ -87,8 +94,11 @@ public class CommLinkForm extends AbstractForm {
 	protected final TypeCache<Controller> ccache;
 
 	/** Create a new comm link form */
-	public CommLinkForm(TypeCache<CommLink> c, TypeCache<Controller> cc) {
+	public CommLinkForm(TmsConnection tc, TypeCache<CommLink> c,
+		TypeCache<Controller> cc)
+	{
 		super(TITLE);
+		connection = tc;
 		cache = c;
 		ccache = cc;
 	}
@@ -187,8 +197,22 @@ public class CommLinkForm extends AbstractForm {
 		bag.anchor = GridBagConstraints.WEST;
 		bag.fill = GridBagConstraints.NONE;
 		panel.add(new JLabel("Seleccted Controller:"), bag);
-		bag.gridx = 2;
+		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.EAST;
+		ctr_props.setEnabled(false);
+		panel.add(ctr_props, bag);
+		new ActionJob(this, ctr_props) {
+			public void perform() throws Exception {
+				doPropertiesAction();
+			}
+		};
+		ctable.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() > 1)
+					ctr_props.doClick();
+			}
+		});
+		bag.gridx = 2;
 		del_ctr.setEnabled(false);
 		panel.add(del_ctr, bag);
 		new ActionJob(this, del_ctr) {
@@ -223,7 +247,21 @@ public class CommLinkForm extends AbstractForm {
 	protected void selectController() {
 		int row = ctable.getSelectedRow();
 		Controller c = cmodel.getProxy(row);
-		del_ctr.setEnabled(row >= 0 && !cmodel.isLastRow(row));
+		boolean exists = row >= 0 && !cmodel.isLastRow(row);
+		ctr_props.setEnabled(exists);
+		// FIXME: should check for "deletable"
+		del_ctr.setEnabled(exists);
+	}
+
+	/** Do the action for controller properties button */
+	protected void doPropertiesAction() throws Exception {
+		ListSelectionModel cs = ctable.getSelectionModel();
+		int row = cs.getMinSelectionIndex();
+		if(row >= 0) {
+			Controller c = cmodel.getProxy(row);
+			connection.getDesktop().show(new ControllerForm(
+				connection, c));
+		}
 	}
 
 	/** Create the failed controller panel */
