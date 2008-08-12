@@ -103,6 +103,12 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 		super.initialize();
 	}
 
+	/** Dispose of the form */
+	protected void dispose() {
+		location.dispose();
+		super.dispose();
+	}
+
 	/** Update the form with the current state of the device */
 	protected void doUpdate() throws RemoteException {
 		location.doUpdate();

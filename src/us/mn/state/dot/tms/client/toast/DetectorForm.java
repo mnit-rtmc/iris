@@ -127,6 +127,12 @@ public class DetectorForm extends TMSObjectForm {
 		setBackground(Color.LIGHT_GRAY);
 	}
 
+	/** Dispose of the form */
+	protected void dispose() {
+		location.dispose();
+		super.dispose();
+	}
+
 	/** Create the Location panel */
 	protected JPanel createLocationPanel() throws RemoteException {
 		location = new LocationPanel(admin, detector.getGeoLoc(),

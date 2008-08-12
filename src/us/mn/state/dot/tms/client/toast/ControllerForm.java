@@ -105,6 +105,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Dispose of the form */
 	protected void dispose() {
 		link_model.dispose();
+		location.dispose();
 		super.dispose();
 	}
 

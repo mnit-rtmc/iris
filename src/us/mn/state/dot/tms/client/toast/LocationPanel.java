@@ -124,6 +124,11 @@ public class LocationPanel extends FormPanel {
 		addRow("North Offset", northOff);
 	}
 
+	/** Dispose of the location panel */
+	public void dispose() {
+		// FIXME
+	}
+
 	/** Add a "Select Point" button */
 	public void addSelectPointButton(final MapBean map) {
 		if(enable) {

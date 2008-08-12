@@ -154,6 +154,12 @@ public class R_NodeProperties extends TMSObjectForm {
 		setBackground(Color.LIGHT_GRAY);
 	}
 
+	/** Dispose of the form */
+	protected void dispose() {
+		location.dispose();
+		super.dispose();
+	}
+
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
 		location.addSelectPointButton(map);
