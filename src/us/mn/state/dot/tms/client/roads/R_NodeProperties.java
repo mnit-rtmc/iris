@@ -259,7 +259,6 @@ public class R_NodeProperties extends TMSObjectForm {
 
 	/** Update the form with the current state of the roadway node */
 	protected void doUpdate() throws RemoteException {
-		location.doUpdate();
 		notes.setText(r_node.getNotes());
 		node_type.setSelectedIndex(r_node.getNodeType());
 		pickable.setSelected(r_node.isPickable());
@@ -276,7 +275,6 @@ public class R_NodeProperties extends TMSObjectForm {
 
 	/** Apply button pressed */
 	protected void applyPressed() throws Exception {
-		location.applyPressed();
 		r_node.setNotes(notes.getText());
 		r_node.setNodeType(node_type.getSelectedIndex());
 		r_node.setPickable(pickable.isSelected());

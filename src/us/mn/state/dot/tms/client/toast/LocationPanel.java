@@ -20,7 +20,11 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
@@ -33,7 +37,7 @@ import us.mn.state.dot.tms.client.SonarState;
  *
  * @author Douglas Lau
  */
-public class LocationPanel extends FormPanel {
+public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 
 	/** Get the Integer value of a spinner */
 	static protected int getSpinnerInt(JSpinner s) {
@@ -49,6 +53,17 @@ public class LocationPanel extends FormPanel {
 			return null;
 	}
 
+	/** Get an int to use for a spinner model */
+	static protected int asInt(Integer i) {
+		if(i != null)
+			return i;
+		else
+			return 0;
+	}
+
+	/** GeoLoc type cache */
+	protected final TypeCache<GeoLoc> cache;
+
 	/** Location object */
 	protected final GeoLoc loc;
 
@@ -56,7 +71,7 @@ public class LocationPanel extends FormPanel {
 	protected final SonarState state;
 
 	/** Freeway combobox */
-	protected final JComboBox freeBox = new JComboBox();
+	protected final JComboBox freeway = new JComboBox();
 
 	/** Freeway direction combo box */
 	protected final JComboBox freeDir = new JComboBox(TMSObject.DIR_LONG);
@@ -65,7 +80,7 @@ public class LocationPanel extends FormPanel {
 	protected final JComboBox crossMod = new JComboBox(TMSObject.MODIFIER);
 
 	/** Cross street combobox */
-	protected final JComboBox crossBox = new JComboBox();
+	protected final JComboBox cross = new JComboBox();
 
 	/** Cross street direction combobox */
 	protected final JComboBox crossDir = new JComboBox(TMSObject.DIRECTION);
@@ -94,6 +109,7 @@ public class LocationPanel extends FormPanel {
 		super(enable);
 		loc = l;
 		state = st;
+		cache = st.getGeoLocs();
 	}
 
 	/** Create a new location panel */
@@ -103,17 +119,18 @@ public class LocationPanel extends FormPanel {
 
 	/** Initialize the location panel */
 	public void initialize() {
-		freeBox.setModel(new WrapperComboBoxModel(
-			state.getRoadModel()));
-		crossBox.setModel(new WrapperComboBoxModel(
-			state.getRoadModel()));
-		add("Freeway", freeBox);
+		cache.addProxyListener(this);
+		freeway.setModel(new WrapperComboBoxModel(
+			state.getRoadModel(), true));
+		cross.setModel(new WrapperComboBoxModel(
+			state.getRoadModel(), true));
+		add("Freeway", freeway);
 		setWidth(2);
 		addRow(freeDir);
 		add(crossMod);
 		setWest();
 		setWidth(2);
-		add(crossBox);
+		add(cross);
 		setWidth(1);
 		addRow(crossDir);
 		add("Easting", easting);
@@ -122,11 +139,105 @@ public class LocationPanel extends FormPanel {
 		add("Northing", northing);
 		setEast();
 		addRow("North Offset", northOff);
+		new ActionJob(this, freeway) {
+			public void perform() {
+				loc.setFreeway((Road)freeway.getSelectedItem());
+			}
+		};
+		new ActionJob(this, cross) {
+			public void perform() {
+				loc.setCrossStreet(
+					(Road)cross.getSelectedItem());
+			}
+		};
+		new ActionJob(this, freeDir) {
+			public void perform() {
+				loc.setFreeDir(
+					(short)freeDir.getSelectedIndex());
+			}
+		};
+		new ActionJob(this, crossMod) {
+			public void perform() {
+				loc.setCrossMod(
+					(short)crossMod.getSelectedIndex());
+			}
+		};
+		new ActionJob(this, crossDir) {
+			public void perform() {
+				loc.setCrossDir(
+					(short)crossDir.getSelectedIndex());
+			}
+		};
+		new ChangeJob(this, easting) {
+			public void perform() {
+				loc.setEasting(getSpinnerInteger(easting));
+			}
+		};
+		new ChangeJob(this, eastOff) {
+			public void perform() {
+				loc.setEastOffset(getSpinnerInteger(eastOff));
+			}
+		};
+		new ChangeJob(this, northing) {
+			public void perform() {
+				loc.setNorthing(getSpinnerInteger(northing));
+			}
+		};
+		new ChangeJob(this, northOff) {
+			public void perform() {
+				loc.setNorthOffset(getSpinnerInteger(northOff));
+			}
+		};
+		updateAttribute(null);
 	}
 
 	/** Dispose of the location panel */
 	public void dispose() {
-		// FIXME
+		cache.removeProxyListener(this);
+	}
+
+	/** A new proxy has been added */
+	public void proxyAdded(GeoLoc p) {
+		// we're not interested
+	}
+
+	/** A proxy has been removed */
+	public void proxyRemoved(GeoLoc p) {
+		if(p == loc)
+			dispose();
+	}
+
+	/** A proxy has been changed */
+	public void proxyChanged(GeoLoc p, final String a) {
+		if(p == loc) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					updateAttribute(a);
+				}
+			});
+		}
+	}
+
+	/** Update one attribute on the form */
+	protected void updateAttribute(String a) {
+		if(a == null || a.equals("freeway"))
+			freeway.setSelectedItem(loc.getFreeway());
+		if(a == null || a.equals("freeDir"))
+			freeDir.setSelectedIndex(loc.getFreeDir());
+		if(a == null || a.equals("crossMod"))
+			crossMod.setSelectedIndex(loc.getCrossMod());
+		if(a == null || a.equals("crossStreet"))
+			cross.setSelectedItem(loc.getCrossStreet());
+		if(a == null || a.equals("crossDir"))
+			crossDir.setSelectedIndex(loc.getCrossDir());
+		if(a == null || a.equals("easting"))
+			easting.setValue(asInt(loc.getEasting()));
+		if(a == null || a.equals("eastOffset"))
+			eastOff.setValue(asInt(loc.getEastOffset()));
+		if(a == null || a.equals("northing"))
+			northing.setValue(asInt(loc.getNorthing()));
+		if(a == null || a.equals("northOffset"))
+			northOff.setValue(asInt(loc.getNorthOffset()));
 	}
 
 	/** Add a "Select Point" button */
@@ -140,58 +251,6 @@ public class LocationPanel extends FormPanel {
 				}
 			};
 		}
-	}
-
-	/** Update the location panel */
-	public void doUpdate() {
-		if(loc == null)
-			return;
-		Road f = loc.getFreeway();
-		if(f != null)
-			freeBox.setSelectedItem(f);
-		else
-			freeBox.setSelectedItem(null);
-		freeDir.setSelectedIndex(loc.getFreeDir());
-		crossMod.setSelectedIndex(loc.getCrossMod());
-		Road x = loc.getCrossStreet();
-		if(x != null)
-			crossBox.setSelectedItem(x);
-		else
-			crossBox.setSelectedItem(null);
-		crossDir.setSelectedIndex(loc.getCrossDir());
-		easting.setValue(asInt(loc.getEasting()));
-		eastOff.setValue(asInt(loc.getEastOffset()));
-		northing.setValue(asInt(loc.getNorthing()));
-		northOff.setValue(asInt(loc.getNorthOffset()));
-	}
-
-	/** Get an int to use for a spinner model */
-	static protected int asInt(Integer i) {
-		if(i != null)
-			return i;
-		else
-			return 0;
-	}
-
-	/** Apply button is pressed */
-	public void applyPressed() throws Exception {
-		if(loc == null)
-			return;
-		Road f = state.lookupRoad((String)freeBox.getSelectedItem());
-		Road c = state.lookupRoad((String)crossBox.getSelectedItem());
-		Integer x = getSpinnerInteger(easting);
-		Integer xO = getSpinnerInteger(eastOff);
-		Integer y = getSpinnerInteger(northing);
-		Integer yO = getSpinnerInteger(northOff);
-		loc.setFreeway(f);
-		loc.setFreeDir((short)freeDir.getSelectedIndex());
-		loc.setCrossMod((short)crossMod.getSelectedIndex());
-		loc.setCrossStreet(c);
-		loc.setCrossDir((short)crossDir.getSelectedIndex());
-		loc.setEasting(x);
-		loc.setEastOffset(xO);
-		loc.setNorthing(y);
-		loc.setNorthOffset(yO);
 	}
 
 	/** Select point button is pressed */

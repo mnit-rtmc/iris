@@ -175,7 +175,6 @@ public class DetectorForm extends TMSObjectForm {
 
 	/** Update the form with the current state of the detector */
 	protected void doUpdate() throws RemoteException {
-		location.doUpdate();
 		name.setText(detector.getLabel(false));
 		notes.setText(detector.getNotes());
 		controller.setEnabled(detector.getController() != null);
@@ -192,7 +191,6 @@ public class DetectorForm extends TMSObjectForm {
 	protected void applyPressed() throws Exception {
 		try {
 			float afl = Float.parseFloat(field.getText());
-			location.applyPressed();
 			detector.setFakeDetector(fake.getText());
 			detector.setLaneType(
 				(short)lane.getSelectedIndex());

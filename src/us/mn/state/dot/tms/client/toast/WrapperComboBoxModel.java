@@ -38,15 +38,24 @@ public class WrapperComboBoxModel extends AbstractListModel
 	/** Are blank selections allowed? */
 	protected final boolean blanks;
 
+	/** Are null selections allowed? */
+	protected final boolean nulls;
+
 	/** Create a new WrapperComboBoxModel */
 	public WrapperComboBoxModel(ListModel m) {
-		this(m, true);
+		this(m, true, false);
 	}
 
 	/** Create a new WrapperComboBoxModel */
 	public WrapperComboBoxModel(ListModel m, boolean b) {
+		this(m, b, b);
+	}
+
+	/** Create a new WrapperComboBoxModel */
+	public WrapperComboBoxModel(ListModel m, boolean b, boolean n) {
 		model = m;
 		blanks = b;
+		nulls = n;
 	}
 
 	/** Add a list data listener */
@@ -71,8 +80,12 @@ public class WrapperComboBoxModel extends AbstractListModel
 					index--;
 				}
 				if(blanks) {
-					if(index == 0)
-						return BLANK;
+					if(index == 0) {
+						if(nulls)
+							return null;
+						else
+							return BLANK;
+					}
 					return model.getElementAt(index - 1);
 				} else
 					return model.getElementAt(index);
@@ -103,7 +116,9 @@ public class WrapperComboBoxModel extends AbstractListModel
 	public void setSelectedItem(Object s) {
 		synchronized(model) {
 			boolean isExtra = true;
-			if(BLANK.equals(s)) {
+			if(nulls && s == null)
+				isExtra = false;
+			else if(BLANK.equals(s)) {
 				s = null;
 				isExtra = false;
 			} else {

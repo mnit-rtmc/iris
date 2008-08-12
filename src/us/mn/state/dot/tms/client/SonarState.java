@@ -288,11 +288,6 @@ public class SonarState extends Client {
 		}
 	}
 
-	/** Lookup the specified road */
-	public Road lookupRoad(String name) {
-		return roads.getObject(name);
-	}
-
 	/** Lookup a geo location */
 	public GeoLoc lookupGeoLoc(String name) {
 		return geo_locs.getObject(name);

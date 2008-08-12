@@ -111,14 +111,12 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 
 	/** Update the form with the current state of the device */
 	protected void doUpdate() throws RemoteException {
-		location.doUpdate();
 		notes.setText(device.getNotes());
 		controller.setEnabled(device.getController() != null);
 	}
 
 	/** Apply button is pressed */
 	protected void applyPressed() throws Exception {
-		location.applyPressed();
 		device.setNotes(notes.getText());
 	}
 }
