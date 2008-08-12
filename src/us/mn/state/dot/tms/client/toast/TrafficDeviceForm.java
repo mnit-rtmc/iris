@@ -77,14 +77,7 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 		location.addRow(controller);
 		new ActionJob(this, controller) {
 			public void perform() throws Exception {
-// FIXME: do SONAR linkup
-//				Controller c = device.getController();
-//				if(c != null) {
-//					String oid = c.getOID().toString();
-//					connection.getDesktop().show(
-//						ControllerForm.create(
-//						connection, c, oid));
-//				}
+				controllerPressed();
 			}
 		};
 		tab.add("Location", location);
@@ -101,6 +94,18 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 		}
 		setBackground(Color.LIGHT_GRAY);
 		super.initialize();
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() throws RemoteException {
+		Controller c = connection.getSonarState().lookupController(
+			device.getController());
+		if(c == null)
+			controller.setEnabled(false);
+		else {
+			connection.getDesktop().show(
+				new ControllerForm(connection, c));
+		}
 	}
 
 	/** Dispose of the form */

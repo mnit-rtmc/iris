@@ -293,6 +293,11 @@ public class SonarState extends Client {
 		return geo_locs.getObject(name);
 	}
 
+	/** Lookup a controller */
+	public Controller lookupController(String name) {
+		return controllers.getObject(name);
+	}
+
 	/** Look up the specified connection */
 	public Connection lookupConnection(String name) {
 		Map<String, Connection> conn_map = connections.getAll();
