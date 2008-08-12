@@ -51,8 +51,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 		map.put("name", name);
 		if(style != null)
 			map.put("style", style.getName());
-		if(geo_loc != null)
-			map.put("geo_loc", geo_loc.getName());
+		map.put("geo_loc", geo_loc.getName());
 		map.put("mile", mile);
 		return map;
 	}
@@ -68,13 +67,17 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	}
 
 	/** Create a new cabinet */
-	public CabinetImpl(String n) {
+	public CabinetImpl(String n) throws TMSException {
 		super(n);
+		GeoLocImpl g = new GeoLocImpl(n);
+		g.doStore();
+		geo_loc = g;
+		MainServer.server.addObject(geo_loc);
 	}
 
 	/** Create a new cabinet */
 	protected CabinetImpl(String n, CabinetStyle s, GeoLoc l, Float m) {
-		this(n);
+		super(n);
 		style = s;
 		geo_loc = l;
 		mile = m;
@@ -124,10 +127,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	public void doSetGeoLoc(GeoLoc l) throws TMSException {
 		if(l == geo_loc)
 			return;
-		if(l != null)
-			store.update(this, "geo_loc", l.getName());
-		else
-			store.update(this, "geo_loc", null);
+		store.update(this, "geo_loc", l.getName());
 		setGeoLoc(l);
 	}
 
@@ -155,5 +155,11 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	/** Get the milepoint */
 	public Float getMile() {
 		return mile;
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		MainServer.server.removeObject(geo_loc);
 	}
 }

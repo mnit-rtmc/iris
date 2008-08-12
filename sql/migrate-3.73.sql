@@ -44,7 +44,7 @@ Prehistoric	10
 CREATE TABLE cabinet (
 	name VARCHAR(20) PRIMARY KEY,
 	style VARCHAR(20) REFERENCES cabinet_style(name),
-	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
 	mile real
 );
 
@@ -100,6 +100,9 @@ CREATE TABLE controller (
 	active boolean NOT NULL,
 	notes text NOT NULL
 );
+
+CREATE UNIQUE INDEX ctrl_link_drop_idx ON controller
+	USING btree (comm_link, drop_id);
 
 INSERT INTO controller (name, drop_id, comm_link, cabinet, active, notes)
 	(SELECT name, drop_id, comm_link, cabinet, active, notes

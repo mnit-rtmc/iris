@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.toast;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.TreeSet;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
@@ -172,9 +173,9 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		Controller c = getProxy(row);
 		switch(column) {
 			case COL_NAME:
-//				String v = value.toString().trim();
-//				if(v.length() > 0)
-//					cache.createObject(v);
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					createController(v);
 				break;
 			case COL_DROP:
 				c.setDrop(((Number)value).shortValue());
@@ -183,6 +184,16 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				c.setActive((Boolean)value);
 				break;
 		}
+	}
+
+	/** Create a new DMS sign group */
+	protected void createController(String name) {
+		DropNumberModel m = new DropNumberModel(comm_link, cache, 1);
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("comm_link", comm_link);
+		attrs.put("drop_id", m.getNextAvailable());
+		attrs.put("notes", "");
+		cache.createObject(name, attrs);
 	}
 
 	/** Create the drop column */

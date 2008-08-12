@@ -68,6 +68,13 @@ public class DropNumberModel extends SpinnerNumberModel {
 			}
 			return null;
 		}
+		public Short getNextAvailable() {
+			for(short d = 1; d < MAX_DROP_ID; d++) {
+				if(!used.contains(d))
+					return d;
+			}
+			return null;
+		}
 	}
 
 	/** Get the next value */
@@ -82,5 +89,12 @@ public class DropNumberModel extends SpinnerNumberModel {
 		DropFinder drop_finder = new DropFinder();
 		cache.find(drop_finder);
 		return drop_finder.getPreviousDrop();
+	}
+
+	/** Get the next available value */
+	public Short getNextAvailable() {
+		DropFinder drop_finder = new DropFinder();
+		cache.find(drop_finder);
+		return drop_finder.getNextAvailable();
 	}
 }

@@ -261,7 +261,7 @@ CREATE TABLE cabinet_style (
 CREATE TABLE cabinet (
 	name VARCHAR(20) PRIMARY KEY,
 	style VARCHAR(20) REFERENCES cabinet_style(name),
-	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
 	mile real
 );
 
@@ -274,6 +274,8 @@ CREATE TABLE controller (
 	notes text NOT NULL
 );
 
+CREATE UNIQUE INDEX ctrl_link_drop_idx ON controller
+	USING btree (comm_link, drop_id);
 
 
 CREATE TABLE vault_object (

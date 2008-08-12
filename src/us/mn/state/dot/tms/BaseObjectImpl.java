@@ -82,6 +82,7 @@ abstract public class BaseObjectImpl implements Storable {
 	/** Store an object */
 	public void doStore() throws TMSException {
 		store.create(this);
+		initTransients();
 	}
 
 	/** Destroy an object */
@@ -92,5 +93,10 @@ abstract public class BaseObjectImpl implements Storable {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		store.destroy(this);
+	}
+
+	/** Initialize the transient fields */
+	protected void initTransients() throws TMSException {
+		// Override this to initialize new objects
 	}
 }

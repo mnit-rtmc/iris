@@ -84,15 +84,19 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	public ControllerImpl(String n) {
+	public ControllerImpl(String n) throws TMSException {
 		super(n);
+		CabinetImpl c = new CabinetImpl(n);
+		c.doStore();
+		cabinet = c;
+		MainServer.server.addObject(cabinet);
 	}
 
 	/** Create a new controller */
 	protected ControllerImpl(String n, Cabinet c, CommLink l, short d,
 		boolean a, String nt) throws TMSException
 	{
-		this(n);
+		super(n);
 		cabinet = c;
 		comm_link = l;
 		drop_id = d;
@@ -114,9 +118,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		version = "";
-		CommLinkImpl link = (CommLinkImpl)comm_link;
-		if(link != null)
+		if(comm_link instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)comm_link;
 			link.putController(drop_id, this);
+		}
 	}
 
 	/** Create a string representation of the controller */
@@ -246,7 +251,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Administrator notes for this controller */
-	protected String notes;
+	protected String notes = "";
 
 	/** Set the administrator notes */
 	public void setNotes(String n) {
@@ -669,5 +674,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Notify SONAR clients of status changes */
 	public void notifyStatus() {
 		// FIXME: how should this work?
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		if(comm_link instanceof CommLinkImpl) {
+			CommLinkImpl link = (CommLinkImpl)comm_link;
+			link.pullController(this);
+		}
+		super.doDestroy();
+		MainServer.server.removeObject(cabinet);
 	}
 }
