@@ -128,7 +128,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Remote URL for link */
-	protected String url;
+	protected String url = "";
 
 	/** Set remote URL for link */
 	public void setUrl(String u) {
