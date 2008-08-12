@@ -67,8 +67,13 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** A proxy has been removed */
 	public void proxyRemoved(T p) {
-		if(proxy == p)
-			close();
+		if(proxy == p) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					close();
+				}
+			});
+		}
 	}
 
 	/** A proxy has been changed */
