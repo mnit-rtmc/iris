@@ -90,6 +90,8 @@ DROP TABLE node_group;
 DROP TABLE cabinet_types;
 DROP TABLE communication_line;
 
+DELETE FROM geo_loc WHERE name LIKE 'nod_%';
+
 CREATE TABLE controller (
 	name VARCHAR(20) PRIMARY KEY,
 	drop_id smallint NOT NULL,
