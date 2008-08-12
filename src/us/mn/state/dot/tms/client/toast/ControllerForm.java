@@ -114,20 +114,15 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.addRow("Comm Link", comm_link);
 		new ActionJob(this, comm_link) {
 			public void perform() {
-				CommLink c =
-					(CommLink)comm_link.getSelectedItem();
-				if(c != proxy.getCommLink())
-					proxy.setCommLink(c);
+				proxy.setCommLink(
+					(CommLink)comm_link.getSelectedItem());
 			}
 		};
 		panel.addRow("Drop", drop_id);
 		new ChangeJob(this, drop_id) {
 			public void perform() {
 				Number n = (Number)drop_id.getValue();
-				short d = n.shortValue();
-				// Avoid ping-pong looping...
-				if(d != proxy.getDrop())
-					proxy.setDrop(d);
+				proxy.setDrop(n.shortValue());
 			}
 		};
 		panel.addRow("Notes", notes);
