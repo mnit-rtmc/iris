@@ -37,7 +37,7 @@ public interface TMS extends Remote {
 	public TimingPlanList getTimingPlanList() throws RemoteException;
 
 	/** Get the ramp meter list */
-	public RampMeterList getRampMeterList() throws RemoteException;
+	public DeviceList getRampMeterList() throws RemoteException;
 
 	/** Get the dynamic message sign list */
 	public DMSList getDMSList() throws RemoteException;

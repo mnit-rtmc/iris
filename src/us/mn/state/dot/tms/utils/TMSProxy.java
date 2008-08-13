@@ -22,7 +22,7 @@ import java.rmi.RemoteException;
 import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.DetectorList;
 import us.mn.state.dot.tms.Login;
-import us.mn.state.dot.tms.RampMeterList;
+import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TMS;
 import us.mn.state.dot.tms.TMSObject;
@@ -76,10 +76,10 @@ public class TMSProxy {
 	public RemoteListModel getTimingPlans() { return plans; }
 
 	/** Ramp meter list */
-	protected final RampMeterList meter_list;
+	protected final DeviceList meter_list;
 
 	/** Get the ramp meter list */
-	public RampMeterList getMeterList() {
+	public DeviceList getMeterList() {
 		return meter_list;
 	}
 

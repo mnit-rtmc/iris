@@ -380,7 +380,9 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	public TimingPlanList getTimingPlanList() { return plans; }
 
 	/** Get the ramp meter list */
-	public RampMeterList getRampMeterList() { return meters; }
+	public DeviceList getRampMeterList() {
+		return meters;
+	}
 
 	/** Get the dynamic message sign list */
 	public DMSList getDMSList() { return dmss; }

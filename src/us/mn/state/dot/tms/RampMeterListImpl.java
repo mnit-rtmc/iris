@@ -21,13 +21,13 @@ import java.rmi.RemoteException;
 import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
- * RampMeterListImpl is the implementation of the RampMeterList RMI
+ * RampMeterListImpl is the implementation of the DeviceList RMI
  * interface. It maintains a list of all ramp meters plus "available"
  * meters (not assigned to a controller).
  *
  * @author Douglas Lau
  */
-class RampMeterListImpl extends SortedListImpl implements RampMeterList {
+class RampMeterListImpl extends SortedListImpl implements DeviceList {
 
 	/** Ramp meter list XML file */
 	static protected final String METER_XML = "ramp_meters.xml";
