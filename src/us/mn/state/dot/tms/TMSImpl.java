@@ -396,7 +396,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	}
 
 	/** Get the lane control signal list */
-	public DeviceList getLCSList() {
+	public LCSList getLCSList() {
 		return lcss;
 	}
 
