@@ -23,11 +23,33 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class WarningSignList extends SortedListImpl {
+public class WarningSignList extends SortedListImpl implements DeviceList {
+
+	/** Available warning sign list (not assigned to a controller) */
+	protected transient SubsetList available;
+
+	/** Get the list of available warning signs */
+	public SortedList getAvailableList() {
+		return available;
+	}
+
+	/** Initialize the subset list */
+	protected void initialize() throws RemoteException {
+		available = new SubsetList(new DeviceFilter());
+	}
 
 	/** Create a new warning sign list */
 	public WarningSignList() throws RemoteException {
 		super();
+		initialize();
+	}
+
+	/** Load the contents of the list from the ObjectVault */
+	void load(Class c, String keyField) throws ObjectVaultException,
+		TMSException, RemoteException
+	{
+		super.load(c, keyField);
+		available.addFiltered(this);
 	}
 
 	/** Add a warning sign to the list */
@@ -50,7 +72,15 @@ public class WarningSignList extends SortedListImpl {
 				break;
 			}
 		}
+		available.add(key, sign);
 		return sign;
+	}
+
+	/** Update a device in the list */
+	public TMSObject update(String key) {
+		DeviceImpl device = (DeviceImpl)super.update(key);
+		available.update(device);
+		return device;
 	}
 
 	/** Remove a warning sign from the list */
@@ -60,5 +90,6 @@ public class WarningSignList extends SortedListImpl {
 		if(geo_loc != null)
 			MainServer.server.removeObject(geo_loc);
 		deviceList.remove(key);
+		available.remove(key);
 	}
 }

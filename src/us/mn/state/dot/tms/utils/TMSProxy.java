@@ -136,10 +136,21 @@ public class TMSProxy {
 	}
 
 	/** Warning sign list */
+	protected final DeviceList warn_list;
+
+	/** Warning sign list */
 	protected final RemoteListModel warn_signs;
 
 	/** Get the warning sign list */
 	public RemoteListModel getWarningSignList() { return warn_signs; }
+
+	/** Available warning sign list */
+	protected final RemoteListModel availableWarningSigns;
+
+	/** Get the available warning sign list */
+	public RemoteListModel getAvailableWarningSigns() {
+		return availableWarningSigns;
+	}
 
 	/** Available device list */
 	protected final RemoteListModel devices;
@@ -212,7 +223,10 @@ public class TMSProxy {
 		availableDMSs = new RemoteListModel(
 			dms_list.getAvailableList());
 		plans = new RemoteListModel(tms.getTimingPlanList());
-		warn_signs = new RemoteListModel(tms.getWarningSignList());
+		warn_list = tms.getWarningSignList();
+		warn_signs = new RemoteListModel(warn_list);
+		availableWarningSigns = new RemoteListModel(
+			warn_list.getAvailableList());
 		devices = new RemoteListModel(tms.getDeviceList());
 		camera_list = tms.getCameraList();
 		availableCameras = new RemoteListModel(
@@ -231,6 +245,7 @@ public class TMSProxy {
 		stations.dispose();
 		availableMeters.dispose();
 		availableDMSs.dispose();
+		availableWarningSigns.dispose();
 		availableCameras.dispose();
 		availableLCSs.dispose();
 		devices.dispose();

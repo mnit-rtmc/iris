@@ -388,7 +388,9 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	public DMSList getDMSList() { return dmss; }
 
 	/** Get the warning sign list */
-	public SortedList getWarningSignList() { return warn_signs; }
+	public DeviceList getWarningSignList() {
+		return warn_signs;
+	}
 
 	/** Get the camera list */
 	public DeviceList getCameraList() {

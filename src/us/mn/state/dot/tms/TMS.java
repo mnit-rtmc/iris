@@ -43,7 +43,7 @@ public interface TMS extends Remote {
 	public DMSList getDMSList() throws RemoteException;
 
 	/** Get the warning sign list */
-	public SortedList getWarningSignList() throws RemoteException;
+	public DeviceList getWarningSignList() throws RemoteException;
 
 	/** Get the available device list */
 	public SortedList getDeviceList() throws RemoteException;
