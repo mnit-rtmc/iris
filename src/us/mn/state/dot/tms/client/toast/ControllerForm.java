@@ -28,7 +28,10 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Cabinet;
+import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.SonarState;
@@ -69,6 +72,15 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Cabinet style combo box */
 	protected final JComboBox cab_style = new JComboBox();
 
+	/** Cabinet for controller */
+	protected final Cabinet cabinet;
+
+	/** Cabinet cache */
+	protected final TypeCache<Cabinet> cabinets;
+
+	/** Cabinet listener */
+	protected CabinetListener cab_listener;
+
 	/** Status */
 	protected final JLabel status = new JLabel();
 
@@ -87,11 +99,20 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Comm Link list model */
 	protected final ProxyListModel<CommLink> link_model;
 
+	/** Cabinet style list model */
+	protected final ProxyListModel<CabinetStyle> sty_model;
+
 	/** Create a new controller form */
 	public ControllerForm(TmsConnection tc, Controller c) {
 		super(TITLE, tc, c);
-		TypeCache<CommLink> links = tc.getSonarState().getCommLinks();
+		SonarState state = tc.getSonarState();
+		TypeCache<CommLink> links = state.getCommLinks();
 		link_model = new ProxyListModel<CommLink>(links);
+		cabinets = state.getCabinets();
+		cabinet = proxy.getCabinet();
+		cab_listener = new CabinetListener();
+		TypeCache<CabinetStyle> styles = state.getCabinetStyles();
+		sty_model = new ProxyListModel<CabinetStyle>(styles);
 	}
 
 	/** Get the SONAR type cache */
@@ -102,8 +123,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
+		cabinets.addProxyListener(cab_listener);
 		link_model.initialize();
+		sty_model.initialize();
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
+		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Setup", createSetupPanel());
 		tab.add("Cabinet", createCabinetPanel());
@@ -116,7 +140,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Dispose of the form */
 	protected void dispose() {
+		cabinets.removeProxyListener(cab_listener);
 		link_model.dispose();
+		sty_model.dispose();
 		location.dispose();
 		super.dispose();
 	}
@@ -161,13 +187,44 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the cabinet panel */
 	protected JPanel createCabinetPanel() {
-		location = new LocationPanel(admin,
-			proxy.getCabinet().getGeoLoc(),
+		location = new LocationPanel(admin, cabinet.getGeoLoc(),
 			connection.getSonarState());
 		location.initialize();
 		location.addRow("Milepoint", mile);
+		new FocusJob(mile) {
+			public void perform() {
+				if(wasLost()) {
+					String ms = mile.getText();
+					try {
+						Float m = Float.valueOf(ms);
+						cabinet.setMile(m);
+					}
+					catch(NumberFormatException e) {
+						cabinet.setMile(null);
+					}
+				}
+			}
+		};
 		location.addRow("Style", cab_style);
+		new ActionJob(this, cab_style) {
+			public void perform() {
+				cabinet.setStyle((CabinetStyle)
+					cab_style.getSelectedItem());
+			}
+		};
 		return location;
+	}
+
+	/** Listener for cabinet proxy changes */
+	protected class CabinetListener implements ProxyListener<Cabinet> {
+		protected CabinetListener() {
+		}
+		public void proxyAdded(Cabinet p) {}
+		public void proxyRemoved(Cabinet p) {}
+		public void proxyChanged(Cabinet p, final String a) {
+			if(p == cabinet)
+				updateAttribute(a);
+		}
 	}
 
 	/** Create the I/O panel */
@@ -209,5 +266,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			error.setText(proxy.getError());
 		if(a == null || a.equals("version"))
 			version.setText(proxy.getVersion());
+		if(a == null || a.equals("mile")) {
+			Float m = cabinet.getMile();
+			if(m == null)
+				mile.setText("");
+			else
+				mile.setText(m.toString());
+		}
+		if(a == null || a.equals("style"))
+			cab_style.setSelectedItem(cabinet.getStyle());
 	}
 }
