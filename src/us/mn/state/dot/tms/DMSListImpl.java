@@ -32,9 +32,31 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 	/** Location of travel time XML file */
 	static protected final String TRAVEL_XML = "device_status.xml";
 
+	/** Available DMS list (not assigned to a controller) */
+	protected transient SubsetList available;
+
+	/** Get the list of available DMS */
+	public SortedList getAvailableList() {
+		return available;
+	}
+
+	/** Initialize the subset list */
+	protected void initialize() throws RemoteException {
+		available = new SubsetList(new DeviceFilter());
+	}
+
 	/** Create a new DMS list */
 	public DMSListImpl() throws TMSException, RemoteException {
 		super();
+		initialize();
+	}
+
+	/** Load the contents of the list from the ObjectVault */
+	void load(Class c, String keyField) throws ObjectVaultException,
+		TMSException, RemoteException
+	{
+		super.load(c, keyField);
+		available.addFiltered(this);
 	}
 
 	/** Add a dynamic message sign to the list */
@@ -60,7 +82,15 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 				break;
 			}
 		}
+		available.add(key, sign);
 		return sign;
+	}
+
+	/** Update a device in the list */
+	public TMSObject update(String key) {
+		DeviceImpl device = (DeviceImpl)super.update(key);
+		available.update(device);
+		return device;
 	}
 
 	/** Remove a dynamic message sign from the list */
@@ -70,6 +100,7 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		if(geo_loc != null)
 			MainServer.server.removeObject(geo_loc);
 		deviceList.remove( key );
+		available.remove(key);
 	}
 
 	/** Get an iterator of all signs */

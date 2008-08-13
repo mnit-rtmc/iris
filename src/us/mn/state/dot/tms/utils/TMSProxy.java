@@ -112,6 +112,14 @@ public class TMSProxy {
 		return dms_list;
 	}
 
+	/** Available DMS list */
+	protected final RemoteListModel availableDMSs;
+
+	/** Get the available DMS list */
+	public RemoteListModel getAvailableDMSs() {
+		return availableDMSs;
+	}
+
 	/** Dynamic message sign list */
 	protected RemoteListModel dms_model;
 
@@ -201,6 +209,8 @@ public class TMSProxy {
 		availableMeters = new RemoteListModel(
 			meter_list.getAvailableList());
 		dms_list = tms.getDMSList();
+		availableDMSs = new RemoteListModel(
+			dms_list.getAvailableList());
 		plans = new RemoteListModel(tms.getTimingPlanList());
 		warn_signs = new RemoteListModel(tms.getWarningSignList());
 		devices = new RemoteListModel(tms.getDeviceList());
@@ -220,6 +230,7 @@ public class TMSProxy {
 		mainFree.dispose();
 		stations.dispose();
 		availableMeters.dispose();
+		availableDMSs.dispose();
 		availableCameras.dispose();
 		availableLCSs.dispose();
 		devices.dispose();
