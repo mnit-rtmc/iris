@@ -329,7 +329,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		meterList = meters;
 		dmsList = dmss;
 		warnList = warn_signs;
-		availableMeters = (SubsetList)meters.getAvailableList();
 		cameraList = cameras;
 		lcsList = lcss;
 	}
