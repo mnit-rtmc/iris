@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Color;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -92,7 +91,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		super.initialize();
 		link_model.initialize();
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Setup", createSetupPanel());
 		tab.add("Cabinet", createCabinetPanel());

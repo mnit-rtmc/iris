@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -106,17 +107,13 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
+		setLayout(new BorderLayout());
 		model = new CommLinkModel(cache);
 		fmodel = new FailedControllerModel(ccache);
 		tab.add("All Links", createCommLinkPanel());
 		tab.add("Failed Controllers", createFailedControllerPanel());
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
-
-		// FIXME: JPanels don't like to layout properly
-		Dimension d = getPreferredSize();
-		setMinimumSize(new Dimension(d.width, d.height + 30));
-		setPreferredSize(new Dimension(d.width, d.height + 30));
 	}
 
 	/** Dispose of the form */
@@ -136,6 +133,9 @@ public class CommLinkForm extends AbstractForm {
 		bag.insets.top = VGAP;
 		bag.insets.bottom = VGAP;
 		bag.gridwidth = 3;
+		bag.fill = GridBagConstraints.BOTH;
+		bag.weightx = 1;
+		bag.weighty = 0.6f;
 		final ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -157,6 +157,9 @@ public class CommLinkForm extends AbstractForm {
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.anchor = GridBagConstraints.WEST;
+		bag.fill = GridBagConstraints.NONE;
+		bag.weightx = 0;
+		bag.weighty = 0;
 		panel.add(new JLabel("Seleccted Comm Link:"), bag);
 		bag.gridx = 1;
 		panel.add(link_status, bag);
@@ -176,6 +179,8 @@ public class CommLinkForm extends AbstractForm {
 		bag.gridwidth = 3;
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.BOTH;
+		bag.weightx = 1;
+		bag.weighty = 1;
 		final ListSelectionModel cs = ctable.getSelectionModel();
 		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, cs) {
@@ -198,6 +203,8 @@ public class CommLinkForm extends AbstractForm {
 		bag.gridy = 3;
 		bag.anchor = GridBagConstraints.WEST;
 		bag.fill = GridBagConstraints.NONE;
+		bag.weightx = 0;
+		bag.weighty = 0;
 		panel.add(new JLabel("Seleccted Controller:"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.EAST;

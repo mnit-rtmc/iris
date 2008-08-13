@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.awt.BorderLayout;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -53,6 +54,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
+		setLayout(new BorderLayout());
 		TypeCache<T> cache = getTypeCache(connection.getSonarState());
 		cache.addProxyListener(this);
 	}
