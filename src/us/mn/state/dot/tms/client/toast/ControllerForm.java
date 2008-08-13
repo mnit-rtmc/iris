@@ -18,6 +18,7 @@ import java.awt.Color;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -68,6 +69,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Cabinet style combo box */
 	protected final JComboBox cab_style = new JComboBox();
 
+	/** Status */
+	protected final JLabel status = new JLabel();
+
+	/** Error detail */
+	protected final JLabel error = new JLabel();
+
+	/** Firmware version */
+	protected final JLabel version = new JLabel();
+
+	/** Download button */
+	protected final JButton download = new JButton("Download");
+
 	/** Reset button */
 	protected final JButton reset = new JButton("Reset");
 
@@ -95,6 +108,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add("Setup", createSetupPanel());
 		tab.add("Cabinet", createCabinetPanel());
 		tab.add("I/O", createIOPanel());
+		tab.add("Status", createStatusPanel());
 		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
@@ -162,6 +176,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return panel;
 	}
 
+	/** Create the status panel */
+	protected JPanel createStatusPanel() {
+		FormPanel panel = new FormPanel(admin);
+		panel.addRow("Status:", status);
+		panel.addRow("Error Detail:", error);
+		panel.addRow("Version:", version);
+		panel.add(download);
+		panel.setCenter();
+		panel.add(reset);
+		return panel;
+	}
+
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
 		if(a == null || a.equals("commLink")) {
@@ -177,6 +203,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("active"))
 			active.setSelected(proxy.getActive());
-		// FIXME: update the other attributes
+		if(a == null || a.equals("status"))
+			status.setText(proxy.getStatus());
+		if(a == null || a.equals("error"))
+			error.setText(proxy.getError());
+		if(a == null || a.equals("version"))
+			version.setText(proxy.getVersion());
 	}
 }
