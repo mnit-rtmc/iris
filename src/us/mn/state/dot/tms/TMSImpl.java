@@ -391,7 +391,9 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	public SortedList getWarningSignList() { return warn_signs; }
 
 	/** Get the camera list */
-	public SortedList getCameraList() { return cameras; }
+	public DeviceList getCameraList() {
+		return cameras;
+	}
 
 	/** Get the lane control signal list */
 	public SortedList getLCSList() { return lcss; }

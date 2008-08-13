@@ -81,6 +81,13 @@ class RampMeterListImpl extends SortedListImpl implements DeviceList {
 		return meter;
 	}
 
+	/** Update a device in the list */
+	public TMSObject update(String key) {
+		DeviceImpl device = (DeviceImpl)super.update(key);
+		available.update(device);
+		return device;
+	}
+
 	/** Remove a ramp meter from the list */
 	public synchronized void remove( String key ) throws TMSException {
 		GeoLocImpl geo_loc = lookupDeviceLoc(key);

@@ -49,7 +49,7 @@ public interface TMS extends Remote {
 	public SortedList getDeviceList() throws RemoteException;
 
 	/** Get the camera list */
-	public SortedList getCameraList() throws RemoteException;
+	public DeviceList getCameraList() throws RemoteException;
 
 	/** Get the lane control signal list */
 	public SortedList getLCSList() throws RemoteException;

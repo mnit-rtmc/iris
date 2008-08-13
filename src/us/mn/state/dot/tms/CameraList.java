@@ -23,11 +23,33 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public class CameraList extends SortedListImpl {
+public class CameraList extends SortedListImpl implements DeviceList {
+
+	/** Available camera list (not assigned to a controller) */
+	protected transient SubsetList available;
+
+	/** Get the list of available cameras */
+	public SortedList getAvailableList() {
+		return available;
+	}
+
+	/** Initialize the subset list */
+	protected void initialize() throws RemoteException {
+		available = new SubsetList(new DeviceFilter());
+	}
 
 	/** Create a new camera list */
 	public CameraList() throws RemoteException {
 		super();
+		initialize();
+	}
+
+	/** Load the contents of the list from the ObjectVault */
+	void load(Class c, String keyField) throws ObjectVaultException,
+		TMSException, RemoteException
+	{
+		super.load(c, keyField);
+		available.addFiltered(this);
 	}
 
 	/** Add a camera to the list */
@@ -50,7 +72,15 @@ public class CameraList extends SortedListImpl {
 				break;
 			}
 		}
+		available.add(key, camera);
 		return camera;
+	}
+
+	/** Update a device in the list */
+	public TMSObject update(String key) {
+		DeviceImpl device = (DeviceImpl)super.update(key);
+		available.update(device);
+		return device;
 	}
 
 	/** Remove a camera from the list */
@@ -60,5 +90,6 @@ public class CameraList extends SortedListImpl {
 		if(geo_loc != null)
 			MainServer.server.removeObject(geo_loc);
 		deviceList.remove(key);
+		available.remove(key);
 	}
 }

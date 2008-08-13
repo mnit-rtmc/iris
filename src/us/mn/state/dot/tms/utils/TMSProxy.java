@@ -140,11 +140,19 @@ public class TMSProxy {
 	public RemoteListModel getDevices() { return devices; }
 
 	/** Camera list */
-	protected final SortedList camera_list;
+	protected final DeviceList camera_list;
 
 	/** Get the camera list */
-	public SortedList getCameraList() {
+	public DeviceList getCameraList() {
 		return camera_list;
+	}
+
+	/** Available camera list */
+	protected final RemoteListModel availableCameras;
+
+	/** Get the available camera list */
+	public RemoteListModel getAvailableCameras() {
+		return availableCameras;
 	}
 
 	/** Camera list model */
@@ -186,6 +194,8 @@ public class TMSProxy {
 		warn_signs = new RemoteListModel(tms.getWarningSignList());
 		devices = new RemoteListModel(tms.getDeviceList());
 		camera_list = tms.getCameraList();
+		availableCameras = new RemoteListModel(
+			camera_list.getAvailableList());
 		lcss = new RemoteListModel(tms.getLCSList());
 	}
 
@@ -196,6 +206,7 @@ public class TMSProxy {
 		mainFree.dispose();
 		stations.dispose();
 		availableMeters.dispose();
+		availableCameras.dispose();
 		devices.dispose();
 	}
 
