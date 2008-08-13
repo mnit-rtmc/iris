@@ -91,9 +91,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Warning sign list */
 	static SortedListImpl warnList;
 
-	/** Available device list */
-	static SubsetList deviceList;
-
 	/** Available ramp meter list */
 	static SubsetList availableMeters;
 

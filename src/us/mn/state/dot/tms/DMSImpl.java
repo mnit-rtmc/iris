@@ -105,7 +105,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		super(id);
 		mile = new Float(0);
 		plans = new TimingPlanImpl[0];
-		deviceList.add(id, this);
 		resetTransients();
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
@@ -161,12 +160,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	/** Set the controller to which this DMS is assigned */
 	public void setController(String c) throws TMSException {
 		super.setController(c);
-		if(c == null)
-			deviceList.add(id, this);
-		else {
-			deviceList.remove(id);
+		if(c != null)
 			setReset(false);
-		}
 	}
 
 	/** Reset flag */

@@ -93,11 +93,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		cameras.load( CameraImpl.class, "id" );
 		System.err.println( "Loading lane control signals..." );
 		lcss.load( LaneControlSignalImpl.class, "id" );
-		devices.addFiltered(cameras);
-		devices.addFiltered(lcss);
-		devices.addFiltered(meters);
-		devices.addFiltered(dmss);
-		devices.addFiltered(warn_signs);
 	}
 
 	/** determine agency specific polling time */
@@ -324,13 +319,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Lane Control Signals list */
 	protected final LCSListImpl lcss;
 
-	/** Available device list */
-	protected transient SubsetList devices;
-
 	/** Initialize the subset list */
 	protected void initialize() throws RemoteException {
-		devices = new SubsetList( new DeviceFilter() );
-
 		// This is an ugly hack, but it works
 		detList = detectors;
 		statMap = station_map;
@@ -339,7 +329,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		meterList = meters;
 		dmsList = dmss;
 		warnList = warn_signs;
-		deviceList = devices;
 		availableMeters = (SubsetList)meters.getAvailableList();
 		cameraList = cameras;
 		lcsList = lcss;
@@ -401,9 +390,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	public LCSList getLCSList() {
 		return lcss;
 	}
-
-	/** Get the available device list */
-	public SortedList getDeviceList() { return devices; }
 
 	/** Get a TMS object by its object ID */
 	public TMSObject getObject(int oid) {

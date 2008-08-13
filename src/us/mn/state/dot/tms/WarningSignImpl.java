@@ -40,7 +40,6 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign,
 	/** Create a new warning sign */
 	public WarningSignImpl(String i) throws TMSException, RemoteException {
 		super(i);
-		deviceList.add(id, this);
 	}
 
 	/** Create a warning sign from an ObjectVault field map */
@@ -52,15 +51,6 @@ public class WarningSignImpl extends TrafficDeviceImpl implements WarningSign,
 	public Map<String, Object> getColumns() {
 		// FIXME: implement this for SONAR
 		return null;
-	}
-
-	/** Set the controller to which this sign is assigned */
-	public void setController(String c) throws TMSException {
-		super.setController(c);
-		if(c == null)
-			deviceList.add(id, this);
-		else
-			deviceList.remove(id);
 	}
 
 	/** Camera from which this can be seen */

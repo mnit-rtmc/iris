@@ -116,7 +116,6 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 		super.remove( key );
 		if(geo_loc != null)
 			MainServer.server.removeObject(geo_loc);
-		deviceList.remove( key );
 		available.remove(key);
 	}
 }

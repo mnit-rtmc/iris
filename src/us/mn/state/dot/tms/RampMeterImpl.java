@@ -108,7 +108,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		demand = MIN_RELEASE_RATE;
 		releaseRate = MAX_RELEASE_RATE;
 		lock = null;
-		deviceList.add(id, this);
 	}
 
 	/** Create a ramp meter from an ObjectVault field map */
@@ -143,18 +142,6 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			p.add(vault.load(it.next()));
 		plans = (MeterPlanImpl [])p.toArray(new MeterPlanImpl[0]);
 		Arrays.sort(plans);
-	}
-
-	/** Set the controller for this device */
-	public void setController(String c) throws TMSException {
-		super.setController(c);
-		if(c == null) {
-			deviceList.add(id, this);
-			availableMeters.add(id, this);
-		} else {
-			deviceList.remove(id);
-			availableMeters.remove(id);
-		}
 	}
 
 	/** Get the meter poller */

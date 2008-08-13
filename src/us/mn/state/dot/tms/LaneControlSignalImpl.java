@@ -65,7 +65,6 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		modules = new LCSModuleImpl[lanes];
 		for(int i = 0; i < lanes; i++)
 			modules[i] = new LCSModuleImpl();
-		deviceList.add( id, this );
 		turnOff = true;
 	}
 
@@ -258,10 +257,6 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	/** Set the controller to which this LCS is assigned */
 	public void setController(String c) throws TMSException {
 		super.setController(c);
-		if(c == null)
-			deviceList.add(id, this);
-		else
-			deviceList.remove(id);
 		notifyUpdate();
 	}
 

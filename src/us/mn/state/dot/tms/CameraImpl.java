@@ -39,7 +39,6 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	/** Create a new camera with a string id */
 	public CameraImpl(String i) throws TMSException, RemoteException {
 		super(i);
-		deviceList.add(i, this);
 	}
 
 	/** Create a camera from an ObjectVault field map */
@@ -51,15 +50,6 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	public Map<String, Object> getColumns() {
 		// FIXME: implement this for SONAR
 		return null;
-	}
-
-	/** Set the controller to which this camera is assigned */
-	public void setController(String c) throws TMSException {
-		super.setController(c);
-		if(c == null)
-			deviceList.add(id, this);
-		else
-			deviceList.remove(id);
 	}
 
 	/** Host (and port) of encoder for digital video stream */

@@ -152,12 +152,6 @@ public class TMSProxy {
 		return availableWarningSigns;
 	}
 
-	/** Available device list */
-	protected final RemoteListModel devices;
-
-	/** Get the available device list */
-	public RemoteListModel getDevices() { return devices; }
-
 	/** Camera list */
 	protected final DeviceList camera_list;
 
@@ -227,7 +221,6 @@ public class TMSProxy {
 		warn_signs = new RemoteListModel(warn_list);
 		availableWarningSigns = new RemoteListModel(
 			warn_list.getAvailableList());
-		devices = new RemoteListModel(tms.getDeviceList());
 		camera_list = tms.getCameraList();
 		availableCameras = new RemoteListModel(
 			camera_list.getAvailableList());
@@ -248,7 +241,6 @@ public class TMSProxy {
 		availableWarningSigns.dispose();
 		availableCameras.dispose();
 		availableLCSs.dispose();
-		devices.dispose();
 	}
 
 	/** Get a TMSObject */
