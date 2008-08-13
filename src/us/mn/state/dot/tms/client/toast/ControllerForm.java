@@ -217,8 +217,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Listener for cabinet proxy changes */
 	protected class CabinetListener implements ProxyListener<Cabinet> {
-		protected CabinetListener() {
-		}
 		public void proxyAdded(Cabinet p) {}
 		public void proxyRemoved(Cabinet p) {}
 		public void proxyChanged(Cabinet p, final String a) {
