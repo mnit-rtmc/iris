@@ -174,6 +174,17 @@ public class TMSProxy {
 	/** Get the lane control signal list */
 	public RemoteListModel getLCSList() { return lcss; }
 
+	/** LCS list */
+	protected final DeviceList lcs_list;
+
+	/** Available LCS list */
+	protected final RemoteListModel availableLCSs;
+
+	/** Get the available LCS list */
+	public RemoteListModel getAvailableLCSs() {
+		return availableLCSs;
+	}
+
 	/** Create a new TMS proxy */
 	public TMSProxy(String server, String user) throws RemoteException,
 		NotBoundException, MalformedURLException
@@ -196,7 +207,10 @@ public class TMSProxy {
 		camera_list = tms.getCameraList();
 		availableCameras = new RemoteListModel(
 			camera_list.getAvailableList());
-		lcss = new RemoteListModel(tms.getLCSList());
+		lcs_list = tms.getLCSList();
+		lcss = new RemoteListModel(lcs_list);
+		availableLCSs = new RemoteListModel(
+			lcs_list.getAvailableList());
 	}
 
 	/** Dispose of all proxied lists */
@@ -207,6 +221,7 @@ public class TMSProxy {
 		stations.dispose();
 		availableMeters.dispose();
 		availableCameras.dispose();
+		availableLCSs.dispose();
 		devices.dispose();
 	}
 

@@ -25,6 +25,19 @@ import us.mn.state.dot.vault.ObjectVaultException;
  */
 public class LCSListImpl extends SortedListImpl implements LCSList {
 
+	/** Available LCS list (not assigned to a controller) */
+	protected transient SubsetList available;
+
+	/** Get the list of available LCSs*/
+	public SortedList getAvailableList() {
+		return available;
+	}
+
+	/** Initialize the subset list */
+	protected void initialize() throws RemoteException {
+		available = new SubsetList(new DeviceFilter());
+	}
+
 	/**
 	 * Create a new LCSListImpl
 	 *
@@ -32,6 +45,15 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 	 */
 	public LCSListImpl() throws RemoteException {
 		super();
+		initialize();
+	}
+
+	/** Load the contents of the list from the ObjectVault */
+	void load(Class c, String keyField) throws ObjectVaultException,
+		TMSException, RemoteException
+	{
+		super.load(c, keyField);
+		available.addFiltered(this);
 	}
 
 	/**
@@ -47,10 +69,10 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 	public synchronized TMSObject add( String key, int lanes )
 		 throws TMSException, RemoteException
 	{
-		LaneControlSignalImpl lcs = ( LaneControlSignalImpl ) map.get( key );
-		if ( lcs != null ) {
+		LaneControlSignalImpl lcs =
+			(LaneControlSignalImpl) map.get(key);
+		if(lcs != null)
 			return lcs;
-		}
 		lcs = new LaneControlSignalImpl( key, lanes );
 		try {
 			vault.save( lcs, getUserName() );
@@ -66,6 +88,7 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 				break;
 			}
 		}
+		available.add(key, lcs);
 		return lcs;
 	}
 
@@ -73,6 +96,13 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 	public TMSObject add( String key ) throws TMSException {
 		throw new ChangeVetoException(
 			"LCS constructor must include the number of lanes");
+	}
+
+	/** Update a device in the list */
+	public TMSObject update(String key) {
+		DeviceImpl device = (DeviceImpl)super.update(key);
+		available.update(device);
+		return device;
 	}
 
 	/**
@@ -87,5 +117,6 @@ public class LCSListImpl extends SortedListImpl implements LCSList {
 		if(geo_loc != null)
 			MainServer.server.removeObject(geo_loc);
 		deviceList.remove( key );
+		available.remove(key);
 	}
 }

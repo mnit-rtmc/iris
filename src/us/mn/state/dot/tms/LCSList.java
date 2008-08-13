@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,23 +11,17 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.*;
+import java.rmi.RemoteException;
 
 /**
  * Remote interface for the list of LaneControlSignals
  *
  * @author    <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
- * @created   May 24, 2002
- * @version   $Revision: 1.4 $ $Date: 2003/12/01 23:48:50 $
  */
-public interface LCSList extends SortedList {
+public interface LCSList extends DeviceList {
 
 	/**
 	 * Add an element to the list
