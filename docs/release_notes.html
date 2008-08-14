@@ -11,6 +11,50 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.73.0 (14 August 2008)</dt>
+	<dd><ul>
+		<li>
+			Circuit, Node and Node Group objects removed.
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.73.sql</code>
+		</li>
+		<li>
+			There were various other database changes.
+			Communication Line renamed to Comm Link.
+			Controller170 merged into Controller.
+			Cabinet and Cabinet Style classes/tables added.
+			These new classes are all SONAR based.
+			This means new roles will need to be assigned to users
+			change these objects.
+		</li>
+		<li>
+			The "Sonet System" GUI completely replaced with a new
+			"Comm Links" GUI.
+			Some features are missing from this new interface
+			(error counters and test communications), but they
+			will be added back in a later version.
+		</li>
+		<li>
+			The "log" database is no longer required for IRIS
+			operation.
+			Tables from "log" database moved to "event" schema
+			in the "tms" database.
+			This means the IRIS server requires one less connection
+			to the PostgreSQL server.
+			It also adds some foreign key relationships between
+			the schemas.
+			Some additional database scripts will be required to
+			retain "log" database event history.
+			Also, a cron task should be set up to remove old
+			records from the event.comm_event table (many events
+			will be created per day).
+		</li>
+		<li>
+			SONAR dependency updated to 1.7.10.
+			Scheduler dependency updated to 0.1.1.
+		</li>
+	</ul></dd>
 	<dt>3.72.0 (23 July 2008)</dt>
 	<dd><ul>
 		<li>
