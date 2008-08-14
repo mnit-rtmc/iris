@@ -14,13 +14,18 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.rmi.RemoteException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTable;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -34,6 +39,8 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -44,6 +51,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Douglas Lau
  */
 public class ControllerForm extends SonarObjectForm<Controller> {
+
+	/** Table row height */
+	static protected final int ROW_HEIGHT = 24;
 
 	/** Frame title */
 	static protected final String TITLE = "Controller: ";
@@ -80,6 +90,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Cabinet listener */
 	protected CabinetListener cab_listener;
+
+	/** Controller IO model */
+	protected ControllerIOModel io_model;
 
 	/** Status */
 	protected final JLabel status = new JLabel();
@@ -120,9 +133,22 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return st.getControllers();
 	}
 
+	/** Get the ControllerIO array */
+	protected ControllerIO[] getControllerIO() {
+		Integer[] cio = proxy.getCio();
+		ControllerIO[] io = new ControllerIO[cio.length];
+		TMSProxy tms = connection.getProxy();
+		for(int i = 0; i < cio.length; i++) {
+			if(cio[i] != null)
+				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
+		}
+		return io;
+	}
+
 	/** Initialize the widgets on the form */
-	protected void initialize() {
+	protected void initialize() throws RemoteException {
 		super.initialize();
+		io_model = new ControllerIOModel(proxy, connection.getProxy());
 		cabinets.addProxyListener(cab_listener);
 		link_model.initialize();
 		sty_model.initialize();
@@ -227,7 +253,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the I/O panel */
 	protected JPanel createIOPanel() {
-		FormPanel panel = new FormPanel(admin);
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.setBorder(BORDER);
+		JTable table = new JTable();
+		table.setAutoCreateColumnsFromModel(false);
+		table.setModel(io_model);
+		table.setColumnModel(io_model.createColumnModel());
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setRowHeight(ROW_HEIGHT);
+		table.setPreferredScrollableViewportSize(new Dimension(
+			table.getPreferredSize().width, ROW_HEIGHT * 8));
+		JScrollPane pane = new JScrollPane(table);
+		panel.add(pane);
 		return panel;
 	}
 
@@ -273,5 +310,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if(a == null || a.equals("style"))
 			cab_style.setSelectedItem(cabinet.getStyle());
+		if(a == null || a.equals("cio"))
+			io_model.setCio(getControllerIO());
 	}
 }
