@@ -275,8 +275,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.addRow("Error Detail:", error);
 		panel.addRow("Version:", version);
 		panel.add(download);
+		new ActionJob(this, download) {
+			public void perform() {
+				proxy.setDownload(false);
+			}
+		};
 		panel.setCenter();
 		panel.add(reset);
+		new ActionJob(this, reset) {
+			public void perform() {
+				proxy.setDownload(true);
+			}
+		};
 		return panel;
 	}
 
