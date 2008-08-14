@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -283,6 +284,29 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return io;
 	}
 
+	/** Get all controller I/O pins */
+	public synchronized Integer[] getCio() {
+		// array of vault_oid for RMI objects
+		Integer[] io = new Integer[ALL_PINS];
+		for(int i: io_pins.keySet()) {
+			Object obj = io_pins.get(i);
+			if(obj instanceof TMSObjectImpl) {
+				TMSObjectImpl tobj = (TMSObjectImpl)obj;
+				io[i] = tobj.getOID();
+			}
+		}
+		return io;
+	}
+
+	/** Notify clients of changes to the IO pin assignment */
+	protected void notifyIO() {
+		if(MainServer.server != null) {
+			Integer[] io = getCio();
+			String[] ios = Marshaller.marshall(Integer.class, io);
+			MainServer.server.setAttribute(this, "cio", ios);
+		}
+	}
+
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io)
 		throws TMSException
@@ -299,6 +323,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		if(io != null)
 			io_pins.put(pin, io);
+		notifyIO();
 	}
 
 	/** Get a list of all traffic devices on the controller */

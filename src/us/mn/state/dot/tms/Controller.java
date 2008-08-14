@@ -79,4 +79,7 @@ public interface Controller extends SonarObject {
 
 	/** Get the testing status flag */
 	boolean getTest();
+
+	/** Get object IDs for IO pins */
+	Integer[] getCio();
 }
