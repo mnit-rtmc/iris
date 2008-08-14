@@ -62,7 +62,8 @@ abstract public class DiagnosticOperation extends ControllerOperation {
 		count++;
 		if(count > 9) {
 			count = 0;
-			controller.notifyStatus();
+//			FIXME: do some magic here ...
+//			controller.notifyStatus();
 		}
 		if(shouldStop())
 			phase = null;
@@ -80,7 +81,8 @@ abstract public class DiagnosticOperation extends ControllerOperation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(count > 0)
-			controller.notifyStatus();
+		// FIXME: do some magic here ...
+//		if(count > 0)
+//			controller.notifyStatus();
 	}
 }

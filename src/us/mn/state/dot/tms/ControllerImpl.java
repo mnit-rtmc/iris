@@ -298,15 +298,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return io;
 	}
 
-	/** Notify clients of changes to the IO pin assignment */
-	protected void notifyIO() {
-		if(MainServer.server != null) {
-			Integer[] io = getCio();
-			String[] ios = Marshaller.marshall(Integer.class, io);
-			MainServer.server.setAttribute(this, "cio", ios);
-		}
-	}
-
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io)
 		throws TMSException
@@ -552,7 +543,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			setup = "";
 		else
 			setup = s;
-		// FIXME: notify error attribute
+		notifyError();
 	}
 
 	/** Log an exception */
@@ -621,10 +612,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(isFailed()) {
 			failTime = new Date();
 			logFailMessage(EventType.COMM_FAILED, id);
-			// FIXME: notify error attribute
+			notifyError();
 			return false;
 		}
-		// FIXME: notify error attribute
 		return true;
 	}
 
@@ -633,8 +623,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		boolean failed = isFailed();
 		status = "";
 		errorCounter = 0;
-		if(failed)
+		if(failed) {
 			logFailMessage(EventType.COMM_RESTORED, id);
+			notifyError();
+		}
 	}
 
 	/** Reset the error counter */
@@ -696,9 +688,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return test != null;
 	}
 
-	/** Notify SONAR clients of status changes */
-	public void notifyStatus() {
-		// FIXME: how should this work?
+	/** Notify SONAR clients of changes to the IO pin assignment */
+	protected void notifyIO() {
+		if(MainServer.server != null) {
+			Integer[] io = getCio();
+			String[] ios = Marshaller.marshall(Integer.class, io);
+			MainServer.server.setAttribute(this, "cio", ios);
+		}
+	}
+
+	/** Notify SONAR clients of changes to "error" attribute */
+	public void notifyError() {
+		if(MainServer.server != null) {
+			String[] e = new String[] { getError() };
+			MainServer.server.setAttribute(this, "error", e);
+		}
 	}
 
 	/** Destroy an object */
