@@ -92,7 +92,7 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	}
 
 	/** Controller associated with this traffic device */
-	protected String controller;
+	protected String controller = "";
 
 	/** Update the controller and/or pin */
 	protected void updateController(ControllerImpl oc, ControllerImpl c,
