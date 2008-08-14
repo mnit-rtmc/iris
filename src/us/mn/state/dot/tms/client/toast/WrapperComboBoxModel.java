@@ -133,6 +133,8 @@ public class WrapperComboBoxModel extends AbstractListModel
 			}
 			if(isExtra)
 				extra = s;
+			else
+				extra = null;
 			selected = s;
 		}
 		fireContentsChanged(this, -1, -1);
