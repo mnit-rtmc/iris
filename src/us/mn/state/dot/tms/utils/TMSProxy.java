@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.DetectorList;
 import us.mn.state.dot.tms.Login;
 import us.mn.state.dot.tms.DeviceList;
-import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TMS;
 import us.mn.state.dot.tms.TMSObject;
 
