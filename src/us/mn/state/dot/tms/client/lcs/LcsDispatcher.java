@@ -77,7 +77,7 @@ public class LcsDispatcher extends JPanel implements TmsSelectionListener {
 		super( new GridBagLayout() );
 		this.handler = handler;
 		handler.getSelectionModel().addTmsSelectionListener( this );
-		userName = handler.getUser().getFullName();
+		userName = handler.getUser().getName();
 		setBorder(BorderFactory.createTitledBorder(
 			"Selected Lane Control Signal"));
 		GridBagConstraints bag = new GridBagConstraints();
