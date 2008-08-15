@@ -327,8 +327,8 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	/** Get the event type */
 	protected EventType getEventType() {
 		if(modules[0].getState() == LCSModule.DARK)
-			return EventType.DMS_CLEARED;
+			return EventType.LCS_CLEARED;
 		else
-			return EventType.DMS_DEPLOYED;
+			return EventType.LCS_DEPLOYED;
 	}
 }
