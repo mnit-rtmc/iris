@@ -37,7 +37,7 @@ public class ClearLcsAction extends TrafficDeviceAction {
 		putValue(Action.SHORT_DESCRIPTION, "Blank the LCS.");
 		putValue(Action.LONG_DESCRIPTION,
 			"Blank the Lane Control Signal.");
-		userName = c.getUser().getFullName();
+		userName = c.getUser().getName();
 	}
 
 	/** Actually perform the action */
