@@ -171,9 +171,9 @@ public class BinaryDetectionRequest extends Request {
 				c += 1;
 				headway = 0;
 				speed = 0;
-				controller.logEvent(stamp, inp, 0, 0, 0);
+				controller.logEvent(stamp, inp + 1, 0, 0, 0);
 			}
-			controller.logEvent(stamp, inp, duration, headway,
+			controller.logEvent(stamp, inp + 1, duration, headway,
 				speed);
 		}
 
@@ -236,14 +236,15 @@ public class BinaryDetectionRequest extends Request {
 		DetectionEvent pe = p_events[inp];
 		DetectionEvent ce = c_events[inp];
 		if(pe == null || (ce.is_reset() && !ce.equals(pe))) {
-			controller.logEvent(null, inp, 0, 0, 0);
+			controller.logEvent(null, inp + 1, 0, 0, 0);
 			return;
 		}
 		if(!ce.equals(pe)) {
 			int speed = 0;
-			int sp = controller.getSpeedPair(inp);
+			int sp = controller.getSpeedPair(inp + 1);
 			if(sp > 0 && sp <= 4) {
-				DetectorImpl d = controller.getDetector(inp);
+				DetectorImpl d = controller.getDetectorAtPin(
+					inp + 1);
 				speed = ce.calculateSpeed(c_events[sp - 1],
 					d.getFieldLength());
 			}

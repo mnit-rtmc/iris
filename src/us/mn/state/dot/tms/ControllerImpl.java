@@ -392,22 +392,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get a detector by its I/O pin number */
-	protected synchronized DetectorImpl getDetectorAtPin(int pin) {
+	public synchronized DetectorImpl getDetectorAtPin(int pin) {
 		ControllerIO io = io_pins.get(pin);
 		if(io instanceof DetectorImpl)
 			return (DetectorImpl)io;
 		else
 			return null;
-	}
-
-	/** Get a data detector (input from 0 to 23) */
-	public DetectorImpl getDetector(int inp) {
-		return getDetectorAtPin(getDetectorPin(inp));
-	}
-
-	/** Get the I/O pin for a detector input (0 to 23) */
-	public int getDetectorPin(int inp) {
-		return inp + 1;
 	}
 
 	/** Check whether this controller has any active detectors */
@@ -431,8 +421,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Find a matching detector for the specified input */
-	public int getSpeedPair(int inp) {
-		DetectorImpl d = getDetector(inp);
+	public int getSpeedPair(int pin) {
+		DetectorImpl d = getDetectorAtPin(pin);
 		if(d != null && d.isVelocity())
 			return getSpeedPair(d);
 		return 0;
@@ -457,11 +447,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Store 30-second detector data */
-	public void storeData30Second(Calendar stamp, int[] volume,
-		int[] scans, int[] speed)
+	public void storeData30Second(Calendar stamp, int start_pin,
+		int[] volume, int[] scans, int[] speed)
 	{
 		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = getDetector(i);
+			DetectorImpl det = getDetectorAtPin(start_pin + i);
 			if(det != null) {
 				det.storeData30Second(stamp, volume[i],
 					scans[i]);
@@ -472,21 +462,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Store 5-minute detector data */
-	public void storeData5Minute(Calendar stamp, int[] volume,
-		int[] scan) throws IOException
+	public void storeData5Minute(Calendar stamp, int start_pin,
+		int[] volume, int[] scan) throws IOException
 	{
 		for(int i = 0; i < volume.length; i++) {
-			DetectorImpl det = getDetector(i);
+			DetectorImpl det = getDetectorAtPin(start_pin + i);
 			if(det != null)
 				det.storeData5Minute(stamp, volume[i], scan[i]);
 		}
 	}
 
 	/** Log a vehicle detection event */
-	public void logEvent(Calendar stamp, int inp, int duration,
+	public void logEvent(Calendar stamp, int pin, int duration,
 		int headway, int speed)
 	{
-		DetectorImpl det = getDetector(inp);
+		DetectorImpl det = getDetectorAtPin(pin);
 		if(det != null)
 			det.logEvent(stamp, duration, headway, speed);
 	}

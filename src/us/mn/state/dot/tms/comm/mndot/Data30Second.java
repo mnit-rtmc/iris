@@ -59,7 +59,8 @@ public class Data30Second extends IntervalData {
 	/** Cleanup the operation */
 	public void cleanup() {
 		Calendar stamp = completer.getStamp();
-		controller.storeData30Second(stamp, volume, scans, null);
+		controller.storeData30Second(stamp, FIRST_DETECTOR_PIN, volume,
+			scans, null);
 		completer.down();
 		super.cleanup();
 	}

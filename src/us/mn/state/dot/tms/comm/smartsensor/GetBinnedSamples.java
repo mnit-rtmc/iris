@@ -104,7 +104,7 @@ public class GetBinnedSamples extends ControllerOperation {
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(success) {
-			controller.storeData30Second(stamp, volume, scans,
+			controller.storeData30Second(stamp, 1, volume, scans,
 				speed);
 		}
 		completer.down();

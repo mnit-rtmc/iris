@@ -32,6 +32,9 @@ abstract public class Controller170Operation extends ControllerOperation {
 	/** I/O pin for second ramp meter */
 	static protected final int METER_2_PIN = 3;
 
+	/** I/O pin for the first detector */
+	static protected final int FIRST_DETECTOR_PIN = 39;
+
 	/** Total number of detector inputs on a 170 controller */
 	static protected final int DETECTOR_INPUTS = 24;
 

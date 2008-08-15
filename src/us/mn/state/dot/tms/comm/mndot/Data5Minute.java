@@ -117,7 +117,8 @@ public class Data5Minute extends IntervalData {
 				mess.getRequest();
 			}
 			processData(rec);
-			controller.storeData5Minute(stamp, volume, scans);
+			controller.storeData5Minute(stamp, FIRST_DETECTOR_PIN,
+				volume, scans);
 			updateGreenCount(meter1,
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
 			updateGreenCount(meter2,

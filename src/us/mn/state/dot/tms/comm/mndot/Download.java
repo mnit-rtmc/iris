@@ -231,7 +231,8 @@ public class Download extends Controller170Operation implements TimingTable {
 	public byte[] getQueueBitmap() {
 		byte[] bitmap = new byte[DETECTOR_INPUTS / 8];
 		for(int inp = 0; inp < DETECTOR_INPUTS; inp++) {
-			DetectorImpl det = controller.getDetector(inp);
+			DetectorImpl det = controller.getDetectorAtPin(
+				FIRST_DETECTOR_PIN + inp);
 			if(det != null && det.getLaneType() == Detector.QUEUE)
 				bitmap[inp / 8] |= 1 << (inp % 8);
 		}
