@@ -31,14 +31,14 @@ public class SignStatusEvent extends BaseEvent {
 	protected final String message;
 
 	/** User who deployed message */
-	protected final String user_id;
+	protected final String iris_user;
 
 	/** Create a new sign status event */
 	public SignStatusEvent(EventType e, String d, String m, String u) {
 		super(e);
 		device_id = d;
 		message = m;
-		user_id = u;
+		iris_user = u;
 	}
 
 	/** Get the database table name */
@@ -53,7 +53,7 @@ public class SignStatusEvent extends BaseEvent {
 		map.put("event_date", event_date);
 		map.put("device_id", device_id);
 		map.put("message", message);
-		map.put("user_id", user_id);
+		map.put("iris_user", iris_user);
 		return map;
 	}
 }
