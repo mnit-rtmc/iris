@@ -524,6 +524,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return status;
 	}
 
+	/** Set the controller communication status */
+	protected void setStatus(String s) {
+		if(!s.equals(status)) {
+			status = s;
+			notifyStatus();
+		}
+	}
+
 	/** Controller setup configuration state */
 	protected transient String setup = "";
 
@@ -538,7 +546,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Log an exception */
 	public void logException(String id, String message) {
-		status = message;
+		setStatus(message);
 		if(!isFailed()) {
 			CommEvent ev = new CommEvent(EventType.COMM_ERROR,
 				getName(), id);
@@ -611,8 +619,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Reset the error counter */
 	public void resetErrorCounter(String id) {
 		boolean failed = isFailed();
-		status = "";
 		errorCounter = 0;
+		setStatus("");
 		if(failed) {
 			logFailMessage(EventType.COMM_RESTORED, id);
 			notifyError();
@@ -684,6 +692,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			Integer[] io = getCio();
 			String[] ios = Marshaller.marshall(Integer.class, io);
 			MainServer.server.setAttribute(this, "cio", ios);
+		}
+	}
+
+	/** Notify SONAR clients of changes to "status" attribute */
+	public void notifyStatus() {
+		if(MainServer.server != null) {
+			String[] s = new String[] { status };
+			MainServer.server.setAttribute(this, "status", s);
 		}
 	}
 
