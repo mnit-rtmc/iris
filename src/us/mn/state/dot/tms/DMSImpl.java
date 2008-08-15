@@ -737,6 +737,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	protected void logMessage(EventType et, String id, String text, 
 		String owner)
 	{
+		if(NO_OWNER.equals(owner))
+			owner = null;
 		SignStatusEvent sse = new SignStatusEvent(et, id, text, owner);
 		try {
 			sse.doStore();
