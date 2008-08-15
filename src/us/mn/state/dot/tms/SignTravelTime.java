@@ -24,11 +24,14 @@ import java.util.Map;
  */
 public class SignTravelTime extends SignMessage {
 
+	/** IRIS is owner of travel time messages */
+	static public final String IRIS_OWNER = "IRIS";
+
 	/** Duration of travel time messages (2 minutes) */
 	static public final int MESSAGE_DURATION = 2;
 
 	/** Create a new sign travel time message */
 	public SignTravelTime(MultiString m, Map<Integer, BitmapGraphic> b) {
-		super("IRIS", m, b, MESSAGE_DURATION);
+		super(IRIS_OWNER, m, b, MESSAGE_DURATION);
 	}
 }

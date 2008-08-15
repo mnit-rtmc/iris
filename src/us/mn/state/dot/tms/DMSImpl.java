@@ -739,6 +739,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	{
 		if(NO_OWNER.equals(owner))
 			owner = null;
+		if(SignTravelTime.IRIS_OWNER.equals(owner))
+			owner = null;
 		SignStatusEvent sse = new SignStatusEvent(et, id, text, owner);
 		try {
 			sse.doStore();
