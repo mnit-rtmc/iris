@@ -141,18 +141,13 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
 	}
 
-	/** Set the meter to local metering mode */
-	protected void setLocal(RampMeterImpl meter) {
-		sendMeteringRate(meter, MeterRate.FLASH);
-	}
-
 	/** Send a new release rate (vehicles per hour) */
 	public void sendReleaseRate(RampMeterImpl meter, int rate) {
 		int n = getMeterNumber(meter);
 		if(n > 0) {
 			// Workaround for errors in rx only (good tx)
 			if(meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS)
-				setLocal(meter);
+				stopMetering(meter);
 			else {
 				int r = meter.calculateRedTime(rate);
 				new SetRedTime(meter, n, r).start();
