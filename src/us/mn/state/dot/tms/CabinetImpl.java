@@ -115,7 +115,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 		return style;
 	}
 
-	/** Controller location */
+	/** Cabinet location */
 	protected GeoLoc geo_loc;
 
 	/** Set the cabinet location */
