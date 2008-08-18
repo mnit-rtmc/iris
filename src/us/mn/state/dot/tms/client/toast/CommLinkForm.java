@@ -160,7 +160,7 @@ public class CommLinkForm extends AbstractForm {
 		bag.fill = GridBagConstraints.NONE;
 		bag.weightx = 0;
 		bag.weighty = 0;
-		panel.add(new JLabel("Seleccted Comm Link:"), bag);
+		panel.add(new JLabel("Selected Comm Link:"), bag);
 		bag.gridx = 1;
 		panel.add(link_status, bag);
 		bag.gridx = 2;
@@ -205,7 +205,7 @@ public class CommLinkForm extends AbstractForm {
 		bag.fill = GridBagConstraints.NONE;
 		bag.weightx = 0;
 		bag.weighty = 0;
-		panel.add(new JLabel("Seleccted Controller:"), bag);
+		panel.add(new JLabel("Selected Controller:"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.EAST;
 		ctr_props.setEnabled(false);
