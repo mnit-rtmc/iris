@@ -32,14 +32,14 @@ public class CommLinkIcon implements Icon {
 
 	static protected final int WIDTH = 44;
 	static protected final int HEIGHT = 24;
-	static protected final double W2 = WIDTH / 2.0;
-	static protected final double H2 = HEIGHT / 2.0;
-	static protected final double W25 = WIDTH * 2.0 / 5;
-	static protected final double W35 = WIDTH * 3.0 / 5;
-	static protected final double H25 = HEIGHT * 2.0 / 5;
-	static protected final double H35 = HEIGHT * 3.0 / 5;
-	static protected final double H15 = HEIGHT * 1.0 / 5;
-	static protected final double H45 = HEIGHT * 4.0 / 5;
+	static protected final float W2 = WIDTH / 2.0f;
+	static protected final float H2 = HEIGHT / 2.0f;
+	static protected final float W25 = WIDTH * 2.0f / 5;
+	static protected final float W35 = WIDTH * 3.0f / 5;
+	static protected final float H25 = HEIGHT * 2.0f / 5;
+	static protected final float H35 = HEIGHT * 3.0f / 5;
+	static protected final float H15 = HEIGHT * 1.0f / 5;
+	static protected final float H45 = HEIGHT * 4.0f / 5;
 	protected final Color color;
 	protected final GeneralPath path = new GeneralPath();
 

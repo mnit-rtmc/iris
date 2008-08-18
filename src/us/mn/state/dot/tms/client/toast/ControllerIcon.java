@@ -33,18 +33,18 @@ public class ControllerIcon implements Icon {
 
 	static protected final int WIDTH = 44;
 	static protected final int HEIGHT = 24;
-	static protected final double W2 = WIDTH / 2.0;
-	static protected final double H2 = HEIGHT / 2.0;
-	static protected final double W2_5 = WIDTH * 2.0 / 5;
-	static protected final double W3_5 = WIDTH * 3.0 / 5;
-	static protected final double H1_5 = HEIGHT / 5.0;
-	static protected final double H2_5 = HEIGHT * 2.0 / 5;
-	static protected final double H3_5 = HEIGHT * 3.0 / 5;
-	static protected final double H4_5 = HEIGHT * 4.0 / 5;
-	static protected final double H10 = HEIGHT / 10.0;
-	static protected final double H12 = HEIGHT / 12.0;
-	static protected final double H20 = HEIGHT / 20.0;
-	static protected final double H24 = HEIGHT / 24.0;
+	static protected final float W2 = WIDTH / 2.0f;
+	static protected final float H2 = HEIGHT / 2.0f;
+	static protected final float W2_5 = WIDTH * 2.0f / 5;
+	static protected final float W3_5 = WIDTH * 3.0f / 5;
+	static protected final float H1_5 = HEIGHT / 5.0f;
+	static protected final float H2_5 = HEIGHT * 2.0f / 5;
+	static protected final float H3_5 = HEIGHT * 3.0f / 5;
+	static protected final float H4_5 = HEIGHT * 4.0f / 5;
+	static protected final float H10 = HEIGHT / 10.0f;
+	static protected final float H12 = HEIGHT / 12.0f;
+	static protected final float H20 = HEIGHT / 20.0f;
+	static protected final float H24 = HEIGHT / 24.0f;
 	protected final Color color;
 	protected final GeneralPath path =
 		new GeneralPath(GeneralPath.WIND_EVEN_ODD);
@@ -72,8 +72,8 @@ public class ControllerIcon implements Icon {
 		addCircle(W3_5, H3_5 + H10);
 		path.closePath();
 	}
-	protected void addCircle(double w, double h) {
-		Arc2D.Double arc = new Arc2D.Double(w - H24, h - H24,
+	protected void addCircle(float w, float h) {
+		Arc2D.Float arc = new Arc2D.Float(w - H24, h - H24,
 			H12, H12, 0, 360, Arc2D.OPEN);
 		path.append(arc, false);
 	}
