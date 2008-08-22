@@ -34,6 +34,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a new camera manager */
 	public CameraManager(TypeCache<Camera> c, GeoLocManager lm) {
 		super(c, lm);
+		initialize();
 	}
 
 	/** Get the proxy type name */
