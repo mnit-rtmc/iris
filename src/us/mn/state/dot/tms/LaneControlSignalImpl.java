@@ -40,9 +40,6 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		return tableName;
 	}
 
-	/** Camera from which this can be seen */
-	protected CameraImpl camera;
-
 	/** Lane modules */
 	protected final LCSModuleImpl[] modules;
 
@@ -85,21 +82,19 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		return null;
 	}
 
-	/** Set the verification camera */
-	public void setCamera(String id) throws TMSException {
-		setCamera(lookupCamera(id));
+	/** Camera from which this can be seen */
+	protected String camera = "";
+
+	/** Get verification camera */
+	public String getCamera() {
+		return camera;
 	}
 
 	/** Set the verification camera */
-	protected synchronized void setCamera(CameraImpl c)
-		throws TMSException
-	{
-		if(c == camera)
+	public synchronized void setCamera(String c) throws TMSException {
+		if(c.equals(camera))
 			return;
-		if(c == null)
-			store.update(this, "camera", null);
-		else
-			store.update(this, "camera", c.getName());
+		store.update(this, "camera", c);
 		camera = c;
 	}
 
@@ -147,16 +142,6 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 		for(int i = 0; i < states.length; i++)
 			settings |= (1 << modules[i].getSFO(states[i]));
 		return settings;
-	}
-
-	/** Get verification camera */
-	public String getCamera() {
-		// FIXME: once LaneControlSignalImpl is SONAR, just return the
-		// camera
-		if(camera == null)
-			return null;
-		else
-			return camera.getName();
 	}
 
 	/**

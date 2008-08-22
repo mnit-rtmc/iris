@@ -237,33 +237,19 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** Camera from which this can be seen */
-	protected CameraImpl camera;
-
-	/** Set the verification camera */
-	public void setCamera(String id) throws TMSException {
-		setCamera(lookupCamera(id));
-	}
-
-	/** Set the verification camera */
-	protected synchronized void setCamera(CameraImpl c)
-		throws TMSException
-	{
-		if(c == camera)
-			return;
-		if(c == null)
-			store.update(this, "camera", null);
-		else
-			store.update(this, "camera", c.getName());
-		camera = c;
-	}
+	protected String camera = "";
 
 	/** Get verification camera */
 	public String getCamera() {
-		// FIXME: once DMSImpl is SONAR, just return the camera
-		if(camera == null)
-			return null;
-		else
-			return camera.getName();
+		return camera;
+	}
+
+	/** Set the verification camera */
+	public synchronized void setCamera(String c) throws TMSException {
+		if(c.equals(camera))
+			return;
+		store.update(this, "camera", c);
+		camera = c;
 	}
 
 	/** Miles downstream of reference point */
