@@ -72,19 +72,12 @@ public class SonarLayerState<T extends SonarObject> extends LayerState {
 
 	/** Do left-click event processing */
 	protected void doLeftClick(MouseEvent e, MapObject o) {
-		// FIXME: find the proxy from the MapObject
-		//model.setSelected((TmsMapProxy)o);
-	}
-
-	/** Show a popup menu for the given proxy */
-	protected void showPopupMenu(MouseEvent e) {
-		manager.showPopupMenu(e);
+		model.setSelected(manager.findProxy(o));
 	}
 
 	/** Do right-click event processing */
 	protected void doRightClick(MouseEvent e, MapObject o) {
-		// FIXME: find the proxy from the MapObject
-		//model.setSelected(proxy);
-		showPopupMenu(e);
+		model.setSelected(manager.findProxy(o));
+		manager.showPopupMenu(e);
 	}
 }
