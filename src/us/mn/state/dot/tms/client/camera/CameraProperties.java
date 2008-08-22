@@ -14,27 +14,37 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Color;
 import java.rmi.RemoteException;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.SortedList;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.LocationPanel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * This is a form for viewing and editing the properties of a camera.
  *
  * @author Douglas Lau
  */
-public class CameraProperties extends TrafficDeviceForm {
+public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Frame title */
 	static private final String TITLE = "Camera: ";
+
+	/** Location panel */
+	protected LocationPanel location;
 
 	/** Video stream encoder host (and port) */
 	protected final JTextField encoder = new JTextField("", 20);
@@ -52,54 +62,81 @@ public class CameraProperties extends TrafficDeviceForm {
 	/** Checkbox to allow publishing camera images */
 	protected final JCheckBox publish = new JCheckBox();
 
-	/** Remote camera object */
-	protected Camera camera;
-
 	/** Create a new camera properties form */
-	public CameraProperties(TmsConnection tc, String id) {
-		super(TITLE + id, tc, id);
+	public CameraProperties(TmsConnection tc, Camera c) {
+		super(TITLE + c.getName(), tc, c);
+	}
+
+	/** Get the SONAR type cache */
+	protected TypeCache<Camera> getTypeCache(SonarState st) {
+		return st.getCameras();
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
-		SortedList s = connection.getProxy().getCameraList();
-		camera = (Camera)s.getElement(id);
-		setDevice(camera);
 		super.initialize();
+		JTabbedPane tab = new JTabbedPane();
+		tab.add("Location", createLocationPanel());
 		tab.add("Setup", createSetupPanel());
+		add(tab);
+		updateAttribute(null);
+		setBackground(Color.LIGHT_GRAY);
+	}
+
+	/** Dispose of the form */
+	protected void dispose() {
+		location.dispose();
+		super.dispose();
+	}
+
+	/** Create the location panel */
+	protected JPanel createLocationPanel() {
+		location = new LocationPanel(admin, proxy.getGeoLoc(),
+			connection.getSonarState());
+		location.initialize();
+		return location;
 	}
 
 	/** Create camera setup panel */
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(admin);
 		panel.addRow("Encoder", encoder);
+		new FocusJob(encoder) {
+			public void perform() {
+				proxy.setEncoder(encoder.getText());
+			}
+		};
 		panel.addRow("Encoder Channel", encoder_channel);
+		new ChangeJob(this, encoder_channel) {
+			public void perform() {
+				Number c = (Number)encoder_channel.getValue();
+				proxy.setEncoderChannel(c.intValue());
+			}
+		};
 		panel.addRow("NVR", nvr);
+		new FocusJob(nvr) {
+			public void perform() {
+				proxy.setNvr(nvr.getText());
+			}
+		};
 		panel.addRow("Publish", publish);
+		new ActionJob(this, publish) {
+			public void perform() {
+				proxy.setPublish(publish.isSelected());
+			}
+		};
 		return panel;
 	}
 
-	/** Update the form with the current state of the device */
-	protected void doUpdate() throws RemoteException {
-		super.doUpdate();
-		encoder.setText(camera.getEncoder());
-		encoder_channel.setValue(camera.getEncoderChannel());
-		nvr.setText(camera.getNvr());
-		publish.setSelected(camera.getPublish());
-	}
-
-	/** Apply button is pressed */
-	protected void applyPressed() throws Exception {
-		try {
-			super.applyPressed();
-			camera.setEncoder(encoder.getText());
-			Number c = (Number)encoder_channel.getValue();
-			camera.setEncoderChannel(c.intValue());
-			camera.setNvr(nvr.getText());
-			camera.setPublish(publish.isSelected());
-		}
-		finally {
-			camera.notifyUpdate();
-		}
+	/** Update one attribute on the form */
+	protected void updateAttribute(String a) {
+		if(a == null || a.equals("encoder"))
+			encoder.setText(proxy.getEncoder());
+		if(a == null || a.equals("encoderChannel"))
+			encoder_channel.setValue(proxy.getEncoderChannel());
+		if(a == null || a.equals("nvr"))
+			nvr.setText(proxy.getNvr());
+		if(a == null || a.equals("publish"))
+			publish.setSelected(proxy.getPublish());
 	}
 }

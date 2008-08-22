@@ -166,7 +166,7 @@ public interface RampMeter extends TrafficDevice {
 		RemoteException;
 
 	/** Get verification camera */
-	public TrafficDevice getCamera() throws RemoteException;
+	public String getCamera() throws RemoteException;
 
 	/** Get the detectors associated with the ramp meter */
 	public Detector[] getDetectors() throws RemoteException;

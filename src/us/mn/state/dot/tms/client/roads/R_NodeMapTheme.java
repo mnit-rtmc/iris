@@ -61,7 +61,8 @@ public class R_NodeMapTheme extends StyledTheme {
 
 	/** Create a new roadway node map theme */
 	public R_NodeMapTheme() {
-		super("R_Nodes", STYLE, new StationMarker());
+		super("R_Nodes", new StationMarker());
+		addStyle(STYLE);
 		addStyle(NO_GPS);
 //		addStyle(MISMATCH);
 	}

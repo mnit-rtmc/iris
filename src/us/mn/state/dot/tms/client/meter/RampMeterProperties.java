@@ -159,7 +159,8 @@ public class RampMeterProperties extends TrafficDeviceForm {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getMeterList();
 		meter = (RampMeter)s.getElement(id);
-		ListModel cameraModel = tms.getCameras().getModel();
+		ListModel cameraModel =
+			connection.getSonarState().getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(cameraModel));
 		setDevice(meter);
 		super.initialize();
@@ -407,9 +408,9 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the ramp meter */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		TrafficDevice c = meter.getCamera();
+		String c = meter.getCamera();
 		if(c != null)
-			camera.setSelectedItem(c.getId());
+			camera.setSelectedItem(c);
 		wait.setText("" + meter.getMaxWait());
 		storage.setText("" + meter.getStorage());
 		singleRelease.setSelected(meter.isSingleRelease());

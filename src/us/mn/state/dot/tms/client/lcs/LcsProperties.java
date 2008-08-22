@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
-
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
@@ -28,7 +27,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListModel;
-
 import us.mn.state.dot.tms.LaneControlSignal;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TrafficDevice;
@@ -81,7 +79,8 @@ public class LcsProperties extends TrafficDeviceForm {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getLCSList().getList();
 		lcs = (LaneControlSignal)s.getElement(id);
-		ListModel cameraModel = tms.getCameras().getModel();
+		ListModel cameraModel =
+			connection.getSonarState().getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(cameraModel));
 		numberOfLanes = lcs.getLanes();
 		setDevice(lcs);
@@ -156,9 +155,9 @@ public class LcsProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the signal */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		TrafficDevice c = lcs.getCamera();
+		String c = lcs.getCamera();
 		if(c != null)
-			camera.setSelectedItem(c.getId());
+			camera.setSelectedItem(c);
 		Color color = Color.GRAY;
 		if(lcs.isActive())
 			color = OK;

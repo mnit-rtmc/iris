@@ -110,11 +110,11 @@ public class MeterProxy extends TrafficDeviceProxy {
 	/** Update the ramp meter update information */
 	public void updateUpdateInfo() throws RemoteException {
 		super.updateUpdateInfo();
-		Camera camera = (Camera)meter.getCamera();
+		String camera = meter.getCamera();
 		if(camera == null)
 			camera_id = "";
 		else
-			camera_id = camera.getId();
+			camera_id = camera;
 		control_mode = meter.getControlMode();
 	}
 

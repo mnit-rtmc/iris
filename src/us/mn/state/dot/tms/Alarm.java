@@ -21,7 +21,7 @@ import java.rmi.RemoteException;
  *
  * @author Douglas Lau
  */
-public interface Alarm extends TMSObject, ControllerIO {
+public interface Alarm extends TMSObject, ControllerIO_RMI {
 
 	/** Get the administrator notes */
 	public String getNotes() throws RemoteException;

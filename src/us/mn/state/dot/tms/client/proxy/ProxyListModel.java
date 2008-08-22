@@ -82,13 +82,15 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Add a new proxy to the list model */
 	public void proxyAdded(T proxy) {
-		final ListModel model = this;
 		final int row = doProxyAdded(proxy);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireIntervalAdded(model, row, row);
-			}
-		});
+		if(row >= 0) {
+			final ListModel model = this;
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireIntervalAdded(model, row, row);
+				}
+			});
+		}
 	}
 
 	/** Remove a proxy from the model */
@@ -104,22 +106,65 @@ public class ProxyListModel<T extends SonarObject>
 	public void proxyRemoved(T proxy) {
 		final ListModel model = this;
 		final int row = doProxyRemoved(proxy);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireIntervalRemoved(model, row, row);
-			}
-		});
+		if(row >= 0) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireIntervalRemoved(model, row, row);
+				}
+			});
+		}
 	}
 
 	/** Change a proxy in the model */
 	public void proxyChanged(T proxy, String attrib) {
 		final ListModel model = this;
-		final int row = getRow(proxy);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireContentsChanged(model, row, row);
+		int pre_row, post_row;
+		synchronized(proxies) {
+			pre_row = preChangeRow(proxy);
+			post_row = postChangeRow(proxy);
+		}
+		if(pre_row >= 0 && post_row < 0) {
+			final int row = pre_row;
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireIntervalRemoved(model, row, row);
+				}
+			});
+		}
+		if(pre_row < 0 && post_row >= 0) {
+			final int row = post_row;
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireIntervalAdded(model, row, row);
+				}
+			});
+		}
+		if(pre_row >= 0 && post_row >= 0) {
+			final int r0 = Math.min(pre_row, post_row);
+			final int r1 = Math.max(pre_row, post_row);
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireContentsChanged(model, r0, r1);
+				}
+			});
+		}
+	}
+
+	/** Find and remove a proxy which may not be in proper sort order */
+	protected int preChangeRow(T proxy) {
+		Iterator<T> it = proxies.iterator();
+		for(int i = 0; it.hasNext(); i++) {
+			if(proxy.equals(it.next())) {
+				it.remove();
+				return i;
 			}
-		});
+		}
+		return -1;
+	}
+
+	/** Handle a proxy after a change has happened */
+	protected int postChangeRow(T proxy) {
+		return doProxyAdded(proxy);
 	}
 
 	/** Get the size (for ListModel) */

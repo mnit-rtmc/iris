@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,19 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  */
 public class SelectMonitorCamera extends ViconOperation {
 
+	/** Parse the integer ID of a monitor or camera */
+	static protected int parseUID(String name) {
+		String id = name;
+		while(!Character.isDigit(id.charAt(0)))
+			id = id.substring(1);
+		try {
+			return Integer.parseInt(id);
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+
 	/** Create a new select monitor camera operation */
 	public SelectMonitorCamera(VideoMonitorImpl m, CameraImpl c) {
 		super(COMMAND, m, c);
@@ -41,8 +54,10 @@ public class SelectMonitorCamera extends ViconOperation {
 
 		/** Command controller to move the camera */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new SelectMonitorRequest(monitor.getUID()));
-			mess.add(new SelectCameraRequest(camera.getUID()));
+			mess.add(new SelectMonitorRequest(parseUID(
+				monitor.getName())));
+			mess.add(new SelectCameraRequest(parseUID(
+				camera.getName())));
 			mess.setRequest();
 			return null;
 		}

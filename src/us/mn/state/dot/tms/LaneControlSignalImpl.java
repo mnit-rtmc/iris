@@ -87,7 +87,7 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 
 	/** Set the verification camera */
 	public void setCamera(String id) throws TMSException {
-		setCamera((CameraImpl)cameraList.getElement(id));
+		setCamera(lookupCamera(id));
 	}
 
 	/** Set the verification camera */
@@ -96,11 +96,10 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	{
 		if(c == camera)
 			return;
-		// FIXME: use toString() instead of getOID()
 		if(c == null)
-			store.update(this, "camera", "0");
+			store.update(this, "camera", null);
 		else
-			store.update(this, "camera", c.getOID());
+			store.update(this, "camera", c.getName());
 		camera = c;
 	}
 
@@ -151,8 +150,13 @@ public class LaneControlSignalImpl extends TrafficDeviceImpl implements
 	}
 
 	/** Get verification camera */
-	public TrafficDevice getCamera() {
-		return camera;
+	public String getCamera() {
+		// FIXME: once LaneControlSignalImpl is SONAR, just return the
+		// camera
+		if(camera == null)
+			return null;
+		else
+			return camera.getName();
 	}
 
 	/**

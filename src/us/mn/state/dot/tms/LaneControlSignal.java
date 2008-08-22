@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2004  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
@@ -42,7 +38,7 @@ public interface LaneControlSignal extends TrafficDevice {
 		RemoteException;
 
 	/** Get verification camera */
-	public TrafficDevice getCamera() throws RemoteException;
+	public String getCamera() throws RemoteException;
 
 	/** Get the states of each module of this signal */
 	public int[] getSignals() throws RemoteException;

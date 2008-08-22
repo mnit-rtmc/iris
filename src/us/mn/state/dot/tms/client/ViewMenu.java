@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.tms.client.camera.CameraListForm;
+import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.dms.DMSListForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
@@ -154,7 +154,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CameraListForm(tc));
+				desktop.show(new CameraForm(st.getCameras()));
 			}
 		};
 		add(item);

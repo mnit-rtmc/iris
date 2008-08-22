@@ -14,53 +14,42 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * CCTV Camera
  *
  * @author Douglas Lau
  */
-public interface Camera extends TrafficDevice {
+public interface Camera extends Device2 {
 
-	/** Get the integer id of the camera */
-	int getUID() throws RemoteException;
+	/** SONAR type name */
+	String SONAR_TYPE = "camera";
 
 	/** Set the video encoder host name (and port) */
-	void setEncoder(String enc) throws TMSException, RemoteException;
+	void setEncoder(String enc);
 
 	/** Get the video encoder host name (and port) */
-	String getEncoder() throws RemoteException;
+	String getEncoder();
 
 	/** Set the input channel on the encoder */
-	void setEncoderChannel(int c) throws TMSException, RemoteException;
+	void setEncoderChannel(int c);
 
 	/** Get the input channel on the encoder */
-	int getEncoderChannel() throws RemoteException;
+	int getEncoderChannel();
 
 	/** Set the video NVR host name (and port) */
-	void setNvr(String n) throws TMSException, RemoteException;
+	void setNvr(String n);
 
 	/** Get the video NVR host name (and port) */
-	String getNvr() throws RemoteException;
+	String getNvr();
 
 	/** Set flag to allow publishing camera images */
-	void setPublish(boolean p) throws TMSException, RemoteException;
+	void setPublish(boolean p);
 
 	/** Get flag to allow publishing camera images */
-	boolean getPublish() throws RemoteException;
-
-	/** Get the side of the road that the camera is on */
-	short getRoadSide() throws RemoteException;
+	boolean getPublish();
 
 	/** Command the camera to pan, tilt or zoom */
-	void move(float p, float t, float z) throws RemoteException;
-
-	/** Not published camera status code */
-	public int STATUS_NOT_PUBLISHED = 11;
-
-	/** String descriptions of status codes */
-	public String[] STATUS = {
-		"Inactive", "Available", "Not Published"
-	};
+	void setPtz(float[] ptz);
 }

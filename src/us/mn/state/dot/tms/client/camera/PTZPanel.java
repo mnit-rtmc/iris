@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * GUI for controlling camera PTZ
@@ -104,7 +105,7 @@ public class PTZPanel extends JPanel {
 		}
 
 		/** Set the camera to move */
-		public void setCamera(CameraProxy cam) {
+		public void setCamera(Camera cam) {
 			setAction(new CameraMoveAction(cam, name, description,
 				pan, tilt, zoom));
 		}
@@ -157,7 +158,7 @@ public class PTZPanel extends JPanel {
 	}
 
 	/** Set a new camera to control */
-	public void setCamera(CameraProxy cam) {
+	public void setCamera(Camera cam) {
 		left.setCamera(cam);
 		right.setCamera(cam);
 		up.setCamera(cam);

@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -188,6 +189,22 @@ public class SonarState extends Client {
 		return geo_locs;
 	}
 
+	/** Cache of cameras */
+	protected final TypeCache<Camera> cameras;
+
+	/** Get the camera cache */
+	public TypeCache<Camera> getCameras() {
+		return cameras;
+	}
+
+	/** Camera proxy list model */
+	protected final ProxyListModel<Camera> camera_model;
+
+	/** Get the camera list model */
+	public ProxyListModel<Camera> getCameraModel() {
+		return camera_model;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -238,6 +255,9 @@ public class SonarState extends Client {
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
 		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class);
+		cameras = new TypeCache<Camera>(Camera.class);
+		camera_model = new ProxyListModel<Camera>(cameras);
+		camera_model.initialize();
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class);
@@ -265,6 +285,7 @@ public class SonarState extends Client {
 		populate(fonts);
 		populate(glyphs);
 		populate(monitors);
+		populate(cameras);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
@@ -296,6 +317,11 @@ public class SonarState extends Client {
 	/** Lookup a controller */
 	public Controller lookupController(String name) {
 		return controllers.getObject(name);
+	}
+
+	/** Lookup a camera */
+	public Camera lookupCamera(String name) {
+		return cameras.getObject(name);
 	}
 
 	/** Look up the specified connection */

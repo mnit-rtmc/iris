@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ public class WarningSignProxy extends TrafficDeviceProxy
 	}
 
 	/** Get the verification camera */
-	public TrafficDevice getCamera() throws RemoteException {
+	public String getCamera() throws RemoteException {
 		return sign.getCamera();
 	}
 

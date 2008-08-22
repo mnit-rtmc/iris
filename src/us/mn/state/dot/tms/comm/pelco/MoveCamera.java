@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.comm.pelco;
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * Pelco operation to move a camera.
  *
  * @author Douglas Lau
  */
-public class MoveCamera extends DeviceOperation {
+public class MoveCamera extends Device2Operation {
 
 	/** Range of PTZ values */
 	static protected final int PTZ_RANGE = 64;

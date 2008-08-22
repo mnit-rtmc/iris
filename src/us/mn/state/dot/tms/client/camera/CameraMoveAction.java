@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.rmi.RemoteException;
 import javax.swing.Action;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
 
 /**
  * Sends a PTZ command to a camera.
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
  * @author Douglas Lau
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  */
-public class CameraMoveAction extends TrafficDeviceAction {
+public class CameraMoveAction extends ProxyAction<Camera> {
 
 	/** The direction (and speed) to pan the camera */
 	protected final int pan;
@@ -36,7 +36,7 @@ public class CameraMoveAction extends TrafficDeviceAction {
 	protected final int zoom;
 
 	/** Create a new action to move the camera. */
-	public CameraMoveAction(CameraProxy c, String name, String description,
+	public CameraMoveAction(Camera c, String name, String description,
 		int p, int t, int z)
 	{
 		super(c);
@@ -49,8 +49,7 @@ public class CameraMoveAction extends TrafficDeviceAction {
 	}
 	
 	/** Actually perform the action */
-	protected void do_perform() throws RemoteException {
-		CameraProxy p = (CameraProxy)proxy;
-		p.camera.move(pan, tilt, zoom);
+	protected void do_perform() {
+// FIXME	proxy.move(pan, tilt, zoom);
 	}
 }

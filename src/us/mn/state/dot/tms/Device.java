@@ -22,7 +22,7 @@ import java.rmi.RemoteException;
  *
  * @author Douglas Lau
  */
-public interface Device extends TMSObject, ControllerIO {
+public interface Device extends TMSObject, ControllerIO_RMI {
 
 	/** Get the active status */
 	public boolean isActive() throws RemoteException;

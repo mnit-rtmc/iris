@@ -45,9 +45,6 @@ public interface TMS extends Remote {
 	/** Get the warning sign list */
 	public DeviceList getWarningSignList() throws RemoteException;
 
-	/** Get the camera list */
-	public DeviceList getCameraList() throws RemoteException;
-
 	/** Get the lane control signal list */
 	public LCSList getLCSList() throws RemoteException;
 

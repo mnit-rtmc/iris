@@ -14,53 +14,112 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.Map;
+import java.sql.ResultSet;
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.vault.FieldMap;
 
 /**
- * CameraImpl
+ * CameraImpl represents a single CCTV camera.
  *
  * @author Douglas Lau
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  */
-public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
+public class CameraImpl extends Device2Impl implements Camera {
 
-	/** ObjectVault table name */
-	static public final String tableName = "camera";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
-
-	/** Create a new camera with a string id */
-	public CameraImpl(String i) throws TMSException, RemoteException {
-		super(i);
-	}
-
-	/** Create a camera from an ObjectVault field map */
-	protected CameraImpl(FieldMap fields) throws RemoteException {
-		super(fields);
+	/** Load all the cameras */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading cameras...");
+		namespace.registerType(SONAR_TYPE, CameraImpl.class);
+		store.query("SELECT name, geo_loc, controller, pin, notes, " +
+			"encoder, encoder_channel, nvr, publish " +
+			"FROM camera;", new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new CameraImpl(namespace,
+					row.getString(1),	// name
+					row.getString(2),	// geo_loc
+					row.getString(3),	// controller
+					row.getInt(4),		// pin
+					row.getString(5),	// notes
+					row.getString(6),	// encoder
+					row.getInt(7),	// encoder_channel
+					row.getString(8),	// nvr
+					row.getBoolean(9)	// publish
+				));
+			}
+		});
 	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
-		return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("geo_loc", geo_loc.getName());
+		if(controller != null)
+			map.put("controller", controller.getName());
+		map.put("pin", pin);
+		map.put("notes", notes);
+		map.put("encoder", encoder);
+		map.put("encoder_channel", encoder_channel);
+		map.put("nvr", nvr);
+		map.put("publich", publish);
+		return map;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new camera with a string name */
+	public CameraImpl(String n) throws TMSException {
+		super(n);
+	}
+
+	/** Create a camera */
+	protected CameraImpl(String n, GeoLoc l, ControllerImpl c, int p,
+		String nt, String e, int ec, String nv, boolean pb)
+	{
+		super(n, l, c, p, nt);
+		encoder = e;
+		encoder_channel = ec;
+		nvr = nv;
+		publish = pb;
+	}
+
+	/** Create a camera */
+	protected CameraImpl(Namespace ns, String n, String l, String c, int p,
+		String nt, String e, int ec, String nv, boolean pb)
+		throws NamespaceError
+	{
+		this(n, (GeoLoc)ns.getObject(GeoLoc.SONAR_TYPE, l),
+			(ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
+			p, nt, e, ec, nv, pb);
 	}
 
 	/** Host (and port) of encoder for digital video stream */
 	protected String encoder;
 
 	/** Set the video encoder host name (and port) */
-	public synchronized void setEncoder(String enc) throws TMSException {
+	public void setEncoder(String enc) {
+		encoder = enc;
+	}
+
+	/** Set the video encoder host name (and port) */
+	public void doSetEncoder(String enc) throws TMSException {
 		if(enc.equals(encoder))
 			return;
 		store.update(this, "encoder", enc);
-		encoder = enc;
+		setEncoder(enc);
 	}
 
 	/** Get the video encoder host name (and port) */
@@ -72,11 +131,16 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	protected int encoder_channel;
 
 	/** Set the input channel on the encoder */
-	public synchronized void setEncoderChannel(int c) throws TMSException {
+	public void setEncoderChannel(int c) {
+		encoder_channel = c;
+	}
+
+	/** Set the input channel on the encoder */
+	public void doSetEncoderChannel(int c) throws TMSException {
 		if(c == encoder_channel)
 			return;
 		store.update(this, "encoder_channel", c);
-		encoder_channel = c;
+		setEncoderChannel(c);
 	}
 
 	/** Get the input channel on the encoder */
@@ -88,11 +152,16 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	protected String nvr;
 
 	/** Set the video NVR host name (and port) */
-	public synchronized void setNvr(String n) throws TMSException {
+	public void setNvr(String n) {
+		nvr = n;
+	}
+
+	/** Set the video NVR host name (and port) */
+	public void doSetNvr(String n) throws TMSException {
 		if(n.equals(nvr))
 			return;
 		store.update(this, "nvr", n);
-		nvr = n;
+		setNvr(n);
 	}
 
 	/** Get the video NVR host name (and port) */
@@ -104,11 +173,16 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 	protected boolean publish;
 
 	/** Set flag to allow publishing camera images */
-	public synchronized void setPublish(boolean p) throws TMSException {
+	public void setPublish(boolean p) {
+		publish = p;
+	}
+
+	/** Set flag to allow publishing camera images */
+	public void doSetPublish(boolean p) throws TMSException {
 		if(p == publish)
 			return;
 		store.update(this, "publish", p);
-		publish = p;
+		setPublish(p);
 	}
 
 	/** Get flag to allow publishing camera images */
@@ -116,56 +190,15 @@ public class CameraImpl extends TrafficDeviceImpl implements Camera, Storable {
 		return publish;
 	}
 
-	/** Get the integer id of the camera */
-	public int getUID() {
-		try {
-			return Integer.parseInt(id.substring(1));
-		}
-		catch(NumberFormatException e) {
-			return 0;
-		}
-	}
-
-	/** Get the side of the road that the camera is on */
-	public short getRoadSide() {
-		GeoLoc loc = lookupGeoLoc();
-		if(loc == null)
-			return Road.NONE;
-		switch(loc.getFreeDir()) {
-			case Road.EAST:
-				return Road.SOUTH;
-			case Road.WEST:
-				return Road.NORTH;
-			case Road.NORTH:
-				return Road.EAST;
-			case Road.SOUTH:
-				return Road.WEST;
-			case Road.EAST_WEST:
-			case Road.NORTH_SOUTH:
-				//FIXME: add a value for cameras in the median
-				return Road.NONE;
-		}
-		return Road.NONE;
-	}
-
-	/** Get the current status code */
-	public int getStatusCode() {
-		if(!publish || getEncoder() == null)
-			return STATUS_NOT_PUBLISHED;
-		if(isActive())
-			return STATUS_AVAILABLE;
-		else
-			return STATUS_INACTIVE;
-	}
-
-	/** Notify all observers for an update */
-	public void notifyUpdate() {
-		super.notifyUpdate();
-		cameraList.update(id);
-	}
-
 	/** Command the camera pan, tilt or zoom */
-	public void move(float p, float t, float z) {
+	public void setPtz(float [] ptz) {
+		// FIXME: SONAR should not send notification to clients for
+		// this write-only attribute.
+		if(ptz.length != 3)
+			return;
+		float p = ptz[0];
+		float t = ptz[1];
+		float z = ptz[2];
 		MessagePoller mp = getPoller();
 		if(mp instanceof CameraPoller) {
 			CameraPoller cp = (CameraPoller)mp;

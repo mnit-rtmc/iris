@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.ControllerIO_RMI;
 import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -133,14 +133,16 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return st.getControllers();
 	}
 
-	/** Get the ControllerIO array */
-	protected ControllerIO[] getControllerIO() {
+	/** Get the ControllerIO_RMI array */
+	protected ControllerIO_RMI[] getControllerIO() {
 		Integer[] cio = proxy.getCio();
-		ControllerIO[] io = new ControllerIO[cio.length];
+		ControllerIO_RMI[] io = new ControllerIO_RMI[cio.length];
 		TMSProxy tms = connection.getProxy();
 		for(int i = 0; i < cio.length; i++) {
-			if(cio[i] != null)
-				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
+			if(cio[i] != null) {
+				io[i] = (ControllerIO_RMI)tms.getTMSObject(
+					cio[i]);
+			}
 		}
 		return io;
 	}

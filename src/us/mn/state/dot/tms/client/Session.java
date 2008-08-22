@@ -28,9 +28,10 @@ import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationMap;
-import us.mn.state.dot.tms.client.camera.CameraHandler;
+import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSHandler;
 import us.mn.state.dot.tms.client.dms.DMSTab;
@@ -43,6 +44,7 @@ import us.mn.state.dot.tms.client.roads.R_NodeLayer;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
+import us.mn.state.dot.tms.client.sonar.SonarLayer;
 import us.mn.state.dot.tms.client.warning.WarningSignHandler;
 import us.mn.state.dot.tms.utils.Agency;
 
@@ -78,8 +80,11 @@ public class Session {
 	/** Incident layer */
 	protected final TmsIncidentLayer incLayer;
 
+	/** Camera manager */
+	protected final CameraManager cam_manager;
+
 	/** Camera layer */
-	protected final TmsMapLayer camLayer;
+	protected final SonarLayer<Camera> camLayer;
 
 	/** List of all tabs */
 	protected final List<IrisTab> tabs = new LinkedList<IrisTab>();
@@ -153,9 +158,8 @@ public class Session {
 	}
 
 	/** Add the camera tab */
-	protected void addCameraTab(final SonarState st) throws RemoteException {
-		tabs.add(new CameraTab((CameraHandler)camLayer.getHandler(),
-			props, logger, st));
+	protected void addCameraTab(final SonarState st, IrisUser user) {
+		tabs.add(new CameraTab(cam_manager, props, logger, st, user));
 	}
 
 	/** Add the roadway tab */
@@ -189,7 +193,8 @@ public class Session {
 			incLayer=null;
 		}
 
-		camLayer = CameraHandler.createLayer(tmsConnection);
+		cam_manager = new CameraManager(st.getCameras());
+		camLayer = cam_manager.getLayer();
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
 		if(user.hasPermission(IrisPermission.DMS_TAB))
@@ -200,7 +205,7 @@ public class Session {
 			addIncidentTab();
 		if(user.hasPermission(IrisPermission.LCS_TAB))
 			addLcsTab();
-		addCameraTab(st);
+		addCameraTab(st, user);
 		if(user.hasPermission(IrisPermission.ADMINISTRATOR))
 			addRoadwayTab();
 	}

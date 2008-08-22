@@ -91,9 +91,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Warning sign list */
 	static SortedListImpl warnList;
 
-	/** Camera list */
-	static SortedListImpl cameraList;
-
 	/** LCS list */
 	static LCSListImpl lcsList;
 
@@ -364,6 +361,19 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		catch(NamespaceError e) {
 			e.printStackTrace();
 			return false;
+		}
+	}
+
+	/** Lookup a camera in the SONAR namespace */
+	static public CameraImpl lookupCamera(String name) {
+		try {
+			return (CameraImpl)namespace.lookupObject(
+				Camera.SONAR_TYPE, name);
+		}
+		catch(NamespaceError e) {
+			System.err.println("lookupCamera(" + name +
+				") FAILED: " + e.getMessage());
+			return null;
 		}
 	}
 

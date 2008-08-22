@@ -34,7 +34,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.ControllerIO_RMI;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.DMS;
@@ -85,7 +85,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Get the type of the specified ControllerIO device */
-	static protected DeviceType getType(ControllerIO cio) {
+	static protected DeviceType getType(ControllerIO_RMI cio) {
 		if(cio instanceof Camera)
 			return DeviceType.Camera;
 		else if(cio instanceof Detector)
@@ -117,13 +117,13 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected final TMSProxy tms;
 
 	/** Array of ControllerIO assignments */
-	protected ControllerIO[] io;
+	protected ControllerIO_RMI[] io;
 
 	/** Array of ControllerIO device types */
 	protected DeviceType[] types;
 
 	/** Available camera model */
-	protected final WrapperComboBoxModel c_model;
+//	protected final WrapperComboBoxModel c_model;
 
 	/** Available detector model */
 	protected final WrapperComboBoxModel dt_model;
@@ -152,10 +152,10 @@ public class ControllerIOModel extends AbstractTableModel {
 	{
 		controller = c;
 		tms = _tms;
-		io = new ControllerIO[0];
+		io = new ControllerIO_RMI[0];
 		types = new DeviceType[0];
-		c_model = new WrapperComboBoxModel(
-			tms.getAvailableCameras().getModel(), true);
+//		c_model = new WrapperComboBoxModel(
+//			tms.getAvailableCameras().getModel(), true);
 		dt_model = new WrapperComboBoxModel(
 			tms.getAvailable().getModel(), true);
 		dms_model = new WrapperComboBoxModel(
@@ -169,7 +169,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Set the array of controller IO assignments */
-	public void setCio(ControllerIO[] cio) {
+	public void setCio(ControllerIO_RMI[] cio) {
 		io = cio;
 		types = new DeviceType[cio.length];
 		for(int i = 0; i < cio.length; i++)
@@ -228,7 +228,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected void setDeviceType(int pin, DeviceType io_type) {
 		int row = pin - 1;
 		if(io_type != types[pin]) {
-			ControllerIO cio = io[pin];
+			ControllerIO_RMI cio = io[pin];
 			if(cio != null) {
 				try {
 					cio.setController(null);
@@ -247,7 +247,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected void setDevice(int pin, Object value) {
 		try {
 			clearDevice(pin);
-			ControllerIO cio = lookupControllerIO(types[pin],
+			ControllerIO_RMI cio = lookupControllerIO(types[pin],
 				value);
 			if(cio != null) {
 				cio.setPin(pin);
@@ -262,7 +262,7 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Clear the device at the specified pin */
 	protected void clearDevice(int pin) throws Exception {
-		ControllerIO cio = io[pin];
+		ControllerIO_RMI cio = io[pin];
 		if(cio != null) {
 			cio.setController(null);
 			((TMSObject)cio).notifyUpdate();
@@ -270,15 +270,15 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Lookup the ControllerIO for the given value */
-	protected ControllerIO lookupControllerIO(DeviceType d, Object value)
-		throws RemoteException
+	protected ControllerIO_RMI lookupControllerIO(DeviceType d,
+		Object value) throws RemoteException
 	{
 		if(d == null || value == null)
 			return null;
 		String v = value.toString();
 		switch(d) {
-			case Camera:
-				return lookupCamera(v);
+//			case Camera:
+//				return lookupCamera(v);
 			case Detector:
 				try {
 					int index = Integer.parseInt(v);
@@ -298,11 +298,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			default:
 				return null;
 		}
-	}
-
-	protected Camera lookupCamera(String id) throws RemoteException {
-		DeviceList s = (DeviceList)tms.getCameraList();
-		return (Camera)s.getElement(id);
 	}
 
 	protected Detector lookupDetector(int index) throws RemoteException {
@@ -362,8 +357,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		if(d == null)
 			return no_model;
 		switch(d) {
-			case Camera:
-				return c_model;
+//			case Camera:
+//				return c_model;
 			case Detector:
 				return dt_model;
 			case DMS:

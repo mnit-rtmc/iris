@@ -89,8 +89,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		dmss.load( DMSImpl.class, "id" );
 		System.err.println("Loading warning signs...");
 		warn_signs.load(WarningSignImpl.class, "id");
-		System.err.println( "Loading cameras..." );
-		cameras.load( CameraImpl.class, "id" );
 		System.err.println( "Loading lane control signals..." );
 		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
@@ -313,9 +311,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Warning sign list */
 	protected final WarningSignList warn_signs;
 
-	/** Camera list */
-	protected final CameraList cameras;
-
 	/** Lane Control Signals list */
 	protected final LCSListImpl lcss;
 
@@ -329,7 +324,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		meterList = meters;
 		dmsList = dmss;
 		warnList = warn_signs;
-		cameraList = cameras;
 		lcsList = lcss;
 	}
 
@@ -345,7 +339,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		meters = new RampMeterListImpl();
 		dmss = new DMSListImpl();
 		warn_signs = new WarningSignList();
-		cameras = new CameraList();
 		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
@@ -378,11 +371,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Get the warning sign list */
 	public DeviceList getWarningSignList() {
 		return warn_signs;
-	}
-
-	/** Get the camera list */
-	public DeviceList getCameraList() {
-		return cameras;
 	}
 
 	/** Get the lane control signal list */

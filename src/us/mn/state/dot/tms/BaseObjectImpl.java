@@ -48,6 +48,7 @@ abstract public class BaseObjectImpl implements Storable {
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
 		SignTextImpl.loadAll();
+		CameraImpl.loadAll();
 	}
 
 	/** Get the primary key name */

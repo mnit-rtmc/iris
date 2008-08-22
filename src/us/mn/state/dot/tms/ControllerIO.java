@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
-
 /**
  * ControllerIO is an input/output connected to a controller (alarm or device)
  *
@@ -23,15 +21,9 @@ import java.rmi.RemoteException;
  */
 public interface ControllerIO {
 
-	/** Set the controller for the I/O */
-	void setController(String c) throws TMSException, RemoteException;
-
-	/** Get the controller for the I/O */
-	String getController() throws RemoteException;
-
 	/** Set the controller I/O pin number */
-	void setPin(int p) throws TMSException, RemoteException;
+	void setPin(int p) throws Exception;
 
 	/** Get the controller I/O pin number */
-	int getPin() throws RemoteException;
+	int getPin() throws Exception;
 }

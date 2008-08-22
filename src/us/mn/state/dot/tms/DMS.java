@@ -36,7 +36,7 @@ public interface DMS extends TrafficDevice {
 	public void setCamera(String id) throws TMSException, RemoteException;
 
 	/** Get verification camera */
-	public TrafficDevice getCamera() throws RemoteException;
+	public String getCamera() throws RemoteException;
 
 	/** Get the miles downstream of reference point */
 	public Float getMile() throws RemoteException;

@@ -17,12 +17,10 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.BorderLayout;
 import java.util.Properties;
 import java.util.logging.Logger;
-
 import javax.swing.JPanel;
-
 import us.mn.state.dot.tms.client.IrisTab;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.device.StatusSummary;
+import us.mn.state.dot.tms.client.security.IrisUser;
 
 /**
  * Provides a GUI for the camera tab on the operator interface for IRIS.
@@ -38,22 +36,22 @@ public class CameraTab extends IrisTab {
 	protected final Logger logger;
 
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(CameraHandler handler, Properties p,
-		Logger l, final SonarState st)
+	public CameraTab(CameraManager manager, Properties p, Logger l,
+		SonarState st, IrisUser user)
 	{
 		super("Camera", "Camera summary");
-		tabPanel = createSideBar(handler, p, st);
+		tabPanel = createSideBar(manager, p, st, user);
 		logger = l;
 	}
 
 	/** Create the side bar component */
-	protected JPanel createSideBar(CameraHandler handler, Properties props,
-		SonarState st)
+	protected JPanel createSideBar(CameraManager manager, Properties props,
+		SonarState st, IrisUser user)
 	{
 		JPanel p = new JPanel(new BorderLayout());
-		p.add(new CameraViewer(handler, props, logger, st),
+		p.add(new CameraViewer(manager, props, logger, st, user),
 			BorderLayout.NORTH);
-		p.add(new StatusSummary(handler), BorderLayout.CENTER);
+		p.add(manager.createStyleSummary(), BorderLayout.CENTER);
 		return p;
 	}
 

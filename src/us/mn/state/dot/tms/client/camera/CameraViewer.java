@@ -20,32 +20,29 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.rmi.RemoteException;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
-
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsSelectionEvent;
-import us.mn.state.dot.tms.client.TmsSelectionListener;
-import us.mn.state.dot.tms.client.TmsSelectionModel;
+import us.mn.state.dot.tms.client.security.IrisUser;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.video.AbstractDataSource;
-import us.mn.state.dot.video.Camera;
 import us.mn.state.dot.video.Client;
 import us.mn.state.dot.video.HttpDataSource;
 import us.mn.state.dot.video.VideoException;
@@ -55,8 +52,9 @@ import us.mn.state.dot.video.VideoException;
  *
  * @author Douglas Lau
  */
-public final class CameraViewer extends JPanel implements TmsSelectionListener {
-
+public class CameraViewer extends JPanel
+	implements ProxySelectionListener<Camera>
+{
 	/** The number of frames to process (for streaming) */
 	static protected final int STREAM_DURATION = 300;
 
@@ -78,11 +76,27 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	/** Network worker thread */
 	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
 
+	/** Parse the integer ID of a monitor or camera */
+	static protected int parseUID(String name) {
+		String id = name;
+		while(!Character.isDigit(id.charAt(0)))
+			id = id.substring(1);
+		try {
+			return Integer.parseInt(id);
+		}
+		catch(NumberFormatException e) {
+			return 0;
+		}
+	}
+
 	/** Properties for configuring the video client */
 	private final Properties videoProps;
 
 	/** Message logger */
 	protected final Logger logger;
+
+	/** Sonar state */
+	protected final SonarState state;
 
 	/** The base URLs of the backend video stream servers */
 	private final String[] streamUrls;
@@ -116,11 +130,14 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final JPanel videoControls =
 		new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-	/** Device handler for camera devices */
-	protected final CameraHandler handler;
+	/** Proxy manager for camera devices */
+	protected final CameraManager manager;
+
+	/** Logged in user */
+	protected final IrisUser user;
 
 	/** Currently selected camera */
-	protected CameraProxy selected = null;
+	protected Camera selected = null;
 
 	/** Joystick polling thread */
 	protected final JoystickThread joystick = new JoystickThread();
@@ -128,16 +145,18 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected final TypeCache<VideoMonitor> monitors;
 	
 	/** Create a new camera viewer */
-	public CameraViewer(CameraHandler h, Properties p,
-		Logger l, final SonarState st)
+	public CameraViewer(CameraManager m, Properties p, Logger l,
+		SonarState st, IrisUser u)
 	{
 		super(new GridBagLayout());
-		monitors = st.getVideoMonitors();
+		manager = m;
+		manager.getSelectionModel().addProxySelectionListener(this);
 		videoProps = p;
 		logger = l;
+		state = st;
+		user = u;
+		monitors = state.getVideoMonitors();
 		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
-		handler = h;
-		handler.getSelectionModel().addTmsSelectionListener( this );
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
@@ -157,7 +176,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		add(txtId, bag);
 		bag.gridx = 3;
 		bag.weightx = 0.5;
-		cmbOutput = createOutputCombo(st);
+		cmbOutput = createOutputCombo();
 		add(cmbOutput, bag);
 		bag.gridx = 1;
 		bag.gridy = 1;
@@ -209,7 +228,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 				}
 			}
 		};
-		Connection c = st.lookupConnection(st.getConnection());
+		Connection c = state.lookupConnection(state.getConnection());
 		client.setSonarSessionId(c.getSessionId());
 		client.setRate(30);
 		t.setDaemon(true);
@@ -249,8 +268,8 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	protected float zoom;
 
 	/** Poll the joystick and send PTZ command to server */
-	protected void pollJoystick() throws RemoteException {
-		CameraProxy proxy = selected;	// Avoid race
+	protected void pollJoystick() {
+		Camera proxy = selected;	// Avoid race
 		if(proxy != null) {
 			float p = filter_deadzone(joystick.getPan());
 			float t = -filter_deadzone(joystick.getTilt());
@@ -258,7 +277,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 			if(p != 0 || pan != 0 || t != 0 || tilt != 0 ||
 			   z != 0 || zoom != 0)
 			{
-				proxy.camera.move(p, t, z);
+// FIXME			proxy.move(p, t, z);
 				pan = p;
 				tilt = t;
 				zoom = z;
@@ -266,35 +285,23 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		}
 	}
 
-	/** Lookup the camera by ID */
-	protected CameraProxy lookupCamera(String id) {
-		Map proxies = handler.getProxies();
-		synchronized(proxies) {
-			Object proxy = proxies.get(id);
-			if(proxy instanceof CameraProxy)
-				return (CameraProxy)proxy;
-			else
-				return null;
-		}
-	}
-
 	/** Select the next camera */
 	protected void selectNextCamera() {
-		CameraProxy camera = selected;	// Avoid race
+		Camera camera = selected;	// Avoid race
 		if(camera != null)
-			selectCamera(camera.getUID() + 1);
+			selectCamera(parseUID(camera.getName()) + 1);
 	}
 
 	/** Select the previous camera */
 	protected void selectPreviousCamera() {
-		CameraProxy camera = selected;	// Avoid race
+		Camera camera = selected;	// Avoid race
 		if(camera != null)
-			selectCamera(camera.getUID() - 1);
+			selectCamera(parseUID(camera.getName()) - 1);
 	}
 
 	/** Select the camera by number */
 	protected void selectCamera(int uid) {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		b.append(uid);
 		while(b.length() < 3)
 			b.insert(0, '0');
@@ -303,11 +310,9 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** Select the camera by ID */
 	protected void selectCamera(String id) {
-		CameraProxy proxy = lookupCamera(id);
-		if(proxy != null) {
-			TmsSelectionModel sel = handler.getSelectionModel();
-			sel.setSelected(proxy);
-		}
+		Camera proxy = state.lookupCamera(id);
+		if(proxy != null)
+			manager.getSelectionModel().setSelected(proxy);
 	}
 
 	/** Dispose of the camera viewer */
@@ -317,7 +322,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	}
 
 	/** Set the selected camera */
-	public void setSelected(CameraProxy camera) {
+	public void setSelected(Camera camera) {
 		selected = camera;
 		pan = 0;
 		tilt = 0;
@@ -326,22 +331,29 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 		refreshStatus();
 	}
 
-	/** Called whenever the selected TMS object changes */
-	public void selectionChanged(TmsSelectionEvent e) {
-		final TMSObject o = e.getSelected();
-		if(o instanceof CameraProxy)
-			setSelected((CameraProxy)o);
+	/** Called whenever a camera is added to the selection */
+	public void selectionAdded(Camera c) {
+		setSelected(c);
+	}
+
+	/** Called whenever a camera is removed from the selection */
+	public void selectionRemoved(Camera c) {
+		if(c == selected)
+			setSelected(null);
 	}
 
 	/** Called whenever the TMS object is updated */
 	public void refreshUpdate() {
-		CameraProxy camera = selected;	// Avoid NPE
+		Camera camera = selected;	// Avoid NPE
 		if(camera != null) {
-			txtId.setText(camera.getId());
-			txtLocation.setText(camera.getDescription());
-			play.setEnabled(camera.isActive());
-			stop.setEnabled(camera.isActive());
-			if(camera.isActive())
+			txtId.setText(camera.getName());
+			txtLocation.setText(GeoLocHelper.getDescription(
+				camera.getGeoLoc()));
+			Controller ctr = camera.getController();
+			boolean isActive = ctr != null && ctr.getActive();
+			play.setEnabled(isActive);
+			stop.setEnabled(isActive);
+			if(isActive)
 				ptz_panel.setCamera(camera);
 			else
 				ptz_panel.setEnabled(false);
@@ -351,7 +363,7 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 
 	/** Refresh the status of the device */
 	public void refreshStatus() {
-		CameraProxy camera = selected;
+		Camera camera = selected;
 		if(camera == null) {
 			clear();
 			return;
@@ -373,15 +385,16 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	}
 
 	/** Start video streaming */
-	protected void playPressed(CameraProxy c) throws MalformedURLException,
+	protected void playPressed(Camera c) throws MalformedURLException,
 		VideoException
 	{
-		Camera camera = new Camera();
-		camera.setId(c.getId());
+		us.mn.state.dot.video.Camera camera =
+			new us.mn.state.dot.video.Camera();
+		camera.setId(c.getName());
 		client.setCamera(camera);
 		monitor.setDataSource(new HttpDataSource(client,
-			new URL(streamUrls[client.getArea()] + "?id=" + client.getCameraId())),
-			STREAM_DURATION);
+			new URL(streamUrls[client.getArea()] + "?id=" +
+			client.getCameraId())), STREAM_DURATION);
 	}
 
 	/** Stop video streaming */
@@ -399,13 +412,13 @@ public final class CameraViewer extends JPanel implements TmsSelectionListener {
 	}
 
 	/** Create the video output selection combo box */
-	private JComboBox createOutputCombo(final SonarState st){
+	private JComboBox createOutputCombo() {
 		JComboBox box = new JComboBox();
-		String userName = handler.getUser().getName();
-		FilteredMonitorModel m =
-			new FilteredMonitorModel(st.lookupUser(userName), st);
+		FilteredMonitorModel m = new FilteredMonitorModel(
+			state.lookupUser(user.getName()), state);
 		box.setModel(new WrapperComboBoxModel(m));
-		if(m.getSize()>1) box.setSelectedIndex(1);
+		if(m.getSize() > 1)
+			box.setSelectedIndex(1);
 		return box;
 	}
 }

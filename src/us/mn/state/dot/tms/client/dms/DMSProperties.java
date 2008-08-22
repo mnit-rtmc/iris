@@ -350,7 +350,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		h_mm = sign.getSignWidth();
 		hb_mm = sign.getHorizontalBorder();
 
-		ListModel model = tms.getCameras().getModel();
+		ListModel model = connection.getSonarState().getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(model));
 		TimingPlanModel plan_model = new TimingPlanModel(
 			(TimingPlanList)tms.getTimingPlans().getList(), sign,
@@ -990,9 +990,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the sign */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		TrafficDevice c = sign.getCamera();
+		String c = sign.getCamera();
 		if(c != null)
-			camera.setSelectedItem(c.getId());
+			camera.setSelectedItem(c);
 		String t = sign.getTravel();
 		Color color = Color.GRAY;
 		if(sign.isActive())

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,8 @@ public class DirectionalIncidentTheme extends StyledTheme {
 
 	/** Create a new directional incident theme */
 	public DirectionalIncidentTheme(TypeCache<SystemPolicy> c) {
-		super("Incidents", new Style("default", null, Color.BLACK), IncidentLayer.TWO_WAY);
+		super("Incidents", IncidentLayer.TWO_WAY);
+		addStyle(new Style("default", null, Color.BLACK));
 		int[] r = new int[4];
 		r[0] = getPolicyValue(c, SystemPolicy.RING_RADIUS_0);
 		r[1] = getPolicyValue(c, SystemPolicy.RING_RADIUS_1);

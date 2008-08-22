@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.comm.vicon;
 
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.VideoMonitorImpl;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * ViconOperation is the base class for the Vicon comm protocol.
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  * @author Douglas Lau
  */
-abstract public class ViconOperation extends DeviceOperation {
+abstract public class ViconOperation extends Device2Operation {
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitorImpl monitor;

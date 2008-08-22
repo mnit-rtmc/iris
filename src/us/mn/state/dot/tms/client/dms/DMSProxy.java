@@ -140,11 +140,11 @@ public class DMSProxy extends TrafficDeviceProxy {
 	/** Update the DMS update information */
 	public void updateUpdateInfo() throws RemoteException {
 		super.updateUpdateInfo();
-		TrafficDevice camera = dms.getCamera();
+		String camera = dms.getCamera();
 		if(camera == null)
 			camera_id = " ";
 		else
-			camera_id = camera.getId();
+			camera_id = camera;
 		text_lines = dms.getTextLines();
 		line_height = dms.getLineHeightPixels();
 

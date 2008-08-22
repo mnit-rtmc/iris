@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public class WarningSignProperties extends TrafficDeviceForm {
 		sign = (WarningSign)s.getElement(id);
 		setDevice(sign);
 		super.initialize();
-		ListModel m = tms.getCameras().getModel();
+		ListModel m = connection.getSonarState().getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(m));
 		location.addRow("Camera", camera);
 		location.add(new JLabel("Sign Text"));
@@ -71,9 +71,9 @@ public class WarningSignProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the warning sign */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		TrafficDevice c = sign.getCamera();
+		String c = sign.getCamera();
 		if(c != null)
-			camera.setSelectedItem(c.getId());
+			camera.setSelectedItem(c);
 		area.setText(sign.getText());
 	}
 

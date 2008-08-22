@@ -18,7 +18,6 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-
 import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.DetectorList;
 import us.mn.state.dot.tms.Login;
@@ -151,35 +150,6 @@ public class TMSProxy {
 		return availableWarningSigns;
 	}
 
-	/** Camera list */
-	protected final DeviceList camera_list;
-
-	/** Get the camera list */
-	public DeviceList getCameraList() {
-		return camera_list;
-	}
-
-	/** Available camera list */
-	protected final RemoteListModel availableCameras;
-
-	/** Get the available camera list */
-	public RemoteListModel getAvailableCameras() {
-		return availableCameras;
-	}
-
-	/** Camera list model */
-	protected RemoteListModel cameras;
-
-	/** Get the camera list model
-	 * @deprecated */
-	public RemoteListModel getCameras() { return cameras; }
-
-	/** Set the camera list model
-	 * @deprecated */
-	public void setCameras(RemoteListModel c) {
-		cameras = c;
-	}
-
 	/** Lane Control Signal list */
 	protected final RemoteListModel lcss;
 
@@ -220,9 +190,6 @@ public class TMSProxy {
 		warn_signs = new RemoteListModel(warn_list);
 		availableWarningSigns = new RemoteListModel(
 			warn_list.getAvailableList());
-		camera_list = tms.getCameraList();
-		availableCameras = new RemoteListModel(
-			camera_list.getAvailableList());
 		lcs_list = tms.getLCSList();
 		lcss = new RemoteListModel(lcs_list);
 		availableLCSs = new RemoteListModel(
@@ -238,7 +205,6 @@ public class TMSProxy {
 		availableMeters.dispose();
 		availableDMSs.dispose();
 		availableWarningSigns.dispose();
-		availableCameras.dispose();
 		availableLCSs.dispose();
 	}
 
