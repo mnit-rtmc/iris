@@ -110,4 +110,16 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		}
 		return null;
 	}
+
+	/** Find a proxy using a map searcher */
+	public T findProxy(MapSearcher s) {
+		synchronized(proxies) {
+			for(T proxy: proxies) {
+				MapGeoLoc loc = manager.findGeoLoc(proxy);
+				if(s.next(loc))
+					return proxy;
+			}
+		}
+		return null;
+	}
 }

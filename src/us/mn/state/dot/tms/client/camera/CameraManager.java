@@ -18,6 +18,8 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.StyleListModel;
@@ -30,8 +32,8 @@ import us.mn.state.dot.tms.client.sonar.StyleListModel;
 public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a new camera manager */
-	public CameraManager(TypeCache<Camera> c) {
-		super(c);
+	public CameraManager(TypeCache<Camera> c, GeoLocManager lm) {
+		super(c, lm);
 	}
 
 	/** Get the proxy type name */
@@ -69,8 +71,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Find the map geo location for a proxy */
-	protected MapGeoLoc findGeoLoc(Camera proxy) {
-		// FIXME
-		return null;
+	protected GeoLoc getGeoLoc(Camera proxy) {
+		return proxy.getGeoLoc();
 	}
 }

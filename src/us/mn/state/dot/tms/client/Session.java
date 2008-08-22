@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
 import us.mn.state.dot.tms.client.roads.R_NodeHandler;
 import us.mn.state.dot.tms.client.roads.R_NodeLayer;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
+import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.sonar.SonarLayer;
@@ -79,6 +80,9 @@ public class Session {
 
 	/** Incident layer */
 	protected final TmsIncidentLayer incLayer;
+
+	/** Location manager */
+	protected final GeoLocManager loc_manager;
 
 	/** Camera manager */
 	protected final CameraManager cam_manager;
@@ -193,7 +197,8 @@ public class Session {
 			incLayer=null;
 		}
 
-		cam_manager = new CameraManager(st.getCameras());
+		loc_manager = new GeoLocManager(st.getGeoLocs());
+		cam_manager = new CameraManager(st.getCameras(), loc_manager);
 		camLayer = cam_manager.getLayer();
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();

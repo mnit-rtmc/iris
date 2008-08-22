@@ -25,6 +25,7 @@ import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.GeoLoc;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -36,6 +37,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
+
+	/** Geo location manager */
+	protected final GeoLocManager loc_manager;
 
 	/** Selection model */
 	protected final ProxySelectionModel<T> s_model =
@@ -52,8 +56,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 	protected final SonarLayer<T> layer;
 
 	/** Create a new proxy manager */
-	protected ProxyManager(TypeCache<T> c) {
+	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
 		cache = c;
+		loc_manager = lm;
 		theme = createTheme();
 		for(Symbol s: theme.getSymbols()) {
 			String name = s.getLabel();
@@ -151,13 +156,20 @@ abstract public class ProxyManager<T extends SonarObject> {
 	abstract protected StyleListModel<T> getAllModel();
 
 	/** Find the map geo location for a proxy */
-	abstract protected MapGeoLoc findGeoLoc(T proxy);
+	protected MapGeoLoc findGeoLoc(T proxy) {
+		GeoLoc loc = getGeoLoc(proxy);
+		return loc_manager.findMapGeoLoc(loc);
+	}
+
+	/** Get the GeoLoc for the specified proxy */
+	abstract protected GeoLoc getGeoLoc(T proxy);
 
 	/** Find the proxy for a map geo location */
-	public T findProxy(MapObject o) {
-		// FIXME
-		// cast to MapGeoLoc
-		// look up proxy in GeoLoc manager
-		return null;
+	public T findProxy(final MapObject o) {
+		return getAllModel().findProxy(new MapSearcher() {
+			public boolean next(MapObject mo) {
+				return o == mo;
+			}
+		});
 	}
 }

@@ -79,7 +79,10 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Get an appropriate style for the given map object */
 	public Style getStyle(MapObject o) {
 		T proxy = manager.findProxy(o);
-		return getStyle(proxy);
+		if(proxy != null)
+			return getStyle(proxy);
+		else
+			return dstyle;
 	}
 
 	/** Get an appropriate style for the given proxy object */
