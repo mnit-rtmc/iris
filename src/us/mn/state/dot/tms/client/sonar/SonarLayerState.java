@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.sonar;
 
 import java.awt.Component;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.LayerState;
@@ -56,10 +57,10 @@ public class SonarLayerState<T extends SonarObject> extends LayerState {
 
 	/** Set the selection */
 	protected void setSelection() {
-		T[] proxies = model.getSelected();
-		MapGeoLoc[] sel = new MapGeoLoc[proxies.length];
+		List<T> proxies = model.getSelected();
+		MapGeoLoc[] sel = new MapGeoLoc[proxies.size()];
 		for(int i = 0; i < sel.length; i++)
-			sel[i] = manager.findGeoLoc(proxies[i]);
+			sel[i] = manager.findGeoLoc(proxies.get(i));
 		setSelections(sel);
 	}
 

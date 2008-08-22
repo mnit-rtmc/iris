@@ -60,9 +60,8 @@ public class ProxySelectionModel<T extends SonarObject> {
 	}
 
 	/** Get the selected TMS object */
-	public T[] getSelected() {
-		// FIXME: return array of selected proxy objects
-		return null;
+	public List<T> getSelected() {
+		return new LinkedList<T>(selected);
 	}
 
 	/** Add a proxy selection listener to the model */
