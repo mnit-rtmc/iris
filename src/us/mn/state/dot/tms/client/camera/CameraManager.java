@@ -14,14 +14,17 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
+import java.awt.Color;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
+import us.mn.state.dot.tms.client.sonar.ProxyTheme;
 import us.mn.state.dot.tms.client.sonar.StyleListModel;
 
 /**
@@ -30,6 +33,21 @@ import us.mn.state.dot.tms.client.sonar.StyleListModel;
  * @author Douglas Lau
  */
 public class CameraManager extends ProxyManager<Camera> {
+
+	/** Name of active style */
+	static protected final String STYLE_ACTIVE = "Active";
+
+	/** Name of inactive style */
+	static protected final String STYLE_INACTIVE = "Inactive";
+
+	/** Name of unpublished style */
+	static protected final String STYLE_UNPUBLISHED = "Not published";
+
+	/** Name of list model containing all objects */
+	static protected final String STYLE_ALL = "All";
+
+	/** Color for active camera style */
+	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
 	/** Create a new camera manager */
 	public CameraManager(TypeCache<Camera> c, GeoLocManager lm) {
@@ -44,20 +62,34 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a styled theme for cameras */
 	protected StyledTheme createTheme() {
-		// FIXME
-		return null;
-	}
-
-	/** Get the style list model containing all proxies */
-	protected StyleListModel<Camera> getAllModel() {
-		// FIXME
-		return null;
+		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
+			getProxyType(), new CameraMarker());
+		theme.addStyle(STYLE_ACTIVE, COLOR_ACTIVE);
+		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
+			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(STYLE_ALL);
+		return theme;
 	}
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, Camera proxy) {
-		// FIXME
+		if(STYLE_ACTIVE.equals(s)) {
+			Controller ctr = proxy.getController();
+			return ctr != null && ctr.getActive();
+		}
+		if(STYLE_INACTIVE.equals(s)) {
+			Controller ctr = proxy.getController();
+			return ctr == null || !ctr.getActive();
+		}
+		if(STYLE_UNPUBLISHED.equals(s))
+			return !proxy.getPublish();
 		return false;
+	}
+
+	/** Get the style list model containing all proxies */
+	protected StyleListModel<Camera> getAllModel() {
+		return getStyleModel(STYLE_ALL);
 	}
 
 	/** Show the properties form for the selected proxy */

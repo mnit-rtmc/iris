@@ -30,27 +30,27 @@ import us.mn.state.dot.sonar.SonarObject;
 public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Outline for stroking traffic devices */
-	static protected final Outline OUTLINE = Outline.createSolid(
+	static public final Outline OUTLINE = Outline.createSolid(
 		Color.BLACK, 30);
 
 	/** Outline for stroking traffic devices */
-	static protected final Outline INACTIVE_OUTLINE = Outline.createSolid(
+	static public final Outline OUTLINE_INACTIVE = Outline.createSolid(
 		Color.BLACK, 10);
 
 	/** Color to display inactive devices */
-	static protected final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
+	static public final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
 
 	/** Color to display failed devices */
-	static protected final Color COLOR_FAILED = Color.GRAY;
+	static public final Color COLOR_FAILED = Color.GRAY;
 
 	/** Color to display unavailable devices */
-	static protected final Color COLOR_UNAVAILABLE = Color.BLACK;
+	static public final Color COLOR_UNAVAILABLE = Color.BLACK;
 
 	/** Color to display available devices */
-	static protected final Color COLOR_AVAILABLE = new Color(96, 96, 255);
+	static public final Color COLOR_AVAILABLE = new Color(96, 96, 255);
 
 	/** Color to display deployed devices */
-	static protected final Color COLOR_DEPLOYED = Color.YELLOW;
+	static public final Color COLOR_DEPLOYED = Color.YELLOW;
 
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
@@ -67,13 +67,18 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Add a style to the theme */
 	public void addStyle(String name, Color color, Outline outline) {
 		Style style = new Style(name, outline, color);
-		dstyle = style;
 		addStyle(style);
 	}
 
 	/** Add a style to the theme */
 	public void addStyle(String name, Color color) {
 		addStyle(name, color, OUTLINE);
+	}
+
+	/** Add a default style to the theme */
+	public void addStyle(String name) {
+		dstyle = new Style(name, null, null);
+		addStyle(dstyle);
 	}
 
 	/** Get an appropriate style for the given map object */

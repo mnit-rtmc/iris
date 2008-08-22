@@ -29,9 +29,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  */
 public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 
-	/** Name of list model containing all objects */
-	static protected final String ALL = "All";
-
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
@@ -51,11 +48,6 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		name = n;
 		legend = l;
 		smodel = new StyleListSelectionModel<T>(m);
-	}
-
-	/** Create a style list model for all proxies */
-	public StyleListModel(ProxyManager<T> m) {
-		this(m, ALL, null);
 	}
 
 	/** Dispose of the list model */
