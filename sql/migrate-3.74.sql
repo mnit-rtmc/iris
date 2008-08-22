@@ -51,8 +51,8 @@ INSERT INTO device_camera (vault_oid, camera)
 	WHERE dms.camera = c.vault_oid);
 ALTER TABLE dms DROP COLUMN camera;
 ALTER TABLE dms ADD COLUMN camera VARCHAR(10);
-ALTER TABLE dms ADD CONSTRAINT fk_dms_camera FOREIGN KEY (camera)
-	REFERENCES camera(name);
+UPDATE dms SET camera = '';
+ALTER TABLE dms ALTER COLUMN camera SET NOT NULL;
 UPDATE dms SET camera = device_camera.camera
 	FROM device_camera WHERE dms.vault_oid = device_camera.vault_oid;
 
@@ -61,8 +61,8 @@ INSERT INTO device_camera (vault_oid, camera)
 	WHERE ramp_meter.camera = c.vault_oid);
 ALTER TABLE ramp_meter DROP COLUMN camera;
 ALTER TABLE ramp_meter ADD COLUMN camera VARCHAR(10);
-ALTER TABLE ramp_meter ADD CONSTRAINT fk_ramp_meter_camera FOREIGN KEY (camera)
-	REFERENCES camera(name);
+UPDATE ramp_meter SET camera = '';
+ALTER TABLE ramp_meter ALTER COLUMN camera SET NOT NULL;
 UPDATE ramp_meter SET camera = device_camera.camera
 	FROM device_camera WHERE ramp_meter.vault_oid = device_camera.vault_oid;
 
@@ -71,8 +71,8 @@ INSERT INTO device_camera (vault_oid, camera)
 	WHERE warning_sign.camera = c.vault_oid);
 ALTER TABLE warning_sign DROP COLUMN camera;
 ALTER TABLE warning_sign ADD COLUMN camera VARCHAR(10);
-ALTER TABLE warning_sign ADD CONSTRAINT fk_ramp_meter_camera
-	FOREIGN KEY (camera) REFERENCES camera(name);
+UPDATE warning_sign SET camera = '';
+ALTER TABLE warning_sign ALTER COLUMN camera SET NOT NULL;
 UPDATE warning_sign SET camera = device_camera.camera
 	FROM device_camera WHERE warning_sign.vault_oid = device_camera.vault_oid;
 
@@ -81,8 +81,8 @@ INSERT INTO device_camera (vault_oid, camera)
 	WHERE lcs.camera = c.vault_oid);
 ALTER TABLE lcs DROP COLUMN camera;
 ALTER TABLE lcs ADD COLUMN camera VARCHAR(10);
-ALTER TABLE lcs ADD CONSTRAINT fk_ramp_meter_camera
-	FOREIGN KEY (camera) REFERENCES camera(name);
+UPDATE lcs SET camera = '';
+ALTER TABLE lcs ALTER COLUMN camera SET NOT NULL;
 UPDATE lcs SET camera = device_camera.camera
 	FROM device_camera WHERE lcs.vault_oid = device_camera.vault_oid;
 
