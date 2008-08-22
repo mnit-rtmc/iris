@@ -36,10 +36,12 @@ public class StyleListSelectionModel<T extends SonarObject>
 		final ProxySelectionModel<T> sel = manager.getSelectionModel();
 		sel.addProxySelectionListener(new ProxySelectionListener<T>() {
 			public void selectionAdded(T proxy) {
+				// FIXME
 				// find the index of the proxy
 				// call addSelectionInterval
 			}
 			public void selectionRemoved(T proxy) {
+				// FIXME
 				// find the index of the proxy
 				// call removeSelectionInterval
 			}
@@ -48,6 +50,7 @@ public class StyleListSelectionModel<T extends SonarObject>
 			public void valueChanged(ListSelectionEvent e) {
 				if(e.getValueIsAdjusting())
 					return;
+				// FIXME
 				// iterate through event interval
 				// add/remove each proxy to/from sel model
 			}
