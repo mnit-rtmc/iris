@@ -22,7 +22,7 @@ import us.mn.state.dot.sonar.SonarObject;
  *
  * @author Douglas Lau
  */
-public interface Device2 extends SonarObject {
+public interface Device2 extends SonarObject, ControllerIO_SONAR {
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
