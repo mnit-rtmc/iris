@@ -370,13 +370,13 @@ public class CameraViewer extends JPanel
 		}
 		try {
 			Object o = cmbOutput.getSelectedItem();
-			if(o == null){
+			if(o == null)
 				playPressed(camera);
-			}else{
+			else {
 				stopPressed();
 				us.mn.state.dot.tms.VideoMonitor mon =
-					monitors.getObject((String)o);
-				//FIXME: do the actual switching here
+					monitors.getObject(o.toString());
+				// FIXME: do the actual switching here
 			}
 		}
 		catch(Exception e) {
