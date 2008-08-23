@@ -19,6 +19,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
 
+import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,6 +59,9 @@ public class DMSListForm extends SortedListForm {
 
 	/** Alert line 3 message field */
 	protected final JTextField line3 = new JTextField();
+
+	/** overwrite checkbox */
+	protected final JCheckBox overwrite = new JCheckBox("Overwrite existing sign messages");
 
 	/** Create a new DMSListForm */
 	public DMSListForm(TmsConnection tc) {
@@ -126,6 +130,11 @@ public class DMSListForm extends SortedListForm {
 		panel.add(line2);
 		lay.setConstraints(line3, bag);
 		panel.add(line3);
+
+		// overwrite checkbox
+		lay.setConstraints(overwrite, bag);
+		panel.add(overwrite);
+
 		bag.gridx = 0;
 		bag.gridwidth = 2;
 		bag.weightx = 0;
@@ -160,6 +169,7 @@ public class DMSListForm extends SortedListForm {
 		text[0] = line1.getText().trim().toUpperCase();
 		text[1] = line2.getText().trim().toUpperCase();
 		text[2] = line3.getText().trim().toUpperCase();
+		boolean ow=overwrite.isSelected(); //FIXME: use checkbox to create SignMessage here
 		signList.sendGroup(null, "Alert", text);
 	}
 
