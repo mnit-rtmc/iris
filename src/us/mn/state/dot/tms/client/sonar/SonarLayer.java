@@ -23,6 +23,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.event.LayerChangedEvent;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -70,20 +71,35 @@ public class SonarLayer<T extends SonarObject> extends Layer
 
 	/** Add a new proxy to the layer */
 	public void proxyAdded(T proxy) {
-		updateExtent();
-		notifyLayerChanged(LayerChangedEvent.DATA);
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				updateExtent();
+				notifyLayerChanged(LayerChangedEvent.DATA);
+			}
+		}.addToScheduler();
 	}
 
 	/** Remove a proxy from the model */
 	public void proxyRemoved(T proxy) {
-		updateExtent();
-		notifyLayerChanged(LayerChangedEvent.DATA);
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				updateExtent();
+				notifyLayerChanged(LayerChangedEvent.DATA);
+			}
+		}.addToScheduler();
 	}
 
 	/** Change a proxy in the model */
 	public void proxyChanged(T proxy, String attrib) {
-		// Can an attribute change affect the layer?
-		notifyLayerChanged(LayerChangedEvent.DATA);
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				// Can an attribute change affect the layer?
+				notifyLayerChanged(LayerChangedEvent.DATA);
+			}
+		}.addToScheduler();
 	}
 
 	/** Update the layer extent */

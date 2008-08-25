@@ -22,6 +22,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -96,13 +97,23 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Add a new proxy to the table model */
-	public void proxyAdded(T proxy) {
+	protected void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				fireTableRowsInserted(row, row);
 			}
 		});
+	}
+
+	/** Add a new proxy to the table model */
+	public void proxyAdded(final T proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyAddedSlow(proxy);
+			}
+		}.addToScheduler();
 	}
 
 	/** Remove a proxy from the table model */
@@ -115,7 +126,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Remove a proxy from the table model */
-	public void proxyRemoved(T proxy) {
+	protected void proxyRemovedSlow(T proxy) {
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
 			SwingUtilities.invokeLater(new Runnable() {
@@ -126,8 +137,18 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 	}
 
+	/** Remove a proxy from the table model */
+	public void proxyRemoved(final T proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyRemovedSlow(proxy);
+			}
+		}.addToScheduler();
+	}
+
 	/** Change a proxy in the table model */
-	public void proxyChanged(T proxy, String attrib) {
+	protected void proxyChangedSlow(T proxy, String attrib) {
 		int pre_row, post_row;
 		synchronized(proxies) {
 			pre_row = preChangeRow(proxy);
@@ -158,6 +179,16 @@ abstract public class ProxyTableModel<T extends SonarObject>
 				}
 			});
 		}
+	}
+
+	/** Change a proxy in the table model */
+	public void proxyChanged(final T proxy, final String attrib) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyChangedSlow(proxy, attrib);
+			}
+		}.addToScheduler();
 	}
 
 	/** Find and remove a proxy which may not be in proper sort order */

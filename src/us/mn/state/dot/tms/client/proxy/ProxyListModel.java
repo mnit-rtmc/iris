@@ -20,6 +20,7 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -81,7 +82,7 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Add a new proxy to the list model */
-	public void proxyAdded(T proxy) {
+	protected void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
 			final ListModel model = this;
@@ -91,6 +92,16 @@ public class ProxyListModel<T extends SonarObject>
 				}
 			});
 		}
+	}
+
+	/** Add a new proxy to the list model */
+	public void proxyAdded(final T proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyAddedSlow(proxy);
+			}
+		}.addToScheduler();
 	}
 
 	/** Remove a proxy from the model */
@@ -103,7 +114,7 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Remove a proxy from the model */
-	public void proxyRemoved(T proxy) {
+	protected void proxyRemovedSlow(final T proxy) {
 		final ListModel model = this;
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
@@ -115,8 +126,18 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
+	/** Remove a proxy from the model */
+	public void proxyRemoved(final T proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyRemovedSlow(proxy);
+			}
+		}.addToScheduler();
+	}
+
 	/** Change a proxy in the model */
-	public void proxyChanged(T proxy, String attrib) {
+	protected void proxyChangedSlow(final T proxy, final String attrib) {
 		final ListModel model = this;
 		int pre_row, post_row;
 		synchronized(proxies) {
@@ -148,6 +169,16 @@ public class ProxyListModel<T extends SonarObject>
 				}
 			});
 		}
+	}
+
+	/** Change a proxy in the list model */
+	public void proxyChanged(final T proxy, final String attrib) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyChangedSlow(proxy, attrib);
+			}
+		}.addToScheduler();
 	}
 
 	/** Find and remove a proxy which may not be in proper sort order */

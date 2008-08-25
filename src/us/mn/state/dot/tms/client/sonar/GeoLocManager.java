@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.sonar;
 
 import java.util.HashMap;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -45,28 +46,43 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	}
 
 	/** Add a new GeoLoc to the manager */
-	public void proxyAdded(GeoLoc proxy) {
-		MapGeoLoc loc = new MapGeoLoc(proxy);
-		synchronized(proxies) {
-			proxies.put(proxy.getName(), loc);
-		}
+	public void proxyAdded(final GeoLoc proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				MapGeoLoc loc = new MapGeoLoc(proxy);
+				synchronized(proxies) {
+					proxies.put(proxy.getName(), loc);
+				}
+			}
+		}.addToScheduler();
 	}
 
 	/** Remove a GeoLoc from the manager */
-	public void proxyRemoved(GeoLoc proxy) {
-		synchronized(proxies) {
-			proxies.remove(proxy.getName());
-		}
+	public void proxyRemoved(final GeoLoc proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				synchronized(proxies) {
+					proxies.remove(proxy.getName());
+				}
+			}
+		}.addToScheduler();
 	}
 
 	/** Change a proxy in the model */
-	public void proxyChanged(GeoLoc proxy, String attrib) {
-		MapGeoLoc loc;
-		synchronized(proxies) {
-			loc = proxies.get(proxy.getName());
-		}
-		if(loc != null)
-			loc.doUpdate();
+	public void proxyChanged(final GeoLoc proxy, String attrib) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				MapGeoLoc loc;
+				synchronized(proxies) {
+					loc = proxies.get(proxy.getName());
+				}
+				if(loc != null)
+					loc.doUpdate();
+			}
+		}.addToScheduler();
 	}
 
 	/** Find the map location for the given proxy */

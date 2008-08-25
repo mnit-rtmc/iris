@@ -18,6 +18,8 @@ import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import javax.swing.Box;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
@@ -34,6 +36,17 @@ import us.mn.state.dot.tms.GeoLoc;
  * @author Douglas Lau
  */
 abstract public class ProxyManager<T extends SonarObject> {
+
+	/** Make a menu label */
+	static protected Box makeMenuLabel(String id) {
+		Box b = Box.createHorizontalBox();
+		b.add(Box.createHorizontalStrut(6));
+		b.add(Box.createHorizontalGlue());
+		b.add(new JLabel(id));
+		b.add(Box.createHorizontalGlue());
+		b.add(Box.createHorizontalStrut(6));
+		return b;
+	}
 
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
