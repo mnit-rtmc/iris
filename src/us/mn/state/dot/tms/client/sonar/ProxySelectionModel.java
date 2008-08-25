@@ -59,9 +59,14 @@ public class ProxySelectionModel<T extends SonarObject> {
 		selected.clear();
 	}
 
-	/** Get the selected TMS object */
+	/** Get a list of the selected proxies */
 	public List<T> getSelected() {
 		return new LinkedList<T>(selected);
+	}
+
+	/** Get the count of selected objects */
+	public int getSelectedCount() {
+		return selected.size();
 	}
 
 	/** Add a proxy selection listener to the model */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.sonar;
 
+import java.util.LinkedList;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -66,12 +67,17 @@ public class StyleListSelectionModel<T extends SonarObject>
 
 	/** Update the proxy selection model from a selection event */
 	protected void updateProxySelectionModel(ListSelectionEvent e) {
+		LinkedList<T> s = new LinkedList<T>();
+		// First, remove unselected items
 		for(int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 			T proxy = model.getProxy(i);
 			if(isSelectedIndex(i))
-				sel.addSelected(proxy);
+				s.add(proxy);
 			else
 				sel.removeSelected(proxy);
 		}
+		// Now, add selected items
+		for(T proxy: s)
+			sel.addSelected(proxy);
 	}
 }

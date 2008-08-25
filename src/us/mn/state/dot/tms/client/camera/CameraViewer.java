@@ -333,7 +333,8 @@ public class CameraViewer extends JPanel
 
 	/** Called whenever a camera is added to the selection */
 	public void selectionAdded(Camera c) {
-		setSelected(c);
+		if(manager.getSelectionModel().getSelectedCount() <= 1)
+			setSelected(c);
 	}
 
 	/** Called whenever a camera is removed from the selection */
