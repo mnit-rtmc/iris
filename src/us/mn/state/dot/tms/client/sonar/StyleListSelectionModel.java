@@ -28,12 +28,21 @@ import us.mn.state.dot.sonar.SonarObject;
 public class StyleListSelectionModel<T extends SonarObject>
 	extends DefaultListSelectionModel
 {
+	/** Style list model */
+	protected final StyleListModel<T> model;
+
+	/** Proxy selection model */
+	protected final ProxySelectionModel<T> sel;
+
 	/** Flag to determine if an event was initiated by this model */
 	protected boolean initiated = false;
 
 	/** Create a new proxy list selection model */
-	public StyleListSelectionModel(ProxyManager<T> manager) {
-		final ProxySelectionModel<T> sel = manager.getSelectionModel();
+	public StyleListSelectionModel(StyleListModel<T> m,
+		ProxyManager<T> manager)
+	{
+		model = m;
+		sel = manager.getSelectionModel();
 		sel.addProxySelectionListener(new ProxySelectionListener<T>() {
 			public void selectionAdded(T proxy) {
 				// FIXME
@@ -50,10 +59,19 @@ public class StyleListSelectionModel<T extends SonarObject>
 			public void valueChanged(ListSelectionEvent e) {
 				if(e.getValueIsAdjusting())
 					return;
-				// FIXME
-				// iterate through event interval
-				// add/remove each proxy to/from sel model
+				updateProxySelectionModel(e);
 			}
 		});
+	}
+
+	/** Update the proxy selection model from a selection event */
+	protected void updateProxySelectionModel(ListSelectionEvent e) {
+		for(int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
+			T proxy = model.getProxy(i);
+			if(isSelectedIndex(i))
+				sel.addSelected(proxy);
+			else
+				sel.removeSelected(proxy);
+		}
 	}
 }

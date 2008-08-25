@@ -47,7 +47,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		manager = m;
 		name = n;
 		legend = l;
-		smodel = new StyleListSelectionModel<T>(m);
+		smodel = new StyleListSelectionModel<T>(this, m);
 	}
 
 	/** Dispose of the list model */
