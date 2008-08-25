@@ -77,14 +77,15 @@ public class CameraManager extends ProxyManager<Camera> {
 		if(STYLE_ACTIVE.equals(s)) {
 			Controller ctr = proxy.getController();
 			return ctr != null && ctr.getActive();
-		}
+		} else
 		if(STYLE_INACTIVE.equals(s)) {
 			Controller ctr = proxy.getController();
 			return ctr == null || !ctr.getActive();
-		}
+		} else
 		if(STYLE_UNPUBLISHED.equals(s))
 			return !proxy.getPublish();
-		return false;
+		else
+			return STYLE_ALL.equals(s);
 	}
 
 	/** Get the style list model containing all proxies */
@@ -99,8 +100,11 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a popup menu for the selected proxy object(s) */
 	protected JPopupMenu createPopup() {
-		// FIXME
-		return null;
+		JPopupMenu p = new JPopupMenu();
+//		p.add(makeMenuLabel(id));
+		p.add(new javax.swing.JLabel("Popup Test"));
+		p.addSeparator();
+		return p;
 	}
 
 	/** Find the map geo location for a proxy */
