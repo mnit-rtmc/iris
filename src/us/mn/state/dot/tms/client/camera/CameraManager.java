@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
+import java.util.List;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -120,13 +121,19 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a popup menu for the selected proxy object(s) */
 	protected JPopupMenu createPopup() {
-		if(s_model.getSelectedCount() == 1) {
+		int n_selected = s_model.getSelectedCount();
+		if(n_selected < 1)
+			return null;
+		if(n_selected == 1) {
 			for(Camera cam: s_model.getSelected())
 				return createSinglePopup(cam);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new javax.swing.JLabel("Popup Test"));
+		p.add(new javax.swing.JLabel("" + n_selected + " Cameras"));
 		p.addSeparator();
+		List<Camera> sel = s_model.getSelected();
+		p.add(new PublishAction(sel));
+		p.add(new UnpublishAction(sel));
 		return p;
 	}
 

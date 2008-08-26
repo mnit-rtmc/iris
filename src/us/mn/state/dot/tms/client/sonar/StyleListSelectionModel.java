@@ -75,10 +75,12 @@ public class StyleListSelectionModel<T extends SonarObject>
 	protected void updateProxySelectionModel(ListSelectionEvent e) {
 		for(int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 			T proxy = model.getProxy(i);
-			if(isSelectedIndex(i))
-				sel.addSelected(proxy);
-			else
-				sel.removeSelected(proxy);
+			if(proxy != null) {
+				if(isSelectedIndex(i))
+					sel.addSelected(proxy);
+				else
+					sel.removeSelected(proxy);
+			}
 		}
 	}
 }
