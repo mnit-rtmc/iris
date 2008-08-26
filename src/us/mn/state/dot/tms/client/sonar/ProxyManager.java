@@ -37,6 +37,9 @@ import us.mn.state.dot.tms.GeoLoc;
  */
 abstract public class ProxyManager<T extends SonarObject> {
 
+	/** Name of list model containing all objects */
+	static public final String STYLE_ALL = "All";
+
 	/** Make a menu label */
 	static protected Box makeMenuLabel(String id) {
 		Box b = Box.createHorizontalBox();
@@ -162,11 +165,8 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Iterate through all proxy objects */
 	public MapObject forEach(MapSearcher s) {
-		return getAllModel().forEach(s);
+		return getStyleModel(STYLE_ALL).forEach(s);
 	}
-
-	/** Get the style list model containing all proxies */
-	abstract protected StyleListModel<T> getAllModel();
 
 	/** Find the map geo location for a proxy */
 	protected MapGeoLoc findGeoLoc(T proxy) {
@@ -179,7 +179,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Find the proxy for a map geo location */
 	public T findProxy(final MapObject o) {
-		return getAllModel().findProxy(new MapSearcher() {
+		return getStyleModel(STYLE_ALL).findProxy(new MapSearcher() {
 			public boolean next(MapObject mo) {
 				return o == mo;
 			}

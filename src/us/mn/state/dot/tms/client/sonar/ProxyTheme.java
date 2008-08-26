@@ -40,6 +40,10 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Color to display inactive devices */
 	static public final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
 
+	/** Color to display "no controller" devices */
+	static public final Color COLOR_NO_CONTROLLER =
+		new Color(255, 255, 255, 64);
+
 	/** Color to display failed devices */
 	static public final Color COLOR_FAILED = Color.GRAY;
 

@@ -40,16 +40,16 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
 public class CameraManager extends ProxyManager<Camera> {
 
 	/** Name of active style */
-	static protected final String STYLE_ACTIVE = "Active";
+	static public final String STYLE_ACTIVE = "Active";
 
 	/** Name of inactive style */
-	static protected final String STYLE_INACTIVE = "Inactive";
+	static public final String STYLE_INACTIVE = "Inactive";
 
 	/** Name of unpublished style */
-	static protected final String STYLE_UNPUBLISHED = "Not published";
+	static public final String STYLE_UNPUBLISHED = "Not published";
 
-	/** Name of list model containing all objects */
-	static protected final String STYLE_ALL = "All";
+	/** Name of "no controller" style */
+	static public final String STYLE_NO_CONTROLLER = "No controller";
 
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
@@ -79,6 +79,8 @@ public class CameraManager extends ProxyManager<Camera> {
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
 		theme.addStyle(STYLE_ACTIVE, COLOR_ACTIVE);
+		theme.addStyle(STYLE_NO_CONTROLLER,
+			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
@@ -88,19 +90,19 @@ public class CameraManager extends ProxyManager<Camera> {
 		if(STYLE_ACTIVE.equals(s)) {
 			Controller ctr = proxy.getController();
 			return ctr != null && ctr.getActive();
-		} else
-		if(STYLE_INACTIVE.equals(s)) {
+		} else if(STYLE_INACTIVE.equals(s)) {
 			Controller ctr = proxy.getController();
 			return ctr == null || !ctr.getActive();
-		} else
-		if(STYLE_UNPUBLISHED.equals(s))
+		} else if(STYLE_UNPUBLISHED.equals(s))
 			return !proxy.getPublish();
+		else if(STYLE_NO_CONTROLLER.equals(s))
+			return proxy.getController() == null;
 		else
 			return STYLE_ALL.equals(s);
 	}
 
 	/** Get the style list model containing all proxies */
-	protected StyleListModel<Camera> getAllModel() {
+	public StyleListModel<Camera> getAllModel() {
 		return getStyleModel(STYLE_ALL);
 	}
 
