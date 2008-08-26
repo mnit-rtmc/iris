@@ -154,7 +154,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CameraForm(st.getCameras()));
+				desktop.show(new CameraForm(tc,
+					st.getCameras()));
 			}
 		};
 		add(item);

@@ -25,7 +25,9 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
  * A form for displaying and editing cameras
@@ -43,15 +45,22 @@ public class CameraForm extends AbstractForm {
 	/** Table to hold the camera list */
 	protected final JTable c_table = new JTable();
 
+	/** Button to display the camera properties */
+	protected final JButton properties = new JButton("Properties");
+
 	/** Button to delete the selected camera */
 	protected final JButton del_camera = new JButton("Delete Camera");
+
+	/** TMS connection */
+	protected final TmsConnection connection;
 
 	/** Camera type cache */
 	protected final TypeCache<Camera> cache;
 
 	/** Create a new camera form */
-	public CameraForm(TypeCache<Camera> c) {
+	public CameraForm(TmsConnection tc, TypeCache<Camera> c) {
 		super(TITLE);
+		connection = tc;
 		cache = c;
 	}
 
@@ -75,6 +84,7 @@ public class CameraForm extends AbstractForm {
 		bag.insets.right = HGAP;
 		bag.insets.top = VGAP;
 		bag.insets.bottom = VGAP;
+		bag.gridheight = 2;
 		final ListSelectionModel s = c_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -88,6 +98,22 @@ public class CameraForm extends AbstractForm {
 		c_table.setColumnModel(c_model.createColumnModel());
 		JScrollPane pane = new JScrollPane(c_table);
 		panel.add(pane, bag);
+		bag.gridheight = 1;
+		bag.anchor = GridBagConstraints.CENTER;
+		properties.setEnabled(false);
+		panel.add(properties, bag);
+		new ActionJob(this, properties) {
+			public void perform() throws Exception {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0) {
+					Camera cam = c_model.getProxy(row);
+					if(cam != null)
+						showPropertiesForm(cam);
+				}
+			}
+		};
+		bag.gridx = 1;
+		bag.gridy = 1;
 		del_camera.setEnabled(false);
 		panel.add(del_camera, bag);
 		new ActionJob(this, del_camera) {
@@ -103,6 +129,13 @@ public class CameraForm extends AbstractForm {
 	/** Change the selected camera */
 	protected void selectCamera() {
 		int row = c_table.getSelectedRow();
+		properties.setEnabled(row >= 0 && !c_model.isLastRow(row));
 		del_camera.setEnabled(row >= 0 && !c_model.isLastRow(row));
+	}
+
+	/** Show the properties form for a camera */
+	protected void showPropertiesForm(Camera cam) throws Exception {
+		SmartDesktop desktop = connection.getDesktop();
+		desktop.show(new CameraProperties(connection, cam));
 	}
 }

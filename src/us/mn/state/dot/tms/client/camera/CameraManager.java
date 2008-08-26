@@ -21,11 +21,14 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
+import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
 import us.mn.state.dot.tms.client.sonar.StyleListModel;
+import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
  * A camera manager is a container for SONAR camera objects.
@@ -49,9 +52,15 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
+	/** TMS connection */
+	protected final TmsConnection connection;
+
 	/** Create a new camera manager */
-	public CameraManager(TypeCache<Camera> c, GeoLocManager lm) {
+	public CameraManager(TmsConnection tc, TypeCache<Camera> c,
+		GeoLocManager lm)
+	{
 		super(c, lm);
+		connection = tc;
 		initialize();
 	}
 
@@ -95,15 +104,42 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Show the properties form for the selected proxy */
 	public void showPropertiesForm() {
-		// FIXME
+		if(s_model.getSelectedCount() == 1) {
+			for(Camera cam: s_model.getSelected()) {
+				SmartDesktop desktop = connection.getDesktop();
+				try {
+					desktop.show(new CameraProperties(
+						connection, cam));
+				}
+				catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
 	protected JPopupMenu createPopup() {
+		if(s_model.getSelectedCount() == 1) {
+			for(Camera cam: s_model.getSelected())
+				return createSinglePopup(cam);
+		}
 		JPopupMenu p = new JPopupMenu();
-//		p.add(makeMenuLabel(id));
 		p.add(new javax.swing.JLabel("Popup Test"));
 		p.addSeparator();
+		return p;
+	}
+
+	/** Create a popup menu for a single camera selection */
+	protected JPopupMenu createSinglePopup(Camera sel) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(makeMenuLabel(sel.getName()));
+		p.addSeparator();
+		p.add(new PropertiesAction<Camera>(sel) {
+			protected void do_perform() {
+				showPropertiesForm();
+			}
+		});
 		return p;
 	}
 

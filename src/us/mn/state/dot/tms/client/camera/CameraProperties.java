@@ -64,7 +64,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create a new camera properties form */
 	public CameraProperties(TmsConnection tc, Camera c) {
-		super(TITLE + c.getName(), tc, c);
+		super(TITLE, tc, c);
 	}
 
 	/** Get the SONAR type cache */

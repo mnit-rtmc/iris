@@ -198,7 +198,8 @@ public class Session {
 		}
 
 		loc_manager = new GeoLocManager(st.getGeoLocs());
-		cam_manager = new CameraManager(st.getCameras(), loc_manager);
+		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
+			loc_manager);
 		camLayer = cam_manager.getLayer();
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
