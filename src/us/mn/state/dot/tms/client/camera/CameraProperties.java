@@ -16,10 +16,12 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
 import java.rmi.RemoteException;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
@@ -27,8 +29,10 @@ import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
@@ -45,6 +49,12 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Location panel */
 	protected LocationPanel location;
+
+	/** Notes text area */
+	protected final JTextArea notes = new JTextArea(3, 24);
+
+	/** Controller button */
+	protected final JButton controller = new JButton("Controller");
 
 	/** Video stream encoder host (and port) */
 	protected final JTextField encoder = new JTextField("", 20);
@@ -94,7 +104,31 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		location = new LocationPanel(admin, proxy.getGeoLoc(),
 			connection.getSonarState());
 		location.initialize();
+		location.addRow("Notes", notes);
+		new FocusJob(notes) {
+			public void perform() {
+				proxy.setNotes(notes.getText());
+			}
+		};
+		location.setCenter();
+		location.addRow(controller);
+		new ActionJob(this, controller) {
+			public void perform() throws Exception {
+				controllerPressed();
+			}
+		};
 		return location;
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() throws RemoteException {
+		Controller c = proxy.getController();
+		if(c == null)
+			controller.setEnabled(false);
+		else {
+			connection.getDesktop().show(
+				new ControllerForm(connection, c));
+		}
 	}
 
 	/** Create camera setup panel */
@@ -130,6 +164,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
+		if(a == null || a.equals("notes"))
+			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("encoder"))
 			encoder.setText(proxy.getEncoder());
 		if(a == null || a.equals("encoderChannel"))
