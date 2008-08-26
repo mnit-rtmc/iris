@@ -35,8 +35,8 @@ public class StyleListSelectionModel<T extends SonarObject>
 	/** Proxy selection model */
 	protected final ProxySelectionModel<T> sel;
 
-	/** Flag to determine if an event was initiated by this model */
-	protected boolean initiated = false;
+	/** The "valueIsAdjusting" crap doesn't work right */
+	protected boolean adjusting = false;
 
 	/** Create a new proxy list selection model */
 	public StyleListSelectionModel(StyleListModel<T> m,
@@ -46,19 +46,25 @@ public class StyleListSelectionModel<T extends SonarObject>
 		sel = manager.getSelectionModel();
 		sel.addProxySelectionListener(new ProxySelectionListener<T>() {
 			public void selectionAdded(T proxy) {
-				// FIXME
-				// find the index of the proxy
-				// call addSelectionInterval
+				int i = model.getRow(proxy);
+				if(i >= 0) {
+					adjusting = true;
+					addSelectionInterval(i, i);
+					adjusting = false;
+				}
 			}
 			public void selectionRemoved(T proxy) {
-				// FIXME
-				// find the index of the proxy
-				// call removeSelectionInterval
+				int i = model.getRow(proxy);
+				if(i >= 0) {
+					adjusting = true;
+					removeSelectionInterval(i, i);
+					adjusting = false;
+				}
 			}
 		});
 		addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if(e.getValueIsAdjusting())
+				if(adjusting || e.getValueIsAdjusting())
 					return;
 				updateProxySelectionModel(e);
 			}
@@ -67,17 +73,12 @@ public class StyleListSelectionModel<T extends SonarObject>
 
 	/** Update the proxy selection model from a selection event */
 	protected void updateProxySelectionModel(ListSelectionEvent e) {
-		LinkedList<T> s = new LinkedList<T>();
-		// First, remove unselected items
 		for(int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
 			T proxy = model.getProxy(i);
 			if(isSelectedIndex(i))
-				s.add(proxy);
+				sel.addSelected(proxy);
 			else
 				sel.removeSelected(proxy);
 		}
-		// Now, add selected items
-		for(T proxy: s)
-			sel.addSelected(proxy);
 	}
 }

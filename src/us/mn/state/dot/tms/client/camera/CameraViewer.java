@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.video.AbstractDataSource;
@@ -339,7 +340,11 @@ public class CameraViewer extends JPanel
 
 	/** Called whenever a camera is removed from the selection */
 	public void selectionRemoved(Camera c) {
-		if(c == selected)
+		ProxySelectionModel<Camera> model = manager.getSelectionModel();
+		if(model.getSelectedCount() == 1) {
+			for(Camera cam: model.getSelected())
+				setSelected(cam);
+		} else if(c == selected)
 			setSelected(null);
 	}
 
