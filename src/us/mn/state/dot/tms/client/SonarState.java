@@ -93,6 +93,14 @@ public class SonarState extends Client {
 		return cabinet_styles;
 	}
 
+	/** Cabinet style proxy list model */
+	protected final ProxyListModel<CabinetStyle> cab_style_model;
+
+	/** Get the Cabinet Style list model */
+	public ProxyListModel<CabinetStyle> getCabinetStyleModel() {
+		return cab_style_model;
+	}
+
 	/** Cache of cabinet proxies */
 	protected final TypeCache<Cabinet> cabinets;
 
@@ -107,6 +115,14 @@ public class SonarState extends Client {
 	/** Get the comm link type cache */
 	public TypeCache<CommLink> getCommLinks() {
 		return comm_links;
+	}
+
+	/** Comm link proxy list model */
+	protected final ProxyListModel<CommLink> comm_link_model;
+
+	/** Get the CommLink list model */
+	public ProxyListModel<CommLink> getCommLinkModel() {
+		return comm_link_model;
 	}
 
 	/** Cache of controller proxies */
@@ -241,8 +257,13 @@ public class SonarState extends Client {
 		system_policy = new TypeCache<SystemPolicy>(SystemPolicy.class);
 		cabinet_styles = new TypeCache<CabinetStyle>(
 			CabinetStyle.class);
+		cab_style_model = new ProxyListModel<CabinetStyle>(
+			cabinet_styles);
+		cab_style_model.initialize();
 		cabinets = new TypeCache<Cabinet>(Cabinet.class);
 		comm_links = new TypeCache<CommLink>(CommLink.class);
+		comm_link_model = new ProxyListModel<CommLink>(comm_links);
+		comm_link_model.initialize();
 		controllers = new TypeCache<Controller>(Controller.class);
 		holidays = new TypeCache<Holiday>(Holiday.class);
 		graphics = new TypeCache<Graphic>(Graphic.class);

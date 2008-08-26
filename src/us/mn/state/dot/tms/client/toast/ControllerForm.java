@@ -119,13 +119,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	public ControllerForm(TmsConnection tc, Controller c) {
 		super(TITLE, tc, c);
 		SonarState state = tc.getSonarState();
-		TypeCache<CommLink> links = state.getCommLinks();
-		link_model = new ProxyListModel<CommLink>(links);
+		link_model = state.getCommLinkModel();
 		cabinets = state.getCabinets();
 		cabinet = proxy.getCabinet();
 		cab_listener = new CabinetListener();
-		TypeCache<CabinetStyle> styles = state.getCabinetStyles();
-		sty_model = new ProxyListModel<CabinetStyle>(styles);
+		sty_model = state.getCabinetStyleModel();
 	}
 
 	/** Get the SONAR type cache */
@@ -152,8 +150,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		super.initialize();
 		io_model = new ControllerIOModel(proxy, connection.getProxy());
 		cabinets.addProxyListener(cab_listener);
-		link_model.initialize();
-		sty_model.initialize();
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));
 		JTabbedPane tab = new JTabbedPane();
@@ -169,8 +165,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Dispose of the form */
 	protected void dispose() {
 		cabinets.removeProxyListener(cab_listener);
-		link_model.dispose();
-		sty_model.dispose();
 		location.dispose();
 		super.dispose();
 	}
