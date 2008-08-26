@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.utils.Agency;
 
+
 /**
  * Gui for selecting messages for DMS.
  *
@@ -253,9 +254,16 @@ if(nl == 0) nl = 3;
 
 	/** Calculate the number of pages for the sign */
 	protected int calculateSignPages(int ml, int nl) {
+		int ret=0;
+
 		if(nl > 0)
-			return 1 + Math.max(0, (ml - 1) / nl);
+			ret = 1 + Math.max(0, (ml - 1) / nl);
 		else
-			return 1;
+			ret = 1;
+
+		// D10 has a minimum of 2 pages
+		if(Agency.isId(Agency.CALTRANS_D10))
+			ret = ret<2 ? 2 : ret;
+		return ret;
 	}
 }
