@@ -64,10 +64,10 @@ public class CameraManager extends ProxyManager<Camera> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
 			getProxyType(), new CameraMarker());
-		theme.addStyle(STYLE_ACTIVE, COLOR_ACTIVE);
+		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(STYLE_ACTIVE, COLOR_ACTIVE);
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
