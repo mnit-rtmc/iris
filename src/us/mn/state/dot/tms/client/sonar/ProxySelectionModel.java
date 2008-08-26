@@ -48,7 +48,6 @@ public class ProxySelectionModel<T extends SonarObject> {
 
 	/** Set a proxy to be a single selection */
 	public void setSelected(T proxy) {
-System.err.println("setSelected: " + proxy);
 		clearSelection();
 		addSelected(proxy);
 	}
