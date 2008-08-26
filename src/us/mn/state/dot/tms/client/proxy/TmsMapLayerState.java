@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,8 +75,11 @@ public class TmsMapLayerState extends LayerState {
 
 	/** Do left-click event processing */
 	protected void doLeftClick(MouseEvent e, MapObject o) {
-		if(o instanceof TmsMapProxy)
+		if(o instanceof TmsMapProxy) {
+			setSelections(new MapObject[] { o });
 			model.setSelected((TmsMapProxy)o);
+		} else
+			clearSelections();
 	}
 
 	/** Show a popup menu for the given proxy */
@@ -100,8 +103,10 @@ public class TmsMapLayerState extends LayerState {
 	protected void doRightClick(MouseEvent e, MapObject o) {
 		if(o instanceof TmsMapProxy) {
 			TmsMapProxy proxy = (TmsMapProxy)o;
+			setSelections(new MapObject[] { o });
 			model.setSelected(proxy);
 			showPopupMenu(e, proxy);
-		}
+		} else
+			clearSelections();
 	}
 }

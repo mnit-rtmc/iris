@@ -72,12 +72,22 @@ public class SonarLayerState<T extends SonarObject> extends LayerState {
 
 	/** Do left-click event processing */
 	protected void doLeftClick(MouseEvent e, MapObject o) {
-		model.setSelected(manager.findProxy(o));
+		T proxy = manager.findProxy(o);
+		if(proxy != null)
+			model.setSelected(proxy);
+		else
+			model.clearSelection();
+		setSelection();
 	}
 
 	/** Do right-click event processing */
 	protected void doRightClick(MouseEvent e, MapObject o) {
-		model.setSelected(manager.findProxy(o));
-		manager.showPopupMenu(e);
+		T proxy = manager.findProxy(o);
+		if(proxy != null) {
+			model.setSelected(proxy);
+			manager.showPopupMenu(e);
+		} else
+			model.clearSelection();
+		setSelection();
 	}
 }
