@@ -139,12 +139,16 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Create a popup menu for a single camera selection */
-	protected JPopupMenu createSinglePopup(Camera sel) {
+	protected JPopupMenu createSinglePopup(Camera proxy) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(sel.getName() + " - " +
-			GeoLocHelper.getDescription(sel.getGeoLoc())));
+		p.add(makeMenuLabel(proxy.getName() + " - " +
+			GeoLocHelper.getDescription(proxy.getGeoLoc())));
 		p.addSeparator();
-		p.add(new PropertiesAction<Camera>(sel) {
+		List<Camera> sel = s_model.getSelected();
+		p.add(new PublishAction(sel));
+		p.add(new UnpublishAction(sel));
+		p.addSeparator();
+		p.add(new PropertiesAction<Camera>(proxy) {
 			protected void do_perform() {
 				showPropertiesForm();
 			}
