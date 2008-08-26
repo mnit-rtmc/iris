@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.sonar;
 
 import java.awt.Component;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.JPopupMenu;
@@ -70,24 +71,28 @@ public class SonarLayerState<T extends SonarObject> extends LayerState {
 		model.removeProxySelectionListener(listener);
 	}
 
-	/** Do left-click event processing */
-	protected void doLeftClick(MouseEvent e, MapObject o) {
+	/** Do mouse click event processing */
+	protected void doClick(MouseEvent e, MapObject o) {
 		T proxy = manager.findProxy(o);
-		if(proxy != null)
-			model.setSelected(proxy);
-		else
+		if(proxy != null) {
+			int m = e.getModifiersEx();
+			if((m & InputEvent.CTRL_DOWN_MASK) != 0)
+				model.addSelected(proxy);
+			else
+				model.setSelected(proxy);
+		} else
 			model.clearSelection();
 		setSelection();
 	}
 
+	/** Do left-click event processing */
+	protected void doLeftClick(MouseEvent e, MapObject o) {
+		doClick(e, o);
+	}
+
 	/** Do right-click event processing */
 	protected void doRightClick(MouseEvent e, MapObject o) {
-		T proxy = manager.findProxy(o);
-		if(proxy != null) {
-			model.setSelected(proxy);
-			manager.showPopupMenu(e);
-		} else
-			model.clearSelection();
-		setSelection();
+		doClick(e, o);
+		manager.showPopupMenu(e);
 	}
 }
