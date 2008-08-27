@@ -15,19 +15,51 @@
 package us.mn.state.dot.tms;
 
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * SignAlert is a class which encapsulates all the properties of a single
  * alert on a dynamic message sign (DMS).
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SignAlert extends SignMessage {
 
+	/** overwrite existing sign messages */
+	protected boolean m_overwrite=false;
+
 	/** Create a new sign alert */
 	public SignAlert(String o, MultiString m, Map<Integer, BitmapGraphic> b,
-		int d)
+		int d, boolean overwrite)
 	{
 		super(o, m, b, d);
+		m_overwrite=overwrite;
+		MsgActPriority ap=new MsgActPriorityProc(MsgActPriority.VAL_OPER_ALERT,
+			new callBackAlert());
+		this.setActivationPriority(ap);
+	}
+
+	/**
+	 * This is an activation priority callback used for alerts.
+	 * @see MsgActPriority,MsgActPriorityProc,SignMessage
+	 */
+	public class callBackAlert implements MsgActPriorityProc.CallbackSupersede,Serializable
+	{
+		/** return true for a new alert to supersede the existing sign message */
+		public boolean supersede(SignMessage existingMsg) {
+			if(existingMsg==null)
+				return true;
+			boolean s=false;
+			// overwrite existing messages on the sign?
+			if (m_overwrite)
+				s=supersedeNumeric(existingMsg);
+			else
+				s=existingMsg.isBlank() ||
+					existingMsg instanceof SignAlert ||
+					existingMsg instanceof SignTravelTime;
+			System.err.println("SignAlert.callBackAlert.supersede(): will alert supersede? "+s);
+			return s;
+		}
 	}
 }

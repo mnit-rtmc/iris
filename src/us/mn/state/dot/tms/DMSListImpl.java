@@ -109,10 +109,18 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		return list.iterator();
 	}
 
-	/** Send an alert to all signs in the specified group */
-	public void sendGroup(String group, String owner, String[] text)
+	/** 
+	 * Send an alert to all signs in the specified group.
+	 * @param group Name of sign group to send message to.
+	 * @param owner Message owner.
+	 * @param text Message text.
+	 * @param overwrite True to overwrite existing sign messages.
+	 */
+	public void sendGroup(String group, String owner, String[] text, 
+		boolean overwrite)
 		throws TMSException
 	{
+		// FIXME: move this code into a method that returns a multistring.
 		StringBuffer b = new StringBuffer();
 		for(int i = 0; i < text.length; i++) {
 			if(i > 0)
@@ -126,7 +134,7 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		while(i.hasNext()) {
 			DMSImpl dms = (DMSImpl)i.next();
 			try {
-				dms.setAlert(owner, b.toString());
+				dms.setAlert(owner, b.toString(),overwrite);
 			}
 			catch(InvalidMessageException e) {
 				// Ignore for this sign

@@ -25,7 +25,8 @@ import java.rmi.RemoteException;
 public interface DMSList extends DeviceList {
 
 	/** Send an alert to all signs in the specified group */
-	public void sendGroup(String group, String owner, String[] text)
+	public void sendGroup(String group, String owner, String[] text,
+		boolean overwrite)
 		throws TMSException, RemoteException;
 
 	/** Clear all signs in the specified group */

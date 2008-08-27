@@ -169,8 +169,9 @@ public class DMSListForm extends SortedListForm {
 		text[0] = line1.getText().trim().toUpperCase();
 		text[1] = line2.getText().trim().toUpperCase();
 		text[2] = line3.getText().trim().toUpperCase();
-		boolean ow=overwrite.isSelected(); //FIXME: use checkbox to create SignMessage here
-		signList.sendGroup(null, "Alert", text);
+		boolean ow=overwrite.isSelected();
+		//FIXME: maybe append user name to "Alert-" ?
+		signList.sendGroup(null, "Alert", text, ow);
 	}
 
 	/** Clear an alert when the clear button is pressed */
