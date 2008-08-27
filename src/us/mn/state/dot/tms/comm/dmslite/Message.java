@@ -15,20 +15,23 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import us.mn.state.dot.tms.MainServer;
+import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
+import us.mn.state.dot.tms.utils.SEmail;
+import us.mn.state.dot.tms.utils.PropertyFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
-
 import java.lang.IllegalArgumentException;
-
 import java.util.LinkedList;
+import java.util.Properties;
 
 /**
  * DMS Lite Message. A Message represents the bytes sent and
@@ -65,6 +68,23 @@ public class Message implements AddressedMessage
 		m_is = new TokenStreamReader(
 		    is, 1024, 16384, 1000);    // buffer size, max cap, sleep time
 		System.err.println("dmslite.Message.Message() called.");
+	}
+
+	/** toString */
+	public String toString() {
+		String ret="Message(";
+		if (m_objlist!=null) {
+			ret+="m_objlist.size()="+m_objlist.size();
+			int idx=0;
+	 		for(Object i : m_objlist) {
+				assert i instanceof ReqRes;
+				ReqRes rr = (ReqRes) i;
+				ret += ", m_objlist["+idx+"]="+rr.toString()+")";
+				++idx;
+			}
+		}
+		ret+=")";
+		return ret;
 	}
 
 	/** set timeout value in MS */
@@ -113,19 +133,11 @@ public class Message implements AddressedMessage
 		return(m_completiontimeMS);
 	}
 
-	/**
-	 * Add an object to this message. The object must be a Pair with the car
-	 * being a String representing the name of the element, and the cdr being
-	 * the element value.
-	 */
+	/** Add an object to this message. The object must be a ReqRes */
 	public void add(Object mo) {
-
-		// arg check
-		if(!(mo instanceof ReqRes)) {
+		if(!(mo instanceof ReqRes))
 			throw new IllegalArgumentException(
 			    "dmslite.Message.add() wrong arg type.");
-		}
-
 		m_objlist.add(mo);
 	}
 
@@ -152,12 +164,13 @@ public class Message implements AddressedMessage
 		System.err.println("write done.");
 
 		// read response
-		String token;
+		String token=null;
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,
 		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
 			this.setCompletionTimeMS((int)STime.calcTimeDeltaMS(starttime));
 		} catch (IllegalStateException ex) {
+			this.handleCAWSFailure("Illegal state reading response from cmsserver.");
 			throw new IOException(
 			    "SEVERE error: capacity exceeded in dmslite.Message.getRequest(): "+ex);
 		} catch (IOException ex) {
@@ -166,6 +179,7 @@ public class Message implements AddressedMessage
 
 		// timed out?
 		if(token == null) {
+			this.handleCAWSFailure("Possibly timed out waiting for response from cmserver.");
 			String err="";
 			err+="SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
 			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs). ";
@@ -186,6 +200,125 @@ public class Message implements AddressedMessage
 				rr.parseRes(DMSLITEMSGTAG,this.getRespMsgName(),
 			    		token);    // throws IOException on error
 			}
+		}
+	}
+
+	/** 
+	  * Search for a request or response value by name.
+	  * @return null if not found else the value.
+	  */
+	protected String searchForReqResItem(String name) {
+		if (m_objlist==null)
+			return null;
+ 		for(Object i : m_objlist) {
+			assert i instanceof ReqRes;
+			ReqRes rr = (ReqRes) i;
+			String value=rr.searchReqResVal(name);
+			if(value != null)
+				return value;
+		}
+		return null;
+	}
+
+	/** 
+	  * Determine if a failure sending a CAWS message to the cmsserver
+	  * occurred. 
+	  * @return true on failure else false.
+	  */
+	protected boolean checkCAWSFailure() {
+		//System.err.println("Message.checkCAWSFailure() called. this="+this.toString());
+		if (m_objlist==null)
+			return false;
+
+		String ret=null;
+
+		// IsValid: was there an error?
+		String isvalid=this.searchForReqResItem("IsValid");
+		if(isvalid == null || isvalid.toLowerCase().equals("true"))
+			return false;
+
+		// Owner: was owner CAWS?
+		String owner=this.searchForReqResItem("Owner");
+		if(owner == null || !owner.toLowerCase().equals(CawsPoller.CAWS.toLowerCase()))
+			return false;
+
+		// at this point we know there was an error to report
+		return true;
+	}
+
+	/** Generate a CAWS failure message */
+	protected String getCAWSFailureMessage() {
+		if (m_objlist==null)
+			return "";
+
+		String ret="";
+
+		// Owner: was owner CAWS?
+		String owner=this.searchForReqResItem("Owner");
+		if(owner == null)
+			owner="";
+
+		// ErrMsg: get the error description
+		String errmsg=this.searchForReqResItem("ErrMsg");
+		if(errmsg == null)
+			errmsg="";
+
+		// Id: get message id
+		String id=this.searchForReqResItem("Id");
+		if(id == null)
+			id="";
+
+		// Address: get cms number
+		String address=this.searchForReqResItem("Address");
+		if(address == null)
+			address="";
+
+		// MsgText: actual message
+		String msg=this.searchForReqResItem("MsgText");
+		if(msg == null)
+			msg="";
+
+		// build error string
+		ret="";
+		ret+="Could not send a CAWS message to a CMS: reason="+errmsg;
+		ret+=", CMS="+address;
+		ret+=", message id=V"+id;
+		ret+=", time="+STime.getCurDateTimeString(true);
+		ret+=", message="+msg;
+		ret+=", author="+owner;
+		ret+=", note=";	// appended to by handleCawsFailure()
+
+		//System.err.println("Message.checkCAWSFailure() returning="+ret);
+		return ret;
+	}
+
+	/** 
+	  * This method handles a failure when IRIS fails to send a CAWS 
+	  * message to a CMS.
+	  * @param errmsgnote Optional error message, appended to generated message.
+	  */
+	public void handleCAWSFailure(String errmsgnote) {
+		if(MainServer.m_serverprops==null)
+			return;
+		if(errmsgnote==null)
+			errmsgnote="";
+
+		// generate an error message
+		String errmsg = getCAWSFailureMessage() + errmsgnote;
+		System.err.println("Warning: failure to send CAWS message to CMS: "+errmsg);
+
+		// build email
+		Properties props = MainServer.getServerProps();
+		String sender=PropertyFile.get(props,"d10.caws.email_sender");
+		String recipient=PropertyFile.get(props,"d10.caws.email_recipient");
+		String subject="IRIS could not send CAWS message to CMS";
+
+		// send
+		if(recipient==null || sender==null || recipient.length()<=0 || sender.length()<=0)
+			System.err.println("Message.handleCAWSFailure(): didn't try to send CAWS error email.");
+		else {
+			boolean sendflag=SEmail.sendEmail(props, sender, recipient, subject, errmsg);
+			System.err.println("Message.handleCAWSFailure(): sent email, success="+sendflag);
 		}
 	}
 

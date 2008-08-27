@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.MsgActPriority;
+import us.mn.state.dot.tms.MsgActPriorityD10;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -43,15 +45,15 @@ public class OpMessage extends OpDms {
 	protected boolean modify = true;
 
 	/** Sign message */
-	protected final SignMessage m_message;
+	protected final SignMessage m_signMessage;
 
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m) {
 		super(COMMAND, d);
-		m_message = m;
+		m_signMessage = m;
 		System.err.println(
 		    "dmslite.OpMessage.OpMessage() called. Msg="
-		    + m + ",numpages=" + m_message.getNumPages());
+		    + m + ",numpages=" + m_signMessage.getNumPages());
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -65,7 +67,7 @@ public class OpMessage extends OpDms {
 	 * @return
 	 */
 	protected Phase phaseOne() {
-		int np = m_message.getNumPages();
+		int np = m_signMessage.getNumPages();
 
 		if (np <= 0) {
 			return null;
@@ -99,7 +101,7 @@ public class OpMessage extends OpDms {
 	 */
 	protected Calendar calcMsgOffTime(Calendar ontime)
 	{
-		int mins=this.m_message.getDuration();
+		int mins=this.m_signMessage.getDuration();
 		assert mins!=SignMessage.DURATION_INFINITE;
 		Calendar offtime=(Calendar)ontime.clone();
 		offtime.add(Calendar.MINUTE,mins);
@@ -118,12 +120,9 @@ public class OpMessage extends OpDms {
 	protected class PhaseSendOnePageMessage extends Phase {
 
 		/**
-		 * Set the status to modify request
-		 *
+		 * Set the status to modify request. Called by Operation.poll().
 		 * @param argmess
-		 *
-		 * @return
-		 *
+		 * @return next Phase to execute else null.
 		 * @throws IOException
 		 */
 		protected Phase poll(AddressedMessage argmess)
@@ -136,10 +135,10 @@ public class OpMessage extends OpDms {
 			Message mess = (Message) argmess;
 
 			// sanity check
-			if (m_message.getBitmap(0).length()!=300) {
+			if (m_signMessage.getBitmap(0).length()!=300) {
 				System.err.println(
-				    "WARNING: bitmap pg 1 wrong size in PhaseSendOnePageMessage: m_message.length="
-				    + m_message.getBitmap(0).length()+", msg="+m_message.toString());
+				    "WARNING: bitmap pg 1 wrong size in PhaseSendOnePageMessage: m_signMessage.length="
+				    + m_signMessage.getBitmap(0).length()+", msg="+m_signMessage.toString());
 			}
 
 			// set message attributes as a function of the operation
@@ -175,7 +174,7 @@ public class OpMessage extends OpDms {
 			mess.add(rr1);
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_message.getMulti().toString()));
+			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
@@ -185,7 +184,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime=m_message.getDuration()!=SignMessage.DURATION_INFINITE;
+			boolean useofftime=m_signMessage.getDuration()!=SignMessage.DURATION_INFINITE;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
@@ -193,14 +192,14 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
-			mess.add(new ReqRes("Owner", m_message.getOwner()));
+			mess.add(new ReqRes("Owner", m_signMessage.getOwner()));
 
 			// msg
-			byte[] bitmaparray = m_message.getBitmap().getBitmap();
+			byte[] bitmaparray = m_signMessage.getBitmap().getBitmap();
 			String msg = prepareBitmap(bitmaparray);
 			mess.add(new ReqRes("Msg", msg));
 
-			// send msg
+			// send msg to field controller
             		mess.getRequest();	// throws IOException
 
 			// parse resp msg
@@ -241,7 +240,7 @@ public class OpMessage extends OpDms {
 				// parse rest of response
 				if (valid) {
 					// set new message
-					m_dms.setActiveMessage(m_message);
+					m_dms.setActiveMessage(m_signMessage);
 				} else {
 					System.err.println(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
@@ -252,6 +251,12 @@ public class OpMessage extends OpDms {
 					if (flagFailureShouldRetry(errmsg)) {
 						System.err.println("OpMessage: will retry failed operation.");
 						return this;
+
+					// give up
+					} else {
+						// if caws failure, handle it
+						if( mess.checkCAWSFailure() )
+							mess.handleCAWSFailure("was sending a message.");						
 					}
 				}
 			}
@@ -281,12 +286,9 @@ public class OpMessage extends OpDms {
 	protected class PhaseSendTwoPageMessage extends Phase {
 
 		/**
-		 * Set the status to modify request
-		 *
+		 * Set the status to modify request. Called by Operation.poll().
 		 * @param argmess
-		 *
-		 * @return
-		 *
+		 * @return next Phase to execute else null.
 		 * @throws IOException
 		 */
 		protected Phase poll(AddressedMessage argmess)
@@ -298,15 +300,15 @@ public class OpMessage extends OpDms {
 			Message mess = (Message) argmess;
 
 			// sanity check
-			if (m_message.getBitmap(0).length()!=300) {
+			if (m_signMessage.getBitmap(0).length()!=300) {
 				System.err.println(
-				    "WARNING: bitmap pg 1 wrong size in PhaseSendTwoPageMessage: m_message.length="
-				    + m_message.getBitmap(0).length()+", msg="+m_message.toString());
+				    "WARNING: bitmap pg 1 wrong size in PhaseSendTwoPageMessage: m_signMessage.length="
+				    + m_signMessage.getBitmap(0).length()+", msg="+m_signMessage.toString());
 			}
-			if (m_message.getBitmap(1).length()!=300) {
+			if (m_signMessage.getBitmap(1).length()!=300) {
 				System.err.println(
-				    "WARNING: bitmap pg 2 wrong size in PhaseSendTwoPageMessage: m_message.length="
-				    + m_message.getBitmap(1).length()+", msg="+m_message.toString());
+				    "WARNING: bitmap pg 2 wrong size in PhaseSendTwoPageMessage: m_signMessage.length="
+				    + m_signMessage.getBitmap(1).length()+", msg="+m_signMessage.toString());
 			}
 
 			// set message attributes as a function of the operation
@@ -353,7 +355,7 @@ public class OpMessage extends OpDms {
 			}
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_message.getMulti().toString()));
+			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
@@ -363,7 +365,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime=m_message.getDuration()!=SignMessage.DURATION_INFINITE;
+			boolean useofftime=m_signMessage.getDuration()!=SignMessage.DURATION_INFINITE;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
@@ -375,18 +377,18 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(MSG_DISPLAY_MSG_TIME_MS).toString()));
 
 			// Owner
-			mess.add(new ReqRes("Owner", m_message.getOwner()));
+			mess.add(new ReqRes("Owner", m_signMessage.getOwner()));
 
 			// msg (the bitmap)
 			{
 				// pg 1
-				BitmapGraphic bg1 = m_message.getBitmap(0);
+				BitmapGraphic bg1 = m_signMessage.getBitmap(0);
 				assert bg1 != null;
 				byte[] bitmaparraypg1 = bg1.getBitmap();
 				String msgpg1 = prepareBitmap(bitmaparraypg1);
 
 				// pg 2
-				BitmapGraphic bg2 = m_message.getBitmap(1);
+				BitmapGraphic bg2 = m_signMessage.getBitmap(1);
 				assert bg2 != null;
 				byte[] bitmaparraypg2 = bg2.getBitmap();
 				String msgpg2 = prepareBitmap(bitmaparraypg2);
@@ -434,7 +436,7 @@ public class OpMessage extends OpDms {
 				if (valid) {
 
 					// set new message
-					m_dms.setActiveMessage(m_message);
+					m_dms.setActiveMessage(m_signMessage);
 
 				} else {
 					System.err.println(
@@ -446,8 +448,13 @@ public class OpMessage extends OpDms {
 					if (flagFailureShouldRetry(errmsg)) {
 						System.err.println("OpMessage: will retry failed operation.");
 						return this;
-					}
 
+					// give up
+					} else {
+						// if caws failure, handle it
+						if( mess.checkCAWSFailure() )
+							mess.handleCAWSFailure("was sending a message.");						
+					}
 				}
 			}
 

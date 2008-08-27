@@ -176,6 +176,12 @@ public class OpBlank extends OpDms
 					System.err.println(
 					    "OpBlank: will retry failed operation");
 					return this;
+
+				// give up
+				} else {
+					// if caws failure, handle it
+					if( mess.checkCAWSFailure() )
+						mess.handleCAWSFailure("was blanking a message.");						
 				}
 			}
 
