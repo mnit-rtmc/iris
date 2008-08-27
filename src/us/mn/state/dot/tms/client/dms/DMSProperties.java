@@ -139,7 +139,8 @@ public class DMSProperties extends TrafficDeviceForm {
 	};
 
 	/** Frame title */
-	static protected String TITLE = I18NMessages.get("DMSProperties.Title")+": ";
+	static protected String TITLE = 
+		I18NMessages.get("DMSProperties.Title")+": ";
 
 	/** Remote dynamic message sign interface */
 	protected DMS sign;
@@ -337,7 +338,8 @@ public class DMSProperties extends TrafficDeviceForm {
 
 		// pixel test button is (optional)
 		if (!Agency.isId(Agency.CALTRANS_D10))
-			pixelTest = new JButton(I18NMessages.get("DMSProperties.PixelTestButton"));
+			pixelTest = new JButton(I18NMessages.get(
+				"DMSProperties.PixelTestButton"));
 		else
 			pixelTest = null;
 
@@ -349,19 +351,22 @@ public class DMSProperties extends TrafficDeviceForm {
 
 		// fan test button is (optional)
 		if (!Agency.isId(Agency.CALTRANS_D10))
-			fanTest = new JButton(I18NMessages.get("DMSProperties.FanTestButton"));
+			fanTest = new JButton(I18NMessages.get(
+				"DMSProperties.FanTestButton"));
 		else
 			fanTest = null;
 
 		// get status button (optional)
 		if (Agency.isId(Agency.CALTRANS_D10))
-			getStatusButton = new JButton(I18NMessages.get("DMSProperties.GetStatusButton"));
+			getStatusButton = new JButton(I18NMessages.get(
+				"DMSProperties.GetStatusButton"));
 		else
 			getStatusButton = null;
 
 		// reset button (optional)
 		if (Agency.isId(Agency.CALTRANS_D10))
-			resetButton = new JButton(I18NMessages.get("DMSProperties.ResetButton"));
+			resetButton = new JButton(I18NMessages.get(
+				"DMSProperties.ResetButton"));
 		else
 			resetButton = null;
 	}
