@@ -51,6 +51,14 @@ public class MainServer {
 	/** File to log standard error stream */
 	static protected final String STD_ERR = LOG_FILE_DIR + "iris.stderr";
 
+	/** server properties file */
+	static public Properties m_serverprops=null;
+
+	/** get server properties file */
+	public static Properties getServerProps() {
+		return m_serverprops;
+	}
+
 	/** Redirect the standard output and error streams to log files */
 	static protected void redirectStdStreams() throws IOException {
 		FileOutputStream fos = new FileOutputStream(STD_OUT, true);
@@ -72,9 +80,9 @@ public class MainServer {
 		try {
 			redirectStdStreams();
 			sanityChecks();
-			Properties props = PropertyLoader.load(PROP_FILE);
-			Agency.readProps(props);
-			TMSImpl tms = new TMSImpl(props);
+			m_serverprops = PropertyLoader.load(PROP_FILE);
+			Agency.readProps(m_serverprops);
+			TMSImpl tms = new TMSImpl(m_serverprops);
 			Namespace ns = new Namespace();
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
@@ -88,7 +96,7 @@ public class MainServer {
 			LocateRegistry.createRegistry(
 				Registry.REGISTRY_PORT);
 			Naming.bind("//localhost/login", login);
-			server = new Server(ns, props);
+			server = new Server(ns, m_serverprops);
 			System.err.println("IRIS Server active for "+Agency.getId()+".");
 			server.join();
 		}
