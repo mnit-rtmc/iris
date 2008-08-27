@@ -277,6 +277,18 @@ CREATE TABLE controller (
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON controller
 	USING btree (comm_link, drop_id);
 
+CREATE TABLE camera (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	controller VARCHAR(20) REFERENCES controller(name),
+	pin INTEGER NOT NULL,
+	notes text NOT NULL,
+	encoder text NOT NULL,
+	encoder_channel integer NOT NULL,
+	nvr text NOT NULL,
+	publish boolean NOT NULL
+);
+
 
 CREATE TABLE vault_object (
     vault_oid integer NOT NULL,
@@ -379,7 +391,7 @@ REVOKE ALL ON TABLE traffic_device FROM PUBLIC;
 GRANT SELECT ON TABLE traffic_device TO PUBLIC;
 
 CREATE TABLE dms (
-    camera integer NOT NULL,
+    camera VARCHAR(10) NOT NULL,
     mile real NOT NULL,
     travel text NOT NULL
 )
@@ -454,7 +466,7 @@ CREATE TABLE ramp_meter (
     "singleRelease" boolean NOT NULL,
     "storage" integer NOT NULL,
     "maxWait" integer NOT NULL,
-    camera integer NOT NULL
+    camera VARCHAR(10) NOT NULL
 )
 INHERITS (traffic_device);
 
@@ -494,28 +506,6 @@ CREATE TABLE time_plan_log (
 REVOKE ALL ON TABLE time_plan_log FROM PUBLIC;
 GRANT SELECT ON TABLE time_plan_log TO PUBLIC;
 
-CREATE TABLE add_remove_device_log (
-    event_id integer DEFAULT nextval('tms_log_seq'::text) NOT NULL,
-    event_date timestamp with time zone NOT NULL,
-    device_type text NOT NULL,
-    device_id text NOT NULL,
-    event_description character varying(10) NOT NULL,
-    edited_by text NOT NULL
-);
-
-REVOKE ALL ON TABLE add_remove_device_log FROM PUBLIC;
-GRANT SELECT ON TABLE add_remove_device_log TO PUBLIC;
-
-CREATE TABLE camera (
-    encoder text NOT NULL,
-    encoder_channel integer NOT NULL,
-    nvr text NOT NULL,
-    publish boolean NOT NULL
-)
-INHERITS (traffic_device);
-
-REVOKE ALL ON TABLE camera FROM PUBLIC;
-GRANT SELECT ON TABLE camera TO PUBLIC;
 
 CREATE TABLE stratified_plan (
     dummy_48294 boolean
@@ -536,7 +526,7 @@ CREATE TABLE lcs_module (
 INHERITS (tms_object);
 
 CREATE TABLE lcs (
-    camera integer NOT NULL,
+    camera VARCHAR(10) NOT NULL,
     modules integer[] NOT NULL
 )
 INHERITS (traffic_device);
@@ -571,56 +561,8 @@ return old;
 end; '
     LANGUAGE plpgsql;
 
-CREATE FUNCTION add_detector() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, NEW.index, ''add'', user); return NEW; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION remove_detector() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, OLD.index, ''remove'', user); return OLD; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION add_dms() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, NEW.id, ''add'', user); return NEW; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION remove_dms() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, OLD.id, ''remove'', user); return OLD; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION add_meter() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, NEW.id, ''add'', user); return NEW; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION remove_meter() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, OLD.id, ''remove'', user); return OLD; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION add_camera() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, NEW.id, ''add'', user); return NEW; end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION remove_camera() RETURNS "trigger"
-    AS '
-	begin insert into add_remove_device_log(event_date, device_type, device_id, event_description, edited_by) 
-	values(CURRENT_TIMESTAMP, TG_RELNAME, OLD.id, ''remove'', user); return OLD; end; '
-    LANGUAGE plpgsql;
-
 CREATE TABLE warning_sign (
-    camera integer NOT NULL,
+    camera VARCHAR(10) NOT NULL,
     text text NOT NULL
 )
 INHERITS (traffic_device);
@@ -779,12 +721,11 @@ CREATE VIEW controller_loc_view AS
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.id, d.notes, c.id AS camera, d.mile, d.travel,
+	SELECT d.id, d.notes, d.camera, d.mile, d.travel,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.east_off, l.northing, l.north_off
 	FROM dms d
-	JOIN geo_loc_view l ON d.geo_loc = l.name
-	LEFT JOIN camera c ON d.camera = c.vault_oid;
+	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW sign_text_view AS
@@ -798,16 +739,15 @@ GRANT SELECT ON sign_text_view TO PUBLIC;
 CREATE VIEW ramp_meter_view AS
 	SELECT m.vault_oid, m.id, m.notes,
 	m."controlMode" AS control_mode, m."singleRelease" AS single_release,
-	m."storage", m."maxWait" AS max_wait, c.id AS camera,
+	m."storage", m."maxWait" AS max_wait, m.camera,
 	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
 	FROM ramp_meter m
-	JOIN geo_loc_view l ON m.geo_loc = l.name
-	LEFT JOIN camera c ON m.camera = c.vault_oid;
+	JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
-	SELECT c.id, ctr.comm_link, ctr.drop_id, ctr.active, c.notes,
+	SELECT c.name, ctr.comm_link, ctr.drop_id, ctr.active, c.notes,
 	c.encoder, c.encoder_channel, c.nvr, c.publish,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.northing, l.east_off, l.north_off
@@ -939,7 +879,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
 79334	4	0	alarm	us.mn.state.dot.tms.AlarmImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
-134	4	0	camera	us.mn.state.dot.tms.CameraImpl
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
 84656	4	0	r_node	us.mn.state.dot.tms.R_NodeImpl
 37	4	0	vault_list	us.mn.state.dot.vault.ListElement
@@ -1142,48 +1081,7 @@ CREATE TRIGGER detector_fieldlength_log_trig
     FOR EACH ROW
     EXECUTE PROCEDURE detector_fieldlength_log();
 
-CREATE TRIGGER add_detector_trig
-    AFTER INSERT ON detector
-    FOR EACH ROW
-    EXECUTE PROCEDURE add_detector();
-
-CREATE TRIGGER remove_detector_trig
-    AFTER DELETE ON detector
-    FOR EACH ROW
-    EXECUTE PROCEDURE remove_detector();
-
-CREATE TRIGGER add_dms_trig
-    AFTER INSERT ON dms
-    FOR EACH ROW
-    EXECUTE PROCEDURE add_dms();
-
-CREATE TRIGGER remove_dms_trig
-    AFTER DELETE ON dms
-    FOR EACH ROW
-    EXECUTE PROCEDURE remove_dms();
-
-CREATE TRIGGER add_meter_trig
-    AFTER INSERT ON ramp_meter
-    FOR EACH ROW
-    EXECUTE PROCEDURE add_meter();
-
-CREATE TRIGGER remove_meter_trig
-    AFTER DELETE ON ramp_meter
-    FOR EACH ROW
-    EXECUTE PROCEDURE remove_meter();
-
-CREATE TRIGGER add_camera_trig
-    AFTER INSERT ON camera
-    FOR EACH ROW
-    EXECUTE PROCEDURE add_camera();
-
-CREATE TRIGGER remove_camera_trig
-    AFTER DELETE ON camera
-    FOR EACH ROW
-    EXECUTE PROCEDURE remove_camera();
-
 SELECT pg_catalog.setval('tms_log_seq', 8284, true);
-
 
 SET search_path = event, public, pg_catalog;
 
