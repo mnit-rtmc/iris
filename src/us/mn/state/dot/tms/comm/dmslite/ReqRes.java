@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 
-
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 import org.w3c.dom.Document;
@@ -45,11 +43,11 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class ReqRes {
 
-    // fields
-    private String   m_reqname;
-    private String   m_reqval;
-    private String[] m_resnames;
-    private String[] m_resvals;
+    	// fields
+	private String   m_reqname;
+	private String   m_reqval;
+	private String[] m_resnames;
+	private String[] m_resvals;
 
 	/**
 	 * Constructor for a request that contains no associated responses.
@@ -115,6 +113,29 @@ public class ReqRes {
         return (m_reqval);
     }
 
+	/**
+	 *  search for a value in the request and response fields.
+	 *  @param name Name of request or response to search for.
+	 *  @return null if not found else the value found.
+	 */
+	public String searchReqResVal(String name) {
+		if(name == null)
+			return null;
+
+		// request
+		if(m_reqname!=null)
+			if(m_reqname.equals(name))
+				return m_reqval;
+		// response
+		String ret=null;
+		try {
+			ret=getResVal(name);
+		} catch(IllegalArgumentException ex) {
+			ret=null;
+		}
+		return ret;
+	}
+
     /**
      *  Get a response value for the specified name
      * 
@@ -158,6 +179,28 @@ public class ReqRes {
             }
         }
     }
+
+	/** toString */
+	public String toString() {
+		if(m_resnames==null)
+			return "";
+		String ret="ReqReq(";
+		ret += "Request name="+m_reqname;
+		ret += ", Request value="+m_reqval;
+		ret += ", Response names=";
+		for (int i = 0; i < m_resnames.length; ++i) {
+			if (m_resnames[i]!=null)
+				ret += ", ["+i+"]="+m_resnames[i];
+		}
+		ret += ", Response values=";
+		for (int i = 0; i < m_resnames.length; ++i) {
+			if (m_resvals[i]!=null)
+				ret += ", ["+i+"]="+m_resvals[i];
+		}
+		ret += ")";
+		return ret;
+	}
+
 
     /**
      *  Parse an xml response and update response fields.
