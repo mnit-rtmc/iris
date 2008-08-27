@@ -59,7 +59,7 @@
 		      message="Missing dependency: ${lib.dir}/${file.dep}"/>
 	</target>
 
-	<!-- Check for dependancies -->
+	<!-- Check for dependencies -->
 	<target name="check">
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-client.properties"/>
@@ -232,6 +232,7 @@
 		</copy>
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
+				<include name="mail.jar"/>
 				<include name="postgresql.jar"/>
 				<include name="${scheduler.jar}"/>
 				<include name="${vault.jar}"/>
