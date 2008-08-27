@@ -152,8 +152,9 @@ public class DmsLitePoller extends MessagePoller
 	}
 
 	/**
-	 * Send a new message to the sign
+	 * Send a new message to the sign. Called by DMSImpl.
 	 * @throws InvalidMessageException
+	 * @see DMSImpl,DMS
 	 */
 	public void sendMessage(DMSImpl dms, SignMessage m)
 		throws InvalidMessageException {
@@ -184,7 +185,7 @@ public class DmsLitePoller extends MessagePoller
 		//System.err.println("DmsLitePoller.sendMessage(), bitmap="
 		//    + Convert.toHexString(m.getBitmap().getBitmap()));
 
-		// finally, send message
+		// finally, send message to field controller
 		OpMessage cmd = new OpMessage(dms, m);
 		cmd.start();
 	}
