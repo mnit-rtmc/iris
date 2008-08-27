@@ -29,10 +29,29 @@ public class PropertyFile
 	/** class can't be instantiated */
 	private PropertyFile() {}
 
+	/** Read a property file and return it 
+	 *  @return null on failure
+	 */
+	/*
+	static protected Properties readFile(String fname)
+	{
+		try {
+			URL url = createURL(fname);
+			Properties props = new Properties();
+			props.load(url.openStream());
+			return props;
+		} catch(Exception ex) {
+			System.err.println("PropertyFile.readFile(): failed to read properties file: ex="+ex);
+			return null;
+		}
+	}
+	*/
+
 	/** 
 	  * Read a property from the property file
 	  * @param pf Property file.
 	  * @param id Name of property to return.
+	  * @return an empty string if the property wasn't found.
 	  */
 	static public String get(Properties pf,String id) {
 		return get(pf,id,"");
