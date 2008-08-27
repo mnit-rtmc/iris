@@ -714,7 +714,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		}
 		else {
  			System.err.println(this+", "+"DMSImpl.sendMessage(): "+
-				not activating new message: "+
+				"not activating new message: "+
 				m.toStringDebug()+" < "+message.toStringDebug());
 		}
 	}
