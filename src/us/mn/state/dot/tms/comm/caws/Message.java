@@ -44,7 +44,6 @@ public class Message implements AddressedMessage
 	/** dms messages received from caws */
 	private byte[] m_msgs = new byte[0];
 
-	// consts
 	// fields
 	private HttpFileMessenger m_mess;    // associated file messenger
 
