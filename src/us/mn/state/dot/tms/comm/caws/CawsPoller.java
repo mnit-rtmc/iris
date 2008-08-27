@@ -37,6 +37,9 @@ import us.mn.state.dot.tms.comm.SignPoller;
  */
 public class CawsPoller extends MessagePoller implements SignPoller
 {
+	/** identifier used elsewhere, e.g. message author */
+	public static final String CAWS="CAWS";
+
 	/** the only valid drop address */
 	static public final int VALID_DROP_ADDRESS = 1;
 
