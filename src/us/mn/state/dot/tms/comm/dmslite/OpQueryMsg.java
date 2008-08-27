@@ -26,6 +26,8 @@ import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
 import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.MsgActPriority;
+import us.mn.state.dot.tms.MsgActPriorityD10;
 import us.mn.state.dot.tms.utils.SDMS;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -342,7 +344,7 @@ public class OpQueryMsg extends OpDms
 
 				// have text
 				if(msgtextavailable) {
-					m_dms.setMessageFromController(msgtext, duramins);
+					m_dms.setMessageFromController(msgtext, duramins, owner,MsgActPriorityD10.PRI_D10_OPER_MSG);
 
 				// don't have text
 				} else {
