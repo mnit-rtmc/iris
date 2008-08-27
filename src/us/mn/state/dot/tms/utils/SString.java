@@ -233,9 +233,7 @@ public class SString {
 		return i;
 	}
 
-	/**
-	*  convert string to double.
-	*/
+	/** convert string to double */
 	public static double stringToDouble(String s) {
 		if (s == null)
 		    return (0);
@@ -244,6 +242,25 @@ public class SString {
 		    d = Double.parseDouble(s);
 		} catch (Exception e) {}
 		return d;
+	}
+
+	/** convert double to string with rounding */
+	public static String doubleToString(double d,int numdecplaces) {
+		String ret="";
+		// full precision
+		if (numdecplaces<0)
+			ret=new Double(d).toString();
+		// zero decimal places
+		else if (numdecplaces==0) {
+			ret=(new Double(Math.round(d))).toString();
+			if (ret.endsWith(".0"))
+				ret=ret.replace(".0","");
+		} else {
+			double mult=Math.pow(10,numdecplaces);
+			ret=new Double(Math.round(d*mult)/mult).toString();
+		}
+		//System.err.println(ret);
+		return ret;
 	}
 
 	/** convert int to string */
