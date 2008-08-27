@@ -110,7 +110,11 @@ abstract public class Operation {
 		return phase == null;
 	}
 
-	/** Perform a poll with an addressed message */
+	/** 
+	  * Perform a poll with an addressed message. Called by 
+	  * MessagePoller.doPoll().
+	  * @see MessagePoller
+	  */
 	public void poll(AddressedMessage mess) throws IOException,
 		DeviceContentionException
 	{
