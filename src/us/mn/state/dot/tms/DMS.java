@@ -65,6 +65,10 @@ public interface DMS extends TrafficDevice {
 	public void setMessage(String owner, String text, int duration)
 		throws InvalidMessageException, RemoteException;
 
+	/** Set the message displayed on the sign */
+	public void setMessage(String owner, String text, int duration, MsgActPriority ap)
+		throws InvalidMessageException, RemoteException;
+
 	/** Clear the message displayed on the sign */
 	public void clearMessage(String owner) throws RemoteException;
 

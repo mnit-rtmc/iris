@@ -29,9 +29,10 @@ import java.util.TreeMap;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @see MsgActPriority,MsgActPriorityProc,DMSImpl,MsgActPriorityCallBackBlank
  */
-public class SignMessage implements Serializable {
-
+public class SignMessage implements Serializable 
+{
 	/** Create a one page map of graphics */
 	static protected TreeMap<Integer, BitmapGraphic> createSinglePage(
 		BitmapGraphic b)
@@ -49,7 +50,6 @@ public class SignMessage implements Serializable {
 	 * Create a new sign message. Use this constructor to create a message
 	 * with a single or multiple page of text, and a single page
 	 * BitmapGraphic.
-	 *
 	 * @param o Message owner.
 	 * @param m Message text as a MultiString. 
 	 * @param b Message BitmapGraphic for the first page.
@@ -61,9 +61,8 @@ public class SignMessage implements Serializable {
 
 	/** 
 	 * Create a new sign message. Use this constructor to create a message
-	 * with a single or multiple page of text, and single or multiple 
-	 * BitmapGraphics.
-	 *
+	 * with a single or multiple page of text, single or multiple 
+	 * BitmapGraphics, with a default activation priority.
 	 * @param o Message owner.
 	 * @param m Message text as a MultiString. 
 	 * @param b Message Map of BitmapGraphic for all pages.
@@ -79,6 +78,30 @@ public class SignMessage implements Serializable {
 		bitmaps = new TreeMap<Integer, BitmapGraphic>(b);
 		this.deployTime = new Date();
 		this.durationMins = d;
+		this.m_activationPriority = MsgActPriority.PRI_OPER_MSG;
+	}
+
+	/** 
+	 * Create a new sign message. Use this constructor to create a message
+	 * with a single or multiple page of text, single or multiple 
+	 * BitmapGraphics, and an activation priority.
+	 * @param o Message owner.
+	 * @param m Message text as a MultiString. 
+	 * @param b Message Map of BitmapGraphic for all pages.
+	 * @param d Message duration in mins. Use 0 for a blank message. 
+	 * @param ap Message activation priority.
+	 */
+	public SignMessage(String o, MultiString m,
+		Map<Integer, BitmapGraphic> b, int d, MsgActPriority ap)
+	{
+		if(o == null || m == null || b == null || ap == null)
+			throw new NullPointerException();
+		this.owner = o;
+		this.multi = m;
+		this.bitmaps = new TreeMap<Integer, BitmapGraphic>(b);
+		this.deployTime = new Date();
+		this.durationMins = d;
+		this.m_activationPriority = ap;
 	}
 
 	/** Get the message MULTI string */
@@ -94,8 +117,15 @@ public class SignMessage implements Serializable {
 		return owner;
 	}
 
+	/** return true if the message belongs to the specified owner */
+	public boolean isOwner(String argOwner) {
+		if (argOwner==null || owner==null)
+			return false;
+		return argOwner.equals(owner);
+	}
+
 	/** Time this message was deployed */
-	protected final Date deployTime;
+	protected final Date deployTime;	// FIXME: maybe better to use ticks here (a long)
 
 	/** Get the message deployed time */
 	public Date getDeployTime() { return deployTime; }
@@ -127,13 +157,9 @@ public class SignMessage implements Serializable {
 		if(o instanceof SignMessage) {
 			SignMessage m = (SignMessage)o;
 			return multi.equals(m.multi);
-		} else
-			return false;
-	}
-
-	/** Check if a string matches the message */
-	public boolean equalsString(String s) {
-		return multi.equalsString(s);
+		} else if( o instanceof String)
+			return multi.equals((String)o);
+		return false;
 	}
 
 	/** Calculate a hash code for the message */
@@ -205,8 +231,69 @@ public class SignMessage implements Serializable {
 		return multi.toString();
 	}
 
+	/** toString() returns the message as a MultiString, plus other debug info */
+	public String toStringDebug() {
+		return "Msg="+multi.toString()+", actPriority="+
+			m_activationPriority.valueOf()+", owner="+owner+
+			", durationMins="+durationMins+".";
+	}
+
 	/** return the number of pages in the message MultiString */
 	public int getNumPages() {
 		return multi.getNumPages();
 	}
+
+	/* message activation priority */
+	protected MsgActPriority m_activationPriority = 
+		MsgActPriority.PRI_OPER_MSG;
+
+	/** get the message activation priority */
+	public MsgActPriority getActivationPriority() {
+		return m_activationPriority;
+	}
+
+	/** set the message activation priority */
+	public void setActivationPriority(MsgActPriority m) {
+		m_activationPriority=m;
+	}
+
+	/** 
+	 * Determine if one message would supersede (replace) another on the 
+	 * DMS using numeric NTCIP priority values.
+	 *  @param mos Typically the message on the sign.
+	 *  @return true if this supersedes the argument message.
+	 */
+	public boolean supersedeNumeric(SignMessage mos) {
+		if( mos==null )
+			return false;
+		if( getActivationPriority()==null )
+			return true;
+		return this.getActivationPriority().supersede(mos.getActivationPriority());
+	}
+
+	/** 
+	 * Determine if one message would supersede (replace) another on the 
+	 * DMS. Note that we are asking the potential new message (this) to 
+	 * evaluate whether it supercedes the message on the sign (the arg).
+	 *  @param mos Typically the message on the sign.
+	 *  @return true if this supersedes the argument message.
+	 */
+	public boolean supersede(SignMessage mos) {
+		System.err.println("SignMessage.supersede(mos="+(mos==null?"null":mos.toStringDebug())+") called.");
+		if (mos==null || this.getActivationPriority()==null)
+			return true;
+		// start with subclass
+		else if (this.getActivationPriority() instanceof MsgActPriorityProc)
+			return ((MsgActPriorityProc)this.getActivationPriority()).supersede(mos);
+		// straight numeric priority comparison
+		else if (this.getActivationPriority() instanceof MsgActPriority)
+			return this.supersedeNumeric(mos);
+		else {
+			String err="Unknown type in SignMessage.supersede()";
+			assert false : err;
+			System.err.println(err);
+			return true;
+		}
+	}
 }
+
