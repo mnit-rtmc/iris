@@ -69,7 +69,7 @@ abstract public class OpDms extends DeviceOperation {
 		super.handleException(e);
 	}
 
-	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successfull */
+	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successful */
 	public void cleanup() {
 		//System.err.println("dmslite.OpDms.cleanup() called, success="+success);
 		m_dms.setReset(success);
@@ -150,8 +150,23 @@ abstract public class OpDms extends DeviceOperation {
 
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
-		String user_note="last operation at "+STime.getCurTimeShortString()+", "+new Integer(m.getCompletionTimeMS()).toString()+" ms.";
-		m_dms.setUserNote(user_note);
+		m_dms.setUserNote(buildUserNote(m));
 	}
+
+	/** build user note */
+	public String buildUserNote(Message m) {
+		SignMessage sm=m_dms.getMessage();
+		StringBuilder note=new StringBuilder();
+		String deploytime="null";
+		if (sm!=null && sm.getDeployTime()!=null)
+			deploytime=sm.getDeployTime().toString();
+		note.append("Last operation at "+STime.getCurTimeShortString());
+		String delta=SString.doubleToString((((double)m.getCompletionTimeMS())/1000),2);
+		note.append(" (").append(delta).append(" secs)");
+		//note.append(", last message deployed: "+deploytime);
+		note.append(".");
+		return note.toString();
+	}
+
 }
 
