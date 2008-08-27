@@ -24,6 +24,10 @@ us/mn/state/dot/tms/DeviceList.class
 us/mn/state/dot/tms/DMS.class
 us/mn/state/dot/tms/DmsSignGroup.class
 us/mn/state/dot/tms/DMSList.class
+us/mn/state/dot/tms/MsgActPriority.class
+us/mn/state/dot/tms/MsgActPriorityD10.class
+us/mn/state/dot/tms/MsgActPriorityProc*.class
+us/mn/state/dot/tms/comm/caws/MsgActPriorityCallBackBlank.class
 us/mn/state/dot/tms/ErrorCounter.class
 us/mn/state/dot/tms/Font.class
 us/mn/state/dot/tms/Glyph.class
@@ -54,7 +58,7 @@ us/mn/state/dot/tms/RemoteObserver.class
 us/mn/state/dot/tms/RemoteObserverImpl.class
 us/mn/state/dot/tms/RemoteObserverImpl??.class
 us/mn/state/dot/tms/Road.class
-us/mn/state/dot/tms/SignAlert.class
+us/mn/state/dot/tms/SignAlert*.class
 us/mn/state/dot/tms/SignGroup.class
 us/mn/state/dot/tms/SignMessage.class
 us/mn/state/dot/tms/SignText.class
