@@ -65,8 +65,7 @@ public class OpProcessCawsMsgs extends ControllerOperation
 			throws IOException {
 			System.err.println(
 			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll() called.");
-			assert argmess instanceof Message :
-			       "wrong message type";
+			assert argmess instanceof Message : "wrong message type";
 
 			Message mess = (Message) argmess;
 
