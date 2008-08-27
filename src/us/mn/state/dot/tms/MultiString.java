@@ -83,13 +83,9 @@ public class MultiString implements Serializable {
 	public boolean equals(Object o) {
 		if(o instanceof MultiString)
 			return toString().equals(o.toString());
-		else
-			return false;
-	}
-
-	/** Test if the MULTI string is equal to another string */
-	public boolean equalsString(String s) {
-		return toString().equals(s);
+		if(o instanceof String)
+			return toString().equals(o.toString());
+		return false;
 	}
 
 	/** Calculate a hash code for the MULTI string */
