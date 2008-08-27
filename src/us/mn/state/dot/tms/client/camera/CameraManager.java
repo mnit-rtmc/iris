@@ -101,11 +101,6 @@ public class CameraManager extends ProxyManager<Camera> {
 			return STYLE_ALL.equals(s);
 	}
 
-	/** Get the style list model containing all proxies */
-	public StyleListModel<Camera> getAllModel() {
-		return getStyleModel(STYLE_ALL);
-	}
-
 	/** Show the properties form for the selected proxy */
 	public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {

@@ -241,4 +241,20 @@ public class ProxyListModel<T extends SonarObject>
 		if(proxy != null)
 			proxy.destroy();
 	}
+
+	/** Callback interface to find a proxy in the list */
+	public interface ProxyFinder<T> {
+		boolean check(T proxy);
+	}
+
+	/** Find a proxy in the list */
+	public T find(ProxyFinder pf) {
+		synchronized(proxies) {
+			for(T proxy: proxies) {
+				if(pf.check(proxy))
+					return proxy;
+			}
+		}
+		return null;
+	}
 }

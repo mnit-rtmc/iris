@@ -34,7 +34,9 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.ControllerIO_RMI;
+import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.DMS;
@@ -46,6 +48,8 @@ import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
 import us.mn.state.dot.tms.utils.TMSProxy;
+import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.camera.CameraManager;
 
 /**
  * Special table model for Controller I/O pins.
@@ -85,7 +89,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Get the type of the specified ControllerIO device */
-	static protected DeviceType getType(ControllerIO_RMI cio) {
+	static protected DeviceType getType(ControllerIO cio) {
 		if(cio instanceof Camera)
 			return DeviceType.Camera;
 		else if(cio instanceof Detector)
@@ -117,13 +121,13 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected final TMSProxy tms;
 
 	/** Array of ControllerIO assignments */
-	protected ControllerIO_RMI[] io;
+	protected ControllerIO[] io;
 
 	/** Array of ControllerIO device types */
 	protected DeviceType[] types;
 
 	/** Available camera model */
-//	protected final WrapperComboBoxModel c_model;
+	protected final WrapperComboBoxModel c_model;
 
 	/** Available detector model */
 	protected final WrapperComboBoxModel dt_model;
@@ -152,10 +156,11 @@ public class ControllerIOModel extends AbstractTableModel {
 	{
 		controller = c;
 		tms = _tms;
-		io = new ControllerIO_RMI[0];
+		io = new ControllerIO[0];
 		types = new DeviceType[0];
-//		c_model = new WrapperComboBoxModel(
-//			tms.getAvailableCameras().getModel(), true);
+		c_model = new WrapperComboBoxModel(
+			Session.cam_manager_singleton.getStyleModel(
+			CameraManager.STYLE_NO_CONTROLLER), true);
 		dt_model = new WrapperComboBoxModel(
 			tms.getAvailable().getModel(), true);
 		dms_model = new WrapperComboBoxModel(
@@ -169,7 +174,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Set the array of controller IO assignments */
-	public void setCio(ControllerIO_RMI[] cio) {
+	public void setCio(ControllerIO[] cio) {
 		io = cio;
 		types = new DeviceType[cio.length];
 		for(int i = 0; i < cio.length; i++)
@@ -228,10 +233,16 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected void setDeviceType(int pin, DeviceType io_type) {
 		int row = pin - 1;
 		if(io_type != types[pin]) {
-			ControllerIO_RMI cio = io[pin];
-			if(cio != null) {
+			ControllerIO cio = io[pin];
+			if(cio instanceof ControllerIO_SONAR) {
+				ControllerIO_SONAR cio_s =
+					(ControllerIO_SONAR)cio;
+				cio_s.setController(null);
+			}
+			if(cio instanceof ControllerIO_RMI) {
+				ControllerIO_RMI cio_r = (ControllerIO_RMI)cio;
 				try {
-					cio.setController(null);
+					cio_r.setController(null);
 					((TMSObject)cio).notifyUpdate();
 				}
 				catch(Exception e) {
@@ -247,11 +258,18 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected void setDevice(int pin, Object value) {
 		try {
 			clearDevice(pin);
-			ControllerIO_RMI cio = lookupControllerIO(types[pin],
+			ControllerIO cio = lookupControllerIO(types[pin],
 				value);
-			if(cio != null) {
-				cio.setPin(pin);
-				cio.setController(controller.getName());
+			if(cio instanceof ControllerIO_SONAR) {
+				ControllerIO_SONAR cio_s =
+					(ControllerIO_SONAR)cio;
+				cio_s.setPin(pin);
+				cio_s.setController(controller);
+			}
+			if(cio instanceof ControllerIO_RMI) {
+				ControllerIO_RMI cio_r = (ControllerIO_RMI)cio;
+				cio_r.setPin(pin);
+				cio_r.setController(controller.getName());
 				((TMSObject)cio).notifyUpdate();
 			}
 		}
@@ -262,23 +280,28 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Clear the device at the specified pin */
 	protected void clearDevice(int pin) throws Exception {
-		ControllerIO_RMI cio = io[pin];
-		if(cio != null) {
-			cio.setController(null);
+		ControllerIO cio = io[pin];
+		if(cio instanceof ControllerIO_SONAR) {
+			ControllerIO_SONAR cio_s = (ControllerIO_SONAR)cio;
+			cio_s.setController(null);
+		}
+		if(cio instanceof ControllerIO_RMI) {
+			ControllerIO_RMI cio_r = (ControllerIO_RMI)cio;
+			cio_r.setController(null);
 			((TMSObject)cio).notifyUpdate();
 		}
 	}
 
 	/** Lookup the ControllerIO for the given value */
-	protected ControllerIO_RMI lookupControllerIO(DeviceType d,
-		Object value) throws RemoteException
+	protected ControllerIO lookupControllerIO(DeviceType d, Object value)
+		throws RemoteException
 	{
 		if(d == null || value == null)
 			return null;
 		String v = value.toString();
 		switch(d) {
-//			case Camera:
-//				return lookupCamera(v);
+			case Camera:
+				return (Camera)value;
 			case Detector:
 				try {
 					int index = Integer.parseInt(v);
@@ -357,8 +380,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		if(d == null)
 			return no_model;
 		switch(d) {
-//			case Camera:
-//				return c_model;
+			case Camera:
+				return c_model;
 			case Detector:
 				return dt_model;
 			case DMS:
@@ -415,7 +438,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		catch(RemoteException e) {
 			new ExceptionDialog(e).setVisible(true);
 		}
-		return null;
+		return value;
 	}
 
 	/** Create the table column model */

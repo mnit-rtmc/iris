@@ -87,6 +87,9 @@ public class Session {
 	/** Camera manager */
 	protected final CameraManager cam_manager;
 
+	/** FIXME: this is a hack */
+	static public CameraManager cam_manager_singleton;
+
 	/** Camera layer */
 	protected final SonarLayer<Camera> camLayer;
 
@@ -200,6 +203,7 @@ public class Session {
 		loc_manager = new GeoLocManager(st.getGeoLocs());
 		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
 			loc_manager);
+		cam_manager_singleton = cam_manager;
 		camLayer = cam_manager.getLayer();
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();

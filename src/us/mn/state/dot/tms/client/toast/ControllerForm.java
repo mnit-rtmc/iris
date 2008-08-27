@@ -37,9 +37,10 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerIO_RMI;
+import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -57,6 +58,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Frame title */
 	static protected final String TITLE = "Controller: ";
+
+	/** SONAR state */
+	protected final SonarState state;
 
 	/** Comm link combo box */
 	protected final JComboBox comm_link = new JComboBox();
@@ -118,7 +122,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create a new controller form */
 	public ControllerForm(TmsConnection tc, Controller c) {
 		super(TITLE, tc, c);
-		SonarState state = tc.getSonarState();
+		state = tc.getSonarState();
 		link_model = state.getCommLinkModel();
 		cabinets = state.getCabinets();
 		cabinet = proxy.getCabinet();
@@ -131,17 +135,26 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return st.getControllers();
 	}
 
-	/** Get the ControllerIO_RMI array */
-	protected ControllerIO_RMI[] getControllerIO() {
+	/** Get the ControllerIO array */
+	protected ControllerIO[] getControllerIO() {
 		Integer[] cio = proxy.getCio();
-		ControllerIO_RMI[] io = new ControllerIO_RMI[cio.length];
+		final ControllerIO[] io = new ControllerIO[cio.length];
 		TMSProxy tms = connection.getProxy();
 		for(int i = 0; i < cio.length; i++) {
-			if(cio[i] != null) {
-				io[i] = (ControllerIO_RMI)tms.getTMSObject(
-					cio[i]);
-			}
+			if(cio[i] != null)
+				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
 		}
+		ProxyListModel<Camera> cams = state.getCameraModel();
+		cams.find(new ProxyListModel.ProxyFinder<Camera>() {
+			public boolean check(Camera camera) {
+				if(camera.getController() == proxy) {
+					int pin = camera.getPin();
+					if(pin > 0 && pin < io.length)
+						io[pin] = camera;
+				}
+				return false;
+			}
+		});
 		return io;
 	}
 
