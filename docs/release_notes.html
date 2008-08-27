@@ -11,6 +11,25 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.74.0 (27 August 2008)</dt>
+	<dd><ul>
+		<li>
+			Camera objects converted to SONAR.
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.74.sql</code>
+		</li>
+		<li>
+			Multiple cameras can be selected at once, by holding
+			down CTRL key (or shift key in lists).
+			When multiple cameras are selected, popup menu allows
+			all cameras to be published/unpublished at once.
+		</li>
+		<li>
+			SONAR dependency updated to 1.9.0.
+			MapBean dependency updated to 4.3.0.
+		</li>
+	</ul></dd>
 	<dt>3.73.0 (14 August 2008)</dt>
 	<dd><ul>
 		<li>
