@@ -43,10 +43,12 @@ import us.mn.state.dot.tms.utils.I18NMessages;
 public class DMSListForm extends SortedListForm {
 
 	/** Frame title */
-	static protected String TITLE = I18NMessages.get("DMSListForm.Title")+": ";
+	static protected final String TITLE = 
+		I18NMessages.get("DMSListForm.Title")+": ";
 
 	/** Add title */
-	static protected final String ADD_TITLE = "Add DMS";
+	static protected final String ADD_TITLE = 
+		"Add "+I18NMessages.get("DMSListForm.SignAcronym");
 
 	/** Remote sign list interface */
 	protected final DMSList signList;
@@ -61,7 +63,12 @@ public class DMSListForm extends SortedListForm {
 	protected final JTextField line3 = new JTextField();
 
 	/** overwrite checkbox */
-	protected final JCheckBox overwrite = new JCheckBox("Overwrite existing sign messages");
+	protected final JCheckBox overwrite = 
+		new JCheckBox("Overwrite existing sign messages");
+
+	/** name of Alert */
+	protected final String m_alertName = 
+		I18NMessages.get("DMSListForm.AlertName");
 
 	/** Create a new DMSListForm */
 	public DMSListForm(TmsConnection tc) {
@@ -75,7 +82,7 @@ public class DMSListForm extends SortedListForm {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("List", createListPanel());
 		if(connection.isAlert())
-			tab.add("Alert", createAlertPanel());
+			tab.add(m_alertName, createAlertPanel());
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
 	}
@@ -88,11 +95,13 @@ public class DMSListForm extends SortedListForm {
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
 		bag.gridwidth = 2;
-		JLabel label = new JLabel("WARNING: Alert will be sent to");
+		JLabel label = new JLabel("WARNING: "+
+			m_alertName+" will be sent to");
 		label.setForeground(TmsForm.ERROR);
 		lay.setConstraints(label, bag);
 		panel.add(label);
-		label = new JLabel("all active "+I18NMessages.get("DMSListForm.AlertText")+".");
+		label = new JLabel("all active "+
+			I18NMessages.get("DMSListForm.AlertText")+".");
 		label.setForeground(TmsForm.ERROR);
 		lay.setConstraints(label, bag);
 		panel.add(label);
@@ -140,12 +149,14 @@ public class DMSListForm extends SortedListForm {
 		bag.weightx = 0;
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.NONE;
-		final JButton send = new JButton(I18NMessages.get("DMSListForm.SendButton"));
+		final JButton send = new JButton(
+			I18NMessages.get("DMSListForm.SendButton"));
 		send.setToolTipText(
 			I18NMessages.get("DMSListForm.SendButton.ToolTip"));
 		lay.setConstraints(send, bag);
 		panel.add(send);
-		final JButton clear = new JButton(I18NMessages.get("DMSListForm.ClearButton"));
+		final JButton clear = new JButton(
+			I18NMessages.get("DMSListForm.ClearButton"));
 		clear.setToolTipText(
 			I18NMessages.get("DMSListForm.ClearButton.ToolTip"));
 		lay.setConstraints(clear, bag);
@@ -169,9 +180,10 @@ public class DMSListForm extends SortedListForm {
 		text[0] = line1.getText().trim().toUpperCase();
 		text[1] = line2.getText().trim().toUpperCase();
 		text[2] = line3.getText().trim().toUpperCase();
-		boolean ow=overwrite.isSelected();
-		//FIXME: maybe append user name to "Alert-" ?
-		signList.sendGroup(null, "Alert", text, ow);
+		boolean ow = overwrite.isSelected();
+		//FIXME: for owner, maybe append user name to m_alertName?
+		String owner = m_alertName;
+		signList.sendGroup(null, owner, text, ow);
 	}
 
 	/** Clear an alert when the clear button is pressed */
