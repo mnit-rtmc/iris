@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.Iterator;
 import java.rmi.RemoteException;
@@ -29,6 +30,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SignPoller;
+import us.mn.state.dot.tms.comm.VideoMonitorPoller;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -471,5 +473,43 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				return false;
 			}
 		});
+	}
+
+	/** Select a camera on a video monitor */
+	static public void selectMonitorCamera(final VideoMonitor m,
+		final String cam) throws NamespaceError
+	{
+		namespace.findObject(Controller.SONAR_TYPE,
+			new Checker<ControllerImpl>()
+		{
+			public boolean check(ControllerImpl c) {
+				MessagePoller p = c.getPoller();
+				if(p instanceof VideoMonitorPoller) {
+					VideoMonitorPoller vmp =
+						(VideoMonitorPoller)p;
+					vmp.setMonitorCamera(c, m, cam);
+				}
+				return false;
+			}
+		});
+	}
+
+	/** Unpublish a camera */
+	static public void unpublishCamera(final Camera cam)
+		throws NamespaceError, TMSException
+	{
+		final LinkedList<VideoMonitorImpl> restricted =
+			new LinkedList<VideoMonitorImpl>();
+		namespace.findObject(VideoMonitor.SONAR_TYPE,
+			new Checker<VideoMonitorImpl>()
+		{
+			public boolean check(VideoMonitorImpl m) {
+				if(m.getRestricted() && (m.getCamera() == cam))
+					restricted.add(m);
+				return false;
+			}
+		});
+		for(VideoMonitorImpl m: restricted)
+			m.selectCamera("");
 	}
 }

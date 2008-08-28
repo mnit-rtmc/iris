@@ -32,7 +32,6 @@ import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -113,6 +112,9 @@ public class CameraViewer extends JPanel
 
 	/** Video output selection ComboBox */
 	protected final JComboBox cmbOutput;
+
+	/** Video monitor output */
+	protected us.mn.state.dot.tms.VideoMonitor video_monitor;
 	
 	/** Streaming video viewer */
 	protected final us.mn.state.dot.video.client.VideoMonitor monitor =
@@ -142,8 +144,6 @@ public class CameraViewer extends JPanel
 
 	/** Joystick polling thread */
 	protected final JoystickThread joystick = new JoystickThread();
-
-	protected final TypeCache<VideoMonitor> monitors;
 	
 	/** Create a new camera viewer */
 	public CameraViewer(CameraManager m, Properties p, Logger l,
@@ -156,7 +156,6 @@ public class CameraViewer extends JPanel
 		logger = l;
 		state = st;
 		user = u;
-		monitors = state.getVideoMonitors();
 		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -179,6 +178,11 @@ public class CameraViewer extends JPanel
 		bag.weightx = 0.5;
 		cmbOutput = createOutputCombo();
 		add(cmbOutput, bag);
+		new ActionJob(this, cmbOutput) {
+			public void perform() throws Exception {
+				monitorSelected();
+			}
+		};
 		bag.gridx = 1;
 		bag.gridy = 1;
 		bag.weightx = 1;
@@ -328,8 +332,24 @@ public class CameraViewer extends JPanel
 		pan = 0;
 		tilt = 0;
 		zoom = 0;
-		refreshUpdate();
-		refreshStatus();
+		if(camera != null) {
+			txtId.setText(camera.getName());
+			txtLocation.setText(GeoLocHelper.getDescription(
+				camera.getGeoLoc()));
+			try {
+				if(isCameraActive(camera)) {
+					if(video_monitor == null)
+						playPressed(camera);
+					else
+						video_monitor.setCamera(camera);
+				} else
+					stopPressed();
+			}
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		updateMonitorPanel(camera);
 	}
 
 	/** Called whenever a camera is added to the selection */
@@ -348,46 +368,50 @@ public class CameraViewer extends JPanel
 			setSelected(null);
 	}
 
-	/** Called whenever the TMS object is updated */
-	public void refreshUpdate() {
-		Camera camera = selected;	// Avoid NPE
-		if(camera != null) {
-			txtId.setText(camera.getName());
-			txtLocation.setText(GeoLocHelper.getDescription(
-				camera.getGeoLoc()));
-			Controller ctr = camera.getController();
-			boolean isActive = ctr != null && ctr.getActive();
-			play.setEnabled(isActive);
-			stop.setEnabled(isActive);
-			if(isActive)
-				ptz_panel.setCamera(camera);
-			else
-				ptz_panel.setEnabled(false);
-		} else
-			ptz_panel.setEnabled(false);
+	/** Update the monitor panel */
+	protected void updateMonitorPanel(Camera camera) {
+		if(isCameraActive(camera) && (video_monitor == null))
+			enableMonitorPanel(camera);
+		else
+			disableMonitorPanel();
 	}
 
-	/** Refresh the status of the device */
-	public void refreshStatus() {
+	/** Enable the monitor panel */
+	protected void enableMonitorPanel(Camera camera) {
+		play.setEnabled(true);
+		stop.setEnabled(true);
+		ptz_panel.setCamera(camera);
+		ptz_panel.setEnabled(true);
+	}
+
+	/** Disable the monitor panel */
+	protected void disableMonitorPanel() {
+		stopPressed();
+		play.setEnabled(false);
+		stop.setEnabled(false);
+		ptz_panel.setEnabled(false);
+	}
+
+	/** Test if the selected camera is active */
+	protected boolean isCameraActive(Camera camera) {
+		if(camera != null) {
+			Controller ctr = camera.getController();
+			return ctr != null && ctr.getActive();
+		} else
+			return false;
+	}
+
+	/** Called when a video monitor is selected */
+	protected void monitorSelected() {
 		Camera camera = selected;
-		if(camera == null) {
-			clear();
-			return;
-		}
-		try {
-			Object o = cmbOutput.getSelectedItem();
-			if(o == null)
-				playPressed(camera);
-			else {
-				stopPressed();
-				us.mn.state.dot.tms.VideoMonitor mon =
-					monitors.getObject(o.toString());
-				// FIXME: do the actual switching here
-			}
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
+		Object o = cmbOutput.getSelectedItem();
+		if(o instanceof us.mn.state.dot.tms.VideoMonitor) {
+			video_monitor =
+				(us.mn.state.dot.tms.VideoMonitor)o;
+			video_monitor.setCamera(camera);
+		} else
+			video_monitor = null;
+		updateMonitorPanel(camera);
 	}
 
 	/** Start video streaming */
@@ -412,9 +436,7 @@ public class CameraViewer extends JPanel
 	protected void clear() {
 		txtId.setText("");
 		txtLocation.setText("");
-		play.setEnabled(false);
-		stop.setEnabled(false);
-		ptz_panel.setEnabled(false);
+		disableMonitorPanel();
 	}
 
 	/** Create the video output selection combo box */

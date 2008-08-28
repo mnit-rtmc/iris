@@ -37,4 +37,10 @@ public interface VideoMonitor extends SonarObject {
 
 	/** Get flag to restrict publishing camera images */
 	boolean getRestricted();
+
+	/** Set the camera displayed on the monitor */
+	void setCamera(Camera c);
+
+	/** Get the camera displayed on the monitor */
+	Camera getCamera();
 }

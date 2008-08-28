@@ -16,11 +16,13 @@ package us.mn.state.dot.tms.comm.vicon;
 
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.MessengerException;
+import us.mn.state.dot.tms.comm.VideoMonitorPoller;
 
 /**
  * ViconPoller is a java implementation of the Vicon Video Switch serial
@@ -29,7 +31,7 @@ import us.mn.state.dot.tms.comm.MessengerException;
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  * @author Douglas Lau
  */
-public class ViconPoller extends MessagePoller {
+public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 
 	/** Dummy drop value for creating addressed messages */
 	static protected final int VICON_DROP = 1;
@@ -70,5 +72,12 @@ public class ViconPoller extends MessagePoller {
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
 		return null; // no diagmnostic testing can be done
+	}
+
+	/** Set the camera to display on the specified monitor */
+	public void setMonitorCamera(ControllerImpl c, VideoMonitor m,
+		String cam)
+	{
+		new SelectMonitorCamera(c, m, cam).start();
 	}
 }

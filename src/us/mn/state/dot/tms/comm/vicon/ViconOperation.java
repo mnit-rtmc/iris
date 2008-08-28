@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.comm.vicon;
 
-import us.mn.state.dot.tms.CameraImpl;
-import us.mn.state.dot.tms.VideoMonitorImpl;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.comm.ControllerOperation;
 
 /**
  * ViconOperation is the base class for the Vicon comm protocol.
@@ -24,18 +24,28 @@ import us.mn.state.dot.tms.comm.Device2Operation;
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  * @author Douglas Lau
  */
-abstract public class ViconOperation extends Device2Operation {
+abstract public class ViconOperation extends ControllerOperation {
 
 	/** Video monitor to select camera on */
-	protected final VideoMonitorImpl monitor;
+	protected final VideoMonitor monitor;
 
 	/** Camera to perform operation on */
-	protected final CameraImpl camera;
+	protected final String camera;
+
+	/** Begin the operation */
+	public final void begin() {
+		phase = phaseOne();
+	}
+
+	/** Create the first real phase of the operation */
+	abstract protected Phase phaseOne();
 
 	/** Create a new Vicon operation */
-	public ViconOperation(int p, VideoMonitorImpl m, CameraImpl c) {
+	public ViconOperation(int p, ControllerImpl c, VideoMonitor m,
+		String cam)
+	{
 		super(p, c);
 		monitor = m;
-		camera = c;
+		camera = cam;
 	}
 }

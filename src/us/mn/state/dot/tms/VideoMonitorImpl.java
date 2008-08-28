@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.comm.vicon.SelectMonitorCamera;
+import us.mn.state.dot.sonar.NamespaceError;
 
 /**
  * A video monitor output from a video switch
@@ -109,10 +109,51 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 			return;
 		store.update(this, "restricted", r);
 		setRestricted(r);
+		if(r && !isCameraPublished(camera))
+			selectCamera("");
 	}
 
 	/** Get flag to restrict publishing camera images */
 	public boolean getRestricted() {
 		return restricted;
+	}
+
+	/** Camera displayed on the video monitor */
+	protected transient Camera camera;
+
+	/** Set the camera displayed on the monitor */
+	public void setCamera(Camera c) {
+		camera = c;
+	}
+
+	/** Set the camera displayed on the monitor */
+	public void doSetCamera(Camera c) throws TMSException {
+		if(restricted && !isCameraPublished(c))
+			c = null;
+		setCamera(c);
+		if(c == null)
+			selectCamera("");
+		else
+			selectCamera(c.getName());
+	}
+
+	/** Get the camera displayed on the monitor */
+	public Camera getCamera() {
+		return camera;
+	}
+
+	/** Check if the camera video should be published */
+	static protected boolean isCameraPublished(Camera c) {
+		return c != null && c.getPublish();
+	}
+
+	/** Select a camera for the video monitor */
+	public void selectCamera(String cam) throws TMSException {
+		try {
+			TMSImpl.selectMonitorCamera(this, cam);
+		}
+		catch(NamespaceError e) {
+			throw new TMSException(e);
+		}
 	}
 }

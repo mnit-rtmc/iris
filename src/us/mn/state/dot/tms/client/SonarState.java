@@ -305,8 +305,8 @@ public class SonarState extends Client {
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
-		populate(monitors);
 		populate(cameras);
+		populate(monitors);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);

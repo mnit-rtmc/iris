@@ -183,6 +183,12 @@ public class CameraImpl extends Device2Impl implements Camera {
 			return;
 		store.update(this, "publish", p);
 		setPublish(p);
+		try {
+			TMSImpl.unpublishCamera(this);
+		}
+		catch(NamespaceError e) {
+			throw new TMSException(e);
+		}
 	}
 
 	/** Get flag to allow publishing camera images */

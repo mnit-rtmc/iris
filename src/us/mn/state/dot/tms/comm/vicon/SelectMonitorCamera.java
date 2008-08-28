@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.comm.vicon;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.CameraImpl;
-import us.mn.state.dot.tms.VideoMonitorImpl;
+import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -29,7 +29,7 @@ public class SelectMonitorCamera extends ViconOperation {
 	/** Parse the integer ID of a monitor or camera */
 	static protected int parseUID(String name) {
 		String id = name;
-		while(!Character.isDigit(id.charAt(0)))
+		while(id.length() > 0 && !Character.isDigit(id.charAt(0)))
 			id = id.substring(1);
 		try {
 			return Integer.parseInt(id);
@@ -40,8 +40,10 @@ public class SelectMonitorCamera extends ViconOperation {
 	}
 
 	/** Create a new select monitor camera operation */
-	public SelectMonitorCamera(VideoMonitorImpl m, CameraImpl c) {
-		super(COMMAND, m, c);
+	public SelectMonitorCamera(ControllerImpl c, VideoMonitor m,
+		String cam)
+	{
+		super(COMMAND, c, m, cam);
 	}
 
 	/** Begin the operation */
@@ -56,8 +58,7 @@ public class SelectMonitorCamera extends ViconOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new SelectMonitorRequest(parseUID(
 				monitor.getName())));
-			mess.add(new SelectCameraRequest(parseUID(
-				camera.getName())));
+			mess.add(new SelectCameraRequest(parseUID(camera)));
 			mess.setRequest();
 			return null;
 		}
