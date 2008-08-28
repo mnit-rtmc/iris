@@ -97,17 +97,19 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Add a new proxy to the table model */
-	protected void proxyAddedSlow(T proxy) {
+	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireTableRowsInserted(row, row);
-			}
-		});
+		if(row >= 0) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					fireTableRowsInserted(row, row);
+				}
+			});
+		}
 	}
 
 	/** Add a new proxy to the table model */
-	public void proxyAdded(final T proxy) {
+	public final void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -119,14 +121,19 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Remove a proxy from the table model */
 	protected int doProxyRemoved(T proxy) {
 		synchronized(proxies) {
-			int row = getRow(proxy);
-			proxies.remove(proxy);
-			return row;
+			Iterator<T> it = proxies.iterator();
+			for(int row = 0; it.hasNext(); row++) {
+				if(proxy == it.next()) {
+					it.remove();
+					return row;
+				}
+			}
 		}
+		return -1;
 	}
 
 	/** Remove a proxy from the table model */
-	protected void proxyRemovedSlow(T proxy) {
+	protected final void proxyRemovedSlow(T proxy) {
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
 			SwingUtilities.invokeLater(new Runnable() {
@@ -138,7 +145,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Remove a proxy from the table model */
-	public void proxyRemoved(final T proxy) {
+	public final void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -151,8 +158,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected void proxyChangedSlow(T proxy, String attrib) {
 		int pre_row, post_row;
 		synchronized(proxies) {
-			pre_row = preChangeRow(proxy);
-			post_row = postChangeRow(proxy);
+			pre_row = doProxyRemoved(proxy);
+			post_row = doProxyAdded(proxy);
 		}
 		if(pre_row >= 0 && post_row < 0) {
 			final int r = pre_row;
@@ -182,30 +189,13 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Change a proxy in the table model */
-	public void proxyChanged(final T proxy, final String attrib) {
+	public final void proxyChanged(final T proxy, final String attrib) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
 				proxyChangedSlow(proxy, attrib);
 			}
 		}.addToScheduler();
-	}
-
-	/** Find and remove a proxy which may not be in proper sort order */
-	protected int preChangeRow(T proxy) {
-		Iterator<T> it = proxies.iterator();
-		for(int i = 0; it.hasNext(); i++) {
-			if(proxy.equals(it.next())) {
-				it.remove();
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/** Handle a proxy after a change has happened */
-	protected int postChangeRow(T proxy) {
-		return doProxyAdded(proxy);
 	}
 
 	/** Get the count of rows in the table */

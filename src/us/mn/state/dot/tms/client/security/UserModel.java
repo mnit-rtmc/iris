@@ -50,10 +50,10 @@ public class UserModel extends ProxyTableModel<User> {
 	}
 
 	/** Change a user in the table model */
-	public void proxyChanged(User u, String attrib) {
-		super.proxyChanged(u, attrib);
+	protected void proxyChangedSlow(User proxy, String attrib) {
+		super.proxyChangedSlow(proxy, attrib);
 		if(attrib.equals("roles"))
-			rmodel.updateUserRoles(u);
+			rmodel.updateUserRoles(proxy);
 	}
 
 	/** Get the count of columns in the table */

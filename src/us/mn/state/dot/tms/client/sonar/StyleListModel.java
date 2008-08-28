@@ -58,13 +58,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	}
 
 	/** Add a new proxy */
-	public void proxyAdded(T proxy) {
-		if(manager.checkStyle(name, proxy))
-			super.proxyAdded(proxy);
-	}
-
-	/** Check if the proxy is the right style after a change */
-	protected int postChangeRow(T proxy) {
+	protected int doProxyAdded(T proxy) {
 		if(manager.checkStyle(name, proxy))
 			return super.doProxyAdded(proxy);
 		else

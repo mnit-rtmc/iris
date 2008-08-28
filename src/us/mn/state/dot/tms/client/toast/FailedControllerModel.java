@@ -84,22 +84,10 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 		return c != null && c.getActive() && !c.getStatus().equals("");
 	}
 
-	/** Add a new proxy to the table model */
-	public void proxyAdded(Controller proxy) {
-		if(isFailed(proxy))
-			super.proxyAdded(proxy);
-	}
-
-	/** Remove a proxy from the table model */
-	public void proxyRemoved(Controller proxy) {
-		if(isFailed(proxy))
-			super.proxyRemoved(proxy);
-	}
-
 	/** Add a Controller proxy if it is failed */
-	protected int postChangeRow(Controller proxy) {
+	protected int doProxyAdded(Controller proxy) {
 		if(isFailed(proxy))
-			return doProxyAdded(proxy);
+			return super.doProxyAdded(proxy);
 		else
 			return -1;
 	}

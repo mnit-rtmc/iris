@@ -77,21 +77,11 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	}
 
 	/** Add a new proxy to the table model */
-	public void proxyAdded(SignGroup proxy) {
+	protected int doProxyAdded(SignGroup proxy) {
 		if(isListed(proxy))
-			super.proxyAdded(proxy);
-	}
-
-	/** Remove a proxy from the table model */
-	public void proxyRemoved(SignGroup proxy) {
-		if(isListed(proxy))
-			super.proxyRemoved(proxy);
-	}
-
-	/** Change a proxy in the table model */
-	public void proxyChanged(SignGroup proxy, String attrib) {
-		if(isListed(proxy))
-			super.proxyChanged(proxy, attrib);
+			return super.doProxyAdded(proxy);
+		else
+			return -1;
 	}
 
 	/** DMS identifier */

@@ -82,7 +82,7 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Add a new proxy to the list model */
-	protected void proxyAddedSlow(T proxy) {
+	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
 			final ListModel model = this;
@@ -95,7 +95,7 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Add a new proxy to the list model */
-	public void proxyAdded(final T proxy) {
+	public final void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -107,14 +107,19 @@ public class ProxyListModel<T extends SonarObject>
 	/** Remove a proxy from the model */
 	protected int doProxyRemoved(T proxy) {
 		synchronized(proxies) {
-			int row = getRow(proxy);
-			proxies.remove(proxy);
-			return row;
+			Iterator<T> it = proxies.iterator();
+			for(int row = 0; it.hasNext(); row++) {
+				if(proxy == it.next()) {
+					it.remove();
+					return row;
+				}
+			}
 		}
+		return -1;
 	}
 
 	/** Remove a proxy from the model */
-	protected void proxyRemovedSlow(final T proxy) {
+	protected final void proxyRemovedSlow(final T proxy) {
 		final ListModel model = this;
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
@@ -127,7 +132,7 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Remove a proxy from the model */
-	public void proxyRemoved(final T proxy) {
+	public final void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
@@ -137,12 +142,14 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Change a proxy in the model */
-	protected void proxyChangedSlow(final T proxy, final String attrib) {
+	protected final void proxyChangedSlow(final T proxy,
+		final String attrib)
+	{
 		final ListModel model = this;
 		int pre_row, post_row;
 		synchronized(proxies) {
-			pre_row = preChangeRow(proxy);
-			post_row = postChangeRow(proxy);
+			pre_row = doProxyRemoved(proxy);
+			post_row = doProxyAdded(proxy);
 		}
 		if(pre_row >= 0 && post_row < 0) {
 			final int row = pre_row;
@@ -172,30 +179,13 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Change a proxy in the list model */
-	public void proxyChanged(final T proxy, final String attrib) {
+	public final void proxyChanged(final T proxy, final String attrib) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
 				proxyChangedSlow(proxy, attrib);
 			}
 		}.addToScheduler();
-	}
-
-	/** Find and remove a proxy which may not be in proper sort order */
-	protected int preChangeRow(T proxy) {
-		Iterator<T> it = proxies.iterator();
-		for(int i = 0; it.hasNext(); i++) {
-			if(proxy.equals(it.next())) {
-				it.remove();
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/** Handle a proxy after a change has happened */
-	protected int postChangeRow(T proxy) {
-		return doProxyAdded(proxy);
 	}
 
 	/** Get the size (for ListModel) */

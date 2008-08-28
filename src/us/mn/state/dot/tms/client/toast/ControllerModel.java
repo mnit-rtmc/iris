@@ -102,21 +102,9 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Add a new proxy to the table model */
-	public void proxyAdded(Controller proxy) {
+	protected int doProxyAdded(Controller proxy) {
 		if(proxy.getCommLink() == comm_link)
-			super.proxyAdded(proxy);
-	}
-
-	/** Remove a proxy from the table model */
-	public void proxyRemoved(Controller proxy) {
-		if(proxy.getCommLink() == comm_link)
-			super.proxyRemoved(proxy);
-	}
-
-	/** Add a Controller proxy if it is failed */
-	protected int postChangeRow(Controller proxy) {
-		if(proxy.getCommLink() == comm_link)
-			return doProxyAdded(proxy);
+			return super.doProxyAdded(proxy);
 		else
 			return -1;
 	}

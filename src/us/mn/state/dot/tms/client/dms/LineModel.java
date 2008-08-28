@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.SignText;
 
 /**
  * Model for a sign text line combo box
+ * FIXME: this should extend ProxyListModel
  *
  * @author Douglas Lau
  */

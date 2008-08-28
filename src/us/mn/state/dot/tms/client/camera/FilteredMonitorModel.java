@@ -44,18 +44,10 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 	}
 
 	/** Add a new proxy to the list model */
-	public void proxyAdded(VideoMonitor proxy) {
+	protected int doProxyAdded(VideoMonitor proxy) {
 		if(user.canUpdate(createUpdateString(proxy)))
-			super.proxyAdded(proxy);
-	}
-
-	/** Change a proxy in the model */
-	public void proxyChanged(VideoMonitor proxy, String attrib) {
-		boolean exists = proxies.contains(proxy);
-		boolean canUpdate = user.canUpdate(createUpdateString(proxy));
-		if(canUpdate && !exists)
-			super.proxyAdded(proxy);
-		else if(!canUpdate && exists)
-			super.proxyRemoved(proxy);
+			return super.doProxyAdded(proxy);
+		else
+			return -1;
 	}
 }
