@@ -151,15 +151,8 @@ public class UserManager {
 			panel.addRow("Username", user_name);
 			panel.addRow("Password", password);
 			new ActionJob(b_log_in) {
-				public void perform() throws Exception {
-					try {
-						doLogin();
-					}
-					catch(AuthenticationException e) {
-						// ShowHandler will take care
-						// of displaying a message to
-						// the user; don't do it again
-					}
+				public void perform() throws Exception{
+					doLoginWrapped();
 				}
 			};
 			password.addKeyListener(new KeyAdapter() {
@@ -171,6 +164,17 @@ public class UserManager {
 			panel.setCenter();
 			panel.addRow(b_log_in);
 			add(panel);
+		}
+
+		/** Try logging in and fiddle with exception stuff */
+		protected void doLoginWrapped() throws Exception {
+			try {
+				doLogin();
+			}
+			catch(AuthenticationException e) {
+				throw new java.rmi.ConnectException(
+					"SONAR server too slow");
+			}
 		}
 
 		/** Do the login authentication */
