@@ -156,8 +156,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Show the popup menu for the selected proxy or proxies */
 	public void showPopupMenu(MouseEvent e) {
 		JPopupMenu popup = createPopup();
-		popup.setInvoker(e.getComponent());
-		popup.show(e.getComponent(), e.getX(), e.getY());
+		if(popup != null) {
+			popup.setInvoker(e.getComponent());
+			popup.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 
 	/** Create a popup menu for the selected proxy object(s) */
