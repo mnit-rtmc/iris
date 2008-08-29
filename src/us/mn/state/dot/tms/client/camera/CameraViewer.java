@@ -338,9 +338,8 @@ public class CameraViewer extends JPanel
 				camera.getGeoLoc()));
 			try {
 				if(isCameraActive(camera)) {
-					if(video_monitor == null)
-						playPressed(camera);
-					else
+					playPressed(camera);
+					if(video_monitor != null)
 						video_monitor.setCamera(camera);
 				} else
 					stopPressed();
@@ -370,7 +369,7 @@ public class CameraViewer extends JPanel
 
 	/** Update the monitor panel */
 	protected void updateMonitorPanel(Camera camera) {
-		if(isCameraActive(camera) && (video_monitor == null))
+		if(isCameraActive(camera))
 			enableMonitorPanel(camera);
 		else
 			disableMonitorPanel();
