@@ -180,11 +180,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	abstract protected GeoLoc getGeoLoc(T proxy);
 
 	/** Find the proxy for a map geo location */
-	public T findProxy(final MapObject o) {
-		return getStyleModel(STYLE_ALL).findProxy(new MapSearcher() {
-			public boolean next(MapObject mo) {
-				return o == mo;
-			}
-		});
+	public T findProxy(MapObject o) {
+		return getStyleModel(STYLE_ALL).findProxy(o);
 	}
 }
