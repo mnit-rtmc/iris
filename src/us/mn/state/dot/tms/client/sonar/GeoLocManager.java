@@ -59,12 +59,14 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	}
 
 	/** Remove a GeoLoc from the manager */
-	public void proxyRemoved(final GeoLoc proxy) {
+	public void proxyRemoved(GeoLoc proxy) {
+		// Get the name before the proxy is destroyed
+		final String name = proxy.getName();
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
 				synchronized(proxies) {
-					proxies.remove(proxy.getName());
+					proxies.remove(name);
 				}
 			}
 		}.addToScheduler();
