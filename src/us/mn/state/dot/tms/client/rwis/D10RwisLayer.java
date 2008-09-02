@@ -16,32 +16,33 @@
 // This module was enhanced by the Advanced Highway Maintenance &
 // Construction Technology (AHMCT) Research Center at the University of
 // California - Davis (UCD), in partnership with the California Department
-// of Transportation (Caltrans) by Michael Darter, 02/08/08, and
+// of Transportation (Caltrans) by Michael Darter, 06/13/08, and
 // is provided as open-source software.
 // ***************************/
 
-package gov.ca.dot.d10.tms.client.incidents;
+package us.mn.state.dot.tms.client.rwis;
 
 import java.util.logging.Logger;
 import java.util.Properties;
 
-import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
-import us.mn.state.dot.tdxml.XmlIncidentClient;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tdxml.XmlIncidentClient;
 import us.mn.state.dot.tdxml.TdxmlException;
+import us.mn.state.dot.tdxml.d10.CHPXmlIncidentClient;
+import us.mn.state.dot.tms.client.rwis.TmsRwisLayer;
 import us.mn.state.dot.tms.SystemPolicy;
+import us.mn.state.dot.trafmap.RwisLayer;
 
-import gov.ca.dot.d10.tdxml.CHPXmlIncidentClient;
 
 /**
  * A Caltrans D10 specific map layer for displaying incidents.
  *
  * @author Michael Darter
  */
-public class D10IncidentLayer extends TmsIncidentLayer {
+public class D10RwisLayer extends TmsRwisLayer {
 
-	/** Create a new D10 TMS incident layer */
-	public D10IncidentLayer(Properties props, Logger logger,
+	/** Create a new D10 rwis layer */
+	public D10RwisLayer(Properties props, Logger logger,
 		TypeCache<SystemPolicy> c) throws TdxmlException
 	{
 		super(props, logger,c);
@@ -50,8 +51,8 @@ public class D10IncidentLayer extends TmsIncidentLayer {
 	/** create incident client, called by constructor, may be overridden by each agency. */
 	protected XmlIncidentClient createIncidentClient(Properties props, Logger logger) 
 		throws TdxmlException
-    {
-        return new CHPXmlIncidentClient(props, logger);
+	{
+        	return new CHPXmlIncidentClient(props, logger);
 	}
 
 }

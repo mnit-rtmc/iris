@@ -53,8 +53,8 @@ import us.mn.state.dot.tms.utils.Agency;
 
 // agency specific imports
 import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
-import gov.ca.dot.d10.tms.client.incidents.D10IncidentLayer;
-import gov.ca.dot.d10.tms.client.rwis.D10RwisLayer;
+import us.mn.state.dot.tms.client.incidents.D10IncidentLayer;
+import us.mn.state.dot.tms.client.rwis.D10RwisLayer;
 
 /**
  * A session is one IRIS login session.
