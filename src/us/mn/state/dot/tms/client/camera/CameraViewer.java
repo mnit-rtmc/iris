@@ -423,7 +423,8 @@ public class CameraViewer extends JPanel
 		client.setCamera(camera);
 		monitor.setDataSource(new HttpDataSource(client,
 			new URL(streamUrls[client.getArea()] + "?id=" +
-			client.getCameraId())), STREAM_DURATION);
+			client.getCameraId() + "&ssid=" +
+			client.getSonarSessionId())), STREAM_DURATION);
 	}
 
 	/** Stop video streaming */
