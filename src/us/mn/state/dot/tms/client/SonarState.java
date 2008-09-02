@@ -297,7 +297,7 @@ public class SonarState extends Client {
 		waitForLogin();
 		populate(system_policy);
 		populate(roads);
-		populate(geo_locs);
+		populate(geo_locs, true);
 		populate(comm_links);
 		populate(cabinet_styles);
 		populate(cabinets);
