@@ -294,6 +294,7 @@ public class SonarState extends Client {
 		populate(roles);
 		populate(users);
 		populate(connections);
+		waitForLogin();
 		populate(system_policy);
 		populate(roads);
 		populate(geo_locs);
@@ -312,15 +313,12 @@ public class SonarState extends Client {
 		populate(sign_text);
 	}
 
-	/** Look up the specified user */
-	public User lookupUser(String name) {
-		Map<String, User> user_map = users.getAll();
-		while(true) {
-			synchronized(user_map) {
-				User u = user_map.get(name);
-				if(u != null)
-					return u;
-			}
+	/** Wait for the login to be complete (roles, users and connections) */
+	protected void waitForLogin() throws AuthenticationException {
+		String connection = getConnection();
+		for(int i = 0; i < 100; i++) {
+			if(connections.getObject(connection) != null)
+				return;
 			try {
 				Thread.sleep(100);
 			}
@@ -328,6 +326,13 @@ public class SonarState extends Client {
 				// Do nothing
 			}
 		}
+		throw new AuthenticationException(
+			"Login failed: no connection");
+	}
+
+	/** Look up the specified user */
+	public User lookupUser(String name) {
+		return users.getObject(name);
 	}
 
 	/** Lookup a geo location */
@@ -347,19 +352,6 @@ public class SonarState extends Client {
 
 	/** Look up the specified connection */
 	public Connection lookupConnection(String name) {
-		Map<String, Connection> conn_map = connections.getAll();
-		while(true) {
-			synchronized(conn_map) {
-				Connection c = conn_map.get(name);
-				if(c != null)
-					return c;
-			}
-			try {
-				Thread.sleep(100);
-			}
-			catch(InterruptedException e) {
-				// Do nothing
-			}
-		}
+		return connections.getObject(name);
 	}
 }
