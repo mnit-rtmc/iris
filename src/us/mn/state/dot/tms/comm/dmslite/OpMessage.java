@@ -243,7 +243,7 @@ public class OpMessage extends OpDms {
 					m_dms.setActiveMessage(m_signMessage);
 				} else {
 					System.err.println(
-					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
+					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
 					m_dms.setStatus(OPNAME+": "+errmsg);
 
