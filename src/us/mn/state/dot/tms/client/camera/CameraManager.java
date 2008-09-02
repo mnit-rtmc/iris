@@ -22,7 +22,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
@@ -138,8 +137,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a popup menu for a single camera selection */
 	protected JPopupMenu createSinglePopup(Camera proxy) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(proxy.getName() + " - " +
-			GeoLocHelper.getDescription(proxy.getGeoLoc())));
+		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
 		List<Camera> sel = s_model.getSelected();
 		p.add(new PublishAction(sel));

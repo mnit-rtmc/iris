@@ -28,6 +28,7 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -182,5 +183,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Find the proxy for a map geo location */
 	public T findProxy(MapObject o) {
 		return getStyleModel(STYLE_ALL).findProxy(o);
+	}
+
+	/** Get the description of a proxy */
+	public String getDescription(T proxy) {
+		return proxy.getName() + " - " +
+			GeoLocHelper.getDescription(getGeoLoc(proxy));
 	}
 }

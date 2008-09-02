@@ -51,9 +51,12 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	public StyleSummary(final ProxyManager<T> man) {
 		super(new GridBagLayout());
 		manager = man;
+		ProxyCellRenderer<T> renderer =
+			new ProxyCellRenderer<T>(manager);
 		setBorder(BorderFactory.createTitledBorder(
 			manager.getProxyType() + " Summary"));
 		list = new ProxyJList<T>(manager);
+		list.setCellRenderer(renderer);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
 		int half = styles.length / 2;
