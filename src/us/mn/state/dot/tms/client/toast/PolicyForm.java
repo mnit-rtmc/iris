@@ -100,6 +100,7 @@ public class PolicyForm extends AbstractForm {
 		new ProxyListener<SystemPolicy>()
 	{
 		public void proxyAdded(SystemPolicy p) { }
+		public void enumerationComplete() { }
 		public void proxyRemoved(SystemPolicy p) { }
 		public void proxyChanged(SystemPolicy p, String a) {
 			doUpdate();

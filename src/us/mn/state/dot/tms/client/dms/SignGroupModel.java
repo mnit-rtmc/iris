@@ -107,6 +107,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 				model.proxyChanged(proxy.getSignGroup(),
 					"member");
 			}
+			public void enumerationComplete() { }
 			public void proxyRemoved(DmsSignGroup proxy) {
 				model.proxyChanged(proxy.getSignGroup(),
 					"member");

@@ -58,9 +58,13 @@ public class SonarLayer<T extends SonarObject> extends Layer
 		cache = manager.getCache();
 	}
 
+	/** Enumeration complete flag */
+	protected boolean complete;
+
 	/** Initialize the layer. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
+		complete = false;
 		cache.addProxyListener(this);
 	}
 
@@ -72,10 +76,22 @@ public class SonarLayer<T extends SonarObject> extends Layer
 	/** Add a new proxy to the layer */
 	public void proxyAdded(T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
+		if(complete) {
+			new AbstractJob() {
+				public void perform() {
+					updateExtent();
+				}
+			}.addToScheduler();
+		}
+	}
+
+	/** Enumeration of all proxies is complete */
+	public void enumerationComplete() {
+		complete = true;
+		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
 				updateExtent();
-				notifyLayerChanged(LayerChangedEvent.DATA);
 			}
 		}.addToScheduler();
 	}
@@ -86,7 +102,6 @@ public class SonarLayer<T extends SonarObject> extends Layer
 		new AbstractJob() {
 			public void perform() {
 				updateExtent();
-				notifyLayerChanged(LayerChangedEvent.DATA);
 			}
 		}.addToScheduler();
 	}
@@ -97,7 +112,7 @@ public class SonarLayer<T extends SonarObject> extends Layer
 		new AbstractJob() {
 			public void perform() {
 				// Can an attribute change affect the layer?
-				notifyLayerChanged(LayerChangedEvent.DATA);
+				notifyLayerChanged();
 			}
 		}.addToScheduler();
 	}
@@ -108,6 +123,7 @@ public class SonarLayer<T extends SonarObject> extends Layer
 		manager.forEach(calc);
 		if(calc.extent != null)
 			extent.setRect(calc.extent);
+		notifyLayerChanged();
 	}
 
 	/** Class to calculate the extent of the layer */
@@ -133,7 +149,8 @@ public class SonarLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Notify listeners that the layer has changed */
-	protected void notifyLayerChanged(final int reason) {
+	protected void notifyLayerChanged() {
+		int reason = LayerChangedEvent.DATA;
 		final LayerChangedEvent e = new LayerChangedEvent(this, reason);
 		Runnable notifier = new Runnable() {
 			public void run() {
@@ -144,11 +161,6 @@ public class SonarLayer<T extends SonarObject> extends Layer
 			notifier.run();
 		else
 			SwingUtilities.invokeLater(notifier);
-	}
-
-	/** Notify the renderer of the layer has changed */
-	public void notifyRendererChanged() {
-		notifyLayerChanged(LayerChangedEvent.DATA);
 	}
 
 	/** Create a new layer state */

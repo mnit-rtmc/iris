@@ -58,6 +58,11 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		}.addToScheduler();
 	}
 
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// We're not interested
+	}
+
 	/** Remove a GeoLoc from the manager */
 	public void proxyRemoved(GeoLoc proxy) {
 		// Get the name before the proxy is destroyed

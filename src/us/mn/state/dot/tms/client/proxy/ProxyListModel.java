@@ -104,6 +104,11 @@ public class ProxyListModel<T extends SonarObject>
 		}.addToScheduler();
 	}
 
+	/** Enumeration of all proxies is complete */
+	public void enumerationComplete() {
+		// Nothing to do
+	}
+
 	/** Remove a proxy from the model */
 	protected int doProxyRemoved(T proxy) {
 		synchronized(proxies) {

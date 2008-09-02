@@ -201,6 +201,11 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		// we're not interested
 	}
 
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
+	}
+
 	/** A proxy has been removed */
 	public void proxyRemoved(GeoLoc p) {
 		if(p == loc)

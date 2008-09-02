@@ -473,6 +473,7 @@ public class DMSPanel extends JPanel {
 		new ProxyListener<SystemPolicy>()
 	{
 		public void proxyAdded(SystemPolicy p) { }
+		public void enumerationComplete() { }
 		public void proxyRemoved(SystemPolicy p) { }
 		public void proxyChanged(SystemPolicy p, String a) {
 			readSystemDMSPageTimes();

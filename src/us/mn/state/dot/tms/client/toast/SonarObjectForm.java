@@ -68,6 +68,11 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		// we're not interested
 	}
 
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
+	}
+
 	/** A proxy has been removed */
 	public void proxyRemoved(T p) {
 		if(proxy == p) {

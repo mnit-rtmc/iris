@@ -87,6 +87,7 @@ public class FontForm extends AbstractForm {
 		new ProxyListener<Graphic>()
 	{
 		public void proxyAdded(Graphic p) { }
+		public void enumerationComplete() { }
 		public void proxyRemoved(Graphic p) { }
 		public void proxyChanged(Graphic p, String a) {
 			if(isFromSelectedFont(p)) {
@@ -117,6 +118,7 @@ public class FontForm extends AbstractForm {
 				repaint();
 			}
 		}
+		public void enumerationComplete() { }
 		public void proxyRemoved(Glyph p) {
 			if(isFromSelectedFont(p)) {
 				removeGlyph(p);

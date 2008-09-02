@@ -55,6 +55,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 				if(isMember(proxy.getSignGroup()))
 					addSignText(proxy);
 			}
+			public void enumerationComplete() { }
 			public void proxyRemoved(SignText proxy) {
 				if(isMember(proxy.getSignGroup()))
 					removeSignText(proxy);
@@ -82,6 +83,11 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	public void proxyAdded(DmsSignGroup proxy) {
 		if(dms_id.equals(proxy.getDms()))
 			addGroup(proxy.getSignGroup());
+	}
+
+	/** Enumeration of the proxy type is complete */
+	public void enumerationComplete() {
+		// We're not interested
 	}
 
 	/** Remove a proxy from the model */

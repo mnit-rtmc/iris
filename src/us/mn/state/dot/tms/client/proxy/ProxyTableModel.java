@@ -118,6 +118,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}.addToScheduler();
 	}
 
+	/** Enumeration of all proxies is complete */
+	public void enumerationComplete() {
+		// Nothing to do
+	}
+
 	/** Remove a proxy from the table model */
 	protected int doProxyRemoved(T proxy) {
 		synchronized(proxies) {
