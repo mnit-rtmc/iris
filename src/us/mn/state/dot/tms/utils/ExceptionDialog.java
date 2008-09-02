@@ -45,7 +45,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
@@ -131,8 +130,10 @@ public class ExceptionDialog extends JDialog {
 			addText(ee.getMessage());
 		}
 		catch(SonarException ee) {
-			addText("The server reported the");
-			addText("following problem:");
+			setFatal(true);
+			addText("This program has encountered");
+			addText("a problem while communicating");
+			addText("with the IRIS server.");
 			box.add(Box.createVerticalStrut(6));
 			addText(ee.getMessage());
 		}

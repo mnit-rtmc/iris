@@ -150,9 +150,9 @@ public class UserManager {
 			FormPanel panel = new FormPanel(true);
 			panel.addRow("Username", user_name);
 			panel.addRow("Password", password);
-			new ActionJob(b_log_in) {
+			new ActionJob(desktop, b_log_in) {
 				public void perform() throws Exception{
-					doLoginWrapped();
+					doLogin();
 				}
 			};
 			password.addKeyListener(new KeyAdapter() {
@@ -166,24 +166,13 @@ public class UserManager {
 			add(panel);
 		}
 
-		/** Try logging in and fiddle with exception stuff */
-		protected void doLoginWrapped() throws Exception {
-			try {
-				doLogin();
-			}
-			catch(AuthenticationException e) {
-				throw new java.rmi.ConnectException(
-					"SONAR server too slow");
-			}
-		}
-
 		/** Do the login authentication */
 		protected void doLogin() throws Exception {
 			char[] pwd = password.getPassword();
 			password.setText("");
+			close();
 			state = createSonarState();
 			user = createUser(user_name.getText(), pwd);
-			close();
 			fireLogin();
 		}
 	}
@@ -211,7 +200,7 @@ public class UserManager {
 	/** Create a new user */
 	protected IrisUser createUser(String userName, char[] pwd)
 		throws SonarException, NoSuchFieldException,
-		IllegalAccessException, AuthenticationException
+		IllegalAccessException
 	{
 		state.login(userName, new String(pwd));
 		User user = state.lookupUser(userName);

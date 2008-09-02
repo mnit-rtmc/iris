@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.client;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
-import javax.naming.AuthenticationException;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.ShowHandler;
@@ -288,13 +288,12 @@ public class SonarState extends Client {
 
 	/** Login to the SONAR server */
 	public void login(String user, String password)
-		throws AuthenticationException
+		throws SonarException
 	{
 		super.login(user, password);
 		populate(roles);
 		populate(users);
 		populate(connections);
-		waitForLogin();
 		populate(system_policy);
 		populate(roads, true);
 		populate(geo_locs, true);
@@ -311,23 +310,6 @@ public class SonarState extends Client {
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
-	}
-
-	/** Wait for the login to be complete (roles, users and connections) */
-	protected void waitForLogin() throws AuthenticationException {
-		String connection = getConnection();
-		for(int i = 0; i < 100; i++) {
-			if(connections.getObject(connection) != null)
-				return;
-			try {
-				Thread.sleep(100);
-			}
-			catch(InterruptedException e) {
-				// Do nothing
-			}
-		}
-		throw new AuthenticationException(
-			"Login failed: no connection");
 	}
 
 	/** Look up the specified user */
