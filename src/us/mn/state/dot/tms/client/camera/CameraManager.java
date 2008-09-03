@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
 import java.util.List;
+import java.util.HashSet;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -50,11 +51,17 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Name of "no controller" style */
 	static public final String STYLE_NO_CONTROLLER = "No controller";
 
+	/** Name of "playlist" style */
+	static public final String STYLE_PLAYLIST = "Playlist";
+
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
 	/** TMS connection */
 	protected final TmsConnection connection;
+
+	/** Set of cameras in the playlist */
+	protected final HashSet<Camera> playlist = new HashSet<Camera>();
 
 	/** Create a new camera manager */
 	public CameraManager(TmsConnection tc, TypeCache<Camera> c,
@@ -77,6 +84,7 @@ public class CameraManager extends ProxyManager<Camera> {
 		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(STYLE_PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_ACTIVE, COLOR_ACTIVE);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
@@ -96,6 +104,8 @@ public class CameraManager extends ProxyManager<Camera> {
 			return !proxy.getPublish();
 		else if(STYLE_NO_CONTROLLER.equals(s))
 			return proxy.getController() == null;
+		else if(STYLE_PLAYLIST.equals(s))
+			return inPlaylist(proxy);
 		else
 			return STYLE_ALL.equals(s);
 	}
@@ -128,9 +138,11 @@ public class CameraManager extends ProxyManager<Camera> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(new javax.swing.JLabel("" + n_selected + " Cameras"));
 		p.addSeparator();
-		List<Camera> sel = s_model.getSelected();
-		p.add(new PublishAction(sel));
-		p.add(new UnpublishAction(sel));
+		p.add(new PublishAction(s_model));
+		p.add(new UnpublishAction(s_model));
+		p.addSeparator();
+		p.add(new AddPlaylistAction(this, s_model));
+		p.add(new RemovePlaylistAction(this, s_model));
 		return p;
 	}
 
@@ -139,9 +151,13 @@ public class CameraManager extends ProxyManager<Camera> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
-		List<Camera> sel = s_model.getSelected();
-		p.add(new PublishAction(sel));
-		p.add(new UnpublishAction(sel));
+		p.add(new PublishAction(s_model));
+		p.add(new UnpublishAction(s_model));
+		p.addSeparator();
+		if(inPlaylist(proxy))
+			p.add(new RemovePlaylistAction(this, s_model));
+		else
+			p.add(new AddPlaylistAction(this, s_model));
 		p.addSeparator();
 		p.add(new PropertiesAction<Camera>(proxy) {
 			protected void do_perform() {
@@ -149,6 +165,31 @@ public class CameraManager extends ProxyManager<Camera> {
 			}
 		});
 		return p;
+	}
+
+	/** Test if a camera is in the playlist */
+	public boolean inPlaylist(Camera c) {
+		synchronized(playlist) {
+			return playlist.contains(c);
+		}
+	}
+
+	/** Add a camera to the playlist */
+	public void addPlaylist(Camera c) {
+		synchronized(playlist) {
+			playlist.add(c);
+		}
+		StyleListModel<Camera> p_model = getStyleModel(STYLE_PLAYLIST);
+		p_model.proxyChanged(c, STYLE_PLAYLIST);
+	}
+
+	/** Remove a camera from the playlist */
+	public void removePlaylist(Camera c) {
+		synchronized(playlist) {
+			playlist.remove(c);
+		}
+		StyleListModel<Camera> p_model = getStyleModel(STYLE_PLAYLIST);
+		p_model.proxyChanged(c, STYLE_PLAYLIST);
 	}
 
 	/** Find the map geo location for a proxy */

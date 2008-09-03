@@ -22,22 +22,29 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;;
 
 /**
- * This is an action to unpublish a set of cameras.
+ * This is an action to remove cameras from the playlist.
  *
  * @author Douglas Lau
  */
-public class UnpublishAction extends AbstractAction {
+public class RemovePlaylistAction extends AbstractAction {
+
+	/** Camera manager */
+	protected final CameraManager manager;
 
 	/** Proxy selection model */
 	protected final ProxySelectionModel<Camera> s_model;
 
-	/** Create a new unpublish action */
-	public UnpublishAction(ProxySelectionModel<Camera> s) {
+	/** Create a new remove playlist action */
+	public RemovePlaylistAction(CameraManager m,
+		ProxySelectionModel<Camera> s)
+	{
+		manager = m;
 		s_model = s;
-		putValue(Action.NAME, "Unpublish");
-		putValue(Action.SHORT_DESCRIPTION,"Unpublish selected cameras");
-		putValue(Action.LONG_DESCRIPTION, "Unpublish the selected " +
-			" cameras for restricted access");
+		putValue(Action.NAME, "Remove from playlist");
+		putValue(Action.SHORT_DESCRIPTION,
+			"Remove cameras from playlist");
+		putValue(Action.LONG_DESCRIPTION, "Remove the selected " +
+			"cameras from the playlist");
 	}
 
 	/** Schedule the action to be performed */
@@ -49,10 +56,10 @@ public class UnpublishAction extends AbstractAction {
 		}.addToScheduler();
 	}
 
-	/** Publish the selected cameras */
+	/** Remove the selected cameras from the playlist */
 	protected void do_perform() {
 		for(Camera c: s_model.getSelected())
-			c.setPublish(false);
+			manager.removePlaylist(c);
 		s_model.clearSelection();
 	}
 }

@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.event.ActionEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;;
 
 /**
  * This is an action to publish a set of cameras.
@@ -28,12 +28,12 @@ import us.mn.state.dot.tms.Camera;
  */
 public class PublishAction extends AbstractAction {
 
-	/** List of selected cameras */
-	protected final List<Camera> selected;
+	/** Proxy selection model */
+	protected final ProxySelectionModel<Camera> s_model;
 
 	/** Create a new publish action */
-	public PublishAction(List<Camera> sel) {
-		selected = sel;
+	public PublishAction(ProxySelectionModel<Camera> s) {
+		s_model = s;
 		putValue(Action.NAME, "Publish");
 		putValue(Action.SHORT_DESCRIPTION, "Publish selected cameras");
 		putValue(Action.LONG_DESCRIPTION, "Publish the selected " +
@@ -51,7 +51,8 @@ public class PublishAction extends AbstractAction {
 
 	/** Publish the selected cameras */
 	protected void do_perform() {
-		for(Camera c: selected)
+		for(Camera c: s_model.getSelected())
 			c.setPublish(true);
+		s_model.clearSelection();
 	}
 }
