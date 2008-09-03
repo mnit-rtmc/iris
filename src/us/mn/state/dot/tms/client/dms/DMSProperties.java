@@ -988,6 +988,7 @@ public class DMSProperties extends TrafficDeviceForm {
 					sign.reset();
 				}
 			};
+			resetModemButton.setEnabled(false);	//FIXME: remove this line when operation supported in D10 cmsserver
 		}
 
 		bag.gridx = 2;
