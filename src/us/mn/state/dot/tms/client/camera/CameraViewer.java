@@ -337,12 +337,9 @@ public class CameraViewer extends JPanel
 			txtLocation.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
 			try {
-				if(isCameraActive(camera)) {
-					playPressed(camera);
-					if(video_monitor != null)
-						video_monitor.setCamera(camera);
-				} else
-					stopPressed();
+				playPressed(camera);
+				if(video_monitor != null)
+					video_monitor.setCamera(camera);
 			}
 			catch(Exception e) {
 				e.printStackTrace();
@@ -369,7 +366,7 @@ public class CameraViewer extends JPanel
 
 	/** Update the monitor panel */
 	protected void updateMonitorPanel(Camera camera) {
-		if(isCameraActive(camera))
+		if(camera != null)
 			enableMonitorPanel(camera);
 		else
 			disableMonitorPanel();
@@ -389,15 +386,6 @@ public class CameraViewer extends JPanel
 		play.setEnabled(false);
 		stop.setEnabled(false);
 		ptz_panel.setEnabled(false);
-	}
-
-	/** Test if the selected camera is active */
-	protected boolean isCameraActive(Camera camera) {
-		if(camera != null) {
-			Controller ctr = camera.getController();
-			return ctr != null && ctr.getActive();
-		} else
-			return false;
 	}
 
 	/** Called when a video monitor is selected */
