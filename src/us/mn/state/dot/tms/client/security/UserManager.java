@@ -20,16 +20,15 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import javax.naming.AuthenticationException;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -181,20 +180,12 @@ public class UserManager {
 	protected SonarState createSonarState() throws IOException,
 		ConfigurationError, NoSuchFieldException, IllegalAccessException
 	{
-		return new SonarState(props, new ShowHandler() {
-			public void display(String m) {
-				Exception e = createException(m);
+		return new SonarState(props, new ExceptionHandler() {
+			public boolean handle(Exception e) {
 				new ExceptionDialog(e).setVisible(true);
+				return true;
 			}
 		});
-	}
-
-	/** Create an exception from a SONAR show message */
-	static protected Exception createException(String m) {
-		if(m.equals("Permission denied: Authentication failed"))
-			return new AuthenticationException(m);
-		else
-			return new SonarException(m);
 	}
 
 	/** Create a new user */

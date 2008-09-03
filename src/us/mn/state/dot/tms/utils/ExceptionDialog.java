@@ -46,6 +46,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.client.SonarShowException;
+import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
 
@@ -126,6 +128,17 @@ public class ExceptionDialog extends JDialog {
 		catch(ChangeVetoException ee) {
 			addText("The change has been prevented");
 			addText("for the following reason:");
+			box.add(Box.createVerticalStrut(6));
+			addText(ee.getMessage());
+		}
+		catch(PermissionException ee) {
+			addText("Permission denied:");
+			box.add(Box.createVerticalStrut(6));
+			addText(ee.getMessage());
+		}
+		catch(SonarShowException ee) {
+			addText("The following message was");
+			addText("received from the IRIS server:");
 			box.add(Box.createVerticalStrut(6));
 			addText(ee.getMessage());
 		}

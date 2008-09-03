@@ -17,13 +17,13 @@ package us.mn.state.dot.tms.client;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
-import us.mn.state.dot.sonar.client.ShowHandler;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
@@ -246,7 +246,7 @@ public class SonarState extends Client {
 	}
 
 	/** Create a new Sonar state */
-	public SonarState(Properties props, ShowHandler handler)
+	public SonarState(Properties props, ExceptionHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
 		IllegalAccessException
 	{
