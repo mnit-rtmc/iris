@@ -275,6 +275,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Reset sign button (optional) */
 	protected final JButton resetButton;
 
+	/** Reset modem button (optional) */
+	protected final JButton resetModemButton;
+
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
 
@@ -369,6 +372,13 @@ public class DMSProperties extends TrafficDeviceForm {
 				"DMSProperties.ResetButton"));
 		else
 			resetButton = null;
+
+		// reset modem button (optional)
+		if (Agency.isId(Agency.CALTRANS_D10))
+			resetModemButton = new JButton(I18NMessages.get(
+				"DMSProperties.ResetModemButton"));
+		else
+			resetModemButton = null;
 	}
 
 	protected int h_pix;
@@ -961,6 +971,19 @@ public class DMSProperties extends TrafficDeviceForm {
 			lay.setConstraints(resetButton, bag);
 			panel.add(resetButton);
 			new ActionJob(this, resetButton) {
+				public void perform() throws Exception {
+					sign.reset();
+				}
+			};
+		}
+
+		// reset modem button (optional)
+		if( resetModemButton!=null ) {
+			resetModemButton.setToolTipText(
+				I18NMessages.get("DMSProperties.ResetModemButton.ToolTip"));
+			lay.setConstraints(resetModemButton, bag);
+			panel.add(resetModemButton);
+			new ActionJob(this, resetModemButton) {
 				public void perform() throws Exception {
 					sign.reset();
 				}

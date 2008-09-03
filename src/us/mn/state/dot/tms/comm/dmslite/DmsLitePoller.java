@@ -250,6 +250,16 @@ public class DmsLitePoller extends MessagePoller
 	}
 
 	/** 
+	 * Reset the dms modem, called from DMSImpl.resetModem(), via button on 
+	 * the dms status tab. 
+	 */
+	public void resetModem(DMSImpl dms) {
+		if (dms == null)
+			return;
+		new OpResetModem(dms).start();
+	}
+
+	/** 
 	 * Get the sign message, called from DMSImpl.getSignMessage(), 
 	 * via button on the dms status tab. 
 	 */

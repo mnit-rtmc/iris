@@ -51,6 +51,9 @@ public interface DMSPoller {
 	/** reset the sign */
 	void reset(DMSImpl dms);
 
+	/** reset the sign modem */
+	void resetModem(DMSImpl dms);
+
 	/** get the sign message */
 	void getSignMessage(DMSImpl dms);
 

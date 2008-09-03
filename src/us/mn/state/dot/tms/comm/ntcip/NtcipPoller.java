@@ -179,6 +179,11 @@ public class NtcipPoller extends MessagePoller implements SignPoller,
 		// ignored
 	}
 
+	/** reset the dms modem, called from DMSImpl.reset(), via button on dms status tab. */
+	public void resetModem(DMSImpl dms) {
+		// ignored
+	}
+
 	/** get the sign message, called from DMSImpl.getSignMessage(). */
 	public void getSignMessage(DMSImpl dms) {
 		if(dms != null)

@@ -1465,6 +1465,13 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			p.reset(this);
 	}
 
+	/** reset the dms modem */
+	public void resetModem() {
+		DMSPoller p = getDMSPoller();
+		if(p != null)
+			p.resetModem(this);
+	}
+
 	/** get the current sign message */
 	public void getSignMessage() {
 		DMSPoller p = getDMSPoller();
