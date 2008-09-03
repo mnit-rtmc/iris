@@ -41,7 +41,9 @@ public class ProxyCellRenderer<T extends SonarObject>
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
 		T proxy = (T)value;
-		String v = manager.getDescription(proxy);
+		String v = null;
+		if(proxy != null)
+			v = manager.getDescription(proxy);
 		return super.getListCellRendererComponent(list, v, index,
 			isSelected, cellHasFocus);
 	}
