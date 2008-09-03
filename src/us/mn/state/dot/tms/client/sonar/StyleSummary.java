@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.sonar;
 
+import java.awt.CardLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -38,11 +39,14 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
-	/** List to display devices of selected status */
-	protected final ProxyJList<T> list;
-
 	/** Radio button group */
 	protected final ButtonGroup r_buttons = new ButtonGroup();
+
+	/** Card layout for style lists */
+	protected final CardLayout cards = new CardLayout();
+
+	/** List panel for card layout */
+	protected final JPanel list_panel;
 
 	/** Status label */
 	protected final JLabel s_label = new JLabel();
@@ -55,14 +59,19 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			new ProxyCellRenderer<T>(manager);
 		setBorder(BorderFactory.createTitledBorder(
 			manager.getProxyType() + " Summary"));
-		list = new ProxyJList<T>(manager);
-		list.setCellRenderer(renderer);
+		list_panel = new JPanel(cards);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
 		int half = styles.length / 2;
 		for(int i = 0; i < styles.length; i++) {
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
+			ProxyJList<T> list = new ProxyJList<T>(manager);
+			list.setModel(m);
+			list.setSelectionModel(m.getSelectionModel());
+			list.setCellRenderer(renderer);
+			JScrollPane scroll = new JScrollPane(list);
+			list_panel.add(scroll, m.getName());
 			final JRadioButton b = new JRadioButton(m.getName());
 			r_buttons.add(b);
 			bag.gridx = 1;
@@ -86,10 +95,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 				}
 			});
 			m.addListDataListener(new ListDataListener() {
-				public void contentsChanged(ListDataEvent e) {
-//					c.setText(Integer.toString(
-//						m.getSize()));
-				}
+				public void contentsChanged(ListDataEvent e) { }
 				public void intervalAdded(ListDataEvent e) {
 					c.setText(Integer.toString(
 						m.getSize()));
@@ -110,24 +116,21 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.gridx = 8;
 		add(new JPanel(), bag);
 		bag.gridx = 0;
-		bag.gridy = half;
-		bag.gridwidth = 4;
-		bag.insets.top = 8;
-		add(s_label, bag);
 		bag.gridy = half + 1;
 		bag.gridwidth = 9;
-		bag.weightx = 0;
+		bag.insets.top = 8;
+		add(s_label, bag);
+		bag.gridy = half + 2;
+		bag.weightx = 1;
 		bag.weighty = 1;
 		bag.fill = GridBagConstraints.BOTH;
-		add(new JScrollPane(list), bag);
+		add(list_panel, bag);
 	}
 
 	/** Set the selected style */
 	public void setStyle(String style) {
 		s_label.setText(manager.getProxyType() + " status: " + style);
-		StyleListModel<T> m = manager.getStyleModel(style);
-		list.setModel(m);
-		list.setSelectionModel(m.getSelectionModel());
+		cards.show(list_panel, style);
 	}
 
 	/** Dispose of the widget */
