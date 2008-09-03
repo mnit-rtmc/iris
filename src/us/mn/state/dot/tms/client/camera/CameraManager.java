@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
 import us.mn.state.dot.tms.client.sonar.StyleListModel;
+import us.mn.state.dot.tms.client.sonar.StyleSummary;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -90,6 +91,13 @@ public class CameraManager extends ProxyManager<Camera> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);
 		return theme;
+	}
+
+	/** Create a new style summary for this proxy type */
+	public StyleSummary<Camera> createStyleSummary() {
+		StyleSummary<Camera> summary = super.createStyleSummary();
+		summary.setStyle(STYLE_ACTIVE);
+		return summary;
 	}
 
 	/** Check the style of the specified proxy */
