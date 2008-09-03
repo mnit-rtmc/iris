@@ -417,8 +417,10 @@ public class DMSProperties extends TrafficDeviceForm {
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
-		tab.add("Brightness", createBrightnessPanel());
-		tab.add("Ledstar", createLedstarPanel());
+		if (!Agency.isId(Agency.CALTRANS_D10))
+			tab.add("Brightness", createBrightnessPanel());
+		if (!Agency.isId(Agency.CALTRANS_D10))
+			tab.add("Ledstar", createLedstarPanel());
 		tab.add("Status", createStatusPanel());
 	}
 
