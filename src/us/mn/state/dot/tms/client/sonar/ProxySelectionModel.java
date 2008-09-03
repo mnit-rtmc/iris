@@ -54,9 +54,10 @@ public class ProxySelectionModel<T extends SonarObject> {
 
 	/** Clear the proxy selection */
 	public void clearSelection() {
-		for(T proxy: selected)
-			fireSelectionRemoved(proxy);
+		List<T> sel = getSelected();
 		selected.clear();
+		for(T proxy: sel)
+			fireSelectionRemoved(proxy);
 	}
 
 	/** Get a list of the selected proxies */
