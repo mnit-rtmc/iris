@@ -74,6 +74,7 @@ import us.mn.state.dot.tms.utils.TMSProxy;
  * sign (DMS).
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSProperties extends TrafficDeviceForm {
 
@@ -422,6 +423,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		if (!Agency.isId(Agency.CALTRANS_D10))
 			tab.add("Ledstar", createLedstarPanel());
 		tab.add("Status", createStatusPanel());
+		if (Agency.isId(Agency.CALTRANS_D10))
+			tab.add("Attributes", createAttributePanel());
 	}
 
 	/** Dispose of the form */
@@ -896,6 +899,47 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign.setPixelCurrentHigh(high);
 		sign.setBadPixelLimit(bad);
 		sign.notifyUpdate();
+	}
+
+	/** Create the Attribute panel */
+	protected JPanel createAttributePanel() {
+//FIXME: mtod finish
+		JPanel panel = new JPanel(new GridBagLayout());
+/*
+		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets.top = 2;
+		bag.insets.bottom = 2;
+		bag.gridx = 0;
+		bag.gridy = GridBagConstraints.RELATIVE;
+		bag.anchor = GridBagConstraints.EAST;
+		panel.add(new JLabel("XXXXXX: "), bag);
+		panel.add(new JLabel("xxx: "), bag);
+		panel.add(new JLabel("Pixel current high threshold: "), bag);
+		panel.add(new JLabel("Bad pixel limit: "), bag);
+		bag.gridx = 1;
+		bag.anchor = GridBagConstraints.WEST;
+		panel.add(ldcPotBase, bag);
+		panel.add(currentLow, bag);
+		panel.add(currentHigh, bag);
+		panel.add(badLimit, bag);
+		if(admin) {
+			bag.gridx = 2;
+			bag.anchor = GridBagConstraints.EAST;
+			panel.add(ldcPotBaseSpn, bag);
+			panel.add(currentLowSpn, bag);
+			panel.add(currentHighSpn, bag);
+			panel.add(badLimitSpn, bag);
+			bag.gridx = 0;
+			bag.gridwidth = 3;
+			JButton send = new JButton("Set values");
+			panel.add(send, bag);
+			new ActionJob(this, send) {
+				public void perform() throws Exception {
+					setAttributeValues();
+				}
+			};
+		}*/
+		return panel;
 	}
 
 	/** Create status panel */
