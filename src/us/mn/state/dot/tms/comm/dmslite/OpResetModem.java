@@ -85,9 +85,9 @@ public class OpResetModem extends OpDms
 
 			// build req msg and expected response
 			mess.setName(OPNAME);
-			mess.setReqMsgName("SetInitReqMsg");
-			mess.setRespMsgName("SetInitRespMsg");
-
+			mess.setReqMsgName("SetInitModemReqMsg");
+			mess.setRespMsgName("SetInitModemRespMsg");
+			// FIXME: fields below are placeholders and non-functional until this operation is implemented
 			// id
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
 			mess.add(rr0);
