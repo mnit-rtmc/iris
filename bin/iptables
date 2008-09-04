@@ -1,0 +1,13 @@
+# Firewall configuration for IRIS (SONAR)
+#
+# This is a simple iptables script to limit the number of connections from
+# a single host to 50 or less. It is meant to handle denial-of-service attacks.
+# If the firewall needs to protect other ports, this needs modification.
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -p tcp --syn --dport 1037 -m connlimit --connlimit-above 50 -j DROP
+-A INPUT -j ACCEPT
+-A FORWARD -j REJECT --reject-with icmp-host-prohibited
+COMMIT
