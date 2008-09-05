@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.Camera;
@@ -205,6 +206,30 @@ public class SonarState extends Client {
 		return geo_locs;
 	}
 
+	/** Cache of alarms */
+	protected final TypeCache<Alarm> alarms;
+
+	/** Get the alarm cache */
+	public TypeCache<Alarm> getAlarms() {
+		return alarms;
+	}
+
+	/** Alarm proxy list model */
+	protected final ProxyListModel<Alarm> alarm_model;
+
+	/** Get the alarm list model */
+	public ProxyListModel<Alarm> getAlarmModel() {
+		return alarm_model;
+	}
+
+	/** Available alarm proxy list model */
+	protected final ProxyListModel<Alarm> avail_alarm_model;
+
+	/** Get the available alarm list model */
+	public ProxyListModel<Alarm> getAvailableAlarms() {
+		return avail_alarm_model;
+	}
+
 	/** Cache of cameras */
 	protected final TypeCache<Camera> cameras;
 
@@ -276,6 +301,18 @@ public class SonarState extends Client {
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
 		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class);
+		alarms = new TypeCache<Alarm>(Alarm.class);
+		alarm_model = new ProxyListModel<Alarm>(alarms);
+		alarm_model.initialize();
+		avail_alarm_model = new ProxyListModel<Alarm>(alarms) {
+			protected int doProxyAdded(Alarm proxy) {
+				if(proxy.getController() == null)
+					return super.doProxyAdded(proxy);
+				else
+					return -1;
+			}
+		};
+		avail_alarm_model.initialize();
 		cameras = new TypeCache<Camera>(Camera.class);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
@@ -305,6 +342,7 @@ public class SonarState extends Client {
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
+		populate(alarms);
 		populate(cameras);
 		populate(monitors);
 		populate(sign_groups);

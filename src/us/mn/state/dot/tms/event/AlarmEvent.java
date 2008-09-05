@@ -14,21 +14,36 @@
  */
 package us.mn.state.dot.tms.event;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * This enumeration contains events in the event_type table.
+ * This is a class for logging alarm events to a database.
  *
  * @author Douglas Lau
  */
-public enum EventType {
-	ALARM_TRIGGERED(1), ALARM_CLEARED(2),
-	DMS_DEPLOYED(91), DMS_CLEARED(92),
-	LCS_DEPLOYED(89), LCS_CLEARED(90),
-	DET_CHATTER(96), DET_LOCKED_ON(95), DET_NO_HITS(94),
-	COMM_ERROR(8), COMM_FAILED(65), COMM_RESTORED(9);
+public class AlarmEvent extends BaseEvent {
 
-	public final int id;
+	/** Alarm name */
+	protected final String alarm;
 
-	private EventType(int i) {
-		id = i;
+	/** Create a new alarm event */
+	public AlarmEvent(EventType e, String a) {
+		super(e);
+		alarm = a;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return "event.alarm_event";
+	}
+
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("event_desc_id", event_type.id);
+		map.put("event_date", event_date);
+		map.put("alarm", alarm);
+		return map;
 	}
 }

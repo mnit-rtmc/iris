@@ -38,6 +38,9 @@ abstract public class Controller170Operation extends ControllerOperation {
 	/** Total number of detector inputs on a 170 controller */
 	static protected final int DETECTOR_INPUTS = 24;
 
+	/** Special function input pin for first alarm */
+	static protected final int ALARM_PIN = 70;
+
 	/** Lookup the first ramp meter on a 170 controller */
 	static protected RampMeterImpl lookupMeter1(ControllerImpl c) {
 		ControllerIO[] io_pins = c.getIO();

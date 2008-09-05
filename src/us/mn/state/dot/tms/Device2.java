@@ -14,30 +14,16 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
  * Device is the base interface for all field devices, including detectors,
  * cameras, ramp meters, dynamic message signs, etc.
  *
  * @author Douglas Lau
  */
-public interface Device2 extends SonarObject, ControllerIO_SONAR {
+public interface Device2 extends ControllerIO_SONAR {
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
-
-	/** Set the controller to which this device is attached */
-	void setController(Controller c);
-
-	/** Get the controller to which this device is attached */
-	Controller getController();
-
-	/** Set the controller I/O pin number */
-	public void setPin(int p);
-
-	/** Get the controller I/O pin number */
-	public int getPin();
 
 	/** Set the administrator notes */
 	void setNotes(String n);

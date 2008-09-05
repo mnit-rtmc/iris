@@ -32,6 +32,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
@@ -49,6 +50,7 @@ import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
 import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 
 /**
@@ -72,7 +74,7 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
-		Camera, Detector, DMS, LCS, Ramp_Meter, Warning_Sign
+		Alarm, Camera, Detector, DMS, LCS, Ramp_Meter, Warning_Sign
 	}
 
 	/** Types of IO devices */
@@ -80,6 +82,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		new LinkedList<DeviceType>();
 	static {
 		IO_TYPE.add(null);
+		IO_TYPE.add(DeviceType.Alarm);
 		IO_TYPE.add(DeviceType.Camera);
 		IO_TYPE.add(DeviceType.Detector);
 		IO_TYPE.add(DeviceType.DMS);
@@ -90,7 +93,9 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Get the type of the specified ControllerIO device */
 	static protected DeviceType getType(ControllerIO cio) {
-		if(cio instanceof Camera)
+		if(cio instanceof Alarm)
+			return DeviceType.Alarm;
+		else if(cio instanceof Camera)
 			return DeviceType.Camera;
 		else if(cio instanceof Detector)
 			return DeviceType.Detector;
@@ -126,6 +131,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Array of ControllerIO device types */
 	protected DeviceType[] types;
 
+	/** Available alarm model */
+	protected final WrapperComboBoxModel a_model;
+
 	/** Available camera model */
 	protected final WrapperComboBoxModel c_model;
 
@@ -151,13 +159,15 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected final JComboBox d_combo = new JComboBox();
 
 	/** Create a new controller IO model */
-	public ControllerIOModel(Controller c, TMSProxy _tms)
+	public ControllerIOModel(Controller c, SonarState state, TMSProxy _tms)
 		throws RemoteException
 	{
 		controller = c;
 		tms = _tms;
 		io = new ControllerIO[0];
 		types = new DeviceType[0];
+		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
+			 true);
 		c_model = new WrapperComboBoxModel(
 			Session.cam_manager_singleton.getStyleModel(
 			CameraManager.STYLE_NO_CONTROLLER), true);
@@ -300,6 +310,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return null;
 		String v = value.toString();
 		switch(d) {
+			case Alarm:
+				return (Alarm)value;
 			case Camera:
 				return (Camera)value;
 			case Detector:
@@ -380,6 +392,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		if(d == null)
 			return no_model;
 		switch(d) {
+			case Alarm:
+				return a_model;
 			case Camera:
 				return c_model;
 			case Detector:

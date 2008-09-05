@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.SonarObject;
+
 /**
  * ControllerIO is an input/output connected to a controller (alarm or device)
  *
  * @author Douglas Lau
  */
-public interface ControllerIO_SONAR extends ControllerIO {
+public interface ControllerIO_SONAR extends ControllerIO, SonarObject {
 
 	/** Set the controller for the I/O */
 	void setController(Controller c);

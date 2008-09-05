@@ -429,10 +429,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get an alarm from the controller */
-	public synchronized Alarm getAlarm(int pin) {
+	public synchronized AlarmImpl getAlarm(int pin) {
 		ControllerIO io = io_pins.get(pin);
-		if(io instanceof Alarm)
-			return (Alarm)io;
+		if(io instanceof AlarmImpl)
+			return (AlarmImpl)io;
 		else
 			return null;
 	}

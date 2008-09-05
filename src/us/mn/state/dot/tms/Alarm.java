@@ -14,18 +14,22 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
-
 /**
  * Alarm is a class for reading alarm inputs on controllers.
  *
  * @author Douglas Lau
  */
-public interface Alarm extends TMSObject, ControllerIO_RMI {
+public interface Alarm extends ControllerIO_SONAR {
 
-	/** Get the administrator notes */
-	public String getNotes() throws RemoteException;
+	/** SONAR type name */
+	String SONAR_TYPE = "alarm";
 
-	/** Set the administrator notes */
-	public void setNotes(String n) throws TMSException, RemoteException;
+	/** Set the description */
+	void setDescription(String d);
+
+	/** Get the description */
+	String getDescription();
+
+	/** Get the state of the alarm */
+	boolean getState();
 }

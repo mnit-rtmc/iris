@@ -18,14 +18,13 @@ import java.io.IOException;
 import us.mn.state.dot.tms.AlarmImpl;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ControllerOperation;
 
 /**
  * Operation to query the controller alarms.
  *
  * @author Douglas Lau
  */
-public class QueryAlarms extends ControllerOperation {
+public class QueryAlarms extends Controller170Operation {
 
 	/** Parse alarm special function input data */
 	static protected boolean[] parseAlarms(byte[] data) {
@@ -57,10 +56,10 @@ public class QueryAlarms extends ControllerOperation {
 			mess.getRequest();
 			boolean[] alarms = parseAlarms(data);
 			for(int i = 0; i < 10; i++) {
-				AlarmImpl a = (AlarmImpl)controller.getAlarm(
-					i + Address.ALARM_PIN);
+				int pin = ALARM_PIN + i;
+				AlarmImpl a = controller.getAlarm(pin);
 				if(a != null)
-					a.setState(alarms[i]);
+					a.setStateNotify(alarms[i]);
 			}
 			return null;
 		}

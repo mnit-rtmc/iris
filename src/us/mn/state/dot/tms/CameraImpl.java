@@ -94,6 +94,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 		encoder_channel = ec;
 		nvr = nv;
 		publish = pb;
+		initTransients();
 	}
 
 	/** Create a camera */

@@ -35,12 +35,14 @@ import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -138,30 +140,42 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Get the ControllerIO array */
 	protected ControllerIO[] getControllerIO() {
 		Integer[] cio = proxy.getCio();
-		final ControllerIO[] io = new ControllerIO[cio.length];
+		ControllerIO[] io = new ControllerIO[cio.length];
 		TMSProxy tms = connection.getProxy();
 		for(int i = 0; i < cio.length; i++) {
 			if(cio[i] != null)
 				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
 		}
+		ProxyListModel<Alarm> alarms = state.getAlarmModel();
+		alarms.find(new ControllerIOFinder(io));
 		ProxyListModel<Camera> cams = state.getCameraModel();
-		cams.find(new ProxyListModel.ProxyFinder<Camera>() {
-			public boolean check(Camera camera) {
-				if(camera.getController() == proxy) {
-					int pin = camera.getPin();
-					if(pin > 0 && pin < io.length)
-						io[pin] = camera;
-				}
-				return false;
-			}
-		});
+		cams.find(new ControllerIOFinder(io));
 		return io;
+	}
+
+	/** A controller IO finder helps locate IO for a controller */
+	protected class ControllerIOFinder implements
+		ProxyListModel.ProxyFinder<ControllerIO_SONAR>
+	{
+		protected final ControllerIO[] io;
+		protected ControllerIOFinder(ControllerIO[] _io) {
+			io = _io;
+		}
+		public boolean check(ControllerIO_SONAR cios) {
+			if(cios.getController() == proxy) {
+				int pin = cios.getPin();
+				if(pin > 0 && pin < io.length)
+					io[pin] = cios;
+			}
+			return false;
+		}
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
 		super.initialize();
-		io_model = new ControllerIOModel(proxy, connection.getProxy());
+		io_model = new ControllerIOModel(proxy, state,
+			connection.getProxy());
 		cabinets.addProxyListener(cab_listener);
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));
