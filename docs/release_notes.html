@@ -11,6 +11,28 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.75.0 (5 September 2008)</dt>
+	<dd><ul>
+		<li>
+			Alarm objects converted to SONAR.
+			Alarm events now logged in DB in event schema.
+			New playlist feature added to camera tab.
+		</li>
+		<li>
+			Many SONAR login issues were fixed.
+			Numerous other bugs also have been fixed.
+		</li>
+		<li>
+			Scheduler dependency updated to 0.2.0.
+			SONAR dependency updated to 2.0.0.
+			SONAR has a new dependency on scheduler.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.75.sql</code>
+		</li>
+	</ul></dd>
 	<dt>3.74.0 (27 August 2008)</dt>
 	<dd><ul>
 		<li>
