@@ -277,6 +277,14 @@ CREATE TABLE controller (
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON controller
 	USING btree (comm_link, drop_id);
 
+CREATE TABLE alarm (
+	name VARCHAR(10) PRIMARY KEY,
+	description VARCHAR(24) NOT NULL,
+	controller VARCHAR(20) REFERENCES controller(name),
+	pin integer NOT NULL,
+	state BOOLEAN NOT NULL
+);
+
 CREATE TABLE camera (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
@@ -380,15 +388,10 @@ CREATE TABLE device (
 )
 INHERITS (tms_object);
 
-GRANT SELECT ON device TO PUBLIC;
-
 CREATE TABLE traffic_device (
     id text NOT NULL
 )
 INHERITS (device);
-
-REVOKE ALL ON TABLE traffic_device FROM PUBLIC;
-GRANT SELECT ON TABLE traffic_device TO PUBLIC;
 
 CREATE TABLE dms (
     camera VARCHAR(10) NOT NULL,
@@ -396,9 +399,6 @@ CREATE TABLE dms (
     travel text NOT NULL
 )
 INHERITS (traffic_device);
-
-REVOKE ALL ON TABLE dms FROM PUBLIC;
-GRANT SELECT ON TABLE dms TO PUBLIC;
 
 CREATE UNIQUE INDEX dms_pkey ON dms USING btree (vault_oid);
 CREATE UNIQUE INDEX dms_id_index ON dms USING btree (id);
@@ -458,9 +458,6 @@ CREATE TABLE detector (
 )
 INHERITS (device);
 
-REVOKE ALL ON TABLE detector FROM PUBLIC;
-GRANT SELECT ON TABLE detector TO PUBLIC;
-
 CREATE TABLE ramp_meter (
     "controlMode" integer NOT NULL,
     "singleRelease" boolean NOT NULL,
@@ -469,9 +466,6 @@ CREATE TABLE ramp_meter (
     camera VARCHAR(10) NOT NULL
 )
 INHERITS (traffic_device);
-
-REVOKE ALL ON TABLE ramp_meter FROM PUBLIC;
-GRANT SELECT ON TABLE ramp_meter TO PUBLIC;
 
 CREATE TABLE timing_plan (
     "startTime" integer NOT NULL,
@@ -569,13 +563,6 @@ INHERITS (traffic_device);
 
 REVOKE ALL ON TABLE warning_sign FROM PUBLIC;
 GRANT SELECT ON TABLE warning_sign TO PUBLIC;
-
-CREATE TABLE alarm (
-    controller VARCHAR(20) NOT NULL REFERENCES controller(name),
-    pin integer NOT NULL,
-    notes text NOT NULL
-)
-INHERITS (tms_object);
 
 CREATE TABLE traffic_device_timing_plan (
     traffic_device text,
@@ -689,8 +676,8 @@ CREATE VIEW geo_loc_view AS
 GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE VIEW device_loc_view AS
-	SELECT d.vault_oid, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
-	l.cross_dir
+	SELECT d.vault_oid, d.controller, d.geo_loc,
+	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir
 	FROM device d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON device_loc_view TO PUBLIC;
@@ -720,10 +707,16 @@ CREATE VIEW controller_loc_view AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
+CREATE VIEW alarm_view AS
+	SELECT a.name, a.description, a.state, a.controller, a.pin, c.comm_link,
+		c.drop_id
+	FROM alarm a LEFT JOIN controller c ON a.controller = c.name;
+GRANT SELECT ON alarm_view TO PUBLIC;
+
 CREATE VIEW dms_view AS
-	SELECT d.id, d.notes, d.camera, d.mile, d.travel,
+	SELECT d.id, d.notes, d.camera, d.mile, d.travel, d.geo_loc,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.east_off, l.northing, l.north_off
+	l.easting, l.east_off, l.northing, l.north_off, d.controller
 	FROM dms d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
@@ -739,18 +732,18 @@ GRANT SELECT ON sign_text_view TO PUBLIC;
 CREATE VIEW ramp_meter_view AS
 	SELECT m.vault_oid, m.id, m.notes,
 	m."controlMode" AS control_mode, m."singleRelease" AS single_release,
-	m."storage", m."maxWait" AS max_wait, m.camera,
+	m."storage", m."maxWait" AS max_wait, m.camera, m.geo_loc,
 	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing, l.east_off, l.north_off
+	l.easting, l.northing, l.east_off, l.north_off, m.controller
 	FROM ramp_meter m
 	JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
-	SELECT c.name, ctr.comm_link, ctr.drop_id, ctr.active, c.notes,
-	c.encoder, c.encoder_channel, c.nvr, c.publish,
-	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing, l.east_off, l.north_off
+	SELECT c.name, c.notes, c.encoder, c.encoder_channel, c.nvr, c.publish,
+	c.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, l.easting, l.northing, l.east_off, l.north_off,
+	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM camera c
 	JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN controller ctr ON c.controller = ctr.name;
@@ -813,12 +806,12 @@ CREATE VIEW detector_label_view AS
 GRANT SELECT ON detector_label_view TO PUBLIC;
 
 CREATE VIEW detector_view AS
-	SELECT d."index" AS det_id, c.comm_link, c.drop_id, d.pin,
+	SELECT d."index" AS det_id, d.controller, c.comm_link, c.drop_id, d.pin,
 	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
 		d."laneType", d."laneNumber", d.abandoned) AS label,
-	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	d."laneNumber" AS lane_number, d."fieldLength" AS field_length,
-	ln.description AS lane_type,
+	d.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, d."laneNumber" AS lane_number,
+	d."fieldLength" AS field_length, ln.description AS lane_type,
 	boolean_converter(d.abandoned) AS abandoned,
 	boolean_converter(d."forceFail") AS force_fail,
 	boolean_converter(c.active) AS active, d.fake, d.notes
@@ -828,8 +821,14 @@ CREATE VIEW detector_view AS
 	LEFT JOIN controller c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
+CREATE VIEW controller_view AS
+	SELECT c.name, drop_id, comm_link, cabinet, active, notes, cab.geo_loc
+	FROM controller c
+	JOIN cabinet cab ON c.cabinet = cab.name;
+GRANT SELECT ON controller_view TO PUBLIC;
+
 CREATE VIEW controller_device_view AS
-	SELECT d.id, d.controller, d.pin,
+	SELECT d.id, d.controller, d.pin, d.geo_loc,
 	trim(l.freeway || ' ' || l.free_dir) AS freeway,
 	trim(trim(' @' FROM l.cross_mod || ' ' || l.cross_street)
 		|| ' ' || l.cross_dir) AS cross_street
@@ -838,7 +837,7 @@ CREATE VIEW controller_device_view AS
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
-	SELECT c.comm_link, c.drop_id, cab.mile,
+	SELECT c.name, c.comm_link, c.drop_id, cab.mile, cab.geo_loc,
 	trim(l.freeway || ' ' || l.free_dir) || ' ' || l.cross_mod || ' ' ||
 		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
 	cab.style AS "type", d1.id AS "id (meter1)",
@@ -877,7 +876,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
-79334	4	0	alarm	us.mn.state.dot.tms.AlarmImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
 84656	4	0	r_node	us.mn.state.dot.tms.R_NodeImpl
@@ -1092,6 +1090,15 @@ CREATE TABLE event.event_description (
 	description text NOT NULL
 );
 
+CREATE TABLE event.alarm_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	alarm VARCHAR(10) NOT NULL REFERENCES alarm(name)
+		ON DELETE CASCADE
+);
+
 CREATE TABLE event.comm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event_id_seq'),
 	event_date timestamp with time zone NOT NULL,
@@ -1121,6 +1128,14 @@ CREATE TABLE event.sign_event (
 );
 
 SET search_path = public, event, pg_catalog;
+
+CREATE VIEW alarm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description AS event_description,
+		e.alarm, a.description
+	FROM event.alarm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN alarm a ON e.alarm = a.name;
+GRANT SELECT ON alarm_event_view TO PUBLIC;
 
 CREATE VIEW comm_event_view AS
 	SELECT e.event_id, e.event_date, ed.description,
@@ -1177,6 +1192,8 @@ CREATE VIEW recent_sign_event_view AS
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 COPY event.event_description (event_desc_id, description) FROM stdin;
+1	Alarm TRIGGERED
+2	Alarm CLEARED
 8	Comm ERROR
 9	Comm RESTORED
 65	Comm FAILED
