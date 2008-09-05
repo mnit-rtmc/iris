@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -123,5 +124,13 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 	/** Apply button is pressed */
 	protected void applyPressed() throws Exception {
 		device.setNotes(notes.getText());
+	}
+
+	/** Get the name of a camera */
+	protected String getCameraName(Camera c) {
+		if(c == null)
+			return "";
+		else
+			return c.getName();
 	}
 }

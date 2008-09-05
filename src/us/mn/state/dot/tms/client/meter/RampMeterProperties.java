@@ -43,11 +43,13 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.MeterPlan;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TrafficDevice;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -67,6 +69,9 @@ public class RampMeterProperties extends TrafficDeviceForm {
 
 	/** Remote ramp meter object */
 	protected RampMeter meter;
+
+	/** Sonar state */
+	protected final SonarState state;
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
@@ -149,6 +154,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	/** Create a new ramp meter properties form */
 	public RampMeterProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
+		state = tc.getSonarState();
 		ButtonGroup group = new ButtonGroup();
 		group.add(meter_on);
 		group.add(meter_off);
@@ -159,8 +165,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getMeterList();
 		meter = (RampMeter)s.getElement(id);
-		ListModel cameraModel =
-			connection.getSonarState().getCameraModel();
+		ListModel cameraModel = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(cameraModel));
 		setDevice(meter);
 		super.initialize();
@@ -408,9 +413,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the ramp meter */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		String c = meter.getCamera();
-		if(c != null)
-			camera.setSelectedItem(c);
+		camera.setSelectedItem(state.lookupCamera(meter.getCamera()));
 		wait.setText("" + meter.getMaxWait());
 		storage.setText("" + meter.getStorage());
 		singleRelease.setSelected(meter.isSingleRelease());
@@ -507,7 +510,8 @@ public class RampMeterProperties extends TrafficDeviceForm {
 		try {
 			super.applyPressed();
 			meter.checkStratifiedPlans();
-			meter.setCamera((String)camera.getSelectedItem());
+			meter.setCamera(getCameraName(
+				(Camera)camera.getSelectedItem()));
 			meter.setSingleRelease(singleRelease.isSelected());
 			meter.setControlMode(controlMode.getSelectedIndex());
 			meter.setMaxWait(Integer.parseInt(wait.getText()));

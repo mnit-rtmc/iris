@@ -27,9 +27,11 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListModel;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.LaneControlSignal;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TrafficDevice;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
@@ -69,9 +71,13 @@ public class LcsProperties extends TrafficDeviceForm {
 	/** Remote lane control signal object */
 	protected LaneControlSignal lcs;
 
+	/** SONAR state */
+	protected final SonarState state;
+
 	/** Create a new lane control signal properties form */
 	public LcsProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
+		state = tc.getSonarState();
 	}
 
 	/** Initialize the widgets on the form */
@@ -79,8 +85,7 @@ public class LcsProperties extends TrafficDeviceForm {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getLCSList().getList();
 		lcs = (LaneControlSignal)s.getElement(id);
-		ListModel cameraModel =
-			connection.getSonarState().getCameraModel();
+		ListModel cameraModel = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(cameraModel));
 		numberOfLanes = lcs.getLanes();
 		setDevice(lcs);
@@ -93,7 +98,7 @@ public class LcsProperties extends TrafficDeviceForm {
 	/** Apply button is pressed */
 	protected void applyPressed() throws Exception {
 		super.applyPressed();
-		lcs.setCamera((String)camera.getSelectedItem());
+		lcs.setCamera(getCameraName((Camera)camera.getSelectedItem()));
 		lcs.notifyUpdate();
 	}
 
@@ -155,9 +160,7 @@ public class LcsProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the signal */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		String c = lcs.getCamera();
-		if(c != null)
-			camera.setSelectedItem(c);
+		camera.setSelectedItem(state.lookupCamera(lcs.getCamera()));
 		Color color = Color.GRAY;
 		if(lcs.isActive())
 			color = OK;

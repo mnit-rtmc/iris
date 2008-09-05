@@ -45,6 +45,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
@@ -350,7 +351,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		h_mm = sign.getSignWidth();
 		hb_mm = sign.getHorizontalBorder();
 
-		ListModel model = connection.getSonarState().getCameraModel();
+		ListModel model = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(model));
 		TimingPlanModel plan_model = new TimingPlanModel(
 			(TimingPlanList)tms.getTimingPlans().getList(), sign,
@@ -990,9 +991,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the sign */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		String c = sign.getCamera();
-		if(c != null)
-			camera.setSelectedItem(c);
+		camera.setSelectedItem(state.lookupCamera(sign.getCamera()));
 		String t = sign.getTravel();
 		Color color = Color.GRAY;
 		if(sign.isActive())
@@ -1102,7 +1101,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Apply button is pressed */
 	protected void applyPressed() throws Exception {
 		super.applyPressed();
-		sign.setCamera((String)camera.getSelectedItem());
+		sign.setCamera(getCameraName((Camera)camera.getSelectedItem()));
 		if(b_table.isModified()) {
 			int[] table = b_table.getTableData();
 			sign.setBrightnessTable(table);

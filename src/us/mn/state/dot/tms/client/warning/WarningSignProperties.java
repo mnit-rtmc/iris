@@ -20,9 +20,11 @@ import javax.swing.ListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
@@ -41,6 +43,9 @@ public class WarningSignProperties extends TrafficDeviceForm {
 	/** Remote warning sign object */
 	protected WarningSign sign;
 
+	/** Sonar state */
+	protected final SonarState state;
+
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
 
@@ -50,6 +55,7 @@ public class WarningSignProperties extends TrafficDeviceForm {
 	/** Create a new warning sign form */
 	public WarningSignProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
+		state = tc.getSonarState();
 	}
 
 	/** Initialize the widgets on the form */
@@ -59,7 +65,7 @@ public class WarningSignProperties extends TrafficDeviceForm {
 		sign = (WarningSign)s.getElement(id);
 		setDevice(sign);
 		super.initialize();
-		ListModel m = connection.getSonarState().getCameraModel();
+		ListModel m = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(m));
 		location.addRow("Camera", camera);
 		location.add(new JLabel("Sign Text"));
@@ -71,9 +77,7 @@ public class WarningSignProperties extends TrafficDeviceForm {
 	/** Update the form with the current state of the warning sign */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
-		String c = sign.getCamera();
-		if(c != null)
-			camera.setSelectedItem(c);
+		camera.setSelectedItem(state.lookupCamera(sign.getCamera()));
 		area.setText(sign.getText());
 	}
 
@@ -81,7 +85,8 @@ public class WarningSignProperties extends TrafficDeviceForm {
 	protected void applyPressed() throws Exception {
 		try {
 			super.applyPressed();
-			sign.setCamera((String)camera.getSelectedItem());
+			sign.setCamera(getCameraName(
+				(Camera)camera.getSelectedItem()));
 			sign.setText(area.getText());
 		} finally {
 			sign.notifyUpdate();
