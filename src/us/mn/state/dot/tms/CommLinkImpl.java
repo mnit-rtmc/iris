@@ -345,10 +345,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			status = e.getMessage();
 		}
 		finally {
-			if(MainServer.server == null)
-				return;
-			MainServer.server.setAttribute(this, "status",
-				new String[] { status });
+			notifyStatus();
 		}
 	}
 
@@ -370,6 +367,14 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Get the communication status */
 	public String getStatus() {
 		return status;
+	}
+
+	/** Notify SONAR clients of changes to "status" attribute */
+	public void notifyStatus() {
+		if(MainServer.server != null) {
+			String[] s = new String[] { status };
+			MainServer.server.setAttribute(this, "status", s);
+		}
 	}
 
 	/** Field device controllers */
