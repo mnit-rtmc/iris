@@ -421,7 +421,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Add an operation to the communication link */
 	void addOperation(Operation o) {
-		MessagePoller p = poller;	// Avoid NPE races
+		MessagePoller p = getPoller();
 		if(p != null)
 			p.addOperation(o);
 	}
@@ -436,7 +436,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Perform downloads on all controllers on this link */
 	public synchronized void download() {
-		MessagePoller p = poller;	// Avoid NPE races
+		MessagePoller p = getPoller();
 		if(p != null) {
 			for(ControllerImpl c: controllers.values())
 				p.download(c, false);
@@ -445,7 +445,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Poll this communication link for sign status data */
 	public synchronized void pollSigns(Completer comp) {
-		MessagePoller p = poller;	// Avoid NPE races
+		MessagePoller p = getPoller();
 		if(p instanceof SignPoller) {
 			SignPoller sp = (SignPoller)p;
 			for(ControllerImpl c: controllers.values())
@@ -455,7 +455,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Poll this communication link for 30-second data */
 	public synchronized void poll30Second(Completer comp) {
-		MessagePoller p = poller;	// Avoid NPE races
+		MessagePoller p = getPoller();
 		if(p != null) {
 			load = p.getLoad();
 			for(ControllerImpl c: controllers.values())
@@ -466,7 +466,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Poll this communication link for 5-minute data */
 	public synchronized void poll5Minute(Completer comp) {
-		MessagePoller p = poller;	// Avoid NPE races
+		MessagePoller p = getPoller();
 		if(p != null) {
 			for(ControllerImpl c: controllers.values()) {
 				c.resetPeriod(ErrorCounter.PERIOD_5_MIN);
