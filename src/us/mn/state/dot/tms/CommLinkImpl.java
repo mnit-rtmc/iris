@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
-import us.mn.state.dot.tms.comm.KillThread;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.Operation;
@@ -356,13 +355,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Close the communication link */
 	protected synchronized void close() {
 		if(poller != null) {
-			poller.addOperation(new KillThread());
-			try {
-				poller.join();
-			}
-			catch(InterruptedException e) {
-				e.printStackTrace();
-			}
+			poller.stopPolling();
 			poller = null;
 		}
 		if(messenger != null) {

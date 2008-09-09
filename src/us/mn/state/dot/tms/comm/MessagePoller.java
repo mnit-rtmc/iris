@@ -79,6 +79,17 @@ abstract public class MessagePoller extends Thread {
 		queue.add(o);
 	}
 
+	/** Stop polling on this thread */
+	public void stopPolling() {
+		addOperation(new KillThread());
+		try {
+			join();
+		}
+		catch(InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/** MessagePoller is a subclass of Thread.  This is the run method. */
 	public void run() {
 		performOperations();
