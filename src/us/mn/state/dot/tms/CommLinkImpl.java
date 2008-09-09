@@ -384,39 +384,51 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		new TreeMap<Integer, ControllerImpl>();
 
 	/** Put a controller on the link */
-	public synchronized void putController(int d, ControllerImpl c)
+	public void putController(int d, ControllerImpl c)
 		throws ChangeVetoException
 	{
-		if(controllers.containsKey(d))
-			throw new ChangeVetoException("Drop " + d + " exists");
-		controllers.put(d, c);
+		synchronized(controllers) {
+			if(controllers.containsKey(d)) {
+				throw new ChangeVetoException("Drop " + d +
+					" exists");
+			}
+			controllers.put(d, c);
+		}
 	}
 
 	/** Pull a controller from the link */
-	public synchronized void pullController(ControllerImpl c) {
+	public void pullController(ControllerImpl c) {
 		Integer d = new Integer(c.getDrop());
-		controllers.remove(d);
+		synchronized(controllers) {
+			controllers.remove(d);
+		}
 	}
 
 	/** Get a controller by drop */
-	public synchronized Controller getController(short drop) {
+	public Controller getController(short drop) {
 		Integer d = new Integer(drop);
-		return controllers.get(d);
+		synchronized(controllers) {
+			return controllers.get(d);
+		}
 	}
 
 	/** Get the controllers defined for this communication link */
-	public synchronized Controller[] getControllers() {
-		return (Controller [])controllers.values().toArray(
-			new Controller[0]);
+	public Controller[] getControllers() {
+		synchronized(controllers) {
+			return (Controller [])controllers.values().toArray(
+				new Controller[0]);
+		}
 	}
 
 	/** Find the controller */
-	public synchronized ControllerImpl findController(Controller c) {
-		for(ControllerImpl cont: controllers.values()) {
-			if(cont.equals(c))
-				return cont;
+	public ControllerImpl findController(Controller c) {
+		synchronized(controllers) {
+			for(ControllerImpl cont: controllers.values()) {
+				if(cont.equals(c))
+					return cont;
+			}
+			return null;
 		}
-		return null;
 	}
 
 	/** Add an operation to the communication link */
@@ -435,55 +447,67 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Perform downloads on all controllers on this link */
-	public synchronized void download() {
+	public void download() {
 		MessagePoller p = getPoller();
 		if(p != null) {
-			for(ControllerImpl c: controllers.values())
-				p.download(c, false);
+			synchronized(controllers) {
+				for(ControllerImpl c: controllers.values())
+					p.download(c, false);
+			}
 		}
 	}
 
 	/** Poll this communication link for sign status data */
-	public synchronized void pollSigns(Completer comp) {
+	public void pollSigns(Completer comp) {
 		MessagePoller p = getPoller();
 		if(p instanceof SignPoller) {
 			SignPoller sp = (SignPoller)p;
-			for(ControllerImpl c: controllers.values())
-				sp.pollSigns(c, comp);
+			synchronized(controllers) {
+				for(ControllerImpl c: controllers.values())
+					sp.pollSigns(c, comp);
+			}
 		}
 	}
 
 	/** Poll this communication link for 30-second data */
-	public synchronized void poll30Second(Completer comp) {
+	public void poll30Second(Completer comp) {
 		MessagePoller p = getPoller();
 		if(p != null) {
 			load = p.getLoad();
-			for(ControllerImpl c: controllers.values())
-				p.poll30Second(c, comp);
+			synchronized(controllers) {
+				for(ControllerImpl c: controllers.values())
+					p.poll30Second(c, comp);
+			}
 		} else
 			load = 0;
 	}
 
 	/** Poll this communication link for 5-minute data */
-	public synchronized void poll5Minute(Completer comp) {
+	public void poll5Minute(Completer comp) {
 		MessagePoller p = getPoller();
 		if(p != null) {
-			for(ControllerImpl c: controllers.values()) {
-				c.resetPeriod(ErrorCounter.PERIOD_5_MIN);
-				p.poll5Minute(c, comp);
+			synchronized(controllers) {
+				for(ControllerImpl c: controllers.values()) {
+					c.resetPeriod(ErrorCounter.PERIOD_5_MIN);
+					p.poll5Minute(c, comp);
+				}
 			}
 		}
 	}
 
 	/** Poll this communication link for 1-hour data */
-	public synchronized void poll1Hour() {
-		for(ControllerImpl c: controllers.values())
-			c.resetPeriod(ErrorCounter.PERIOD_1_HOUR);
+	public void poll1Hour() {
+		synchronized(controllers) {
+			for(ControllerImpl c: controllers.values())
+				c.resetPeriod(ErrorCounter.PERIOD_1_HOUR);
+		}
 	}
 
 	/** Poll this communication link for 1-day data */
-	public synchronized void poll1Day() {
-		for(ControllerImpl c: controllers.values())
-			c.resetPeriod(ErrorCounter.PERIOD_1_DAY);
+	public void poll1Day() {
+		synchronized(controllers) {
+			for(ControllerImpl c: controllers.values())
+				c.resetPeriod(ErrorCounter.PERIOD_1_DAY);
+		}
 	}
 }
