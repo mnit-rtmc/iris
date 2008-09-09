@@ -208,6 +208,15 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Get the message poller */
 	public MessagePoller getPoller() {
+		MessagePoller p = poller;
+		if(p != null) {
+			setStatus(p.getStatus());
+			if(p.isAlive())
+				return p;
+			else
+				close();
+		}
+		open();
 		return poller;
 	}
 
@@ -336,9 +345,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		try {
 			poller = createPoller();
 			messenger.setTimeout(timeout);
-			messenger.open();
 			poller.start();
-			setStatus("");
 		}
 		catch(IOException e) {
 			close();

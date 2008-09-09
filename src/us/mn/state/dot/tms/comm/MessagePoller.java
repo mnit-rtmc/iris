@@ -57,6 +57,14 @@ abstract public class MessagePoller extends Thread {
 	/** Load average (for last completed interval) */
 	protected float load = 0;
 
+	/** Poller status (null means not initialized yet) */
+	protected String status = null;
+
+	/** Get the poller status */
+	public String getStatus() {
+		return status;
+	}
+
 	/** Create a new message poller */
 	public MessagePoller(String name, Messenger m) {
 		super(GROUP, "Poller: " + name);
@@ -92,8 +100,21 @@ abstract public class MessagePoller extends Thread {
 
 	/** MessagePoller is a subclass of Thread.  This is the run method. */
 	public void run() {
-		performOperations();
+		try {
+			messenger.open();
+			status = "";
+			performOperations();
+			status = "CLOSING";
+		}
+		catch(IOException e) {
+			status = e.getMessage();
+		}
 		messenger.close();
+		drainQueue();
+	}
+
+	/** Drain the poll queue */
+	protected void drainQueue() {
 		IOException closing = new IOException("CLOSING PORT");
 		while(queue.hasNext()) {
 			Operation o = queue.next();
