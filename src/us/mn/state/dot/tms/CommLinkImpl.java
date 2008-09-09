@@ -188,8 +188,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(t == timeout)
 			return;
 		try {
-			if(messenger != null)
-				messenger.setTimeout(t);
+			Messenger m = messenger;
+			if(m != null)
+				m.setTimeout(t);
 		}
 		catch(IOException e) {
 			throw new TMSException(e);
@@ -349,7 +350,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				return;
 			MainServer.server.setAttribute(this, "status",
 				new String[] { status });
-			// FIXME: queue a flush on all connections
 		}
 	}
 
