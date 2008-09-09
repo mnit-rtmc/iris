@@ -336,9 +336,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected synchronized void open() {
 		try {
 			poller = createPoller();
-			poller.start();
 			messenger.setTimeout(timeout);
 			messenger.open();
+			poller.start();
 			status = "";
 		}
 		catch(IOException e) {
