@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -120,8 +121,14 @@ public class UserManager {
 	/** Logout the current user */
 	public void logout() {
 		SonarState s = state;
-		if(s != null)
-			s.quit();
+		if(s != null) {
+			try {
+				s.quit();
+			}
+			catch(FlushError e) {
+				// Ignore
+			}
+		}
 		state = null;
 		user = null;
 		fireLogout();
