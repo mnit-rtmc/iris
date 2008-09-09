@@ -42,7 +42,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		System.err.println("Loading alarms...");
 		namespace.registerType(SONAR_TYPE, AlarmImpl.class);
 		store.query("SELECT name, description, controller, pin, state" +
-			" FROM " + SONAR_TYPE  + ";", new ResultFactory()
+			" FROM " + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new AlarmImpl(namespace,
