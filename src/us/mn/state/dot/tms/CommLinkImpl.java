@@ -338,14 +338,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			messenger.setTimeout(timeout);
 			messenger.open();
 			poller.start();
-			status = "";
+			setStatus("");
 		}
 		catch(IOException e) {
 			close();
-			status = e.getMessage();
-		}
-		finally {
-			notifyStatus();
+			setStatus(e.getMessage());
 		}
 	}
 
@@ -364,17 +361,20 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Communication link status */
 	protected transient String status = Constants.UNKNOWN;
 
+	/** Set the communication status */
+	public void setStatus(String s) {
+		if(s == null || s.equals(status))
+			return;
+		status = s;
+		if(MainServer.server != null) {
+			MainServer.server.setAttribute(this, "status",
+				new String[] { status });
+		}
+	}
+
 	/** Get the communication status */
 	public String getStatus() {
 		return status;
-	}
-
-	/** Notify SONAR clients of changes to "status" attribute */
-	public void notifyStatus() {
-		if(MainServer.server != null) {
-			String[] s = new String[] { status };
-			MainServer.server.setAttribute(this, "status", s);
-		}
 	}
 
 	/** Field device controllers */
