@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
@@ -141,16 +137,22 @@ abstract public class BER extends ASN1 {
 		byte clazz = (byte)(first & Tag.CLASS_MASK);
 		boolean constructed = (first & Tag.CONSTRUCTED) != 0;
 		int number = (first & Tag.ONE_OCTET);
-		if(number == Tag.ONE_OCTET) {
-			number = 0;
-			int next = HIGH_BIT;
-			while((next & HIGH_BIT) != 0) {
-				next = is.read();
-				number <<= 7;
-				number |= (next & SEVEN_BITS);
-			}
-		}
+		if(number == Tag.ONE_OCTET)
+			number = decodeSubidentifier(is);
 		return getTag(clazz, constructed, number);
+	}
+
+	/** Decode a BER subidentifier */
+	protected int decodeSubidentifier(InputStream is) throws IOException {
+		int number = 0;
+		for(int i = 0; i < 4; i++) {
+			int next = is.read();
+			number <<= 7;
+			number |= (next & SEVEN_BITS);
+			if((next & HIGH_BIT) != 0)
+				return number;
+		}
+		throw new ParsingException("INVALID SUBIDENTIFIER");
 	}
 
 	/** Decode a BER length */
