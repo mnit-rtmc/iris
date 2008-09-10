@@ -95,7 +95,7 @@ abstract public class Request {
 		byte[] buf = new byte[expected];
 		int b = is.read(buf);
 		if(b < 0)
-			throw new EOFException();
+			throw new EOFException("END OF STREAM");
 		if(b != buf.length)
 			throw RESPONSE_LENGTH;
 		return buf;

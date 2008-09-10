@@ -27,6 +27,10 @@ import us.mn.state.dot.tms.comm.ParsingException;
  */
 abstract public class BER extends ASN1 {
 
+	/** End of stream exception */
+	static protected final EOFException END_OF_STREAM =
+		new EOFException("END OF STREAM");
+
 	/** Constant to check the high bit of a byte */
 	static public final byte HIGH_BIT = (byte)0x80;
 
@@ -141,7 +145,7 @@ abstract public class BER extends ASN1 {
 	protected Tag decodeIdentifier(InputStream is) throws IOException {
 		int first = is.read();
 		if(first < 0)
-			throw new EOFException();
+			throw END_OF_STREAM;
 		byte clazz = (byte)(first & Tag.CLASS_MASK);
 		boolean constructed = (first & Tag.CONSTRUCTED) != 0;
 		int number = (first & Tag.ONE_OCTET);
@@ -156,7 +160,7 @@ abstract public class BER extends ASN1 {
 		for(int i = 0; i < 4; i++) {
 			int next = is.read();
 			if(next < 0)
-				throw new EOFException();
+				throw END_OF_STREAM;
 			number <<= 7;
 			number |= (next & SEVEN_BITS);
 			if((next & HIGH_BIT) != 0)
@@ -169,7 +173,7 @@ abstract public class BER extends ASN1 {
 	protected int decodeLength(InputStream is) throws IOException {
 		int first = is.read();
 		if(first < 0)
-			throw new EOFException();
+			throw END_OF_STREAM;
 		if(first == RESERVED)
 			throw new ParsingException("RESERVED LENGTH CODE");
 		int length = first & SEVEN_BITS;
@@ -181,7 +185,7 @@ abstract public class BER extends ASN1 {
 				length <<= 8;
 				int lg = is.read();
 				if(lg < 0)
-					throw new EOFException();
+					throw END_OF_STREAM;
 				length |= lg;
 			}
 		}
@@ -201,13 +205,13 @@ abstract public class BER extends ASN1 {
 			throw new ParsingException("INVALID INTEGER LENGTH");
 		int value = is.read();
 		if(value < 0)
-			throw new EOFException();
+			throw END_OF_STREAM;
 		value = (byte)value;	// NOTE: cast to preserve sign
 		for(int i = 1; i < length; i++) {
 			value <<= 8;
 			int v = is.read();
 			if(v < 0)
-				throw new EOFException();
+				throw END_OF_STREAM;
 			value |= v;
 		}
 		return value;
@@ -224,7 +228,7 @@ abstract public class BER extends ASN1 {
 		if(length > 0) {
 			int blen = is.read(buffer);
 			if(blen < 0)
-				throw new EOFException();
+				throw END_OF_STREAM;
 			if(blen != length)
 				throw new ParsingException("READ STRING FAIL");
 		}
@@ -246,7 +250,7 @@ abstract public class BER extends ASN1 {
 		if(length > 0) {
 			int blen = is.read(buffer);
 			if(blen < 0)
-				throw new EOFException();
+				throw END_OF_STREAM;
 			if(blen != length)
 				throw new ParsingException("READ OID FAIL");
 		}

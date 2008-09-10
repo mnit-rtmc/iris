@@ -34,6 +34,10 @@ import us.mn.state.dot.tms.comm.PortException;
  */
 abstract public class HDLC {
 
+	/** End of stream exception */
+	static protected final EOFException END_OF_STREAM =
+		new EOFException("END OF STREAM");
+
 	/** Invalid address exception */
 	static public final class InvalidAddressException
 		extends IndexOutOfBoundsException
@@ -183,7 +187,7 @@ abstract public class HDLC {
 			for(int i = 0; i < MAX_MESSAGE; i++) {
 				int b = super.read();
 				if(b < 0)
-					throw new EOFException();
+					throw END_OF_STREAM;
 				if(b == FLAG)
 					return;
 			}
@@ -196,7 +200,7 @@ abstract public class HDLC {
 			while(super.available() == 0) {
 				int b = super.read();
 				if(b < 0)
-					throw new EOFException();
+					throw END_OF_STREAM;
 				if(b == FLAG)
 					return false;
 				buf[scanned++] = (byte)b;
@@ -207,7 +211,7 @@ abstract public class HDLC {
 				MAX_MESSAGE - scanned);
 			int b = super.read(buf, scanned, a);
 			if(b < 0)
-				throw new EOFException();
+				throw END_OF_STREAM;
 			for(int i = 0; i < b; i++) {
 				if(buf[scanned] == FLAG)
 					return false;

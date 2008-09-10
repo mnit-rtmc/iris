@@ -98,7 +98,7 @@ public class Message implements AddressedMessage {
 		while(true) {
 			int value = is.read();
 			if(value < 0)
-				throw new EOFException();
+				throw new EOFException("END OF STREAM");
 			resp.append((char)value);
 			if(value == EOR)
 				break;

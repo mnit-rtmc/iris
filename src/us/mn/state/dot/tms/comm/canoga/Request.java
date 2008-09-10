@@ -102,7 +102,7 @@ abstract public class Request {
 				throw new ParsingException("TOO MANY TRIES");
 			int b = is.read(buf, i, buf.length - i);
 			if(b < 0)
-				throw new EOFException();
+				throw new EOFException("END OF STREAM");
 			i += b;
 		}
 		return buf;
