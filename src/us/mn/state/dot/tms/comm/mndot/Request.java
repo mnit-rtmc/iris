@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.comm.mndot;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.ParsingException;
 import us.mn.state.dot.tms.comm.PortException;
-import us.mn.state.dot.tms.comm.TimeoutException;
 
 /**
  * Mndot Request
@@ -94,8 +94,8 @@ abstract public class Request {
 	{
 		byte[] buf = new byte[expected];
 		int b = is.read(buf);
-		if(b <= 0)
-			throw new TimeoutException();
+		if(b < 0)
+			throw new EOFException();
 		if(b != buf.length)
 			throw RESPONSE_LENGTH;
 		return buf;

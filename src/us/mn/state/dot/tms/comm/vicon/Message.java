@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.comm.vicon;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ProtocolException;
-import us.mn.state.dot.tms.comm.TimeoutException;
 
 /**
  * Vicon message
@@ -98,7 +98,7 @@ public class Message implements AddressedMessage {
 		while(true) {
 			int value = is.read();
 			if(value < 0)
-				throw new TimeoutException();
+				throw new EOFException();
 			resp.append((char)value);
 			if(value == EOR)
 				break;

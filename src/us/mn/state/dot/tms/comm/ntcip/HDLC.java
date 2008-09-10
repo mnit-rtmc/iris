@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
@@ -23,7 +24,6 @@ import java.io.FilterInputStream;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.ParsingException;
 import us.mn.state.dot.tms.comm.PortException;
-import us.mn.state.dot.tms.comm.TimeoutException;
 
 /**
  * This is an implementation of the ISO/IEC standard 3309 High-level Data
@@ -182,8 +182,8 @@ abstract public class HDLC {
 			scanned = 0;
 			for(int i = 0; i < MAX_MESSAGE; i++) {
 				int b = super.read();
-				if(b == -1)
-					throw new TimeoutException();
+				if(b < 0)
+					throw new EOFException();
 				if(b == FLAG)
 					return;
 			}
@@ -195,8 +195,8 @@ abstract public class HDLC {
 		protected boolean scan() throws IOException {
 			while(super.available() == 0) {
 				int b = super.read();
-				if(b == -1)
-					throw new TimeoutException();
+				if(b < 0)
+					throw new EOFException();
 				if(b == FLAG)
 					return false;
 				buf[scanned++] = (byte)b;
@@ -206,8 +206,8 @@ abstract public class HDLC {
 			int a = Math.min(super.available(),
 				MAX_MESSAGE - scanned);
 			int b = super.read(buf, scanned, a);
-			if(b == -1)
-				throw new TimeoutException();
+			if(b < 0)
+				throw new EOFException();
 			for(int i = 0; i < b; i++) {
 				if(buf[scanned] == FLAG)
 					return false;
