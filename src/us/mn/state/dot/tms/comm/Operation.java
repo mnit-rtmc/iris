@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.comm;
 import java.io.IOException;
 
 /**
- * An operation to be performed on a field controller.  Each communication
- * line maintains a prioritized queue of all outstanding operations. When an
+ * An operation to be performed on a field controller.  Each message
+ * poller maintains a prioritized queue of all outstanding operations. When an
  * operation gets to the head of the queue, the next phase is performed by
  * calling the poll method.
  *
@@ -65,7 +65,7 @@ abstract public class Operation {
 	/** Current phase of the operation */
 	protected Phase phase;
 
-	/** Create a new serial I/O operation */
+	/** Create a new I/O operation */
 	public Operation(int prio) {
 		priority = prio;
 		phase = null;
