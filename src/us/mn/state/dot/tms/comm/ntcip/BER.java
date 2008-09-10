@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
@@ -139,6 +140,8 @@ abstract public class BER extends ASN1 {
 	/** Decode a BER identifier (tag) */
 	protected Tag decodeIdentifier(InputStream is) throws IOException {
 		int first = is.read();
+		if(first < 0)
+			throw new EOFException();
 		byte clazz = (byte)(first & Tag.CLASS_MASK);
 		boolean constructed = (first & Tag.CONSTRUCTED) != 0;
 		int number = (first & Tag.ONE_OCTET);
@@ -152,6 +155,8 @@ abstract public class BER extends ASN1 {
 		int number = 0;
 		for(int i = 0; i < 4; i++) {
 			int next = is.read();
+			if(next < 0)
+				throw new EOFException();
 			number <<= 7;
 			number |= (next & SEVEN_BITS);
 			if((next & HIGH_BIT) != 0)
@@ -163,6 +168,8 @@ abstract public class BER extends ASN1 {
 	/** Decode a BER length */
 	protected int decodeLength(InputStream is) throws IOException {
 		int first = is.read();
+		if(first < 0)
+			throw new EOFException();
 		if(first == RESERVED)
 			throw new ParsingException("RESERVED LENGTH CODE");
 		int length = first & SEVEN_BITS;
@@ -172,7 +179,10 @@ abstract public class BER extends ASN1 {
 			int i = length;
 			for(length = 0; i > 0; i--) {
 				length <<= 8;
-				length |= is.read();
+				int lg = is.read();
+				if(lg < 0)
+					throw new EOFException();
+				length |= lg;
 			}
 		}
 		if(length > is.available()) {
@@ -189,10 +199,16 @@ abstract public class BER extends ASN1 {
 		int length = decodeLength(is);
 		if(length < 1 || length > 4)
 			throw new ParsingException("INVALID INTEGER LENGTH");
-		int value = (byte)is.read(); // NOTE: cast to preserve sign
+		int value = is.read();
+		if(value < 0)
+			throw new EOFException();
+		value = (byte)value;	// NOTE: cast to preserve sign
 		for(int i = 1; i < length; i++) {
 			value <<= 8;
-			value |= is.read();
+			int v = is.read();
+			if(v < 0)
+				throw new EOFException();
+			value |= v;
 		}
 		return value;
 	}
@@ -205,8 +221,13 @@ abstract public class BER extends ASN1 {
 		if(length < 0)
 			throw new ParsingException("NEGATIVE STRING LENGTH");
 		byte[] buffer = new byte[length];
-		if(length > 0 && is.read(buffer) != length)
-			throw new ParsingException("FAILED TO READ STRING");
+		if(length > 0) {
+			int blen = is.read(buffer);
+			if(blen < 0)
+				throw new EOFException();
+			if(blen != length)
+				throw new ParsingException("READ STRING FAIL");
+		}
 		return buffer;
 	}
 
@@ -222,8 +243,13 @@ abstract public class BER extends ASN1 {
 		if(length < 1)
 			throw new ParsingException("NEGATIVE OID LENGTH");
 		byte[] buffer = new byte[length];
-		if(is.read(buffer) != length)
-			throw new ParsingException("FAILED TO READ OID");
+		if(length > 0) {
+			int blen = is.read(buffer);
+			if(blen < 0)
+				throw new EOFException();
+			if(blen != length)
+				throw new ParsingException("READ OID FAIL");
+		}
 		// FIXME: this is obviously bogus
 		return new int[0];
 	}
