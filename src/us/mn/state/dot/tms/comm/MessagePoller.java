@@ -117,7 +117,7 @@ abstract public class MessagePoller extends Thread {
 
 	/** Drain the poll queue */
 	protected void drainQueue() {
-		IOException closing = new IOException("CLOSING PORT");
+		IOException closing = new IOException(status);
 		while(queue.hasNext()) {
 			Operation o = queue.next();
 			o.handleException(closing);
