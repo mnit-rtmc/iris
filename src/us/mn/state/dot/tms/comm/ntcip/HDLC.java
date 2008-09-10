@@ -23,7 +23,6 @@ import java.io.InputStream;
 import java.io.FilterInputStream;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.ParsingException;
-import us.mn.state.dot.tms.comm.PortException;
 
 /**
  * This is an implementation of the ISO/IEC standard 3309 High-level Data
@@ -393,17 +392,14 @@ abstract public class HDLC {
 			}
 			catch(IOException e) {
 				next = true;
-				throw new PortException(e.getMessage());
+				throw e;
 			}
 		}
 
 		/** Flushes the message to the lower-level stream */
 		public void flush() throws IOException {
 			next = true;
-			try { out.flush(); }
-			catch(IOException e) {
-				throw new PortException(e.getMessage());
-			}
+			out.flush();
 		}
 	}
 

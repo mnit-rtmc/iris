@@ -125,7 +125,7 @@ abstract public class MessagePoller extends Thread {
 	}
 
 	/** Perform operations on the poll queue */
-	protected void performOperations() {
+	protected void performOperations() throws IOException {
 		while(true) {
 			Operation o = queue.next();
 			if(o instanceof KillThread)

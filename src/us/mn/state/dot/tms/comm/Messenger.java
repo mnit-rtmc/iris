@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.ControllerImpl;
 
 /**
@@ -87,9 +87,8 @@ abstract public class Messenger {
 
 	/** Check the exception to see if a stream needs to be reopened */
 	protected boolean shouldReopen(IOException e) {
-		return (e instanceof PortException) ||
-			(e instanceof SocketException) ||
-			(e instanceof EOFException);
+		return !(e instanceof SerialIOException ||
+			e instanceof SocketTimeoutException);
 	}
 
 	/** Handle an IO exception */

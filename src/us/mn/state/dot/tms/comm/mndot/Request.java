@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.ParsingException;
-import us.mn.state.dot.tms.comm.PortException;
 
 /**
  * Mndot Request
@@ -78,14 +77,8 @@ abstract public class Request {
 	protected void doPoll(OutputStream output, byte[] req)
 		throws IOException
 	{
-		try {
-			output.write(req);
-			output.flush();
-		}
-		catch(IOException e) {
-			// FIXME: hack to force the port to be reopened
-			throw new PortException(e.getMessage());
-		}
+		output.write(req);
+		output.flush();
 	}
 
 	/** Get a response from an input stream */
