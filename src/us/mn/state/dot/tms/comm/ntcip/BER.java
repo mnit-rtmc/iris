@@ -38,7 +38,8 @@ abstract public class BER extends ASN1 {
 	/** Encode a BER identifier to the output stream */
 	protected void encodeIdentifier(Tag tag) throws IOException {
 		byte first = tag.clazz;
-		if(tag.constructed) first |= Tag.CONSTRUCTED;
+		if(tag.constructed)
+			first |= Tag.CONSTRUCTED;
 		if(tag.number < Tag.ONE_OCTET) {
 			encoder.write(first | tag.number);
 			return;
@@ -57,12 +58,12 @@ abstract public class BER extends ASN1 {
 
 	/** Encode a BER length */
 	protected void encodeLength(int length) throws IOException {
-		if(length < 128) encoder.write(length);
+		if(length < 128)
+			encoder.write(length);
 		else if(length < 256) {
 			encoder.write(HIGH_BIT | 1);
 			encoder.write(length);
-		}
-		else {
+		} else {
 			encoder.write(HIGH_BIT | 2);
 			encoder.write((byte)(length >> 8));
 			encoder.write((byte)(length & 0xFF));
@@ -73,8 +74,10 @@ abstract public class BER extends ASN1 {
 	protected void encodeBoolean(boolean value) throws IOException {
 		encodeIdentifier(Tag.BOOLEAN);
 		encodeLength(1);
-		if(value) encoder.write(0xFF);
-		else encoder.write(0x00);
+		if(value)
+			encoder.write(0xFF);
+		else
+			encoder.write(0x00);
 	}
 
 	/** Encode an integer value */
@@ -84,8 +87,10 @@ abstract public class BER extends ASN1 {
 		boolean flag = false;
 		for(int shift = 23; shift > 0; shift -= 8) {
 			int test = (value >> shift) & 0x1FF;
-			if(test != 0 && test != 0x1FF) flag = true;
-			if(flag) buffer[len++] = (byte)(test >> 1);
+			if(test != 0 && test != 0x1FF)
+				flag = true;
+			if(flag)
+				buffer[len++] = (byte)(test >> 1);
 		}
 		buffer[len++] = (byte)(value & 0xFF);
 		encodeIdentifier(Tag.INTEGER);
@@ -158,30 +163,32 @@ abstract public class BER extends ASN1 {
 	/** Decode a BER length */
 	protected int decodeLength(InputStream is) throws IOException {
 		int first = is.read();
-		if(first == RESERVED) throw new
-			ParsingException("RESERVED LENGTH CODE");
+		if(first == RESERVED)
+			throw new ParsingException("RESERVED LENGTH CODE");
 		int length = first & SEVEN_BITS;
 		if(length != first) {
-			if(length == 0) throw new
-				ParsingException("INDEFINITE LENGTH");
+			if(length == 0)
+				throw new ParsingException("INDEFINITE LENGTH");
 			int i = length;
 			for(length = 0; i > 0; i--) {
 				length <<= 8;
 				length |= is.read();
 			}
 		}
-		if(length > is.available()) throw new ParsingException(
-			"INVALID LENGTH: " + length + " > " + is.available());
+		if(length > is.available()) {
+			throw new ParsingException("INVALID LENGTH: " + length +
+				" > " + is.available());
+		}
 		return length;
 	}
 
 	/** Decode an integer */
 	protected int decodeInteger(InputStream is) throws IOException {
-		if(decodeIdentifier(is) != Tag.INTEGER) throw new
-			ParsingException("EXPECTED AN INTEGER TAG");
+		if(decodeIdentifier(is) != Tag.INTEGER)
+			throw new ParsingException("EXPECTED AN INTEGER TAG");
 		int length = decodeLength(is);
-		if(length < 1 || length > 4) throw new
-			ParsingException("INVALID INTEGER LENGTH");
+		if(length < 1 || length > 4)
+			throw new ParsingException("INVALID INTEGER LENGTH");
 		int value = (byte)is.read(); // NOTE: cast to preserve sign
 		for(int i = 1; i < length; i++) {
 			value <<= 8;
@@ -192,14 +199,14 @@ abstract public class BER extends ASN1 {
 
 	/** Decode an octet string */
 	protected byte[] decodeOctetString(InputStream is) throws IOException {
-		if(decodeIdentifier(is) != Tag.OCTET_STRING) throw new
-			ParsingException("EXPECTED OCTET STRING TAG");
+		if(decodeIdentifier(is) != Tag.OCTET_STRING)
+			throw new ParsingException("EXPECTED OCTET STRING TAG");
 		int length = decodeLength(is);
-		if(length < 0) throw new
-			ParsingException("NEGATIVE STRING LENGTH");
+		if(length < 0)
+			throw new ParsingException("NEGATIVE STRING LENGTH");
 		byte[] buffer = new byte[length];
-		if(length > 0 && is.read(buffer) != length) throw
-			new ParsingException("FAILED TO READ STRING");
+		if(length > 0 && is.read(buffer) != length)
+			throw new ParsingException("FAILED TO READ STRING");
 		return buffer;
 	}
 
@@ -207,14 +214,16 @@ abstract public class BER extends ASN1 {
 	protected int[] decodeObjectIdentifier(InputStream is)
 		throws IOException
 	{
-		if(decodeIdentifier(is) != Tag.OBJECT_IDENTIFIER) throw
-			new ParsingException("EXPECTED OBJECT IDENTIFIER TAG");
+		if(decodeIdentifier(is) != Tag.OBJECT_IDENTIFIER) {
+			throw new ParsingException(
+				"EXPECTED OBJECT IDENTIFIER TAG");
+		}
 		int length = decodeLength(is);
-		if(length < 1) throw new
-			ParsingException("NEGATIVE OID LENGTH");
+		if(length < 1)
+			throw new ParsingException("NEGATIVE OID LENGTH");
 		byte[] buffer = new byte[length];
-		if(is.read(buffer) != length) throw new
-			ParsingException("FAILED TO READ OID");
+		if(is.read(buffer) != length)
+			throw new ParsingException("FAILED TO READ OID");
 		// FIXME: this is obviously bogus
 		return new int[0];
 	}
@@ -222,8 +231,8 @@ abstract public class BER extends ASN1 {
 	/** Decode a sequence (or sequence-of)
 	  * @return Length of sequence */
 	protected int decodeSequence(InputStream is) throws IOException {
-		if(decodeIdentifier(is) != Tag.SEQUENCE) throw new
-			ParsingException("EXPECTED SEQUENCE TAG");
+		if(decodeIdentifier(is) != Tag.SEQUENCE)
+			throw new ParsingException("EXPECTED SEQUENCE TAG");
 		return decodeLength(is);
 	}
 }
