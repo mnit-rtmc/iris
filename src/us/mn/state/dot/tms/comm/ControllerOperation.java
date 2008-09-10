@@ -14,9 +14,7 @@
  */
 package us.mn.state.dot.tms.comm;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.ControllerImpl;
 
 /**
@@ -68,11 +66,7 @@ abstract public class ControllerOperation extends Operation {
 	public void handleException(IOException e) {
 		String s = e.getMessage();
 		controller.logException(id, s);
-		// FIXME: this is a bit fragile
-		boolean r = (e instanceof ParsingException) ||
-			(e instanceof SocketTimeoutException) ||
-			(e instanceof EOFException);
-		if(r && controller.retry(id))
+		if(controller.retry(id))
 			return;
 		else
 			super.handleException(e);

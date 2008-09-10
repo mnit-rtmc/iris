@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DebugLog;
@@ -136,7 +137,9 @@ abstract public class MessagePoller extends Thread {
 	}
 
 	/** Perform one poll for an operation */
-	protected synchronized void doPoll(final ControllerOperation o) {
+	protected synchronized void doPoll(final ControllerOperation o)
+		throws IOException
+	{
 		final String oname = o.toString();
 		long start = System.currentTimeMillis();
 		try {
@@ -155,17 +158,12 @@ abstract public class MessagePoller extends Thread {
 		catch(DownloadRequestException e) {
 			download(o);
 		}
-		catch(IOException e) {
+		catch(ParsingException e) {
 			o.handleException(e);
-			try {
-				messenger.handleException(e);
-			}
-			catch(IOException e2) {
-				POLL_LOG.log(getName() + " second: " +
-					e2.getMessage());
-				POLL_LOG.log(getName() + " first: " +
-					e.getMessage());
-			}
+			messenger.drain();
+		}
+		catch(SocketTimeoutException e) {
+			o.handleException(e);
 		}
 		catch(NumberFormatException e) {
 			o.handleException(new IOException(

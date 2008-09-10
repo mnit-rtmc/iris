@@ -18,7 +18,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.ControllerImpl;
 
 /**
@@ -40,15 +39,6 @@ abstract public class Messenger {
 
 	/** Close the messenger */
 	abstract public void close();
-
-	/** Drain any bytes from the input stream */
-	protected void drain() throws IOException {
-		if(input != null) {
-			int a = input.available();
-			if(a > 0)
-				input.skip(a);
-		}
-	}
 
 	/** Set the messenger timeout */
 	abstract public void setTimeout(int t) throws IOException;
@@ -85,20 +75,13 @@ abstract public class Messenger {
 			return os;
 	}
 
-	/** Check the exception to see if a stream needs to be reopened */
-	protected boolean shouldReopen(IOException e) {
-		return !(e instanceof ParsingException ||
-			e instanceof SocketTimeoutException);
-	}
-
-	/** Handle an IO exception */
-	public synchronized void handleException(IOException e)
-		throws IOException
-	{
-		if(shouldReopen(e)) {
-			close();
-			open();
-		} else
-			drain();
+	/** Drain any bytes from the input stream */
+	public void drain() throws IOException {
+		InputStream is = input;
+		if(is != null) {
+			int a = is.available();
+			if(a > 0)
+				is.skip(a);
+		}
 	}
 }
