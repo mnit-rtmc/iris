@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
-import us.mn.state.dot.tms.comm.SerialIOException;
+import us.mn.state.dot.tms.comm.ParsingException;
 
 /**
  * Controller operation to collect vehicle event data
@@ -45,7 +45,7 @@ public class CollectEventData extends ControllerOperation {
 		controller.logException(id, e.getMessage());
 		if(!controller.hasActiveDetector())
 			phase = null;
-		if(e instanceof SerialIOException)
+		if(e instanceof ParsingException)
 			controller.retry(id);
 		if(controller.getFailMillis() > VOL_COUNT_WRAP)
 			phase = null;

@@ -69,7 +69,7 @@ abstract public class ControllerOperation extends Operation {
 		String s = e.getMessage();
 		controller.logException(id, s);
 		// FIXME: this is a bit fragile
-		boolean r = (e instanceof SerialIOException) ||
+		boolean r = (e instanceof ParsingException) ||
 			(e instanceof SocketTimeoutException) ||
 			(e instanceof EOFException);
 		if(r && controller.retry(id))

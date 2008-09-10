@@ -87,7 +87,7 @@ abstract public class Messenger {
 
 	/** Check the exception to see if a stream needs to be reopened */
 	protected boolean shouldReopen(IOException e) {
-		return !(e instanceof SerialIOException ||
+		return !(e instanceof ParsingException ||
 			e instanceof SocketTimeoutException);
 	}
 
