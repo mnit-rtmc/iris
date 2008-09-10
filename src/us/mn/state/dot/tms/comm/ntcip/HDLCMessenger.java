@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,12 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 
 /**
  * HDLC Messenger
@@ -57,26 +57,26 @@ public class HDLCMessenger extends Messenger {
 
 	/** Get an input stream for the specified controller */
 	public InputStream getInputStream(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		InputStream _input = input;	// Avoid races
 		if(_input != null) {
 			int drop = c.getDrop();
 			return new HDLC.AddressedInputStream(_input, drop);
 		} else
-			throw new MessengerException("MESSENGER CLOSED");
+			throw new EOFException("MESSENGER CLOSED");
 	}
 
 	/** Get an output stream for the specified controller */
 	public OutputStream getOutputStream(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		OutputStream _output = output;	// Avoid races
 		if(_output != null) {
 			int drop = c.getDrop();
 			return new HDLC.AddressedOutputStream(_output, drop);
 		} else
-			throw new MessengerException("MESSENGER CLOSED");
+			throw new EOFException("MESSENGER CLOSED");
 	}
 
 	/** Check if a drop address is valid */

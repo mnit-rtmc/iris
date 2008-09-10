@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.pelco;
 
+import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -23,7 +24,6 @@ import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 
 /**
  * PelcoPoller is a java implementation of the Pelco D camera control 
@@ -43,7 +43,7 @@ public class PelcoPoller extends MessagePoller implements CameraPoller {
 
 	/** Create a new message for the specified drop address */
 	public AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		return new Message(messenger.getOutputStream(c), c.getDrop());
 	}

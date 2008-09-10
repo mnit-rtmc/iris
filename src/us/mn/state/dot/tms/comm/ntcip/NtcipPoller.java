@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
@@ -26,7 +27,6 @@ import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 import us.mn.state.dot.tms.comm.SignPoller;
 
 /**
@@ -47,7 +47,7 @@ public class NtcipPoller extends MessagePoller implements SignPoller,
 
 	/** Create a new message for the specified controller */
 	public AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		return snmp.new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c));

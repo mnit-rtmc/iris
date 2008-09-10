@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.smartsensor;
 
+import java.io.EOFException;
 import java.io.PrintStream;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -21,7 +22,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 
 /**
  * SmartSensorPoller is a java implementation of the Wavetronix SmartSensor
@@ -38,7 +38,7 @@ public class SmartSensorPoller extends MessagePoller {
 
 	/** Create a new message for the specified controller */
 	public AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		return new Message(new PrintStream(
 			messenger.getOutputStream(c)),

@@ -60,11 +60,11 @@ abstract public class Messenger {
 
 	/** Get an input stream for the specified controller */
 	public InputStream getInputStream(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		InputStream is = input;
 		if(is == null)
-			throw new MessengerException("CLOSED");
+			throw new EOFException("MESSENGER CLOSED");
 		else
 			return input;
 	}
@@ -76,11 +76,11 @@ abstract public class Messenger {
 
 	/** Get an output stream for the specified controller */
 	public OutputStream getOutputStream(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		OutputStream os = output;
 		if(os == null)
-			throw new MessengerException("CLOSED");
+			throw new EOFException("MESSENGER CLOSED");
 		else
 			return os;
 	}
@@ -89,7 +89,6 @@ abstract public class Messenger {
 	protected boolean shouldReopen(IOException e) {
 		return (e instanceof PortException) ||
 			(e instanceof SocketException) ||
-			(e instanceof MessengerException) ||
 			(e instanceof EOFException);
 	}
 

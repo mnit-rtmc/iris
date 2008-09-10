@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.vicon;
 
+import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -21,7 +22,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
 
 /**
@@ -43,7 +43,7 @@ public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 
 	/** Create a new message for the specified drop address */
 	public AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c));

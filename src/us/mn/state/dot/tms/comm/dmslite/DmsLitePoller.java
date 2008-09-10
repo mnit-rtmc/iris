@@ -15,6 +15,7 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
@@ -27,7 +28,6 @@ import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.SocketMessenger;
 
@@ -57,10 +57,11 @@ public class DmsLitePoller extends MessagePoller
 	 *
 	 * @param c Associated controller.
 	 * @return A newly created Message.
-	 * @throws MessengerException
+	 * @throws EOFException
 	 */
 	public AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException {
+		throws EOFException
+	{
 		System.err.println("DmsLitePoller.createMessage() called.");
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream(c));

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
 import us.mn.state.dot.sched.Completer;
@@ -214,7 +215,7 @@ abstract public class MessagePoller extends Thread {
 
 	/** Create a message for the specified controller */
 	abstract protected AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException;
+		throws EOFException;
 
 	/** Respond to a download request from a controller */
 	protected void download(ControllerOperation o) {

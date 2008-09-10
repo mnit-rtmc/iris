@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.canoga;
 
+import java.io.EOFException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
@@ -22,7 +23,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 
 /**
  * CanogaPoller is a java implementation of the 3M Canoga (tm) serial
@@ -48,7 +48,7 @@ public class CanogaPoller extends MessagePoller {
 
 	/** Create a new message for the specified controller */
 	public AddressedMessage createMessage(ControllerImpl c)
-		throws MessengerException
+		throws EOFException
 	{
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream(c), c.getDrop());

@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.MessengerException;
 import us.mn.state.dot.tms.comm.SignPoller;
 
 /**
@@ -54,7 +53,7 @@ public class CawsPoller extends MessagePoller implements SignPoller {
     }
 
     /** Create a new message for the specified controller, called by MessagePoller.doPoll(). */
-    public AddressedMessage createMessage(ControllerImpl c) throws MessengerException {
+    public AddressedMessage createMessage(ControllerImpl c) {
 
         // System.err.println("CawsPoller.createMessage() called.");
         return new Message(messenger);
