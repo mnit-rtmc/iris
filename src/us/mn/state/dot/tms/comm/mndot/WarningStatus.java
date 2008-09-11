@@ -37,12 +37,12 @@ public class WarningStatus extends DeviceOperation {
 	public WarningStatus(WarningSignImpl w, Completer comp) {
 		super(DATA_30_SEC, w);
 		completer = comp;
-		completer.up();
 		warn = w;
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		completer.up();
 		return new QueryStatus();
 	}
 

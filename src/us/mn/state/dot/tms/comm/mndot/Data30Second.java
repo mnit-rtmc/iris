@@ -34,11 +34,11 @@ public class Data30Second extends IntervalData {
 	public Data30Second(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
-		completer.up();
 	}
 
 	/** Begin the operation */
 	public void begin() {
+		completer.up();
 		phase = new QuerySample30Sec();
 	}
 

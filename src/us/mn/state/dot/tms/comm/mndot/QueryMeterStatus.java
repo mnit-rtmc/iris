@@ -67,11 +67,11 @@ public class QueryMeterStatus extends Controller170Operation
 	public QueryMeterStatus(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
-		completer.up();
 	}
 
 	/** Begin the operation */
 	public void begin() {
+		completer.up();
 		phase = new GetStatus();
 	}
 

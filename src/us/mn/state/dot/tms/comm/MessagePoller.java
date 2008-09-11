@@ -76,17 +76,23 @@ abstract public class MessagePoller extends Thread {
 
 	/** Add an operation to the message poller */
 	public void addOperation(Operation o) {
-		if(queue.isClogged()) {
-			if(o.getPriority() >= Operation.DEVICE_DATA) {
-				if(POLL_LOG.isOpen()) {
-					POLL_LOG.log(getName() +
-						", DROPPING: " + o);
-				}
-				return;
-			}
+		// NOTE: we must synchronize on the queue here so that begin()
+		// gets called before the poll queue thread get access to it
+		synchronized(queue) {
+			if(queueOperation(o))
+				o.begin();
 		}
-		o.begin();
-		queue.add(o);
+	}
+
+	/** Queue an operation to be processed */
+	protected boolean queueOperation(Operation o) {
+		if(queue.add(o))
+			return true;
+		else {
+			if(POLL_LOG.isOpen())
+				POLL_LOG.log(getName() + ", DROPPING: " + o);
+			return false;
+		}
 	}
 
 	/** Stop polling on this thread */
@@ -102,6 +108,8 @@ abstract public class MessagePoller extends Thread {
 
 	/** MessagePoller is a subclass of Thread.  This is the run method. */
 	public void run() {
+		if(POLL_LOG.isOpen())
+			POLL_LOG.log(getName() + " STARTING");
 		try {
 			messenger.open();
 			status = "";
@@ -113,14 +121,17 @@ abstract public class MessagePoller extends Thread {
 		}
 		messenger.close();
 		drainQueue();
+		if(POLL_LOG.isOpen())
+			POLL_LOG.log(getName() + " STOPPING");
 	}
 
 	/** Drain the poll queue */
 	protected void drainQueue() {
-		IOException closing = new IOException(status);
+		queue.close();
+		IOException e = new IOException(status);
 		while(queue.hasNext()) {
 			Operation o = queue.next();
-			o.handleException(closing);
+			o.handleException(e);
 			o.cleanup();
 		}
 	}
@@ -152,7 +163,8 @@ abstract public class MessagePoller extends Thread {
 			if(oc.getPriority() > o.getPriority()) {
 				queue.remove(oc);
 				oc.setPriority(o.getPriority());
-				queue.add(oc);
+				if(!queueOperation(oc))
+					oc.cleanup();
 			}
 		}
 		catch(DownloadRequestException e) {
@@ -170,10 +182,8 @@ abstract public class MessagePoller extends Thread {
 				"NUMBER FORMAT EXCEPTION"));
 		}
 		finally {
-			if(o.isDone())
+			if(o.isDone() || !queueOperation(o))
 				o.cleanup();
-			else
-				queue.add(o);
 			if(POLL_LOG.isOpen()) {
 				long el = sample_load(start);
 				POLL_LOG.log(getName() + ", " + oname +

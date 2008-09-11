@@ -59,7 +59,6 @@ public class GetBinnedSamples extends ControllerOperation {
 	public GetBinnedSamples(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
-		completer.up();
 		long s = comp.getStamp().getTimeInMillis();
 		stamp.setTimeInMillis(s);
 		oldest.setTimeInMillis(s);
@@ -75,6 +74,7 @@ public class GetBinnedSamples extends ControllerOperation {
 
 	/** Begin the operation */
 	public void begin() {
+		completer.up();
 		phase = new GetCurrentSamples();
 	}
 

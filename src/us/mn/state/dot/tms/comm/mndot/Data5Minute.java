@@ -51,7 +51,6 @@ public class Data5Minute extends IntervalData {
 	public Data5Minute(ControllerImpl c, Completer comp) {
 		super(DATA_5_MIN, c);
 		completer = comp;
-		completer.up();
 		long s = System.currentTimeMillis();
 		stamp.setTimeInMillis(s);
 		oldest.setTimeInMillis(s);
@@ -63,6 +62,7 @@ public class Data5Minute extends IntervalData {
 
 	/** Begin the operation */
 	public void begin() {
+		completer.up();
 		phase = new GetNextRecord();
 	}
 

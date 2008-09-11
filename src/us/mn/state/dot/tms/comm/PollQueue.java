@@ -24,16 +24,33 @@ import java.io.PrintStream;
  */
 public final class PollQueue {
 
-	/** Front node in the queue */
-	protected Node front = null;
-
 	/** The clog threshold determines how many polls can be in the queue
 	 * before it is considered "clogged". */
 	static protected final int CLOG_THRESHOLD = 50;
 
+	/** Front node in the queue */
+	protected Node front = null;
+
+	/** Flag to tell when the poller is closing */
+	protected boolean closing = false;
+
+	/** Close the queue for new operations */
+	public synchronized void close() {
+		closing = true;
+	}
+
+	/** Check if an operation should be added to the queue */
+	protected boolean shouldAdd(Operation o) {
+		if(closing)
+			return false;
+		if(isClogged() && o.getPriority() >= Operation.DEVICE_DATA)
+			return false;
+		return true;
+	}
+
 	/** Check if the queue is clogged. This is true if the queue contains
 	 * at least CLOG_THRESHOLD polls. */
-	public boolean isClogged() {
+	protected boolean isClogged() {
 		int i = 0;
 		Node node = front;
 		while(node != null) {
@@ -45,7 +62,9 @@ public final class PollQueue {
 	}
 
 	/** Add an operation to the queue */
-	public synchronized void add(Operation o) {
+	public synchronized boolean add(Operation o) {
+		if(!shouldAdd(o))
+			return false;
 		int priority = o.getPriority();
 		Node prev = null;
 		Node node = front;
@@ -61,6 +80,7 @@ public final class PollQueue {
 		else
 			prev.next = node;
 		notify();
+		return true;
 	}
 
 	/** Remove an operation from the queue */

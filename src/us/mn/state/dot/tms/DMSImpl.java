@@ -173,6 +173,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			DMSPoller p = getDMSPoller();
 			if(p != null) {
 				resetTransients();
+				// NOTE: this avoids a stack overflow with
+				// DMSOperation.cleanup()
+				reset = true;
 				p.queryConfiguration(this);
 			}
 		}

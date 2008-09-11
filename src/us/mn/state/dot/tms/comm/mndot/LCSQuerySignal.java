@@ -39,11 +39,11 @@ public class LCSQuerySignal extends DeviceOperation {
 		super(DATA_30_SEC, l);
 		lcs = l;
 		completer = comp;
-		completer.up();
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		completer.up();
 		return new QueryVerifies();
 	}
 
