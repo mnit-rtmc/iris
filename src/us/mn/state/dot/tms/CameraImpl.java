@@ -67,7 +67,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 		map.put("encoder", encoder);
 		map.put("encoder_channel", encoder_channel);
 		map.put("nvr", nvr);
-		map.put("publich", publish);
+		map.put("publish", publish);
 		return map;
 	}
 
@@ -109,7 +109,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 	}
 
 	/** Host (and port) of encoder for digital video stream */
-	protected String encoder;
+	protected String encoder = "";
 
 	/** Set the video encoder host name (and port) */
 	public void setEncoder(String enc) {
@@ -151,7 +151,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 	}
 
 	/** Host (and port) of NVR for digital video stream */
-	protected String nvr;
+	protected String nvr = "";
 
 	/** Set the video NVR host name (and port) */
 	public void setNvr(String n) {
