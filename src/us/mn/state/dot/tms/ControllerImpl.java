@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.event.EventType;
  * @author Douglas Lau
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
+
 	/** Communication failure retry threshold */
 	static public final int RETRY_THRESHOLD = 3;
 
