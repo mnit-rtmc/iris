@@ -57,16 +57,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		return map;
 	}
 
-	/** Destroy a graphic */
-	public void destroy() {
-		// Handled by doDestroy() method
-	}
-
-	/** Destroy a graphic */
-	public void doDestroy() throws TMSException {
-		store.destroy(this);
-	}
-
 	/** Get the database table name */
 	public String getTable() {
 		return SONAR_TYPE;
