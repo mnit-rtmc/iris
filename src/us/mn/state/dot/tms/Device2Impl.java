@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.comm.Device2Operation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 
@@ -27,17 +28,16 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 	ControllerIO
 {
 	/** Create a new device */
-	protected Device2Impl(String n) throws TMSException {
+	protected Device2Impl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
-		g.doStore();
+		MainServer.server.createObject(g);
 		geo_loc = g;
-		MainServer.server.addObject(geo_loc);
 		notes = "";
 	}
 
 	/** Create a device */
-	protected Device2Impl(String n, GeoLoc l, ControllerImpl c, int p,
+	protected Device2Impl(String n, GeoLocImpl l, ControllerImpl c, int p,
 		String nt)
 	{
 		super(n);
@@ -59,6 +59,12 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 				" initialization error");
 			e.printStackTrace();
 		}
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		store.destroy(geo_loc);
 	}
 
 	/** Get the active status */
@@ -156,20 +162,7 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 	}
 
 	/** Device location */
-	protected GeoLoc geo_loc;
-
-	/** Set the device location */
-	public void setGeoLoc(GeoLoc l) {
-		geo_loc = l;
-	}
-
-	/** Set the device location */
-	public void doSetGeoLoc(GeoLoc l) throws TMSException {
-		if(l == geo_loc)
-			return;
-		store.update(this, "geo_loc", l.getName());
-		setGeoLoc(l);
-	}
+	protected GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	public GeoLoc getGeoLoc() {
