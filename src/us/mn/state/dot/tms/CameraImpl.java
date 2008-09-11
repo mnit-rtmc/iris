@@ -37,7 +37,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"encoder, encoder_channel, nvr, publish " +
-			"FROM camera;", new ResultFactory()
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new CameraImpl(namespace,
@@ -73,7 +73,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

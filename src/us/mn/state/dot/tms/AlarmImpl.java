@@ -42,7 +42,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		System.err.println("Loading alarms...");
 		namespace.registerType(SONAR_TYPE, AlarmImpl.class);
 		store.query("SELECT name, description, controller, pin, state" +
-			" FROM " + SONAR_TYPE + ";", new ResultFactory()
+			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new AlarmImpl(namespace,
@@ -70,7 +70,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
