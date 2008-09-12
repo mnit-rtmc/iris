@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.ParsingException;
 
@@ -44,24 +43,28 @@ abstract public class Request {
 	/** Convert an integer to a hexadecimal number padded to d digits */
 	static protected String hex(int n, int d) {
 		String b = Integer.toHexString(n).toUpperCase();
-		if(n < 0) while(b.length() < d) b = "F" + b;
-		else while(b.length() < d) b = "0" + b;
+		if(n < 0) {
+			while(b.length() < d)
+				b = "F" + b;
+		} else {
+			while(b.length() < d)
+				b = "0" + b;
+		}
 		return b;
 	}
 
 	/** Calculate the checksum of a buffer */
 	static protected String checksum(String buf) {
 		int sum = 0;
-		for(int i = 0; i < buf.length(); i++) {
+		for(int i = 0; i < buf.length(); i++)
 			sum += buf.charAt(i);
-		}
 		return hex(sum, 4);
 	}
 
 	/** Compare the response with its trailing checksum */
 	static protected String compareChecksum(String r) throws IOException {
-		if(r.length() < 4) throw new ParsingException(
-			"INCOMPLETE RESPONSE");
+		if(r.length() < 4)
+			throw new ParsingException("INCOMPLETE RESPONSE");
 		String payload = r.substring(0, r.length() - 4);
 		String hexsum = checksum(payload);
 		if(r.endsWith(hexsum))
@@ -83,6 +86,7 @@ abstract public class Request {
 	/** Read a line of text from an input stream */
 	protected String readLine(InputStream is) throws IOException {
 		StringBuffer buf = new StringBuffer();
+		// FIXME: this is bad; only loop for X iterations
 		while(true) {
 			int b = is.read();
 			if(b < 0)
@@ -99,22 +103,26 @@ abstract public class Request {
 		throws IOException
 	{
 		String response = readLine(is).trim();
-		if(response.startsWith(h)) {
+		if(response.startsWith(h))
 			response = response.substring(h.length());
-		} else throw new ParsingException("INVALID RESPONSE HEADER");
-		if(response.startsWith(r.substring(0, 2))) {
+		else
+			throw new ParsingException("INVALID RESPONSE HEADER");
+		if(response.startsWith(r.substring(0, 2)))
 			response = response.substring(2);
-		} else throw new ParsingException("INVALID RESPONSE");
-		if(response.endsWith("~")) {
+		else
+			throw new ParsingException("INVALID RESPONSE");
+		if(response.endsWith("~"))
 			response = response.substring(0, response.length() - 1);
-		} else throw new ParsingException("INVALID RESPONSE TAIL");
+		else
+			throw new ParsingException("INVALID RESPONSE TAIL");
 		if(response.equals("Failure") ||
-			response.equals("Invalid") ||
-			response.equals("Empty"))
+		   response.equals("Invalid") ||
+		   response.equals("Empty"))
 		{
 			throw new SmartSensorError(response);
 		}
-		if(hasChecksum()) response = compareChecksum(response);
+		if(hasChecksum())
+			response = compareChecksum(response);
 		setResponse(response);
 	}
 
