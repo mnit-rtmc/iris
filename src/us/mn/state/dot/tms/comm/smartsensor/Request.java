@@ -85,9 +85,8 @@ abstract public class Request {
 
 	/** Read a line of text from an input stream */
 	protected String readLine(InputStream is) throws IOException {
-		StringBuffer buf = new StringBuffer();
-		// FIXME: this is bad; only loop for X iterations
-		while(true) {
+		StringBuilder buf = new StringBuilder();
+		for(int i = 0; i < 256; i++) {
 			int b = is.read();
 			if(b < 0)
 				throw new EOFException("END OF STREAM");
@@ -96,6 +95,7 @@ abstract public class Request {
 			else
 				buf.append((char)b);
 		}
+		throw new ParsingException("RANDOM NOISE");
 	}
 
 	/** Get response from the sensor */
