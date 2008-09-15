@@ -64,8 +64,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
 
-	/** Sign text area */
-	protected final JTextArea area = new JTextArea(3, 24);
+	/** Sign message text area */
+	protected final JTextArea message = new JTextArea(3, 24);
 
 	/** Create a new warning sign form */
 	public WarningSignProperties(TmsConnection tc, WarningSign s) {
@@ -138,10 +138,10 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 					(Camera)camera.getSelectedItem());
 			}
 		};
-		panel.addRow("Sign Text", area);
-		new FocusJob(area) {
+		panel.addRow("Sign Text", message);
+		new FocusJob(message) {
 			public void perform() {
-				proxy.setText(area.getText());
+				proxy.setMessage(message.getText());
 			}
 		};
 		return panel;
@@ -154,6 +154,6 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		if(a == null || a.equals("camera"))
 			camera.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("text"))
-			area.setText(proxy.getText());
+			message.setText(proxy.getMessage());
 	}
 }

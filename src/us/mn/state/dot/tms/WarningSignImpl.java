@@ -36,7 +36,7 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 		System.err.println("Loading warning signs...");
 		namespace.registerType(SONAR_TYPE, WarningSignImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"camera, text FROM iris." + SONAR_TYPE + ";",
+			"camera, message FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -47,7 +47,7 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
 					row.getString(6),	// camera
-					row.getString(7)	// text
+					row.getString(7)	// message
 				));
 			}
 		});
@@ -64,7 +64,7 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 		map.put("notes", notes);
 		if(camera != null)
 			map.put("camera", camera.getName());
-		map.put("text", text);
+		map.put("message", message);
 		return map;
 	}
 
@@ -85,22 +85,22 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 
 	/** Create a warning sign */
 	protected WarningSignImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, CameraImpl cam, String t)
+		int p, String nt, CameraImpl cam, String m)
 	{
 		super(n, l, c, p, nt);
 		camera = cam;
-		text = t;
+		message = m;
 		initTransients();
 	}
 
 	/** Create a warning sign */
 	protected WarningSignImpl(Namespace ns, String n, String l, String c,
-		int p, String nt, String cam, String t) throws NamespaceError
+		int p, String nt, String cam, String m) throws NamespaceError
 	{
 		this(n, (GeoLocImpl)ns.getObject(GeoLoc.SONAR_TYPE, l),
 			(ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
 			p, nt, (CameraImpl)ns.getObject(Camera.SONAR_TYPE, cam),
-			t);
+			m);
 	}
 
 	/** Camera from which this sign can be seen */
@@ -128,24 +128,24 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 	}
 
 	/** Message text of the sign */
-	protected String text = "";
+	protected String message = "";
 
 	/** Set the message text */
-	public void setText(String t) {
-		text = t;
+	public void setMessage(String m) {
+		message = m;
 	}
 
 	/** Set the message text */
-	public void doSetText(String t) throws TMSException {
-		if(t.equals(text))
+	public void doSetMessage(String m) throws TMSException {
+		if(m.equals(message))
 			return;
-		store.update(this, "text", t);
-		setText(t);
+		store.update(this, "message", m);
+		setMessage(m);
 	}
 
 	/** Get the message text */
-	public String getText() {
-		return text;
+	public String getMessage() {
+		return message;
 	}
 
 	/** Flag for deployed status */

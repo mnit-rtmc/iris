@@ -34,10 +34,10 @@ public interface WarningSign extends Device2 {
 	Camera getCamera();
 
 	/** Set the message text */
-	void setText(String t);
+	void setMessage(String t);
 
 	/** Get the message text */
-	String getText();
+	String getMessage();
 
 	/** Set the deployed status of the sign */
 	void setDeployed(boolean d);
