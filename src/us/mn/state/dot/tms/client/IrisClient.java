@@ -92,7 +92,7 @@ public class IrisClient extends JFrame {
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
 		setName( "IRIS" );
-        I18NMessages.initialize (props);
+		I18NMessages.initialize (props);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
