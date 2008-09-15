@@ -18,14 +18,14 @@ import java.io.IOException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * Query the status of a warning sign
  *
  * @author Douglas Lau
  */
-public class WarningStatus extends DeviceOperation {
+public class WarningStatus extends Device2Operation {
 
 	/** 30-Second completer */
 	protected final Completer completer;

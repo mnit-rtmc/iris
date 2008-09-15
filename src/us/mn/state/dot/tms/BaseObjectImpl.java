@@ -50,6 +50,7 @@ abstract public class BaseObjectImpl implements Storable {
 		SignTextImpl.loadAll();
 		AlarmImpl.loadAll();
 		CameraImpl.loadAll();
+		WarningSignImpl.loadAll();
 	}
 
 	/** Get the primary key name */

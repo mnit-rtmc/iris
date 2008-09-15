@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2005  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,31 +11,32 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.client.warning;
 
-import java.rmi.RemoteException;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;;
 
 /**
  * Action to deploy a warning sign.
  *
  * @author Douglas Lau
  */
-public class DeployAction extends TrafficDeviceAction {
+public class DeployAction extends AbstractAction {
+
+	/** Proxy selection model */
+	protected final ProxySelectionModel<WarningSign> s_model;
 
 	/** Flag to deploy/clear sign */
 	protected final boolean deploy;
 
 	/** Create a new deploy action */
-	public DeployAction(WarningSignProxy p, boolean d) {
-		super(p);
+	public DeployAction(ProxySelectionModel<WarningSign> s, boolean d) {
+		s_model = s;
 		deploy = d;
 		if(deploy) {
 			putValue(Action.NAME, "Deploy");
@@ -50,9 +51,19 @@ public class DeployAction extends TrafficDeviceAction {
 		}
 	}
 
+	/** Schedule the action to be performed */
+	public void actionPerformed(ActionEvent e) {
+		new AbstractJob() {
+			public void perform() {
+				do_perform();
+			}
+		}.addToScheduler();
+	}
+
 	/** Actually perform the action */
-	protected void do_perform() throws RemoteException {
-		WarningSign sign = (WarningSign)proxy;
-		sign.setDeployed(deploy);
+	protected void do_perform() {
+		for(WarningSign s: s_model.getSelected())
+			s.setDeployed(deploy);
+		s_model.clearSelection();
 	}
 }

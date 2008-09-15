@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * A WarningSign is a traffic device can display one fixed message. It can
@@ -22,23 +22,26 @@ import java.rmi.RemoteException;
  *
  * @author Douglas Lau
  */
-public interface WarningSign extends TrafficDevice {
+public interface WarningSign extends Device2 {
+
+	/** SONAR type name */
+	String SONAR_TYPE = "warning_sign";
 
 	/** Set the verification camera */
-	public void setCamera(String id) throws TMSException, RemoteException;
+	void setCamera(Camera c);
 
 	/** Get the verification camera */
-	public String getCamera() throws RemoteException;
-
-	/** Get the message text */
-	public String getText() throws RemoteException;
+	Camera getCamera();
 
 	/** Set the message text */
-	public void setText(String t) throws TMSException, RemoteException;
+	void setText(String t);
 
-	/** Check if the warning sign is deployed */
-	public boolean isDeployed() throws RemoteException;
+	/** Get the message text */
+	String getText();
 
 	/** Set the deployed status of the sign */
-	public void setDeployed(boolean d) throws RemoteException;
+	void setDeployed(boolean d);
+
+	/** Check if the warning sign is deployed */
+	boolean getDeployed();
 }

@@ -14,20 +14,29 @@
  */
 package us.mn.state.dot.tms.client.warning;
 
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.rmi.RemoteException;
+import javax.swing.JButton;
 import javax.swing.ListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.SortedList;
-import us.mn.state.dot.tms.TrafficDevice;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.toast.ControllerForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
@@ -35,16 +44,22 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class WarningSignProperties extends TrafficDeviceForm {
+public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Frame title */
 	static private final String TITLE = "Warning Sign: ";
 
-	/** Remote warning sign object */
-	protected WarningSign sign;
-
 	/** Sonar state */
 	protected final SonarState state;
+
+	/** Location panel */
+	protected LocationPanel location;
+
+	/** Notes text area */
+	protected final JTextArea notes = new JTextArea(3, 24);
+
+	/** Controller button */
+	protected final JButton controller = new JButton("Controller");
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
@@ -53,43 +68,92 @@ public class WarningSignProperties extends TrafficDeviceForm {
 	protected final JTextArea area = new JTextArea(3, 24);
 
 	/** Create a new warning sign form */
-	public WarningSignProperties(TmsConnection tc, String id) {
-		super(TITLE + id, tc, id);
+	public WarningSignProperties(TmsConnection tc, WarningSign s) {
+		super(TITLE, tc, s);
 		state = tc.getSonarState();
+	}
+
+	/** Get the SONAR type cache */
+	protected TypeCache<WarningSign> getTypeCache(SonarState st) {
+		return st.getWarningSigns();
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
-		SortedList s = (SortedList)
-			connection.getProxy().getWarningSignList().getList();
-		sign = (WarningSign)s.getElement(id);
-		setDevice(sign);
 		super.initialize();
+		JTabbedPane tab = new JTabbedPane();
+		tab.add("Location", createLocationPanel());
+		tab.add("Setup", createSetupPanel());
+		add(tab);
+		updateAttribute(null);
+		setBackground(Color.LIGHT_GRAY);
+	}
+
+	/** Dispose of the form */
+	protected void dispose() {
+		location.dispose();
+		super.dispose();
+	}
+
+	/** Create the location panel */
+	protected JPanel createLocationPanel() {
+		location = new LocationPanel(admin, proxy.getGeoLoc(), state);
+		location.initialize();
+		location.addRow("Notes", notes);
+		new FocusJob(notes) {
+			public void perform() {
+				proxy.setNotes(notes.getText());
+			}
+		};
+		location.setCenter();
+		location.addRow(controller);
+		new ActionJob(this, controller) {
+			public void perform() throws Exception {
+				controllerPressed();
+			}
+		};
+		return location;
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() throws RemoteException {
+		Controller c = proxy.getController();
+		if(c == null)
+			controller.setEnabled(false);
+		else {
+			connection.getDesktop().show(
+				new ControllerForm(connection, c));
+		}
+	}
+
+	/** Create the setup panel */
+	protected JPanel createSetupPanel() {
+		FormPanel panel = new FormPanel(admin);
 		ListModel m = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(m));
-		location.addRow("Camera", camera);
-		location.add(new JLabel("Sign Text"));
-		location.setWest();
-		location.setWidth(2);
-		location.addRow(area);
+		panel.addRow("Camera", camera);
+		new ActionJob(this, camera) {
+			public void perform() {
+				proxy.setCamera(
+					(Camera)camera.getSelectedItem());
+			}
+		};
+		panel.addRow("Sign Text", area);
+		new FocusJob(area) {
+			public void perform() {
+				proxy.setText(area.getText());
+			}
+		};
+		return panel;
 	}
 
-	/** Update the form with the current state of the warning sign */
-	protected void doUpdate() throws RemoteException {
-		super.doUpdate();
-		camera.setSelectedItem(state.lookupCamera(sign.getCamera()));
-		area.setText(sign.getText());
-	}
-
-	/** Apply button is pressed */
-	protected void applyPressed() throws Exception {
-		try {
-			super.applyPressed();
-			sign.setCamera(getCameraName(
-				(Camera)camera.getSelectedItem()));
-			sign.setText(area.getText());
-		} finally {
-			sign.notifyUpdate();
-		}
+	/** Update one attribute on the form */
+	protected void updateAttribute(String a) {
+		if(a == null || a.equals("notes"))
+			notes.setText(proxy.getNotes());
+		if(a == null || a.equals("camera"))
+			camera.setSelectedItem(proxy.getCamera());
+		if(a == null || a.equals("text"))
+			area.setText(proxy.getText());
 	}
 }

@@ -52,6 +52,7 @@ import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraManager;
+import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
 /**
  * Special table model for Controller I/O pins.
@@ -180,7 +181,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		m_model = new WrapperComboBoxModel(
 			tms.getAvailableMeters().getModel(), true);
 		w_model = new WrapperComboBoxModel(
-			tms.getAvailableWarningSigns().getModel(), true);
+			Session.warn_manager_singleton.getStyleModel(
+			WarningSignManager.STYLE_NO_CONTROLLER), true);
 	}
 
 	/** Set the array of controller IO assignments */
@@ -329,7 +331,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			case Ramp_Meter:
 				return lookupRampMeter(v);
 			case Warning_Sign:
-				return lookupWarningSign(v);
+				return (WarningSign)value;
 			default:
 				return null;
 		}
@@ -353,13 +355,6 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected RampMeter lookupRampMeter(String id) throws RemoteException {
 		DeviceList l = (DeviceList)tms.getMeterList();
 		return (RampMeter)l.getElement(id);
-	}
-
-	protected WarningSign lookupWarningSign(String id)
-		throws RemoteException
-	{
-		DeviceList l = (DeviceList)tms.getWarningSignList().getList();
-		return (WarningSign)l.getElement(id);
 	}
 
 	/** Create the pin column */

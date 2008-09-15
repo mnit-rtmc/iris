@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -246,6 +247,14 @@ public class SonarState extends Client {
 		return camera_model;
 	}
 
+	/** Cache of warning signs */
+	protected final TypeCache<WarningSign> warn_signs;
+
+	/** Get the warning sign cache */
+	public TypeCache<WarningSign> getWarningSigns() {
+		return warn_signs;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -316,6 +325,7 @@ public class SonarState extends Client {
 		cameras = new TypeCache<Camera>(Camera.class);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
+		warn_signs = new TypeCache<WarningSign>(WarningSign.class);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class);
@@ -344,6 +354,7 @@ public class SonarState extends Client {
 		populate(glyphs);
 		populate(alarms);
 		populate(cameras);
+		populate(warn_signs);
 		populate(monitors);
 		populate(sign_groups);
 		populate(dms_sign_groups);

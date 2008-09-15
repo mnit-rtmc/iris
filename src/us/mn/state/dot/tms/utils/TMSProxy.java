@@ -133,23 +133,6 @@ public class TMSProxy {
 		dms_model = m;
 	}
 
-	/** Warning sign list */
-	protected final DeviceList warn_list;
-
-	/** Warning sign list */
-	protected final RemoteListModel warn_signs;
-
-	/** Get the warning sign list */
-	public RemoteListModel getWarningSignList() { return warn_signs; }
-
-	/** Available warning sign list */
-	protected final RemoteListModel availableWarningSigns;
-
-	/** Get the available warning sign list */
-	public RemoteListModel getAvailableWarningSigns() {
-		return availableWarningSigns;
-	}
-
 	/** Lane Control Signal list */
 	protected final RemoteListModel lcss;
 
@@ -186,10 +169,6 @@ public class TMSProxy {
 		availableDMSs = new RemoteListModel(
 			dms_list.getAvailableList());
 		plans = new RemoteListModel(tms.getTimingPlanList());
-		warn_list = tms.getWarningSignList();
-		warn_signs = new RemoteListModel(warn_list);
-		availableWarningSigns = new RemoteListModel(
-			warn_list.getAvailableList());
 		lcs_list = tms.getLCSList();
 		lcss = new RemoteListModel(lcs_list);
 		availableLCSs = new RemoteListModel(
@@ -204,7 +183,6 @@ public class TMSProxy {
 		stations.dispose();
 		availableMeters.dispose();
 		availableDMSs.dispose();
-		availableWarningSigns.dispose();
 		availableLCSs.dispose();
 	}
 

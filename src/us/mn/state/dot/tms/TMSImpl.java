@@ -89,8 +89,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		meters.load( RampMeterImpl.class, "id" );
 		System.err.println( "Loading dms list..." );
 		dmss.load( DMSImpl.class, "id" );
-		System.err.println("Loading warning signs...");
-		warn_signs.load(WarningSignImpl.class, "id");
 		System.err.println( "Loading lane control signals..." );
 		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
@@ -176,7 +174,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		protected final Job job = new Job() {
 			public void perform() {
 				dmss.notifyStatus();
-				warn_signs.notifyStatus();
 				lcss.notifyStatus();
 			}
 		};
@@ -310,9 +307,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Dynamic message sign list */
 	protected final DMSListImpl dmss;
 
-	/** Warning sign list */
-	protected final WarningSignList warn_signs;
-
 	/** Lane Control Signals list */
 	protected final LCSListImpl lcss;
 
@@ -325,7 +319,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		planList = plans;
 		meterList = meters;
 		dmsList = dmss;
-		warnList = warn_signs;
 		lcsList = lcss;
 	}
 
@@ -340,7 +333,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		plans = new TimingPlanListImpl();
 		meters = new RampMeterListImpl();
 		dmss = new DMSListImpl();
-		warn_signs = new WarningSignList();
 		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
@@ -369,11 +361,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Get the dynamic message sign list */
 	public DMSList getDMSList() { return dmss; }
-
-	/** Get the warning sign list */
-	public DeviceList getWarningSignList() {
-		return warn_signs;
-	}
 
 	/** Get the lane control signal list */
 	public LCSList getLCSList() {

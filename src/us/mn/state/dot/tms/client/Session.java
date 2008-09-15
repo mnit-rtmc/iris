@@ -46,7 +46,7 @@ import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.sonar.SonarLayer;
-import us.mn.state.dot.tms.client.warning.WarningSignHandler;
+import us.mn.state.dot.tms.client.warning.WarningSignManager;
 import us.mn.state.dot.tms.utils.Agency;
 
 // agency specific imports
@@ -89,9 +89,13 @@ public class Session {
 
 	/** FIXME: this is a hack */
 	static public CameraManager cam_manager_singleton;
+	static public WarningSignManager warn_manager_singleton;
 
 	/** Camera layer */
 	protected final SonarLayer<Camera> camLayer;
+
+	/** Warning sign manager */
+	protected final WarningSignManager warn_manager;
 
 	/** List of all tabs */
 	protected final List<IrisTab> tabs = new LinkedList<IrisTab>();
@@ -131,7 +135,7 @@ public class Session {
 	/** Add the DMS tab */
 	protected void addDMSTab(final SonarState st) throws RemoteException {
 		TmsMapLayer dmsLayer = DMSHandler.createLayer(tmsConnection);
-		Layer warnLayer = WarningSignHandler.createLayer(tmsConnection);
+		Layer warnLayer = warn_manager.getLayer();
 		List<LayerState> lstates = createBaseLayers();
 		lstates.add(gpoly.createState());
 		lstates.add(camLayer.createState());
@@ -205,6 +209,9 @@ public class Session {
 			loc_manager);
 		cam_manager_singleton = cam_manager;
 		camLayer = cam_manager.getLayer();
+		warn_manager = new WarningSignManager(tmsConnection,
+			st.getWarningSigns(), loc_manager);
+		warn_manager_singleton = warn_manager;
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
 		if(user.hasPermission(IrisPermission.DMS_TAB))

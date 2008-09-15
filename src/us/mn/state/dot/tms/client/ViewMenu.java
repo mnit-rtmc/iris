@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.HolidayForm;
 import us.mn.state.dot.tms.client.toast.PolicyForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.warning.WarningSignListForm;
+import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 
@@ -181,7 +181,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('W');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new WarningSignListForm(tc));
+				desktop.show(new WarningSignForm(tc,
+					st.getWarningSigns()));
 			}
 		};
 		add(item);

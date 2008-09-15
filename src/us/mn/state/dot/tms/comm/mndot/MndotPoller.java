@@ -165,6 +165,6 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 
 	/** Set the deployed status of the sign */
 	public void setDeployed(WarningSignImpl sign, boolean d) {
-		new SetMeterRate(sign, 1, getDeployedRate(d)).start();
+		new MeterRateCommand(sign, 1, getDeployedRate(d)).start();
 	}
 }
