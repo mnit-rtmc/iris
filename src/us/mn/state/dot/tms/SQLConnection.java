@@ -169,6 +169,8 @@ public class SQLConnection {
 			putStatement(s);
 		}
 		catch(SQLException e) {
+			System.err.println("SQLConnection.update(): e="+
+				e+", sql="+sql);
 			throw new TMSException(e);
 		}
 	}
