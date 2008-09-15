@@ -75,7 +75,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Description of video monitor */
-	protected String description;
+	protected String description = "";
 
 	/** Set the video monitor description */
 	public void setDescription(String d) {
