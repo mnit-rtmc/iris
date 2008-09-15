@@ -255,6 +255,14 @@ public class SonarState extends Client {
 		return warn_signs;
 	}
 
+	/** Warning sign proxy list model */
+	protected final ProxyListModel<WarningSign> warn_model;
+
+	/** Get the warning sign list model */
+	public ProxyListModel<WarningSign> getWarningSignModel() {
+		return warn_model;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -326,6 +334,8 @@ public class SonarState extends Client {
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class);
+		warn_model = new ProxyListModel<WarningSign>(warn_signs);
+		warn_model.initialize();
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class);

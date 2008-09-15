@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.ControllerIO_SONAR;
+import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -150,6 +151,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		alarms.find(new ControllerIOFinder(io));
 		ProxyListModel<Camera> cams = state.getCameraModel();
 		cams.find(new ControllerIOFinder(io));
+		ProxyListModel<WarningSign> w_signs =
+			state.getWarningSignModel();
+		w_signs.find(new ControllerIOFinder(io));
 		return io;
 	}
 
