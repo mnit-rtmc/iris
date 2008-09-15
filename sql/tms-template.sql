@@ -367,6 +367,46 @@ CREATE RULE camera_update AS ON UPDATE TO iris.camera DO INSTEAD
 CREATE RULE camera_delete AS ON DELETE TO iris.camera DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
+CREATE TABLE iris._warning_sign (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	notes text NOT NULL,
+	message text NOT NULL,
+	camera VARCHAR(10) REFERENCES iris._camera(name)
+);
+
+ALTER TABLE iris._warning_sign ADD CONSTRAINT _warning_sign_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.warning_sign AS SELECT
+	w.name, geo_loc, controller, pin, notes, message, camera
+	FROM iris._warning_sign w JOIN iris._device_io d ON w.name = d.name;
+
+CREATE RULE warning_sign_insert AS ON INSERT TO iris.warning_sign DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._warning_sign VALUES (NEW.name, NEW.geo_loc, NEW.notes,
+		NEW.message, NEW.camera);
+);
+
+CREATE RULE warning_sign_update AS ON UPDATE TO iris.warning_sign DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._warning_sign SET
+		geo_loc = NEW.geo_loc,
+		notes = NEW.notes,
+		message = NEW.message,
+		camera = NEW.camera
+	WHERE name = OLD.name;
+);
+
+CREATE RULE warning_sign_delete AS ON DELETE TO iris.warning_sign DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+
+
 
 CREATE TABLE vault_object (
     vault_oid integer NOT NULL,
@@ -625,15 +665,6 @@ return old;
 end; '
     LANGUAGE plpgsql;
 
-CREATE TABLE warning_sign (
-    camera VARCHAR(10) NOT NULL,
-    text text NOT NULL
-)
-INHERITS (traffic_device);
-
-REVOKE ALL ON TABLE warning_sign FROM PUBLIC;
-GRANT SELECT ON TABLE warning_sign TO PUBLIC;
-
 CREATE TABLE traffic_device_timing_plan (
     traffic_device text,
     timing_plan integer
@@ -819,6 +850,16 @@ CREATE VIEW camera_view AS
 	LEFT JOIN controller ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
+CREATE VIEW warning_sign_view AS
+	SELECT w.name, w.notes, w.message, w.camera, w.geo_loc,
+	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.easting, l.northing, l.east_off, l.north_off,
+	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.warning_sign w
+	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
+	LEFT JOIN controller ctr ON w.controller = ctr.name;
+GRANT SELECT ON warning_sign_view TO PUBLIC;
+
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 	smallint, boolean) RETURNS text AS
 '	DECLARE
@@ -943,7 +984,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 1532	4	0	java_lang_Integer	java.lang.Integer
 1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
 51458	4	0	stratified_plan	us.mn.state.dot.tms.StratifiedPlanImpl
-64501	4	0	warning_sign	us.mn.state.dot.tms.WarningSignImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
@@ -1123,8 +1163,6 @@ CREATE UNIQUE INDEX stratified_plan_pkey ON stratified_plan USING btree (vault_o
 CREATE UNIQUE INDEX lcs_module_pkey ON lcs_module USING btree (vault_oid);
 
 CREATE UNIQUE INDEX lcs_pkey ON lcs USING btree (vault_oid);
-
-CREATE UNIQUE INDEX warning_sign_pkey ON warning_sign USING btree (vault_oid);
 
 CREATE UNIQUE INDEX detector_index ON detector USING btree ("index");
 
