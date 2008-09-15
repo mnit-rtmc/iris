@@ -253,7 +253,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetEasting(Integer x) throws TMSException {
 		if(x == easting)
 			return;
-		if(x < 0)
+		if(x != null && x.intValue() < 0)
 			throw new ChangeVetoException("Invalid Easting");
 		store.update(this, "easting", x);
 		setEasting(x);
@@ -297,7 +297,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetNorthing(Integer y) throws TMSException {
 		if(y == northing)
 			return;
-		if(y < 0)
+		if(y != null && y.intValue() < 0)
 			throw new ChangeVetoException("Invalid Northing");
 		store.update(this, "northing", y);
 		setNorthing(y);
