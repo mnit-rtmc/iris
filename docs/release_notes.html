@@ -11,6 +11,27 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.77.0 (15 September 2008)</dt>
+	<dd><ul>
+		<li>
+			Warning signs have been converted to SONAR.
+		</li>
+		<li>
+			A bug related to creating video monitors was fixed.
+		</li>
+		<li>
+			An obscure infinite loop in SmartSensor decode was
+			fixed.
+		</li>
+		<li>
+			SONAR dependency updated to 2.1.1.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.77.sql</code>
+		</li>
+	</ul></dd>
 	<dt>3.76.0 (12 September 2008)</dt>
 	<dd><ul>
 		<li>
