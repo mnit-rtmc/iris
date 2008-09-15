@@ -73,6 +73,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create a new proxy table model */
 	public ProxyTableModel(TypeCache<T> c, boolean a) {
+		assert c != null : "arg c is null in ProxyTableModel constructor";
 		cache = c;
 		admin = a;
 	}
@@ -80,7 +81,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Initialize the proxy table model. This cannot be done in the
 	 * constructor because subclasses may not be fully constructed. */
 	public void initialize() {
-		cache.addProxyListener(this);
+		cache.addProxyListener(this); // add all children to table model
 	}
 
 	/** Dispose of the proxy table model */
