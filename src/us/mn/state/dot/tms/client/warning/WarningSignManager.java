@@ -73,6 +73,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
+		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
 
