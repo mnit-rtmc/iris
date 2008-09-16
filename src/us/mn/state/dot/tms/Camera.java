@@ -51,7 +51,7 @@ public interface Camera extends Device2 {
 	boolean getPublish();
 
 	/** Command the camera to pan, tilt or zoom */
-	void setPtz(float[] ptz);
+	void setPtz(Float[] ptz);
 
 	/** Command the camera to set the preset */
 	void setPreset(int preset);

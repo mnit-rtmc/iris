@@ -55,8 +55,11 @@ import us.mn.state.dot.video.VideoException;
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
-	/** The number of frames to process (for streaming) */
-	static protected final int STREAM_DURATION = 900;
+	/** The default number of frames to process (for streaming) */
+	static protected final String DEFAULT_STREAM_DURATION = "900";
+
+	/** The property name for the number of frames to process */
+	static protected final String PROPERTY_STREAM_DURATION = "stream.duration";
 
 	/** Dead zone needed for too-precise joystick drivers */
 	static protected final float AXIS_DEADZONE = 3f / 64;
@@ -220,7 +223,7 @@ public class CameraViewer extends JPanel
 		videoControls.add(stop);
 		add(videoControls, bag);
 		bag.gridy = 4;
-		if (p.getProperty(PROPERTY_ON_SCREEN_PTZ, "").equalsIgnoreCase(PROPERTY_TRUE)) {
+		if (videoProps.getProperty(PROPERTY_ON_SCREEN_PTZ, "").equalsIgnoreCase(PROPERTY_TRUE)) {
 			add(ptz_panel, bag);
 		}
 		new ActionJob(NETWORKER, play) {
@@ -307,7 +310,11 @@ public class CameraViewer extends JPanel
 			if(p != 0 || pan != 0 || t != 0 || tilt != 0 ||
 			   z != 0 || zoom != 0)
 			{
-// FIXME			proxy.move(p, t, z);
+				Float[] ptz = new Float[3];
+				ptz[0] = new Float(p);
+				ptz[1] = new Float(t);
+				ptz[2] = new Float(z);
+				proxy.setPtz(ptz);
 				pan = p;
 				tilt = t;
 				zoom = z;
@@ -444,7 +451,9 @@ public class CameraViewer extends JPanel
 		monitor.setDataSource(new HttpDataSource(client,
 			new URL(streamUrls[client.getArea()] + "?id=" +
 			client.getCameraId() + "&ssid=" +
-			client.getSonarSessionId())), STREAM_DURATION);
+			client.getSonarSessionId())), Integer.parseInt(
+			videoProps.getProperty(PROPERTY_STREAM_DURATION,
+			DEFAULT_STREAM_DURATION)));
 	}
 
 	/** Stop video streaming */

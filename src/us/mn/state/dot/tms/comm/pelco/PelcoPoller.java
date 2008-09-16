@@ -86,6 +86,6 @@ public class PelcoPoller extends MessagePoller implements CameraPoller {
 
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-		return null; // no diagmnostic testing can be done
+		return null; // no diagnostic testing can be done
 	}
 }
