@@ -124,27 +124,11 @@ public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDev
 	}
 
 	/** Add a new proxy to the table model, via interface ProxyListener */
-	public void proxyAdded(TrafficDeviceAttribute proxy) {
-		//System.err.println("TrafficDeviceAttributeTableModel.proxyAdded() called. proxy="+proxy.toString());
+	public int doProxyAdded(TrafficDeviceAttribute proxy) {
+		//System.err.println("TrafficDeviceAttributeTableModel.doProxyAdded() called. proxy="+proxy.toString());
 		if(proxyInModel(proxy))
-			super.proxyAdded(proxy);
-	}
-
-	/** Remove a proxy from the table model, via interface ProxyListener  */
-	public void proxyRemoved(TrafficDeviceAttribute proxy) {
-		//System.err.println("TrafficDeviceAttributeTableModel.proxyRemoved() called");
-		if(proxyInModel(proxy))
-			super.proxyRemoved(proxy);
-	}
-
-	/** Change a proxy in the table model, via interface ProxyListener 
-	 *  @param proxy The modified object.
-	 *  @param attrib The name of the attribute that changed.
-	 */
-	public void proxyChanged(TrafficDeviceAttribute proxy, String attrib) {
-		//System.err.println("TrafficDeviceAttributeTableModel.proxyChanged() called: attrib="+attrib+", proxyInModel="+proxyInModel(proxy));
-		if(proxyInModel(proxy))
-			super.proxyChanged(proxy, attrib);
+			return super.doProxyAdded(proxy);
+		return -1;
 	}
 
 	/** Does the specified proxy fit into this model? */
