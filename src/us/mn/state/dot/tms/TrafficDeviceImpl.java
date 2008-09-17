@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.rmi.RemoteException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.vault.FieldMap;
 
@@ -25,6 +26,7 @@ import us.mn.state.dot.vault.FieldMap;
  * such as ramp meters, dynamic message signs, etc.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 abstract public class TrafficDeviceImpl extends DeviceImpl
 	implements TrafficDevice
@@ -124,4 +126,58 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 
 	/** Get the current status code */
 	abstract public int getStatusCode();
+
+	/** Lookup a TrafficDeviceAttribute in the SONAR namespace */
+	static protected TrafficDeviceAttribute lookupTrafficDeviceAttribute(
+		final String id, final String aname) 
+	{
+		//System.err.println("TrafficDeviceImpl.lookupTrafficDeviceAttribute("+id+","+aname+") called.");
+		if(aname==null || id==null || aname.length()<=0 || 
+			id.length()<=0) 
+		{
+			assert false;
+			return null;
+		}
+
+		String name=id+"_"+aname;
+		TrafficDeviceAttribute ret=null;
+		try {
+			ret = (TrafficDeviceAttribute)namespace.getObject(
+				TrafficDeviceAttribute.SONAR_TYPE, name);
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+			ret=null;
+		}
+		//System.err.println("TrafficDeviceImpl.lookupTrafficDeviceAttribute("+id+","+aname+"): name="+name+", ret="+ret);
+		return ret;
+	}
+
+	/** Get the value of the named attribute for a specific device. This 
+	  * is a server side method. 
+	  * @return null if the attribute doesn't exist else a String.
+	  */
+	static public String getAttributeValue(final String id,
+		final String aname)
+	{
+		//System.err.println("TrafficDeviceImpl.getAttributeValue("+id+","+aname+") called.");
+		TrafficDeviceAttribute a = 
+			lookupTrafficDeviceAttribute(id,aname);
+		return (a == null ? null : a.getAttributeValue());
+	}
+
+	/** Get the value of the named attribute for a specific device. This 
+	  * is a server side method. 
+	  * @return false if the attribute doesn't exist else the value.
+	  */
+	static public boolean getAttributeValueBoolean(final String id,
+		final String aname)
+	{
+		//System.err.println("TrafficDeviceImpl.getAttributeValueBoolean("+id+","+aname+") called.");
+		TrafficDeviceAttribute a = 
+			lookupTrafficDeviceAttribute(id,aname);
+		return (a == null ? false : a.getAttributeValueBoolean());
+	}
+
 }
+

@@ -19,6 +19,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -39,6 +40,7 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
+
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
@@ -60,8 +62,11 @@ import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanList;
 import us.mn.state.dot.tms.TrafficDevice;
+import us.mn.state.dot.tms.TrafficDeviceAttribute;
+import us.mn.state.dot.tms.client.AttributeTab;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.TrafficDeviceAttributeTableModel;
 import us.mn.state.dot.tms.client.toast.TMSObjectForm;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
@@ -332,7 +337,13 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Array of timing plans */
 	protected TimingPlan[] plans;
 
-	/** Create a new DMS properties from */
+	/** attribute editor tab (optional) */
+	protected AttributeTab attribute_tab=null;
+
+	/** Create a new DMS properties form 
+	 *  @param tc TmsConnection
+	 *  @param id Dms ID, e.g. "V1"
+	 */
 	public DMSProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
 		state = tc.getSonarState();
@@ -340,7 +351,7 @@ public class DMSProperties extends TrafficDeviceForm {
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
 
-		// pixel test button is (optional)
+		// pixel test button (optional)
 		if (!Agency.isId(Agency.CALTRANS_D10))
 			pixelTest = new JButton(I18NMessages.get(
 				"DMSProperties.PixelTestButton"));
@@ -415,6 +426,9 @@ public class DMSProperties extends TrafficDeviceForm {
 		setDevice(sign);
 		super.initialize();
 		location.addRow("Camera", camera);
+
+		// create the tabs
+//FIXME: it would be nice if these tabs were in separate classes (see AttributeTab) mtod, 09/16/08
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
@@ -423,8 +437,13 @@ public class DMSProperties extends TrafficDeviceForm {
 		if (!Agency.isId(Agency.CALTRANS_D10))
 			tab.add("Ledstar", createLedstarPanel());
 		tab.add("Status", createStatusPanel());
-		if (Agency.isId(Agency.CALTRANS_D10))
-			tab.add("Attributes", createAttributePanel());
+
+		// optional attribute tab
+		if (Agency.isId(Agency.CALTRANS_D10)) {
+			attribute_tab = new AttributeTab(admin, this, 
+				state, getId()); 
+			tab.add(attribute_tab);
+		}
 	}
 
 	/** Dispose of the form */
@@ -432,6 +451,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign_group_model.dispose();
 		if(sign_text_model != null)
 			sign_text_model.dispose();
+		if(attribute_tab != null)
+			attribute_tab.dispose();
 		super.dispose();
 	}
 
@@ -578,7 +599,7 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Initialize the sign text table */
 	protected void initSignTextTable() {
-		final ListSelectionModel s =sign_text_table.getSelectionModel();
+		final ListSelectionModel s = sign_text_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
@@ -899,47 +920,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign.setPixelCurrentHigh(high);
 		sign.setBadPixelLimit(bad);
 		sign.notifyUpdate();
-	}
-
-	/** Create the Attribute panel */
-	protected JPanel createAttributePanel() {
-//FIXME: mtod finish
-		JPanel panel = new JPanel(new GridBagLayout());
-/*
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.top = 2;
-		bag.insets.bottom = 2;
-		bag.gridx = 0;
-		bag.gridy = GridBagConstraints.RELATIVE;
-		bag.anchor = GridBagConstraints.EAST;
-		panel.add(new JLabel("XXXXXX: "), bag);
-		panel.add(new JLabel("xxx: "), bag);
-		panel.add(new JLabel("Pixel current high threshold: "), bag);
-		panel.add(new JLabel("Bad pixel limit: "), bag);
-		bag.gridx = 1;
-		bag.anchor = GridBagConstraints.WEST;
-		panel.add(ldcPotBase, bag);
-		panel.add(currentLow, bag);
-		panel.add(currentHigh, bag);
-		panel.add(badLimit, bag);
-		if(admin) {
-			bag.gridx = 2;
-			bag.anchor = GridBagConstraints.EAST;
-			panel.add(ldcPotBaseSpn, bag);
-			panel.add(currentLowSpn, bag);
-			panel.add(currentHighSpn, bag);
-			panel.add(badLimitSpn, bag);
-			bag.gridx = 0;
-			bag.gridwidth = 3;
-			JButton send = new JButton("Set values");
-			panel.add(send, bag);
-			new ActionJob(this, send) {
-				public void perform() throws Exception {
-					setAttributeValues();
-				}
-			};
-		}*/
-		return panel;
 	}
 
 	/** Create status panel */
@@ -1267,5 +1247,16 @@ public class DMSProperties extends TrafficDeviceForm {
 		}
 		sign.setTravel(travel.getText());
 		sign.notifyUpdate();
+	}
+
+	/** Get the sign id */
+	protected String getId() {
+		String signId = "";
+		try {
+			signId = sign.getId();
+		} catch (RemoteException ex) {
+			System.err.println("DMSProperties.getId(): exception="+ex);
+		}
+		return signId;
 	}
 }

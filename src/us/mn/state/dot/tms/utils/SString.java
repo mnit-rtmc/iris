@@ -222,7 +222,8 @@ public class SString {
 		return (hex);
 	}
 
-	/** convert string to int */
+	/** convert string to int. This method suppresses all number format
+	 *  exceptions, returning 0 if a NumberFormatException is caught. */
 	public static int stringToInt(String s) {
 		if (s == null)
 		    return (0);

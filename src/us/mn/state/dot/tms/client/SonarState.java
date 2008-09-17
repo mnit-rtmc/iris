@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemPolicy;
+import us.mn.state.dot.tms.TrafficDeviceAttribute;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -287,6 +288,17 @@ public class SonarState extends Client {
 		return sign_text;
 	}
 
+	/** Cache of traffic device attributes */
+	protected final TypeCache<TrafficDeviceAttribute> 
+		traffic_device_attributes;
+
+	/** Get the traffic device attribute cache */
+	public TypeCache<TrafficDeviceAttribute> 
+		getTrafficDeviceAttributes() 
+	{
+		return traffic_device_attributes;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -340,6 +352,8 @@ public class SonarState extends Client {
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class);
 		sign_text = new TypeCache<SignText>(SignText.class);
+		traffic_device_attributes = new TypeCache<
+			TrafficDeviceAttribute>(TrafficDeviceAttribute.class);
 		singleton = this;
 	}
 
@@ -369,6 +383,7 @@ public class SonarState extends Client {
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
+		populate(traffic_device_attributes);
 	}
 
 	/** Look up the specified user */

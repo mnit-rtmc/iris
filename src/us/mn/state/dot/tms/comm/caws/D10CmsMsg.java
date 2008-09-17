@@ -24,6 +24,9 @@ import us.mn.state.dot.tms.MsgActPriorityProc;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.TrafficDeviceImpl;
+import us.mn.state.dot.tms.TrafficDeviceAttribute;
+import us.mn.state.dot.tms.TrafficDeviceAttributeImpl;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.comm.caws.MsgActPriorityCallBackBlank;
 import us.mn.state.dot.tms.utils.SString;
@@ -300,6 +303,14 @@ public class D10CmsMsg  implements Serializable
 	protected boolean shouldSendMessage(DMSImpl dms) {
 		if (dms == null || m_multistring==null || m_multistring.length()<=0)
 			return (false);
+
+		// is caws activated for the sign?
+		if(!TrafficDeviceImpl.getAttributeValueBoolean(getIrisCmsId(),
+			TrafficDeviceAttribute.CAWS_CONTROLLED)) {
+			System.err.println("D10CmsMsg.shouldSendMessage(): DMS "+getIrisCmsId()+" is NOT activated for CAWS.");
+			return false;
+		}
+		System.err.println("D10CmsMsg.shouldSendMessage(): DMS "+getIrisCmsId()+" is activated for CAWS.");
 
 		// be safe and send the caws message by default
 		boolean send=true;
