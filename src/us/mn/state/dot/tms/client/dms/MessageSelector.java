@@ -147,10 +147,13 @@ public class MessageSelector extends JPanel {
 				m = i + 1;
 		}
 		String ret=null;
-		if(m > 0)
-			ret=buildMulti(mess, m).toString();
+		if(m > 0) {
+			if (Agency.isId(Agency.CALTRANS_D10))
+				ret = buildMultiPageOriented(mess, m).toString();
+			else
+				ret = buildMultiLineOriented(mess, m).toString();
+		}
 		return ret;
-
 	}
 
 	/** get text from combobox line */
@@ -168,8 +171,8 @@ public class MessageSelector extends JPanel {
 		return "";
 	}
 
-	/** Build a MULTI string from an array of line strings */
-	protected MultiString buildMulti(String[] mess, int m) {
+	/** Build a line oriened MULTI string from an array of line strings */
+	protected MultiString buildMultiLineOriented(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
@@ -179,6 +182,34 @@ public class MessageSelector extends JPanel {
 					multi.addLine();
 			}
 			multi.addText(mess[i]);
+		}
+		return multi;
+	}
+
+	/** 
+	 *  Build a page oriented MULTI string from an array of line strings.
+	 *  Each line of text on a page is moved towards the top of the page
+	 *  as much as possible. This is important if vertical centering is
+	 *  used to position text lines on the sign. For example, if this 
+	 *  array is received: [LINE1][][LINE2][][LINE3][], this string will 
+	 *  be returned: "LINE1[nl]LINE2[nl][np]LINE3[nl]".
+	 */
+	protected MultiString buildMultiPageOriented(String[] mess, int m) {
+		MultiString multi = new MultiString();
+		int lastTerminatedPage = 0;
+		int pageNum=-1;
+		for(int i = 0; i < m; i++) {
+			if(i % n_lines == 0)
+				++pageNum;
+			if(mess[i]==null || mess[i].length()<=0)
+				continue;
+			// new page so terminate previous page
+			if(pageNum>lastTerminatedPage) {
+				lastTerminatedPage = pageNum;
+				multi.addPage();
+			}
+			multi.addText(mess[i]);
+			multi.addLine();
 		}
 		return multi;
 	}

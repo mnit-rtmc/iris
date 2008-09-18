@@ -191,6 +191,7 @@ public class SignMessage implements Serializable
 	 *           null if a bitmap has not been set.
 	 */
 	public BitmapGraphic getBitmap(int pg) {
+		assert pg >= 0;
 		return bitmaps.get(pg);
 	}
 
@@ -223,6 +224,7 @@ public class SignMessage implements Serializable
 	 * @param b BitmapGraphic to set for the specified page.
 	 */
 	public void setBitmap(int pg, BitmapGraphic b) {
+		assert pg >= 0;
 		bitmaps.put(pg, b);
 	}
 
@@ -254,7 +256,7 @@ public class SignMessage implements Serializable
 
 	/** set the message activation priority */
 	public void setActivationPriority(MsgActPriority m) {
-		m_activationPriority=m;
+		m_activationPriority = m;
 	}
 
 	/** 
@@ -264,9 +266,9 @@ public class SignMessage implements Serializable
 	 *  @return true if this supersedes the argument message.
 	 */
 	public boolean supersedeNumeric(SignMessage mos) {
-		if( mos==null )
+		if(mos == null)
 			return false;
-		if( getActivationPriority()==null )
+		if(getActivationPriority() == null)
 			return true;
 		return this.getActivationPriority().supersede(mos.getActivationPriority());
 	}
@@ -280,13 +282,13 @@ public class SignMessage implements Serializable
 	 */
 	public boolean supersede(SignMessage mos) {
 		System.err.println("SignMessage.supersede(mos="+(mos==null?"null":mos.toStringDebug())+") called.");
-		if (mos==null || this.getActivationPriority()==null)
+		if(mos == null || this.getActivationPriority() == null)
 			return true;
 		// start with subclass
-		else if (this.getActivationPriority() instanceof MsgActPriorityProc)
+		else if(this.getActivationPriority() instanceof MsgActPriorityProc)
 			return ((MsgActPriorityProc)this.getActivationPriority()).supersede(mos);
 		// straight numeric priority comparison
-		else if (this.getActivationPriority() instanceof MsgActPriority)
+		else if(this.getActivationPriority() instanceof MsgActPriority)
 			return this.supersedeNumeric(mos);
 		else {
 			String err="Unknown type in SignMessage.supersede()";

@@ -30,7 +30,8 @@ public class PixelMapBuilder implements MultiString.Callback {
 	/** Pixel height of sign */
 	protected final int height;
 
-	/** Pixel width of characters, where 0 indicates a variable width font */
+	/** Pixel width of a character, where 0 indicates a variable 
+	 *  width font, otherwise a fixed character width is assumed. */
 	protected final int c_width;
 
 	/** Font to render text */
@@ -65,14 +66,25 @@ public class PixelMapBuilder implements MultiString.Callback {
 		Graphic lookupGraphic(int cp) throws InvalidMessageException;
 	}
 
-	/** Add a span of text */
-	public void addText(int p, int l, MultiString.JustificationLine j,
-		String t)
+	/** 
+	 * Add a span of text.
+	 * @param p Page number, zero based.
+	 * @param line Line number, zero based.
+	 * @param nltp Number of lines of actual text on the page.
+	 * @param jl Line justification, e.g. centered, left, right.
+	 * @param jp Line justification, e.g. top, middle, bottom.
+	 * @param t Text to render.
+	 */
+	public void addText(int p, int line, int nltp, MultiString.JustificationLine jl,
+		MultiString.JustificationPage jp, String t)
 	{
+		assert p >= 0;
+		assert line >= 0;
+		assert nltp >= 0;
 		BitmapGraphic bg = getBitmap(p);
 		try {
-			int x = calculatePixelX(j, t);
-			int y = l * (font.getHeight() + font.getLineSpacing());
+			int x = calculatePixelX(jl, t);
+			int y = calculatePixelY(jp, t, line, nltp);
 			render(bg, t, x, y);
 		}
 		catch(IndexOutOfBoundsException e) {
@@ -88,6 +100,7 @@ public class PixelMapBuilder implements MultiString.Callback {
 
 	/** Get a bitmap graphic for the specified page number */
 	protected BitmapGraphic getBitmap(int p) {
+		assert p >= 0;
 		if(pixmaps.containsKey(p))
 			return pixmaps.get(p);
 		BitmapGraphic g = new BitmapGraphic(width, height);
@@ -96,21 +109,42 @@ public class PixelMapBuilder implements MultiString.Callback {
 	}
 
 	/** Calculate the X pixel position to place text */
-	protected int calculatePixelX(MultiString.JustificationLine j,
+	protected int calculatePixelX(MultiString.JustificationLine jl,
 		String t) throws InvalidMessageException
 	{
-		int x = _calculatePixelX(j, t);
+		int x = _calculatePixelX(jl, t);
 		if(x < 0)
 			throw new InvalidMessageException("Message too long");
 		else
 			return x;
 	}
 
+	/** Calculate the Y pixel position to place text.
+	 *  @param jp Line justification, e.g. top, middle, bottom.
+	 *  @param t Text to render.
+	 *  @param line Line number, zero based.
+	 *  @param nltp Number of lines of actual text on the page.
+	 *  @param The Y pixel position of the top of the text.
+	 */
+	protected int calculatePixelY(MultiString.JustificationPage jp,
+		String t, int line, int nltp) throws InvalidMessageException
+	{
+		int y = _calculatePixelY(jp, t, line, nltp);
+		if(y < 0)
+			throw new InvalidMessageException("Too many lines in message");
+		else
+			return y;
+	}
+
 	/** Calculate the X pixel position to place text */
-	protected int _calculatePixelX(MultiString.JustificationLine j,
+	protected int _calculatePixelX(MultiString.JustificationLine jl,
 		String t) throws InvalidMessageException
 	{
-		switch(j) {
+		switch(jl) {
+		case UNDEFINED:
+			return 0;
+		case OTHER:
+			return 0;
 		case LEFT:
 			return 0;
 		case CENTER:
@@ -121,7 +155,38 @@ public class PixelMapBuilder implements MultiString.Callback {
 			return (w - r) / 2 * pseudo_c_width;
 		case RIGHT:
 			return width - calculateWidth(t) - 1;
+		case FULL:
+			return 0;
 		default:
+			assert false;
+			return 0;
+		}
+	}
+
+	/** Calculate the Y pixel position to place text 
+	 *  @param The Y pixel position of the top of the text.
+	 */
+	protected int _calculatePixelY(MultiString.JustificationPage jp,
+		String t, int line, int nltp) throws InvalidMessageException
+	{
+		switch(jp) {
+		// FIXME: add bottom justification in the future
+		case UNDEFINED:
+		case OTHER:
+		case TOP:
+		case BOTTOM:
+			// top justified
+			return line * (font.getHeight() + font.getLineSpacing());
+		case MIDDLE:
+			final int linesPerPage = 3;	// FIXME: shouldn't be constant
+			final double vertBorder = Math.max((linesPerPage - (double)nltp) / 2, 0);
+			final int height = font.getHeight() + font.getLineSpacing();
+			final double y = (vertBorder+line) * height;
+			final int ret = (int)Math.round(y);
+			//System.err.println("ret="+ret+", vertBorder="+vertBorder+", height="+height);
+			return ret;
+		default:
+			assert false;
 			return 0;
 		}
 	}

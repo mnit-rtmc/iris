@@ -107,8 +107,9 @@ public class DMSProxy extends TrafficDeviceProxy {
 		final ArrayList<String> al = new ArrayList<String>(text_lines);
 		MultiString multi = m.getMulti();
 		multi.parse(new MultiString.Callback() {
-			public void addText(int p, int l,
-				MultiString.JustificationLine j, String t)
+			public void addText(int p, int l, int nltp, 
+				MultiString.JustificationLine jl, 
+				MultiString.JustificationPage jp, String t)
 			{
 				int m_lines = Math.max(text_lines, l + 1);
 				while(al.size() < (p + 1) * m_lines)
