@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -75,6 +76,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	/** Button used to clear the DMS. Text also set in ClearDmsAction */
 	protected final JButton btnClear = 
 		new JButton(I18NMessages.get("DMSDispatcher.ClearButton"));
+
+	/** Button used to get the DMS status (optional) */
+	protected JButton btnGetStatus = null;
 
 	protected final TmsSelectionModel selectionModel;
 
@@ -173,6 +177,21 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		box.add(Box.createHorizontalGlue());
 		box.add(btnClear);
 		box.add(Box.createHorizontalGlue());
+
+		// add optional 'get status' button
+		if(Agency.isId(Agency.CALTRANS_D10)) {
+			btnGetStatus = new JButton(I18NMessages.get(
+				"DMSDispatcher.GetStatusButton"));
+			btnGetStatus.setToolTipText(I18NMessages.get(
+				"DMSDispatcher.GetStatusButton.ToolTip"));
+			new ActionJob(this, btnGetStatus) {
+				public void perform() throws Exception {
+					selectedSign.dms.getSignMessage();
+				}
+			};
+			box.add(btnGetStatus);
+			box.add(Box.createHorizontalGlue());
+		}
 		return box;
 	}
 
@@ -224,6 +243,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			btnSend.setEnabled(true);
 			btnClear.setEnabled(true);
 			btnClear.setAction(new ClearDmsAction(proxy, userName));
+			if(btnGetStatus!=null)
+				btnGetStatus.setEnabled(true);
 			cmbExpire.setEnabled(true);
 			cmbExpire.setSelectedIndex(0);
 			proxy.updateUpdateInfo(); // update global messages
@@ -246,6 +267,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		messageSelector.clearSelections();
 		btnSend.setEnabled(false);
 		btnClear.setEnabled(false);
+		if(btnGetStatus!=null)
+			btnGetStatus.setEnabled(false);
 		pnlSign.setSign(null);
 	}
 
