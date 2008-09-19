@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.utils.SDMS;
 
 /**
  * Model for a sign text line combo box
@@ -66,8 +67,12 @@ public class SignTextComboBoxModel extends AbstractListModel implements ComboBox
 	public Object getElementAt(int index) {
 		int i = 0;
 		for(SignText t: m_items) {
-			if(i == index)
+			if(i == index) {
+				// this is a hack, see the note in ignoreLineHack()
+				if(t!=null && SDMS.ignoreLineHack(t.toString()))
+					return "";
 				return t;
+			}
 			i++;
 		}
 		return null;
@@ -83,6 +88,9 @@ public class SignTextComboBoxModel extends AbstractListModel implements ComboBox
 
 	/** Get the selected item */
 	public Object getSelectedItem() {
+		// this is a hack, see the note in ignoreLineHack()
+		if(m_selected!=null && SDMS.ignoreLineHack(m_selected.toString()))
+			return "";
 		return m_selected;
 	}
 
