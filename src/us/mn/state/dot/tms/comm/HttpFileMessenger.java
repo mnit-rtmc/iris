@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 
 /**
  * A HttpFileMessenger is a class which reads a file from a URL using http.
@@ -59,7 +60,7 @@ public class HttpFileMessenger extends Messenger
 	 *  @returns byte[] containing contents of read file.
 	 */
 	public byte[] read() {
-		System.err.println("HttpFileMessenger.read() called.");
+		//System.err.println("HttpFileMessenger.read() called.");
 		InputStream in = null;
 		byte[] ret = new byte[0];
 		try {
@@ -90,6 +91,9 @@ public class HttpFileMessenger extends Messenger
 			// for( int i=0; i<len; ++i ) System.err.print(ret[i]+" "+(char)ret[i]+","); System.err.println(" ");
 			System.err.println("HttpFileMessenger.read(), read "
 					   + al.size() + " bytes, file date=" + fdate + ".");
+		} catch (UnknownHostException e) {
+			//System.err.println(
+			//    "HttpFileMessenger.read(): ignoring bogus url: "+e);
 		} catch (IOException e) {
 			System.err.println(
 			    "HttpFileMessenger.read(), caught exception: " + e);
