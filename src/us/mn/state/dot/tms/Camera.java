@@ -57,5 +57,5 @@ public interface Camera extends Device2 {
 	void setPreset(int preset);
 
 	/** Command the camera to goto the preset */
-	void goToPreset(int preset);
+	void setGoToPreset(int preset);
 }

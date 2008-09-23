@@ -14,7 +14,7 @@ package us.mn.state.dot.tms.comm.pelco;
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * Pelco operation to goto a camera preset.
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
  * @company University of California, Davis
  * @created July 2, 2008
  */
-public class GoToCameraPreset extends DeviceOperation {
+public class GoToCameraPreset extends Device2Operation {
 
 	/** The camera preset to goto */
 	private final int m_preset;

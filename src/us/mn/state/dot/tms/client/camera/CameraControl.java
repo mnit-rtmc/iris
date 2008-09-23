@@ -23,7 +23,7 @@ import javax.swing.JSlider;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
-import java.rmi.RemoteException;
+import us.mn.state.dot.tms.Camera;
 
 /**
  * This class creates a Swing panel for controlling camera pan, tilt, and zoom.
@@ -206,19 +206,24 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 	public void stateChanged(ChangeEvent ce) {
 		PTZButton button = (PTZButton) ce.getSource();
 		ButtonModel model = button.getModel();
-		if (model.isPressed()) {
-			m_cameraProxy.move(m_speed * button.getUnitVector()[0], m_speed * button.getUnitVector()[1], m_speed * button.getUnitVector()[2]);
+		if(model.isPressed()) {
+			Float[] ptz = new Float[] {
+				m_speed * button.getUnitVector()[0],
+				m_speed * button.getUnitVector()[1],
+				m_speed * button.getUnitVector()[2]
+			};
+			m_cameraProxy.setPtz(ptz);
 		}
 	}
 	
 	/** Process the button action event (button released) */
 	public void actionPerformed(ActionEvent ae) {
 		JButton button = (JButton) ae.getSource();
-		if (button instanceof PresetButton) {
-			m_cameraProxy.goToPreset(((PresetButton) button).getPreset());
-		} else {
-			m_cameraProxy.move(0, 0, 0);
-		}
+		if(button instanceof PresetButton) {
+			PresetButton pbutton = (PresetButton)button;
+			m_cameraProxy.setGoToPreset(pbutton.getPreset());
+		} else
+			m_cameraProxy.setPtz(new Float[] { 0f, 0f, 0f } );
 	}
 	
 	/** Set the camera to control */

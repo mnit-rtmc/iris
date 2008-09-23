@@ -224,7 +224,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 	}
 
 	/** Command the camera to goto the preset */
-	public void goToPreset(int preset) {
+	public void setGoToPreset(int preset) {
 		MessagePoller mp = getPoller();
 		if(mp instanceof CameraPoller) {
 			CameraPoller cp = (CameraPoller)mp;
