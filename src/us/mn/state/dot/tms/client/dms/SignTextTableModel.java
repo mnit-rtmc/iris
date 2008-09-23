@@ -27,7 +27,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.client.security.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for sign text.
@@ -88,21 +88,11 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	}
 
 	/** Add a new proxy to the table model */
-	public void proxyAdded(SignText proxy) {
+	protected int doProxyAdded(SignText proxy) {
 		if(proxy.getSignGroup() == group)
-			super.proxyAdded(proxy);
-	}
-
-	/** Remove a proxy from the table model */
-	public void proxyRemoved(SignText proxy) {
-		if(proxy.getSignGroup() == group)
-			super.proxyRemoved(proxy);
-	}
-
-	/** Change a proxy in the table model */
-	public void proxyChanged(SignText proxy, String attrib) {
-		if(proxy.getSignGroup() == group)
-			super.proxyChanged(proxy, attrib);
+			return super.doProxyAdded(proxy);
+		else
+			return -1;
 	}
 
 	/** Sign group */
