@@ -96,6 +96,7 @@ public class MainServer {
 			LocateRegistry.createRegistry(
 				Registry.REGISTRY_PORT);
 			Naming.bind("//localhost/login", login);
+			MainServer.validateDatabaseVersion();
 			server = new Server(ns, m_serverprops);
 			System.err.println("IRIS Server active for "+Agency.getId()+".");
 			server.join();
@@ -114,6 +115,26 @@ public class MainServer {
 			TimeZone.getDefault().getDisplayName()+
 			") doesn't support DST. Specify the time zone via the command line.");
 		}
+	}
+
+	/** verify database version is valid */
+	protected static void validateDatabaseVersion() {
+
+		// get db version from database
+		String dbVer=SystemAttributeImpl.getValue(SystemAttributeImpl.
+			DATABASE_VERSION);
+		String codeVer = "@@VERSION@@";
+		boolean ok = dbVer.trim().equals(codeVer.trim());
+		if(!ok) {
+			System.err.println("IRIS code version = " + codeVer + 
+				", database version = " + dbVer);
+			// for D10 this is a fatal error
+			if (Agency.isId(Agency.CALTRANS_D10)) {
+				System.err.println("WARNING: code and data mismatch?");
+				System.exit(1);
+			}
+		}
+
 	}
 
 }

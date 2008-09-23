@@ -52,6 +52,7 @@ abstract public class BaseObjectImpl implements Storable {
 		CameraImpl.loadAll();
 		WarningSignImpl.loadAll();
 		TrafficDeviceAttributeImpl.loadAll();
+		SystemAttributeImpl.loadAll();
 	}
 
 	/** Get the primary key name */

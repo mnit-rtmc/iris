@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TrafficDeviceAttribute;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -299,6 +300,17 @@ public class SonarState extends Client {
 		return traffic_device_attributes;
 	}
 
+	/** Cache of system attributes */
+	protected final TypeCache<SystemAttribute> 
+		system_attributes;
+
+	/** Get the system attribute cache */
+	public TypeCache<SystemAttribute> 
+		getSystemAttributes() 
+	{
+		return system_attributes;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -354,6 +366,8 @@ public class SonarState extends Client {
 		sign_text = new TypeCache<SignText>(SignText.class);
 		traffic_device_attributes = new TypeCache<
 			TrafficDeviceAttribute>(TrafficDeviceAttribute.class);
+		system_attributes = new TypeCache<
+			SystemAttribute>(SystemAttribute.class);
 		singleton = this;
 	}
 
