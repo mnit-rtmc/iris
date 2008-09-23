@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,43 +28,39 @@ public interface TrafficDeviceAttribute extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "traffic_device_attribute";
 
-	/** attribute names common to all agencies */
-	//String BLA_BLA_BLA = "bla_bla_bla";
-
 	/** attribute names specific to D10 */
 	String CAWS_CONTROLLED = "CAWS_controlled";
 
 	/** Set the traffic device id */
-	public void setId(String dms);
+	void setId(String dms);
 
 	/** Get the traffic device id */
-	public String getId();
+	String getId();
 
 	/** Set the attribute name */
-	public void setAttributeName(String aname);
+	void setAttributeName(String aname);
 
 	/** Get the attribute name */
-	public String getAttributeName();
+	String getAttributeName();
 
 	/** Set the attribute value */
-	public void setAttributeValue(String avalue);
+	void setAttributeValue(String avalue);
 
 	/** Get the attribute value */
-	public String getAttributeValue();
+	String getAttributeValue();
 
 	/** Set the attribute value as a boolean. */
-	public void setAttributeValueBoolean(boolean arg);
+	void setAttributeValueBoolean(boolean arg);
 
 	/** Get the attribute value as a boolean */
-	public boolean getAttributeValueBoolean();
+	boolean getAttributeValueBoolean();
 
 	/** Set the attribute value as an int */
-	public void setAttributeValueInt(int arg);
+	void setAttributeValueInt(int arg);
 
 	/** Get the attribute value as an int */
-	public int getAttributeValueInt();
+	int getAttributeValueInt();
 
 	/** toString */
-	public String toString();
+	String toString();
 }
-
