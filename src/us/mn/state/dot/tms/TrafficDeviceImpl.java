@@ -128,10 +128,9 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	abstract public int getStatusCode();
 
 	/** Lookup a TrafficDeviceAttribute in the SONAR namespace */
-	static protected TrafficDeviceAttribute lookupTrafficDeviceAttribute(
+	static protected TrafficDeviceAttributeImpl lookupTrafficDeviceAttribute(
 		final String id, final String aname) 
 	{
-		//System.err.println("TrafficDeviceImpl.lookupTrafficDeviceAttribute("+id+","+aname+") called.");
 		if(aname==null || id==null || aname.length()<=0 || 
 			id.length()<=0) 
 		{
@@ -140,16 +139,15 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 		}
 
 		String name=id+"_"+aname;
-		TrafficDeviceAttribute ret=null;
+		TrafficDeviceAttributeImpl ret=null;
 		try {
-			ret = (TrafficDeviceAttribute)namespace.getObject(
+			ret = (TrafficDeviceAttributeImpl)namespace.getObject(
 				TrafficDeviceAttribute.SONAR_TYPE, name);
 		}
 		catch(NamespaceError e) {
 			e.printStackTrace();
 			ret=null;
 		}
-		//System.err.println("TrafficDeviceImpl.lookupTrafficDeviceAttribute("+id+","+aname+"): name="+name+", ret="+ret);
 		return ret;
 	}
 
@@ -160,7 +158,6 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	static public String getAttributeValue(final String id,
 		final String aname)
 	{
-		//System.err.println("TrafficDeviceImpl.getAttributeValue("+id+","+aname+") called.");
 		TrafficDeviceAttribute a = 
 			lookupTrafficDeviceAttribute(id,aname);
 		return (a == null ? null : a.getAttributeValue());
@@ -173,11 +170,8 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	static public boolean getAttributeValueBoolean(final String id,
 		final String aname)
 	{
-		//System.err.println("TrafficDeviceImpl.getAttributeValueBoolean("+id+","+aname+") called.");
-		TrafficDeviceAttribute a = 
+		TrafficDeviceAttributeImpl a = 
 			lookupTrafficDeviceAttribute(id,aname);
 		return (a == null ? false : a.getAttributeValueBoolean());
 	}
-
 }
-

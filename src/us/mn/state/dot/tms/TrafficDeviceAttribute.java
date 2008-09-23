@@ -48,19 +48,4 @@ public interface TrafficDeviceAttribute extends SonarObject {
 
 	/** Get the attribute value */
 	String getAttributeValue();
-
-	/** Set the attribute value as a boolean. */
-	void setAttributeValueBoolean(boolean arg);
-
-	/** Get the attribute value as a boolean */
-	boolean getAttributeValueBoolean();
-
-	/** Set the attribute value as an int */
-	void setAttributeValueInt(int arg);
-
-	/** Get the attribute value as an int */
-	int getAttributeValueInt();
-
-	/** toString */
-	String toString();
 }

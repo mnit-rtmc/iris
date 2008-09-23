@@ -174,20 +174,6 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 		return Boolean.parseBoolean(avalue);
 	}
 
-	/** Set the attribute value as an int. */
-	public void setAttributeValueInt(int arg_avalue) {
-		avalue = String.valueOf(arg_avalue);
-	}
-
-	/** 
-	 *  Get the attribute value as an int. 
-	 *  @return The string attribute converted to an int.
-	 */
-	public int getAttributeValueInt() {
-		avalue = (avalue == null ? "0" : avalue);
-		return SString.stringToInt(avalue);
-	}
-
 	/** toString */
 	public String toString() {
 		return "TrafficDeviceAttribute: Id="+getId()+", aname="
