@@ -158,11 +158,6 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 		return avalue;
 	}
 
-	/** Set the attribute value as a boolean. */
-	public void setAttributeValueBoolean(boolean arg_avalue) {
-		avalue = String.valueOf(arg_avalue);
-	}
-
 	/** 
 	 *  Get the attribute value as a boolean. 
 	 *  @return True if the string attribute value is equal, ignoring 
@@ -170,8 +165,8 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 	 * 	    exist false is returned.
 	 */
 	public boolean getAttributeValueBoolean() {
-		avalue = (avalue == null ? "" : avalue);
-		return Boolean.parseBoolean(avalue);
+		String v = (avalue == null ? "" : avalue);
+		return Boolean.parseBoolean(v);
 	}
 
 	/** toString */
