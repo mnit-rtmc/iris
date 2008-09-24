@@ -11,6 +11,29 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.78.0 (24 September 2008)</dt>
+	<dd><ul>
+		<li>
+			Merged many changes from AHMCT (UC Davis).
+			DMS message comboboxes are editable (agency-specific).
+			RWIS tab added for weather stations (agency-specific).
+			Internationalization work done on user interface.
+			Many bugs fixed for Caltrans.
+			Added buttons for camera presets.
+		</li>
+		<li>
+			Vault dependency updated to 1.3.3.
+			SONAR dependency updated to 2.1.2.
+			Tdxml dependency updated to 1.4.2.
+			TrafMap dependency updated to 4.15.
+			Video client dependency updated to 1.33.0.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.78.sql</code>
+		</li>
+	</ul></dd>
 	<dt>3.77.0 (15 September 2008)</dt>
 	<dd><ul>
 		<li>
