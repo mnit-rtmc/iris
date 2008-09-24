@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,6 +94,8 @@ public class IrisUser implements Principal {
 			addPermission(IrisPermission.DMS_TAB);
 		else if(role.equals("meter"))
 			addPermission(IrisPermission.METER_TAB);
+		else if(role.equals("rwis"))
+			addPermission(IrisPermission.RWIS_TAB);
 		else if(role.equals("alert"))
 			addPermission(IrisPermission.ALERT);
 		else if(role.equals("activate"))

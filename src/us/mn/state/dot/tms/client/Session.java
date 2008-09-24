@@ -146,7 +146,8 @@ public class Session {
 		lstates.add(gpoly.createState());
 		lstates.add(camLayer.createState());
 		lstates.add(incLayer.createState());
-		lstates.add(rwisLayer.createState());
+		if(rwisLayer != null)
+			lstates.add(rwisLayer.createState());
 		lstates.add(dmsLayer.createState());
 		lstates.add(warnLayer.createState());
 		tabs.add(new DMSTab(lstates, vlayer,
@@ -205,18 +206,21 @@ public class Session {
 		gpoly = createStationLayer();
 
 		// create agency specific incident layer
-		if (Agency.isId(Agency.MNDOT))
+		if(Agency.isId(Agency.MNDOT)) {
 			incLayer = new TmsIncidentLayer(props, logger,
 		    		st.getSystemPolicy());
-		else if (Agency.isId(Agency.CALTRANS_D10))
+			rwisLayer = null;
+		} else if(Agency.isId(Agency.CALTRANS_D10)) {
 			incLayer = new D10IncidentLayer(props, logger,
-			st.getSystemPolicy());
-		else {
+				st.getSystemPolicy());
+			rwisLayer = new D10RwisLayer(props, logger,
+				st.getSystemPolicy());
+		} else {
 			assert false : "unknown agencyid";
-			incLayer=null;
+			incLayer = null;
+			rwisLayer = null;
 		}
 
-		rwisLayer = new D10RwisLayer(props,logger,st.getSystemPolicy());
 		loc_manager = new GeoLocManager(st.getGeoLocs());
 		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
 			loc_manager);
@@ -233,7 +237,7 @@ public class Session {
 			addMeterTab();
 		if(user.hasPermission(IrisPermission.MAIN_TAB))
 			addIncidentTab();
-		if(true || user.hasPermission(IrisPermission.RWIS_TAB)) //FIXME
+		if(user.hasPermission(IrisPermission.RWIS_TAB))
 			addRwisTab();
 		if(user.hasPermission(IrisPermission.LCS_TAB))
 			addLcsTab();
@@ -248,6 +252,7 @@ public class Session {
 			tab.dispose();
 		gpoly.dispose();
 		incLayer.dispose();
-		rwisLayer.dispose();
+		if(rwisLayer != null)
+			rwisLayer.dispose();
 	}
 }
