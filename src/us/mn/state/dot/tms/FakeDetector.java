@@ -24,6 +24,14 @@ import java.util.StringTokenizer;
  */
 public class FakeDetector implements Constants {
 
+	/** Calculate the average from a total and sample count */
+	static protected float calculateAverage(float total, int count) {
+		if(count > 0)
+			return total / count;
+		else
+			return MISSING_DATA;
+	}
+
 	/** Plus composite type */
 	static protected final int PLUS = 1;
 
@@ -120,11 +128,17 @@ public class FakeDetector implements Constants {
 	/** Left over volume from earlier sampling intervals */
 	protected transient int leftover = 0;
 
+	/** Calculate the fake detector data */
+	public void calculate() {
+		calculateFlow();
+		calculateSpeed();
+	}
+
 	/** Flow rate from earlier sampling interval */
 	protected transient float flow = MISSING_DATA;
 
 	/** Calculate the fake detector flow rate */
-	public void calculateFlow() {
+	protected void calculateFlow() {
 		int volume = 0;
 		for(int i = 0; i < plus.length; i++) {
 			int v = (int)plus[i].getVolume();
@@ -163,5 +177,27 @@ public class FakeDetector implements Constants {
 	/** Get the calculated flow rate */
 	public float getFlow() {
 		return flow;
+	}
+
+	/** Speed from earlier sampling interval */
+	protected transient float speed = MISSING_DATA;
+
+	/** Calculate the fake detector speed */
+	public void calculateSpeed() {
+		float t_speed = 0;
+		int n_speed = 0;
+		for(DetectorImpl det: plus) {
+			float s = det.getSpeed();
+			if(s > 0) {
+				t_speed += s;
+				n_speed++;
+			}
+		}
+		speed = calculateAverage(t_speed, n_speed);
+	}
+
+	/** Get the calculated speed */
+	public float getSpeed() {
+		return speed;
 	}
 }

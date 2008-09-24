@@ -439,12 +439,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		return fake;
 	}
 
-	/** Calculate the fake flow rate if necessary */
-	public void calculateFakeFlow() {
+	/** Calculate the fake data if necessary */
+	public void calculateFakeData() {
 		FakeDetector f = fake_det;
-		if(f == null)
-			return;
-		f.calculateFlow();
+		if(f != null)
+			f.calculate();
 	}
 
 	/** Accumulator for number of samples locked on (scans) */
@@ -478,37 +477,55 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			return MISSING_DATA;
 	}
 
-	/** Get the current raw flost rate (vehicles per hour) */
-	protected float getRawFlow() {
-		if(isSampling() && last_volume != MISSING_DATA)
-			return last_volume * SAMPLES_PER_HOUR;
+	/** Get the current flow rate (vehicles per hour) */
+	public float getFlow() {
+		float flow = getFlowRaw();
+		if(flow != MISSING_DATA)
+			return flow;
+		else
+			return getFlowFake();
+	}
+
+	/** Get the current raw flow rate (vehicles per hour) */
+	protected float getFlowRaw() {
+		float volume = getVolume();
+		if(volume >= 0)
+			return volume * SAMPLES_PER_HOUR;
 		else
 			return MISSING_DATA;
 	}
 
-	/** Get the current flow rate (vehicles per hour) */
-	public float getFlow() {
-		if(isSampling() && last_volume != MISSING_DATA)
-			return last_volume * SAMPLES_PER_HOUR;
-		else {
-			FakeDetector f = fake_det;
-			if(f == null)
-				return MISSING_DATA;
-			else
-				return f.getFlow();
-		}
+	/** Get the fake flow rate (vehicles per hour) */
+	protected float getFlowFake() {
+		FakeDetector f = fake_det;
+		if(f != null)
+			return f.getFlow();
+		else
+			return MISSING_DATA;
 	}
 
 	/** Get the current density (vehicles per mile) */
 	public float getDensity() {
-		int speed = last_speed;
+		float density = getDensityFromFlowSpeed();
+		if(density != MISSING_DATA)
+			return density;
+		else
+			return getDensityFromOccupancy();
+	}
+
+	/** Get the density from flow and speed (vehicles per mile) */
+	protected float getDensityFromFlowSpeed() {
+		float speed = getSpeedRaw();
 		if(speed > 0) {
-			float flow = getRawFlow();
+			float flow = getFlowRaw();
 			if(flow > MISSING_DATA)
 				return flow / speed;
-			else
-				return MISSING_DATA;
 		}
+		return MISSING_DATA;
+	}
+
+	/** Get the density from occupancy (vehicles per mile) */
+	protected float getDensityFromOccupancy() {
 		float occ = getOccupancy();
 		if(occ == MISSING_DATA || fieldLength <= 0)
 			return MISSING_DATA;
@@ -517,17 +534,42 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Get the current speed (miles per hour) */
 	public float getSpeed() {
-		if(isSampling() && last_speed != MISSING_DATA)
+		float speed = getSpeedRaw();
+		if(speed > 0)
+			return speed;
+		speed = getSpeedEstimate();
+		if(speed > 0)
+			return speed;
+		else
+			return getSpeedFake();
+	}
+
+	/** Get the current raw speed (miles per hour) */
+	protected float getSpeedRaw() {
+		if(isSampling())
 			return last_speed;
-		if(last_scans == MISSING_DATA)
+		else
 			return MISSING_DATA;
-		float flow = getRawFlow();
+	}
+
+	/** Get speed estimate based on flow / density */
+	protected float getSpeedEstimate() {
+		float flow = getFlowRaw();
 		if(flow <= 0)
 			return MISSING_DATA;
-		float density = getDensity();
+		float density = getDensityFromOccupancy();
 		if(density <= DENSITY_THRESHOLD)
 			return MISSING_DATA;
 		return flow / density;
+	}
+
+	/** Get fake speed (miles per hour) */
+	protected float getSpeedFake() {
+		FakeDetector f = fake_det;
+		if(f != null)
+			return f.getSpeed();
+		else
+			return MISSING_DATA;
 	}
 
 	/** Force fail detector and log the cause */
@@ -733,7 +775,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public void printSampleXmlElement(PrintWriter out) {
 		if(abandoned || !isSampling())
 			return;
-		int flow = Math.round(getRawFlow());
+		int flow = Math.round(getFlowRaw());
 		int speed = Math.round(getSpeed());
 		out.print("\t<sample sensor='D" + index);
 		if(flow != MISSING_DATA)

@@ -155,12 +155,12 @@ class DetectorListImpl extends IndexedListImpl implements DetectorList {
 		System.err.println("Finished FLUSH @ " + new Date());
 	}
 
-	/** Calculate fake detector flow rates */
-	public void calculateFakeFlows() {
+	/** Calculate fake detector data */
+	public void calculateFakeData() {
 		Iterator it = getIterator();
 		while(it.hasNext()) {
 			DetectorImpl det = (DetectorImpl)it.next();
-			det.calculateFakeFlow();
+			det.calculateFakeData();
 		}
 	}
 

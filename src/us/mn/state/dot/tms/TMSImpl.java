@@ -210,7 +210,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		/** Job to be performed on completion */
 		protected final Job job = new Job() {
 			public void perform() {
-				detectors.calculateFakeFlows();
+				detectors.calculateFakeData();
 				detectors.writeSampleXml();
 				station_map.calculateData(stamp);
 				station_map.writeSampleXml();
