@@ -29,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
@@ -37,8 +38,10 @@ import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.dms.FontComboBox;
 import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -68,6 +71,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Used to select the expires time for a message */
 	protected final JComboBox cmbExpire = new JComboBox();
+
+	/** Used to select the DMS font for a message (optional) */
+	protected FontComboBox cmbFont = null;
 
 	/** Button used to send a message to the DMS */
 	protected final JButton btnSend = 
@@ -144,6 +150,14 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		Box boxRight = Box.createVerticalBox();
 		boxRight.add(Box.createVerticalGlue());
 		boxRight.add(buildDurationBox());
+
+		// add optional font selection combo box
+		if(Agency.isId(Agency.CALTRANS_D10)) {
+			JPanel fjp=buildFontSelectorBox(st.getFonts());
+			if(fjp != null)
+				boxRight.add(fjp);
+		}
+
 		boxRight.add(Box.createVerticalStrut(4));
 		boxRight.add(buildButtonPanel());
 		boxRight.add(Box.createVerticalGlue());
@@ -231,6 +245,18 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		cmbExpire.addItem( new Expiration( "16 Hours", 960 ) );
 		cmbExpire.addItem( new Expiration( "17 Hours", 1020 ) );
 		cmbExpire.setSelectedIndex( 0 );
+		return p;
+	}
+
+	/** Build the font selector combo box */
+	protected JPanel buildFontSelectorBox(TypeCache<Font> tcf) {
+		assert tcf != null;
+		if(tcf == null)
+			return null;
+		cmbFont = new FontComboBox(tcf);
+		JPanel p = new JPanel(new FlowLayout());
+		p.add(new JLabel("Font"));
+		p.add(cmbFont);
 		return p;
 	}
 

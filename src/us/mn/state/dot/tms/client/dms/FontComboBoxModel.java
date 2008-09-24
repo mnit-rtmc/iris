@@ -1,0 +1,104 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2008  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+package us.mn.state.dot.tms.client.dms;
+
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Map;
+import javax.swing.JComboBox;
+import javax.swing.AbstractListModel;
+import javax.swing.ComboBoxModel;
+
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.Font;
+
+/**
+ * Combobox model for fonts.
+ *
+ * @author Michael Darter
+ */
+public class FontComboBoxModel extends ProxyListModel<Font>
+	implements ComboBoxModel 
+{
+	/** constructor */
+	public FontComboBoxModel(TypeCache<Font> arg_fonts) {
+		super(arg_fonts);
+	}
+
+	/** Get the item at the specified index */
+	public Object getElementAt(int index) {
+/*
+		int i = 0;
+		for(SignText t: m_items) {
+			if(i == index) {
+				// this is a hack, see the note in ignoreLineHack()
+				if(t!=null && SDMS.ignoreLineHack(t.toString()))
+					return "";
+				return t;
+			}
+			i++;
+		}
+*/
+		return "oh ya";
+	}
+
+	/** Get the number of items in the model */
+	public int getSize() {
+		return 1;
+	}
+
+	/** Get the selected item */
+	public Object getSelectedItem() {
+		//return m_selected;
+		return "oh ya";
+	}
+
+	/** 
+	 * Set the selected item. This method is called by the combobox when:
+	 * 	-the focus leaves the combobox with a String arg when editable.
+	 *      -a combobox item is clicked on via the mouse.
+	 *      -a combobox item is moved to via the cursor keys.
+	 */
+	public void setSelectedItem(Object s) {
+	}
+
+	/* 
+	protected void LoadComboBox(){
+		List<String> fontNames = getFontNames(m_fonts);
+		if(fontNames != null) {
+			for(String fn: fontNames)
+				this.addItem(fn);
+			if(fontNames.size()>0)
+				this.setSelectedIndex(0);
+		}
+
+	}*/
+
+	/** return a list of available fonts */
+/*
+	protected List<String> getFontNames(TypeCache<Font> tcf) {
+		LinkedList<String> fontNames = new LinkedList();
+		Map<String,Font> fonts = tcf.getAll();
+		synchronized(fonts) {
+			for(Font proxy: fonts.values()) {
+				fontNames.add(proxy.getName());
+			}
+		}
+		return fontNames;
+	}
+*/
+}
