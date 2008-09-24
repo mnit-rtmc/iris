@@ -17,8 +17,8 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -29,6 +29,44 @@ import us.mn.state.dot.sonar.NamespaceError;
 public class SystemAttributeImpl extends BaseObjectImpl 
 	implements SystemAttribute 
 {
+	/** Lookup a SystemAttribute in the SONAR namespace */
+	static protected SystemAttribute lookupSystemAttribute(String att) {
+		if(att == null || att.length() <= 0) {
+			assert false;
+			return null;
+		}
+		try {
+			return (SystemAttribute)namespace.getObject(
+				SystemAttribute.SONAR_TYPE, att);
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/** Get the value of the named attribute. This is a server side method. 
+	 * @return The value of the named attribute; null if the attribute
+	 * doesn't exist. */
+	static protected String getValue(final String att) {
+		SystemAttribute a = lookupSystemAttribute(att);
+		return a == null ? null : a.getValue();
+	}
+
+	/** Verify database version is valid */
+	static protected void validateDatabaseVersion() {
+		String dbVer = getValue(DATABASE_VERSION);
+		String codeVer = "@@VERSION@@";
+		boolean ok = (dbVer != null) &&
+			dbVer.trim().equals(codeVer.trim());
+		if(!ok) {
+			System.err.println("IRIS code version = " + codeVer + 
+				", database version = " + dbVer);
+			if(Agency.isId(Agency.CALTRANS_D10))
+				System.exit(1);
+		}
+	}
+
 	/** Load all */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading system attributes...");
@@ -44,6 +82,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 				));
 			}
 		});
+		validateDatabaseVersion();
 	}
 
 	/** Get a mapping of the columns */
@@ -70,9 +109,8 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** Create a new attribute */
-	protected SystemAttributeImpl(String arg_name, String arg_value) 
-	{
-		super(arg_name);	// key
+	protected SystemAttributeImpl(String att_name, String arg_value) {
+		super(att_name);
 		value = arg_value;
 	}
 
@@ -82,17 +120,6 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	/** Set the attribute value */
 	public void setValue(String arg_value) {
 		value = arg_value;
-	}
-
-	/** Get the value of the named attribute. This 
-	  * is a server side method. 
-	  * @return null if the attribute doesn't exist else a String.
-	  */
-	public static String getValue(final String arg_name)
-	{
-		SystemAttribute a = 
-			lookupSystemAttribute(arg_name);
-		return (a == null ? null : a.getValue());
 	}
 
 	/** Set the attribute value, doSet is required for 
@@ -110,34 +137,4 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	public String getValue() {
 		return value;
 	}
-
-	/** Lookup a SystemAttribute in the SONAR namespace */
-	static protected SystemAttribute lookupSystemAttribute(
-		final String arg_name) 
-	{
-		//System.err.println("SystemAttributeImpl.lookupSystemAttribute("+arg_name+") called.");
-		if(arg_name==null || arg_name.length()<=0) {
-			assert false;
-			return null;
-		}
-
-		SystemAttribute ret=null;
-		try {
-			ret = (SystemAttribute)namespace.getObject(
-				SystemAttribute.SONAR_TYPE, arg_name);
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-			ret=null;
-		}
-		//System.err.println("SystemAttributeImpl.lookupSystemAttribute("+arg_name+"), ret="+ret);
-		return ret;
-	}
-
-	/** toString */
-	public String toString() {
-		return "SystemAttribute: name="+getName()+
-			", value="+getValue()+".";
-	}
 }
-

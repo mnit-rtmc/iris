@@ -31,12 +31,8 @@ public interface SystemAttribute extends SonarObject {
 	String DATABASE_VERSION = "database_version";
 
 	/** Set the attribute value */
-	public void setValue(String arg_value);
+	void setValue(String arg_value);
 
 	/** Get the attribute value */
-	public String getValue();
-
-	/** toString */
-	public String toString();
+	String getValue();
 }
-
