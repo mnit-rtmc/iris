@@ -27,6 +27,9 @@ public interface WarningSign extends Device2 {
 	/** SONAR type name */
 	String SONAR_TYPE = "warning_sign";
 
+	/** Get the device location */
+	GeoLoc getGeoLoc();
+
 	/** Set the verification camera */
 	void setCamera(Camera c);
 

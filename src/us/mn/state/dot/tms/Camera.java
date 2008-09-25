@@ -26,6 +26,9 @@ public interface Camera extends Device2 {
 	/** SONAR type name */
 	String SONAR_TYPE = "camera";
 
+	/** Get the device location */
+	GeoLoc getGeoLoc();
+
 	/** Set the video encoder host name (and port) */
 	void setEncoder(String enc);
 

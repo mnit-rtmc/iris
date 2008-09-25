@@ -84,13 +84,17 @@ public class CameraImpl extends Device2Impl implements Camera {
 	/** Create a new camera with a string name */
 	public CameraImpl(String n) throws TMSException, SonarException {
 		super(n);
+		GeoLocImpl g = new GeoLocImpl(name);
+		MainServer.server.createObject(g);
+		geo_loc = g;
 	}
 
 	/** Create a camera */
 	protected CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
 		String nt, String e, int ec, String nv, boolean pb)
 	{
-		super(n, l, c, p, nt);
+		super(n, c, p, nt);
+		geo_loc = l;
 		encoder = e;
 		encoder_channel = ec;
 		nvr = nv;
@@ -106,6 +110,20 @@ public class CameraImpl extends Device2Impl implements Camera {
 		this(n, (GeoLocImpl)ns.getObject(GeoLoc.SONAR_TYPE, l),
 			(ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
 			p, nt, e, ec, nv, pb);
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		store.destroy(geo_loc);
+	}
+
+	/** Device location */
+	protected GeoLocImpl geo_loc;
+
+	/** Get the device location */
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
 	}
 
 	/** Host (and port) of encoder for digital video stream */
