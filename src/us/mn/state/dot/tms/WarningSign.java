@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
  * A WarningSign is a traffic device can display one fixed message. It can
  * only be turned on or off.
