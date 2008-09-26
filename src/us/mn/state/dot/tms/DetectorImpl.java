@@ -573,12 +573,13 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	}
 
 	/** Reversible lane name */
-	static protected final String REV = "I-394 HOV";
+	static protected final String REV = "I-394 Rev";
 
 	/** Get the volume "no hit" threshold (seconds) */
 	protected int getNoHitThreshold() {
 		GeoLoc loc = lookupGeoLoc();
 		if(isRamp()) {
+			// FIXME: this is a hack
 			Road freeway = loc.getFreeway();
 			if(freeway != null && REV.equals(freeway.getName()))
 				return 72 * Interval.HOUR;
