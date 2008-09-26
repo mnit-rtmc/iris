@@ -222,10 +222,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		/** Find the detectors for a given ramp meter */
 		protected boolean findDetectors() {
 			DetectorSet ds = meter.getDetectorSet();
-			queue = ds.getDetectorSet(Detector.QUEUE);
-			passage = ds.getDetectorSet(Detector.PASSAGE);
-			merge = ds.getDetectorSet(Detector.MERGE);
-			bypass = ds.getDetectorSet(Detector.BYPASS);
+			queue = ds.getDetectorSet(LaneType.QUEUE);
+			passage = ds.getDetectorSet(LaneType.PASSAGE);
+			merge = ds.getDetectorSet(LaneType.MERGE);
+			bypass = ds.getDetectorSet(LaneType.BYPASS);
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();
 		}
@@ -741,43 +741,43 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
 	/** Create a set of entrance detectors for a zone */
 	static protected DetectorSet createEntranceSet(DetectorSet ds) {
-		DetectorSet ent = ds.getDetectorSet(Detector.BYPASS);
-		ent.addDetectors(ds, Detector.OMNIBUS);
-		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		DetectorSet ent = ds.getDetectorSet(LaneType.BYPASS);
+		ent.addDetectors(ds, LaneType.OMNIBUS);
+		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
 		if(p.isDefined())
 			ent.addDetectors(p);
 		else
-			ent.addDetectors(ds, Detector.MERGE);
+			ent.addDetectors(ds, LaneType.MERGE);
 		if(ent.size() > 0)
 			return ent;
-		ent.addDetectors(ds, Detector.EXIT);
-		ent.addDetectors(ds, Detector.MAINLINE);
-		ent.addDetectors(ds, Detector.AUXILIARY);
+		ent.addDetectors(ds, LaneType.EXIT);
+		ent.addDetectors(ds, LaneType.MAINLINE);
+		ent.addDetectors(ds, LaneType.AUXILIARY);
 		return ent;
 	}
 
 	/** Create a set of exit detectors for a zone */
 	static protected DetectorSet createExitSet(DetectorSet ds) {
-		DetectorSet exit = ds.getDetectorSet(Detector.EXIT);
+		DetectorSet exit = ds.getDetectorSet(LaneType.EXIT);
 		if(exit.size() > 0)
 			return exit;
-		exit.addDetectors(ds, Detector.MAINLINE);
-		exit.addDetectors(ds, Detector.AUXILIARY);
-		exit.addDetectors(ds, Detector.CD_LANE);
+		exit.addDetectors(ds, LaneType.MAINLINE);
+		exit.addDetectors(ds, LaneType.AUXILIARY);
+		exit.addDetectors(ds, LaneType.CD_LANE);
 		if(exit.size() > 0)
 			return exit;
-		exit.addDetectors(ds, Detector.BYPASS);
-		DetectorSet q = ds.getDetectorSet(Detector.QUEUE);
+		exit.addDetectors(ds, LaneType.BYPASS);
+		DetectorSet q = ds.getDetectorSet(LaneType.QUEUE);
 		if(q.size() > 0) {
 			exit.addDetectors(q);
 			return exit;
 		}
-		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
 		if(p.size() > 0) {
 			exit.addDetectors(p);
 			return exit;
 		}
-		exit.addDetectors(ds, Detector.MERGE);
+		exit.addDetectors(ds, LaneType.MERGE);
 		return exit;
 	}
 

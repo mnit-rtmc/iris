@@ -32,6 +32,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.IndexedList;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.utils.TMSProxy;
@@ -62,7 +63,8 @@ public class DetectorForm extends TMSObjectForm {
 	protected LocationPanel location;
 
 	/** Lane type combo box */
-	protected final JComboBox lane = new JComboBox(Detector.LANE_TYPE);
+	protected final JComboBox lane =
+		new JComboBox(LaneType.getDescriptions());
 
 	/** Model for lane number spinner */
 	protected final SpinnerNumberModel num_model =

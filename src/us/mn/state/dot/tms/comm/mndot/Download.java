@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorImpl;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.StratifiedPlanImpl;
@@ -233,8 +234,11 @@ public class Download extends Controller170Operation implements TimingTable {
 		for(int inp = 0; inp < DETECTOR_INPUTS; inp++) {
 			DetectorImpl det = controller.getDetectorAtPin(
 				FIRST_DETECTOR_PIN + inp);
-			if(det != null && det.getLaneType() == Detector.QUEUE)
+			if(det != null &&
+				det.getLaneType() == LaneType.QUEUE.ordinal())
+			{
 				bitmap[inp / 8] |= 1 << (inp % 8);
+			}
 		}
 		return bitmap;
 	}

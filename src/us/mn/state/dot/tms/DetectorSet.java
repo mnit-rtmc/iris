@@ -63,9 +63,9 @@ public class DetectorSet implements Constants {
 	}
 
 	/** Add the detectors of the given type from another detector set */
-	public void addDetectors(DetectorSet other, short type) {
+	public void addDetectors(DetectorSet other, LaneType lt) {
 		for(DetectorImpl d: other.detectors) {
-			if(type == d.getLaneType())
+			if(lt.ordinal() == d.getLaneType())
 				addDetector(d);
 		}
 	}
@@ -195,10 +195,10 @@ public class DetectorSet implements Constants {
 		return buf.toString();
 	}
 
-	/** Get the detector set for the given detector type */
-	public DetectorSet getDetectorSet(short type) {
+	/** Get the detector set for the given lane type */
+	public DetectorSet getDetectorSet(LaneType lt) {
 		DetectorSet set = new DetectorSet();
-		set.addDetectors(this, type);
+		set.addDetectors(this, lt);
 		return set;
 	}
 

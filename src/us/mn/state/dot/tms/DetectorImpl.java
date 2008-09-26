@@ -161,7 +161,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		buffer.append(cross.getAbbrev());
 		buffer.append(DIR_FREEWAY[freeDir]);
 		if( !statName ) {
-			if(laneType == REVERSIBLE) {
+			if(laneType == LaneType.REVERSIBLE) {
 				if(freeDir == Road.EAST_WEST) {
 					if(laneNumber == 1)
 						buffer.append('S');
@@ -172,10 +172,10 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			else if(isMainline()) {
 				if(laneNumber > 0)
 					buffer.append(laneNumber);
-				buffer.append(LANE_SUFFIX[laneType]);
+				buffer.append(laneType.suffix);
 			}
 			else {
-				buffer.append(LANE_SUFFIX[laneType]);
+				buffer.append(laneType.suffix);
 				if(laneNumber > 0)
 					buffer.append(laneNumber);
 			}
@@ -189,7 +189,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public boolean isAvailable() {
 		if(abandoned)
 			return false;
-		if(laneType == NONE)
+		if(laneType == LaneType.NONE)
 			return false;
 		return super.isAvailable();
 	}
@@ -228,87 +228,66 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	}
 
 	/** Lane type */
-	protected short laneType;
+	protected LaneType laneType = LaneType.NONE;
 
 	/** Set the lane type */
 	public void setLaneType(short t) throws TMSException {
-		if(t == laneType)
+		LaneType lt = LaneType.fromOrdinal(t);
+		if(lt == laneType)
 			return;
-		if(t < 0 || t > LANE_TYPE.length)
-			throw new ChangeVetoException("Invalid lane type");
-		if(!isMainlineType(t) && getStation() != null)
+		if(!lt.isMainline() && getStation() != null)
 			throw new ChangeVetoException("Station link exists");
-		_setLaneType(t);
+		_setLaneType(lt);
 	}
 
 	/** Set the lane type */
-	protected synchronized void _setLaneType(short t) throws TMSException {
+	protected synchronized void _setLaneType(LaneType t)
+		throws TMSException
+	{
 		if(t == laneType)
 			return;
-		store.update(this, "laneType", t);
+		store.update(this, "laneType", t.ordinal());
 		laneType = t;
 	}
 
 	/** Get the lane type */
-	public short getLaneType() { return laneType; }
+	public short getLaneType() {
+		return (short)laneType.ordinal();
+	}
 
 	/** Is this a mailline detector? (auxiliary, cd, etc.) */
 	public boolean isMainline() {
-		return isMainlineType(laneType);
+		return laneType.isMainline();
 	}
 
 	/** Is this a station detector? (mainline, non-HOV) */
 	public boolean isStation() {
-		return laneType == MAINLINE;
-	}
-
-	/** Is the given lane type a mainline? (auxiliary, cd, etc.) */
-	static public boolean isMainlineType(int t) {
-		return t == MAINLINE || t == AUXILIARY || t == CD_LANE ||
-			t == REVERSIBLE || t == VELOCITY ||
-			t == HOV || t == HOT;
-	}
-
-	/** Is this a CD lane detector? */
-	public boolean isCD() {
-		return laneType == CD_LANE;
+		return laneType.isStation();
 	}
 
 	/** Is this a station or CD detector? */
 	public boolean isStationOrCD() {
-		return isStation() || isCD();
+		return laneType.isStationOrCD();
 	}
 
 	/** Is this a ramp detector? (merge, queue, exit, bypass) */
 	public boolean isRamp() {
-		return isRampType(laneType);
-	}
-
-	/** Is the given lane type a ramp? (merge, queuee, exit, bypass) */
-	static public boolean isRampType(int t) {
-		return t == MERGE || t == QUEUE || t == EXIT ||
-			t == BYPASS || t == PASSAGE || t == OMNIBUS;
+		return laneType.isRamp();
 	}
 
 	/** Is this an onramp detector? */
 	public boolean isOnRamp() {
-		return isOnRampType(laneType);
-	}
-
-	/** Is the given lane type an on-ramp? (merge, queue, bypass ) */
-	static public boolean isOnRampType(int t) {
-		return t == MERGE || t == QUEUE || t == BYPASS ||
-			t == PASSAGE || t == OMNIBUS || t == GREEN;
+		return laneType.isOnRamp();
 	}
 
 	/** Is this an offRamp detector? */
 	public boolean isOffRamp() {
-		return laneType == EXIT;
+		return laneType.isOffRamp();
 	}
 
 	/** Is this a velocity detector? */
 	public boolean isVelocity() {
-		return laneType == VELOCITY;
+		return laneType.isVelocity();
 	}
 
 	/** Test if the given detector is a speed pair with this detector */
@@ -596,27 +575,23 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Reversible lane name */
 	static protected final String REV = "I-394 HOV";
 
-	/** Get the volume "no hit" threshold */
+	/** Get the volume "no hit" threshold (seconds) */
 	protected int getNoHitThreshold() {
 		GeoLoc loc = lookupGeoLoc();
 		if(isRamp()) {
 			Road freeway = loc.getFreeway();
 			if(freeway != null && REV.equals(freeway.getName()))
-				return SAMPLE_3_DAYS;
+				return 72 * Interval.HOUR;
 			Road cross = loc.getCrossStreet();
 			if(cross != null && REV.equals(cross.getName()))
-				return SAMPLE_3_DAYS;
+				return 72 * Interval.HOUR;
 		}
-		return SAMPLE_THRESHOLD[laneType];
+		return laneType.no_hit_threshold;
 	}
 
-	/** Get the scan "locked on" threshold */
+	/** Get the scan "locked on" threshold (seconds) */
 	protected int getLockedOnThreshold() {
-		if(isMainlineType(laneType))
-			return SAMPLE_3_MINUTES;
-		if(laneType == QUEUE)
-			return SAMPLE_30_MINUTES;
-		return SAMPLE_20_MINUTES;
+		return laneType.lock_on_threshold;
 	}
 
 	/** Test the detector volume data with error detecting algorithms */
@@ -625,7 +600,7 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 			malfunction(EventType.DET_CHATTER);
 		if(volume == 0) {
 			no_hits++;
-			if(no_hits > getNoHitThreshold())
+			if(no_hits * SECONDS_PER_SAMPLE > getNoHitThreshold())
 				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
@@ -635,7 +610,8 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	protected void testScans(int scans) {
 		if(scans >= MAX_SCANS) {
 			locked_on++;
-			if(locked_on > getLockedOnThreshold())
+			int secs = locked_on * SECONDS_PER_SAMPLE;
+			if(secs > getLockedOnThreshold())
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;
@@ -643,10 +619,10 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Test the detector data with error detecting algorithms */
 	protected void testData(int volume, int scans) {
-		if(laneType == GREEN)
-			return;
-		testVolume(volume);
-		testScans(scans);
+		if(laneType != LaneType.GREEN) {
+			testVolume(volume);
+			testScans(scans);
+		}
 	}
 
 	/** Data cache */
@@ -755,15 +731,15 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Print a single detector as an XML element */
 	public void printXmlElement(PrintWriter out) {
-		short cat = getLaneType();
+		LaneType lt = laneType;
 		short lane = getLaneNumber();
 		float field = getFieldLength();
 		String l = replaceEntities(getLabel(false));
 		out.print("<detector index='D" + index + "' ");
 		if(!l.equals("FUTURE"))
 			out.print("label='" + l + "' ");
-		if(cat > MAINLINE)
-			out.print("category='" + LANE_SUFFIX[cat] + "' ");
+		if(lt != LaneType.NONE && lt != LaneType.MAINLINE)
+			out.print("category='" + lt.suffix + "' ");
 		if(lane > 0)
 			out.print("lane='" + lane + "' ");
 		if(field != DEFAULT_FIELD_LENGTH)

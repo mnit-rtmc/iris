@@ -169,7 +169,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Lookup the green count detector */
 	protected void lookupGreenDetector() {
 		DetectorImpl[] g = getDetectorSet().getDetectorSet(
-			Detector.GREEN).toArray();
+			LaneType.GREEN).toArray();
 		if(g.length > 0)
 			green_det = g[0];
 		else
@@ -803,15 +803,15 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	protected void printMeterDetectors(PrintWriter out) {
 		DetectorSet ds = getDetectorSet();
 		printAttribute(out, "green",
-			ds.getDetectorSet(Detector.GREEN));
+			ds.getDetectorSet(LaneType.GREEN));
 		printAttribute(out, "passage",
-			ds.getDetectorSet(Detector.PASSAGE));
+			ds.getDetectorSet(LaneType.PASSAGE));
 		printAttribute(out, "merge",
-			ds.getDetectorSet(Detector.MERGE));
+			ds.getDetectorSet(LaneType.MERGE));
 		printAttribute(out, "queue",
-			ds.getDetectorSet(Detector.QUEUE));
+			ds.getDetectorSet(LaneType.QUEUE));
 		printAttribute(out, "bypass",
-			ds.getDetectorSet(Detector.BYPASS));
+			ds.getDetectorSet(LaneType.BYPASS));
 	}
 
 	/** Print a meter detector set attribute */
