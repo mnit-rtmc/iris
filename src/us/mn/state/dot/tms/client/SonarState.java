@@ -317,32 +317,34 @@ public class SonarState extends Client {
 		IllegalAccessException
 	{
 		super(props, handler);
-		roles = new TypeCache<Role>(Role.class);
-		users = new TypeCache<User>(User.class);
-		connections = new TypeCache<Connection>(Connection.class);
-		system_policy = new TypeCache<SystemPolicy>(SystemPolicy.class);
+		roles = new TypeCache<Role>(Role.class, this);
+		users = new TypeCache<User>(User.class, this);
+		connections = new TypeCache<Connection>(Connection.class, this);
+		system_policy = new TypeCache<SystemPolicy>(SystemPolicy.class,
+			this);
 		cabinet_styles = new TypeCache<CabinetStyle>(
-			CabinetStyle.class);
+			CabinetStyle.class, this);
 		cab_style_model = new ProxyListModel<CabinetStyle>(
 			cabinet_styles);
 		cab_style_model.initialize();
-		cabinets = new TypeCache<Cabinet>(Cabinet.class);
-		comm_links = new TypeCache<CommLink>(CommLink.class);
+		cabinets = new TypeCache<Cabinet>(Cabinet.class, this);
+		comm_links = new TypeCache<CommLink>(CommLink.class, this);
 		comm_link_model = new ProxyListModel<CommLink>(comm_links);
 		comm_link_model.initialize();
-		controllers = new TypeCache<Controller>(Controller.class);
-		holidays = new TypeCache<Holiday>(Holiday.class);
-		graphics = new TypeCache<Graphic>(Graphic.class);
-		fonts = new TypeCache<Font>(Font.class);
-		glyphs = new TypeCache<Glyph>(Glyph.class);
-		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class);
+		controllers = new TypeCache<Controller>(Controller.class, this);
+		holidays = new TypeCache<Holiday>(Holiday.class, this);
+		graphics = new TypeCache<Graphic>(Graphic.class, this);
+		fonts = new TypeCache<Font>(Font.class, this);
+		glyphs = new TypeCache<Glyph>(Glyph.class, this);
+		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
+			this);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
 		monitor_model.initialize();
-		roads = new TypeCache<Road>(Road.class);
+		roads = new TypeCache<Road>(Road.class, this);
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
-		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class);
-		alarms = new TypeCache<Alarm>(Alarm.class);
+		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class, this);
+		alarms = new TypeCache<Alarm>(Alarm.class, this);
 		alarm_model = new ProxyListModel<Alarm>(alarms);
 		alarm_model.initialize();
 		avail_alarm_model = new ProxyListModel<Alarm>(alarms) {
@@ -354,20 +356,22 @@ public class SonarState extends Client {
 			}
 		};
 		avail_alarm_model.initialize();
-		cameras = new TypeCache<Camera>(Camera.class);
+		cameras = new TypeCache<Camera>(Camera.class, this);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
-		warn_signs = new TypeCache<WarningSign>(WarningSign.class);
+		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
+			this);
 		warn_model = new ProxyListModel<WarningSign>(warn_signs);
 		warn_model.initialize();
-		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
+		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
-			DmsSignGroup.class);
-		sign_text = new TypeCache<SignText>(SignText.class);
-		traffic_device_attributes = new TypeCache<
-			TrafficDeviceAttribute>(TrafficDeviceAttribute.class);
-		system_attributes = new TypeCache<
-			SystemAttribute>(SystemAttribute.class);
+			DmsSignGroup.class, this);
+		sign_text = new TypeCache<SignText>(SignText.class, this);
+		traffic_device_attributes =
+			new TypeCache<TrafficDeviceAttribute>(
+			TrafficDeviceAttribute.class, this);
+		system_attributes = new TypeCache<SystemAttribute>(
+			SystemAttribute.class, this);
 		singleton = this;
 	}
 

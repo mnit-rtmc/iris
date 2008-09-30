@@ -121,14 +121,8 @@ public class UserManager {
 	/** Logout the current user */
 	public void logout() {
 		SonarState s = state;
-		if(s != null) {
-			try {
-				s.quit();
-			}
-			catch(FlushError e) {
-				// Ignore
-			}
-		}
+		if(s != null)
+			s.quit();
 		state = null;
 		user = null;
 		fireLogout();
