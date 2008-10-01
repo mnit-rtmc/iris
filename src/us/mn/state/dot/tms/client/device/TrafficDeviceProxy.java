@@ -56,6 +56,7 @@ abstract public class TrafficDeviceProxy extends DeviceProxy
 		statusCode = device.getStatusCode();
 		operation = device.getOperation();
 		status = device.getStatus();
+		controllerStatus = device.getControllerStatus();
 	}
 
 	public final boolean equals(Object obj) {
@@ -76,6 +77,15 @@ abstract public class TrafficDeviceProxy extends DeviceProxy
 		return id.compareTo(proxy.getId());
 	}
 
+	/** controller status */
+	protected String controllerStatus;
+
+	/** Get the controller status */
+	public String getControllerStatus() {
+		return controllerStatus;
+	}
+
+	/** operation */
 	protected String operation;
 
 	/** Get a description of the current device operation */

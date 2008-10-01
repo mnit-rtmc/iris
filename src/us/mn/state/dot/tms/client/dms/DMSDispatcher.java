@@ -45,9 +45,13 @@ import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
+ * It uses a number of optional controls which appear or do not appear on screen
+ * as a function of the Agency.
+ * the agency.
  * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel, TmsSelectionModel
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
@@ -66,11 +70,14 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	/** Displays the current operation of the DMS */
 	protected final JTextField txtOperation = new JTextField();
 
+	/** Displays the controller status (optional) */
+	protected JTextField txtControllerStatus = new JTextField();
+
 	/** Displays the brightness of the DMS */
 	protected final JTextField txtBrightness = new JTextField();
 
 	/** Used to select the expires time for a message (optional) */
-	protected JComboBox cmbExpire = null;
+	protected JComboBox cmbExpire = new JComboBox();
 
 	/** Used to select the DMS font for a message (optional) */
 	protected FontComboBox cmbFont = null;
@@ -84,7 +91,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		new JButton(I18NMessages.get("DMSDispatcher.ClearButton"));
 
 	/** Button used to get the DMS status (optional) */
-	protected JButton btnGetStatus = null;
+	protected JButton btnGetStatus = new JButton(I18NMessages.get(
+		"DMSDispatcher.GetStatusButton"));
 
 	protected final TmsSelectionModel selectionModel;
 
@@ -100,6 +108,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSHandler handler, final SonarState st, TmsConnection tmsConnection) {
 		super( new GridBagLayout() );
+		setOptionalControlUse();
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(),tmsConnection);
 		userName = handler.getUser().getName();
@@ -121,6 +130,14 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		bag.gridx = 0;
 		bag.gridy = 2;
 		add(new JLabel("Operation"), bag);
+
+		// label for optional controller status field
+		if(m_useControllerStatusField) {
+			bag.gridx = 0;
+			bag.gridy = 3;
+			add(new JLabel("Status"), bag);
+		}
+
 		bag.gridx = 1;
 		bag.gridy = 0;
 		bag.fill = GridBagConstraints.HORIZONTAL;
@@ -142,8 +159,17 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		bag.gridwidth = 3;
 		txtOperation.setEditable(false);
 		add(txtOperation, bag);
+
+		// add optional controller status field
+		if(m_useControllerStatusField) {
+			bag.gridx = 1;
+			bag.gridy = 3;
+			txtControllerStatus.setEditable(false);
+			add(txtControllerStatus, bag);
+		}
+
 		bag.gridx = 0;
-		bag.gridy = 3;
+		bag.gridy = 4;
 		bag.gridwidth = 4;
 		bag.insets.top = 6;
 		add(pnlSign, bag);
@@ -151,11 +177,11 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		boxRight.add(Box.createVerticalGlue());
 
 		// add optional duration combobox
-		if(!Agency.isId(Agency.CALTRANS_D10))
+		if(m_useDurationComboBox)
 			boxRight.add(buildDurationBox());
 
 		// add optional font selection combo box
-		if(Agency.isId(Agency.CALTRANS_D10)) {
+		if(m_useFontsComboBox) {
 			JPanel fjp=buildFontSelectorBox(st.getFonts());
 			if(fjp != null)
 				boxRight.add(fjp);
@@ -167,10 +193,24 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		Box deployBox = Box.createHorizontalBox();
 		deployBox.add(messageSelector);
 		deployBox.add(boxRight);
-		bag.gridy = 4;
+		bag.gridy = 5;
 		add(deployBox, bag);
 		clearSelected();
 		selectionModel.addTmsSelectionListener(this);
+	}
+
+	/** flags for optional controls */
+	protected boolean m_useFontsComboBox;
+	protected boolean m_useDurationComboBox;
+	protected boolean m_useControllerStatusField;
+	protected boolean m_useGetStatusButton;
+
+	/** set flags for optional controls */
+	protected void setOptionalControlUse() {
+		m_useFontsComboBox = Agency.isId(Agency.CALTRANS_D10);
+		m_useDurationComboBox = !Agency.isId(Agency.CALTRANS_D10);
+		m_useControllerStatusField = Agency.isId(Agency.CALTRANS_D10);
+		m_useGetStatusButton = Agency.isId(Agency.CALTRANS_D10);
 	}
 
 	/** Dispose of the dispatcher */
@@ -196,9 +236,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		box.add(Box.createHorizontalGlue());
 
 		// add optional 'get status' button
-		if(Agency.isId(Agency.CALTRANS_D10)) {
-			btnGetStatus = new JButton(I18NMessages.get(
-				"DMSDispatcher.GetStatusButton"));
+		if(m_useGetStatusButton) {
 			btnGetStatus.setToolTipText(I18NMessages.get(
 				"DMSDispatcher.GetStatusButton.ToolTip"));
 			new ActionJob(this, btnGetStatus) {
@@ -214,7 +252,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Build the optional message duration box */
 	protected JPanel buildDurationBox() {
-		cmbExpire = new JComboBox();
+		assert m_useDurationComboBox;
+		if(!m_useDurationComboBox)
+			return null;
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel("Duration"));
 		p.add(cmbExpire);
@@ -254,6 +294,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Build the font selector combo box */
 	protected JPanel buildFontSelectorBox(TypeCache<Font> tcf) {
+		assert m_useFontsComboBox;
+		if(!m_useFontsComboBox)
+			return null;
 		assert tcf != null;
 		if(tcf == null)
 			return null;
@@ -273,13 +316,13 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			btnSend.setEnabled(true);
 			btnClear.setEnabled(true);
 			btnClear.setAction(new ClearDmsAction(proxy, userName));
-			if(btnGetStatus != null)
+			if(m_useGetStatusButton)
 				btnGetStatus.setEnabled(true);
-			if(cmbExpire != null) {
+			if(m_useDurationComboBox) {
 				cmbExpire.setEnabled(true);
 				cmbExpire.setSelectedIndex(0);
 			}
-			if(cmbFont != null) {
+			if(m_useFontsComboBox) {
 				cmbFont.setEnabled(true);
 				cmbFont.setDefaultSelection();
 			}
@@ -297,11 +340,11 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		txtCamera.setText("");
 		txtLocation.setText("");
 		txtBrightness.setText("");
-		if(cmbExpire != null) {
+		if(m_useDurationComboBox) {
 			cmbExpire.setEnabled(false);
 			cmbExpire.setSelectedIndex(0);
 		}
-		if(cmbFont != null) {
+		if(m_useFontsComboBox) {
 			cmbFont.setEnabled(false);
 			cmbFont.setDefaultSelection();
 		}
@@ -309,16 +352,16 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		messageSelector.clearSelections();
 		btnSend.setEnabled(false);
 		btnClear.setEnabled(false);
-		if(btnGetStatus!=null)
+		if(m_useGetStatusButton)
 			btnGetStatus.setEnabled(false);
 		pnlSign.setSign(null);
 	}
 
 	/** Get the selected duration */
 	protected int getDuration() {
-		if(cmbExpire == null)
+		assert m_useDurationComboBox;
+		if(!m_useDurationComboBox)
 			return SignMessage.DURATION_INFINITE;
-
 		Expiration e = (Expiration)cmbExpire.getSelectedItem();
 		if(e != null)
 			return e.getDuration();
@@ -333,6 +376,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	 *	    selected Font.
 	 */
 	protected Font getSelectedFont() {
+		assert m_useFontsComboBox;
+		if(!m_useFontsComboBox)
+			return null;
 		return (cmbFont == null ? null : 
 			(Font)cmbFont.getSelectedItem());
 	}
@@ -386,6 +432,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		}
 		txtBrightness.setText("" + Math.round(
 			dms.getLightOutput() / 655.35f));
+
+		// optional controller status field
+		if(m_useControllerStatusField)
+			txtControllerStatus.setText(dms.getControllerStatus());
 	}
 
 	/** get the currently selected DMS */

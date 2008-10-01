@@ -36,6 +36,9 @@ public interface TrafficDevice extends Device {
 	/** Get a description of the current device operation */
 	public String getOperation() throws RemoteException;
 
+	/** Get a controller status */
+	public String getControllerStatus() throws RemoteException;
+
 	/** Inactive traffic device status code */
 	public int STATUS_INACTIVE = 0;
 
