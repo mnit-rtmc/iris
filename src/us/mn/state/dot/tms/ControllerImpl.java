@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.Marshaller;
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.ControllerOperation;
@@ -86,12 +87,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	public ControllerImpl(String n) throws TMSException {
+	public ControllerImpl(String n) throws TMSException, SonarException {
 		super(n);
 		CabinetImpl c = new CabinetImpl(n);
-		c.doStore();
+		MainServer.server.createObject(c);
 		cabinet = c;
-		MainServer.server.addObject(cabinet);
 	}
 
 	/** Create a new controller */

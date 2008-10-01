@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.Namespace;
 
 /**
@@ -67,12 +68,11 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	}
 
 	/** Create a new cabinet */
-	public CabinetImpl(String n) throws TMSException {
+	public CabinetImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(n);
-		g.doStore();
+		MainServer.server.createObject(g);
 		geo_loc = g;
-		MainServer.server.addObject(geo_loc);
 	}
 
 	/** Create a new cabinet */
