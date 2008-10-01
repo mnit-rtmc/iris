@@ -69,8 +69,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	/** Displays the brightness of the DMS */
 	protected final JTextField txtBrightness = new JTextField();
 
-	/** Used to select the expires time for a message */
-	protected final JComboBox cmbExpire = new JComboBox();
+	/** Used to select the expires time for a message (optional) */
+	protected JComboBox cmbExpire = null;
 
 	/** Used to select the DMS font for a message (optional) */
 	protected FontComboBox cmbFont = null;
@@ -149,7 +149,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		add(pnlSign, bag);
 		Box boxRight = Box.createVerticalBox();
 		boxRight.add(Box.createVerticalGlue());
-		boxRight.add(buildDurationBox());
+
+		// add optional duration combobox
+		if(!Agency.isId(Agency.CALTRANS_D10))
+			boxRight.add(buildDurationBox());
 
 		// add optional font selection combo box
 		if(Agency.isId(Agency.CALTRANS_D10)) {
@@ -209,8 +212,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		return box;
 	}
 
-	/** Build the message duration box */
+	/** Build the optional message duration box */
 	protected JPanel buildDurationBox() {
+		cmbExpire = new JComboBox();
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel("Duration"));
 		p.add(cmbExpire);
@@ -271,8 +275,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			btnClear.setAction(new ClearDmsAction(proxy, userName));
 			if(btnGetStatus != null)
 				btnGetStatus.setEnabled(true);
-			cmbExpire.setEnabled(true);
-			cmbExpire.setSelectedIndex(0);
+			if(cmbExpire != null) {
+				cmbExpire.setEnabled(true);
+				cmbExpire.setSelectedIndex(0);
+			}
 			if(cmbFont != null) {
 				cmbFont.setEnabled(true);
 				cmbFont.setDefaultSelection();
@@ -291,8 +297,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		txtCamera.setText("");
 		txtLocation.setText("");
 		txtBrightness.setText("");
-		cmbExpire.setEnabled(false);
-		cmbExpire.setSelectedIndex(0);
+		if(cmbExpire != null) {
+			cmbExpire.setEnabled(false);
+			cmbExpire.setSelectedIndex(0);
+		}
 		if(cmbFont != null) {
 			cmbFont.setEnabled(false);
 			cmbFont.setDefaultSelection();
@@ -308,6 +316,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Get the selected duration */
 	protected int getDuration() {
+		if(cmbExpire == null)
+			return SignMessage.DURATION_INFINITE;
+
 		Expiration e = (Expiration)cmbExpire.getSelectedItem();
 		if(e != null)
 			return e.getDuration();
