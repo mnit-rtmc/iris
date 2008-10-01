@@ -45,7 +45,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
- *
+ * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel, TmsSelectionModel
  * @author Erik Engstrom
  * @author Douglas Lau
  */
@@ -253,7 +253,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		assert tcf != null;
 		if(tcf == null)
 			return null;
-		cmbFont = new FontComboBox(tcf);
+		cmbFont = new FontComboBox(this, tcf);
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel("Font"));
 		p.add(cmbFont);
@@ -269,10 +269,14 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			btnSend.setEnabled(true);
 			btnClear.setEnabled(true);
 			btnClear.setAction(new ClearDmsAction(proxy, userName));
-			if(btnGetStatus!=null)
+			if(btnGetStatus != null)
 				btnGetStatus.setEnabled(true);
 			cmbExpire.setEnabled(true);
 			cmbExpire.setSelectedIndex(0);
+			if(cmbFont != null) {
+				cmbFont.setEnabled(true);
+				cmbFont.setDefaultSelection();
+			}
 			proxy.updateUpdateInfo(); // update global messages
 			pnlSign.setSign(proxy);
 			refreshUpdate();
@@ -289,6 +293,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		txtBrightness.setText("");
 		cmbExpire.setEnabled(false);
 		cmbExpire.setSelectedIndex(0);
+		if(cmbFont != null) {
+			cmbFont.setEnabled(false);
+			cmbFont.setDefaultSelection();
+		}
 		messageSelector.setEnabled(false);
 		messageSelector.clearSelections();
 		btnSend.setEnabled(false);
@@ -305,6 +313,17 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			return e.getDuration();
 		else
 			return SignMessage.DURATION_INFINITE;
+	}
+
+	/** 
+	 *  Get the selected font. The font selector is an optional control
+	 *  and may be null.
+	 *  @return Null if no font is selected or cmbFont is null, else the
+	 *	    selected Font.
+	 */
+	protected Font getSelectedFont() {
+		return (cmbFont == null ? null : 
+			(Font)cmbFont.getSelectedItem());
 	}
 
 	/** Send a new message to the selected DMS object */
@@ -357,4 +376,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		txtBrightness.setText("" + Math.round(
 			dms.getLightOutput() / 655.35f));
 	}
+
+	/** get the currently selected DMS */
+	public DMSProxy getSelectedDms() {
+		return selectedSign;
+	}
+
 }

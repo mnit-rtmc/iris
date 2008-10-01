@@ -28,43 +28,30 @@ import us.mn.state.dot.tms.Font;
 
 /**
  * Combobox model for fonts.
- *
+ * @see FontComboBox, DMSDispatcher, ProxyListModel, Font, FontImpl, TypeCache
  * @author Michael Darter
  */
 public class FontComboBoxModel extends ProxyListModel<Font>
 	implements ComboBoxModel 
 {
+	/** currently selected font */
+	Font m_selected;
+
 	/** constructor */
 	public FontComboBoxModel(TypeCache<Font> arg_fonts) {
 		super(arg_fonts);
+		initialize();
 	}
 
 	/** Get the item at the specified index */
 	public Object getElementAt(int index) {
-/*
-		int i = 0;
-		for(SignText t: m_items) {
-			if(i == index) {
-				// this is a hack, see the note in ignoreLineHack()
-				if(t!=null && SDMS.ignoreLineHack(t.toString()))
-					return "";
-				return t;
-			}
-			i++;
-		}
-*/
-		return "oh ya";
-	}
-
-	/** Get the number of items in the model */
-	public int getSize() {
-		return 1;
+		Font f = (Font)super.getElementAt(index);
+		return f;
 	}
 
 	/** Get the selected item */
 	public Object getSelectedItem() {
-		//return m_selected;
-		return "oh ya";
+		return m_selected;
 	}
 
 	/** 
@@ -73,23 +60,17 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	 *      -a combobox item is clicked on via the mouse.
 	 *      -a combobox item is moved to via the cursor keys.
 	 */
-	public void setSelectedItem(Object s) {
+	public void setSelectedItem(Object f) {
+		if(f instanceof Font)
+			m_selected = (Font)f;
+		else if(f == null)
+			m_selected = null;
+		else
+			assert false : "unexpected type in setSelectedItem().";
 	}
 
-	/* 
-	protected void LoadComboBox(){
-		List<String> fontNames = getFontNames(m_fonts);
-		if(fontNames != null) {
-			for(String fn: fontNames)
-				this.addItem(fn);
-			if(fontNames.size()>0)
-				this.setSelectedIndex(0);
-		}
-
-	}*/
-
-	/** return a list of available fonts */
-/*
+	/** return a list of available fonts (for debugging) */
+	/*
 	protected List<String> getFontNames(TypeCache<Font> tcf) {
 		LinkedList<String> fontNames = new LinkedList();
 		Map<String,Font> fonts = tcf.getAll();
@@ -100,5 +81,5 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 		}
 		return fontNames;
 	}
-*/
+	*/
 }
