@@ -359,7 +359,6 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Get the selected duration */
 	protected int getDuration() {
-		assert m_useDurationComboBox;
 		if(!m_useDurationComboBox)
 			return SignMessage.DURATION_INFINITE;
 		Expiration e = (Expiration)cmbExpire.getSelectedItem();
