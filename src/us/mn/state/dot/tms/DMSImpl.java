@@ -585,15 +585,17 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Create a blank message for the sign */
 	protected SignMessage createBlankMessage(String owner) {
-		return createBlankMessage(owner,MsgActPriority.PRI_OPER_BLANK);
+		return createBlankMessage(owner, MsgActPriority.PRI_OPER_BLANK);
 	}
 
 	/** Create a blank message for the sign w/ activation priority */
-	protected SignMessage createBlankMessage(String owner,MsgActPriority ap) {
+	protected SignMessage createBlankMessage(String owner,
+		MsgActPriority ap)
+	{
 		MultiString multi = new MultiString();
 		BitmapGraphic bitmap = new BitmapGraphic(signWidthPixels,
 			signHeightPixels);
-		SignMessage sm=new SignMessage(owner, multi, bitmap, 0);
+		SignMessage sm = new SignMessage(owner, multi, bitmap, 0);
 		sm.setActivationPriority(ap);
 		return sm;
 	}
@@ -611,12 +613,12 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Set a new message on the sign, all pages rendered, ignoring
 	 *  activation priorities. */
-	public void setMessage(String owner, String text, int duration, MsgActPriority ap)
-		throws InvalidMessageException
+	public void setMessage(String owner, String text, int duration,
+		MsgActPriority ap) throws InvalidMessageException
 	{
 		MultiString multi = new MultiString(text);
 		sendMessage(new SignMessage(owner, multi,
-			createPixelMaps(multi), duration, ap),true);
+			createPixelMaps(multi), duration, ap), true);
 	}
 
 	/** Set a new message on the sign */
@@ -645,8 +647,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		if(!isActive())
 			return;
 		MultiString multi = new MultiString(text);
-		SignMessage sm=new SignAlert(owner, multi,
-			createPixelMaps(multi),SignMessage.DURATION_INFINITE,overwrite);
+		SignMessage sm = new SignAlert(owner, multi,
+			createPixelMaps(multi), SignMessage.DURATION_INFINITE,
+			overwrite);
 		sendMessage(sm,true);
 	}
 
@@ -661,7 +664,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	{
 		// only replace existing messages if they are TT, ie don't
 		// replace messages sent by operators.
-		//FIXME: use activation priority scheme
+		// FIXME: use activation priority scheme
 		if(isActive() && (message.isBlank() ||
 			message instanceof SignTravelTime))
 		{
@@ -680,8 +683,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return;
 		}
 		MultiString multi = new MultiString(text);
-		//FIXME: use activation priority here
-		sendMessage(new SignTravelTime(multi, createPixelMaps(multi)),false);
+		// FIXME: use activation priority here
+		sendMessage(new SignTravelTime(multi, createPixelMaps(multi)),
+			false);
 	}
 
 	/** Clear a travel time message */
@@ -695,27 +699,25 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
  	 *  on the sign.
 	 *  @param m SignMessage to activate.
 	 *  @param useActPriority If false, activation priority is ignored.
-	 *  @see MsgActPriority,MsgActPriorityProc
+	 *  @see MsgActPriority, MsgActPriorityProc
 	 */
-	protected void sendMessage(SignMessage m, boolean useActPriority) throws InvalidMessageException
+	protected void sendMessage(SignMessage m, boolean useActPriority)
+		throws InvalidMessageException
 	{
-		if (m==null)
+		if(m == null)
 			return;
-
 		// Note that below, we are asking the potential new message to
-		// evaluate if it supercedes the message on the sign, not the
+		// evaluate if it supersedes the message on the sign, not the
 		// other way around. 
-		if ( (useActPriority ? m.supersede(message) : true ) ) {
- 			System.err.println(this+", "+"DMSImpl.sendMessage(): activating new message: "+
-				m.toStringDebug()+" >= "+message.toStringDebug());
+		if(useActPriority ? m.supersede(message) : true) {
 			DMSPoller p = getDMSPoller();
 			if(p != null)
 				p.sendMessage(this, m);
-		}
-		else {
- 			System.err.println(this+", "+"DMSImpl.sendMessage(): "+
-				"not activating new message: "+
-				m.toStringDebug()+" < "+message.toStringDebug());
+		} else {
+ 			System.err.println(this + ", DMSImpl.sendMessage(): " +
+				"not activating new message: " +
+				m.toStringDebug() + " < " +
+				message.toStringDebug());
 		}
 	}
 
@@ -731,29 +733,30 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		setMessageTimeRemaining(createBlankMessage(owner));
 	}
 
-	/** Clear the message displayed on the sign using an activation priority */
-	public void clearMessageUsingActivationPriority(String owner,MsgActPriority ap) {
-		//setMessageTimeRemaining(createBlankMessage(owner,ap));
-		assert owner!=null && ap!=null : "An arg is null.";
-		if (owner==null || ap==null) 
+	/** Clear the message displayed on the sign using an activation
+	 *  priority */
+	public void clearMessageUsingActivationPriority(String owner,
+		MsgActPriority ap)
+	{
+		assert owner != null && ap != null : "An arg is null.";
+		if(owner == null || ap == null) 
 			return;
-		SignMessage m=createBlankMessage(owner,ap);
+		SignMessage m = createBlankMessage(owner, ap);
 
 		// activate blank only if it has a higher priority
-		if (m.supersede(message)) {
- 			System.err.println(this+" clearMessageUsingActivationPriority(): activating blank: m="+m.toStringDebug()+", mos="+message.toStringDebug());
+		if(m.supersede(message))
 			setMessageTimeRemaining(m);
-		}
 		else {
- 			System.err.println(this+" clearMessageUsingActivationPriority(): NOT activating blank: m="+m.toStringDebug()+", mos="+message.toStringDebug());
+ 			System.err.println(this +
+				" clearMessageUsingActivationPriority(): " +
+				"NOT activating blank: m=" + m.toStringDebug() +
+				", mos=" + message.toStringDebug());
 		}
 	}
 
 	/** Set the active sign message (called after a message has been
 	 * successfully activated) */
 	public void setActiveMessage(SignMessage m) {
-		//System.err.println(this+", "+"DMSImpl.setActiveMessage(m="+m.toStringDebug()+") called.");
-
 		// If the new message is different from the old message
 		// then log it.  Required to prevent double-logging
 		// when users double-click the send.
@@ -777,15 +780,20 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	 * with a default activation priority.
 	 */
 	public void setMessageFromController(String text, int time) {
-		setMessageFromController(text,time,NO_OWNER,MsgActPriority.PRI_OPER_MSG);
+		setMessageFromController(text, time, NO_OWNER,
+			MsgActPriority.PRI_OPER_MSG);
 	}
 
 	/** 
 	 * Set the message from information read from the controller.
 	 * All pages are rendered.
 	 */
-	public void setMessageFromController(String text, final int time, String argowner, MsgActPriority ap) {
-		if(message.equals(text)) //FIXME: this just tests if multistrings are identical, what if activation priority is different but text the same?
+	public void setMessageFromController(String text, final int time,
+		String argowner, MsgActPriority ap)
+	{
+		// FIXME: this just tests if multistrings are identical, what
+		// if activation priority is different but text the same?
+		if(message.equals(text))
 			return;
 		MultiString multi = new MultiString(text);
 		setActiveMessage(new SignMessage(argowner, multi,

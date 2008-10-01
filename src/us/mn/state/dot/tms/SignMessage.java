@@ -281,7 +281,6 @@ public class SignMessage implements Serializable
 	 *  @return true if this supersedes the argument message.
 	 */
 	public boolean supersede(SignMessage mos) {
-		System.err.println("SignMessage.supersede(mos="+(mos==null?"null":mos.toStringDebug())+") called.");
 		if(mos == null || this.getActivationPriority() == null)
 			return true;
 		// start with subclass
@@ -298,4 +297,3 @@ public class SignMessage implements Serializable
 		}
 	}
 }
-

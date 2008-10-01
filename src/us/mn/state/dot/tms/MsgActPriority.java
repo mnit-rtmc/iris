@@ -31,30 +31,37 @@ import java.io.Serializable;
  * priority levels, create a subclass.
  *
  * @author Michael Darter
- * @see MsgActPriorityD10,MsgActPriorityProc,SignMessage,MsgActPriorityCallBackBlank
+ * @see MsgActPriorityD10, MsgActPriorityProc, SignMessage,
+ * MsgActPriorityCallBackBlank
  */
 public class MsgActPriority implements Serializable {
 
 	/** priority values used for validation */
-	public static final int VAL_LOWEST=0;
-	public static final int VAL_HIGHEST=255;
+	public static final int VAL_LOWEST = 0;
+	public static final int VAL_HIGHEST = 255;
 
 	/** priority values common to all agencies */
-	public static final int VAL_OPER_BLANK=130;
-	public static final int VAL_OPER_MSG=VAL_OPER_BLANK;
-	public static final int VAL_OPER_ALERT=VAL_OPER_MSG;
-	public static final int VAL_IRIS_TRAVELTIME=110;
+	public static final int VAL_OPER_BLANK = 130;
+	public static final int VAL_OPER_MSG = VAL_OPER_BLANK;
+	public static final int VAL_OPER_ALERT = VAL_OPER_MSG;
+	public static final int VAL_IRIS_TRAVELTIME = 110;
 
 	/** canned priorities common to all agencies */
-	public static final MsgActPriority PRI_LOWEST=new MsgActPriority(VAL_LOWEST);
-	public static final MsgActPriority PRI_HIGHEST=new MsgActPriority(VAL_HIGHEST);
-	public static final MsgActPriority PRI_OPER_BLANK=new MsgActPriority(VAL_OPER_BLANK);
-	public static final MsgActPriority PRI_OPER_MSG=new MsgActPriority(VAL_OPER_MSG);
-	public static final MsgActPriority PRI_OPER_ALERT=new MsgActPriority(VAL_OPER_ALERT);
-	public static final MsgActPriority PRI_IRIS_TRAVELTIME=new MsgActPriority(VAL_IRIS_TRAVELTIME);
+	static public final MsgActPriority PRI_LOWEST =
+		new MsgActPriority(VAL_LOWEST);
+	static public final MsgActPriority PRI_HIGHEST =
+		new MsgActPriority(VAL_HIGHEST);
+	static public final MsgActPriority PRI_OPER_BLANK =
+		new MsgActPriority(VAL_OPER_BLANK);
+	static public final MsgActPriority PRI_OPER_MSG =
+		new MsgActPriority(VAL_OPER_MSG);
+	static public final MsgActPriority PRI_OPER_ALERT =
+		new MsgActPriority(VAL_OPER_ALERT);
+	static public final MsgActPriority PRI_IRIS_TRAVELTIME =
+		new MsgActPriority(VAL_IRIS_TRAVELTIME);
 
 	/** priority, which follows NTCIP activation priority, ranges 0-255 */
-	protected int m_priority=VAL_OPER_MSG;
+	protected int m_priority = VAL_OPER_MSG;
 
 	/** Create a priority */
 	public MsgActPriority() {
@@ -67,7 +74,7 @@ public class MsgActPriority implements Serializable {
 
 	/** get String representation */
 	public String toString() {
-		return "Priority="+m_priority;
+		return "Priority=" + m_priority;
 	}
 
 	/** 
@@ -75,22 +82,24 @@ public class MsgActPriority implements Serializable {
 	 * DMS. Note that we are asking the potential new priority (this) to 
 	 * evaluate whether it supercedes the priority of the message on the 
 	 * sign (the argument).
-	 * @param priOnSign Typically the priority level of the message on the sign.
-	 * @return true if the priority of this supersedes the argument priority value.
+	 * @param priOnSign Typically the priority level of the message on the
+	 * sign.
+	 * @return true if the priority of this supersedes the argument priority
+	 * value.
 	 */
 	public boolean supersede(final MsgActPriority priOnSign) {
-		System.err.println("MsgActPriority.supersede("+priOnSign.toString()+") called.");
-		if (priOnSign==null)
+		if(priOnSign == null)
 			return false;
 		return this.valueOf() >= priOnSign.valueOf();
 	}
 
 	/** set priority using int */
 	public void setValue(final int priority) {
-		assert (priority>=VAL_LOWEST && priority<=VAL_HIGHEST) : "Bogus priority="+priority;
-		m_priority=priority;
+		assert (priority >= VAL_LOWEST && priority <= VAL_HIGHEST) :
+			"Bogus priority=" + priority;
+		m_priority = priority;
 		m_priority=(m_priority < VAL_LOWEST ? VAL_LOWEST : m_priority);
-		m_priority=(m_priority > VAL_HIGHEST ? VAL_HIGHEST : m_priority);
+		m_priority=(m_priority > VAL_HIGHEST ? VAL_HIGHEST :m_priority);
 	}
 
 	/** get priority as int */
@@ -101,7 +110,7 @@ public class MsgActPriority implements Serializable {
 	/** Test for equality */
 	public boolean equals(Object o) {
 		if(o instanceof MsgActPriority)
-			return this.valueOf()==((MsgActPriority)o).valueOf();
+			return this.valueOf() == ((MsgActPriority)o).valueOf();
 		return false;
 	}
 
@@ -110,4 +119,3 @@ public class MsgActPriority implements Serializable {
 		return this.hashCode();
 	}
 }
-
