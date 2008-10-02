@@ -18,15 +18,23 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 
 /**
- * Blank sign text for message selector combo boxes.
+ * Client-side sign text for message selector combo boxes.
  *
  * @author Douglas Lau
  */
-public class BlankSignText implements SignText {
+public class ClientSignText implements SignText {
+
+	/** Sign text message */
+	protected final String message;
+
+	/** Create a new client sign text */
+	public ClientSignText(String m) {
+		message = m;
+	}
 
 	/** Get the SONAR object name */
 	public String getName() {
-		return "BLANK";
+		return "client_sign_text_" + message;
 	}
 
 	/** Get the SONAR type name */
@@ -56,7 +64,7 @@ public class BlankSignText implements SignText {
 
 	/** Get the message */
 	public String getMessage() {
-		return "";
+		return message;
 	}
 
 	/** Set the priority */

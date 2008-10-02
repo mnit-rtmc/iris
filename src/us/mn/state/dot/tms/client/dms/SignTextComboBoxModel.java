@@ -61,7 +61,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 		m_cbline = cbline;
 		m_signMsgModel = smm;
 		m_tmsConnection = tmsConnection;
-		m_items.add(new BlankSignText());
+		m_items.add(new ClientSignText(""));
 	}
 
 	/** Get the element at the specified index */
@@ -108,8 +108,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 		else if(s instanceof SignText)
 			m_selected = (SignText)s;
 		else {
-			m_selected = null;
 			assert false: "unknown arg type";
+			m_selected = null;
 		}
 		// this results in a call to the editor's setSelectedItem method
 		fireContentsChanged(this, -1, -1);
