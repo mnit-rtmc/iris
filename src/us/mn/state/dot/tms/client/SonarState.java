@@ -384,6 +384,7 @@ public class SonarState extends Client {
 		populate(users);
 		populate(connections);
 		populate(system_policy);
+		populate(system_attributes);
 		populate(roads, true);
 		populate(geo_locs, true);
 		populate(comm_links);

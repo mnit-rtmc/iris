@@ -27,6 +27,7 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemPolicy;
 
 /**
@@ -65,6 +66,9 @@ public class PolicyForm extends AbstractForm {
 	/** System policy type cache */
 	protected final TypeCache<SystemPolicy> cache;
 
+	/** SystemAttribute type cache */
+	protected final TypeCache<SystemAttribute> cache_attribs;
+
 	/** Ramp meter green time slider */
 	protected final JSlider green = createSlider(0, 30);
 
@@ -95,6 +99,12 @@ public class PolicyForm extends AbstractForm {
 	/** Apply button */
 	protected final JButton apply = new JButton("Apply Changes");
 
+	/** system attribute editor tab */
+	protected SystemAttributeTab systemAttributeTab=null;
+
+	/** user is an admin */
+	protected final boolean admin;	//FIXME: what if user changes to admin? This isn't updated
+
 	/** Proxy listener for System Policy proxies */
 	protected final ProxyListener<SystemPolicy> sp_listener =
 		new ProxyListener<SystemPolicy>()
@@ -108,9 +118,13 @@ public class PolicyForm extends AbstractForm {
 	};
 
 	/** Create a new policy form */
-	public PolicyForm(TypeCache<SystemPolicy> c) {
+	public PolicyForm(boolean argAdmin, TypeCache<SystemPolicy> c, 
+		TypeCache<SystemAttribute> arg_cache_attribs) 
+	{
 		super(TITLE);
+		admin = argAdmin;
 		cache = c;
+		cache_attribs = arg_cache_attribs;
 	}
 
 	/** Initialise the widgets on the form */
@@ -123,6 +137,12 @@ public class PolicyForm extends AbstractForm {
 		tab.add("Meters", createMeterPanel());
 		tab.add("DMS", createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
+
+		// add system attribute editor tab
+		systemAttributeTab = new SystemAttributeTab(admin, 
+			this, cache_attribs);
+		tab.add(systemAttributeTab);
+
 		add(Box.createVerticalStrut(VGAP));
 		new ActionJob(this, apply) {
 			public void perform() throws Exception {
