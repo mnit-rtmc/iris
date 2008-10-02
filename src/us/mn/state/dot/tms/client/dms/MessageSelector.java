@@ -23,6 +23,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -30,7 +31,6 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.utils.Agency;
-
 
 /**
  * Gui for selecting messages for DMS.
@@ -67,16 +67,16 @@ public class MessageSelector extends JPanel {
 	/** Number of lines on the currently selected sign */
 	protected int n_lines;
 
-	/** Tms connection */
-	protected TmsConnection m_tmsConnection;
+	/** SONAR user */
+	protected final User user;
 
 	/** Create a new message selector */
-	public MessageSelector(TypeCache<DmsSignGroup> d,
-		TypeCache<SignText> t, TmsConnection tmsConnection)
+	public MessageSelector(TypeCache<DmsSignGroup> d, TypeCache<SignText> t,
+		User u)
 	{
 		dms_sign_groups = d;
 		sign_text = t;
-		m_tmsConnection=tmsConnection;
+		user = u;
 		add(tab);
 		initializeWidgets(0, 1);
 	}
@@ -275,7 +275,7 @@ if(nl == 0) nl = 3;
 	/** Create a new message model */
 	protected void createMessageModel(String dms_id) {
 		SignMessageModel mm = new SignMessageModel(dms_id,
-			dms_sign_groups, sign_text,m_tmsConnection);
+			dms_sign_groups, sign_text, user);
 		mm.initialize();
 		SignMessageModel omm = mess_model;
 		mess_model = mm;

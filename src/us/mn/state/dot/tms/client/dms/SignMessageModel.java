@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -38,6 +39,11 @@ import us.mn.state.dot.tms.utils.SDMS;
  */
 public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 
+	/** Create a SONAR name to check for allowed updates */
+	static protected String createNamespaceString(String name) {
+		return SignText.SONAR_TYPE + "/" + name;
+	}
+
 	/** DMS id associated with this object */
 	protected final String dms_id;
 
@@ -50,17 +56,17 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	/** Listener for sign text proxies */
 	protected final ProxyListener<SignText> listener;
 
-	/** Tms Connection */
-	protected TmsConnection m_tmsConnection;
+	/** SONAR User for permission checks */
+	protected final User user;
 
 	/** Create a new sign message model */
 	public SignMessageModel(String dms, TypeCache<DmsSignGroup> d,
-		TypeCache<SignText> t, TmsConnection tmsConnection)
+		TypeCache<SignText> t, User u)
 	{
 		dms_id = dms;
 		dms_sign_groups = d;
 		sign_text = t;
-		m_tmsConnection = tmsConnection;
+		user = u;
 		listener = new ProxyListener<SignText>() {
 			public void proxyAdded(SignText proxy) {
 				if(isMember(proxy.getSignGroup()))
@@ -163,14 +169,15 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 			return;
 		String mess = SDMS.getValidText(messarg);
 		String name = createUniqueSignTextName(sg);
-		if(name == null)
-			return;
-		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("sign_group", sg);
-		attrs.put("line", new Short(line));
-		attrs.put("message", mess);
-		attrs.put("priority", new Short(priority));
-		sign_text.createObject(name, attrs);
+		if(name != null && user.canAdd(createNamespaceString(name))) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("sign_group", sg);
+			attrs.put("line", new Short(line));
+			attrs.put("message", mess);
+			attrs.put("priority", new Short(priority));
+			sign_text.createObject(name, attrs);
+		}
 	}
 
 	/** 
@@ -304,7 +311,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 			return lines.get(line);
 		else {
 			SignTextComboBoxModel m = new SignTextComboBoxModel(
-				line, this, m_tmsConnection);
+				line, this);
 			lines.put(line, m);
 			return m;
 		}

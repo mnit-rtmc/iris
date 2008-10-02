@@ -50,21 +50,15 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** shortcut to container */
 	protected final SignMessageModel m_signMsgModel;
 
-	/** Tms Connection */
-	protected final TmsConnection m_tmsConnection;
-
 	/** 
 	 * Create a new line model.
 	 * @param cbline Combobox line number associated with this
 	 * SignTextComboBoxModel.
 	 * @param smm The container.
 	 */
-	protected SignTextComboBoxModel(short cbline, SignMessageModel smm,
-		TmsConnection tmsConnection)
-	{
+	protected SignTextComboBoxModel(short cbline, SignMessageModel smm) {
 		m_cbline = cbline;
 		m_signMsgModel = smm;
-		m_tmsConnection = tmsConnection;
 		m_items.add(BLANK_SIGN_TEXT);
 	}
 
@@ -126,34 +120,23 @@ public class SignTextComboBoxModel extends AbstractListModel
 		if(st != null)
 			return st;
 		else {
-			// string not in lib, add it
 			addMsgToLib(s);
 			// note: adding to the lib results in a listener
 			// eventually being called which loads the new
-			// SignText item into the combobox. If adding to
-			// the lib failed (e.g. user not an admin) then
-			// a ClientSignText is loaded into the combobox
-			// anyway.
+			// SignText proxy item into the combobox. Until that
+			// happens, we can create a ClientSignText object
+			// and use that.
 			return new ClientSignText(s);
 		}
 	}
 
-	/** 
-	 * Add a message line to the persistent library, which will trigger 
-	 * notification that the sonar cache type has changed.
-	 */
+	/** Add a message to the identity sign group library */
 	protected void addMsgToLib(String message) {
-		// only admins can add to lib
-		if(!m_tmsConnection.isAdmin())
-			return;
-
-		// only add message if an identity sign group exists
 		SignGroup isg = m_signMsgModel.getIdentitySignGroup();
-		if(isg == null)
-			return;
-
-		m_signMsgModel.createSignText(isg, m_cbline, message,
-			DEFAULT_PRIORITY);
+		if(isg != null) {
+			m_signMsgModel.createSignText(isg, m_cbline, message,
+				DEFAULT_PRIORITY);
+		}
 	}
 
 	/** 
