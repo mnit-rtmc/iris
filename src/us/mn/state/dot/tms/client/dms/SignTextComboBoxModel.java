@@ -103,36 +103,35 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 *      -a combobox item is moved to via the cursor keys.
 	 */
 	public void setSelectedItem(Object s) {
-		if(s instanceof String) {
-			// new item entered via editable combobox
-			SignText st = lookupMessage((String)s);
-			if(st == null) {
-				// string not in lib, add it
-				addMsgToLib((String)s);
-				// note: adding to the lib results in a listener
-				// eventually being called which loads the new
-				// SignText item into the combobox. If adding to
-				// the lib failed (e.g. user not an admin) then
-				// a String is loaded into the combobox below
-				// anyway.
-				m_selected = (String)s;
-			} else {
-				// string in lib, use SignText as current
-				m_selected = st;
-			}
-		} else if(s instanceof SignText) {
-			// SignText already in the list
-			SignText st = (SignText)s;
-			m_selected = st;
-		} else {
+		if(s instanceof String)
+			setSelectedItemString((String)s);
+		else if(s instanceof SignText)
+			m_selected = (SignText)s;
+		else {
 			m_selected = null;
-			String msg="WARNING: unknown arg type in setSelectedItem(Object)";
-			System.err.println(msg);
-			assert false : msg;
+			assert false: "unknown arg type";
 		}
-
 		// this results in a call to the editor's setSelectedItem method
 		fireContentsChanged(this, -1, -1);
+	}
+
+	/** Set the selected item.  This method is called when a new string is
+	 * entered via combobox editor. */
+	protected void setSelectedItemString(String s) {
+		SignText st = lookupMessage(s);
+		if(st != null)
+			m_selected = st;
+		else {
+			// string not in lib, add it
+			addMsgToLib(s);
+			// note: adding to the lib results in a listener
+			// eventually being called which loads the new
+			// SignText item into the combobox. If adding to
+			// the lib failed (e.g. user not an admin) then
+			// a String is loaded into the combobox below
+			// anyway.
+			m_selected = s;
+		}
 	}
 
 	/** 
