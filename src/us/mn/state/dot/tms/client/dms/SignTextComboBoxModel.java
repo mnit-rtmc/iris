@@ -36,6 +36,10 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Default priority for newly created sign messages */
 	static protected final short DEFAULT_PRIORITY = 50;
 
+	/** Blank client-side sign text object */
+	static protected final SignText BLANK_SIGN_TEXT =
+		new ClientSignText("");
+
 	/** Set of sorted SignText items in the line model */
 	protected final TreeSet<SignText> m_items =
 		new TreeSet<SignText>(new SignTextComparator());
@@ -61,7 +65,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 		m_cbline = cbline;
 		m_signMsgModel = smm;
 		m_tmsConnection = tmsConnection;
-		m_items.add(new ClientSignText(""));
+		m_items.add(BLANK_SIGN_TEXT);
 	}
 
 	/** Get the element at the specified index */
@@ -86,13 +90,13 @@ public class SignTextComboBoxModel extends AbstractListModel
 	}
 
 	/** Selected item, either a String or SignText */
-	protected Object m_selected;
+	protected SignText m_selected;
 
 	/** Get the selected item */
 	public Object getSelectedItem() {
 		// this is a hack, see the note in ignoreLineHack()
 		if(m_selected != null && SDMS.ignoreLineHack(m_selected.toString()))
-			return "";
+			return BLANK_SIGN_TEXT;
 		return m_selected;
 	}
 
@@ -104,7 +108,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 */
 	public void setSelectedItem(Object s) {
 		if(s instanceof String)
-			setSelectedItemString((String)s);
+			m_selected = getSignText((String)s);
 		else if(s instanceof SignText)
 			m_selected = (SignText)s;
 		else {
@@ -115,12 +119,12 @@ public class SignTextComboBoxModel extends AbstractListModel
 		fireContentsChanged(this, -1, -1);
 	}
 
-	/** Set the selected item.  This method is called when a new string is
-	 * entered via combobox editor. */
-	protected void setSelectedItemString(String s) {
+	/** Get or create a sign text for the given string.  This method is
+	 * called when a new string is entered via combobox editor. */
+	protected SignText getSignText(String s) {
 		SignText st = lookupMessage(s);
 		if(st != null)
-			m_selected = st;
+			return st;
 		else {
 			// string not in lib, add it
 			addMsgToLib(s);
@@ -128,9 +132,9 @@ public class SignTextComboBoxModel extends AbstractListModel
 			// eventually being called which loads the new
 			// SignText item into the combobox. If adding to
 			// the lib failed (e.g. user not an admin) then
-			// a String is loaded into the combobox below
+			// a ClientSignText is loaded into the combobox
 			// anyway.
-			m_selected = s;
+			return new ClientSignText(s);
 		}
 	}
 
