@@ -226,8 +226,9 @@ public class MessageSelector extends JPanel {
 
 	/** Set the selected message for a message line combo box */
 	protected void setLineSelection(int i, String m) {
-		ComboBoxModel model = cmbLine[i].getModel();
-		model.setSelectedItem(m);
+		SignTextComboBoxModel model = mess_model.getLineModel(
+			(short)(i + 1));
+		model.setSelectedString(m);
 	}
 
 	/** Clear the combobox selections */
