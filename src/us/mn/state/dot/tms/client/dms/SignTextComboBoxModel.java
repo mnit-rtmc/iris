@@ -76,7 +76,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 				// this is a hack, see the note in
 				// ignoreLineHack()
 				if(t != null && SDMS.ignoreLineHack(t.toString()))
-					return "";
+					return BLANK_SIGN_TEXT;
 				return t;
 			}
 			i++;
