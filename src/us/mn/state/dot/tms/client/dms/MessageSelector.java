@@ -96,12 +96,15 @@ public class MessageSelector extends JPanel {
 			return;
 		n_lines = n;
 		n_pages = p;
+		boolean can_add = mess_model != null &&
+			mess_model.canAddSignText("arbitrary_name");
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
-			final ComboBoxEditor cbe=new MsgComboBoxEditor();
-			cmbLine[i].setEditor(cbe);
-			cmbLine[i].setEditable(areMessagesEditable());
+			if(can_add) {
+				cmbLine[i].setEditor(new MsgComboBoxEditor());
+				cmbLine[i].setEditable(true);
+			}
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
 		}
@@ -114,17 +117,6 @@ public class MessageSelector extends JPanel {
 		}
 		for(p = n_pages; p < tab.getTabCount(); p++)
 			tab.removeTabAt(p);
-	}
-
-	/** 
-	 * Determine if message line comboboxes are editable.
-	 * This is a function of agency.
-	 */
-	protected boolean areMessagesEditable() {
-		boolean editable = false;
-		if (Agency.isId(Agency.CALTRANS_D10))
-			editable=true;
-		return editable;
 	}
 
 	/** Create a new page panel */

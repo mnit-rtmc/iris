@@ -169,7 +169,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 			return;
 		String mess = SDMS.getValidText(messarg);
 		String name = createUniqueSignTextName(sg);
-		if(name != null && user.canAdd(createNamespaceString(name))) {
+		if(canAddSignText(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
@@ -178,6 +178,11 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 			attrs.put("priority", new Short(priority));
 			sign_text.createObject(name, attrs);
 		}
+	}
+
+	/** Check if the user can add the named sign text */
+	public boolean canAddSignText(String name) {
+		return name != null && user.canAdd(createNamespaceString(name));
 	}
 
 	/** 
