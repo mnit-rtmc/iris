@@ -158,16 +158,13 @@ public class MessageSelector extends JPanel {
 
 	/** get text from combobox line */
 	protected String getMessageFromCB(int line) {
-		assert line>=0 && line<cmbLine.length;
+		assert line >= 0 && line < cmbLine.length;
 		Object o = cmbLine[line].getSelectedItem();
-		if(o==null)
-			return("");
-		if (o instanceof SignText )
+		if(o == null)
+			return "";
+		if(o instanceof SignText)
 			return ((SignText)o).getMessage();
-		else if (o instanceof String )
-			return (String)o;
-
-		assert false : "unknown type in getMessageFromCB()";
+		assert false: "unknown type in getMessageFromCB()";
 		return "";
 	}
 
