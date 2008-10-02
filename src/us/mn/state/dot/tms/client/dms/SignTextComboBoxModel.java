@@ -33,18 +33,21 @@ import us.mn.state.dot.tms.utils.SDMS;
 public class SignTextComboBoxModel extends AbstractListModel
 	implements ComboBoxModel
 {
+	/** Default priority for newly created sign messages */
+	static protected final short DEFAULT_PRIORITY = 50;
+
 	/** Set of sorted SignText items in the line model */
 	protected final TreeSet<SignText> m_items =
 		new TreeSet<SignText>(new SignTextComparator());
 
-	/** shortcut to container */
-	SignMessageModel m_signMsgModel = null;
-
 	/** combobox line number */
-	short m_cbline = 1;
+	protected final short m_cbline;
+
+	/** shortcut to container */
+	protected final SignMessageModel m_signMsgModel;
 
 	/** Tms Connection */
-	protected TmsConnection m_tmsConnection;
+	protected final TmsConnection m_tmsConnection;
 
 	/** 
 	 * Create a new line model.
@@ -59,11 +62,6 @@ public class SignTextComboBoxModel extends AbstractListModel
 		m_signMsgModel = smm;
 		m_tmsConnection = tmsConnection;
 		m_items.add(new BlankSignText());
-	}
-
-	/** Get the composite object that contains this object */
-	public SignMessageModel getComposite() {
-		return m_signMsgModel;
 	}
 
 	/** Get the element at the specified index */
@@ -142,22 +140,17 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 * notification that the sonar cache type has changed.
 	 */
 	protected void addMsgToLib(String message) {
-		if(getComposite() == null || m_tmsConnection == null)
-			return;
-
 		// only admins can add to lib
 		if(!m_tmsConnection.isAdmin())
 			return;
 
 		// only add message if an identity sign group exists
-		SignGroup isg = this.getComposite().getIdentitySignGroup();
-		if(isg==null)
+		SignGroup isg = m_signMsgModel.getIdentitySignGroup();
+		if(isg == null)
 			return;
 
-		// add message to lib
-		final short defaultPriority = 50;
-		this.getComposite().createSignText(isg, m_cbline, message,
-			defaultPriority);
+		m_signMsgModel.createSignText(isg, m_cbline, message,
+			DEFAULT_PRIORITY);
 	}
 
 	/** 
