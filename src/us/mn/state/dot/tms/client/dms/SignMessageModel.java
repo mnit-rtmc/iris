@@ -192,15 +192,10 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		final String sgname = sg.getName();
 		final HashSet<String> names = new HashSet<String>();
 
-		// cycle through all SignTexts
-		sign_text.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof SignText) {
-					SignText st = (SignText)o;
-					if(!st.getSignGroup().getName().equals(sgname))
-						return false;
+		sign_text.find(new Checker<SignText>() {
+			public boolean check(SignText st) {
+				if(st.getSignGroup().getName().equals(sgname))
 					names.add(st.getName());
-				}
 				return false;
 			}
 		});
@@ -246,22 +241,17 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	{
 		if(sign_text == null || msg == null || sg == null || line < 1)
 			return null;
-		SignText ret = sign_text.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof SignText) {
-					SignText st = (SignText)o;
-					if(st.getLine() != line)
-						return false;
-					if(!st.getSignGroup().getName().equals(sg.getName()))
-						return false;
-					if(!st.getMessage().equals(msg))
-						return false;
-					return true;
-				}
-				return false;
+		return sign_text.find(new Checker<SignText>() {
+			public boolean check(SignText st) {
+				if(st.getLine() != line)
+					return false;
+				if(!st.getSignGroup().getName().equals(sg.getName()))
+					return false;
+				if(!st.getMessage().equals(msg))
+					return false;
+				return true;
 			}
 		});
-		return ret;
 	}
 
 	/** 
@@ -272,13 +262,10 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	protected void addGroup(final SignGroup g) {
 		groups.add(g.getName());
 		// add new sign text lines in new group to combobox models
-		sign_text.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof SignText) {
-					SignText t = (SignText)o;
-					if(t.getSignGroup() == g)
-						addSignText(t);
-				}
+		sign_text.find(new Checker<SignText>() {
+			public boolean check(SignText st) {
+				if(st.getSignGroup() == g)
+					addSignText(st);
 				return false;
 			}
 		});
@@ -291,13 +278,10 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	protected void removeGroup(final SignGroup g) {
 		groups.remove(g.getName());
 		// delete lines from combobox models associated with sign group
-		sign_text.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof SignText) {
-					SignText t = (SignText)o;
-					if(t.getSignGroup() == g)
-						removeSignText(t);
-				}
+		sign_text.find(new Checker<SignText>() {
+			public boolean check(SignText st) {
+				if(st.getSignGroup() == g)
+					removeSignText(st);
 				return false;
 			}
 		});
