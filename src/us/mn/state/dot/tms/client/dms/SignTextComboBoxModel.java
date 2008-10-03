@@ -33,8 +33,8 @@ import us.mn.state.dot.tms.utils.SDMS;
 public class SignTextComboBoxModel extends AbstractListModel
 	implements ComboBoxModel
 {
-	/** Default priority for newly created sign messages */
-	static protected final short DEFAULT_PRIORITY = 50;
+	/** Priority for on-the-fly created sign messages */
+	static protected final short ON_THE_FLY_PRIORITY = 99;
 
 	/** Blank client-side sign text object */
 	static protected final SignText BLANK_SIGN_TEXT =
@@ -95,16 +95,6 @@ public class SignTextComboBoxModel extends AbstractListModel
 	}
 
 	/** 
-	 * Set the selected item as a String. This method is called when the
-	 * message changes on the DMS.
-	 */
-	public void setSelectedString(String s) {
-		m_selected = getSignText((String)s, false);
-		// this results in a call to the editor's setSelectedItem method
-		fireContentsChanged(this, -1, -1);
-	}
-
-	/** 
 	 * Set the selected item. This method is called by the combobox when:
 	 * 	-the focus leaves the combobox with a String arg when editable.
 	 *      -a combobox item is clicked on via the mouse.
@@ -112,7 +102,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 */
 	public void setSelectedItem(Object s) {
 		if(s instanceof String)
-			m_selected = getSignText((String)s, true);
+			m_selected = getSignText((String)s);
 		else if(s instanceof SignText)
 			m_selected = (SignText)s;
 		else {
@@ -123,36 +113,15 @@ public class SignTextComboBoxModel extends AbstractListModel
 		fireContentsChanged(this, -1, -1);
 	}
 
-	/** Get or create a sign text for the given string.  This method is
-	 * called when a new string is entered via combobox editor. */
-	protected SignText getSignText(String s, boolean add) {
+	/** Get or create a sign text for the given string */
+	protected SignText getSignText(String s) {
+		if(s.length() == 0)
+			return BLANK_SIGN_TEXT;
 		SignText st = lookupMessage(s);
 		if(st != null)
 			return st;
-		else {
-			if(add && !isSelectedMessage(s))
-				addMsgToLib(s);
-			// note: adding to the lib results in a listener
-			// eventually being called which loads the new
-			// SignText proxy item into the combobox. Until that
-			// happens, we can create a ClientSignText object
-			// and use that.
+		else
 			return new ClientSignText(s);
-		}
-	}
-
-	/** Check if the given string is the same as the selected message */
-	protected boolean isSelectedMessage(String s) {
-		return m_selected != null && s.equals(m_selected.getMessage());
-	}
-
-	/** Add a message to the local sign group library */
-	protected void addMsgToLib(String message) {
-		SignGroup lsg = m_signMsgModel.getLocalSignGroup();
-		if(lsg != null) {
-			m_signMsgModel.createSignText(lsg, m_cbline, message,
-				DEFAULT_PRIORITY);
-		}
 	}
 
 	/** 
@@ -162,7 +131,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 */
 	protected SignText lookupMessage(String t) {
 		for(SignText st: m_items) {
-			if(st.getMessage().equals(t))
+			if(t.equals(st.getMessage()))
 				return st;
 		}
 		return null;
@@ -205,6 +174,22 @@ public class SignTextComboBoxModel extends AbstractListModel
 					fireIntervalRemoved(this, i, i);
 				}
 			});
+		}
+	}
+
+	/** Update the message library with the currently selected messages */
+	public void updateMessageLibrary() {
+		SignText st = m_selected;
+		if(st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
+			addMsgToLib(st.getMessage());
+	}
+
+	/** Add a message to the local sign group library */
+	protected void addMsgToLib(String message) {
+		SignGroup lsg = m_signMsgModel.getLocalSignGroup();
+		if(lsg != null) {
+			m_signMsgModel.createSignText(lsg, m_cbline, message,
+				ON_THE_FLY_PRIORITY);
 		}
 	}
 }

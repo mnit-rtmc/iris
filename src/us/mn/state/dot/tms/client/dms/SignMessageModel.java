@@ -271,4 +271,10 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		// add to associated model
 		this.addSignText(t);
 	}
+
+	/** Update the message library with the currently selected messages */
+	public void updateMessageLibrary() {
+		for(SignTextComboBoxModel m: lines.values())
+			m.updateMessageLibrary();
+	}
 }

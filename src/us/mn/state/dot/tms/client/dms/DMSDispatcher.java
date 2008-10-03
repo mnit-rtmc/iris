@@ -287,8 +287,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected void sendMessage() throws TMSException, RemoteException {
 		DMSProxy proxy = selectedSign;	// Avoid NPE race
 		String message = messageSelector.getMessage();
-		if(proxy != null && message != null)
+		if(proxy != null && message != null) {
 			proxy.dms.setMessage(userName, message, getDuration());
+			messageSelector.updateMessageLibrary();
+		}
 	}
 
 	/** Called whenever the selected DMS changes */

@@ -31,6 +31,9 @@ import us.mn.state.dot.tms.utils.SDMS;
  */
 public class SignTextCreator {
 
+	/** Maximum number of lines for a sign */
+	static protected final int MAX_LINES = 12;
+
 	/** Create a SONAR name to check for allowed updates */
 	static protected String createNamespaceString(String name) {
 		return SignText.SONAR_TYPE + "/" + name;
@@ -41,6 +44,9 @@ public class SignTextCreator {
 
 	/** SONAR User for permission checks */
 	protected final User user;
+
+	/** Unique ID for sign text naming */
+	protected int uid = 0;
 
 	/** Create a new sign text creator */
 	public SignTextCreator(TypeCache<SignText> st, User u) {
@@ -93,10 +99,16 @@ public class SignTextCreator {
 	 */
 	protected String createUniqueSignTextName(SignGroup sg) {
 		HashSet<String> names = createSignTextNameSet(sg);
-		for(int i = 0; i < names.size() + 1; i++) {
-			String n = sg.getName() + "_" + i;
-			if(!names.contains(n))
+		// NOTE: uid needs to persist between calls so that calling
+		// this method twice in a row doesn't return the same name
+		final int uid_max = names.size() + MAX_LINES;
+		for(int i = 0; i < uid_max; i++) {
+			final int _uid = (uid + i) % uid_max + 1;
+			String n = sg.getName() + "_" + _uid;
+			if(!names.contains(n)) {
+				uid = _uid;
 				return n;
+			}
 		}
 		assert false;
 		return null;

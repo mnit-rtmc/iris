@@ -228,7 +228,7 @@ public class MessageSelector extends JPanel {
 	protected void setLineSelection(int i, String m) {
 		SignTextComboBoxModel model = mess_model.getLineModel(
 			(short)(i + 1));
-		model.setSelectedString(m);
+		model.setSelectedItem(m);
 	}
 
 	/** Clear the combobox selections */
@@ -286,5 +286,11 @@ if(nl == 0) nl = 3;
 		if(Agency.isId(Agency.CALTRANS_D10))
 			ret = ret<2 ? 2 : ret;
 		return ret;
+	}
+
+	/** Update the message library with the currently selected messages */
+	public void updateMessageLibrary() {
+		if(mess_model != null)
+			mess_model.updateMessageLibrary();
 	}
 }
