@@ -186,15 +186,11 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	 * Create a HashSet which contains all SignText names for this sign.
 	 * @return A HashSet with entries as SignText names, e.g. V1_23
 	 */
-	private HashSet<String> createSignTextNameSet(SignGroup sg) {
-		if(sg == null)
-			return null;
-		final String sgname = sg.getName();
+	private HashSet<String> createSignTextNameSet(final SignGroup sg) {
 		final HashSet<String> names = new HashSet<String>();
-
 		sign_text.find(new Checker<SignText>() {
 			public boolean check(SignText st) {
-				if(st.getSignGroup().getName().equals(sgname))
+				if(st.getSignGroup() == sg)
 					names.add(st.getName());
 				return false;
 			}
@@ -202,25 +198,18 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		return names;
 	}
 
-	/** Create a SignText name given a sign group name and unique id */
-	private String buildSignTextName(String sign_group_name, int id) {
-		if(sign_group_name == null)
-			return "";
-		return sign_group_name + "_" + id;
-	}
-
 	/** 
 	 * Create a SignText name, which is in this form: 
 	 *    sign_group.name + "_" + uniqueid
 	 *    where uniqueid is a sequential integer.
 	 * @return A unique string for a new SignText entry, e.g. V1_23
+	 *
+	 * FIXME: this code is duplicated in SignTextTableModel as createName
 	 */
 	private String createUniqueSignTextName(SignGroup sg) {
-		if(sg == null || sg.getName() == null)
-			return null;
-		final HashSet<String> names = createSignTextNameSet(sg);
+		HashSet<String> names = createSignTextNameSet(sg);
 		for(int i = 0; i < 10000; i++) {
-			String n = buildSignTextName(sg.getName(), i);
+			String n = sg.getName() + "_" + i;
 			if(!names.contains(n))
 				return n;
 		}

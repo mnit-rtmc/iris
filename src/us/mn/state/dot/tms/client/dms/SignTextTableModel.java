@@ -236,8 +236,6 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	 * @return A unique string in the form: group name + _n
 	 */
 	protected String createName() {
-		if (group==null)
-			return null;
 		HashSet<String> names = getNames();
 		for(int i = 0; i < 10000; i++) {
 			String n = group.getName() + "_" + i;
