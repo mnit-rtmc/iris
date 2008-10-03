@@ -45,6 +45,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
@@ -334,6 +335,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Sonar state */
 	protected final SonarState state;
 
+	/** SONAR user */
+	protected final User user;
+
 	/** Array of timing plans */
 	protected TimingPlan[] plans;
 
@@ -347,6 +351,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	public DMSProperties(TmsConnection tc, String id) {
 		super(TITLE + id, tc, id);
 		state = tc.getSonarState();
+		user = state.lookupUser(tc.getUser().getName());
 		sign_group_model = new SignGroupModel(id,
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
@@ -546,7 +551,7 @@ public class DMSProperties extends TrafficDeviceForm {
 			if(sign_text_model != null)
 				sign_text_model.dispose();
 			sign_text_model = new SignTextTableModel(group,
-				state.getSignText(), true);
+				state.getSignText(), user);
 			sign_text_table.setModel(sign_text_model);
 			delete_group.setEnabled(isGroupDeletable(group));
 		} else {

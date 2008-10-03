@@ -14,17 +14,14 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.TreeSet;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -82,6 +79,16 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 			return 0;
 	}
 
+	/** Get the attribute name for the given column */
+	static protected String getAttributeName(int column) {
+		switch(column) {
+		case COL_LINE: return "line";
+		case COL_MESSAGE: return "message";
+		case COL_PRIORITY: return "priority";
+		default: return null;
+		}
+	}
+
 	/** Create an empty set of proxies */
 	protected TreeSet<SignText> createProxySet() {
 		return new TreeSet<SignText>(new SignTextComparator());
@@ -98,18 +105,20 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	/** Sign group */
 	protected final SignGroup group;
 
+	/** Sign text creator */
+	protected final SignTextCreator creator;
+
 	/** Line for adding a new row */
 	protected Short m_line;
 
 	/** Priority for adding a new row */
 	protected Short m_priority;
 
-	/** Create a new sign text table model 
-	 *  @param a True if admin else false.
-	 */
-	public SignTextTableModel(SignGroup g, TypeCache<SignText> c, boolean a) {
-		super(c, a);
+	/** Create a new sign text table model */
+	public SignTextTableModel(SignGroup g, TypeCache<SignText> c, User u) {
+		super(c, true);
 		group = g;
+		creator = new SignTextCreator(c, u);
 		initialize();
 	}
 
@@ -155,7 +164,16 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		return admin;
+		synchronized(proxies) {
+			if(row == proxies.size())
+				return creator.canAddSignText("arbitrary_name");
+		}
+		SignText st = getProxy(row);
+		if(st != null) {
+			return creator.canUpdateSignText(st.getName() + "/" +
+				getAttributeName(column));
+		} else
+			return false;
 	}
 
 	/** Set the value at the specified cell */
@@ -199,63 +217,16 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 		}
 	}
 
-	/** Create a new sign text message using the current line and priority values */
+	/** Create a new sign text message using the current line and priority
+	 * values */
 	protected void createSignText(String message) {
 		if(m_line == null)
 			m_line = 1;
 		if(m_priority == null)
 			m_priority = 50;
-		createSignText(m_line,message,m_priority);
+		creator.create(group, m_line, message, m_priority);
 		m_line = null;
 		m_priority = null;
-	}
-
-	/** Create a new sign text message using the specified args */
-	protected void createSignText(short line,String message,short priority) {
-		// validate args
-		if(message==null || line<=0) {
-			return;
-		}
-
-		String name = createName();
-		if(name == null) {
-			// FIXME: display a warning?
-			return;
-		}
-		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("sign_group", group);
-		attrs.put("line", new Short(line));
-		attrs.put("message", message);
-		attrs.put("priority", new Short(priority));
-		cache.createObject(name, attrs);
-	}
-
-	/** 
-	 * Create a new sign text name. A sign text name is the associated
-	 * sign group name with _n appended, where n is a unique integer.
-	 * @return A unique string in the form: group name + _n
-	 */
-	protected String createName() {
-		HashSet<String> names = getNames();
-		for(int i = 0; i < 10000; i++) {
-			String n = group.getName() + "_" + i;
-			if(!names.contains(n))
-				return n;
-		}
-		String msg="Warning: something is wrong in SignTextTableModel.createName().";
-		System.err.println(msg);
-		assert false : msg;
-		return null;
-	}
-
-	/** Get a set of sign text names */
-	protected HashSet<String> getNames() {
-		HashSet<String> names = new HashSet<String>();
-		synchronized(proxies) {
-			for(SignText t: proxies)
-				names.add(t.getName());
-		}
-		return names;
 	}
 
 	/** Create the table column model */

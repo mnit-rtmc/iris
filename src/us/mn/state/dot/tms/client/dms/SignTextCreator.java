@@ -79,6 +79,12 @@ public class SignTextCreator {
 		return name != null && user.canAdd(createNamespaceString(name));
 	}
 
+	/** Check if the user can update the named sign text */
+	public boolean canUpdateSignText(String name) {
+		return name != null &&
+			user.canUpdate(createNamespaceString(name));
+	}
+
 	/** 
 	 * Create a SignText name, which is in this form: 
 	 *    sign_group.name + "_" + uniqueid
