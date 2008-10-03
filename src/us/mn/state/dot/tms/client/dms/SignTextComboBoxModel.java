@@ -146,11 +146,11 @@ public class SignTextComboBoxModel extends AbstractListModel
 		return m_selected != null && s.equals(m_selected.getMessage());
 	}
 
-	/** Add a message to the identity sign group library */
+	/** Add a message to the local sign group library */
 	protected void addMsgToLib(String message) {
-		SignGroup isg = m_signMsgModel.getIdentitySignGroup();
-		if(isg != null) {
-			m_signMsgModel.createSignText(isg, m_cbline, message,
+		SignGroup lsg = m_signMsgModel.getLocalSignGroup();
+		if(lsg != null) {
+			m_signMsgModel.createSignText(lsg, m_cbline, message,
 				DEFAULT_PRIORITY);
 		}
 	}

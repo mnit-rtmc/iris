@@ -127,29 +127,26 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	}
 
 	/** 
-	 * Get the DMS SignGroup with the same name as the DMS id.
-	 * @return the SignGroup else null if it doesn't exist.
+	 * Get the local SignGroup for the DMS.
+	 * @return local SignGroup if it exists, otherwise null
 	 */
-	protected SignGroup getIdentitySignGroup() {
-		if (dms_sign_groups==null || dms_id==null)
-			return null;
-		// find the DmsSignGroup for the identity SignGroup. The
-		// identity sign group has the same name as the dms, e.g. V1.
-		DmsSignGroup dsg = dms_sign_groups.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof DmsSignGroup) {
-					DmsSignGroup g = (DmsSignGroup)o;
-					if(g.getDms().equals(dms_id) && 
-						g.getSignGroup().getName().equals(dms_id) )
-						return true;
-				}
-				return false;
+	protected SignGroup getLocalSignGroup() {
+		DmsSignGroup dsg = dms_sign_groups.find(
+			new Checker<DmsSignGroup>()
+		{
+			public boolean check(DmsSignGroup g) {
+				return isLocalSignGroup(g);
 			}
 		});
-		if (dsg==null)
+		if(dsg != null)
+			return dsg.getSignGroup();
+		else
 			return null;
-		SignGroup sg = dsg.getSignGroup();
-		return sg;
+	}
+
+	/** Check if the given sign group is a local group for the DMS */
+	protected boolean isLocalSignGroup(DmsSignGroup g) {
+		return g.getDms().equals(dms_id) && g.getSignGroup().getLocal();
 	}
 
 	/** 
