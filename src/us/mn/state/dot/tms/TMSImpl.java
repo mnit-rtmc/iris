@@ -27,7 +27,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
