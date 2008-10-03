@@ -276,13 +276,10 @@ public class FontForm extends AbstractForm {
 			gmap.clear();
 		}
 		final LinkedList<Glyph> glist = new LinkedList<Glyph>();
-		glyphs.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof Glyph) {
-					Glyph g = (Glyph)o;
-					if(g.getFont() == font)
-						glist.add(g);
-				}
+		glyphs.find(new Checker<Glyph>() {
+			public boolean check(Glyph g) {
+				if(g.getFont() == font)
+					glist.add(g);
 				return false;
 			}
 		});

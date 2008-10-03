@@ -564,14 +564,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected boolean hasMembers(final SignGroup group) {
 		TypeCache<DmsSignGroup> dms_sign_groups =
 			state.getDmsSignGroups();
-		return null != dms_sign_groups.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof DmsSignGroup) {
-					DmsSignGroup g = (DmsSignGroup)o;
-					if(g.getSignGroup() == group)
-						return true;
-				}
-				return false;
+		return null != dms_sign_groups.find(new Checker<DmsSignGroup>(){
+			public boolean check(DmsSignGroup g) {
+				return g.getSignGroup() == group;
 			}
 		});
 	}
@@ -579,14 +574,9 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Check if a sign group has any sign text messages */
 	protected boolean hasSignText(final SignGroup group) {
 		TypeCache<SignText> sign_text = state.getSignText();
-		return null != sign_text.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof SignText) {
-					SignText t = (SignText)o;
-					if(t.getSignGroup() == group)
-						return true;
-				}
-				return false;
+		return null != sign_text.find(new Checker<SignText>() {
+			public boolean check(SignText t) {
+				return t.getSignGroup() == group;
 			}
 		});
 	}
@@ -666,28 +656,18 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Lookup a font for the sign */
 	protected Font lookupFont() {
 		TypeCache<Font> fonts = state.getFonts();
-		Font f = fonts.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof Font) {
-					Font f = (Font)o;
-					if(f.getWidth() == c_pix &&
-					   f.getHeight() == v_pix)
-						return true;
-				}
-				return false;
+		Font f = fonts.find(new Checker<Font>() {
+			public boolean check(Font f) {
+				return f.getWidth() == c_pix &&
+					f.getHeight() == v_pix;
 			}
 		});
 		if(f != null || c_pix == 0)
 			return f;
-		return fonts.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof Font) {
-					Font f = (Font)o;
-					if(f.getWidth() == 0 &&
-					   f.getHeight() == v_pix)
-						return true;
-				}
-				return false;
+		return fonts.find(new Checker<Font>() {
+			public boolean check(Font f) {
+				return f.getWidth() == 0 &&
+					f.getHeight() == v_pix;
 			}
 		});
 	}
@@ -695,15 +675,10 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Lookup a glyph in the specified font */
 	protected Graphic lookupGlyph(final Font f, final int cp) {
 		TypeCache<Glyph> glyphs = state.getGlyphs();
-		Glyph g = glyphs.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof Glyph) {
-					Glyph g = (Glyph)o;
-					if(g.getFont() == f &&
-					   g.getCodePoint() == cp)
-						return true;
-				}
-				return false;
+		Glyph g = glyphs.find(new Checker<Glyph>() {
+			public boolean check(Glyph g) {
+				return g.getFont() == f &&
+					g.getCodePoint() == cp;
 			}
 		});
 		if(g != null)

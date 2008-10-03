@@ -51,15 +51,10 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 
 	/** Lookup a DMS sign group */
 	protected DmsSignGroup lookupDmsSignGroup(final SignGroup group) {
-		return dms_sign_groups.find(new Checker() {
-			public boolean check(SonarObject o) {
-				if(o instanceof DmsSignGroup) {
-					DmsSignGroup g = (DmsSignGroup)o;
-					if(g.getSignGroup() == group &&
-					   g.getDms().equals(dms_id))
-						return true;
-				}
-				return false;
+		return dms_sign_groups.find(new Checker<DmsSignGroup>() {
+			public boolean check(DmsSignGroup g) {
+				return g.getSignGroup() == group &&
+					g.getDms().equals(dms_id);
 			}
 		});
 	}
