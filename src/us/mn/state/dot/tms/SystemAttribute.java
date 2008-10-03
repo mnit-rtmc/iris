@@ -28,7 +28,9 @@ public interface SystemAttribute extends SonarObject {
 	String SONAR_TYPE = "system_attribute";
 
 	/** attribute names common to all agencies */
+	// note: please append units to names!
 	String DATABASE_VERSION = "database_version";
+	String DMS_POLL_FREQ_SECS = "dms_poll_freq_secs";
 
 	/** Set the attribute value */
 	void setValue(String arg_value);

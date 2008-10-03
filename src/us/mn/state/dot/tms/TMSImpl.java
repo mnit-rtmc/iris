@@ -93,16 +93,10 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
 
-	/** determine agency specific polling time in seconds */
-	public static int getAgencyPollTimerJobSigns() {
-		if (Agency.isId(Agency.CALTRANS_D10))
-			return(60*20);	// 20 mins
-		return(30);
-	}
-
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
-		TIMER.addJob(new TimerJobSigns(TMSImpl.getAgencyPollTimerJobSigns()));
+		TIMER.addJob(new TimerJobSigns(
+			SystemAttributeImpl.getDMSPollTimeSecs()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {

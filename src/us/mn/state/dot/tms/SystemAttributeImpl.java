@@ -14,11 +14,14 @@
  */
 package us.mn.state.dot.tms;
 
+import java.lang.IllegalArgumentException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.utils.Agency;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -51,6 +54,24 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	static protected String getValue(final String att) {
 		SystemAttribute a = lookupSystemAttribute(att);
 		return a == null ? null : a.getValue();
+	}
+
+	/** Get the value of the named attribute as an integer. This is a 
+	 *  server side method.
+	 *  @param att Name of an existing system attribute.
+	 *  @throws IllegalArgumentException if the specified attribute 
+	 *	    was not found.
+	 *  @return The value of the named attribute;  
+	 */
+	static public int getValueInt(final String att) 
+		throws IllegalArgumentException 
+	{
+		SystemAttribute a = lookupSystemAttribute(att);
+		if(a == null) 
+			throw new IllegalArgumentException(
+				"Specified system attribute ("+att+") does not exist.");
+		String str = a.getValue();
+		return SString.stringToInt(str);
 	}
 
 	/** Verify database version is valid */
@@ -136,5 +157,31 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	/** Get the attribute value */
 	public String getValue() {
 		return value;
+	}
+
+	/** return a 'missing system attribute' warning message */
+	public static String getWarningMessage(String aname,int avalue) {
+		return getWarningMessage(aname, Integer.toString(avalue));
+	}
+
+	/** return a 'missing system attribute' warning message */
+	public static String getWarningMessage(String aname,String avalue) {
+		return "Warning: a system attribute ("+aname+
+			") was not found, using a default value ("+avalue+").";
+	}
+
+	/** return the DMS poll time in seconds */
+	public static int getDMSPollTimeSecs() {
+		final String aname = DMS_POLL_FREQ_SECS;
+		final int MINIMUM = 5;
+		final int DEFAULT = 30;
+		int secs;
+		try {
+			secs = SystemAttributeImpl.getValueInt(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,DEFAULT));
+			secs = DEFAULT;
+		}
+		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 }
