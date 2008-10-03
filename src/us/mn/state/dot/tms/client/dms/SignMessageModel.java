@@ -17,15 +17,12 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.utils.SDMS;
 
 /**
  * Model for sign text messages. This object is instantiated and contained by
@@ -38,11 +35,6 @@ import us.mn.state.dot.tms.utils.SDMS;
  * @author Michael Darter
  */
 public class SignMessageModel implements ProxyListener<DmsSignGroup> {
-
-	/** Create a SONAR name to check for allowed updates */
-	static protected String createNamespaceString(String name) {
-		return SignText.SONAR_TYPE + "/" + name;
-	}
 
 	/** DMS id associated with this object */
 	protected final String dms_id;
@@ -59,6 +51,9 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	/** SONAR User for permission checks */
 	protected final User user;
 
+	/** Sign text creator */
+	protected final SignTextCreator creator;
+
 	/** Create a new sign message model */
 	public SignMessageModel(String dms, TypeCache<DmsSignGroup> d,
 		TypeCache<SignText> t, User u)
@@ -67,6 +62,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 		dms_sign_groups = d;
 		sign_text = t;
 		user = u;
+		creator = new SignTextCreator(t, u);
 		listener = new ProxyListener<SignText>() {
 			public void proxyAdded(SignText proxy) {
 				if(isMember(proxy.getSignGroup()))
@@ -159,65 +155,14 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	protected void createSignText(SignGroup sg, short line, String messarg,
 		short priority)
 	{
-		if (sg==null || line<1 || messarg==null || messarg.length()<=0)
+		if(sg==null || line<1 || messarg==null || messarg.length()<=0)
 			return;
-		// FIXME: this is a hack, see comments in method
-		if(SDMS.ignoreLineHack(messarg))
-			return;
-		String mess = SDMS.getValidText(messarg);
-		String name = createUniqueSignTextName(sg);
-		if(canAddSignText(name)) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("sign_group", sg);
-			attrs.put("line", new Short(line));
-			attrs.put("message", mess);
-			attrs.put("priority", new Short(priority));
-			sign_text.createObject(name, attrs);
-		}
+		creator.create(sg, line, messarg, priority);
 	}
 
 	/** Check if the user can add the named sign text */
 	public boolean canAddSignText(String name) {
-		return name != null && user.canAdd(createNamespaceString(name));
-	}
-
-	/** 
-	 * Create a HashSet which contains all SignText names for this sign.
-	 * @return A HashSet with entries as SignText names, e.g. V1_23
-	 */
-	private HashSet<String> createSignTextNameSet(final SignGroup sg) {
-		final HashSet<String> names = new HashSet<String>();
-		sign_text.find(new Checker<SignText>() {
-			public boolean check(SignText st) {
-				if(st.getSignGroup() == sg)
-					names.add(st.getName());
-				return false;
-			}
-		});
-		return names;
-	}
-
-	/** 
-	 * Create a SignText name, which is in this form: 
-	 *    sign_group.name + "_" + uniqueid
-	 *    where uniqueid is a sequential integer.
-	 * @return A unique string for a new SignText entry, e.g. V1_23
-	 *
-	 * FIXME: this code is duplicated in SignTextTableModel as createName
-	 */
-	private String createUniqueSignTextName(SignGroup sg) {
-		HashSet<String> names = createSignTextNameSet(sg);
-		for(int i = 0; i < 10000; i++) {
-			String n = sg.getName() + "_" + i;
-			if(!names.contains(n))
-				return n;
-		}
-		String msg =
-			"Warning: SignMessageModel.createUniqueSignTextName()";
-		System.err.println(msg);
-		assert false : msg;
-		return null;
+		return creator.canAddSignText(name);
 	}
 
 	/** 
