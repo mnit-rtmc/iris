@@ -73,7 +73,6 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create a new proxy table model */
 	public ProxyTableModel(TypeCache<T> c, boolean a) {
-		assert c != null : "arg c is null in ProxyTableModel constructor";
 		cache = c;
 		admin = a;
 	}
