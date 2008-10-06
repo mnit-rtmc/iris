@@ -16,6 +16,12 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.ComboBoxEditor;
 import javax.swing.ComboBoxModel;
@@ -101,10 +107,8 @@ public class MessageSelector extends JPanel {
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
-			if(can_add) {
-				cmbLine[i].setEditor(new MsgComboBoxEditor());
-				cmbLine[i].setEditable(true);
-			}
+			if(can_add)
+				createEditor(cmbLine[i]);
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
 		}
@@ -117,6 +121,40 @@ public class MessageSelector extends JPanel {
 		}
 		for(p = n_pages; p < tab.getTabCount(); p++)
 			tab.removeTabAt(p);
+	}
+
+	/** Key event saved when making combobox editable */
+	protected KeyEvent first_key_event;
+
+	/** Create an editor for a combo box */
+	protected void createEditor(final JComboBox cbox) {
+		final MsgComboBoxEditor cbe = new MsgComboBoxEditor();
+		final java.awt.Component editor = cbe.getEditorComponent();
+		cbox.setEditor(cbe);
+		cbox.addKeyListener(new KeyAdapter() {
+			public void keyTyped(KeyEvent e) {
+				if(!cbox.isEditable()) {
+					cbox.setEditable(true);
+					first_key_event = e;
+				}
+			}
+		});
+		cbe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cbox.setEditable(false);
+			}
+		});
+		editor.addFocusListener(new FocusAdapter() {
+			public void focusGained(FocusEvent e) {
+				if(first_key_event != null) {
+					editor.dispatchEvent(first_key_event);
+					first_key_event = null;
+				}
+			}
+			public void focusLost(FocusEvent e) {
+				cbox.setEditable(false);
+			}
+		});
 	}
 
 	/** Create a new page panel */

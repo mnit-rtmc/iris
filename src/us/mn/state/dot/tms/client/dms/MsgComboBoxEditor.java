@@ -22,63 +22,39 @@
  * CA 95054 USA or visit www.sun.com if you need additional information or
  * have any questions.
  */
-
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.utils.SDMS;
-import us.mn.state.dot.tms.utils.SString;
-
-import java.awt.*;
-import java.awt.event.*;
-
-import java.lang.reflect.Method;
-
+import java.awt.Component;
+import java.awt.event.ActionListener;
 import javax.swing.border.Border;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JTextField;
+import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.utils.SDMS;
 
 /**
- * The default editor for editable combo boxes. The editor is implemented as a JTextField.
+ * The editor for SignText combo boxes.
+ * This class is based on javax.swing.plaf.basic.BasicComboBoxEditor
  *
  * @author Arnaud Weber
  * @author Mark Davidson
  * @author Michael Darter
  */
-public class MsgComboBoxEditor implements ComboBoxEditor
-{
-	protected JTextField m_editor;
+public class MsgComboBoxEditor implements ComboBoxEditor {
+
+	protected final JTextField m_editor;
+
 	private Object m_oldValue;
 
-	/** constructor */
+	/** Create a new MsgComboBoxEditor */
 	public MsgComboBoxEditor() {
-		m_editor = createEditorComponent();
+		m_editor = new JTextField("", 9);
+		m_editor.setBorder(null);
 	}
 
-	/**
-	 * Method description
-	 *
-	 *
-	 * @return
-	 */
+	/** Get the editor component */
 	public Component getEditorComponent() {
 		return m_editor;
-	}
-
-	/**
-	 * Creates the internal editor component. Override this to provide
-	 * a custom implementation.
-	 *
-	 * @return a new editor component
-	 * @since 1.6
-	 */
-	private JTextField createEditorComponent() {
-		JTextField e = new BorderlessTextField("", 9);
-		e.setBorder(null);
-		return e;
 	}
 
 	/**
@@ -87,10 +63,9 @@ public class MsgComboBoxEditor implements ComboBoxEditor
 	 * @param anObject the displayed value of the editor
 	 */
 	public void setItem(Object anObject) {
-		if(anObject == null) {
+		if(anObject == null)
 			m_editor.setText("");
-		} else {
-
+		else {
 			m_editor.setText(getItemText(anObject));
 			m_oldValue = anObject;
 		}
@@ -98,22 +73,13 @@ public class MsgComboBoxEditor implements ComboBoxEditor
 
 	/** return text for all possible types */
 	private static String getItemText(Object o) {
-		String txt = "";
-		if(o instanceof String)
-			txt = ((String) o).toString();
-		else if(o instanceof SignText)
-			txt = ((SignText) o).getMessage();
-		else {
-			String msg="MsgComboBoxEditor.getItemText(o): WARNING: unexpected type encountered.";
-			assert false : msg;
-			txt="";
-		}
-
-		// FIXME: this is a hack, see comments in method
+		String txt;
+		if(o instanceof SignText)
+			txt = ((SignText)o).getMessage();
+		else
+			txt = o.toString();
 		if(SDMS.ignoreLineHack(txt))
 			txt = "";
-
-		// validate text
 		return SDMS.getValidText(txt);
 	}
 
@@ -121,13 +87,10 @@ public class MsgComboBoxEditor implements ComboBoxEditor
 	public Object getItem() {
 		String newValue = SDMS.getValidText(m_editor.getText());
 		m_editor.setText(newValue);
-
-		// we have an oldValue that isn't a string
-		if((m_oldValue != null) &&!(m_oldValue instanceof String)) {
-
-			// The original value is not a string, return the object
+		if(m_oldValue instanceof SignText) {
 			if(getItemText(newValue).equals(
-				getItemText(m_oldValue))) {
+				 getItemText(m_oldValue)))
+			{
 				return m_oldValue;
 			}
 		}
@@ -148,47 +111,5 @@ public class MsgComboBoxEditor implements ComboBoxEditor
 	/** remove action listener */
 	public void removeActionListener(ActionListener l) {
 		m_editor.removeActionListener(l);
-	}
-
-	static class BorderlessTextField extends JTextField
-	{
-		public BorderlessTextField(String value, int n) {
-			super(value, n);
-		}
-
-		/** workaround for 4530952 */
-		public void setText(String s) {
-			if(getText().equals(s)) {
-				return;
-			}
-
-			super.setText(s);
-		}
-
-		public void setBorder(Border b) {
-			if(!(b instanceof UIResource)) {
-				super.setBorder(b);
-			}
-		}
-	}
-
-	/**
-	 * A subclass of MsgComboBoxEditor that implements UIResource.
-	 * MsgComboBoxEditor doesn't implement UIResource
-	 * directly so that applications can safely override the
-	 * cellRenderer property with BasicListCellRenderer subclasses.
-	 * <p>
-	 * <strong>Warning:</strong>
-	 * Serialized objects of this class will not be compatible with
-	 * future Swing releases. The current serialization support is
-	 * appropriate for short term storage or RMI between applications running
-	 * the same version of Swing.  As of 1.4, support for long term storage
-	 * of all JavaBeans<sup><font size="-2">TM</font></sup>
-	 * has been added to the <code>java.beans</code> package.
-	 * Please see {@link java.beans.XMLEncoder}.
-	 */
-	private static class UIResource extends MsgComboBoxEditor
-		implements javax.swing.plaf.UIResource
-	{
 	}
 }
