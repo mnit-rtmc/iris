@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.utils.Agency;
+import us.mn.state.dot.tms.utils.IrisInfo;
 
 /**
  * This is the main class to start the IRIS server.
@@ -78,6 +79,7 @@ public class MainServer {
 	/** Start the server and register it with the RMI registry */
 	static public void main(String[] args) {
 		try {
+			IrisInfo.setClientSide(false);
 			redirectStdStreams();
 			sanityChecks();
 			m_serverprops = PropertyLoader.load(PROP_FILE);
