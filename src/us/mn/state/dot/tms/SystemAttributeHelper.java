@@ -57,8 +57,7 @@ public class SystemAttributeHelper {
 		return a.getValue();
 	}
 
-	/** Get the value of the named attribute as an integer. This is a 
-	 *  server side method.
+	/** Get the value of the named attribute as an integer.
 	 *  @param aname Name of an existing system attribute.
 	 *  @throws IllegalArgumentException if the specified attribute 
 	 *	    was not found.
@@ -68,6 +67,19 @@ public class SystemAttributeHelper {
 		throws IllegalArgumentException 
 	{
 		return SString.stringToInt(
+			SystemAttributeHelper.getValue(aname));
+	}
+
+	/** Get the value of the named attribute as a boolean.
+	 *  @param aname Name of an existing system attribute.
+	 *  @throws IllegalArgumentException if the specified attribute 
+	 *	    was not found.
+	 *  @return The value of the named attribute;  
+	 */
+	static public boolean getValueBoolean(final String aname) 
+		throws IllegalArgumentException 
+	{
+		return SString.stringToBoolean(
 			SystemAttributeHelper.getValue(aname));
 	}
 
@@ -114,6 +126,11 @@ public class SystemAttributeHelper {
 	/** return a 'missing system attribute' warning message */
 	public static String getWarningMessage(String aname,int avalue) {
 		return getWarningMessage(aname, Integer.toString(avalue));
+	}
+
+	/** return a 'missing system attribute' warning message */
+	public static String getWarningMessage(String aname,boolean avalue) {
+		return getWarningMessage(aname, Boolean.toString(avalue));
 	}
 
 	/** return a 'missing system attribute' warning message */
@@ -168,5 +185,21 @@ public class SystemAttributeHelper {
 				return true;
 		return false;
 	}
+
+	/** Return true to use the DMSDispatcher get status button */
+	public static boolean useGetStatusBtn() {
+		final String aname = 
+			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN;
+		final boolean DEFAULT = false;
+		boolean ret;
+		try {
+			ret = SystemAttributeHelper.getValueBoolean(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,DEFAULT));
+			ret = DEFAULT;
+		}
+		return ret;
+	}
+
 }
 
