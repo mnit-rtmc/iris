@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.utils.STime;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Random;
 
 /**
  * Operation to be performed on a dynamic message sign
@@ -132,9 +133,12 @@ abstract public class OpDms extends DeviceOperation {
 		}
 	}
 
+	/** random number generator */
+	static private Random m_rand = new Random(System.currentTimeMillis());
+
 	/** generate a unique operation id, which is a long, returned as a string */
 	public static String generateId() {
-		return new Long(new GregorianCalendar().getTimeInMillis()).toString();
+		return new Long(System.currentTimeMillis()+m_rand.nextInt()).toString();
 	}
 
 	/** create a blank message */
