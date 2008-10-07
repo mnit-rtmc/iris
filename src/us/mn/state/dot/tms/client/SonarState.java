@@ -428,4 +428,9 @@ public class SonarState extends Client {
 	public Connection lookupConnection(String name) {
 		return connections.getObject(name);
 	}
+
+	/** Lookup a system attribute */
+	public SystemAttribute lookupSystemAttribute(String name) {
+		return system_attributes.getObject(name);
+	}
 }
