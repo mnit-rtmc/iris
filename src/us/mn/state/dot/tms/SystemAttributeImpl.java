@@ -21,18 +21,20 @@ import java.util.Map;
 
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.utils.Agency;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A system attribute is a name mapped to a string value.
- *
+ * @see SystemAttributeHelper, SystemAttribute
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class SystemAttributeImpl extends BaseObjectImpl 
 	implements SystemAttribute 
 {
-	/** Lookup a SystemAttribute in the SONAR namespace */
+	/** Lookup a SystemAttribute in the SONAR namespace. 
+	 *  @return Null if the specified attribute does not exist else the 
+	 *  attribute value.
+	 */
 	static protected SystemAttribute lookupSystemAttribute(String att) {
 		if(att == null || att.length() <= 0) {
 			assert false;
@@ -45,46 +47,6 @@ public class SystemAttributeImpl extends BaseObjectImpl
 		catch(NamespaceError e) {
 			e.printStackTrace();
 			return null;
-		}
-	}
-
-	/** Get the value of the named attribute. This is a server side method. 
-	 * @return The value of the named attribute; null if the attribute
-	 * doesn't exist. */
-	static protected String getValue(final String att) {
-		SystemAttribute a = lookupSystemAttribute(att);
-		return a == null ? null : a.getValue();
-	}
-
-	/** Get the value of the named attribute as an integer. This is a 
-	 *  server side method.
-	 *  @param att Name of an existing system attribute.
-	 *  @throws IllegalArgumentException if the specified attribute 
-	 *	    was not found.
-	 *  @return The value of the named attribute;  
-	 */
-	static public int getValueInt(final String att) 
-		throws IllegalArgumentException 
-	{
-		SystemAttribute a = lookupSystemAttribute(att);
-		if(a == null) 
-			throw new IllegalArgumentException(
-				"Specified system attribute ("+att+") does not exist.");
-		String str = a.getValue();
-		return SString.stringToInt(str);
-	}
-
-	/** Verify database version is valid */
-	static protected void validateDatabaseVersion() {
-		String dbVer = getValue(DATABASE_VERSION);
-		String codeVer = "@@VERSION@@";
-		boolean ok = (dbVer != null) &&
-			dbVer.trim().equals(codeVer.trim());
-		if(!ok) {
-			System.err.println("IRIS code version = " + codeVer + 
-				", database version = " + dbVer);
-			if(Agency.isId(Agency.CALTRANS_D10))
-				System.exit(1);
 		}
 	}
 
@@ -103,7 +65,10 @@ public class SystemAttributeImpl extends BaseObjectImpl
 				));
 			}
 		});
-		validateDatabaseVersion();
+
+		// validiate essential system attributes, shutdown if invalid
+		SystemAttributeHelper.validateDatabaseVersion();
+		SystemAttributeHelper.validateAgencyId();
 	}
 
 	/** Get a mapping of the columns */
@@ -157,31 +122,5 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	/** Get the attribute value */
 	public String getValue() {
 		return value;
-	}
-
-	/** return a 'missing system attribute' warning message */
-	public static String getWarningMessage(String aname,int avalue) {
-		return getWarningMessage(aname, Integer.toString(avalue));
-	}
-
-	/** return a 'missing system attribute' warning message */
-	public static String getWarningMessage(String aname,String avalue) {
-		return "Warning: a system attribute ("+aname+
-			") was not found, using a default value ("+avalue+").";
-	}
-
-	/** return the DMS poll time in seconds */
-	public static int getDMSPollTimeSecs() {
-		final String aname = DMS_POLL_FREQ_SECS;
-		final int MINIMUM = 5;
-		final int DEFAULT = 30;
-		int secs;
-		try {
-			secs = SystemAttributeImpl.getValueInt(aname);
-		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(aname,DEFAULT));
-			secs = DEFAULT;
-		}
-		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 }
