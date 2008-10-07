@@ -48,7 +48,7 @@ import java.util.TimeZone;
 public class D10CmsMsg  implements Serializable
 {
 	// consts
-	private static final String CAWS = "CAWS";
+	private static final String CAWS_OWNER = CawsPoller.CAWS_OWNER;
 	private static final String DESC_BLANK = "Blank";
 	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
 	private static final String DESC_TWOPAGENORM = "2 Page (Normal)";
@@ -337,7 +337,8 @@ public class D10CmsMsg  implements Serializable
 		// blank the message
 		if (mtype == CawsMsgType.BLANK) {
 			System.err.println("D10CmsMsg.sendMessage(): will blank DMS "+ this.getIrisCmsId() + " for DMS=" + dms + ".");
-			dms.clearMessageUsingActivationPriority(CAWS,createMsgActPriority());
+			dms.clearMessageUsingActivationPriority(
+				CAWS_OWNER,createMsgActPriority());
 
 		// 1 or 2 pg msg
 		} else if ((mtype == CawsMsgType.ONEPAGEMSG)
@@ -381,7 +382,7 @@ public class D10CmsMsg  implements Serializable
 			dms.createPixelMaps(multi);
 
 		// create sign message
-		String owner = CAWS;
+		String owner = CAWS_OWNER;
 		SignMessage sm = new SignMessage(owner, multi, bitmaps,
 			SignMessage.DURATION_INFINITE);
 

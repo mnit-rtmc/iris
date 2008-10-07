@@ -41,7 +41,7 @@ public class MsgActPriorityCallBackBlank implements MsgActPriorityProc.CallbackS
 	public boolean supersede(SignMessage existingMsg) {
 		if (existingMsg==null)
 			return true;
-		return existingMsg.isOwner(CawsPoller.CAWS);
+		return existingMsg.isOwner(CawsPoller.CAWS_OWNER);
 	}
 }
 
