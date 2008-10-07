@@ -95,7 +95,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
 		TIMER.addJob(new TimerJobSigns(
-			SystemAttributeImpl.getDMSPollTimeSecs()));
+			SystemAttributeHelper.getDMSPollTimeSecs()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
