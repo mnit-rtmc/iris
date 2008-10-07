@@ -184,8 +184,8 @@ public class Message implements AddressedMessage
 			String err="";
 			err+="SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
 			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs). ";
-			err+="Sent operation="+SString.byteArrayToString(array);
 			System.err.println(err);
+			System.err.println("Sent operation="+SString.byteArrayToString(array));
 			throw new IOException(err);
 
 		// parse response
