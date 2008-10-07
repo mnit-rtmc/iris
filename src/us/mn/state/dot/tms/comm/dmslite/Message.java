@@ -291,7 +291,7 @@ public class Message implements AddressedMessage
 		ret="";
 		ret+="Could not send a CAWS message to a CMS: reason="+errmsg;
 		ret+=", CMS="+address;
-		ret+=", message id=V"+id;
+		ret+=", message id="+id;
 		ret+=", time="+STime.getCurDateTimeString(true);
 		ret+=", message="+msg;
 		ret+=", author="+owner;
