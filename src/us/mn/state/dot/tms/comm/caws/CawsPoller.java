@@ -20,12 +20,15 @@ import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.SignPoller;
+
 
 /**
  * Caltrans D10 CAWS Poller. This class provides a Caltrans D10
@@ -38,7 +41,7 @@ import us.mn.state.dot.tms.comm.SignPoller;
 public class CawsPoller extends MessagePoller implements SignPoller
 {
 	/** identifier used elsewhere, e.g. message author */
-	public static final String CAWS="CAWS";
+	public static final String CAWS_OWNER = "CAWS";
 
 	/** the only valid drop address */
 	static public final int VALID_DROP_ADDRESS = 1;
@@ -69,8 +72,8 @@ public class CawsPoller extends MessagePoller implements SignPoller
 	 * dialog in the status tab.
 	 */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		System.err.println("CawsPoller.download() called, reset="
-				   + reset);
+		//System.err.println("CawsPoller.download() called, reset="
+		//		   + reset);
 	}
 
 	/** Perform a sign status poll. Defined in SignPoller interface. */
@@ -78,10 +81,10 @@ public class CawsPoller extends MessagePoller implements SignPoller
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		System.err.println("CawsPoller.poll30Second() called.");
-
-		// retrieve caws CMS messages
-		new OpProcessCawsMsgs(c).start();
+		boolean act = isCAWSActive();
+		System.err.println("CawsPoller.poll30Second() called, caws active = "+act+".");
+		if(act)
+			new OpProcessCawsMsgs(c).start();
 	}
 
 	/** Perform a 5-minute poll */
@@ -95,8 +98,13 @@ public class CawsPoller extends MessagePoller implements SignPoller
 	 * @see us.mn.state.dot.tms.ControllerImpl#testCommunications
 	 */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-
 		// System.err.println("CawsPoller.startTest() called.");
 		return null;
+	}
+
+	/** return true if CAWS poller should handle caws messages */
+	protected static boolean isCAWSActive() {
+		return SystemAttributeHelper.isAttribute(
+			SystemAttribute.CALTRANS_D10_CAWS_ACTIVE,true);
 	}
 }

@@ -96,6 +96,20 @@ public class SystemAttributeHelper {
 		return avalue.equals(readvalue);
 	}
 
+	/** return true if the specified attribute matches expected value */
+	public static boolean isAttribute(String aname, boolean avalue) {
+		if(aname == null)
+			return false;
+		boolean readvalue = false;
+		try {
+			String s = SystemAttributeHelper.getValue(aname);
+			readvalue = new Boolean(s).booleanValue();
+		} catch(IllegalArgumentException ex) {
+			return false;
+		}
+		return avalue == readvalue;
+	}
+
 	/** return true if the agency id matches */
 	public static boolean isAgencyCaltransD10() {
 		return isAttribute(SystemAttribute.AGENCY_ID,

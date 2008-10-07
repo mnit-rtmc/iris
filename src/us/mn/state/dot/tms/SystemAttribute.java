@@ -40,6 +40,9 @@ public interface SystemAttribute extends SonarObject {
 	final String AGENCY_ID_MNDOT = "mndot";
 	final String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
 
+	/** Caltrans D10 specific values */
+	final String CALTRANS_D10_CAWS_ACTIVE = "caltrans_d10_caws_active";
+
 	/** Set the attribute value */
 	void setValue(String arg_value);
 
