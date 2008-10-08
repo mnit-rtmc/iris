@@ -63,9 +63,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Frame title */
 	static protected final String TITLE = "Controller: ";
 
-	/** SONAR state */
-	protected final SonarState state;
-
 	/** Comm link combo box */
 	protected final JComboBox comm_link = new JComboBox();
 
@@ -128,7 +125,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create a new controller form */
 	public ControllerForm(TmsConnection tc, Controller c) {
 		super(TITLE, tc, c);
-		state = tc.getSonarState();
 		link_model = state.getCommLinkModel();
 		cabinets = state.getCabinets();
 		cabinet = proxy.getCabinet();
@@ -137,8 +133,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<Controller> getTypeCache(SonarState st) {
-		return st.getControllers();
+	protected TypeCache<Controller> getTypeCache() {
+		return state.getControllers();
 	}
 
 	/** Get the ControllerIO array */
@@ -243,8 +239,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the cabinet panel */
 	protected JPanel createCabinetPanel() {
-		location = new LocationPanel(admin, cabinet.getGeoLoc(),
-			connection.getSonarState());
+		location = new LocationPanel(admin, cabinet.getGeoLoc(), state);
 		location.initialize();
 		location.addRow("Milepoint", mile);
 		new FocusJob(mile) {
@@ -326,8 +321,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		if(a == null || a.equals("commLink")) {
 			comm_link.setSelectedItem(proxy.getCommLink());
 			drop_model = new DropNumberModel(
-				proxy.getCommLink(), getTypeCache(
-				connection.getSonarState()), proxy.getDrop());
+				proxy.getCommLink(), getTypeCache(),
+				proxy.getDrop());
 			drop_id.setModel(drop_model);
 		}
 		if(a == null || a.equals("drop"))

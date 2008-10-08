@@ -37,6 +37,9 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** TMS connection */
 	protected final TmsConnection connection;
 
+	/** SONAR state */
+	protected final SonarState state;
+
 	/** Administrator privilege flag */
 	protected final boolean admin;
 
@@ -45,6 +48,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		super(prefix + p.getName());
 		proxy = p;
 		connection = tc;
+		state = tc.getSonarState();
 		admin = connection.isAdmin();
 	}
 
@@ -56,12 +60,12 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
 		setLayout(new BorderLayout());
-		TypeCache<T> cache = getTypeCache(connection.getSonarState());
+		TypeCache<T> cache = getTypeCache();
 		cache.addProxyListener(this);
 	}
 
 	/** Get the SONAR type cache */
-	abstract protected TypeCache<T> getTypeCache(SonarState st);
+	abstract protected TypeCache<T> getTypeCache();
 
 	/** A new proxy has been added */
 	public void proxyAdded(T p) {
@@ -100,7 +104,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** Dispose of the form */
 	protected void dispose() {
-		TypeCache<T> cache = getTypeCache(connection.getSonarState());
+		TypeCache<T> cache = getTypeCache();
 		cache.removeProxyListener(this);
 	}
 }

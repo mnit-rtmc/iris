@@ -49,9 +49,6 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	/** Frame title */
 	static private final String TITLE = "Warning Sign: ";
 
-	/** Sonar state */
-	protected final SonarState state;
-
 	/** Location panel */
 	protected LocationPanel location;
 
@@ -70,12 +67,11 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	/** Create a new warning sign form */
 	public WarningSignProperties(TmsConnection tc, WarningSign s) {
 		super(TITLE, tc, s);
-		state = tc.getSonarState();
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<WarningSign> getTypeCache(SonarState st) {
-		return st.getWarningSigns();
+	protected TypeCache<WarningSign> getTypeCache() {
+		return state.getWarningSigns();
 	}
 
 	/** Initialize the widgets on the form */

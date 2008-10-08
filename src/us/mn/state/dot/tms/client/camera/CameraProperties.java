@@ -78,8 +78,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<Camera> getTypeCache(SonarState st) {
-		return st.getCameras();
+	protected TypeCache<Camera> getTypeCache() {
+		return state.getCameras();
 	}
 
 	/** Initialize the widgets on the form */
@@ -101,8 +101,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location = new LocationPanel(admin, proxy.getGeoLoc(),
-			connection.getSonarState());
+		location = new LocationPanel(admin, proxy.getGeoLoc(), state);
 		location.initialize();
 		location.addRow("Notes", notes);
 		new FocusJob(notes) {
