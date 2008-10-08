@@ -40,10 +40,10 @@ import java.util.Random;
  */
 abstract public class OpDms extends DeviceOperation {
 
-	// timeout for DMS messages
-	static final int TIMEOUT_DMS_DEFAULT_MS = 1000*50;
-	static final int TIMEOUT_DMS_MODEM_MS = 1000*45*5; //FIXME mtod
-	static final int TIMEOUT_DMS_WIZARD_MS = 1000*50;
+	// timeout for DMS messages (values must match cmsserver props file)
+	static final int TIMEOUT_DMS_DEFAULT_MS = 1000*(60+5);
+	static final int TIMEOUT_DMS_MODEM_MS = 1000*(60*5+5);
+	static final int TIMEOUT_DMS_WIZARD_MS = 1000*(60+5);
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
