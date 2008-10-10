@@ -94,4 +94,34 @@ public class BitmapGraphic implements Serializable {
 				setPixel(x, y, b.getPixel(x, y));
 		}
 	}
+
+	/** Return a wider bitmap. The existing bitmap is centered within
+	 *  the new wider bitmap.
+	 *  @param newwidth The new width of the bitmap.
+	 *  @param newfill Bit value of the new space.
+	 */
+	public BitmapGraphic widen(int newwidth, int newfill) {
+		if(newwidth<0 || newwidth <= width)
+			return this;
+
+		// new bitmap
+		BitmapGraphic newbm = new BitmapGraphic(newwidth,this.height);
+
+		// edges of existing bitmap centered within wider bitmap
+		int ledgeidx = (newbm.width - this.width)/2;
+		int redgeidx = newbm.width - ledgeidx - 1;
+		assert ledgeidx > 0;
+		assert redgeidx > 0;
+		assert ledgeidx <= redgeidx;
+		// insert existing bitmap into wider bitmap
+		for(int y=0; y<newbm.height; ++y)
+			for(int x=0; x<newbm.width; ++x) {
+				int newpix = newfill;
+				if(x >= ledgeidx && x <= redgeidx)
+					newpix = getPixel(x - ledgeidx, y);
+				newbm.setPixel(x,y,newpix);
+			}
+		return newbm;
+	}
 }
+
