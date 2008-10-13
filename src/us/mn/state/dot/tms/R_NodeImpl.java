@@ -15,15 +15,15 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
-import java.rmi.RemoteException;
+import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import us.mn.state.dot.vault.FieldMap;
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * R_NodeImpl is an implementation of the R_Node interface. Each
@@ -31,15 +31,7 @@ import us.mn.state.dot.vault.FieldMap;
  *
  * @author Douglas Lau
  */
-public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
-
-	/** ObjectVault table name */
-	static public final String tableName = "r_node";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
+public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Maximum number of lanes allowed */
 	static protected final int LANES_MAX = 8;
@@ -59,96 +51,189 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	/** Maximum freeway speed limit */
 	static protected final int MAXIMUM_SPEED_LIMIT = 75;
 
-	/** Table mapping for r_node_detector relation */
-	static public TableMapping mapping;
+	/** Make a sorted array of detectors */
+	static protected Detector[] makeDetectorArray(DetectorImpl[] dets) {
+		Detector[] result = new Detector[dets.length];
+		for(int i = 0; i < result.length; i++)
+			result[i] = dets[i];
+		Arrays.sort(result);
+		return result;
+	}
+
+	/** Load all the r_nodes */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading r_nodes...");
+		namespace.registerType(SONAR_TYPE, R_NodeImpl.class);
+		store.query("SELECT name, geo_loc, node_type, pickable, " +
+			"transition, lanes, attach_side, shift, station_id, " +
+			"speed_limit, notes FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new R_NodeImpl(namespace,
+					row.getString(1),	// name
+					row.getString(2),	// geo_loc
+					row.getInt(3),		// node_type
+					row.getBoolean(4),	// pickable
+					row.getInt(5),		// transition
+					row.getInt(6),		// lanes
+					row.getBoolean(7),	// attach_side
+					row.getInt(8),		// shift
+					row.getString(9),	// station_id
+					row.getInt(10),		// speed_limit
+					row.getString(11)	// notes
+				));
+			}
+		});
+	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
-		return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("geo_loc", geo_loc.getName());
+		map.put("node_type", node_type.ordinal());
+		map.put("pickable", pickable);
+		map.put("transition", transition.ordinal());
+		map.put("lanes", lanes);
+		map.put("attach_side", attach_side);
+		map.put("shift", shift);
+		map.put("station_id", station_id);
+		map.put("speed_limit", speed_limit);
+		map.put("notes", notes);
+		return map;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new r_node */
+	public R_NodeImpl(String n) throws TMSException, SonarException {
+		super(n);
+		GeoLocImpl g = new GeoLocImpl(name);
+		MainServer.server.createObject(g);
+		geo_loc = g;
+	}
+
+	/** Create an r_node */
+	protected R_NodeImpl(String n, GeoLocImpl loc, int typ, boolean p,
+		int trn, int l, boolean as, int s, String st, int sl, String nt)
+	{
+		super(n);
+		geo_loc = loc;
+		node_type = R_NodeType.fromOrdinal(typ);
+		pickable = p;
+		transition = R_NodeTransition.fromOrdinal(trn);
+		lanes = l;
+		attach_side = as;
+		shift = s;
+		station_id = st;
+		speed_limit = sl;
+		notes = nt;
+	}
+
+	/** Create an r_node */
+	protected R_NodeImpl(Namespace ns, String n, String loc, int typ,
+		boolean p, int trn, int l, boolean as, int s, String st, int sl,
+		String nt) throws NamespaceError
+	{
+		this(n, (GeoLocImpl)ns.getObject(GeoLoc.SONAR_TYPE, loc),
+			typ, p, trn, l, as, s, st, sl, nt);
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		store.destroy(geo_loc);
+	}
+
+	/** Initialize transient fields */
+	public void initTransients() throws TMSException {
+		super.initTransients();
+		updateStation(null, createStation(station_id));
 	}
 
 	/** Node location */
-	protected String geo_loc;
-
-	/** Set the controller location */
-	public synchronized void setGeoLoc(String l) throws TMSException {
-		if(l == geo_loc)
-			return;
-		store.update(this, "geo_loc", l);
-		geo_loc = l;
-	}
+	protected GeoLocImpl geo_loc;
 
 	/** Get the location */
-	public String getGeoLoc() {
+	public GeoLoc getGeoLoc() {
 		return geo_loc;
-	}
-
-	/** Lookup the geo location */
-	public GeoLocImpl lookupGeoLoc() {
-		return lookupGeoLoc(geo_loc);
 	}
 
 	/** Check if the location is valid */
 	public boolean hasLocation() {
-		return !GeoLocHelper.isNull(lookupGeoLoc());
+		return !GeoLocHelper.isNull(geo_loc);
 	}
 
 	/** Calculate the distance to another roadway node (in meters) */
 	public Double metersTo(R_NodeImpl other) {
-		return metersTo(other.lookupGeoLoc());
+		return metersTo(other.getGeoLoc());
 	}
 
 	/** Calculate the distance to another location (in meters) */
 	public Double metersTo(GeoLoc loc) {
-		return GeoLocHelper.metersTo(lookupGeoLoc(), loc);
+		return GeoLocHelper.metersTo(geo_loc, loc);
 	}
 
 	/** Node type */
-	protected int node_type;
+	protected R_NodeType node_type = R_NodeType.STATION;
 
 	/** Get the node type */
 	public int getNodeType() {
-		return node_type;
+		return node_type.ordinal();
 	}
 
 	/** Set the node type */
-	public synchronized void setNodeType(int t) throws TMSException {
-		if(t == node_type)
-			return;
-		if(t < 0 || t >= TYPES.length)
+	public void setNodeType(int t) {
+		node_type = R_NodeType.fromOrdinal(t);
+	}
+
+	/** Set the node type */
+	public void doSetNodeType(int t) throws TMSException {
+		R_NodeType nt = R_NodeType.fromOrdinal(t);
+		if(nt == null)
 			throw new ChangeVetoException("Bad node type: " + t);
+		if(nt == node_type)
+			return;
 		store.update(this, "node_type", t);
-		node_type = t;
+		setNodeType(t);
 	}
 
 	/** Check if the r_node is a station */
 	public boolean isStation() {
-		return node_type == TYPE_STATION;
+		return node_type == R_NodeType.STATION;
 	}
 
 	/** Check if the r_node is an entrance */
 	public boolean isEntrance() {
-		return node_type == TYPE_ENTRANCE;
+		return node_type == R_NodeType.ENTRANCE;
 	}
 
 	/** Check if the r_node is an exit */
 	public boolean isExit() {
-		return node_type == TYPE_EXIT;
+		return node_type == R_NodeType.EXIT;
 	}
 
 	/** Check if the r_node is an access node */
 	public boolean isAccess() {
-		return node_type == TYPE_ACCESS;
+		return node_type == R_NodeType.ACCESS;
 	}
 
 	/** Test if this r_node type can be linked in a corridor */
 	protected boolean isCorridorType() {
 		switch(node_type) {
-			case TYPE_STATION:
-			case TYPE_ENTRANCE:
-			case TYPE_EXIT:
-			case TYPE_INTERSECTION:
+			case STATION:
+			case ENTRANCE:
+			case EXIT:
+			case INTERSECTION:
 				return true;
 			default:
 				return false;
@@ -158,45 +243,56 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	/** Pickable flag */
 	protected boolean pickable;
 
-	/** Is this node pickable? */
-	public boolean isPickable() {
-		return pickable;
-	}
-
 	/** Set the pickable flag */
-	public synchronized void setPickable(boolean p) throws TMSException {
-		if(p == pickable)
-			return;
-		store.update(this, "pickable", p);
+	public void setPickable(boolean p) {
 		pickable = p;
 	}
 
-	/** Transition type */
-	protected int transition;
+	/** Set the pickable flag */
+	public void doSetPickable(boolean p) throws TMSException {
+		if(p == pickable)
+			return;
+		store.update(this, "pickable", p);
+		setPickable(p);
+	}
 
-	/** Get the transition type */
-	public int getTransition() {
-		return transition;
+	/** Is this node pickable? */
+	public boolean getPickable() {
+		return pickable;
+	}
+
+	/** Transition type */
+	protected R_NodeTransition transition = R_NodeTransition.NONE;
+
+	/** Set the transition type */
+	public void setTransition(int t) {
+		transition = R_NodeTransition.fromOrdinal(t);
 	}
 
 	/** Set the transition type */
-	public synchronized void setTransition(int t) throws TMSException {
-		if(t == transition)
-			return;
-		if(t < 0 || t >= TRANSITIONS.length)
+	public void doSetTransition(int t) throws TMSException {
+		R_NodeTransition trn = R_NodeTransition.fromOrdinal(t);
+		if(trn == null)
 			throw new ChangeVetoException("Bad transition: " + t);
+		if(trn == transition)
+			return;
 		store.update(this, "transition", t);
-		transition = t;
+		setTransition(t);
+	}
+
+	/** Get the transition type */
+	public int getTransition() {
+		return transition.ordinal();
 	}
 
 	/** Check if this r_node is an exit to a common section */
 	protected boolean isCommonExit() {
-		return isExit() && (transition == TRANSITION_COMMON);
+		return isExit() && (transition == R_NodeTransition.COMMON);
 	}
 
 	/** Check if this r_node links to a CD road */
 	public boolean isCD() {
-		return transition == TRANSITION_CD;
+		return transition == R_NodeTransition.CD;
 	}
 
 	/** Check if this r_node has a link to the downstream r_node */
@@ -206,187 +302,169 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Check if this r_node should impose a "turn" penalty */
 	public boolean hasTurnPenalty() {
-		return (transition == TRANSITION_LOOP) ||
-			(transition == TRANSITION_LEG) ||
-			(transition == TRANSITION_HOV) ||
-			(transition == TRANSITION_FLYOVER);
+		return (transition == R_NodeTransition.LOOP) ||
+			(transition == R_NodeTransition.LEG) ||
+			(transition == R_NodeTransition.HOV) ||
+			(transition == R_NodeTransition.FLYOVER);
 	}
 
 	/** Number of lanes */
 	protected int lanes;
+
+	/** Set the number of lanes */
+	public void setLanes(int l) {
+		lanes = l;
+	}
+
+	/** Set the number of lanes */
+	public void doSetLanes(int l) throws TMSException {
+		if(l == lanes)
+			return;
+		if(l < 0 || l > LANES_MAX)
+			throw new ChangeVetoException("Bad lanes: " + l);
+		store.update(this, "lanes", l);
+		setLanes(l);
+	}
 
 	/** Get the number of lanes */
 	public int getLanes() {
 		return lanes;
 	}
 
-	/** Set the number of lanes */
-	public synchronized void setLanes(int l) throws TMSException {
-		if(l == lanes)
-			return;
-		if(l < 0 || l > LANES_MAX)
-			throw new ChangeVetoException("Bad lanes: " + l);
-		store.update(this, "lanes", l);
-		lanes = l;
-	}
-
 	/** Attach side value */
 	protected boolean attach_side;
+
+	/** Set the attach side */
+	public void setAttachSide(boolean s) {
+		attach_side = s;
+	}
+
+	/** Set the attach side */
+	public void doSetAttachSide(boolean s) throws TMSException {
+		if(s == attach_side)
+			return;
+		store.update(this, "attach_side", s);
+		setAttachSide(s);
+	}
 
 	/** Get the attach side (true = left, false = right) */
 	public boolean getAttachSide() {
 		return attach_side;
 	}
 
-	/** Set the attach side */
-	public synchronized void setAttachSide(boolean s) throws TMSException {
-		if(s == attach_side)
-			return;
-		store.update(this, "attach_side", s);
-		attach_side = s;
-	}
-
 	/** Lane shift from corridor reference to attach side */
 	protected int shift;
+
+	/** Set the lane shift */
+	public void setShift(int s) {
+		shift = s;
+	}
+
+	/** Set the lane shift */
+	public void doSetShift(int s) throws TMSException {
+		if(s == shift)
+			return;
+		if(s < SHIFT_MIN || s > SHIFT_MAX)
+			throw new ChangeVetoException("Bad shift: " + s);
+		store.update(this, "shift", s);
+		setShift(s);
+	}
 
 	/** Get the lane shift */
 	public int getShift() {
 		return shift;
 	}
 
-	/** Set the lane shift */
-	public synchronized void setShift(int s) throws TMSException {
-		if(s == shift)
-			return;
-		if(s < SHIFT_MIN || s > SHIFT_MAX)
-			throw new ChangeVetoException("Bad shift: " + s);
-		store.update(this, "shift", s);
-		shift = s;
+	/** Staiton ID */
+	protected String station_id;
+
+	/** Station object */
+	protected StationImpl station;
+
+	/** Set the station ID */
+	public void setStationID(String s) {
+		station_id = s;
 	}
 
-	/** Staiton ID */
-	protected String station_id = "";
-
-	/** Get the staiton ID */
-	static protected String getStationID(String sid) {
-		if(sid == null || sid.length() < 1)
-			return "";
-		else
-			return sid;
+	/** Set the station ID */
+	public void doSetStationID(String s) throws TMSException {
+		if(s == station_id || (s != null && s.equals(station_id)))
+			return;
+		store.update(this, "station_id", s);
+		StationImpl stat = createStation(s);
+		updateStation(station, stat);
+		setStationID(s);
 	}
 
 	/** Get the station ID */
 	public String getStationID() {
-		return getStationID(station_id);
+		return station_id;
 	}
 
-	/** Create a remove station object */
-	protected StationImpl createStation(String s) throws RemoteException {
-		if(s != null)
-			return new StationImpl(s, this);
+	/** Create a station */
+	protected StationImpl createStation(String sid) {
+		if(sid != null)
+			return new StationImpl(sid, this);
 		else
 			return null;
 	}
 
-	/** Put the station ID into the station list */
-	protected void _setStationID(String s) throws TMSException,
-		RemoteException
-	{
-		if(statMap.getElement(s) != null)
-			throw new ChangeVetoException("Duplicate ID: " + s);
-		StationImpl station = createStation(s);
-		store.update(this, "station_id", s);
-		try {
-			if(station != null)
-				statMap.add(s, station);
-			if(station_id.length() > 0)
-				statMap.remove(station_id);
-		}
-		finally {
-			station_id = s;
-		}
+	/** Update the station */
+	protected void updateStation(StationImpl os, StationImpl s) {
+		if(s != null)
+			MainServer.server.addObject(s);
+		if(os != null)
+			MainServer.server.removeObject(os);
+		station = s;
 	}
 
-	/** Set the station ID */
-	public synchronized void setStationID(String s) throws TMSException,
-		RemoteException
-	{
-		s = getStationID(s);
-		if(s.equals(station_id))
-			return;
-		validateText(s);
-		synchronized(statMap) {
-			_setStationID(s);
-		}
-	}
-
-	/** Get the associated station */
-	public Station getStation() {
-		synchronized(statMap) {
-			String sid = getStationID();
-			if(sid.length() > 0)
-				return statMap.getElement(sid);
-		}
-		return null;
+	/** Get the station */
+	public StationImpl getStation() {
+		return station;
 	}
 
 	/** Speed limit */
 	protected int speed_limit = DEFAULT_SPEED_LIMIT;
+
+	/** Set the speed limit */
+	public void setSpeedLimit(int l) {
+		speed_limit = l;
+	}
+
+	/** Set the speed limit */
+	public void doSetSpeedLimit(int l) throws TMSException {
+		if(l == speed_limit)
+			return;
+		if(l < MINIMUM_SPEED_LIMIT || l > MAXIMUM_SPEED_LIMIT)
+			throw new ChangeVetoException("Bad speed limit: " + l);
+		store.update(this, "speed_limit", l);
+		setSpeedLimit(l);
+	}
 
 	/** Get the speed limit */
 	public int getSpeedLimit() {
 		return speed_limit;
 	}
 
-	/** Set the speed limit */
-	public synchronized void setSpeedLimit(int l) throws TMSException {
-		if(l == speed_limit)
-			return;
-		if(l < MINIMUM_SPEED_LIMIT || l > MAXIMUM_SPEED_LIMIT)
-			throw new ChangeVetoException("Bad speed limit: " + l);
-		store.update(this, "speed_limit", l);
-		speed_limit = l;
-	}
-
 	/** Administrator notes */
 	protected String notes;
+
+	/** Set the administrator notes */
+	public void setNotes(String n) {
+		notes = n;
+	}
+
+	/** Set the administrator notes */
+	public void doSetNotes(String n) throws TMSException {
+		if(n.equals(notes))
+			return;
+		store.update(this, "notes", n);
+		setNotes(n);
+	}
 
 	/** Get the administrator notes */
 	public String getNotes() {
 		return notes;
-	}
-
-	/** Set the administrator notes */
-	public synchronized void setNotes(String n) throws TMSException {
-		if(n.equals(notes))
-			return;
-		store.update(this, "notes", n);
-		notes = n;
-	}
-
-	/** Test if a detector is valid for the node type */
-	protected boolean validateDetector(DetectorImpl det) {
-		switch(node_type) {
-			case TYPE_STATION:
-				return det.isMainline();
-			case TYPE_ENTRANCE:
-				return det.isOnRamp();
-			case TYPE_EXIT:
-				return det.isOffRamp();
-		}
-		return false;
-	}
-
-	/** Get all detectors with a matching location */
-	public Detector[] getMatchingDetectors() {
-		List<DetectorImpl> dets = detList.getFiltered(lookupGeoLoc());
-		Iterator<DetectorImpl> it = dets.iterator();
-		while(it.hasNext()) {
-			DetectorImpl det = it.next();
-			if(!validateDetector(det))
-				it.remove();
-		}
-		return makeDetectorArray(dets);
 	}
 
 	/** Node detectors */
@@ -396,26 +474,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	protected synchronized void _setDetectors(DetectorImpl[] dets)
 		throws TMSException
 	{
-		Arrays.sort(dets);
-		if(Arrays.equals(dets, detectors))
-			return;
-		mapping.update("r_node", this, dets);
-		detectors = dets;
-		notifyUpdate();
+		// FIXME
 	}
 
 	/** Set the array of detectors */
-	public void setDetectors(Detector[] dets) throws TMSException,
-		RemoteException
-	{
-		// Need to look up DetectorImpl objects, since RMI refs
-		// cannot be cast to Impls.
-		DetectorImpl[] n_dets = new DetectorImpl[dets.length];
-		for(int i = 0; i < n_dets.length; i++) {
-			n_dets[i] = (DetectorImpl)detList.getElement(
-				dets[i].getIndex());
-		}
-		_setDetectors(n_dets);
+	public void setDetectors(Detector[] dets) throws TMSException {
+		// FIXME
 	}
 
 	/** Get an array of all node detectors */
@@ -423,17 +487,12 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return makeDetectorArray(detectors);
 	}
 
-	/** Get the detector array */
-	public DetectorImpl[] getDetectorArray() {
-		return detectors;
-	}
-
 	/** Get the detector set for the r_node */
 	public DetectorSet getDetectorSet() {
 		DetectorImpl[] dets = detectors;	// Avoid race
 		DetectorSet set = new DetectorSet();
 		for(DetectorImpl d: dets) {
-			if(!d.isAbandoned())
+			if(!d.getAbandoned())
 				set.addDetector(d);
 		}
 		return set;
@@ -449,75 +508,26 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 		return false;
 	}
 
-	/** Random number generator for R_Node names */
-	static protected final Random RAND = new Random();
-
-	/** Create a new name */
-	static protected String createName() {
-		return "rnd_" + RAND.nextInt();
-	}
-
-	/** Create a new r_node */
-	public R_NodeImpl() throws TMSException, RemoteException {
-		geo_loc = createName();
-		GeoLocImpl loc = new GeoLocImpl(geo_loc);
-		loc.doStore();
-		MainServer.server.addObject(loc);
-	}
-
-	/** Create an r_node from an ObjectVault field map */
-	protected R_NodeImpl(FieldMap fields) throws RemoteException {
-		// hmmmm
-	}
-
-	/** Initialize transient fields */
-	public void initTransients() throws TMSException,
-		RemoteException
-	{
-		// NOTE: must be called after detList is populated
-		LinkedList<DetectorImpl> dets = new LinkedList<DetectorImpl>();
-		Set s = mapping.lookup("r_node", this);
-		Iterator it = s.iterator();
-		while(it.hasNext()) {
-			Integer det_no = (Integer)it.next();
-			dets.add((DetectorImpl)detList.getElement(det_no));
-		}
-		detectors = makeDetectorImplArray(dets);
-		String sid = getStationID();
-		if(sid.length() > 0)
-			statMap.add(sid, new StationImpl(sid, this));
-	}
-
-	/** Is this object deletable? */
-	public boolean isDeletable() throws TMSException {
-		// Cannot delete node with a Station
-		if(getStationID().length() > 0)
-			return false;
-		return super.isDeletable();
-	}
-
 	/** Get the true UTM Northing (without offset) */
 	protected Integer getTrueNorthing() {
-		return GeoLocHelper.getTrueNorthing(lookupGeoLoc());
+		return GeoLocHelper.getTrueNorthing(geo_loc);
 	}
 
 	/** Get the true UTM Easting (without offset) */
 	protected Integer getTrueEasting() {
-		return GeoLocHelper.getTrueEasting(lookupGeoLoc());
+		return GeoLocHelper.getTrueEasting(geo_loc);
 	}
 
 	/** Test if an other r_node is a matching entrance */
 	protected boolean isMatchingEntrance(R_NodeImpl other) {
 		return other.isEntrance() &&
-			GeoLocHelper.rampMatches(lookupGeoLoc(),
-			other.lookupGeoLoc());
+			GeoLocHelper.rampMatches(geo_loc, other.getGeoLoc());
 	}
 
 	/** Test if an other r_node is a matching access */
 	protected boolean isMatchingAccess(R_NodeImpl other) {
 		return other.isAccess() &&
-			GeoLocHelper.accessMatches(lookupGeoLoc(),
-			other.lookupGeoLoc());
+			GeoLocHelper.accessMatches(geo_loc, other.getGeoLoc());
 	}
 
 	/** Test if an other r_node links with this (exit) r_node */
@@ -528,8 +538,7 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 	/** Test if an other r_node links with this (access) r_node */
 	public boolean isAccessLink(R_NodeImpl other) {
 		return other.isEntrance() &&
-			GeoLocHelper.accessMatches(lookupGeoLoc(),
-			other.lookupGeoLoc());
+			GeoLocHelper.accessMatches(geo_loc, other.getGeoLoc());
 	}
 
 	/** Downstream roadway nodes */
@@ -553,25 +562,29 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 
 	/** Get the linked corridor for an entrance or exit */
 	public Corridor getLinkedCorridor() {
-		return nodeMap.getCorridor(GeoLocHelper.getLinkedCorridor(
-			lookupGeoLoc()));
+		if(TMSObjectImpl.corridors != null) {
+			String c = GeoLocHelper.getLinkedCorridor(geo_loc);
+			return TMSObjectImpl.corridors.getCorridor(c);
+		} else
+			return null;
 	}
 
 	/** Print the r_node as an XML element */
 	public void printXml(PrintWriter out) {
 		out.print("\t<r_node ");
-		out.print("id='N" + getOID() + "' ");
-		out.print("n_type='" + TYPES[node_type] + "' ");
+		out.print("id='N" + getName() + "' ");
+		out.print("n_type='" + node_type.description + "' ");
 		if(pickable)
 			out.print("pickable='t' ");
-		String sid = getStationID();
-		if(sid.length() > 0)
+		String sid = station_id;
+		if(sid != null)
 			out.print("station_id='" + sid + "' ");
-		GeoLoc loc = lookupGeoLoc();
+		GeoLoc loc = geo_loc;
 		if(loc != null) {
 			Road x = loc.getCrossStreet();
 			if(x != null) {
-				String xs = replaceEntities(x.getName());
+				String xs = XmlWriter.replaceEntities(
+					x.getName());
 				out.print("label='" + xs + "' ");
 			}
 			out.print("easting='" + getTrueEasting() + "' ");
@@ -594,45 +607,16 @@ public class R_NodeImpl extends TMSObjectImpl implements R_Node, Storable {
 			out.print("dets='");
 			StringBuilder b = new StringBuilder();
 			for(DetectorImpl det: dets)
-				b.append("D" + det.getIndex() + " ");
+				b.append("D" + det.getName() + " ");
 			out.print(b.toString().trim() + "' ");
 		}
 		if(downstream.size() > 0) {
 			out.print("downstream='");
 			StringBuilder b = new StringBuilder();
 			for(R_NodeImpl d: downstream)
-				b.append("N" + d.getOID() + " ");
+				b.append("N" + d.getName() + " ");
 			out.print(b.toString().trim() + "' ");
 		}
 		out.println("/>");
-	}
-
-	/** Make a sorted array of detectors */
-	static protected Detector[] makeDetectorArray(DetectorImpl[] dets) {
-		Detector[] result = new Detector[dets.length];
-		for(int i = 0; i < result.length; i++)
-			result[i] = dets[i];
-		Arrays.sort(result);
-		return result;
-	}
-
-	/** Make a sorted array of detectors */
-	static protected Detector[] makeDetectorArray(List<DetectorImpl> dets) {
-		Detector[] result = new Detector[dets.size()];
-		for(int i = 0; i < result.length; i++)
-			result[i] = dets.get(i);
-		Arrays.sort(result);
-		return result;
-	}
-
-	/** Make a sorted array of detectors */
-	static protected DetectorImpl[] makeDetectorImplArray(
-		List<DetectorImpl> dets)
-	{
-		DetectorImpl[] result = new DetectorImpl[dets.size()];
-		for(int i = 0; i < result.length; i++)
-			result[i] = dets.get(i);
-		Arrays.sort(result);
-		return result;
 	}
 }

@@ -14,14 +14,17 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * A station is a group of related detectors.
  *
  * @author Douglas Lau
  */
-public interface Station extends TMSObject {
+public interface Station extends SonarObject {
+
+	/** SONAR type name */
+	String SONAR_TYPE = "station";
 
 	/** Default speed limit */
 	int DEFAULT_SPEED_LIMIT = 55;
@@ -33,14 +36,17 @@ public interface Station extends TMSObject {
 	int MAXIMUM_SPEED_LIMIT = 75;
 
 	/** Get the station label */
-	public String getLabel() throws RemoteException;
+	String getLabel();
+
+	/** Get the roadway node */
+	R_Node getR_Node();
 
 	/** Is this station active? */
-	public boolean isActive() throws RemoteException;
+	boolean getActive();
 
 	/** Get the average station flow */
-	public int getFlow() throws RemoteException;
+	int getFlow();
 
 	/** Get the average station speed */
-	public int getSpeed() throws RemoteException;
+	int getSpeed();
 }

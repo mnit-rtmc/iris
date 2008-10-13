@@ -343,7 +343,7 @@ public class Corridor {
 		// FIXME: there may be more than one linked CD road
 		for(R_NodeImpl r_node: n_points.values()) {
 			if(r_node.isCD()) {
-				GeoLoc l = r_node.lookupGeoLoc();
+				GeoLoc l = r_node.getGeoLoc();
 				String c = GeoLocHelper.getLinkedCorridor(l);
 				if(c != null)
 					return c;

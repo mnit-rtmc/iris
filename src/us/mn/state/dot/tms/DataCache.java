@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import java.util.Calendar;
  *
  * @author Douglas Lau
  */
-public class DataCache implements Constants {
+public class DataCache {
 
 	/** Volume traffic data buffer */
 	protected final TrafficDataBuffer.Volume vol_buf;
@@ -63,9 +63,12 @@ public class DataCache implements Constants {
 		try {
 			int[] volume = vol_buf.read(stamp, 10);
 			int[] scans = scan_buf.read(stamp, 10);
-			if(!mergeData5(volume, vol5, scans, scan5)) return;
-			if(vol5 > MISSING_DATA) vol_buf.merge(stamp, volume);
-			if(scan5 > MISSING_DATA) scan_buf.merge(stamp, scans);
+			if(!mergeData5(volume, vol5, scans, scan5))
+				return;
+			if(vol5 > Constants.MISSING_DATA)
+				vol_buf.merge(stamp, volume);
+			if(scan5 > Constants.MISSING_DATA)
+				scan_buf.merge(stamp, scans);
 		}
 		catch(IndexOutOfBoundsException e) {
 			mergeSlow(cal, vol5, scan5);
@@ -100,13 +103,16 @@ public class DataCache implements Constants {
 			}
 			scan30 += scans[i];
 		}
-		if(missing < 1) return false;
+		if(missing < 1)
+			return false;
 		int vmis5 = vol5 - vol30;
-		if(vmis5 <= 0) return false;
+		if(vmis5 <= 0)
+			return false;
 		int vmis30 = vmis5 / missing;
 		int vmod30 = vmis5 % missing;
 		int smis5 = scan5 - scan30;
-		if(smis5 < 0) smis5 = 0;
+		if(smis5 < 0)
+			smis5 = 0;
 		int smis30 = smis5 / missing;
 		int smod30 = smis5 % missing;
 		for(int i = 0; i < 10; i++) {
@@ -121,7 +127,8 @@ public class DataCache implements Constants {
 				}
 				if(smerge && vmis30 > 0) {
 					scans[i] = smis30;
-					if(smod30-- > 0) scans[i]++;
+					if(smod30-- > 0)
+						scans[i]++;
 				}
 				else smis5 = 0;
 			}
@@ -143,9 +150,12 @@ public class DataCache implements Constants {
 		try {
 			int[] volume = readVolume(vFile, r);
 			int[] scans = readScans(cFile, r);
-			if(!mergeData5(volume, vol5, scans, scan5)) return;
-			if(vol5 > MISSING_DATA) mergeVolume(vFile, r, volume);
-			if(scan5 > MISSING_DATA) mergeScans(cFile, r, scans);
+			if(!mergeData5(volume, vol5, scans, scan5))
+				return;
+			if(vol5 > Constants.MISSING_DATA)
+				mergeVolume(vFile, r, volume);
+			if(scan5 > Constants.MISSING_DATA)
+				mergeScans(cFile, r, scans);
 		}
 		finally {
 			vFile.close();
@@ -159,8 +169,9 @@ public class DataCache implements Constants {
 	{
 		int[] volume = new int[10];
 		for(int i = 0; i < 10; i++)
-			volume[i] = MISSING_DATA;
-		if(vFile.length() < (r + 1) * 10) return volume;
+			volume[i] = Constants.MISSING_DATA;
+		if(vFile.length() < (r + 1) * 10)
+			return volume;
 		byte[] vol = new byte[10];
 		vFile.seek(r * 10);
 		vFile.readFully(vol);
@@ -174,7 +185,8 @@ public class DataCache implements Constants {
 		throws IOException
 	{
 		int fsiz = (r + 1) * 10;
-		if(vFile.length() < fsiz) vFile.setLength(fsiz);
+		if(vFile.length() < fsiz)	
+			vFile.setLength(fsiz);
 		byte[] vol = new byte[10];
 		for(int i = 0; i < 10; i++)
 			vol[i] = (byte)volume[i];
@@ -188,8 +200,9 @@ public class DataCache implements Constants {
 	{
 		int[] scans = new int[10];
 		for(int i = 0; i < 10; i++)
-			scans[i] = MISSING_DATA;
-		if(cFile.length() < (r + 1) * 20) return scans;
+			scans[i] = Constants.MISSING_DATA;
+		if(cFile.length() < (r + 1) * 20)
+			return scans;
 		byte[] scn = new byte[20];
 		cFile.seek(r * 20);
 		cFile.readFully(scn);
@@ -205,7 +218,8 @@ public class DataCache implements Constants {
 		throws IOException
 	{
 		int fsiz = (r + 1) * 20;
-		if(cFile.length() < fsiz) cFile.setLength(fsiz);
+		if(cFile.length() < fsiz)
+			cFile.setLength(fsiz);
 		byte[] scn = new byte[20];
 		for(int i = 0; i < 10; i++) {
 			int j = i * 2;

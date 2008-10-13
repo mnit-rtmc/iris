@@ -15,14 +15,13 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
-import java.rmi.RemoteException;
 
 /**
  * A station is a group of related detectors.
  *
  * @author Douglas Lau
  */
-public class StationImpl extends TMSObjectImpl implements Station, Constants {
+public class StationImpl implements Station {
 
 	/** Speed ranks for extending rolling sample averaging */
 	static public final int[] SPEED_RANK = { 25, 20, 15, 0 };
@@ -35,7 +34,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 		if(count > 0)
 			return total / count;
 		else
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
 	}
 
 	/** Get the number of rolling samples for the given speed */
@@ -83,20 +82,28 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 	protected final R_NodeImpl r_node;
 
 	/** Get the roadway node */
-	public R_NodeImpl getR_Node() {
+	public R_Node getR_Node() {
 		return r_node;
 	}
 
         /** Create a new station */
-	public StationImpl(String station_id, R_NodeImpl n)
-		throws RemoteException
-	{
+	public StationImpl(String station_id, R_NodeImpl n) {
 		name = station_id;
 		r_node = n;
 		for(int i = 0; i < avg_speed.length; i++)
-			avg_speed[i] = MISSING_DATA;
+			avg_speed[i] = Constants.MISSING_DATA;
 		for(int i = 0; i < low_speed.length; i++)
-			low_speed[i] = MISSING_DATA;
+			low_speed[i] = Constants.MISSING_DATA;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Destroy a station */
+	public void destroy() {
+		// Nothing to do
 	}
 
 	/** Get a string representation of the station */
@@ -111,38 +118,26 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 
 	/** Get the station label */
 	public String getLabel() {
-		DetectorImpl[] dets = r_node.getDetectorArray();
+		Detector[] dets = r_node.getDetectors();
 		if(dets.length > 0)
-			return dets[0].getLabel(true);
+			return DetectorHelper.getStationLabel(dets[0]);
 		else
 			return "UNASSIGNED";
 	}
 
 	/** Is this station active? */
-	public boolean isActive() {
-		return r_node.getDetectorArray().length > 0;
+	public boolean getActive() {
+		return r_node.getDetectors().length > 0;
 	}
 
 	/** Current average station volume */
-	protected float volume = MISSING_DATA;
-
-	/** Get the average station volume
-	 * @deprecated */
-	public float getVolume() {
-		return volume;
-	}
+	protected float volume = Constants.MISSING_DATA;
 
 	/** Current average station occupancy */
-	protected float occupancy = MISSING_DATA;
-
-	/** Get the average station occupancy
-	 * @deprecated */
-	public float getOccupancy() {
-		return occupancy;
-	}
+	protected float occupancy = Constants.MISSING_DATA;
 
 	/** Current average station flow */
-	protected int flow = MISSING_DATA;
+	protected int flow = Constants.MISSING_DATA;
 
 	/** Get the average station flow */
 	public int getFlow() {
@@ -150,7 +145,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 	}
 
 	/** Current average station speed */
-	protected int speed = MISSING_DATA;
+	protected int speed = Constants.MISSING_DATA;
 
 	/** Get the average station speed */
 	public int getSpeed() {
@@ -187,8 +182,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 
 	/** Calculate the current station data */
 	public void calculateData() {
-		float low = MISSING_DATA;
-		DetectorImpl[] dets = r_node.getDetectorArray();
+		float low = Constants.MISSING_DATA;
 		float t_volume = 0;
 		int n_volume = 0;
 		float t_occ = 0;
@@ -197,22 +191,22 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 		int n_flow = 0;
 		float t_speed = 0;
 		int n_speed = 0;
-		for(int i = 0; i < dets.length; i++) {
-			DetectorImpl det = dets[i];
+		for(Detector d: r_node.getDetectors()) {
+			DetectorImpl det = (DetectorImpl)d;
 			if(!det.isStationOrCD())
 				continue;
 			float f = det.getVolume();
-			if(f != MISSING_DATA) {
+			if(f != Constants.MISSING_DATA) {
 				t_volume += f;
 				n_volume++;
 			}
 			f = det.getOccupancy();
-			if(f != MISSING_DATA) {
+			if(f != Constants.MISSING_DATA) {
 				t_occ += f;
 				n_occ++;
 			}
 			f = det.getFlow();
-			if(f != MISSING_DATA) {
+			if(f != Constants.MISSING_DATA) {
 				t_flow += f;
 				n_flow++;
 			}
@@ -220,7 +214,7 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 			if(f > 0) {
 				t_speed += f;
 				n_speed++;
-				if(low == MISSING_DATA)
+				if(low == Constants.MISSING_DATA)
 					low = f;
 				else
 					low = Math.min(f, low);
@@ -236,12 +230,12 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 
 	/** Print the current sample as an XML element */
 	public void printSampleXmlElement(PrintWriter out) {
-		if(!isActive())
+		if(!getActive())
 			return;
 		int f = getFlow();
 		int s = getSpeed();
 		out.print("\t<sample sensor='" + name);
-		if(f > MISSING_DATA)
+		if(f > Constants.MISSING_DATA)
 			out.print("' flow='" + f);
 		if(s > 0)
 			out.print("' speed='" + s);
@@ -250,12 +244,12 @@ public class StationImpl extends TMSObjectImpl implements Station, Constants {
 
 	/** Print the current sample as an XML element */
 	public void printStationXmlElement(PrintWriter out) {
-		if(!isActive())
+		if(!getActive())
 			return;
 		String n = getIndex();
 		if(n.length() < 1)
 			return;
-		if(volume == MISSING_DATA) {
+		if(volume == Constants.MISSING_DATA) {
 			out.println("\t<station id='" + n +
 				"' status='fail'/>");
 		} else {

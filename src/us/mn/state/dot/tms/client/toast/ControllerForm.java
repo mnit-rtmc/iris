@@ -33,6 +33,7 @@ import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
@@ -43,6 +44,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.ControllerIO_SONAR;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
@@ -112,11 +114,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JLabel version = new JLabel();
 
 	/** Download button */
-	protected final JButton download = 
+	protected final JButton download =
 		new JButton(I18NMessages.get("ControllerForm.DownloadButton"));
 
 	/** Reset button */
-	protected final JButton reset = 
+	protected final JButton reset =
 		new JButton(I18NMessages.get("ControllerForm.ResetButton"));
 
 	/** Comm Link list model */
@@ -150,19 +152,20 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			if(cio[i] != null)
 				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
 		}
-		ProxyListModel<Alarm> alarms = state.getAlarmModel();
+		TypeCache<Alarm> alarms = state.getAlarms();
 		alarms.find(new ControllerIOFinder(io));
-		ProxyListModel<Camera> cams = state.getCameraModel();
+		TypeCache<Camera> cams = state.getCameras();
 		cams.find(new ControllerIOFinder(io));
-		ProxyListModel<WarningSign> w_signs =
-			state.getWarningSignModel();
+		TypeCache<Detector> dets = state.getDetectors();
+		dets.find(new ControllerIOFinder(io));
+		TypeCache<WarningSign> w_signs = state.getWarningSigns();
 		w_signs.find(new ControllerIOFinder(io));
 		return io;
 	}
 
 	/** A controller IO finder helps locate IO for a controller */
 	protected class ControllerIOFinder implements
-		ProxyListModel.ProxyFinder<ControllerIO_SONAR>
+		Checker<ControllerIO_SONAR>
 	{
 		protected final ControllerIO[] io;
 		protected ControllerIOFinder(ControllerIO[] _io) {

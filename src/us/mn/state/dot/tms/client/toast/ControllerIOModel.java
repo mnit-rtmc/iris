@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.LaneControlSignal;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TMSObject;
@@ -173,7 +172,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			Session.cam_manager_singleton.getStyleModel(
 			CameraManager.STYLE_NO_CONTROLLER), true);
 		dt_model = new WrapperComboBoxModel(
-			tms.getAvailable().getModel(), true);
+			Session.det_manager_singleton.getStyleModel(
+			DetectorManager.STYLE_NO_CONTROLLER), true);
 		dms_model = new WrapperComboBoxModel(
 			tms.getAvailableDMSs().getModel(), true);
 		lcs_model = new WrapperComboBoxModel(
@@ -317,13 +317,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			case Camera:
 				return (Camera)value;
 			case Detector:
-				try {
-					int index = Integer.parseInt(v);
-					return lookupDetector(index);
-				}
-				catch(NumberFormatException e) {
-					return null;
-				}
+				return (Detector)value;
 			case DMS:
 				return lookupDMS(v);
 			case LCS:
@@ -335,11 +329,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			default:
 				return null;
 		}
-	}
-
-	protected Detector lookupDetector(int index) throws RemoteException {
-		IndexedList l = (IndexedList)tms.getDetectors().getList();
-		return (Detector)l.getElement(index);
 	}
 
 	protected DMS lookupDMS(String id) throws RemoteException {
@@ -439,9 +428,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Lookup a device ID */
 	protected Object lookupId(Object value) {
 		try {
-			if(value instanceof Detector)
-				return ((Detector)value).getIndex();
-			else if(value instanceof TrafficDevice)
+			if(value instanceof TrafficDevice)
 				return ((TrafficDevice)value).getId();
 		}
 		catch(RemoteException e) {

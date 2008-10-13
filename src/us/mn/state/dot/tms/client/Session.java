@@ -30,8 +30,8 @@ import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.StationMap;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSHandler;
@@ -41,13 +41,13 @@ import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
-import us.mn.state.dot.tms.client.roads.R_NodeHandler;
-import us.mn.state.dot.tms.client.roads.R_NodeLayer;
+import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.sonar.SonarLayer;
+import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 import us.mn.state.dot.tms.utils.Agency;
 
@@ -93,8 +93,15 @@ public class Session {
 	/** Camera manager */
 	protected final CameraManager cam_manager;
 
+	/** Detector manager */
+	protected final DetectorManager det_manager;
+
+	/** R_Node manager */
+	protected final R_NodeManager r_node_manager;
+
 	/** FIXME: this is a hack */
 	static public CameraManager cam_manager_singleton;
+	static public DetectorManager det_manager_singleton;
 	static public WarningSignManager warn_manager_singleton;
 
 	/** Camera layer */
@@ -120,15 +127,13 @@ public class Session {
 	}
 
 	/** Create the station layer */
-	protected StationLayer createStationLayer() throws IOException,
-		TdxmlException
+	protected StationLayer createStationLayer(final SonarState st)
+		throws IOException, TdxmlException
 	{
 		StationLayer layer = new StationLayer(props, logger);
-		final StationMap s_list = (StationMap)(tmsConnection.getProxy(
-			).getStations().getList());
 		layer.setLabels(new StationLayer.Labeller() {
 			public String getLabel(String sid) throws IOException {
-				Station s = s_list.getElement(sid);
+				Station s = st.lookupStation(sid);
 				if(s != null)
 					return s.getLabel();
 				else
@@ -187,12 +192,11 @@ public class Session {
 	}
 
 	/** Add the roadway tab */
-	protected void addRoadwayTab() throws RemoteException {
+	protected void addRoadwayTab() {
 		List<LayerState> lstates = createBaseLayers();
-		R_NodeLayer layer = R_NodeHandler.createLayer(tmsConnection);
+		SonarLayer<R_Node> layer = r_node_manager.getLayer();
 		lstates.add(layer.createState());
-		tabs.add(new RoadwayTab(layer,
-			(R_NodeHandler)layer.getHandler(), lstates, vlayer));
+		tabs.add(new RoadwayTab(r_node_manager, lstates, vlayer));
 	}
 
 	/** Create a new session */
@@ -203,7 +207,7 @@ public class Session {
 		props = p;
 		logger = l;
 		baseLayers = new BaseLayers().getLayers();
-		gpoly = createStationLayer();
+		gpoly = createStationLayer(st);
 
 		// create agency specific incident layer
 		if(Agency.isId(Agency.MNDOT)) {
@@ -226,6 +230,11 @@ public class Session {
 			loc_manager);
 		cam_manager_singleton = cam_manager;
 		camLayer = cam_manager.getLayer();
+		det_manager = new DetectorManager(tmsConnection,
+			st.getDetectors(), loc_manager);
+		det_manager_singleton = det_manager;
+		r_node_manager = new R_NodeManager(tmsConnection,
+			st.getR_Nodes(), loc_manager);
 		warn_manager = new WarningSignManager(tmsConnection,
 			st.getWarningSigns(), loc_manager);
 		warn_manager_singleton = warn_manager;

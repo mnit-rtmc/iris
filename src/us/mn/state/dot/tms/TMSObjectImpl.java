@@ -51,9 +51,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** Unknown status string */
 	static protected final String UNKNOWN = "???";
 
-	/** Regex pattern to match an ampersand */
-	static protected final Pattern AMPERSAND = Pattern.compile("&");
-
 	/** General text validation regex pattern */
 	static protected final Pattern TEXT_PATTERN =
 		Pattern.compile("[[\\p{Graph}\\p{Blank}]&&[^'\\[\\]]]*");
@@ -67,17 +64,11 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** SONAR namespace */
 	static Namespace namespace;
 
+	/** Corridor manager */
+	static CorridorManager corridors;
+
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";
-
-	/** Detector list */
-	static public DetectorListImpl detList;
-
-	/** Station map */
-	static StationMapImpl statMap;
-
-	/** R_Node map */
-	static R_NodeMapImpl nodeMap;
 
 	/** Timing plan list */
 	static TimingPlanListImpl planList;
@@ -87,9 +78,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** DMS list */
 	static public DMSListImpl dmsList;
-
-	/** Warning sign list */
-	static SortedListImpl warnList;
 
 	/** LCS list */
 	static LCSListImpl lcsList;
@@ -120,12 +108,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		catch( ServerNotActiveException e ) {
 			return "unknown";
 		}
-	}
-
-	/** Replace special characters with proper entities */
-	static protected String replaceEntities(String text) {
-		Matcher m = AMPERSAND.matcher(text);
-		return m.replaceAll("&amp;");
 	}
 
 	/** Validate a string of text */

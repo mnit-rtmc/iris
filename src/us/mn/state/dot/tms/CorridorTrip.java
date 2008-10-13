@@ -22,7 +22,7 @@ import java.util.TreeMap;
  *
  * @author Douglas Lau
  */
-public class CorridorTrip implements Constants {
+public class CorridorTrip {
 
 	/** Distance to use low station speed at end of trip (miles) */
 	static protected final float LOW_SPEED_DISTANCE = 1.0f;

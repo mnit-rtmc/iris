@@ -14,66 +14,55 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
-
 /**
  * Detector for traffic data sampling
  *
  * @author Douglas Lau
  */
-public interface Detector extends Device {
+public interface Detector extends Device2 {
 
-	/** Get the detector index */
-	int getIndex() throws RemoteException;
+	/** SONAR type name */
+	String SONAR_TYPE = "detector";
+
+	/** Set the r_node (roadway network node) */
+	void setR_Node(R_Node n);
+
+	/** Get the r_node (roadway network node) */
+	R_Node getR_Node();
 
 	/** Set the lane type */
-	void setLaneType(short t) throws TMSException, RemoteException;
+	void setLaneType(short t);
 
 	/** Get the lane type */
-	short getLaneType() throws RemoteException;
-
-	/** Is this a station detector? (mainline, non-HOV) */
-	boolean isStation() throws RemoteException;
+	short getLaneType();
 
 	/** Set the lane number */
-	void setLaneNumber(short laneNumber) throws TMSException,
-		RemoteException;
+	void setLaneNumber(short n);
 
 	/** Get the lane number */
-	short getLaneNumber() throws RemoteException;
+	short getLaneNumber();
 
 	/** Set the abandoned status */
-	void setAbandoned(boolean abandoned) throws TMSException,
-		RemoteException;
+	void setAbandoned(boolean a);
 
 	/** Get the abandoned status */
-	boolean isAbandoned() throws RemoteException;
+	boolean getAbandoned();
 
 	/** Set the Force Fail status */
-	void setForceFail(boolean forceFail) throws TMSException,
-		RemoteException;
+	void setForceFail(boolean f);
 
 	/** Get the Force Fail status */
-	boolean getForceFail() throws RemoteException;
+	boolean getForceFail();
 
-	/** Set the average field length */
-	void setFieldLength(float field) throws TMSException, RemoteException;
+	/** Set the average field length (feet) */
+	void setFieldLength(float f);
 
-	/** Get the average field length */
-	float getFieldLength() throws RemoteException;
+	/** Get the average field length (feet) */
+	float getFieldLength();
 
-	/** Get the String representation of this detector */
-	String getLabel() throws RemoteException;
+	/** Set the fake expression */
+	void setFake(String f);
 
-	/** Get the detector label */
-	String getLabel(boolean statName) throws RemoteException;
-
-	/** Set the fake detector */
-	void setFakeDetector(String f) throws TMSException, RemoteException;
-
-	/** Get the fake detector */
-	String getFakeDetector() throws RemoteException;
-
-	/** Get the station which contains this detector */
-	Station getStation() throws RemoteException;
+	/** Get the fake expression */
+	String getFake();
 }

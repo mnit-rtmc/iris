@@ -16,7 +16,7 @@ us/mn/state/dot/tms/ControllerIO_SONAR.class
 us/mn/state/dot/tms/DataFactory.class
 us/mn/state/dot/tms/DateChecker.class
 us/mn/state/dot/tms/Detector.class
-us/mn/state/dot/tms/DetectorData.class
+us/mn/state/dot/tms/DetectorHelper.class
 us/mn/state/dot/tms/DetectorList.class
 us/mn/state/dot/tms/Device.class
 us/mn/state/dot/tms/Device2.class
@@ -49,6 +49,8 @@ us/mn/state/dot/tms/MultiString*.class
 us/mn/state/dot/tms/PixelMapBuilder*.class
 us/mn/state/dot/tms/R_Node.class
 us/mn/state/dot/tms/R_NodeMap.class
+us/mn/state/dot/tms/R_NodeTransition.class
+us/mn/state/dot/tms/R_NodeType.class
 us/mn/state/dot/tms/RampMeter.class
 us/mn/state/dot/tms/RampMeterLock.class
 us/mn/state/dot/tms/RemoteDataFactory.class

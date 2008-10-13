@@ -47,7 +47,7 @@ public class MeterDataForm extends AbstractForm {
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));
 		for(Detector det: proxy.meter.getDetectors())
-			plot.addDetector(Integer.toString(det.getIndex()));
+			plot.addDetector(det.getName());
 		add(plot);
 	}
 }

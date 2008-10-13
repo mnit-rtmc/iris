@@ -831,7 +831,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 		protected void followEntrance(R_NodeImpl n) {
-			GeoLoc branch = n.lookupGeoLoc();
+			GeoLoc branch = n.getGeoLoc();
 			Corridor c = n.getLinkedCorridor();
 			if(c != null) {
 				Corridor.NodeFinder nf =
@@ -843,7 +843,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				GeoLocHelper.getDescription(branch));
 		}
 		protected void followExit(R_NodeImpl n) {
-			GeoLoc branch = n.lookupGeoLoc();
+			GeoLoc branch = n.getGeoLoc();
 			Corridor c = n.getLinkedCorridor();
 			if(c != null) {
 				Corridor.NodeFinder nf =
@@ -855,24 +855,24 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				GeoLocHelper.getDescription(branch));
 		}
 		public boolean check(R_NodeImpl n) {
-			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION) {
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if(nt == R_NodeType.INTERSECTION) {
 				removeInvalidZones();
 				return false;
 			}
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() == 0) {
- 				if(nt == R_Node.TYPE_ENTRANCE)
+ 				if(nt == R_NodeType.ENTRANCE)
 					followEntrance(n);
-				if(nt == R_Node.TYPE_EXIT)
+				if(nt == R_NodeType.EXIT)
 					followExit(n);
 				return false;
 			}
-			if(nt == R_Node.TYPE_STATION)
+			if(nt == R_NodeType.STATION)
 				addStation(ds);
-			else if(nt == R_Node.TYPE_ENTRANCE)
+			else if(nt == R_NodeType.ENTRANCE)
 				addEntrance(ds);
-			else if(nt == R_Node.TYPE_EXIT)
+			else if(nt == R_NodeType.EXIT)
 				addExit(ds);
 			return false;
 		}
@@ -910,23 +910,23 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				return check_not_found(n);
 		}
 		protected boolean check_found(R_NodeImpl n) {
-			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+			if(n.getTransition()==R_NodeTransition.COMMON.ordinal())
 				return true;
 			else
 				return check_found_inside(n);
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
-			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION)
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if(nt == R_NodeType.INTERSECTION)
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_Node.TYPE_ENTRANCE) {
+				if(nt == R_NodeType.ENTRANCE) {
 					zone_builder.addEntrance(ds);
 					if(n.getLanes() == 0)
 						return true;
 				}
-				if(nt == R_Node.TYPE_STATION && is_not_CD(n)) {
+				if(nt == R_NodeType.STATION && is_not_CD(n)) {
 					zone_builder.addEntrance(ds);
 					return true;
 				}
@@ -934,13 +934,13 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			return false;
 		}
 		protected boolean is_not_CD(R_NodeImpl n) {
-			GeoLoc loc = n.lookupGeoLoc();
+			GeoLoc loc = n.getGeoLoc();
 			return !GeoLocHelper.matchesRoot(loc, branch);
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
-			if(n.getNodeType() != R_Node.TYPE_EXIT)
+			if(n.getNodeType() != R_NodeType.EXIT.ordinal())
 				return false;
-			GeoLoc loc = n.lookupGeoLoc();
+			GeoLoc loc = n.getGeoLoc();
 			if(GeoLocHelper.rampMatches(loc, branch)) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
@@ -977,29 +977,29 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				return check_not_found(n);
 		}
 		protected boolean check_found(R_NodeImpl n) {
-			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+			if(n.getTransition()==R_NodeTransition.COMMON.ordinal())
 				return true;
 			else
 				return check_found_inside(n);
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
-			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION)
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if(nt == R_NodeType.INTERSECTION)
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_Node.TYPE_STATION) {
+				if(nt == R_NodeType.STATION) {
 					zone_builder.addExit(ds);
 					return true;
-				} else if(nt == R_Node.TYPE_EXIT)
+				} else if(nt == R_NodeType.EXIT)
 					zone_builder.addExit(ds);
 			}
 			return false;
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
-			if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
+			if(n.getNodeType() != R_NodeType.ENTRANCE.ordinal())
 				return false;
-			GeoLoc loc = n.lookupGeoLoc();
+			GeoLoc loc = n.getGeoLoc();
 			if(GeoLocHelper.rampMatches(loc, branch)) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();

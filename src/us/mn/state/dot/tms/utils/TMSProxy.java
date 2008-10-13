@@ -19,7 +19,6 @@ import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import us.mn.state.dot.tms.DMSList;
-import us.mn.state.dot.tms.DetectorList;
 import us.mn.state.dot.tms.Login;
 import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.TMS;
@@ -34,38 +33,6 @@ public class TMSProxy {
 
 	/** Remote TMS */
 	protected final TMS tms;
-
-	/** Detector list */
-	protected final RemoteListModel detectors;
-
-	/** Get the detector list */
-	public RemoteListModel getDetectors() { return detectors; }
-
-	/** Available detector list */
-	protected final RemoteListModel available;
-
-	/** Get the available detector list */
-	public RemoteListModel getAvailable() { return available; }
-
-	/** Free mainline detectors */
-	protected final RemoteListModel mainFree;
-
-	/** Get the free mainline detector list */
-	public RemoteListModel getMainFree() { return mainFree; }
-
-	/** Station list */
-	protected final RemoteListModel stations;
-
-	/** Get the station list */
-	public RemoteListModel getStations() { return stations; }
-
-	/** R_Node list */
-	protected final RemoteListModel r_nodes;
-
-	/** Get the r_node list */
-	public RemoteListModel getR_Nodes() {
-		return r_nodes;
-	}
 
 	/** Timing plan list */
 	protected final RemoteListModel plans;
@@ -156,12 +123,6 @@ public class TMSProxy {
 	{
 		Login l = (Login)Naming.lookup("//" + server + "/login");
 		tms = l.login(user);
-		DetectorList dets = (DetectorList)tms.getDetectorList();
-		detectors = new RemoteListModel(dets);
-		available = new RemoteListModel(dets.getAvailableList());
-		mainFree = new RemoteListModel(dets.getMainFreeList());
-		stations = new RemoteListModel(tms.getStationMap());
-		r_nodes = new RemoteListModel(tms.getR_NodeMap());
 		meter_list = tms.getRampMeterList();
 		availableMeters = new RemoteListModel(
 			meter_list.getAvailableList());
@@ -177,10 +138,6 @@ public class TMSProxy {
 
 	/** Dispose of all proxied lists */
 	public void dispose() {
-		detectors.dispose();
-		available.dispose();
-		mainFree.dispose();
-		stations.dispose();
 		availableMeters.dispose();
 		availableDMSs.dispose();
 		availableLCSs.dispose();

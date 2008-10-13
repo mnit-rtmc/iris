@@ -49,7 +49,9 @@ abstract public class BaseObjectImpl implements Storable {
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
 		SignTextImpl.loadAll();
+		R_NodeImpl.loadAll();
 		AlarmImpl.loadAll();
+		DetectorImpl.loadAll();
 		CameraImpl.loadAll();
 		WarningSignImpl.loadAll();
 		TrafficDeviceAttributeImpl.loadAll();

@@ -217,6 +217,28 @@ public class GeoLocHelper {
 			return l.getNorthOffset();
 	}
 
+	/** Get the combined easting */
+	static public Integer getCombinedEasting(GeoLoc l) {
+		if(l.getEasting() != null) {
+			int easting = l.getEasting();
+			if(l.getEastOffset() != null)
+				easting += l.getEastOffset();
+			return easting;
+		} else
+			return l.getEastOffset();
+	}
+
+	/** Get the combined northing */
+	static public Integer getCombinedNorthing(GeoLoc l) {
+		if(l.getNorthing() != null) {
+			int northing = l.getNorthing();
+			if(l.getNorthOffset() != null)
+				northing += l.getNorthOffset();
+			return northing;
+		} else
+			return l.getNorthOffset();
+	}
+
 	/** Check if the UTM coordinates are null */
 	static public boolean isNull(GeoLoc l) {
 		return (getTrueEasting(l) == null) ||

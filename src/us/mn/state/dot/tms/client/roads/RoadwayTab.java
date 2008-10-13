@@ -19,7 +19,6 @@ import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.client.MapTab;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
 
 /**
@@ -42,12 +41,12 @@ public class RoadwayTab extends MapTab {
 	protected final JPanel tabPanel;
 
 	/** Create a new roadway node tab */
-	public RoadwayTab(R_NodeLayer l, R_NodeHandler handler,
-		List<LayerState> lstates, ViewLayer vlayer)
+	public RoadwayTab(R_NodeManager m, List<LayerState> lstates,
+		ViewLayer vlayer)
 	{
 		super("Roadway", "View / edit roadway nodes");
-		clist = new CorridorList(handler);
-		chooser = new CorridorChooser(handler, l, map, clist);
+		clist = new CorridorList(m);
+		chooser = new CorridorChooser(m, map, clist);
 		map.addLayers(lstates);
 		tabPanel = createSideBar();
 		mapPanel = createMapPanel(vlayer);

@@ -35,32 +35,31 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.tms.IndexedList;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeMap;
+import us.mn.state.dot.tms.R_NodeTransition;
+import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
-import us.mn.state.dot.tms.client.toast.TMSObjectForm;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * R_NodeProperties is a form for viewing and editing roadway node parameters.
  *
  * @author Douglas Lau
  */
-public class R_NodeProperties extends TMSObjectForm {
+public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Map for selecting points (FIXME) */
 	static public MapBean map;
 
 	/** Frame title */
 	static protected final String TITLE = "R_Node: ";
-
-	/** Roadway node being displayed */
-	protected final R_Node r_node;
 
 	/** Location panel */
 	protected LocationPanel location;
@@ -69,14 +68,15 @@ public class R_NodeProperties extends TMSObjectForm {
 	protected final JTextArea notes = new JTextArea(3, 20);
 
 	/** Node type combobox */
-	protected final JComboBox node_type = new JComboBox(R_Node.TYPES);
+	protected final JComboBox node_type =
+		new JComboBox(R_NodeType.getDescriptions());
 
 	/** Pickable check box */
 	protected final JCheckBox pickable = new JCheckBox();
 
 	/** Transition type combobox */
 	protected final JComboBox transition =
-		new JComboBox(R_Node.TRANSITIONS);
+		new JComboBox(R_NodeTransition.getDescriptions());
 
 	/** Component for number of lanes */
 	protected final JSpinner lanes = new JSpinner(
@@ -96,17 +96,8 @@ public class R_NodeProperties extends TMSObjectForm {
 	protected final JSpinner slimit = new JSpinner(
 		new SpinnerNumberModel(55, 25, 120, 5));
 
-	/** Remote detector list */
-	protected IndexedList det_list;
-
-	/** Detector model */
-	protected R_NodeDetectorModel det_model;
-
 	/** Detector table */
 	protected final JTable det_table = new JTable();
-
-	/** Button to find all matching detectors */
-	protected final JButton match = new JButton("Match");
 
 	/** Button to edit the selected detector */
 	protected final JButton edit = new JButton("Edit");
@@ -114,23 +105,23 @@ public class R_NodeProperties extends TMSObjectForm {
 	/** Button to remove the selected detector */
 	protected final JButton remove = new JButton("Remove");
 
-	/** Apply button */
-	protected final JButton apply = new JButton("Apply Changes");
-
 	/** Create a new roadway node properties form */
-	public R_NodeProperties(TmsConnection tc, R_Node n, Integer oid) {
-		super(TITLE + oid, tc);
-		r_node = n;
+	public R_NodeProperties(TmsConnection tc, R_Node n) {
+		super(TITLE, tc, n);
+	}
+
+	/** Get the SONAR type cache */
+	protected TypeCache<R_Node> getTypeCache(SonarState st) {
+		return st.getR_Nodes();
 	}
 
 	/** Initialize the widgets on the form */
 	protected void initialize() throws RemoteException {
-		det_list = (IndexedList)tms.getDetectors().getList();
-		location = new LocationPanel(admin, r_node.getGeoLoc(),
+		location = new LocationPanel(admin, proxy.getGeoLoc(),
 			connection.getSonarState());
 		det_table.setAutoCreateColumnsFromModel(false);
-		det_table.setColumnModel(
-			R_NodeDetectorModel.createColumnModel());
+//		det_table.setColumnModel(
+//			R_NodeDetectorModel.createColumnModel());
 		det_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		det_table.setPreferredScrollableViewportSize(
 			new Dimension(280, 8 * det_table.getRowHeight()));
@@ -142,15 +133,7 @@ public class R_NodeProperties extends TMSObjectForm {
 		tab.add("Setup", createSetupPanel());
 		tab.add("Detectors", createDetectorPanel());
 		add(tab);
-		if(admin) {
-			add(Box.createVerticalStrut(VGAP));
-			add(apply);
-			new ActionJob(this, apply) {
-				public void perform() throws Exception {
-					applyPressed();
-				}
-			};
-		}
+		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -189,13 +172,6 @@ public class R_NodeProperties extends TMSObjectForm {
 		if(admin) {
 			Box box = Box.createVerticalBox();
 			box.add(Box.createVerticalGlue());
-			box.add(match);
-			new ActionJob(this, match) {
-				public void perform() throws Exception {
-					doMatch();
-				}
-			};
-			box.add(Box.createVerticalStrut(VGAP));
 			box.add(edit);
 			new ActionJob(this, edit) {
 				public void perform() throws RemoteException {
@@ -223,13 +199,6 @@ public class R_NodeProperties extends TMSObjectForm {
 		return dpanel;
 	}
 
-	/** Lookup detectors with matching location */
-	protected void doMatch() throws RemoteException {
-		det_model = new R_NodeDetectorModel(det_list,
-			r_node.getMatchingDetectors(), admin);
-		det_table.setModel(det_model);
-	}
-
 	/** Enable/disable buttons depending on selected row */
 	protected void doButtonEnable() {
 		int s = det_table.getSelectedRow() + 1;
@@ -242,49 +211,53 @@ public class R_NodeProperties extends TMSObjectForm {
 	protected void doEdit() throws RemoteException {
 		int s = det_table.getSelectedRow();
 		if(s >= 0) {
-			Integer did = det_model.getDetectorID(s);
+/*			Integer did = det_model.getDetectorID(s);
 			if(did != null) {
 				connection.getDesktop().show(
 					new DetectorForm(connection, did));
-			}
+			} */
 		}
 	}
 
 	/** Remove the currently selected detector */
 	protected void doRemove() throws RemoteException {
-		int r = det_table.getSelectedRow();
+/*		int r = det_table.getSelectedRow();
 		if(r >= 0)
-			det_model.removeRow(r);
+			det_model.removeRow(r); */
 	}
 
-	/** Update the form with the current state of the roadway node */
-	protected void doUpdate() throws RemoteException {
-		notes.setText(r_node.getNotes());
-		node_type.setSelectedIndex(r_node.getNodeType());
-		pickable.setSelected(r_node.isPickable());
-		transition.setSelectedIndex(r_node.getTransition());
-		lanes.setValue(r_node.getLanes());
-		attach_side.setSelected(r_node.getAttachSide());
-		shift.setValue(r_node.getShift());
-		station_id.setText(r_node.getStationID());
-		slimit.setValue(r_node.getSpeedLimit());
-		det_model = new R_NodeDetectorModel(det_list,
-			r_node.getDetectors(), admin);
-		det_table.setModel(det_model);
+	/** Update one attribute on the form */
+	protected void updateAttribute(String a) {
+		if(a == null || a.equals("notes"))
+			notes.setText(proxy.getNotes());
+		if(a == null || a.equals("node_type"))
+			node_type.setSelectedIndex(proxy.getNodeType());
+		if(a == null || a.equals("pickable"))
+			pickable.setSelected(proxy.getPickable());
+		if(a == null || a.equals("transition"))
+			transition.setSelectedIndex(proxy.getTransition());
+		if(a == null || a.equals("lanes"))
+			lanes.setValue(proxy.getLanes());
+		if(a == null || a.equals("attach_side"))
+			attach_side.setSelected(proxy.getAttachSide());
+		if(a == null || a.equals("shift"))
+			shift.setValue(proxy.getShift());
+		if(a == null || a.equals("station_id"))
+			station_id.setText(proxy.getStationID());
+		if(a == null || a.equals("speed_limit"))
+			slimit.setValue(proxy.getSpeedLimit());
 	}
 
 	/** Apply button pressed */
 	protected void applyPressed() throws Exception {
-		r_node.setNotes(notes.getText());
-		r_node.setNodeType(node_type.getSelectedIndex());
-		r_node.setPickable(pickable.isSelected());
-		r_node.setTransition(transition.getSelectedIndex());
-		r_node.setLanes(((Number)lanes.getValue()).intValue());
-		r_node.setAttachSide(attach_side.isSelected());
-		r_node.setShift(((Number)shift.getValue()).intValue());
-		r_node.setStationID(station_id.getText());
-		r_node.setSpeedLimit(((Number)slimit.getValue()).intValue());
-		r_node.setDetectors(det_model.getDetectors());
-		r_node.notifyUpdate();
+		proxy.setNotes(notes.getText());
+		proxy.setNodeType(node_type.getSelectedIndex());
+		proxy.setPickable(pickable.isSelected());
+		proxy.setTransition(transition.getSelectedIndex());
+		proxy.setLanes(((Number)lanes.getValue()).intValue());
+		proxy.setAttachSide(attach_side.isSelected());
+		proxy.setShift(((Number)shift.getValue()).intValue());
+		proxy.setStationID(station_id.getText());
+		proxy.setSpeedLimit(((Number)slimit.getValue()).intValue());
 	}
 }

@@ -43,6 +43,11 @@ public class MapGeoLoc implements MapObject {
 	/** Geo location */
 	protected final GeoLoc loc;
 
+	/** Get the geo location */
+	public GeoLoc getGeoLoc() {
+		return loc;
+	}
+
 	/** Create a new location transform */
 	public MapGeoLoc(GeoLoc l) {
 		loc = l;

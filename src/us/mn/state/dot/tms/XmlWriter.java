@@ -19,7 +19,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPOutputStream;
+import us.mn.state.dot.sonar.NamespaceError;
 
 /**
  * A simple class for writing out XML documents
@@ -30,6 +33,15 @@ abstract public class XmlWriter {
 
 	/** Filesystem directory to write XML files */
 	static protected final String XML_DIR = "/var/local/tms/dds";
+
+	/** Regex pattern to match an ampersand */
+	static protected final Pattern AMPERSAND = Pattern.compile("&");
+
+	/** Replace special characters with proper entities */
+	static public String replaceEntities(String text) {
+		Matcher m = AMPERSAND.matcher(text);
+		return m.replaceAll("&amp;");
+	}
 
 	/** File to write final XML data */
 	protected final File file;
@@ -59,7 +71,7 @@ abstract public class XmlWriter {
 	}
 
 	/** Write the XML file */
-	public void write() throws IOException {
+	public void write() throws IOException, NamespaceError {
 		PrintWriter out = new PrintWriter(createOutputStream());
 		try {
 			print(out);
@@ -72,5 +84,5 @@ abstract public class XmlWriter {
 	}
 
 	/** Print the XML to a print writer */
-	abstract public void print(PrintWriter out);
+	abstract public void print(PrintWriter out) throws NamespaceError;
 }

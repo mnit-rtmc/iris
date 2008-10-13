@@ -24,12 +24,11 @@ import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
 import us.mn.state.dot.tms.client.meter.RampMeterListForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
-import us.mn.state.dot.tms.client.roads.StationListForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
-import us.mn.state.dot.tms.client.toast.DetectorListForm;
+import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.HolidayForm;
 import us.mn.state.dot.tms.client.toast.PolicyForm;
@@ -107,15 +106,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('t');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DetectorListForm(tc));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Stations");
-		item.setMnemonic('S');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new StationListForm(tc));
+				desktop.show(new DetectorForm(
+					st.getDetectors()));
 			}
 		};
 		add(item);

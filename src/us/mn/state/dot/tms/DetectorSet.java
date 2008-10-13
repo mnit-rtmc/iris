@@ -21,7 +21,7 @@ import java.util.TreeSet;
  *
  * @author Douglas Lau
  */
-public class DetectorSet implements Constants {
+public class DetectorSet {
 
 	/** Estimated sustainable capacity of mainline right lanes */
 	static protected final int CAP_RIGHT_LANE = 1800;
@@ -97,7 +97,7 @@ public class DetectorSet implements Constants {
 	/** Test if the detector set is not bad */
 	public boolean isNotBad() {
 		for(DetectorImpl det: detectors) {
-			if(det.getFlow() == MISSING_DATA)
+			if(det.getFlow() == Constants.MISSING_DATA)
 				return false;
 		}
 		return true;
@@ -136,18 +136,18 @@ public class DetectorSet implements Constants {
 
 	/** Calculate the upstream (one lane) capacity for a mainline zone */
 	public float getUpstreamCapacity() {
-		float max_density = MISSING_DATA;
-		float speed = MISSING_DATA;
+		float max_density = Constants.MISSING_DATA;
+		float speed = Constants.MISSING_DATA;
 		for(DetectorImpl det: detectors) {
 			float d = det.getDensity();
 			float s = det.getSpeed();
-			if(d > max_density && s != MISSING_DATA) {
+			if(d > max_density && s != Constants.MISSING_DATA) {
 				max_density = d;
 				speed = s;
 			}
 		}
 		if(max_density < 0)
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
 		float spare_density = FULL_DENSITY - max_density;
 		if(spare_density <= 0)
 			return 0;
@@ -185,7 +185,7 @@ public class DetectorSet implements Constants {
 		StringBuffer buf = new StringBuffer();
 		buf.append('\'');
 		for(DetectorImpl det: detectors) {
-			buf.append(det.getIndex());
+			buf.append(det.getName());
 			buf.append(' ');
 		}
 		if(detectors.size() == 0)

@@ -31,15 +31,18 @@ import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TrafficDeviceAttribute;
@@ -217,20 +220,36 @@ public class SonarState extends Client {
 		return alarms;
 	}
 
-	/** Alarm proxy list model */
-	protected final ProxyListModel<Alarm> alarm_model;
-
-	/** Get the alarm list model */
-	public ProxyListModel<Alarm> getAlarmModel() {
-		return alarm_model;
-	}
-
 	/** Available alarm proxy list model */
 	protected final ProxyListModel<Alarm> avail_alarm_model;
 
 	/** Get the available alarm list model */
 	public ProxyListModel<Alarm> getAvailableAlarms() {
 		return avail_alarm_model;
+	}
+
+	/** Cache of r_nodes */
+	protected final TypeCache<R_Node> r_nodes;
+
+	/** Get the r_node cache */
+	public TypeCache<R_Node> getR_Nodes() {
+		return r_nodes;
+	}
+
+	/** Cache of detectors */
+	protected final TypeCache<Detector> detectors;
+
+	/** Get the detector cache */
+	public TypeCache<Detector> getDetectors() {
+		return detectors;
+	}
+
+	/** Cache of stations */
+	protected final TypeCache<Station> stations;
+
+	/** Get the station cache */
+	public TypeCache<Station> getStations() {
+		return stations;
 	}
 
 	/** Cache of cameras */
@@ -255,14 +274,6 @@ public class SonarState extends Client {
 	/** Get the warning sign cache */
 	public TypeCache<WarningSign> getWarningSigns() {
 		return warn_signs;
-	}
-
-	/** Warning sign proxy list model */
-	protected final ProxyListModel<WarningSign> warn_model;
-
-	/** Get the warning sign list model */
-	public ProxyListModel<WarningSign> getWarningSignModel() {
-		return warn_model;
 	}
 
 	/** Cache of sign groups */
@@ -343,8 +354,6 @@ public class SonarState extends Client {
 		road_model.initialize();
 		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class);
 		alarms = new TypeCache<Alarm>(Alarm.class);
-		alarm_model = new ProxyListModel<Alarm>(alarms);
-		alarm_model.initialize();
 		avail_alarm_model = new ProxyListModel<Alarm>(alarms) {
 			protected int doProxyAdded(Alarm proxy) {
 				if(proxy.getController() == null)
@@ -354,12 +363,13 @@ public class SonarState extends Client {
 			}
 		};
 		avail_alarm_model.initialize();
+		r_nodes = new TypeCache<R_Node>(R_Node.class);
+		detectors = new TypeCache<Detector>(Detector.class);
+		stations = new TypeCache<Station>(Station.class);
 		cameras = new TypeCache<Camera>(Camera.class);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class);
-		warn_model = new ProxyListModel<WarningSign>(warn_signs);
-		warn_model.initialize();
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class);
@@ -391,6 +401,9 @@ public class SonarState extends Client {
 		populate(fonts);
 		populate(glyphs);
 		populate(alarms);
+		populate(r_nodes);
+		populate(detectors);
+		populate(stations);
 		populate(cameras);
 		populate(warn_signs);
 		populate(monitors);
@@ -413,6 +426,16 @@ public class SonarState extends Client {
 	/** Lookup a controller */
 	public Controller lookupController(String name) {
 		return controllers.getObject(name);
+	}
+
+	/** Lookup a detector */
+	public Detector lookupDetector(String name) {
+		return detectors.getObject(name);
+	}
+
+	/** Lookup a station */
+	public Station lookupStation(String name) {
+		return stations.getObject(name);
 	}
 
 	/** Lookup a camera */

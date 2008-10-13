@@ -82,7 +82,12 @@ abstract public class ProxyManager<T extends SonarObject> {
 			models.put(name, new StyleListModel<T>(this, name,
 				s.getLegend()));
 		}
-		layer = new SonarLayer<T>(this);
+		layer = createLayer();
+	}
+
+	/** Create a layer for this proxy type */
+	protected SonarLayer<T> createLayer() {
+		return new SonarLayer<T>(this);
 	}
 
 	/** Initialize the proxy manager. This cannot be done in the constructor
@@ -172,7 +177,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Find the map geo location for a proxy */
-	protected MapGeoLoc findGeoLoc(T proxy) {
+	public MapGeoLoc findGeoLoc(T proxy) {
 		GeoLoc loc = getGeoLoc(proxy);
 		return loc_manager.findMapGeoLoc(loc);
 	}

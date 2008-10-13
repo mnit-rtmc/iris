@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.rmi.RemoteException;
 import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -36,8 +35,8 @@ public class CorridorChooser extends JPanel {
 	/** Combo box to select a freeway corridor */
 	protected final JComboBox corridor_combo = new JComboBox();
 
-	/** Roadway node handler */
-	protected final R_NodeHandler handler;
+	/** Roadway node manager */
+	protected final R_NodeManager manager;
 
 	/** Roadway node layer */
 	protected final R_NodeLayer layer;
@@ -49,18 +48,16 @@ public class CorridorChooser extends JPanel {
 	protected final CorridorList clist;
 
 	/** Create a new corridor chooser */
-	public CorridorChooser(R_NodeHandler h, R_NodeLayer l, MapBean m,
-		CorridorList c)
-	{
+	public CorridorChooser(R_NodeManager man, MapBean m, CorridorList c) {
 		super(new GridBagLayout());
-		handler = h;
-		layer = l;
+		manager = man;
+		layer = (R_NodeLayer)man.getLayer();
 		map = m;
 		clist = c;
 		corridor_combo.setModel(new WrapperComboBoxModel(
-			handler.getCorridorModel()));
+			manager.getCorridorModel()));
 		new ActionJob(this, corridor_combo) {
-			public void perform() throws RemoteException {
+			public void perform() {
 				Object s = corridor_combo.getSelectedItem();
 				if(s instanceof String)
 					setCorridor((String)s);
@@ -81,8 +78,8 @@ public class CorridorChooser extends JPanel {
 	}
 
 	/** Set a new selected corridor */
-	protected void setCorridor(String c) throws RemoteException {
-		clist.setCorridor(handler.createSet(c));
+	protected void setCorridor(String c) {
+		clist.setCorridor(manager.createSet(c));
 		layer.setCorridor(c);
 		map.zoomTo(layer.getExtent());
 	}

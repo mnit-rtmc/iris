@@ -14,135 +14,75 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * An R_Node represents one node on the roadway network.
  *
  * @author Douglas Lau
  */
-public interface R_Node extends TMSObject {
+public interface R_Node extends SonarObject {
 
-	/** Node type descriptions */
-	String[] TYPES = {
-		"Station", "Entrance", "Exit", "Intersection", "Access",
-		"Interchange"
-	};
-
-	/** Station r_node type */
-	int TYPE_STATION = 0;
-
-	/** Entrance r_node type */
-	int TYPE_ENTRANCE = 1;
-
-	/** Exit r_node type */
-	int TYPE_EXIT = 2;
-
-	/** Intersection r_node type */
-	int TYPE_INTERSECTION = 3;
-
-	/** Access r_node type */
-	int TYPE_ACCESS = 4;
-
-	/** Interchange r_node type */
-	int TYPE_INTERCHANGE = 5;
-
-	/** Transition descriptions */
-	String[] TRANSITIONS = {
-		"None", "Loop", "Leg", "Slipramp", "CD", "HOV", "Common",
-		"Flyover"
-	};
-
-	/** None transition */
-	int TRANSITION_NONE = 0;
-
-	/** Loop transition */
-	int TRANSITION_LOOP = 1;
-
-	/** Leg transition */
-	int TRANSITION_LEG = 2;
-
-	/** Slipramp transition */
-	int TRANSITION_SLIPRAMP = 3;
-
-	/** CD road transition */
-	int TRANSITION_CD = 4;
-
-	/** HOV transition */
-	int TRANSITION_HOV = 5;
-
-	/** Common section transition */
-	int TRANSITION_COMMON = 6;
-
-	/** Flyover transition */
-	int TRANSITION_FLYOVER = 7;
+	/** SONAR type name */
+	String SONAR_TYPE = "r_node";
 
 	/** Get the location */
-	String getGeoLoc() throws RemoteException;
-
-	/** Set the location */
-	void setGeoLoc(String l) throws TMSException, RemoteException;
-
-	/** Get the node type */
-	int getNodeType() throws RemoteException;
+	GeoLoc getGeoLoc();
 
 	/** Set the node type */
-	void setNodeType(int t) throws TMSException, RemoteException;
+	void setNodeType(int t);
 
-	/** Is this node pickable? */
-	boolean isPickable() throws RemoteException;
+	/** Get the node type */
+	int getNodeType();
 
 	/** Set the pickable flag */
-	void setPickable(boolean p) throws TMSException, RemoteException;
+	void setPickable(boolean p);
 
-	/** Get the transition type */
-	int getTransition() throws RemoteException;
+	/** Is this node pickable? */
+	boolean getPickable();
 
 	/** Set the transition type */
-	void setTransition(int t) throws TMSException, RemoteException;
+	void setTransition(int t);
 
-	/** Get the number of lanes */
-	int getLanes() throws RemoteException;
+	/** Get the transition type */
+	int getTransition();
 
 	/** Set the number of lanes */
-	void setLanes(int l) throws TMSException, RemoteException;
+	void setLanes(int l);
 
-	/** Get the attach side (true = left, false = right) */
-	boolean getAttachSide() throws RemoteException;
+	/** Get the number of lanes */
+	int getLanes();
 
 	/** Set the attach side */
-	void setAttachSide(boolean s) throws TMSException, RemoteException;
+	void setAttachSide(boolean s);
 
-	/** Get the lane shift */
-	int getShift() throws RemoteException;
+	/** Get the attach side (true = left, false = right) */
+	boolean getAttachSide();
 
 	/** Set the lane shift */
-	void setShift(int s) throws TMSException, RemoteException;
+	void setShift(int s);
 
-	/** Get the station ID */
-	String getStationID() throws RemoteException;
+	/** Get the lane shift */
+	int getShift();
 
 	/** Set the station ID */
-	void setStationID(String s) throws TMSException, RemoteException;
+	void setStationID(String s);
 
-	/** Get the speed limit */
-	int getSpeedLimit() throws RemoteException;
+	/** Get the station ID */
+	String getStationID();
 
 	/** Set the speed limit */
-	void setSpeedLimit(int l) throws TMSException, RemoteException;
+	void setSpeedLimit(int l);
 
-	/** Get the administrator notes */
-	String getNotes() throws RemoteException;
+	/** Get the speed limit */
+	int getSpeedLimit();
 
 	/** Set the administrator notes */
-	void setNotes(String n) throws TMSException, RemoteException;
+	void setNotes(String n);
 
-	/** Get all detectors with a matching location */
-	Detector[] getMatchingDetectors() throws RemoteException;
+	/** Get the administrator notes */
+	String getNotes();
 
 	/** Get an array of all node detectors */
-	Detector[] getDetectors() throws RemoteException;
-
-	/** Set the array of detectors */
-	void setDetectors(Detector[] dets) throws TMSException, RemoteException;
+	Detector[] getDetectors();
 }
