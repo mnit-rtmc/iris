@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.MsgActPriority;
 import us.mn.state.dot.tms.MsgActPriorityD10;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.SDMS;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -135,15 +136,15 @@ public class OpQueryMsg extends OpDms
 	}
 
 	/**
-	 * Create a SignMessage using a bitmap.
-	 *
+	 * Create a SignMessage using a bitmap and no message text.
 	 * @params owner message owner.
-	 * @params argmulti A String in the MultiString format.
 	 * @params argbitmap Bitmap associated with message text.
 	 * @params dura message duration in mins.
-	 * @returns A SignMessage that contains the text of the message and a rendered bitmap.
+	 * @returns A SignMessage that contains the text of the message and 
+	 *  a rendered bitmap.
 	 */
-	private SignMessage createSignMessageWithBitmap(String owner, byte[] argbitmap, int dura) 
+	private SignMessage createSignMessageWithBitmap(String owner, 
+		byte[] argbitmap, int dura) 
 	{
 		//System.err.println(
 		//    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
@@ -212,6 +213,42 @@ public class OpQueryMsg extends OpDms
 
 		System.err.println("OpQueryMsg.calcMsgDuration: duration (mins)=" + m);
 		return ((int)m);
+	}
+
+	/* create sign message without message text
+	 * @params owner message owner.
+	 * @params argbitmap Bitmap associated with message text.
+	 * @params dura message duration in mins.
+	 * @return the SignMessage with no message text or null on failure
+	 */
+	protected SignMessage createSignMessageWithBitmapNoText(boolean usebitmap, 
+		String bitmap, String owner, int duramins) 
+	{
+		// don't have bitmap
+		if(!usebitmap)
+			return null;
+
+		// have bitmap
+		final int BM_WIDTH = 96;
+		final int BM_HEIGHT = 25;
+		final int BM_SIZE = BM_WIDTH * BM_HEIGHT / 8 * 2;
+
+		SignMessage sm = null;
+
+		// assume a bitmap size
+		if(bitmap.length() % BM_SIZE == 0 ) {
+			BitmapGraphic bmg = 
+				new BitmapGraphic(BM_WIDTH,BM_HEIGHT);
+			bmg.setBitmap(new HexString(bitmap).toByteArray());
+			BitmapGraphic bmgResize = 
+				bmg.resizeWidth(m_dms.getSignWidthPixels());
+			sm = createSignMessageWithBitmap(owner, 
+				bmgResize.getBitmap(), duramins);
+		} else {
+			System.err.println("WARNING: received bogus bitmap size: len="+bitmap.length());
+			sm = null;
+		}
+		return sm;
 	}
 
 	/**
@@ -344,25 +381,17 @@ public class OpQueryMsg extends OpDms
 
 				// have text
 				if(msgtextavailable) {
-					m_dms.setMessageFromController(msgtext, duramins, owner,MsgActPriorityD10.PRI_D10_OPER_MSG);
+					m_dms.setMessageFromController(msgtext, 
+						duramins, owner,MsgActPriorityD10.PRI_D10_OPER_MSG);
 
 				// don't have text
 				} else {
-					SignMessage sm;
-
-					// have bitmap
-					if(usebitmap) {
-						byte[] bm=Convert.hexStringToByteArray(bitmap);
-						// System.err.println("OpQueryMsg: hex string length=" + bitmap.length() + ", byte[] length=" + bm.length);
-						sm = createSignMessageWithBitmap(owner, bm, duramins);
-
-					// don't have bitmap, therefore CMS is blank
-					} else {
+					SignMessage sm = createSignMessageWithBitmapNoText(
+						usebitmap,bitmap,owner,duramins);
+					if(sm == null)
 						sm=OpDms.createBlankMsg(m_dms,owner);
-					}
-
-					// set new message
-					m_dms.setActiveMessage(sm);
+					else
+						m_dms.setActiveMessage(sm);
 				}
 
 			// valid flag is false

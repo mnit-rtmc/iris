@@ -22,9 +22,11 @@ import us.mn.state.dot.tms.MsgActPriorityD10;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.STime;
 
 import java.io.IOException;
+import java.lang.StringBuilder;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -47,6 +49,10 @@ public class OpMessage extends OpDms {
 	/** Sign message */
 	protected final SignMessage m_signMessage;
 
+	/** fixed message width flags */
+	final protected boolean m_fixedOutboundMessageWidth = true;
+	final protected int FIXED_MSG_WIDTH_PIXELS = 96;
+
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m) {
 		super(COMMAND, d);
@@ -61,26 +67,36 @@ public class OpMessage extends OpDms {
 		return "Sending new message";
 	}
 
-	/**
-	 * Create the first real phase of the operation
-	 *
-	 * @return
-	 */
+	/** 
+	  * Return the bitmap page as a hex string. The width of the 
+	  * bitmap is adjusted as necessary.
+	  */
+	public String getBitmapPage(int pg) {
+		if(m_signMessage == null)
+			return "";
+		BitmapGraphic oldbmg = m_signMessage.getBitmap(pg);
+		BitmapGraphic newbmg = null;
+		if(m_fixedOutboundMessageWidth)
+			newbmg = oldbmg.resizeWidth(FIXED_MSG_WIDTH_PIXELS);
+		else
+			newbmg = oldbmg;
+		if(newbmg == null)
+			return "";
+		return new HexString(newbmg.getBitmap()).toString();
+	}
+
+	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 		int np = m_signMessage.getNumPages();
-
-		if (np <= 0) {
+		if (np <= 0)
 			return null;
-		} else if (np == 1) {
+		else if (np == 1)
 			return new PhaseSendOnePageMessage();
-		} else if (np == 2) {
+		else if (np == 2)
 			return new PhaseSendTwoPageMessage();
-		}
-
 		System.err.println(
 		    "WARNING: bogus number of pages (" + np
 		    + ") in dmslite.OpMessage.OpMessage(). Ignored.");
-
 		return null;
 	}
 
@@ -91,16 +107,14 @@ public class OpMessage extends OpDms {
 	  *
 	  * @return On time
 	  */
-	protected Calendar calcMsgOnTime()
-	{
+	protected Calendar calcMsgOnTime() {
 		return(new GregorianCalendar());
 	}
 
 	/** Calculate message off time, which is the start time + duration.
 	 *  This method should not be called if duration is infinite.
 	 */
-	protected Calendar calcMsgOffTime(Calendar ontime)
-	{
+	protected Calendar calcMsgOffTime(Calendar ontime) {
 		int mins=this.m_signMessage.getDuration();
 		assert mins!=SignMessage.DURATION_INFINITE;
 		Calendar offtime=(Calendar)ontime.clone();
@@ -126,20 +140,14 @@ public class OpMessage extends OpDms {
 		 * @throws IOException
 		 */
 		protected Phase poll(AddressedMessage argmess)
-			throws IOException {
+			throws IOException 
+		{
 			System.err.println(
 			    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg) called.");
 			assert argmess instanceof Message :
 			       "wrong message type";
 
 			Message mess = (Message) argmess;
-
-			// sanity check
-			if (m_signMessage.getBitmap(0).length()!=300) {
-				System.err.println(
-				    "WARNING: bitmap pg 1 wrong size in PhaseSendOnePageMessage: m_signMessage.length="
-				    + m_signMessage.getBitmap(0).length()+", msg="+m_signMessage.toString());
-			}
 
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
@@ -194,17 +202,14 @@ public class OpMessage extends OpDms {
 			// Owner
 			mess.add(new ReqRes("Owner", m_signMessage.getOwner()));
 
-			// msg
-			byte[] bitmaparray = m_signMessage.getBitmap().getBitmap();
-			String msg = prepareBitmap(bitmaparray);
-			mess.add(new ReqRes("Msg", msg));
+			// bitmap
+			mess.add(new ReqRes("Msg", getBitmapPage(0)));
 
 			// send msg to field controller
             		mess.getRequest();	// throws IOException
 
 			// parse resp msg
 			{
-
 				// get valid flag
 				long id = 0;
 				boolean valid=false;
@@ -266,14 +271,6 @@ public class OpMessage extends OpDms {
 		}
 	}
 
-	/** prepare a bitmap to send via xml */
-	protected String prepareBitmap(byte[] a)
-	{
-		//String s=Convert.toHexString(Convert.reverseByte(a));
-		String s=Convert.toHexString(a);
-		return(s);
-	}
-
 	/**
 	 * Phase to send a two page message.
 	 * Note, the type of exception throw here determines
@@ -298,18 +295,6 @@ public class OpMessage extends OpDms {
 			assert argmess instanceof Message : "wrong message type";
 
 			Message mess = (Message) argmess;
-
-			// sanity check
-			if (m_signMessage.getBitmap(0).length()!=300) {
-				System.err.println(
-				    "WARNING: bitmap pg 1 wrong size in PhaseSendTwoPageMessage: m_signMessage.length="
-				    + m_signMessage.getBitmap(0).length()+", msg="+m_signMessage.toString());
-			}
-			if (m_signMessage.getBitmap(1).length()!=300) {
-				System.err.println(
-				    "WARNING: bitmap pg 2 wrong size in PhaseSendTwoPageMessage: m_signMessage.length="
-				    + m_signMessage.getBitmap(1).length()+", msg="+m_signMessage.toString());
-			}
 
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
@@ -379,22 +364,8 @@ public class OpMessage extends OpDms {
 			// Owner
 			mess.add(new ReqRes("Owner", m_signMessage.getOwner()));
 
-			// msg (the bitmap)
-			{
-				// pg 1
-				BitmapGraphic bg1 = m_signMessage.getBitmap(0);
-				assert bg1 != null;
-				byte[] bitmaparraypg1 = bg1.getBitmap();
-				String msgpg1 = prepareBitmap(bitmaparraypg1);
-
-				// pg 2
-				BitmapGraphic bg2 = m_signMessage.getBitmap(1);
-				assert bg2 != null;
-				byte[] bitmaparraypg2 = bg2.getBitmap();
-				String msgpg2 = prepareBitmap(bitmaparraypg2);
-
-				mess.add(new ReqRes("Msg", msgpg1 + msgpg2));
-			}
+			// bitmap
+			mess.add(new ReqRes("Msg", getBitmapPage(0) + getBitmapPage(1)));
 
 			// send msg
             		mess.getRequest();	// throws IOException

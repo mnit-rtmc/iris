@@ -19,6 +19,8 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import us.mn.state.dot.tms.utils.HexString;
+
 /**
  * A buffer for parsing. A caller typically adds to the end,
  * and extracts tokens from the beginning. The buffer grows

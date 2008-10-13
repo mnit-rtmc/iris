@@ -167,6 +167,5 @@ abstract public class OpDms extends DeviceOperation {
 		note.append(".");
 		return note.toString();
 	}
-
 }
 

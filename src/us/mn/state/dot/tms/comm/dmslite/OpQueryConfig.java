@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DmsSignMatrixType;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.utils.SString;
 
 import java.io.IOException;
 
@@ -155,28 +156,28 @@ public class OpQueryConfig extends OpDms
 					else
 						System.err.println("SEVERE: Unknown matrix type read ("+stype+")");
 
-					horizBorder = Convert.stringToInt(
+					horizBorder = SString.stringToInt(
 						rr1.getResVal("horizBorder"));
-					vertBorder = Convert.stringToInt(
+					vertBorder = SString.stringToInt(
 						rr1.getResVal("vertBorder"));
-					horizPitch = Convert.stringToInt(
+					horizPitch = SString.stringToInt(
 						rr1.getResVal("horizPitch"));
-					vertPitch = Convert.stringToInt(
+					vertPitch = SString.stringToInt(
 						rr1.getResVal("vertPitch"));
-					signHeight = Convert.stringToInt(
+					signHeight = SString.stringToInt(
 						rr1.getResVal("signHeight"));
-					signWidth = Convert.stringToInt(
+					signWidth = SString.stringToInt(
 						rr1.getResVal("signWidth"));
-					characterHeightPixels = Convert.stringToInt(
+					characterHeightPixels = SString.stringToInt(
 						rr1.getResVal(
 							"characterHeightPixels"));
-					characterWidthPixels = Convert.stringToInt(
+					characterWidthPixels = SString.stringToInt(
 						rr1.getResVal(
 							"characterWidthPixels"));
-					signHeightPixels = Convert.stringToInt(
+					signHeightPixels = SString.stringToInt(
 						rr1.getResVal(
 							"signHeightPixels"));
-					signWidthPixels = Convert.stringToInt(
+					signWidthPixels = SString.stringToInt(
 						rr1.getResVal(
 							"signWidthPixels"));
 
