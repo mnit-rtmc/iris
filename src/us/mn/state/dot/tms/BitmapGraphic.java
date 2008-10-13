@@ -95,24 +95,35 @@ public class BitmapGraphic implements Serializable {
 		}
 	}
 
+	/** Return a narrower or wider bitmap. The existing bitmap is either
+	 *  truncated or space added on the left and right edges.
+	 *  @param newwidth The new width of the bitmap.
+	 */
+	public BitmapGraphic resizeWidth(int newwidth) {
+		if(newwidth < this.width)
+			return narrow(newwidth);
+		else if(newwidth > this.width)
+			return widen(newwidth,0);
+		return this;
+	}
+
 	/** Return a wider bitmap. The existing bitmap is centered within
 	 *  the new wider bitmap.
 	 *  @param newwidth The new width of the bitmap.
 	 *  @param newfill Bit value of the new space.
 	 */
 	public BitmapGraphic widen(int newwidth, int newfill) {
-		if(newwidth<0 || newwidth <= width)
+		if(newwidth<=0 || newwidth == width)
 			return this;
-
-		// new bitmap
+		if(newwidth <= width)
+			return this;
 		BitmapGraphic newbm = new BitmapGraphic(newwidth,this.height);
-
 		// edges of existing bitmap centered within wider bitmap
-		int ledgeidx = (newbm.width - this.width)/2;
-		int redgeidx = newbm.width - ledgeidx - 1;
-		assert ledgeidx > 0;
-		assert redgeidx > 0;
-		assert ledgeidx <= redgeidx;
+		int diff = Math.abs(this.width - newbm.width)/2;
+		int ledgeidx = diff;
+		int redgeidx = Math.abs(newbm.width - diff) - 1;
+		assert ledgeidx > 0 && redgeidx > 0 : ledgeidx + ", "+redgeidx;
+		assert ledgeidx <= redgeidx : ledgeidx + ", "+redgeidx;
 		// insert existing bitmap into wider bitmap
 		for(int y=0; y<newbm.height; ++y)
 			for(int x=0; x<newbm.width; ++x) {
@@ -120,6 +131,32 @@ public class BitmapGraphic implements Serializable {
 				if(x >= ledgeidx && x <= redgeidx)
 					newpix = getPixel(x - ledgeidx, y);
 				newbm.setPixel(x,y,newpix);
+			}
+		return newbm;
+	}
+
+	/** Return a narrower bitmap. The existing bitmap is truncated on
+	 *  the left and right edges.
+	 *  @param newwidth The new width of the bitmap.
+	 */
+	public BitmapGraphic narrow(int newwidth) {
+		if(newwidth<=0 || newwidth == width)
+			return this;
+		if(newwidth >= width)
+			return this;
+		BitmapGraphic newbm = new BitmapGraphic(newwidth,this.height);
+		// edges of existing bitmap centered within wider bitmap
+		int diff = Math.abs(this.width - newbm.width)/2;
+		int ledgeidx = diff;
+		int redgeidx = Math.abs(this.width - diff) - 1;
+		assert ledgeidx > 0 && redgeidx > 0 : ledgeidx + ", "+redgeidx;
+		assert ledgeidx <= redgeidx : ledgeidx + ", "+redgeidx;
+		// copy center of old bitmap into new
+		for(int y=0; y<this.height; ++y)
+			for(int x=0; x<this.width; ++x) {
+				if(x >= ledgeidx && x <= redgeidx)
+					newbm.setPixel(x - ledgeidx, y, 
+						getPixel(x, y));
 			}
 		return newbm;
 	}
