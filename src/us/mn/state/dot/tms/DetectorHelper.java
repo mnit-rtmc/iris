@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
  * Helper class for detectors.
  *
@@ -23,6 +26,10 @@ public class DetectorHelper {
 
 	/** Future detector label */
 	static protected final String FUTURE = "FUTURE";
+
+	/** Pattern to match detector names */
+	static protected final Pattern DET_NAME =
+		Pattern.compile("([0-9]*)(.*)");
 
 	/** Don't allow instances to be created */
 	private DetectorHelper() {
@@ -84,18 +91,37 @@ public class DetectorHelper {
 
 	/** Compare two detectors for sorting */
 	static public int compare(Detector a, Detector b) {
-		Integer an = getNumber(a);
-		Integer bn = getNumber(b);
-		if(an != null && bn != null)
-			return an.compareTo(bn);
-		else
-			return a.getName().compareTo(b.getName());
+		String an = parseName(a.getName());
+		String bn = parseName(b.getName());
+		return an.compareTo(bn);
 	}
 
-	/** Get the detector number */
-	static protected Integer getNumber(Detector det) {
+	/** Parse a detector name */
+	static protected String parseName(String n) {
+		Matcher m = DET_NAME.matcher(n);
+		if(m.find())
+			return formatInteger(m.group(1)) + m.group(2);
+		else
+			return n;
+	}
+
+	/** Format an integer to eight digits */
+	static protected String formatInteger(String s) {
+		Integer n = parseInteger(s);
+		if(n != null) {
+			StringBuilder b = new StringBuilder();
+			b.append(n.toString());
+			while(b.length() < 8)
+				b.insert(0, '0');
+			return b.toString();
+		} else
+			return "";
+	}
+
+	/** Parse a string and return an integer */
+	static protected Integer parseInteger(String s) {
 		try {
-			return Integer.valueOf(det.getName());
+			return Integer.valueOf(s);
 		}
 		catch(NumberFormatException e) {
 			return null;
