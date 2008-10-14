@@ -35,6 +35,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.R_Node;
@@ -147,6 +149,12 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected JPanel createLocationPanel() {
 		location.addSelectPointButton(map);
 		location.addRow("Notes", notes);
+		new FocusJob(notes) {
+			public void perform() {
+				if(wasLost())
+					proxy.setNotes(notes.getText());
+			}
+		};
 		return location;
 	}
 
@@ -154,13 +162,60 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected FormPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(admin);
 		panel.addRow("Node type", node_type);
+		new ActionJob(this, node_type) {
+			public void perform() {
+				proxy.setNodeType(node_type.getSelectedIndex());
+			}
+		};
 		panel.addRow("Pickable", pickable);
+		new ActionJob(this, pickable) {
+			public void perform() {
+				proxy.setPickable(pickable.isSelected());
+			}
+		};
 		panel.addRow("Transition", transition);
+		new ActionJob(this, transition) {
+			public void perform() {
+				proxy.setTransition(
+					transition.getSelectedIndex());
+			}
+		};
 		panel.addRow("Lanes", lanes);
+		new ChangeJob(this, lanes) {
+			public void perform() {
+				Number n = (Number)lanes.getValue();
+				proxy.setLanes(n.intValue());
+			}
+		};
 		panel.addRow("Attach side", attach_side);
+		new ActionJob(this, attach_side) {
+			public void perform() {
+				proxy.setAttachSide(attach_side.isSelected());
+			}
+		};
 		panel.addRow("Shift", shift);
+		new ChangeJob(this, shift) {
+			public void perform() {
+				Number n = (Number)shift.getValue();
+				proxy.setShift(n.intValue());
+			}
+		};
 		panel.addRow("Station ID", station_id);
+		new FocusJob(station_id) {
+			public void perform() {
+				if(wasLost()) {
+					String sid = station_id.getText();
+					proxy.setStationID(sid);
+				}
+			}
+		};
 		panel.addRow("Speed Limit", slimit);
+		new ChangeJob(this, slimit) {
+			public void perform() {
+				Number n = (Number)slimit.getValue();
+				proxy.setSpeedLimit(n.intValue());
+			}
+		};
 		return panel;
 	}
 
@@ -246,18 +301,5 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 			station_id.setText(proxy.getStationID());
 		if(a == null || a.equals("speed_limit"))
 			slimit.setValue(proxy.getSpeedLimit());
-	}
-
-	/** Apply button pressed */
-	protected void applyPressed() throws Exception {
-		proxy.setNotes(notes.getText());
-		proxy.setNodeType(node_type.getSelectedIndex());
-		proxy.setPickable(pickable.isSelected());
-		proxy.setTransition(transition.getSelectedIndex());
-		proxy.setLanes(((Number)lanes.getValue()).intValue());
-		proxy.setAttachSide(attach_side.isSelected());
-		proxy.setShift(((Number)shift.getValue()).intValue());
-		proxy.setStationID(station_id.getText());
-		proxy.setSpeedLimit(((Number)slimit.getValue()).intValue());
 	}
 }
