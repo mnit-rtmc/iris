@@ -45,27 +45,35 @@ public class R_NodeLayer extends SonarLayer<R_Node> {
 		super(m);
 	}
 
-	/** Extent rectangle */
-	protected Rectangle2D _extent;
-
 	/** Get the extent for the currently selected corridor */
 	public Rectangle2D getExtent() {
-		_extent = null;
-		final R_NodeManager m = (R_NodeManager)manager;
-		m.findCorridor(corridor, new Checker<R_Node>() {
-			public boolean check(R_Node n) {
-				MapGeoLoc l = m.findGeoLoc(n);
-				if(l != null) {
-					_extent = getUnion(_extent,
-						l.getGeoLoc());
-				}
-				return false;
-			}
-		});
-		if(_extent != null)
-			return _extent;
-		else
-			return super.getExtent();
+		if(corridor != null) {
+			CorridorExtent ce = new CorridorExtent(corridor);
+			ce.calculateExtent();
+			if(ce.extent != null)
+				return ce.extent;
+		}
+		return super.getExtent();
+	}
+
+	/** A class to calculate the extent of a corridor */
+	protected class CorridorExtent implements Checker<R_Node> {
+		protected final String cor;
+		protected final R_NodeManager man;
+		protected Rectangle2D extent = null;
+		protected CorridorExtent(String c) {
+			cor = c;
+			man = (R_NodeManager)manager;
+		}
+		protected void calculateExtent() {
+			man.findCorridor(cor, this);
+		}
+		public boolean check(R_Node n) {
+			MapGeoLoc l = man.findGeoLoc(n);
+			if(l != null)
+				extent = getUnion(extent, l.getGeoLoc());
+			return false;
+		}
 	}
 
 	/** Get the union of the given extent with another node */
