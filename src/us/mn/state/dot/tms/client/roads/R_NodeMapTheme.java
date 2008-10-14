@@ -55,8 +55,9 @@ public class R_NodeMapTheme extends ProxyTheme<R_Node> {
 
 	/** Get the shape to use for the given map object */
 	protected Shape getShape(MapObject o) {
-		if(o instanceof R_Node)
-			return getShape((R_Node)o);
+		R_Node n = manager.findProxy(o);
+		if(n != null)
+			return getShape(n);
 		else
 			return STATION_MARKER;
 	}
