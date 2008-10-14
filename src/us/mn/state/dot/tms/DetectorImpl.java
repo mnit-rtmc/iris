@@ -155,22 +155,7 @@ public class DetectorImpl extends Device2Impl implements Detector,
 
 	/** Compare to another detector */
 	public int compareTo(DetectorImpl other) {
-		Integer n = getNumber();
-		Integer on = other.getNumber();
-		if(n != null && on != null)
-			return n.compareTo(on);
-		else
-			return name.compareTo(other.getName());
-	}
-
-	/** Get the detector number */
-	public Integer getNumber() {
-		try {
-			return Integer.valueOf(name);
-		}
-		catch(NumberFormatException e) {
-			return null;
-		}
+		return DetectorHelper.compare(this, other);
 	}
 
 	/** R_Node (roadway network node) */

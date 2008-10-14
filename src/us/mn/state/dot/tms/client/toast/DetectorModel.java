@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
+import java.util.Comparator;
+import java.util.TreeSet;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -62,6 +64,17 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	public DetectorModel(TypeCache<Detector> c) {
 		super(c, true);
 		initialize();
+	}
+
+	/** Create an empty set of proxies */
+	protected TreeSet<Detector> createProxySet() {
+		return new TreeSet<Detector>(
+			new Comparator<Detector>() {
+				public int compare(Detector a, Detector b) {
+					return DetectorHelper.compare(a, b);
+				}
+			}
+		);
 	}
 
 	/** Get the class of the specified column */
