@@ -118,7 +118,7 @@ public class StationImpl implements Station {
 
 	/** Get the station label */
 	public String getLabel() {
-		Detector[] dets = r_node.getDetectors();
+		DetectorImpl[] dets = r_node.getDetectors();
 		if(dets.length > 0)
 			return DetectorHelper.getStationLabel(dets[0]);
 		else
@@ -191,8 +191,7 @@ public class StationImpl implements Station {
 		int n_flow = 0;
 		float t_speed = 0;
 		int n_speed = 0;
-		for(Detector d: r_node.getDetectors()) {
-			DetectorImpl det = (DetectorImpl)d;
+		for(DetectorImpl det: r_node.getDetectors()) {
 			if(!det.isStationOrCD())
 				continue;
 			float f = det.getVolume();

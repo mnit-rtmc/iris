@@ -82,7 +82,4 @@ public interface R_Node extends SonarObject {
 
 	/** Get the administrator notes */
 	String getNotes();
-
-	/** Get an array of all node detectors */
-	Detector[] getDetectors();
 }

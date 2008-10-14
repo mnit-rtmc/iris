@@ -471,12 +471,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get an array of all node detectors */
-	public Detector[] getDetectors() {
-		DetectorImpl[] dets = detectors.toArray();
-		Detector[] d = new Detector[dets.length];
-		for(int i = 0; i < dets.length; i++)
-			d[i] = dets[i];
-		return d;
+	public DetectorImpl[] getDetectors() {
+		return detectors.toArray();
 	}
 
 	/** Get the (active) detector set for the r_node */
