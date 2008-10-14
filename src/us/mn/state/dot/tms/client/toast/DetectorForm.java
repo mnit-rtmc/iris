@@ -91,6 +91,7 @@ public class DetectorForm extends AbstractForm {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setRowHeight(20);
 		JScrollPane pane = new JScrollPane(table);
 		panel.add(pane, bag);
 		del_button.setEnabled(false);

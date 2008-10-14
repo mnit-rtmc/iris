@@ -15,12 +15,17 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.TreeSet;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -60,6 +65,14 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	/** Notes column number */
 	static protected final int COL_NOTES = 8;
 
+	/** List of all lane types */
+	static protected final LinkedList<String> LANE_TYPES =
+		new LinkedList<String>();
+	static {
+		for(String lt: LaneType.getDescriptions())
+			LANE_TYPES.add(lt);
+	}
+
 	/** Create a new detector table model */
 	public DetectorModel(TypeCache<Detector> c) {
 		super(c, true);
@@ -83,7 +96,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 			return Boolean.class;
 		else if(column == COL_FIELD_LENGTH)
 			return Float.class;
-		else if(column == COL_LANE_TYPE || column == COL_LANE_NUMBER)
+		else if(column == COL_LANE_NUMBER)
 			return Short.class;
 		else
 			return String.class;
@@ -105,7 +118,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 			case COL_LABEL:
 				return DetectorHelper.getLabel(d);
 			case COL_LANE_TYPE:
-				return d.getLaneType();
+				return LANE_TYPES.get(d.getLaneType());
 			case COL_LANE_NUMBER:
 				return d.getLaneNumber();
 			case COL_ABANDONED:
@@ -128,7 +141,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		if(isLastRow(row))
 			return column == COL_NAME;
 		else
-			return column != COL_LABEL;
+			return column != COL_NAME && column != COL_LABEL;
 	}
 
 	/** Set the value at the specified cell */
@@ -141,7 +154,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 					cache.createObject(v);
 				break;
 			case COL_LANE_TYPE:
-				d.setLaneType(((Number)value).shortValue());
+				d.setLaneType((short)LANE_TYPES.indexOf(value));
 				break;
 			case COL_LANE_NUMBER:
 				d.setLaneNumber(((Number)value).shortValue());
@@ -171,14 +184,23 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 60, "Detector"));
-		m.addColumn(createColumn(COL_LABEL, 100, "Label"));
-		m.addColumn(createColumn(COL_LANE_TYPE, 60, "Lane Type"));
+		m.addColumn(createColumn(COL_LABEL, 140, "Label"));
+		m.addColumn(createLaneTypeColumn());
 		m.addColumn(createColumn(COL_LANE_NUMBER, 60, "Lane #"));
 		m.addColumn(createColumn(COL_ABANDONED, 60, "Abandoned"));
 		m.addColumn(createColumn(COL_FORCE_FAIL, 60, "Force Fail"));
-		m.addColumn(createColumn(COL_FIELD_LENGTH, 80, "Field Length"));
+		m.addColumn(createColumn(COL_FIELD_LENGTH, 60, "Field Len"));
 		m.addColumn(createColumn(COL_FAKE, 180, "Fake"));
 		m.addColumn(createColumn(COL_NOTES, 180, "Notes"));
 		return m;
+	}
+
+	/** Create the lane type column */
+	protected TableColumn createLaneTypeColumn() {
+		TableColumn c = new TableColumn(COL_LANE_TYPE, 80);
+		c.setHeaderValue("Lane Type");
+		JComboBox combo = new JComboBox(LaneType.getDescriptions());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
 	}
 }
