@@ -85,7 +85,7 @@ public class DetectorImpl extends Device2Impl implements Detector,
 		map.put("pin", pin);
 		if(r_node != null)
 			map.put("r_node", r_node.getName());
-		map.put("lane_type", lane_type);
+		map.put("lane_type", (short)lane_type.ordinal());
 		map.put("lane_number", lane_number);
 		map.put("abandoned", abandoned);
 		map.put("force_fail", force_fail);
