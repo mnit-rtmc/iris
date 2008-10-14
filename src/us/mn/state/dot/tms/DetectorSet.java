@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Comparator;
 import java.util.TreeSet;
 
 /**
@@ -37,11 +38,30 @@ public class DetectorSet {
 
 	/** Set of detectors */
 	protected final TreeSet<DetectorImpl> detectors =
-		new TreeSet<DetectorImpl>();
+		new TreeSet<DetectorImpl>(
+			new Comparator<DetectorImpl>() {
+				public int compare(DetectorImpl a,
+					DetectorImpl b)
+				{
+					int la = a.getLaneNumber();
+					int lb = b.getLaneNumber();
+					int n = la - lb;
+					if(n == 0)
+						return a.compareTo(b);
+					else
+						return n;
+				}
+			}
+		);
 
 	/** Add a detector to the detector set */
 	public void addDetector(DetectorImpl det) {
 		detectors.add(det);
+	}
+
+	/** Remove a detector from the detector set */
+	public void removeDetector(DetectorImpl det) {
+		detectors.remove(det);
 	}
 
 	/** Get the number of detectors in the detector set */

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -50,15 +49,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Maximum freeway speed limit */
 	static protected final int MAXIMUM_SPEED_LIMIT = 75;
-
-	/** Make a sorted array of detectors */
-	static protected Detector[] makeDetectorArray(DetectorImpl[] dets) {
-		Detector[] result = new Detector[dets.length];
-		for(int i = 0; i < result.length; i++)
-			result[i] = dets[i];
-		Arrays.sort(result);
-		return result;
-	}
 
 	/** Load all the r_nodes */
 	static protected void loadAll() throws TMSException {
@@ -468,30 +458,31 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Node detectors */
-	protected transient DetectorImpl[] detectors = new DetectorImpl[0];
+	protected transient DetectorSet detectors = new DetectorSet();
 
-	/** Set the array of detectors */
-	protected synchronized void _setDetectors(DetectorImpl[] dets)
-		throws TMSException
-	{
-		// FIXME
+	/** Add a detector to the r_node */
+	public void addDetector(DetectorImpl det) {
+		detectors.addDetector(det);
 	}
 
-	/** Set the array of detectors */
-	public void setDetectors(Detector[] dets) throws TMSException {
-		// FIXME
+	/** Remove a detector from the r_node */
+	public void removeDetector(DetectorImpl det) {
+		detectors.removeDetector(det);
 	}
 
 	/** Get an array of all node detectors */
 	public Detector[] getDetectors() {
-		return makeDetectorArray(detectors);
+		DetectorImpl[] dets = detectors.toArray();
+		Detector[] d = new Detector[dets.length];
+		for(int i = 0; i < dets.length; i++)
+			d[i] = dets[i];
+		return d;
 	}
 
-	/** Get the detector set for the r_node */
+	/** Get the (active) detector set for the r_node */
 	public DetectorSet getDetectorSet() {
-		DetectorImpl[] dets = detectors;	// Avoid race
 		DetectorSet set = new DetectorSet();
-		for(DetectorImpl d: dets) {
+		for(DetectorImpl d: detectors.toArray()) {
 			if(!d.getAbandoned())
 				set.addDetector(d);
 		}
@@ -500,8 +491,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Does this node have the specified detector? */
 	public boolean hasDetector(DetectorImpl det) {
-		DetectorImpl[] dets = detectors;	// Avoid race
-		for(DetectorImpl d: dets) {
+		for(DetectorImpl d: detectors.toArray()) {
 			if(d == det)
 				return true;
 		}
@@ -602,7 +592,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		int slim = getSpeedLimit();
 		if(slim != DEFAULT_SPEED_LIMIT)
 			out.print("s_limit='" + slim + "' ");
-		DetectorImpl[] dets = detectors;
+		DetectorImpl[] dets = detectors.toArray();
 		if(dets.length > 0) {
 			out.print("dets='");
 			StringBuilder b = new StringBuilder();

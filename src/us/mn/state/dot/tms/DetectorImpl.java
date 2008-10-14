@@ -23,6 +23,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.Namespace;
@@ -34,13 +35,14 @@ import us.mn.state.dot.tms.event.EventType;
  *
  * @author Douglas Lau
  */
-public class DetectorImpl extends Device2Impl implements Detector {
-
+public class DetectorImpl extends Device2Impl implements Detector,
+	Comparable<DetectorImpl>
+{
 	/** Detector debug log */
 	static protected final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Load all the detectors */
-	static protected void loadAll() throws TMSException {
+	static protected void loadAll() throws TMSException, NamespaceError {
 		System.err.println("Loading detectors...");
 		namespace.registerType(SONAR_TYPE, DetectorImpl.class);
 		store.query("SELECT name, controller, pin, r_node, lane_type, "+
@@ -62,6 +64,14 @@ public class DetectorImpl extends Device2Impl implements Detector {
 					row.getString(10),	// fake
 					row.getString(11)	// notes
 				));
+			}
+		});
+		// Transients need to be initialized after all detectors are
+		// loaded (for resolving fake detectors).
+		namespace.findObject(SONAR_TYPE, new Checker<DetectorImpl>() {
+			public boolean check(DetectorImpl d) {
+				d.initTransients();
+				return false;
 			}
 		});
 	}
@@ -98,6 +108,7 @@ public class DetectorImpl extends Device2Impl implements Detector {
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);
+		initTransients();
 	}
 
 	/** Create a detector */
@@ -129,7 +140,8 @@ public class DetectorImpl extends Device2Impl implements Detector {
 	public void initTransients() {
 		super.initTransients();
 		data_cache = new DataCache(name);
-		// FIXME: put detector in r_node detectors attribute
+		if(r_node != null)
+			r_node.addDetector(this);
 		try {
 			fake_det = createFakeDetector(fake);
 		}
@@ -138,6 +150,26 @@ public class DetectorImpl extends Device2Impl implements Detector {
 				" (" + fake + ")");
 			fake = null;
 			fake_det = null;
+		}
+	}
+
+	/** Compare to another detector */
+	public int compareTo(DetectorImpl other) {
+		Integer n = getNumber();
+		Integer on = other.getNumber();
+		if(n != null && on != null)
+			return n.compareTo(on);
+		else
+			return name.compareTo(other.getName());
+	}
+
+	/** Get the detector number */
+	public Integer getNumber() {
+		try {
+			return Integer.valueOf(name);
+		}
+		catch(NumberFormatException e) {
+			return null;
 		}
 	}
 
@@ -157,7 +189,10 @@ public class DetectorImpl extends Device2Impl implements Detector {
 			store.update(this, "r_node", n.getName());
 		else
 			store.update(this, "r_node", null);
-		// FIXME: update old and new r_node detectors attribute
+		if(r_node != null)
+			r_node.removeDetector(this);
+		if(n instanceof R_NodeImpl)
+			((R_NodeImpl)n).addDetector(this);
 		setR_Node(n);
 	}
 

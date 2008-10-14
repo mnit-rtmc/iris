@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.Namespace;
 
 /**
@@ -30,7 +31,9 @@ abstract public class BaseObjectImpl implements Storable {
 	static protected SQLConnection store;
 
 	/** Load all objects from the database into the SONAR Namespace */
-	static void loadAll(SQLConnection s, Namespace ns) throws TMSException {
+	static void loadAll(SQLConnection s, Namespace ns) throws TMSException,
+		NamespaceError
+	{
 		store = s;
 		namespace = ns;
 		SystemAttributeImpl.loadAll();
