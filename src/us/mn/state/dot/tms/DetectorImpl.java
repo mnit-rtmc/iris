@@ -143,14 +143,15 @@ public class DetectorImpl extends Device2Impl implements Detector,
 		if(r_node != null)
 			r_node.addDetector(this);
 		try {
-			fake_det = createFakeDetector(fake);
+			if(fake != null)
+				fake_det = createFakeDetector(fake);
 		}
 		catch(ChangeVetoException e) {
 			DET_LOG.log("Invalid FAKE Detector: " + name +
 				" (" + fake + ")");
 			fake = null;
-			fake_det = null;
 		}
+		fake_det = null;
 	}
 
 	/** Compare to another detector */
