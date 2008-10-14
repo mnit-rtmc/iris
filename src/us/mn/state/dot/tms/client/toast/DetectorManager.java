@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.toast;
 
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -26,6 +27,7 @@ import us.mn.state.dot.tms.client.roads.StationMarker;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
+import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.StyleSummary;
 
 /**
@@ -54,6 +56,11 @@ public class DetectorManager extends ProxyManager<Detector> {
 		super(c, lm);
 		connection = tc;
 		initialize();
+	}
+
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<Detector> createStyleListModel(Symbol s) {
+		return new DetectorListModel(this, s.getLabel(), s.getLegend());
 	}
 
 	/** Get the proxy type name */

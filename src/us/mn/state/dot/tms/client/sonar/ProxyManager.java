@@ -77,12 +77,14 @@ abstract public class ProxyManager<T extends SonarObject> {
 		cache = c;
 		loc_manager = lm;
 		theme = createTheme();
-		for(Symbol s: theme.getSymbols()) {
-			String name = s.getLabel();
-			models.put(name, new StyleListModel<T>(this, name,
-				s.getLegend()));
-		}
+		for(Symbol s: theme.getSymbols())
+			models.put(s.getLabel(), createStyleListModel(s));
 		layer = createLayer();
+	}
+
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<T> createStyleListModel(Symbol s) {
+		return new StyleListModel<T>(this, s.getLabel(), s.getLegend());
 	}
 
 	/** Create a layer for this proxy type */
