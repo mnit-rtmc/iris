@@ -83,8 +83,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 			synchronized(map_proxies) {
 				map_proxies.put(i, proxy);
 			}
-		} else
-			System.err.println("putMapProxy failed: " + proxy);
+		}
 	}
 
 	/** Get the style name */
@@ -112,7 +111,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		synchronized(proxies) {
 			for(T proxy: proxies) {
 				MapGeoLoc loc = manager.findGeoLoc(proxy);
-				if(s.next(loc))
+				if(loc != null && s.next(loc))
 					return loc;
 			}
 		}
@@ -124,7 +123,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		synchronized(proxies) {
 			for(T proxy: proxies) {
 				MapGeoLoc loc = manager.findGeoLoc(proxy);
-				if(s.next(loc))
+				if(loc != null && s.next(loc))
 					return proxy;
 			}
 		}

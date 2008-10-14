@@ -179,7 +179,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(T proxy) {
 		GeoLoc loc = getGeoLoc(proxy);
-		return loc_manager.findMapGeoLoc(loc);
+		if(loc != null)
+			return loc_manager.findMapGeoLoc(loc);
+		else
+			return null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */
