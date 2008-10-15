@@ -134,7 +134,10 @@ public class CorridorList extends JPanel {
 
 	/** Create a sorted list of roadway nodes for one corridor */
 	static protected List<R_Node> createSortedList(Set<R_Node> node_s) {
-		CorridorBase c = new CorridorBase(getCorridorLoc(node_s), true);
+		GeoLoc loc = getCorridorLoc(node_s);
+		if(loc == null)
+			return new LinkedList<R_Node>();
+		CorridorBase c = new CorridorBase(loc, true);
 		for(R_Node n: node_s)
 			c.addNode(n);
 		c.arrangeNodes();
