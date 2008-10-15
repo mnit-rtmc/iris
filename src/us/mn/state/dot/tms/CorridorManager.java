@@ -50,7 +50,7 @@ public class CorridorManager {
 				if(cid != null) {
 					Corridor c = corridors.get(cid);
 					if(c == null) {
-						c = new Corridor(false, loc);
+						c = new Corridor(loc);
 						corridors.put(cid, c);
 					}
 					c.addNode(r_node);
@@ -104,7 +104,7 @@ public class CorridorManager {
 		R_NodeImpl nearest = null;
 		double distance = 0;
 		for(R_NodeImpl other: others) {
-			double m = r_node.metersTo(other);
+			double m = Corridor.metersTo(r_node, other);
 			if(nearest == null || m < distance) {
 				nearest = other;
 				distance = m;
