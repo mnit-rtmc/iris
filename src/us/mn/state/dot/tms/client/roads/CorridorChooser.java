@@ -23,6 +23,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.sonar.SonarLayer;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
@@ -39,7 +41,7 @@ public class CorridorChooser extends JPanel {
 	protected final R_NodeManager manager;
 
 	/** Roadway node layer */
-	protected final R_NodeLayer layer;
+	protected final SonarLayer<R_Node> layer;
 
 	/** Map bean */
 	protected final MapBean map;
@@ -51,7 +53,7 @@ public class CorridorChooser extends JPanel {
 	public CorridorChooser(R_NodeManager man, MapBean m, CorridorList c) {
 		super(new GridBagLayout());
 		manager = man;
-		layer = (R_NodeLayer)man.getLayer();
+		layer = man.getLayer();
 		map = m;
 		clist = c;
 		corridor_combo.setModel(new WrapperComboBoxModel(
@@ -79,8 +81,9 @@ public class CorridorChooser extends JPanel {
 
 	/** Set a new selected corridor */
 	protected void setCorridor(String c) {
-		clist.setCorridor(manager.createSet(c));
-		layer.setCorridor(c);
+		manager.setCorridor(c);
+		clist.setCorridor(manager.createSet());
+		layer.updateExtent();
 		map.zoomTo(layer.getExtent());
 	}
 

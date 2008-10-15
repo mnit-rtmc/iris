@@ -38,7 +38,7 @@ public class SonarLayer<T extends SonarObject> extends Layer
 {
 	/** Shape used for calculating the layer extent */
 	static protected final Rectangle2D EXTENT_SHAPE =
-		new Rectangle2D.Float(-50, -50, 100, 100);
+		new Rectangle2D.Float(-500, -500, 1000, 1000);
 
 	/** Proxy manager for the layer */
 	protected final ProxyManager<T> manager;
@@ -118,7 +118,7 @@ public class SonarLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Update the layer extent */
-	protected void updateExtent() {
+	public void updateExtent() {
 		ExtentCalculator calc = new ExtentCalculator();
 		manager.forEach(calc);
 		if(calc.extent != null)

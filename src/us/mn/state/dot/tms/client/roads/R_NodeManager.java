@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
+import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.SonarLayer;
@@ -65,6 +66,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** TMS connection */
 	protected final TmsConnection connection;
 
+	/** Currently selected corridor */
+	protected String corridor = null;
+
+	/** Select a new freeway corridor */
+	public void setCorridor(String c) {
+		corridor = c;
+	}
+
 	/** Create a new roadway node manager */
 	public R_NodeManager(TmsConnection tc, TypeCache<R_Node> c,
 		GeoLocManager lm)
@@ -80,11 +89,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
 		if(c != null)
 			addCorridor(c);
-	}
-
-	/** Create a layer for this proxy type */
-	protected SonarLayer<R_Node> createLayer() {
-		return new R_NodeLayer(this);
 	}
 
 	/** Get the proxy type */
@@ -118,12 +122,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Add a corridor to the corridor model */
-	protected void addCorridor(String corridor) {
-		if(corridors.add(corridor)) {
+	protected void addCorridor(String cor) {
+		if(corridors.add(cor)) {
 			Iterator<String> it = corridors.iterator();
 			for(int i = 0; it.hasNext(); i++) {
 				String c = it.next();
-				if(corridor.equals(c)) {
+				if(cor.equals(c)) {
 					model.add(i, c);
 					return;
 				}
@@ -131,10 +135,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	}
 
-	/** Create a set of roadway nodes for the specified corridor */
-	public Set<R_Node> createSet(String corridor) {
+	/** Create a set of roadway nodes for the current corridor */
+	public Set<R_Node> createSet() {
 		final HashSet<R_Node> nodes = new HashSet<R_Node>();
-		findCorridor(corridor, new Checker<R_Node>() {
+		findCorridor(new Checker<R_Node>() {
 			public boolean check(R_Node n) {
 				nodes.add(n);
 				return false;
@@ -144,17 +148,21 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Find all r_nodes on the specified corridor */
-	public R_Node findCorridor(final String cor, final Checker<R_Node> ch) {
+	public R_Node findCorridor(final Checker<R_Node> ch) {
 		return cache.find(new Checker<R_Node>() {
 			public boolean check(R_Node n) {
-				String c = GeoLocHelper.getCorridor(
-					n.getGeoLoc());
-				if(cor.equals(c))
+				if(checkCorridor(n))
 					return ch.check(n);
 				else
 					return false;
 			}
 		});
+	}
+
+	/** Check the corridor of an r_node */
+	protected boolean checkCorridor(R_Node n) {
+		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
+		return corridor == null || corridor.equals(c);
 	}
 
 	/** Show the properties form for the selected proxy */
@@ -201,6 +209,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			}
 		});
 		return p;
+	}
+
+	/** Find the map geo location for a proxy */
+	public MapGeoLoc findGeoLoc(R_Node proxy) {
+		if(checkCorridor(proxy))
+			return super.findGeoLoc(proxy);
+		else
+			return null;
 	}
 
 	/** Get the GeoLoc for the specified proxy */
