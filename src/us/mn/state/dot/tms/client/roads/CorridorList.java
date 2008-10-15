@@ -58,6 +58,9 @@ public class CorridorList extends JPanel {
 	/** List component */
 	protected final JList jlist = new JList();
 
+	/** Roadway corridor */
+	protected CorridorBase corridor;
+
 	/** Roadway node renderer list */
 	protected List<R_NodeRenderer> r_nodes;
 
@@ -131,15 +134,16 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Create a sorted list of roadway nodes for one corridor */
-	static protected List<R_Node> createSortedList(Set<R_Node> node_s) {
+	static protected CorridorBase createCorridor(Set<R_Node> node_s) {
 		GeoLoc loc = getCorridorLoc(node_s);
-		if(loc == null)
-			return new LinkedList<R_Node>();
-		CorridorBase c = new CorridorBase(loc, true);
-		for(R_Node n: node_s)
-			c.addNode(n);
-		c.arrangeNodes();
-		return c.getNodes();
+		if(loc != null) {
+			CorridorBase c = new CorridorBase(loc, true);
+			for(R_Node n: node_s)
+				c.addNode(n);
+			c.arrangeNodes();
+			return c;
+		} else
+			return null;
 	}
 
 	/** Get a location for a corridor */
@@ -174,7 +178,8 @@ public class CorridorList extends JPanel {
 				it.remove();
 			}
 		}
-		List<R_Node> node_t = createSortedList(node_s);
+		corridor = createCorridor(node_s);
+		List<R_Node> node_t = getSortedList();
 		setTangentAngles(node_t);
 		R_NodeRenderer prev = null;
 		for(R_Node proxy: node_t) {
@@ -185,6 +190,14 @@ public class CorridorList extends JPanel {
 			prev = r;
 		}
 		return ren_l;
+	}
+
+	/** Get a sorted list of roadway nodes for the selected corridor */
+	protected List<R_Node> getSortedList() {
+		if(corridor != null)
+			return corridor.getNodes();
+		else
+			return new LinkedList<R_Node>();
 	}
 
 	/** Set the tangent angles for all the roadway nodes in a list */
