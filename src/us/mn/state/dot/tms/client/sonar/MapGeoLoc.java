@@ -81,9 +81,13 @@ public class MapGeoLoc implements MapObject {
 
 	/** Set the tangent angle (radians) */
 	public void setTangent(double t) {
-		tangent = t;
-		updateTransform();
-		updateInverseTransform();
+		if(Double.isInfinite(t) || Double.isNaN(t)) {
+			System.err.println("MapGeoLoc.setTangent: Bad tangent");
+		} else {
+			tangent = t;
+			updateTransform();
+			updateInverseTransform();
+		}
 	}
 
 	/** Get the tangent angle (radians) */
