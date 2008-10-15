@@ -25,6 +25,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -120,8 +121,17 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when a proxy has been added */
-	public void proxyAdded(T proxy) {
-		// FIXME: is this too slow for SONAR task processor thread?
+	public void proxyAdded(final T proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				proxyAddedSlow(proxy);
+			}
+		}.addToScheduler();
+	}
+
+	/** Add a proxy to the manager */
+	protected void proxyAddedSlow(T proxy) {
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if(loc != null) {
 			int i = System.identityHashCode(loc);

@@ -22,16 +22,13 @@ import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import us.mn.state.dot.map.StyledTheme;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
@@ -75,24 +72,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		super(c, lm);
 		connection = tc;
 		initialize();
-		// FIXME: this is never removed...
-		cache.addProxyListener(new ProxyListener<R_Node>() {
-			public void proxyAdded(final R_Node n) {
-				// Don't hog the SONAR TaskProcessor thread
-				new AbstractJob() {
-					public void perform() {
-						proxyAddedSlow(n);
-					}
-				}.addToScheduler();
-			}
-			public void enumerationComplete() { }
-			public void proxyRemoved(R_Node n) { }
-			public void proxyChanged(R_Node n, String a) { }
-		});
 	}
 
 	/** Add a new proxy to the r_node manager */
 	protected void proxyAddedSlow(R_Node n) {
+		super.proxyAddedSlow(n);
 		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
 		if(c != null)
 			addCorridor(c);
