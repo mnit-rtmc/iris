@@ -33,6 +33,8 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -130,103 +132,23 @@ public class CorridorList extends JPanel {
 		add(rbutton, bag);
 	}
 
-	/** Find the nearest node to the given node */
-	static protected R_Node findNearest(Set<R_Node> node_s, R_Node end) {
-		R_Node nearest = null;
-		double distance = 0;
-		for(R_Node proxy: node_s) {
-			double d = GeoLocHelper.metersTo(proxy.getGeoLoc(),
-				end.getGeoLoc());
-			if(nearest == null || d < distance) {
-				nearest = proxy;
-				distance = d;
-			}
-		}
-		return nearest;
-	}
-
-	/** Link the nearest node */
-	static protected void linkNearestNode(Set<R_Node> node_s,
-		LinkedList<R_Node> node_l)
-	{
-		R_Node first = node_l.getFirst();
-		R_Node last = node_l.getLast();
-		R_Node fnear = findNearest(node_s, first);
-		R_Node lnear = findNearest(node_s, last);
-		double df = GeoLocHelper.metersTo(first.getGeoLoc(),
-			fnear.getGeoLoc());
-		double dl = GeoLocHelper.metersTo(last.getGeoLoc(),
-			lnear.getGeoLoc());
-		if(df < dl) {
-			node_l.addFirst(fnear);
-			node_s.remove(fnear);
-		} else {
-			node_l.addLast(lnear);
-			node_s.remove(lnear);
-		}
-	}
-
-	/** Compare the Northing of two R_Nodes */
-	static protected boolean compareNorthing(R_Node n0, R_Node n1) {
-		return GeoLocHelper.getTrueNorthing(n0.getGeoLoc()) <
-			GeoLocHelper.getTrueNorthing(n1.getGeoLoc());
-	}
-
-	/** Compare the Easting of two R_Nodes */
-	static protected boolean compareEasting(R_Node n0, R_Node n1) {
-		return GeoLocHelper.getTrueEasting(n0.getGeoLoc()) <
-			GeoLocHelper.getTrueEasting(n1.getGeoLoc());
-	}
-
-	/** Check if a list of roadway nodes is reversed */
-	static protected boolean isListReversed(R_Node first, R_Node last) {
-		short dir = first.getGeoLoc().getFreeDir();
-		switch(dir) {
-			case Road.NORTH:
-				return compareNorthing(first, last);
-			case Road.SOUTH:
-				return compareNorthing(last, first);
-			case Road.EAST:
-				return compareEasting(first, last);
-			case Road.WEST:
-				return compareEasting(last, first);
-		}
-		return false;
-	}
-
-	/** Create a reversed list of roadway nodes */
-	static protected List<R_Node> createReversed(LinkedList<R_Node> node_l)
-	{
-		LinkedList<R_Node> node_r = new LinkedList<R_Node>();
-		for(R_Node proxy: node_l)
-			node_r.addFirst(proxy);
-		return node_r;
-	}
-
-	/** Reverse a list of roadway nodes if necessary */
-	static protected List<R_Node> reversedListIfNecessary(
-		LinkedList<R_Node> node_l)
-	{
-		if(node_l.size() > 1) {
-			R_Node first = node_l.getFirst();
-			R_Node last = node_l.getLast();
-			if(isListReversed(first, last))
-				return createReversed(node_l);
-		}
-		return node_l;
-	}
-
 	/** Create a sorted list of roadway nodes for one corridor */
 	static protected List<R_Node> createSortedList(Set<R_Node> node_s) {
-		LinkedList<R_Node> node_l = new LinkedList<R_Node>();
+		CorridorBase c = new CorridorBase(getCorridorLoc(node_s), true);
+		for(R_Node n: node_s)
+			c.addNode(n);
+		c.arrangeNodes();
+		return c.getNodes();
+	}
+
+	/** Get a location for a corridor */
+	static protected GeoLoc getCorridorLoc(Set<R_Node> node_s) {
 		Iterator<R_Node> it = node_s.iterator();
 		if(it.hasNext()) {
-			node_l.add(it.next());
-			it.remove();
-		}
-		while(!node_s.isEmpty())
-			linkNearestNode(node_s, node_l);
-		return reversedListIfNecessary(node_l);
+			R_Node n = it.next();
+			return n.getGeoLoc();
+		} else
+			return null;
 	}
 
 	/** Set the corridor to display */
@@ -236,7 +158,6 @@ public class CorridorList extends JPanel {
 		for(R_NodeRenderer r: r_nodes)
 			nr_list.addElement(r);
 		jlist.setModel(nr_list);
-		jlist.setSelectedIndex(0);
 	}
 
 	/** Create a list of roadway node renderers for one corridor */

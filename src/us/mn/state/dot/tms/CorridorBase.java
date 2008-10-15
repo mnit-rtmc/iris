@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -70,6 +71,9 @@ public class CorridorBase {
 		return free_dir;
 	}
 
+	/** Flag for downstream-to-upstream (backwards) order */
+	protected final boolean order_down_up;
+
 	/** Set of unsorted roadway nodes */
 	protected final Set<R_Node> unsorted = new HashSet<R_Node>();
 
@@ -77,10 +81,16 @@ public class CorridorBase {
 	protected final LinkedList<R_Node> r_nodes = new LinkedList<R_Node>();
 
 	/** Create a new corridor */
-	public CorridorBase(GeoLoc loc) {
+	public CorridorBase(GeoLoc loc, boolean order) {
 		name = GeoLocHelper.getCorridor(loc);
 		freeway = loc.getFreeway().getName();
 		free_dir = loc.getFreeDir();
+		order_down_up = order;
+	}
+
+	/** Create a new corridor */
+	protected CorridorBase(GeoLoc loc) {
+		this(loc, false);
 	}
 
 	/** Add a roadway node to the corridor */
@@ -148,7 +158,8 @@ public class CorridorBase {
 
 	/** Check if the roadway nodes are in reverse order */
 	protected boolean isReversed() {
-		return r_nodes.size() > 1 && !isUpstreamToDownstream();
+		return r_nodes.size() > 1 &&
+			(order_down_up == isUpstreamToDownstream());
 	}
 
 	/** Reverse the list of roadway nodes */
@@ -182,5 +193,10 @@ public class CorridorBase {
 	/** Arrange the nodes in the corridor */
 	public void arrangeNodes() {
 		sortNodes();
+	}
+
+	/** Get the list of r_nodes */
+	public List<R_Node> getNodes() {
+		return r_nodes;
 	}
 }
