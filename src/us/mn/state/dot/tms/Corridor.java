@@ -27,7 +27,7 @@ import java.util.TreeMap;
  *
  * @author Douglas Lau
  */
-public class Corridor {
+public class Corridor extends CorridorBase {
 
 	/** Conversion value from meter to mile length units */
 	static protected final float METERS_PER_MILE = 1609.344f;
@@ -35,180 +35,6 @@ public class Corridor {
 	/** Convert meters to miles */
 	static protected float metersToMiles(double meters) {
 		return (float)(meters / METERS_PER_MILE);
-	}
-
-	/** Corridor name */
-	protected final String name;
-
-	/** Get the corridor name */
-	public String getName() {
-		return name;
-	}
-
-	/** Flag for downstream-to-upstream (backwards) order */
-	protected final boolean order_down_up;
-
-	/** Corridor freeway */
-	protected final String freeway;
-
-	/** Get the corridor freeway */
-	public String getFreeway() {
-		return freeway;
-	}
-
-	/** Corridor direction */
-	protected final short free_dir;
-
-	/** Get the corridor direction */
-	public short getFreeDir() {
-		return free_dir;
-	}
-
-	/** Set of unsorted roadway nodes */
-	protected final Set<R_NodeImpl> unsorted = new HashSet<R_NodeImpl>();
-
-	/** Roadway node list */
-	protected final LinkedList<R_NodeImpl> r_nodes =
-		new LinkedList<R_NodeImpl>();
-
-	/** Mapping from milepoint to r_node */
-	protected final TreeMap<Float, R_NodeImpl> n_points =
-		new TreeMap<Float, R_NodeImpl>();
-
-	/** Create a new corridor */
-	public Corridor(boolean order, GeoLoc loc) {
-		name = GeoLocHelper.getCorridor(loc);
-		order_down_up = order;
-		freeway = loc.getFreeway().getName();
-		free_dir = loc.getFreeDir();
-	}
-
-	/** Add a roadway node to the corridor */
-	public void addNode(R_NodeImpl r_node) {
-		assert r_nodes.isEmpty();
-		assert n_points.isEmpty();
-		if(r_node.hasLocation())
-			unsorted.add(r_node);
-	}
-
-	/** Find the nearest unsorted node to the given node */
-	protected R_NodeImpl findNearest(R_NodeImpl end) {
-		R_NodeImpl nearest = null;
-		double n_meters = 0;
-		for(R_NodeImpl r_node: unsorted) {
-			double m = r_node.metersTo(end);
-			if(nearest == null || m < n_meters) {
-				nearest = r_node;
-				n_meters = m;
-			}
-		}
-		return nearest;
-	}
-
-	/** Link the nearest node */
-	protected void linkNearestNode() {
-		R_NodeImpl first = r_nodes.getFirst();
-		R_NodeImpl last = r_nodes.getLast();
-		R_NodeImpl fnear = findNearest(first);
-		R_NodeImpl lnear = findNearest(last);
-		if(first.metersTo(fnear) < last.metersTo(lnear)) {
-			r_nodes.addFirst(fnear);
-			unsorted.remove(fnear);
-		} else {
-			r_nodes.addLast(lnear);
-			unsorted.remove(lnear);
-		}
-	}
-
-	/** Check if the nodes are in upstream-to-downstream order */
-	protected boolean isUpstreamToDownstream() {
-		R_NodeImpl first = r_nodes.getFirst();
-		R_NodeImpl last = r_nodes.getLast();
-		switch(free_dir) {
-			case Road.NORTH:
-				return first.getTrueNorthing() <
-					last.getTrueNorthing();
-			case Road.SOUTH:
-				return first.getTrueNorthing() >
-					last.getTrueNorthing();
-			case Road.EAST:
-				return first.getTrueEasting() <
-					last.getTrueEasting();
-			case Road.WEST:
-				return first.getTrueEasting() >
-					last.getTrueEasting();
-			case Road.INNER_LOOP:
-				// FIXME: this might be tricky
-				return false;
-			case Road.OUTER_LOOP:
-				// FIXME: this might be tricky
-				return false;
-		}
-		return false;
-	}
-
-	/** Check if the roadway nodes are in reverse order */
-	protected boolean isReversed() {
-		if(order_down_up)
-			return isUpstreamToDownstream();
-		else
-			return !isUpstreamToDownstream();
-	}
-
-	/** Reverse the list of roadway nodes */
-	protected void reverseList() {
-		LinkedList<R_NodeImpl> tmp =
-			new LinkedList<R_NodeImpl>(r_nodes);
-		r_nodes.clear();
-		for(R_NodeImpl r_node: tmp)
-			r_nodes.addFirst(r_node);
-	}
-
-	/** Put one r_node into the list */
-	protected void beginList() {
-		// Only way to get one Set element is to get iterator
-		Iterator<R_NodeImpl> it = unsorted.iterator();
-		if(it.hasNext()) {
-			r_nodes.add(it.next());
-			it.remove();
-		}
-	}
-
-	/** Sort the roadway nodes for the corridor */
-	protected void sortNodes() {
-		assert r_nodes.isEmpty();
-		beginList();
-		while(!unsorted.isEmpty())
-			linkNearestNode();
-		// Reverse the list if necessary
-		if(r_nodes.size() > 1) {
-			if(isReversed())
-				reverseList();
-		}
-	}
-
-	/** Link each node with the next downstream node in the corridor */
-	protected void linkDownstream() {
-		Iterator<R_NodeImpl> down = r_nodes.iterator();
-		// Throw away first r_node in downstream iterator
-		if(down.hasNext())
-			down.next();
-		for(R_NodeImpl r_node: r_nodes) {
-			if(down.hasNext()) {
-				R_NodeImpl d = down.next();
-				if(r_node.hasDownstreamLink())
-					r_node.addDownstream(d);
-			}
-		}
-	}
-
-	/** Print out the corridor to an XML file */
-	public void printXml(PrintWriter out) {
-		out.println("<corridor route='" + freeway + "' dir='" +
-			TMSObject.DIRECTION[free_dir] + "'>");
-		for(R_NodeImpl r_node: r_nodes)
-			r_node.printXml(out);
-		out.println("</corridor>");
 	}
 
 	/** Adjustment for r_node milepoints falling on exact same spot */
@@ -219,17 +45,56 @@ public class Corridor {
 			return 0.0000001f;
 	}
 
+	/** Calculate the distance to a location (in meters) */
+	static public Double metersTo(R_Node n, GeoLoc l) {
+		return GeoLocHelper.metersTo(n.getGeoLoc(), l);
+	}
+
+	/** Mapping from milepoint to r_node */
+	protected final TreeMap<Float, R_NodeImpl> n_points =
+		new TreeMap<Float, R_NodeImpl>();
+
+	/** Create a new corridor */
+	public Corridor(GeoLoc loc) {
+		super(loc);
+	}
+
+	/** Link each node with the next downstream node in the corridor */
+	protected void linkDownstream() {
+		Iterator<R_Node> down = r_nodes.iterator();
+		// Throw away first r_node in downstream iterator
+		if(down.hasNext())
+			down.next();
+		for(R_Node n: r_nodes) {
+			R_NodeImpl r_node = (R_NodeImpl)n;
+			if(down.hasNext()) {
+				R_NodeImpl d = (R_NodeImpl)down.next();
+				if(r_node.hasDownstreamLink())
+					r_node.addDownstream(d);
+			}
+		}
+	}
+
+	/** Print out the corridor to an XML file */
+	public void printXml(PrintWriter out) {
+		out.println("<corridor route='" + freeway + "' dir='" +
+			TMSObject.DIRECTION[free_dir] + "'>");
+		for(R_Node n: r_nodes)
+			((R_NodeImpl)n).printXml(out);
+		out.println("</corridor>");
+	}
+
 	/** Calculate the mile points for all nodes on the corridor */
 	protected void calculateNodeMilePoints() {
 		assert n_points.isEmpty();
 		float miles = 0;
-		R_NodeImpl previous = null;
-		for(R_NodeImpl n: r_nodes) {
+		R_Node previous = null;
+		for(R_Node n: r_nodes) {
 			if(previous != null)
-				miles += metersToMiles(previous.metersTo(n));
+				miles += metersToMiles(metersTo(previous, n));
 			while(n_points.containsKey(miles))
 				miles += calculateEpsilon(miles);
-			n_points.put(miles, n);
+			n_points.put(miles, (R_NodeImpl)n);
 			previous = n;
 		}
 	}
@@ -242,18 +107,16 @@ public class Corridor {
 	}
 
 	/** Calculate the mile point for a location */
-	public float calculateMilePoint(GeoLoc loc)
-		throws BadRouteException
-	{
+	public float calculateMilePoint(GeoLoc loc) throws BadRouteException {
 		if(n_points.isEmpty())
 			throw new BadRouteException("No nodes on corridor");
-		R_NodeImpl nearest = null;
-		R_NodeImpl n_after = null;
+		R_Node nearest = null;
+		R_Node n_after = null;
 		float n_mile = 0;
 		double n_meters = 0;
 		for(Float mile: n_points.keySet()) {
-			R_NodeImpl n = n_points.get(mile);
-			double m = n.metersTo(loc);
+			R_Node n = n_points.get(mile);
+			double m = metersTo(n, loc);
 			if(nearest == null || m < n_meters) {
 				nearest = n;
 				n_after = n;
@@ -263,7 +126,7 @@ public class Corridor {
 				n_after = n;
 		}
 		float mi = metersToMiles(n_meters);
-		if(n_after.metersTo(nearest) > n_after.metersTo(loc))
+		if(metersTo(n_after, nearest) > metersTo(n_after, loc))
 			return n_mile + mi;
 		else
 			return n_mile - mi;

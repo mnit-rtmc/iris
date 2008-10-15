@@ -13,6 +13,7 @@ us/mn/state/dot/tms/Controller.class
 us/mn/state/dot/tms/ControllerIO.class
 us/mn/state/dot/tms/ControllerIO_RMI.class
 us/mn/state/dot/tms/ControllerIO_SONAR.class
+us/mn/state/dot/tms/CorridorBase.class
 us/mn/state/dot/tms/DataFactory.class
 us/mn/state/dot/tms/DateChecker.class
 us/mn/state/dot/tms/Detector.class

@@ -76,7 +76,7 @@ public class RouteBuilder {
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
-		if(r_node.metersTo(origin) > MAX_ORIGIN_DISTANCE) {
+		if(Corridor.metersTo(r_node, origin) > MAX_ORIGIN_DISTANCE) {
 			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
 				GeoLocHelper.getDescription(origin));
 		}

@@ -163,16 +163,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return !GeoLocHelper.isNull(geo_loc);
 	}
 
-	/** Calculate the distance to another roadway node (in meters) */
-	public Double metersTo(R_NodeImpl other) {
-		return metersTo(other.getGeoLoc());
-	}
-
-	/** Calculate the distance to another location (in meters) */
-	public Double metersTo(GeoLoc loc) {
-		return GeoLocHelper.metersTo(geo_loc, loc);
-	}
-
 	/** Node type */
 	protected R_NodeType node_type = R_NodeType.STATION;
 
