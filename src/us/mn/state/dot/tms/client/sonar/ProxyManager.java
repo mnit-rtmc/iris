@@ -86,8 +86,11 @@ abstract public class ProxyManager<T extends SonarObject>
 		cache = c;
 		loc_manager = lm;
 		theme = createTheme();
-		for(Symbol s: theme.getSymbols())
-			models.put(s.getLabel(), createStyleListModel(s));
+		for(Symbol s: theme.getSymbols()) {
+			StyleListModel<T> slm = createStyleListModel(s);
+			if(slm != null)
+				models.put(s.getLabel(), slm);
+		}
 		layer = createLayer();
 	}
 

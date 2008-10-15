@@ -22,6 +22,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -34,6 +35,7 @@ import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.SonarLayer;
+import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -109,6 +111,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return s.equals(c);
 		} else
 			return STYLE_ALL.equals(s);
+	}
+
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<R_Node> createStyleListModel(Symbol s) {
+		// No style list models on roadway tab
+		return null;
 	}
 
 	/** Create a styled theme for r_nodes */
