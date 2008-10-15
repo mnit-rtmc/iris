@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -37,7 +36,6 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
 
 /**
