@@ -153,7 +153,8 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Set the corridor to display */
-	public void setCorridor(Set<R_Node> node_s) {
+	public void setCorridor(String c) {
+		Set<R_Node> node_s = manager.createSet();
 		r_nodes = createRendererList(node_s);
 		nr_list = new DefaultListModel();
 		for(R_NodeRenderer r: r_nodes)

@@ -82,7 +82,7 @@ public class CorridorChooser extends JPanel {
 	/** Set a new selected corridor */
 	protected void setCorridor(String c) {
 		manager.setCorridor(c);
-		clist.setCorridor(manager.createSet());
+		clist.setCorridor(c);
 		layer.updateExtent();
 		map.zoomTo(layer.getExtent());
 	}
