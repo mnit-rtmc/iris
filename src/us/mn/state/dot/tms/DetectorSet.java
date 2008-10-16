@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Comparator;
 import java.util.TreeSet;
 
 /**
@@ -21,7 +22,7 @@ import java.util.TreeSet;
  *
  * @author Douglas Lau
  */
-public class DetectorSet implements Constants {
+public class DetectorSet {
 
 	/** Estimated sustainable capacity of mainline right lanes */
 	static protected final int CAP_RIGHT_LANE = 1800;
@@ -37,11 +38,30 @@ public class DetectorSet implements Constants {
 
 	/** Set of detectors */
 	protected final TreeSet<DetectorImpl> detectors =
-		new TreeSet<DetectorImpl>();
+		new TreeSet<DetectorImpl>(
+			new Comparator<DetectorImpl>() {
+				public int compare(DetectorImpl a,
+					DetectorImpl b)
+				{
+					int la = a.getLaneNumber();
+					int lb = b.getLaneNumber();
+					int n = la - lb;
+					if(n == 0)
+						return a.compareTo(b);
+					else
+						return n;
+				}
+			}
+		);
 
 	/** Add a detector to the detector set */
 	public void addDetector(DetectorImpl det) {
 		detectors.add(det);
+	}
+
+	/** Remove a detector from the detector set */
+	public void removeDetector(DetectorImpl det) {
+		detectors.remove(det);
 	}
 
 	/** Get the number of detectors in the detector set */
@@ -63,9 +83,9 @@ public class DetectorSet implements Constants {
 	}
 
 	/** Add the detectors of the given type from another detector set */
-	public void addDetectors(DetectorSet other, short type) {
+	public void addDetectors(DetectorSet other, LaneType lt) {
 		for(DetectorImpl d: other.detectors) {
-			if(type == d.getLaneType())
+			if(lt.ordinal() == d.getLaneType())
 				addDetector(d);
 		}
 	}
@@ -97,7 +117,7 @@ public class DetectorSet implements Constants {
 	/** Test if the detector set is not bad */
 	public boolean isNotBad() {
 		for(DetectorImpl det: detectors) {
-			if(det.getFlow() == MISSING_DATA)
+			if(det.getFlow() == Constants.MISSING_DATA)
 				return false;
 		}
 		return true;
@@ -136,18 +156,18 @@ public class DetectorSet implements Constants {
 
 	/** Calculate the upstream (one lane) capacity for a mainline zone */
 	public float getUpstreamCapacity() {
-		float max_density = MISSING_DATA;
-		float speed = MISSING_DATA;
+		float max_density = Constants.MISSING_DATA;
+		float speed = Constants.MISSING_DATA;
 		for(DetectorImpl det: detectors) {
 			float d = det.getDensity();
 			float s = det.getSpeed();
-			if(d > max_density && s != MISSING_DATA) {
+			if(d > max_density && s != Constants.MISSING_DATA) {
 				max_density = d;
 				speed = s;
 			}
 		}
 		if(max_density < 0)
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
 		float spare_density = FULL_DENSITY - max_density;
 		if(spare_density <= 0)
 			return 0;
@@ -185,7 +205,7 @@ public class DetectorSet implements Constants {
 		StringBuffer buf = new StringBuffer();
 		buf.append('\'');
 		for(DetectorImpl det: detectors) {
-			buf.append(det.getIndex());
+			buf.append(det.getName());
 			buf.append(' ');
 		}
 		if(detectors.size() == 0)
@@ -195,10 +215,10 @@ public class DetectorSet implements Constants {
 		return buf.toString();
 	}
 
-	/** Get the detector set for the given detector type */
-	public DetectorSet getDetectorSet(short type) {
+	/** Get the detector set for the given lane type */
+	public DetectorSet getDetectorSet(LaneType lt) {
 		DetectorSet set = new DetectorSet();
-		set.addDetectors(this, type);
+		set.addDetectors(this, lt);
 		return set;
 	}
 

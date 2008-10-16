@@ -22,9 +22,6 @@ package us.mn.state.dot.tms;
  */
 public interface Device2 extends ControllerIO_SONAR {
 
-	/** Get the device location */
-	GeoLoc getGeoLoc();
-
 	/** Set the administrator notes */
 	void setNotes(String n);
 

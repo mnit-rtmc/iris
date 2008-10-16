@@ -24,15 +24,6 @@ import java.rmi.RemoteException;
  */
 public interface TMS extends Remote {
 
-	/** Get the detector list */
-	public IndexedList getDetectorList() throws RemoteException;
-
-	/** Get the station map */
-	public StationMap getStationMap() throws RemoteException;
-
-	/** Get the r_node map */
-	public R_NodeMap getR_NodeMap() throws RemoteException;
-
 	/** Get the timing plan list */
 	public TimingPlanList getTimingPlanList() throws RemoteException;
 

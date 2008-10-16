@@ -30,18 +30,12 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 	/** Create a new device */
 	protected Device2Impl(String n) throws TMSException, SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
-		geo_loc = g;
 		notes = "";
 	}
 
 	/** Create a device */
-	protected Device2Impl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt)
-	{
+	protected Device2Impl(String n, ControllerImpl c, int p, String nt) {
 		super(n);
-		geo_loc = l;
 		controller = c;
 		pin = p;
 		notes = nt;
@@ -59,12 +53,6 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 				" initialization error");
 			e.printStackTrace();
 		}
-	}
-
-	/** Destroy an object */
-	public void doDestroy() throws TMSException {
-		super.doDestroy();
-		store.destroy(geo_loc);
 	}
 
 	/** Get the active status */
@@ -159,14 +147,6 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 	/** Get the controller I/O pin number */
 	public int getPin() {
 		return pin;
-	}
-
-	/** Device location */
-	protected GeoLocImpl geo_loc;
-
-	/** Get the device location */
-	public GeoLoc getGeoLoc() {
-		return geo_loc;
 	}
 
 	/** Administrator notes for this device */

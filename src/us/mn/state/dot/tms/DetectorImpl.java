@@ -16,384 +16,363 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.rmi.RemoteException;
+import java.sql.ResultSet;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.event.DetFailEvent;
 import us.mn.state.dot.tms.event.EventType;
-import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * Detector for traffic data sampling
  *
  * @author Douglas Lau
  */
-public class DetectorImpl extends DeviceImpl implements Detector, Constants,
-	Comparable<DetectorImpl>, Storable
+public class DetectorImpl extends Device2Impl implements Detector,
+	Comparable<DetectorImpl>
 {
-	/** ObjectVault table name */
-	static public final String tableName = "detector";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
-
 	/** Detector debug log */
 	static protected final DebugLog DET_LOG = new DebugLog("detector");
 
-	/** Create a new detector */
-	public DetectorImpl(int i) throws TMSException, RemoteException {
-		super("D" + i);
-		index = i;
-		fieldLength = DEFAULT_FIELD_LENGTH;
-		fake = "";
-		locked_on = 0;
-		no_hits = 0;
-		last_volume = MISSING_DATA;
-		last_scans = MISSING_DATA;
-		last_speed = MISSING_DATA;
-		data_cache = new DataCache(getKey());
-		fake_det = null;
-	}
-
-	/** Create a detector from an ObjectVault field map */
-	protected DetectorImpl( FieldMap fields ) throws RemoteException {
-		super(fields);
-		index = fields.getInt( "index" );
-		locked_on = 0;
-		no_hits = 0;
-		last_volume = MISSING_DATA;
-		last_scans = MISSING_DATA;
-		last_speed = MISSING_DATA;
-		data_cache = new DataCache(getKey());
+	/** Load all the detectors */
+	static protected void loadAll() throws TMSException, NamespaceError {
+		System.err.println("Loading detectors...");
+		namespace.registerType(SONAR_TYPE, DetectorImpl.class);
+		store.query("SELECT name, controller, pin, r_node, lane_type, "+
+			"lane_number, abandoned, force_fail, field_length, " +
+			"fake, notes FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new DetectorImpl(namespace,
+					row.getString(1),	// name
+					row.getString(2),	// controller
+					row.getInt(3),		// pin
+					row.getString(4),	// r_node
+					row.getShort(5),	// lane_type
+					row.getShort(6),	// lane_number
+					row.getBoolean(7),	// abandoned
+					row.getBoolean(8),	// force_fail
+					row.getFloat(9),	// field_length
+					row.getString(10),	// fake
+					row.getString(11)	// notes
+				));
+			}
+		});
+		// Transients need to be initialized after all detectors are
+		// loaded (for resolving fake detectors).
+		namespace.findObject(SONAR_TYPE, new Checker<DetectorImpl>() {
+			public boolean check(DetectorImpl d) {
+				d.initTransients();
+				return false;
+			}
+		});
 	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
-		return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		if(controller != null)
+			map.put("controller", controller.getName());
+		map.put("pin", pin);
+		if(r_node != null)
+			map.put("r_node", r_node.getName());
+		map.put("lane_type", (short)lane_type.ordinal());
+		map.put("lane_number", lane_number);
+		map.put("abandoned", abandoned);
+		map.put("force_fail", force_fail);
+		map.put("field_length", field_length);
+		map.put("fake", fake);
+		map.put("notes", notes);
+		return map;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new detector */
+	public DetectorImpl(String n) throws TMSException, SonarException {
+		super(n);
+		initTransients();
+	}
+
+	/** Create a detector */
+	protected DetectorImpl(String n, ControllerImpl c, int p, R_NodeImpl r,
+		short lt, short ln, boolean a, boolean ff, float fl, String f,
+		String nt)
+	{
+		super(n, c, p, nt);
+		r_node = r;
+		lane_type = LaneType.fromOrdinal(lt);
+		lane_number = ln;
+		abandoned = a;
+		force_fail = ff;
+		field_length = fl;
+		fake = f;
+	}
+
+	/** Create a detector */
+	protected DetectorImpl(Namespace ns, String n, String c, int p,
+		String r, short lt, short ln, boolean a, boolean ff, float fl,
+		String f, String nt) throws NamespaceError
+	{
+		this(n, (ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
+			p, (R_NodeImpl)ns.getObject(R_Node.SONAR_TYPE, r), lt,
+			ln, a, ff, fl, f, nt);
 	}
 
 	/** Initialize the transient state */
-	public void initTransients() throws ObjectVaultException,
-		TMSException, RemoteException
-	{
+	public void initTransients() {
 		super.initTransients();
+		data_cache = new DataCache(name);
+		if(r_node != null)
+			r_node.addDetector(this);
 		try {
-			fake_det = createFakeDetector(fake);
+			if(fake != null)
+				fake_det = createFakeDetector(fake);
 		}
 		catch(ChangeVetoException e) {
-			DET_LOG.log("Invalid FAKE Detector: " + index +
+			DET_LOG.log("Invalid FAKE Detector: " + name +
 				" (" + fake + ")");
-			fake = "";
-			fake_det = null;
+			fake = null;
 		}
+		fake_det = null;
 	}
 
-	/** Get a padded string version of the detector index */
-	String getId() {
-		StringBuffer buf = new StringBuffer().append( index );
-		while(buf.length() < 4)
-			buf.insert(0, ' ');
-		return buf.toString();
-	}
-
-	/** Get the primary key name */
-	public String getKeyName() {
-		return "index";
-	}
-
-	/** Get the detector key */
-	public String getKey() {
-		return Integer.toString(index);
-	}
-
-	/** Get a String representation of the detector */
-	public String toString() {
-		StringBuffer buffer = new StringBuffer().append( index );
-		while(buffer.length() < 4)
-			buffer.insert(0, ' ');
-		buffer.append("  ").append(getLabel(false));
-		return buffer.toString();
-	}
-
-	/** Compare for sorting by lane number */
+	/** Compare to another detector */
 	public int compareTo(DetectorImpl other) {
-		int l = laneNumber - other.laneNumber;
-		if(l == 0)
-			return index - other.index;
+		return DetectorHelper.compare(this, other);
+	}
+
+	/** R_Node (roadway network node) */
+	protected R_NodeImpl r_node;
+
+	/** Set the r_node (roadway network node) */
+	public void setR_Node(R_Node n) {
+		r_node = (R_NodeImpl)n;
+	}
+
+	/** Set the r_node (roadway network node) */
+	public void doSetR_Node(R_Node n) throws TMSException {
+		if(n == r_node)
+			return;
+		if(n != null)
+			store.update(this, "r_node", n.getName());
 		else
-			return l;
+			store.update(this, "r_node", null);
+		if(r_node != null)
+			r_node.removeDetector(this);
+		if(n instanceof R_NodeImpl)
+			((R_NodeImpl)n).addDetector(this);
+		setR_Node(n);
 	}
 
-	/** Get a String representation of the detector */
-	public String getLabel() throws RemoteException {
-		return toString();
+	/** Get the r_node (roadway network node) */
+	public R_Node getR_Node() {
+		return r_node;
 	}
 
-	/** Get the detector label */
-	public String getLabel(boolean statName) {
-		GeoLoc loc = lookupGeoLoc();
-		if(loc == null)
-			return "FUTURE";
-		Road freeway = loc.getFreeway();
-		Road cross = loc.getCrossStreet();
-		if(freeway == null || cross == null) {
-			if(isActive())
-				return "INVALID";
-			else
-				return "FUTURE";
-		}
-		short freeDir = loc.getFreeDir();
-		short crossDir = loc.getCrossDir();
-		short crossMod = loc.getCrossMod();
-		StringBuffer buffer = new StringBuffer();
-		buffer.append(freeway.getAbbrev());
-		buffer.append("/");
-		if(crossDir > 0)
-			buffer.append(DIRECTION[crossDir]);
-		buffer.append(MOD_SHORT[crossMod]);
-		buffer.append(cross.getAbbrev());
-		buffer.append(DIR_FREEWAY[freeDir]);
-		if( !statName ) {
-			if(laneType == REVERSIBLE) {
-				if(freeDir == Road.EAST_WEST) {
-					if(laneNumber == 1)
-						buffer.append('S');
-					if(laneNumber == 2)
-						buffer.append('N');
-				}
-			}
-			else if(isMainline()) {
-				if(laneNumber > 0)
-					buffer.append(laneNumber);
-				buffer.append(LANE_SUFFIX[laneType]);
-			}
-			else {
-				buffer.append(LANE_SUFFIX[laneType]);
-				if(laneNumber > 0)
-					buffer.append(laneNumber);
-			}
-			if(abandoned)
-				buffer.append("-ABND");
-		}
-		return buffer.toString();
-	}
-
-	/** Is the detector available for a controller? */
-	public boolean isAvailable() {
-		if(abandoned)
-			return false;
-		if(laneType == NONE)
-			return false;
-		return super.isAvailable();
-	}
-
-	/** Set the controller for this device */
-	public void setController(String c) throws TMSException {
-		super.setController(c);
-		try {
-			detList.update(index);
-		}
-		catch(IndexOutOfBoundsException e) {
-			// During startup, detList is still empty
-		}
-	}
-
-	/** Is the detector free to be linked to a station? */
-	public boolean isFreeMainline() {
-		if(abandoned || isActive())
-			return false;
-		if(!isMainline())
-			return false;
-		if(getStation() != null)
-			return false;
-		return true;
-	}
-
-	/** Detector index */
-	protected final int index;
-
-	/** Get the detector index */
-	public int getIndex() { return index; }
-
-	/** Get the station which contains this detector */
-	public Station getStation() {
-		return statMap.getStation(this);
+	/** Lookup the geo location */
+	public GeoLoc lookupGeoLoc() {
+		R_Node n = r_node;
+		if(n != null)
+			return n.getGeoLoc();
+		return null;
 	}
 
 	/** Lane type */
-	protected short laneType;
+	protected LaneType lane_type = LaneType.NONE;
 
 	/** Set the lane type */
-	public void setLaneType(short t) throws TMSException {
-		if(t == laneType)
-			return;
-		if(t < 0 || t > LANE_TYPE.length)
-			throw new ChangeVetoException("Invalid lane type");
-		if(!isMainlineType(t) && getStation() != null)
-			throw new ChangeVetoException("Station link exists");
-		_setLaneType(t);
+	public void setLaneType(short t) {
+		lane_type = LaneType.fromOrdinal(t);
 	}
 
 	/** Set the lane type */
-	protected synchronized void _setLaneType(short t) throws TMSException {
-		if(t == laneType)
+	public void doSetLaneType(short t) throws TMSException {
+		LaneType lt = LaneType.fromOrdinal(t);
+		if(lt == lane_type)
 			return;
-		store.update(this, "laneType", t);
-		laneType = t;
+		store.update(this, "lane_type", t);
+		setLaneType(t);
 	}
 
 	/** Get the lane type */
-	public short getLaneType() { return laneType; }
+	public short getLaneType() {
+		return (short)lane_type.ordinal();
+	}
 
 	/** Is this a mailline detector? (auxiliary, cd, etc.) */
 	public boolean isMainline() {
-		return isMainlineType(laneType);
+		return lane_type.isMainline();
 	}
 
 	/** Is this a station detector? (mainline, non-HOV) */
 	public boolean isStation() {
-		return laneType == MAINLINE;
-	}
-
-	/** Is the given lane type a mainline? (auxiliary, cd, etc.) */
-	static public boolean isMainlineType(int t) {
-		return t == MAINLINE || t == AUXILIARY || t == CD_LANE ||
-			t == REVERSIBLE || t == VELOCITY ||
-			t == HOV || t == HOT;
-	}
-
-	/** Is this a CD lane detector? */
-	public boolean isCD() {
-		return laneType == CD_LANE;
+		return lane_type.isStation();
 	}
 
 	/** Is this a station or CD detector? */
 	public boolean isStationOrCD() {
-		return isStation() || isCD();
+		return lane_type.isStationOrCD();
 	}
 
 	/** Is this a ramp detector? (merge, queue, exit, bypass) */
 	public boolean isRamp() {
-		return isRampType(laneType);
-	}
-
-	/** Is the given lane type a ramp? (merge, queuee, exit, bypass) */
-	static public boolean isRampType(int t) {
-		return t == MERGE || t == QUEUE || t == EXIT ||
-			t == BYPASS || t == PASSAGE || t == OMNIBUS;
+		return lane_type.isRamp();
 	}
 
 	/** Is this an onramp detector? */
 	public boolean isOnRamp() {
-		return isOnRampType(laneType);
-	}
-
-	/** Is the given lane type an on-ramp? (merge, queue, bypass ) */
-	static public boolean isOnRampType(int t) {
-		return t == MERGE || t == QUEUE || t == BYPASS ||
-			t == PASSAGE || t == OMNIBUS || t == GREEN;
+		return lane_type.isOnRamp();
 	}
 
 	/** Is this an offRamp detector? */
 	public boolean isOffRamp() {
-		return laneType == EXIT;
+		return lane_type.isOffRamp();
 	}
 
 	/** Is this a velocity detector? */
 	public boolean isVelocity() {
-		return laneType == VELOCITY;
+		return lane_type.isVelocity();
 	}
 
 	/** Test if the given detector is a speed pair with this detector */
-	public boolean isSpeedPair(Object o) {
-		GeoLoc loc = lookupGeoLoc();
-		if(o instanceof DetectorImpl) {
-			DetectorImpl d = (DetectorImpl)o;
+	public boolean isSpeedPair(ControllerIO io) {
+		if(io instanceof DetectorImpl) {
+			DetectorImpl d = (DetectorImpl)io;
+			GeoLoc loc = lookupGeoLoc();
 			GeoLoc oloc = d.lookupGeoLoc();
-			return GeoLocHelper.matches(loc, oloc) &&
-				laneNumber == d.laneNumber &&
-				!d.isVelocity() && d.isMainline();
+			if(loc != null && oloc != null) {
+				return GeoLocHelper.matches(loc, oloc) &&
+					lane_number == d.lane_number &&
+					!d.isVelocity() && d.isMainline();
+			}
 		}
 		return false;
 	}
 
 	/** Lane number */
-	protected short laneNumber;
+	protected short lane_number;
 
 	/** Set the lane number */
-	public synchronized void setLaneNumber(short l) throws TMSException {
-		if(l == laneNumber)
+	public void setLaneNumber(short l) {
+		lane_number = l;
+	}
+
+	/** Set the lane number */
+	public void doSetLaneNumber(short l) throws TMSException {
+		if(l == lane_number)
 			return;
-		store.update(this, "laneNumber", l);
-		laneNumber = l;
+		store.update(this, "lane_number", l);
+		setLaneNumber(l);
 	}
 
 	/** Get the lane number */
-	public short getLaneNumber() { return laneNumber; }
+	public short getLaneNumber() {
+		return lane_number;
+	}
 
 	/** Abandoned status flag */
 	protected boolean abandoned;
 
 	/** Set the abandoned status */
-	public synchronized void setAbandoned(boolean a) throws TMSException {
-		if(a == abandoned)
-			return;
-		store.update(this, "abandoned", a);
+	public void setAbandoned(boolean a) {
 		abandoned = a;
 	}
 
+	/** Set the abandoned status */
+	public void doSetAbandoned(boolean a) throws TMSException {
+		if(a == abandoned)
+			return;
+		store.update(this, "abandoned", a);
+		setAbandoned(a);
+	}
+
 	/** Get the abandoned status */
-	public boolean isAbandoned() { return abandoned; }
+	public boolean getAbandoned() {
+		return abandoned;
+	}
 
 	/** Force Fail status flag */
-	protected boolean forceFail;
+	protected boolean force_fail;
 
 	/** Set the Force Fail status */
-	public synchronized void setForceFail(boolean f) throws TMSException {
-		if(f == forceFail)
+	public void setForceFail(boolean f) {
+		force_fail = f;
+	}
+
+	/** Set the Force Fail status */
+	public void doSetForceFail(boolean f) throws TMSException {
+		if(f == force_fail)
 			return;
-		store.update(this, "forceFail", f);
-		forceFail = f;
+		store.update(this, "force_fail", f);
+		setForceFail(f);
 	}
 
 	/** Get the Force Fail status */
-	public boolean getForceFail() { return forceFail; }
+	public boolean getForceFail() {
+		return force_fail;
+	}
+
+	/** Notify SONAR clients of changes to "force_fail" attribute */
+	public void notifyForceFail() {
+		if(MainServer.server != null) {
+			String[] ff = new String[] {
+				String.valueOf(force_fail)
+			};
+			MainServer.server.setAttribute(this, "force_fail", ff);
+		}
+	}
 
 	/** Check if the detector is currently 'failed' */
 	public boolean isFailed() {
-		return forceFail || last_volume == MISSING_DATA;
+		return force_fail || last_volume == Constants.MISSING_DATA;
 	}
 
 	/** Check if the detector is currently sampling data */
 	public boolean isSampling() {
-		return isActive() && !forceFail;
+		return isActive() && !force_fail;
 	}
 
 	/** Average detector field length */
-	protected float fieldLength;
+	protected float field_length = Constants.DEFAULT_FIELD_LENGTH;
 
 	/** Set the average field length */
-	public synchronized void setFieldLength(float field)
-		throws TMSException
-	{
-		if(field == fieldLength)
+	public void setFieldLength(float f) {
+		field_length = f;
+	}
+
+	/** Set the average field length */
+	public void doSetFieldLength(float f) throws TMSException {
+		if(f == field_length)
 			return;
-		store.update(this, "fieldLength", field);
-		fieldLength = field;
+		store.update(this, "field_length", f);
+		setFieldLength(f);
 	}
 
 	/** Get the average field length */
-	public float getFieldLength() { return fieldLength; }
+	public float getFieldLength() {
+		return field_length;
+	}
 
 	/** Fake detector expression */
-	protected String fake;
+	protected String fake = null;
 
 	/** Fake detector to use if detector is failed */
 	protected transient FakeDetector fake_det;
@@ -402,147 +381,199 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	static protected FakeDetector createFakeDetector(String f)
 		throws ChangeVetoException
 	{
-		if(f.equals(""))
-			return null;
-		else {
-			try {
-				return new FakeDetector(f);
-			}
-			catch(NumberFormatException e) {
-				throw new ChangeVetoException(
-					"Invalid detector number");
-			}
-			catch(IndexOutOfBoundsException e) {
-				throw new ChangeVetoException(
-					"Bad detector #:" + e.getMessage());
-			}
+		try {
+			return new FakeDetector(f, namespace);
+		}
+		catch(NamespaceError e) {
+			throw new ChangeVetoException("Unknown name");
+		}
+		catch(NumberFormatException e) {
+			throw new ChangeVetoException(
+				"Invalid detector number");
+		}
+		catch(IndexOutOfBoundsException e) {
+			throw new ChangeVetoException(
+				"Bad detector #:" + e.getMessage());
 		}
 	}
-
-	/** Set the fake detector */
-	public synchronized void setFakeDetector(String f) throws TMSException,
-		RemoteException
-	{
-		if(f.equals(fake))
-			return;
-		FakeDetector fd = createFakeDetector(f);
-		// Normalize the fake detector string
-		if(fd != null)
-			f = fd.toString();
-		store.update(this, "fake", f);
+	
+	/** Set the fake expression */
+	public void setFake(String f) {
 		fake = f;
-		fake_det = fd;
 	}
 
-	/** Get the fake detector */
-	public String getFakeDetector() {
+	/** Set the fake expression */
+	public void doSetFake(String f) throws TMSException {
+		FakeDetector fd = null;
+		if(f != null) {
+			fd = createFakeDetector(f);
+			// Normalize the fake detector string
+			f = fd.toString();
+			if(f.equals("")) {
+				fd = null;
+				f = null;
+			}
+		}
+		if(f == fake || (f != null && f.equals(fake)))
+			return;
+		store.update(this, "fake", f);
+		fake_det = fd;
+		setFake(f);
+	}
+
+	/** Get the fake expression */
+	public String getFake() {
 		return fake;
 	}
 
-	/** Calculate the fake flow rate if necessary */
-	public void calculateFakeFlow() {
+	/** Calculate the fake data if necessary */
+	public void calculateFakeData() {
 		FakeDetector f = fake_det;
-		if(f == null)
-			return;
-		f.calculateFlow();
+		if(f != null)
+			f.calculate();
 	}
 
 	/** Accumulator for number of samples locked on (scans) */
-	protected transient int locked_on;
+	protected transient int locked_on = 0;
 
 	/** Accumulator for number of samples with no hits (volume) */
-	protected transient int no_hits;
+	protected transient int no_hits = 0;
 
 	/** Volume from the last 30-second sample period */
-	protected transient int last_volume;
+	protected transient int last_volume = Constants.MISSING_DATA;
 
 	/** Scans from the last 30-second sample period */
-	protected transient int last_scans;
+	protected transient int last_scans = Constants.MISSING_DATA;
 
 	/** Speed from the last 30-second sample period */
-	protected transient int last_speed;
+	protected transient int last_speed = Constants.MISSING_DATA;
 
 	/** Get the current volume */
 	public float getVolume() {
 		if(isSampling())
 			return last_volume;
 		else
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
 	}
 
 	/** Get the current occupancy */
 	public float getOccupancy() {
-		if(isSampling() && last_scans != MISSING_DATA)
-			return MAX_OCCUPANCY * (float)last_scans / MAX_SCANS;
+		if(isSampling() && last_scans != Constants.MISSING_DATA)
+			return Constants.MAX_OCCUPANCY *
+				(float)last_scans / Constants.MAX_SCANS;
 		else
-			return MISSING_DATA;
-	}
-
-	/** Get the current raw flost rate (vehicles per hour) */
-	protected float getRawFlow() {
-		if(isSampling() && last_volume != MISSING_DATA)
-			return last_volume * SAMPLES_PER_HOUR;
-		else
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
 	}
 
 	/** Get the current flow rate (vehicles per hour) */
 	public float getFlow() {
-		if(isSampling() && last_volume != MISSING_DATA)
-			return last_volume * SAMPLES_PER_HOUR;
-		else {
-			FakeDetector f = fake_det;
-			if(f == null)
-				return MISSING_DATA;
-			else
-				return f.getFlow();
-		}
+		float flow = getFlowRaw();
+		if(flow != Constants.MISSING_DATA)
+			return flow;
+		else
+			return getFlowFake();
+	}
+
+	/** Get the current raw flow rate (vehicles per hour) */
+	protected float getFlowRaw() {
+		float volume = getVolume();
+		if(volume >= 0)
+			return volume * Constants.SAMPLES_PER_HOUR;
+		else
+			return Constants.MISSING_DATA;
+	}
+
+	/** Get the fake flow rate (vehicles per hour) */
+	protected float getFlowFake() {
+		FakeDetector f = fake_det;
+		if(f != null)
+			return f.getFlow();
+		else
+			return Constants.MISSING_DATA;
 	}
 
 	/** Get the current density (vehicles per mile) */
 	public float getDensity() {
-		int speed = last_speed;
+		float density = getDensityFromFlowSpeed();
+		if(density != Constants.MISSING_DATA)
+			return density;
+		else
+			return getDensityFromOccupancy();
+	}
+
+	/** Get the density from flow and speed (vehicles per mile) */
+	protected float getDensityFromFlowSpeed() {
+		float speed = getSpeedRaw();
 		if(speed > 0) {
-			float flow = getRawFlow();
-			if(flow > MISSING_DATA)
+			float flow = getFlowRaw();
+			if(flow > Constants.MISSING_DATA)
 				return flow / speed;
-			else
-				return MISSING_DATA;
 		}
+		return Constants.MISSING_DATA;
+	}
+
+	/** Get the density from occupancy (vehicles per mile) */
+	protected float getDensityFromOccupancy() {
 		float occ = getOccupancy();
-		if(occ == MISSING_DATA || fieldLength <= 0)
-			return MISSING_DATA;
-		return occ * FEET_PER_MILE / fieldLength / MAX_OCCUPANCY;
+		if(occ == Constants.MISSING_DATA || field_length <= 0)
+			return Constants.MISSING_DATA;
+		return occ * Constants.FEET_PER_MILE / field_length /
+			Constants.MAX_OCCUPANCY;
 	}
 
 	/** Get the current speed (miles per hour) */
 	public float getSpeed() {
-		if(isSampling() && last_speed != MISSING_DATA)
+		float speed = getSpeedRaw();
+		if(speed > 0)
+			return speed;
+		speed = getSpeedEstimate();
+		if(speed > 0)
+			return speed;
+		else
+			return getSpeedFake();
+	}
+
+	/** Get the current raw speed (miles per hour) */
+	protected float getSpeedRaw() {
+		if(isSampling())
 			return last_speed;
-		if(last_scans == MISSING_DATA)
-			return MISSING_DATA;
-		float flow = getRawFlow();
+		else
+			return Constants.MISSING_DATA;
+	}
+
+	/** Get speed estimate based on flow / density */
+	protected float getSpeedEstimate() {
+		float flow = getFlowRaw();
 		if(flow <= 0)
-			return MISSING_DATA;
-		float density = getDensity();
-		if(density <= DENSITY_THRESHOLD)
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
+		float density = getDensityFromOccupancy();
+		if(density <= Constants.DENSITY_THRESHOLD)
+			return Constants.MISSING_DATA;
 		return flow / density;
+	}
+
+	/** Get fake speed (miles per hour) */
+	protected float getSpeedFake() {
+		FakeDetector f = fake_det;
+		if(f != null)
+			return f.getSpeed();
+		else
+			return Constants.MISSING_DATA;
 	}
 
 	/** Force fail detector and log the cause */
 	protected void malfunction(EventType event_type) {
-		if(forceFail)
+		if(force_fail)
 			return;
 		try {
-			store.update(this, "forceFail", true);
-			forceFail = true;
+			doSetForceFail(true);
+			notifyForceFail();
 		}
 		catch(TMSException e) {
 			e.printStackTrace();
 			return;
 		}
-		DetFailEvent ev = new DetFailEvent(event_type, getId());
+		DetFailEvent ev = new DetFailEvent(event_type, getName());
 		try {
 			ev.doStore();
 		}
@@ -551,39 +582,44 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 		}
 	}
 
-	/** Reversible lane name */
-	static protected final String REV = "I-394 HOV";
-
-	/** Get the volume "no hit" threshold */
+	/** Get the volume "no hit" threshold (seconds) */
 	protected int getNoHitThreshold() {
-		GeoLoc loc = lookupGeoLoc();
 		if(isRamp()) {
-			Road freeway = loc.getFreeway();
-			if(freeway != null && REV.equals(freeway.getName()))
-				return SAMPLE_3_DAYS;
-			Road cross = loc.getCrossStreet();
-			if(cross != null && REV.equals(cross.getName()))
-				return SAMPLE_3_DAYS;
+			GeoLoc loc = lookupGeoLoc();
+			if(loc != null && isReversibleLocationHack(loc))
+				return 72 * Interval.HOUR;
 		}
-		return SAMPLE_THRESHOLD[laneType];
+		return lane_type.no_hit_threshold;
 	}
 
-	/** Get the scan "locked on" threshold */
+	/** Reversible lane name */
+	static protected final String REV = "I-394 Rev";
+
+	/** Check if a location is on a reversible road */
+	protected boolean isReversibleLocationHack(GeoLoc loc) {
+		// FIXME: this is a Mn/DOT-specific hack
+		Road freeway = loc.getFreeway();
+		if(freeway != null && REV.equals(freeway.getName()))
+			return true;
+		Road cross = loc.getCrossStreet();
+		if(cross != null && REV.equals(cross.getName()))
+			return true;
+		return false;
+	}
+
+	/** Get the scan "locked on" threshold (seconds) */
 	protected int getLockedOnThreshold() {
-		if(isMainlineType(laneType))
-			return SAMPLE_3_MINUTES;
-		if(laneType == QUEUE)
-			return SAMPLE_30_MINUTES;
-		return SAMPLE_20_MINUTES;
+		return lane_type.lock_on_threshold;
 	}
 
 	/** Test the detector volume data with error detecting algorithms */
 	protected void testVolume(int volume) {
-		if(volume > MAX_VOLUME)
+		if(volume > Constants.MAX_VOLUME)
 			malfunction(EventType.DET_CHATTER);
 		if(volume == 0) {
 			no_hits++;
-			if(no_hits > getNoHitThreshold())
+			int secs = no_hits * Constants.SECONDS_PER_SAMPLE;
+			if(secs > getNoHitThreshold())
 				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
@@ -591,9 +627,10 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Test the detector scan data with error detecting algorithms */
 	protected void testScans(int scans) {
-		if(scans >= MAX_SCANS) {
+		if(scans >= Constants.MAX_SCANS) {
 			locked_on++;
-			if(locked_on > getLockedOnThreshold())
+			int secs = locked_on * Constants.SECONDS_PER_SAMPLE;
+			if(secs > getLockedOnThreshold())
 				malfunction(EventType.DET_LOCKED_ON);
 		} else
 			locked_on = 0;
@@ -601,10 +638,10 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Test the detector data with error detecting algorithms */
 	protected void testData(int volume, int scans) {
-		if(laneType == GREEN)
-			return;
-		testVolume(volume);
-		testScans(scans);
+		if(lane_type != LaneType.GREEN) {
+			testVolume(volume);
+			testScans(scans);
+		}
 	}
 
 	/** Data cache */
@@ -613,20 +650,24 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	/** Store 30-second data for this detector */
 	public void storeData30Second(Calendar stamp, int volume, int scans) {
 		testData(volume, scans);
-		try { data_cache.write(stamp, volume, scans); }
+		try {
+			data_cache.write(stamp, volume, scans);
+		}
 		catch(IndexOutOfBoundsException e) {
-			DET_LOG.log("CACHE OVERFLOW for detector " + index);
+			DET_LOG.log("CACHE OVERFLOW for detector " + name);
 		}
 		last_volume = volume;
 		last_scans = scans;
-		last_speed = MISSING_DATA;
+		last_speed = Constants.MISSING_DATA;
 	}
 
 	/** Store 30-second speed for this detector */
 	public void storeSpeed30Second(Calendar stamp, int speed) {
-		try { data_cache.writeSpeed(stamp, speed); }
+		try {
+			data_cache.writeSpeed(stamp, speed);
+		}
 		catch(IndexOutOfBoundsException e) {
-			DET_LOG.log("CACHE OVERFLOW for detector " + index);
+			DET_LOG.log("CACHE OVERFLOW for detector " + name);
 		}
 		last_speed = speed;
 	}
@@ -640,7 +681,9 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 
 	/** Flush buffered data from before the given time stamp to disk */
 	public void flush(Calendar stamp) {
-		try { data_cache.flush(stamp); }
+		try {
+			data_cache.flush(stamp);
+		}
 		catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -701,30 +744,31 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public void logEvent(final Calendar stamp, int duration, int headway,
 		int speed)
 	{
-		final String det_id = Integer.toString(index);
 		final String line = formatEvent(stamp, duration, headway,
 			speed);
 		TMSImpl.FLUSH.addJob(new Job() {
 			public void perform() throws IOException {
-				EventLogger.print(stamp, det_id, line);
+				EventLogger.print(stamp, name, line);
 			}
 		});
 	}
 
 	/** Print a single detector as an XML element */
 	public void printXmlElement(PrintWriter out) {
-		short cat = getLaneType();
+		LaneType lt = lane_type;
 		short lane = getLaneNumber();
 		float field = getFieldLength();
-		String l = replaceEntities(getLabel(false));
-		out.print("<detector index='D" + index + "' ");
+		String l = XmlWriter.replaceEntities(
+			DetectorHelper.getLabel(this));
+		// NOTE: the 'D' is needed for XML validity
+		out.print("<detector index='D" + name + "' ");
 		if(!l.equals("FUTURE"))
 			out.print("label='" + l + "' ");
-		if(cat > MAINLINE)
-			out.print("category='" + LANE_SUFFIX[cat] + "' ");
+		if(lt != LaneType.NONE && lt != LaneType.MAINLINE)
+			out.print("category='" + lt.suffix + "' ");
 		if(lane > 0)
 			out.print("lane='" + lane + "' ");
-		if(field != DEFAULT_FIELD_LENGTH)
+		if(field != Constants.DEFAULT_FIELD_LENGTH)
 			out.print("field='" + field + "' ");
 		out.println("/>");
 	}
@@ -733,10 +777,11 @@ public class DetectorImpl extends DeviceImpl implements Detector, Constants,
 	public void printSampleXmlElement(PrintWriter out) {
 		if(abandoned || !isSampling())
 			return;
-		int flow = Math.round(getRawFlow());
+		int flow = Math.round(getFlowRaw());
 		int speed = Math.round(getSpeed());
-		out.print("\t<sample sensor='D" + index);
-		if(flow != MISSING_DATA)
+		// NOTE: the 'D' is needed for XML validity
+		out.print("\t<sample sensor='D" + name);
+		if(flow != Constants.MISSING_DATA)
 			out.print("' flow='" + flow);
 		if(isMainline() && speed > 0)
 			out.print("' speed='" + speed);

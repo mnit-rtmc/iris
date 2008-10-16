@@ -29,7 +29,7 @@ import java.util.Date;
  *
  * @author Douglas Lau
  */
-abstract public class TrafficDataBuffer implements Constants {
+abstract public class TrafficDataBuffer {
 
 	/** Traffic data debug log */
 	static protected final DebugLog TRAFFIC_LOG = new DebugLog("traffic");
@@ -146,7 +146,7 @@ abstract public class TrafficDataBuffer implements Constants {
 		int offset = recordOffset(stamp) - count;
 		if(offset >= 0) {
 			while(offset-- > 0)
-				write(MISSING_DATA);
+				write(Constants.MISSING_DATA);
 			write(value);
 		} else {
 			/* Timestamps duplicated or out of order */
@@ -176,7 +176,7 @@ abstract public class TrafficDataBuffer implements Constants {
 	/** Read a single record out of the buffer */
 	protected int read(int offset) {
 		if(offset < 0 || offset >= count)
-			return MISSING_DATA;
+			return Constants.MISSING_DATA;
 		else
 			return buf[offset];
 	}
@@ -213,7 +213,8 @@ abstract public class TrafficDataBuffer implements Constants {
 			if(offset <= 0)
 				return;
 			int r = record(start);
-			int mark = Math.min(r + offset, SAMPLES_PER_DAY);
+			int mark = Math.min(r + offset,
+				Constants.SAMPLES_PER_DAY);
 			int records = flush(mark - r);
 			count -= records;
 			if(count > 0) {
@@ -229,7 +230,7 @@ abstract public class TrafficDataBuffer implements Constants {
 			records = count;
 		boolean missing = true;
 		for(int i = 0; i < records; i++) {
-			if(read(i) != MISSING_DATA)
+			if(read(i) != Constants.MISSING_DATA)
 				missing = false;
 		}
 		if(missing)
@@ -245,7 +246,7 @@ abstract public class TrafficDataBuffer implements Constants {
 				new BufferedOutputStream(fos);
 			DataOutputStream dos = new DataOutputStream(bos);
 			while(offset-- > 0)
-				writeTo(dos, MISSING_DATA);
+				writeTo(dos, Constants.MISSING_DATA);
 			for(int i = 0; i < records; i++)
 				writeTo(dos, read(i));
 			dos.flush();
@@ -286,8 +287,8 @@ abstract public class TrafficDataBuffer implements Constants {
 		protected void writeTo(DataOutputStream dos, int vol)
 			throws IOException
 		{
-			if(vol < MISSING_DATA || vol > Byte.MAX_VALUE)
-				vol = MISSING_DATA;
+			if(vol < Constants.MISSING_DATA || vol > Byte.MAX_VALUE)
+				vol = Constants.MISSING_DATA;
 			dos.writeByte(vol);
 		}
 	}
@@ -313,8 +314,8 @@ abstract public class TrafficDataBuffer implements Constants {
 		protected void writeTo(DataOutputStream dos, int scan)
 			throws IOException
 		{
-			if(scan < MISSING_DATA)
-				scan = MISSING_DATA;
+			if(scan < Constants.MISSING_DATA)
+				scan = Constants.MISSING_DATA;
 			dos.writeShort(scan);
 		}
 	}
@@ -340,8 +341,9 @@ abstract public class TrafficDataBuffer implements Constants {
 		protected void writeTo(DataOutputStream dos, int speed)
 			throws IOException
 		{
-			if(speed < MISSING_DATA || speed > Byte.MAX_VALUE)
-				speed = MISSING_DATA;
+			if(speed < Constants.MISSING_DATA ||
+			   speed > Byte.MAX_VALUE)
+				speed = Constants.MISSING_DATA;
 			dos.writeByte(speed);
 		}
 	}

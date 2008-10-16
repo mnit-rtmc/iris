@@ -121,16 +121,19 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Show the properties form for the selected proxy */
 	public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
-			for(Camera cam: s_model.getSelected()) {
-				SmartDesktop desktop = connection.getDesktop();
-				try {
-					desktop.show(new CameraProperties(
-						connection, cam));
-				}
-				catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
+			for(Camera cam: s_model.getSelected())
+				showPropertiesForm(cam);
+		}
+	}
+
+	/** Show the properteis form for the given proxy */
+	protected void showPropertiesForm(Camera cam) {
+		SmartDesktop desktop = connection.getDesktop();
+		try {
+			desktop.show(new CameraProperties(connection, cam));
+		}
+		catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 

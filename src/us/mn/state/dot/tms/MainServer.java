@@ -84,10 +84,11 @@ public class MainServer {
 			Agency.readProps(m_serverprops);
 			TMSImpl tms = new TMSImpl(m_serverprops);
 			Namespace ns = new Namespace();
+			TMSObjectImpl.namespace = ns;
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
+			ns.registerType(Station.SONAR_TYPE, StationImpl.class);
 			BaseObjectImpl.loadAll(TMSObjectImpl.store, ns);
-			TMSObjectImpl.namespace = ns;
 			RMISocketFactory.setSocketFactory(
 				new TmsSocketFactory());
 			tms.loadFromVault();

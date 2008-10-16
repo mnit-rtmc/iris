@@ -19,14 +19,12 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.rmi.RemoteException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -34,12 +32,11 @@ import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.client.proxy.GeoTransform;
-import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
-import us.mn.state.dot.tms.client.proxy.Vector;
+import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
 
 /**
  * CorridorList is a graphical freeway corridor list.
@@ -51,8 +48,8 @@ public class CorridorList extends JPanel {
 	/** Offset angle for default North map markers */
 	static protected final double NORTH_ANGLE = Math.PI / 2;
 
-	/** Roadway node handler */
-	protected final R_NodeHandler handler;
+	/** Roadway node manager */
+	protected final R_NodeManager manager;
 
 	/** Renderer for painting roadway nodes */
 	protected final R_NodeCellRenderer renderer =
@@ -60,6 +57,9 @@ public class CorridorList extends JPanel {
 
 	/** List component */
 	protected final JList jlist = new JList();
+
+	/** Roadway corridor */
+	protected CorridorBase corridor;
 
 	/** Roadway node renderer list */
 	protected List<R_NodeRenderer> r_nodes;
@@ -77,15 +77,15 @@ public class CorridorList extends JPanel {
 	protected JButton rbutton = new JButton("Remove");
 
 	/** Create a corridor list */
-	public CorridorList(R_NodeHandler h) {
+	public CorridorList(R_NodeManager m) {
 		super(new GridBagLayout());
-		handler = h;
+		manager = m;
 		setBorder(BorderFactory.createTitledBorder(
 			"Corridor Node List"));
 		jlist.setCellRenderer(renderer);
 		jlist.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, jlist) {
-			public void perform() throws RemoteException {
+			public void perform() {
 				if(!event.getValueIsAdjusting())
 					updateNodeSelection();
 			}
@@ -102,8 +102,8 @@ public class CorridorList extends JPanel {
 			}
 		};
 		new ActionJob(this, ebutton) {
-			public void perform() throws RemoteException {
-				showPropertiesForm();
+			public void perform() {
+				manager.showPropertiesForm();
 			}
 		};
 		new ActionJob(this, rbutton) {
@@ -133,151 +133,56 @@ public class CorridorList extends JPanel {
 		add(rbutton, bag);
 	}
 
-	/** Find the nearest node to the given node */
-	static protected R_NodeProxy findNearest(Set<R_NodeProxy> node_s,
-		R_NodeProxy end)
-	{
-		R_NodeProxy nearest = null;
-		double distance = 0;
-		for(R_NodeProxy proxy: node_s) {
-			double d = proxy.distanceTo(end);
-			if(nearest == null || d < distance) {
-				nearest = proxy;
-				distance = d;
-			}
-		}
-		return nearest;
-	}
-
-	/** Link the nearest node */
-	static protected void linkNearestNode(Set<R_NodeProxy> node_s,
-		LinkedList<R_NodeProxy> node_l)
-	{
-		R_NodeProxy first = node_l.getFirst();
-		R_NodeProxy last = node_l.getLast();
-		R_NodeProxy fnear = findNearest(node_s, first);
-		R_NodeProxy lnear = findNearest(node_s, last);
-		if(first.distanceTo(fnear) < last.distanceTo(lnear)) {
-			node_l.addFirst(fnear);
-			node_s.remove(fnear);
-		} else {
-			node_l.addLast(lnear);
-			node_s.remove(lnear);
-		}
-	}
-
-	/** Compare the Northing of two R_Nodes */
-	static protected boolean compareNorthing(R_NodeProxy n0,
-		R_NodeProxy n1)
-	{
-		return GeoLocHelper.getTrueNorthing(n0.loc) <
-			GeoLocHelper.getTrueNorthing(n1.loc);
-	}
-
-	/** Compare the Easting of two R_Nodes */
-	static protected boolean compareEasting(R_NodeProxy n0,
-		R_NodeProxy n1)
-	{
-		return GeoLocHelper.getTrueEasting(n0.loc) <
-			GeoLocHelper.getTrueEasting(n1.loc);
-	}
-
-	/** Check if a list of roadway nodes is reversed */
-	static protected boolean isListReversed(R_NodeProxy first,
-		R_NodeProxy last)
-	{
-		short dir = first.getGeoLoc().getFreeDir();
-		switch(dir) {
-			case Road.NORTH:
-				return compareNorthing(first, last);
-			case Road.SOUTH:
-				return compareNorthing(last, first);
-			case Road.EAST:
-				return compareEasting(first, last);
-			case Road.WEST:
-				return compareEasting(last, first);
-		}
-		return false;
-	}
-
-	/** Create a reversed list of roadway nodes */
-	static protected List<R_NodeProxy> createReversed(
-		LinkedList<R_NodeProxy> node_l)
-	{
-		LinkedList<R_NodeProxy> node_r = new LinkedList<R_NodeProxy>();
-		for(R_NodeProxy proxy: node_l)
-			node_r.addFirst(proxy);
-		return node_r;
-	}
-
-	/** Reverse a list of roadway nodes if necessary */
-	static protected List<R_NodeProxy> reversedListIfNecessary(
-		LinkedList<R_NodeProxy> node_l)
-	{
-		if(node_l.size() > 1) {
-			R_NodeProxy first = node_l.getFirst();
-			R_NodeProxy last = node_l.getLast();
-			if(isListReversed(first, last))
-				return createReversed(node_l);
-		}
-		return node_l;
-	}
-
 	/** Create a sorted list of roadway nodes for one corridor */
-	static protected List<R_NodeProxy> createSortedList(
-		Set<R_NodeProxy> node_s)
-	{
-		LinkedList<R_NodeProxy> node_l = new LinkedList<R_NodeProxy>();
-		Iterator<R_NodeProxy> it = node_s.iterator();
-		if(it.hasNext()) {
-			node_l.add(it.next());
-			it.remove();
-		}
-		while(!node_s.isEmpty())
-			linkNearestNode(node_s, node_l);
-		return reversedListIfNecessary(node_l);
+	static protected CorridorBase createCorridor(Set<R_Node> node_s) {
+		GeoLoc loc = getCorridorLoc(node_s);
+		if(loc != null) {
+			CorridorBase c = new CorridorBase(loc, true);
+			for(R_Node n: node_s)
+				c.addNode(n);
+			c.arrangeNodes();
+			return c;
+		} else
+			return null;
 	}
 
-	/** Set the tangent angles for all the roadway nodes in a list */
-	static protected void setTangentAngles(List<R_NodeProxy> node_t) {
-		GeoTransform loc, loc_a, loc_b;
-		for(int i = 0; i < node_t.size(); i++) {
-			if(i == 0)
-				loc_a = node_t.get(0).getGeoTransform();
-			else
-				loc_a = node_t.get(i - 1).getGeoTransform();
-			loc = node_t.get(i).getGeoTransform();
-			if(i == node_t.size() - 1)
-				loc_b = node_t.get(i).getGeoTransform();
-			else
-				loc_b = node_t.get(i + 1).getGeoTransform();
-			if(loc_a != loc_b) {
-				Vector va = loc_a.getVector();
-				Vector vb = loc_b.getVector();
-				Vector a = va.subtract(vb);
-				loc.setTangent(a.getAngle() - NORTH_ANGLE);
-			}
-		}
+	/** Get a location for a corridor */
+	static protected GeoLoc getCorridorLoc(Set<R_Node> node_s) {
+		Iterator<R_Node> it = node_s.iterator();
+		if(it.hasNext()) {
+			R_Node n = it.next();
+			return n.getGeoLoc();
+		} else
+			return null;
+	}
+
+	/** Set the corridor to display */
+	public void setCorridor(String c) {
+		Set<R_Node> node_s = manager.createSet();
+		r_nodes = createRendererList(node_s);
+		nr_list = new DefaultListModel();
+		for(R_NodeRenderer r: r_nodes)
+			nr_list.addElement(r);
+		jlist.setModel(nr_list);
 	}
 
 	/** Create a list of roadway node renderers for one corridor */
-	static protected List<R_NodeRenderer> createRendererList(
-		Set<R_NodeProxy> node_s)
-	{
+	protected List<R_NodeRenderer> createRendererList(Set<R_Node> node_s) {
 		LinkedList<R_NodeRenderer> ren_l =
 			new LinkedList<R_NodeRenderer>();
-		Iterator<R_NodeProxy> it = node_s.iterator();
+		Iterator<R_Node> it = node_s.iterator();
 		while(it.hasNext()) {
-			R_NodeProxy proxy = it.next();
-			if(!proxy.hasLocation()) {
+			R_Node proxy = it.next();
+			if(GeoLocHelper.isNull(proxy.getGeoLoc())) {
 				ren_l.add(new R_NodeRenderer(proxy));
 				it.remove();
 			}
 		}
-		List<R_NodeProxy> node_t = createSortedList(node_s);
+		corridor = createCorridor(node_s);
+		List<R_Node> node_t = getSortedList();
 		setTangentAngles(node_t);
 		R_NodeRenderer prev = null;
-		for(R_NodeProxy proxy: node_t) {
+		for(R_Node proxy: node_t) {
 			R_NodeRenderer r = new R_NodeRenderer(proxy);
 			ren_l.add(r);
 			if(prev != null)
@@ -287,20 +192,40 @@ public class CorridorList extends JPanel {
 		return ren_l;
 	}
 
-	/** Set the corridor to display */
-	public void setCorridor(Set<R_NodeProxy> node_s)
-		throws RemoteException
-	{
-		r_nodes = createRendererList(node_s);
-		nr_list = new DefaultListModel();
-		for(R_NodeRenderer r: r_nodes)
-			nr_list.addElement(r);
-		jlist.setModel(nr_list);
-		jlist.setSelectedIndex(0);
+	/** Get a sorted list of roadway nodes for the selected corridor */
+	protected List<R_Node> getSortedList() {
+		if(corridor != null)
+			return corridor.getNodes();
+		else
+			return new LinkedList<R_Node>();
+	}
+
+	/** Set the tangent angles for all the roadway nodes in a list */
+	protected void setTangentAngles(List<R_Node> node_t) {
+		// FIXME: should really check for coincient points, since they
+		// cause tangent angle to be calculated as NaN
+		MapGeoLoc loc, loc_a, loc_b;
+		for(int i = 0; i < node_t.size(); i++) {
+			if(i == 0)
+				loc_a = manager.findGeoLoc(node_t.get(0));
+			else
+				loc_a = manager.findGeoLoc(node_t.get(i - 1));
+			loc = manager.findGeoLoc(node_t.get(i));
+			if(i == node_t.size() - 1)
+				loc_b = manager.findGeoLoc(node_t.get(i));
+			else
+				loc_b = manager.findGeoLoc(node_t.get(i + 1));
+			if(loc_a != loc_b) {
+				Vector va = Vector.create(loc_a.getGeoLoc());
+				Vector vb = Vector.create(loc_b.getGeoLoc());
+				Vector a = va.subtract(vb);
+				loc.setTangent(a.getAngle() - NORTH_ANGLE);
+			}
+		}
 	}
 
 	/** Get the selected roadway node */
-	protected R_NodeProxy getSelectedNode() {
+	protected R_Node getSelectedNode() {
 		int index = jlist.getSelectedIndex();
 		try {
 			return r_nodes.get(index).getProxy();
@@ -312,28 +237,18 @@ public class CorridorList extends JPanel {
 
 	/** Update the roadway node selection */
 	protected void updateNodeSelection() {
-		R_NodeProxy proxy = getSelectedNode();
+		R_Node proxy = getSelectedNode();
 		if(proxy != null)
-			handler.getSelectionModel().setSelected(proxy);
-	}
-
-	/** Show the properties form */
-	protected void showPropertiesForm() throws RemoteException {
-		R_NodeProxy proxy = getSelectedNode();
-		if(proxy != null)
-			proxy.showPropertiesForm(handler.getConnection());
+			manager.getSelectionModel().setSelected(proxy);
 	}
 
 	/** Do the add button action */
-	protected void doAddButton() throws Exception {
-		R_Node r_node = handler.addNode();
-System.out.println("R_Node OID: " + r_node.getOID());
+	protected void doAddButton() {
+		// FIXME
 	}
 
 	/** Do the remove button action */
-	protected void doRemoveButton() throws Exception {
-		R_NodeProxy proxy = getSelectedNode();
-		if(proxy != null)
-			handler.removeNode(proxy);
+	protected void doRemoveButton() {
+		// FIXME
 	}
 }

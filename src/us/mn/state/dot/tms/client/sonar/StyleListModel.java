@@ -14,12 +14,8 @@
  */
 package us.mn.state.dot.tms.client.sonar;
 
-import java.util.HashMap;
-import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.event.ListDataListener;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
@@ -42,11 +38,6 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	/** Selection model for the style list model */
 	protected final StyleListSelectionModel<T> smodel;
 
-	/** Mapping from MapObject identityHashCode to proxy objects.  This is
-	 * an optimization cache to help findProxy run fast. */
-	protected final HashMap<Integer, T> map_proxies =
-		new HashMap<Integer, T>();
-
 	/** Create a new style list model */
 	public StyleListModel(ProxyManager<T> m, String n, Icon l) {
 		super(m.getCache());
@@ -65,26 +56,10 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 
 	/** Add a new proxy */
 	protected int doProxyAdded(T proxy) {
-		if(manager.checkStyle(name, proxy)) {
-			putMapProxy(proxy);
+		if(manager.checkStyle(name, proxy))
 			return super.doProxyAdded(proxy);
-		} else
+		else
 			return -1;
-	}
-
-	/** Put a map proxy */
-	protected void putMapProxy(T proxy) {
-		// FIXME: this will leak when proxy objects are removed.
-		// Not easy to fix, since proxy objects die before we can
-		// get the corresponding MapGeoLoc to remove.
-		MapGeoLoc loc = manager.findGeoLoc(proxy);
-		if(loc != null) {
-			int i = System.identityHashCode(loc);
-			synchronized(map_proxies) {
-				map_proxies.put(i, proxy);
-			}
-		} else
-			System.err.println("putMapProxy failed: " + proxy);
 	}
 
 	/** Get the style name */
@@ -105,37 +80,5 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	/** Get the style name */
 	public String toString() {
 		return name;
-	}
-
-	/** Iterate through all proxy objects in the model */
-	public MapObject forEach(MapSearcher s) {
-		synchronized(proxies) {
-			for(T proxy: proxies) {
-				MapGeoLoc loc = manager.findGeoLoc(proxy);
-				if(s.next(loc))
-					return loc;
-			}
-		}
-		return null;
-	}
-
-	/** Find a proxy using a map searcher */
-	public T findProxy(MapSearcher s) {
-		synchronized(proxies) {
-			for(T proxy: proxies) {
-				MapGeoLoc loc = manager.findGeoLoc(proxy);
-				if(s.next(loc))
-					return proxy;
-			}
-		}
-		return null;
-	}
-
-	/** Find a proxy matching the given map object */
-	public T findProxy(final MapObject o) {
-		int i = System.identityHashCode(o);
-		synchronized(map_proxies) {
-			return map_proxies.get(i);
-		}
 	}
 }

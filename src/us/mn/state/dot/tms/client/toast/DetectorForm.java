@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,213 +14,101 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import java.awt.Color;
-import java.rmi.RemoteException;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.IndexedList;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.utils.TMSProxy;
+import us.mn.state.dot.tms.client.toast.AbstractForm;
 
 /**
- * DetectorForm is a Swing dialog for entering and editing Detector records
+ * A form for displaying and editing detectors
  *
  * @author Douglas Lau
  */
-public class DetectorForm extends TMSObjectForm {
+public class DetectorForm extends AbstractForm {
 
 	/** Frame title */
-	static protected final String TITLE = "Detector ";
+	static protected final String TITLE = "Detectors";
 
-	/** Detector index */
-	protected final int index;
+	/** Table model for detectors */
+	protected DetectorModel model;
 
-	/** Remote detector list object */
-	protected IndexedList dList;
+	/** Table to hold the detector list */
+	protected final JTable table = new JTable();
 
-	/** Remote detector object */
-	protected Detector detector;
+	/** Button to delete the selected detector */
+	protected final JButton del_button = new JButton("Delete Detector");
 
-	/** Detector name label component */
-	protected final JLabel name = new JLabel("<Undefined>");
+	/** Detector type cache */
+	protected final TypeCache<Detector> cache;
 
-	/** Location panel */
-	protected LocationPanel location;
-
-	/** Lane type combo box */
-	protected final JComboBox lane = new JComboBox(Detector.LANE_TYPE);
-
-	/** Model for lane number spinner */
-	protected final SpinnerNumberModel num_model =
-		new SpinnerNumberModel(0, 0, 8, 1);
-
-	/** Lane number spinner */
-	protected final JSpinner number = new JSpinner(num_model);
-
-	/** Notes text area */
-	protected final JTextArea notes = new JTextArea(3, 24);
-
-	/** Controller button */
-	protected final JButton controller = new JButton( "Controller" );
-
-	/** Station button */
-	protected final JButton station = new JButton("Station");
-
-	/** Abandoned status check box */
-	protected final JCheckBox abandoned = new JCheckBox();
-
-	/** Force fail status check box */
-	protected final JCheckBox forceFail = new JCheckBox();
-
-	/** Average field length text field */
-	protected final JTextField field = new JTextField("", 8);
-
-	/** Fake detector text field */
-	protected final JTextField fake = new JTextField("", 24);
-
-	/** Apply changes button */
-	protected final JButton apply = new JButton( "Apply Changes" );
-
-	/** Create a new DetectorForm */
-	public DetectorForm(TmsConnection tc, int i) {
-		super(TITLE + i, tc);
-		index = i;
+	/** Create a new detector form */
+	public DetectorForm(TypeCache<Detector> c) {
+		super(TITLE);
+		cache = c;
 	}
 
-	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
-		TMSProxy tms = connection.getProxy();
-		dList = (IndexedList)tms.getDetectors().getList();
-		obj = dList.getElement(index);
-		detector = (Detector)obj;
-		super.initialize();
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(name);
-		add(Box.createVerticalStrut(VGAP));
-		JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
-		add(tab);
-		tab.add("Location", createLocationPanel());
-		tab.add("Setup", createSetupPanel());
-		if(admin) {
-			add(Box.createVerticalStrut(VGAP));
-			new ActionJob(this, apply) {
-				public void perform() throws Exception {
-					applyPressed();
-				}
-			};
-			add(apply);
-		}
-		setBackground(Color.LIGHT_GRAY);
+	/** Initializze the widgets in the form */
+	protected void initialize() {
+		model = new DetectorModel(cache);
+		add(createDetectorPanel());
+		Dimension d = new Dimension(table.getPreferredSize().width,
+			table.getPreferredScrollableViewportSize().height);
+		table.setPreferredScrollableViewportSize(d);
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
-		location.dispose();
-		super.dispose();
+		model.dispose();
 	}
 
-	/** Create the Location panel */
-	protected JPanel createLocationPanel() throws RemoteException {
-		location = new LocationPanel(admin, detector.getGeoLoc(),
-			connection.getSonarState());
-		location.initialize();
-		location.addRow("Notes", notes);
-		Box box = new Box(BoxLayout.X_AXIS);
-		box.add(controller);
-		new ActionJob(this, controller) {
-			public void perform() throws Exception {
-				controllerPressed();
+	/** Create detector panel */
+	protected JPanel createDetectorPanel() {
+		JPanel panel = new JPanel(new GridBagLayout());
+		panel.setBorder(BORDER);
+		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets.left = HGAP;
+		bag.insets.right = HGAP;
+		bag.insets.top = VGAP;
+		bag.insets.bottom = VGAP;
+		final ListSelectionModel s = table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, s) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectDetector();
 			}
 		};
-		box.add(Box.createHorizontalStrut(HGAP));
-		box.add(station);
-		new ActionJob(this, station) {
+		table.setModel(model);
+		table.setAutoCreateColumnsFromModel(false);
+		table.setColumnModel(model.createColumnModel());
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		table.setRowHeight(20);
+		JScrollPane pane = new JScrollPane(table);
+		panel.add(pane, bag);
+		del_button.setEnabled(false);
+		panel.add(del_button, bag);
+		new ActionJob(this, del_button) {
 			public void perform() throws Exception {
-				stationPressed();
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					model.deleteRow(row);
 			}
 		};
-		location.setCenter();
-		location.addRow(box);
-		return location;
-	}
-
-	/** Create detector setup panel */
-	protected JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(admin);
-		panel.add("Lane", lane);
-		panel.addRow(number);
-		panel.addRow("Avg field length", field);
-		panel.add(new JLabel("Fake"));
-		panel.setWidth(3);
-		panel.setWest();
-		panel.addRow(fake);
-		panel.addRow("Abandoned", abandoned);
-		panel.addRow("Force Fail", forceFail);
 		return panel;
 	}
 
-	/** Update the form with the current state of the detector */
-	protected void doUpdate() throws RemoteException {
-		name.setText(detector.getLabel(false));
-		notes.setText(detector.getNotes());
-		controller.setEnabled(detector.getController() != null);
-		station.setEnabled(detector.getStation() != null);
-		lane.setSelectedIndex(detector.getLaneType());
-		number.setValue(detector.getLaneNumber());
-		field.setText(String.valueOf(detector.getFieldLength()));
-		fake.setText(detector.getFakeDetector());
-		abandoned.setSelected(detector.isAbandoned());
-		forceFail.setSelected(detector.getForceFail());
-	}
-
-	/** Apply button pressed */
-	protected void applyPressed() throws Exception {
-		try {
-			float afl = Float.parseFloat(field.getText());
-			detector.setFakeDetector(fake.getText());
-			detector.setLaneType(
-				(short)lane.getSelectedIndex());
-			detector.setLaneNumber(
-				((Number)number.getValue()).shortValue());
-			detector.setNotes(notes.getText());
-			detector.setFieldLength(afl);
-			detector.setAbandoned(abandoned.isSelected());
-			detector.setForceFail(forceFail.isSelected());
-		}
-		finally {
-			detector.notifyUpdate();
-			dList.update(index);
-		}
-	}
-
-	/** Controller lookup button pressed */
-	protected void controllerPressed() throws RemoteException {
-		Controller c = connection.getSonarState().lookupController(
-			detector.getController());
-		if(c == null)
-			controller.setEnabled(false);
-		else {
-			connection.getDesktop().show(
-				new ControllerForm(connection, c));
-		}
-	}
-
-	/** Station lookup button pressed */
-	protected void stationPressed() throws Exception {
-		// FIXME: bring up the r_node for the station
+	/** Change the selected detector */
+	protected void selectDetector() {
+		int row = table.getSelectedRow();
+		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
 	}
 }

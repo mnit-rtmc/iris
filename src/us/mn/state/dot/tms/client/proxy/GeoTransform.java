@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Road;
 
 /**
@@ -47,16 +46,6 @@ public class GeoTransform {
 		loc = l;
 		updateTransform();
 		updateInverseTransform();
-	}
-
-	/** Get the vector from the origin */
-	public Vector getVector() {
-		if(loc != null) {
-			int x = GeoLocHelper.getTrueEasting(loc);
-			int y = GeoLocHelper.getTrueNorthing(loc);
-			return new Vector(x, y);
-		} else
-			return new Vector(0, 0);
 	}
 
 	/** Get the default angle (radians) */

@@ -27,7 +27,11 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeTransition;
+import us.mn.state.dot.tms.R_NodeType;
 
 /**
  * Renderer for roadway nodes
@@ -40,10 +44,10 @@ public class R_NodeRenderer extends JPanel {
 	static public final Color COLOR_GPS = Color.GREEN;
 
 	/** Background color for nodes with guessed locations */
-	static public final Color COLOR_LOC = Color.ORANGE;
+	static public final Color COLOR_NO_GPS = Color.ORANGE;
 
 	/** Background color for nodes with bad locations */
-	static public final Color COLOR_BAD = Color.RED;
+	static public final Color COLOR_NO_LOC = Color.RED;
 
 	/** Width of one lane */
 	static protected final int LANE_WIDTH = 20;
@@ -86,10 +90,10 @@ public class R_NodeRenderer extends JPanel {
 	protected int height = 0;
 
 	/** Proxy to roadway node */
-	protected final R_NodeProxy proxy;
+	protected final R_Node proxy;
 
 	/** Get the roadway node proxy */
-	public R_NodeProxy getProxy() {
+	public R_Node getProxy() {
 		return proxy;
 	}
 
@@ -102,7 +106,7 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Create a new roadway node renderer */
-	public R_NodeRenderer(R_NodeProxy p) {
+	public R_NodeRenderer(R_Node p) {
 		proxy = p;
 	}
 
@@ -111,19 +115,21 @@ public class R_NodeRenderer extends JPanel {
 		if(sel)
 			setBackground(Color.LIGHT_GRAY);
 		else {
-			if(proxy.hasGPS())
+			GeoLoc loc = proxy.getGeoLoc();
+			if(GeoLocHelper.hasGPS(loc))
 				setBackground(COLOR_GPS);
-			else if(proxy.hasLocation())
-				setBackground(COLOR_LOC);
+			else if(GeoLocHelper.isNull(loc))
+				setBackground(COLOR_NO_LOC);
 			else
-				setBackground(COLOR_BAD);
+				setBackground(COLOR_NO_GPS);
 		}
 	}
 
 	/** Test if the given side is defined by the r_node */
 	protected boolean isSideDefined(boolean side) {
-		return (proxy.getNodeType() == R_Node.TYPE_STATION) ||
-			(proxy.getNodeType() == R_Node.TYPE_INTERSECTION) ||
+		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
+		return (nt == R_NodeType.STATION) ||
+			(nt == R_NodeType.INTERSECTION) ||
 			(side == proxy.getAttachSide()) ||
 			(!hasMainline());
 	}
@@ -177,7 +183,9 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Check if this r_node has mainline lanes (vs ramp only) */
 	protected boolean hasMainline() {
-		return proxy.getTransition() != R_Node.TRANSITION_COMMON;
+		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
+			proxy.getTransition());
+		return nt != R_NodeTransition.COMMON;
 	}
 
 	/** Allow for subclasses to modify cross-street label */
@@ -200,8 +208,10 @@ public class R_NodeRenderer extends JPanel {
 		fillRoadway(g2);
 		drawSkipStripes(g2);
 		drawDetectors(g2);
-		if(proxy.xStreet != null)
-			drawCrossStreet(g2);
+		String xStreet = GeoLocHelper.getCrossDescription(
+			proxy.getGeoLoc());
+		if(xStreet != null)
+			drawCrossStreet(g2, xStreet);
 	}
 
 	/** Fill the background */
@@ -214,12 +224,13 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the yellow lines */
 	protected void drawYellowLines(Graphics2D g) {
+		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
 		g.setColor(Color.YELLOW);
 		if(hasMainline())
 			g.draw(createYellowMainLine());
-		if(proxy.getNodeType() == R_Node.TYPE_ENTRANCE)
+		if(nt == R_NodeType.ENTRANCE)
 			g.draw(createEntranceYellow());
-		else if(proxy.getNodeType() == R_Node.TYPE_EXIT)
+		else if(nt == R_NodeType.EXIT)
 			g.draw(createExitYellow());
 	}
 
@@ -232,12 +243,13 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the white lines */
 	protected void drawWhiteLines(Graphics2D g) {
+		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
 		g.setColor(Color.WHITE);
 		if(hasMainline())
 			g.draw(createWhiteMainLine());
-		if(proxy.getNodeType() == R_Node.TYPE_ENTRANCE)
+		if(nt == R_NodeType.ENTRANCE)
 			g.draw(createEntranceWhite());
-		else if(proxy.getNodeType() == R_Node.TYPE_EXIT)
+		else if(nt == R_NodeType.EXIT)
 			g.draw(createExitWhite());
 	}
 
@@ -250,12 +262,13 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Fill the roadway area */
 	protected void fillRoadway(Graphics2D g) {
+		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
 		g.setColor(Color.BLACK);
 		if(hasMainline())
 			g.fill(createMainRoadway());
-		if(proxy.getNodeType() == R_Node.TYPE_ENTRANCE)
+		if(nt == R_NodeType.ENTRANCE)
 			g.fill(createEntranceRoadway());
-		else if(proxy.getNodeType() == R_Node.TYPE_EXIT)
+		else if(nt == R_NodeType.EXIT)
 			g.fill(createExitRoadway());
 	}
 
@@ -269,15 +282,16 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw the skip stripes */
 	protected void drawSkipStripes(Graphics2D g) {
+		R_NodeType nt = R_NodeType.fromOrdinal(proxy.getNodeType());
 		g.setColor(Color.WHITE);
 		g.setStroke(LINE_DASHED);
 		if(hasMainline())
 			drawMainlineSkipStripes(g);
-		if(proxy.getNodeType() == R_Node.TYPE_ENTRANCE) {
+		if(nt == R_NodeType.ENTRANCE) {
 			for(int lane = 1; lane < proxy.getLanes(); lane++)
 				g.draw(createEntranceRamp(lane, true));
 		}
-		if(proxy.getNodeType() == R_Node.TYPE_EXIT) {
+		if(nt == R_NodeType.EXIT) {
 			for(int lane = 1; lane < proxy.getLanes(); lane++)
 				g.draw(createExitRamp(lane, true));
 		}
@@ -314,9 +328,11 @@ public class R_NodeRenderer extends JPanel {
 			x2 = x + LANE_WIDTH;
 			x3 = x - LANE_WIDTH * lane;
 		}
+		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
+			proxy.getTransition());
 		GeneralPath path = new GeneralPath();
 		if(reverse) {
-			if(proxy.getTransition() == R_Node.TRANSITION_LOOP) {
+			if(nt == R_NodeTransition.LOOP) {
 				path.moveTo(x3, y3);
 				path.curveTo(x3, y0, x1, y1, x1, y2);
 			} else {
@@ -324,7 +340,7 @@ public class R_NodeRenderer extends JPanel {
 				path.curveTo(x3, y1, x2, y1, x1, y1);
 			}
 		} else {
-			if(proxy.getTransition() == R_Node.TRANSITION_LOOP) {
+			if(nt == R_NodeTransition.LOOP) {
 				path.moveTo(x1, y2);
 				path.curveTo(x1, y1, x3, y0, x3, y3);
 			} else {
@@ -415,11 +431,11 @@ public class R_NodeRenderer extends JPanel {
 	/** Draw the detector locations */
 	protected void drawDetectors(Graphics2D g) {
 		g.setStroke(LINE_BASIC);
-		switch(proxy.getNodeType()) {
-			case R_Node.TYPE_STATION:
+		switch(R_NodeType.fromOrdinal(proxy.getNodeType())) {
+			case STATION:
 				drawStationDetectors(g);
 				break;
-			case R_Node.TYPE_ENTRANCE:
+			case ENTRANCE:
 				drawEntranceDetectors(g);
 				break;
 		}
@@ -447,7 +463,9 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Draw entrance detectors stuff */
 	protected void drawEntranceDetectors(Graphics2D g) {
-		if(proxy.getTransition() == R_Node.TRANSITION_HOV) {
+		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
+			proxy.getTransition());
+		if(nt == R_NodeTransition.HOV) {
 			int x = getHovDiamondX();
 			int y = height - LANE_HEIGHT - 1;
 			GeneralPath path = new GeneralPath();
@@ -478,9 +496,9 @@ public class R_NodeRenderer extends JPanel {
 	}
 
 	/** Draw the cross-street label */
-	protected void drawCrossStreet(Graphics2D g) {
+	protected void drawCrossStreet(Graphics2D g, String xStreet) {
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
-			g.getFontRenderContext(), proxy.xStreet);
+			g.getFontRenderContext(), xStreet);
 		Rectangle2D rect = gv.getVisualBounds();
 		int x = WIDTH - (int)rect.getWidth() - 4;
 		int y = (height + (int)rect.getHeight()) / 2;
@@ -504,11 +522,11 @@ public class R_NodeRenderer extends JPanel {
 
 	/** Get the preferred height */
 	protected int getPreferredHeight() {
-		switch(proxy.getNodeType()) {
-			case R_Node.TYPE_ENTRANCE:
-			case R_Node.TYPE_EXIT:
+		switch(R_NodeType.fromOrdinal(proxy.getNodeType())) {
+			case ENTRANCE:
+			case EXIT:
 				return LANE_HEIGHT * (proxy.getLanes() + 2);
-			case R_Node.TYPE_STATION:
+			case STATION:
 				return getPreferredStationHeight();
 		}
 		return LANE_HEIGHT;

@@ -46,9 +46,7 @@ public class SQLConnection {
 
 	/** passed an sql statement, escape special characters */
 	static protected String escapeDelimiters(String sqlarg) {   
-		sqlarg = (sqlarg==null ? "" : sqlarg);
-		String sql = sqlarg.replace ("'", "''");
-		return sql;
+		return sqlarg.replace("'", "''");
 	}
 
 	/** Location of database server */
@@ -169,19 +167,10 @@ public class SQLConnection {
 			putStatement(s);
 		}
 		catch(SQLException e) {
-			System.err.println("SQLConnection.update(): e="+
-				e+", sql="+sql);
+			System.err.println("SQLConnection.update(): e=" +
+				e + ", sql=" + sql);
 			throw new TMSException(e);
 		}
-	}
-
-	/** Get the string representation of an object value */
-	static protected String valueAsString(Object value) {
-		if(value != null)
-			return value.toString();
-		else
-			// this "0" is needed for ObjectVault compatibility
-			return "0";
 	}
 
 	/** Update one field in a storable database table */
@@ -195,7 +184,7 @@ public class SQLConnection {
 			updateNull(s, field);
 			return;
 		}
-		String v = escapeDelimiters(valueAsString(value));
+		String v = escapeDelimiters(value.toString());
 		validateSql(v);
 		update("UPDATE " + s.getTable() + " SET \"" + field +
 			"\" = '" + v + "' WHERE " + s.getKeyName() +
@@ -232,9 +221,8 @@ public class SQLConnection {
 		}
 		keys.setLength(keys.length() - 1);
 		values.setLength(values.length() - 1);
-		String sql="INSERT INTO " + s.getTable() + " (" + keys +
+		String sql = "INSERT INTO " + s.getTable() + " (" + keys +
 			") VALUES (" + values + ");";
-		//System.err.println("SQLConnection.create(): sql="+sql);
 		update(sql);
 	}
 

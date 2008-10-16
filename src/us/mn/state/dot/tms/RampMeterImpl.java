@@ -169,7 +169,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Lookup the green count detector */
 	protected void lookupGreenDetector() {
 		DetectorImpl[] g = getDetectorSet().getDetectorSet(
-			Detector.GREEN).toArray();
+			LaneType.GREEN).toArray();
 		if(g.length > 0)
 			green_det = g[0];
 		else
@@ -728,20 +728,24 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		final DetectorSet ds = new DetectorSet();
 		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
 			public boolean check(R_NodeImpl n) {
-				if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
-					return false;
-				GeoLoc l = n.lookupGeoLoc();
-				if(GeoLocHelper.matchesRoot(l, loc))
-					ds.addDetectors(n.getDetectorSet());
+				if(n.getNodeType() ==
+					R_NodeType.ENTRANCE.ordinal())
+				{
+					GeoLoc l = n.getGeoLoc();
+					if(GeoLocHelper.matchesRoot(l, loc)) {
+						ds.addDetectors(
+							n.getDetectorSet());
+					}
+				}
 				return false;
 			}
 		};
 		Corridor corridor = getCorridor();
-		if(corridor != null) {
+		if(corridor != null && corridors != null) {
 			corridor.findNode(finder);
 			String cd = corridor.getLinkedCDRoad();
 			if(cd != null) {
-				Corridor cd_road = nodeMap.getCorridor(cd);
+				Corridor cd_road = corridors.getCorridor(cd);
 				if(cd_road != null)
 					cd_road.findNode(finder);
 			}
@@ -766,10 +770,14 @@ public class RampMeterImpl extends TrafficDeviceImpl
 
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
-		GeoLoc loc = lookupGeoLoc();
-		if(loc == null)
-			return null;
-		return nodeMap.getCorridor(GeoLocHelper.getCorridor(loc));
+		if(corridors != null) {
+			GeoLoc loc = lookupGeoLoc();
+			if(loc != null) {
+				String c = GeoLocHelper.getCorridor(loc);
+				return corridors.getCorridor(c);
+			}
+		}
+		return null;
 	}
 
 	/** Print a single detector as an XML element */
@@ -796,22 +804,22 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			if(x != null)
 				b.append(x.getName());
 		}
-		return replaceEntities(b.toString().trim());
+		return XmlWriter.replaceEntities(b.toString().trim());
 	}
 
 	/** Print the detectors associated with a ramp meter */
 	protected void printMeterDetectors(PrintWriter out) {
 		DetectorSet ds = getDetectorSet();
 		printAttribute(out, "green",
-			ds.getDetectorSet(Detector.GREEN));
+			ds.getDetectorSet(LaneType.GREEN));
 		printAttribute(out, "passage",
-			ds.getDetectorSet(Detector.PASSAGE));
+			ds.getDetectorSet(LaneType.PASSAGE));
 		printAttribute(out, "merge",
-			ds.getDetectorSet(Detector.MERGE));
+			ds.getDetectorSet(LaneType.MERGE));
 		printAttribute(out, "queue",
-			ds.getDetectorSet(Detector.QUEUE));
+			ds.getDetectorSet(LaneType.QUEUE));
 		printAttribute(out, "bypass",
-			ds.getDetectorSet(Detector.BYPASS));
+			ds.getDetectorSet(LaneType.BYPASS));
 	}
 
 	/** Print a meter detector set attribute */
@@ -822,7 +830,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			StringBuilder b = new StringBuilder();
 			for(DetectorImpl det: ds.toArray()) {
 				b.append(" D");
-				b.append(det.getIndex());
+				b.append(det.getName());
 			}
 			out.print(attr + "='");
 			out.print(b.toString().trim());

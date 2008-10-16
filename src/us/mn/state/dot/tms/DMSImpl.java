@@ -533,9 +533,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Create one route to a travel time destination */
 	protected Route createRoute(StationImpl s) {
-		R_NodeImpl r_node = s.getR_Node();
-		GeoLoc dest = r_node.lookupGeoLoc();
-		RouteBuilder builder = new RouteBuilder(getId(), nodeMap,
+		GeoLoc dest = s.getR_Node().getGeoLoc();
+		RouteBuilder builder = new RouteBuilder(getId(), corridors,
 			MAX_ROUTE_LEGS, MAX_ROUTE_DISTANCE);
 		GeoLoc loc = lookupGeoLoc();
 		SortedSet<Route> routes = builder.findRoutes(loc, dest);
@@ -547,7 +546,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Create one route to a travel time destination */
 	protected Route createRoute(String sid) {
-		StationImpl s = (StationImpl)statMap.getElement(sid);
+		StationImpl s = lookupStation(sid);
 		if(s != null)
 			return createRoute(s);
 		else
@@ -1658,4 +1657,14 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		", message="+(message==null?"null":message.toStringDebug());
 	}
 
+	/** Lookup a station */
+	static protected StationImpl lookupStation(String sid) {
+		try {
+			return (StationImpl)namespace.getObject(
+				Station.SONAR_TYPE, sid);
+		}
+		catch(NamespaceError e) {
+			return null;
+		}
+	}
 }

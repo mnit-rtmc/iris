@@ -37,8 +37,8 @@ public class RouteBuilder {
 	/** Name to use for debugging purposes */
 	protected final String name;
 
-	/** Map of all R_Nodes */
-	protected final R_NodeMapImpl node_map;
+	/** Corridor manager */
+	protected final CorridorManager corridors;
 
 	/** Maximum number of corridor legs */
 	protected final int legs;
@@ -53,9 +53,9 @@ public class RouteBuilder {
 	protected final TreeSet<Route> routes = new TreeSet<Route>();
 
 	/** Create a new route builder */
-	public RouteBuilder(String n, R_NodeMapImpl map, int l, float d) {
+	public RouteBuilder(String n, CorridorManager c, int l, float d) {
 		name = n;
-		node_map = map;
+		corridors = c;
 		legs = l;
 		max_dist = d;
 	}
@@ -70,19 +70,19 @@ public class RouteBuilder {
 				origin.getName());
 			return;
 		}
-		Corridor c = node_map.getCorridor(cid);
+		Corridor c = corridors.getCorridor(cid);
 		if(c == null) {
 			TRAVEL_LOG.log(name + ": MISSING CORRIDOR: " + cid);
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
-		if(r_node.metersTo(origin) > MAX_ORIGIN_DISTANCE) {
+		if(Corridor.metersTo(r_node, origin) > MAX_ORIGIN_DISTANCE) {
 			throw new BadRouteException("ORIGIN OFF MAINLINE: " +
 				GeoLocHelper.getDescription(origin));
 		}
 		int i = 0;
 		while(r_node != null) {
-			GeoLoc dest = r_node.lookupGeoLoc();
+			GeoLoc dest = r_node.getGeoLoc();
 			ODPair od = new ODPair(origin, dest, false);
 			float dist = distance + c.calculateDistance(od);
 			if(TRAVEL_LOG.isOpen()) {
@@ -104,7 +104,7 @@ public class RouteBuilder {
 				if(TRAVEL_LOG.isOpen()) {
 					TRAVEL_LOG.log(name +
 						": BREAKING R_NODE LOOP AT " +
-						r_node.getOID());
+						r_node.getName());
 				}
 				break;
 			}
@@ -118,12 +118,12 @@ public class RouteBuilder {
 		float distance, GeoLoc origin, GeoLoc destination)
 		throws BadRouteException
 	{
-		GeoLoc dest = r_node.lookupGeoLoc();
+		GeoLoc dest = r_node.getGeoLoc();
 		R_NodeImpl next = null;
 		for(R_NodeImpl n: r_node.getDownstream()) {
 			if(!r_node.isCorridorType())
 				continue;
-			GeoLoc down = n.lookupGeoLoc();
+			GeoLoc down = n.getGeoLoc();
 			if(GeoLocHelper.isSameCorridor(down, origin))
 				next = n;
 			else {
@@ -148,7 +148,7 @@ public class RouteBuilder {
 		final GeoLoc destination)
 	{
 		ODPair od = new ODPair(origin, destination, false);
-		Corridor c = node_map.getCorridor(od);
+		Corridor c = corridors.getCorridor(od);
 		if(c != null) {
 			try {
 				float d = c.calculateDistance(od);
@@ -174,13 +174,13 @@ public class RouteBuilder {
 		Route r = new Route();
 		int turns = 0;
 		for(ODPair od: path) {
-			Corridor c = node_map.getCorridor(od);
+			Corridor c = corridors.getCorridor(od);
 			r.addTrip(new CorridorTrip(name, c, od));
 			if(od.hasTurn())
 				turns++;
 		}
 		r.setTurns(turns);
-		Corridor c = node_map.getCorridor(odf);
+		Corridor c = corridors.getCorridor(odf);
 		r.addTrip(new CorridorTrip(name, c, odf));
 		routes.add(r);
 		// NOTE: this optimisation will prevent us from finding some

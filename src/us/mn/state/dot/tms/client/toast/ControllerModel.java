@@ -174,7 +174,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		}
 	}
 
-	/** Create a new DMS sign group */
+	/** Create a new controller */
 	protected void createController(String name) {
 		DropNumberModel m = new DropNumberModel(comm_link, cache, 1);
 		HashMap<String, Object> attrs = new HashMap<String, Object>();

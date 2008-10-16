@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,19 +14,16 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
-
 /**
- * DetectorList is an interface which contains the methods for
- * remotely maintaining a detector list.
+ * Time interval values.
  *
  * @author Douglas Lau
  */
-public interface DetectorList extends IndexedList {
+public interface Interval {
 
-	/** Get the available detector list */
-	public SortedList getAvailableList() throws RemoteException;
+	/** Number of seconds in a minute */
+	int MINUTE = 60;
 
-	/** Get the free mainline detector list */
-	public SortedList getMainFreeList() throws RemoteException;
+	/** Number of seconds in an hour */
+	int HOUR = 60 * MINUTE;
 }

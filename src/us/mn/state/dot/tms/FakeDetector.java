@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,23 @@ package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * Fake Detector
  *
  * @author Douglas Lau
  */
-public class FakeDetector implements Constants {
+public class FakeDetector {
+
+	/** Calculate the average from a total and sample count */
+	static protected float calculateAverage(float total, int count) {
+		if(count > 0)
+			return total / count;
+		else
+			return Constants.MISSING_DATA;
+	}
 
 	/** Plus composite type */
 	static protected final int PLUS = 1;
@@ -50,19 +60,19 @@ public class FakeDetector implements Constants {
 
 	/** Get a string representation of the fake detector */
 	public String toString() {
-		StringBuffer b = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		if(constant != 0) {
 			b.append('#');
 			b.append(constant);
 		}
-		for(int i = 0; i < plus.length; i++) {
+		for(DetectorImpl det: plus) {
 			if(b.length() > 0)
 				b.append('+');
-			b.append(plus[i].getIndex());
+			b.append(det.getName());
 		}
-		for(int i = 0; i < minus.length; i++) {
+		for(DetectorImpl det: minus) {
 			b.append('-');
-			b.append(minus[i].getIndex());
+			b.append(det.getName());
 		}
 		if(percent != 100) {
 			b.append('%');
@@ -72,7 +82,9 @@ public class FakeDetector implements Constants {
 	}
 
 	/** Create a new fake detector */
-	public FakeDetector(String d) throws NumberFormatException {
+	public FakeDetector(String d, Namespace ns)
+		throws NumberFormatException, NamespaceError
+	{
 		LinkedList<DetectorImpl> p = new LinkedList<DetectorImpl>();
 		LinkedList<DetectorImpl> m = new LinkedList<DetectorImpl>();
 		int type = PLUS;
@@ -97,17 +109,16 @@ public class FakeDetector implements Constants {
 			}
 			if(t.equals(" "))
 				continue;
-			int i = Integer.parseInt(t);
 			if(type == CONSTANT) {
-				constant = i;
+				constant = Integer.parseInt(t);
 				continue;
 			}
 			if(type == PERCENT) {
-				percent = i;
+				percent = Integer.parseInt(t);
 				continue;
 			}
-			DetectorImpl det = (DetectorImpl)
-				TMSObjectImpl.detList.getElement(i);
+			DetectorImpl det = (DetectorImpl)ns.getObject(
+				Detector.SONAR_TYPE, t);
 			if(type == PLUS)
 				p.add(det);
 			if(type == MINUS)
@@ -120,17 +131,23 @@ public class FakeDetector implements Constants {
 	/** Left over volume from earlier sampling intervals */
 	protected transient int leftover = 0;
 
+	/** Calculate the fake detector data */
+	public void calculate() {
+		calculateFlow();
+		calculateSpeed();
+	}
+
 	/** Flow rate from earlier sampling interval */
-	protected transient float flow = MISSING_DATA;
+	protected transient float flow = Constants.MISSING_DATA;
 
 	/** Calculate the fake detector flow rate */
-	public void calculateFlow() {
+	protected void calculateFlow() {
 		int volume = 0;
 		for(int i = 0; i < plus.length; i++) {
 			int v = (int)plus[i].getVolume();
 			if(v < 0) {
 				leftover = 0;
-				flow = MISSING_DATA;
+				flow = Constants.MISSING_DATA;
 				return;
 			}
 			volume += v;
@@ -139,7 +156,7 @@ public class FakeDetector implements Constants {
 			int v = (int)minus[i].getVolume();
 			if(v < 0) {
 				leftover = 0;
-				flow = MISSING_DATA;
+				flow = Constants.MISSING_DATA;
 				return;
 			}
 			volume -= v;
@@ -155,7 +172,7 @@ public class FakeDetector implements Constants {
 		}
 		if(flow < 0)
 			flow = 0;
-		float f = (constant + volume * SAMPLES_PER_HOUR) *
+		float f = (constant + volume * Constants.SAMPLES_PER_HOUR) *
 			percent / 100.0f;
 		flow += 0.01f * (f - flow);
 	}
@@ -163,5 +180,27 @@ public class FakeDetector implements Constants {
 	/** Get the calculated flow rate */
 	public float getFlow() {
 		return flow;
+	}
+
+	/** Speed from earlier sampling interval */
+	protected transient float speed = Constants.MISSING_DATA;
+
+	/** Calculate the fake detector speed */
+	public void calculateSpeed() {
+		float t_speed = 0;
+		int n_speed = 0;
+		for(DetectorImpl det: plus) {
+			float s = det.getSpeed();
+			if(s > 0) {
+				t_speed += s;
+				n_speed++;
+			}
+		}
+		speed = calculateAverage(t_speed, n_speed);
+	}
+
+	/** Get the calculated speed */
+	public float getSpeed() {
+		return speed;
 	}
 }

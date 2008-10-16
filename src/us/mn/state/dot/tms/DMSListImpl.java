@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.rmi.RemoteException;
 import us.mn.state.dot.vault.ObjectVaultException;
+import us.mn.state.dot.sonar.NamespaceError;
 
 /**
  * DMSListImpl is a list containing all DMS objects, plus all global
@@ -164,6 +165,9 @@ public class DMSListImpl extends SortedListImpl implements DMSList {
 		};
 		try { w.write(); }
 		catch(IOException e) {
+			e.printStackTrace();
+		}
+		catch(NamespaceError e) {
 			e.printStackTrace();
 		}
 	}

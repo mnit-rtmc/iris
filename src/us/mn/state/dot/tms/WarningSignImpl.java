@@ -81,13 +81,17 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 	/** Create a new warning sign with a string name */
 	public WarningSignImpl(String n) throws TMSException, SonarException {
 		super(n);
+		GeoLocImpl g = new GeoLocImpl(name);
+		MainServer.server.createObject(g);
+		geo_loc = g;
 	}
 
 	/** Create a warning sign */
 	protected WarningSignImpl(String n, GeoLocImpl l, ControllerImpl c,
 		int p, String nt, CameraImpl cam, String m)
 	{
-		super(n, l, c, p, nt);
+		super(n, c, p, nt);
+		geo_loc = l;
 		camera = cam;
 		message = m;
 		initTransients();
@@ -101,6 +105,20 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 			(ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
 			p, nt, (CameraImpl)ns.getObject(Camera.SONAR_TYPE, cam),
 			m);
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		store.destroy(geo_loc);
+	}
+
+	/** Device location */
+	protected GeoLocImpl geo_loc;
+
+	/** Get the device location */
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
 	}
 
 	/** Camera from which this sign can be seen */

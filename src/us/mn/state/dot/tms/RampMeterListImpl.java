@@ -19,6 +19,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.rmi.RemoteException;
 import us.mn.state.dot.vault.ObjectVaultException;
+import us.mn.state.dot.sonar.NamespaceError;
 
 /**
  * RampMeterListImpl is the implementation of the DeviceList RMI
@@ -152,7 +153,12 @@ class RampMeterListImpl extends SortedListImpl implements DeviceList {
 				printXmlBody(out);
 			}
 		};
-		w.write();
+		try {
+			w.write();
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Print the body of the ramp meter list XML file */

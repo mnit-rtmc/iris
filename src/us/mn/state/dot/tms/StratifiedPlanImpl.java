@@ -222,10 +222,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		/** Find the detectors for a given ramp meter */
 		protected boolean findDetectors() {
 			DetectorSet ds = meter.getDetectorSet();
-			queue = ds.getDetectorSet(Detector.QUEUE);
-			passage = ds.getDetectorSet(Detector.PASSAGE);
-			merge = ds.getDetectorSet(Detector.MERGE);
-			bypass = ds.getDetectorSet(Detector.BYPASS);
+			queue = ds.getDetectorSet(LaneType.QUEUE);
+			passage = ds.getDetectorSet(LaneType.PASSAGE);
+			merge = ds.getDetectorSet(LaneType.MERGE);
+			bypass = ds.getDetectorSet(LaneType.BYPASS);
 			return queue.isDefined() || passage.isDefined() ||
 				merge.isDefined();
 		}
@@ -741,43 +741,43 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 
 	/** Create a set of entrance detectors for a zone */
 	static protected DetectorSet createEntranceSet(DetectorSet ds) {
-		DetectorSet ent = ds.getDetectorSet(Detector.BYPASS);
-		ent.addDetectors(ds, Detector.OMNIBUS);
-		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		DetectorSet ent = ds.getDetectorSet(LaneType.BYPASS);
+		ent.addDetectors(ds, LaneType.OMNIBUS);
+		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
 		if(p.isDefined())
 			ent.addDetectors(p);
 		else
-			ent.addDetectors(ds, Detector.MERGE);
+			ent.addDetectors(ds, LaneType.MERGE);
 		if(ent.size() > 0)
 			return ent;
-		ent.addDetectors(ds, Detector.EXIT);
-		ent.addDetectors(ds, Detector.MAINLINE);
-		ent.addDetectors(ds, Detector.AUXILIARY);
+		ent.addDetectors(ds, LaneType.EXIT);
+		ent.addDetectors(ds, LaneType.MAINLINE);
+		ent.addDetectors(ds, LaneType.AUXILIARY);
 		return ent;
 	}
 
 	/** Create a set of exit detectors for a zone */
 	static protected DetectorSet createExitSet(DetectorSet ds) {
-		DetectorSet exit = ds.getDetectorSet(Detector.EXIT);
+		DetectorSet exit = ds.getDetectorSet(LaneType.EXIT);
 		if(exit.size() > 0)
 			return exit;
-		exit.addDetectors(ds, Detector.MAINLINE);
-		exit.addDetectors(ds, Detector.AUXILIARY);
-		exit.addDetectors(ds, Detector.CD_LANE);
+		exit.addDetectors(ds, LaneType.MAINLINE);
+		exit.addDetectors(ds, LaneType.AUXILIARY);
+		exit.addDetectors(ds, LaneType.CD_LANE);
 		if(exit.size() > 0)
 			return exit;
-		exit.addDetectors(ds, Detector.BYPASS);
-		DetectorSet q = ds.getDetectorSet(Detector.QUEUE);
+		exit.addDetectors(ds, LaneType.BYPASS);
+		DetectorSet q = ds.getDetectorSet(LaneType.QUEUE);
 		if(q.size() > 0) {
 			exit.addDetectors(q);
 			return exit;
 		}
-		DetectorSet p = ds.getDetectorSet(Detector.PASSAGE);
+		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
 		if(p.size() > 0) {
 			exit.addDetectors(p);
 			return exit;
 		}
-		exit.addDetectors(ds, Detector.MERGE);
+		exit.addDetectors(ds, LaneType.MERGE);
 		return exit;
 	}
 
@@ -831,7 +831,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 		}
 		protected void followEntrance(R_NodeImpl n) {
-			GeoLoc branch = n.lookupGeoLoc();
+			GeoLoc branch = n.getGeoLoc();
 			Corridor c = n.getLinkedCorridor();
 			if(c != null) {
 				Corridor.NodeFinder nf =
@@ -843,7 +843,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				GeoLocHelper.getDescription(branch));
 		}
 		protected void followExit(R_NodeImpl n) {
-			GeoLoc branch = n.lookupGeoLoc();
+			GeoLoc branch = n.getGeoLoc();
 			Corridor c = n.getLinkedCorridor();
 			if(c != null) {
 				Corridor.NodeFinder nf =
@@ -855,24 +855,24 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				GeoLocHelper.getDescription(branch));
 		}
 		public boolean check(R_NodeImpl n) {
-			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION) {
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if(nt == R_NodeType.INTERSECTION) {
 				removeInvalidZones();
 				return false;
 			}
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() == 0) {
- 				if(nt == R_Node.TYPE_ENTRANCE)
+ 				if(nt == R_NodeType.ENTRANCE)
 					followEntrance(n);
-				if(nt == R_Node.TYPE_EXIT)
+				if(nt == R_NodeType.EXIT)
 					followExit(n);
 				return false;
 			}
-			if(nt == R_Node.TYPE_STATION)
+			if(nt == R_NodeType.STATION)
 				addStation(ds);
-			else if(nt == R_Node.TYPE_ENTRANCE)
+			else if(nt == R_NodeType.ENTRANCE)
 				addEntrance(ds);
-			else if(nt == R_Node.TYPE_EXIT)
+			else if(nt == R_NodeType.EXIT)
 				addExit(ds);
 			return false;
 		}
@@ -910,23 +910,23 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				return check_not_found(n);
 		}
 		protected boolean check_found(R_NodeImpl n) {
-			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+			if(n.getTransition()==R_NodeTransition.COMMON.ordinal())
 				return true;
 			else
 				return check_found_inside(n);
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
-			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION)
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if(nt == R_NodeType.INTERSECTION)
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_Node.TYPE_ENTRANCE) {
+				if(nt == R_NodeType.ENTRANCE) {
 					zone_builder.addEntrance(ds);
 					if(n.getLanes() == 0)
 						return true;
 				}
-				if(nt == R_Node.TYPE_STATION && is_not_CD(n)) {
+				if(nt == R_NodeType.STATION && is_not_CD(n)) {
 					zone_builder.addEntrance(ds);
 					return true;
 				}
@@ -934,13 +934,13 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			return false;
 		}
 		protected boolean is_not_CD(R_NodeImpl n) {
-			GeoLoc loc = n.lookupGeoLoc();
+			GeoLoc loc = n.getGeoLoc();
 			return !GeoLocHelper.matchesRoot(loc, branch);
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
-			if(n.getNodeType() != R_Node.TYPE_EXIT)
+			if(n.getNodeType() != R_NodeType.EXIT.ordinal())
 				return false;
-			GeoLoc loc = n.lookupGeoLoc();
+			GeoLoc loc = n.getGeoLoc();
 			if(GeoLocHelper.rampMatches(loc, branch)) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();
@@ -977,29 +977,29 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				return check_not_found(n);
 		}
 		protected boolean check_found(R_NodeImpl n) {
-			if(n.getTransition() == R_Node.TRANSITION_COMMON)
+			if(n.getTransition()==R_NodeTransition.COMMON.ordinal())
 				return true;
 			else
 				return check_found_inside(n);
 		}
 		protected boolean check_found_inside(R_NodeImpl n) {
-			int nt = n.getNodeType();
-			if(nt == R_Node.TYPE_INTERSECTION)
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if(nt == R_NodeType.INTERSECTION)
 				return true;
 			DetectorSet ds = n.getDetectorSet();
 			if(ds.size() > 0) {
-				if(nt == R_Node.TYPE_STATION) {
+				if(nt == R_NodeType.STATION) {
 					zone_builder.addExit(ds);
 					return true;
-				} else if(nt == R_Node.TYPE_EXIT)
+				} else if(nt == R_NodeType.EXIT)
 					zone_builder.addExit(ds);
 			}
 			return false;
 		}
 		protected boolean check_not_found(R_NodeImpl n) {
-			if(n.getNodeType() != R_Node.TYPE_ENTRANCE)
+			if(n.getNodeType() != R_NodeType.ENTRANCE.ordinal())
 				return false;
-			GeoLoc loc = n.lookupGeoLoc();
+			GeoLoc loc = n.getGeoLoc();
 			if(GeoLocHelper.rampMatches(loc, branch)) {
 				found = true;
 				DetectorSet ds = n.getDetectorSet();

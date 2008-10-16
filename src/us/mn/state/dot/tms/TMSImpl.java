@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -41,6 +42,9 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  */
 final class TMSImpl extends TMSObjectImpl implements TMS {
+
+	/** Detector sample file */
+	static protected final String SAMPLE_XML = "det_sample.xml";
 
 	/** Worker thread */
 	static protected final Scheduler TIMER =
@@ -70,8 +74,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			props.getProperty("UserName"),
 			props.getProperty("Password")
 		);
-		R_NodeImpl.mapping = new TableMapping(store, "r_node",
-			"detector");
 		TrafficDeviceImpl.plan_mapping = new TableMapping(store,
 			"traffic_device", "timing_plan");
 	}
@@ -80,11 +82,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	void loadFromVault() throws ObjectVaultException, TMSException,
 		RemoteException
 	{
-		System.err.println("Loading detectors...");
-		detectors.load(DetectorImpl.class, "index");
-		System.err.println("Loading r_nodes...");
-		// NOTE: must be called after detList is populated
-		r_nodes.load(R_NodeImpl.class, "vault_oid");
 		System.err.println( "Loading meters..." );
 		meters.load( RampMeterImpl.class, "id" );
 		System.err.println( "Loading dms list..." );
@@ -100,9 +97,13 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		return(30);
 	}
 
+	/** Station manager */
+	protected transient StationManager station_manager;
+
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
-		TIMER.addJob(new TimerJobSigns(TMSImpl.getAgencyPollTimerJobSigns()));
+		station_manager = new StationManager(namespace);
+		TIMER.addJob(new TimerJobSigns(getAgencyPollTimerJobSigns()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
@@ -121,7 +122,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		TIMER.addJob(new Job(Calendar.DATE, 1,
 			Calendar.HOUR, 20)
 		{
-			public void perform() throws IOException {
+			public void perform() throws Exception {
 				writeXmlConfiguration();
 			}
 		});
@@ -142,19 +143,66 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			}
 		} );
 		TIMER.addJob(new Job(1000) {
-			public void perform() throws IOException {
+			public void perform() throws Exception {
 				writeXmlConfiguration();
 			}
 		});
 	}
 
 	/** Write the TMS xml configuration files */
-	protected void writeXmlConfiguration() throws IOException {
+	protected void writeXmlConfiguration() throws IOException,
+		NamespaceError
+	{
 		System.err.println("Writing TMS XML files @ " + new Date());
-		detectors.writeXml();
-		r_nodes.writeXml();
+		new DetectorXmlWriter(namespace).write();
+		corridors = new CorridorManager(namespace);
+		new R_NodeXmlWriter(corridors).write();
 		meters.writeXml();
 		System.err.println("Completed TMS XML dump @ " + new Date());
+	}
+
+	/** Write the sample data out as XML */
+	public void writeSampleXml() throws IOException, NamespaceError {
+		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
+			public void print(PrintWriter out) {
+				printSampleXmlHead(out);
+				printSampleXmlBody(out);
+				printSampleXmlTail(out);
+			}
+		};
+		w.write();
+	}
+
+	/** Print the header of the detector sample XML file */
+	protected void printSampleXmlHead(PrintWriter out) {
+		out.println("<?xml version='1.0'?>");
+		out.println("<!DOCTYPE traffic_sample SYSTEM 'tms.dtd'>");
+		out.println("<traffic_sample time_stamp='" + new Date() +
+			"' period='30'>");
+		out.println("\t&detectors;");
+	}
+
+	/** Print the body of the detector sample XML file */
+	static protected void printSampleXmlBody(final PrintWriter out) {
+		try {
+			namespace.findObject(Detector.SONAR_TYPE,
+				new Checker<DetectorImpl>()
+			{
+				public boolean check(DetectorImpl det) {
+					det.calculateFakeData();
+					det.printSampleXmlElement(out);
+					return false;
+				}
+			});
+		}
+		catch(NamespaceError e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Print the tail of the detector sample XML file */
+	protected void printSampleXmlTail(PrintWriter out) {
+		out.println("</traffic_sample>");
 	}
 
 	/** Calculate the 30-second interval for the given time stamp */
@@ -210,11 +258,18 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		/** Job to be performed on completion */
 		protected final Job job = new Job() {
 			public void perform() {
-				detectors.calculateFakeFlows();
-				detectors.writeSampleXml();
-				station_map.calculateData(stamp);
-				station_map.writeSampleXml();
-				station_map.writeStationXml();
+				try {
+					writeSampleXml();
+					station_manager.calculateData(stamp);
+					station_manager.writeSampleXml();
+					station_manager.writeStationXml();
+				}
+				catch(IOException e) {
+					e.printStackTrace();
+				}
+				catch(NamespaceError e) {
+					e.printStackTrace();
+				}
 				int interval = calculateInterval(stamp);
 				meters.computeDemand(interval);
 				if(!isHoliday(stamp)) {
@@ -259,8 +314,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 		/** Job to be performed on completion */
 		protected final Job job = new Job(500) {
-			public void perform() {
-				detectors.flush(stamp);
+			public void perform() throws NamespaceError {
+				flushDetectorData(stamp);
 			}
 		};
 
@@ -289,15 +344,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 	}
 
-	/** Master detector list */
-	protected final DetectorListImpl detectors;
-
-	/** Master station list */
-	protected final StationMapImpl station_map;
-
-	/** Master r_node map */
-	protected final R_NodeMapImpl r_nodes;
-
 	/** Master timing plan list */
 	protected final TimingPlanListImpl plans;
 
@@ -313,9 +359,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Initialize the subset list */
 	protected void initialize() throws RemoteException {
 		// This is an ugly hack, but it works
-		detList = detectors;
-		statMap = station_map;
-		nodeMap = r_nodes;
 		planList = plans;
 		meterList = meters;
 		dmsList = dmss;
@@ -327,28 +370,12 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		ObjectVaultException
 	{
 		super();
-		detectors = new DetectorListImpl();
-		station_map = new StationMapImpl();
-		r_nodes = new R_NodeMapImpl();
 		plans = new TimingPlanListImpl();
 		meters = new RampMeterListImpl();
 		dmss = new DMSListImpl();
 		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
-	}
-
-	/** Get the detector list */
-	public IndexedList getDetectorList() { return detectors; }
-
-	/** Get the station map */
-	public StationMap getStationMap() {
-		return station_map;
-	}
-
-	/** Get the r_node map */
-	public R_NodeMap getR_NodeMap() {
-		return r_nodes;
 	}
 
 	/** Get the timing plan list */
@@ -404,6 +431,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		});
 	}
 
+
 	/** Poll all controllers 5 minute interval */
 	static protected void poll5Minute(final Completer comp)
 		throws NamespaceError
@@ -418,6 +446,23 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				return false;
 			}
 		});
+	}
+
+	/** Flush the detector data to disk */
+	static protected void flushDetectorData(final Calendar stamp)
+		throws NamespaceError
+	{
+		System.err.println("Starting FLUSH @ " + new Date() + " for " +
+			stamp.getTime());
+		namespace.findObject(Detector.SONAR_TYPE,
+			new Checker<DetectorImpl>()
+		{
+			public boolean check(DetectorImpl det) {
+				det.flush(stamp);
+				return false;
+			}
+		});
+		System.err.println("Finished FLUSH @ " + new Date());
 	}
 
 	/** Poll all controllers for 1 hour interval */
