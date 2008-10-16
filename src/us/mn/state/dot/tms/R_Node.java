@@ -26,6 +26,11 @@ public interface R_Node extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "r_node";
 
+	/** Set the location.  This is needed for creating a new phantom r_node
+	 * with SONAR.  It is an error to call this method this after the
+	 * r_node has been created. */
+	void setGeoLoc(GeoLoc loc);
+
 	/** Get the location */
 	GeoLoc getGeoLoc();
 

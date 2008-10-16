@@ -276,7 +276,7 @@ public class FontForm extends AbstractForm {
 			gmap.clear();
 		}
 		final LinkedList<Glyph> glist = new LinkedList<Glyph>();
-		glyphs.find(new Checker<Glyph>() {
+		glyphs.findObject(new Checker<Glyph>() {
 			public boolean check(Glyph g) {
 				if(g.getFont() == font)
 					glist.add(g);

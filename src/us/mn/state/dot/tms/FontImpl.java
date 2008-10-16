@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * The FontImpl class defines all the attributes of a pixel font. These

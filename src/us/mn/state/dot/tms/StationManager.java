@@ -20,7 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
  * This class writes out station XML files.
@@ -36,13 +36,13 @@ class StationManager {
 	static protected final String STATION_XML = "station.xml";
 
 	/** SONAR namespace */
-	protected final Namespace namespace;
+	protected final ServerNamespace namespace;
 
 	/** Most recent time stamp of calculated data */
 	protected transient Calendar stamp;
 
 	/** Create a new station manager */
-	public StationManager(Namespace ns) {
+	public StationManager(ServerNamespace ns) {
 		namespace = ns;
 		stamp = Calendar.getInstance();
 	}
@@ -95,19 +95,14 @@ class StationManager {
 
 	/** Print the body of the station sample XML file */
 	protected void printSampleXmlBody(final PrintWriter out) {
-		try {
-			namespace.findObject(Station.SONAR_TYPE,
-				new Checker<StationImpl>()
-			{
-				public boolean check(StationImpl s) {
-					s.printSampleXmlElement(out);
-					return false;
-				}
-			});
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-		}
+		namespace.findObject(Station.SONAR_TYPE,
+			new Checker<StationImpl>()
+		{
+			public boolean check(StationImpl s) {
+				s.printSampleXmlElement(out);
+				return false;
+			}
+		});
 	}
 
 	/** Print the tail of the station sample XML file */
@@ -141,19 +136,14 @@ class StationManager {
 
 	/** Print the body of the station sample XML file */
 	protected void printStationXmlBody(final PrintWriter out) {
-		try {
-			namespace.findObject(Station.SONAR_TYPE,
-				new Checker<StationImpl>()
-			{
-				public boolean check(StationImpl s) {
-					s.printStationXmlElement(out);
-					return false;
-				}
-			});
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-		}
+		namespace.findObject(Station.SONAR_TYPE,
+			new Checker<StationImpl>()
+		{
+			public boolean check(StationImpl s) {
+				s.printStationXmlElement(out);
+				return false;
+			}
+		});
 	}
 
 	/** Print the tail of the station sample XML file */

@@ -17,8 +17,7 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.event.AlarmEvent;
 import us.mn.state.dot.tms.event.EventType;
 
@@ -98,10 +97,10 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 
 	/** Create a new alarm */
 	public AlarmImpl(Namespace ns, String n, String d, String c, int p,
-		boolean s) throws NamespaceError
+		boolean s)
 	{
-		this(n, d, (ControllerImpl)ns.getObject(Controller.SONAR_TYPE,
-			c), p, s);
+		this(n, d, (ControllerImpl)ns.lookupObject(
+			Controller.SONAR_TYPE, c), p, s);
 	}
 
 	/** Initialize the controller for this alarm */

@@ -17,8 +17,6 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * A glyph defines the graphic used for a single code point in a font.
@@ -82,23 +80,13 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
 	/** Lookup a font in the SONAR namespace */
 	static protected FontImpl lookupFont(String f) {
-		try {
-			return (FontImpl)namespace.lookupObject("font", f);
-		}
-		catch(NamespaceError e) {
-			return null;
-		}
+		return (FontImpl)namespace.lookupObject(Font.SONAR_TYPE, f);
 	}
 
 	/** Lookup a graphic in the SONAR namespace */
 	static protected GraphicImpl lookupGraphic(String g) {
-		try {
-			return (GraphicImpl)namespace.lookupObject("graphic",
-				g);
-		}
-		catch(NamespaceError e) {
-			return null;
-		}
+		return (GraphicImpl)namespace.lookupObject(Graphic.SONAR_TYPE,
+			g);
 	}
 
 	/** Create a glyph from database lookup */

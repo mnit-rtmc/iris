@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * A graphic is an image which can be displayed on a DMS

@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.utils.Agency;
 
 /**
@@ -35,14 +34,8 @@ public class SystemAttributeImpl extends BaseObjectImpl
 			assert false;
 			return null;
 		}
-		try {
-			return (SystemAttribute)namespace.getObject(
-				SystemAttribute.SONAR_TYPE, att);
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-			return null;
-		}
+		return (SystemAttribute)namespace.lookupObject(
+			SystemAttribute.SONAR_TYPE, att);
 	}
 
 	/** Get the value of the named attribute. This is a server side method. 

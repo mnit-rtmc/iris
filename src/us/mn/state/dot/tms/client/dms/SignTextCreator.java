@@ -122,7 +122,7 @@ public class SignTextCreator {
 	 */
 	protected HashSet<String> createSignTextNameSet(final SignGroup sg) {
 		final HashSet<String> names = new HashSet<String>();
-		sign_text.find(new Checker<SignText>() {
+		sign_text.findObject(new Checker<SignText>() {
 			public boolean check(SignText st) {
 				if(st.getSignGroup() == sg)
 					names.add(st.getName());

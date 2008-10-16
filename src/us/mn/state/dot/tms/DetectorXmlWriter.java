@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
  * This class writes out the current detector configuration to an XML file.
@@ -31,10 +31,10 @@ public class DetectorXmlWriter extends XmlWriter {
 	static protected final String DETS_XML = "detectors.xml";
 
 	/** SONAR namespace */
-	protected final Namespace namespace;
+	protected final ServerNamespace namespace;
 
 	/** Create a new detector XML writer */
-	public DetectorXmlWriter(Namespace ns) {
+	public DetectorXmlWriter(ServerNamespace ns) {
 		super(DETS_XML, false);
 		namespace = ns;
 	}

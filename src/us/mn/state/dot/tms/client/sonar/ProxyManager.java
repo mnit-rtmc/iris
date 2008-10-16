@@ -227,7 +227,7 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Iterate through all proxy objects */
 	public MapObject forEach(final MapSearcher s) {
-		T result = cache.find(new Checker<T>() {
+		T result = cache.findObject(new Checker<T>() {
 			public boolean check(T proxy) {
 				MapGeoLoc loc = findGeoLoc(proxy);
 				return loc != null && s.next(loc);

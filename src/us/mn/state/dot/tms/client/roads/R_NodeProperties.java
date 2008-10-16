@@ -113,8 +113,8 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	}
 
 	/** Get the SONAR type cache */
-	protected TypeCache<R_Node> getTypeCache(SonarState st) {
-		return st.getR_Nodes();
+	protected TypeCache<R_Node> getTypeCache() {
+		return state.getR_Nodes();
 	}
 
 	/** Initialize the widgets on the form */

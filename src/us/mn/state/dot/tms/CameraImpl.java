@@ -17,9 +17,9 @@ package us.mn.state.dot.tms;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 
@@ -103,13 +103,12 @@ public class CameraImpl extends Device2Impl implements Camera {
 	}
 
 	/** Create a camera */
-	protected CameraImpl(Namespace ns, String n, String l, String c, int p,
-		String nt, String e, int ec, String nv, boolean pb)
-		throws NamespaceError
+	protected CameraImpl(Namespace ns, String n, String l, String c,
+		int p, String nt, String e, int ec, String nv, boolean pb)
 	{
-		this(n, (GeoLocImpl)ns.getObject(GeoLoc.SONAR_TYPE, l),
-			(ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
-			p, nt, e, ec, nv, pb);
+		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
+			(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
+			c), p, nt, e, ec, nv, pb);
 	}
 
 	/** Destroy an object */

@@ -80,21 +80,21 @@ public class DropNumberModel extends SpinnerNumberModel {
 	/** Get the next value */
 	public Object getNextValue() {
 		DropFinder drop_finder = new DropFinder();
-		cache.find(drop_finder);
+		cache.findObject(drop_finder);
 		return drop_finder.getNextDrop();
 	}
 
 	/** Get the previous value */
 	public Object getPreviousValue() {
 		DropFinder drop_finder = new DropFinder();
-		cache.find(drop_finder);
+		cache.findObject(drop_finder);
 		return drop_finder.getPreviousDrop();
 	}
 
 	/** Get the next available value */
 	public Short getNextAvailable() {
 		DropFinder drop_finder = new DropFinder();
-		cache.find(drop_finder);
+		cache.findObject(drop_finder);
 		return drop_finder.getNextAvailable();
 	}
 }

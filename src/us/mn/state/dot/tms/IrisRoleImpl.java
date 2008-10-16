@@ -23,7 +23,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
 
 /**
@@ -38,7 +38,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	static protected SQLConnection store;
 
 	/** Lookup all the roles */
-	static public void lookup(SQLConnection c, final Namespace ns)
+	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;

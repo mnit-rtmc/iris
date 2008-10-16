@@ -18,7 +18,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
  * A DMS sign group is a relation between dynamic message signs (DMS) and
@@ -77,8 +77,8 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** Create a new DMS sign group */
-	protected DmsSignGroupImpl(Namespace ns, String n, String d, String g)
-		throws NamespaceError
+	protected DmsSignGroupImpl(ServerNamespace ns, String n, String d,
+		String g) throws NamespaceError
 	{
 		this(n, d, (SignGroupImpl)ns.lookupObject("sign_group", g));
 	}

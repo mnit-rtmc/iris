@@ -157,7 +157,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Find all r_nodes on the specified corridor */
 	public R_Node findCorridor(final Checker<R_Node> ch) {
-		return cache.find(new Checker<R_Node>() {
+		return cache.findObject(new Checker<R_Node>() {
 			public boolean check(R_Node n) {
 				if(checkCorridor(n))
 					return ch.check(n);

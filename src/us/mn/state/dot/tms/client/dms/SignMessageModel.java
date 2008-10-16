@@ -127,7 +127,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	 * @return local SignGroup if it exists, otherwise null
 	 */
 	protected SignGroup getLocalSignGroup() {
-		DmsSignGroup dsg = dms_sign_groups.find(
+		DmsSignGroup dsg = dms_sign_groups.findObject(
 			new Checker<DmsSignGroup>()
 		{
 			public boolean check(DmsSignGroup g) {
@@ -175,11 +175,11 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	{
 		if(sign_text == null || msg == null || sg == null || line < 1)
 			return null;
-		return sign_text.find(new Checker<SignText>() {
+		return sign_text.findObject(new Checker<SignText>() {
 			public boolean check(SignText st) {
 				if(st.getLine() != line)
 					return false;
-				if(!st.getSignGroup().getName().equals(sg.getName()))
+				if(st.getSignGroup() != sg)
 					return false;
 				if(!st.getMessage().equals(msg))
 					return false;
@@ -196,7 +196,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	protected void addGroup(final SignGroup g) {
 		groups.add(g.getName());
 		// add new sign text lines in new group to combobox models
-		sign_text.find(new Checker<SignText>() {
+		sign_text.findObject(new Checker<SignText>() {
 			public boolean check(SignText st) {
 				if(st.getSignGroup() == g)
 					addSignText(st);
@@ -212,7 +212,7 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	protected void removeGroup(final SignGroup g) {
 		groups.remove(g.getName());
 		// delete lines from combobox models associated with sign group
-		sign_text.find(new Checker<SignText>() {
+		sign_text.findObject(new Checker<SignText>() {
 			public boolean check(SignText st) {
 				if(st.getSignGroup() == g)
 					removeSignText(st);

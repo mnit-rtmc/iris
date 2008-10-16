@@ -17,8 +17,7 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.Namespace;
 
 /**
  * GeoLoc contains attributes necessary to describe a map location.
@@ -117,10 +116,10 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Create a new geo location */
 	protected GeoLocImpl(Namespace ns, String n, String f, short fd,
 		String x, short xd, short xm, Integer e, Integer eo,
-		Integer nr, Integer no) throws NamespaceError
+		Integer nr, Integer no)
 	{
-		this(n, (Road)ns.getObject(Road.SONAR_TYPE, f), fd,
-			(Road)ns.getObject(Road.SONAR_TYPE, x), xd, xm,
+		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, f), fd,
+			(Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm,
 			e, eo, nr, no);
 	}
 

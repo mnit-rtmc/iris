@@ -184,20 +184,15 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Print the body of the detector sample XML file */
 	static protected void printSampleXmlBody(final PrintWriter out) {
-		try {
-			namespace.findObject(Detector.SONAR_TYPE,
-				new Checker<DetectorImpl>()
-			{
-				public boolean check(DetectorImpl det) {
-					det.calculateFakeData();
-					det.printSampleXmlElement(out);
-					return false;
-				}
-			});
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-		}
+		namespace.findObject(Detector.SONAR_TYPE,
+			new Checker<DetectorImpl>()
+		{
+			public boolean check(DetectorImpl det) {
+				det.calculateFakeData();
+				det.printSampleXmlElement(out);
+				return false;
+			}
+		});
 	}
 
 	/** Print the tail of the detector sample XML file */

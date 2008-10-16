@@ -51,7 +51,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 
 	/** Lookup a DMS sign group */
 	protected DmsSignGroup lookupDmsSignGroup(final SignGroup group) {
-		return dms_sign_groups.find(new Checker<DmsSignGroup>() {
+		return dms_sign_groups.findObject(new Checker<DmsSignGroup>() {
 			public boolean check(DmsSignGroup g) {
 				return g.getSignGroup() == group &&
 					g.getDms().equals(dms_id);

@@ -16,8 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
 import java.util.StringTokenizer;
-import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.Namespace;
 
 /**
  * Fake Detector
@@ -83,7 +82,7 @@ public class FakeDetector {
 
 	/** Create a new fake detector */
 	public FakeDetector(String d, Namespace ns)
-		throws NumberFormatException, NamespaceError
+		throws NumberFormatException
 	{
 		LinkedList<DetectorImpl> p = new LinkedList<DetectorImpl>();
 		LinkedList<DetectorImpl> m = new LinkedList<DetectorImpl>();
@@ -117,7 +116,7 @@ public class FakeDetector {
 				percent = Integer.parseInt(t);
 				continue;
 			}
-			DetectorImpl det = (DetectorImpl)ns.getObject(
+			DetectorImpl det = (DetectorImpl)ns.lookupObject(
 				Detector.SONAR_TYPE, t);
 			if(type == PLUS)
 				p.add(det);

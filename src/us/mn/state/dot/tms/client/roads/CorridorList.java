@@ -244,7 +244,10 @@ public class CorridorList extends JPanel {
 
 	/** Do the add button action */
 	protected void doAddButton() {
-		// FIXME
+		// FIXME: 1) come up with a unique name for the new r_node
+		// 2) create a new geo_loc with freeway and free_dir set
+		// 3) wait for proxyAdded on new geo_loc
+		// 4) create r_node with geo_loc set
 	}
 
 	/** Do the remove button action */

@@ -24,9 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.event.DetFailEvent;
 import us.mn.state.dot.tms.event.EventType;
 
@@ -42,7 +41,7 @@ public class DetectorImpl extends Device2Impl implements Detector,
 	static protected final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Load all the detectors */
-	static protected void loadAll() throws TMSException, NamespaceError {
+	static protected void loadAll() throws TMSException {
 		System.err.println("Loading detectors...");
 		namespace.registerType(SONAR_TYPE, DetectorImpl.class);
 		store.query("SELECT name, controller, pin, r_node, lane_type, "+
@@ -129,11 +128,11 @@ public class DetectorImpl extends Device2Impl implements Detector,
 	/** Create a detector */
 	protected DetectorImpl(Namespace ns, String n, String c, int p,
 		String r, short lt, short ln, boolean a, boolean ff, float fl,
-		String f, String nt) throws NamespaceError
+		String f, String nt)
 	{
-		this(n, (ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
-			p, (R_NodeImpl)ns.getObject(R_Node.SONAR_TYPE, r), lt,
-			ln, a, ff, fl, f, nt);
+		this(n,(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,c),
+			p, (R_NodeImpl)ns.lookupObject(R_Node.SONAR_TYPE, r),
+			lt, ln, a, ff, fl, f, nt);
 	}
 
 	/** Initialize the transient state */
@@ -383,9 +382,6 @@ public class DetectorImpl extends Device2Impl implements Detector,
 	{
 		try {
 			return new FakeDetector(f, namespace);
-		}
-		catch(NamespaceError e) {
-			throw new ChangeVetoException("Unknown name");
 		}
 		catch(NumberFormatException e) {
 			throw new ChangeVetoException(

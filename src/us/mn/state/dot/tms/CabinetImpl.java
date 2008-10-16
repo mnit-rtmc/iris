@@ -17,9 +17,8 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * A cabinet is a field cabinet enclosure which contains controllers.
@@ -85,10 +84,10 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 
 	/** Create a new cabinet */
 	protected CabinetImpl(Namespace ns, String n, String s, String l,
-		Float m) throws NamespaceError
+		Float m)
 	{
-		this(n, (CabinetStyle)ns.getObject(CabinetStyle.SONAR_TYPE, s),
-			(GeoLoc)ns.getObject(GeoLoc.SONAR_TYPE, l), m);
+		this(n, (CabinetStyle)ns.lookupObject( CabinetStyle.SONAR_TYPE,
+			s), (GeoLoc)ns.lookupObject(GeoLoc.SONAR_TYPE, l), m);
 	}
 
 	/** Cabinet style */

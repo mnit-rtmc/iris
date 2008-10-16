@@ -27,7 +27,6 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.ntcip.ShortErrorStatus;
@@ -850,7 +849,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Lookup the best font */
 	static protected FontImpl _lookupFont(final int h, final int w,
-		final int ls) throws NamespaceError
+		final int ls)
 	{
 		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
 			new Checker<FontImpl>()
@@ -863,16 +862,11 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Lookup the best font */
 	static protected FontImpl lookupFont(int h, int w, int ls) {
-		try {
-			FontImpl f = _lookupFont(h, w, ls);
-			if(f != null || w == 0)
-				return f;
-			else
-				return _lookupFont(h, 0, ls);
-		}
-		catch(NamespaceError e) {
-			return null;
-		}
+		FontImpl f = _lookupFont(h, w, ls);
+		if(f != null || w == 0)
+			return f;
+		else
+			return _lookupFont(h, 0, ls);
 	}
 
 	/** Get the appropriate font for this sign */
@@ -1659,12 +1653,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Lookup a station */
 	static protected StationImpl lookupStation(String sid) {
-		try {
-			return (StationImpl)namespace.getObject(
-				Station.SONAR_TYPE, sid);
-		}
-		catch(NamespaceError e) {
-			return null;
-		}
+		return (StationImpl)namespace.lookupObject(Station.SONAR_TYPE,
+			sid);
 	}
 }

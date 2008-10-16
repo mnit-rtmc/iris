@@ -187,7 +187,7 @@ public class PolicyForm extends AbstractForm {
 
 	/** Get the value of the named policy */
 	protected int getPolicyValue(String p) {
-		SystemPolicy sp = cache.getObject(p);
+		SystemPolicy sp = cache.lookupObject(p);
 		if(sp != null)
 			return sp.getValue();
 		else
@@ -211,7 +211,7 @@ public class PolicyForm extends AbstractForm {
 
 	/** Set the value of the named policy */
 	protected void setPolicyValue(String p, int v) {
-		SystemPolicy sp = cache.getObject(p);
+		SystemPolicy sp = cache.lookupObject(p);
 		if(sp != null)
 			sp.setValue(v);
 		else {

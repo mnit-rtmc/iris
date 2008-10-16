@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
 import us.mn.state.dot.sonar.PropertyLoader;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.utils.Agency;
 
@@ -83,7 +83,7 @@ public class MainServer {
 			m_serverprops = PropertyLoader.load(PROP_FILE);
 			Agency.readProps(m_serverprops);
 			TMSImpl tms = new TMSImpl(m_serverprops);
-			Namespace ns = new Namespace();
+			ServerNamespace ns = new ServerNamespace();
 			TMSObjectImpl.namespace = ns;
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);

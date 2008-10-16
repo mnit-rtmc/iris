@@ -20,9 +20,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.server.Namespace;
 
 /**
  * R_NodeImpl is an implementation of the R_Node interface. Each
@@ -81,7 +80,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("geo_loc", geo_loc.getName());
+		map.put("geo_loc", geo_loc);
 		map.put("node_type", node_type.ordinal());
 		map.put("pickable", pickable);
 		map.put("transition", transition.ordinal());
@@ -105,11 +104,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Create a new r_node */
-	public R_NodeImpl(String n) throws TMSException, SonarException {
+	public R_NodeImpl(String n) {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
-		geo_loc = g;
 	}
 
 	/** Create an r_node */
@@ -132,16 +128,10 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Create an r_node */
 	protected R_NodeImpl(Namespace ns, String n, String loc, int typ,
 		boolean p, int trn, int l, boolean as, int s, String st, int sl,
-		String nt) throws NamespaceError
+		String nt)
 	{
-		this(n, (GeoLocImpl)ns.getObject(GeoLoc.SONAR_TYPE, loc),
+		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
 			typ, p, trn, l, as, s, st, sl, nt);
-	}
-
-	/** Destroy an object */
-	public void doDestroy() throws TMSException {
-		super.doDestroy();
-		store.destroy(geo_loc);
 	}
 
 	/** Initialize transient fields */
@@ -152,6 +142,14 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Node location */
 	protected GeoLocImpl geo_loc;
+
+	/** Set the location.  This is needed for creating a new phantom r_node
+	 * with SONAR.  It is an error to call this method this after the
+	 * r_node has been created. */
+	public void setGeoLoc(GeoLoc loc) {
+		assert geo_loc == null;
+		geo_loc = (GeoLocImpl)loc;
+	}
 
 	/** Get the location */
 	public GeoLoc getGeoLoc() {

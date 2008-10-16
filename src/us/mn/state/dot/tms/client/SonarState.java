@@ -419,36 +419,36 @@ public class SonarState extends Client {
 
 	/** Look up the specified user */
 	public User lookupUser(String name) {
-		return users.getObject(name);
+		return users.lookupObject(name);
 	}
 
 	/** Lookup a geo location */
 	public GeoLoc lookupGeoLoc(String name) {
-		return geo_locs.getObject(name);
+		return geo_locs.lookupObject(name);
 	}
 
 	/** Lookup a controller */
 	public Controller lookupController(String name) {
-		return controllers.getObject(name);
+		return controllers.lookupObject(name);
 	}
 
 	/** Lookup a detector */
 	public Detector lookupDetector(String name) {
-		return detectors.getObject(name);
+		return detectors.lookupObject(name);
 	}
 
 	/** Lookup a station */
 	public Station lookupStation(String name) {
-		return stations.getObject(name);
+		return stations.lookupObject(name);
 	}
 
 	/** Lookup a camera */
 	public Camera lookupCamera(String name) {
-		return cameras.getObject(name);
+		return cameras.lookupObject(name);
 	}
 
 	/** Look up the specified connection */
 	public Connection lookupConnection(String name) {
-		return connections.getObject(name);
+		return connections.lookupObject(name);
 	}
 }

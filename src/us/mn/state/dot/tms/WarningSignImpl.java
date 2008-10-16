@@ -17,9 +17,8 @@ package us.mn.state.dot.tms;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
-import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.WarningSignPoller;
 
@@ -98,13 +97,13 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 	}
 
 	/** Create a warning sign */
-	protected WarningSignImpl(Namespace ns, String n, String l, String c,
-		int p, String nt, String cam, String m) throws NamespaceError
+	protected WarningSignImpl(Namespace ns, String n, String l,
+		String c, int p, String nt, String cam, String m)
 	{
-		this(n, (GeoLocImpl)ns.getObject(GeoLoc.SONAR_TYPE, l),
-			(ControllerImpl)ns.getObject(Controller.SONAR_TYPE, c),
-			p, nt, (CameraImpl)ns.getObject(Camera.SONAR_TYPE, cam),
-			m);
+		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
+		       (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,c),
+			p, nt,
+			(CameraImpl)ns.lookupObject(Camera.SONAR_TYPE, cam), m);
 	}
 
 	/** Destroy an object */

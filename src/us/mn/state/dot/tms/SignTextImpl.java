@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
  * Sign text contains the properties of a single line message for display
@@ -100,7 +100,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	}
 
 	/** Create a new sign text message */
-	protected SignTextImpl(Namespace ns, String n, String g, short l,
+	protected SignTextImpl(ServerNamespace ns, String n, String g, short l,
 		String m, short p) throws NamespaceError
 	{
 		this(n, (SignGroupImpl)ns.lookupObject("sign_group", g), l,m,p);

@@ -21,10 +21,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import us.mn.state.dot.sonar.Marshaller;
-import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.server.Namespace;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
@@ -109,11 +107,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Create a new controller */
 	protected ControllerImpl(Namespace ns, String n, String c, String l,
-		short d, boolean a, String nt) throws NamespaceError,
-		TMSException
+		short d, boolean a, String nt) throws TMSException
 	{
-		this(n, (Cabinet)ns.getObject(Cabinet.SONAR_TYPE, c),
-			(CommLink)ns.getObject(CommLink.SONAR_TYPE, l),
+		this(n, (Cabinet)ns.lookupObject(Cabinet.SONAR_TYPE, c),
+			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, l),
 			d, a, nt);
 	}
 
@@ -691,7 +688,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected void notifyIO() {
 		if(MainServer.server != null) {
 			Integer[] io = getCio();
-			String[] ios = Marshaller.marshall(Integer.class, io);
+			String[] ios = namespace.marshall(Integer.class, io);
 			MainServer.server.setAttribute(this, "cio", ios);
 		}
 	}

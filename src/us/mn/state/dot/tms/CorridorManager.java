@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
  * This is a class to manage freeway network corridors.
@@ -31,14 +31,14 @@ import us.mn.state.dot.sonar.server.Namespace;
 public class CorridorManager {
 
 	/** SONAR namespace */
-	protected final Namespace namespace;
+	protected final ServerNamespace namespace;
 
 	/** Map to hold all corridors */
 	protected final Map<String, Corridor> corridors =
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */
-	public CorridorManager(Namespace ns) throws NamespaceError {
+	public CorridorManager(ServerNamespace ns) throws NamespaceError {
 		namespace = ns;
 		namespace.findObject(R_Node.SONAR_TYPE,
 			new Checker<R_NodeImpl>()

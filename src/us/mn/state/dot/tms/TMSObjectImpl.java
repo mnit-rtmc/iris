@@ -30,8 +30,7 @@ import java.rmi.server.ServerNotActiveException;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -62,7 +61,7 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	static SQLConnection store;
 
 	/** SONAR namespace */
-	static Namespace namespace;
+	static ServerNamespace namespace;
 
 	/** Corridor manager */
 	static CorridorManager corridors;
@@ -283,23 +282,16 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	}
 
 	/** Lookup a geo location in the SONAR namespace */
-	static protected GeoLocImpl lookupGeoLoc(final String l) {
-		if(l == null)
-			return null;
-		try {
-			return (GeoLocImpl)namespace.getObject(
+	static protected GeoLocImpl lookupGeoLoc(String l) {
+		if(l != null) {
+			return (GeoLocImpl)namespace.lookupObject(
 				GeoLoc.SONAR_TYPE, l);
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
+		} else
 			return null;
-		}
 	}
 
 	/** Lookup the named system policy */
-	static protected SystemPolicyImpl lookupPolicy(final String p)
-		throws NamespaceError
-	{
+	static protected SystemPolicyImpl lookupPolicy(final String p) {
 		return (SystemPolicyImpl)namespace.findObject(
 			SystemPolicy.SONAR_TYPE, new Checker<SystemPolicyImpl>()
 		{
@@ -311,21 +303,15 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** Get the value of a system policy */
 	static public int getPolicyValue(String p) {
-		try {
-			SystemPolicyImpl sp = lookupPolicy(p);
-			if(sp != null)
-				return sp.getValue();
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-		}
-		return 0;
+		SystemPolicyImpl sp = lookupPolicy(p);
+		if(sp != null)
+			return sp.getValue();
+		else
+			return 0;
 	}
 
 	/** Lookup a holiday which matches the given calendar */
-	static protected HolidayImpl lookupHoliday(final Calendar stamp)
-		throws NamespaceError
-	{
+	static protected HolidayImpl lookupHoliday(final Calendar stamp) {
 		return (HolidayImpl)namespace.findObject(Holiday.SONAR_TYPE,
 			new Checker<HolidayImpl>()
 		{
@@ -337,39 +323,20 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** Check if the given date/time matches any holiday */
 	static public boolean isHoliday(Calendar stamp) {
-		try {
-			return lookupHoliday(stamp) != null;
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-			return false;
-		}
+		return lookupHoliday(stamp) != null;
 	}
 
 	/** Lookup a camera in the SONAR namespace */
 	static public CameraImpl lookupCamera(String name) {
-		try {
-			return (CameraImpl)namespace.lookupObject(
-				Camera.SONAR_TYPE, name);
-		}
-		catch(NamespaceError e) {
-			System.err.println("lookupCamera(" + name +
-				") FAILED: " + e.getMessage());
-			return null;
-		}
+		return (CameraImpl)namespace.lookupObject(Camera.SONAR_TYPE,
+			name);
 	}
 
 	/** Lookup a controller in the SONAR namespace */
 	static protected ControllerImpl lookupController(final String c) {
 		if(c == null || c.equals(""))
 			return null;
-		try {
-			return (ControllerImpl)namespace.getObject(
-				Controller.SONAR_TYPE, c);
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-			return null;
-		}
+		return (ControllerImpl)namespace.lookupObject(
+			Controller.SONAR_TYPE, c);
 	}
 }

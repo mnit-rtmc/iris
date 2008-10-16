@@ -70,7 +70,7 @@ public class DirectionalIncidentTheme extends StyledTheme {
 	static protected int getPolicyValue(TypeCache<SystemPolicy> c,
 		String p)
 	{
-		SystemPolicy sp = c.getObject(p);
+		SystemPolicy sp = c.lookupObject(p);
 		if(sp != null)
 			return sp.getValue();
 		else

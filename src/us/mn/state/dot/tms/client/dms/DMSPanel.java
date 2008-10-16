@@ -461,7 +461,7 @@ public class DMSPanel extends JPanel {
 
 	/** Get the value of the named policy */
 	protected int getPolicyValue(String p) {
-		SystemPolicy sp = cache.getObject(p);
+		SystemPolicy sp = cache.lookupObject(p);
 		if(sp != null)
 			return sp.getValue();
 		else

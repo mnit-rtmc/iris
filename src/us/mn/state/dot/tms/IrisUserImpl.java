@@ -23,7 +23,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.server.Namespace;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 
 /**
@@ -40,7 +40,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	static protected TableMapping mapping;
 
 	/** Lookup all the users */
-	static public void lookup(SQLConnection c, final Namespace ns)
+	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;
@@ -86,8 +86,8 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	}
 
 	/** Create an IRIS user from database lookup */
-	protected IrisUserImpl(Namespace ns, String n, String d, String fn)
-		throws TMSException, NamespaceError
+	protected IrisUserImpl(ServerNamespace ns, String n, String d,
+		String fn) throws TMSException, NamespaceError
 	{
 		this(n);
 		dn = d;

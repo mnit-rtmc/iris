@@ -149,19 +149,19 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
 		}
 		TypeCache<Alarm> alarms = state.getAlarms();
-		alarms.find(new ControllerIOFinder(io));
+		alarms.findObject(new ControllerIOFinder<Alarm>(io));
 		TypeCache<Camera> cams = state.getCameras();
-		cams.find(new ControllerIOFinder(io));
+		cams.findObject(new ControllerIOFinder<Camera>(io));
 		TypeCache<Detector> dets = state.getDetectors();
-		dets.find(new ControllerIOFinder(io));
+		dets.findObject(new ControllerIOFinder<Detector>(io));
 		TypeCache<WarningSign> w_signs = state.getWarningSigns();
-		w_signs.find(new ControllerIOFinder(io));
+		w_signs.findObject(new ControllerIOFinder<WarningSign>(io));
 		return io;
 	}
 
 	/** A controller IO finder helps locate IO for a controller */
-	protected class ControllerIOFinder implements
-		Checker<ControllerIO_SONAR>
+	protected class ControllerIOFinder<T extends ControllerIO_SONAR>
+		implements Checker<T>
 	{
 		protected final ControllerIO[] io;
 		protected ControllerIOFinder(ControllerIO[] _io) {

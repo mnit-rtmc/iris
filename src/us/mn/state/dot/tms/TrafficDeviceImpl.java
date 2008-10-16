@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.rmi.RemoteException;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.vault.FieldMap;
 
@@ -138,17 +137,9 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 			return null;
 		}
 
-		String name=id+"_"+aname;
-		TrafficDeviceAttributeImpl ret=null;
-		try {
-			ret = (TrafficDeviceAttributeImpl)namespace.getObject(
-				TrafficDeviceAttribute.SONAR_TYPE, name);
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-			ret=null;
-		}
-		return ret;
+		String name = id + "_" + aname;
+		return (TrafficDeviceAttributeImpl)namespace.lookupObject(
+			TrafficDeviceAttribute.SONAR_TYPE, name);
 	}
 
 	/** Get the value of the named attribute for a specific device. This 
