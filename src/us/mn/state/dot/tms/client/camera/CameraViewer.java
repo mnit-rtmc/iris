@@ -35,6 +35,7 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.security.IrisUser;
@@ -174,6 +175,11 @@ public class CameraViewer extends JPanel
 		logger = l;
 		state = st;
 		user = u;
+
+		// FIXME: use to be implemented
+		boolean onscreenPTZ = SystemAttributeHelper.useOnScrnPTZ();
+		int numPresets = SystemAttributeHelper.numPresetBtns();
+
 		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();

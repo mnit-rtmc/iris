@@ -34,14 +34,22 @@ public interface SystemAttribute extends SonarObject {
 	final String AGENCY_ID = "agency_id";
 
 	/** DMSDispatcher */
-	final String DMSDISPATCHER_GETSTATUS_BTN = "dmsdispatcher_getstatus_btn";
+	final String DMSDISPATCHER_GETSTATUS_BTN = 
+		"dmsdispatcher_getstatus_btn";
+
+	/** CameraViewer */
+	final String CAMERAVIEWER_ONSCRN_PTZCTRLS = 
+		"cameraviewer_onscrn_ptzctrls";
+	final String CAMERAVIEWER_NUM_PRESET_BTNS = 
+		"cameraviewer_num_preset_btns";
 
 	/** possible values for the AGENCY_ID attribute */
 	final String AGENCY_ID_MNDOT = "mndot";
 	final String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
 
 	/** Caltrans D10 specific values */
-	final String CALTRANS_D10_CAWS_ACTIVE = "caltrans_d10_caws_active";
+	final String CALTRANS_D10_CAWS_ACTIVE = 
+		"caltrans_d10_caws_active";
 
 	/** Set the attribute value */
 	void setValue(String arg_value);

@@ -215,5 +215,34 @@ public class SystemAttributeHelper {
 		return ret;
 	}
 
+	/** Return true to display onscreen PTZ controls in CameraViewer */
+	public static boolean useOnScrnPTZ() {
+		final String aname = 
+			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS;
+		final boolean DEFAULT = false;
+		boolean ret;
+		try {
+			ret = SystemAttributeHelper.getValueBoolean(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,DEFAULT));
+			ret = DEFAULT;
+		}
+		return ret;
+	}
+
+	/** Return number of CameraViewer PTZ preset buttons */
+	public static int numPresetBtns() {
+		final String aname = 
+			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS;
+		final int DEFAULT = 3;
+		int ret;
+		try {
+			ret = SystemAttributeHelper.getValueInt(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,DEFAULT));
+			ret = DEFAULT;
+		}
+		return ret;
+	}
 }
 
