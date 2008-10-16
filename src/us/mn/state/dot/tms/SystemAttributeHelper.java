@@ -57,17 +57,34 @@ public class SystemAttributeHelper {
 		return a.getValue();
 	}
 
-	/** Get the value of the named attribute as an integer.
+        /** Get the value of the named attribute as an integer.
+         *  @param aname Name of an existing system attribute.
+         *  @throws IllegalArgumentException if the specified attribute 
+         *          was not found.
+         *  @return The value of the named attribute;  
+         */
+        static public int getValueInt(final String aname) 
+                throws IllegalArgumentException 
+        {
+                return SString.stringToInt(
+                        SystemAttributeHelper.getValue(aname));
+        }
+
+	/** Get the value of the named attribute as an integer. If the
+	 *  attribute is not found, the default is silently returned.
 	 *  @param aname Name of an existing system attribute.
-	 *  @throws IllegalArgumentException if the specified attribute 
-	 *	    was not found.
-	 *  @return The value of the named attribute;  
+	 *  @param dvalue Default value.
+	 *  @return The value of the named attribute or the default;  
 	 */
-	static public int getValueInt(final String aname) 
-		throws IllegalArgumentException 
-	{
-		return SString.stringToInt(
-			SystemAttributeHelper.getValue(aname));
+	static public int getValueIntDef(final String aname,int dvalue) {
+		int ret = dvalue;
+		try {
+			ret = getValueInt(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,
+				new Integer(dvalue).toString()));
+		}
+		return ret;
 	}
 
 	/** Get the value of the named attribute as a boolean.
@@ -81,6 +98,23 @@ public class SystemAttributeHelper {
 	{
 		return SString.stringToBoolean(
 			SystemAttributeHelper.getValue(aname));
+	}
+
+	/** Get the value of the named attribute as a boolean. If the
+	 *  attribute is not found, the default is silently returned.
+	 *  @param aname Name of an existing system attribute.
+	 *  @param dvalue Default value.
+	 *  @return The value of the named attribute or the default;  
+	 */
+	static public boolean getValueBooleanDef(final String aname,boolean dvalue) {
+		boolean ret = dvalue;
+		try {
+			ret = getValueBoolean(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,
+				new Boolean(dvalue).toString()));
+		}
+		return ret;
 	}
 
 	/** return true if the specified attribute matches expected value */
@@ -124,16 +158,10 @@ public class SystemAttributeHelper {
 
 	/** return the DMS poll time in seconds */
 	public static int getDMSPollTimeSecs() {
-		final String aname = SystemAttribute.DMS_POLL_FREQ_SECS;
 		final int MINIMUM = 5;
 		final int DEFAULT = 30;
-		int secs;
-		try {
-			secs = SystemAttributeHelper.getValueInt(aname);
-		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(aname,DEFAULT));
-			secs = DEFAULT;
-		}
+		int secs = SystemAttributeHelper.getValueIntDef(
+			SystemAttribute.DMS_POLL_FREQ_SECS, DEFAULT);
 		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 
@@ -202,47 +230,20 @@ public class SystemAttributeHelper {
 
 	/** Return true to use the DMSDispatcher get status button */
 	public static boolean useGetStatusBtn() {
-		final String aname = 
-			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN;
-		final boolean DEFAULT = false;
-		boolean ret;
-		try {
-			ret = SystemAttributeHelper.getValueBoolean(aname);
-		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(aname,DEFAULT));
-			ret = DEFAULT;
-		}
-		return ret;
+		return getValueBooleanDef(
+			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN,false);
 	}
 
 	/** Return true to display onscreen PTZ controls in CameraViewer */
 	public static boolean useOnScrnPTZ() {
-		final String aname = 
-			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS;
-		final boolean DEFAULT = false;
-		boolean ret;
-		try {
-			ret = SystemAttributeHelper.getValueBoolean(aname);
-		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(aname,DEFAULT));
-			ret = DEFAULT;
-		}
-		return ret;
+		return getValueBooleanDef(
+			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS,false);
 	}
 
 	/** Return number of CameraViewer PTZ preset buttons */
 	public static int numPresetBtns() {
-		final String aname = 
-			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS;
-		final int DEFAULT = 3;
-		int ret;
-		try {
-			ret = SystemAttributeHelper.getValueInt(aname);
-		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(aname,DEFAULT));
-			ret = DEFAULT;
-		}
-		return ret;
+		return SystemAttributeHelper.getValueIntDef(
+			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, 3);
 	}
 }
 
