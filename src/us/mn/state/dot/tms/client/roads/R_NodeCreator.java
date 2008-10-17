@@ -49,8 +49,18 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	/** R_Node type cache */
 	protected final TypeCache<R_Node> r_nodes;
 
+	/** Get the r_node type cache */
+	public TypeCache<R_Node> getR_Nodes() {
+		return r_nodes;
+	}
+
 	/** Geo loc type cache */
 	protected final TypeCache<GeoLoc> geo_locs;
+
+	/** Get the location type cache */
+	public TypeCache<GeoLoc> getGeoLocs() {
+		return geo_locs;
+	}
 
 	/** SONAR User for permission checks */
 	protected final User user;

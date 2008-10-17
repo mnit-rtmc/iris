@@ -30,8 +30,11 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -43,7 +46,7 @@ import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
  *
  * @author Douglas Lau
  */
-public class CorridorList extends JPanel {
+public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Offset angle for default North map markers */
 	static protected final double NORTH_ANGLE = Math.PI / 2;
@@ -53,6 +56,12 @@ public class CorridorList extends JPanel {
 
 	/** Roadway node creator */
 	protected final R_NodeCreator creator;
+
+	/** Roadway node type cache */
+	protected final TypeCache<R_Node> r_nodes;
+
+	/** Location type cache */
+	protected final TypeCache<GeoLoc> geo_locs;
 
 	/** Renderer for painting roadway nodes */
 	protected final R_NodeCellRenderer renderer =
@@ -65,7 +74,7 @@ public class CorridorList extends JPanel {
 	protected CorridorBase corridor;
 
 	/** Roadway node renderer list */
-	protected List<R_NodeRenderer> r_nodes;
+	protected List<R_NodeRenderer> r_list;
 
 	/** Roadway node renderer list model */
 	protected DefaultListModel nr_list;
@@ -84,6 +93,8 @@ public class CorridorList extends JPanel {
 		super(new GridBagLayout());
 		manager = m;
 		creator = c;
+		r_nodes = creator.getR_Nodes();
+		geo_locs = creator.getGeoLocs();
 		setBorder(BorderFactory.createTitledBorder(
 			"Corridor Node List"));
 		jlist.setCellRenderer(renderer);
@@ -135,6 +146,81 @@ public class CorridorList extends JPanel {
 		add(ebutton, bag);
 		bag.gridx = 2;
 		add(rbutton, bag);
+		r_nodes.addProxyListener(this);
+		geo_locs.addProxyListener(new ProxyListener<GeoLoc>() {
+			public void proxyAdded(GeoLoc proxy) { }
+			public void enumerationComplete() { }
+			public void proxyRemoved(GeoLoc proxy) { }
+			public void proxyChanged(GeoLoc proxy, String a) {
+				geoLocChanged(proxy, a);
+			}
+		});
+	}
+
+	/** Enumeration complete flag */
+	protected boolean complete;
+
+	/** Called when a proxy has been added */
+	public void proxyAdded(final R_Node proxy) {
+		// Don't hog the SONAR TaskProcessor thread
+		if(complete && manager.checkCorridor(proxy)) {
+			new AbstractJob() {
+				public void perform() {
+					updateListModel();
+				}
+			}.addToScheduler();
+		}
+	}
+
+	/** Called when proxy enumeration is complete */
+	public void enumerationComplete() {
+		complete = true;
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				updateListModel();
+			}
+		}.addToScheduler();
+	}
+
+	/** Called when a proxy has been removed */
+	public void proxyRemoved(R_Node proxy) {
+		if(manager.checkCorridor(proxy)) {
+			// Don't hog the SONAR TaskProcessor thread
+			new AbstractJob() {
+				public void perform() {
+					updateListModel();
+				}
+			}.addToScheduler();
+		}
+	}
+
+	/** Called when a proxy attribute has changed */
+	public void proxyChanged(R_Node proxy, String a) {
+		// not interested
+	}
+
+	/** Called when a GeoLoc proxy attribute has changed */
+	protected void geoLocChanged(final GeoLoc loc, String a) {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				if(checkCorridor(loc))
+					updateListModel();
+			}
+		}.addToScheduler();
+	}
+
+	/** Check the corridor for a geo location */
+	protected boolean checkCorridor(GeoLoc loc) {
+		// NOTE: this assumes that GeoLoc name matches R_Node name
+		R_Node proxy = r_nodes.lookupObject(loc.getName());
+		// FIXME: should return true if GeoLoc changes to another
+		// corridor
+		if(proxy != null)
+			return manager.checkCorridor(proxy);
+		else
+			return false;
 	}
 
 	/** Create a sorted list of roadway nodes for one corridor */
@@ -160,12 +246,12 @@ public class CorridorList extends JPanel {
 			return null;
 	}
 
-	/** Set the corridor to display */
-	public void setCorridor(String c) {
+	/** Update the corridor list model */
+	public void updateListModel() {
 		Set<R_Node> node_s = manager.createSet();
-		r_nodes = createRendererList(node_s);
+		r_list = createRendererList(node_s);
 		nr_list = new DefaultListModel();
-		for(R_NodeRenderer r: r_nodes)
+		for(R_NodeRenderer r: r_list)
 			nr_list.addElement(r);
 		jlist.setModel(nr_list);
 	}
@@ -232,7 +318,7 @@ public class CorridorList extends JPanel {
 	protected R_Node getSelectedNode() {
 		int index = jlist.getSelectedIndex();
 		try {
-			return r_nodes.get(index).getProxy();
+			return r_list.get(index).getProxy();
 		}
 		catch(IndexOutOfBoundsException e) {
 			return null;

@@ -69,7 +69,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected final TmsConnection connection;
 
 	/** Currently selected corridor */
-	protected String corridor = null;
+	protected String corridor = "";
 
 	/** Select a new freeway corridor */
 	public void setCorridor(String c) {
@@ -168,9 +168,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Check the corridor of an r_node */
-	protected boolean checkCorridor(R_Node n) {
+	public boolean checkCorridor(R_Node n) {
 		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
-		return corridor == null || corridor.equals(c);
+		return corridor.equals(c);
 	}
 
 	/** Show the properties form for the selected proxy */
@@ -221,7 +221,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(R_Node proxy) {
-		if(checkCorridor(proxy))
+		if("".equals(corridor) || checkCorridor(proxy))
 			return super.findGeoLoc(proxy);
 		else
 			return null;
