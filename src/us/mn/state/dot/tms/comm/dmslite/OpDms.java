@@ -52,9 +52,18 @@ abstract public class OpDms extends DeviceOperation {
 	protected final DMSImpl m_dms;
 
 	/** Create a new DMS operation */
-	public OpDms(int p, DMSImpl d) {
+	public OpDms(int p, DMSImpl d, String opName) {
 		super(p, d);
 		m_dms = d;
+		m_opName = opName;
+	}
+
+	/** operation name */
+	private String m_opName = "";
+
+	/** get operation name */
+	public String getOpName() {
+		return m_opName;
 	}
 
 	/** 
@@ -171,5 +180,13 @@ abstract public class OpDms extends DeviceOperation {
 		note.append(".");
 		return note.toString();
 	}
+
+	/** set dms status */
+	public void setDmsStatus(String s) {
+		final int MAXLEN = 64;
+		s = SString.truncate(s,MAXLEN);
+		m_dms.setStatus(getOpName() + ": " + s);
+	}
+
 }
 

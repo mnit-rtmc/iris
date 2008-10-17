@@ -43,11 +43,9 @@ import java.util.TreeMap;
  */
 public class OpResetModem extends OpDms
 {
-	protected static final String OPNAME="OpResetModem";
-
 	/** Create a new DMS query status object */
 	public OpResetModem(DMSImpl d) {
-		super(DEVICE_DATA, d);
+		super(DEVICE_DATA, d, "OpResetModem");
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -84,7 +82,7 @@ public class OpResetModem extends OpDms
 			setMsgAttributes(mess);
 
 			// build req msg and expected response
-			mess.setName(OPNAME);
+			mess.setName(getOpName());
 			mess.setReqMsgName("SetInitModemReqMsg");
 			mess.setRespMsgName("SetInitModemRespMsg");
 			// FIXME: fields below are placeholders and non-functional until this operation is implemented
@@ -142,7 +140,7 @@ public class OpResetModem extends OpDms
 			} else {
 				System.err.println(
 				    "OpResetModem: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
-				m_dms.setStatus(OPNAME+": "+errmsg);
+				setDmsStatus(errmsg);
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {

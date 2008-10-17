@@ -29,8 +29,6 @@ import java.io.IOException;
  */
 public class OpBlank extends OpDms
 {
-	protected static final String OPNAME = "OpBlank";
-
 	/** associated DMS */
 	private final DMSImpl m_dms;
 
@@ -39,7 +37,7 @@ public class OpBlank extends OpDms
 
 	/** Create a new DMS query configuration object */
 	public OpBlank(DMSImpl d, SignMessage mess) {
-		super(DOWNLOAD, d);
+		super(DOWNLOAD, d, "OpBlank");
 		m_dms = d;
 		m_mess = mess;
 	}
@@ -169,7 +167,7 @@ public class OpBlank extends OpDms
 				System.err.println(
 				    "OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="
 				    + errmsg);
-				m_dms.setStatus(OPNAME + ": " + errmsg);
+				setDmsStatus(errmsg);
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {

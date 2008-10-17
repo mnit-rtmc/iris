@@ -30,8 +30,6 @@ import java.io.IOException;
  */
 public class OpQueryConfig extends OpDms
 {
-	static final String OPNAME="OpQueryConfig";
-
 	/** associated DMS */
 	protected final DMSImpl dms;
 
@@ -42,7 +40,7 @@ public class OpQueryConfig extends OpDms
 
 	/** Create a new DMS query configuration object */
 	public OpQueryConfig(DMSImpl d) {
-		super(DOWNLOAD, d);
+		super(DOWNLOAD, d, "OpQueryConfig");
 		dms = d;
 	}
 
@@ -229,7 +227,7 @@ public class OpQueryConfig extends OpDms
 				System.err.println(
 				    "OpQueryConfig: response from cmsserver received, ignored because Xml valid field is false, errmsg="
 				    + errmsg);
-				m_dms.setStatus(OPNAME + ": " + errmsg);
+				setDmsStatus(errmsg);
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {

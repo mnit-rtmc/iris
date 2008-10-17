@@ -47,11 +47,9 @@ import java.util.TreeMap;
  */
 public class OpQueryMsg extends OpDms
 {
-	protected static final String OPNAME="OpQueryMsg";
-
 	/** Create a new DMS query status object */
 	public OpQueryMsg(DMSImpl d) {
-		super(DEVICE_DATA, d);
+		super(DEVICE_DATA, d, "OpQueryMsg");
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -398,7 +396,7 @@ public class OpQueryMsg extends OpDms
 			} else {
 				System.err.println(
 				    "OpQueryMsg: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
-				m_dms.setStatus(OPNAME+": "+errmsg);
+				setDmsStatus(errmsg);
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {

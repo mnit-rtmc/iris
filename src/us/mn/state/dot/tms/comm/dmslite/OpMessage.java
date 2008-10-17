@@ -38,8 +38,6 @@ import java.util.GregorianCalendar;
  */
 public class OpMessage extends OpDms {
 
-	static final String OPNAME="OpMessage";
-
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;
 
@@ -55,7 +53,7 @@ public class OpMessage extends OpDms {
 
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m) {
-		super(COMMAND, d);
+		super(COMMAND, d, "OpMessage");
 		m_signMessage = m;
 		System.err.println(
 		    "dmslite.OpMessage.OpMessage() called. Msg="
@@ -250,7 +248,7 @@ public class OpMessage extends OpDms {
 					System.err.println(
 					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
-					m_dms.setStatus(OPNAME+": "+errmsg);
+					setDmsStatus(errmsg);
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
@@ -413,7 +411,7 @@ public class OpMessage extends OpDms {
 					System.err.println(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
 					    errmsg+",id="+id);
-					m_dms.setStatus(OPNAME+": "+errmsg);
+					setDmsStatus(errmsg);
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
