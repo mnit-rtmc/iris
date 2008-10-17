@@ -31,7 +31,7 @@ public class SystemAttributeHelperD10 extends SystemAttributeHelper {
 	private final static String DMSLITE_OP_TIMEOUT_SECS = 
 		"caltrans_d10_op_timeout_secs";
 	private final static String DMSLITE_MODEM_OP_TIMEOUT_SECS = 
-		"caltrans_d10_modem_op_timeout_secs";
+		"caltrans_d10_mod_op_timeout_secs";
 
 	/** disallow instantiation */
 	protected SystemAttributeHelperD10() {

@@ -30,6 +30,9 @@ public interface SystemAttribute extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "system_attribute";
 
+	/** maximum length of an attribute name */
+	final int MAXLEN_ANAME = 32;
+
 	/** attribute names common to all agencies */
 	// note: please append units to names!
 	final String DATABASE_VERSION = "database_version";

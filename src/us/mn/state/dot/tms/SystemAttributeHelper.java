@@ -44,6 +44,10 @@ public class SystemAttributeHelper {
 		if(aname == null)
 			throw new IllegalArgumentException(
 				"System attribute (null) was not found.");
+		if(aname.length() > SystemAttribute.MAXLEN_ANAME)
+			throw new IllegalArgumentException(
+				"System attribute name is too long (>"+
+				SystemAttribute.MAXLEN_ANAME+").");
 		SystemAttribute a;
 		if(IrisInfo.getClientSide())
 			// client side code
