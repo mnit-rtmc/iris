@@ -267,8 +267,8 @@ public class SystemAttributeHelper {
 		final int DEFAULT = 3;
 		int np = SystemAttributeHelper.getValueIntDef(
 			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, DEFAULT);
-		np = (np < MIN : MIN : np);
-		np = (np > MAX : MAX : np);
+		np = (np < MIN ? MIN : np);
+		np = (np > MAX ? MAX : np);
 		return np;
 	}
 
