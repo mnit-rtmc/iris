@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -39,11 +40,6 @@ import java.util.Random;
  * @author Michael Darter
  */
 abstract public class OpDms extends DeviceOperation {
-
-	// timeout for DMS messages (values must match cmsserver props file)
-	static final int TIMEOUT_DMS_DEFAULT_MS = 1000*(60+5);
-	static final int TIMEOUT_DMS_MODEM_MS = 1000*(60*5+5);
-	static final int TIMEOUT_DMS_WIZARD_MS = 1000*(60+5);
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
@@ -88,23 +84,22 @@ abstract public class OpDms extends DeviceOperation {
 
 	/** return the timeout for this operation */
 	public int calcTimeoutMS() {
-		assert m_dms!=null : "m_dms is null in OpDms.getTimeoutMS()";
-		String a=m_dms.getSignAccess();
-		int ms=TIMEOUT_DMS_DEFAULT_MS;
+		assert m_dms != null : "m_dms is null in OpDms.getTimeoutMS()";
+		String a = m_dms.getSignAccess();
+		int secs = 60;
 		if (a.toLowerCase().contains("modem")) {
-			ms=TIMEOUT_DMS_MODEM_MS;
-			System.err.println("connection type is modem:"+a+", dms="+m_dms.toString());
+			secs = SystemAttributeHelper.dmsliteModemOpTimeoutSecs();
+			System.err.println("connection type is modem:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
 		} else if (a.toLowerCase().contains("wizard")) {
-			ms=TIMEOUT_DMS_WIZARD_MS;
-			System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString());
+			secs = SystemAttributeHelper.dmsliteOpTimeoutSecs();
+			System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
 		} else {
-			ms=TIMEOUT_DMS_DEFAULT_MS;
 			// unknown sign type, this happens when the first 
 			// OpDmsQueryConfig message is being sent, so a 
-			// default timeout should be assigned.
+			// default timeout should be used.
 			//System.err.println("OpDms.calcTimeoutMS(): unknown sign access type:"+a+", dms="+m_dms.toString());
 		}
-		return ms;
+		return secs * 1000;
 	}
 
 	/** set message attributes which are a function of the operation, sign, etc. */

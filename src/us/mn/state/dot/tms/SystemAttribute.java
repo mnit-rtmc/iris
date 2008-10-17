@@ -50,6 +50,10 @@ public interface SystemAttribute extends SonarObject {
 	/** Caltrans D10 specific values */
 	final String CALTRANS_D10_CAWS_ACTIVE = 
 		"caltrans_d10_caws_active";
+	final String CALTRANS_D10_DMSLITE_OP_TIMEOUT_SECS = 
+		"caltrans_d10_op_timeout_secs";
+	final String CALTRANS_D10_DMSLITE_MODEM_OP_TIMEOUT_SECS = 
+		"caltrans_d10_modem_op_timeout_secs";
 
 	/** Set the attribute value */
 	void setValue(String arg_value);

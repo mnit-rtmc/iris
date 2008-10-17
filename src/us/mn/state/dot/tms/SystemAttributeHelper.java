@@ -245,5 +245,18 @@ public class SystemAttributeHelper {
 		return SystemAttributeHelper.getValueIntDef(
 			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, 3);
 	}
+
+	/** Return dmslite operation timeout in seconds */
+	public static int dmsliteOpTimeoutSecs() {
+		return SystemAttributeHelper.getValueIntDef(
+			SystemAttribute.CALTRANS_D10_DMSLITE_OP_TIMEOUT_SECS, 60+5);
+	}
+
+	/** Return dmslite modem operation timeout in seconds */
+	public static int dmsliteModemOpTimeoutSecs() {
+		return SystemAttributeHelper.getValueIntDef(
+			SystemAttribute.CALTRANS_D10_DMSLITE_MODEM_OP_TIMEOUT_SECS, 5*60+5);
+	}
+
 }
 
