@@ -262,8 +262,14 @@ public class SystemAttributeHelper {
 
 	/** Return number of CameraViewer PTZ preset buttons */
 	public static int numPresetBtns() {
-		return SystemAttributeHelper.getValueIntDef(
-			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, 3);
+		final int MIN = 0;
+		final int MAX = 20;
+		final int DEFAULT = 3;
+		int np = SystemAttributeHelper.getValueIntDef(
+			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, DEFAULT);
+		np = (np < MIN : MIN : np);
+		np = (np > MAX : MAX : np);
+		return np;
 	}
 
 	/** Return the preferred font name */
