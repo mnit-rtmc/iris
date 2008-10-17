@@ -618,8 +618,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		MsgActPriority ap) throws InvalidMessageException
 	{
 		MultiString multi = new MultiString(text);
-		sendMessage(new SignMessage(owner, multi,
-			createPixelMaps(multi), duration, ap), true);
+		String pfn = getPreferedFontName();
+ 		sendMessage(new SignMessage(owner, multi,
+			createPixelMaps(multi, pfn), duration, ap), true);
 	}
 
 	/** Set a new message on the sign */
@@ -831,12 +832,26 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** 
 	 * Create a pixel map of the message for all pages within the
-	 * MultiString message.
+	 * MultiString message, using the default font.
 	 */
 	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi) {
-		final FontImpl font = getFont();
+		return createPixelMaps(multi, "");
+	}
+
+	/** 
+	 * Create a pixel map of the message for all pages within the
+	 * MultiString message, using the specified font.
+	 * @param multi Multistring to render
+	 * @param fontname Name of font to render using. If zero length or null
+	 *	  the default font is used.
+	 */
+	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi, 
+		String fontname) 
+	{
+		final FontImpl font = getFont(fontname);
 		if(font == null)
 			return new TreeMap<Integer, BitmapGraphic>();
+
 		PixelMapBuilder builder = new PixelMapBuilder(signWidthPixels,
 			signHeightPixels, characterWidthPixels, font,
 			new PixelMapBuilder.GlyphFinder() {
@@ -882,21 +897,21 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return _lookupFont(h, 0, ls);
 	}
 
-	/** Get the appropriate font for this sign */
-	public FontImpl getFont() {
-		// the prefered font name is set in the DMSDispatcher font 
-		// combobox, which is only active for Caltrans D10.
-		String pfn = getPreferedFontName();
+	/** Get the appropriate named font for this sign.
+	 * @param pf Preferred font name. If not found the default font is used.
+	 */
+	public FontImpl getFont(String pfn) {
+		FontImpl font = lookupFontByName(pfn);
+		if(font != null)
+			return font;
+		else
+			return getFont();
+	}
 
-		if(pfn == null || pfn.length() <= 0) {
-			// font for all agencies except D10
-			return lookupFont(getLineHeightPixels(),
-				characterWidthPixels, 0);
-		} else {
-			// font for Caltrans D10, or other agencies that enable
-			// the font combobox on DMSDispatcher. 
-			return lookupFontByName(pfn);
-		}
+	/** Get the default font for this sign */
+	public FontImpl getFont() {
+		return lookupFont(getLineHeightPixels(), characterWidthPixels,
+			0);
 	}
 
 	/** Test if the sign status is unavailable */
@@ -1693,7 +1708,10 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return "";
 	}
 
-	/** Get the prefered font for new messages */
+	/** 
+	 *  Get the prefered font name, which is set in the DMSDispatcher
+	 *  font combobox, which is only active for Caltrans D10.
+	 */
 	public String getPreferedFontName() {
 		return m_preferedFontName;
 	}
