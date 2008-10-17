@@ -21,14 +21,14 @@ import us.mn.state.dot.tms.utils.SString;
 /**
  * Static System Attribute convenience methods accessible from
  * the client and server. These methods are used to retrieve
- * system attributes and validate them.
- *
+ * system attributes and validate them. Agency specific methods
+ * should be placed in a subclass.
  * @author Michael Darter
  */
 public class SystemAttributeHelper {
 
 	/** disallow instantiation */
-	private SystemAttributeHelper() {
+	protected SystemAttributeHelper() {
 		assert false;
 	}
 
@@ -245,18 +245,5 @@ public class SystemAttributeHelper {
 		return SystemAttributeHelper.getValueIntDef(
 			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, 3);
 	}
-
-	/** Return dmslite operation timeout in seconds */
-	public static int dmsliteOpTimeoutSecs() {
-		return SystemAttributeHelper.getValueIntDef(
-			SystemAttribute.CALTRANS_D10_DMSLITE_OP_TIMEOUT_SECS, 60+5);
-	}
-
-	/** Return dmslite modem operation timeout in seconds */
-	public static int dmsliteModemOpTimeoutSecs() {
-		return SystemAttributeHelper.getValueIntDef(
-			SystemAttribute.CALTRANS_D10_DMSLITE_MODEM_OP_TIMEOUT_SECS, 5*60+5);
-	}
-
 }
 

@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttributeHelperD10;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
@@ -81,7 +81,7 @@ public class CawsPoller extends MessagePoller implements SignPoller
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		boolean act = isCAWSActive();
+		boolean act = SystemAttributeHelperD10.isCAWSActive();
 		System.err.println("CawsPoller.poll30Second() called, caws active = "+act+".");
 		if(act)
 			new OpProcessCawsMsgs(c).start();
@@ -100,11 +100,5 @@ public class CawsPoller extends MessagePoller implements SignPoller
 	public DiagnosticOperation startTest(ControllerImpl c) {
 		// System.err.println("CawsPoller.startTest() called.");
 		return null;
-	}
-
-	/** return true if CAWS poller should handle caws messages */
-	protected static boolean isCAWSActive() {
-		return SystemAttributeHelper.isAttribute(
-			SystemAttribute.CALTRANS_D10_CAWS_ACTIVE,true);
 	}
 }

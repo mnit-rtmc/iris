@@ -17,7 +17,10 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A system attribute is a name mapped to a string value.
+ * A system attribute is a name mapped to a string value. This interface
+ * contains predefined names of attributes common to all agencies. 
+ * Attributes specific to an agency should be placed in an extended
+ * helper class.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -46,14 +49,6 @@ public interface SystemAttribute extends SonarObject {
 	/** possible values for the AGENCY_ID attribute */
 	final String AGENCY_ID_MNDOT = "mndot";
 	final String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
-
-	/** Caltrans D10 specific values */
-	final String CALTRANS_D10_CAWS_ACTIVE = 
-		"caltrans_d10_caws_active";
-	final String CALTRANS_D10_DMSLITE_OP_TIMEOUT_SECS = 
-		"caltrans_d10_op_timeout_secs";
-	final String CALTRANS_D10_DMSLITE_MODEM_OP_TIMEOUT_SECS = 
-		"caltrans_d10_modem_op_timeout_secs";
 
 	/** Set the attribute value */
 	void setValue(String arg_value);

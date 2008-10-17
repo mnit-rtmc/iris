@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttributeHelperD10;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -88,10 +88,10 @@ abstract public class OpDms extends DeviceOperation {
 		String a = m_dms.getSignAccess();
 		int secs = 60;
 		if (a.toLowerCase().contains("modem")) {
-			secs = SystemAttributeHelper.dmsliteModemOpTimeoutSecs();
+			secs = SystemAttributeHelperD10.dmsliteModemOpTimeoutSecs();
 			System.err.println("connection type is modem:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
 		} else if (a.toLowerCase().contains("wizard")) {
-			secs = SystemAttributeHelper.dmsliteOpTimeoutSecs();
+			secs = SystemAttributeHelperD10.dmsliteOpTimeoutSecs();
 			System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
 		} else {
 			// unknown sign type, this happens when the first 
