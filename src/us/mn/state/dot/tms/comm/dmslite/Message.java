@@ -68,7 +68,7 @@ public class Message implements AddressedMessage
 		m_os = os;
 		m_is = new TokenStreamReader(
 		    is, 1024, 16384, 1000);    // buffer size, max cap, sleep time
-		System.err.println("dmslite.Message.Message() called.");
+		//System.err.println("dmslite.Message.Message() called.");
 	}
 
 	/** toString */
