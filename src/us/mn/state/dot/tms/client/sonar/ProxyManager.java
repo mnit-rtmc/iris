@@ -230,7 +230,7 @@ abstract public class ProxyManager<T extends SonarObject>
 		T result = cache.findObject(new Checker<T>() {
 			public boolean check(T proxy) {
 				MapGeoLoc loc = findGeoLoc(proxy);
-				return loc != null && s.next(loc);
+				return isLocationSet(loc) && s.next(loc);
 			}
 		});
 		if(result != null)
@@ -239,10 +239,15 @@ abstract public class ProxyManager<T extends SonarObject>
 			return null;
 	}
 
+	/** Check if the location is set */
+	static protected boolean isLocationSet(MapGeoLoc loc) {
+		return loc != null && !GeoLocHelper.isNull(loc.getGeoLoc());
+	}
+
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(T proxy) {
 		GeoLoc loc = getGeoLoc(proxy);
-		if(loc != null && !GeoLocHelper.isNull(loc))
+		if(loc != null)
 			return loc_manager.findMapGeoLoc(loc);
 		else
 			return null;
