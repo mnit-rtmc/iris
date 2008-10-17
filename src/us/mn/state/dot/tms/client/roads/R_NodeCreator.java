@@ -24,7 +24,8 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 
 /**
- * This is a utility class to create new r_nodes.
+ * This is a utility class to create new r_nodes. It creates both a GeoLoc and
+ * an R_Node, because an R_Node cannot have a null GeoLoc.
  *
  * @author Douglas Lau
  */

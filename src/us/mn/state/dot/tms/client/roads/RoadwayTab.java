@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.client.MapTab;
+import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.trafmap.ViewLayer;
 
 /**
@@ -42,10 +44,13 @@ public class RoadwayTab extends MapTab {
 
 	/** Create a new roadway node tab */
 	public RoadwayTab(R_NodeManager m, List<LayerState> lstates,
-		ViewLayer vlayer)
+		ViewLayer vlayer, TmsConnection tc)
 	{
 		super("Roadway", "View / edit roadway nodes");
-		clist = new CorridorList(m);
+		SonarState st = tc.getSonarState();
+		R_NodeCreator creator = new R_NodeCreator(st.getR_Nodes(),
+			st.getGeoLocs(), st.lookupUser(tc.getUser().getName()));
+		clist = new CorridorList(m, creator);
 		chooser = new CorridorChooser(m, map, clist);
 		map.addLayers(lstates);
 		tabPanel = createSideBar();

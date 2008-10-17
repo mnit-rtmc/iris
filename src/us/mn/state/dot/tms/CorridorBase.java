@@ -56,10 +56,10 @@ public class CorridorBase {
 	}
 
 	/** Corridor freeway */
-	protected final String freeway;
+	protected final Road freeway;
 
 	/** Get the corridor freeway */
-	public String getFreeway() {
+	public Road getFreeway() {
 		return freeway;
 	}
 
@@ -83,7 +83,7 @@ public class CorridorBase {
 	/** Create a new corridor */
 	public CorridorBase(GeoLoc loc, boolean order) {
 		name = GeoLocHelper.getCorridor(loc);
-		freeway = loc.getFreeway().getName();
+		freeway = loc.getFreeway();
 		free_dir = loc.getFreeDir();
 		order_down_up = order;
 	}

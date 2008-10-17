@@ -51,6 +51,9 @@ public class CorridorList extends JPanel {
 	/** Roadway node manager */
 	protected final R_NodeManager manager;
 
+	/** Roadway node creator */
+	protected final R_NodeCreator creator;
+
 	/** Renderer for painting roadway nodes */
 	protected final R_NodeCellRenderer renderer =
 		new R_NodeCellRenderer();
@@ -77,9 +80,10 @@ public class CorridorList extends JPanel {
 	protected JButton rbutton = new JButton("Remove");
 
 	/** Create a corridor list */
-	public CorridorList(R_NodeManager m) {
+	public CorridorList(R_NodeManager m, R_NodeCreator c) {
 		super(new GridBagLayout());
 		manager = m;
+		creator = c;
 		setBorder(BorderFactory.createTitledBorder(
 			"Corridor Node List"));
 		jlist.setCellRenderer(renderer);
@@ -244,10 +248,9 @@ public class CorridorList extends JPanel {
 
 	/** Do the add button action */
 	protected void doAddButton() {
-		// FIXME: 1) come up with a unique name for the new r_node
-		// 2) create a new geo_loc with freeway and free_dir set
-		// 3) wait for proxyAdded on new geo_loc
-		// 4) create r_node with geo_loc set
+		CorridorBase c = corridor;
+		if(c != null)
+			creator.create(c.getFreeway(), c.getFreeDir());
 	}
 
 	/** Do the remove button action */

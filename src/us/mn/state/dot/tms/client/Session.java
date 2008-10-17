@@ -196,7 +196,8 @@ public class Session {
 		List<LayerState> lstates = createBaseLayers();
 		SonarLayer<R_Node> layer = r_node_manager.getLayer();
 		lstates.add(layer.createState());
-		tabs.add(new RoadwayTab(r_node_manager, lstates, vlayer));
+		tabs.add(new RoadwayTab(r_node_manager, lstates, vlayer,
+			tmsConnection));
 	}
 
 	/** Create a new session */
