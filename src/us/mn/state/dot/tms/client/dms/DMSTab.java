@@ -46,7 +46,7 @@ public class DMSTab extends MapTab {
 
 	/** Create a new DMS tab */
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
-		DMSHandler handler, final SonarState st,TmsConnection tmsConnection)
+		DMSHandler handler, SonarState st, TmsConnection tmsConnection)
 	{
 		super(I18NMessages.get("MesgSignMenuLabel"),
 			I18NMessages.get("MesgSignMenuHoverText"));
