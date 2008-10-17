@@ -60,9 +60,9 @@ public class OpQueryMsg extends OpDms
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 
-		System.err.println(
-		    "dmslite.OpQueryMsg.phaseOne() called: m_dms.getSignWidthPixels()="
-		    + m_dms.getSignWidthPixels());
+		//System.err.println(
+		//    "dmslite.OpQueryMsg.phaseOne() called: m_dms.getSignWidthPixels()="
+		//    + m_dms.getSignWidthPixels());
 
 		// has getConfig() been called yet? If not, don't do anything
 		// FIXME: there must be a better way to check for this condition
@@ -189,8 +189,8 @@ public class OpQueryMsg extends OpDms
 	 */
 	private static int calcMsgDuration(boolean useont, boolean useofft,
 					   Calendar ontime, Calendar offtime) {
-		System.err.println("OpQueryMsg.calcMsgDuration:  useontime=" + useont + ",  ontime="+ontime.getTime());
-		System.err.println("OpQueryMsg.calcMsgDuration: useofftime=" + useofft + ", offtime="+offtime.getTime());
+		//System.err.println("OpQueryMsg.calcMsgDuration:  useontime=" + useont + ",  ontime="+ontime.getTime());
+		//System.err.println("OpQueryMsg.calcMsgDuration: useofftime=" + useofft + ", offtime="+offtime.getTime());
 
 		if(!useont) {
 			throw new IllegalArgumentException("must have ontime in calcMsgDuration.");
@@ -209,7 +209,7 @@ public class OpQueryMsg extends OpDms
 		long delta=offtime.getTimeInMillis()-ontime.getTimeInMillis();
 		long m = ((delta < 0) ? 0 : delta / 1000 / 60);
 
-		System.err.println("OpQueryMsg.calcMsgDuration: duration (mins)=" + m);
+		//System.err.println("OpQueryMsg.calcMsgDuration: duration (mins)=" + m);
 		return ((int)m);
 	}
 
@@ -263,8 +263,8 @@ public class OpQueryMsg extends OpDms
 		/** Query current message */
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException {
-			System.err.println(
-			    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) called.");
+			//System.err.println(
+			//    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) called.");
 			assert argmess instanceof Message :
 			       "wrong message type";
 
@@ -363,15 +363,15 @@ public class OpQueryMsg extends OpDms
 				if (!useont) {
 					useont=true;
 					ont=new GregorianCalendar();
-					System.err.println("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
-						" no ontime specified, assuming now.");
+					//System.err.println("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
+					//	" no ontime specified, assuming now.");
 				}
 
 				// error checking: valid off time?
 				if (useont && useofft && offt.compareTo(ont)<=0) {
 					useofft=false;
-					System.err.println("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
-						" offtime <= ontime, so off time ignored.");
+					//System.err.println("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
+					//	" offtime <= ontime, so off time ignored.");
 				}
 
 				// calc message duration
