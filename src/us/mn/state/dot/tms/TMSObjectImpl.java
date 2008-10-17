@@ -90,7 +90,8 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 		throws ServerNotActiveException
 	{
 		String host = getClientHost();
-		System.err.println("Logging in: " + userName + " from " + host);
+		System.err.println("Logging in: " + userName + 
+			" from " + host + ", " + new Date().toString());
 		synchronized(users) {
 			users.put(host, userName);
 		}
