@@ -57,6 +57,22 @@ public class SystemAttributeHelper {
 		return a.getValue();
 	}
 
+	/** Get the value of the named attribute as a string. If the
+	 *  attribute is not found, the default is silently returned.
+	 *  @param aname Name of an existing system attribute.
+	 *  @param dvalue Default value.
+	 *  @return The value of the named attribute or the default;  
+	 */
+	static public String getValueDef(final String aname,String dvalue) {
+		String ret = dvalue;
+		try {
+			ret = getValue(aname);
+		} catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname,dvalue));
+		}
+		return ret;
+	}
+
         /** Get the value of the named attribute as an integer.
          *  @param aname Name of an existing system attribute.
          *  @throws IllegalArgumentException if the specified attribute 
@@ -245,5 +261,12 @@ public class SystemAttributeHelper {
 		return SystemAttributeHelper.getValueIntDef(
 			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, 3);
 	}
+
+	/** Return the preferred font name */
+	public static String preferredFontName() {
+		return SystemAttributeHelper.getValueDef(
+			SystemAttribute.DMS_PREFERRED_FONT, "");
+	}
+
 }
 

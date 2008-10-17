@@ -1701,11 +1701,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get the initial font name, used by constructor */
 	public String getInitialFontName() {
-		if(Agency.isId(Agency.CALTRANS_D10)) {
-			return "CT_Single_Stroke";   //FIXME mtod: would be nice if this wasn't hard coded
-		}
-		// the font name is irrelevant for other agencies 
-		return "";
+		return SystemAttributeHelper.preferredFontName();
 	}
 
 	/** 

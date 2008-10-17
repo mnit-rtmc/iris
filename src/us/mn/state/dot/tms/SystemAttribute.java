@@ -40,6 +40,10 @@ public interface SystemAttribute extends SonarObject {
 	final String DMSDISPATCHER_GETSTATUS_BTN = 
 		"dmsdispatcher_getstatus_btn";
 
+	/** DMS */
+	final String DMS_PREFERRED_FONT = 
+		"dms_preferred_font";
+
 	/** CameraViewer */
 	final String CAMERAVIEWER_ONSCRN_PTZCTRLS = 
 		"cameraviewer_onscrn_ptzctrls";
