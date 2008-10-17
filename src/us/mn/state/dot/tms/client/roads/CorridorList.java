@@ -206,8 +206,8 @@ public class CorridorList extends JPanel {
 
 	/** Set the tangent angles for all the roadway nodes in a list */
 	protected void setTangentAngles(List<R_Node> node_t) {
-		// FIXME: should really check for coincient points, since they
-		// cause tangent angle to be calculated as NaN
+		// FIXME: should really check for coincident points, since they
+		// cause the tangent angle to be calculated as NaN
 		MapGeoLoc loc, loc_a, loc_b;
 		for(int i = 0; i < node_t.size(); i++) {
 			if(i == 0)
@@ -255,6 +255,11 @@ public class CorridorList extends JPanel {
 
 	/** Do the remove button action */
 	protected void doRemoveButton() {
-		// FIXME
+		R_Node proxy = getSelectedNode();
+		if(proxy != null) {
+			GeoLoc loc = proxy.getGeoLoc();
+			proxy.destroy();
+			loc.destroy();
+		}
 	}
 }

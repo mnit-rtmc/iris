@@ -151,7 +151,8 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Called when a proxy has been removed */
 	public void proxyRemoved(T proxy) {
-		// FIXME: this will leak when proxy objects are removed.
+		s_model.removeSelected(proxy);
+		// FIXME: map_proxies will leak when proxy objects are removed.
 		// Not easy to fix, since proxy objects die before we can
 		// get the corresponding MapGeoLoc to remove.
 	}
