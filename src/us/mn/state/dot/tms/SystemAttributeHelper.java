@@ -278,5 +278,14 @@ public class SystemAttributeHelper {
 			SystemAttribute.DMS_PREFERRED_FONT, "");
 	}
 
+	/** Return number of video frames before stream is stopped */
+	public static int numVideoFramesBeforeStop() {
+		final int MIN = 0;
+		final int DEFAULT = 900;
+		int nf = SystemAttributeHelper.getValueIntDef(
+			SystemAttribute.CAMERAVIEWER_NUM_VIDEO_FRAMES, DEFAULT);
+		nf = (nf < MIN ? MIN : nf);
+		return nf;
+	}
 }
 

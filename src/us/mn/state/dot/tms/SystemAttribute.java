@@ -52,6 +52,8 @@ public interface SystemAttribute extends SonarObject {
 		"cameraviewer_onscrn_ptzctrls";
 	final String CAMERAVIEWER_NUM_PRESET_BTNS = 
 		"cameraviewer_num_preset_btns";
+	final String CAMERAVIEWER_NUM_VIDEO_FRAMES = 
+		"cameraviewer_num_video_frames";
 
 	/** possible values for the AGENCY_ID attribute */
 	final String AGENCY_ID_MNDOT = "mndot";
