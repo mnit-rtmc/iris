@@ -170,7 +170,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Check the corridor of an r_node */
 	public boolean checkCorridor(R_Node n) {
 		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
-		return corridor.equals(c);
+		if(c != null)
+			return c.equals(corridor);
+		else
+			return "".equals(corridor);
 	}
 
 	/** Show the properties form for the selected proxy */

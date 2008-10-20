@@ -345,6 +345,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		CorridorBase c = corridor;
 		if(c != null)
 			creator.create(c.getFreeway(), c.getFreeDir());
+		else
+			creator.create();
 	}
 
 	/** Do the remove button action */

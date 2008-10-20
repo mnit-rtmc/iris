@@ -88,10 +88,16 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 			}
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("freeway", freeway);
+			if(freeway != null)
+				attrs.put("freeway", freeway);
 			attrs.put("free_dir", new Short(free_dir));
 			geo_locs.createObject(name, attrs);
 		}
+	}
+
+	/** Create a new r_node (with no default corridor) */
+	public void create() {
+		create(null, (short)0);
 	}
 
 	/** Create a unique R_Node name */
