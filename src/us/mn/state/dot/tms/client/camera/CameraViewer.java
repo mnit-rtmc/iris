@@ -56,41 +56,23 @@ import us.mn.state.dot.video.VideoException;
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
-	/** The default number of frames to process (for streaming) */
-	static protected final String DEFAULT_STREAM_DURATION = "900";
-
-	/** The property name for the number of frames to process */
-	static protected final String PROPERTY_STREAM_DURATION = "stream.duration";
+	/** The system attribute for the number of frames to process (for streaming) */
+	static protected final int STREAM_DURATION = SystemAttributeHelper.numVideoFramesBeforeStop();
 
 	/** Dead zone needed for too-precise joystick drivers */
 	static protected final float AXIS_DEADZONE = 3f / 64;
 
-	/** Button number to select preset 1 */
-	static protected final int BUTTON_PRESET_1 = 0;
+	/** The system attribute for on screen ptz control */
+	static protected final boolean ON_SCREEN_PTZ = SystemAttributeHelper.useOnScrnPTZ();
 
-	/** Button number to select preset 2 */
-	static protected final int BUTTON_PRESET_2 = 1;
-
-	/** Button number to select preset 3 */
-	static protected final int BUTTON_PRESET_3 = 2;
-
-	/** Button number to select preset 4*/
-	static protected final int BUTTON_PRESET_4 = 3;
-
-	/** Button number to select preset 5 */
-	static protected final int BUTTON_PRESET_5= 4;
+	/** The system attribute for the number of button presets */
+	static protected final int NUMBER_BUTTON_PRESETS = SystemAttributeHelper.numPresetBtns();
 
 	/** Button number to select previous camera */
 	static protected final int BUTTON_PREVIOUS = 10;
 
 	/** Button number to select next camera */
 	static protected final int BUTTON_NEXT = 11;
-	
-	/** The property value for true */
-	static protected final String PROPERTY_TRUE = "true";
-	
-	/** The property name for on screen ptz control */
-	static protected final String PROPERTY_ON_SCREEN_PTZ = "on.screen.ptz";
 
 	/** Network worker thread */
 	static protected final Scheduler NETWORKER = new Scheduler("NETWORKER");
@@ -175,11 +157,6 @@ public class CameraViewer extends JPanel
 		logger = l;
 		state = st;
 		user = u;
-
-		// FIXME: use to be implemented
-		boolean onscreenPTZ = SystemAttributeHelper.useOnScrnPTZ();
-		int numPresets = SystemAttributeHelper.numPresetBtns();
-
 		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -229,7 +206,7 @@ public class CameraViewer extends JPanel
 		videoControls.add(stop);
 		add(videoControls, bag);
 		bag.gridy = 4;
-		if (videoProps.getProperty(PROPERTY_ON_SCREEN_PTZ, "").equalsIgnoreCase(PROPERTY_TRUE)) {
+		if (ON_SCREEN_PTZ) {
 			add(ptz_panel, bag);
 		}
 		new ActionJob(NETWORKER, play) {
@@ -269,16 +246,8 @@ public class CameraViewer extends JPanel
 						selectNextCamera();
 					else if(ev.button == BUTTON_PREVIOUS)
 						selectPreviousCamera();
-					else if(ev.button == BUTTON_PRESET_1)
-						selectCameraPreset(1);
-					else if(ev.button == BUTTON_PRESET_2)
-						selectCameraPreset(2);
-					else if(ev.button == BUTTON_PRESET_3)
-						selectCameraPreset(3);
-					else if(ev.button == BUTTON_PRESET_4)
-						selectCameraPreset(4);
-					else if(ev.button == BUTTON_PRESET_5)
-						selectCameraPreset(5);
+					else if((ev.button >= 0) && (ev.button < NUMBER_BUTTON_PRESETS))
+						selectCameraPreset(ev.button + 1);
 				}
 			}
 		});
@@ -457,9 +426,7 @@ public class CameraViewer extends JPanel
 		monitor.setDataSource(new HttpDataSource(client,
 			new URL(streamUrls[client.getArea()] + "?id=" +
 			client.getCameraId() + "&ssid=" +
-			client.getSonarSessionId())), Integer.parseInt(
-			videoProps.getProperty(PROPERTY_STREAM_DURATION,
-			DEFAULT_STREAM_DURATION)));
+			client.getSonarSessionId())), STREAM_DURATION);
 	}
 
 	/** Stop video streaming */

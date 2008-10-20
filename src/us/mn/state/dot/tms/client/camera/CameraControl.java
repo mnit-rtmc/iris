@@ -24,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
  * This class creates a Swing panel for controlling camera pan, tilt, and zoom.
@@ -64,21 +65,12 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 	/** Button used to zoom out */
 	protected final PTZButton m_zoomOut = new PTZButton("-", "Zoom out", new int[] {0, 0, -1});
 
-	/** Button used to go to preset location 1 */
-	private final PresetButton m_preset1 = new PresetButton(1, "Preset 1");
+	/** Number of buttons used to go to preset location */
+	private final int NUMBER_PRESET_BUTTONS = SystemAttributeHelper.numPresetBtns();
 
-	/** Button used to go to preset location 2 */
-	private final PresetButton m_preset2 = new PresetButton(2, "Preset 2");
+	/** Array of buttons used to go to preset locations */
+	private final PresetButton[] m_preset = new PresetButton[NUMBER_PRESET_BUTTONS];
 	
-	/** Button used to go to preset location 3 */
-	private final PresetButton m_preset3 = new PresetButton(3, "Preset 3");
-
-	/** Button used to go to preset location 4 */
-	private final PresetButton m_preset4 = new PresetButton(4, "Preset 4");
-
-	/** Button used to go to preset location 5 */
-	private final PresetButton m_preset5 = new PresetButton(5, "Preset 5");
-
 	/** The preferred size of the slider */
 	static protected final Dimension SLIDER_SIZE = new Dimension(150, 30);
 
@@ -93,7 +85,6 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 
 	/** Constructor */
 	public CameraControl() {
-		
 		// add controls 
 		super(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -136,23 +127,31 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		c.gridx = 0;
 		c.gridy = 3;
 		add(m_ptzSpeed, c);
-		
+
+		// add button controls	
 		c.gridwidth = 1;
-		c.gridx = 0;
-		c.gridy = 4;
-		add(m_preset1, c);
-		c.gridx = 1;
-		c.gridy = 4;
-		add(m_preset2, c);
-		c.gridx = 2;
-		c.gridy = 4;
-		add(m_preset3, c);
-		c.gridx = 3;
-		c.gridy = 4;
-		add(m_preset4, c);
-		c.gridx = 4;
-		c.gridy = 4;
-		add(m_preset5, c);
+		for (int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
+			m_preset[i] = new PresetButton(i + 1, new String("Preset " + (i + 1)));
+			c.gridx = i % 5;
+			c.gridy = 4 + (i / 5);
+			add(m_preset[i], c);
+		}
+	
+		//c.gridx = 0;
+		//c.gridy = 4;
+		//add(m_preset1, c);
+		//c.gridx = 1;
+		//c.gridy = 4;
+		//add(m_preset2, c);
+		//c.gridx = 2;
+		//c.gridy = 4;
+		//add(m_preset3, c);
+		//c.gridx = 3;
+		//c.gridy = 4;
+		//add(m_preset4, c);
+		//c.gridx = 4;
+		//c.gridy = 4;
+		//add(m_preset5, c);
 
 		// configure slider
 		m_ptzSpeed.setMajorTickSpacing(10);
@@ -185,11 +184,9 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		m_panRightTiltDown.addActionListener(this);
 		m_zoomIn.addActionListener(this);
 		m_zoomOut.addActionListener(this);
-		m_preset1.addActionListener(this);
-		m_preset2.addActionListener(this);
-		m_preset3.addActionListener(this);
-		m_preset4.addActionListener(this);
-		m_preset5.addActionListener(this);
+		for (int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
+			m_preset[i].addActionListener(this);
+		}
 
 		// add change listener for speed slider
 		m_ptzSpeed.addChangeListener(new ChangeListener() {
@@ -248,10 +245,8 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		m_zoomIn.setEnabled(enable);
 		m_zoomOut.setEnabled(enable);
 		m_ptzSpeed.setEnabled(enable);
-		m_preset1.setEnabled(enable);
-		m_preset2.setEnabled(enable);
-		m_preset3.setEnabled(enable);
-		m_preset4.setEnabled(enable);
-		m_preset5.setEnabled(enable);
+		for (int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
+			m_preset[i].setEnabled(enable);
+		}
 	}
 }
