@@ -287,5 +287,11 @@ public class SystemAttributeHelper {
 		nf = (nf < MIN ? MIN : nf);
 		return nf;
 	}
+
+	/** Return true to use DMSDispatcher overwrite message checkbox */
+	public static boolean useMsgOverwriteCBox() {
+		return getValueBooleanDef(
+			SystemAttribute.DMSDISPATCHER_OVERWRITE_CBOX,false);
+	}
 }
 

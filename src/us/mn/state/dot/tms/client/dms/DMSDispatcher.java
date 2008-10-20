@@ -23,6 +23,7 @@ import java.rmi.RemoteException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -31,6 +32,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -91,9 +93,13 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		new JButton(I18NMessages.get("DMSDispatcher.ClearButton"));
 
 	/** Button used to get the DMS status (optional) */
-	protected JButton btnGetStatus = new JButton(I18NMessages.get(
+	protected final JButton btnGetStatus = new JButton(I18NMessages.get(
 		"DMSDispatcher.GetStatusButton"));
 
+	/** overwrite checkbox (optional) */
+	protected JCheckBox cboxOverwrite = null;
+
+	/** Select model */
 	protected final TmsSelectionModel selectionModel;
 
 	/** Currently logged in user name */
@@ -170,6 +176,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			add(txtControllerStatus, bag);
 		}
 
+		// add panel sign
 		bag.gridx = 0;
 		bag.gridy = 4;
 		bag.gridwidth = 4;
@@ -189,6 +196,17 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 				boxRight.add(fjp);
 		}
 
+		// add optional overwrite checkbox
+		if(m_useOverwriteCheck) {
+			cboxOverwrite = new JCheckBox(I18NMessages.get(
+				"DMSDispatcher.OverwriteCBox"));
+			JPanel p = new JPanel(new FlowLayout());
+			p.add(cboxOverwrite);
+			//boxRight.add(cboxOverwrite);
+			boxRight.add(p);
+			cboxOverwrite.setEnabled(false); //FIXME: activate checkbox
+		}
+
 		boxRight.add(Box.createVerticalStrut(4));
 		boxRight.add(buildButtonPanel());
 		boxRight.add(Box.createVerticalGlue());
@@ -206,13 +224,17 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected boolean m_useDurationComboBox;
 	protected boolean m_useControllerStatusField;
 	protected boolean m_useGetStatusButton;
+	protected boolean m_useOverwriteCheck;
 
 	/** set flags for optional controls */
 	protected void setOptionalControlUse() {
+		//FIXME: use system attributes here, not agency ID
 		m_useFontsComboBox = Agency.isId(Agency.CALTRANS_D10);
 		m_useDurationComboBox = !Agency.isId(Agency.CALTRANS_D10);
 		m_useControllerStatusField = Agency.isId(Agency.CALTRANS_D10);
 		m_useGetStatusButton = Agency.isId(Agency.CALTRANS_D10);
+		m_useOverwriteCheck = 
+			SystemAttributeHelper.useMsgOverwriteCBox();
 	}
 
 	/** Dispose of the dispatcher */
