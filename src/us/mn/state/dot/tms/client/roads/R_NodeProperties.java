@@ -222,7 +222,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected void updateAttribute(String a) {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
-		if(a == null || a.equals("node_type"))
+		if(a == null || a.equals("nodeType"))
 			node_type.setSelectedIndex(proxy.getNodeType());
 		if(a == null || a.equals("pickable"))
 			pickable.setSelected(proxy.getPickable());
@@ -230,13 +230,13 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 			transition.setSelectedIndex(proxy.getTransition());
 		if(a == null || a.equals("lanes"))
 			lanes.setValue(proxy.getLanes());
-		if(a == null || a.equals("attach_side"))
+		if(a == null || a.equals("attachSide"))
 			attach_side.setSelected(proxy.getAttachSide());
 		if(a == null || a.equals("shift"))
 			shift.setValue(proxy.getShift());
-		if(a == null || a.equals("station_id"))
+		if(a == null || a.equals("stationID"))
 			station_id.setText(proxy.getStationID());
-		if(a == null || a.equals("speed_limit"))
+		if(a == null || a.equals("speedLimit"))
 			slimit.setValue(proxy.getSpeedLimit());
 	}
 }
