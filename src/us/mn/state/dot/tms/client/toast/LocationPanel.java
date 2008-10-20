@@ -208,8 +208,13 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 
 	/** A proxy has been removed */
 	public void proxyRemoved(GeoLoc p) {
-		if(p == loc)
-			dispose();
+		if(p == loc) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					dispose();
+				}
+			});
+		}
 	}
 
 	/** A proxy has been changed */
