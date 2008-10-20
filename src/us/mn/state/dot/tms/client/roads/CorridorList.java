@@ -213,14 +213,22 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 
 	/** Check the corridor for a geo location */
 	protected boolean checkCorridor(GeoLoc loc) {
-		// NOTE: this assumes that GeoLoc name matches R_Node name
+		// NOTE: The fast path assumes that GeoLoc name matches R_Node
+		//       name.  If that is not the case, the GeoLoc should
+		//       still be found by checkRenderers(GeoLoc).
 		R_Node proxy = r_nodes.lookupObject(loc.getName());
-		// FIXME: should return true if GeoLoc changes to another
-		// corridor
-		if(proxy != null)
-			return manager.checkCorridor(proxy);
-		else
-			return false;
+		return (proxy != null && manager.checkCorridor(proxy)) ||
+			checkRenderers(loc);
+	}
+
+	/** Check the renderer list for a geo location. This is needed in case
+	 * the geo location has changed to a different corridor. */
+	protected boolean checkRenderers(GeoLoc loc) {
+		for(R_NodeRenderer r: r_list) {
+			if(r.getProxy().getGeoLoc() == loc)
+				return true;
+		}
+		return false;
 	}
 
 	/** Create a sorted list of roadway nodes for one corridor */
