@@ -17,12 +17,8 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.rmi.RemoteException;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -32,8 +28,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
@@ -42,10 +36,7 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
@@ -101,11 +92,8 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Detector table */
 	protected final JTable det_table = new JTable();
 
-	/** Button to edit the selected detector */
-	protected final JButton edit = new JButton("Edit");
-
-	/** Button to remove the selected detector */
-	protected final JButton remove = new JButton("Remove");
+	/** R_Node detector modell */
+	protected R_NodeDetectorModel det_model;
 
 	/** Create a new roadway node properties form */
 	public R_NodeProperties(TmsConnection tc, R_Node n) {
@@ -121,15 +109,18 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected void initialize() throws RemoteException {
 		location = new LocationPanel(admin, proxy.getGeoLoc(),
 			connection.getSonarState());
+		det_model = new R_NodeDetectorModel(state.getDetectors(),
+			proxy);
 		det_table.setAutoCreateColumnsFromModel(false);
-//		det_table.setColumnModel(
-//			R_NodeDetectorModel.createColumnModel());
+		det_table.setModel(det_model);
+		det_table.setColumnModel(det_model.createColumnModel());
 		det_table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		det_table.setPreferredScrollableViewportSize(
-			new Dimension(280, 8 * det_table.getRowHeight()));
+		det_table.setRowHeight(20);
+		det_table.setPreferredScrollableViewportSize(new Dimension(
+			det_table.getPreferredSize().width,
+			det_table.getRowHeight() * 8));
 		super.initialize();
 		location.initialize();
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
 		tab.add("Setup", createSetupPanel());
@@ -224,61 +215,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		JPanel dpanel = new JPanel();
 		dpanel.setBorder(BORDER);
 		dpanel.add(new JScrollPane(det_table));
-		if(admin) {
-			Box box = Box.createVerticalBox();
-			box.add(Box.createVerticalGlue());
-			box.add(edit);
-			new ActionJob(this, edit) {
-				public void perform() throws RemoteException {
-					doEdit();
-				}
-			};
-			box.add(Box.createVerticalStrut(VGAP));
-			box.add(remove);
-			new ActionJob(this, remove) {
-				public void perform() throws RemoteException {
-					doRemove();
-				}
-			};
-			box.add(Box.createVerticalGlue());
-			dpanel.add(box);
-			det_table.getSelectionModel().addListSelectionListener(
-				new ListSelectionListener()
-			{
-				public void valueChanged(ListSelectionEvent e) {
-					if(!e.getValueIsAdjusting())
-						doButtonEnable();
-				}
-			});
-		}
 		return dpanel;
-	}
-
-	/** Enable/disable buttons depending on selected row */
-	protected void doButtonEnable() {
-		int s = det_table.getSelectedRow() + 1;
-		boolean e = (s > 0) && (s < det_table.getRowCount());
-		edit.setEnabled(e);
-		remove.setEnabled(e);
-	}
-
-	/** Edit the currently selected detector */
-	protected void doEdit() throws RemoteException {
-		int s = det_table.getSelectedRow();
-		if(s >= 0) {
-/*			Integer did = det_model.getDetectorID(s);
-			if(did != null) {
-				connection.getDesktop().show(
-					new DetectorForm(connection, did));
-			} */
-		}
-	}
-
-	/** Remove the currently selected detector */
-	protected void doRemove() throws RemoteException {
-/*		int r = det_table.getSelectedRow();
-		if(r >= 0)
-			det_model.removeRow(r); */
 	}
 
 	/** Update one attribute on the form */
