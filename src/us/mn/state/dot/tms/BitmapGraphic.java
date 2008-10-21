@@ -42,7 +42,7 @@ public class BitmapGraphic implements Serializable {
 	/** Set the bitmap */
 	public void setBitmap(byte[] b) {
 		if(b.length != bitmap.length)
-			throw new IndexOutOfBoundsException("b="+b+
+			throw new IndexOutOfBoundsException("b="+b.length+
 			", bitmap.length="+bitmap.length);
 		System.arraycopy(b, 0, bitmap, 0, bitmap.length);
 	}
