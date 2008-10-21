@@ -94,6 +94,7 @@ DROP TABLE r_node;
 DROP VIEW detector_view;
 DROP VIEW detector_event_view;
 DROP VIEW detector_label_view;
+DROP FUNCTION detector_fieldlength_log;
 
 ALTER TABLE event.detector_event ADD COLUMN did VARCHAR(10);
 UPDATE event.detector_event SET did = device_id::VARCHAR(10);

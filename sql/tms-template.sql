@@ -323,6 +323,71 @@ CREATE RULE alarm_update AS ON UPDATE TO iris.alarm DO INSTEAD
 CREATE RULE alarm_delete AS ON DELETE TO iris.alarm DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
+CREATE TABLE iris.r_node (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
+	node_type integer NOT NULL REFERENCES r_node_type(n_type),
+	pickable boolean NOT NULL,
+	transition integer NOT NULL REFERENCES r_node_transition(n_transition),
+	lanes integer NOT NULL,
+	attach_side boolean NOT NULL,
+	shift integer NOT NULL,
+	station_id VARCHAR(10),
+	speed_limit integer NOT NULL,
+	notes text NOT NULL
+);
+
+CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
+
+CREATE TABLE iris._detector (
+	name VARCHAR(10) PRIMARY KEY,
+	r_node VARCHAR(10) REFERENCES iris.r_node(name),
+	lane_type smallint NOT NULL REFERENCES lane_type(id),
+	lane_number smallint NOT NULL,
+	abandoned boolean NOT NULL,
+	force_fail boolean NOT NULL,
+	field_length real NOT NULL,
+	fake VARCHAR(32),
+	notes VARCHAR(32)
+);
+
+ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.detector AS SELECT
+	det.name, controller, pin, r_node, lane_type, lane_number, abandoned,
+	force_fail, field_length, fake, notes
+	FROM iris._detector det JOIN iris._device_io d ON det.name = d.name;
+
+CREATE RULE detector_insert AS ON INSERT TO iris.detector DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._detector VALUES (NEW.name, NEW.r_node, NEW.lane_type,
+		NEW.lane_number, NEW.abandoned, NEW.force_fail,
+		NEW.field_length, NEW.fake, NEW.notes);
+);
+
+CREATE RULE detector_update AS ON UPDATE TO iris.detector DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._detector SET
+		r_node = NEW.r_node,
+		lane_type = NEW.lane_type,
+		lane_number = NEW.lane_number,
+		abandoned = NEW.abandoned,
+		force_fail = NEW.force_fail,
+		field_length = NEW.field_length,
+		fake = NEW.fake,
+		notes = NEW.notes
+	WHERE name = OLD.name;
+);
+
+CREATE RULE detector_delete AS ON DELETE TO iris.detector DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+
 CREATE TABLE iris._camera (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
@@ -418,7 +483,7 @@ CREATE TABLE system_attribute (
 	value VARCHAR(64) NOT NULL
 );
 
-INSERT INTO system_attribute VALUES('database_version', '3.78.0');
+INSERT INTO system_attribute VALUES('database_version', '3.79.0');
 
 
 CREATE TABLE vault_object (
@@ -565,22 +630,6 @@ CREATE TABLE "java_util_TreeMap" (
 )
 INHERITS ("java_util_AbstractMap");
 
-CREATE TABLE indexed_list (
-    list integer NOT NULL
-)
-INHERITS (abstract_list);
-
-CREATE TABLE detector (
-    "index" integer NOT NULL,
-    "laneType" smallint NOT NULL,
-    "laneNumber" smallint NOT NULL,
-    abandoned boolean NOT NULL,
-    "forceFail" boolean NOT NULL,
-    "fieldLength" real NOT NULL,
-    fake text NOT NULL
-)
-INHERITS (device);
-
 CREATE TABLE ramp_meter (
     "controlMode" integer NOT NULL,
     "singleRelease" boolean NOT NULL,
@@ -651,31 +700,12 @@ INHERITS (traffic_device);
 REVOKE ALL ON TABLE lcs FROM PUBLIC;
 GRANT SELECT ON TABLE lcs TO PUBLIC;
 
-CREATE TABLE detector_fieldlength_log (
-    "index" integer,
-    event_date timestamp with time zone,
-    field_length real
-);
-
-REVOKE ALL ON TABLE detector_fieldlength_log FROM PUBLIC;
-GRANT SELECT ON TABLE detector_fieldlength_log TO PUBLIC;
-
 CREATE FUNCTION time_plan_log() RETURNS "trigger"
     AS '
 	begin if (OLD."startTime" != NEW."startTime" or OLD."stopTime"!= NEW."stopTime" or OLD.target!=NEW.target) 
 	then insert into time_plan_log(vault_oid, event_date, logged_by, start_time, stop_time, target) 
 	values(OLD.vault_oid, CURRENT_TIMESTAMP, user, OLD."startTime", OLD."stopTime", OLD.target); end if; return old; 
 	end; '
-    LANGUAGE plpgsql;
-
-CREATE FUNCTION detector_fieldlength_log() RETURNS "trigger"
-    AS 'begin
-if (OLD."fieldLength" != NEW."fieldLength") then 
-insert into detector_fieldlength_log(index, event_date, field_length) 
-values (OLD.index, CURRENT_TIMESTAMP, OLD."fieldLength"); 
-end if; 
-return old; 
-end; '
     LANGUAGE plpgsql;
 
 CREATE TABLE traffic_device_timing_plan (
@@ -686,30 +716,6 @@ CREATE TABLE traffic_device_timing_plan (
 REVOKE ALL ON TABLE traffic_device_timing_plan FROM PUBLIC;
 GRANT SELECT ON TABLE traffic_device_timing_plan TO PUBLIC;
 
-CREATE TABLE r_node_detector (
-    r_node integer NOT NULL,
-    detector integer NOT NULL
-);
-
-REVOKE ALL ON TABLE r_node_detector FROM PUBLIC;
-GRANT SELECT ON TABLE r_node_detector TO PUBLIC;
-
-CREATE TABLE r_node (
-    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
-    node_type integer NOT NULL,
-    pickable boolean NOT NULL,
-    transition integer NOT NULL,
-    lanes integer NOT NULL,
-    attach_side boolean NOT NULL,
-    shift integer NOT NULL,
-    station_id text NOT NULL,
-    speed_limit integer NOT NULL,
-    notes text NOT NULL
-)
-INHERITS (tms_object);
-
-REVOKE ALL ON TABLE r_node FROM PUBLIC;
-GRANT SELECT ON TABLE r_node TO PUBLIC;
 
 
 CREATE FUNCTION get_next_oid() RETURNS integer
@@ -797,10 +803,10 @@ CREATE VIEW device_loc_view AS
 GRANT SELECT ON device_loc_view TO PUBLIC;
 
 CREATE VIEW r_node_view AS
-	SELECT n.vault_oid, freeway, free_dir, cross_mod, cross_street,
+	SELECT n.name, freeway, free_dir, cross_mod, cross_street,
 	cross_dir, nt.name AS node_type, n.pickable, tr.name AS transition,
 	n.lanes, n.attach_side, n.shift, n.station_id, n.speed_limit, n.notes
-	FROM r_node n
+	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
 	JOIN r_node_type nt ON n.node_type = nt.n_type
 	JOIN r_node_transition tr ON n.transition = tr.n_transition;
@@ -809,8 +815,8 @@ GRANT SELECT ON r_node_view TO PUBLIC;
 CREATE VIEW freeway_station_view AS
 	SELECT station_id, freeway, free_dir, cross_mod, cross_street,
 	speed_limit
-	FROM r_node r, geo_loc_view l
-	WHERE r.geo_loc = l.name AND station_id != '';
+	FROM iris.r_node r, geo_loc_view l
+	WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
 GRANT SELECT ON freeway_station_view TO PUBLIC;
 
 CREATE VIEW controller_loc_view AS
@@ -922,26 +928,27 @@ CREATE FUNCTION boolean_converter(boolean) RETURNS text AS
 LANGUAGE plpgsql;
 
 CREATE VIEW detector_label_view AS
-	SELECT d."index" AS det_id,
+	SELECT d.name AS det_id,
 	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
-		d."laneType", d."laneNumber", d.abandoned) AS label
-	FROM detector d
-	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name;
+		d.lane_type, d.lane_number, d.abandoned) AS label
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
 GRANT SELECT ON detector_label_view TO PUBLIC;
 
 CREATE VIEW detector_view AS
-	SELECT d."index" AS det_id, d.controller, c.comm_link, c.drop_id, d.pin,
+	SELECT d.name AS det_id, d.controller, c.comm_link, c.drop_id, d.pin,
 	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
-		d."laneType", d."laneNumber", d.abandoned) AS label,
-	d.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
-	l.cross_dir, d."laneNumber" AS lane_number,
-	d."fieldLength" AS field_length, ln.description AS lane_type,
+		d.lane_type, d.lane_number, d.abandoned) AS label,
+	rnd.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
 	boolean_converter(d.abandoned) AS abandoned,
-	boolean_converter(d."forceFail") AS force_fail,
+	boolean_converter(d.force_fail) AS force_fail,
 	boolean_converter(c.active) AS active, d.fake, d.notes
-	FROM detector d
-	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
-	LEFT JOIN lane_type ln ON d."laneType" = ln.id
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+	LEFT JOIN lane_type ln ON d.lane_type = ln.id
 	LEFT JOIN controller c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
@@ -982,7 +989,6 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 2	4	1	vault_counter	us.mn.state.dot.vault.Counter
 24	4	0	java_util_AbstractCollection	java.util.AbstractCollection
 23	4	0	java_util_AbstractList	java.util.AbstractList
-1272	4	0	indexed_list	us.mn.state.dot.tms.IndexedListImpl
 23834	4	0	ramp_meter	us.mn.state.dot.tms.RampMeterImpl
 30	4	0	java_lang_Number	java.lang.Number
 41	4	0	tms_object	us.mn.state.dot.tms.TMSObjectImpl
@@ -1001,9 +1007,7 @@ COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM 
 63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
 58	4	0	dms	us.mn.state.dot.tms.DMSImpl
 43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
-84656	4	0	r_node	us.mn.state.dot.tms.R_NodeImpl
 37	4	0	vault_list	us.mn.state.dot.vault.ListElement
-2065	4	0	detector	us.mn.state.dot.tms.DetectorImpl
 4	4	52	vault_types	us.mn.state.dot.vault.Type
 \.
 
@@ -1161,10 +1165,6 @@ CREATE UNIQUE INDEX "java_util_AbstractMap_pkey" ON "java_util_AbstractMap" USIN
 
 CREATE UNIQUE INDEX "java_util_TreeMap_pkey" ON "java_util_TreeMap" USING btree (vault_oid);
 
-CREATE UNIQUE INDEX indexed_list_pkey ON indexed_list USING btree (vault_oid);
-
-CREATE UNIQUE INDEX detector_pkey ON detector USING btree (vault_oid);
-
 CREATE UNIQUE INDEX ramp_meter_pkey ON ramp_meter USING btree (vault_oid);
 
 CREATE UNIQUE INDEX timing_plan_pkey ON timing_plan USING btree (vault_oid);
@@ -1177,28 +1177,13 @@ CREATE UNIQUE INDEX lcs_module_pkey ON lcs_module USING btree (vault_oid);
 
 CREATE UNIQUE INDEX lcs_pkey ON lcs USING btree (vault_oid);
 
-CREATE UNIQUE INDEX detector_index ON detector USING btree ("index");
-
-CREATE UNIQUE INDEX r_node_pkey ON r_node USING btree (vault_oid);
-
 ALTER TABLE ONLY time_plan_log
     ADD CONSTRAINT time_plan_log_pkey PRIMARY KEY (event_id);
-
-ALTER TABLE ONLY r_node_detector
-    ADD CONSTRAINT "$2" FOREIGN KEY (detector) REFERENCES detector("index");
-
-ALTER TABLE ONLY r_node_detector
-    ADD CONSTRAINT "$1" FOREIGN KEY (r_node) REFERENCES r_node(vault_oid);
 
 CREATE TRIGGER time_plan_log_trig
     AFTER UPDATE ON simple_plan
     FOR EACH ROW
     EXECUTE PROCEDURE time_plan_log();
-
-CREATE TRIGGER detector_fieldlength_log_trig
-    AFTER UPDATE ON detector
-    FOR EACH ROW
-    EXECUTE PROCEDURE detector_fieldlength_log();
 
 SELECT pg_catalog.setval('tms_log_seq', 8284, true);
 
@@ -1235,7 +1220,7 @@ CREATE TABLE event.detector_event (
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	device_id integer REFERENCES detector("index")
+	device_id VARCHAR(10) REFERENCES iris._detector(name)
 );
 
 CREATE TABLE event.sign_event (
@@ -1268,8 +1253,8 @@ GRANT SELECT ON comm_event_view TO PUBLIC;
 
 CREATE VIEW detector_event_view AS
 	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
-	FROM detector_event e
-	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id
+	FROM event.detector_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
 	JOIN detector_label_view dl ON e.device_id = dl.det_id;
 GRANT SELECT ON detector_event_view TO PUBLIC;
 
