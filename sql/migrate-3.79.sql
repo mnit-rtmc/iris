@@ -94,7 +94,6 @@ DROP TABLE r_node;
 DROP VIEW detector_view;
 DROP VIEW detector_event_view;
 DROP VIEW detector_label_view;
-DROP FUNCTION detector_fieldlength_log;
 
 ALTER TABLE event.detector_event ADD COLUMN did VARCHAR(10);
 UPDATE event.detector_event SET did = device_id::VARCHAR(10);
@@ -106,6 +105,8 @@ ALTER TABLE event.detector_event ADD CONSTRAINT _detector_event_device_id_fkey
 	FOREIGN KEY (device_id) REFERENCES iris._detector(name);
 
 DROP TABLE detector;
+DROP FUNCTION detector_fieldlength_log();
+DROP TABLE detector_fieldlength_log;
 
 CREATE VIEW r_node_view AS
 	SELECT n.name, freeway, free_dir, cross_mod, cross_street,
