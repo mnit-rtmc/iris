@@ -11,6 +11,32 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.79.0 (21 October 2008)</dt>
+	<dd><ul>
+		<li>
+			Detector, r_nodes and stations converted to SONAR.
+		</li>
+		<li>
+			Fixed several bugs related to recent SONAR updates.
+		</li>
+		<li>
+			Lots of code cleanups and minor enhancements.
+		</li>
+		<li>
+			SONAR dependency updated to 2.3.2.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.79.sql</code>
+		</li>
+		<li>
+			NOTE: Some changes cannot be migrated automatically, and
+			some manual steps may be required.
+			Before migrating the database, please test with
+			sql/detector_check.sql.
+		</li>
+	</ul></dd>
 	<dt>3.78.0 (24 September 2008)</dt>
 	<dd><ul>
 		<li>
