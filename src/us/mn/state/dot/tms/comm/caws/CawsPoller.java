@@ -81,9 +81,7 @@ public class CawsPoller extends MessagePoller implements SignPoller
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		boolean act = SystemAttributeHelperD10.isCAWSActive();
-		System.err.println("CawsPoller.poll30Second() called, caws active = "+act+".");
-		if(act)
+		if(SystemAttributeHelperD10.isCAWSActive())
 			new OpProcessCawsMsgs(c).start();
 	}
 
