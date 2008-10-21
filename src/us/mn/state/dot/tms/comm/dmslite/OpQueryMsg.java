@@ -84,21 +84,21 @@ public class OpQueryMsg extends OpDms
 	}
 
 	/** calculate the number of pages in a bitmap */
-	protected int calcNumPages(byte[] bm) {
+	protected int calcNumPages(byte[] bm, int width, int height) {
+		if(width<=0 || height<=0)
+			return 0;
 
 		// calc size of 1 page
-		int lenpg=m_dms.getSignWidthPixels()*m_dms.getSignHeightPixels()/8;
-		if (lenpg<=0) {
-			return(0);
-		}
+		//int lenpg = m_dms.getSignWidthPixels()*m_dms.getSignHeightPixels()/8;
+		int lenpg = width * height / 8;
+		if(lenpg <= 0)
+			return 0;
 
 		// calculate number of pages based on bitmap length
-		int npgs=bm.length/lenpg;
+		int npgs = bm.length / lenpg;
 		//System.err.println("OpQueryMsg.calcnumPages(): bm.length="+bm.length+",lenpg="+lenpg+",npgs="+npgs);
-		if (npgs*lenpg!=bm.length) {
-			return(0);
-		}
-
+		if(npgs * lenpg != bm.length)
+			return 0;
 		return npgs;
 	}
 
@@ -136,47 +136,95 @@ public class OpQueryMsg extends OpDms
 	/**
 	 * Create a SignMessage using a bitmap and no message text.
 	 * @params owner message owner.
-	 * @params argbitmap Bitmap associated with message text.
+	 * @params sbitmap Bitmap as hexstring associated with message text.
+	 * 	           This bitmap is assumed to be a 96x25 bitmap which
+	 *                 dmslite will always return and is specific to 
+	 *                 Caltrans. 
 	 * @params dura message duration in mins.
 	 * @returns A SignMessage that contains the text of the message and 
 	 *  a rendered bitmap.
 	 */
 	private SignMessage createSignMessageWithBitmap(String owner, 
-		byte[] argbitmap, int dura) 
+		String sbitmap, int dura) 
 	{
-		//System.err.println(
-		//    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
-		//    + m_dms.getSignWidthPixels() + ", argbitmap.len="
-		//    + argbitmap.length + ", owner="+owner+".");
+		// assumed bitmap page size, specific to Caltrans
+		final int BM_WIDTH = 96;
+		final int BM_HEIGHT = 25;
+		final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
+		final int BM_SIZE_HEXCHAR = BM_PGLEN_BYTES * 2;
 
-		assert owner != null;
-		assert argbitmap != null;
+		// sanity checks
+		if(owner == null)
+			owner = "unknown";
+		if(sbitmap == null)
+			return null;
+		if(sbitmap.length() % BM_SIZE_HEXCHAR != 0 ) {
+			System.err.println("WARNING: received bogus sbitmap size: len="+sbitmap.length());
+			return null;
+		}
+		if(BM_HEIGHT != m_dms.getSignHeightPixels()) {
+			assert false : "bogus bitmap size: " + BM_HEIGHT + ", " + m_dms.getSignHeightPixels();
+			return null;
+		}
+
+		// convert bitmap to byte array
+		byte[] argbitmap = new HexString(sbitmap).toByteArray();
+		if(argbitmap == null) {
+			assert false;
+			return null;
+		}
+
+		System.err.println(
+		    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
+		    + m_dms.getSignWidthPixels() + ", argbitmap.len="
+		    + argbitmap.length + ", owner="+owner+".");
 
 		// calc number of pages
-		int numpgs=this.calcNumPages(argbitmap);
-		//System.err.println("OpQueryMsg.createSignMessageWithBitmap(): numpages=" + numpgs);
+		int numpgs=this.calcNumPages(argbitmap, BM_WIDTH, BM_HEIGHT);
+		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): numpages=" + numpgs);
+		if(numpgs <= 0)
+			return null;
 
 		// create multistring
 		MultiString multi = new MultiString(OpQueryMsg.createMessageTextUsingBitmap(numpgs,argbitmap));
-		//System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
+		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
 
 		// create multipage bitmap
 		TreeMap<Integer, BitmapGraphic> bitmaps = new TreeMap<Integer, BitmapGraphic>();
 		for (int pg=0; pg<numpgs; ++pg) {
-			int pglen=m_dms.getSignHeightPixels() * m_dms.getSignWidthPixels()/8;
-			byte[] nbm = new byte[pglen];
-			System.arraycopy(argbitmap, pg*pglen, nbm, 0, pglen);
-			BitmapGraphic bm=new BitmapGraphic(m_dms.getSignWidthPixels(),m_dms.getSignHeightPixels());
+
+			// extract 1 page
+			byte[] nbm = extractPage(pg, BM_PGLEN_BYTES, argbitmap);
+			if(nbm==null)
+				return null;
+			BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
 			bm.setBitmap(nbm);
-			bitmaps.put(pg, bm);
+
+			// resize to actual sign width
+			BitmapGraphic bmgResize = 
+				bm.resizeWidth(m_dms.getSignWidthPixels());
+
+			bitmaps.put(pg, bmgResize);
 		}
 
 		// create SignMessage
-		SignMessage sm = new SignMessage(owner, multi, bitmaps, dura);
-
-		return sm;
+		return new SignMessage(owner, multi, bitmaps, dura);
 	}
 
+	/** extract a single page from a byte array */
+	private byte[] extractPage(int pg, int pglen, byte[] argbitmap) {
+		if(argbitmap == null || pg <0 || pglen <=0)
+			return null;
+		if(argbitmap.length % pglen != 0 ) {
+			System.err.println("WARNING: extractPage() received bogus bitmap size: len=" +
+				argbitmap.length + ", pglen=" + pglen);
+			return null;
+		}
+		byte[] nbm = new byte[pglen];
+		System.arraycopy(argbitmap, pg * pglen, nbm, 0, pglen);
+		return nbm;
+	}
+	
 	/**
 	 * Calculate message duration
 	 *
@@ -211,42 +259,6 @@ public class OpQueryMsg extends OpDms
 
 		//System.err.println("OpQueryMsg.calcMsgDuration: duration (mins)=" + m);
 		return ((int)m);
-	}
-
-	/* create sign message without message text
-	 * @params owner message owner.
-	 * @params argbitmap Bitmap associated with message text.
-	 * @params dura message duration in mins.
-	 * @return the SignMessage with no message text or null on failure
-	 */
-	protected SignMessage createSignMessageWithBitmapNoText(boolean usebitmap, 
-		String bitmap, String owner, int duramins) 
-	{
-		// don't have bitmap
-		if(!usebitmap)
-			return null;
-
-		// have bitmap
-		final int BM_WIDTH = 96;
-		final int BM_HEIGHT = 25;
-		final int BM_SIZE = BM_WIDTH * BM_HEIGHT / 8 * 2;
-
-		SignMessage sm = null;
-
-		// assume a bitmap size
-		if(bitmap.length() % BM_SIZE == 0 ) {
-			BitmapGraphic bmg = 
-				new BitmapGraphic(BM_WIDTH,BM_HEIGHT);
-			bmg.setBitmap(new HexString(bitmap).toByteArray());
-			BitmapGraphic bmgResize = 
-				bmg.resizeWidth(m_dms.getSignWidthPixels());
-			sm = createSignMessageWithBitmap(owner, 
-				bmgResize.getBitmap(), duramins);
-		} else {
-			System.err.println("WARNING: received bogus bitmap size: len="+bitmap.length());
-			sm = null;
-		}
-		return sm;
 	}
 
 	/**
@@ -384,12 +396,12 @@ public class OpQueryMsg extends OpDms
 
 				// don't have text
 				} else {
-					SignMessage sm = createSignMessageWithBitmapNoText(
-						usebitmap,bitmap,owner,duramins);
+					SignMessage sm = null;
+					if(usebitmap)
+						sm = createSignMessageWithBitmap(owner, bitmap, duramins);
 					if(sm == null)
-						sm=OpDms.createBlankMsg(m_dms,owner);
-					else
-						m_dms.setActiveMessage(sm);
+						sm = OpDms.createBlankMsg(m_dms,owner);
+					m_dms.setActiveMessage(sm);
 				}
 
 			// valid flag is false
