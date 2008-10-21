@@ -153,6 +153,13 @@ public class DetectorImpl extends Device2Impl implements Detector,
 		fake_det = null;
 	}
 
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		if(r_node != null)
+			r_node.removeDetector(this);
+	}
+
 	/** Compare to another detector */
 	public int compareTo(DetectorImpl other) {
 		return DetectorHelper.compare(this, other);
