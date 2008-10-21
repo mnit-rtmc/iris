@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 
 /**
@@ -124,6 +125,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		station_id = st;
 		speed_limit = sl;
 		notes = nt;
+		initTransients();
 	}
 
 	/** Create an r_node */
@@ -136,9 +138,16 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Initialize transient fields */
-	public void initTransients() throws TMSException {
-		super.initTransients();
-		updateStation(null, createStation(station_id));
+	public void initTransients() {
+		station = createStation(station_id);
+		if(station != null) {
+			try {
+				namespace.add(station);
+			}
+			catch(NamespaceError e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/** Node location */
