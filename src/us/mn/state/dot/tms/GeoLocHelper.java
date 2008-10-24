@@ -89,7 +89,10 @@ public class GeoLocHelper {
 			return "Unknown location";
 	}
 
-	/** Filter for alternate directions on a North-South road */
+	/** Filter for alternate directions on a North-South road.
+	 * @param d Direction to be filtered
+	 * @param ad Alternate road direction
+	 * @return Filtered direction */
 	static protected short filterNorthSouth(short d, short ad) {
 		if(ad == Road.EAST) {
 			if(d == Road.EAST)
@@ -105,7 +108,10 @@ public class GeoLocHelper {
 		return d;
 	}
 
-	/** Filter for alternate directions on an East-West road */
+	/** Filter for alternate directions on an East-West road.
+	 * @param d Direction to be filtered
+	 * @param ad Alternate road direction
+	 * @return Filtered direction */
 	static protected short filterEastWest(short d, short ad) {
 		if(ad == Road.NORTH) {
 			if(d == Road.NORTH)
@@ -121,11 +127,15 @@ public class GeoLocHelper {
 		return d;
 	}
 
-	/** Filter the freeway direction which matches the given direction */
-	static protected short filterDirection(short d, short ad) {
-		if(d == Road.NORTH_SOUTH)
+	/** Filter the freeway direction which matches the given direction.
+	 * @param d Direction to be filtered
+	 * @param rd Main road direction (NORTH_SOUTH / EAST_WEST)
+	 * @param ad Alternate road direction
+	 * @return Filtered direction */
+	static protected short filterDirection(short d, short rd, short ad) {
+		if(rd == Road.NORTH_SOUTH)
 			return filterNorthSouth(d, ad);
-		else if(d == Road.EAST_WEST)
+		else if(rd == Road.EAST_WEST)
 			return filterEastWest(d, ad);
 		else
 			return d;
@@ -134,8 +144,9 @@ public class GeoLocHelper {
 	/** Filter the direction for the given road */
 	static public short filterDirection(short d, Road r) {
 		if(r != null) {
+			short rd = r.getDirection();
 			short ad = r.getAltDir();
-			return filterDirection(d, ad);
+			return filterDirection(d, rd, ad);
 		} else
 			return d;
 	}
