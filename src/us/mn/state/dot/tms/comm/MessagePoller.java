@@ -119,7 +119,9 @@ abstract public class MessagePoller extends Thread {
 		catch(IOException e) {
 			status = e.getMessage();
 		}
-		messenger.close();
+		finally {
+			messenger.close();
+		}
 		drainQueue();
 		if(POLL_LOG.isOpen())
 			POLL_LOG.log(getName() + " STOPPING");
