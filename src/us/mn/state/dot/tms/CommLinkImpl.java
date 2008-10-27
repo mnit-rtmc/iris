@@ -107,7 +107,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
-		closePoller(poller);
+		closePoller();
 		super.doDestroy();
 	}
 
@@ -344,26 +344,27 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Open the message poller */
 	protected synchronized MessagePoller openPoller() {
-		closePoller(poller);
+		closePoller();
 		try {
 			poller = createPoller();
 			Messenger m = messenger;
 			if(m != null)
 				m.setTimeout(timeout);
 			poller.start();
-			return poller;
 		}
 		catch(IOException e) {
-			closePoller(poller);
+			closePoller();
 			setStatus("I/O error: " + e.getMessage());
-			return null;
 		}
+		return poller;
 	}
 
-	/** Close a message poller */
-	protected void closePoller(MessagePoller p) {
+	/** Close the message poller */
+	protected void closePoller() {
+		MessagePoller p = poller;
 		if(p != null)
 			p.stopPolling();
+		poller = null;
 	}
 
 	/** Communication link status */
