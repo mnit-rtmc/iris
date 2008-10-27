@@ -102,7 +102,13 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		url = u;
 		protocol = p;
 		timeout = t;
-		open();
+		openPoller();
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		closePoller(poller);
+		super.doDestroy();
 	}
 
 	/** Description of communication link */
@@ -139,9 +145,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(u.equals(url))
 			return;
 		store.update(this, "url", u);
-		close();
 		setUrl(u);
-		open();
+		openPoller();
 	}
 
 	/** Get remote URL for link */
@@ -164,9 +169,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(p < 0 || p >= PROTOCOLS.length)
 			throw new ChangeVetoException("Invalid protocol: " + p);
 		store.update(this, "protocol", p);
-		close();
 		setProtocol(p);
-		open();
+		openPoller();
 	}
 
 	/** Get the communication protocol */
@@ -213,12 +217,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			setStatus(p.getStatus());
 			if(p.isAlive())
 				return p;
-			else
-				close();
 		}
 		failControllers();
-		open();
-		return poller;
+		return openPoller();
 	}
 
 	/** Communication messenger */
@@ -341,29 +342,28 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		}
 	}
 
-	/** Open the communication link */
-	protected synchronized void open() {
+	/** Open the message poller */
+	protected synchronized MessagePoller openPoller() {
+		closePoller(poller);
 		try {
 			poller = createPoller();
-			messenger.setTimeout(timeout);
+			Messenger m = messenger;
+			if(m != null)
+				m.setTimeout(timeout);
 			poller.start();
+			return poller;
 		}
 		catch(IOException e) {
-			close();
+			closePoller(poller);
 			setStatus("I/O error: " + e.getMessage());
+			return null;
 		}
 	}
 
-	/** Close the communication link */
-	protected synchronized void close() {
-		if(poller != null) {
-			poller.stopPolling();
-			poller = null;
-		}
-		if(messenger != null) {
-			messenger.close();
-			messenger = null;
-		}
+	/** Close a message poller */
+	protected void closePoller(MessagePoller p) {
+		if(p != null)
+			p.stopPolling();
 	}
 
 	/** Communication link status */
