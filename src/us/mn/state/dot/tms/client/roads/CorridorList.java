@@ -74,10 +74,10 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 	protected CorridorBase corridor;
 
 	/** Roadway node renderer list */
-	protected List<R_NodeRenderer> r_list;
+	protected List<R_NodeRenderer> r_list =new LinkedList<R_NodeRenderer>();
 
 	/** Roadway node renderer list model */
-	protected R_NodeListModel nr_list;
+	protected R_NodeListModel nr_list = new R_NodeListModel();
 
 	/** Button to add a new roadway node */
 	protected JButton abutton = new JButton("Add");
