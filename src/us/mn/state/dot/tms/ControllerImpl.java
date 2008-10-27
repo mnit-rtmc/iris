@@ -564,7 +564,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected transient boolean failed = true;
 
 	/** Set the failed status of the controller */
-	public void setFailed(boolean f, String id) {
+	protected void setFailed(boolean f, String id) {
 		if(f == failed)
 			return;
 		if(f) {
@@ -579,6 +579,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		failed = f;
 		notifyStatus();
 		notifyError();
+	}
+
+	/** Set the failed status of the controller */
+	public void setFailed(boolean f) {
+		setFailed(f, toString());
 	}
 
 	/** Get the failure status */

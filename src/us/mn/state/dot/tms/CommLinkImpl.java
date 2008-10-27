@@ -216,6 +216,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			else
 				close();
 		}
+		failControllers();
 		open();
 		return poller;
 	}
@@ -433,6 +434,15 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 					return cont;
 			}
 			return null;
+		}
+	}
+
+	/** Set all controllers to a failed status */
+	protected void failControllers() {
+		synchronized(controllers) {
+			for(ControllerImpl c: controllers.values()) {
+				c.setFailed(true);
+			}
 		}
 	}
 
