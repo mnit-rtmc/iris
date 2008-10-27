@@ -349,7 +349,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		}
 		catch(IOException e) {
 			close();
-			setStatus(e.getMessage());
+			setStatus("I/O error: " + e.getMessage());
 		}
 	}
 
