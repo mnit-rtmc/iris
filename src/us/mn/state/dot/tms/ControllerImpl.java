@@ -117,6 +117,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		version = "";
+		failed = true;
+		errorCounter = RETRY_THRESHOLD;
 		if(comm_link instanceof CommLinkImpl) {
 			CommLinkImpl link = (CommLinkImpl)comm_link;
 			link.putController(drop_id, this);
@@ -524,10 +526,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the controller communication status */
 	protected void setStatus(String s) {
-		if(!s.equals(status)) {
+		// NOTE: the status attribute is set here, but don't notify
+		// clients until communication fails. That happens in the
+		// setFailed method.
+		if(!s.equals(status))
 			status = s;
-			notifyStatus();
-		}
 	}
 
 	/** Controller setup configuration state */
@@ -557,12 +560,30 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Error counter for this controller */
-	protected transient int errorCounter = RETRY_THRESHOLD;
+	/** Failed status of controller */
+	protected transient boolean failed = true;
+
+	/** Set the failed status of the controller */
+	public void setFailed(boolean f, String id) {
+		if(f == failed)
+			return;
+		if(f) {
+			if("".equals(getStatus()))
+				setStatus("Failed");
+			failTime = new Date();
+			logFailMessage(EventType.COMM_FAILED, id);
+		} else {
+			setStatus("");
+			logFailMessage(EventType.COMM_RESTORED, id);
+		}
+		failed = f;
+		notifyStatus();
+		notifyError();
+	}
 
 	/** Get the failure status */
 	public boolean isFailed() {
-		return errorCounter >= RETRY_THRESHOLD;
+		return failed;
 	}
 
 	/** Time stamp of most recent comm failure */
@@ -596,6 +617,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		updateNowCounters();
 	}
 
+	/** Error counter for this controller */
+	protected transient int errorCounter = RETRY_THRESHOLD;
+
 	/** Should a poll be tried again? This method is called after 
 	  * a failure and bumps the error counter.
 	  * @param id The ID of the device that failed.
@@ -605,24 +629,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(isFailed())
 			return false;
 		errorCounter++;
-		if(isFailed()) {
-			failTime = new Date();
-			logFailMessage(EventType.COMM_FAILED, id);
-			notifyError();
-			return false;
-		}
-		return true;
+		if(errorCounter >= RETRY_THRESHOLD)
+			setFailed(true, id);
+		return !isFailed();
 	}
 
 	/** Reset the error counter */
 	public void resetErrorCounter(String id) {
-		boolean failed = isFailed();
 		errorCounter = 0;
-		setStatus("");
-		if(failed) {
-			logFailMessage(EventType.COMM_RESTORED, id);
-			notifyError();
-		}
+		setFailed(false, id);
 	}
 
 	/** Reset the error counter */
