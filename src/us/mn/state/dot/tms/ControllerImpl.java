@@ -529,8 +529,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		// NOTE: the status attribute is set here, but don't notify
 		// clients until communication fails. That happens in the
 		// setFailed method.
-		if(!s.equals(status))
-			status = s;
+		status = s;
 	}
 
 	/** Controller setup configuration state */
