@@ -714,7 +714,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Notify SONAR clients of changes to "status" attribute */
 	public void notifyStatus() {
 		if(MainServer.server != null) {
-			String[] s = new String[] { status };
+			String[] s = new String[] { getStatus() };
 			MainServer.server.setAttribute(this, "status", s);
 		}
 	}
