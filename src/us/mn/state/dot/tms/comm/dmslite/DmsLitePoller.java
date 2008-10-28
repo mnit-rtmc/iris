@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.SocketMessenger;
 
 /**
@@ -38,8 +37,7 @@ import us.mn.state.dot.tms.comm.SocketMessenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsLitePoller extends MessagePoller
-	implements SignPoller, DMSPoller {
+public class DmsLitePoller extends MessagePoller implements DMSPoller {
 
 	/** valid address range (inclusive) */
 	static public final int MAX_ADDRESS = 255;

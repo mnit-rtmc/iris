@@ -27,16 +27,14 @@ import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.SignPoller;
 
 /**
  * NtcipPoller
  *
  * @author Douglas Lau
  */
-public class NtcipPoller extends MessagePoller implements SignPoller,
-	DMSPoller
-{
+public class NtcipPoller extends MessagePoller implements DMSPoller {
+
 	/** SNMP message protocol */
 	protected final SNMP snmp = new SNMP();
 
