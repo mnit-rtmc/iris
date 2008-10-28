@@ -521,7 +521,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get the controller communication status */
 	public String getStatus() {
-		return status;
+		if(isFailed())
+			return "";
+		else
+			return status;
 	}
 
 	/** Set the controller communication status */
@@ -555,14 +558,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(f == failed)
 			return;
 		if(f) {
-			if("".equals(getStatus()))
-				setStatus("Failed");
 			failTime = new Date();
 			logFailMessage(EventType.COMM_FAILED, id);
-		} else {
-			setStatus("");
+		} else
 			logFailMessage(EventType.COMM_RESTORED, id);
-		}
 		failed = f;
 		notifyStatus();
 		notifyError();
