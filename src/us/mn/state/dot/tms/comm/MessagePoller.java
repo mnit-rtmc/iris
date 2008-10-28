@@ -74,6 +74,11 @@ abstract public class MessagePoller extends Thread {
 		messenger = m;
 	}
 
+	/** Set the receive timeout */
+	public void setTimeout(int t) throws IOException {
+		messenger.setTimeout(t);
+	}
+
 	/** Add an operation to the message poller */
 	public void addOperation(Operation o) {
 		// NOTE: we must synchronize on the queue here so that begin()

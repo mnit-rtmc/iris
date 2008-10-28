@@ -191,9 +191,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(t == timeout)
 			return;
 		try {
-			Messenger m = messenger;
-			if(m != null)
-				m.setTimeout(t);
+			MessagePoller p = poller;
+			if(p != null)
+				p.setTimeout(t);
 		}
 		catch(IOException e) {
 			throw new TMSException(e);
@@ -221,9 +221,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		failControllers();
 		return openPoller();
 	}
-
-	/** Communication messenger */
-	protected transient Messenger messenger;
 
 	/** Parse a TCP port */
 	protected int parseTcpPort(String p) throws IOException {
@@ -254,63 +251,54 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create an NTCIP Class C poller */
 	protected MessagePoller createNtcipCPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new NtcipPoller(name, messenger);
+		return new NtcipPoller(name, createSocketMessenger());
 	}
 
 	/** Create an NTCIP Class B poller */
 	protected MessagePoller createNtcipBPoller() throws IOException {
-		messenger = createSocketMessenger();
-		HDLCMessenger hdlc = new HDLCMessenger(messenger);
+		HDLCMessenger hdlc = new HDLCMessenger(createSocketMessenger());
 		return new NtcipPoller(name, hdlc);
 	}
 
 	/** Create a Mn/DOT poller */
 	protected MessagePoller createMndotPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new MndotPoller(name, messenger, protocol);
+		return new MndotPoller(name, createSocketMessenger(),
+			protocol);
 	}
 
 	/** Create a SmartSensor poller */
 	protected MessagePoller createSmartSensorPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new SmartSensorPoller(name, messenger);
+		return new SmartSensorPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Canoga poller */
 	protected MessagePoller createCanogaPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new CanogaPoller(name, messenger);
+		return new CanogaPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Vicon poller */
 	protected MessagePoller createViconPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new ViconPoller(name, messenger);
+		return new ViconPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Pelco poller */
 	protected MessagePoller createPelcoPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new PelcoPoller(name, messenger);
+		return new PelcoPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Manchester poller */
 	protected MessagePoller createManchesterPoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new ManchesterPoller(name, messenger);
+		return new ManchesterPoller(name, createSocketMessenger());
 	}
 
 	/** Create a DMS Lite poller */
 	protected MessagePoller createDmsLitePoller() throws IOException {
-		messenger = createSocketMessenger();
-		return new DmsLitePoller(name, messenger);
+		return new DmsLitePoller(name, createSocketMessenger());
 	}
 
 	/** Create a CAWS poller */
 	protected MessagePoller createCawsPoller() throws IOException {
-		messenger = createHttpFileMessenger();
-		return new CawsPoller(name, messenger);
+		return new CawsPoller(name, createHttpFileMessenger());
 	}
 
 	/** Try to open the communication link */
@@ -347,9 +335,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		closePoller();
 		try {
 			poller = createPoller();
-			Messenger m = messenger;
-			if(m != null)
-				m.setTimeout(timeout);
+			poller.setTimeout(timeout);
 			poller.start();
 		}
 		catch(IOException e) {
