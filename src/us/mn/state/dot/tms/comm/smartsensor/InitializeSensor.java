@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2007  Minnesota Department of Transportation
+ * Copyright (C) 2004-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class InitializeSensor extends ControllerOperation {
 	public InitializeSensor(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c, c.toString());
 		restart = r;
-		controller.setSetup("OK");
+		controller.setError("OK");
 	}
 
 	/** Begin the sensor initialization operation */
@@ -126,7 +126,7 @@ public class InitializeSensor extends ControllerOperation {
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(!success)
-			controller.setSetup(null);
+			controller.setError(null);
 		super.cleanup();
 	}
 }

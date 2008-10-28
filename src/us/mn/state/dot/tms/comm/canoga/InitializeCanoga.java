@@ -40,7 +40,7 @@ public class InitializeCanoga extends ControllerOperation {
 	public InitializeCanoga(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c, c.toString());
 		restart = r;
-		controller.setSetup("OK");
+		controller.setError("OK");
 	}
 
 	/** Begin the sensor initialization operation */
@@ -76,7 +76,7 @@ public class InitializeCanoga extends ControllerOperation {
 			controller.setVersion(version.getValue() + " (" +
 				serial_number.getValue() + ")");
 		} else
-			controller.setSetup(null);
+			controller.setError(null);
 		super.cleanup();
 	}
 }

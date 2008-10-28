@@ -52,7 +52,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	public Download(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c);
 		restart = r;
-		controller.setSetup("OK");
+		controller.setError("OK");
 	}
 
 	/** Handle an exception */
@@ -110,7 +110,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	protected void checkCabinetStyle(int dips) {
 		Integer d = lookupDips();
 		if(d != null && d != dips)
-			controller.setSetup("CABINET STYLE " + dips);
+			controller.setError("CABINET STYLE " + dips);
 	}
 
 	/** Lookup the correct dip switch setting to the controller */
@@ -306,7 +306,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(!success)
-			controller.setSetup(null);
+			controller.setError(null);
 		super.cleanup();
 	}
 

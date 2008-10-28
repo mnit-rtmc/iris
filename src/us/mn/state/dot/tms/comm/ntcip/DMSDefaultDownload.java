@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class DMSDefaultDownload extends DMSOperation {
 	/** Create a new DMS default download object */
 	public DMSDefaultDownload(DMSImpl d) {
 		super(DOWNLOAD, d);
-		controller.setSetup("OK");
+		controller.setError("OK");
 	}
 
 	/** Create the first real phase of the operation */
@@ -197,7 +197,7 @@ public class DMSDefaultDownload extends DMSOperation {
 		if(success)
 			dms.notifyUpdate();
 		else
-			controller.setSetup(null);
+			controller.setError(null);
 		super.cleanup();
 	}
 }

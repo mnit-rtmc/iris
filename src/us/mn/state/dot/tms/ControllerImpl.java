@@ -532,18 +532,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		status = s;
 	}
 
-	/** Controller setup configuration state */
-	protected transient String setup = "";
-
-	/** Set the controller setup configuration state */
-	public void setSetup(String s) {
-		if(s == null)
-			setup = "";
-		else
-			setup = s;
-		notifyError();
-	}
-
 	/** Log an exception */
 	public void logException(String id, String message) {
 		setStatus(message);
@@ -593,12 +581,24 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Time stamp of most recent comm failure */
 	protected transient Date failTime = new Date();
 
-	/** Get the controller error status */
+	/** Controller error detail */
+	protected transient String error = "";
+
+	/** Set the controller error detail */
+	public void setError(String s) {
+		if(s == null)
+			error = "";
+		else
+			error = s;
+		notifyError();
+	}
+
+	/** Get the controller error detail */
 	public String getError() {
 		if(isFailed())
 			return "FAIL @ " + failTime.toString();
 		else
-			return setup;
+			return error;
 	}
 
 	/** Get the number of milliseconds the controller has been failed */

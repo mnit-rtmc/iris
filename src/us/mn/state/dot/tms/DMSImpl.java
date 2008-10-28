@@ -921,7 +921,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		error_status = s;
 		ControllerImpl c = getControllerImpl();
 		if(c != null)
-			c.setSetup(s.getValue());
+			c.setError(s.getValue());
 	}
 
 	/** Pixel failure count */
