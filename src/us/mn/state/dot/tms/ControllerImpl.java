@@ -522,9 +522,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the controller communication status */
 	public String getStatus() {
 		if(isFailed())
-			return "";
-		else
 			return status;
+		else
+			return "";
 	}
 
 	/** Set the controller communication status */
