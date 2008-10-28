@@ -210,13 +210,13 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Message poller for communication */
 	protected transient MessagePoller poller;
 
-	/** Get the message poller */
-	public MessagePoller getPoller() {
-		MessagePoller p = poller;
-		if(p != null) {
-			setStatus(p.getStatus());
-			if(p.isAlive())
-				return p;
+	/** Get the message poller.  This must be synchronized to protect
+	 * access to the poller member variable. */
+	public synchronized MessagePoller getPoller() {
+		if(poller != null) {
+			setStatus(poller.getStatus());
+			if(poller.isAlive())
+				return poller;
 		}
 		failControllers();
 		return openPoller();
@@ -346,10 +346,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Close the message poller */
-	protected void closePoller() {
-		MessagePoller p = poller;
-		if(p != null)
-			p.stopPolling();
+	protected synchronized void closePoller() {
+		if(poller != null)
+			poller.stopPolling();
 		poller = null;
 	}
 
