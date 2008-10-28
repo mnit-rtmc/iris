@@ -121,10 +121,10 @@ abstract public class MessagePoller extends Thread {
 		}
 		finally {
 			messenger.close();
+			drainQueue();
+			if(POLL_LOG.isOpen())
+				POLL_LOG.log(getName() + " STOPPING");
 		}
-		drainQueue();
-		if(POLL_LOG.isOpen())
-			POLL_LOG.log(getName() + " STOPPING");
 	}
 
 	/** Drain the poll queue */
@@ -150,9 +150,7 @@ abstract public class MessagePoller extends Thread {
 	}
 
 	/** Perform one poll for an operation */
-	protected synchronized void doPoll(final ControllerOperation o)
-		throws IOException
-	{
+	protected void doPoll(final ControllerOperation o) throws IOException {
 		final String oname = o.toString();
 		long start = System.currentTimeMillis();
 		try {

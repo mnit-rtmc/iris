@@ -36,10 +36,11 @@ public class SocketMessenger extends Messenger {
 	protected int timeout = 750;
 
 	/** Set the receive timeout */
-	public synchronized void setTimeout(int t) throws IOException {
+	public void setTimeout(int t) throws IOException {
 		timeout = t;
-		if(socket != null)
-			socket.setSoTimeout(t);
+		Socket s = socket;
+		if(s != null)
+			s.setSoTimeout(t);
 	}
 
 	/** Create a new socket messenger */
@@ -49,18 +50,20 @@ public class SocketMessenger extends Messenger {
 
 	/** Open the socket messenger */
 	public void open() throws IOException {
-		socket = new Socket();
-		socket.setSoTimeout(timeout);
-		socket.connect(address, timeout);
-		input = socket.getInputStream();
-		output = socket.getOutputStream();
+		Socket s = new Socket();
+		s.setSoTimeout(timeout);
+		s.connect(address, timeout);
+		input = s.getInputStream();
+		output = s.getOutputStream();
+		socket = s;
 	}
 
 	/** Close the socket messenger */
-	public synchronized void close() {
-		if(socket != null) {
+	public void close() {
+		Socket s = socket;
+		if(s != null) {
 			try {
-				socket.close();
+				s.close();
 			}
 			catch(IOException e) {
 				// Ignore

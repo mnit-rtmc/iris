@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
@@ -27,10 +26,9 @@ import java.net.UnknownHostException;
  *
  * @author Douglas Lau
  * @author Michael Darter
- * @created April 8, 2008
  */
-public class HttpFileMessenger extends Messenger
-{
+public class HttpFileMessenger extends Messenger {
+
 	/** URL to read */
 	private URL m_url;
 
@@ -47,13 +45,13 @@ public class HttpFileMessenger extends Messenger
 	}
 
 	/** Set the receive timeout */
-	public synchronized void setTimeout(int t) throws IOException {}
+	public void setTimeout(int t) throws IOException {}
 
 	/** Open the messenger */
 	public void open() throws IOException {}
 
 	/** Close the messenger */
-	public synchronized void close() {}
+	public void close() {}
 
 	/**
 	 *  read the url.
