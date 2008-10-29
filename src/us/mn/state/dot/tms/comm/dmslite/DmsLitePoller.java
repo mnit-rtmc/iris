@@ -181,7 +181,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		//System.err.println("DmsLitePoller.sendMessage(), bitmap len="
 		//	+m.getBitmap().getBitmap().length);
 		//System.err.println("DmsLitePoller.sendMessage(), bitmap="
-		//    + Convert.toHexString(m.getBitmap().getBitmap()));
+		//    + HexString.toHexString(m.getBitmap().getBitmap()));
 
 		// finally, send message to field controller
 		OpMessage cmd = new OpMessage(dms, m);
