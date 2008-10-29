@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.utils.STime;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.Random;
 
 /**
  * Operation to be performed on a dynamic message sign
@@ -39,10 +40,10 @@ import java.util.GregorianCalendar;
  */
 abstract public class OpDms extends DeviceOperation {
 
-	// timeout for DMS messages
-	static final int TIMEOUT_DMS_DEFAULT_MS = 1000*50;
-	static final int TIMEOUT_DMS_MODEM_MS = 1000*45*5; //FIXME mtod
-	static final int TIMEOUT_DMS_WIZARD_MS = 1000*50;
+	// timeout for DMS messages (values must match cmsserver props file)
+	static final int TIMEOUT_DMS_DEFAULT_MS = 1000*(60+5);
+	static final int TIMEOUT_DMS_MODEM_MS = 1000*(60*5+5);
+	static final int TIMEOUT_DMS_WIZARD_MS = 1000*(60+5);
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
@@ -132,9 +133,12 @@ abstract public class OpDms extends DeviceOperation {
 		}
 	}
 
+	/** random number generator */
+	static private Random m_rand = new Random(System.currentTimeMillis());
+
 	/** generate a unique operation id, which is a long, returned as a string */
 	public static String generateId() {
-		return new Long(new GregorianCalendar().getTimeInMillis()).toString();
+		return new Long(System.currentTimeMillis()+m_rand.nextInt()).toString();
 	}
 
 	/** create a blank message */

@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.MainServer;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
+import us.mn.state.dot.tms.comm.caws.D10CmsMsg;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 import us.mn.state.dot.tms.utils.SEmail;
@@ -183,8 +184,8 @@ public class Message implements AddressedMessage
 			String err="";
 			err+="SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
 			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs). ";
-			err+="Sent operation="+SString.byteArrayToString(array);
 			System.err.println(err);
+			System.err.println("Sent operation="+SString.byteArrayToString(array));
 			throw new IOException(err);
 
 		// parse response
@@ -220,13 +221,22 @@ public class Message implements AddressedMessage
 		return null;
 	}
 
+	/** return true if message owner is CAWS */
+	protected boolean ownerCaws() {
+		String owner=this.searchForReqResItem("Owner");
+		if(owner == null)
+			return false;
+		return owner.toLowerCase().equals(
+			CawsPoller.CAWS_OWNER.toLowerCase());
+	}
+
 	/** 
 	  * Determine if a failure sending a CAWS message to the cmsserver
 	  * occurred. 
 	  * @return true on failure else false.
 	  */
 	protected boolean checkCAWSFailure() {
-		//System.err.println("Message.checkCAWSFailure() called. this="+this.toString());
+		System.err.println("Message.checkCAWSFailure() called. this="+this.toString()+", ownerCAWS="+ownerCaws());
 		if (m_objlist==null)
 			return false;
 
@@ -237,9 +247,8 @@ public class Message implements AddressedMessage
 		if(isvalid == null || isvalid.toLowerCase().equals("true"))
 			return false;
 
-		// Owner: was owner CAWS?
-		String owner=this.searchForReqResItem("Owner");
-		if(owner == null || !owner.toLowerCase().equals(CawsPoller.CAWS.toLowerCase()))
+		// owner isn't caws?
+		if(!ownerCaws())
 			return false;
 
 		// at this point we know there was an error to report
@@ -282,13 +291,13 @@ public class Message implements AddressedMessage
 		ret="";
 		ret+="Could not send a CAWS message to a CMS: reason="+errmsg;
 		ret+=", CMS="+address;
-		ret+=", message id=V"+id;
+		ret+=", message id="+id;
 		ret+=", time="+STime.getCurDateTimeString(true);
 		ret+=", message="+msg;
 		ret+=", author="+owner;
 		ret+=", note=";	// appended to by handleCawsFailure()
 
-		//System.err.println("Message.checkCAWSFailure() returning="+ret);
+		//System.err.println("Message.getCAWSFailureMessage() returning="+ret);
 		return ret;
 	}
 
@@ -300,8 +309,14 @@ public class Message implements AddressedMessage
 	public void handleCAWSFailure(String errmsgnote) {
 		if(MainServer.m_serverprops==null)
 			return;
+		if(MainServer.m_serverprops==null)
+			return;
 		if(errmsgnote==null)
 			errmsgnote="";
+
+		// owner isn't caws?
+		if(!ownerCaws())
+			return;
 
 		// generate an error message
 		String errmsg = getCAWSFailureMessage() + errmsgnote;
@@ -314,10 +329,12 @@ public class Message implements AddressedMessage
 		String subject="IRIS could not send CAWS message to CMS";
 
 		// send
-		if(recipient==null || sender==null || recipient.length()<=0 || sender.length()<=0)
+		if(recipient==null || sender==null || recipient.length()<=0 || 
+			sender.length()<=0)
 			System.err.println("Message.handleCAWSFailure(): didn't try to send CAWS error email.");
 		else {
-			boolean sendflag=SEmail.sendEmail(props, sender, recipient, subject, errmsg);
+			boolean sendflag=SEmail.sendEmail(props, sender, 
+				recipient, subject, errmsg);
 			System.err.println("Message.handleCAWSFailure(): sent email, success="+sendflag);
 		}
 	}
@@ -326,10 +343,7 @@ public class Message implements AddressedMessage
 	public void setRequest(String community) throws IOException {}
 
 	/** Send an set request message */
-	public void setRequest() throws IOException {
-
-		// setRequest(PUBLIC);
-	}
+	public void setRequest() throws IOException {}
 
 	/**
 	 * Return a request message with this format:
@@ -345,7 +359,8 @@ public class Message implements AddressedMessage
 			       "dmslite.Message() arg must be a ReqRes";
 
 			// System.err.println("will add:"+i);
-			Xml.addXmlTag(children, ((ReqRes) i).getReqName(),((ReqRes) i).getReqVal());
+			Xml.addXmlTag(children, ((ReqRes) i).getReqName(),
+				((ReqRes) i).getReqVal());
 		}
 
 		// enclose child tags in message tag

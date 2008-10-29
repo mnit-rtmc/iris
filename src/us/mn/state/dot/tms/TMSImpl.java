@@ -28,7 +28,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
@@ -90,20 +89,14 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
 
-	/** determine agency specific polling time in seconds */
-	public static int getAgencyPollTimerJobSigns() {
-		if (Agency.isId(Agency.CALTRANS_D10))
-			return(60*20);	// 20 mins
-		return(30);
-	}
-
 	/** Station manager */
 	protected transient StationManager station_manager;
 
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
 		station_manager = new StationManager(namespace);
-		TIMER.addJob(new TimerJobSigns(getAgencyPollTimerJobSigns()));
+		TIMER.addJob(new TimerJobSigns(
+			SystemAttributeHelper.getDMSPollTimeSecs()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
@@ -425,7 +418,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			}
 		});
 	}
-
 
 	/** Poll all controllers 5 minute interval */
 	static protected void poll5Minute(final Completer comp)

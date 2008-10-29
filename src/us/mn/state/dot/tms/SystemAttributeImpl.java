@@ -21,14 +21,17 @@ import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * A system attribute is a name mapped to a string value.
- *
+ * @see SystemAttributeHelper, SystemAttribute
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class SystemAttributeImpl extends BaseObjectImpl 
 	implements SystemAttribute 
 {
-	/** Lookup a SystemAttribute in the SONAR namespace */
+	/** Lookup a SystemAttribute in the SONAR namespace. 
+	 *  @return Null if the specified attribute does not exist else the 
+	 *  attribute value.
+	 */
 	static protected SystemAttribute lookupSystemAttribute(String att) {
 		if(att == null || att.length() <= 0) {
 			assert false;
@@ -36,28 +39,6 @@ public class SystemAttributeImpl extends BaseObjectImpl
 		}
 		return (SystemAttribute)namespace.lookupObject(
 			SystemAttribute.SONAR_TYPE, att);
-	}
-
-	/** Get the value of the named attribute. This is a server side method. 
-	 * @return The value of the named attribute; null if the attribute
-	 * doesn't exist. */
-	static protected String getValue(final String att) {
-		SystemAttribute a = lookupSystemAttribute(att);
-		return a == null ? null : a.getValue();
-	}
-
-	/** Verify database version is valid */
-	static protected void validateDatabaseVersion() {
-		String dbVer = getValue(DATABASE_VERSION);
-		String codeVer = "@@VERSION@@";
-		boolean ok = (dbVer != null) &&
-			dbVer.trim().equals(codeVer.trim());
-		if(!ok) {
-			System.err.println("IRIS code version = " + codeVer + 
-				", database version = " + dbVer);
-			if(Agency.isId(Agency.CALTRANS_D10))
-				System.exit(1);
-		}
 	}
 
 	/** Load all */
@@ -75,7 +56,10 @@ public class SystemAttributeImpl extends BaseObjectImpl
 				));
 			}
 		});
-		validateDatabaseVersion();
+
+		// validiate essential system attributes, shutdown if invalid
+		SystemAttributeHelper.validateDatabaseVersion();
+		SystemAttributeHelper.validateAgencyId();
 	}
 
 	/** Get a mapping of the columns */

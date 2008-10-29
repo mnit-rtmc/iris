@@ -28,7 +28,20 @@ public interface SystemAttribute extends SonarObject {
 	String SONAR_TYPE = "system_attribute";
 
 	/** attribute names common to all agencies */
-	String DATABASE_VERSION = "database_version";
+	// note: please append units to names!
+	final String DATABASE_VERSION = "database_version";
+	final String DMS_POLL_FREQ_SECS = "dms_poll_freq_secs";
+	final String AGENCY_ID = "agency_id";
+
+	/** DMSDispatcher */
+	final String DMSDISPATCHER_GETSTATUS_BTN = "dmsdispatcher_getstatus_btn";
+
+	/** possible values for the AGENCY_ID attribute */
+	final String AGENCY_ID_MNDOT = "mndot";
+	final String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
+
+	/** Caltrans D10 specific values */
+	final String CALTRANS_D10_CAWS_ACTIVE = "caltrans_d10_caws_active";
 
 	/** Set the attribute value */
 	void setValue(String arg_value);

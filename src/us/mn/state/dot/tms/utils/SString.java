@@ -245,6 +245,17 @@ public class SString {
 		return d;
 	}
 
+	/** convert string to boolean */
+	public static boolean stringToBoolean(String s) {
+		if (s == null)
+		    return false;
+		boolean b = false;
+		try {
+		    b = Boolean.parseBoolean(s);
+		} catch (Exception e) {}
+		return b;
+	}
+
 	/** convert double to string with rounding */
 	public static String doubleToString(double d,int numdecplaces) {
 		String ret="";
