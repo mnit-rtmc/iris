@@ -62,8 +62,9 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('P');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new PolicyForm(
-					st.getSystemPolicy()));
+				desktop.show(new PolicyForm(tc.isAdmin(), 
+					st.getSystemPolicy(), 
+					st.getSystemAttributes()));
 			}
 		};
 		add(item);

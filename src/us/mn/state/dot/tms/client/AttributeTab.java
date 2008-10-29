@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.TrafficDeviceAttribute;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 
 /**
- * This is a tab for viewing and editing attributes.
+ * This is a tab for viewing and editing traffic device attributes.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -50,7 +50,7 @@ public class AttributeTab extends JPanel {
 	protected final JTable attribute_table = new JTable();
 
 	/** Button to delete the selected role */
-	protected final JButton del_attrib_btn = new JButton("Delete Attribute");
+	protected final JButton del_attrib_btn = new JButton("Delete");
 
 	/** form this tab is displayed on */
 	protected final TrafficDeviceForm m_tdf;
@@ -78,12 +78,8 @@ public class AttributeTab extends JPanel {
 		assert !bogus : "bogus args";
 		if( bogus )
 			return;
-
-		// create table model
 		attribute_model = new TrafficDeviceAttributeTableModel(m_id, 
 			state.getTrafficDeviceAttributes(),admin);
-		System.err.println("DMSProperties.DMSProperties(): attribute_model="+attribute_model.toString());
-
 		createControls();
 	}
 
@@ -122,8 +118,8 @@ public class AttributeTab extends JPanel {
 		bag.gridx = 0;
 		bag.gridy = GridBagConstraints.RELATIVE;
 		this.add(del_attrib_btn, bag);
-		del_attrib_btn.setEnabled(false); //FIXME: delete isn't working yet
-		//del_attrib_btn.setEnabled(m_admin);
+		//del_attrib_btn.setEnabled(false); //FIXME: delete isn't working yet
+		del_attrib_btn.setEnabled(m_admin);
 		new ActionJob(this, del_attrib_btn) {
 			public void perform() throws Exception {
 				final ListSelectionModel s = 
@@ -141,9 +137,7 @@ public class AttributeTab extends JPanel {
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
-				// FIXME
-				//if(!event.getValueIsAdjusting())
-				//	selectSignText();
+				// do nothing
 			}
 		};
 		attribute_table.setAutoCreateColumnsFromModel(false);
