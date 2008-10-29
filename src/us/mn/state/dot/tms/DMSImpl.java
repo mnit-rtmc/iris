@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.ntcip.ShortErrorStatus;
 import us.mn.state.dot.tms.event.EventType;
 import us.mn.state.dot.tms.event.SignStatusEvent;
+import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -107,6 +108,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		resetTransients();
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
+		m_preferedFontName = getInitialFontName();
 	}
 
 	/** Constructor needed for ObjectVault */
@@ -114,6 +116,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		super(fields);
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
+		m_preferedFontName = getInitialFontName();
 	}
 
 	/** Get a mapping of the columns */
@@ -860,7 +863,22 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		});
 	}
 
-	/** Lookup the best font */
+	/** Lookup a font by name */
+	static protected FontImpl lookupFontByName(final String fontName) {
+		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
+			new Checker<FontImpl>()
+		{
+			public boolean check(FontImpl f) {
+				return f.getName().equals(fontName);
+			}
+		});
+	}
+
+	/** Lookup the best font 
+	 *  @param h Line height in pixels for this DMS.
+	 *  @param w Line width in pixels for this DMS.
+	 *  @param ls Character width in pixels for this DMS.
+	 */
 	static protected FontImpl lookupFont(int h, int w, int ls) {
 		FontImpl f = _lookupFont(h, w, ls);
 		if(f != null || w == 0)
@@ -871,7 +889,23 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get the appropriate font for this sign */
 	public FontImpl getFont() {
-		return lookupFont(getLineHeightPixels(),characterWidthPixels,0);
+		FontImpl font = null;
+
+		// the prefered font name is set in the DMSDispatcher font 
+		// combobox, which is only active for Caltrans D10.
+		String pfn = getPreferedFontName();
+
+		// font for all agencies except D10
+		if(pfn==null || pfn.length()<=0)
+			font = DMSImpl.lookupFont(getLineHeightPixels(),
+				characterWidthPixels,0);
+
+		// font for Caltrans D10, or other agencies that enable
+		// the font combobox on DMSDispatcher. 
+		else
+			font = DMSImpl.lookupFontByName(pfn);
+
+		return font;
 	}
 
 	/** Test if the sign status is unavailable */
@@ -1655,5 +1689,31 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	static protected StationImpl lookupStation(String sid) {
 		return (StationImpl)namespace.lookupObject(Station.SONAR_TYPE,
 			sid);
+	}
+	/** prefered font name for new messages, should not be null */
+	protected transient String m_preferedFontName = "";
+
+	/** Get the initial font name, used by constructor */
+	public String getInitialFontName() {
+		if(Agency.isId(Agency.CALTRANS_D10)) {
+			return "CT_Single_Stroke";   //FIXME mtod: would be nice if this wasn't hard coded
+		}
+		// the font name is irrelevant for other agencies 
+		return "";
+	}
+
+	/** Get the prefered font for new messages */
+	public String getPreferedFontName() {
+		return m_preferedFontName;
+	}
+
+	/** Set the prefered font for new messages.
+	 *  @param fontName A font name, may be zero length, but not null.
+	 */
+	public void setPreferedFontName(String fontName) {
+		assert fontName!=null;
+		if(fontName == null)
+			fontName = "";
+		m_preferedFontName=fontName;
 	}
 }

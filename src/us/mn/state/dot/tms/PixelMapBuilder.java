@@ -124,7 +124,6 @@ public class PixelMapBuilder implements MultiString.Callback {
 	 *  @param t Text to render.
 	 *  @param line Line number, zero based.
 	 *  @param nltp Number of lines of actual text on the page.
-	 *  @param The Y pixel position of the top of the text.
 	 */
 	protected int calculatePixelY(MultiString.JustificationPage jp,
 		String t, int line, int nltp) throws InvalidMessageException
@@ -164,13 +163,16 @@ public class PixelMapBuilder implements MultiString.Callback {
 	}
 
 	/** Calculate the Y pixel position to place text 
-	 *  @param The Y pixel position of the top of the text.
+	 *  @param jp Line justification, e.g. top, middle, bottom.
+	 *  @param t Text to render.
+	 *  @param line Line number, zero based.
+	 *  @param nltp Number of lines of actual text on the page.
 	 */
 	protected int _calculatePixelY(MultiString.JustificationPage jp,
 		String t, int line, int nltp) throws InvalidMessageException
 	{
 		switch(jp) {
-		// FIXME: add bottom justification in the future
+		// everything is top justified except for MIDDLE
 		case UNDEFINED:
 		case OTHER:
 		case TOP:
@@ -178,12 +180,16 @@ public class PixelMapBuilder implements MultiString.Callback {
 			// top justified
 			return line * (font.getHeight() + font.getLineSpacing());
 		case MIDDLE:
-			final int linesPerPage = 3;	// FIXME: shouldn't be constant
-			final double vertBorder = Math.max((linesPerPage - (double)nltp) / 2, 0);
-			final int height = font.getHeight() + font.getLineSpacing();
-			final double y = (vertBorder+line) * height;
+			final int lineHeight = 
+				font.getHeight() + font.getLineSpacing();
+			final double linesPerPage = 
+				(double)height / (double)lineHeight;
+			final double vertBorder = Math.max((linesPerPage - 
+				(double)nltp) / 2, 0);
+			final double y = (vertBorder+line) * lineHeight;
 			final int ret = (int)Math.round(y);
-			//System.err.println("ret="+ret+", vertBorder="+vertBorder+", height="+height);
+			//System.err.println("_calculatePixelY(): ret="+ret+", vertBorder="+vertBorder+", height="+height+
+			//",linesPerPage="+linesPerPage+", t="+t+", line="+line+", nltp="+nltp+", lineHeight="+lineHeight);
 			return ret;
 		default:
 			assert false;

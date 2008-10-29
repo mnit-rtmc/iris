@@ -26,7 +26,11 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
- * List model for IRIS proxies
+ * List model for IRIS proxies. This class contains a TypeCache for a single
+ * SonarObject. An object of this type is added as a listener to the TypeCache,
+ * so that notification is received by instances of this class when any of the
+ * SonarObjects change, are deleted, or new ones are added. This class also 
+ * defines a TreeSet which contains proxy objects for the TypeCache objects.
  *
  * @author Douglas Lau
  */
@@ -94,7 +98,11 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** Add a new proxy to the list model */
+	/** 
+	 *  Add a new proxy to the list model. Defined in interface 
+	 *  ProxyListener. Called when a new object is added to the
+	 *  TypeCache.
+	 */
 	public final void proxyAdded(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
@@ -104,7 +112,8 @@ public class ProxyListModel<T extends SonarObject>
 		}.addToScheduler();
 	}
 
-	/** Enumeration of all proxies is complete */
+	/** Enumeration of all proxies is complete. Defined in interface
+	 *  ProxyListener. */
 	public void enumerationComplete() {
 		// Nothing to do
 	}
@@ -136,7 +145,10 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** Remove a proxy from the model */
+	/** Remove a proxy from the model. Defined in interface 
+	 *  ProxyListener. Called when an object in the TypeCache
+	 *  is removed.
+	 */
 	public final void proxyRemoved(final T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
@@ -183,7 +195,10 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** Change a proxy in the list model */
+	/** Change a proxy in the list model. Defined in interface 
+	 *  ProxyListener. Called when an object in the TypeCache
+	 *  changes.
+	 */
 	public final void proxyChanged(final T proxy, final String attrib) {
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
