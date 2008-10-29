@@ -87,7 +87,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws Exception {
-		super("IRIS:");
+		super("IRIS: Login to Start");
 		this.props = props;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);

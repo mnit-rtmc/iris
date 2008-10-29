@@ -111,6 +111,14 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 		}
 	}
 
+	/** Get the controller status */
+	public String getControllerStatus() {
+		ControllerImpl c = getControllerImpl();
+		if(c != null)
+			return c.getStatus();
+		return "";
+	}
+
 	/** Get a description of the current device operation */
 	public String getOperation() {
 		DeviceOperation o = owner;
