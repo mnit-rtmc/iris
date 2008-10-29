@@ -80,7 +80,7 @@ public class MsgActPriority implements Serializable {
 	/** 
 	 * Determine if one message would supersede (replace) another on the 
 	 * DMS. Note that we are asking the potential new priority (this) to 
-	 * evaluate whether it supercedes the priority of the message on the 
+	 * evaluate whether it supersedes the priority of the message on the 
 	 * sign (the argument).
 	 * @param priOnSign Typically the priority level of the message on the
 	 * sign.

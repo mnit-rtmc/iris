@@ -276,7 +276,7 @@ public class SignMessage implements Serializable
 	/** 
 	 * Determine if one message would supersede (replace) another on the 
 	 * DMS. Note that we are asking the potential new message (this) to 
-	 * evaluate whether it supercedes the message on the sign (the arg).
+	 * evaluate whether it supersedes the message on the sign (the arg).
 	 *  @param mos Typically the message on the sign.
 	 *  @return true if this supersedes the argument message.
 	 */
