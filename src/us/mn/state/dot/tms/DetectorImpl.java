@@ -342,7 +342,7 @@ public class DetectorImpl extends Device2Impl implements Detector,
 			String[] ff = new String[] {
 				String.valueOf(force_fail)
 			};
-			MainServer.server.setAttribute(this, "force_fail", ff);
+			MainServer.server.setAttribute(this, "forceFail", ff);
 		}
 	}
 
