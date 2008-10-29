@@ -288,10 +288,10 @@ public class SystemAttributeHelper {
 		return nf;
 	}
 
-	/** Return true to use DMSDispatcher overwrite message checkbox */
-	public static boolean useMsgOverwriteCBox() {
+	/** Return true to use the AWS checkbox in DMSDispatcher */
+	public static boolean useAwsCheckBox() {
 		return getValueBooleanDef(
-			SystemAttribute.DMSDISPATCHER_OVERWRITE_CBOX,false);
+			SystemAttribute.DMSDISPATCHER_AWS_CKBOX,false);
 	}
 }
 

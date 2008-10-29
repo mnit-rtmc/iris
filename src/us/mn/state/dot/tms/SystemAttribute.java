@@ -42,8 +42,8 @@ public interface SystemAttribute extends SonarObject {
 	/** DMSDispatcher */
 	final String DMSDISPATCHER_GETSTATUS_BTN = 
 		"dmsdispatcher_getstatus_btn";
-	final String DMSDISPATCHER_OVERWRITE_CBOX = 
-		"dmsdispatcher_overwrite_cbox";
+	final String DMSDISPATCHER_AWS_CKBOX = 
+		"dmsdispatcher_aws_ckbox";
 
 	/** DMS */
 	final String DMS_PREFERRED_FONT = 

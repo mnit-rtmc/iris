@@ -96,8 +96,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected final JButton btnGetStatus = new JButton(I18NMessages.get(
 		"DMSDispatcher.GetStatusButton"));
 
-	/** overwrite checkbox (optional) */
-	protected JCheckBox cboxOverwrite = null;
+	/** AWS checkbox (optional) */
+	protected AwsCheckBox awsCheckBox = null;
 
 	/** Select model */
 	protected final TmsSelectionModel selectionModel;
@@ -196,15 +196,12 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 				boxRight.add(fjp);
 		}
 
-		// add optional overwrite checkbox
-		if(m_useOverwriteCheck) {
-			cboxOverwrite = new JCheckBox(I18NMessages.get(
-				"DMSDispatcher.OverwriteCBox"));
+		// add optional AWS checkbox
+		if(m_useAwsCheckBox) {
+			awsCheckBox = new AwsCheckBox(this);
 			JPanel p = new JPanel(new FlowLayout());
-			p.add(cboxOverwrite);
-			//boxRight.add(cboxOverwrite);
+			p.add(awsCheckBox);
 			boxRight.add(p);
-			cboxOverwrite.setEnabled(false); //FIXME: activate checkbox
 		}
 
 		boxRight.add(Box.createVerticalStrut(4));
@@ -224,7 +221,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected boolean m_useDurationComboBox;
 	protected boolean m_useControllerStatusField;
 	protected boolean m_useGetStatusButton;
-	protected boolean m_useOverwriteCheck;
+	protected boolean m_useAwsCheckBox;
 
 	/** set flags for optional controls */
 	protected void setOptionalControlUse() {
@@ -233,8 +230,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		m_useDurationComboBox = !Agency.isId(Agency.CALTRANS_D10);
 		m_useControllerStatusField = Agency.isId(Agency.CALTRANS_D10);
 		m_useGetStatusButton = Agency.isId(Agency.CALTRANS_D10);
-		m_useOverwriteCheck = 
-			SystemAttributeHelper.useMsgOverwriteCBox();
+		m_useAwsCheckBox = 
+			SystemAttributeHelper.useAwsCheckBox();
 	}
 
 	/** Dispose of the dispatcher */
