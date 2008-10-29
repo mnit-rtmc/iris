@@ -864,14 +864,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** Lookup a font by name */
-	static protected FontImpl lookupFontByName(final String fontName) {
-		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
-			new Checker<FontImpl>()
-		{
-			public boolean check(FontImpl f) {
-				return f.getName().equals(fontName);
-			}
-		});
+	static protected FontImpl lookupFontByName(String fontName) {
+		return (FontImpl)namespace.lookupObject(Font.SONAR_TYPE,
+			fontName);
 	}
 
 	/** Lookup the best font 
@@ -889,23 +884,19 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get the appropriate font for this sign */
 	public FontImpl getFont() {
-		FontImpl font = null;
-
 		// the prefered font name is set in the DMSDispatcher font 
 		// combobox, which is only active for Caltrans D10.
 		String pfn = getPreferedFontName();
 
-		// font for all agencies except D10
-		if(pfn==null || pfn.length()<=0)
-			font = DMSImpl.lookupFont(getLineHeightPixels(),
-				characterWidthPixels,0);
-
-		// font for Caltrans D10, or other agencies that enable
-		// the font combobox on DMSDispatcher. 
-		else
-			font = DMSImpl.lookupFontByName(pfn);
-
-		return font;
+		if(pfn == null || pfn.length() <= 0) {
+			// font for all agencies except D10
+			return lookupFont(getLineHeightPixels(),
+				characterWidthPixels, 0);
+		} else {
+			// font for Caltrans D10, or other agencies that enable
+			// the font combobox on DMSDispatcher. 
+			return lookupFontByName(pfn);
+		}
 	}
 
 	/** Test if the sign status is unavailable */
