@@ -19,17 +19,18 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * A traffic device attribute is a name mapped to a string value. Device 
  * attributes are associated with a single traffic device, identified by id.
+ * Attributes names specific to an agency should be defined in a subclass.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public interface TrafficDeviceAttribute extends SonarObject {
 
+	/** maximum length of an attribute name */
+	final int MAXLEN_ANAME = 32;
+
 	/** SONAR type name */
 	String SONAR_TYPE = "traffic_device_attribute";
-
-	/** attribute names specific to D10 */
-	String CAWS_CONTROLLED = "CAWS_controlled";
 
 	/** Set the traffic device id */
 	void setId(String dms);
@@ -48,4 +49,8 @@ public interface TrafficDeviceAttribute extends SonarObject {
 
 	/** Get the attribute value */
 	String getAttributeValue();
+
+	/** DMS related attribute names */
+	String AWS_CONTROLLED = "AWS_controlled";
 }
+

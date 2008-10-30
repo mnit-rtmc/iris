@@ -32,6 +32,19 @@ import us.mn.state.dot.tms.utils.SString;
 public class TrafficDeviceAttributeImpl extends BaseObjectImpl 
 	implements TrafficDeviceAttribute 
 {
+	/** Lookup a TrafficDeviceAttribute in the SONAR namespace. 
+	 *  @return Null if the specified attribute does not exist else the 
+	 *  attribute value.
+	 */
+	static protected TrafficDeviceAttribute lookup(String att) {
+		if(att == null || att.length() <= 0) {
+			assert false;
+			return null;
+		}
+		return (TrafficDeviceAttribute)namespace.lookupObject(
+			TrafficDeviceAttribute.SONAR_TYPE, att);
+	}
+
 	/** Load all the device attributes */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading traffic device attributes...");
@@ -120,7 +133,7 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 
 	/** Set the traffic device attribute name, doSet is required for 
 	 *  database backed sonar objects */
-	public void doSetAttributeName(String arg_aname) throws TMSException {
+	public void dosetName(String arg_aname) throws TMSException {
 		if(arg_aname==null)
 			return;
 		if(id.equals(arg_aname))
@@ -144,7 +157,7 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 
 	/** Set the traffic device attribute value, doSet is required for 
 	 *  database backed sonar objects */
-	public void doSetAttributeValue(String arg_avalue) throws TMSException {
+	public void dosetValue(String arg_avalue) throws TMSException {
 		if(arg_avalue==null)
 			return;
 		if(id.equals(arg_avalue))
@@ -172,7 +185,7 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 	/** toString */
 	public String toString() {
 		return "TrafficDeviceAttribute: Id="+getId()+", aname="
-			+getAttributeName()+", avalue="+getAttributeValue()
+			+getName()+", avalue="+getAttributeValue()
 			+".";
 	}
 }

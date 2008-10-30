@@ -457,4 +457,9 @@ public class SonarState extends Client {
 	public SystemAttribute lookupSystemAttribute(String name) {
 		return system_attributes.lookupObject(name);
 	}
+
+	/** Lookup a traffic device attribute */
+	public TrafficDeviceAttribute lookupTrafficDeviceAttribute(String name) {
+		return traffic_device_attributes.lookupObject(name);
+	}
 }

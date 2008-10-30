@@ -54,7 +54,7 @@ public class SystemAttributeHelper {
 			a = SonarState.singleton.lookupSystemAttribute(aname);
 		else
 			// server side code
-			a = SystemAttributeImpl.lookupSystemAttribute(aname);
+			a = SystemAttributeImpl.lookup(aname);
 		if(a == null)
 			throw new IllegalArgumentException(
 				"System attribute ("+aname+") was not found.");

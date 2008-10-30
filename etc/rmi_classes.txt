@@ -82,5 +82,6 @@ us/mn/state/dot/tms/TMSException.class
 us/mn/state/dot/tms/TMSObject.class
 us/mn/state/dot/tms/TrafficDevice.class
 us/mn/state/dot/tms/TrafficDeviceAttribute.class
+us/mn/state/dot/tms/TrafficDeviceAttributeHelper.class
 us/mn/state/dot/tms/VideoMonitor.class
 us/mn/state/dot/tms/WarningSign.class

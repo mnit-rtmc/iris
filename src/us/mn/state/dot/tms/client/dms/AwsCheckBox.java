@@ -20,6 +20,7 @@ import java.rmi.RemoteException;
 import javax.swing.JCheckBox;
 import java.awt.event.ItemListener;
 
+import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.client.dms.DMSDispatcher;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -81,9 +82,14 @@ public class AwsCheckBox extends JCheckBox implements ItemListener
 		//updateDmsState();
 	}
 
-	/** Set the initial state of the checkbox */
-	public void updateCheckBoxState() {
-		this.setSelected(false);
+	/** Set the initial state */
+	public void setDefaultSelection() {
+		if(m_dmsDispatcher == null || m_dmsDispatcher.selectedSign==null)
+			return;
+		String id = m_dmsDispatcher.selectedSign.getId();
+		if(id == null)
+			return;
+		this.setSelected(TrafficDeviceAttributeHelper.awsControlled(id));
 	}
 }
 

@@ -347,6 +347,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 				cmbFont.setEnabled(true);
 				cmbFont.setDefaultSelection();
 			}
+			if(m_useAwsCheckBox) {
+				awsCheckBox.setEnabled(true);
+				awsCheckBox.setDefaultSelection();
+			}
 			proxy.updateUpdateInfo(); // update global messages
 			pnlSign.setSign(proxy);
 			refreshUpdate();
@@ -368,6 +372,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		if(m_useFontsComboBox) {
 			cmbFont.setEnabled(false);
 			cmbFont.setDefaultSelection();
+		}
+		if(m_useFontsComboBox) {
+			awsCheckBox.setEnabled(false);
+			awsCheckBox.setDefaultSelection();
 		}
 		messageSelector.setEnabled(false);
 		messageSelector.clearSelections();

@@ -32,7 +32,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	 *  @return Null if the specified attribute does not exist else the 
 	 *  attribute value.
 	 */
-	static protected SystemAttribute lookupSystemAttribute(String att) {
+	static protected SystemAttribute lookup(String att) {
 		if(att == null || att.length() <= 0) {
 			assert false;
 			return null;

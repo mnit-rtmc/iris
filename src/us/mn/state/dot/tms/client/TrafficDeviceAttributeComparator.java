@@ -36,8 +36,8 @@ public class TrafficDeviceAttributeComparator implements Comparator<TrafficDevic
 			return c;
 
 		// for same attribute name?
-		String s0 = t0.getAttributeName();
-		String s1 = t1.getAttributeName();
+		String s0 = t0.getName();
+		String s1 = t1.getName();
 		c = s0.compareTo(s1);
 		if(c != 0)
 			return c;

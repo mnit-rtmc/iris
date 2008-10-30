@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TrafficDeviceImpl;
 import us.mn.state.dot.tms.TrafficDeviceAttribute;
+import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.TrafficDeviceAttributeImpl;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.comm.caws.MsgActPriorityCallBackBlank;
@@ -98,7 +99,7 @@ public class D10CmsMsg  implements Serializable
 
 		// validity check
 		int numtoks = tok.countTokens();
-		if (numtoks != 13) {
+		if(numtoks != 13) {
 			throw new IllegalArgumentException(
 			    "Bogus CMS message format (" + argline + ").");
 		}
@@ -111,7 +112,7 @@ public class D10CmsMsg  implements Serializable
 
 		// message description
 		String f02 = tok.nextToken();
-		if (!f02.equals(DESC_BLANK) &&!f02.equals(
+		if(!f02.equals(DESC_BLANK) &&!f02.equals(
 			DESC_ONEPAGENORM) &&!f02.equals(
 			DESC_TWOPAGENORM)) {    // FIXME: verify possibilities
 			System.err.println(
@@ -123,7 +124,7 @@ public class D10CmsMsg  implements Serializable
 
 		// pg 1 font
 		String f03 = tok.nextToken();
-		if (!f03.equals(SINGLESTROKE) &&!f03.equals(DOUBLESTROKE)) {
+		if(!f03.equals(SINGLESTROKE) &&!f03.equals(DOUBLESTROKE)) {
 			System.err.println(
 			    "WARNING: unknown pg 1 font received in D10CmsMsg.parse(): "
 			    + f03);
@@ -131,7 +132,7 @@ public class D10CmsMsg  implements Serializable
 
 		// pg 2 font
 		String f04 = tok.nextToken();
-		if (!f04.equals(SINGLESTROKE) &&!f04.equals(DOUBLESTROKE)) {
+		if(!f04.equals(SINGLESTROKE) &&!f04.equals(DOUBLESTROKE)) {
 			System.err.println(
 			    "WARNING: unknown pg 2 font received in D10CmsMsg.parse(): "
 			    + f04);
@@ -157,7 +158,7 @@ public class D10CmsMsg  implements Serializable
 			m.append("[nl]");
 
 			// pg2
-			if (row4.length() + row5.length() + row6.length() > 0) {
+			if(row4.length() + row5.length() + row6.length() > 0) {
 				m.append("[np]");
 				m.append(row4);
 				m.append("[nl]");
@@ -174,7 +175,7 @@ public class D10CmsMsg  implements Serializable
 
 		// ignore this field, nothing there
 		String f12 = tok.nextToken();
-		if (!m_desc.equals(DESC_BLANK)) {
+		if(!m_desc.equals(DESC_BLANK)) {
 			System.err.println("D10CmsMsg.D10CmsMsg():" + m_date
 				+ "," + m_cmsid + "," + m_multistring + ","
 				+ m_ontime);
@@ -193,7 +194,7 @@ public class D10CmsMsg  implements Serializable
 		throws IllegalArgumentException {
 
 		// sanity check
-		if ((argdate == null) || (argdate.length() != 14)) {
+		if((argdate == null) || (argdate.length() != 14)) {
 			throw new IllegalArgumentException(
 			    "Bogus date string received: " + argdate);
 		}
@@ -201,42 +202,42 @@ public class D10CmsMsg  implements Serializable
 		// note the column range is: inclusive, exclusive
 		// year
 		int y = SString.stringToInt(argdate.substring(0, 4));
-		if (y < 2008) {
+		if(y < 2008) {
 			throw new IllegalArgumentException(
 			    "Bogus year received:" + argdate + "," + y);
 		}
 
 		// month
 		int m = SString.stringToInt(argdate.substring(4, 6)) - 1;    // zero based
-		if ((m < 0) || (m > 11)) {
+		if((m < 0) || (m > 11)) {
 			throw new IllegalArgumentException(
 			    "Bogus month received:" + argdate + "," + m);
 		}
 
 		// day
 		int d = SString.stringToInt(argdate.substring(6, 8));
-		if ((d < 1) || (d > 31)) {
+		if((d < 1) || (d > 31)) {
 			throw new IllegalArgumentException(
 			    "Bogus day received:" + argdate + "," + d);
 		}
 
 		// hour
 		int h = SString.stringToInt(argdate.substring(8, 10));
-		if ((h < 0) || (h > 23)) {
+		if((h < 0) || (h > 23)) {
 			throw new IllegalArgumentException(
 			    "Bogus hour received:" + argdate + "," + h);
 		}
 
 		// min
 		int mi = SString.stringToInt(argdate.substring(10, 12));
-		if ((mi < 0) || (mi > 59)) {
+		if((mi < 0) || (mi > 59)) {
 			throw new IllegalArgumentException(
 			    "Bogus minute received:" + argdate + "," + mi);
 		}
 
 		// sec
 		int s = SString.stringToInt(argdate.substring(12, 14));
-		if ((s < 0) || (s > 59)) {
+		if((s < 0) || (s > 59)) {
 			throw new IllegalArgumentException(
 			    "Bogus second received:" + argdate + "," + s);
 		}
@@ -265,13 +266,13 @@ public class D10CmsMsg  implements Serializable
 
 		CawsMsgType ret = CawsMsgType.BLANK;
 
-		if (m_desc.equals(DESC_BLANK)) {
+		if(m_desc.equals(DESC_BLANK)) {
 			ret = CawsMsgType.BLANK;
-		} else if (m_desc.equals(DESC_ONEPAGENORM)) {
+		} else if(m_desc.equals(DESC_ONEPAGENORM)) {
 			ret = CawsMsgType.ONEPAGEMSG;
-		} else if (m_desc.equals(DESC_TWOPAGENORM)) {
+		} else if(m_desc.equals(DESC_TWOPAGENORM)) {
 			ret = CawsMsgType.TWOPAGEMSG;
-		} else if (false) {	//FIXME: add in the future
+		} else if(false) {	//FIXME: add in the future
 			ret = CawsMsgType.TRAVELTIME;
 		} else {
 			String msg="D10CmsMsg.getCawsMsgType: Warning: unknown D10 message description encountered ("+m_desc+").";
@@ -291,7 +292,7 @@ public class D10CmsMsg  implements Serializable
 	public void activate(DMSImpl dms) {
 		System.err.println("-----D10CmsMsg.activate("+dms+") called, msg=" + this);
 		boolean activate=shouldSendMessage(dms);
-		if (activate)
+		if(activate)
 			this.sendMessage(dms);
 	}
 
@@ -301,25 +302,26 @@ public class D10CmsMsg  implements Serializable
 	 * @return true to send the message.
 	 */
 	protected boolean shouldSendMessage(DMSImpl dms) {
-		if (dms == null || m_multistring==null || m_multistring.length()<=0)
+		if(dms == null || m_multistring==null || m_multistring.length()<=0)
 			return (false);
 
 		// is caws activated for the sign?
-		if(!TrafficDeviceImpl.getAttributeValueBoolean(getIrisCmsId(),
-			TrafficDeviceAttribute.CAWS_CONTROLLED)) {
-			System.err.println("D10CmsMsg.shouldSendMessage(): DMS "+getIrisCmsId()+" is NOT activated for CAWS.");
+		if(!TrafficDeviceAttributeHelper.awsControlled(
+			getIrisCmsId())) 
+		{
+			System.err.println("D10CmsMsg.shouldSendMessage(): DMS " + getIrisCmsId() + " is NOT activated for CAWS control.");
 			return false;
 		}
-		System.err.println("D10CmsMsg.shouldSendMessage(): DMS "+getIrisCmsId()+" is activated for CAWS.");
+		System.err.println("D10CmsMsg.shouldSendMessage(): DMS "+getIrisCmsId()+" is activated for CAWS control.");
 
 		// be safe and send the caws message by default
 		boolean send=true;
 
 		// message already deployed?
-		if (dms.getStatusCode()==DMS.STATUS_DEPLOYED) {
-			SignMessage cur=dms.getMessage();
-			if (cur!=null)
-				send=!cur.equals(m_multistring);
+		if(dms.getStatusCode() == DMS.STATUS_DEPLOYED) {
+			SignMessage cur = dms.getMessage();
+			if(cur!=null)
+				send = !cur.equals(m_multistring);
 			System.err.println("D10CmsMsg.shouldSendMessage(): DMS is deployed, m_multistring="+m_multistring+", cur msg="+cur.toString());
 		}
 
@@ -335,13 +337,13 @@ public class D10CmsMsg  implements Serializable
 		CawsMsgType mtype = this.getCawsMsgType();
 
 		// blank the message
-		if (mtype == CawsMsgType.BLANK) {
+		if(mtype == CawsMsgType.BLANK) {
 			System.err.println("D10CmsMsg.sendMessage(): will blank DMS "+ this.getIrisCmsId() + " for DMS=" + dms + ".");
 			dms.clearMessageUsingActivationPriority(
 				CAWS_OWNER,createMsgActPriority());
 
 		// 1 or 2 pg msg
-		} else if ((mtype == CawsMsgType.ONEPAGEMSG)
+		} else if((mtype == CawsMsgType.ONEPAGEMSG)
 			|| (mtype == CawsMsgType.TWOPAGEMSG)) {
 
 			System.err.println("D10CmsMsg.sendMessage(): will activate DMS " + this.getIrisCmsId() + ":" + this);
@@ -353,7 +355,7 @@ public class D10CmsMsg  implements Serializable
 			}
 
 		// travel time message
-		} else if (mtype==CawsMsgType.TRAVELTIME) {
+		} else if(mtype==CawsMsgType.TRAVELTIME) {
 			//FIXME: add in future
 
 		// error
@@ -395,16 +397,16 @@ public class D10CmsMsg  implements Serializable
 	/** Return a MsgActPriority as a function of the message */
 	protected MsgActPriority createMsgActPriority() {
 		MsgActPriority ret=null;
-		if (getCawsMsgType()==CawsMsgType.BLANK) {
+		if(getCawsMsgType()==CawsMsgType.BLANK) {
 			System.err.println("D10CmsMsg.createMsgActPriority(): creating blank caws message");
 			// create a procedural activation priority
 			ret=new MsgActPriorityProc(MsgActPriorityD10.VAL_D10_CAWS_BLANK,
 				new MsgActPriorityCallBackBlank());
 		}
-		else if (getCawsMsgType()==CawsMsgType.ONEPAGEMSG || 
+		else if(getCawsMsgType()==CawsMsgType.ONEPAGEMSG || 
 			getCawsMsgType()==CawsMsgType.TWOPAGEMSG)
 			ret=MsgActPriorityD10.PRI_D10_CAWS_MSG;
-		else if (getCawsMsgType()==CawsMsgType.TRAVELTIME)
+		else if(getCawsMsgType()==CawsMsgType.TRAVELTIME)
 			ret=MsgActPriorityD10.PRI_D10_CAWS_TRAVELTIME;
 		else {
 			ret=MsgActPriority.PRI_OPER_MSG;
