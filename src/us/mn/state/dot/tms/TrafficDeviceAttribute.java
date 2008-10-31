@@ -48,17 +48,8 @@ public interface TrafficDeviceAttribute extends SonarObject {
 	/** Set the attribute value */
 	void setAValue(String avalue);
 
-	/** Set the attribute value as boolean */
-	//void setAValueBoolean(boolean aname);
-
 	/** Get the attribute value */
 	String getAValue();
-
-	/** Get the attribute value as a boolean*/
-	boolean getAValueBoolean();
-
-	/** toString */
-	String toString();
 
 	/** DMS related attribute names */
 	String AWS_CONTROLLED = "AWS_controlled";

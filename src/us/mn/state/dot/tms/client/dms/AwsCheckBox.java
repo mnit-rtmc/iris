@@ -77,10 +77,16 @@ public class AwsCheckBox extends JCheckBox
 		if(p == null)
 			setEnabled(false);
 		else {
-			setSelected(p.getAValueBoolean());
+			setSelected(getValueBoolean(p));
 			setEnabled(true);
 		}
 		System.err.println("AwsCheckBox.update(): found proxy? "+(p != null));
+	}
+
+	/** Get a traffic device attribute as a boolean value */
+	static protected boolean getValueBoolean(TrafficDeviceAttribute p) {
+		return TrafficDeviceAttributeHelper.getValueBoolean(
+			p.getAName());
 	}
 
 	/** get the id of the sonar proxy e.g. "V1" */
@@ -140,8 +146,7 @@ public class AwsCheckBox extends JCheckBox
 
 		boolean pattrib = SString.stringToBoolean(proxy.getAValue());
 		System.err.println("AwsCheckBox.proxyChanged(): proxy attribute="+pattrib);
-		System.err.println("AwsCheckBox.proxyChanged(): proxy.getAValueBoolean="+proxy.getAValueBoolean());
-		if(pattrib!=proxy.getAValueBoolean())
+		if(pattrib != getValueBoolean(proxy))
 			System.err.println("ERROR....??");	// Doug?
 
 		// checkbox needs to be updated?
@@ -179,4 +184,3 @@ public class AwsCheckBox extends JCheckBox
 		// Nothing to do
 	}
 }
-
