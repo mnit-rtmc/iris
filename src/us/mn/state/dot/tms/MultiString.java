@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import us.mn.state.dot.tms.utils.Agency;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
  * NTCIP -- MULTI (MarkUp Language for Transportation Information)
@@ -162,7 +162,8 @@ public class MultiString implements Serializable {
 		int linenum = 0;
 		int nltp = getNumTextLinesOnPage(page);
 		JustificationLine justl = JustificationLine.CENTER;
-		JustificationPage justp = (Agency.isId(Agency.CALTRANS_D10) ? 
+		JustificationPage justp = 
+			(SystemAttributeHelper.isAgencyCaltransD10() ? 
 			JustificationPage.MIDDLE : JustificationPage.TOP);
 		Matcher m = TAG.matcher(b);
 		for(String textline: TAG.split(b)) {

@@ -32,6 +32,7 @@ import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSHandler;
@@ -49,7 +50,6 @@ import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.sonar.SonarLayer;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
-import us.mn.state.dot.tms.utils.Agency;
 
 // agency specific imports
 import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
@@ -211,10 +211,10 @@ public class Session {
 		gpoly = createStationLayer(st);
 
 		// create agency specific incident layer
-		if(Agency.isId(Agency.MNDOT)) {
+		if(SystemAttributeHelper.isAgencyMnDOT()) {
 			incLayer = new TmsIncidentLayer(props, logger);
 			rwisLayer = null;
-		} else if(Agency.isId(Agency.CALTRANS_D10)) {
+		} else if(SystemAttributeHelper.isAgencyCaltransD10()) {
 			incLayer = new D10IncidentLayer(props, logger);
 			rwisLayer = new D10RwisLayer(props, logger);
 		} else {

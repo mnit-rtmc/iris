@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.ntcip.ShortErrorStatus;
 import us.mn.state.dot.tms.event.EventType;
 import us.mn.state.dot.tms.event.SignStatusEvent;
-import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.vault.FieldMap;
 import us.mn.state.dot.vault.ObjectVaultException;
 

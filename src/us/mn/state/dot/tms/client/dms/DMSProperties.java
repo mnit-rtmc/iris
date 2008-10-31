@@ -60,6 +60,7 @@ import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SortedList;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanList;
 import us.mn.state.dot.tms.TrafficDevice;
@@ -71,7 +72,6 @@ import us.mn.state.dot.tms.client.TrafficDeviceAttributeTableModel;
 import us.mn.state.dot.tms.client.toast.TMSObjectForm;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.utils.I18NMessages;
 import us.mn.state.dot.tms.utils.TMSProxy;
 
@@ -357,7 +357,7 @@ public class DMSProperties extends TrafficDeviceForm {
 			connection.isAdmin());
 
 		// pixel test button (optional)
-		if (!Agency.isId(Agency.CALTRANS_D10))
+		if (!SystemAttributeHelper.isAgencyCaltransD10())
 			pixelTest = new JButton(I18NMessages.get(
 				"DMSProperties.PixelTestButton"));
 		else
@@ -370,28 +370,28 @@ public class DMSProperties extends TrafficDeviceForm {
 			lampTest = null;
 
 		// fan test button is (optional)
-		if (!Agency.isId(Agency.CALTRANS_D10))
+		if (!SystemAttributeHelper.isAgencyCaltransD10())
 			fanTest = new JButton(I18NMessages.get(
 				"DMSProperties.FanTestButton"));
 		else
 			fanTest = null;
 
 		// get status button (optional)
-		if (Agency.isId(Agency.CALTRANS_D10))
+		if (SystemAttributeHelper.isAgencyCaltransD10())
 			getStatusButton = new JButton(I18NMessages.get(
 				"DMSProperties.GetStatusButton"));
 		else
 			getStatusButton = null;
 
 		// reset button (optional)
-		if (Agency.isId(Agency.CALTRANS_D10))
+		if (SystemAttributeHelper.isAgencyCaltransD10())
 			resetButton = new JButton(I18NMessages.get(
 				"DMSProperties.ResetButton"));
 		else
 			resetButton = null;
 
 		// reset modem button (optional)
-		if (Agency.isId(Agency.CALTRANS_D10))
+		if (SystemAttributeHelper.isAgencyCaltransD10())
 			resetModemButton = new JButton(I18NMessages.get(
 				"DMSProperties.ResetModemButton"));
 		else
@@ -437,14 +437,14 @@ public class DMSProperties extends TrafficDeviceForm {
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
-		if (!Agency.isId(Agency.CALTRANS_D10))
+		if (!SystemAttributeHelper.isAgencyCaltransD10())
 			tab.add("Brightness", createBrightnessPanel());
-		if (!Agency.isId(Agency.CALTRANS_D10))
+		if (!SystemAttributeHelper.isAgencyCaltransD10())
 			tab.add("Ledstar", createLedstarPanel());
 		tab.add("Status", createStatusPanel());
 
 		// optional attribute tab
-		if (Agency.isId(Agency.CALTRANS_D10)) {
+		if (SystemAttributeHelper.isAgencyCaltransD10()) {
 			attribute_tab = new AttributeTab(admin, this, 
 				state, getId()); 
 			tab.add(attribute_tab);

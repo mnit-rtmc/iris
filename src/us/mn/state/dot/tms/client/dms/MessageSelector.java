@@ -29,14 +29,15 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * Gui for selecting messages for DMS.
@@ -77,8 +78,8 @@ public class MessageSelector extends JPanel {
 	protected final User user;
 
 	/** Create a new message selector */
-	public MessageSelector(TypeCache<DmsSignGroup> d, TypeCache<SignText> t,
-		User u)
+	public MessageSelector(TypeCache<DmsSignGroup> d, 
+		TypeCache<SignText> t, User u)
 	{
 		dms_sign_groups = d;
 		sign_text = t;
@@ -178,7 +179,7 @@ public class MessageSelector extends JPanel {
 		}
 		String ret=null;
 		if(m > 0) {
-			if (Agency.isId(Agency.CALTRANS_D10))
+			if (SystemAttributeHelper.isAgencyCaltransD10())
 				ret = buildMultiPageOriented(mess, m).toString();
 			else
 				ret = buildMultiLineOriented(mess, m).toString();
@@ -321,8 +322,8 @@ if(nl == 0) nl = 3;
 			ret = 1;
 
 		// D10 has a minimum of 2 pages
-		if(Agency.isId(Agency.CALTRANS_D10))
-			ret = ret<2 ? 2 : ret;
+		if(SystemAttributeHelper.isAgencyCaltransD10())
+			ret = ret < 2 ? 2 : ret;
 		return ret;
 	}
 

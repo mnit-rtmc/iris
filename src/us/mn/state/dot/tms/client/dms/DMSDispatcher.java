@@ -43,15 +43,13 @@ import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.dms.FontComboBox;
-import us.mn.state.dot.tms.utils.Agency;
 import us.mn.state.dot.tms.utils.I18NMessages;
 import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
- * as a function of the Agency.
- * the agency.
+ * as a function of the agency.
  * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel, TmsSelectionModel
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -229,11 +227,14 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** set flags for optional controls */
 	protected void setOptionalControlUse() {
-		//FIXME: use system attributes here, not agency ID
-		m_useFontsComboBox = Agency.isId(Agency.CALTRANS_D10);
-		m_useDurationComboBox = !Agency.isId(Agency.CALTRANS_D10);
-		m_useControllerStatusField = Agency.isId(Agency.CALTRANS_D10);
-		m_useGetStatusButton = Agency.isId(Agency.CALTRANS_D10);
+		m_useFontsComboBox = 
+			SystemAttributeHelper.isAgencyCaltransD10();
+		m_useDurationComboBox = 
+			!SystemAttributeHelper.isAgencyCaltransD10();
+		m_useControllerStatusField = 
+			SystemAttributeHelper.isAgencyCaltransD10();
+		m_useGetStatusButton = 
+			SystemAttributeHelper.isAgencyCaltransD10();
 		m_useAwsCheckBox = 
 			SystemAttributeHelper.useAwsCheckBox();
 	}

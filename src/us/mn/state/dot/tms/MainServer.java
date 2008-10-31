@@ -29,7 +29,6 @@ import java.util.TimeZone;
 import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
-import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * This is the main class to start the IRIS server.
@@ -81,7 +80,6 @@ public class MainServer {
 			redirectStdStreams();
 			sanityChecks();
 			m_serverprops = PropertyLoader.load(PROP_FILE);
-			Agency.readProps(m_serverprops);
 			TMSImpl tms = new TMSImpl(m_serverprops);
 			ServerNamespace ns = new ServerNamespace();
 			// FIXME: static namespace hacks
@@ -102,7 +100,7 @@ public class MainServer {
 			Naming.bind("//localhost/login", login);
 			server = new Server(ns, m_serverprops);
 			System.err.println("IRIS Server active for " +
-				Agency.getId() + ".");
+				SystemAttributeHelper.agencyId() + ".");
 			server.join();
 		}
 		catch(Exception e) {

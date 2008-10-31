@@ -211,6 +211,11 @@ public class SystemAttributeHelper {
 		}
 	}
 
+	/** return the agency id */
+	public static String agencyId() {
+		return getValueDef(SystemAttribute.AGENCY_ID,"");
+	}
+
 	/** return true if the agency id matches */
 	public static boolean isAgencyCaltransD10() {
 		return isAttribute(SystemAttribute.AGENCY_ID,
