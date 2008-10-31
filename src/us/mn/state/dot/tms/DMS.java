@@ -66,7 +66,12 @@ public interface DMS extends TrafficDevice {
 		throws InvalidMessageException, RemoteException;
 
 	/** Set the message displayed on the sign */
-	public void setMessage(String owner, String text, int duration, MsgActPriority ap)
+	public void setMessage(String owner, String text, int duration, 
+		String font) throws InvalidMessageException, RemoteException;
+
+	/** Set the message displayed on the sign */
+	public void setMessage(String owner, String text, int duration, 
+		MsgActPriority ap, String font) 
 		throws InvalidMessageException, RemoteException;
 
 	/** Clear the message displayed on the sign */
@@ -252,11 +257,5 @@ public interface DMS extends TrafficDevice {
 
 	/** Get the optimal line height (pixels) */
 	public int getLineHeightPixels() throws RemoteException;
-
-	/** Get the preferred font for new messages */
-	public String getPreferredFontName() throws RemoteException;
-
-	/** Set the preferred font for new messages */
-	public void setPreferredFontName(String fontName) throws RemoteException;
 }
 

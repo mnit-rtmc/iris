@@ -399,26 +399,15 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			return SignMessage.DURATION_INFINITE;
 	}
 
-	/** 
-	 *  Get the selected font. The font selector is an optional control
-	 *  and may be null.
-	 *  @return Null if no font is selected or cmbFont is null, else the
-	 *	    selected Font.
-	 */
-	protected Font getSelectedFont() {
-		assert m_useFontsComboBox;
-		if(!m_useFontsComboBox)
-			return null;
-		return (cmbFont == null ? null : 
-			(Font)cmbFont.getSelectedItem());
-	}
-
 	/** Send a new message to the selected DMS object */
 	protected void sendMessage() throws TMSException, RemoteException {
 		DMSProxy proxy = selectedSign;	// Avoid NPE race
 		String message = messageSelector.getMessage();
+		String fontName = (m_useFontsComboBox ? 
+			cmbFont.getSelectedItemName() : null);
 		if(proxy != null && message != null) {
-			proxy.dms.setMessage(userName, message, getDuration());
+			proxy.dms.setMessage(userName, message, 
+				getDuration(), fontName);
 			messageSelector.updateMessageLibrary();
 		}
 	}

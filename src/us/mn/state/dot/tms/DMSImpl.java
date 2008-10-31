@@ -108,7 +108,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		resetTransients();
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
-		m_preferredFontName = getInitialFontName();
 	}
 
 	/** Constructor needed for ObjectVault */
@@ -116,7 +115,6 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		super(fields);
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
-		m_preferredFontName = getInitialFontName();
 	}
 
 	/** Get a mapping of the columns */
@@ -605,23 +603,34 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	protected transient SignMessage message;
 
 	/** Set a new message on the sign, all pages rendered, using the 
-	 *  default activation priority */
+	 *  default activation priority, and default font */
 	public void setMessage(String owner, String text, int duration)
 		throws InvalidMessageException
 	{
-		setMessage(owner, text, duration, MsgActPriority.PRI_OPER_MSG);
+		setMessage(owner, text, duration, MsgActPriority.PRI_OPER_MSG,
+			null);
 	}
 
-	/** Set a new message on the sign, all pages rendered, ignoring
-	 *  activation priorities. */
-	public void setMessage(String owner, String text, int duration,
-		MsgActPriority ap) throws InvalidMessageException
+	/** Set a new message on the sign, all pages rendered, using the 
+	 *  default activation priority, and specified font */
+	public void setMessage(String owner, String text, int duration, 
+		String font) throws InvalidMessageException
 	{
-		MultiString multi = new MultiString(text);
-		String pfn = getPreferredFontName();
+		setMessage(owner, text, duration, MsgActPriority.PRI_OPER_MSG,
+			font);
+ 	}
+
+ 	/** Set a new message on the sign, all pages rendered, ignoring
+	 *  activation priorities, using the specified font. */
+ 	public void setMessage(String owner, String text, int duration,
+		MsgActPriority ap, String font) throws InvalidMessageException
+ 	{
+ 		MultiString multi = new MultiString(text);
+		if(font == null || font.length() <= 0)
+			font = getPreferredFontName();
  		sendMessage(new SignMessage(owner, multi,
-			createPixelMaps(multi, pfn), duration, ap), true);
-	}
+			createPixelMaps(multi, font), duration, ap), true);
+ 	}
 
 	/** Set a new message on the sign */
 	public void setMessage(SignMessage m) throws InvalidMessageException {
@@ -1697,29 +1706,8 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			sid);
 	}
 
-	/** Preferred font name for new messages, should not be null */
-	protected transient String m_preferredFontName = "";
-
-	/** Get the initial font name, used by constructor */
-	public String getInitialFontName() {
-		return SystemAttributeHelper.preferredFontName();
-	}
-
-	/** 
-	 *  Get the preferred font name, which is set in the DMSDispatcher
-	 *  font combobox, which is only active for Caltrans D10.
-	 */
+	/** Get the preferred system font name */
 	public String getPreferredFontName() {
-		return m_preferredFontName;
-	}
-
-	/** Set the preferred font for new messages.
-	 *  @param fontName A font name, may be zero length, but not null.
-	 */
-	public void setPreferredFontName(String fontName) {
-		assert fontName!=null;
-		if(fontName == null)
-			fontName = "";
-		m_preferredFontName=fontName;
+		return SystemAttributeHelper.preferredFontName();
 	}
 }

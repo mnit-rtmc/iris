@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.JComboBox;
 
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.dms.DMSDispatcher;
 import us.mn.state.dot.tms.Font;
@@ -29,8 +30,6 @@ import us.mn.state.dot.tms.Font;
  * Combobox for font selection. This combobox contains sonar Font objects.
  * It is single selection and non-editable. The combobox is loaded with all
  * IRIS fonts via the model FontComboBoxModel, which extends ProxyListModel.
- * When a user changes the combobox selected font, the "preferred font" in
- * the associated DMS is updated.
  * @see DMSDispatcher, ProxyListModel, Font, FontImpl, DMS, DMSImpl, TypeCache
  * @author Michael Darter
  */
@@ -47,45 +46,9 @@ public class FontComboBox extends JComboBox
 		setModel(new FontComboBoxModel(arg_fonts));
 	}
 
-	/** Set the currently selected font. A null arg is ignored. */
-	public void setSelectedItem(Object item) {
-		super.setSelectedItem(item);
-		setPreferredDMSFont((Font) item);
-	}
-
-	/** Set preferred font in associated DMS */
-	protected void setPreferredDMSFont(Font f) {
-		if(f == null)
-			return;
-		DMSProxy dms = m_dmsDispatcher.getSelectedDms();
-		if(dms == null)
-			return;
-		if(dms.dms != null) {
-			String fname = f.getName();
-			try {
-				dms.dms.setPreferredFontName(fname);
-			} catch(RemoteException ex) {}
-		}
-	}
-
-	/** Get preferred font in associated DMS */
-	protected String getPreferredDMSFont()
-	{
-		String fname = "";
-		DMSProxy dms = m_dmsDispatcher.getSelectedDms();
-		if(dms == null)
-			return fname;
-		if(dms.dms != null) {
-			try {
-				fname = dms.dms.getPreferredFontName();
-			} catch(RemoteException ex) {}
-		}
-		return fname;
-	}
-
 	/** 
 	 *  Get the currently selected font.
-	 *  @return The selected font or null of nothing selected
+	 *  @return The selected font or null of nothing selected.
 	 */
 	public Font getSelectedItem()
 	{
@@ -96,6 +59,18 @@ public class FontComboBox extends JComboBox
 			return (Font)obj;
 		assert false : "Unknown object in getSelectedItem()";
 		return null;
+	}
+
+	/** 
+	 *  Get the name of the currently selected font.
+	 *  @return The selected font name or null of nothing selected.
+	 */
+	public String getSelectedItemName()
+	{
+		Font f = getSelectedItem();
+		if(f == null)
+			return null;
+		return f.getName();
 	}
 
 	/** return the combobox item index of a matching item or -1 if not found */
@@ -124,13 +99,9 @@ public class FontComboBox extends JComboBox
 	 */
 	protected int getDefaultSelectionIndex() {
 		final int NOTFOUND = -1;
-
-		// nothing in combobox yet
 		if(getItemCount() <= 0)
 			return NOTFOUND;
-
-		// combobox is loaded, get preferred DMS font name
-		String fname = getPreferredDMSFont();
+		String fname = SystemAttributeHelper.preferredFontName();
 		return search(fname);
 	}
 }
