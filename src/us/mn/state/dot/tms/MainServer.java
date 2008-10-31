@@ -30,7 +30,6 @@ import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.utils.Agency;
-import us.mn.state.dot.tms.utils.IrisInfo;
 
 /**
  * This is the main class to start the IRIS server.
@@ -79,14 +78,16 @@ public class MainServer {
 	/** Start the server and register it with the RMI registry */
 	static public void main(String[] args) {
 		try {
-			IrisInfo.setClientSide(false);
 			redirectStdStreams();
 			sanityChecks();
 			m_serverprops = PropertyLoader.load(PROP_FILE);
 			Agency.readProps(m_serverprops);
 			TMSImpl tms = new TMSImpl(m_serverprops);
 			ServerNamespace ns = new ServerNamespace();
+			// FIXME: static namespace hacks
 			TMSObjectImpl.namespace = ns;
+			SystemAttributeHelper.namespace = ns;
+			TrafficDeviceAttributeHelper.namespace = ns;
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);

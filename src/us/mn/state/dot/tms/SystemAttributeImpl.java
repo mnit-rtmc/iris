@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.utils.Agency;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -28,19 +27,6 @@ import us.mn.state.dot.tms.utils.Agency;
 public class SystemAttributeImpl extends BaseObjectImpl 
 	implements SystemAttribute 
 {
-	/** Lookup a SystemAttribute in the SONAR namespace. 
-	 *  @return Null if the specified attribute does not exist else the 
-	 *  attribute value.
-	 */
-	static protected SystemAttribute lookup(String att) {
-		if(att == null || att.length() <= 0) {
-			assert false;
-			return null;
-		}
-		return (SystemAttribute)namespace.lookupObject(
-			SystemAttribute.SONAR_TYPE, att);
-	}
-
 	/** Load all */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading system attributes...");
@@ -103,7 +89,6 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	 *  database backed sonar objects
 	 */
 	public void doSetValue(String arg_value) throws TMSException {
-		//System.err.println("SystemAttributeImpl.doSetValue("+arg_value+") called.");
 		if(arg_value == null)
 			return;
 		if(value.equals(arg_value))

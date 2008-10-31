@@ -14,8 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.utils.IrisInfo;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -32,6 +31,9 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class TrafficDeviceAttributeHelper {
 
+	/** SONAR namespace */
+	static public Namespace namespace;
+
 	/** disallow instantiation */
 	protected TrafficDeviceAttributeHelper() {
 		assert false;
@@ -46,15 +48,18 @@ public class TrafficDeviceAttributeHelper {
 			return null;
 		if(name.length() > TrafficDeviceAttribute.MAXLEN_NAME)
 			return null;
-		TrafficDeviceAttribute a;
-		if(IrisInfo.getClientSide())
-			// client side code
-			a = SonarState.singleton.
-				lookupTrafficDeviceAttribute(name);
-		else
-			// server side code
-			a = TrafficDeviceAttributeImpl.lookup(name);
-		return a;
+		return lookup(name);
+	}
+
+	/** Lookup a TrafficDeviceAttribute in the SONAR namespace. 
+	 *  @return Null if the specified attribute does not exist else the 
+	 *  attribute value.
+	 */
+	static protected TrafficDeviceAttribute lookup(String att) {
+		assert namespace != null;
+		assert att != null && att.length() > 0;
+		return (TrafficDeviceAttribute)namespace.lookupObject(
+			TrafficDeviceAttribute.SONAR_TYPE, att);
 	}
 
 	/** Return the TrafficDeviceAttribute with the specified id and name.

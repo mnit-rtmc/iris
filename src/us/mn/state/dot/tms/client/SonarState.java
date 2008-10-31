@@ -44,8 +44,10 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TrafficDeviceAttribute;
+import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -383,6 +385,9 @@ public class SonarState extends Client {
 		system_attributes = new TypeCache<SystemAttribute>(
 			SystemAttribute.class, this);
 		singleton = this;
+		// FIXME: this is an ugly hack
+		SystemAttributeHelper.namespace = getNamespace();
+		TrafficDeviceAttributeHelper.namespace = getNamespace();
 	}
 
 	/** Login to the SONAR server */

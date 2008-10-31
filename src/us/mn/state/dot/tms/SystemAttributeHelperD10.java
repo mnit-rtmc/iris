@@ -14,10 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.utils.IrisInfo;
-import us.mn.state.dot.tms.utils.SString;
-
 /**
  * Static System Attribute convenience methods accessible from
  * the client and server, and are specific to Caltrans D10.

@@ -14,8 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.utils.IrisInfo;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -27,29 +26,35 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class SystemAttributeHelper {
 
+	/** SONAR namespace */
+	static public Namespace namespace;
+
 	/** disallow instantiation */
 	protected SystemAttributeHelper() {
 		assert false;
 	}
 
-	/** Return the SystemAttribute with the specified name.
-	 *  @param name Name of an existing attribute.
+	/** Get the SystemAttribute with the specified name.
+	 *  @param aname Name of an existing attribute.
 	 *  @return SystemAttribute or null if not found.
 	 */
-	static public SystemAttribute get(final String aname) {
+	static public SystemAttribute get(String aname) {
 		if(aname == null)
 			return null;
 		if(aname.length() > TrafficDeviceAttribute.MAXLEN_ANAME)
 			return null;
-		SystemAttribute a;
-		if(IrisInfo.getClientSide())
-			// client side code
-			a = SonarState.singleton.
-				lookupSystemAttribute(aname);
-		else
-			// server side code
-			a = SystemAttributeImpl.lookup(aname);
-		return a;
+		return lookup(aname);
+	}
+
+	/** Lookup a SystemAttribute in the SONAR namespace. 
+	 *  @return The specified system attribute, or null if the it does not
+	 *  exist in the namespace.
+	 */
+	static protected SystemAttribute lookup(String att) {
+		assert namespace != null;
+		assert att != null && att.length() > 0;
+		return (SystemAttribute)namespace.lookupObject(
+			SystemAttribute.SONAR_TYPE, att);
 	}
 
 	/** Get the value of the named attribute as a string.
@@ -62,9 +67,10 @@ public class SystemAttributeHelper {
 		throws IllegalArgumentException 
 	{
 		SystemAttribute a = get(aname);
-		if(a == null)
-			throw new IllegalArgumentException(
-				"System attribute ("+aname+") was not found.");
+		if(a == null) {
+			throw new IllegalArgumentException("System attribute ("
+				+ aname + ") was not found.");
+		}
 		return a.getValue();
 	}
 
@@ -133,7 +139,9 @@ public class SystemAttributeHelper {
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default;  
 	 */
-	static public boolean getValueBooleanDef(final String aname,boolean dvalue) {
+	static public boolean getValueBooleanDef(final String aname,
+		boolean dvalue)
+	{
 		boolean ret = dvalue;
 		try {
 			ret = getValueBoolean(aname);

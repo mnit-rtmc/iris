@@ -24,7 +24,6 @@ import java.util.TimeZone;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
-import us.mn.state.dot.tms.utils.IrisInfo;
 import us.mn.state.dot.util.HTTPProxySelector;
 
 /**
@@ -145,7 +144,6 @@ public class MainClient {
 	 * @param args Arguments passed to the application.
 	 */
 	static public void main(String[] args) {
-		IrisInfo.setClientSide(true);
 		try {
 			execute(args);
 		}
