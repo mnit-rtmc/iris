@@ -29,7 +29,7 @@ public class SystemAttributeHelper {
 	/** SONAR namespace */
 	static public Namespace namespace;
 
-	/** disallow instantiation */
+	/** Disallow instantiation */
 	protected SystemAttributeHelper() {
 		assert false;
 	}
@@ -80,14 +80,14 @@ public class SystemAttributeHelper {
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default;  
 	 */
-	static public String getValueDef(final String aname,String dvalue) {
-		String ret = dvalue;
+	static public String getValueDef(final String aname, String dvalue) {
 		try {
-			ret = getValue(aname);
-		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(aname,dvalue));
+			return getValue(aname);
 		}
-		return ret;
+		catch(IllegalArgumentException ex) { 
+			System.err.println(getWarningMessage(aname, dvalue));
+			return dvalue;
+		}
 	}
 
         /** Get the value of the named attribute as an integer.
@@ -108,15 +108,15 @@ public class SystemAttributeHelper {
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default;  
 	 */
-	static public int getValueIntDef(final String aname,int dvalue) {
-		int ret = dvalue;
+	static public int getValueIntDef(final String aname, int dvalue) {
 		try {
-			ret = getValueInt(aname);
-		} catch(IllegalArgumentException ex) { 
+			return getValueInt(aname);
+		}
+		catch(IllegalArgumentException ex) { 
 			System.err.println(getWarningMessage(aname,
 				new Integer(dvalue).toString()));
+			return dvalue;
 		}
-		return ret;
 	}
 
 	/** Get the value of the named attribute as a boolean.
@@ -140,41 +140,40 @@ public class SystemAttributeHelper {
 	static public boolean getValueBooleanDef(final String aname,
 		boolean dvalue)
 	{
-		boolean ret = dvalue;
 		try {
-			ret = getValueBoolean(aname);
-		} catch(IllegalArgumentException ex) { 
+			return getValueBoolean(aname);
+		}
+		catch(IllegalArgumentException ex) { 
 			System.err.println(getWarningMessage(aname,
 				new Boolean(dvalue).toString()));
+			return dvalue;
 		}
-		return ret;
 	}
 
 	/** return true if the specified attribute matches expected value */
 	public static boolean isAttribute(String aname, String avalue) {
 		if(aname == null || avalue == null)
 			return false;
-		String readvalue = "";
 		try {
-			readvalue = getValue(aname);
-		} catch(IllegalArgumentException ex) {
+			return avalue.equals(getValue(aname));
+		}
+		catch(IllegalArgumentException ex) {
 			return false;
 		}
-		return avalue.equals(readvalue);
 	}
 
 	/** return true if the specified attribute matches expected value */
 	public static boolean isAttribute(String aname, boolean avalue) {
 		if(aname == null)
 			return false;
-		boolean readvalue = false;
 		try {
 			String s = getValue(aname);
-			readvalue = new Boolean(s).booleanValue();
-		} catch(IllegalArgumentException ex) {
+			boolean readvalue = new Boolean(s).booleanValue();
+			return avalue == readvalue;
+		}
+		catch(IllegalArgumentException ex) {
 			return false;
 		}
-		return avalue == readvalue;
 	}
 
 	/** return true if the agency id matches */
@@ -199,19 +198,20 @@ public class SystemAttributeHelper {
 	}
 
 	/** return a 'missing system attribute' warning message */
-	public static String getWarningMessage(String aname,int avalue) {
+	public static String getWarningMessage(String aname, int avalue) {
 		return getWarningMessage(aname, Integer.toString(avalue));
 	}
 
 	/** return a 'missing system attribute' warning message */
-	public static String getWarningMessage(String aname,boolean avalue) {
+	public static String getWarningMessage(String aname, boolean avalue) {
 		return getWarningMessage(aname, Boolean.toString(avalue));
 	}
 
 	/** return a 'missing system attribute' warning message */
-	public static String getWarningMessage(String aname,String avalue) {
-		return "Warning: a system attribute ("+aname+
-			") was not found, using a default value ("+avalue+").";
+	public static String getWarningMessage(String aname, String avalue) {
+		return "Warning: a system attribute (" + aname +
+			") was not found, using a default value (" + avalue +
+			").";
 	}
 
 	/** Validate the database version */
@@ -228,13 +228,12 @@ public class SystemAttributeHelper {
 	}
 
 	/** Validate an attribute and force shutdown if invalid */
-	static protected void shutdownValidate(String aname, String[] values) 
-	{
-		if(!validate(aname,values)) {
+	static protected void shutdownValidate(String aname, String[] values) {
+		if(!validate(aname, values)) {
 			String msg = "";
-			msg += "Failure: a required system attribute ("+aname;
+			msg += "Failure: a required system attribute (" + aname;
 			msg += ") did not match an expected value (";
-			for(int i=0; i<values.length; ++i) {
+			for(int i = 0; i < values.length; ++i) {
 				msg += values[i];
 				if(i < values.length - 1)
 					msg += ",";
@@ -249,28 +248,29 @@ public class SystemAttributeHelper {
 	static protected boolean validate(String aname,String[] values) {
 		if(aname == null || values == null || values.length <= 0)
 			return false;
-		String readValue;
 		try {
-			readValue = getValue(aname);
-		} catch(IllegalArgumentException ex) {
+			String readValue = getValue(aname);
+			for(String i: values) {
+				if(readValue.equals(i))
+					return true;
+			}
 			return false;
 		}
-		for(String i : values)
-			if(readValue.equals(i))
-				return true;
-		return false;
+		catch(IllegalArgumentException ex) {
+			return false;
+		}
 	}
 
 	/** Return true to use the DMSDispatcher get status button */
 	public static boolean useGetStatusBtn() {
 		return getValueBooleanDef(
-			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN,false);
+			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN, false);
 	}
 
 	/** Return true to display onscreen PTZ controls in CameraViewer */
 	public static boolean useOnScrnPTZ() {
 		return getValueBooleanDef(
-			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS,false);
+			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS, false);
 	}
 
 	/** Return number of CameraViewer PTZ preset buttons */
@@ -303,7 +303,6 @@ public class SystemAttributeHelper {
 	/** Return true to use the AWS checkbox in DMSDispatcher */
 	public static boolean useAwsCheckBox() {
 		return getValueBooleanDef(
-			SystemAttribute.DMSDISPATCHER_AWS_CKBOX,false);
+			SystemAttribute.DMSDISPATCHER_AWS_CKBOX, false);
 	}
 }
-
