@@ -483,7 +483,7 @@ CREATE TABLE system_attribute (
 	value VARCHAR(64) NOT NULL
 );
 
-INSERT INTO system_attribute VALUES('database_version', '3.79.0');
+INSERT INTO system_attribute VALUES('database_version', '3.80.0');
 
 
 CREATE TABLE vault_object (
