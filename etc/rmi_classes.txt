@@ -49,7 +49,6 @@ us/mn/state/dot/tms/MeterPlan.class
 us/mn/state/dot/tms/MultiString*.class
 us/mn/state/dot/tms/PixelMapBuilder*.class
 us/mn/state/dot/tms/R_Node.class
-us/mn/state/dot/tms/R_NodeMap.class
 us/mn/state/dot/tms/R_NodeTransition.class
 us/mn/state/dot/tms/R_NodeType.class
 us/mn/state/dot/tms/RampMeter.class
