@@ -15,9 +15,6 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,11 +25,8 @@ import java.awt.Component;
 import javax.swing.Box;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * This is a tab for viewing and editing system attributes.

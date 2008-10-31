@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,10 +24,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttributeImpl;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
