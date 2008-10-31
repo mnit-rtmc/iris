@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.system;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -29,6 +29,8 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemPolicy;
+import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
  * PolicyForm allows administrators to change system-wide policy parameters.

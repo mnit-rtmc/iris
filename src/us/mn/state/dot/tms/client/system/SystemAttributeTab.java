@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.system;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -26,17 +26,13 @@ import javax.swing.ListSelectionModel;
 import javax.swing.BoxLayout;
 import java.awt.Component;
 import javax.swing.Box;
-
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.TrafficDeviceAttribute;
-import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.SystemAttributeTableModel;
-import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * This is a tab for viewing and editing system attributes.
