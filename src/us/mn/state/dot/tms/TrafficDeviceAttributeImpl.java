@@ -127,23 +127,23 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 	protected String aname;
 
 	/** Set the attribute name */
-	public void setAttributeName(String arg_aname) {
+	public void setAName(String arg_aname) {
 		aname = arg_aname;
 	}
 
 	/** Set the traffic device attribute name, doSet is required for 
 	 *  database backed sonar objects */
-	public void dosetName(String arg_aname) throws TMSException {
+	public void doSetAName(String arg_aname) throws TMSException {
 		if(arg_aname==null)
 			return;
 		if(id.equals(arg_aname))
 			return;
 		store.update(this, "aname", arg_aname);
-		setAttributeName(arg_aname);
+		setAName(arg_aname);
 	}
 
 	/** Get the attribute name */
-	public String getAttributeName() {
+	public String getAName() {
 		return aname;
 	}
 
@@ -151,23 +151,30 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 	protected String avalue;
 
 	/** Set the attribute value */
-	public void setAttributeValue(String arg_avalue) {
+	public void setAValue(String arg_avalue) {
 		avalue = arg_avalue;
 	}
 
+	/** Set the attribute value as a boolean*/
+	/* doesn't seem to work, why?
+	public void setAValueBoolean(boolean arg_avalue) {
+		setAValue(SString.booleanToString(arg_avalue));
+	}
+	*/
+
 	/** Set the traffic device attribute value, doSet is required for 
 	 *  database backed sonar objects */
-	public void dosetValue(String arg_avalue) throws TMSException {
+	public void doSetAValue(String arg_avalue) throws TMSException {
 		if(arg_avalue==null)
 			return;
 		if(id.equals(arg_avalue))
 			return;
 		store.update(this, "avalue", arg_avalue);
-		setAttributeValue(arg_avalue);
+		setAValue(arg_avalue);
 	}
 
 	/** Get the attribute value */
-	public String getAttributeValue() {
+	public String getAValue() {
 		return avalue;
 	}
 
@@ -177,15 +184,18 @@ public class TrafficDeviceAttributeImpl extends BaseObjectImpl
 	 *          case, to "true", else false. If the attribute doesn't 
 	 * 	    exist false is returned.
 	 */
-	public boolean getAttributeValueBoolean() {
-		String v = (avalue == null ? "" : avalue);
-		return Boolean.parseBoolean(v);
+	public boolean getAValueBoolean() {
+		//String v = (avalue == null ? "" : avalue);
+		return Boolean.parseBoolean(avalue);
 	}
 
 	/** toString */
 	public String toString() {
-		return "TrafficDeviceAttribute: Id="+getId()+", aname="
-			+getName()+", avalue="+getAttributeValue()
-			+".";
+		String m = "(TrafficDeviceAttribute: ";
+		m += "Id="+getId();
+		m += ", aname=" + getName();
+		m += ", avalue="+getAValue();
+		m += ".";
+		return m;
 	}
 }

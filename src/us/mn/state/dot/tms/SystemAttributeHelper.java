@@ -32,29 +32,36 @@ public class SystemAttributeHelper {
 		assert false;
 	}
 
+	/** Return the SystemAttribute with the specified name.
+	 *  @param name Name of an existing attribute.
+	 *  @return SystemAttribute or null if not found.
+	 */
+	static public SystemAttribute get(final String aname) {
+		if(aname == null)
+			return null;
+		if(aname.length() > TrafficDeviceAttribute.MAXLEN_ANAME)
+			return null;
+		SystemAttribute a;
+		if(IrisInfo.getClientSide())
+			// client side code
+			a = SonarState.singleton.
+				lookupSystemAttribute(aname);
+		else
+			// server side code
+			a = SystemAttributeImpl.lookup(aname);
+		return a;
+	}
+
 	/** Get the value of the named attribute as a string.
 	 *  @param aname Name of an existing system attribute.
 	 *  @throws IllegalArgumentException if the specified attribute 
 	 *	    was not found.
 	 *  @return The value of the named attribute;  
 	 */
-	static protected String getValue(final String aname)
+	static public String getValue(final String aname)
 		throws IllegalArgumentException 
 	{
-		if(aname == null)
-			throw new IllegalArgumentException(
-				"System attribute (null) was not found.");
-		if(aname.length() > SystemAttribute.MAXLEN_ANAME)
-			throw new IllegalArgumentException(
-				"System attribute name is too long (>"+
-				SystemAttribute.MAXLEN_ANAME+").");
-		SystemAttribute a;
-		if(IrisInfo.getClientSide())
-			// client side code
-			a = SonarState.singleton.lookupSystemAttribute(aname);
-		else
-			// server side code
-			a = SystemAttributeImpl.lookup(aname);
+		SystemAttribute a = get(aname);
 		if(a == null)
 			throw new IllegalArgumentException(
 				"System attribute ("+aname+") was not found.");

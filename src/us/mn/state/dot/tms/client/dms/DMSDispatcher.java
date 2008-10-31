@@ -33,6 +33,8 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.TrafficDeviceAttribute;
+import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -198,7 +200,9 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 		// add optional AWS checkbox
 		if(m_useAwsCheckBox) {
-			awsCheckBox = new AwsCheckBox(this);
+			awsCheckBox = new AwsCheckBox(getAwsProxyName(), 
+				I18NMessages.get("DMSDispatcher.AwsCheckBox"), 
+				st.getTrafficDeviceAttributes());
 			JPanel p = new JPanel(new FlowLayout());
 			p.add(awsCheckBox);
 			boxRight.add(p);
@@ -348,8 +352,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 				cmbFont.setDefaultSelection();
 			}
 			if(m_useAwsCheckBox) {
-				awsCheckBox.setEnabled(true);
-				awsCheckBox.setDefaultSelection();
+				awsCheckBox.setProxy(getAwsProxyName());
 			}
 			proxy.updateUpdateInfo(); // update global messages
 			pnlSign.setSign(proxy);
@@ -373,9 +376,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			cmbFont.setEnabled(false);
 			cmbFont.setDefaultSelection();
 		}
-		if(m_useFontsComboBox) {
-			awsCheckBox.setEnabled(false);
-			awsCheckBox.setDefaultSelection();
+		if(m_useAwsCheckBox) {
+			awsCheckBox.setProxy(null);
 		}
 		messageSelector.setEnabled(false);
 		messageSelector.clearSelections();
@@ -473,4 +475,19 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		return selectedSign;
 	}
 
+	/** get the currently selected DMS id, e.g. "V1" */
+	public String getSelectedDmsId() {
+		if( selectedSign == null )
+			return null;
+		return selectedSign.getId();
+	}
+
+	/** get the currently selected DMS id, e.g. "V1_AWS_controlled" */
+	public String getAwsProxyName() {
+		String name = TrafficDeviceAttributeHelper.createName(
+			getSelectedDmsId(),
+			TrafficDeviceAttribute.AWS_CONTROLLED);
+		return name;
+	}
 }
+

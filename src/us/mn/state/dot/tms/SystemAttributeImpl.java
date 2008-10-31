@@ -100,9 +100,11 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** Set the attribute value, doSet is required for 
-	 *  database backed sonar objects */
+	 *  database backed sonar objects
+	 */
 	public void doSetValue(String arg_value) throws TMSException {
-		if(arg_value==null)
+		//System.err.println("SystemAttributeImpl.doSetValue("+arg_value+") called.");
+		if(arg_value == null)
 			return;
 		if(value.equals(arg_value))
 			return;

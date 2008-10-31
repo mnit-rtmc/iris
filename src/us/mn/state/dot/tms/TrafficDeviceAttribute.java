@@ -26,7 +26,8 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public interface TrafficDeviceAttribute extends SonarObject {
 
-	/** maximum length of an attribute name */
+	/** maximum lengths of attributes */
+	final int MAXLEN_NAME = 32;
 	final int MAXLEN_ANAME = 32;
 
 	/** SONAR type name */
@@ -39,16 +40,25 @@ public interface TrafficDeviceAttribute extends SonarObject {
 	String getId();
 
 	/** Set the attribute name */
-	void setAttributeName(String aname);
+	void setAName(String aname);
 
 	/** Get the attribute name */
-	String getAttributeName();
+	String getAName();
 
 	/** Set the attribute value */
-	void setAttributeValue(String avalue);
+	void setAValue(String avalue);
+
+	/** Set the attribute value as boolean */
+	//void setAValueBoolean(boolean aname);
 
 	/** Get the attribute value */
-	String getAttributeValue();
+	String getAValue();
+
+	/** Get the attribute value as a boolean*/
+	boolean getAValueBoolean();
+
+	/** toString */
+	String toString();
 
 	/** DMS related attribute names */
 	String AWS_CONTROLLED = "AWS_controlled";

@@ -24,10 +24,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TrafficDeviceAttribute;
+import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.TrafficDeviceAttributeImpl;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
@@ -37,7 +39,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDeviceAttribute> {
+public class TrafficDeviceAttributeTableModel 
+	extends ProxyTableModel<TrafficDeviceAttribute> 
+{
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
@@ -143,9 +147,9 @@ public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDev
 	protected Object getValue(TrafficDeviceAttribute t, int col) {
 		//System.err.println("TrafficDeviceAttributeTableModel.getValue() called. t="+t.toString()+", column="+col);
 		if(col == COL_NAME)
-			return t.getAttributeName();
+			return t.getAName();
 		else if(col == COL_VALUE)
-			return t.getAttributeValue();
+			return t.getAValue();
 		else {
 			String err="bogus column value in getValue";
 			System.err.println(err);
@@ -206,13 +210,13 @@ public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDev
 			setValue(t, col, value);
 	}
 
-	/** Set the value of the specified sign text column */
+	/** Set the value of the specified column */
 	protected void setValue(TrafficDeviceAttribute t, int col, Object value) {
 		//System.err.println("TrafficDeviceAttributeTableModel.setValue() called: t="+t.toString()+", col="+col+", value="+value);
 		if(col == COL_NAME)
-			t.setAttributeName(value.toString());
+			t.setAName(value.toString());
 		else if(col == COL_VALUE)
-			t.setAttributeValue(value.toString());
+			t.setAValue(value.toString());
 		else {
 			String err = "bogus column value in setValue";
 			System.err.println(err);
@@ -252,7 +256,6 @@ public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDev
 
 	/** Create a new TrafficDeviceAttribute using the current field values */
 	protected void createTrafficDeviceAttribute() {
-		//System.err.println("TrafficDeviceAttributeTableModel.createTrafficDeviceAttribute() called");
 		// only create new attribute if all items specified
 		if( m_new_aname.length() > 0 && m_new_avalue.length() > 0 ) {
 			createTrafficDeviceAttribute(m_id, 
@@ -271,7 +274,7 @@ public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDev
 			return;
 		}
 
-		String name = createName(id,aname);
+		String name = TrafficDeviceAttributeHelper.createName(id,aname);
 		if(name == null || name.length()<=0)
 			return;
 		//System.err.println("TrafficDeviceAttributeTableModel.createTrafficDeviceAttribute(,,): name="+name+", id="+id+", aname="+aname+", avalue="+avalue);
@@ -280,15 +283,6 @@ public class TrafficDeviceAttributeTableModel extends ProxyTableModel<TrafficDev
 		attrs.put("aname", aname);
 		attrs.put("avalue", avalue);
 		cache.createObject(name, attrs);
-	}
-
-	/** Create a new name using an id and aname */
-	public static String createName(String id, String aname) {
-		if (id==null || id.length()<=0 || aname==null || aname.length()<=0) {
-			assert false : "bogus args in createName()";
-			return null;
-		}
-		return id + "_" + aname;
 	}
 
 	/** toString */

@@ -144,8 +144,7 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 			assert false;
 			return null;
 		}
-
-		String name = id + "_" + aname;
+		String name = TrafficDeviceAttributeHelper.createName(id,aname);
 		return (TrafficDeviceAttributeImpl)namespace.lookupObject(
 			TrafficDeviceAttribute.SONAR_TYPE, name);
 	}
@@ -159,7 +158,7 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	{
 		TrafficDeviceAttribute a = 
 			lookupTrafficDeviceAttribute(id,aname);
-		return (a == null ? null : a.getAttributeValue());
+		return (a == null ? null : a.getAValue());
 	}
 
 	/** Get the value of the named attribute for a specific device. This 
@@ -171,6 +170,6 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 	{
 		TrafficDeviceAttributeImpl a = 
 			lookupTrafficDeviceAttribute(id,aname);
-		return (a == null ? false : a.getAttributeValueBoolean());
+		return (a == null ? false : a.getAValueBoolean());
 	}
 }

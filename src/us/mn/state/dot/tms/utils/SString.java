@@ -256,6 +256,11 @@ public class SString {
 		return b;
 	}
 
+	/** convert boolean to string */
+	public static String booleanToString(boolean b) {
+		return new Boolean(b).toString();
+	}
+
 	/** convert double to string with rounding */
 	public static String doubleToString(double d,int numdecplaces) {
 		String ret="";

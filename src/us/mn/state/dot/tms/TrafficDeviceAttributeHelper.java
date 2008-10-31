@@ -37,135 +37,171 @@ public class TrafficDeviceAttributeHelper {
 		assert false;
 	}
 
-	/** Get the value of the named attribute as a string.
+	/** Return the TrafficDeviceAttribute with the specified name.
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
+	 *  @return TrafficDeviceAttribute or null if not found.
+	 */
+	static public TrafficDeviceAttribute get(final String name) {
+		if(name == null)
+			return null;
+		if(name.length() > TrafficDeviceAttribute.MAXLEN_NAME)
+			return null;
+		TrafficDeviceAttribute a;
+		if(IrisInfo.getClientSide())
+			// client side code
+			a = SonarState.singleton.
+				lookupTrafficDeviceAttribute(name);
+		else
+			// server side code
+			a = TrafficDeviceAttributeImpl.lookup(name);
+		return a;
+	}
+
+	/** Return the TrafficDeviceAttribute with the specified id and name.
 	 *  @param id Traffic device ID, e.g. "V1".
 	 *  @param aname Name of an existing attribute.
+	 *  @return TrafficDeviceAttribute or null if not found.
+	 */
+	static public TrafficDeviceAttribute get(final String id, 
+		final String aname)
+	{
+		return get(createName(id,aname));
+	}
+
+	/** Get the value of the named attribute as a string.
+	 *  @param id Traffic device ID, e.g. "V1".
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
 	 *  @throws IllegalArgumentException if the specified attribute 
 	 *	    was not found.
 	 *  @return The value of the named attribute;  
 	 */
-	static protected String getValue(final String id, final String aname)
+	static public String getValue(final String name)
 		throws IllegalArgumentException 
 	{
-		if(id == null)
-			throw new IllegalArgumentException(
-				"Traffic device id was null");
-		if(aname == null)
-			throw new IllegalArgumentException(
-				"Device attribute (null) was not found.");
-		if(aname.length() > TrafficDeviceAttribute.MAXLEN_ANAME)
-			throw new IllegalArgumentException(
-				"Device attribute name is too long (>"+
-				TrafficDeviceAttribute.MAXLEN_ANAME+").");
-		TrafficDeviceAttribute a;
-		final String fullaname = id + "_" + aname;
-		if(IrisInfo.getClientSide())
-			// client side code
-			a = SonarState.singleton.
-				lookupTrafficDeviceAttribute(fullaname);
-		else
-			// server side code
-			a = TrafficDeviceAttributeImpl.lookup(fullaname);
+		TrafficDeviceAttribute a = get(name);
 		if(a == null)
 			throw new IllegalArgumentException(
-				"Device attribute (" + fullaname + 
+				"Device attribute (" + name + 
 				") was not found.");
-		return a.getAttributeValue();
+		return a.getAValue();
+	}
+
+	/** Create a new name using an id and aname */
+	public static String createName(String id, String aname) {
+		if(id==null || aname==null)
+			return null;
+		if(id.length() <= 0 || aname.length() <= 0)
+			return null;
+		return id + "_" + aname;
+	}
+
+	/** return the device id given the attribute name.
+	 *  @param name Name of attribute, e.g. "V1_numofpixels"
+	 *  @return Device id, e.g. "V1" or null on error.
+	 */
+	public static String extractDeviceId(String name) {
+		if(name == null)
+			return null;
+		int i = name.indexOf('_');
+		if(i <= 0)
+			return null;
+		String id = null;
+		try { 
+			id = name.substring(0, i);
+		}
+		catch(Exception ex) {
+			return null;
+		}
+		return id;		
 	}
 
 	/** Get the value of the named attribute as a string. If the
 	 *  attribute is not found, the default is silently returned.
-	 *  @param aname Name of an existing attribute.
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default;  
 	 */
-	static public String getValueDef(final String id, final String aname, 
-		String dvalue) 
+	static public String getValueDef(final String name, String dvalue) 
 	{
 		String ret = dvalue;
 		try {
-			ret = getValue(id, aname);
+			ret = getValue(name);
 		} catch(IllegalArgumentException ex) { 
-			System.err.println(
-				getWarningMessage(id, aname, dvalue));
+			System.err.println(getWarningMessage(name, dvalue));
 		}
 		return ret;
 	}
 
         /** Get the value of the named attribute as an integer.
-         *  @param aname Name of an existing attribute.
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
          *  @throws IllegalArgumentException if the specified attribute 
          *          was not found.
          *  @return The value of the named attribute;  
          */
-        static public int getValueInt(final String id, final String aname) 
+        static public int getValueInt(final String name) 
                 throws IllegalArgumentException 
         {
-                return SString.stringToInt(
-                        TrafficDeviceAttributeHelper.getValue(id, aname));
+                return SString.stringToInt(getValue(name));
         }
 
 	/** Get the value of the named attribute as an integer. If the
 	 *  attribute is not found, the default is silently returned.
-	 *  @param aname Name of an existing attribute.
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default;  
 	 */
-	static public int getValueIntDef(final String id, final String aname, 
-		int dvalue) 
+	static public int getValueIntDef(final String name, int dvalue) 
 	{
 		int ret = dvalue;
 		try {
-			ret = getValueInt(id, aname);
+			ret = getValueInt(name);
 		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(id, aname,
+			System.err.println(getWarningMessage(name,
 				new Integer(dvalue).toString()));
 		}
 		return ret;
 	}
 
 	/** Get the value of the named attribute as a boolean.
-	 *  @param aname Name of an existing attribute.
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
 	 *  @throws IllegalArgumentException if the specified attribute 
 	 *	    was not found.
 	 *  @return The value of the named attribute;  
 	 */
-	static public boolean getValueBoolean(final String id, 
-		final String aname) throws IllegalArgumentException 
+	static public boolean getValueBoolean(final String name) 
+		throws IllegalArgumentException 
 	{
-		return SString.stringToBoolean(
-			TrafficDeviceAttributeHelper.getValue(id, aname));
+		return SString.stringToBoolean(getValue(name));
 	}
 
 	/** Get the value of the named attribute as a boolean. If the
 	 *  attribute is not found, the default is silently returned.
-	 *  @param aname Name of an existing attribute.
+	 *  @param name Object name, e.g. "V1_AWS_controlled"
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default;  
 	 */
-	static public boolean getValueBooleanDef(final String id, 
-		final String aname, boolean dvalue) 
+	static public boolean getValueBooleanDef(final String name, 
+		boolean dvalue) 
 	{
 		boolean ret = dvalue;
 		try {
-			ret = getValueBoolean(id, aname);
+			ret = getValueBoolean(name);
 		} catch(IllegalArgumentException ex) { 
-			System.err.println(getWarningMessage(id, aname,
+			System.err.println(getWarningMessage(name,
 				new Boolean(dvalue).toString()));
 		}
 		return ret;
 	}
 
 	/** return true if the specified attribute matches expected value */
-	public static boolean isAttribute(final String id, String aname, 
-		String avalue) 
+	public static boolean isAttribute(final String name, 
+		final String avalue) 
 	{
-		if(aname == null || avalue == null)
+		if(name == null || avalue == null)
 			return false;
 		String readvalue = "";
 		try {
-			readvalue = TrafficDeviceAttributeHelper.getValue(
-				id, aname);
+			readvalue = getValue(name);
 		} catch(IllegalArgumentException ex) {
 			return false;
 		}
@@ -173,15 +209,13 @@ public class TrafficDeviceAttributeHelper {
 	}
 
 	/** return true if the specified attribute matches expected value */
-	public static boolean isAttribute(final String id, String aname, 
-		boolean avalue) 
+	public static boolean isAttribute(final String name, boolean avalue) 
 	{
-		if(aname == null)
+		if(name == null)
 			return false;
 		boolean readvalue = false;
 		try {
-			String s = TrafficDeviceAttributeHelper.getValue(
-				id, aname);
+			String s = getValue(name);
 			readvalue = new Boolean(s).booleanValue();
 		} catch(IllegalArgumentException ex) {
 			return false;
@@ -190,31 +224,30 @@ public class TrafficDeviceAttributeHelper {
 	}
 
 	/** return a 'missing device attribute' warning message */
-	public static String getWarningMessage(String id, String aname, 
-		int avalue) 
+	public static String getWarningMessage(final String name, int avalue) 
 	{
-		return getWarningMessage(id, aname, Integer.toString(avalue));
+		return getWarningMessage(name, Integer.toString(avalue));
 	}
 
 	/** return a 'missing device attribute' warning message */
-	public static String getWarningMessage(String id, String aname, 
+	public static String getWarningMessage(final String name, 
 		boolean avalue) 
 	{
-		return getWarningMessage(id, aname, Boolean.toString(avalue));
+		return getWarningMessage(name, Boolean.toString(avalue));
 	}
 
 	/** return a 'missing device attribute' warning message */
-	public static String getWarningMessage(String id, String aname,
+	public static String getWarningMessage(final String name, 
 		String avalue) 
 	{
-		return "Warning: a device ("+id+") attribute ("+aname+
+		return "Warning: a device attribute ("+name+
 			") was not found, using a default value ("+avalue+").";
 	}
 
 	/** get attribute that flags if the device controlled by an AWS */
-	public static boolean awsControlled(String id) {
-		return getValueBooleanDef(id, 
-			TrafficDeviceAttribute.AWS_CONTROLLED, false);
+	public static boolean awsControlled(String devid) {
+		return getValueBooleanDef(createName(devid,
+			TrafficDeviceAttribute.AWS_CONTROLLED),false);
 	}
 }
 
