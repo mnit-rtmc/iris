@@ -865,23 +865,27 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return builder.getPixmaps();
 	}
 
-	/** Lookup the best font */
-	static protected FontImpl _lookupFont(final int h, final int w,
-		final int ls)
-	{
-		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
-			new Checker<FontImpl>()
-		{
-			public boolean check(FontImpl f) {
-				return f.matches(h, w, ls);
-			}
-		});
+	/** Get the appropriate named font for this sign.
+	 * @param pf Preferred font name. If not found the default font is used.
+	 */
+	public FontImpl getFont(String pfn) {
+		FontImpl font = lookupFontByName(pfn);
+		if(font != null)
+			return font;
+		else
+			return getFont();
 	}
 
 	/** Lookup a font by name */
 	static protected FontImpl lookupFontByName(String fontName) {
 		return (FontImpl)namespace.lookupObject(Font.SONAR_TYPE,
 			fontName);
+	}
+
+	/** Get the default font for this sign */
+	public FontImpl getFont() {
+		return lookupFont(getLineHeightPixels(), characterWidthPixels,
+			0);
 	}
 
 	/** Lookup the best font 
@@ -897,21 +901,17 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return _lookupFont(h, 0, ls);
 	}
 
-	/** Get the appropriate named font for this sign.
-	 * @param pf Preferred font name. If not found the default font is used.
-	 */
-	public FontImpl getFont(String pfn) {
-		FontImpl font = lookupFontByName(pfn);
-		if(font != null)
-			return font;
-		else
-			return getFont();
-	}
-
-	/** Get the default font for this sign */
-	public FontImpl getFont() {
-		return lookupFont(getLineHeightPixels(), characterWidthPixels,
-			0);
+	/** Lookup the best font */
+	static protected FontImpl _lookupFont(final int h, final int w,
+		final int ls)
+	{
+		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
+			new Checker<FontImpl>()
+		{
+			public boolean check(FontImpl f) {
+				return f.matches(h, w, ls);
+			}
+		});
 	}
 
 	/** Test if the sign status is unavailable */
