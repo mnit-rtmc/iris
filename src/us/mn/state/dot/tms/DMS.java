@@ -253,10 +253,10 @@ public interface DMS extends TrafficDevice {
 	/** Get the optimal line height (pixels) */
 	public int getLineHeightPixels() throws RemoteException;
 
-	/** Get the prefered font for new messages */
-	public String getPreferedFontName() throws RemoteException;
+	/** Get the preferred font for new messages */
+	public String getPreferredFontName() throws RemoteException;
 
-	/** Set the prefered font for new messages */
-	public void setPreferedFontName(String fontName) throws RemoteException;
+	/** Set the preferred font for new messages */
+	public void setPreferredFontName(String fontName) throws RemoteException;
 }
 

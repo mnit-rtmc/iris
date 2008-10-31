@@ -108,7 +108,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		resetTransients();
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
-		m_preferedFontName = getInitialFontName();
+		m_preferredFontName = getInitialFontName();
 	}
 
 	/** Constructor needed for ObjectVault */
@@ -116,7 +116,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		super(fields);
 		message = createBlankMessage(NO_OWNER);
 		s_routes = new HashMap<String, Route>();
-		m_preferedFontName = getInitialFontName();
+		m_preferredFontName = getInitialFontName();
 	}
 
 	/** Get a mapping of the columns */
@@ -618,7 +618,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		MsgActPriority ap) throws InvalidMessageException
 	{
 		MultiString multi = new MultiString(text);
-		String pfn = getPreferedFontName();
+		String pfn = getPreferredFontName();
  		sendMessage(new SignMessage(owner, multi,
 			createPixelMaps(multi, pfn), duration, ap), true);
 	}
@@ -1696,8 +1696,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return (StationImpl)namespace.lookupObject(Station.SONAR_TYPE,
 			sid);
 	}
-	/** prefered font name for new messages, should not be null */
-	protected transient String m_preferedFontName = "";
+
+	/** Preferred font name for new messages, should not be null */
+	protected transient String m_preferredFontName = "";
 
 	/** Get the initial font name, used by constructor */
 	public String getInitialFontName() {
@@ -1705,20 +1706,20 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	}
 
 	/** 
-	 *  Get the prefered font name, which is set in the DMSDispatcher
+	 *  Get the preferred font name, which is set in the DMSDispatcher
 	 *  font combobox, which is only active for Caltrans D10.
 	 */
-	public String getPreferedFontName() {
-		return m_preferedFontName;
+	public String getPreferredFontName() {
+		return m_preferredFontName;
 	}
 
-	/** Set the prefered font for new messages.
+	/** Set the preferred font for new messages.
 	 *  @param fontName A font name, may be zero length, but not null.
 	 */
-	public void setPreferedFontName(String fontName) {
+	public void setPreferredFontName(String fontName) {
 		assert fontName!=null;
 		if(fontName == null)
 			fontName = "";
-		m_preferedFontName=fontName;
+		m_preferredFontName=fontName;
 	}
 }

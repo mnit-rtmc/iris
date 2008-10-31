@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.Font;
  * Combobox for font selection. This combobox contains sonar Font objects.
  * It is single selection and non-editable. The combobox is loaded with all
  * IRIS fonts via the model FontComboBoxModel, which extends ProxyListModel.
- * When a user changes the combobox selected font, the "prefered font" in
+ * When a user changes the combobox selected font, the "preferred font" in
  * the associated DMS is updated.
  * @see DMSDispatcher, ProxyListModel, Font, FontImpl, DMS, DMSImpl, TypeCache
  * @author Michael Darter
@@ -50,11 +50,11 @@ public class FontComboBox extends JComboBox
 	/** Set the currently selected font. A null arg is ignored. */
 	public void setSelectedItem(Object item) {
 		super.setSelectedItem(item);
-		setPreferedDMSFont((Font) item);
+		setPreferredDMSFont((Font) item);
 	}
 
-	/** Set prefered font in associated DMS */
-	protected void setPreferedDMSFont(Font f) {
+	/** Set preferred font in associated DMS */
+	protected void setPreferredDMSFont(Font f) {
 		if(f == null)
 			return;
 		DMSProxy dms = m_dmsDispatcher.getSelectedDms();
@@ -63,13 +63,13 @@ public class FontComboBox extends JComboBox
 		if(dms.dms != null) {
 			String fname = f.getName();
 			try {
-				dms.dms.setPreferedFontName(fname);
+				dms.dms.setPreferredFontName(fname);
 			} catch(RemoteException ex) {}
 		}
 	}
 
-	/** Get prefered font in associated DMS */
-	protected String getPreferedDMSFont()
+	/** Get preferred font in associated DMS */
+	protected String getPreferredDMSFont()
 	{
 		String fname = "";
 		DMSProxy dms = m_dmsDispatcher.getSelectedDms();
@@ -77,7 +77,7 @@ public class FontComboBox extends JComboBox
 			return fname;
 		if(dms.dms != null) {
 			try {
-				fname = dms.dms.getPreferedFontName();
+				fname = dms.dms.getPreferredFontName();
 			} catch(RemoteException ex) {}
 		}
 		return fname;
@@ -129,8 +129,8 @@ public class FontComboBox extends JComboBox
 		if(getItemCount() <= 0)
 			return NOTFOUND;
 
-		// combobox is loaded, get prefered DMS font name
-		String fname = getPreferedDMSFont();
+		// combobox is loaded, get preferred DMS font name
+		String fname = getPreferredDMSFont();
 		return search(fname);
 	}
 }
