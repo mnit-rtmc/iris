@@ -31,8 +31,8 @@ import java.awt.event.ActionEvent;
 
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.SystemPolicy;
-import us.mn.state.dot.tms.TMSObjectImpl;
+import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.client.ProxyListener;
 
@@ -151,21 +151,21 @@ public class DMSPanel extends JPanel {
 	/** time counter for amount of time message has been displayed */
 	protected int pageTimeCounterMS = 0;
 
-	/** multipage message on time, read from system policies */
+	/** Multipage message on time, read from system attributes */
 	protected int onTimeMS = 2000;
 
-	/** multipage message off time, read from system policies */
+	/** Multipage message off time, read from system attributes */
 	protected int offTimeMS = 0;
 
-	/** System policy type cache */
-	protected final TypeCache<SystemPolicy> cache;
+	/** System attribute type cache */
+	protected final TypeCache<SystemAttribute> cache;
 
 	/** Create a new DMS panel */
-	public DMSPanel(TypeCache<SystemPolicy> c) {
+	public DMSPanel(TypeCache<SystemAttribute> c) {
 		super(true);
 		_setSign(null);
 		cache = c;
-		cache.addProxyListener(sp_listener);
+		cache.addProxyListener(sa_listener);
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
@@ -453,35 +453,28 @@ public class DMSPanel extends JPanel {
 	 * time each page is displayed and blanked for multipage messages.
 	 */
 	protected void readSystemDMSPageTimes() {
-		// note: the retrieve values are in 1/10 seconds and converted
-		// to MS
-		onTimeMS = 100 * getPolicyValue(SystemPolicy.DMS_PAGE_ON_TIME);
-		offTimeMS = 100 *getPolicyValue(SystemPolicy.DMS_PAGE_OFF_TIME);
+		// note: the retrieve values are in seconds and converted to MS
+		onTimeMS = Math.round(1000 *
+			SystemAttributeHelper.getDmsPageOnSecs());
+		offTimeMS = Math.round(1000 *
+			SystemAttributeHelper.getDmsPageOffSecs());
 	}
 
-	/** Get the value of the named policy */
-	protected int getPolicyValue(String p) {
-		SystemPolicy sp = cache.lookupObject(p);
-		if(sp != null)
-			return sp.getValue();
-		else
-			return 0;
-	}
-
-	/** Proxy listener for System Policy proxies */
-	protected final ProxyListener<SystemPolicy> sp_listener =
-		new ProxyListener<SystemPolicy>()
+	/** Proxy listener for System Attribute proxies */
+	protected final ProxyListener<SystemAttribute> sa_listener =
+		new ProxyListener<SystemAttribute>()
 	{
-		public void proxyAdded(SystemPolicy p) { }
+		public void proxyAdded(SystemAttribute p) { }
 		public void enumerationComplete() { }
-		public void proxyRemoved(SystemPolicy p) { }
-		public void proxyChanged(SystemPolicy p, String a) {
+		public void proxyRemoved(SystemAttribute p) { }
+		public void proxyChanged(SystemAttribute p, String a) {
+			// FIXME: probably should only call on DMS_PAGE_ attrs
 			readSystemDMSPageTimes();
 		}
 	};
 
 	/** Dispose of the form */
 	protected void dispose() {
-		cache.removeProxyListener(sp_listener);
+		cache.removeProxyListener(sa_listener);
 	}
 }

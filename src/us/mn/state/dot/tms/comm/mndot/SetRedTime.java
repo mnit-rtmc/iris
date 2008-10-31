@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ public class SetRedTime extends DeviceOperation implements TimingTable {
 			mess.add(new MemoryRequest(address, bo.toByteArray()));
 			mess.setRequest();
 			meter.setReleaseRate(meter.calculateReleaseRate(
-				red_time));
+				red_time / 10.0f));
 			return null;
 		}
 	}

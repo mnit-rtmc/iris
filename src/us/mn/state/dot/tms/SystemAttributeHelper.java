@@ -61,7 +61,7 @@ public class SystemAttributeHelper {
 	 *  @param aname Name of an existing system attribute.
 	 *  @throws IllegalArgumentException if the specified attribute 
 	 *	    was not found.
-	 *  @return The value of the named attribute;  
+	 *  @return The value of the named attribute
 	 */
 	static public String getValue(final String aname)
 		throws IllegalArgumentException 
@@ -78,7 +78,7 @@ public class SystemAttributeHelper {
 	 *  attribute is not found, the default is silently returned.
 	 *  @param aname Name of an existing system attribute.
 	 *  @param dvalue Default value.
-	 *  @return The value of the named attribute or the default;  
+	 *  @return The value of the named attribute or the default
 	 */
 	static public String getValueDef(final String aname, String dvalue) {
 		try {
@@ -94,7 +94,7 @@ public class SystemAttributeHelper {
          *  @param aname Name of an existing system attribute.
          *  @throws IllegalArgumentException if the specified attribute 
          *          was not found.
-         *  @return The value of the named attribute;  
+         *  @return The value of the named attribute
          */
         static public int getValueInt(final String aname) 
                 throws IllegalArgumentException 
@@ -106,9 +106,9 @@ public class SystemAttributeHelper {
 	 *  attribute is not found, the default is silently returned.
 	 *  @param aname Name of an existing system attribute.
 	 *  @param dvalue Default value.
-	 *  @return The value of the named attribute or the default;  
+	 *  @return The value of the named attribute or the default
 	 */
-	static public int getValueIntDef(final String aname, int dvalue) {
+	static public int getValueInt(final String aname, int dvalue) {
 		try {
 			return getValueInt(aname);
 		}
@@ -119,11 +119,46 @@ public class SystemAttributeHelper {
 		}
 	}
 
+        /** Get the value of the named attribute as a float.
+         *  @param aname Name of an existing system attribute.
+         *  @throws IllegalArgumentException if the specified attribute 
+         *          was not found or could not be parsed.
+         *  @return The value of the named attribute
+         */
+	static public float getValueFloat(String aname)
+		throws IllegalArgumentException
+	{
+		try {
+			return Float.parseFloat(getValue(aname));
+		}
+		catch(NumberFormatException e) {
+			throw new IllegalArgumentException("System Attribute " +
+				aname + " could not be parsed");
+		}
+	}
+
+	/** Get the value of the named attribute as a float. If the
+	 *  attribute is not valid, the default is silently returned.
+	 *  @param aname Name of an existing system attribute.
+	 *  @param dvalue Default value.
+	 *  @return The value of the named attribute or the default
+	 */
+	static public float getValueFloat(String aname, float dvalue) {
+		try {
+			return getValueFloat(aname);
+		}
+		catch(IllegalArgumentException e) {
+			System.err.println(getWarningMessage(aname,
+				new Float(dvalue).toString()));
+			return dvalue;
+		}
+	}
+
 	/** Get the value of the named attribute as a boolean.
 	 *  @param aname Name of an existing system attribute.
 	 *  @throws IllegalArgumentException if the specified attribute 
 	 *	    was not found.
-	 *  @return The value of the named attribute;  
+	 *  @return The value of the named attribute
 	 */
 	static public boolean getValueBoolean(final String aname) 
 		throws IllegalArgumentException 
@@ -135,7 +170,7 @@ public class SystemAttributeHelper {
 	 *  attribute is not found, the default is silently returned.
 	 *  @param aname Name of an existing system attribute.
 	 *  @param dvalue Default value.
-	 *  @return The value of the named attribute or the default;  
+	 *  @return The value of the named attribute or the default
 	 */
 	static public boolean getValueBooleanDef(final String aname,
 		boolean dvalue)
@@ -192,9 +227,54 @@ public class SystemAttributeHelper {
 	public static int getDMSPollTimeSecs() {
 		final int MINIMUM = 5;
 		final int DEFAULT = 30;
-		int secs = getValueIntDef(SystemAttribute.DMS_POLL_FREQ_SECS,
+		int secs = getValueInt(SystemAttribute.DMS_POLL_FREQ_SECS,
 			DEFAULT);
 		return (secs < MINIMUM ? MINIMUM : secs);
+	}
+
+	/** Get the meter green time (seconds) */
+	static public float getMeterGreenSecs() {
+		return getValueFloat(SystemAttribute.METER_GREEN_SECS, 1.3f);
+	}
+
+	/** Get the meter yellow time (seconds) */
+	static public float getMeterYellowSecs() {
+		return getValueFloat(SystemAttribute.METER_YELLOW_SECS, 0.7f);
+	}
+
+	/** Get the meter minimum red time (seconds) */
+	static public float getMeterMinRedSecs() {
+		return getValueFloat(SystemAttribute.METER_MIN_RED_SECS, 0.1f);
+	}
+
+	/** Get the DMS page on time (seconds) */
+	static public float getDmsPageOnSecs() {
+		return getValueFloat(SystemAttribute.DMS_PAGE_ON_SECS, 2.0f);
+	}
+
+	/** Get the DMS page off time (seconds) */
+	static public float getDmsPageOffSecs() {
+		return getValueFloat(SystemAttribute.DMS_PAGE_OFF_SECS, 0.0f);
+	}
+
+	/** Get the incident ring 1 miles */
+	static public int getIncidentRing1Miles() {
+		return getValueInt(SystemAttribute.INCIDENT_RING_1_MILES, 0);
+	}
+
+	/** Get the incident ring 2 miles */
+	static public int getIncidentRing2Miles() {
+		return getValueInt(SystemAttribute.INCIDENT_RING_2_MILES, 0);
+	}
+
+	/** Get the incident ring 3 miles */
+	static public int getIncidentRing3Miles() {
+		return getValueInt(SystemAttribute.INCIDENT_RING_3_MILES, 0);
+	}
+
+	/** Get the incident ring 4 miles */
+	static public int getIncidentRing4Miles() {
+		return getValueInt(SystemAttribute.INCIDENT_RING_4_MILES, 0);
 	}
 
 	/** return a 'missing system attribute' warning message */
@@ -278,7 +358,7 @@ public class SystemAttributeHelper {
 		final int MIN = 0;
 		final int MAX = 20;
 		final int DEFAULT = 3;
-		int np = getValueIntDef(
+		int np = getValueInt(
 			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, DEFAULT);
 		np = (np < MIN ? MIN : np);
 		np = (np > MAX ? MAX : np);
@@ -294,7 +374,7 @@ public class SystemAttributeHelper {
 	public static int numVideoFramesBeforeStop() {
 		final int MIN = 0;
 		final int DEFAULT = 900;
-		int nf = getValueIntDef(
+		int nf = getValueInt(
 			SystemAttribute.CAMERAVIEWER_NUM_VIDEO_FRAMES, DEFAULT);
 		nf = (nf < MIN ? MIN : nf);
 		return nf;

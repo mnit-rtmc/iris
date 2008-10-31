@@ -37,7 +37,6 @@ abstract public class BaseObjectImpl implements Storable {
 		store = s;
 		namespace = ns;
 		SystemAttributeImpl.loadAll();
-		SystemPolicyImpl.loadAll();
 		HolidayImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();

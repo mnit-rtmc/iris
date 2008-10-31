@@ -291,26 +291,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 			return null;
 	}
 
-	/** Lookup the named system policy */
-	static protected SystemPolicyImpl lookupPolicy(final String p) {
-		return (SystemPolicyImpl)namespace.findObject(
-			SystemPolicy.SONAR_TYPE, new Checker<SystemPolicyImpl>()
-		{
-			public boolean check(SystemPolicyImpl sp) {
-				return p.equals(sp.getName());
-			}
-		});
-	}
-
-	/** Get the value of a system policy */
-	static public int getPolicyValue(String p) {
-		SystemPolicyImpl sp = lookupPolicy(p);
-		if(sp != null)
-			return sp.getValue();
-		else
-			return 0;
-	}
-
 	/** Lookup a holiday which matches the given calendar */
 	static protected HolidayImpl lookupHoliday(final Calendar stamp) {
 		return (HolidayImpl)namespace.findObject(Holiday.SONAR_TYPE,

@@ -112,7 +112,8 @@ public class QueryMeterStatus extends Controller170Operation
 			mess.add(new MemoryRequest(address, data));
 			mess.getRequest();
 			int red = parseRedTime(data);
-			meter.setReleaseRate(meter.calculateReleaseRate(red));
+			meter.setReleaseRate(meter.calculateReleaseRate(
+				red / 10.0f));
 			return phases.poll();
 		}
 	}

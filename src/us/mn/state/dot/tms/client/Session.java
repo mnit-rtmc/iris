@@ -212,14 +212,11 @@ public class Session {
 
 		// create agency specific incident layer
 		if(Agency.isId(Agency.MNDOT)) {
-			incLayer = new TmsIncidentLayer(props, logger,
-		    		st.getSystemPolicy());
+			incLayer = new TmsIncidentLayer(props, logger);
 			rwisLayer = null;
 		} else if(Agency.isId(Agency.CALTRANS_D10)) {
-			incLayer = new D10IncidentLayer(props, logger,
-				st.getSystemPolicy());
-			rwisLayer = new D10RwisLayer(props, logger,
-				st.getSystemPolicy());
+			incLayer = new D10IncidentLayer(props, logger);
+			rwisLayer = new D10RwisLayer(props, logger);
 		} else {
 			assert false : "unknown agencyid";
 			incLayer = null;

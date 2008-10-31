@@ -123,7 +123,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 			st.getSignText(),st.lookupUser(tc.getUser().getName()));
 		userName = handler.getUser().getName();
 		selectionModel = handler.getSelectionModel();
-		pnlSign = new DMSPanel(st.getSystemPolicy());
+		pnlSign = new DMSPanel(st.getSystemAttributes());
 		setBorder(BorderFactory.createTitledBorder(
 			I18NMessages.get("DMSDispatcher.GroupBoxTitle")));
 		GridBagConstraints bag = new GridBagConstraints();

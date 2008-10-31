@@ -45,7 +45,6 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.tms.TrafficDeviceAttribute;
 import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -86,12 +85,12 @@ public class SonarState extends Client {
 		return connections;
 	}
 
-	/** Cache of system policy proxies */
-	protected final TypeCache<SystemPolicy> system_policy;
+	/** Cache of system attributes */
+	protected final TypeCache<SystemAttribute> system_attributes;
 
-	/** Get the system policy type cache */
-	public TypeCache<SystemPolicy> getSystemPolicy() {
-		return system_policy;
+	/** Get the system attribute type cache */
+	public TypeCache<SystemAttribute> getSystemAttributes() {
+		return system_attributes;
 	}
 
 	/** Cache of cabinet style proxies */
@@ -313,17 +312,6 @@ public class SonarState extends Client {
 		return traffic_device_attributes;
 	}
 
-	/** Cache of system attributes */
-	protected final TypeCache<SystemAttribute> 
-		system_attributes;
-
-	/** Get the system attribute cache */
-	public TypeCache<SystemAttribute> 
-		getSystemAttributes() 
-	{
-		return system_attributes;
-	}
-
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -333,8 +321,8 @@ public class SonarState extends Client {
 		roles = new TypeCache<Role>(Role.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
-		system_policy = new TypeCache<SystemPolicy>(SystemPolicy.class,
-			this);
+		system_attributes = new TypeCache<SystemAttribute>(
+			SystemAttribute.class, this);
 		cabinet_styles = new TypeCache<CabinetStyle>(
 			CabinetStyle.class, this);
 		cab_style_model = new ProxyListModel<CabinetStyle>(
@@ -382,8 +370,6 @@ public class SonarState extends Client {
 		traffic_device_attributes =
 			new TypeCache<TrafficDeviceAttribute>(
 			TrafficDeviceAttribute.class, this);
-		system_attributes = new TypeCache<SystemAttribute>(
-			SystemAttribute.class, this);
 		singleton = this;
 		// FIXME: this is an ugly hack
 		SystemAttributeHelper.namespace = getNamespace();
@@ -398,7 +384,6 @@ public class SonarState extends Client {
 		populate(roles);
 		populate(users);
 		populate(connections);
-		populate(system_policy);
 		populate(system_attributes);
 		populate(roads, true);
 		populate(geo_locs, true);
@@ -456,11 +441,6 @@ public class SonarState extends Client {
 	/** Look up the specified connection */
 	public Connection lookupConnection(String name) {
 		return connections.lookupObject(name);
-	}
-
-	/** Lookup a system attribute */
-	public SystemAttribute lookupSystemAttribute(String name) {
-		return system_attributes.lookupObject(name);
 	}
 
 	/** Lookup a traffic device attribute */

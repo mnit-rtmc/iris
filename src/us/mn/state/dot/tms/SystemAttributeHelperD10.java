@@ -36,13 +36,13 @@ public class SystemAttributeHelperD10 extends SystemAttributeHelper {
 
 	/** Return dmslite operation timeout in seconds */
 	public static int dmsliteOpTimeoutSecs() {
-		return SystemAttributeHelper.getValueIntDef(
+		return SystemAttributeHelper.getValueInt(
 			DMSLITE_OP_TIMEOUT_SECS, 60+5);
 	}
 
 	/** Return dmslite modem operation timeout in seconds */
 	public static int dmsliteModemOpTimeoutSecs() {
-		return SystemAttributeHelper.getValueIntDef(
+		return SystemAttributeHelper.getValueInt(
 			DMSLITE_MODEM_OP_TIMEOUT_SECS, 5*60+5);
 	}
 

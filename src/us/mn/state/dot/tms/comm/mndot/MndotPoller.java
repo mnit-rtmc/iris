@@ -149,7 +149,8 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 			if(meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS)
 				stopMetering(meter);
 			else {
-				int r = meter.calculateRedTime(rate);
+				float red = meter.calculateRedTime(rate);
+				int r = Math.round(red * 10);
 				new SetRedTime(meter, n, r).start();
 			}
 		}

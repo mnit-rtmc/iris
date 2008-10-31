@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.StratifiedPlanImpl;
-import us.mn.state.dot.tms.SystemPolicy;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TMSObjectImpl;
 import us.mn.state.dot.tms.WarningSignImpl;
@@ -39,6 +39,18 @@ import us.mn.state.dot.tms.comm.MeterPoller;
  * @author Douglas Lau
  */
 public class Download extends Controller170Operation implements TimingTable {
+
+	/** Get the system meter green time */
+	static protected int getGreenTime() {
+		float g = SystemAttributeHelper.getMeterGreenSecs();
+		return Math.round(g * 10);
+	}
+
+	/** Get the system meter yellow time */
+	static protected int getYellowTime() {
+		float g = SystemAttributeHelper.getMeterYellowSecs();
+		return Math.round(g * 10);
+	}
 
 	/** Flag to perform a level-1 restart */
 	protected final boolean restart;
@@ -324,10 +336,8 @@ public class Download extends Controller170Operation implements TimingTable {
 		for(int t = TimingPlan.AM; t <= TimingPlan.PM; t++) {
 			bcd.write16Bit(STARTUP_GREEN);
 			bcd.write16Bit(STARTUP_YELLOW);
-			bcd.write16Bit(TMSObjectImpl.getPolicyValue(
-				SystemPolicy.METER_GREEN_TIME));
-			bcd.write16Bit(TMSObjectImpl.getPolicyValue(
-				SystemPolicy.METER_YELLOW_TIME));
+			bcd.write16Bit(getGreenTime());
+			bcd.write16Bit(getYellowTime());
 			bcd.write16Bit(HOV_PREEMPT);
 			for(int i = 0; i < 6; i++)
 				bcd.write16Bit(red[t]);
@@ -370,8 +380,9 @@ public class Download extends Controller170Operation implements TimingTable {
 			if(p.checkPeriod(t)) {
 				int sta = p.getStartTime();
 				int sto = p.getStopTime();
-				red[t] = meter.calculateRedTime(
+				float r = meter.calculateRedTime(
 					meter.getTarget(sta));
+				red[t] = Math.round(r * 10);
 				rate[t] = MeterRate.TOD;
 				start[t] = 100 * (sta / 60) + sta % 60;
 				stop[t] = 100 * (sto / 60) + sto % 60;

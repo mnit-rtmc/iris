@@ -17,9 +17,7 @@ package us.mn.state.dot.tms.client.rwis;
 import java.util.Properties;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tdxml.TdxmlException;
-import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.trafmap.IncidentLayer;
 import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.tms.client.incidents.DirectionalIncidentTheme;
@@ -38,11 +36,11 @@ public class TmsRwisLayer extends RwisLayer {
 	protected final DirectionalIncidentTheme theme;
 
 	/** Create a new TMS incdent layer */
-	public TmsRwisLayer(Properties props, Logger logger,
-		TypeCache<SystemPolicy> c) throws TdxmlException
+	public TmsRwisLayer(Properties props, Logger logger)
+		throws TdxmlException
 	{
 		super(props, logger);
-		theme = new DirectionalIncidentTheme(c);
+		theme = new DirectionalIncidentTheme();
 	}
 
 	/** Create a new layer state */

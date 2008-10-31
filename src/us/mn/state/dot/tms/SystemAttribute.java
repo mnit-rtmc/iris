@@ -31,35 +31,60 @@ public interface SystemAttribute extends SonarObject {
 	String SONAR_TYPE = "system_attribute";
 
 	/** maximum length of an attribute name */
-	final int MAXLEN_ANAME = 32;
+	int MAXLEN_ANAME = 32;
 
 	/** attribute names common to all agencies */
-	// note: please append units to names!
-	final String DATABASE_VERSION = "database_version";
-	final String DMS_POLL_FREQ_SECS = "dms_poll_freq_secs";
-	final String AGENCY_ID = "agency_id";
+	String DATABASE_VERSION = "database_version";
 
-	/** DMSDispatcher */
-	final String DMSDISPATCHER_GETSTATUS_BTN = 
-		"dmsdispatcher_getstatus_btn";
-	final String DMSDISPATCHER_AWS_CKBOX = 
-		"dmsdispatcher_aws_ckbox";
+	/** DMS page on time */
+	String DMS_PAGE_ON_SECS = "dms_page_on_secs";
 
-	/** DMS */
-	final String DMS_PREFERRED_FONT = 
-		"dms_preferred_font";
+	/** DMS page off time */
+	String DMS_PAGE_OFF_SECS = "dms_page_off_secs";
+
+	/** DMS status polling frequency */
+	String DMS_POLL_FREQ_SECS = "dms_poll_freq_secs";
+
+	/** DMS preferred font name */
+	String DMS_PREFERRED_FONT = "dms_preferred_font";
+
+	/** DMS client "get status" button (boolean) */
+	String DMSDISPATCHER_GETSTATUS_BTN = "dmsdispatcher_getstatus_btn";
+
+	/** DMS client AWS checkbox (boolean) */
+	String DMSDISPATCHER_AWS_CKBOX = "dmsdispatcher_aws_ckbox";
+
+	/** Meter green time */
+	String METER_GREEN_SECS = "meter_green_secs";
+
+	/** Meter yellow time */
+	String METER_YELLOW_SECS = "meter_yellow_secs";
+
+	/** Meter mimimum red time */
+	String METER_MIN_RED_SECS = "meter_min_red_secs";
+
+	/** Incident ring 1 radius */
+	String INCIDENT_RING_1_MILES = "incident_ring_1_miles";
+
+	/** Incident ring 2 radius */
+	String INCIDENT_RING_2_MILES = "incident_ring_2_miles";
+
+	/** Incident ring 3 radius */
+	String INCIDENT_RING_3_MILES = "incident_ring_3_miles";
+
+	/** Incident ring 4 radius */
+	String INCIDENT_RING_4_MILES = "incident_ring_4_miles";
 
 	/** CameraViewer */
-	final String CAMERAVIEWER_ONSCRN_PTZCTRLS = 
-		"cameraviewer_onscrn_ptzctrls";
-	final String CAMERAVIEWER_NUM_PRESET_BTNS = 
-		"cameraviewer_num_preset_btns";
-	final String CAMERAVIEWER_NUM_VIDEO_FRAMES = 
-		"cameraviewer_num_video_frames";
+	String CAMERAVIEWER_ONSCRN_PTZCTRLS = "cameraviewer_onscrn_ptzctrls";
+	String CAMERAVIEWER_NUM_PRESET_BTNS = "cameraviewer_num_preset_btns";
+	String CAMERAVIEWER_NUM_VIDEO_FRAMES = "cameraviewer_num_video_frames";
+
+	String AGENCY_ID = "agency_id";
 
 	/** possible values for the AGENCY_ID attribute */
-	final String AGENCY_ID_MNDOT = "mndot";
-	final String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
+	String AGENCY_ID_MNDOT = "mndot";
+	String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
 
 	/** Set the attribute value */
 	void setValue(String arg_value);

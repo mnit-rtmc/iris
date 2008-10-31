@@ -24,13 +24,10 @@ package us.mn.state.dot.tms.client.rwis;
 
 import java.util.logging.Logger;
 import java.util.Properties;
-
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tdxml.XmlIncidentClient;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tdxml.d10.CHPXmlIncidentClient;
 import us.mn.state.dot.tms.client.rwis.TmsRwisLayer;
-import us.mn.state.dot.tms.SystemPolicy;
 import us.mn.state.dot.trafmap.RwisLayer;
 
 
@@ -42,15 +39,16 @@ import us.mn.state.dot.trafmap.RwisLayer;
 public class D10RwisLayer extends TmsRwisLayer {
 
 	/** Create a new D10 rwis layer */
-	public D10RwisLayer(Properties props, Logger logger,
-		TypeCache<SystemPolicy> c) throws TdxmlException
+	public D10RwisLayer(Properties props, Logger logger)
+		throws TdxmlException
 	{
-		super(props, logger,c);
+		super(props, logger);
 	}
 
-	/** create incident client, called by constructor, may be overridden by each agency. */
-	protected XmlIncidentClient createIncidentClient(Properties props, Logger logger) 
-		throws TdxmlException
+	/** create incident client, called by constructor, may be overridden by
+	 *  each agency. */
+	protected XmlIncidentClient createIncidentClient(Properties props,
+		Logger logger) throws TdxmlException
 	{
         	return new CHPXmlIncidentClient(props, logger);
 	}

@@ -30,7 +30,6 @@ import us.mn.state.dot.tdxml.d10.CHPXmlIncidentClient;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tdxml.XmlIncidentClient;
 import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
-import us.mn.state.dot.tms.SystemPolicy;
 
 /**
  * A Caltrans D10 specific map layer for displaying incidents.
@@ -40,10 +39,10 @@ import us.mn.state.dot.tms.SystemPolicy;
 public class D10IncidentLayer extends TmsIncidentLayer {
 
 	/** Create a new D10 TMS incident layer */
-	public D10IncidentLayer(Properties props, Logger logger,
-		TypeCache<SystemPolicy> c) throws TdxmlException
+	public D10IncidentLayer(Properties props, Logger logger)
+		throws TdxmlException
 	{
-		super(props, logger,c);
+		super(props, logger);
 	}
 
 	/** create incident client, called by constructor, may be overridden by each agency. */

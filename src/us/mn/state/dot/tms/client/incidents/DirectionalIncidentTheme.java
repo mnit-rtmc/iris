@@ -23,8 +23,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
-import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.SystemPolicy;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.trafmap.IncidentLayer;
 
 /**
@@ -66,26 +65,15 @@ public class DirectionalIncidentTheme extends StyledTheme {
 	/** Ellipses to paint selection rings */
 	protected final Ellipse2D[] ellipses;
 
-	/** Get the value of the named policy */
-	static protected int getPolicyValue(TypeCache<SystemPolicy> c,
-		String p)
-	{
-		SystemPolicy sp = c.lookupObject(p);
-		if(sp != null)
-			return sp.getValue();
-		else
-			return 0;
-	}
-
 	/** Create a new directional incident theme */
-	public DirectionalIncidentTheme(TypeCache<SystemPolicy> c) {
+	public DirectionalIncidentTheme() {
 		super("Incidents", IncidentLayer.TWO_WAY);
 		addStyle(new Style("default", null, Color.BLACK));
 		int[] r = new int[4];
-		r[0] = getPolicyValue(c, SystemPolicy.RING_RADIUS_0);
-		r[1] = getPolicyValue(c, SystemPolicy.RING_RADIUS_1);
-		r[2] = getPolicyValue(c, SystemPolicy.RING_RADIUS_2);
-		r[3] = getPolicyValue(c, SystemPolicy.RING_RADIUS_3);
+		r[0] = SystemAttributeHelper.getIncidentRing1Miles();
+		r[1] = SystemAttributeHelper.getIncidentRing2Miles();
+		r[2] = SystemAttributeHelper.getIncidentRing3Miles();
+		r[3] = SystemAttributeHelper.getIncidentRing4Miles();
 		ellipses = createEllipses(r);
 		addStyle(STYLE);
 	}
