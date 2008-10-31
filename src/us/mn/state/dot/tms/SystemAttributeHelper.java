@@ -99,8 +99,7 @@ public class SystemAttributeHelper {
         static public int getValueInt(final String aname) 
                 throws IllegalArgumentException 
         {
-                return SString.stringToInt(
-                        SystemAttributeHelper.getValue(aname));
+                return SString.stringToInt(getValue(aname));
         }
 
 	/** Get the value of the named attribute as an integer. If the
@@ -129,8 +128,7 @@ public class SystemAttributeHelper {
 	static public boolean getValueBoolean(final String aname) 
 		throws IllegalArgumentException 
 	{
-		return SString.stringToBoolean(
-			SystemAttributeHelper.getValue(aname));
+		return SString.stringToBoolean(getValue(aname));
 	}
 
 	/** Get the value of the named attribute as a boolean. If the
@@ -158,7 +156,7 @@ public class SystemAttributeHelper {
 			return false;
 		String readvalue = "";
 		try {
-			readvalue = SystemAttributeHelper.getValue(aname);
+			readvalue = getValue(aname);
 		} catch(IllegalArgumentException ex) {
 			return false;
 		}
@@ -171,7 +169,7 @@ public class SystemAttributeHelper {
 			return false;
 		boolean readvalue = false;
 		try {
-			String s = SystemAttributeHelper.getValue(aname);
+			String s = getValue(aname);
 			readvalue = new Boolean(s).booleanValue();
 		} catch(IllegalArgumentException ex) {
 			return false;
@@ -195,8 +193,8 @@ public class SystemAttributeHelper {
 	public static int getDMSPollTimeSecs() {
 		final int MINIMUM = 5;
 		final int DEFAULT = 30;
-		int secs = SystemAttributeHelper.getValueIntDef(
-			SystemAttribute.DMS_POLL_FREQ_SECS, DEFAULT);
+		int secs = getValueIntDef(SystemAttribute.DMS_POLL_FREQ_SECS,
+			DEFAULT);
 		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 
@@ -280,7 +278,7 @@ public class SystemAttributeHelper {
 		final int MIN = 0;
 		final int MAX = 20;
 		final int DEFAULT = 3;
-		int np = SystemAttributeHelper.getValueIntDef(
+		int np = getValueIntDef(
 			SystemAttribute.CAMERAVIEWER_NUM_PRESET_BTNS, DEFAULT);
 		np = (np < MIN ? MIN : np);
 		np = (np > MAX ? MAX : np);
@@ -289,15 +287,14 @@ public class SystemAttributeHelper {
 
 	/** Return the preferred font name */
 	public static String preferredFontName() {
-		return SystemAttributeHelper.getValueDef(
-			SystemAttribute.DMS_PREFERRED_FONT, "");
+		return getValueDef(SystemAttribute.DMS_PREFERRED_FONT, "");
 	}
 
 	/** Return number of video frames before stream is stopped */
 	public static int numVideoFramesBeforeStop() {
 		final int MIN = 0;
 		final int DEFAULT = 900;
-		int nf = SystemAttributeHelper.getValueIntDef(
+		int nf = getValueIntDef(
 			SystemAttribute.CAMERAVIEWER_NUM_VIDEO_FRAMES, DEFAULT);
 		nf = (nf < MIN ? MIN : nf);
 		return nf;
