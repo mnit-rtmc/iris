@@ -45,11 +45,7 @@ public class PolicyForm extends AbstractForm {
 
 	/** Create a spinner */
 	static protected JSpinner createSpinner() {
-		SpinnerNumberModel m = new SpinnerNumberModel(0.0f, 0.0f, 5.0f,
-			0.1f);
-		JSpinner s = new JSpinner();
-		s.setEditor(new JSpinner.NumberEditor(s, "##.#"));
-		return s;
+		return new JSpinner(new SpinnerNumberModel(0, 0, 5, 0.1));
 	}
 
 	/** Create an incident miles spinner */
