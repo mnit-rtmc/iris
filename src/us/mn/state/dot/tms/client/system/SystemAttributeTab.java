@@ -39,7 +39,7 @@ public class SystemAttributeTab extends FormPanel {
 	static protected final int ROW_HEIGHT = 20;
 
 	/** table model */
-	protected SystemAttributeTableModel m_tableModel;
+	protected final SystemAttributeTableModel m_tableModel;
 
 	/** traffic device attribute table */
 	protected final JTable m_table = new JTable();
@@ -116,7 +116,6 @@ public class SystemAttributeTab extends FormPanel {
 
 	/** cleanup */
 	public void dispose() {
-		if(m_tableModel != null)
-			m_tableModel.dispose();
+		m_tableModel.dispose();
 	}
 }

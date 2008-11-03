@@ -97,7 +97,7 @@ public class SystemAttributeForm extends AbstractForm {
 	protected final JSpinner ring4 = createMileSpinner();
 
 	/** System attribute editor tab */
-	protected SystemAttributeTab systemAttributeTab = null;
+	protected final SystemAttributeTab systemAttributeTab;
 
 	/** SONAR User for permission checks */
 	protected final User user;
@@ -123,6 +123,7 @@ public class SystemAttributeForm extends AbstractForm {
 		super(TITLE);
 		cache = c;
 		user = u;
+		systemAttributeTab = new SystemAttributeTab(cache, this);
 	}
 
 	/** Initialise the widgets on the form */
@@ -133,7 +134,6 @@ public class SystemAttributeForm extends AbstractForm {
 		tab.add("Meters", createMeterPanel());
 		tab.add("DMS", createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
-		systemAttributeTab = new SystemAttributeTab(cache, this);
 		tab.add(systemAttributeTab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
@@ -142,6 +142,7 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Dispose of the form */
 	protected void dispose() {
 		cache.removeProxyListener(sa_listener);
+		systemAttributeTab.dispose();
 	}
 
 	/** Check if the user can add the named attribute */
