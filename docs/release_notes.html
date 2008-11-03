@@ -11,6 +11,37 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.80.0 (3 November 2008)</dt>
+	<dd><ul>
+		<li>
+			System attributes replaces system policy table.
+			This is a system-wide configuration widget for IRIS.
+			This work was done by AHMCT, with additional features
+			by Mn/DOT.
+		</li>
+		<li>
+			Fixed some comm link and controller status issues.
+		</li>
+		<li>
+			Lots of code cleanups and minor bug fixes.
+		</li>
+		<li>
+			Font can be selected when creating new DMS message
+			(Optional feature from AHMCT).
+		</li>
+		<li>
+			SONAR dependency updated to 2.3.3.
+		</li>
+		<li>
+			TrafMap dependency updated to 4.16.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.80.sql</code>
+		</li>
+	</ul></dd>
+
 	<dt>3.79.0 (21 October 2008)</dt>
 	<dd><ul>
 		<li>
