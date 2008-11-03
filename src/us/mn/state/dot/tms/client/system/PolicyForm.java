@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -44,7 +45,8 @@ public class PolicyForm extends AbstractForm {
 
 	/** Create a spinner */
 	static protected JSpinner createSpinner() {
-		SpinnerNumberModel m = new SpinnerNumberModel(0, 0, 5, 0.1f);
+		SpinnerNumberModel m = new SpinnerNumberModel(0.0f, 0.0f, 5.0f,
+			0.1f);
 		JSpinner s = new JSpinner();
 		s.setEditor(new JSpinner.NumberEditor(s, "##.#"));
 		return s;
@@ -150,7 +152,13 @@ public class PolicyForm extends AbstractForm {
 	protected JPanel createMeterPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
-		panel.addRow(new JLabel("System-Wide Ramp Meter"));
+		panel.addRow(new JLabel("Ramp Meter Attributes"));
+		panel.setCenter();
+		JTextArea area = new JTextArea("Use caution: these values " +
+			"are commonly\nstored in controller memory.  A " +
+			"download\nmight be required for each controller.");
+		area.setBackground(null);
+		panel.addRow(area);
 		panel.setCenter();
 		panel.addRow(new JLabel("Interval Times (seconds)"));
 		panel.addRow("Green", green);
