@@ -43,6 +43,11 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Frame title */
 	static private final String TITLE = "System Attributes";
 
+	/** Caution text */
+	static protected final String CAUTION = "Use caution: these values " +
+		"are stored in\ncontroller memory.  If changed, new values\n" +
+		"must be sent to each controller.";
+
 	/** Create a SONAR name to check for allowed updates */
 	static protected String createNamespaceString(String name) {
 		return SystemAttribute.SONAR_TYPE + "/" + name;
@@ -92,7 +97,7 @@ public class SystemAttributeForm extends AbstractForm {
 	protected final JSpinner ring4 = createMileSpinner();
 
 	/** System attribute editor tab */
-	protected SystemAttributeTab systemAttributeTab=null;
+	protected SystemAttributeTab systemAttributeTab = null;
 
 	/** SONAR User for permission checks */
 	protected final User user;
@@ -128,7 +133,7 @@ public class SystemAttributeForm extends AbstractForm {
 		tab.add("Meters", createMeterPanel());
 		tab.add("DMS", createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
-		systemAttributeTab = new SystemAttributeTab(true, this, cache);
+		systemAttributeTab = new SystemAttributeTab(cache, this);
 		tab.add(systemAttributeTab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
@@ -150,46 +155,41 @@ public class SystemAttributeForm extends AbstractForm {
 			name));
 	}
 
+	/** Check if the user can remove the named attribute */
+	public boolean canRemoveAttribute(String name) {
+		return name != null && user.canRemove(createNamespaceString(
+			name));
+	}
+
+	/** Initialize one spinner widget */
+	protected void initSpinner(final JSpinner spinner, final String name) {
+		if(canUpdateAttribute(name)) {
+			new ChangeJob(this, spinner) {
+				public void perform() {
+					setAttribute(name, spinner.getValue());
+				}
+			};
+		} else
+			spinner.setEnabled(false);
+	}
+
 	/** Create the ramp meter policy panel */
 	protected JPanel createMeterPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
 		panel.addRow(new JLabel("Ramp Meter Attributes"));
 		panel.setCenter();
-		JTextArea area = new JTextArea("Use caution: these values " +
-			"are commonly\nstored in controller memory.  A " +
-			"download\nmight be required for each controller.");
+		JTextArea area = new JTextArea(CAUTION);
 		area.setBackground(null);
 		panel.addRow(area);
 		panel.setCenter();
 		panel.addRow(new JLabel("Interval Times (seconds)"));
 		panel.addRow("Green", green);
-		if(canUpdateAttribute(SystemAttribute.METER_GREEN_SECS)) {
-			new ChangeJob(this, green) {
-				public void perform() {
-					setAtt(SystemAttribute.METER_GREEN_SECS,
-						green.getValue());
-				}
-			};
-		}
+		initSpinner(green, SystemAttribute.METER_GREEN_SECS);
 		panel.addRow("Yellow", yellow);
-		if(canUpdateAttribute(SystemAttribute.METER_YELLOW_SECS)) {
-			new ChangeJob(this, yellow) {
-				public void perform() {
-					setAtt(SystemAttribute.METER_YELLOW_SECS,
-						yellow.getValue());
-				}
-			};
-		}
+		initSpinner(yellow, SystemAttribute.METER_YELLOW_SECS);
 		panel.addRow("Minimum Red", min_red);
-		if(canUpdateAttribute(SystemAttribute.METER_MIN_RED_SECS)) {
-			new ChangeJob(this, min_red) {
-				public void perform() {
-					setAtt(SystemAttribute.METER_MIN_RED_SECS,
-						min_red.getValue());
-				}
-			};
-		}
+		initSpinner(min_red, SystemAttribute.METER_MIN_RED_SECS);
 		return panel;
 	}
 
@@ -197,25 +197,15 @@ public class SystemAttributeForm extends AbstractForm {
 	protected JPanel createDMSPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
+		JTextArea area = new JTextArea(CAUTION);
+		area.setBackground(null);
+		panel.addRow(area);
+		panel.setCenter();
 		panel.addRow(new JLabel("Page time (seconds)"));
 		panel.addRow("On", page_on);
-		if(canUpdateAttribute(SystemAttribute.DMS_PAGE_ON_SECS)) {
-			new ChangeJob(this, page_on) {
-				public void perform() {
-					setAtt(SystemAttribute.DMS_PAGE_ON_SECS,
-						page_on.getValue());
-				}
-			};
-		}
+		initSpinner(page_on, SystemAttribute.DMS_PAGE_ON_SECS);
 		panel.addRow("Off", page_off);
-		if(canUpdateAttribute(SystemAttribute.DMS_PAGE_OFF_SECS)) {
-			new ChangeJob(this, page_off) {
-				public void perform() {
-					setAtt(SystemAttribute.DMS_PAGE_OFF_SECS,
-						page_off.getValue());
-				}
-			};
-		}
+		initSpinner(page_off, SystemAttribute.DMS_PAGE_OFF_SECS);
 		return panel;
 	}
 
@@ -225,46 +215,18 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Ring radii (miles)"));
 		panel.addRow("Ring 1", ring1);
-		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_1_MILES)) {
-			new ChangeJob(this, ring1) {
-				public void perform() {
-					setAtt(SystemAttribute.INCIDENT_RING_1_MILES,
-						ring1.getValue());
-				}
-			};
-		}
+		initSpinner(ring1, SystemAttribute.INCIDENT_RING_1_MILES);
 		panel.addRow("Ring 2", ring2);
-		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_2_MILES)) {
-			new ChangeJob(this, ring2) {
-				public void perform() {
-					setAtt(SystemAttribute.INCIDENT_RING_2_MILES,
-						ring2.getValue());
-				}
-			};
-		}
+		initSpinner(ring2, SystemAttribute.INCIDENT_RING_2_MILES);
 		panel.addRow("Ring 3", ring3);
-		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_3_MILES)) {
-			new ChangeJob(this, ring3) {
-				public void perform() {
-					setAtt(SystemAttribute.INCIDENT_RING_3_MILES,
-						ring3.getValue());
-				}
-			};
-		}
+		initSpinner(ring3, SystemAttribute.INCIDENT_RING_3_MILES);
 		panel.addRow("Ring 4", ring4);
-		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_4_MILES)) {
-			new ChangeJob(this, ring4) {
-				public void perform() {
-					setAtt(SystemAttribute.INCIDENT_RING_4_MILES,
-						ring4.getValue());
-				}
-			};
-		}
+		initSpinner(ring4, SystemAttribute.INCIDENT_RING_4_MILES);
 		return panel;
 	}
 
 	/** Set the value of the named attribute */
-	protected void setAtt(String attr, Object v) {
+	protected void setAttribute(String attr, Object v) {
 		SystemAttribute sa = cache.lookupObject(attr);
 		if(sa != null) {
 			if(canUpdateAttribute(attr))

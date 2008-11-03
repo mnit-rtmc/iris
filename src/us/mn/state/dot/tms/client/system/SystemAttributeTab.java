@@ -16,17 +16,13 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.Dimension;
 import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.BoxLayout;
-import java.awt.Component;
-import javax.swing.Box;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
  * This is a tab for viewing and editing system attributes.
@@ -34,10 +30,13 @@ import us.mn.state.dot.tms.SystemAttribute;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SystemAttributeTab extends JPanel {
+public class SystemAttributeTab extends FormPanel {
 
-	/** tab name */
-	protected final String TAB_NAME = "System Attributes";
+	/** Tab name */
+	static protected final String TAB_NAME = "All";
+
+	/** Table row height */
+	static protected final int ROW_HEIGHT = 20;
 
 	/** table model */
 	protected SystemAttributeTableModel m_tableModel;
@@ -46,39 +45,22 @@ public class SystemAttributeTab extends JPanel {
 	protected final JTable m_table = new JTable();
 
 	/** Button to delete the selected attribute */
-	protected final JButton del_attrib_btn = 
-		new JButton("Delete");
+	protected final JButton del_attrib_btn = new JButton("Delete");
 
 	/** form this tab is displayed on */
 	protected final SystemAttributeForm m_form;
-
-	/** Sonar state */
-	TypeCache<SystemAttribute> m_systemAttributes;
-
-	/** user is an admin */
-//FIXME: what if user changes to admin? This isn't updated
-//FIXME: use system_attribute permissions, not admin?
-	protected final boolean m_admin;	
 
 	/** Create the attribute editor tab.
 	 * @param admin True if user is an admin.
 	 * @param form Form this tab is placed onto.
 	 * @param sa Type cache for system attributres.
 	 */
-	public SystemAttributeTab(boolean admin, SystemAttributeForm form, 
-		TypeCache<SystemAttribute> sa)
+	public SystemAttributeTab(TypeCache<SystemAttribute> sa,
+		SystemAttributeForm form)
 	{
-		m_admin = admin;
+		super(true);
 		m_form = form;
-		m_systemAttributes = sa;
-
-		// arg checks
-		boolean bogus=(form==null || sa==null);
-		assert !bogus : "bogus args";
-		if( bogus )
-			return;
-
-		m_tableModel = new SystemAttributeTableModel(admin,sa);
+		m_tableModel = new SystemAttributeTableModel(sa, form);
 		createControls();
 	}
 
@@ -89,25 +71,10 @@ public class SystemAttributeTab extends JPanel {
 
 	/** create the attribute editor tab */
 	protected void createControls() {
-		this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-
-		this.add(Box.createRigidArea(new Dimension(0,10)));
-
-		// table
 		initTable();
-		JScrollPane scroll = new JScrollPane(m_table);
-		this.add(scroll);
-
-		this.add(Box.createVerticalGlue());
-		this.add(Box.createRigidArea(new Dimension(0,20)));
-
-		// delete button
-		del_attrib_btn.setAlignmentX(Component.CENTER_ALIGNMENT);
-		this.add(del_attrib_btn);
-		del_attrib_btn.setEnabled(m_admin);
-
-		this.add(Box.createRigidArea(new Dimension(0,20)));
-
+		addRow(m_table);
+		setCenter();
+		addRow(del_attrib_btn);
 		new ActionJob(this, del_attrib_btn) {
 			public void perform() throws Exception {
 				final ListSelectionModel s = 
@@ -121,19 +88,31 @@ public class SystemAttributeTab extends JPanel {
 
 	/** Initialize the table */
 	protected void initTable() {
-		final ListSelectionModel s = m_table.getSelectionModel();
+		ListSelectionModel s = m_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
-				// do nothing
+				selectAttribute();
 			}
 		};
 		m_table.setAutoCreateColumnsFromModel(false);
 		m_table.setColumnModel(
 			SystemAttributeTableModel.createColumnModel());
 		m_table.setModel(m_tableModel);
-		m_table.setPreferredScrollableViewportSize(
-			new Dimension(280, 200));
+		m_table.setRowHeight(ROW_HEIGHT);
+		m_table.setPreferredScrollableViewportSize(new Dimension(
+			m_table.getPreferredSize().width, ROW_HEIGHT * 12));
+	}
+
+	/** Select an attribute */
+	protected void selectAttribute() {
+		SystemAttribute proxy = m_tableModel.getProxy(
+			m_table.getSelectedRow());
+		if(proxy != null) {
+			String a = proxy.getName();
+			del_attrib_btn.setEnabled(m_form.canRemoveAttribute(a));
+		} else
+			del_attrib_btn.setEnabled(false);
 	}
 
 	/** cleanup */
@@ -142,4 +121,3 @@ public class SystemAttributeTab extends JPanel {
 			m_tableModel.dispose();
 	}
 }
-

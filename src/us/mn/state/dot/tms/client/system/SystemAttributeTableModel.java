@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.system;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -52,37 +51,19 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		RENDERER.setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
+	/** Form containing table */
+	protected final SystemAttributeForm m_form;
+
 	/** 
 	 *  Create a new table model.
-	 *  @param admin True if admin else false.
 	 *  @param tc TypeCache for the table items being displayed/edited.
 	 */
-	public SystemAttributeTableModel(boolean arg_admin, 
-		TypeCache<SystemAttribute> arg_tc) 
+	public SystemAttributeTableModel(TypeCache<SystemAttribute> arg_tc,
+		SystemAttributeForm f)
 	{
-		super(arg_tc, arg_admin);
-		initialize();	// in superclass, sets this as listener (ProxyListener)
-	}
-
-	/** return the class for each column */ /*
-	public Class getColumnClass(int columnIndex) {
-		return getValueAt(0, columnIndex).getClass();
-	} */
-
-	/** attribute name for a new proxy, via last row in table */
-	protected String m_new_name="";
-
-	/** set attribute name for a new proxy */
-	protected void setNewAttribName(String arg_name) {
-		m_new_name = (arg_name == null ? "" : arg_name).trim();
-	}
-
-	/** attribute value for a new proxy, via last row in table */
-	protected String m_new_value="";
-
-	/** set attribute value for a new proxy */
-	protected void setNewAttribValue(String arg_value) {
-		m_new_value = (arg_value == null ? "" : arg_value).trim();
+		super(arg_tc, true);
+		m_form = f;
+		initialize();
 	}
 
 	/** Create a new table column */
@@ -113,32 +94,14 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 			new SystemAttributeComparator());
 	}
 
-	/** Add a new proxy to the table model, via interface ProxyListener */
-	public int doProxyAdded(SystemAttribute proxy) {
-		if(proxyInModel(proxy))
-			return super.doProxyAdded(proxy);
-		return -1;
-	}
-
-	/** Does the specified proxy fit into this model? */
-	public boolean proxyInModel(SystemAttribute proxy) {
-		if( proxy==null )
-			return false;
-		return true; //FIXME m_name.equals(proxy.getName());
-	}
-
 	/** Get the value of a column */
 	protected Object getValue(SystemAttribute t, int col) {
 		if(col == COL_NAME)
 			return t.getName();
 		else if(col == COL_VALUE)
 			return t.getValue();
-		else {
-			String err="bogus column value in getValue";
-			System.err.println(err);
-			assert false : err;
-		}
-		return null;
+		else
+			return null;
 	}
 
 	/** Get the value at the specified cell */
@@ -146,40 +109,31 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		SystemAttribute t = getProxy(row);
 		if(t != null)
 			return getValue(t, col);
-		// return current values
-		if(col == COL_NAME)
-			return m_new_name;
-		else if(col == COL_VALUE)
-			return m_new_value;
-		else {
-			String err="Bogus column value in getValueAt().";
-			System.err.println(err);
-			assert false : err;
-		}
-		return null;
+		else
+			return null;
 	}
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 36, "Name"));
-		m.addColumn(createColumn(COL_VALUE, 200, "Value"));
+		m.addColumn(createColumn(COL_NAME, 140, "Name"));
+		m.addColumn(createColumn(COL_VALUE, 180, "Value"));
 		return m;
 	}
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
-		// only last row name is editable if an admin
-		if(col == COL_NAME)
-			return isLastRow(row) && admin;
-		else if(col == COL_VALUE)
-			return admin;
-		else {
-			String err="Bogus column value in isCellEditable().";
-			System.err.println(err);
-			assert false : err;
+		if(col == COL_NAME) {
+			return isLastRow(row) &&
+				m_form.canAddAttribute("test_attr");
+		} else if(col == COL_VALUE) {
+			SystemAttribute t = getProxy(row);
+			if(t != null) {
+				String a = t.getName() + '/' + t.getValue();
+				return m_form.canUpdateAttribute(a);
+			}
 		}
-		return admin;
+		return false;
 	}
 
 	/** Set the value at the specified cell */
@@ -187,87 +141,16 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		SystemAttribute t = getProxy(row);
 		if(t == null)
 			addRow(value, col);
-		else
-			setValue(t, col, value);
-	}
-
-	/** Set the value of the specified sign text column */
-	protected void setValue(SystemAttribute t, int col, Object value) {
-		if(col == COL_NAME)
-			; // FIXME t.setName(value.toString());
 		else if(col == COL_VALUE)
 			t.setValue(value.toString());
-		else {
-			String err = "bogus column value in setValue";
-			System.err.println(err);
-			assert false : err;
-		}
 	}
 	
 	/** Add a row to the table */
 	protected void addRow(Object value, int col) {
-		assert value != null : "value null in addRow()";
-		value = (value == null ? "" : value);
-
 		if(col == COL_NAME) {
-			setNewAttribName(value.toString());
-			createSystemAttribute();
+			String aname = value.toString();
+			if(aname.length() > 0)
+				cache.createObject(aname);
 		}
-		else if(col == COL_VALUE) {
-			setNewAttribValue(value.toString());
-			createSystemAttribute();
-		} else {
-			String err = "bogus column value in addRow";
-			System.err.println(err);
-			assert false : err;
-		}
-	}
-
-	/** Get a set of attribute names */
-	protected HashSet<String> getNames() {
-		HashSet<String> names = new HashSet<String>();
-		synchronized(proxies) {
-			for(SystemAttribute t: proxies)
-				names.add(t.getName());
-		}
-		return names;
-	}
-
-	/** Create a new SystemAttribute using the current field values */
-	protected void createSystemAttribute() {
-		// only create new attribute if all items specified
-		if( m_new_name.length() > 0 && m_new_value.length() > 0 ) {
-			createSystemAttribute(m_new_name, m_new_value);
-			setNewAttribName("");
-			setNewAttribValue("");
-		}
-	}
-
-	/** Create a new SystemAttribute using the specified args */
-	protected void createSystemAttribute(String aname,String avalue) {
-		if(aname==null || aname.length()<=0 || avalue==null) {
-			assert false : "bogus arg in createSystemAttribute";
-			return;
-		}
-		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("value", avalue);
-		cache.createObject(aname, attrs);
-	}
-
-	/** toString */
-	public String toString() {
-		HashSet<String> hs=this.getNames();
-		if( hs == null )
-			return "";
-		String ret="HashSet: size="+hs.size()+":";
-		Iterator it = hs.iterator();
-		while(it.hasNext()) {
-			String val = (String)it.next();
-			ret+=val;
-			if(it.hasNext())
-				ret+=", ";
-		}
-		ret+=".";
-		return ret;		
 	}
 }

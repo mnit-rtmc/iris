@@ -60,8 +60,8 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Policy");
-		item.setMnemonic('P');
+		item = new JMenuItem("System Attributes");
+		item.setMnemonic('S');
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new SystemAttributeForm(

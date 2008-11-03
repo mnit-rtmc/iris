@@ -20,6 +20,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 
 /**
@@ -126,6 +127,16 @@ public class FormPanel extends JPanel {
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
 		addRow(new JScrollPane(area,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+	}
+
+	/** Add a table component */
+	public void addRow(JTable table) {
+		setCenter();
+		bag.weightx = 1;
+		bag.weighty = 1;
+		addRow(new JScrollPane(table,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 	}
