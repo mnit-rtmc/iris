@@ -88,12 +88,6 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		return COLUMN_COUNT;
 	}
 
-	/** Create an empty set of proxies */
-	protected TreeSet<SystemAttribute> createProxySet() {
-		return new TreeSet<SystemAttribute>(
-			new SystemAttributeComparator());
-	}
-
 	/** Get the value of a column */
 	protected Object getValue(SystemAttribute t, int col) {
 		if(col == COL_NAME)
