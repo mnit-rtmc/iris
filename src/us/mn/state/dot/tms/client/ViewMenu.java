@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.client.lcs.LcsListForm;
 import us.mn.state.dot.tms.client.meter.RampMeterListForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
-import us.mn.state.dot.tms.client.system.PolicyForm;
+import us.mn.state.dot.tms.client.system.SystemAttributeForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
@@ -64,7 +64,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('P');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new PolicyForm(
+				desktop.show(new SystemAttributeForm(
 					st.getSystemAttributes(), user));
 			}
 		};

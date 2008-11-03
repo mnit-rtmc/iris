@@ -33,11 +33,12 @@ import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
- * PolicyForm allows administrators to change system-wide policy parameters.
+ * The system attribute allows administrators to change system-wide policy
+ * attributes.
  *
  * @author Douglas Lau
  */
-public class PolicyForm extends AbstractForm {
+public class SystemAttributeForm extends AbstractForm {
 
 	/** Frame title */
 	static private final String TITLE = "System Attributes";
@@ -112,8 +113,8 @@ public class PolicyForm extends AbstractForm {
 		}
 	};
 
-	/** Create a new policy form */
-	public PolicyForm(TypeCache<SystemAttribute> c, User u) {
+	/** Create a new system attribute form */
+	public SystemAttributeForm(TypeCache<SystemAttribute> c, User u) {
 		super(TITLE);
 		cache = c;
 		user = u;

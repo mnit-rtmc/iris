@@ -50,7 +50,7 @@ public class SystemAttributeTab extends JPanel {
 		new JButton("Delete");
 
 	/** form this tab is displayed on */
-	protected final PolicyForm m_form;
+	protected final SystemAttributeForm m_form;
 
 	/** Sonar state */
 	TypeCache<SystemAttribute> m_systemAttributes;
@@ -65,7 +65,7 @@ public class SystemAttributeTab extends JPanel {
 	 * @param form Form this tab is placed onto.
 	 * @param sa Type cache for system attributres.
 	 */
-	public SystemAttributeTab(boolean admin, PolicyForm form, 
+	public SystemAttributeTab(boolean admin, SystemAttributeForm form, 
 		TypeCache<SystemAttribute> sa)
 	{
 		m_admin = admin;
