@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.TreeSet;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
@@ -51,6 +48,24 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		RENDERER.setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
+	/** Create a new table column */
+	static protected TableColumn createColumn(int column, int width,
+		String header)
+	{
+		TableColumn c = new TableColumn(column, width);
+		c.setHeaderValue(header);
+		c.setCellRenderer(RENDERER);
+		return c;
+	}
+
+	/** Create the table column model */
+	static public TableColumnModel createColumnModel() {
+		TableColumnModel m = new DefaultTableColumnModel();
+		m.addColumn(createColumn(COL_NAME, 140, "Name"));
+		m.addColumn(createColumn(COL_VALUE, 180, "Value"));
+		return m;
+	}
+
 	/** Form containing table */
 	protected final SystemAttributeForm m_form;
 
@@ -64,23 +79,6 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		super(arg_tc, true);
 		m_form = f;
 		initialize();
-	}
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		assert header != null;
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		if(column == COL_NAME || column == COL_VALUE)
-			c.setCellRenderer(RENDERER);
-		else {
-			assert false;
-			System.err.println("WARNING: bogus column");
-			c.setCellRenderer(RENDERER);
-		}
-		return c;
 	}
 
 	/** Get the count of columns in the table */
@@ -107,14 +105,6 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 			return null;
 	}
 
-	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 140, "Name"));
-		m.addColumn(createColumn(COL_VALUE, 180, "Value"));
-		return m;
-	}
-
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
 		if(col == COL_NAME) {
@@ -133,18 +123,17 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int col) {
 		SystemAttribute t = getProxy(row);
-		if(t == null)
-			addRow(value, col);
-		else if(col == COL_VALUE)
+		if(t == null) {
+			if(col == COL_NAME)
+				addRow(value);
+		} else if(col == COL_VALUE)
 			t.setValue(value.toString());
 	}
 	
 	/** Add a row to the table */
-	protected void addRow(Object value, int col) {
-		if(col == COL_NAME) {
-			String aname = value.toString();
-			if(aname.length() > 0)
-				cache.createObject(aname);
-		}
+	protected void addRow(Object value) {
+		String aname = value.toString();
+		if(aname.length() > 0)
+			cache.createObject(aname);
 	}
 }
