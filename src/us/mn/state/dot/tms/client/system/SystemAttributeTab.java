@@ -51,9 +51,8 @@ public class SystemAttributeTab extends FormPanel {
 	protected final SystemAttributeForm m_form;
 
 	/** Create the attribute editor tab.
-	 * @param admin True if user is an admin.
-	 * @param form Form this tab is placed onto.
 	 * @param sa Type cache for system attributres.
+	 * @param form Form this tab is placed onto.
 	 */
 	public SystemAttributeTab(TypeCache<SystemAttribute> sa,
 		SystemAttributeForm form)
