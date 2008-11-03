@@ -44,11 +44,6 @@ CREATE TABLE iris_user_role (
 	role VARCHAR(15) NOT NULL REFERENCES role(name)
 );
 
-CREATE TABLE system_policy (
-	name character varying PRIMARY KEY,
-	value integer NOT NULL
-);
-
 CREATE TABLE direction (
 	id smallint PRIMARY KEY,
 	direction VARCHAR(4) NOT NULL,
@@ -482,8 +477,6 @@ CREATE TABLE system_attribute (
 	name VARCHAR(32) PRIMARY KEY,
 	value VARCHAR(64) NOT NULL
 );
-
-INSERT INTO system_attribute VALUES('database_version', '3.80.0');
 
 
 CREATE TABLE vault_object (
@@ -1084,15 +1077,16 @@ COPY road_modifier (id, modifier, mod) FROM stdin;
 8	W Junction	Wj
 \.
 
-COPY system_policy (name, value) FROM stdin;
-meter_green_time	13
-meter_yellow_time	7
-meter_min_red_time	1
-dms_page_on_time	20
-dms_page_off_time	0
-ring_radius_0	2
-ring_radius_1	5
-ring_radius_2	10
+COPY system_attribute (name, value) FROM stdin;
+database_version	3.80.0
+dms_page_on_secs	2.0
+dms_page_off_secs	0.0
+meter_green_secs	1.3
+meter_yellow_secs	0.7
+meter_min_red_secs	0.1
+incident_ring_1_miles	2
+incident_ring_2_miles	5
+incident_ring_3_miles	10
 \.
 
 COPY r_node_type (n_type, name) FROM stdin;
