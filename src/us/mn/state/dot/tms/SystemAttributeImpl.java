@@ -78,7 +78,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** attribute value */
-	protected String value;
+	protected String value = "";
 
 	/** Set the attribute value */
 	public void setValue(String arg_value) {
