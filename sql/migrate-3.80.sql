@@ -30,3 +30,21 @@ INSERT INTO system_attribute
 	FROM system_policy WHERE name = 'ring_radius_2';
 
 DROP TABLE system_policy;
+
+DROP VIEW detector_view;
+
+CREATE VIEW detector_view AS
+	SELECT d.name AS det_id, d.r_node, d.controller, c.comm_link, c.drop_id,
+	d.pin, detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
+		d.lane_type, d.lane_number, d.abandoned) AS label,
+	rnd.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
+	boolean_converter(d.abandoned) AS abandoned,
+	boolean_converter(d.force_fail) AS force_fail,
+	boolean_converter(c.active) AS active, d.fake, d.notes
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+	LEFT JOIN lane_type ln ON d.lane_type = ln.id
+	LEFT JOIN controller c ON d.controller = c.name;
+GRANT SELECT ON detector_view TO PUBLIC;

@@ -930,8 +930,8 @@ CREATE VIEW detector_label_view AS
 GRANT SELECT ON detector_label_view TO PUBLIC;
 
 CREATE VIEW detector_view AS
-	SELECT d.name AS det_id, d.controller, c.comm_link, c.drop_id, d.pin,
-	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
+	SELECT d.name AS det_id, d.r_node, d.controller, c.comm_link, c.drop_id,
+	d.pin, detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
 		d.lane_type, d.lane_number, d.abandoned) AS label,
 	rnd.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
 	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
