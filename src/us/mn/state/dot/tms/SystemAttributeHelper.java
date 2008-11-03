@@ -223,8 +223,8 @@ public class SystemAttributeHelper {
 			SystemAttribute.AGENCY_ID_MNDOT);
 	}
 
-	/** return the DMS poll time in seconds */
-	public static int getDMSPollTimeSecs() {
+	/** Get the DMS polling frequency (seconds) */
+	static public int getDmsPollFreqSecs() {
 		final int MINIMUM = 5;
 		final int DEFAULT = 30;
 		int secs = getValueInt(SystemAttribute.DMS_POLL_FREQ_SECS,

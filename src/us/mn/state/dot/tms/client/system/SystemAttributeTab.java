@@ -83,6 +83,7 @@ public class SystemAttributeTab extends FormPanel {
 					m_tableModel.deleteRow(row);
 			}
 		};
+		del_attrib_btn.setEnabled(false);
 	}
 
 	/** Initialize the table */

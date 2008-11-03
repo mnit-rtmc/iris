@@ -58,6 +58,11 @@ public class SystemAttributeForm extends AbstractForm {
 		return new JSpinner(new SpinnerNumberModel(0, 0, 5, 0.1));
 	}
 
+	/** Create a poll frequency spinner */
+	static protected JSpinner createPollSpinner() {
+		return new JSpinner(new SpinnerNumberModel(30, 5, 86400, 5));
+	}
+
 	/** Create an incident miles spinner */
 	static protected JSpinner createMileSpinner() {
 		SpinnerNumberModel m = new SpinnerNumberModel(0, 0, 20, 1);
@@ -77,6 +82,9 @@ public class SystemAttributeForm extends AbstractForm {
 
 	/** Ramp meter minimum red time spinner */
 	protected final JSpinner min_red = createSpinner();
+
+	/** Poll frequency spinner */
+	protected final JSpinner poll_freq = createPollSpinner();
 
 	/** Page on time spinner */
 	protected final JSpinner page_on = createSpinner();
@@ -150,10 +158,19 @@ public class SystemAttributeForm extends AbstractForm {
 		return name != null && user.canAdd(createNamespaceString(name));
 	}
 
-	/** Check if the user can change the named attribute */
+	/** Check if the user can update the named attribute */
 	public boolean canUpdateAttribute(String name) {
 		return name != null && user.canUpdate(createNamespaceString(
 			name));
+	}
+
+	/** Check if the user can change the named attribute */
+	public boolean canChangeAttribute(String name) {
+		SystemAttribute sa = cache.lookupObject(name);
+		if(sa != null)
+			return canUpdateAttribute(name);
+		else
+			return canAddAttribute(name);
 	}
 
 	/** Check if the user can remove the named attribute */
@@ -164,7 +181,7 @@ public class SystemAttributeForm extends AbstractForm {
 
 	/** Initialize one spinner widget */
 	protected void initSpinner(final JSpinner spinner, final String name) {
-		if(canUpdateAttribute(name)) {
+		if(canChangeAttribute(name)) {
 			new ChangeJob(this, spinner) {
 				public void perform() {
 					setAttribute(name, spinner.getValue());
@@ -178,35 +195,35 @@ public class SystemAttributeForm extends AbstractForm {
 	protected JPanel createMeterPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setCenter();
-		panel.addRow(new JLabel("Ramp Meter Attributes"));
-		panel.setCenter();
-		JTextArea area = new JTextArea(CAUTION);
-		area.setBackground(null);
-		panel.addRow(area);
-		panel.setCenter();
-		panel.addRow(new JLabel("Interval Times (seconds)"));
+		panel.addRow(new JLabel("Ramp Meter Interval Times (seconds)"));
 		panel.addRow("Green", green);
 		initSpinner(green, SystemAttribute.METER_GREEN_SECS);
 		panel.addRow("Yellow", yellow);
 		initSpinner(yellow, SystemAttribute.METER_YELLOW_SECS);
 		panel.addRow("Minimum Red", min_red);
 		initSpinner(min_red, SystemAttribute.METER_MIN_RED_SECS);
+		panel.setCenter();
+		JTextArea area = new JTextArea(CAUTION);
+		area.setBackground(null);
+		panel.addRow(area);
 		return panel;
 	}
 
 	/** Create the DMS policy panel */
 	protected JPanel createDMSPanel() {
 		FormPanel panel = new FormPanel(true);
-		panel.setCenter();
-		JTextArea area = new JTextArea(CAUTION);
-		area.setBackground(null);
-		panel.addRow(area);
+		panel.addRow("Polling Frequency", poll_freq);
+		initSpinner(poll_freq, SystemAttribute.DMS_POLL_FREQ_SECS);
 		panel.setCenter();
 		panel.addRow(new JLabel("Page time (seconds)"));
 		panel.addRow("On", page_on);
 		initSpinner(page_on, SystemAttribute.DMS_PAGE_ON_SECS);
 		panel.addRow("Off", page_off);
 		initSpinner(page_off, SystemAttribute.DMS_PAGE_OFF_SECS);
+		panel.setCenter();
+		JTextArea area = new JTextArea(CAUTION);
+		area.setBackground(null);
+		panel.addRow(area);
 		return panel;
 	}
 
@@ -262,6 +279,10 @@ public class SystemAttributeForm extends AbstractForm {
 		if(a == null || a.equals(SystemAttribute.METER_MIN_RED_SECS)) {
 			min_red.setValue(
 				SystemAttributeHelper.getMeterMinRedSecs());
+		}
+		if(a == null || a.equals(SystemAttribute.DMS_POLL_FREQ_SECS)) {
+			poll_freq.setValue(
+				SystemAttributeHelper.getDmsPollFreqSecs());
 		}
 		if(a == null || a.equals(SystemAttribute.DMS_PAGE_ON_SECS)) {
 			page_on.setValue(
