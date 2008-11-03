@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.dms.DMSListForm;
@@ -48,6 +49,7 @@ public class ViewMenu extends JMenu {
 	public ViewMenu(final TmsConnection tc, final SonarState st) {
 		super("View");
 		final SmartDesktop desktop = tc.getDesktop();
+		final User user = st.lookupUser(tc.getUser().getName());
 		setMnemonic('V');
 		JMenuItem item = new JMenuItem("Users/Roles");
 		item.setMnemonic('U');
@@ -62,8 +64,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('P');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new PolicyForm(tc.isAdmin(), 
-					st.getSystemAttributes()));
+				desktop.show(new PolicyForm(
+					st.getSystemAttributes(), user));
 			}
 		};
 		add(item);

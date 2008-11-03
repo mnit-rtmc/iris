@@ -16,16 +16,15 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.Color;
 import java.util.HashMap;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
@@ -41,7 +40,12 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class PolicyForm extends AbstractForm {
 
 	/** Frame title */
-	static private final String TITLE = "System-Wide Policy";
+	static private final String TITLE = "System Attributes";
+
+	/** Create a SONAR name to check for allowed updates */
+	static protected String createNamespaceString(String name) {
+		return SystemAttribute.SONAR_TYPE + "/" + name;
+	}
 
 	/** Create a spinner */
 	static protected JSpinner createSpinner() {
@@ -86,62 +90,63 @@ public class PolicyForm extends AbstractForm {
 	/** Ring 4 radius spinner */
 	protected final JSpinner ring4 = createMileSpinner();
 
-	/** Apply button */
-	protected final JButton apply = new JButton("Apply Changes");
-
 	/** System attribute editor tab */
 	protected SystemAttributeTab systemAttributeTab=null;
 
-	/** user is an admin */
-	protected final boolean admin;	//FIXME: what if user changes to admin? This isn't updated
+	/** SONAR User for permission checks */
+	protected final User user;
 
 	/** Proxy listener for System Attribute proxies */
 	protected final ProxyListener<SystemAttribute> sa_listener =
 		new ProxyListener<SystemAttribute>()
 	{
-		public void proxyAdded(SystemAttribute p) { }
+		public void proxyAdded(SystemAttribute p) {
+			doUpdateAttribute(p.getName());
+		}
 		public void enumerationComplete() { }
-		public void proxyRemoved(SystemAttribute p) { }
+		public void proxyRemoved(SystemAttribute p) {
+			doUpdateAttribute(p.getName());
+		}
 		public void proxyChanged(SystemAttribute p, String a) {
-			doUpdate();
+			doUpdateAttribute(p.getName());
 		}
 	};
 
 	/** Create a new policy form */
-	public PolicyForm(boolean argAdmin, TypeCache<SystemAttribute> c) {
+	public PolicyForm(TypeCache<SystemAttribute> c, User u) {
 		super(TITLE);
-		admin = argAdmin;
 		cache = c;
+		user = u;
 	}
 
 	/** Initialise the widgets on the form */
 	protected void initialize() {
 		cache.addProxyListener(sa_listener);
-		doUpdate();
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 		add(tab);
 		tab.add("Meters", createMeterPanel());
 		tab.add("DMS", createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
-
-		// add system attribute editor tab
-		systemAttributeTab = new SystemAttributeTab(admin, this, cache);
+		systemAttributeTab = new SystemAttributeTab(true, this, cache);
 		tab.add(systemAttributeTab);
-
-		add(Box.createVerticalStrut(VGAP));
-		new ActionJob(this, apply) {
-			public void perform() throws Exception {
-				applyPressed();
-			}
-		};
-		add(apply);
+		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
 		cache.removeProxyListener(sa_listener);
+	}
+
+	/** Check if the user can add the named attribute */
+	public boolean canAddAttribute(String name) {
+		return name != null && user.canAdd(createNamespaceString(name));
+	}
+
+	/** Check if the user can change the named attribute */
+	public boolean canUpdateAttribute(String name) {
+		return name != null && user.canUpdate(createNamespaceString(
+			name));
 	}
 
 	/** Create the ramp meter policy panel */
@@ -158,8 +163,32 @@ public class PolicyForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Interval Times (seconds)"));
 		panel.addRow("Green", green);
+		if(canUpdateAttribute(SystemAttribute.METER_GREEN_SECS)) {
+			new ChangeJob(this, green) {
+				public void perform() {
+					setAtt(SystemAttribute.METER_GREEN_SECS,
+						green.getValue());
+				}
+			};
+		}
 		panel.addRow("Yellow", yellow);
+		if(canUpdateAttribute(SystemAttribute.METER_YELLOW_SECS)) {
+			new ChangeJob(this, yellow) {
+				public void perform() {
+					setAtt(SystemAttribute.METER_YELLOW_SECS,
+						yellow.getValue());
+				}
+			};
+		}
 		panel.addRow("Minimum Red", min_red);
+		if(canUpdateAttribute(SystemAttribute.METER_MIN_RED_SECS)) {
+			new ChangeJob(this, min_red) {
+				public void perform() {
+					setAtt(SystemAttribute.METER_MIN_RED_SECS,
+						min_red.getValue());
+				}
+			};
+		}
 		return panel;
 	}
 
@@ -169,7 +198,23 @@ public class PolicyForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Page time (seconds)"));
 		panel.addRow("On", page_on);
+		if(canUpdateAttribute(SystemAttribute.DMS_PAGE_ON_SECS)) {
+			new ChangeJob(this, page_on) {
+				public void perform() {
+					setAtt(SystemAttribute.DMS_PAGE_ON_SECS,
+						page_on.getValue());
+				}
+			};
+		}
 		panel.addRow("Off", page_off);
+		if(canUpdateAttribute(SystemAttribute.DMS_PAGE_OFF_SECS)) {
+			new ChangeJob(this, page_off) {
+				public void perform() {
+					setAtt(SystemAttribute.DMS_PAGE_OFF_SECS,
+						page_off.getValue());
+				}
+			};
+		}
 		return panel;
 	}
 
@@ -179,31 +224,51 @@ public class PolicyForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Ring radii (miles)"));
 		panel.addRow("Ring 1", ring1);
+		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_1_MILES)) {
+			new ChangeJob(this, ring1) {
+				public void perform() {
+					setAtt(SystemAttribute.INCIDENT_RING_1_MILES,
+						ring1.getValue());
+				}
+			};
+		}
 		panel.addRow("Ring 2", ring2);
+		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_2_MILES)) {
+			new ChangeJob(this, ring2) {
+				public void perform() {
+					setAtt(SystemAttribute.INCIDENT_RING_2_MILES,
+						ring2.getValue());
+				}
+			};
+		}
 		panel.addRow("Ring 3", ring3);
+		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_3_MILES)) {
+			new ChangeJob(this, ring3) {
+				public void perform() {
+					setAtt(SystemAttribute.INCIDENT_RING_3_MILES,
+						ring3.getValue());
+				}
+			};
+		}
 		panel.addRow("Ring 4", ring4);
+		if(canUpdateAttribute(SystemAttribute.INCIDENT_RING_4_MILES)) {
+			new ChangeJob(this, ring4) {
+				public void perform() {
+					setAtt(SystemAttribute.INCIDENT_RING_4_MILES,
+						ring4.getValue());
+				}
+			};
+		}
 		return panel;
 	}
 
-	/** Update the DMSListForm with the current status */
-	protected void doUpdate() {
-		green.setValue(SystemAttributeHelper.getMeterGreenSecs());
-		yellow.setValue(SystemAttributeHelper.getMeterYellowSecs());
-		min_red.setValue(SystemAttributeHelper.getMeterMinRedSecs());
-		page_on.setValue(SystemAttributeHelper.getDmsPageOnSecs());
-		page_off.setValue(SystemAttributeHelper.getDmsPageOffSecs());
-		ring1.setValue(SystemAttributeHelper.getIncidentRing1Miles());
-		ring2.setValue(SystemAttributeHelper.getIncidentRing2Miles());
-		ring3.setValue(SystemAttributeHelper.getIncidentRing3Miles());
-		ring4.setValue(SystemAttributeHelper.getIncidentRing4Miles());
-	}
-
 	/** Set the value of the named attribute */
-	protected void setAttributeValue(String attr, Object v) {
+	protected void setAtt(String attr, Object v) {
 		SystemAttribute sa = cache.lookupObject(attr);
-		if(sa != null)
-			sa.setValue(v.toString());
-		else {
+		if(sa != null) {
+			if(canUpdateAttribute(attr))
+				sa.setValue(v.toString());
+		} else if(canAddAttribute(attr)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("value", v);
@@ -211,25 +276,56 @@ public class PolicyForm extends AbstractForm {
 		}
 	}
 
-	/** Apply button pressed */
-	public void applyPressed() {
-		setAttributeValue(SystemAttribute.METER_GREEN_SECS,
-			green.getValue());
-		setAttributeValue(SystemAttribute.METER_YELLOW_SECS,
-			yellow.getValue());
-		setAttributeValue(SystemAttribute.METER_MIN_RED_SECS,
-			min_red.getValue());
-		setAttributeValue(SystemAttribute.DMS_PAGE_ON_SECS,
-			page_on.getValue());
-		setAttributeValue(SystemAttribute.DMS_PAGE_OFF_SECS,
-			page_off.getValue());
-		setAttributeValue(SystemAttribute.INCIDENT_RING_1_MILES,
-			ring1.getValue());
-		setAttributeValue(SystemAttribute.INCIDENT_RING_2_MILES,
-			ring2.getValue());
-		setAttributeValue(SystemAttribute.INCIDENT_RING_3_MILES,
-			ring3.getValue());
-		setAttributeValue(SystemAttribute.INCIDENT_RING_4_MILES,
-			ring4.getValue());
+	/** Update one system attribute on the form (WORKER thread) */
+	protected void doUpdateAttribute(final String a) {
+		new AbstractJob() {
+			public void perform() {
+				updateAttribute(a);
+			}
+		}.addToScheduler();
+	}
+
+	/** Update one system attribute on the form */
+	protected void updateAttribute(String a) {
+		if(a == null || a.equals(SystemAttribute.METER_GREEN_SECS)) {
+			green.setValue(
+				SystemAttributeHelper.getMeterGreenSecs());
+		}
+		if(a == null || a.equals(SystemAttribute.METER_YELLOW_SECS)) {
+			yellow.setValue(
+				SystemAttributeHelper.getMeterYellowSecs());
+		}
+		if(a == null || a.equals(SystemAttribute.METER_MIN_RED_SECS)) {
+			min_red.setValue(
+				SystemAttributeHelper.getMeterMinRedSecs());
+		}
+		if(a == null || a.equals(SystemAttribute.DMS_PAGE_ON_SECS)) {
+			page_on.setValue(
+				SystemAttributeHelper.getDmsPageOnSecs());
+		}
+		if(a == null || a.equals(SystemAttribute.DMS_PAGE_OFF_SECS)) {
+			page_off.setValue(
+				SystemAttributeHelper.getDmsPageOffSecs());
+		}
+		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_1_MILES))
+		{
+			ring1.setValue(
+				SystemAttributeHelper.getIncidentRing1Miles());
+		}
+		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_2_MILES))
+		{
+			ring2.setValue(
+				SystemAttributeHelper.getIncidentRing2Miles());
+		}
+		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_3_MILES))
+		{
+			ring3.setValue(
+				SystemAttributeHelper.getIncidentRing3Miles());
+		}
+		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_4_MILES))
+		{
+			ring4.setValue(
+				SystemAttributeHelper.getIncidentRing4Miles());
+		}
 	}
 }
