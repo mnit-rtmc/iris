@@ -150,6 +150,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
+		if(comm_link == null)
+			return false;
 		if(isLastRow(row))
 			return column == COL_NAME;
 		else
