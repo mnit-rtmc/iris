@@ -48,8 +48,7 @@ public class SystemAttributeHelperD10 extends SystemAttributeHelper {
 
 	/** return true if CAWS poller should handle caws messages */
 	public static boolean isCAWSActive() {
-		return SystemAttributeHelper.getValueBooleanDef(
-			CAWS_ACTIVE, false);
+		return SystemAttributeHelper.getValueBoolean(CAWS_ACTIVE,false);
 	}
 }
 

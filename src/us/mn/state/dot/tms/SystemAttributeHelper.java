@@ -80,7 +80,7 @@ public class SystemAttributeHelper {
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default
 	 */
-	static public String getValueDef(final String aname, String dvalue) {
+	static public String getValue(final String aname, String dvalue) {
 		try {
 			return getValue(aname);
 		}
@@ -172,7 +172,7 @@ public class SystemAttributeHelper {
 	 *  @param dvalue Default value.
 	 *  @return The value of the named attribute or the default
 	 */
-	static public boolean getValueBooleanDef(final String aname,
+	static public boolean getValueBoolean(final String aname,
 		boolean dvalue)
 	{
 		try {
@@ -211,9 +211,9 @@ public class SystemAttributeHelper {
 		}
 	}
 
-	/** return the agency id */
-	public static String agencyId() {
-		return getValueDef(SystemAttribute.AGENCY_ID,"");
+	/** Get the agency ID */
+	static public String agencyId() {
+		return getValue(SystemAttribute.AGENCY_ID, "");
 	}
 
 	/** return true if the agency id matches */
@@ -284,7 +284,7 @@ public class SystemAttributeHelper {
 
 	/** Get the TESLA host name (and port) */
 	static public String getTeslaHost() {
-		return getValueDef(SystemAttribute.TESLA_HOST, null);
+		return getValue(SystemAttribute.TESLA_HOST, null);
 	}
 
 	/** return a 'missing system attribute' warning message */
@@ -353,13 +353,13 @@ public class SystemAttributeHelper {
 
 	/** Return true to use the DMSDispatcher get status button */
 	public static boolean useGetStatusBtn() {
-		return getValueBooleanDef(
+		return getValueBoolean(
 			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN, false);
 	}
 
 	/** Return true to display onscreen PTZ controls in CameraViewer */
 	public static boolean useOnScrnPTZ() {
-		return getValueBooleanDef(
+		return getValueBoolean(
 			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS, false);
 	}
 
@@ -376,8 +376,8 @@ public class SystemAttributeHelper {
 	}
 
 	/** Return the preferred font name */
-	public static String preferredFontName() {
-		return getValueDef(SystemAttribute.DMS_PREFERRED_FONT, "");
+	static public String preferredFontName() {
+		return getValue(SystemAttribute.DMS_PREFERRED_FONT, "");
 	}
 
 	/** Return number of video frames before stream is stopped */
@@ -392,7 +392,7 @@ public class SystemAttributeHelper {
 
 	/** Return true to use the AWS checkbox in DMSDispatcher */
 	public static boolean useAwsCheckBox() {
-		return getValueBooleanDef(
-			SystemAttribute.DMSDISPATCHER_AWS_CKBOX, false);
+		return getValueBoolean(SystemAttribute.DMSDISPATCHER_AWS_CKBOX,
+			false);
 	}
 }
