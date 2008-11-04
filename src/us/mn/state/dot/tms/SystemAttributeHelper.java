@@ -282,6 +282,11 @@ public class SystemAttributeHelper {
 		return getValueInt(SystemAttribute.INCIDENT_RING_4_MILES, 0);
 	}
 
+	/** Get the TESLA host name (and port) */
+	static public String getTeslaHost() {
+		return getValueDef(SystemAttribute.TESLA_HOST, null);
+	}
+
 	/** return a 'missing system attribute' warning message */
 	public static String getWarningMessage(String aname, int avalue) {
 		return getWarningMessage(aname, Integer.toString(avalue));

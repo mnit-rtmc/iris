@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
 import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.StyleSummary;
+import us.mn.state.dot.tms.client.sonar.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -170,6 +171,8 @@ public class CameraManager extends ProxyManager<Camera> {
 		else
 			p.add(new AddPlaylistAction(this, s_model));
 		p.addSeparator();
+		if(TeslaAction.isConfigured())
+			p.add(new TeslaAction<Camera>(proxy));
 		p.add(new PropertiesAction<Camera>(proxy) {
 			protected void do_perform() {
 				showPropertiesForm();

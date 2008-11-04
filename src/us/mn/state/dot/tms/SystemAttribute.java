@@ -75,6 +75,9 @@ public interface SystemAttribute extends SonarObject {
 	/** Incident ring 4 radius */
 	String INCIDENT_RING_4_MILES = "incident_ring_4_miles";
 
+	/** TESLA host name (and TCP port) */
+	String TESLA_HOST = "tesla_host";
+
 	/** CameraViewer */
 	String CAMERAVIEWER_ONSCRN_PTZCTRLS = "cameraviewer_onscrn_ptzctrls";
 	String CAMERAVIEWER_NUM_PRESET_BTNS = "cameraviewer_num_preset_btns";
