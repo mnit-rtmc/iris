@@ -56,7 +56,10 @@ public class OpMessage extends OpDms {
 
 	/** return description of operation, which is displayed in the client */
 	public String getOperationDescription() {
-		return "Sending new message";
+		String text = "Sending new message";
+		if(m_signMessage!=null)
+			text += " (" + m_signMessage.getOwner() + ")";
+		return text;
 	}
 
 	/** 

@@ -44,7 +44,10 @@ public class OpBlank extends OpDms
 
 	/** return description of operation, which is displayed in the client */
 	public String getOperationDescription() {
-		return "Blanking the sign";
+		String text = "Blanking the sign";
+		if(m_mess!=null)
+			text += " (" + m_mess.getOwner() + ")";
+		return text;
 	}
 
 	/** Create the first phase of the operation */
