@@ -142,15 +142,13 @@ public class DetectorImpl extends Device2Impl implements Detector,
 		if(r_node != null)
 			r_node.addDetector(this);
 		try {
-			if(fake != null)
-				fake_det = createFakeDetector(fake);
+			fake_det = createFakeDetector(fake);
 		}
 		catch(ChangeVetoException e) {
 			DET_LOG.log("Invalid FAKE Detector: " + name +
 				" (" + fake + ")");
 			fake = null;
 		}
-		fake_det = null;
 	}
 
 	/** Destroy an object */
@@ -388,7 +386,10 @@ public class DetectorImpl extends Device2Impl implements Detector,
 		throws ChangeVetoException
 	{
 		try {
-			return new FakeDetector(f, namespace);
+			if(f != null)
+				return new FakeDetector(f, namespace);
+			else
+				return null;
 		}
 		catch(NumberFormatException e) {
 			throw new ChangeVetoException(
@@ -407,9 +408,8 @@ public class DetectorImpl extends Device2Impl implements Detector,
 
 	/** Set the fake expression */
 	public void doSetFake(String f) throws TMSException {
-		FakeDetector fd = null;
-		if(f != null) {
-			fd = createFakeDetector(f);
+		FakeDetector fd = createFakeDetector(f);
+		if(fd != null) {
 			// Normalize the fake detector string
 			f = fd.toString();
 			if(f.equals("")) {
