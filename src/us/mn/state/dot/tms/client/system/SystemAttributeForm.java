@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * The system attribute allows administrators to change system-wide policy
@@ -43,10 +44,13 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Frame title */
 	static private final String TITLE = "System Attributes";
 
-	/** Caution text */
-	static protected final String CAUTION = "Use caution: these values " +
-		"are stored in\ncontroller memory.  If changed, new values\n" +
-		"must be sent to each controller.";
+	/** Caution text for ramp meters */
+	static protected final String CAUTION_RMETERS = 
+		I18NMessages.get("SystemAttributeForm.RampMeterCaution");
+
+	/** Caution text for DMS */
+	static protected final String CAUTION_DMS = 
+		I18NMessages.get("SystemAttributeForm.DmsCaution");
 
 	/** Create a SONAR name to check for allowed updates */
 	static protected String createNamespaceString(String name) {
@@ -209,7 +213,7 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.addRow("Minimum Red", min_red);
 		initSpinner(min_red, SystemAttribute.METER_MIN_RED_SECS);
 		panel.setCenter();
-		JTextArea area = new JTextArea(CAUTION);
+		JLabel area = new JLabel(CAUTION_RMETERS);
 		area.setBackground(null);
 		panel.addRow(area);
 		return panel;
@@ -233,7 +237,7 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.addRow("Page Off Time", page_off);
 		initSpinner(page_off, SystemAttribute.DMS_PAGE_OFF_SECS);
 		panel.setCenter();
-		JTextArea area = new JTextArea(CAUTION);
+		JLabel area = new JLabel(CAUTION_DMS);
 		area.setBackground(null);
 		panel.addRow(area);
 		return panel;
