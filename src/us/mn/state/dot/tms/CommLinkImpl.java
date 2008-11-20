@@ -50,6 +50,30 @@ import us.mn.state.dot.tms.comm.vicon.ViconPoller;
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
+	/** Create an inet socket address */
+	static protected InetSocketAddress createSocketAddress(String url)
+		throws IOException
+	{
+		String[] s = url.split(":");
+		if(s.length != 2)
+			throw new IOException("INVALID SOCKET ADDRESS");
+		int p = parseTcpPort(s[1]);
+		return new InetSocketAddress(s[0], p);
+	}
+
+	/** Parse a TCP port */
+	static protected int parseTcpPort(String p) throws IOException {
+		try {
+			int i = Integer.parseInt(p);
+			if(i >= 0 && i <= 65535)
+				return i;
+		}
+		catch(NumberFormatException e) {
+			// Fall out
+		}
+		throw new IOException("INVALID TCP PORT: " + p);
+	}
+
 	/** Load all the comm links */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading comm links...");
@@ -222,26 +246,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return openPoller();
 	}
 
-	/** Parse a TCP port */
-	protected int parseTcpPort(String p) throws IOException {
-		try {
-			int i = Integer.parseInt(p);
-			if(i >= 0 && i <= 65535)
-				return i;
-		}
-		catch(NumberFormatException e) {
-			// Fall out
-		}
-		throw new IOException("INVALID TCP PORT: " + p);
-	}
-
 	/** Create a socket messenger */
 	protected Messenger createSocketMessenger() throws IOException {
-		String[] s = url.split(":");
-		if(s.length != 2)
-			throw new IOException("INVALID SOCKET ADDRESS");
-		int p = parseTcpPort(s[1]);
-		return new SocketMessenger(new InetSocketAddress(s[0], p));
+		return new SocketMessenger(createSocketAddress(url));
 	}
 
 	/** Create an http file messenger */
