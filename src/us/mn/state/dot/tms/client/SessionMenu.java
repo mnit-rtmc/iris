@@ -22,12 +22,13 @@ import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
 
 /** 
- * the FileMenu class provides the File menu for the IrisClient.
+ * The sessoin menu contains menu items for logging in, logging out and exiting
+ * the IRIS client.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class FileMenu extends JMenu {
+public class SessionMenu extends JMenu {
 
 	/** UserManager to use for logging in users */
 	protected final UserManager userManager;
@@ -38,12 +39,9 @@ public class FileMenu extends JMenu {
 	/** Logout menu item */
 	protected final JMenuItem log_out = new JMenuItem("Log Out");
 	
-	/**
-	 * Create a new FileMenu
-	 * @param ua UserManager to use for logging in users.
-	 */	
-	public FileMenu( final UserManager um ) {
-		super( "File" );
+	/** Create a new session menu */	
+	public SessionMenu(final UserManager um) {
+		super("Session");
 		userManager = um;
 		userManager.addLoginListener(new LoginListener() {
 			public void login() {
@@ -55,7 +53,7 @@ public class FileMenu extends JMenu {
 				log_out.setEnabled(false);
 			}
 		});
-		setMnemonic( 'F' );
+		setMnemonic('S');
 		log_in.setMnemonic('L');
 		new ActionJob(log_in) {
 			public void perform() throws Exception {
@@ -71,14 +69,14 @@ public class FileMenu extends JMenu {
 		};
 		log_out.setEnabled(false);
 		add(log_out);
-		add( new JSeparator() );
+		add(new JSeparator());
 		JMenuItem item = new JMenuItem("Exit");
-		item.setMnemonic( 'x' );
+		item.setMnemonic('x');
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				userManager.quit();
 			}
 		};
-		add( item );
+		add(item);
 	}
 }

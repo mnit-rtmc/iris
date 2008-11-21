@@ -141,7 +141,7 @@ public class IrisClient extends JFrame {
 	/** Build all the menus */
 	protected void buildMenus(UserManager a) {
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(new FileMenu(a));
+		menuBar.add(new SessionMenu(a));
 		menuBar.add(new HelpMenu(desktop));
 		this.setJMenuBar( menuBar );
 	}
