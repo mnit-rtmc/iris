@@ -123,9 +123,9 @@ public class OpQueryConfig extends OpDms
 				valid = new Boolean(rr1.getResVal("IsValid"));
 
 				// error message text
-				errmsg=rr1.getResVal("ErrMsg");
-				if (!valid && errmsg.length()<1)
-					errmsg="request failed";
+				errmsg = rr1.getResVal("ErrMsg");
+				if(!valid && errmsg.length() <= 0)
+					errmsg = FAILURE_UNKNOWN;
 
 				// update 
 				complete(mess);

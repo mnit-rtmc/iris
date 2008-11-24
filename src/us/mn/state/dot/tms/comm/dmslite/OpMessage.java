@@ -219,8 +219,10 @@ public class OpMessage extends OpDms {
 			mess.setRespMsgName(resname);
 
 			String addr = Integer.toString(controller.getDrop());
-			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
-			ReqRes rr1 = new ReqRes("Address", addr,new String[] { "IsValid", "ErrMsg" });
+			ReqRes rr0 = new ReqRes("Id", generateId(), 
+				new String[] {"Id"});
+			ReqRes rr1 = new ReqRes("Address", addr,
+				new String[] { "IsValid", "ErrMsg" });
 			mess.add(rr0);
 			mess.add(rr1);
 
@@ -260,8 +262,8 @@ public class OpMessage extends OpDms {
 			{
 				// get valid flag
 				long id = 0;
-				boolean valid=false;
-				String errmsg="";
+				boolean valid = false;
+				String errmsg = "";
 
 				try {
 					// id
@@ -274,9 +276,9 @@ public class OpMessage extends OpDms {
 					    + valid + ".");
 
 					// error message text
-					rr1.getResVal("ErrMsg");
-					if (!valid && errmsg.length()<1)
-						errmsg="request failed";
+					errmsg = rr1.getResVal("ErrMsg");
+					if(!valid && errmsg.length() <= 0)
+						errmsg = FAILURE_UNKNOWN;
 
 				} catch (IllegalArgumentException ex) {
 					System.err.println(
@@ -380,12 +382,15 @@ public class OpMessage extends OpDms {
 				mess.setRespMsgName(resname);
 
 				// id
-				rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
+				rr0 = new ReqRes("Id", generateId(), 
+					new String[] {"Id"});
 				mess.add(rr0);
 
 				// drop
-				String addr = Integer.toString(controller.getDrop());
-				rr1 = new ReqRes("Address", addr,new String[] { "IsValid", "ErrMsg" });
+				String addr = Integer.toString(
+					controller.getDrop());
+				rr1 = new ReqRes("Address", addr,new 
+					String[] { "IsValid", "ErrMsg" });
 				mess.add(rr1);
 			}
 
@@ -440,9 +445,9 @@ public class OpMessage extends OpDms {
 					valid = new Boolean(rr1.getResVal("IsValid"));
 
 					// error message text
-					errmsg=rr1.getResVal("ErrMsg");
-					if (!valid && errmsg.length()<1)
-						errmsg="request failed";
+					errmsg = rr1.getResVal("ErrMsg");
+					if(!valid && errmsg.length() <= 0)
+						errmsg = FAILURE_UNKNOWN;
 
 					System.err.println(
 					    "dmslite.OpMessage.PhaseSendTwoPageMessage.poll(msg): parsed msg values: IsValid:"

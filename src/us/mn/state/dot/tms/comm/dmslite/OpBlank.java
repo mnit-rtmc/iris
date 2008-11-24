@@ -135,8 +135,8 @@ public class OpBlank extends OpDms
 
 				// error message text
 				errmsg = rr1.getResVal("ErrMsg");
-				if(!valid && (errmsg.length() < 1))
-					errmsg = "request failed";
+				if(!valid && errmsg.length() <= 0)
+					errmsg = FAILURE_UNKNOWN;
 
 				// valid resp received?
 				System.err.println(

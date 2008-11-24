@@ -34,6 +34,9 @@ import us.mn.state.dot.tms.utils.STime;
  */
 abstract public class OpDms extends Device2Operation {
 
+	/** failure message for unknown reasons */
+	final static String FAILURE_UNKNOWN = "Failure, unknown reason";
+
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
 

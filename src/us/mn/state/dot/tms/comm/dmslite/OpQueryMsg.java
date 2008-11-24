@@ -274,8 +274,8 @@ public class OpQueryMsg extends OpDms {
 
 				// error message text
 				errmsg = rr1.getResVal("ErrMsg");
-				if (!valid && errmsg.length()<1)
-					errmsg="request failed";
+				if(!valid && errmsg.length() <= 0)
+					errmsg = FAILURE_UNKNOWN;
 
 				if(valid) {
 					// msg text available

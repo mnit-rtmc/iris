@@ -79,7 +79,8 @@ public class OpReset extends OpDms
 
 			// everything else
 			String addr = Integer.toString(controller.getDrop());
-			ReqRes rr1 = new ReqRes("Address", addr, new String[] {"IsValid", "ErrMsg"});
+			ReqRes rr1 = new ReqRes("Address", addr, new 
+				String[] {"IsValid", "ErrMsg"});
 			mess.add(rr1);
 
 			// send msg
@@ -101,8 +102,8 @@ public class OpReset extends OpDms
 
 				// error message text
 				errmsg = rr1.getResVal("ErrMsg");
-				if (!valid && errmsg.length()<1)
-					errmsg="request failed";
+				if(!valid && errmsg.length() <= 0)
+					errmsg = FAILURE_UNKNOWN;
 
 			} catch (IllegalArgumentException ex) {
 				System.err.println(
