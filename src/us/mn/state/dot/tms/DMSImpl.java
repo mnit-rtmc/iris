@@ -211,7 +211,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		model = UNKNOWN;
 		version = UNKNOWN;
 		signAccess = UNKNOWN;
-		signMatrixType = DmsSignMatrixType.CHARACTER;
+		signMatrixType = DMSType.VMS_CHAR;
 		signHeight = 0;
 		signWidth = 0;
 		horizontalBorder = 0;
@@ -1122,21 +1122,21 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 	  * Sign type description, must contain "Full" or "Line"
 	  * to distinguish between types of signs.
 	  */
-	protected transient DmsSignMatrixType signMatrixType;
+	protected transient DMSType signMatrixType;
 
 	/** Set sign type */
-	public void setSignMatrixType(DmsSignMatrixType t) {
+	public void setSignMatrixType(DMSType t) {
 		signMatrixType = t;
 	}
 
 	/** Get sign matrix type as an int (via enum) */
 	public int getSignMatrixType() {
-		return signMatrixType.toInt();
+		return signMatrixType.ordinal();
 	}
 
 	/** Get sign matrix type as a String (via enum) */
 	public String getSignMatrixTypeDescription() {
-		return signMatrixType.toString();
+		return signMatrixType.description;
 	}
 
 	/** Sign height (mm) */
@@ -1324,7 +1324,9 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get an estimate of the horizontal pitch (mm) */
 	public int getEstimatedHorizontalPitch() {
-		if(signMatrixType==DmsSignMatrixType.FULL || signMatrixType==DmsSignMatrixType.LINE) {
+		if(signMatrixType == DMSType.VMS_FULL ||
+		   signMatrixType == DMSType.VMS_LINE)
+		{
 			float w = signWidth - horizontalBorder / 2.0f;
 			int wp = signWidthPixels;	// Avoid race
 			if(w > 0 && wp > 0)
@@ -1348,7 +1350,7 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 
 	/** Get an estimate of the vertical pitch (mm) */
 	public int getEstimatedVerticalPitch() {
-		if(signMatrixType==DmsSignMatrixType.FULL) {
+		if(signMatrixType == DMSType.VMS_FULL) {
 			float h = signHeight - verticalBorder / 2.0f;
 			int hp = signHeightPixels;	// Avoid race
 			if(h > 0 && hp > 0)

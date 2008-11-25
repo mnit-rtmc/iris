@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.DmsSignMatrixType;
+import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -113,7 +113,7 @@ public class OpQueryConfig extends OpDms
 			String signAccess = "";
 			String make = "";
 			String version = "";
-			DmsSignMatrixType type = DmsSignMatrixType.FULL;
+			DMSType type = DMSType.VMS_FULL;
 			int horizBorder = 0;
 			int vertBorder = 0;
 			int horizPitch = 0;
@@ -150,7 +150,7 @@ public class OpQueryConfig extends OpDms
 					// determine matrix type
 					String stype = rr1.getResVal("type");
 					if (stype.toLowerCase().contains("full"))
-						type = DmsSignMatrixType.FULL;
+						type = DMSType.VMS_FULL;
 					else
 						System.err.println("SEVERE: Unknown matrix type read ("+stype+")");
 

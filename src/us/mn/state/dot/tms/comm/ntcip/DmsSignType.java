@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2002  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,14 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
-import us.mn.state.dot.tms.DmsSignMatrixType;
+import us.mn.state.dot.tms.DMSType;
 
 /**
  * Ntcip DmsSignType object
@@ -27,47 +23,40 @@ import us.mn.state.dot.tms.DmsSignMatrixType;
  */
 public class DmsSignType extends DmsSignCfg implements ASN1Integer {
 
-	/** Sign types */
-	static protected final String[] TYPE = { "?", "Other", "BOS", "CMS",
-		"VMS Character", "VMS Line", "VMS Full", "??" };
-
 	/** Create a new DmsSignType object */
 	public DmsSignType() {
 		super(2);
 	}
 
 	/** Get the object name */
-	protected String getName() { return "dmsSignType"; }
+	protected String getName() {
+		return "dmsSignType";
+	}
 
 	/** Sign type */
 	protected int type;
 
 	/** Set the integer value */
-	public void setInteger(int value) { type = value; }
+	public void setInteger(int value) {
+		type = value;
+	}
 
 	/** Get the integer value */
-	public int getInteger() { return type; }
+	public int getInteger() {
+		return type;
+	}
 
 	/** Get the object value as a String */
 	public String getValue() {
-		StringBuffer buffer = new StringBuffer();
-		if(( type & 0x80) != 0) buffer.append("Portable ");
-		buffer.append(TYPE[type & 0x07]);
-		return buffer.toString();
+		StringBuilder b = new StringBuilder();
+		if((type & 0x80) != 0)
+			b.append("Portable ");
+		b.append(getValueEnum().description);
+		return b.toString();
 	}
 
-	/** Get the object value as a DmsSignMatrixType */
-	public DmsSignMatrixType getValueEnum() {
-//FIXME: hi Doug, I'm guessing here...
-		String v=(getValue()==null ? "" : getValue().toLowerCase());
-		if (v.contains("character"))
-			return DmsSignMatrixType.CHARACTER;
-		else if (v.contains("line"))
-			return DmsSignMatrixType.LINE;
-		else if (v.contains("cms"))
-			return DmsSignMatrixType.FULL;
-		System.err.println("WARNING: unknown ntcip sign type encountered: "+v);
-		return DmsSignMatrixType.FULL;
+	/** Get the object value as a DMSType */
+	public DMSType getValueEnum() {
+		return DMSType.fromOrdinal(type & 0x7f);
 	}
-
 }
