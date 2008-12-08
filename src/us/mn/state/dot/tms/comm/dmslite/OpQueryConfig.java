@@ -197,7 +197,7 @@ public class OpQueryConfig extends OpDms
 				dms.setSignAccess(signAccess);    // wizard, modem
 				dms.setMake(make);
 				dms.setVersion(version);
-				dms.setSignMatrixType(type);
+				dms.setDMSType(type);
 				dms.setHorizontalBorder(horizBorder);    // in mm
 				dms.setVerticalBorder(vertBorder);    // in mm
 				dms.setHorizontalPitch(horizPitch);

@@ -181,10 +181,8 @@ public class DMSDefaultDownload extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsHorizontalBorder(50));
 			mess.add(new DmsVerticalBorder(69));
-			mess.add(new VmsVerticalPitch(
-				dms.getEstimatedVerticalPitch()));
-			mess.add(new VmsHorizontalPitch(
-				dms.getEstimatedHorizontalPitch()));
+			mess.add(new VmsVerticalPitch(69));
+			mess.add(new VmsHorizontalPitch(69));
 			mess.setRequest("administrator");
 			return null;
 		}

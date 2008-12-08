@@ -12,21 +12,34 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms;
+package us.mn.state.dot.tms.comm.ntcip;
 
 /**
- * Time interval values.  All values are in seconds.
+ * Ntcip PixelFailureTable node
  *
  * @author Douglas Lau
  */
-public interface Interval {
+abstract class PixelFailureTable extends StatError {
 
-	/** Number of seconds in a minute */
-	int MINUTE = 60;
+	/** Row index */
+	protected final int row;
 
-	/** Number of seconds in an hour */
-	int HOUR = 60 * MINUTE;
+	/** Create a new PixelFailureTable item
+	 * @param r Row in the pixel failure table */
+	protected PixelFailureTable(int r) {
+		super(4);
+		row = r;
+		oid[node++] = 3;
+		oid[node++] = 1;
+		oid[node++] = getTableItem();
+		oid[node] = row;
+	}
 
-	/** Number of seconds in a day */
-	int DAY = 24 * HOUR;
+	/** Create an object description */
+	public final String toString() {
+		return getName() + "." + row + ": " + getValue();
+	}
+
+	/** Get the pixel failure table item (defined in subclasses) */
+	abstract protected int getTableItem();
 }

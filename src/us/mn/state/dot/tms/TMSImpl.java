@@ -81,10 +81,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 	void loadFromVault() throws ObjectVaultException, TMSException,
 		RemoteException
 	{
-		System.err.println( "Loading meters..." );
-		meters.load( RampMeterImpl.class, "id" );
-		System.err.println( "Loading dms list..." );
-		dmss.load( DMSImpl.class, "id" );
 		System.err.println( "Loading lane control signals..." );
 		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
@@ -150,7 +146,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		new DetectorXmlWriter(namespace).write();
 		corridors = new CorridorManager(namespace);
 		new R_NodeXmlWriter(corridors).write();
-		meters.writeXml();
+		new RampMeterWriter(namespace).write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 
@@ -209,7 +205,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		/** Job to be performed on each completion */
 		protected final Job job = new Job() {
 			public void perform() {
-				dmss.notifyStatus();
 				lcss.notifyStatus();
 			}
 		};
@@ -259,12 +254,12 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 					e.printStackTrace();
 				}
 				int interval = calculateInterval(stamp);
-				meters.computeDemand(interval);
 				if(!isHoliday(stamp)) {
+					// FIXME: iterate through timing plans
+					// and validate them all
 					meters.validateTimingPlans(interval);
 					dmss.updateTravelTimes(interval);
 				}
-				meters.notifyStatus();
 			}
 		};
 
@@ -332,24 +327,12 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 	}
 
-	/** Master timing plan list */
-	protected final TimingPlanListImpl plans;
-
-	/** Master ramp meter list */
-	protected final RampMeterListImpl meters;
-
-	/** Dynamic message sign list */
-	protected final DMSListImpl dmss;
-
 	/** Lane Control Signals list */
 	protected final LCSListImpl lcss;
 
 	/** Initialize the subset list */
 	protected void initialize() throws RemoteException {
 		// This is an ugly hack, but it works
-		planList = plans;
-		meterList = meters;
-		dmsList = dmss;
 		lcsList = lcss;
 	}
 
@@ -358,24 +341,10 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		ObjectVaultException
 	{
 		super();
-		plans = new TimingPlanListImpl();
-		meters = new RampMeterListImpl();
-		dmss = new DMSListImpl();
 		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
 	}
-
-	/** Get the timing plan list */
-	public TimingPlanList getTimingPlanList() { return plans; }
-
-	/** Get the ramp meter list */
-	public DeviceList getRampMeterList() {
-		return meters;
-	}
-
-	/** Get the dynamic message sign list */
-	public DMSList getDMSList() { return dmss; }
 
 	/** Get the lane control signal list */
 	public LCSList getLCSList() {

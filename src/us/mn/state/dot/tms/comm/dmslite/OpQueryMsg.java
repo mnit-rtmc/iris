@@ -201,8 +201,9 @@ public class OpQueryMsg extends OpDms
 			bm.setBitmap(nbm);
 
 			// resize to actual sign width
-			BitmapGraphic bmgResize = 
-				bm.resizeWidth(m_dms.getSignWidthPixels());
+			BitmapGraphic bmgResize = new BitmapGraphic(
+				m_dms.getSignWidthPixels(), bm.height);
+			bmgResize.copy(bm);
 
 			bitmaps.put(pg, bmgResize);
 		}

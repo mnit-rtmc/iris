@@ -24,9 +24,6 @@ public interface Constants {
 	/** Number of seconds per data sample */
 	public int SECONDS_PER_SAMPLE = 30;
 
-	/** Number of seconds in one hour */
-	public int SECONDS_PER_HOUR = 3600;
-
 	/** Number of data samples in one day */
 	public int SAMPLES_PER_DAY = 86400 / SECONDS_PER_SAMPLE;
 

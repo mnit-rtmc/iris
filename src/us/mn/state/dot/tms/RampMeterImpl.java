@@ -16,132 +16,308 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Arrays;
+import java.sql.ResultSet;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.rmi.RemoteException;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
+import java.util.TreeSet;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.MeterPoller;
 
 /**
- * Each ramp meter is an object of this class.
+ * A ramp meter is a traffic signal which meters the flow of traffic on a
+ * freeway entrance ramp.
  *
  * @author Douglas Lau
  */
-public class RampMeterImpl extends TrafficDeviceImpl
-	implements RampMeter, Constants, Storable
-{
-	/** ObjectVault table name */
-	static public final String tableName = "ramp_meter";
+public class RampMeterImpl extends Device2Impl implements RampMeter {
 
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
+	/** Default maximum wait time (in seconds) */
+	static protected final int DEFAULT_MAX_WAIT = 240;
 
 	/** Meter debug log */
 	static protected final DebugLog METER_LOG = new DebugLog("meter");
 
-	/** Date instance for compute current minute */
-	static protected final Date DATE = new Date();
-
-	/** Calendar instance for computing current minute */
-	static protected final Calendar STAMP = Calendar.getInstance();
-
-	/** Get the current interval of the day */
-	static protected int currentInterval() {
-		synchronized(STAMP) {
-			DATE.setTime(System.currentTimeMillis());
-			STAMP.setTime(DATE);
-			return STAMP.get(Calendar.HOUR_OF_DAY) * 120 +
-				STAMP.get(Calendar.MINUTE) * 2 +
-				STAMP.get(Calendar.SECOND) / 30;
-		}
+	/** Filter a releae rate for valid range */
+	static protected int filterRate(int r) {
+		r = Math.max(r, SystemAttributeHelper.getMeterMinRelease());
+		return Math.min(r, SystemAttributeHelper.getMeterMaxRelease());
 	}
 
-	/** Notify all observers for an update */
-	public void notifyUpdate() {
-		super.notifyUpdate();
-		meterList.update(id);
+	/** Calculate the minimum of two (possibly null) integers */
+	static protected Integer minimum(Integer r0, Integer r1) {
+		if(r0 == null)
+			return r1;
+		if(r1 == null)
+			return r0;
+		return Math.min(r0, r1);
 	}
 
-	/** Status code from last notification */
-	protected transient int status_code;
+	/** Ramp meter / timing plan table mapping */
+	static protected TableMapping mapping;
 
-	/** Notify all observers for a status change */
-	public void notifyStatus() {
-		int s = getStatusCode();
-		if(s != status_code) {
-			status_code = s;
-			final String meter_id = id;
-			WORKER.addJob(new Job() {
-				public void perform() {
-					// NOTE: this grabs the RampMeterList
-					// lock, so must be done on the WORKER
-					// thread to avoid deadlocks
-					meterList.update(meter_id);
-				}
-			});
-		}
-		super.notifyStatus();
-	}
-
-	/** Create a new ramp meter */
-	public RampMeterImpl(String id) throws TMSException,
-		RemoteException
-	{
-		super(id);
-		controlMode = MODE_UNAVAILABLE;
-		singleRelease = false;
-		plans = new MeterPlanImpl[0];
-		policePanelFlash = false;
-		metering = false;
-		shouldMeter = false;
-		minimum = MAX_RELEASE_RATE;
-		demand = MIN_RELEASE_RATE;
-		releaseRate = MAX_RELEASE_RATE;
-		lock = null;
-	}
-
-	/** Create a ramp meter from an ObjectVault field map */
-	protected RampMeterImpl(FieldMap fields) throws RemoteException {
-		super(fields);
-		storage = fields.getInt("storage");
-		maxWait = fields.getInt("maxWait");
-		policePanelFlash = false;
-		metering = false;
-		shouldMeter = false;
-		minimum = MAX_RELEASE_RATE;
-		demand = MIN_RELEASE_RATE;
-		releaseRate = MAX_RELEASE_RATE;
-		lock = null;
+	/** Load all the ramp meters */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading ramp meters...");
+		namespace.registerType(SONAR_TYPE, RampMeterImpl.class);
+		mapping = new TableMapping(store, "ramp_meter", "timing_plan");
+		store.query("SELECT name, geo_loc, controller, pin, notes, " +
+			"meter_type, storage, max_wait, camera, " +
+			"lock FROM " + SONAR_TYPE  + ";",
+			new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new RampMeterImpl(namespace,
+					row.getString(1),	// name
+					row.getString(2),	// geo_loc
+					row.getString(3),	// controller
+					row.getInt(4),		// pin
+					row.getString(5),	// notes
+					row.getInt(6),		// meter_type
+					row.getInt(7),		// storage
+					row.getInt(8),		// max_wait
+					row.getString(9),	// camera
+					row.getInt(10)		// lock
+				));
+			}
+		});
 	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
-		return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("geo_loc", geo_loc);
+		map.put("controller", controller);
+		map.put("pin", pin);
+		map.put("notes", notes);
+		map.put("meter_type", meter_type.ordinal());
+		map.put("storage", storage);
+		map.put("max_wait", max_wait);
+		map.put("camera", camera);
+		map.put("lock", lock.ordinal());
+		return map;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new ramp meter with a string name */
+	public RampMeterImpl(String n) throws TMSException, SonarException {
+		super(n);
+		GeoLocImpl g = new GeoLocImpl(name);
+		MainServer.server.createObject(g);
+		geo_loc = g;
+	}
+
+	/** Create a ramp meter */
+	protected RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
+		int p, String nt, int t, int st, int w, Camera cam, int lk)
+	{
+		super(n, c, p, nt);
+		geo_loc = loc;
+		meter_type = RampMeterType.fromOrdinal(t);
+		storage = st;
+		max_wait = w;
+		camera = cam;
+		lock = RampMeterLock.fromOrdinal(lk);
+		rate = null;
+	}
+
+	/** Create a ramp meter */
+	protected RampMeterImpl(Namespace ns, String n, String loc, String c,
+		int p, String nt, int t, int st, int w, String cam, int lk)
+	{
+		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
+			(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
+			c), p, nt, t, st, w,
+			(Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), lk);
 	}
 
 	/** Initialize the transient state */
-	public void initTransients() throws ObjectVaultException,
-		TMSException, RemoteException
-	{
+	public void initTransients() {
 		super.initTransients();
-		LinkedList p = new LinkedList();
-		Set s = plan_mapping.lookup("traffic_device", this);
-		Iterator it = s.iterator();
-		while(it.hasNext())
-			p.add(vault.load(it.next()));
-		plans = (MeterPlanImpl [])p.toArray(new MeterPlanImpl[0]);
-		Arrays.sort(plans);
+		TreeSet<TimingPlanImpl> p = new TreeSet<TimingPlanImpl>();
+		for(Object o: mapping.lookup(SONAR_TYPE, this)) {
+			p.add((TimingPlanImpl)namespace.lookupObject(
+				TimingPlan.SONAR_TYPE, (String)o));
+		}
+		plans = p.toArray(new TimingPlanImpl[0]);
+		lookupGreenDetector();
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		store.destroy(geo_loc);
+	}
+
+	/** Device location */
+	protected GeoLocImpl geo_loc;
+
+	/** Get the device location */
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Ramp meter type */
+	protected RampMeterType meter_type;
+
+	/** Set ramp meter type */
+	public void setMeterType(int t) {
+		meter_type = RampMeterType.fromOrdinal(t);
+	}
+
+	/** Set the ramp meter type */
+	public void doSetMeterType(int t) {
+		if(t == meter_type.ordinal())
+			return;
+		store.update(this, "meter_type", t);
+		setMeterType(t);
+	}
+
+	/** Get the ramp meter type */
+	public int getMeterType() {
+		return meter_type.ordinal();
+	}
+
+	/** Queue storage length (in feet) */
+	protected int storage = 1;
+
+	/** Set the queue storage length (in feet) */
+	public void setStorage(int s) {
+		storage = s;
+	}
+
+	/** Set the queue storage length (in feet) */
+	public void doSetStorage(int s) throws TMSException {
+		if(s == storage)
+			return;
+		if(s < 1)
+			throw new ChangeVetoException("Storage must be > 0");
+		store.update(this, "storage", s);
+		setStorage(s);
+	}
+
+	/** Get the queue storage length (in feet) */
+	public int getStorage() {
+		return storage;
+	}
+
+	/** Maximum allowed meter wait time (in seconds) */
+	protected int max_wait = DEFAULT_MAX_WAIT;
+
+	/** Set the maximum allowed meter wait time (in seconds) */
+	public void setMaxWait(int w) {
+		max_wait = w;
+	}
+
+	/** Set the maximum allowed meter wait time (in seconds) */
+	public void doSetMaxWait(int w) throws TMSException {
+		if(w == max_wait)
+			return;
+		if(w < 1)
+			throw new ChangeVetoException("Wait must be > 0");
+		store.update(this, "max_wait", w);
+		setMaxWait(w);
+	}
+
+	/** Get the maximum allowed meter wait time (in seconds) */
+	public int getMaxWait() {
+		return max_wait;
+	}
+
+	/** Camera from which this can be seen */
+	protected Camera camera;
+
+	/** Set the verification camera */
+	public void setCamera(Camera c) {
+		camera = c;
+	}
+
+	/** Set the verification camera */
+	public void doSetCamera(Camera c) throws TMSException {
+		if(c == camera)
+			return;
+		store.update(this, "camera", c);
+		setCamera(c);
+	}
+
+	/** Get verification camera */
+	public Camera getCamera() {
+		return camera;
+	}
+
+	/** Metering rate lock status */
+	protected RampMeterLock lock = RampMeterLock.OFF;
+
+	/** Set the ramp meter lock status */
+	public void setLock(int l) {
+		lock = RampMeterLock.fromOrdinal(l);
+	}
+
+	/** Set the ramp meter lock (update) */
+	protected void setLock(RampMeterLock l) throws TMSException {
+		if(l == lock)
+			return;
+		store.update(this, "lock", l.ordinal());
+		lock = l;
+	}
+
+	/** Set the ramp meter lock status */
+	public void doSetLock(int l) throws TMSException {
+		if(RampMeterLock.isControllerLock(l))
+			throw new ChangeVetoException("Invalid lock value");
+		setLock(RampMeterLock.fromOrdinal(l));
+	}
+
+	/** Get the ramp meter lock status */
+	public int getLock() {
+		return lock.ordinal();
+	}
+
+	/** Is the metering rate locked? */
+	boolean isLocked() {
+		return lock != RampMeterLock.OFF;
+	}
+
+	/** Set the status of the police panel switch */
+	public void setPolicePanel(boolean p) {
+		if(p) {
+			if(lock == RampMeterLock.OFF) {
+				setLock(RampMeterLock.POLICE_PANEL);
+				notifyAttribute("lock");
+			}
+		} else {
+			if(lock == RampMeterLock.POLICE_PANEL) {
+				setLock(RampMeterLock.OFF);
+				notifyAttribute("lock");
+			}
+		}
+	}
+
+	/** Set the status of manual metering */
+	public void setManual(boolean m) {
+		if(m) {
+			if(lock == RampMeterLock.OFF) {
+				setLock(RampMeterLock.MANUAL);
+				notifyAttribute("lock");
+			}
+		} else {
+			if(lock == RampMeterLock.MANUAL) {
+				setLock(RampMeterLock.OFF);
+				notifyAttribute("lock");
+			}
+		}
 	}
 
 	/** Get the meter poller */
@@ -154,581 +330,160 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		return null;
 	}
 
-	/** Get the number of milliseconds the controller has been failed */
-	public long getFailMillis() {
-		ControllerImpl c = getControllerImpl();
-		if(c != null)
-			return c.getFailMillis();
-		else
-			return Long.MAX_VALUE;
-	}
-
-	/** Green count detector */
-	protected transient DetectorImpl green_det;
-
-	/** Lookup the green count detector */
-	protected void lookupGreenDetector() {
-		DetectorImpl[] g = getDetectorSet().getDetectorSet(
-			LaneType.GREEN).toArray();
-		if(g.length > 0)
-			green_det = g[0];
-		else
-			green_det = null;
-	}
-
-	/** Ramp meter control mode (MODE_STANDBY, MODE_CENTRAL, etc.) */
-	protected int controlMode;
-
-	/** Set the ramp meter control mode */
-	public synchronized void setControlMode(int m) throws TMSException {
-		if(m == controlMode)
-			return;
-		if(m < 0 || m >= MODE.length)
-			throw new ChangeVetoException("Invalid mode");
-		if((m != MODE_UNAVAILABLE) && !isActive())
-			throw new ChangeVetoException("Meter not active");
-		store.update(this, "controlMode", m);
-		controlMode = m;
-	}
-
-	/** Get the ramp meter control mode */
-	public int getControlMode() {
-		return controlMode;
-	}
-
-	/** Test if the ramp meter control mode is unavailable */
-	public boolean isModeUnavailable() {
-		return getControlMode() == MODE_UNAVAILABLE || !isActive();
-	}
-
-	/** Test if the ramp meter status is unavailable */
-	public boolean isUnavailable() {
-		return isModeUnavailable() || isPolicePanelFlash();
-	}
-
-	/** Single release flag (false indicates dual/alternate release) */
-	protected boolean singleRelease;
-
-	/** Set single release (true) or dual/alternate release (false) */
-	public synchronized void setSingleRelease(boolean s)
-		throws TMSException
-	{
-		if(s == singleRelease)
-			return;
-		store.update(this, "singleRelease", s);
-		singleRelease = s;
-	}
-
-	/** Is this a single or dual/alternate release ramp? */
-	public boolean isSingleRelease() {
-		return singleRelease;
-	}
-
 	/** Array of timing plans for this meter */
-	protected transient MeterPlanImpl[] plans;
+	protected TimingPlanImpl[] plans = new TimingPlanImpl[0];
 
-	/** Add a simple timing plan to the ramp meter */
-	public void addSimpleTimingPlan(int period) throws TMSException,
-		RemoteException
-	{
-		addTimingPlan(new SimplePlanImpl(period));
-	}
-
-	/** Add a stratified timing plan to the ramp meter */
-	public void addStratifiedTimingPlan(int period) throws TMSException,
-		RemoteException
-	{
-		GeoLoc loc = lookupGeoLoc();
-		Road freeway = loc.getFreeway();
-		if(freeway != null) {
-			short freeDir = loc.getFreeDir();
-			MeterPlanImpl plan = meterList.findStratifiedPlan(
-				freeway, freeDir, period);
-			if(plan == null)
-				plan = new StratifiedPlanImpl(period);
-			addTimingPlan(plan);
-		}
-	}
-
-	/** Add a timing plan to the ramp meter */
-	protected synchronized void addTimingPlan(MeterPlanImpl plan)
-		throws TMSException
-	{
-		MeterPlanImpl[] p = new MeterPlanImpl[plans.length + 1];
-		for(int i = 0; i < plans.length; i++) {
-			p[i] = plans[i];
-			if(p[i].equals(plan))
-				return;
-		}
-		p[plans.length] = plan;
-		try {
-			vault.save(plan, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
-		setTimingPlans(p);
-	}
-
-	/** Remove a timing plan from the ramp meter */
-	public synchronized void removeTimingPlan(MeterPlan plan)
-		throws TMSException
-	{
-		MeterPlanImpl old_plan = null;
-		MeterPlanImpl[] p = new MeterPlanImpl[plans.length - 1];
-		for(int i = 0, j = 0; i < plans.length; i++) {
-			if(plans[i].equals(plan))
-				old_plan = plans[i];
-			else {
-				p[j] = plans[i];
-				j++;
-			}
-		}
-		if(old_plan == null)
-			throw new ChangeVetoException("Plan not found");
-		boolean lastReference = old_plan.isDeletable();
-		setTimingPlans(p);
-		if(lastReference)
-			old_plan.notifyDelete();
-	}
-
-	/** Ensure stratified plans are for the right corridor */
-	public void checkStratifiedPlans() throws TMSException {
-		StratifiedPlanImpl am_plan = null;
-		StratifiedPlanImpl pm_plan = null;
-		GeoLoc loc = lookupGeoLoc();
-		Road freeway = loc.getFreeway();
-		if(freeway != null) {
-			short freeDir = loc.getFreeDir();
-			am_plan = meterList.findStratifiedPlan(freeway,
-				freeDir, TimingPlan.AM);
-			pm_plan = meterList.findStratifiedPlan(freeway,
-				freeDir, TimingPlan.PM);
-		}
-		removeInvalidStratifiedPlans(am_plan, pm_plan);
-	}
-
-	/** Remove all stratified timing plans from the ramp meter */
-	protected synchronized void removeInvalidStratifiedPlans(
-		StratifiedPlanImpl am_plan, StratifiedPlanImpl pm_plan)
-		throws TMSException
-	{
-		MeterPlanImpl[] p = plans;
-		for(int i = 0; i < p.length; i++) {
-			MeterPlanImpl plan = p[i];
-			if(plan instanceof StratifiedPlanImpl) {
-				if((plan != am_plan) && (plan != pm_plan))
-					removeTimingPlan(plan);
-			}
-		}
+	/** Set all current timing plans which affect this meter */
+	public void setTimingPlans(TimingPlan[] p) {
+		// NOTE: this is needed for RampMeter interface --
+		//       doSetTimingPlans will always be used
 	}
 
 	/** Set all current timing plans which affect this meter */
-	protected void setTimingPlans(MeterPlanImpl[] p) throws TMSException {
-		Arrays.sort(p);
-		if(Arrays.equals(p, plans))
-			return;
-		plan_mapping.update("traffic_device", this, p);
-		plans = p;
+	public void doSetTimingPlans(TimingPlan[] p) throws TMSException {
+		TreeSet<Storable> pset = new TreeSet<Storable>();
+		for(TimingPlan plan: p) {
+			if(plan instanceof TimingPlanImpl)
+				pset.add((TimingPlanImpl)plan);
+			else
+				throw new ChangeVetoException("Invalid plan");
+		}
+		mapping.update(SONAR_TYPE, this, pset);
+		plans = pset.toArray(new TimingPlanImpl[0]);
 	}
 
 	/** Get an array of all timing plans which affect this meter */
-	public MeterPlan[] getTimingPlans() {
-		MeterPlanImpl[] plans = this.plans;	// Avoid race
-		MeterPlan[] p = new MeterPlan[plans.length];
+	public TimingPlan[] getTimingPlans() {
+		TimingPlanImpl[] plans = this.plans;	// Avoid race
+		TimingPlan[] p = new TimingPlan[plans.length];
 		for(int i = 0; i < plans.length; i++)
 			p[i] = plans[i];
 		return p;
 	}
 
-	/** Find a stratified timing plan in the given time period */
-	public StratifiedPlanImpl findStratifiedPlan(int period) {
-		MeterPlanImpl[] plans = this.plans;	// Avoid race
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i] instanceof StratifiedPlanImpl) {
-				StratifiedPlanImpl plan =
-					(StratifiedPlanImpl)plans[i];
-				if(plan.checkPeriod(period))
-					return plan;
-			}
+	/** Get meter plan states */
+	protected TreeSet<MeterPlanState> getMeterPlanStates() {
+		TimingPlanImpl[] plans = this.plans;	// Avoid race
+		TreeSet<MeterPlanState> states = new TreeSet<MeterPlanState>();
+		for(TimingPlanImpl plan: plans) {
+			TimingPlanState s = plan.getState();
+			if(s instanceof MeterPlanState && s.isWithin())
+				states.add((MeterPlanState)s);
 		}
-		return null;
+		return states;
 	}
 
-	/** Get the target rate for the specified minute */
-	public int getTarget(int minute) {
-		MeterPlanImpl[] plans = this.plans;	// Avoid race
-		int target = RampMeter.MAX_RELEASE_RATE;
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i] instanceof SimplePlanImpl) {
-				SimplePlanImpl plan = (SimplePlanImpl)plans[i];
-				if(minute >= plan.getStartTime() &&
-					minute <= plan.getStopTime())
-				{
-					target = Math.min(target,
-						plan.getTarget(this));
-				}
-			}
+	/** Get the minimum release rate (vehicles per hour) */
+	public int getMinimum() {
+		int m = SystemAttributeHelper.getMeterMinRelease();
+		if(isFailed())
+			m = Math.max(m, getTarget());
+		return filterRate(m);
+	}
+
+	/** Get the target rate for the current time */
+	public int getTarget() {
+		int t = SystemAttributeHelper.getMeterMaxRelease();
+		for(MeterPlanState s: getMeterPlanStates()) {
+			if(s instanceof SimplePlanState)
+				t = Math.min(t, s.getPlan().getTarget());
 		}
-		return target;
+		return t;
 	}
 
-	/** Police panel flash flag */
-	protected transient boolean policePanelFlash;
+	/** Ramp meter queue status */
+	protected RampMeterQueue queue = RampMeterQueue.UNKNOWN;
 
-	/** Set the police panel flash flag */
-	public void setPolicePanelFlash( boolean p ) {
-		policePanelFlash = p;
+	/** Set the queue status */
+	protected void setQueue(RampMeterQueue q) {
+		queue = q;
 	}
 
-	/** Is the ramp meter in police panel flash? */
-	public boolean isPolicePanelFlash() {
-		return policePanelFlash;
-	}
-
-	/** Metering on/off flag */
-	protected transient boolean metering;
-
-	/** Metering command on/off flag */
-	protected transient boolean shouldMeter;
-
-	/** Set the metering status read from the controller */
-	public void setMetering(boolean m, boolean central) {
-		if(isUnavailable() || !central)
-			shouldMeter = false;
-		metering = m;
-		if(metering != shouldMeter) {
-			MeterPoller mp = getMeterPoller();
-			if(mp != null) {
-				if(shouldMeter)
-					mp.startMetering(this);
-				else
-					mp.stopMetering(this);
+	/** Calculate the queue status */
+	protected RampMeterQueue calculateQueue() {
+		if(isFailed())
+			return RampMeterQueue.UNKNOWN;
+		if(isMetering()) {
+			for(MeterPlanState s: getMeterPlanStates()) {
+				RampMeterQueue q = s.getQueue(this);
+				if(q != RampMeterQueue.UNKNOWN)
+					return q;
 			}
-		}
+			return RampMeterQueue.UNKNOWN;
+		} else
+			return RampMeterQueue.EMPTY;
 	}
+
+	/** Update the queue status */
+	protected void updateQueue() {
+		setQueue(calculateQueue());
+		notifyAttribute("queue");
+	}
+
+	/** Get the queue status */
+	public int getQueue() {
+		return queue.ordinal();
+	}
+
+	/** Current metering status */
+	protected boolean metering = false;
 
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
 		return metering;
 	}
 
-	/** Start metering this ramp meter */
-	public void startMetering() throws TMSException {
-		if(isModeUnavailable())
-			throw new ChangeVetoException("Unavailable: " + id);
-		if(isPolicePanelFlash())
-			throw new ChangeVetoException("Police panel: " + id);
-		shouldMeter = true;
-		MeterPoller mp = getMeterPoller();
-		if(mp != null)
-			mp.startMetering(this);
-	}
+	/** Release rate (vehicles per hour) */
+	protected transient Integer rate = null;
 
-	/** Stop metering this ramp meter */
-	public void stopMetering() {
-		shouldMeter = false;
-		MeterPoller mp = getMeterPoller();
-		if(mp != null)
-			mp.stopMetering(this);
-	}
-
-	/** Minimum release rate (vehicles per hour) */
-	protected transient int minimum;
-
-	/** Set the minimum release rate (vehicles per hour) */
-	public void setMinimum(int m) {
-		if(m < MIN_RELEASE_RATE)
-			m = MIN_RELEASE_RATE;
-		if(m > MAX_RELEASE_RATE)
-			m = MAX_RELEASE_RATE;
-		minimum = m;
-		setReleaseRate(releaseRate);
-	}
-
-	/** Get the minimum release rate (vehicles per hour). */
-	public int getMinimum() {
-		return minimum;
-	}
-
-	/** Current estimated ramp demand (vehicles per hour) */
-	protected transient int demand;
-
-	/** Set the ramp meter demand (vehicles per hour) */
-	protected void setDemand(int d) {
-		if(d < MIN_RELEASE_RATE)
-			d = MIN_RELEASE_RATE;
-		if(d > MAX_RELEASE_RATE)
-			d = MAX_RELEASE_RATE;
-		demand = d;
-	}
-
-	/** Get the current estimated ramp demand (vehicles per hour). */
-	public int getDemand() {
-		return demand;
-	}
-
-	/** Update the 30-second green count */
-	public void updateGreenCount(Calendar stamp, int g) throws IOException {
-		DetectorImpl det = green_det;
-		if(det != null) {
-			if(singleRelease) {
-				if((g % 2) != 0)
-					g++;
-				g /= 2;
-			}
-			if(g == 0 && isMetering())
-				return;
-			det.storeData30Second(stamp, g, MISSING_DATA);
+	/** Set the release rate (vehicles per hour) */
+	public void setRate(Integer r) {
+		if(r != null) {
+			int m = getMinimum();
+			if(r < m)
+				r = m;
+			rate = filterRate(r);
 		} else
-			METER_LOG.log("No green det for " + id);
+			rate = null;
 	}
 
-	/** Update the 5-minute green count */
-	public void updateGreenCount5(Calendar stamp, int g)
-		throws IOException
-	{
-		DetectorImpl det = green_det;
-		if(det != null) {
-			if(singleRelease) {
-				if((g % 2) != 0)
-					g++;
-				g /= 2;
-			}
-			det.storeData5Minute(stamp, g, MISSING_DATA);
-		} else
-			METER_LOG.log("No green det for " + id);
+	/** Set the release rate (and notify clients) */
+	public void setRateNotify(Integer r) {
+		setRate(r);
+		notifyAttribute("rate");
 	}
 
-	/** Determine whether a queue exists at the ramp meter */
-	public boolean queueExists() {
-		if(metering) {
-			MeterPlanImpl[] plans = this.plans;	// Avoid race
-			for(int i = 0; i < plans.length; i++) {
-				if(plans[i].checkQueue(this))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/** Current ramp meter release rate (vehicles per hour) */
-	protected transient int releaseRate;
-
-	/** Set the ramp meter release rate (vehicles per hour) */
-	public void setReleaseRate(int r) {
-		if(r < minimum)
-			r = minimum;
-		if(r > MAX_RELEASE_RATE)
-			r = MAX_RELEASE_RATE;
-		releaseRate = r;
-	}
-
-	/** Get the current ramp meter release rate (vehciels per hour) */
-	public int getReleaseRate() {
-		return releaseRate;
-	}
-
-	/** Grow the length of the queue by decreasing the demand */
-	public void growQueue() {
-		setDemand(Math.round(getDemand() * 0.9f));
-		validateTimingPlans(currentInterval());
-	}
-
-	/** Shrink the length of the queue by increasing the demand */
-	public void shrinkQueue() {
-		setDemand(Math.round(getDemand() * 1.1f));
-		validateTimingPlans(currentInterval());
-	}
-
-	/** Compute the ramp demand (and minimum release rate) */
-	public void computeDemand(int interval) {
-		MeterPlanImpl[] plans = this.plans;	// Avoid race
-		int min = MIN_RELEASE_RATE;
-		int dem = MIN_RELEASE_RATE;
-		for(int i = 0; i < plans.length; i++) {
-			dem = Math.max(dem, plans[i].computeDemand(this,
-				interval));
-			min = Math.max(min, plans[i].getMinimum(this));
-		}
-		if(isFailed())
-			min = Math.max(min, getTarget(interval / 2));
-		setMinimum(min);
-		if(!isLocked())
-			setDemand(dem);
+	/** Get the release rate (vehciels per hour) */
+	public Integer getRate() {
+		return rate;
 	}
 
 	/** Compute the current release rate */
-	protected int computeReleaseRate(int interval) {
-		if(isLocked())
-			return getDemand();
-		MeterPlanImpl[] plans = this.plans;	// Avoid race
-		int release = MAX_RELEASE_RATE;
-		for(int i = 0; i < plans.length; i++) {
-			release = Math.min(release,
-				plans[i].validate(this, interval));
+	protected void computeReleaseRate() {
+		if(!isLocked()) {
+			Integer r = null;
+			for(MeterPlanState s: getMeterPlanStates())
+				r = minimum(r, s.getRate(this));
+			setRateNotify(r);
 		}
-		return release;
 	}
 
 	/** Validate all timing plans for this meter */
-	public void validateTimingPlans(int interval) {
-		setReleaseRate(computeReleaseRate(interval));
-		updateReleaseRate();
-		notifyStatus();
+	public void validateTimingPlans() {
+		updateQueue();
+		computeReleaseRate();
+		sendReleaseRate();
 	}
 
-	/** Update the ramp meter release rate */
-	public void updateReleaseRate() {
-		if(isUnavailable() || !isMetering())
-			return;
+	/** Send the ramp meter release rate */
+	public void sendReleaseRate() {
 		MeterPoller mp = getMeterPoller();
 		if(mp != null)
-			mp.sendReleaseRate(this, releaseRate);
-	}
-
-	/** metering rate lock, if one is set.*/
-	protected transient RampMeterLock lock;
-	
-	/** Is the metering rate locked? */
-	public boolean isLocked() {
-		return lock != null;
-	}
-
-	/** Lock or unlock the metering rate */
-	public void setLocked(boolean l, String reason) {
-		if(l == isLocked())
-			return;
-		if(l)
-			lock = new RampMeterLock(getUserName(), reason); 
-		else
-			lock = null;
-		setDemand(getReleaseRate());
-		notifyStatus();
-	}
-
-	/** Get the name of the user who set the lock */
-	public RampMeterLock getLock() {
-		return lock;
-	}
-
-	/** Calculate the red time.
-	 * @param release_rate Release rate (vehicles per hour)
-	 * @return Red time (seconds) */
-	public float calculateRedTime(int release_rate) {
-		float secs_per_veh = SECONDS_PER_HOUR / (float)release_rate;
-		if(singleRelease)
-			secs_per_veh /= 2;
-		// FIXME: these could be computed during meter startup...
-		float green = SystemAttributeHelper.getMeterGreenSecs();
-		float yellow = SystemAttributeHelper.getMeterYellowSecs();
-		float min_red = SystemAttributeHelper.getMeterMinRedSecs();
-		float red_time = secs_per_veh - (green + yellow);
-		return Math.max(red_time, min_red);
-	}
-
-	/** Calculate the release rate
-	 * @param red_time Red time (seconds)
-	 * @return Release rate (vehicles per hour) */
-	public int calculateReleaseRate(float red_time) {
-		float green = SystemAttributeHelper.getMeterGreenSecs();
-		float yellow = SystemAttributeHelper.getMeterYellowSecs();
-		float secs_per_veh = red_time + yellow + green;
-		if(singleRelease)
-			secs_per_veh *= 2;
-		return Math.round(SECONDS_PER_HOUR / secs_per_veh);
-	}
-
-	/** Get the current status code */
-	public int getStatusCode() {
-		if(!isActive())
-			return STATUS_INACTIVE;
-		if(isFailed())
-			return STATUS_FAILED;
-		if(isUnavailable())
-			return STATUS_UNAVAILABLE;
-		if(isMetering())
-			return getMeteringStatus();
-		if(isLocked())
-			return STATUS_LOCKED_OFF;
-		else
-			return STATUS_AVAILABLE;
-	}
-
-	/** Get the current status code if metering */
-	protected int getMeteringStatus() {
-		if(isLocked())
-			return STATUS_LOCKED_ON;
-		int s = STATUS_METERING;
-		MeterPlanImpl[] plans = this.plans;	// Avoid race
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i].checkQueueBackup(this))
-				return STATUS_QUEUE_BACKUP;
-			if(plans[i].checkCongested(this))
-				return STATUS_CONGESTED;
-			if(plans[i].checkWarning(this))
-				return STATUS_WARNING;
-			if(plans[i].checkQueue(this))
-				s = STATUS_QUEUE;
-		}
-		return s;
-	}
-
-	/** Queue storage length (in feet) */
-	protected int storage = 1;
-
-	/** Set the queue storage length (in feet) */
-	public synchronized void setStorage(int s) throws TMSException {
-		if(s == storage)
-			return;
-		if(s < 1)
-			throw new ChangeVetoException("Storage must be > 0");
-		store.update(this, "storage", s);
-		storage = s;
-	}
-
-	/** Get the queue storage length (in feet) */
-	public int getStorage() {
-		return storage;
-	}
-
-	/** Maximum allowed meter wait time (in seconds) */
-	protected int maxWait = DEFAULT_MAX_WAIT;
-
-	/** Set the maximum allowed meter wait time (in seconds) */
-	public synchronized void setMaxWait(int w) throws TMSException {
-		if(w == maxWait)
-			return;
-		if(w < 1)
-			throw new ChangeVetoException("Wait must be > 0");
-		store.update(this, "maxWait", w);
-		maxWait = w;
-	}
-
-	/** Get the maximum allowed meter wait time (in seconds) */
-	public int getMaxWait() {
-		return maxWait;
-	}
-
-	/** Camera from which this can be seen */
-	protected String camera = "";
-
-	/** Get verification camera */
-	public String getCamera() {
-		return camera;
-	}
-
-	/** Set the verification camera */
-	public synchronized void setCamera(String c) throws TMSException {
-		if(c.equals(camera))
-			return;
-		store.update(this, "camera", c);
-		camera = c;
+			mp.sendReleaseRate(this);
 	}
 
 	/** Get the detector set associated with the ramp meter */
 	public DetectorSet getDetectorSet() {
-		final GeoLoc loc = lookupGeoLoc();
 		final DetectorSet ds = new DetectorSet();
 		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
 			public boolean check(R_NodeImpl n) {
@@ -736,7 +491,8 @@ public class RampMeterImpl extends TrafficDeviceImpl
 					R_NodeType.ENTRANCE.ordinal())
 				{
 					GeoLoc l = n.getGeoLoc();
-					if(GeoLocHelper.matchesRoot(l, loc)) {
+					if(GeoLocHelper.matchesRoot(l, geo_loc))
+					{
 						ds.addDetectors(
 							n.getDetectorSet());
 					}
@@ -745,11 +501,12 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			}
 		};
 		Corridor corridor = getCorridor();
-		if(corridor != null && corridors != null) {
+		if(corridor != null && TMSImpl.corridors != null) {
 			corridor.findNode(finder);
 			String cd = corridor.getLinkedCDRoad();
 			if(cd != null) {
-				Corridor cd_road = corridors.getCorridor(cd);
+				Corridor cd_road =
+					TMSImpl.corridors.getCorridor(cd);
 				if(cd_road != null)
 					cd_road.findNode(finder);
 			}
@@ -766,20 +523,63 @@ public class RampMeterImpl extends TrafficDeviceImpl
 		return ds;
 	}
 
+	/** Green count detector */
+	protected transient DetectorImpl green_det = null;
+
+	/** Lookup the green count detector */
+	protected void lookupGreenDetector() {
+		DetectorImpl[] g = getDetectorSet().getDetectorSet(
+			LaneType.GREEN).toArray();
+		if(g.length > 0)
+			green_det = g[0];
+		else
+			green_det = null;
+	}
+
+	/** Update the 30-second green count */
+	public void updateGreenCount(Calendar stamp, int g) throws IOException {
+		DetectorImpl det = green_det;
+		if(det != null) {
+			g = adjustGreenCount(g);
+			if(g == 0 && isMetering())
+				return;
+			det.storeData30Second(stamp, g, Constants.MISSING_DATA);
+		} else
+			METER_LOG.log("No green det for " + getName());
+	}
+
+	/** Adjust the green count for single release meters */
+	protected int adjustGreenCount(int g) {
+		if(meter_type == RampMeterType.SINGLE) {
+			if((g % 2) != 0)
+				g++;
+			return g / 2;
+		} else
+			return g;
+	}
+
+	/** Update the 5-minute green count */
+	public void updateGreenCount5(Calendar stamp, int g)
+		throws IOException
+	{
+		DetectorImpl det = green_det;
+		if(det != null) {
+			g = adjustGreenCount(g);
+			det.storeData5Minute(stamp, g, Constants.MISSING_DATA);
+		} else
+			METER_LOG.log("No green det for " + getName());
+	}
+
 	/** Get the ID of the corridor containing the ramp meter */
 	public String getCorridorID() {
-		GeoLoc loc = lookupGeoLoc();
-		return GeoLocHelper.getCorridorID(loc);
+		return GeoLocHelper.getCorridorID(geo_loc);
 	}
 
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
-		if(corridors != null) {
-			GeoLoc loc = lookupGeoLoc();
-			if(loc != null) {
-				String c = GeoLocHelper.getCorridor(loc);
-				return corridors.getCorridor(c);
-			}
+		if(TMSImpl.corridors != null) {
+			String c = GeoLocHelper.getCorridor(geo_loc);
+			return TMSImpl.corridors.getCorridor(c);
 		}
 		return null;
 	}
@@ -787,7 +587,7 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Print a single detector as an XML element */
 	public void printXmlElement(PrintWriter out) {
 		lookupGreenDetector();
-		out.print("<meter id='" + getId() + "' ");
+		out.print("<meter id='" + getName() + "' ");
 		out.print("label='" + getLabel() + "' ");
 		out.print("storage='" + getStorage() + "' ");
 		int w = getMaxWait();
@@ -800,14 +600,11 @@ public class RampMeterImpl extends TrafficDeviceImpl
 	/** Get the label of a ramp meter */
 	protected String getLabel() {
 		StringBuilder b = new StringBuilder();
-		GeoLoc loc = lookupGeoLoc();
-		if(loc != null) {
-			b.append(DIRECTION[loc.getCrossDir()]);
-			b.append(' ');
-			Road x = loc.getCrossStreet();
-			if(x != null)
-				b.append(x.getName());
-		}
+		b.append(TMSObject.DIRECTION[geo_loc.getCrossDir()]);
+		b.append(' ');
+		Road x = geo_loc.getCrossStreet();
+		if(x != null)
+			b.append(x.getName());
 		return XmlWriter.replaceEntities(b.toString().trim());
 	}
 
@@ -840,5 +637,14 @@ public class RampMeterImpl extends TrafficDeviceImpl
 			out.print(b.toString().trim());
 			out.print("' ");
 		}
+	}
+
+	/** Get the number of milliseconds the meter has been failed */
+	public long getFailMillis() {
+		ControllerImpl c = controller;	// Avoid race
+		if(c != null)
+			return c.getFailMillis();
+		else
+			return Long.MAX_VALUE;
 	}
 }

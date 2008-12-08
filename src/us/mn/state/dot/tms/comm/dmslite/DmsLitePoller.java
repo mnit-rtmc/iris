@@ -12,17 +12,15 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.FontImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignTravelTime;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -86,7 +84,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 
 		// reset button pressed
 		if (reset) {
-			this.reset(dms);
+			sendRequest(dms, SignRequest.RESET_DMS);
 
 		// download button pressed
 		} else {
@@ -141,15 +139,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	}
 
 	/**
-	 * Query the DMS configuration. This method is called at the successful
-	 * completion of each operation.
-	 */
-	public void queryConfiguration(DMSImpl dms) {
-		//System.err.println("DmsLitePoller.queryConfiguration() called.");
-		new OpQueryConfig(dms).start();
-	}
-
-	/**
 	 * Send a new message to the sign. Called by DMSImpl.
 	 * @throws InvalidMessageException
 	 * @see DMSImpl,DMS
@@ -176,6 +165,15 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			return;
 		}
 
+		// blank the sign
+		if(m.getDuration() != null && m.getDuration <= 0) {
+			new OpBlank(dms, m).start();
+			return;
+		}
+
+		// Note: in the future, check for SV170 firmware version, if start and stop
+		//       times are supported, adjust the CMS stop time and send the message.
+
 		//System.err.println("DmsLitePoller.sendMessage(), SignMessage multistring="
 		//	+ m.getMulti().toString());
 		//System.err.println("DmsLitePoller.sendMessage(), bitmap len="
@@ -188,89 +186,24 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		cmd.start();
 	}
 
-	/**
-	 * Set the time remaining for the currently displayed message. This is
-	 * called when:
-	 * 	-The "clear" button in the IRIS client is pressed.
-	 *	-An existing travel time message 
-	 */
-	public void setMessageTimeRemaining(DMSImpl dms, SignMessage m) {
-		//System.err.println("DmsLitePoller.setMessageTimeRemaining() called, duration:"
-		//	+ m.getDuration());
-
-		// blank the sign
-		if (m.getDuration() <= 0) {
-			new OpBlank(dms, m).start();
-			return;
+	/** Send a sign request message to the sign */
+	public void sendRequest(DMSImpl dms, SignRequest r) {
+		switch(r) {
+		case QUERY_CONFIGURATION:
+			new OpQueryConfig(dms).start();
+			break;
+		case QUERY_MESSAGE:
+			new OpQueryMsg(dms).start();
+			break;
+		case RESET_DMS:
+			new OpReset(dms).start();
+			break;
+		case RESET_MODEM:
+			new OpResetModem(dms).start();
+			break;
+		default:
+			// Ignore other requests
+			break;
 		}
-
-		// Note: in the future, check for SV170 firmware version, if start and stop
-		//       times are supported, adjust the CMS stop time and send the message.
-
-		// should never get here
-		String msg="WARNING: DmsLitePoller.setMessageTimeRemaining(): should never get here, duration="+m.getDuration();
-		System.err.println(msg);
-		//assert false : msg;
-	}
-
-	/**
-	 * Set manual brightness level (null for photocell control)
-	 */
-	public void setBrightnessLevel(DMSImpl dms, Integer l) {
-	}
-
-	/**
-	 * Activate a pixel test, which performs a dms query.
-	 */
-	public void testPixels(DMSImpl dms) {
-	}
-
-	/**
-	 * Activate a lamp test
-	 */
-	public void testLamps(DMSImpl dms) {
-	}
-
-	/**
-	 * Activate a fan test
-	 */
-	public void testFans(DMSImpl dms) {
-	}
-
-	/** 
-	 * Reset the dms, called from DMSImpl.reset(), via button on 
-	 * the dms status tab. 
-	 */
-	public void reset(DMSImpl dms) {
-		if (dms == null)
-			return;
-		new OpReset(dms).start();
-	}
-
-	/** 
-	 * Reset the dms modem, called from DMSImpl.resetModem(), via button on 
-	 * the dms status tab. 
-	 */
-	public void resetModem(DMSImpl dms) {
-		if (dms == null)
-			return;
-		new OpResetModem(dms).start();
-	}
-
-	/** 
-	 * Get the sign message, called from DMSImpl.getSignMessage(), 
-	 * via button on the dms status tab. 
-	 */
-	public void getSignMessage(DMSImpl dms) {
-		if (dms == null)
-			return;
-		new OpQueryMsg(dms).start();
-	}
-
-	/**
-	 * Set Ledstar pixel configuration
-	 */
-	public void setLedstarPixel(DMSImpl dms, int ldcPotBase,
-		int pixelCurrentLow, int pixelCurrentHigh,int badPixelLimit) {
 	}
 }

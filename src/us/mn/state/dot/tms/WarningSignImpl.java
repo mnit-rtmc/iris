@@ -182,10 +182,8 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 
 	/** Set the actual deployed status from the controller */
 	public void setDeployedStatus(boolean d) {
-		if(d != deployed) {
+		if(d != deployed)
 			deployed = d;
-			notifyStatus();
-		}
 	}
 
 	/** Get a warning sign poller */

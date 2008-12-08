@@ -46,7 +46,10 @@ public class DMSCommandMessage extends DMSOperation {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new ModifyRequest();
+		if(dms.checkPriority(message.getActivationPriority()))
+			return new ModifyRequest();
+		else
+			return null;
 	}
 
 	/** Phase to set the status to modify request */

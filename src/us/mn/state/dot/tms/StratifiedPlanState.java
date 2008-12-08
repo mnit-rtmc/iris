@@ -24,25 +24,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeSet;
-import java.rmi.RemoteException;
 
 /**
- * StratifiedPlanImpl
+ * Stratified metering timing plan state
  *
  * @author Douglas Lau
  */
-public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
+public class StratifiedPlanState extends MeterPlanState {
 
 	/** Zone debug log */
 	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
-
-	/** ObjectVault table name */
-	static public final String tableName = "stratified_plan";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
 
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/data/meter";
@@ -89,34 +80,58 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	/** Ramp meter demand turn off threshold (second half window) */
 	static protected final float TURN_OFF_THRESHOLD = 0.5f;
 
-	/** Create a new stratified timing plan */
-	public StratifiedPlanImpl(int period) throws TMSException,
-		RemoteException
-	{
-		super(period);
+	/** Number of minutes to flush meter before shutoff */
+	static protected final int FLUSH_MINUTES = 2;
+
+	/** Get the number of metered lanes */
+	static protected int getMeteringLanes(RampMeter m) {
+		return RampMeterType.fromOrdinal(m.getMeterType()).lanes;
 	}
 
-	/** Create a stratified timing plan */
-	protected StratifiedPlanImpl() throws RemoteException {
-		super();
+	/** Create a set of entrance detectors for a zone */
+	static protected DetectorSet createEntranceSet(DetectorSet ds) {
+		DetectorSet ent = ds.getDetectorSet(LaneType.BYPASS);
+		ent.addDetectors(ds, LaneType.OMNIBUS);
+		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
+		if(p.isDefined())
+			ent.addDetectors(p);
+		else
+			ent.addDetectors(ds, LaneType.MERGE);
+		if(ent.size() > 0)
+			return ent;
+		ent.addDetectors(ds, LaneType.EXIT);
+		ent.addDetectors(ds, LaneType.MAINLINE);
+		ent.addDetectors(ds, LaneType.AUXILIARY);
+		return ent;
 	}
 
-	/** Get the plan type */
-	public String getPlanType() { return "Stratified"; }
-
-	/** Get the target release rate for the specified ramp meter */
-	public int getTarget(RampMeter m) {
-		return RampMeter.MAX_RELEASE_RATE;
-	}
-
-	/** Set the target release rate for the specified ramp meter */
-	public void setTarget(RampMeter m, int t) throws TMSException {
-		if(t != RampMeter.MAX_RELEASE_RATE)
-			throw new ChangeVetoException("Invalid target rate");
+	/** Create a set of exit detectors for a zone */
+	static protected DetectorSet createExitSet(DetectorSet ds) {
+		DetectorSet exit = ds.getDetectorSet(LaneType.EXIT);
+		if(exit.size() > 0)
+			return exit;
+		exit.addDetectors(ds, LaneType.MAINLINE);
+		exit.addDetectors(ds, LaneType.AUXILIARY);
+		exit.addDetectors(ds, LaneType.CD_LANE);
+		if(exit.size() > 0)
+			return exit;
+		exit.addDetectors(ds, LaneType.BYPASS);
+		DetectorSet q = ds.getDetectorSet(LaneType.QUEUE);
+		if(q.size() > 0) {
+			exit.addDetectors(q);
+			return exit;
+		}
+		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
+		if(p.size() > 0) {
+			exit.addDetectors(p);
+			return exit;
+		}
+		exit.addDetectors(ds, LaneType.MERGE);
+		return exit;
 	}
 
 	/** Meter state holds stratified plan state for a meter. For each meter
-	    in the stratified plan, there will be one MeterState object. */
+	 *  in the stratified plan, there will be one MeterState object. */
 	protected class MeterState {
 
 		/** Ramp meter */
@@ -158,6 +173,9 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		/** Minimum release rate assigned by stratified timing plan */
 		protected int minimum;
 
+		/** Demand rate assigned by stratified timing plan */
+		protected int demand;
+
 		/** Release rate assigned by stratified timing plan */
 		protected int release;
 
@@ -186,23 +204,23 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected MeterState(RampMeterImpl meter) {
 			this.meter = meter;
 			valid = findDetectors();
-			rate_accum = RampMeter.MAX_RELEASE_RATE;
-			p_flow = RampMeter.MAX_RELEASE_RATE;
+			rate_accum = getMaxRelease();
+			p_flow = getMaxRelease();
 		}
 
 		/** Reset the meter's zone state */
-		protected void reset(int minute) {
+		protected void reset() {
 			if(congested)
-				release = meter.getTarget(minute);
+				release = meter.getTarget();
 			else
-				release = RampMeter.MAX_RELEASE_RATE;
+				release = getMaxRelease();
 			control = null;
 		}
 
 		/** Reset the zone rule state */
 		protected void resetRule() {
 			prop = 0;
-			rate = RampMeter.MAX_RELEASE_RATE;
+			rate = getMaxRelease();
 			done = false;
 		}
 
@@ -245,23 +263,22 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			warning = true;
 			congested = true;
 			if(!valid) {
-				minimum = RampMeter.MIN_RELEASE_RATE;
+				minimum = getMinRelease();
 				return minimum;
 			}
-			rate_accum += K_RATE_ACCUM *
-				(meter.getReleaseRate() - rate_accum);
+			Integer r = meter.getRate();
+			if(r != null)
+				rate_accum += K_RATE_ACCUM * (r - rate_accum);
 			density = DENSITY_SLOPE * rate_accum +
 				DENSITY_Y_INTERCEPT;
 			int storage = meter.getStorage();
-			if(meter.isSingleRelease())
-				storage -= QUEUE_THRESHOLD_DISTANCE;
-			else
-				storage -= QUEUE_THRESHOLD_DISTANCE * 2;
+			int lanes = getMeteringLanes(meter);
+			storage -= QUEUE_THRESHOLD_DISTANCE * lanes;
 			storage = Math.max(storage, 1);
-			max_stored = density * storage / FEET_PER_MILE;
+			max_stored =density * storage / Constants.FEET_PER_MILE;
 			float max_cycle = meter.getMaxWait() / max_stored;
-			minimum = (int)(SECONDS_PER_HOUR / max_cycle);
-			int demand = meter.getDemand();
+			minimum = (int)(Interval.HOUR / max_cycle);
+			int demand = this.demand;
 			int p_demand = calculatePassageDemand(demand);
 			q_prob = Math.min(p_flow / rate_accum, 1.0f);
 			if(queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD) {
@@ -279,9 +296,9 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			}
 			if(!meter.isMetering()) {
 				q_prob = 0;
-				minimum = RampMeter.MIN_RELEASE_RATE;
-			} else if(flushing)
-				minimum = RampMeter.MAX_RELEASE_RATE;
+				minimum = getMinRelease();
+			} else if(isFlushing())
+				minimum = getMaxRelease();
 			has_queue = q_prob > QUEUE_EXISTS_FACTOR;
 			return demand;
 		}
@@ -299,14 +316,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 						p = 0;
 				}
 			} else {
-				p_flow = RampMeter.MAX_RELEASE_RATE;
-				return RampMeter.MAX_RELEASE_RATE;
+				p_flow = getMaxRelease();
+				return getMaxRelease();
 			}
 			p_flow += K_RATE_ACCUM * (p - p_flow);
-//			if(testing)
-//				p += PASSAGE_DEMAND_ADJUSTMENT;
-//			else
-				p *= PASSAGE_DEMAND_FACTOR;
+			p *= PASSAGE_DEMAND_FACTOR;
 			return demand + (int)(K * (p - demand));
 		}
 
@@ -314,7 +328,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected void print(PrintStream stream) {
 			StringBuffer buf = new StringBuffer();
 			buf.append("  <meter id='");
-			buf.append(meter.getId());
+			buf.append(meter.getName());
 			buf.append('\'');
 			if(queue.isDefined()) {
 				buf.append(" queue=");
@@ -340,7 +354,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		protected void printState(PrintStream stream) {
 			StringBuffer buf = new StringBuffer();
 			buf.append("    <meter_state id='");
-			buf.append(meter.getId());
+			buf.append(meter.getName());
 			if(queue.isPerfect()) {
 				buf.append("' Q='");
 				buf.append(queue.getFlow());
@@ -358,9 +372,9 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			buf.append("' R_acc='");
 			buf.append(Math.round(rate_accum));
 			buf.append("' R_min='");
-			buf.append(meter.getMinimum());
+			buf.append(minimum);
 			buf.append("' D='");
-			buf.append(meter.getDemand());
+			buf.append(demand);
 			buf.append("' R='");
 			buf.append(release);
 			if(control != null) {
@@ -376,37 +390,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			stream.println(buf);
 		}
 	}
-
-	/** Compute the demand (and the minimum release rate) for the
-	    specified ramp meter */
-	public synchronized int computeDemand(RampMeterImpl meter,
-		int interval)
-	{
-		if(!active)
-			return RampMeter.MIN_RELEASE_RATE;
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return RampMeter.MIN_RELEASE_RATE;
-		next_interval = true;
-		if(interval >= 2 * stopTime - 4 && interval <= 2 * stopTime)
-			flushing = true;
-		else
-			flushing = false;
-		return state.computeDemand();
-	}
-
-	/** Get the minimum release rate for the specified ramp meter */
-	public synchronized int getMinimum(RampMeterImpl meter) {
-		if(!active)
-			return RampMeter.MIN_RELEASE_RATE;
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return RampMeter.MIN_RELEASE_RATE;
-		return state.minimum;
-	}
-
-	/** Flag to indicate ramp meters should be flushing */
-	protected transient boolean flushing;
 
 	/** Zone is one individual zone within the stratified plan */
 	protected class Zone implements Comparable<Zone> {
@@ -572,11 +555,11 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		}
 
 		/** Reset all the meters in the zone */
-		protected void resetMeters(int minute) {
+		protected void resetMeters() {
 			for(MeterState state: meters) {
 				if(valid && mainline.isFlowing())
 					state.congested = false;
-				state.reset(minute);
+				state.reset();
 			}
 		}
 
@@ -600,23 +583,23 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				if(state.done)
 					rate -= state.release;
 				else
-					demand += state.meter.getDemand();
+					demand += state.demand;
 			}
 			for(MeterState state: meters) {
 				if(state.done)
 					continue;
 				RampMeterImpl meter = state.meter;
-				int r = rate * meter.getDemand() / demand;
+				int r = rate * state.demand / demand;
 				state.prop = r;
 				rate -= r;
-				demand -= meter.getDemand();
+				demand -= state.demand;
 				if(r > state.release) {
 					delta += r - state.release;
 					r = state.release;
 				}
-				if(r < meter.getMinimum()) {
-					delta -= meter.getMinimum() - r;
-					r = meter.getMinimum();
+				if(r < state.minimum) {
+					delta -= state.minimum - r;
+					r = state.minimum;
 				}
 				state.rate = r;
 			}
@@ -625,11 +608,8 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			for(MeterState state: meters) {
 				if((delta > 0) && (state.prop > state.release))
 					state.done = true;
-				if((delta < 0) && (state.prop <
-					state.meter.getMinimum()))
-				{
+				if((delta < 0) && (state.prop < state.minimum))
 					state.done = true;
-				}
 			}
 			return delta;
 		}
@@ -650,10 +630,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		}
 
 		/** Reset state of all meters controlled by this zone */
-		protected void resetControlled(int minute) {
+		protected void resetControlled() {
 			for(MeterState state: meters) {
 				if(state.control == this)
-					state.reset(minute);
+					state.reset();
 			}
 		}
 
@@ -678,7 +658,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			buf.append(downstream);
 			buf.append(" meters='");
 			for(MeterState state: meters) {
-				buf.append(state.meter.getId());
+				buf.append(state.meter.getName());
 				buf.append(' ');
 			}
 			if(meters.size() == 0)
@@ -737,62 +717,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 			buf.append("' />");
 			stream.println(buf);
 		}
-	}
-
-	/** Create a set of entrance detectors for a zone */
-	static protected DetectorSet createEntranceSet(DetectorSet ds) {
-		DetectorSet ent = ds.getDetectorSet(LaneType.BYPASS);
-		ent.addDetectors(ds, LaneType.OMNIBUS);
-		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
-		if(p.isDefined())
-			ent.addDetectors(p);
-		else
-			ent.addDetectors(ds, LaneType.MERGE);
-		if(ent.size() > 0)
-			return ent;
-		ent.addDetectors(ds, LaneType.EXIT);
-		ent.addDetectors(ds, LaneType.MAINLINE);
-		ent.addDetectors(ds, LaneType.AUXILIARY);
-		return ent;
-	}
-
-	/** Create a set of exit detectors for a zone */
-	static protected DetectorSet createExitSet(DetectorSet ds) {
-		DetectorSet exit = ds.getDetectorSet(LaneType.EXIT);
-		if(exit.size() > 0)
-			return exit;
-		exit.addDetectors(ds, LaneType.MAINLINE);
-		exit.addDetectors(ds, LaneType.AUXILIARY);
-		exit.addDetectors(ds, LaneType.CD_LANE);
-		if(exit.size() > 0)
-			return exit;
-		exit.addDetectors(ds, LaneType.BYPASS);
-		DetectorSet q = ds.getDetectorSet(LaneType.QUEUE);
-		if(q.size() > 0) {
-			exit.addDetectors(q);
-			return exit;
-		}
-		DetectorSet p = ds.getDetectorSet(LaneType.PASSAGE);
-		if(p.size() > 0) {
-			exit.addDetectors(p);
-			return exit;
-		}
-		exit.addDetectors(ds, LaneType.MERGE);
-		return exit;
-	}
-
-	/** Linked list of zones in this timing plan */
-	protected transient final LinkedList<Zone> zones =
-		new LinkedList<Zone>();
-
-	/** Create all the layers for this stratified timing plan */
-	protected void createAllLayers(RampMeterImpl meter) {
-		zones.clear();
-		ZoneBuilder zone_builder = new ZoneBuilder();
-		Corridor c = meter.getCorridor();
-		if(c != null)
-			c.findNode(zone_builder);
-		zones.addAll(zone_builder.getList());
 	}
 
 	/** Inner class to build zones */
@@ -1012,11 +936,55 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		}
 	}
 
+	/** Hash map of ramp meter states */
+	protected final HashMap<String, MeterState> states =
+		new HashMap<String, MeterState>();
+
+	/** Linked list of zones in this timing plan */
+	protected final LinkedList<Zone> zones = new LinkedList<Zone>();
+
+	/** Zone change debugging flag */
+	protected boolean zone_change = false;
+
+	/** Flag to indicate the start of the next interval */
+	protected boolean next_interval = false;
+
+	/** Current log file name */
+	protected File log_name;
+
+	/** Create a new stratified timing plan state */
+	public StratifiedPlanState(TimingPlanImpl p) {
+		super(p);
+	}
+
+	/** Compute the demand (and the minimum release rate) for the
+	    specified ramp meter */
+	public synchronized int computeDemand(RampMeter meter) {
+		// FIXME: move this to validate method
+		if(!plan.getActive())
+			return getMinRelease();
+		MeterState state = getMeterState(meter);
+		if(state == null)
+			return getMinRelease();
+		next_interval = true;
+		return state.computeDemand();
+	}
+
+	/** Create all the layers for this stratified timing plan */
+	protected void createAllLayers(RampMeterImpl meter) {
+		zones.clear();
+		ZoneBuilder zone_builder = new ZoneBuilder();
+		Corridor c = meter.getCorridor();
+		if(c != null)
+			c.findNode(zone_builder);
+		zones.addAll(zone_builder.getList());
+	}
+
 	/** Validate the timing plan for the start time */
 	protected int validateStart(RampMeterImpl meter) {
 		states.clear();
 		createAllLayers(meter);
-		return RampMeter.MAX_RELEASE_RATE;
+		return getMaxRelease();
 	}
 
 	/** Validate the timing plan for the stop time */
@@ -1026,25 +994,7 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		states.clear();
 		zones.clear();
 		printEnd();
-		return RampMeter.MAX_RELEASE_RATE;
-	}
-
-	/** Zone change debugging flag */
-	protected transient boolean zone_change = false;
-
-	/** Current log file name */
-	protected transient File log_name;
-
-	/** Create a 4-digit time string from the minute-of-day */
-	static protected String createTime(int minute) {
-		StringBuffer buf = new StringBuffer();
-		buf.append(minute / 60);
-		while(buf.length() < 2)
-			buf.insert(0, '0');
-		buf.append(minute % 60);
-		while(buf.length() < 4)
-			buf.insert(2, '0');
-		return buf.toString();
+		return getMaxRelease();
 	}
 
 	/** Create a new log file */
@@ -1057,8 +1007,9 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 				throw new IOException("mkdir failed: " + dir);
 		}
 		log_name = new File(dir.getCanonicalPath() + File.separator +
-			meter.getCorridorID() + '.' + createTime(startTime) +
-			'-' + createTime(stopTime) + ".xml");
+			meter.getCorridorID() + '.' +
+			stamp_hhmm(plan.getStartMin()) + '-' +
+			stamp_hhmm(plan.getStopMin()) + ".xml");
 		FileOutputStream fos = new FileOutputStream(
 			log_name.getCanonicalPath());
 		return new PrintStream(fos);
@@ -1108,24 +1059,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		zone_change = false;
 	}
 
-	/** Get a string representation of an interval time */
-	static protected String intervalString(int interval) {
-		StringBuffer buf = new StringBuffer();
-		interval++;
-		buf.append(interval / 120);
-		while(buf.length() < 2)
-			buf.insert(0, '0');
-		buf.append(':');
-		buf.append((interval % 120) / 2);
-		while(buf.length() < 5)
-			buf.insert(3, '0');
-		buf.append(':');
-		buf.append((interval % 2) * 30);
-		while(buf.length() < 8)
-			buf.insert(6, '0');
-		return buf.toString();
-	}
-
 	/** Print all zone state information to a stream */
 	protected void printZoneState(PrintStream stream) {
 		for(Zone zone: zones)
@@ -1141,11 +1074,10 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	}
 
 	/** Print the zone and meter state information */
-	protected void printStates(int interval) {
+	protected void printStates() {
 		try {
 			PrintStream stream = appendLogFile();
-			stream.println("  <interval time='" +
-				intervalString(interval) + "'>");
+			stream.println("  <interval time='" + stamp_30() +"'>");
 			printZoneState(stream);
 			printMeterState(stream);
 			stream.println("  </interval>");
@@ -1169,9 +1101,6 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		log_name = null;
 	}
 
-	/** Flag to indicate the start of the next interval */
-	protected transient boolean next_interval = false;
-
 	/** Get a list iterator of all zones starting with last zone */
 	protected ListIterator<Zone> getZoneIterator() {
 		int last = Math.max(zones.size() - 1, 0);
@@ -1183,9 +1112,9 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 	}
 
 	/** Calculate all the metering rates */
-	protected void calculateRates(int interval) {
+	protected void calculateRates() {
 		for(Zone zone: zones)
-			zone.resetMeters(interval / 2);
+			zone.resetMeters();
 		for(Zone zone: zones) {
 			zone.calculateRate();
 			zone.process();
@@ -1194,33 +1123,27 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		while(li.hasPrevious()) {
 			Zone z = (Zone)li.previous();
 			if(z.isBroken()) {
-				z.resetControlled(interval / 2);
+				z.resetControlled();
 				for(Zone zone: zones)
 					zone.process();
 			}
 		}
-		printStates(interval);
+		printStates();
 		next_interval = false;
 	}
 
-	/** Hash map of ramp meter states */
-	protected transient final HashMap<String, MeterState> states =
-		new HashMap<String, MeterState>();
-
 	/** Get the meter state for a specified meter */
-	protected MeterState getMeterState(RampMeterImpl meter) {
-		return states.get(meter.getId());
+	protected MeterState getMeterState(RampMeter meter) {
+		return states.get(meter.getName());
 	}
 
 	/** Get the meter state for a given ramp meter */
-	protected MeterState getOrCreateMeterState(
-		RampMeterImpl meter)
-	{
+	protected MeterState getOrCreateMeterState(RampMeterImpl meter) {
 		MeterState state = getMeterState(meter);
 		if(state != null)
 			return state;
 		state = new MeterState(meter);
-		states.put(meter.getId(), state);
+		states.put(meter.getName(), state);
 		if(state.valid) {
 			for(Zone zone: zones)
 				zone.addMeter(state);
@@ -1228,57 +1151,55 @@ public class StratifiedPlanImpl extends MeterPlanImpl implements Constants {
 		return state;
 	}
 
-	/** Check if this timing plan knows of a queue backup */
-	public synchronized boolean checkQueueBackup(RampMeterImpl meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return false;
-		return state.queue_backup;
-	}
-
-	/** Check if this timing plan is in warning mode */
-	public synchronized boolean checkWarning(RampMeterImpl meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return false;
-		return state.warning;
-	}
-
-	/** Check if this timing plan knows of a congested mainline state */
-	public synchronized boolean checkCongested(RampMeterImpl meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return false;
-		return state.congested;
-	}
-
 	/** Check for the existance of a queue */
-	public synchronized boolean checkQueue(RampMeterImpl meter) {
+	public synchronized RampMeterQueue getQueue(RampMeter meter) {
 		MeterState state = getMeterState(meter);
 		if(state == null)
-			return false;
-		return state.has_queue;
+			return RampMeterQueue.UNKNOWN;
+		else if(state.queue_backup)
+			return RampMeterQueue.FULL;
+		else if(state.has_queue)
+			return RampMeterQueue.EXISTS;
+		else
+			return RampMeterQueue.EMPTY;
+	}
+
+	/** Get the release rate for the specified ramp meter */
+	public synchronized Integer getRate(RampMeter meter) {
+		MeterState state = getMeterState(meter);
+		if(state == null)
+			return null;
+		else
+			return state.release;
+	}
+
+	/** Check if we're in the first half of the timing plan window */
+	protected boolean isFirstHalf() {
+		int min = minute_of_day();
+		return min * 2 < plan.getStartMin() + plan.getStopMin();
+	}
+
+	/** Check if we're in the flushing window */
+	protected boolean isFlushing() {
+		int min = minute_of_day();
+		int stop_min = plan.getStopMin();
+		return min >= stop_min - FLUSH_MINUTES && min <= stop_min;
 	}
 
 	/** Validate the timing plan within the time frame */
-	protected int validateWithin(RampMeterImpl meter, int interval) {
+	protected int validateWithin(RampMeterImpl meter) {
 		if(zone_change)
 			printSetup(meter);
 		if(next_interval)
-			calculateRates(interval);
+			calculateRates();
 		MeterState state = getOrCreateMeterState(meter);
-		boolean first = (interval < startTime + stopTime);
-		int demand = meter.getDemand();
+		int demand = state.demand;
 		if(meter.isMetering()) {
-//			float thresh = state.rate_accum * TURN_OFF_THRESHOLD;
-//			if(!first)
-//				if(demand < thresh)
-//					stopMetering(meter);
-			if(flushing && !state.has_queue)
+			if(isFlushing() && !state.has_queue)
 				stopMetering(meter);
 		} else {
 			float thresh = state.rate_accum;
-			if(first)
+			if(isFirstHalf())
 				thresh *= TURN_ON_THRESHOLD_1;
 			else
 				thresh *= TURN_ON_THRESHOLD_2;

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -28,23 +27,17 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class QueryMeterStatus extends Controller170Operation
-	implements TimingTable
-{
+public class QueryMeterStatus extends Controller170Operation {
+
 	/** Police panel bit from verify data from 170 */
 	static protected final int POLICE_PANEL_BIT = 1 << 4;
-
-	/** Test if it is afternoon */
-	static protected boolean isAfternoon() {
-		return Calendar.getInstance().get(Calendar.AM_PM)== Calendar.PM;
-	}
 
 	/** Get the controller memory address for a red time interval */
 	static protected int getRedAddress(int m, int rate) {
 		int a = Address.METER_1_TIMING_TABLE;
 		if(m == 2)
 			a = Address.METER_2_TIMING_TABLE;
-		if(isAfternoon())
+		if(MndotPoller.isAfternoon())
 			a += Address.OFF_PM_TIMING_TABLE;
 		a += Address.OFF_RED_TIME + (rate * 2);
 		return a;
@@ -111,9 +104,9 @@ public class QueryMeterStatus extends Controller170Operation
 			byte[] data = new byte[2];
 			mess.add(new MemoryRequest(address, data));
 			mess.getRequest();
-			int red = parseRedTime(data);
-			meter.setReleaseRate(meter.calculateReleaseRate(
-				red / 10.0f));
+			float red = parseRedTime(data) / 10.0f;
+			int rate = MndotPoller.calculateReleaseRate(meter, red);
+			meter.setRateNotify(rate);
 			return phases.poll();
 		}
 	}
@@ -140,6 +133,8 @@ public class QueryMeterStatus extends Controller170Operation
 	}
 
 	/** Update meter with the most recent 30-second meter data
+	 * @param meter Ramp meter
+	 * @param n Meter number (1 or 2)
 	 * @param s Meter status
 	 * @param r Metering rate
 	 * @param g 30-second green count
@@ -163,15 +158,20 @@ public class QueryMeterStatus extends Controller170Operation
 	protected void updateMeterStatus(RampMeterImpl meter, int n,
 		MeterStatus status, boolean police, int rate)
 	{
-		meter.setPolicePanelFlash(police);
-		if(police)
-			meter.setStatus("Police panel flash");
-		else
-			meter.setStatus(status.toString());
+		meter.setPolicePanel(police);
+		if(!police)
+			meter.setManual(status.isManual());
+		boolean needs_red_time = false;
 		boolean metering = status.isMetering() ||
 			MeterRate.isMetering(rate);
-		meter.setMetering(metering, MeterRate.isCentralControl(rate));
-		if(status.isManual())
+		if(metering != meter.isMetering()) {
+			needs_red_time = metering;
+			if(!metering)
+				meter.setRateNotify(null);
+		}
+		if(status.isManual() || !MeterRate.isCentralControl(rate))
+			needs_red_time = true;
+		if(MeterRate.isMetering(rate))
 			phases.add(new QueryRedTime(meter, n, rate));
 	}
 }

@@ -48,6 +48,27 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS preferred font name */
 	String DMS_PREFERRED_FONT = "dms_preferred_font";
 
+	/** DMS default font height */
+	String DMS_DEFAULT_FONT_HEIGHT = "dms_default_font_height";
+
+	/** DMS pixel off limit (in a message) */
+	String DMS_PIXEL_OFF_LIMIT = "dms_pixel_off_limit";
+
+	/** DMS pixel on limit (near a message) */
+	String DMS_PIXEL_ON_LIMIT = "dms_pixel_on_limit";
+
+	/** DMS high temp cutoff (degrees Celcius) */
+	String DMS_HIGH_TEMP_CUTOFF = "dms_high_temp_cutoff";
+
+	/** DMS default line justification */
+	String DMS_DEFAULT_JUSTIFICATION_LINE ="dms_default_justification_line";
+
+	/** DMS default page justification */
+	String DMS_DEFAULT_JUSTIFICATION_PAGE ="dms_default_justification_page";
+
+	/** DMS travel time duration (minutes) */
+	String DMS_TRAVEL_DURATION_MINS = "dms_travel_duration_mins";
+
 	/** DMS client "get status" button (boolean) */
 	String DMSDISPATCHER_GETSTATUS_BTN = "dmsdispatcher_getstatus_btn";
 
@@ -63,6 +84,9 @@ public interface SystemAttribute extends SonarObject {
 	/** Meter mimimum red time */
 	String METER_MIN_RED_SECS = "meter_min_red_secs";
 
+	/** Meter maximum red time */
+	String METER_MAX_RED_SECS = "meter_max_red_secs";
+
 	/** Incident ring 1 radius */
 	String INCIDENT_RING_1_MILES = "incident_ring_1_miles";
 
@@ -74,6 +98,15 @@ public interface SystemAttribute extends SonarObject {
 
 	/** Incident ring 4 radius */
 	String INCIDENT_RING_4_MILES = "incident_ring_4_miles";
+
+	/** Minimum overall trip speed for a travel time estimate (mph) */
+	String TRAVEL_TIME_MIN_MPH = "travel_time_min_mph";
+
+	/** Maximum number of legs in a travel time route */
+	String TRAVEL_TIME_MAX_LEGS = "travel_time_max_legs";
+
+	/** Maximum route distance in a travel time route (miles) */
+	String TRAVEL_TIME_MAX_MILES = "travel_time_max_miles";
 
 	/** TESLA host name (and TCP port) */
 	String TESLA_HOST = "tesla_host";

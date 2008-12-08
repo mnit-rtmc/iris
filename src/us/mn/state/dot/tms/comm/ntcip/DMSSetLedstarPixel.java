@@ -38,11 +38,11 @@ public class DMSSetLedstarPixel extends DMSOperation {
 	protected final LedBadPixelLimit badLimit;
 
 	/** Create a new DMS set pixel threshold operation */
-	public DMSSetLedstarPixel(DMSImpl d, int b, int l, int h, int bad) {
+	public DMSSetLedstarPixel(DMSImpl d) {
 		super(COMMAND, d);
-		potBase = new LedLdcPotBase(b);
-		currentLow = new LedPixelLow(l);
-		currentHigh = new LedPixelHigh(h);
+		potBase = new LedLdcPotBase(d.getLdcPotBase());
+		currentLow = new LedPixelLow(d.getPixelCurrentLow());
+		currentHigh = new LedPixelHigh(d.getPixelCurrentHigh());
 		badLimit = new LedBadPixelLimit(bad);
 	}
 

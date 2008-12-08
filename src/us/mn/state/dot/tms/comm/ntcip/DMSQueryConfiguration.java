@@ -122,7 +122,7 @@ public class DMSQueryConfiguration extends DMSOperation {
 			mess.add(tech);
 			mess.getRequest();
 			dms.setSignAccess(access.getValue());
-			dms.setSignMatrixType(type.getValueEnum());
+			dms.setDMSType(type.getValueEnum());
 			dms.setSignHeight(height.getInteger());
 			dms.setSignWidth(width.getInteger());
 			dms.setHorizontalBorder(h_border.getInteger());

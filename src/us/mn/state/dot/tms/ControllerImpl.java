@@ -314,7 +314,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		if(io != null)
 			io_pins.put(pin, io);
-		notifyIO();
+		notifyAttribute("cio");
 	}
 
 	/** Get a list of all traffic devices on the controller */
@@ -487,6 +487,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Set the controller firmware version */
 	public void setVersion(String v) {
 		version = v;
+		notifyAttribute("version");
 	}
 
 	/** Get the controller firmware version */
@@ -563,8 +564,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		} else
 			logFailMessage(EventType.COMM_RESTORED, id);
 		failed = f;
-		notifyStatus();
-		notifyError();
+		notifyAttribute("status");
+		notifyAttribute("error");
 	}
 
 	/** Set the failed status of the controller */
@@ -589,7 +590,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			error = "";
 		else
 			error = s;
-		notifyError();
+		notifyAttribute("error");
 	}
 
 	/** Get the controller error detail */
@@ -700,31 +701,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the testing status flag */
 	public boolean getTest() {
 		return test != null;
-	}
-
-	/** Notify SONAR clients of changes to the IO pin assignment */
-	protected void notifyIO() {
-		if(MainServer.server != null) {
-			Integer[] io = getCio();
-			String[] ios = namespace.marshall(Integer.class, io);
-			MainServer.server.setAttribute(this, "cio", ios);
-		}
-	}
-
-	/** Notify SONAR clients of changes to "status" attribute */
-	public void notifyStatus() {
-		if(MainServer.server != null) {
-			String[] s = new String[] { getStatus() };
-			MainServer.server.setAttribute(this, "status", s);
-		}
-	}
-
-	/** Notify SONAR clients of changes to "error" attribute */
-	public void notifyError() {
-		if(MainServer.server != null) {
-			String[] e = new String[] { getError() };
-			MainServer.server.setAttribute(this, "error", e);
-		}
 	}
 
 	/** Destroy an object */

@@ -27,4 +27,7 @@ public interface Device2 extends ControllerIO_SONAR {
 
 	/** Get the administrator notes */
 	String getNotes();
+
+	/** Get the operation description */
+	String getOperation();
 }

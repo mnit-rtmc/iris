@@ -47,7 +47,6 @@ abstract public class Device2Operation extends ControllerOperation {
 			Device2Operation owner = device.acquire(operation);
 			if(owner != operation)
 				throw new DeviceContentionException(owner);
-			device.notifyStatus();
 			return phaseOne();
 		}
 	}
@@ -62,9 +61,7 @@ abstract public class Device2Operation extends ControllerOperation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
-			device.notifyStatus();
-		device.release(this);
+		device.release(operation);
 		super.cleanup();
 	}
 }

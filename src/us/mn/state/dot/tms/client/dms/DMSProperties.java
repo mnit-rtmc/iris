@@ -19,6 +19,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.rmi.RemoteException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.TreeMap;
 import javax.swing.BorderFactory;
@@ -642,20 +643,8 @@ public class DMSProperties extends TrafficDeviceForm {
 		final Font font = lookupFont();
 		if(font == null)
 			return new TreeMap<Integer, BitmapGraphic>();
-		PixelMapBuilder builder = new PixelMapBuilder(h_pix,
-			v_pix, c_pix, font, new PixelMapBuilder.GlyphFinder()
-		{
-			public Graphic lookupGraphic(int cp)
-				throws InvalidMessageException
-			{
-				Graphic g = lookupGlyph(font, cp);
-				if(g != null)
-					return g;
-				else
-					throw new InvalidMessageException(
-						"Invalid code point");
-			}
-		});
+		PixelMapBuilder builder = new PixelMapBuilder(namespace, h_pix,
+			v_pix, c_pix, font);
 		multi.parse(builder);
 		return builder.getPixmaps();
 	}
@@ -735,12 +724,12 @@ public class DMSProperties extends TrafficDeviceForm {
 			panel.add(box);
 			new ActionJob(this, am_plan) {
 				public void perform() throws Exception {
-					sign.addTimingPlan(TimingPlan.AM);
+					sign.addTimingPlan(Calendar.AM);
 				}
 			};
 			new ActionJob(this, pm_plan) {
 				public void perform() throws Exception {
-					sign.addTimingPlan(TimingPlan.PM);
+					sign.addTimingPlan(Calendar.PM);
 				}
 			};
 		}

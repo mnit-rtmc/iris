@@ -70,7 +70,7 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** Create a new DMS sign group */
-	public DmsSignGroupImpl(String n, String d, SignGroup g) {
+	public DmsSignGroupImpl(String n, DMS d, SignGroup g) {
 		super(n);
 		dms = d;
 		sign_group = g;
@@ -84,10 +84,10 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** DMS name */
-	protected String dms;
+	protected DMS dms;
 
 	/** Get the DMS ID */
-	public String getDms() {
+	public DMS getDms() {
 		return dms;
 	}
 

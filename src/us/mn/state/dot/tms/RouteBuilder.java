@@ -41,10 +41,10 @@ public class RouteBuilder {
 	protected final CorridorManager corridors;
 
 	/** Maximum number of corridor legs */
-	protected final int legs;
+	protected final int legs = SystemAttributeHelper.getTravelTimeMaxLegs();
 
-	/** Maximum route distance */
-	protected float max_dist;
+	/** Maximum route distance (miles) */
+	protected float max_mi = SystemAttributeHelper.getTravelTimeMaxMiles();
 
 	/** Working path */
 	protected final LinkedList<ODPair> path = new LinkedList<ODPair>();
@@ -53,11 +53,9 @@ public class RouteBuilder {
 	protected final TreeSet<Route> routes = new TreeSet<Route>();
 
 	/** Create a new route builder */
-	public RouteBuilder(String n, CorridorManager c, int l, float d) {
+	public RouteBuilder(String n, CorridorManager c) {
 		name = n;
 		corridors = c;
-		legs = l;
-		max_dist = d;
 	}
 
 	/** Search a corridor for branching paths to a destination */
@@ -91,10 +89,10 @@ public class RouteBuilder {
 					+ " (" + i + ", " + dist + " miles) " +
 					od);
 			}
-			if(dist > max_dist) {
+			if(dist > max_mi) {
 				if(TRAVEL_LOG.isOpen()) {
 					TRAVEL_LOG.log(name +
-						": MAX DISTANCE (" + max_dist +
+						": MAX DISTANCE (" + max_mi +
 						") EXCEEDED");
 				}
 				break;
@@ -152,7 +150,7 @@ public class RouteBuilder {
 		if(c != null) {
 			try {
 				float d = c.calculateDistance(od);
-				if(distance + d < max_dist)
+				if(distance + d < max_mi)
 					buildRoute(od);
 			}
 			catch(BadRouteException e) {
@@ -185,16 +183,16 @@ public class RouteBuilder {
 		routes.add(r);
 		// NOTE: this optimisation will prevent us from finding some
 		// secondary routes; we're only interested in the best route.
-		max_dist = Math.min(max_dist, r.getGoodness());
+		max_mi = Math.min(max_mi, r.getGoodness());
 		if(TRAVEL_LOG.isOpen()) {
 			GeoLoc dest = odf.getDestination();
 			TRAVEL_LOG.log(name + ": FOUND ROUTE TO " +
 				GeoLocHelper.getDescription(dest) + ", " +
 				r.getLength() + " miles, " + r.getTurns() +
 				" turns, goodness: " + r.getGoodness());
-			if(max_dist == r.getGoodness()) {
+			if(max_mi == r.getGoodness()) {
 				TRAVEL_LOG.log(name + ": LOWERED MAX DIST TO " +
-					max_dist);
+					max_mi);
 			}
 		}
 	}

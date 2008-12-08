@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
@@ -22,7 +23,7 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
  *
  * @author Douglas Lau
  */
-abstract public class BaseObjectImpl implements Storable {
+abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** SONAR namespace */
 	static protected ServerNamespace namespace;
@@ -38,6 +39,7 @@ abstract public class BaseObjectImpl implements Storable {
 		namespace = ns;
 		SystemAttributeImpl.loadAll();
 		HolidayImpl.loadAll();
+		TimingPlanImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();
@@ -56,7 +58,8 @@ abstract public class BaseObjectImpl implements Storable {
 		DetectorImpl.loadAll();
 		CameraImpl.loadAll();
 		WarningSignImpl.loadAll();
-		TrafficDeviceAttributeImpl.loadAll();
+		RampMeterImpl.loadAll();
+		DMSImpl.loadAll();
 	}
 
 	/** Get the primary key name */
@@ -72,7 +75,7 @@ abstract public class BaseObjectImpl implements Storable {
 	/** Base object name */
 	protected final String name;
 
-	/** Get the graphic name */
+	/** Get the object name */
 	public String getName() {
 		return name;
 	}
@@ -107,5 +110,11 @@ abstract public class BaseObjectImpl implements Storable {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		// Override this to initialize new objects
+	}
+
+	/** Notify SONAR clients of a change to an attribute */
+	protected void notifyAttribute(String aname) {
+		if(MainServer.server != null)
+			MainServer.server.setAttribute(this, aname);
 	}
 }

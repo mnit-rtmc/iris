@@ -16,22 +16,16 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
-import java.util.Calendar;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * Operation to set the red time for a ramp meter
  *
  * @author Douglas Lau
  */
-public class SetRedTime extends DeviceOperation implements TimingTable {
-
-	/** Test if it is afternoon */
-	static protected boolean isAfternoon() {
-		return Calendar.getInstance().get(Calendar.AM_PM)== Calendar.PM;
-	}
+public class RedTimeCommand extends Device2Operation {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
@@ -43,13 +37,13 @@ public class SetRedTime extends DeviceOperation implements TimingTable {
 	protected final int red_time;
 
 	/** Create a set red time packet */
-	public SetRedTime(RampMeterImpl r, int m, int red) {
+	public RedTimeCommand(RampMeterImpl r, int m, int red) {
 		super(COMMAND, r);
 		meter = r;
 		int a = Address.METER_1_TIMING_TABLE;
 		if(m == 2)
 			a = Address.METER_2_TIMING_TABLE;
-		if(isAfternoon())
+		if(MndotPoller.isAfternoon())
 			a += Address.OFF_PM_TIMING_TABLE;
 		a += Address.OFF_RED_TIME;
 		a += MeterRate.CENTRAL * 2;
@@ -59,11 +53,11 @@ public class SetRedTime extends DeviceOperation implements TimingTable {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new DoSetRedTime();
+		return new SetRedTime();
 	}
 
 	/** Phase to set the red time for a ramp meter */
-	protected class DoSetRedTime extends Phase {
+	protected class SetRedTime extends Phase {
 
 		/** Write the new red time to the controller */
 		protected Phase poll(AddressedMessage mess) throws IOException {
@@ -72,8 +66,9 @@ public class SetRedTime extends DeviceOperation implements TimingTable {
 			os.write16Bit(red_time);
 			mess.add(new MemoryRequest(address, bo.toByteArray()));
 			mess.setRequest();
-			meter.setReleaseRate(meter.calculateReleaseRate(
-				red_time / 10.0f));
+			float red = red_time / 10.0f;
+			int rate = MndotPoller.calculateReleaseRate(meter, red);
+			meter.setReleaseRate(rate);
 			return null;
 		}
 	}

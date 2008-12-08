@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.StatusTable;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -222,8 +221,7 @@ public class DMSQueryStatus extends DMSOperation {
 			mess.add(sensor);
 			try {
 				mess.getRequest();
-				StatusTable t = createStatusTable(power);
-				dms.setPowerSupplyTable(t);
+				dms.setPowerStatus(power.getStatus());
 				dms.setHeatTapeStatus(heat.getValue());
 				DMS_LOG.log(dms.getId() + ": " + sensor);
 			}
@@ -231,23 +229,6 @@ public class DMSQueryStatus extends DMSOperation {
 				// Ignore; only Skyline has these objects
 			}
 			return null;
-		}
-
-		/** Create a power supply status table */
-		protected StatusTable createStatusTable(IllumPowerStatus p) {
-			StatusTable t = new StatusTable(SKYLINE_POWER_COLUMNS);
-			String[] s = p.getStatus();
-			int[] b = p.getBackground();
-			for(int i = 0; i < s.length; i++) {
-				String[] rs = new String[2];
-				int[] rb = new int[2];
-				rs[0] = "#" + (i + 1);
-				rs[1] = s[i];
-				rb[0] = 0xFFFFFF;
-				rb[1] = b[i];
-				t.addRow(rs, rb);
-			}
-			return t;
 		}
 	}
 

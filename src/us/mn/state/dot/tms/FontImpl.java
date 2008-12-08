@@ -260,20 +260,4 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		throw new InvalidMessageException("Invalid code point: " +
 			code_point);
 	}
-
-	/** Test if the font matches a specified character height/width */
-	protected boolean matches(int h, int w) {
-		if(h == 0)
-			return w == getWidth();
-		else
-			return (h == height) && (w == getWidth());
-	}
-
-	/** Test if the font matches the specified parameters */
-	public boolean matches(int h, int w, int ls) {
-		if(ls == 0 || ls == lineSpacing)
-			return matches(h, w);
-		else
-			return false;
-	}
 }

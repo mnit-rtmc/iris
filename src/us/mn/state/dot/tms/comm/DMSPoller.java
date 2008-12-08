@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignRequest;
 
 /**
  * DMSPoller is an interface for MessagePoller classes which can poll DMS
@@ -26,38 +27,13 @@ import us.mn.state.dot.tms.SignMessage;
  */
 public interface DMSPoller extends SignPoller {
 
-	/** Query the DMS configuration */
-	void queryConfiguration(DMSImpl dms);
+	/** Send a sign request */
+	void sendRequest(DMSImpl dms, SignRequest r);
 
-	/** Send a new message to the sign */
+	/** Send a message to the sign. If the message is already deployed on
+	 * the sign, restart the time remaining.
+	 * @param dms Sign to send message.
+	 * @param m Message to send. */
 	void sendMessage(DMSImpl dms, SignMessage m)
 		throws InvalidMessageException;
-
-	/** Set the time remaining for the currently displayed message */
-	void setMessageTimeRemaining(DMSImpl dms, SignMessage m);
-
-	/** Set manual brightness level (null for photocell control) */
-	void setBrightnessLevel(DMSImpl dms, Integer l);
-
-	/** Activate a pixel test */
-	void testPixels(DMSImpl dms);
-
-	/** Activate a lamp test */
-	void testLamps(DMSImpl dms);
-
-	/** Activate a fan test */
-	void testFans(DMSImpl dms);
-
-	/** reset the sign */
-	void reset(DMSImpl dms);
-
-	/** reset the sign modem */
-	void resetModem(DMSImpl dms);
-
-	/** get the sign message */
-	void getSignMessage(DMSImpl dms);
-
-	/** Set Ledstar pixel configuration */
-	void setLedstarPixel(DMSImpl dms, int ldcPotBase, int pixelCurrentLow,
-		int pixelCurentHigh, int badPixelLimit);
 }

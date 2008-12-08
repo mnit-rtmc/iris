@@ -74,9 +74,11 @@ public class OpMessage extends OpDms {
 			return "";
 		BitmapGraphic oldbmg = m_signMessage.getBitmap(pg);
 		BitmapGraphic newbmg = null;
-		if(m_fixedOutboundMessageWidth)
-			newbmg = oldbmg.resizeWidth(FIXED_MSG_WIDTH_PIXELS);
-		else
+		if(m_fixedOutboundMessageWidth) {
+			newbmg = new BitmapGraphic(FIXED_MSG_WIDTH_PIXELS,
+				oldbmg.height);
+			newbmg.copy(oldbmg);
+		} else
 			newbmg = oldbmg;
 		if(newbmg == null)
 			return "";
@@ -85,6 +87,8 @@ public class OpMessage extends OpDms {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		if(!dms.checkPriority(m_signMessage.getActivationPriority()))
+			return;
 		int np = m_signMessage.getNumPages();
 		if (np <= 0)
 			return null;

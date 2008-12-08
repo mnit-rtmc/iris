@@ -89,6 +89,8 @@ public class MainServer {
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);
+			ns.registerType(SignMessage.SONAR_TYPE,
+				SignMessageImpl.class);
 			BaseObjectImpl.loadAll(TMSObjectImpl.store, ns);
 			RMISocketFactory.setSocketFactory(
 				new TmsSocketFactory());

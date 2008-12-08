@@ -30,12 +30,6 @@ public interface MeterPoller {
 	/** Threshold to fail communication (ms) */
 	long COMM_FAIL_THRESHOLD_MS = COMM_FAIL_THRESHOLD * 60 * 1000;
 
-	/** Start metering */
-	void startMetering(RampMeterImpl meter);
-
-	/** Stop metering */
-	void stopMetering(RampMeterImpl meter);
-
 	/** Send a new release rate (vehicles per hour) */
-	void sendReleaseRate(RampMeterImpl meter, int rate);
+	void sendReleaseRate(RampMeterImpl meter);
 }

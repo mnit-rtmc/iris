@@ -78,7 +78,7 @@ abstract public class OpDms extends DeviceOperation {
 	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successful */
 	public void cleanup() {
 		//System.err.println("dmslite.OpDms.cleanup() called, success="+success);
-		m_dms.setReset(success);
+		m_dms.setConfigure(success);
 		super.cleanup();
 	}
 

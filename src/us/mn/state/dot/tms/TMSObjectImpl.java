@@ -69,15 +69,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";
 
-	/** Timing plan list */
-	static TimingPlanListImpl planList;
-
-	/** Ramp meter list */
-	static RampMeterListImpl meterList;
-
-	/** DMS list */
-	static public DMSListImpl dmsList;
-
 	/** LCS list */
 	static LCSListImpl lcsList;
 

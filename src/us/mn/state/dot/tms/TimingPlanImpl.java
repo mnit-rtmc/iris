@@ -14,7 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import java.sql.ResultSet;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -22,142 +23,212 @@ import java.util.Map;
  *
  * @author Douglas Lau
  */
-public class TimingPlanImpl extends TMSObjectImpl implements TimingPlan,
-	Comparable, Storable
-{
-	/** ObjectVault table name */
-	static public final String tableName = "timing_plan";
+public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
+	/** Number of minutes in a day */
+	static protected final int MINUTES_PER_DAY = 24 * 60;
 
-	/** Compose the hour and minute to minute-of-day */
-	static protected int minute_of_day(int hour, int minute) {
-		return hour * 60 + minute;
-	}
-
-	/** Default start time for AM timing plans */
-	static protected final int DEFAULT_AM_START = minute_of_day(6, 30);
-
-	/** Default stop time for AM timing plans */
-	static protected final int DEFAULT_AM_STOP = minute_of_day(8, 30);
-
-	/** Default start time for PM timing plans */
-	static protected final int DEFAULT_PM_START = minute_of_day(15, 30);
-
-	/** Default stop time for PM timing plans */
-	static protected final int DEFAULT_PM_STOP = minute_of_day(17, 30);
-
-	/** Create a new timing plan */
-	public TimingPlanImpl(int period) throws TMSException,
-		RemoteException
-	{
-		super();
-		if(period == AM) {
-			startTime = DEFAULT_AM_START;
-			stopTime = DEFAULT_AM_STOP;
-		}
-		else if(period == PM) {
-			startTime = DEFAULT_PM_START;
-			stopTime = DEFAULT_PM_STOP;
-		}
-		else
-			throw new ChangeVetoException("Invalid period");
-	}
-
-	/** Create a timing plan */
-	protected TimingPlanImpl() throws RemoteException {
-		super();
+	/** Load all the timing plans */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading timing plans...");
+		namespace.registerType(SONAR_TYPE, TimingPlanImpl.class);
+		store.query("SELECT name, plan_type, start_min, stop_min, " +
+			"active, testing, target FROM " + SONAR_TYPE  + ";",
+			new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new TimingPlanImpl(
+					row.getString(1),	// name
+					row.getInt(2),		// plan_type
+					row.getInt(3),		// start_min
+					row.getInt(4),		// stop_min
+					row.getBoolean(5),	// active
+					row.getBoolean(6),	// testing
+					row.getInt(7)		// target
+				));
+			}
+		});
 	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
-		return null;
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("plan_type", plan_type);
+		map.put("start_min", start_min);
+		map.put("stop_min", stop_min);
+		map.put("active", active);
+		map.put("testing", testing);
+		map.put("target", target);
+		return map;
 	}
 
-	/** Compare for sorting plan arrays */
-	public int compareTo(Object o) {
-		TimingPlanImpl other = (TimingPlanImpl)o;
-		int c = startTime - other.startTime;
-		if(c == 0)
-			c = stopTime - other.stopTime;
-		if(c == 0)
-			c = getPlanType().compareTo(other.getPlanType());
-		return c;
+	/** Get the database table name */
+	public String getTable() {
+		return SONAR_TYPE;
 	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new timing plan */
+	public TimingPlanImpl(String n) {
+		super(n);
+	}
+
+	/** Create a new timing plan */
+	protected TimingPlanImpl(String n, int p, int st, int sp, boolean a,
+		boolean tst, int t)
+	{
+		this(n);
+		plan_type = p;
+		start_min = st;
+		stop_min = sp;
+		active = a;
+		testing = tst;
+		target = t;
+	}
+
+	/** Timing plan type */
+	protected int plan_type;
 
 	/** Get the plan type */
-	public String getPlanType() {
-		return "Basic";
+	public int getPlanType() {
+		return plan_type;
 	}
 
 	/** Timing plan start time (minute of day) */
-	protected int startTime;
+	protected int start_min;
 
-	/** Get the start time (minute of day) */
-	public int getStartTime() {
-		return startTime;
+	/** Set the start time (minute of day) */
+	public void setStartMin(int t) {
+		start_min = t;
 	}
 
 	/** Set the start time (minute of day) */
-	public synchronized void setStartTime(int t) throws TMSException {
-		if(t < 0 || t > stopTime)
+	public void doSetStartMin(int t) throws TMSException {
+		if(t == start_min)
+			return;
+		if(t < 0 || t > stop_min)
 			throw new ChangeVetoException("Invalid start time");
-		store.update(this, "startTime", t);
-		startTime = t;
+		store.update(this, "start_min", t);
+		setStartMin(t);
+	}
+
+	/** Get the start time (minute of day) */
+	public int getStartMin() {
+		return start_min;
 	}
 
 	/** Timing plan stop time (minute of day) */
-	protected int stopTime;
+	protected int stop_min;
 
-	/** Get the stop time (minute of day) */
-	public int getStopTime() {
-		return stopTime;
+	/** Set the stop time (minute of day) */
+	public void setStopMin(int t) {
+		stop_min = t;
 	}
 
 	/** Set the stop time (minute of day) */
-	public synchronized void setStopTime(int t) throws TMSException {
-		if(t < startTime || t >= MINUTES_PER_DAY)
+	public void doSetStopMin(int t) throws TMSException {
+		if(t == stop_min)
+			return;
+		if(t < start_min || t >= MINUTES_PER_DAY)
 			throw new ChangeVetoException("Invalid stop time");
-		store.update(this, "stopTime", t);
-		stopTime = t;
+		store.update(this, "stop_min", t);
+		setStopMin(t);
+	}
+
+	/** Get the stop time (minute of day) */
+	public int getStopMin() {
+		return stop_min;
 	}
 
 	/** Active status */
 	protected boolean active;
 
-	/** Get the active status */
-	public boolean isActive() {
-		return active;
-	}
-
 	/** Set the active status */
-	public synchronized void setActive(boolean a) throws TMSException {
-		if(a == active)
-			return;
-		store.update(this, "active", a);
+	public void setActive(boolean a) {
 		active = a;
 	}
 
-	/** Testing status */
-	protected transient boolean testing;
-
-	/** Get the testing status */
-	public boolean isTesting() {
-		return testing;
+	/** Set the active status */
+	public void doSetActive(boolean a) throws TMSException {
+		if(a == active)
+			return;
+		store.update(this, "active", a);
+		setActive(a);
 	}
+
+	/** Get the active status */
+	public boolean getActive() {
+		return active;
+	}
+
+	/** Testing status */
+	protected boolean testing;
 
 	/** Set the testing status */
 	public void setTesting(boolean t) {
 		testing = t;
 	}
 
-	/** Check if the specified 30-second interval is within the timing
-	    plan's range */
-	public boolean checkWithin(int interval) {
-		return interval >= (startTime * 2) && interval < (stopTime * 2);
+	/** Set the testing status */
+	public void doSetTesting(boolean t) throws TMSException {
+		if(t == testing)
+			return;
+		store.update(this, "testing", t);
+		setTesting(t);
+	}
+
+	/** Get the testing status */
+	public boolean getTesting() {
+		return testing;
+	}
+
+	/** Target value (release rate) */
+	protected int target;
+
+	/** Set the target value */
+	public void setTarget(int t) {
+		target = t;
+	}
+
+	/** Set the target value */
+	public void doSetTarget(int t) throws TMSException {
+		if(t == target)
+			return;
+		store.update(this, "target", t);
+		setTarget(t);
+	}
+
+	/** Get the target value */
+	public int getTarget() {
+		return target;
+	}
+
+	/** Current timing plan state data */
+	protected transient TimingPlanState state;
+
+	/** Get the current timing plan state */
+	public TimingPlanState getState() {
+		if(state == null)
+			state = createState();
+		return state;
+	}
+
+	/** Create the timing plan state */
+	protected TimingPlanState createState() {
+		switch(plan_type) {
+		case TRAVEL:
+			return new TimingPlanState(this);
+		case SIMPLE:
+			return new SimplePlanState(this);
+		case STRATIFIED:
+			return new StratifiedPlanState(this);
+		default:
+			return null;
+		}
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2004  Minnesota Department of Transportation
+ * Copyright (C) 2000-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,55 +11,60 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * Timing plan
  *
  * @author Douglas Lau
  */
-public interface TimingPlan extends TMSObject {
+public interface TimingPlan extends SonarObject {
 
-	/** Number of minutes in a day */
-	public int MINUTES_PER_DAY = 24 * 60;
+	/** SONAR type name */
+	String SONAR_TYPE = "timing_plan";
 
-	/** AM period plan */
-	public int AM = 0;
+	/** Travel time timing plan */
+	int TRAVEL = 0;
 
-	/** PM period plan */
-	public int PM = 1;
+	/** Simple metering plan */
+	int SIMPLE = 1;
+
+	/** Stratified metering plan */
+	int STRATIFIED = 2;
 
 	/** Get the plan type */
-	public String getPlanType() throws RemoteException;
-
-	/** Get the start time (minute of day) */
-	public int getStartTime() throws RemoteException;
+	int getPlanType();
 
 	/** Set the start time (minute of day) */
-	public void setStartTime(int t) throws TMSException, RemoteException;
+	void setStartMin(int t);
 
-	/** Get the stop time (minute of day) */
-	public int getStopTime() throws RemoteException;
+	/** Get the start time (minute of day) */
+	int getStartMin();
 
 	/** Set the stop time (minute of day) */
-	public void setStopTime(int t) throws TMSException, RemoteException;
+	void setStopMin(int t);
 
-	/** Get the active status */
-	public boolean isActive() throws RemoteException;
+	/** Get the stop time (minute of day) */
+	int getStopMin();
 
 	/** Set the active status */
-	public void setActive(boolean a) throws TMSException, RemoteException;
+	void setActive(boolean a);
 
-	/** Get the testing status */
-	public boolean isTesting() throws RemoteException;
+	/** Get the active status */
+	boolean getActive();
 
 	/** Set the testing status */
-	public void setTesting(boolean t) throws RemoteException;
+	void setTesting(boolean t);
+
+	/** Get the testing status */
+	boolean getTesting();
+
+	/** Set the target value */
+	void setTarget(int t);
+
+	/** Get the target value */
+	int getTarget();
 }

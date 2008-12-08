@@ -237,6 +237,45 @@ public class SystemAttributeHelper {
 		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 
+	/** Get the DMS default font height */
+	static public int getDmsDefaultFontHeight() {
+		return getValueInt(SystemAttribute.DMS_DEFAULT_FONT_HEIGHT, 7);
+	}
+
+	/** Get the DMS pixel off limit (in a message) */
+	static public int getDmsPixelOffLimit() {
+		return getValueInt(SystemAttribute.DMS_PIXEL_OFF_LIMIT, 2);
+	}
+
+	/** Get the DMS pixel on limit (near a message) */
+	static public int getDmsPixelOnLimit() {
+		return getValueInt(SystemAttribute.DMS_PIXEL_ON_LIMIT, 1);
+	}
+
+	/** Get the DMS page on time (seconds) */
+	static public float getDmsPageOnSecs() {
+		return getValueFloat(SystemAttribute.DMS_PAGE_ON_SECS, 2.0f);
+	}
+
+	/** Get the DMS page off time (seconds) */
+	static public float getDmsPageOffSecs() {
+		return getValueFloat(SystemAttribute.DMS_PAGE_OFF_SECS, 0.0f);
+	}
+
+	/** Get the DMS default line justification */
+	static public int getDmsDefaultJustificationLine() {
+		return getValueInt(
+		       SystemAttribute.DMS_DEFAULT_JUSTIFICATION_LINE,
+		       MultiString.JustificationLine.CENTER.ordinal());
+	}
+
+	/** Get the DMS default page justification */
+	static public int getDmsDefaultJustificationPage() {
+		return getValueInt(
+		       SystemAttribute.DMS_DEFAULT_JUSTIFICATION_PAGE,
+		       MultiString.JustificationPage.TOP.ordinal());
+	}
+
 	/** Get the meter green time (seconds) */
 	static public float getMeterGreenSecs() {
 		return getValueFloat(SystemAttribute.METER_GREEN_SECS, 1.3f);
@@ -252,14 +291,23 @@ public class SystemAttributeHelper {
 		return getValueFloat(SystemAttribute.METER_MIN_RED_SECS, 0.1f);
 	}
 
-	/** Get the DMS page on time (seconds) */
-	static public float getDmsPageOnSecs() {
-		return getValueFloat(SystemAttribute.DMS_PAGE_ON_SECS, 2.0f);
+	/** Get the meter maximum release rate (vehicles per hour) */
+	static public int getMeterMaxRelease() {
+		float cycle = getMeterGreenSecs() + getMeterYellowSecs() +
+			getMeterMinRedSecs();
+		return (int)(Interval.HOUR / cycle);
 	}
 
-	/** Get the DMS page off time (seconds) */
-	static public float getDmsPageOffSecs() {
-		return getValueFloat(SystemAttribute.DMS_PAGE_OFF_SECS, 0.0f);
+	/** Get the meter maximum red time (seconds) */
+	static public float getMeterMaxRedSecs() {
+		return getValueFloat(SystemAttribute.METER_MAX_RED_SECS, 13f);
+	}
+
+	/** Get the meter minimum release rate (vehicles per hour) */
+	static public int getMeterMinRelease() {
+		float cycle = getMeterGreenSecs() + getMeterYellowSecs() +
+			getMeterMaxRedSecs();
+		return (int)(Interval.HOUR / cycle);
 	}
 
 	/** Get the incident ring 1 miles */
@@ -280,6 +328,21 @@ public class SystemAttributeHelper {
 	/** Get the incident ring 4 miles */
 	static public int getIncidentRing4Miles() {
 		return getValueInt(SystemAttribute.INCIDENT_RING_4_MILES, 0);
+	}
+
+	/** Get the minimum overall speed for travel times */
+	static public int getTravelTimeMinMPH() {
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MIN_MPH, 15);
+	}
+
+	/** Get the maximum number of legs for travel time routes */
+	static public int getTravelTimeMaxLegs() {
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MAX_LEGS, 8);
+	}
+
+	/** Get the maximum distance of a travel time route */
+	static public int getTravelTimeMaxMiles() {
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MAX_MILES);
 	}
 
 	/** Get the TESLA host name (and port) */
