@@ -28,80 +28,80 @@ import java.io.IOException;
 public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
 
 	/** Create a new DmsIllumBrightnessValues object */
-	public DmsIllumBrightnessValues(int[] table) {
+	public DmsIllumBrightnessValues() {
 		super(7);
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			int levels = table.length / 3;
-			dos.writeByte(levels);
-			for(int i = 0; i < levels * 3; i++)
-				dos.writeShort(table[i]);
-			brightness = bos.toByteArray();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-		finally {
-			try {
-				dos.close();
-				bos.close();
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/** Get the object name */
-	protected String getName() { return "dmsIllumBrightnessValues"; }
+	protected String getName() {
+		return "dmsIllumBrightnessValues";
+	}
 
 	/** Brightness values */
 	protected byte[] brightness;
 
 	/** Set the octet string value */
-	public void setOctetString(byte[] value) { brightness = value; }
+	public void setOctetString(byte[] value) {
+		brightness = value;
+	}
 
 	/** Get the octet string value */
-	public byte[] getOctetString() { return brightness; }
+	public byte[] getOctetString() {
+		return brightness;
+	}
+
+	/** Set the brightness table */
+	public void setTable(int[][] table) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			dos.writeByte(table.length);
+			for(int[] level: table) {
+				dos.writeShort(level[0]); // lightOutput
+				dos.writeShort(level[1]); // photocellLevelDown
+				dos.writeShort(level[2]); // photocellLevelUp
+			}
+			brightness = bos.toByteArray();
+		}
+		finally {
+			dos.close();
+			bos.close();
+		}
+	}
 
 	/** Get the brightness table */
-	public int[] getTable() {
+	public int[][] getTable() throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(brightness);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
-			int[] table = new int[3 * dis.readByte()];
-			for(int i = 0; i < table.length; i++)
-				table[i] = dis.readUnsignedShort();
+			int[][] table = new int[dis.readByte()][3];
+			for(int[] level: table) {
+				level[0] = dis.readUnsignedShort();
+				level[1] = dis.readUnsignedShort();
+				level[2] = dis.readUnsignedShort();
+			}
 			return table;
 		}
-		catch(IOException e) {
-			e.printStackTrace();
-			return new int[0];
-		}
 		finally {
-			try {
-				dis.close();
-				bis.close();
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
+			dis.close();
+			bis.close();
 		}
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		StringBuffer buffer = new StringBuffer();
-		int[] table = getTable();
-		int levels = table.length / 3;
-		buffer.append(levels);
-		for(int i = 0; i < levels; i++) {
-			int j = i * 3;
-			buffer.append(", (").append(table[j]).append(",");
-			buffer.append(table[j + 1]).append(",");
-			buffer.append(table[j + 2]).append(")");
+		StringBuilder b = new StringBuilder();
+		int[][] table = getTable();
+		b.append(table.length);
+		for(int[] level: table) {
+			b.append(", (");
+			b.append(level[0]);
+			b.append(",");
+			b.append(level[1]);
+			b.append(",");
+			b.append(level[2]);
+			b.append(")");
 		}
-		return buffer.toString();
+		return b.toString();
 	}
 }
