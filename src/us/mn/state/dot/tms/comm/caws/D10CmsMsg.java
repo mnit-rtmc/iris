@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
@@ -52,9 +53,6 @@ public class D10CmsMsg implements Serializable
 
 	// types
 	public enum CawsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, TRAVELTIME }
-
-	/** constructor */
-	public D10CmsMsg() {}
 
 	/**
 	 * Create a new object using text line.
@@ -134,25 +132,22 @@ public class D10CmsMsg implements Serializable
 			String row6 = tok.nextToken().trim().toUpperCase();
 
 			// create message-pg1
-			StringBuilder m = new StringBuilder();
+			MultiString m = new MultiString();
+			m.addText(row1);
+			m.addLine();
+			m.addText(row2);
+			m.addLine();
+			m.addText(row3);
 
-			m.append(row1);
-			m.append("[nl]");
-			m.append(row2);
-			m.append("[nl]");
-			m.append(row3);
-			m.append("[nl]");
-
-			// pg2
+			// page 2
 			if(row4.length() + row5.length() + row6.length() > 0) {
-				m.append("[np]");
-				m.append(row4);
-				m.append("[nl]");
-				m.append(row5);
-				m.append("[nl]");
-				m.append(row6);
+				m.addPage();
+				m.addText(row4);
+				m.addLine();
+				m.addText(row5);
+				m.addLine();
+				m.addText(row6);
 			}
-
 			m_multistring = m.toString();
 		}
 
