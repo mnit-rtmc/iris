@@ -81,7 +81,7 @@ public class MultiString {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|tt)([A-Za-z0-9]*)\\]");
+		"\\[(nl|np|jl|jp|tt)([A-Za-z0-9]*)\\]");
 
 	/** Regular expression to match MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -176,6 +176,9 @@ public class MultiString {
 				} else if(tag.equals("jl")) {
 					String v = m.group(2);
 					justl = JustificationLine.parse(v);
+				} else if(tag.equals("jp")) {
+					String v = m.group(2);
+					justp = JustificationPage.parse(v);
 				}
 			}
 		}
