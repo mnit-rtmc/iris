@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
-import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -34,8 +33,8 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class D10CmsMsg implements Serializable
-{
+public class D10CmsMsg implements Serializable {
+
 	// consts
 	private static final String DESC_BLANK = "Blank";
 	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
@@ -44,12 +43,11 @@ public class D10CmsMsg implements Serializable
 	private static final String SINGLESTROKE = "Single Stroke";
 
 	// fields
-	private int m_cmsid = -1;           // cms ID
-	private Date m_date = null;         // message date and time
-	private String m_desc = "";         // this has predefined valid values
-	private String m_multistring = "";  // message as multistring
-	private double m_ontime = 0;
-	private boolean m_valid = false;    // is message valid?
+	private final int m_cmsid;	// cms ID
+	private final Date m_date;	// message date and time
+	private final String m_desc;	// this has predefined valid values
+	private final String m_multistring; // message as multistring
+	private final double m_ontime;
 
 	// types
 	public enum CawsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, TRAVELTIME }
@@ -60,79 +58,43 @@ public class D10CmsMsg implements Serializable
 	 *             "20080403085910;25;Blank;Single Stroke;Single Stroke;;;;;;;0.0;"
 	 */
 	public D10CmsMsg(String line) throws IllegalArgumentException {
-		this.parse(line);
-	}
-
-	/**
-	 * Parse a string that contains a single CMS message.
-	 * @param argline a single CMS message, fields delimited with ';'.
-	 */
-	public void parse(String argline) throws IllegalArgumentException {
 		String[] f = (argline + ' ').split(";");
 		if(f.length != 13) {
 			throw new IllegalArgumentException(
 			    "Bogus CMS message format (" + argline + ").");
 		}
 
-		// date: 20080403085910
 		m_date = convertDate(f[0]);
-
-		// id: 39
 		m_cmsid = SString.stringToInt(f[1]);
+		m_desc = parseDescription(f[2]);
+		parseFont(f[3]);	// pg 1 font
+		parseFont(f[4]);	// pg 2 font
 
-		// message description
-		if(!f[2].equals(DESC_BLANK) &&
-		   !f[2].equals(DESC_ONEPAGENORM) &&
-		   !f[2].equals(DESC_TWOPAGENORM))
-		{
-			// FIXME: verify possibilities
-			System.err.println("WARNING: unknown message " +
-				"description received in D10CmsMsg.parse(): " +
-				f[2]);
-		}
+		String row1 = f[5].trim().toUpperCase();
+		String row2 = f[6].trim().toUpperCase();
+		String row3 = f[7].trim().toUpperCase();
+		String row4 = f[8].trim().toUpperCase();
+		String row5 = f[9].trim().toUpperCase();
+		String row6 = f[10].trim().toUpperCase();
 
-		m_desc = f[2];
+		// create message-pg1
+		MultiString m = new MultiString();
+		m.addText(row1);
+		m.addLine();
+		m.addText(row2);
+		m.addLine();
+		m.addText(row3);
 
-		// pg 1 font
-		if(!f[3].equals(SINGLESTROKE) && !f[3].equals(DOUBLESTROKE)) {
-			System.err.println("WARNING: unknown pg 1 font " +
-				"received in D10CmsMsg.parse(): " + f[3]);
-		}
-
-		// pg 2 font
-		if(!f[4].equals(SINGLESTROKE) &&! f[4].equals(DOUBLESTROKE)) {
-			System.err.println("WARNING: unknown pg 2 font " +
-				"received in D10CmsMsg.parse(): " + f[4]);
-		}
-
-		// rows of text
-		{
-			String row1 = f[5].trim().toUpperCase();
-			String row2 = f[6].trim().toUpperCase();
-			String row3 = f[7].trim().toUpperCase();
-			String row4 = f[8].trim().toUpperCase();
-			String row5 = f[9].trim().toUpperCase();
-			String row6 = f[10].trim().toUpperCase();
-
-			// create message-pg1
-			MultiString m = new MultiString();
-			m.addText(row1);
+		// page 2
+		if(row4.length() + row5.length() + row6.length() > 0) {
+			m.addPage();
+			m.addText(row4);
 			m.addLine();
-			m.addText(row2);
+			m.addText(row5);
 			m.addLine();
-			m.addText(row3);
-
-			// page 2
-			if(row4.length() + row5.length() + row6.length() > 0) {
-				m.addPage();
-				m.addText(row4);
-				m.addLine();
-				m.addText(row5);
-				m.addLine();
-				m.addText(row6);
-			}
-			m_multistring = m.toString();
+			m.addText(row6);
 		}
+		m_multistring = m.toString();
 
 		// on time: 0.0
 		m_ontime = SString.stringToDouble(f[11]);
@@ -142,15 +104,14 @@ public class D10CmsMsg implements Serializable
 				+ "," + m_cmsid + "," + m_multistring + ","
 				+ m_ontime);
 		}
-
-		this.setValid(true);
 	}
 
 	/**
-	 *  Convert a local time date string from the d10 cms file to a Date.
-	 *  @params date String date/time in the format "20080403085910" which is local time.
-	 *  @returns A Date cooresponding to the argument.
-	 *  @throws IllegalArgumentException if the argument is bogus.
+	 * Convert a local time date string from the d10 cms file to a Date.
+	 * @param date String date/time in the format "20080403085910" which is
+	 *             local time.
+	 * @return A Date cooresponding to the argument.
+	 * @throws IllegalArgumentException if the argument is bogus.
 	 */
 	private static Date convertDate(String argdate)
 		throws IllegalArgumentException {
@@ -161,16 +122,15 @@ public class D10CmsMsg implements Serializable
 			    "Bogus date string received: " + argdate);
 		}
 
-		// note the column range is: inclusive, exclusive
-		// year
+		// year (note the column range is: inclusive, exclusive)
 		int y = SString.stringToInt(argdate.substring(0, 4));
 		if(y < 2008) {
 			throw new IllegalArgumentException(
 			    "Bogus year received:" + argdate + "," + y);
 		}
 
-		// month
-		int m = SString.stringToInt(argdate.substring(4, 6)) - 1;    // zero based
+		// month (zero based)
+		int m = SString.stringToInt(argdate.substring(4, 6)) - 1;
 		if((m < 0) || (m > 11)) {
 			throw new IllegalArgumentException(
 			    "Bogus month received:" + argdate + "," + m);
@@ -206,21 +166,36 @@ public class D10CmsMsg implements Serializable
 
 		// create Date
 		Calendar c = new GregorianCalendar(y, m, d, h, mi, s);
-
-		// c.setTimeZone(TimeZone.getTimeZone("UTC"));  // sets UTC time zone
-		Date date = c.getTime();
-
-		return date;
+		return c.getTime();
 	}
 
-	/** set valid */
-	private void setValid(boolean v) {
-		m_valid = v;
+	/**
+	 * Parse a message description.
+	 * @param d Message description.
+	 * @return Message description.
+	 */
+	static protected String parseDescription(String d) {
+		if(!d.equals(DESC_BLANK) &&
+		   !d.equals(DESC_ONEPAGENORM) &&
+		   !d.equals(DESC_TWOPAGENORM))
+		{
+			// FIXME: verify possibilities
+			System.err.println("WARNING: unknown message " +
+				"description received in " +
+				"D10CmsMsg.parseDescription(): " + d);
+		}
 	}
 
-	/** return true if the CMS message is valid else false */
-	public boolean getValid() {
-		return m_valid;
+	/**
+	 * Parse a font.
+	 * @param f Font name.
+	 * @return Font name.
+	 */
+	static protected String parseFont(String f) {
+		if(!f.equals(SINGLESTROKE) && !f.equals(DOUBLESTROKE)) {
+			System.err.println("WARNING: unknown font " +
+				"received in D10CmsMsg.parseFont(): " + f);
+		}
 	}
 
 	/** get message type */
@@ -264,7 +239,7 @@ public class D10CmsMsg implements Serializable
 	 * @return true to send the message.
 	 */
 	protected boolean shouldSendMessage(DMSImpl dms) {
-		if(dms == null || m_multistring==null || m_multistring.length()<=0)
+		if(dms == null || m_multistring.length()<=0)
 			return false;
 
 		// is caws activated for the sign?
