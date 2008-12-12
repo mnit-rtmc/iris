@@ -116,7 +116,7 @@ public class D10CmsMsg {
 		throws IllegalArgumentException {
 
 		// sanity check
-		if((argdate == null) || (argdate.length() != 14)) {
+		if(argdate.length() != 14) {
 			throw new IllegalArgumentException(
 			    "Bogus date string received: " + argdate);
 		}
