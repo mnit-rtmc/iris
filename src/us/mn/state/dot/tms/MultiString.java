@@ -76,14 +76,23 @@ public class MultiString {
 		}
 	}
 
-	/* FIXME: add support for font [fox] tag */
+	/** Parse a font number */
+	static protected int parseFont(String f) {
+		try {
+			return Integer.parseInt(f);
+		}
+		catch(NumberFormatException e) {
+			return 1;
+		}
+	}
+
 	/* FIXME: add support for page time [ptxoy] tag */
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|jp|tt)([A-Za-z0-9]*)\\]");
+		"\\[(nl|np|jl|jp|fo|tt)([A-Za-z0-9]*)\\]");
 
-	/** Regular expression to match MULTI tags */
+	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
 		"[ !#$%&()*+,-./0-9:;<=>?@A-Z]*");
 
@@ -142,6 +151,13 @@ public class MultiString {
 		b.append(NEWPAGE);
 	}
 
+	/** Set a new font number */
+	public void setFont(int f) {
+		b.append("[fo");
+		b.append(f);
+		b.append("]");
+	}
+
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return b.toString();
@@ -150,22 +166,24 @@ public class MultiString {
 	/** MULTI string parsing callback interface */
 	public interface SpanCallback {
 		void addSpan(int page, JustificationPage justp, 
-			int line, JustificationLine justl, String span);
+			int line, JustificationLine justl,
+			int f_num, String span);
 	}
 
 	/** Parse the MULTI string 
 	 * @param cb SpanCallback, called per span. */
 	public void parse(SpanCallback cb) {
 		int page = 0;
+		JustificationPage justp = JustificationPage.fromOrdinal(
+			SystemAttributeHelper.getDmsDefaultJustificationPage());
 		int line = 0;
 		JustificationLine justl = JustificationLine.fromOrdinal(
 			SystemAttributeHelper.getDmsDefaultJustificationLine());
-		JustificationPage justp = JustificationPage.fromOrdinal(
-			SystemAttributeHelper.getDmsDefaultJustificationPage());
+		int f_num = 1;
 		Matcher m = TAG.matcher(b);
 		for(String span: TAG.split(b)) {
 			if(span.length() > 0)
-				cb.addSpan(page, justp, line, justl, span);
+				cb.addSpan(page, justp, line, justl,f_num,span);
 			if(m.find()) {
 				String tag = m.group(1);
 				if(tag.equals("nl"))
@@ -179,6 +197,9 @@ public class MultiString {
 				} else if(tag.equals("jp")) {
 					String v = m.group(2);
 					justp = JustificationPage.parse(v);
+				} else if(tag.equals("fo")) {
+					String v = m.group(2);
+					f_num = parseFont(v);
 				}
 			}
 		}
@@ -189,7 +210,7 @@ public class MultiString {
 		final StringBuilder _b = new StringBuilder();
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
-				int l, JustificationLine jl, String t)
+				int l, JustificationLine jl, int f, String t)
 			{
 				_b.append(t);
 			}
@@ -201,7 +222,7 @@ public class MultiString {
 	protected class PageCounter implements SpanCallback {
 		int num_pages = 0;
 		public void addSpan(int p, JustificationPage jp, int l,
-			JustificationLine jl, String t)
+			JustificationLine jl, int f, String t)
 		{
 			num_pages = Math.max(p + 1, num_pages);
 		}

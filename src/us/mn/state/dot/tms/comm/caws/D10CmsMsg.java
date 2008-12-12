@@ -38,8 +38,8 @@ public class D10CmsMsg {
 	private static final String DESC_BLANK = "Blank";
 	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
 	private static final String DESC_TWOPAGENORM = "2 Page (Normal)";
-	private static final String DOUBLESTROKE = "Double Stroke";
 	private static final String SINGLESTROKE = "Single Stroke";
+	private static final String DOUBLESTROKE = "Double Stroke";
 
 	// fields
 	private final int m_cmsid;		// cms ID
@@ -66,8 +66,8 @@ public class D10CmsMsg {
 		m_date = convertDate(f[0]);
 		m_cmsid = SString.stringToInt(f[1]);
 		m_type = parseDescription(f[2]);
-		parseFont(f[3]);	// page 1 font
-		parseFont(f[4]);	// page 2 font
+		int page_1_font = parseFont(f[3]);
+		int page_2_font = parseFont(f[4]);
 
 		String row1 = f[5].trim().toUpperCase();
 		String row2 = f[6].trim().toUpperCase();
@@ -78,6 +78,8 @@ public class D10CmsMsg {
 
 		// create message-pg1
 		MultiString m = new MultiString();
+		if(page_1_font != 1)
+			m.setFont(page_1_font);
 		m.addText(row1);
 		m.addLine();
 		m.addText(row2);
@@ -87,6 +89,8 @@ public class D10CmsMsg {
 		// page 2
 		if(row4.length() + row5.length() + row6.length() > 0) {
 			m.addPage();
+			if(page_1_font != page_2_font)
+				m.setFont(page_2_font);
 			m.addText(row4);
 			m.addLine();
 			m.addText(row5);
@@ -194,12 +198,18 @@ public class D10CmsMsg {
 	/**
 	 * Parse a font.
 	 * @param f Font name.
-	 * @return Font name.
+	 * @return Font number.
 	 */
-	static protected String parseFont(String f) {
-		if(!f.equals(SINGLESTROKE) && !f.equals(DOUBLESTROKE)) {
-			System.err.println("WARNING: unknown font " +
-				"received in D10CmsMsg.parseFont(): " + f);
+	static protected int parseFont(String f) {
+		if(f.equals(SINGLESTROKE))
+			return 1;
+		else if(f.equals(DOUBLESTROKE))
+			return 2;
+		else {
+			// FIXME: should throw InvalidArgumentException
+			System.err.println("WARNING: unknown font received " +
+				"in D10CmsMsg.parseFont(): " + f);
+			return 1;
 		}
 	}
 

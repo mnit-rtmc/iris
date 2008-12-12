@@ -46,9 +46,6 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	 * Use 0 for full-matrix signs. */
 	protected final int c_height;
 
-	/** Font to render text */
-	protected final Font font;
-
 	/**
 	 * Create a new pixel map builder.
 	 * @param ns SONAR namespace.
@@ -65,29 +62,28 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		height = h;
 		c_width = cw;
 		c_height = ch;
-		font = getFont();
 	}
 
-	/** Get the default font */
-	public Font getFont() {
-		return lookupFont(getLineHeightPixels(), c_width, 0);
+	/** Get a font with the given font number */
+	public Font getFont(int f_num) {
+		return lookupFont(f_num, getLineHeightPixels(f_num), c_width,0);
 	}
 
 	/** Get the optimal line height (pixels) */
-	public int getLineHeightPixels() {
+	protected int getLineHeightPixels(int f_num) {
 		if(c_height > 0)
 			return c_height;
 		for(int h = height; h > 0; h--) {
 			int ls = calculateLineSpacing(h);
 			if(ls != INVALID_LINE_SPACING) {
-				if(lookupFont(h, c_width, ls) != null)
+				if(lookupFont(f_num, h, c_width, ls) != null)
 					return h;
 			}
 		}
 		// No optimal height found; just grab a font...
-		Font font = lookupFont(0, c_width, 0);
-		if(font != null)
-			return font.getHeight();
+		Font f = lookupFont(f_num, 0, c_width, 0);
+		if(f != null)
+			return f.getHeight();
 		else
 			return SystemAttributeHelper.getDmsDefaultFontHeight();
 	}
@@ -104,44 +100,47 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 			return INVALID_LINE_SPACING;
 	}
 
-	/** Lookup a font by name */
-	protected Font lookupFont(String name) {
-		return (Font)namespace.lookupObject(Font.SONAR_TYPE, name);
-	}
-
 	/** Lookup the best font.
+	 * @param n Font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected Font lookupFont(int h, int w, int ls) {
-		Font f = _lookupFont(h, w, ls);
+	protected Font lookupFont(int n, int h, int w, int ls) {
+		Font f = _lookupFont(n, h, w, ls);
 		if(f != null || w == 0)
 			return f;
 		else
-			return _lookupFont(h, 0, ls);
+			return _lookupFont(n, h, 0, ls);
 	}
 
 	/** Lookup the best font.
+	 * @param n Font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected Font _lookupFont(final int h, final int w,
+	protected Font _lookupFont(final int n, final int h, final int w,
 		final int ls)
 	{
 		return (Font)namespace.findObject(Font.SONAR_TYPE,
 			new Checker<Font>()
 		{
 			public boolean check(Font f) {
-				if(ls == 0 || ls == f.getLineSpacing()) {
-					if(h == 0)
-						return w == f.getWidth();
-					else
-						return (h == f.getHeight()) &&
-						       (w == f.getWidth());
-				}
-				return false;
+				return checkFont(f, n, h, w, ls);
 			}
 		});
+	}
+
+	/** Check if a font matches criteria.
+	 * @param n Font number.
+	 * @param h Font height (pixels).  Zero matches any height.
+	 * @param w Font width (pixels).  Zero matches any width.
+	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
+	protected boolean checkFont(Font f, int n, int h, int w, int ls) {
+		boolean n_match = n == f.getNumber();
+		boolean ls_match = (ls == 0) || ls == f.getLineSpacing();
+		boolean h_match = (h == 0) || h == f.getHeight();
+		boolean w_match = (w == 0) || w == f.getWidth();
+		return n_match && ls_match && h_match && h_match && w_match;
 	}
 
 	/** Count of pages */
@@ -156,14 +155,16 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		final MultiString.JustificationPage jp;
 		final int line;
 		final MultiString.JustificationLine jl;
+		final Font font;
 		final String text;
 		TextSpan(int p, MultiString.JustificationPage _jp, int l,
-			MultiString.JustificationLine _jl, String t)
+			MultiString.JustificationLine _jl, Font f, String t)
 		{
 			page = p;
 			jp = _jp;
 			line = l;
 			jl = _jl;
+			font = f;
 			text = t;
 		}
 
@@ -172,7 +173,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 			try {
 				int x = _calculatePixelX();
 				int y = _calculatePixelY(nltp);
-				renderSpan(text, bg, x, y);
+				renderSpan(bg, font, text, x, y);
 			}
 			catch(IndexOutOfBoundsException e) {
 				log("Message text too long: " + text);
@@ -187,7 +188,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 
 		/** Calculate the X pixel position to place a span */
 		protected int _calculatePixelX() throws InvalidMessageException{
-			int x = calculatePixelX(jl, text);
+			int x = calculatePixelX(jl, font, text);
 			if(x >= 0)
 				return x;
 			throw new InvalidMessageException("Message too long: " +
@@ -199,7 +200,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		protected int _calculatePixelY(int nltp)
 			throws InvalidMessageException
 		{
-			int y = calculatePixelY(jp, line, nltp);
+			int y = calculatePixelY(jp, font, line, nltp);
 			if(y >= 0)
 				return y;
 			throw new InvalidMessageException("Too many lines");
@@ -212,12 +213,15 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	 * @param jp Page justification, e.g. top, middle, bottom.
 	 * @param line Line number, zero based.
 	 * @param jl Line justification, e.g. centered, left, right.
+	 * @param f_num Font to use for rendering.
 	 * @param text Text span to render.
 	 */
 	public void addSpan(int page, MultiString.JustificationPage jp,
-		int line, MultiString.JustificationLine jl, String text)
+		int line, MultiString.JustificationLine jl, int f_num,
+		String text)
 	{
-		spans.add(new TextSpan(page, jp, line, jl, text));
+		Font font = getFont(f_num);
+		spans.add(new TextSpan(page, jp, line, jl, font, text));
 		n_pages = Math.max(page + 1, n_pages);
 	}
 
@@ -252,7 +256,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 
 	/** Calculate the X pixel position to place text */
 	protected int calculatePixelX(MultiString.JustificationLine jl,
-		String t) throws InvalidMessageException
+		Font font, String t) throws InvalidMessageException
 	{
 		switch(jl) {
 		case LEFT:
@@ -261,10 +265,10 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 			// determine centering mode: block or bit oriented.
 			int pseudo_c_width = (c_width <= 0 ? 1 : c_width);
 			int w = width / pseudo_c_width;
-			int r = calculateWidth(t) / pseudo_c_width;
+			int r = calculateWidth(font, t) / pseudo_c_width;
 			return (w - r) / 2 * pseudo_c_width;
 		case RIGHT:
-			return width - calculateWidth(t) - 1;
+			return width - calculateWidth(font, t) - 1;
 		default:
 			throw new InvalidMessageException(
 				"Invalid line justification: " + jl);
@@ -272,7 +276,9 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Calculate the width of a span of text */
-	protected int calculateWidth(String t) throws InvalidMessageException {
+	protected int calculateWidth(Font font, String t)
+		throws InvalidMessageException
+	{
 		int w = 0;
 		for(int i = 0; i < t.length(); i++) {
 			if(i > 0)
@@ -286,11 +292,12 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 
 	/** Calculate the Y pixel position to place text
 	 * @param jp Line justification, e.g. top, middle, bottom.
+	 * @param font Font to use.
 	 * @param line Line number, zero based.
 	 * @param nltp Number of lines of actual text on the page.
 	 */
 	protected int calculatePixelY(MultiString.JustificationPage jp,
-		int line, int nltp) throws InvalidMessageException
+		Font font, int line, int nltp) throws InvalidMessageException
 	{
 		int lineHeight = font.getHeight() + font.getLineSpacing();
 		switch(jp) {
@@ -323,8 +330,9 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	/**
 	 * Render a span of text onto a bitmap graphic.
 	 *
-	 * @param t String to render
 	 * @param bg BitmapGraphic to render into.
+	 * @param font Font to render
+	 * @param t Text to render
 	 * @param x Horizontal position to start rendering
 	 * @param y Vertical position to strat rendering
 	 *
@@ -332,8 +340,8 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	 *                                 don't exist.
 	 * @throws IOException If a Base64 decoding error on Graphic.
 	 */
-	protected void renderSpan(String t, BitmapGraphic bg, int x, int y)
-		throws InvalidMessageException, IOException
+	protected void renderSpan(BitmapGraphic bg, Font font, String t, int x,
+		int y) throws InvalidMessageException, IOException
 	{
 		for(int i = 0; i < t.length(); i++) {
 			int cp = t.charAt(i);
