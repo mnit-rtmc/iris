@@ -42,10 +42,10 @@ public class D10CmsMsg {
 	private static final String SINGLESTROKE = "Single Stroke";
 
 	// fields
-	private final int m_cmsid;	// cms ID
-	private final Date m_date;	// message date and time
-	private final String m_desc;	// this has predefined valid values
-	private final String m_multistring; // message as multistring
+	private final int m_cmsid;		// cms ID
+	private final Date m_date;		// message date and time
+	private final CawsMsgType m_type;	// predefined valid values
+	private final String m_multistring;	// message as multistring
 	private final double m_ontime;
 
 	// types
@@ -65,9 +65,9 @@ public class D10CmsMsg {
 
 		m_date = convertDate(f[0]);
 		m_cmsid = SString.stringToInt(f[1]);
-		m_desc = parseDescription(f[2]);
-		parseFont(f[3]);	// pg 1 font
-		parseFont(f[4]);	// pg 2 font
+		m_type = parseDescription(f[2]);
+		parseFont(f[3]);	// page 1 font
+		parseFont(f[4]);	// page 2 font
 
 		String row1 = f[5].trim().toUpperCase();
 		String row2 = f[6].trim().toUpperCase();
@@ -95,10 +95,9 @@ public class D10CmsMsg {
 		}
 		m_multistring = m.toString();
 
-		// on time: 0.0
 		m_ontime = SString.stringToDouble(f[11]);
 
-		if(!m_desc.equals(DESC_BLANK)) {
+		if(m_type != CawsMsgType.BLANK) {
 			System.err.println("D10CmsMsg.D10CmsMsg():" + m_date
 				+ "," + m_cmsid + "," + m_multistring + ","
 				+ m_ontime);
@@ -169,19 +168,26 @@ public class D10CmsMsg {
 	}
 
 	/**
-	 * Parse a message description.
+	 * Parse a message description to a message type.
 	 * @param d Message description.
-	 * @return Message description.
+	 * @return CawsMsgType enum value.
 	 */
-	static protected String parseDescription(String d) {
-		if(!d.equals(DESC_BLANK) &&
-		   !d.equals(DESC_ONEPAGENORM) &&
-		   !d.equals(DESC_TWOPAGENORM))
-		{
-			// FIXME: verify possibilities
-			System.err.println("WARNING: unknown message " +
-				"description received in " +
-				"D10CmsMsg.parseDescription(): " + d);
+	static protected CawsMsgType parseDescription(String d) {
+		if(d.equals(DESC_BLANK))
+			return CawsMsgType.BLANK;
+		else if(d.equals(DESC_ONEPAGENORM))
+			return CawsMsgType.ONEPAGEMSG;
+		else if(d.equals(DESC_TWOPAGENORM))
+			return CawsMsgType.TWOPAGEMSG;
+		else if(false)	//FIXME: add in the future
+			return CawsMsgType.TRAVELTIME;
+		else {
+			// FIXME: should throw InvalidArgumentException
+			String msg = "D10CmsMsg.parseDescription: WARNING: " +
+				"unknown message description (" + d + ").";
+			assert false: msg;
+			System.err.println(msg);
+			return CawsMsgType.BLANK;
 		}
 	}
 
@@ -195,29 +201,6 @@ public class D10CmsMsg {
 			System.err.println("WARNING: unknown font " +
 				"received in D10CmsMsg.parseFont(): " + f);
 		}
-	}
-
-	/** get message type */
-	public CawsMsgType getCawsMsgType() {
-		CawsMsgType ret = CawsMsgType.BLANK;
-
-		if(m_desc.equals(DESC_BLANK)) {
-			ret = CawsMsgType.BLANK;
-		} else if(m_desc.equals(DESC_ONEPAGENORM)) {
-			ret = CawsMsgType.ONEPAGEMSG;
-		} else if(m_desc.equals(DESC_TWOPAGENORM)) {
-			ret = CawsMsgType.TWOPAGEMSG;
-		} else if(false) {	//FIXME: add in the future
-			ret = CawsMsgType.TRAVELTIME;
-		} else {
-			String msg = "D10CmsMsg.getCawsMsgType: Warning: " +
-				"unknown D10 message description (" + m_desc +
-				").";
-			assert false: msg;
-			System.err.println(msg);
-		}
-
-		return ret;
 	}
 
 	/**
@@ -280,7 +263,6 @@ public class D10CmsMsg {
 		case BLANK:
 		case ONEPAGEMSG:
 		case TWOPAGEMSG:
-			// blank, 1 or 2 pg msg
 			System.err.println("D10CmsMsg.sendMessage(): will " +
 				"activate DMS " + getIrisCmsId() + ":" + this);
 			try {
@@ -292,7 +274,6 @@ public class D10CmsMsg {
 			}
 			break;
 		case TRAVELTIME:
-			// travel time message
 			//FIXME: add in future
 			break;
 		default:
