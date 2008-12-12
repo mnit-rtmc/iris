@@ -15,20 +15,10 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.ParsingException;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-
-import java.lang.IllegalArgumentException;
-
-import java.util.LinkedList;
 
 /**
  * CAWS Message. Normally, a Message represents the bytes sent and

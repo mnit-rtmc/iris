@@ -15,11 +15,7 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.DMSListImpl;
-import us.mn.state.dot.tms.TMSObject;
-import us.mn.state.dot.tms.TMSObjectImpl;
 import us.mn.state.dot.tms.utils.SString;
 
 import java.io.Serializable;
@@ -31,7 +27,7 @@ import java.util.StringTokenizer;
  *
  * @author Michael Darter
  */
-public class D10CmsMsgs  implements Serializable
+public class D10CmsMsgs implements Serializable
 {
 	// fields
 	LinkedList<D10CmsMsg> m_msgs = null;
