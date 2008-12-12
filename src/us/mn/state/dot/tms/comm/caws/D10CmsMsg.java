@@ -241,7 +241,7 @@ public class D10CmsMsg implements Serializable
 		// c.setTimeZone(TimeZone.getTimeZone("UTC"));  // sets UTC time zone
 		Date date = c.getTime();
 
-		return (date);
+		return date;
 	}
 
 	/** set valid */
@@ -251,7 +251,7 @@ public class D10CmsMsg implements Serializable
 
 	/** return true if the CMS message is valid else false */
 	public boolean getValid() {
-		return (m_valid);
+		return m_valid;
 	}
 
 	/** get message type */
@@ -274,7 +274,7 @@ public class D10CmsMsg implements Serializable
 			ret = CawsMsgType.BLANK;
 		}
 
-		return (ret);
+		return ret;
 	}
 
 	/**
@@ -296,7 +296,7 @@ public class D10CmsMsg implements Serializable
 	 */
 	protected boolean shouldSendMessage(DMSImpl dms) {
 		if(dms == null || m_multistring==null || m_multistring.length()<=0)
-			return (false);
+			return false;
 
 		// is caws activated for the sign?
 		if(!TrafficDeviceAttributeHelper.awsControlled(
