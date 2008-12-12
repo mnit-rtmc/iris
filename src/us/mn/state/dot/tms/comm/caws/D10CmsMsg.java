@@ -24,29 +24,24 @@ import us.mn.state.dot.tms.MsgActPriorityProc;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.TrafficDeviceImpl;
-import us.mn.state.dot.tms.TrafficDeviceAttribute;
 import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
-import us.mn.state.dot.tms.TrafficDeviceAttributeImpl;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.comm.caws.MsgActPriorityCallBackBlank;
 import us.mn.state.dot.tms.utils.SString;
 
 import java.io.Serializable;
-import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Map;
 import java.util.StringTokenizer;
-import java.util.TimeZone;
 
 /**
  * CAWS D10CmsMsg. This is a single CMS message.
  *
  * @author Michael Darter
  */
-public class D10CmsMsg  implements Serializable
+public class D10CmsMsg implements Serializable
 {
 	// consts
 	private static final String CAWS_OWNER = CawsPoller.CAWS_OWNER;
@@ -362,7 +357,6 @@ public class D10CmsMsg  implements Serializable
 		} else {
 			assert false : "D10CmsMsg.activate(): ERROR--unknown CawsMsgType.";
 		}
-
 	}
 
 	/**
