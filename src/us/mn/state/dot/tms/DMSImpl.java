@@ -1070,7 +1070,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Create a message for the sign */
-	protected SignMessage createMessage(String m, DMSMessagePriority p) {
+	public SignMessage createMessage(String m, DMSMessagePriority p) {
 		Integer w = widthPixels;
 		Integer h = heightPixels;
 		Integer cw = charWidthPixels;

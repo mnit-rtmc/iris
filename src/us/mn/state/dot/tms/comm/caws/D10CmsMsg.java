@@ -14,26 +14,19 @@
  */
 package us.mn.state.dot.tms.comm.caws;
 
-import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.MsgActPriority;
-import us.mn.state.dot.tms.MsgActPriorityD10;
-import us.mn.state.dot.tms.MsgActPriorityProc;
-import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
-import us.mn.state.dot.tms.comm.caws.CawsPoller;
-import us.mn.state.dot.tms.comm.caws.MsgActPriorityCallBackBlank;
-import us.mn.state.dot.tms.utils.SString;
-
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.Map;
 import java.util.StringTokenizer;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
+import us.mn.state.dot.tms.comm.caws.CawsPoller;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * CAWS D10CmsMsg. This is a single CMS message.
@@ -351,55 +344,12 @@ public class D10CmsMsg implements Serializable
 
 	/**
 	 * toSignMessage builds a SignMessage version of this message.
-	 * @params dms The associated DMS.
-	 * @returns A SignMessage that contains the text of the message and a rendered bitmap.
+	 * @param dms The associated DMS.
+	 * @return A SignMessage that contains the text of the message and
+	 *         rendered bitmap(s).
 	 */
 	public SignMessage toSignMessage(DMSImpl dms) {
-		System.err.println(
-		    "D10CmsMsg.toSignMessage() called: dms.SignWidth="
-		    + dms.getSignWidthPixels() + ", getId()=" + dms.getId()
-		    + ", dms.SignHeight=" + dms.getSignHeightPixels());
-
-		// create multistring
-		MultiString multi = new MultiString(m_multistring);
-
-		// create bitmap
-		Map<Integer, BitmapGraphic> bitmaps =
-			dms.createPixelMaps(multi);
-
-		// create sign message
-		String owner = CAWS_OWNER;
-		SignMessage sm = new SignMessage(owner, multi, bitmaps,
-			SignMessage.DURATION_INFINITE);
-
-		// set activation priority
-		sm.setActivationPriority(createMsgActPriority());
-
-		return sm;
-	}
-
-	/** Return a MsgActPriority as a function of the message */
-	protected MsgActPriority createMsgActPriority() {
-		MsgActPriority ret=null;
-		if(getCawsMsgType()==CawsMsgType.BLANK) {
-			System.err.println("D10CmsMsg.createMsgActPriority(): creating blank caws message");
-			// create a procedural activation priority
-			ret=new MsgActPriorityProc(MsgActPriorityD10.VAL_D10_CAWS_BLANK,
-				new MsgActPriorityCallBackBlank());
-		}
-		else if(getCawsMsgType()==CawsMsgType.ONEPAGEMSG || 
-			getCawsMsgType()==CawsMsgType.TWOPAGEMSG)
-			ret=MsgActPriorityD10.PRI_D10_CAWS_MSG;
-		else if(getCawsMsgType()==CawsMsgType.TRAVELTIME)
-			ret=MsgActPriorityD10.PRI_D10_CAWS_TRAVELTIME;
-		else {
-			ret=MsgActPriority.PRI_OPER_MSG;
-			String em="D10CmsMsg.createMsgActPriority(): unknown type encountered";
-			assert false : em;
-			System.err.println(em);
-		}
-		assert ret!=null : "ret is null";
-		return ret;
+		return dms.createMessage(m_multistring, DMSMessagePriority.AWS);
 	}
 
 	/** toString */
