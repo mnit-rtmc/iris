@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.comm.caws;
 
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -44,7 +43,6 @@ import java.util.StringTokenizer;
 public class D10CmsMsg implements Serializable
 {
 	// consts
-	private static final String CAWS_OWNER = CawsPoller.CAWS_OWNER;
 	private static final String DESC_BLANK = "Blank";
 	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
 	private static final String DESC_TWOPAGENORM = "2 Page (Normal)";
@@ -288,7 +286,7 @@ public class D10CmsMsg implements Serializable
 		System.err.println("-----D10CmsMsg.activate("+dms+") called, msg=" + this);
 		boolean activate=shouldSendMessage(dms);
 		if(activate)
-			this.sendMessage(dms);
+			sendMessage(dms);
 	}
 
 	/**
@@ -329,33 +327,25 @@ public class D10CmsMsg implements Serializable
 	 * @params dms The associated DMS.
 	 */
 	protected void sendMessage(DMSImpl dms) {
-		CawsMsgType mtype = this.getCawsMsgType();
-
-		// blank the message
-		if(mtype == CawsMsgType.BLANK) {
-			System.err.println("D10CmsMsg.sendMessage(): will blank DMS "+ this.getIrisCmsId() + " for DMS=" + dms + ".");
-			dms.clearMessageUsingActivationPriority(
-				CAWS_OWNER,createMsgActPriority());
-
-		// 1 or 2 pg msg
-		} else if((mtype == CawsMsgType.ONEPAGEMSG)
-			|| (mtype == CawsMsgType.TWOPAGEMSG)) {
-
-			System.err.println("D10CmsMsg.sendMessage(): will activate DMS " + this.getIrisCmsId() + ":" + this);
+		switch(getCawsMsgType()) {
+		case BLANK:
+		case ONEPAGEMSG:
+		case TWOPAGEMSG:
+			// blank, 1 or 2 pg msg
+			System.err.println("D10CmsMsg.sendMessage(): will activate DMS " + getIrisCmsId() + ":" + this);
 			try {
-				dms.setMessage(this.toSignMessage(dms));
-				dms.updateMessageGraphic();
-			} catch (InvalidMessageException e) {
+				dms.sendMessage(toSignMessage(dms));
+			}
+			catch(TMSException e) {
 				System.err.println("D10CmsMsg.sendMessage(): exception:" + e);
 			}
-
-		// travel time message
-		} else if(mtype==CawsMsgType.TRAVELTIME) {
+			break;
+		case TRAVELTIME:
+			// travel time message
 			//FIXME: add in future
-
-		// error
-		} else {
-			assert false : "D10CmsMsg.activate(): ERROR--unknown CawsMsgType.";
+			break;
+		default:
+			assert false: "D10CmsMsg.sendMessage(): unknown CawsMsgType";
 		}
 	}
 
