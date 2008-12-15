@@ -15,11 +15,10 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-
-import java.io.IOException;
 
 /**
  * Operation to blank the DMS.

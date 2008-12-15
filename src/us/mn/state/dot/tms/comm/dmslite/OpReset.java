@@ -15,25 +15,10 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
-import us.mn.state.dot.tms.BitmapGraphic;
+import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageMemoryType;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageMultiString;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.TMSObjectImpl;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Operation to reset the DMS.
@@ -154,4 +139,3 @@ public class OpReset extends OpDms
 		}
 	}
 }
-

@@ -15,23 +15,18 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import java.util.Random;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
-import us.mn.state.dot.tms.comm.ChecksumException;
-import us.mn.state.dot.tms.comm.DeviceOperation;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.comm.ChecksumException;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Random;
 
 /**
  * Operation to be performed on a dynamic message sign

@@ -15,24 +15,18 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.LinkedList;
+import java.util.Properties;
 import us.mn.state.dot.tms.MainServer;
-import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ParsingException;
-import us.mn.state.dot.tms.comm.caws.D10CmsMsg;
+import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 import us.mn.state.dot.tms.utils.SEmail;
 import us.mn.state.dot.tms.utils.PropertyFile;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.lang.IllegalArgumentException;
-import java.util.LinkedList;
-import java.util.Properties;
 
 /**
  * DMS Lite Message. A Message represents the bytes sent and

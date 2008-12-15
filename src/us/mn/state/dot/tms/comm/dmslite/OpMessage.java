@@ -15,18 +15,15 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.STime;
-
-import java.io.IOException;
-import java.lang.StringBuilder;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * Operation to send a new message to a DMS.

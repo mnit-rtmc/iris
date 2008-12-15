@@ -15,12 +15,11 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.SString;
-
-import java.io.IOException;
 
 /**
  * Operation to query the configuration of a DMS.
