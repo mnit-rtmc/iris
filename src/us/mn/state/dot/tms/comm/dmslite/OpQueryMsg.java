@@ -21,9 +21,9 @@ import java.util.GregorianCalendar;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.MsgActPriorityD10;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.SDMS;
@@ -125,13 +125,13 @@ public class OpQueryMsg extends OpDms
 
 	/**
 	 * Create a SignMessage using a bitmap and no message text.
-	 * @params owner message owner.
-	 * @params sbitmap Bitmap as hexstring associated with message text.
+	 * @param owner message owner.
+	 * @param sbitmap Bitmap as hexstring associated with message text.
 	 * 	           This bitmap is assumed to be a 96x25 bitmap which
 	 *                 dmslite will always return and is specific to 
 	 *                 Caltrans. 
-	 * @params dura message duration in mins.
-	 * @returns A SignMessage that contains the text of the message and 
+	 * @param dura message duration in mins.
+	 * @return A SignMessage that contains the text of the message and 
 	 *  a rendered bitmap.
 	 */
 	private SignMessage createSignMessageWithBitmap(String owner, 
@@ -382,8 +382,12 @@ public class OpQueryMsg extends OpDms
 
 				// have text
 				if(msgtextavailable) {
-					m_dms.setMessageFromController(msgtext, 
-						duramins, owner,MsgActPriorityD10.PRI_D10_OPER_MSG);
+					SignMessage sm = m_dms.createMessage(
+						msgtext,
+						DMSMessagePriority.OPERATOR);
+					// FIXME: owner not set
+					// FIXME: duration not set
+					m_dms.setMessageCurrent(sm);
 
 				// don't have text
 				} else {
