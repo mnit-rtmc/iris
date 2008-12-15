@@ -34,18 +34,19 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS fonts...");
 		namespace.registerType(SONAR_TYPE, FontImpl.class);
-		store.query("SELECT name, height, width, line_spacing, " +
-			"char_spacing, version_id FROM font;",
+		store.query("SELECT name, f_number, height, width, " +
+			"line_spacing, char_spacing, version_id FROM font;",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new FontImpl(
 					row.getString(1),	// name
-					row.getInt(2),		// height
-					row.getInt(3),		// width
-					row.getInt(4),		// line_spacing
-					row.getInt(5),		// char_spacing
-					row.getInt(6)		// version_id
+					row.getInt(2),		// f_number
+					row.getInt(3),		// height
+					row.getInt(4),		// width
+					row.getInt(5),		// line_spacing
+					row.getInt(6),		// char_spacing
+					row.getInt(7)		// version_id
 				));
 			}
 		});
@@ -55,6 +56,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("f_number", f_number);
 		map.put("height", height);
 		map.put("width", width);
 		map.put("line_spacing", lineSpacing);
@@ -79,8 +81,11 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Create a new font */
-	protected FontImpl(String n, int h, int w, int ls, int cs, int v) {
+	protected FontImpl(String n, int num, int h, int w, int ls, int cs,
+		int v)
+	{
 		this(n);
+		f_number = num;
 		height = h;
 		width = w;
 		lineSpacing = ls;
@@ -120,6 +125,29 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		synchronized(glyphs) {
 			return new TreeMap<Integer, GlyphImpl>(glyphs);
 		}
+	}
+
+	/** Font number */
+	protected int f_number = 1;
+
+	/** Set the font number */
+	public void setNumber(int n) {
+		f_number = n;
+	}
+
+	/** Set the font number */
+	public void doSetNumber(int n) {
+		if(n == f_number)
+			return;
+		if(n < 1 || n > 4)
+			throw new ChangeVetoException("Invalid number");
+		store.update(this, "f_number", n);
+		setNumber(n);
+	}
+
+	/** Get the font number */
+	public int getNumber() {
+		return f_number;
 	}
 
 	/** Font height (in pixels) */
