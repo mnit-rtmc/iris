@@ -15,29 +15,19 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.TreeMap;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageMemoryType;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageMultiString;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.MsgActPriority;
 import us.mn.state.dot.tms.MsgActPriorityD10;
+import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.SDMS;
 import us.mn.state.dot.tms.utils.STime;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Operation to query the current message on a DMS.
@@ -423,4 +413,3 @@ public class OpQueryMsg extends OpDms
 		}
 	}
 }
-

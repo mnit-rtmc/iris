@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.MsgActPriority;
-import us.mn.state.dot.tms.MsgActPriorityD10;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
