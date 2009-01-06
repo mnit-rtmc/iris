@@ -25,13 +25,11 @@ import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -310,9 +308,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Note */
 	protected final JLabel dms_note = new JLabel();
 
-	/** Brightness table */
-	protected BrightnessTable b_table;
-
 	/** Timing plan table component */
 	protected final JTable plan_table = new JTable();
 
@@ -321,14 +316,6 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Add PM plan button */
 	protected final JButton pm_plan = new JButton("Add PM Plan");
-
-	/** Photocell brightness control */
-	protected final JRadioButton con_photocell =
-		new JRadioButton("Photocell control");
-
-	/** Manual brightness control button */
-	protected final JRadioButton con_manual =
-		new JRadioButton("Manual control");
 
 	/** Form object */
 	protected final TMSObjectForm form = this;
@@ -428,7 +415,6 @@ public class DMSProperties extends TrafficDeviceForm {
 			admin);
 		plan_table.setModel(plan_model);
 		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
-		b_table = new BrightnessTable(sign, admin);
 		setDevice(sign);
 		super.initialize();
 		location.addRow("Camera", camera);
@@ -438,8 +424,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
-		if (!SystemAttributeHelper.isAgencyCaltransD10())
-			tab.add("Brightness", createBrightnessPanel());
 		if (!SystemAttributeHelper.isAgencyCaltransD10())
 			tab.add("Ledstar", createLedstarPanel());
 		tab.add("Status", createStatusPanel());
@@ -1054,48 +1038,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		return pane;
 	}
 
-	/** Create a brightness table panel */
-	protected JPanel createBrightnessPanel() {
-		GridBagLayout lay = new GridBagLayout();
-		JPanel panel = new JPanel(lay);
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.fill = GridBagConstraints.BOTH;
-		bag.gridwidth = 4;
-		bag.weightx = 1;
-		bag.weighty = 1;
-		b_table.setBorder(b_table.new ScaleBorder(16));
-		lay.setConstraints(b_table, bag);
-		panel.add(b_table);
-		bag.weightx = 0.1f;
-		bag.weighty = 0;
-		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.gridwidth = 1;
-		bag.fill = GridBagConstraints.NONE;
-		bag.insets.top = 6;
-		ButtonGroup group = new ButtonGroup();
-		group.add(con_photocell);
-		new ActionJob(this, con_photocell) {
-			public void perform() throws Exception {
-				sign.activateManualBrightness(false);
-			}
-		};
-		lay.setConstraints(con_photocell, bag);
-		panel.add(con_photocell);
-		bag.gridx = 1;
-		group.add(con_manual);
-		new ActionJob(this, con_manual) {
-			public void perform() throws Exception {
-				sign.activateManualBrightness(true);
-			}
-		};
-		lay.setConstraints(con_manual, bag);
-		panel.add(con_manual);
-
-		return panel;
-	}
-
 	/** Update the form with the current state of the sign */
 	protected void doUpdate() throws RemoteException {
 		super.doUpdate();
@@ -1134,7 +1076,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		ambientTemp.setForeground(color);
 		housingTemp.setForeground(color);
 		dms_note.setForeground(color);
-		b_table.doUpdate();
 		travel.setText(t);
 	}
 
@@ -1192,11 +1133,6 @@ public class DMSProperties extends TrafficDeviceForm {
 			sign.getMaxHousingTemp()));
 		dms_note.setText(sign.getUserNote());
 		operation.setText(sign.getOperation());
-		b_table.doStatus();
-		if(sign.isManualBrightness())
-			con_manual.setSelected(true);
-		else
-			con_photocell.setSelected(true);
 
 		h_pix = sign.getSignWidthPixels();
 		v_pix = sign.getLineHeightPixels();
@@ -1212,10 +1148,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected void applyPressed() throws Exception {
 		super.applyPressed();
 		sign.setCamera(getCameraName((Camera)camera.getSelectedItem()));
-		if(b_table.isModified()) {
-			int[] table = b_table.getTableData();
-			sign.setBrightnessTable(table);
-		}
 		sign.setTravel(travel.getText());
 		sign.notifyUpdate();
 	}
