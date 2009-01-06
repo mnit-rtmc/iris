@@ -48,8 +48,8 @@ public class DMSTab extends MapTab {
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
 		DMSHandler handler, SonarState st, TmsConnection tmsConnection)
 	{
-		super(I18NMessages.get("MesgSignMenuLabel"),
-			I18NMessages.get("MesgSignMenuHoverText"));
+		super(I18NMessages.get("dms.abbreviation"),
+			I18NMessages.get("dms.title"));
 		dispatcher = new DMSDispatcher(handler, st, tmsConnection);
 		chooser = new DmsStatusSummary(handler);
 		map.addLayers(lstates);

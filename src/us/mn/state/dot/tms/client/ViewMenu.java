@@ -20,7 +20,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
-import us.mn.state.dot.tms.client.dms.DMSListForm;
+import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
 import us.mn.state.dot.tms.client.meter.RampMeterListForm;
@@ -140,7 +140,7 @@ public class ViewMenu extends JMenu {
 
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DMSListForm(tc));
+				desktop.show(new DMSForm(tc, st.getDMSs()));
 			}
 		};
 		add(item);
