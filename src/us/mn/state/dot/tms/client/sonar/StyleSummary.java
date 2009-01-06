@@ -25,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import us.mn.state.dot.sonar.SonarObject;
@@ -55,8 +56,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	public StyleSummary(final ProxyManager<T> man) {
 		super(new GridBagLayout());
 		manager = man;
-		ProxyCellRenderer<T> renderer =
-			new ProxyCellRenderer<T>(manager);
+		ListCellRenderer renderer = manager.createCellRenderer();
 		setBorder(BorderFactory.createTitledBorder(
 			manager.getProxyType() + " Summary"));
 		list_panel = new JPanel(cards);
@@ -66,9 +66,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		for(int i = 0; i < styles.length; i++) {
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
-			ProxyJList<T> list = new ProxyJList<T>(manager);
-			list.setModel(m);
-			list.setSelectionModel(m.getSelectionModel());
+			ProxyJList<T> list = manager.createList(styles[i]);
 			list.setCellRenderer(renderer);
 			JScrollPane scroll = new JScrollPane(list);
 			list_panel.add(scroll, m.getName());

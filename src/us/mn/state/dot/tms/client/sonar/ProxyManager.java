@@ -170,6 +170,18 @@ abstract public class ProxyManager<T extends SonarObject>
 		return cache;
 	}
 
+	/** Create a list cell renderer */
+	public ListCellRenderer createCellRenderer() {
+		return new ProxyCellRenderer<T>(this);
+	}
+
+	/** Create a proxy JList for the given style */
+	public ProxyJList<T> createList(String style) {
+		StyleListModel<T> m = getStyleModel(style);
+		assert m != null;
+		return new ProxyJList<T>(m);
+	}
+
 	/** Create a styled theme for this type of proxy */
 	abstract protected StyledTheme createTheme();
 
