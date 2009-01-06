@@ -75,8 +75,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected final TmsConnection connection;
 
 	/** Create a new DMS manager */
-	public DMSManager(TmsConnection tc, TypeCache<DMS> c,
-		GeoLocManager lm)
+	public DMSManager(TmsConnection tc, TypeCache<DMS> c, GeoLocManager lm)
 	{
 		super(c, lm);
 		connection = tc;

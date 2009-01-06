@@ -32,7 +32,7 @@ import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
- * This class renders DMSs in a JList within the DmsStatusSummary.
+ * This class renders DMSs in a JList within the DMS StyleSummary.
  *
  * @author Erik Engstrom
  * @author Douglas Lau

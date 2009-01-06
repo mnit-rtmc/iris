@@ -50,7 +50,8 @@ import us.mn.state.dot.sonar.client.TypeCache;
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of the agency.
- * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel, TmsSelectionModel
+ * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel
+ *
  * @author Erik Engstrom
  * @author Douglas Lau
  * @author Michael Darter
@@ -112,15 +113,15 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected final MessageSelector messageSelector;
 
 	/** Create a new DMS dispatcher */
-	public DMSDispatcher(DMSHandler handler, final SonarState st,
+	public DMSDispatcher(DMSManager manager, final SonarState st,
 		TmsConnection tc)
 	{
 		super( new GridBagLayout() );
 		setOptionalControlUse();
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(),st.lookupUser(tc.getUser().getName()));
-		userName = handler.getUser().getName();
-		selectionModel = handler.getSelectionModel();
+		userName = manager.getUser().getName();
+		selectionModel = manager.getSelectionModel();
 		pnlSign = new DMSPanel(st.getSystemAttributes());
 		setBorder(BorderFactory.createTitledBorder(
 			I18NMessages.get("DMSDispatcher.GroupBoxTitle")));

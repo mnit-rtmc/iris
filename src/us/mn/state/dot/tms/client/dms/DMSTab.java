@@ -36,7 +36,7 @@ public class DMSTab extends MapTab {
 	protected final DMSDispatcher dispatcher;
 
 	/** Summary of DMSs of each status */
-	protected final DmsStatusSummary chooser;
+	protected final StyleSummary<DMS> summary;
 
 	/** Tab panel */
 	protected final JPanel tabPanel;
@@ -46,12 +46,12 @@ public class DMSTab extends MapTab {
 
 	/** Create a new DMS tab */
 	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
-		DMSHandler handler, SonarState st, TmsConnection tmsConnection)
+		DMSManager manager, SonarState st, TmsConnection tmsConnection)
 	{
 		super(I18NMessages.get("dms.abbreviation"),
 			I18NMessages.get("dms.title"));
-		dispatcher = new DMSDispatcher(handler, st, tmsConnection);
-		chooser = new DmsStatusSummary(handler);
+		dispatcher = new DMSDispatcher(manager, st, tmsConnection);
+		summary = new StyleSummary<DMS>(manager);
 		map.addLayers(lstates);
 		tabPanel = createSideBar();
 		mainPanel = createMapPanel(vlayer);
@@ -61,7 +61,7 @@ public class DMSTab extends MapTab {
 	protected JPanel createSideBar() {
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(dispatcher, BorderLayout.NORTH);
-		p.add(chooser, BorderLayout.CENTER);
+		p.add(summary, BorderLayout.CENTER);
 		return p;
 	}
 
@@ -75,7 +75,7 @@ public class DMSTab extends MapTab {
 		super.dispose();
 		mainPanel.removeAll();
 		dispatcher.dispose();
-		chooser.dispose();
+		summary.dispose();
 	}
 
 	/** Get the tab panel */

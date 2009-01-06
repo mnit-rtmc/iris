@@ -35,13 +35,12 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
-import us.mn.state.dot.tms.client.dms.DMSHandler;
+import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
 import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
@@ -93,6 +92,9 @@ public class Session {
 	/** Camera manager */
 	protected final CameraManager cam_manager;
 
+	/** DMS manager */
+	protected final DMSManager dms_manager;
+
 	/** Detector manager */
 	protected final DetectorManager det_manager;
 
@@ -101,6 +103,7 @@ public class Session {
 
 	/** FIXME: this is a hack */
 	static public CameraManager cam_manager_singleton;
+	static public DMSManager dms_manager_singleton;
 	static public DetectorManager det_manager_singleton;
 	static public WarningSignManager warn_manager_singleton;
 
@@ -145,7 +148,7 @@ public class Session {
 
 	/** Add the DMS tab */
 	protected void addDMSTab(final SonarState st) throws RemoteException {
-		TmsMapLayer dmsLayer = DMSHandler.createLayer(tmsConnection);
+		SonarLayer<DMS> dmsLayer = dms_manager.getLayer();
 		Layer warnLayer = warn_manager.getLayer();
 		List<LayerState> lstates = createBaseLayers();
 		lstates.add(gpoly.createState());
@@ -155,8 +158,7 @@ public class Session {
 			lstates.add(rwisLayer.createState());
 		lstates.add(dmsLayer.createState());
 		lstates.add(warnLayer.createState());
-		tabs.add(new DMSTab(lstates, vlayer,
-			(DMSHandler)dmsLayer.getHandler(),st,tmsConnection));
+		tabs.add(new DMSTab(lstates, vlayer, st, tmsConnection));
 	}
 
 	/** Add the meter tab */
@@ -228,6 +230,9 @@ public class Session {
 			loc_manager);
 		cam_manager_singleton = cam_manager;
 		camLayer = cam_manager.getLayer();
+		dms_manager = new DMSManager(tmsConnection, st.getDMSs(),
+			loc_manager);
+		dms_manager_singleton = dms_manager;
 		det_manager = new DetectorManager(tmsConnection,
 			st.getDetectors(), loc_manager);
 		det_manager_singleton = det_manager;
