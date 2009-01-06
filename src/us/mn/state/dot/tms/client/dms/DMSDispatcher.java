@@ -19,7 +19,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.rmi.RemoteException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -30,19 +29,16 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.TmsSelectionEvent;
-import us.mn.state.dot.tms.client.TmsSelectionListener;
 import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.dms.FontComboBox;
 import us.mn.state.dot.tms.utils.I18NMessages;
-import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -54,8 +50,8 @@ import us.mn.state.dot.sonar.client.TypeCache;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSDispatcher extends JPanel implements TmsSelectionListener {
-
+public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
+{
 	/** Panel used for drawing a DMS */
 	protected final DMSPanel pnlSign;
 
@@ -87,9 +83,10 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected final JButton btnSend = 
 		new JButton(I18NMessages.get("DMSDispatcher.SendButton"));
 
-	/** Button used to clear the DMS. Text also set in ClearDmsAction */
+	/** Button used to clear the DMS.
+	 * FIXME: should just use ClearDmsAction */
 	protected final JButton btnClear = 
-		new JButton(I18NMessages.get("DMSDispatcher.ClearButton"));
+		new JButton(I18NMessages.get("dms.clear_button"));
 
 	/** Button used to get the DMS status (optional) */
 	protected final JButton btnGetStatus = new JButton(I18NMessages.get(
@@ -99,13 +96,13 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	protected AwsCheckBox awsCheckBox = null;
 
 	/** Select model */
-	protected final TmsSelectionModel selectionModel;
+	protected final ProxySelectionModel<DMS> selectionModel;
 
 	/** Currently logged in user name */
 	protected final String userName;
 
-	/** The currently selected DMS */
-	protected DMSProxy selectedSign = null;
+	/** Currently selected DMS */
+	protected DMS selectedSign = null;
 
 	/** Message selector widget */
 	protected final MessageSelector messageSelector;
@@ -122,7 +119,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		selectionModel = manager.getSelectionModel();
 		pnlSign = new DMSPanel(st.getSystemAttributes());
 		setBorder(BorderFactory.createTitledBorder(
-			I18NMessages.get("DMSDispatcher.GroupBoxTitle")));
+			I18NMessages.get("dms.selected_title")));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets = new Insets(2, 4, 2, 4);
 		bag.anchor = GridBagConstraints.EAST;
@@ -332,7 +329,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	}
 
 	/** Set the selected DMS */
-	protected void setSelected(DMSProxy proxy) throws RemoteException {
+	protected void setSelected(DMS proxy) {
 		selectedSign = proxy;
 		if(proxy == null)
 			clearSelected();
@@ -399,8 +396,8 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	}
 
 	/** Send a new message to the selected DMS object */
-	protected void sendMessage() throws TMSException, RemoteException {
-		DMSProxy proxy = selectedSign;	// Avoid NPE race
+	protected void sendMessage() throws TMSException {
+		DMS proxy = selectedSign;	// Avoid NPE race
 		String message = messageSelector.getMessage();
 		String fontName = (m_useFontsComboBox ? 
 			cmbFont.getSelectedItemName() : null);
@@ -411,21 +408,25 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		}
 	}
 
-	/** Called whenever the selected DMS changes */
-	public void selectionChanged(TmsSelectionEvent e) {
-		final TMSObject o = e.getSelected();
-		if(o instanceof DMSProxy) {
-			new AbstractJob() {
-				public void perform() throws RemoteException {
-					setSelected((DMSProxy)o);
-				}
-			}.addToScheduler();
-		}
+	/** Called whenever a sign is added to the selection */
+	public void selectionAdded(DMS s) {
+		if(manager.getSelectionModel().getSelectedCount() <= 1)
+			setSelected(s);
+	}
+
+	/** Called whenever a sign is removed from the selection */
+	public void selectionRemoved(DMS s) {
+		ProxySelectionModel<DMS> model = manager.getSelectionModel();
+		if(model.getSelectedCount() == 1) {
+			for(DMS dms: model.getSelected())
+				setSelected(dms);
+		} else if(s == selected)
+			setSelected(null);
 	}
 
 	/** Refresh the update status of the device */
 	public void refreshUpdate() {
-		DMSProxy proxy = selectedSign;	// Avoid NPE race
+		DMS proxy = selectedSign;	// Avoid NPE race
 		if(proxy != null) {
 			txtId.setText(proxy.getId());
 			txtLocation.setText(proxy.getDescription());
@@ -436,7 +437,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 
 	/** Refresh the status of the device */
 	public void refreshStatus() {
-		DMSProxy dms = selectedSign;	// Avoid NPE race
+		DMS dms = selectedSign;	// Avoid NPE race
 		if(dms == null)
 			return;
 		SignMessage m = dms.getMessage();
@@ -459,7 +460,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 	}
 
 	/** get the currently selected DMS */
-	public DMSProxy getSelectedDms() {
+	public DMS getSelectedDms() {
 		return selectedSign;
 	}
 
@@ -470,4 +471,3 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		return selectedSign.getId();
 	}
 }
-

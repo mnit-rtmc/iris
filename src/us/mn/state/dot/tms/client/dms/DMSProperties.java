@@ -144,7 +144,7 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Frame title */
 	static protected String TITLE = 
-		I18NMessages.get("DMSProperties.Title")+": ";
+		I18NMessages.get("dms.abbreviation") + ": ";
 
 	/** Remote dynamic message sign interface */
 	protected DMS sign;

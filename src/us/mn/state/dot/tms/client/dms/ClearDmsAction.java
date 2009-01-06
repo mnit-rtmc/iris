@@ -14,44 +14,39 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.rmi.RemoteException;
 import javax.swing.Action;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * Action to clear the selected DMS.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class ClearDmsAction extends TrafficDeviceAction {
+public class ClearDmsAction extends ProxyAction<DMS> {
 
 	/** Name of logged-in user */
 	protected final String userName;
 
 	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(DMSProxy p, String user) {
+	public ClearDmsAction(DMS p, String user) {
 		super(p);
-		// note: this tag is also used in DMSDispatcher
-		putValue(Action.NAME,I18NMessages.get(
-			"DMSDispatcher.ClearButton"));
+		putValue(Action.NAME, I18NMessages.get("dms.clear_button"));
 		putValue(Action.SHORT_DESCRIPTION,
-			I18NMessages.get("DMSDispatcher.ClearButton.ToolTip"));
-		putValue(Action.LONG_DESCRIPTION,
-			"Remove any message from the sign.");
+			I18NMessages.get("dms.clear_button.tooltip"));
 		userName = user;
 	}
 
 	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(DMSProxy p, TmsConnection c) {
+	public ClearDmsAction(DMS p, TmsConnection c) {
 		this(p, c.getUser().getName());
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() throws RemoteException {
-		DMSProxy p = (DMSProxy)proxy;
-		p.dms.clearMessage(userName);
+	protected void do_perform() {
+		// FIXME: create new blank SignMessageImpl using SONAR
+		proxy.setMessageNext(null);
 	}
 }
