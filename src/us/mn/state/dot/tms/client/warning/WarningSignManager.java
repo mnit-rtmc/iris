@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
-import us.mn.state.dot.tms.client.sonar.StyleSummary;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
