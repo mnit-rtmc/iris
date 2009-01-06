@@ -41,7 +41,7 @@ public class SystemAttributeHelper {
 	static public SystemAttribute get(String aname) {
 		if(aname == null)
 			return null;
-		if(aname.length() > TrafficDeviceAttribute.MAXLEN_ANAME)
+		if(aname.length() > SystemAttribute.MAXLEN_ANAME)
 			return null;
 		return lookup(aname);
 	}

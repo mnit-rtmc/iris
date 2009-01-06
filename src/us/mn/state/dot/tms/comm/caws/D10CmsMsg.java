@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -235,9 +234,7 @@ public class D10CmsMsg {
 			return false;
 
 		// is caws activated for the sign?
-		if(!TrafficDeviceAttributeHelper.awsControlled(
-			getIrisCmsId())) 
-		{
+		if(!dms.getAws()) {
 			System.err.println("D10CmsMsg.shouldSendMessage(): DMS "
 				+ getIrisCmsId() +
 				" is NOT activated for CAWS control.");

@@ -85,7 +85,6 @@ public class MainServer {
 			// FIXME: static namespace hacks
 			TMSObjectImpl.namespace = ns;
 			SystemAttributeHelper.namespace = ns;
-			TrafficDeviceAttributeHelper.namespace = ns;
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
 			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);

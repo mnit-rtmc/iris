@@ -33,8 +33,6 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TrafficDeviceAttribute;
-import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -200,8 +198,7 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		// add optional AWS checkbox
 		if(m_useAwsCheckBox) {
 			awsCheckBox = new AwsCheckBox(getAwsProxyName(), 
-				I18NMessages.get("DMSDispatcher.AwsCheckBox"), 
-				st.getTrafficDeviceAttributes());
+				I18NMessages.get("DMSDispatcher.AwsCheckBox"));
 			JPanel p = new JPanel(new FlowLayout());
 			p.add(awsCheckBox);
 			boxRight.add(p);
@@ -471,14 +468,6 @@ public class DMSDispatcher extends JPanel implements TmsSelectionListener {
 		if( selectedSign == null )
 			return null;
 		return selectedSign.getId();
-	}
-
-	/** get the currently selected DMS id, e.g. "V1_AWS_controlled" */
-	public String getAwsProxyName() {
-		String name = TrafficDeviceAttributeHelper.createName(
-			getSelectedDmsId(),
-			TrafficDeviceAttribute.AWS_CONTROLLED);
-		return name;
 	}
 }
 
