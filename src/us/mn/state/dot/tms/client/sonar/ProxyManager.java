@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.StyledTheme;
