@@ -111,21 +111,18 @@ public class DMSManager extends ProxyManager<DMS> {
 		return new DmsCellRenderer(this);
 	}
 
+	/** Create a proxy JList for the given style */
+	public ProxyJList<DMS> createList(String style) {
+		ProxyJList<DMS> list = super.createList(style);
+		list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		list.setVisibleRowCount(0);
+		return list;
+	}
+
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<DMS> createStyleSummary() {
 		StyleSummary<DMS> summary = super.createStyleSummary();
 		summary.setStyle(STYLE_DEPLOYED);
-
-		list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
-		list.setVisibleRowCount(0);
-
-		// FIXME:
-/*		handler.addRefreshListener(new RefreshListener() {
-			public void dataChanged() {
-				repaint();
-			}
-		}); */
-
 		return summary;
 	}
 
