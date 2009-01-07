@@ -233,9 +233,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Reset sign button (optional) */
 	protected final JButton resetButton;
 
-	/** Reset modem button (optional) */
-	protected final JButton resetModemButton;
-
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
 
@@ -300,8 +297,6 @@ public class DMSProperties extends TrafficDeviceForm {
 			"DMSProperties.GetStatusButton"));
 		resetButton = new JButton(I18NMessages.get(
 			"DMSProperties.ResetButton"));
-		resetModemButton = new JButton(I18NMessages.get(
-			"DMSProperties.ResetModemButton"));
 	}
 
 	protected int h_pix;
@@ -696,46 +691,42 @@ public class DMSProperties extends TrafficDeviceForm {
 		power_table.setPreferredScrollableViewportSize(
 			new Dimension(300, 200));
 		panel.addRow(power_table);
+		panel.addRow("Heat tape", heat_tape);
 		return panel;
 	}
 
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
-		JPanel pane = new JPanel();
-		pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
-		pane.setBorder(BORDER);
-		GridBagLayout lay = new GridBagLayout();
-		JPanel panel = new JPanel(lay);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.gridx = 1;
-		bag.gridy = 0;
-
+		FormPanel panel = new FormPanel(true);
+		panel.add("Bad pixels", badPixels);
 		if(SystemAttributeHelper.isDmsPixelTestEnabled()) {
-			lay.setConstraints(pixelTest, bag);
 			panel.add(pixelTest);
 			new ActionJob(this, pixelTest) {
-				public void perform() throws Exception {
+				public void perform() {
 					sign.testPixels();
 				}
 			};
 		}
-
-		bag.gridy = GridBagConstraints.RELATIVE;
-
+		panel.finishRow();
+		panel.addRow("Lamp status", lamp);
+		panel.add("Fan status", fan);
 		if(SystemAttributeHelper.isDmsFanTestEnabled()) {
-			lay.setConstraints(fanTest, bag);
 			panel.add(fanTest);
 			new ActionJob(this, fanTest) {
-				public void perform() throws Exception {
+				public void perform() {
 					sign.testFans();
 				}
 			};
 		}
-
+		panel.finishRow();
+		panel.addRow("Cabinet temp", cabinetTemp);
+		panel.addRow("Ambient temp", ambientTemp);
+		panel.addRow("Housing temp", housingTemp);
+		panel.add("Operation", operation);
+		operation.setForeground(Color.BLACK);
 		if(SystemAttributeHelper.isDmsStatusEnabled()) {
 			getStatusButton.setToolTipText(I18NMessages.get(
 				"DMSProperties.GetStatusButton.ToolTip"));
-			lay.setConstraints(getStatusButton, bag);
 			panel.add(getStatusButton);
 			new ActionJob(this, getStatusButton) {
 				public void perform() throws Exception {
@@ -743,92 +734,19 @@ public class DMSProperties extends TrafficDeviceForm {
 				}
 			};
 		}
-
+		panel.finishRow();
+		panel.addRow("Note", dms_note);
 		if(SystemAttributeHelper.isDmsResetEnabled()) {
 			resetButton.setToolTipText(I18NMessages.get(
 				"DMSProperties.ResetButton.ToolTip"));
-			lay.setConstraints(resetButton, bag);
-			panel.add(resetButton);
+			panel.addRow(resetButton);
 			new ActionJob(this, resetButton) {
-				public void perform() throws Exception {
-					sign.reset();
-				}
-			};
-			resetModemButton.setToolTipText(I18NMessages.get(
-				"DMSProperties.ResetModemButton.ToolTip"));
-			lay.setConstraints(resetModemButton, bag);
-			panel.add(resetModemButton);
-			new ActionJob(this, resetModemButton) {
-				public void perform() throws Exception {
+				public void perform() {
 					sign.reset();
 				}
 			};
 		}
-
-		bag.gridx = 2;
-		bag.gridy = 0;
-		bag.anchor = GridBagConstraints.EAST;
-		JLabel label = new JLabel("Bad pixels:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		bag.gridy = GridBagConstraints.RELATIVE;
-		label = new JLabel("Lamp status:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Fan status:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Heat tape:");
-		bag.insets.top = 10;
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Cabinet temp:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Ambient temp:");
-		bag.insets.top = 0;
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Housing temp:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		bag.insets.top = 10;
-		label = new JLabel("Operation:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Note:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		bag.gridx = 3;
-		bag.gridy = 0;
-		bag.anchor = GridBagConstraints.WEST;
-		bag.insets.top = 0;
-		bag.insets.left = 2;
-		lay.setConstraints(badPixels, bag);
-		panel.add(badPixels);
-		bag.gridy = GridBagConstraints.RELATIVE;
-		lay.setConstraints(lamp, bag);
-		panel.add(lamp);
-		lay.setConstraints(fan, bag);
-		panel.add(fan);
-		bag.insets.top = 10;
-		lay.setConstraints(heat_tape, bag);
-		panel.add(heat_tape);
-		lay.setConstraints(cabinetTemp, bag);
-		panel.add(cabinetTemp);
-		bag.insets.top = 0;
-		lay.setConstraints(ambientTemp, bag);
-		panel.add(ambientTemp);
-		lay.setConstraints(housingTemp, bag);
-		panel.add(housingTemp);
-		bag.insets.top = 10;
-		lay.setConstraints(operation, bag);
-		panel.add(operation);
-		operation.setForeground(Color.BLACK);
-		lay.setConstraints(dms_note, bag);
-		panel.add(dms_note);
-		pane.add(panel);
-		return pane;
+		return panel;
 	}
 
 	/** Update the form with the current state of the sign */
