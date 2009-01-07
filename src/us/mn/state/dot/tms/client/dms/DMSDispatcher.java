@@ -78,12 +78,12 @@ public class DMSDispatcher extends FormPanel
 	protected FontComboBox cmbFont = null;
 
 	/** Button used to send a message to the DMS */
-	protected final JButton btnSend = 
+	protected final JButton btnSend =
 		new JButton(I18NMessages.get("DMSDispatcher.SendButton"));
 
 	/** Button used to clear the DMS.
 	 * FIXME: should just use ClearDmsAction */
-	protected final JButton btnClear = 
+	protected final JButton btnClear =
 		new JButton(I18NMessages.get("dms.clear_button"));
 
 	/** Button used to get the DMS status (optional) */
@@ -153,7 +153,7 @@ public class DMSDispatcher extends FormPanel
 				boxRight.add(fjp);
 		}
 		if(m_useAwsCheckBox) {
-			awsCheckBox = new AwsCheckBox(getAwsProxyName(), 
+			awsCheckBox = new AwsCheckBox(getAwsProxyName(),
 				I18NMessages.get("DMSDispatcher.AwsCheckBox"));
 			JPanel p = new JPanel(new FlowLayout());
 			p.add(awsCheckBox);
@@ -177,15 +177,15 @@ public class DMSDispatcher extends FormPanel
 
 	/** set flags for optional controls */
 	protected void setOptionalControlUse() {
-		m_useFontsComboBox = 
+		m_useFontsComboBox =
 			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useDurationComboBox = 
+		m_useDurationComboBox =
 			!SystemAttributeHelper.isAgencyCaltransD10();
-		m_useControllerStatusField = 
+		m_useControllerStatusField =
 			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useGetStatusButton = 
+		m_useGetStatusButton =
 			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useAwsCheckBox = 
+		m_useAwsCheckBox =
 			SystemAttributeHelper.useAwsCheckBox();
 	}
 
@@ -325,10 +325,10 @@ public class DMSDispatcher extends FormPanel
 	protected void sendMessage() {
 		DMS proxy = selectedSign;	// Avoid NPE race
 		String message = messageSelector.getMessage();
-		String fontName = (m_useFontsComboBox ? 
+		String fontName = (m_useFontsComboBox ?
 			cmbFont.getSelectedItemName() : null);
 		if(proxy != null && message != null) {
-			proxy.dms.setMessage(userName, message, 
+			proxy.dms.setMessage(userName, message,
 				getDuration(), fontName);
 			messageSelector.updateMessageLibrary();
 		}
