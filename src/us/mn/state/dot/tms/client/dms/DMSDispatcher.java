@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -110,13 +109,12 @@ public class DMSDispatcher extends FormPanel
 		TmsConnection tc)
 	{
 		super(true);
+		setTitle(I18NMessages.get("dms.selected_title"));
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(),st.lookupUser(tc.getUser().getName()));
 		userName = manager.getUser().getName();
 		selectionModel = manager.getSelectionModel();
 		pnlSign = new DMSPanel(st.getSystemAttributes());
-		setBorder(BorderFactory.createTitledBorder(
-			I18NMessages.get("dms.selected_title")));
 
 		txtId.setEditable(false);
 		txtCamera.setEditable(false);
