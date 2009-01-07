@@ -126,8 +126,10 @@ public interface SystemAttribute extends SonarObject {
 	/** TESLA host name (and TCP port) */
 	String TESLA_HOST = "tesla_host";
 
+	/** Camera enable PTZ panel (boolean) */
+	String CAMERA_PTZ_PANEL_ENABLE = "camera_ptz_panel_enable";
+
 	/** CameraViewer */
-	String CAMERAVIEWER_ONSCRN_PTZCTRLS = "cameraviewer_onscrn_ptzctrls";
 	String CAMERAVIEWER_NUM_PRESET_BTNS = "cameraviewer_num_preset_btns";
 	String CAMERAVIEWER_NUM_VIDEO_FRAMES = "cameraviewer_num_video_frames";
 

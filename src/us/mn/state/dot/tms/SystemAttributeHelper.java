@@ -414,12 +414,6 @@ public class SystemAttributeHelper {
 		}
 	}
 
-	/** Return true to display onscreen PTZ controls in CameraViewer */
-	public static boolean useOnScrnPTZ() {
-		return getValueBoolean(
-			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS, false);
-	}
-
 	/** Return number of CameraViewer PTZ preset buttons */
 	public static int numPresetBtns() {
 		final int MIN = 0;
@@ -485,5 +479,11 @@ public class SystemAttributeHelper {
 	/** Is DMS reset enabled? */
 	static public boolean isDmsResetEnabled() {
 		return getValueBoolean(SystemAttribute.DMS_RESET_ENABLE, false);
+	}
+
+	/** Is Camera PTZ panel enabled? */
+	static public boolean isCameraPTZPanelEnabled() {
+		return getValueBoolean(SystemAttribute.CAMERA_PTZ_PANEL_ENABLE,
+			false);
 	}
 }

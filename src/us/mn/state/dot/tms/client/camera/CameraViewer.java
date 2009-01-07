@@ -62,9 +62,6 @@ public class CameraViewer extends JPanel
 	/** Dead zone needed for too-precise joystick drivers */
 	static protected final float AXIS_DEADZONE = 3f / 64;
 
-	/** The system attribute for on screen ptz control */
-	static protected final boolean ON_SCREEN_PTZ = SystemAttributeHelper.useOnScrnPTZ();
-
 	/** The system attribute for the number of button presets */
 	static protected final int NUMBER_BUTTON_PRESETS = SystemAttributeHelper.numPresetBtns();
 
@@ -206,9 +203,8 @@ public class CameraViewer extends JPanel
 		videoControls.add(stop);
 		add(videoControls, bag);
 		bag.gridy = 4;
-		if (ON_SCREEN_PTZ) {
+		if(SystemAttributeHelper.isCameraPTZPanelEnabled())
 			add(ptz_panel, bag);
-		}
 		new ActionJob(NETWORKER, play) {
 			public void perform() throws Exception {
 				playPressed(selected);
