@@ -656,7 +656,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected JPanel createGenericPanel() {
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle("Unknown manufacturer");
-		panel.addRow("Nothing to see here");
+		panel.addRow(new JLabel("Nothing to see here"));
 		return panel;
 	}
 
