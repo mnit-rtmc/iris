@@ -242,6 +242,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		selectionModel.removeTmsSelectionListener(this);
 	}
 
+	/** Build the button panel */
 	protected Box buildButtonPanel() {
 		new ActionJob(btnSend) {
 			public void perform() throws Exception {
