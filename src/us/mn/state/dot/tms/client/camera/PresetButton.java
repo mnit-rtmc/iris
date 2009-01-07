@@ -13,11 +13,8 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.Insets;
 import javax.swing.JButton;
-import javax.swing.JPanel;
 
 /**
  * This class defines a pan-tilt-zoom preset button.
