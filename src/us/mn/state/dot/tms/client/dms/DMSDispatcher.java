@@ -36,8 +36,9 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -95,7 +96,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** AWS checkbox (optional) */
 	protected AwsCheckBox awsCheckBox = null;
 
-	/** Select model */
+	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
 
 	/** Currently logged in user name */
@@ -410,15 +411,14 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(DMS s) {
-		if(manager.getSelectionModel().getSelectedCount() <= 1)
+		if(selectionModel.getSelectedCount() <= 1)
 			setSelected(s);
 	}
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(DMS s) {
-		ProxySelectionModel<DMS> model = manager.getSelectionModel();
-		if(model.getSelectedCount() == 1) {
-			for(DMS dms: model.getSelected())
+		if(selectionModel.getSelectedCount() == 1) {
+			for(DMS dms: selectionModel.getSelected())
 				setSelected(dms);
 		} else if(s == selected)
 			setSelected(null);
