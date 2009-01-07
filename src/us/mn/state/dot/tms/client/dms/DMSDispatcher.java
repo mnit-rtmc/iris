@@ -110,7 +110,6 @@ public class DMSDispatcher extends FormPanel
 		TmsConnection tc)
 	{
 		super(true);
-		setOptionalControlUse();
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(),st.lookupUser(tc.getUser().getName()));
 		userName = manager.getUser().getName();
@@ -129,7 +128,7 @@ public class DMSDispatcher extends FormPanel
 		addRow("Camera", txtCamera);
 		add("Location", txtLocation);
 		addRow("Brightness", txtBrightness);
-		if(m_useControllerStatusField) {
+		if(SystemAttributeHelper.isDmsStatusEnabled()) {
 			add("Operation", txtOperation);
 			addRow("Status", txtControllerStatus);
 		} else
@@ -145,14 +144,14 @@ public class DMSDispatcher extends FormPanel
 	protected Box createDeployBox() {
 		Box boxRight = Box.createVerticalBox();
 		boxRight.add(Box.createVerticalGlue());
-		if(m_useDurationComboBox)
+		if(SystemAttributeHelper.isDmsDurationEnabled())
 			boxRight.add(buildDurationBox());
-		if(m_useFontsComboBox) {
+		if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
 			JPanel fjp = buildFontSelectorBox(st.getFonts());
 			if(fjp != null)
 				boxRight.add(fjp);
 		}
-		if(m_useAwsCheckBox) {
+		if(SystemAttributeHelper.isAwsEnabled()) {
 			awsCheckBox = new AwsCheckBox(getAwsProxyName(),
 				I18NMessages.get("DMSDispatcher.AwsCheckBox"));
 			JPanel p = new JPanel(new FlowLayout());
@@ -166,27 +165,6 @@ public class DMSDispatcher extends FormPanel
 		deployBox.add(messageSelector);
 		deployBox.add(boxRight);
 		return deployBox;
-	}
-
-	/** flags for optional controls */
-	protected boolean m_useFontsComboBox;
-	protected boolean m_useDurationComboBox;
-	protected boolean m_useControllerStatusField;
-	protected boolean m_useGetStatusButton;
-	protected boolean m_useAwsCheckBox;
-
-	/** set flags for optional controls */
-	protected void setOptionalControlUse() {
-		m_useFontsComboBox =
-			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useDurationComboBox =
-			!SystemAttributeHelper.isAgencyCaltransD10();
-		m_useControllerStatusField =
-			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useGetStatusButton =
-			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useAwsCheckBox =
-			SystemAttributeHelper.useAwsCheckBox();
 	}
 
 	/** Dispose of the dispatcher */
@@ -213,7 +191,7 @@ public class DMSDispatcher extends FormPanel
 		box.add(Box.createHorizontalGlue());
 
 		// add optional 'get status' button
-		if(m_useGetStatusButton) {
+		if(SystemAttributeHelper.isDmsStatusEnabled()) {
 			btnGetStatus.setToolTipText(I18NMessages.get(
 				"DMSDispatcher.GetStatusButton.ToolTip"));
 			new ActionJob(this, btnGetStatus) {
@@ -230,9 +208,6 @@ public class DMSDispatcher extends FormPanel
 
 	/** Build the optional message duration box */
 	protected JPanel buildDurationBox() {
-		assert m_useDurationComboBox;
-		if(!m_useDurationComboBox)
-			return null;
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel("Duration"));
 		p.add(cmbExpire);
@@ -242,9 +217,6 @@ public class DMSDispatcher extends FormPanel
 
 	/** Build the font selector combo box */
 	protected JPanel buildFontSelectorBox(TypeCache<Font> tcf) {
-		assert m_useFontsComboBox;
-		if(!m_useFontsComboBox)
-			return null;
 		assert tcf != null;
 		if(tcf == null)
 			return null;
@@ -264,19 +236,18 @@ public class DMSDispatcher extends FormPanel
 			btnSend.setEnabled(true);
 			btnClear.setEnabled(true);
 			btnClear.setAction(new ClearDmsAction(proxy, userName));
-			if(m_useGetStatusButton)
+			if(SystemAttributeHelper.isDmsStatusEnabled())
 				btnGetStatus.setEnabled(true);
-			if(m_useDurationComboBox) {
+			if(SystemAttributeHelper.isDmsDurationEnabled()) {
 				cmbExpire.setEnabled(true);
 				cmbExpire.setSelectedIndex(0);
 			}
-			if(m_useFontsComboBox) {
+			if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
 				cmbFont.setEnabled(true);
 				cmbFont.setDefaultSelection();
 			}
-			if(m_useAwsCheckBox) {
+			if(SystemAttributeHelper.isAwsEnabled())
 				awsCheckBox.setProxy(getAwsProxyName());
-			}
 			proxy.updateUpdateInfo(); // update global messages
 			pnlSign.setSign(proxy);
 			refreshUpdate();
@@ -291,29 +262,28 @@ public class DMSDispatcher extends FormPanel
 		txtCamera.setText("");
 		txtLocation.setText("");
 		txtBrightness.setText("");
-		if(m_useDurationComboBox) {
+		if(SystemAttributeHelper.isDmsDurationEnabled()) {
 			cmbExpire.setEnabled(false);
 			cmbExpire.setSelectedIndex(0);
 		}
-		if(m_useFontsComboBox) {
+		if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
 			cmbFont.setEnabled(false);
 			cmbFont.setDefaultSelection();
 		}
-		if(m_useAwsCheckBox) {
+		if(SystemAttributeHelper.isAwsEnabled())
 			awsCheckBox.setProxy(null);
-		}
 		messageSelector.setEnabled(false);
 		messageSelector.clearSelections();
 		btnSend.setEnabled(false);
 		btnClear.setEnabled(false);
-		if(m_useGetStatusButton)
+		if(SystemAttributeHelper.isDmsStatusEnabled())
 			btnGetStatus.setEnabled(false);
 		pnlSign.setSign(null);
 	}
 
 	/** Get the selected duration */
 	protected Integer getDuration() {
-		if(m_useDurationComboBox) {
+		if(SystemAttributeHelper.isDmsDurationEnabled()) {
 			Expiration e = (Expiration)cmbExpire.getSelectedItem();
 			if(e != null)
 				return e.duration;
@@ -325,8 +295,9 @@ public class DMSDispatcher extends FormPanel
 	protected void sendMessage() {
 		DMS proxy = selectedSign;	// Avoid NPE race
 		String message = messageSelector.getMessage();
-		String fontName = (m_useFontsComboBox ?
-			cmbFont.getSelectedItemName() : null);
+		String fontName = null;
+		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
+			fontName = cmbFont.getSelectedItemName();
 		if(proxy != null && message != null) {
 			proxy.dms.setMessage(userName, message,
 				getDuration(), fontName);
@@ -380,7 +351,7 @@ public class DMSDispatcher extends FormPanel
 			dms.getLightOutput() / 655.35f));
 
 		// optional controller status field
-		if(m_useControllerStatusField)
+		if(SystemAttributeHelper.isDmsStatusEnabled())
 			txtControllerStatus.setText(dms.getControllerStatus());
 	}
 

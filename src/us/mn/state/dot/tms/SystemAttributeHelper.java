@@ -414,12 +414,6 @@ public class SystemAttributeHelper {
 		}
 	}
 
-	/** Return true to use the DMSDispatcher get status button */
-	public static boolean useGetStatusBtn() {
-		return getValueBoolean(
-			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN, false);
-	}
-
 	/** Return true to display onscreen PTZ controls in CameraViewer */
 	public static boolean useOnScrnPTZ() {
 		return getValueBoolean(
@@ -453,9 +447,26 @@ public class SystemAttributeHelper {
 		return nf;
 	}
 
-	/** Return true to use the AWS checkbox in DMSDispatcher */
-	public static boolean useAwsCheckBox() {
-		return getValueBoolean(SystemAttribute.DMSDISPATCHER_AWS_CKBOX,
+	/** Is Automated Warning System enabled? */
+	public static boolean isAwsEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_AWS_ENABLE, false);
+	}
+
+	/** Is DMS status stuff enabled? */
+	static public boolean isDmsStatusEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_STATUS_ENABLE,
 			false);
+	}
+
+	/** Is DMS duration selection enabled? */
+	static public boolean isDmsDurationEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_DURATION_ENABLE,
+			true);
+	}
+
+	/** Is DMS font selection enabled? */
+	static protected boolean isDmsFontSelectionEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_FONT_SELECTION_ENABLE, false);
 	}
 }

@@ -69,11 +69,17 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS travel time duration (minutes) */
 	String DMS_TRAVEL_DURATION_MINS = "dms_travel_duration_mins";
 
-	/** DMS client "get status" button (boolean) */
-	String DMSDISPATCHER_GETSTATUS_BTN = "dmsdispatcher_getstatus_btn";
+	/** DMS enable extra status (boolean) */
+	String DMS_STATUS_ENABLE = "dms_status_enable";
 
-	/** DMS client AWS checkbox (boolean) */
-	String DMSDISPATCHER_AWS_CKBOX = "dmsdispatcher_aws_ckbox";
+	/** DMS enable automated warning system (boolean) */
+	String DMS_AWS_ENABLE = "dms_aws_enable";
+
+	/** DMS enable duration selection (boolean) */
+	String DMS_DURATION_ENABLE = "dms_duration_enable";
+
+	/** DMS enable font selection (boolean) */
+	String DMS_FONT_SELECTION_ENABLE = "dms_font_selection_enable";
 
 	/** Meter green time */
 	String METER_GREEN_SECS = "meter_green_secs";
