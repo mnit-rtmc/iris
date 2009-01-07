@@ -19,20 +19,17 @@ import java.awt.FlowLayout;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
@@ -325,7 +322,7 @@ public class DMSDispatcher extends FormPanel
 	}
 
 	/** Send a new message to the selected DMS object */
-	protected void sendMessage() throws TMSException {
+	protected void sendMessage() {
 		DMS proxy = selectedSign;	// Avoid NPE race
 		String message = messageSelector.getMessage();
 		String fontName = (m_useFontsComboBox ? 
