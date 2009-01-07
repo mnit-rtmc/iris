@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -46,6 +47,11 @@ public class FormPanel extends JPanel {
 		enable = e;
 		setBorder(TmsForm.BORDER);
 		finishRow();
+	}
+
+	/** Set the form title */
+	public void setTitle(String t) {
+		setBorder(BorderFactory.createTitledBorder(t));
 	}
 
 	/** Create default grid bag constraints */

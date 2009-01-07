@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -79,26 +80,10 @@ import us.mn.state.dot.tms.utils.TMSProxy;
  */
 public class DMSProperties extends TrafficDeviceForm {
 
-	/** Format a number for display */
-	static protected String formatNumber(int i) {
-		if(i > 0)
-			return String.valueOf(i);
-		else
-			return UNKNOWN;
-	}
-
 	/** Format milimeter units for display */
 	static protected String formatMM(int i) {
 		if(i > 0)
 			return i + " mm";
-		else
-			return UNKNOWN;
-	}
-
-	/** Format miliamp units for display */
-	static protected String formatMA(int i) {
-		if(i > 0)
-			return i + " (" + (i / 2f) + " ma)";
 		else
 			return UNKNOWN;
 	}
@@ -118,6 +103,7 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Format the temperature */
 	static protected String formatTemp(int minTemp, int maxTemp) {
+		// FIXME: add ability to display Fahrenheit as well
 		if(maxTemp == DMS.UNKNOWN_TEMP)
 			maxTemp = minTemp;
 		if(minTemp == maxTemp) {
@@ -129,22 +115,11 @@ public class DMSProperties extends TrafficDeviceForm {
 			return "" + minTemp + "..." + maxTemp + CELCIUS;
 	}
 
-	/** Default LedStar brightness table */
-	static protected final int[] LEDSTAR_DEFAULT = {
-		512, 0, 100,
-		6400, 0, 10,
-		16384, 10, 20,
-		24576, 20, 30,
-		32768, 30, 50,
-		40960, 50, 70,
-		51200, 70, 255
-	};
-
 	/** Frame title */
 	static protected String TITLE = 
 		I18NMessages.get("dms.abbreviation") + ": ";
 
-	/** Remote dynamic message sign interface */
+	/** Dynamic message sign interface */
 	protected DMS sign;
 
 	/** Camera combo box */
@@ -228,29 +203,17 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Vertical pitch label */
 	protected final JLabel vPitch = new JLabel();
 
-	/** Label to display LDC pot base */
-	protected final JLabel ldcPotBase = new JLabel();
-
 	/** Spinner to adjuct LDC pot base */
 	protected final JSpinner ldcPotBaseSpn = new JSpinner(
 		new SpinnerNumberModel(20, 20, 65, 5));
-
-	/** Pixel current low label */
-	protected final JLabel currentLow = new JLabel();
 
 	/** Pixel current low threshold spinner */
 	protected final JSpinner currentLowSpn = new JSpinner(
 		new SpinnerNumberModel(5, 0, 100, 1));
 
-	/** Pixel current high label */
-	protected final JLabel currentHigh = new JLabel();
-
 	/** Pixel current high threshold spinner */
 	protected final JSpinner currentHighSpn = new JSpinner(
 		new SpinnerNumberModel(40, 0, 100, 1));
-
-	/** Bad pixel limit */
-	protected final JLabel badLimit = new JLabel();
 
 	/** Bad pixel limit spinner */
 	protected final JSpinner badLimitSpn = new JSpinner(
@@ -309,6 +272,9 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Add PM plan button */
 	protected final JButton pm_plan = new JButton("Add PM Plan");
+
+	/** Card layout for manufacturer panels */
+	protected final CardLayout cards = new CardLayout();
 
 	/** Form object */
 	protected final TMSObjectForm form = this;
@@ -382,8 +348,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
-		if (!SystemAttributeHelper.isAgencyCaltransD10())
-			tab.add("Ledstar", createLedstarPanel());
+		tab.add("Manufacturer", createManufacturerPanel());
 		tab.add("Status", createStatusPanel());
 	}
 
@@ -774,47 +739,34 @@ public class DMSProperties extends TrafficDeviceForm {
 		return panel;
 	}
 
-	/** Create Ledstar-specific panel */
-	protected JPanel createLedstarPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.top = 2;
-		bag.insets.bottom = 2;
-		bag.gridx = 0;
-		bag.gridy = GridBagConstraints.RELATIVE;
-		bag.anchor = GridBagConstraints.EAST;
-		panel.add(new JLabel("LDC pot base: "), bag);
-		panel.add(new JLabel("Pixel current low threshold: "), bag);
-		panel.add(new JLabel("Pixel current high threshold: "), bag);
-		panel.add(new JLabel("Bad pixel limit: "), bag);
-		bag.gridx = 1;
-		bag.anchor = GridBagConstraints.WEST;
-		panel.add(ldcPotBase, bag);
-		panel.add(currentLow, bag);
-		panel.add(currentHigh, bag);
-		panel.add(badLimit, bag);
-		if(admin) {
-			bag.gridx = 2;
-			bag.anchor = GridBagConstraints.EAST;
-			panel.add(ldcPotBaseSpn, bag);
-			panel.add(currentLowSpn, bag);
-			panel.add(currentHighSpn, bag);
-			panel.add(badLimitSpn, bag);
-			bag.gridx = 0;
-			bag.gridwidth = 3;
-			JButton send = new JButton("Set values");
-			panel.add(send, bag);
-			new ActionJob(this, send) {
-				public void perform() throws Exception {
-					setLedstarValues();
-				}
-			};
-		}
+	/** Create manufacturer-specific panel */
+	protected JPanel createManufacturerPanel() {
+		// FIXME select card when "Make" is updated
+		JPanel panel = new JPanel(cards);
+		panel.add(createGenericPanel(), "Generic");
+		panel.add(createLedstarPanel(), "Ledstar");
+		panel.add(createSkylinePanel(), "Skyline");
 		return panel;
 	}
 
-	/** Set the Ledstar pixel configuration values on the sign */
-	protected void setLedstarValues() {
+	/** Create generic manufacturer panel */
+	protected JPanel createGenericPanel() {
+		FormPanel panel = new FormPanel(true);
+		panel.setTitle("Unknown manufacturer");
+		panel.addRow("Nothing to see here");
+		return panel;
+	}
+
+	/** Create Ledstar-specific panel */
+	protected JPanel createLedstarPanel() {
+		FormPanel panel = new FormPanel(true);
+		panel.setTitle("Ledstar");
+		panel.addRow("LDC pot base", ldcPotBaseSpn);
+		panel.addRow("Pixel current low threshold", currentLowSpn);
+		panel.addRow("Pixel current high threshold", currentHighSpn);
+		panel.addRow("Bad pixel limit", badLimitSpn);
+/*
+		// FIXME: add jobs for each spinner
 		int base = ((Integer)ldcPotBaseSpn.getValue()).intValue();
 		int low = ((Integer)currentLowSpn.getValue()).intValue();
 		int high = ((Integer)currentHighSpn.getValue()).intValue();
@@ -823,7 +775,20 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign.setPixelCurrentLow(low);
 		sign.setPixelCurrentHigh(high);
 		sign.setBadPixelLimit(bad);
-		sign.notifyUpdate();
+*/
+		return panel;
+	}
+
+
+	/** Create Skyline-specific panel */
+	protected JPanel createSkylinePanel() {
+		FormPanel panel = new FormPanel(true);
+		panel.setTitle("Skyline");
+		power_table.setAutoCreateColumnsFromModel(false);
+		power_table.setPreferredScrollableViewportSize(
+			new Dimension(300, 200));
+		panel.addRow(power_table);
+		return panel;
 	}
 
 	/** Create status panel */
@@ -831,15 +796,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		JPanel pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane, BoxLayout.X_AXIS));
 		pane.setBorder(BORDER);
-		Box box = Box.createVerticalBox();
-		box.add(Box.createVerticalGlue());
-		power_table.setAutoCreateColumnsFromModel(false);
-		power_table.setPreferredScrollableViewportSize(
-			new Dimension(300, 200));
-		JScrollPane scroll = new JScrollPane(power_table);
-		box.add(scroll);
-		box.add(Box.createVerticalGlue());
-		pane.add(box);
 		GridBagLayout lay = new GridBagLayout();
 		JPanel panel = new JPanel(lay);
 		GridBagConstraints bag = new GridBagConstraints();
@@ -994,10 +950,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		hPitch.setForeground(color);
 		vPitch.setForeground(color);
 		badPixels.setForeground(color);
-		ldcPotBase.setForeground(color);
-		currentLow.setForeground(color);
-		currentHigh.setForeground(color);
-		badLimit.setForeground(color);
 		lamp.setForeground(color);
 		fan.setForeground(color);
 		heat_tape.setForeground(color);
@@ -1047,10 +999,10 @@ public class DMSProperties extends TrafficDeviceForm {
 		power_table.setDefaultRenderer(Object.class, m.getRenderer());
 		power_table.setModel(m);
 		badPixels.setText(String.valueOf(sign.getPixelFailureCount()));
-		ldcPotBase.setText(formatNumber(sign.getLdcPotBase()));
-		currentLow.setText(formatMA(sign.getPixelCurrentLow()));
-		currentHigh.setText(formatMA(sign.getPixelCurrentHigh()));
-		badLimit.setText(formatNumber(sign.getBadPixelLimit()));
+		ldcPotBaseSpn.setValue(sign.getLdcPotBase());
+		currentLowSpn.setValue(sign.getPixelCurrentLow());
+		currentHighSpn.setValue(sign.getPixelCurrentHigh());
+		badLimitSpn.setValue(sign.getBadPixelLimit());
 		lamp.setText(sign.getLampStatus());
 		fan.setText(sign.getFanStatus());
 		heat_tape.setText(sign.getHeatTapeStatus());
