@@ -16,9 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -33,12 +30,14 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -51,7 +50,8 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
+public class DMSDispatcher extends FormPanel
+	implements ProxySelectionListener<DMS>
 {
 	/** Panel used for drawing a DMS */
 	protected final DMSPanel pnlSign;
@@ -112,7 +112,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	public DMSDispatcher(DMSManager manager, final SonarState st,
 		TmsConnection tc)
 	{
-		super( new GridBagLayout() );
+		super(true);
 		setOptionalControlUse();
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(),st.lookupUser(tc.getUser().getName()));
@@ -121,79 +121,40 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		pnlSign = new DMSPanel(st.getSystemAttributes());
 		setBorder(BorderFactory.createTitledBorder(
 			I18NMessages.get("dms.selected_title")));
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = new Insets(2, 4, 2, 4);
-		bag.anchor = GridBagConstraints.EAST;
-		add(new JLabel("ID"), bag);
-		bag.gridx = 2;
-		add(new JLabel("Camera"), bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		add(new JLabel("Location"), bag);
-		bag.gridx = 2;
-		add(new JLabel("Brightness"), bag);
-		bag.gridx = 0;
-		bag.gridy = 2;
-		add(new JLabel("Operation"), bag);
 
-		// label for optional controller status field
-		if(m_useControllerStatusField) {
-			bag.gridx = 0;
-			bag.gridy = 3;
-			add(new JLabel("Status"), bag);
-		}
-
-		bag.gridx = 1;
-		bag.gridy = 0;
-		bag.fill = GridBagConstraints.HORIZONTAL;
-		bag.weightx = 1;
 		txtId.setEditable(false);
-		add(txtId, bag);
-		bag.gridx = 3;
 		txtCamera.setEditable(false);
-		add(txtCamera, bag);
-		bag.gridx = 1;
-		bag.gridy = 1;
 		txtLocation.setEditable(false);
-		add(txtLocation, bag);
-		bag.gridx = 3;
 		txtBrightness.setEditable(false);
-		add(txtBrightness, bag);
-		bag.gridx = 1;
-		bag.gridy = 2;
-		bag.gridwidth = 3;
 		txtOperation.setEditable(false);
-		add(txtOperation, bag);
 
-		// add optional controller status field
+		add("ID", txtId);
+		addRow("Camera", txtCamera);
+		add("Location", txtLocation);
+		addRow("Brightness", txtBrightness);
 		if(m_useControllerStatusField) {
-			bag.gridx = 1;
-			bag.gridy = 3;
-			txtControllerStatus.setEditable(false);
-			add(txtControllerStatus, bag);
-		}
+			add("Operation", txtOperation);
+			addRow("Status", txtControllerStatus);
+		} else
+			addRow("Operation", txtOperation);
+		addRow(pnlSign);
+		addRow(createDeployBox());
 
-		// add panel sign
-		bag.gridx = 0;
-		bag.gridy = 4;
-		bag.gridwidth = 4;
-		bag.insets.top = 6;
-		add(pnlSign, bag);
+		clearSelected();
+		selectionModel.addTmsSelectionListener(this);
+	}
+
+	/** Create a component to deploy signs */
+	protected Box createDeployBox() {
 		Box boxRight = Box.createVerticalBox();
 		boxRight.add(Box.createVerticalGlue());
-
-		// add optional duration combobox
 		if(m_useDurationComboBox)
 			boxRight.add(buildDurationBox());
-
-		// add optional font selection combo box
 		if(m_useFontsComboBox) {
 			JPanel fjp = buildFontSelectorBox(st.getFonts());
 			if(fjp != null)
 				boxRight.add(fjp);
 		}
-
-		// add optional AWS checkbox
 		if(m_useAwsCheckBox) {
 			awsCheckBox = new AwsCheckBox(getAwsProxyName(), 
 				I18NMessages.get("DMSDispatcher.AwsCheckBox"));
@@ -201,17 +162,13 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			p.add(awsCheckBox);
 			boxRight.add(p);
 		}
-
 		boxRight.add(Box.createVerticalStrut(4));
 		boxRight.add(buildButtonPanel());
 		boxRight.add(Box.createVerticalGlue());
 		Box deployBox = Box.createHorizontalBox();
 		deployBox.add(messageSelector);
 		deployBox.add(boxRight);
-		bag.gridy = 5;
-		add(deployBox, bag);
-		clearSelected();
-		selectionModel.addTmsSelectionListener(this);
+		return deployBox;
 	}
 
 	/** flags for optional controls */
@@ -264,7 +221,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 				"DMSDispatcher.GetStatusButton.ToolTip"));
 			new ActionJob(this, btnGetStatus) {
 				public void perform() throws Exception {
-					selectedSign.dms.getSignMessage();
+					selectedSign.setSignRequest(
+						SignRequest.QUERY_STATUS);
 				}
 			};
 			box.add(btnGetStatus);

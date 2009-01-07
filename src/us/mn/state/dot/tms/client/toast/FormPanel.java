@@ -90,6 +90,7 @@ public class FormPanel extends JPanel {
 
 	/** Add a centered component to the panel */
 	public void addRow(JComponent comp) {
+		setWidth(GridBagConstraints.REMAINDER);
 		add(comp);
 		finishRow();
 	}
@@ -108,7 +109,10 @@ public class FormPanel extends JPanel {
 
 	/** Add a pair of components to the panel */
 	public void addRow(JComponent c1, JComponent c2) {
-		add(c1, c2);
+		add(c1);
+		setWest();
+		setWidth(GridBagConstraints.REMAINDER);
+		add(c2);
 		finishRow();
 	}
 
