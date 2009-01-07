@@ -188,7 +188,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 		// add optional font selection combo box
 		if(m_useFontsComboBox) {
-			JPanel fjp=buildFontSelectorBox(st.getFonts());
+			JPanel fjp = buildFontSelectorBox(st.getFonts());
 			if(fjp != null)
 				boxRight.add(fjp);
 		}
@@ -282,35 +282,35 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		p.add(cmbExpire);
 		cmbExpire.addItem(new Expiration("Indefinite",
 			SignMessage.DURATION_INFINITE));
-		cmbExpire.addItem( new Expiration( "5 Minutes", 5 ) );
-		cmbExpire.addItem( new Expiration( "15 Minutes", 15 ) );
-		cmbExpire.addItem( new Expiration( "30 Minutes", 30 ) );
-		cmbExpire.addItem( new Expiration( "45 Minutes", 45 ) );
-		cmbExpire.addItem( new Expiration( "1 Hour", 60 ) );
-		cmbExpire.addItem( new Expiration( "1.5 Hours", 90 ) );
-		cmbExpire.addItem( new Expiration( "2 Hours", 120 ) );
-		cmbExpire.addItem( new Expiration( "2.5 Hours", 150 ) );
-		cmbExpire.addItem( new Expiration( "3 Hours", 180 ) );
-		cmbExpire.addItem( new Expiration( "3.5 Hours", 210 ) );
-		cmbExpire.addItem( new Expiration( "4 Hours", 240 ) );
-		cmbExpire.addItem( new Expiration( "4.5 Hours", 270 ) );
-		cmbExpire.addItem( new Expiration( "5 Hours", 300 ) );
-		cmbExpire.addItem( new Expiration( "5.5 Hours", 330 ) );
-		cmbExpire.addItem( new Expiration( "6 Hours", 360 ) );
-		cmbExpire.addItem( new Expiration( "6.5 Hours", 390 ) );
-		cmbExpire.addItem( new Expiration( "7 Hours", 420 ) );
-		cmbExpire.addItem( new Expiration( "7.5 Hours", 420 ) );
-		cmbExpire.addItem( new Expiration( "8 Hours", 480 ) );
-		cmbExpire.addItem( new Expiration( "9 Hours", 540 ) );
-		cmbExpire.addItem( new Expiration( "10 Hours", 600 ) );
-		cmbExpire.addItem( new Expiration( "11 Hours", 660 ) );
-		cmbExpire.addItem( new Expiration( "12 Hours", 720 ) );
-		cmbExpire.addItem( new Expiration( "13 Hours", 780 ) );
-		cmbExpire.addItem( new Expiration( "14 Hours", 840 ) );
-		cmbExpire.addItem( new Expiration( "15 Hours", 900 ) );
-		cmbExpire.addItem( new Expiration( "16 Hours", 960 ) );
-		cmbExpire.addItem( new Expiration( "17 Hours", 1020 ) );
-		cmbExpire.setSelectedIndex( 0 );
+		cmbExpire.addItem(new Expiration("5 Minutes", 5));
+		cmbExpire.addItem(new Expiration("15 Minutes", 15));
+		cmbExpire.addItem(new Expiration("30 Minutes", 30));
+		cmbExpire.addItem(new Expiration("45 Minutes", 45));
+		cmbExpire.addItem(new Expiration("1 Hour", 60));
+		cmbExpire.addItem(new Expiration("1.5 Hours", 90));
+		cmbExpire.addItem(new Expiration("2 Hours", 120));
+		cmbExpire.addItem(new Expiration("2.5 Hours", 150));
+		cmbExpire.addItem(new Expiration("3 Hours", 180));
+		cmbExpire.addItem(new Expiration("3.5 Hours", 210));
+		cmbExpire.addItem(new Expiration("4 Hours", 240));
+		cmbExpire.addItem(new Expiration("4.5 Hours", 270));
+		cmbExpire.addItem(new Expiration("5 Hours", 300));
+		cmbExpire.addItem(new Expiration("5.5 Hours", 330));
+		cmbExpire.addItem(new Expiration("6 Hours", 360));
+		cmbExpire.addItem(new Expiration("6.5 Hours", 390));
+		cmbExpire.addItem(new Expiration("7 Hours", 420));
+		cmbExpire.addItem(new Expiration("7.5 Hours", 420));
+		cmbExpire.addItem(new Expiration("8 Hours", 480));
+		cmbExpire.addItem(new Expiration("9 Hours", 540));
+		cmbExpire.addItem(new Expiration("10 Hours", 600));
+		cmbExpire.addItem(new Expiration("11 Hours", 660));
+		cmbExpire.addItem(new Expiration("12 Hours", 720));
+		cmbExpire.addItem(new Expiration("13 Hours", 780));
+		cmbExpire.addItem(new Expiration("14 Hours", 840));
+		cmbExpire.addItem(new Expiration("15 Hours", 900));
+		cmbExpire.addItem(new Expiration("16 Hours", 960));
+		cmbExpire.addItem(new Expiration("17 Hours", 1020));
+		cmbExpire.setSelectedIndex(0);
 		return p;
 	}
 
@@ -466,8 +466,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** get the currently selected DMS id, e.g. "V1" */
 	public String getSelectedDmsId() {
-		if( selectedSign == null )
+		if(selectedSign == null)
 			return null;
-		return selectedSign.getId();
+		else
+			return selectedSign.getId();
 	}
 }
