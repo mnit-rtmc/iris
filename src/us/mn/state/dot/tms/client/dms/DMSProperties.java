@@ -682,7 +682,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		return panel;
 	}
 
-
 	/** Create Skyline-specific panel */
 	protected JPanel createSkylinePanel() {
 		FormPanel panel = new FormPanel(true);
@@ -857,10 +856,5 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign.setCamera(getCameraName((Camera)camera.getSelectedItem()));
 		sign.setTravel(travel.getText());
 		sign.notifyUpdate();
-	}
-
-	/** Get the sign id */
-	protected String getId() {
-		return sign.getId();
 	}
 }
