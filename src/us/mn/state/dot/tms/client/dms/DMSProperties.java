@@ -58,18 +58,14 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TimingPlanList;
-import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.toast.TMSObjectForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * This is a form for viewing and editing the properties of a dynamic message
@@ -276,9 +272,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Card layout for manufacturer panels */
 	protected final CardLayout cards = new CardLayout();
 
-	/** Form object */
-	protected final TMSObjectForm form = this;
-
 	/** Sonar state */
 	protected final SonarState state;
 
@@ -321,8 +314,6 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		TMSProxy tms = connection.getProxy();
-		SortedList s = tms.getDMSList();
 		sign = (DMS)s.getElement(id);
 
 		h_pix = sign.getSignWidthPixels();
@@ -340,11 +331,9 @@ public class DMSProperties extends TrafficDeviceForm {
 			admin);
 		plan_table.setModel(plan_model);
 		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
-		setDevice(sign);
 		super.initialize();
 		location.addRow("Camera", camera);
 
-		// create the tabs
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
@@ -636,106 +625,25 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Create the configuration panel */
 	protected JPanel createConfigurationPanel() {
-		GridBagLayout lay = new GridBagLayout();
-		JPanel panel = new JPanel(lay);
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.gridx = 0;
-		bag.gridy = 6;
-		bag.weightx = 0.6f;
-		lay.setConstraints(make, bag);
-		panel.add(make);
-		bag.gridy = GridBagConstraints.RELATIVE;
-		lay.setConstraints(model, bag);
-		panel.add(model);
-		lay.setConstraints(version, bag);
-		panel.add(version);
-		bag.gridx = 1;
-		bag.gridy = 0;
-		bag.anchor = GridBagConstraints.EAST;
-		bag.weightx = 0.5f;
-		bag.fill = GridBagConstraints.NONE;
-		JLabel label = new JLabel("Access:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		bag.gridy = GridBagConstraints.RELATIVE;
-		label = new JLabel("Type:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Sign height:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Sign height:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Sign width:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Sign width:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Horizontal border:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Vertical border:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Legend:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Beacon:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Technology:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Character height:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Character width:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Horizontal pitch:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		label = new JLabel("Vertical pitch:");
-		lay.setConstraints(label, bag);
-		panel.add(label);
-		bag.gridx = 2;
-		bag.gridy = 0;
-		bag.anchor = GridBagConstraints.WEST;
-		bag.insets.left = 2;
-		lay.setConstraints(access, bag);
-		panel.add(access);
-		bag.gridy = GridBagConstraints.RELATIVE;
-		lay.setConstraints(type, bag);
-		panel.add(type);
-		lay.setConstraints(height, bag);
-		panel.add(height);
-		lay.setConstraints(pHeight, bag);
-		panel.add(pHeight);
-		lay.setConstraints(width, bag);
-		panel.add(width);
-		lay.setConstraints(pWidth, bag);
-		panel.add(pWidth);
-		lay.setConstraints(hBorder, bag);
-		panel.add(hBorder);
-		lay.setConstraints(vBorder, bag);
-		panel.add(vBorder);
-		lay.setConstraints(legend, bag);
-		panel.add(legend);
-		lay.setConstraints(beacon, bag);
-		panel.add(beacon);
-		lay.setConstraints(tech, bag);
-		panel.add(tech);
-		lay.setConstraints(cHeight, bag);
-		panel.add(cHeight);
-		lay.setConstraints(cWidth, bag);
-		panel.add(cWidth);
-		lay.setConstraints(hPitch, bag);
-		panel.add(hPitch);
-		lay.setConstraints(vPitch, bag);
-		panel.add(vPitch);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Make", make);
+		panel.addRow("Model", model);
+		panel.addRow("Version", version);
+		panel.addRow("Access", access);
+		panel.addRow("Type", type);
+		panel.addRow("Sign height", height);
+		panel.addRow("Sign height", pHeight);
+		panel.addRow("Sign width", width);
+		panel.addRow("Sign width", pWidth);
+		panel.addRow("Horizontal border", hBorder);
+		panel.addRow("Vertical border", vBorder);
+		panel.addRow("Legend", legend);
+		panel.addRow("Beacon", beacon);
+		panel.addRow("Technology", tech);
+		panel.addRow("Character height", cHeight);
+		panel.addRow("Character width", cWidth);
+		panel.addRow("Horizontal pitch", hPitch);
+		panel.addRow("Vertical pitch", vPitch);
 		return panel;
 	}
 
