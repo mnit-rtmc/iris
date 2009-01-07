@@ -15,41 +15,52 @@
 package us.mn.state.dot.tms.client.dms;
 
 /**
- * Encapsulates a possible expiration time.
+ * An enum of possible expiration times.
  *
- * @author Erik Engstrom
+ * @author Douglas Lau
  */
-public class Expiration {
+public enum Expiration {
 
-	private final String label;
+	INDEFINITE("Indefinite", null),
+	_5_MINUTES("5 Minutes", 5),
+	_15_MINUTES("15 Minutes", 15),
+	_30_MINUTES("30 Minutes", 30),
+	_45_MINUTES("45 Minutes", 45),
+	_1_HOUR("1 Hour", 60),
+	_1_5_HOURS("1.5 Hours", 90),
+	_2_HOURS("2 Hours", 120),
+	_2_5_HOURS("2.5 Hours", 150),
+	_3_HOURS("3 Hours", 180),
+	_3_5_HOURS("3.5 Hours", 210),
+	_4_HOURS("4 Hours", 240),
+	_4_5_HOURS("4.5 Hours", 270),
+	_5_HOURS("5 Hours", 300),
+	_5_5_HOURS("5.5 Hours", 330),
+	_6_HOURS("6 Hours", 360),
+	_7_HOURS("7 Hours", 420),
+	_8_HOURS("8 Hours", 480),
+	_9_HOURS("9 Hours", 540),
+	_10_HOURS("10 Hours", 600),
+	_11_HOURS("11 Hours", 660),
+	_12_HOURS("12 Hours", 720),
+	_13_HOURS("13 Hours", 780),
+	_14_HOURS("14 Hours", 840),
+	_15_HOURS("15 Hours", 900),
+	_16_HOURS("16 Hours", 960),
+	_17_HOURS("17 Hours", 1020);
 
-	private final int duration;
+	public final String label;
+
+	public final Integer duration;
 
 	/**
 	 * Create a new Expiration.
 	 *
-	 * @param text the text displayed by this expiration
-	 * @param d integer containing the number of minutes this expiration
-	 * represents; 65536 indicates that the message does not expire
+	 * @param l the expiration label
+	 * @param d number of minutes of duration; null indicates no expiration
 	 */
-	public Expiration(String text, int d) {
-		label = text;
+	private Expiration(String l, int d) {
+		label = l;
 		duration = d;
-	}
-
-	/**
-	 * Returns a String describing the duration of the Expiration
-	 * @return duration of the expiration
-	 */
-	public String toString() {
-		return label;
-	}
-
-	/**
-	 * Gets the number of minutes represented by this expiration
-	 * @return the number of minutes represented by this expiration
-	 */
-	public int getDuration() {
-		return duration;
 	}
 }
