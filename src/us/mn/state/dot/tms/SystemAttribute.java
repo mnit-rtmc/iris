@@ -81,6 +81,15 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS enable font selection (boolean) */
 	String DMS_FONT_SELECTION_ENABLE = "dms_font_selection_enable";
 
+	/** DMS enable pixel test (boolean) */
+	String DMS_PIXEL_TEST_ENABLE = "dms_pixel_test_enable";
+
+	/** DMS enable fan test (boolean) */
+	String DMS_FAN_TEST_ENABLE = "dms_fan_test_enable";
+
+	/** DMS enable reset (boolean) */
+	String DMS_RESET_ENABLE = "dms_reset_enable";
+
 	/** Meter green time */
 	String METER_GREEN_SECS = "meter_green_secs";
 

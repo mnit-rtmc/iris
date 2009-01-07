@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -63,7 +62,6 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanList;
 import us.mn.state.dot.tms.TrafficDevice;
-import us.mn.state.dot.tms.client.AttributeTab;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TMSObjectForm;
@@ -267,9 +265,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Pixel test activation button (optional) */
 	protected final JButton pixelTest;
 
-	/** Lamp test activation button (optional) */
-	protected final JButton lampTest;
-
 	/** Fan test activation button (optional) */
 	protected final JButton fanTest;
 
@@ -327,9 +322,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Array of timing plans */
 	protected TimingPlan[] plans;
 
-	/** attribute editor tab (optional) */
-	protected AttributeTab attribute_tab=null;
-
 	/** Create a new DMS properties form 
 	 *  @param tc TmsConnection
 	 *  @param id Dms ID, e.g. "V1"
@@ -341,47 +333,16 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign_group_model = new SignGroupModel(id,
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
-
-		// pixel test button (optional)
-		if (!SystemAttributeHelper.isAgencyCaltransD10())
-			pixelTest = new JButton(I18NMessages.get(
-				"DMSProperties.PixelTestButton"));
-		else
-			pixelTest = null;
-
-		// lamp test button is (optional)
-		if (false)
-			lampTest = new JButton("Lamp test");
-		else
-			lampTest = null;
-
-		// fan test button is (optional)
-		if (!SystemAttributeHelper.isAgencyCaltransD10())
-			fanTest = new JButton(I18NMessages.get(
-				"DMSProperties.FanTestButton"));
-		else
-			fanTest = null;
-
-		// get status button (optional)
-		if (SystemAttributeHelper.isAgencyCaltransD10())
-			getStatusButton = new JButton(I18NMessages.get(
-				"DMSProperties.GetStatusButton"));
-		else
-			getStatusButton = null;
-
-		// reset button (optional)
-		if (SystemAttributeHelper.isAgencyCaltransD10())
-			resetButton = new JButton(I18NMessages.get(
-				"DMSProperties.ResetButton"));
-		else
-			resetButton = null;
-
-		// reset modem button (optional)
-		if (SystemAttributeHelper.isAgencyCaltransD10())
-			resetModemButton = new JButton(I18NMessages.get(
-				"DMSProperties.ResetModemButton"));
-		else
-			resetModemButton = null;
+		pixelTest = new JButton(I18NMessages.get(
+			"DMSProperties.PixelTestButton"));
+		fanTest = new JButton(I18NMessages.get(
+			"DMSProperties.FanTestButton"));
+		getStatusButton = new JButton(I18NMessages.get(
+			"DMSProperties.GetStatusButton"));
+		resetButton = new JButton(I18NMessages.get(
+			"DMSProperties.ResetButton"));
+		resetModemButton = new JButton(I18NMessages.get(
+			"DMSProperties.ResetModemButton"));
 	}
 
 	protected int h_pix;
@@ -393,7 +354,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected int hb_mm;
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = tms.getDMSList();
 		sign = (DMS)s.getElement(id);
@@ -418,20 +379,12 @@ public class DMSProperties extends TrafficDeviceForm {
 		location.addRow("Camera", camera);
 
 		// create the tabs
-//FIXME: it would be nice if these tabs were in separate classes (see AttributeTab) mtod, 09/16/08
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
 		if (!SystemAttributeHelper.isAgencyCaltransD10())
 			tab.add("Ledstar", createLedstarPanel());
 		tab.add("Status", createStatusPanel());
-
-		// optional attribute tab
-		if (SystemAttributeHelper.isAgencyCaltransD10()) {
-			attribute_tab = new AttributeTab(admin, this, 
-				state, getId()); 
-			tab.add(attribute_tab);
-		}
 	}
 
 	/** Dispose of the form */
@@ -439,8 +392,6 @@ public class DMSProperties extends TrafficDeviceForm {
 		sign_group_model.dispose();
 		if(sign_text_model != null)
 			sign_text_model.dispose();
-		if(attribute_tab != null)
-			attribute_tab.dispose();
 		super.dispose();
 	}
 
@@ -863,7 +814,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	}
 
 	/** Set the Ledstar pixel configuration values on the sign */
-	protected void setLedstarValues() throws RemoteException {
+	protected void setLedstarValues() {
 		int base = ((Integer)ldcPotBaseSpn.getValue()).intValue();
 		int low = ((Integer)currentLowSpn.getValue()).intValue();
 		int high = ((Integer)currentHighSpn.getValue()).intValue();
@@ -895,8 +846,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		bag.gridx = 1;
 		bag.gridy = 0;
 
-		// pixelTest button (optional)
-		if( pixelTest!=null ) {
+		if(SystemAttributeHelper.isDmsPixelTestEnabled()) {
 			lay.setConstraints(pixelTest, bag);
 			panel.add(pixelTest);
 			new ActionJob(this, pixelTest) {
@@ -908,19 +858,7 @@ public class DMSProperties extends TrafficDeviceForm {
 
 		bag.gridy = GridBagConstraints.RELATIVE;
 
-		// lamp test button (optional)
-		if( lampTest!=null ) {
-			lay.setConstraints(lampTest, bag);
-			panel.add(lampTest);
-			new ActionJob(this, lampTest) {
-				public void perform() throws Exception {
-					sign.testLamps();
-				}
-			};
-		}
-
-		// fanTest button (optional)
-		if( fanTest!=null ) {
+		if(SystemAttributeHelper.isDmsFanTestEnabled()) {
 			lay.setConstraints(fanTest, bag);
 			panel.add(fanTest);
 			new ActionJob(this, fanTest) {
@@ -930,10 +868,9 @@ public class DMSProperties extends TrafficDeviceForm {
 			};
 		}
 
-		// get status button (optional)
-		if( getStatusButton!=null ) {
-			getStatusButton.setToolTipText(
-				I18NMessages.get("DMSProperties.GetStatusButton.ToolTip"));
+		if(SystemAttributeHelper.isDmsStatusEnabled()) {
+			getStatusButton.setToolTipText(I18NMessages.get(
+				"DMSProperties.GetStatusButton.ToolTip"));
 			lay.setConstraints(getStatusButton, bag);
 			panel.add(getStatusButton);
 			new ActionJob(this, getStatusButton) {
@@ -943,10 +880,9 @@ public class DMSProperties extends TrafficDeviceForm {
 			};
 		}
 
-		// reset button (optional)
-		if( resetButton!=null ) {
-			resetButton.setToolTipText(
-				I18NMessages.get("DMSProperties.ResetButton.ToolTip"));
+		if(SystemAttributeHelper.isDmsResetEnabled()) {
+			resetButton.setToolTipText(I18NMessages.get(
+				"DMSProperties.ResetButton.ToolTip"));
 			lay.setConstraints(resetButton, bag);
 			panel.add(resetButton);
 			new ActionJob(this, resetButton) {
@@ -954,12 +890,8 @@ public class DMSProperties extends TrafficDeviceForm {
 					sign.reset();
 				}
 			};
-		}
-
-		// reset modem button (optional)
-		if( resetModemButton!=null ) {
-			resetModemButton.setToolTipText(
-				I18NMessages.get("DMSProperties.ResetModemButton.ToolTip"));
+			resetModemButton.setToolTipText(I18NMessages.get(
+				"DMSProperties.ResetModemButton.ToolTip"));
 			lay.setConstraints(resetModemButton, bag);
 			panel.add(resetModemButton);
 			new ActionJob(this, resetModemButton) {
@@ -967,7 +899,6 @@ public class DMSProperties extends TrafficDeviceForm {
 					sign.reset();
 				}
 			};
-			resetModemButton.setEnabled(false);	//FIXME: remove this line when operation supported in D10 cmsserver
 		}
 
 		bag.gridx = 2;
@@ -1037,7 +968,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	}
 
 	/** Update the form with the current state of the sign */
-	protected void doUpdate() throws RemoteException {
+	protected void doUpdate() {
 		super.doUpdate();
 		camera.setSelectedItem(state.lookupCamera(sign.getCamera()));
 		String t = sign.getTravel();
@@ -1090,7 +1021,7 @@ public class DMSProperties extends TrafficDeviceForm {
 	}
 
 	/** Refresh the status of the object */
-	protected void doStatus() throws RemoteException {
+	protected void doStatus() {
 		super.doStatus();
 		make.setText(sign.getMake());
 		model.setText(sign.getModel());
@@ -1152,12 +1083,6 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Get the sign id */
 	protected String getId() {
-		String signId = "";
-		try {
-			signId = sign.getId();
-		} catch (RemoteException ex) {
-			System.err.println("DMSProperties.getId(): exception="+ex);
-		}
-		return signId;
+		return sign.getId();
 	}
 }

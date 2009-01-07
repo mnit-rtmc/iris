@@ -448,7 +448,7 @@ public class SystemAttributeHelper {
 	}
 
 	/** Is Automated Warning System enabled? */
-	public static boolean isAwsEnabled() {
+	static public boolean isAwsEnabled() {
 		return getValueBoolean(SystemAttribute.DMS_AWS_ENABLE, false);
 	}
 
@@ -465,8 +465,25 @@ public class SystemAttributeHelper {
 	}
 
 	/** Is DMS font selection enabled? */
-	static protected boolean isDmsFontSelectionEnabled() {
+	static public boolean isDmsFontSelectionEnabled() {
 		return getValueBoolean(
 			SystemAttribute.DMS_FONT_SELECTION_ENABLE, false);
+	}
+
+	/** Is DMS pixel testing enabled? */
+	static public boolean isDmsPixelTestEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_PIXEL_TEST_ENABLE, true);
+	}
+
+	/** Is DMS fan testing enabled? */
+	static public boolean isDmsFanTestEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_FAN_TEST_ENABLE, true);
+	}
+
+	/** Is DMS reset enabled? */
+	static public boolean isDmsResetEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_RESET_ENABLE, false);
 	}
 }
