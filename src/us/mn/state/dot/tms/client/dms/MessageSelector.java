@@ -29,15 +29,15 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
  * Gui for selecting messages for DMS.
@@ -243,7 +243,7 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** Set the currently selected message */
-	public void setMessage(DMSProxy proxy) {
+	public void setMessage(DMS proxy) {
 		SignMessage message = proxy.getMessage();
 		if(message == null) {
 			if(lastMessage != null) {
@@ -285,7 +285,7 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void updateModel(DMSProxy proxy) {
+	public void updateModel(DMS proxy) {
 		lastMessage = null;
 		createMessageModel(proxy.getId());
 		int ml = mess_model.getMaxLine();

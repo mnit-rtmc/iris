@@ -29,6 +29,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
@@ -131,8 +132,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		if(value instanceof DMSProxy)
-			setDms((DMSProxy)value);
+		if(value instanceof DMS)
+			setDms((DMS)value);
 		if(isSelected)
 			title.setBackground(SELECTED_COLOR);
 		else
@@ -166,7 +167,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Set the DMS to be displayed */
-	protected void setDms(DMSProxy proxy) {
+	protected void setDms(DMS proxy) {
 		lblID.setText(proxy.getId());
 		lblLocation.setText(proxy.getDescription());
 		lblCamera.setText(proxy.getCameraId());
