@@ -246,7 +246,6 @@ public class DMSDispatcher extends FormPanel
 			}
 			if(SystemAttributeHelper.isAwsEnabled())
 				awsCheckBox.setProxy(getAwsProxyName());
-			proxy.updateUpdateInfo(); // update global messages
 			pnlSign.setSign(proxy);
 			refreshUpdate();
 			refreshStatus();
@@ -297,7 +296,7 @@ public class DMSDispatcher extends FormPanel
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
 			fontName = cmbFont.getSelectedItemName();
 		if(proxy != null && message != null) {
-			proxy.dms.setMessage(userName, message,
+			proxy.setNextMessage(userName, message,
 				getDuration(), fontName);
 			messageSelector.updateMessageLibrary();
 		}
@@ -322,7 +321,7 @@ public class DMSDispatcher extends FormPanel
 	public void refreshUpdate() {
 		DMS proxy = selectedSign;	// Avoid NPE race
 		if(proxy != null) {
-			txtId.setText(proxy.getId());
+			txtId.setText(proxy.getName());
 			txtLocation.setText(proxy.getDescription());
 			txtCamera.setText(proxy.getCameraId());
 			messageSelector.updateModel(proxy);
@@ -353,16 +352,17 @@ public class DMSDispatcher extends FormPanel
 			txtControllerStatus.setText(dms.getControllerStatus());
 	}
 
-	/** get the currently selected DMS */
+	/** Get the currently selected DMS */
 	public DMS getSelectedDms() {
 		return selectedSign;
 	}
 
-	/** get the currently selected DMS id, e.g. "V1" */
+	/** Get the currently selected DMS id, e.g. "V1" */
 	public String getSelectedDmsId() {
-		if(selectedSign == null)
-			return null;
+		DMS proxy = selectedSign;	// Avoid NPE race
+		if(proxy != null)
+			return proxy.getName();
 		else
-			return selectedSign.getId();
+			return null;
 	}
 }

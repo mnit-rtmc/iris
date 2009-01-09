@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -30,6 +29,7 @@ import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttributeHelper;
@@ -147,7 +147,7 @@ public class Session {
 	}
 
 	/** Add the DMS tab */
-	protected void addDMSTab(final SonarState st) throws RemoteException {
+	protected void addDMSTab(final SonarState st) {
 		SonarLayer<DMS> dmsLayer = dms_manager.getLayer();
 		Layer warnLayer = warn_manager.getLayer();
 		List<LayerState> lstates = createBaseLayers();
@@ -174,12 +174,12 @@ public class Session {
 	}
 
 	/** Add the incident tab */
-	protected void addIncidentTab() throws RemoteException {
+	protected void addIncidentTab() {
 		tabs.add(new IncidentTab(incLayer));
 	}
 
 	/** Add the rwis tab */
-	protected void addRwisTab() throws RemoteException {
+	protected void addRwisTab() {
 		tabs.add(new RwisTab(rwisLayer));
 	}
 
