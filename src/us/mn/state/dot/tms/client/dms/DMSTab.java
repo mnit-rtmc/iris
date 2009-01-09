@@ -19,9 +19,11 @@ import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.sonar.StyleSummary;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
