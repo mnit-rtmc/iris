@@ -28,7 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.SystemAttribute;
@@ -39,9 +39,9 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 /**
  * Scale GUI representation of a DMS with pixel resolution.
  * Multipage messages are displayed sequentially using the
- * system properties for DMS message on-time and off-time
+ * system attributes for DMS message on-time and off-time
  * (blank time). On-time and off-time values are read from
- * the system policy.
+ * the system attributes.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -80,7 +80,7 @@ public class DMSPanel extends JPanel {
 	static protected final int timerTickLengthMS = 100;
 
 	/** Currently displayed sign */
-	protected DMSProxy proxy;
+	protected DMS proxy;
 
 	/** Sign width (mm) */
 	protected int signWidth = SIGN_WIDTH;
@@ -249,7 +249,7 @@ public class DMSPanel extends JPanel {
 	}
 
 	/** Set the size of the DMS */
-	protected void updateSignSize(DMSProxy p) {
+	protected void updateSignSize(DMS p) {
 		signWidth = p.getSignWidth();
 		signHeight = p.getSignHeight();
 		widthPixels = p.getSignWidthPixels();
@@ -267,7 +267,7 @@ public class DMSPanel extends JPanel {
 	}
 
 	/** Set the sign to render */
-	protected void _setSign(DMSProxy p) {
+	protected void _setSign(DMS p) {
 		proxy = p;
 		if(p == null)
 			setToDefaultSize();
@@ -276,7 +276,7 @@ public class DMSPanel extends JPanel {
 	}
 
 	/** Set the sign to render */
-	public void setSign(DMSProxy p) {
+	public void setSign(DMS p) {
 		if(p != proxy) {
 			_setSign(p);
 			rescale();
