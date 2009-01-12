@@ -98,6 +98,7 @@ public class HolidayForm extends AbstractForm {
 					model.deleteRow(row);
 			}
 		};
+		// FIXME: add a calendar widget (for holiday feedback)
 		return panel;
 	}
 
