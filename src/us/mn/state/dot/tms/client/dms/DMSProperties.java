@@ -25,7 +25,9 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
@@ -41,8 +43,10 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
@@ -51,7 +55,9 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
@@ -286,15 +292,22 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			"DMSProperties.ResetButton"));
 	}
 
+	/** Get the SONAR type cache */
+	protected TypeCache<DMS> getTypeCache() {
+		return state.getDMSs();
+	}
+
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
+		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
 		tab.add("Manufacturer", createManufacturerPanel());
 		tab.add("Status", createStatusPanel());
+		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
 	}
@@ -356,7 +369,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() throws RemoteException {
+	protected void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c == null)
 			controller.setEnabled(false);
@@ -534,30 +547,31 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		Integer ch = proxy.getCharHeightPixels();
 		if(w == null || h == null || cw == null || ch == null)
 			return null;
-		PixelMapBuilder b = new PixelMapBuilder(namespace, w, h, cw,ch);
+		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
+			w, h, cw, ch);
 		return b.getLineHeightPixels();
 	}
 
 	/** Render a message to a bitmap graphic */
 	protected BitmapGraphic renderMessage(SignText st) {
 		MultiString multi = new MultiString(st.getMessage());
-		TreeMap<Integer, BitmapGraphic> pages = renderPages(multi);
-		if(pages.containsKey(0))
-			return pages.get(0);
+		BitmapGraphic[] pages = renderPages(multi);
+		if(pages.length > 0)
+			return pages[0];
 		else
 			return null;
 	}
 
 	/** Render the pages of a text message */
-	protected TreeMap<Integer, BitmapGraphic> renderPages(MultiString multi)
-	{
+	protected BitmapGraphic[] renderPages(MultiString multi) {
 		Integer w = proxy.getWidthPixels();
 		Integer h = getLineHeightPixels();
 		Integer cw = proxy.getCharWidthPixels();
 		Integer ch = proxy.getCharHeightPixels();
 		if(w == null || h == null || cw == null || ch == null)
-			return new TreeMap<Integer, BitmapGraphic>();
-		PixelMapBuilder b = new PixelMapBuilder(namespace, w, h, cw,ch);
+			return new BitmapGraphic[0];
+		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
+			w, h, cw, ch);
 		multi.parse(b);
 		return b.getPixmaps();
 	}
@@ -708,8 +722,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			panel.add(pixelTest);
 			new ActionJob(this, pixelTest) {
 				public void perform() {
-					proxy.setSignRequest(
-						SignRequest.TEST_PIXELS);
+					proxy.setSignRequest(SignRequest.
+						TEST_PIXELS.ordinal());
 				}
 			};
 		}
@@ -720,8 +734,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			panel.add(fanTest);
 			new ActionJob(this, fanTest) {
 				public void perform() {
-					proxy.setSignRequest(
-						SignRequest.TEST_FANS);
+					proxy.setSignRequest(SignRequest.
+						TEST_FANS.ordinal());
 				}
 			};
 		}
@@ -736,8 +750,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			panel.add(getStatusButton);
 			new ActionJob(this, getStatusButton) {
 				public void perform() throws Exception {
-					proxy.setSignRequest(
-						SignRequest.QUERY_MESSAGE);
+					proxy.setSignRequest(SignRequest.
+						QUERY_MESSAGE.ordinal());
 				}
 			};
 		}
@@ -749,8 +763,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			panel.addRow(resetButton);
 			new ActionJob(this, resetButton) {
 				public void perform() {
-					proxy.setSignRequest(
-						SignRequest.RESET_DMS);
+					proxy.setSignRequest(SignRequest.
+						RESET_DMS.ordinal());
 				}
 			};
 		}
@@ -768,7 +782,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(a == null || a.equals("make")) {
 			String m = proxy.getMake();
 			make.setText(m);
-			updateMake(m.toUpper());
+			updateMake(m.toUpperCase());
 		}
 		if(a == null || a.equals("model"))
 			model.setText(proxy.getModel());
@@ -776,8 +790,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			version.setText(proxy.getVersion());
 		if(a == null || a.equals("signAccess"))
 			access.setText(proxy.getSignAccess());
-		if(a == null || a.equals("FIXME"))
-			type.setText(proxy.getSignMatrixTypeDescription());
+		if(a == null || a.equals("dmsType")) {
+			DMSType t = DMSType.fromOrdinal(proxy.getDmsType());
+			type.setText(t.description);
+		}
 		if(a == null || a.equals("faceHeight"))
 			faceHeight.setText(formatMM(proxy.getFaceHeight()));
 		if(a == null || a.equals("faceWidth"))
@@ -791,11 +807,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(a == null || a.equals("verticalBorder"))
 			vBorder.setText(formatMM(proxy.getVerticalBorder()));
 		if(a == null || a.equals("legend"))
-			legend.setText(proxy.getSignLegend());
+			legend.setText(proxy.getLegend());
 		if(a == null || a.equals("beaconType"))
 			beacon.setText(proxy.getBeaconType());
-		if(a == null || a.equals("signTechnology"))
-			tech.setText(proxy.getSignTechnology());
+		if(a == null || a.equals("technology"))
+			tech.setText(proxy.getTechnology());
 		if(a == null || a.equals("charHeightPixels")) {
 			cHeight.setText(formatPixels(
 				proxy.getCharHeightPixels()));
@@ -865,9 +881,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Select card on manufacturer panel for the given make */
 	protected void updateMake(String m) {
-		if(m.contains(MAKE_LEDSTAR.toUpper()))
+		if(m.contains(MAKE_LEDSTAR.toUpperCase()))
 			cards.show(card_panel, MAKE_LEDSTAR);
-		else if(m.contains(MAKE_SKYLINE.toUpper()))
+		else if(m.contains(MAKE_SKYLINE.toUpperCase()))
 			cards.show(card_panel, MAKE_SKYLINE);
 		else
 			cards.show(card_panel, MAKE_GENERIC);
