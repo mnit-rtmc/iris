@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,51 +19,40 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.TreeMap;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -74,7 +63,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSProperties extends TrafficDeviceForm {
+public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Format milimeter units for display */
 	static protected String formatMM(int i) {
@@ -94,32 +83,40 @@ public class DMSProperties extends TrafficDeviceForm {
 			return UNKNOWN;
 	}
 
-	/** Celcius temperature string */
-	static protected final String CELCIUS = "\u00B0 C";
-
 	/** Format the temperature */
-	static protected String formatTemp(int minTemp, int maxTemp) {
-		// FIXME: add ability to display Fahrenheit as well
-		if(maxTemp == DMS.UNKNOWN_TEMP)
-			maxTemp = minTemp;
-		if(minTemp == maxTemp) {
-			if(minTemp == DMS.UNKNOWN_TEMP)
-				return UNKNOWN;
-			else
-				return "" + minTemp + CELCIUS;
-		} else
-			return "" + minTemp + "..." + maxTemp + CELCIUS;
+	static protected String formatTemp(Integer minTemp, Integer maxTemp) {
+		if(minTemp == null || minTemp == maxTemp)
+			return Temperature.formatCelsius(maxTemp);
+		if(maxTemp == null)
+			return Temperature.formatCelsius(minTemp);
+		return Temperature.formatCelsius(minTemp) + " ... " +
+		       Temperature.formatCelsius(maxTemp);
 	}
 
 	/** Frame title */
 	static protected String TITLE = 
 		I18NMessages.get("dms.abbreviation") + ": ";
 
-	/** Dynamic message sign interface */
-	protected DMS sign;
+	/** Generic sign make */
+	static protected final String MAKE_GENERIC = "Generic";
+
+	/** Ledstar sign make */
+	static protected final String MAKE_LEDSTAR = "Ledstar";
+
+	/** Skyline sign make */
+	static protected final String MAKE_SKYLINE = "Skyline";
+
+	/** Location panel */
+	protected LocationPanel location;
+
+	/** Notes text area */
+	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
+
+	/** Controller button */
+	protected final JButton controller = new JButton("Controller");
 
 	/** Sign group model */
 	protected final SignGroupModel sign_group_model;
@@ -143,7 +140,10 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected final SignPixelPanel pixel_panel = new SignPixelPanel();
 
 	/** Travel time template string field */
-	protected final JTextArea travel = new JTextArea();
+	protected final JTextArea travel = new JTextArea(3, 24);
+
+	/** Timing plan table component */
+	protected final JTable plan_table = new JTable();
 
 	/** Make label */
 	protected final JLabel make = new JLabel();
@@ -160,11 +160,11 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Sign type label */
 	protected final JLabel type = new JLabel();
 
-	/** Sign height label */
-	protected final JLabel height = new JLabel();
+	/** Sign face height label */
+	protected final JLabel faceHeight = new JLabel();
 
-	/** Sign width label */
-	protected final JLabel width = new JLabel();
+	/** Sign face width label */
+	protected final JLabel faceWidth = new JLabel();
 
 	/** Horizontal border label */
 	protected final JLabel hBorder = new JLabel();
@@ -211,12 +211,8 @@ public class DMSProperties extends TrafficDeviceForm {
 	protected final JSpinner currentHighSpn = new JSpinner(
 		new SpinnerNumberModel(40, 0, 100, 1));
 
-	/** Bad pixel limit spinner */
-	protected final JSpinner badLimitSpn = new JSpinner(
-		new SpinnerNumberModel(35, 0, 2625, 5));
-
-	/** Operation description label */
-	protected final JLabel operation = new JLabel();
+	/** Heat tape status label */
+	protected final JLabel heatTapeStatus = new JLabel();
 
 	/** Power supply status table */
 	protected final JTable power_table = new JTable();
@@ -242,9 +238,6 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Fan status label */
 	protected final JLabel fan = new JLabel();
 
-	/** Heat tape status label */
-	protected final JLabel heat_tape = new JLabel();
-
 	/** Cabinet temperature label */
 	protected final JLabel cabinetTemp = new JLabel();
 
@@ -254,20 +247,17 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** Housing temperature label */
 	protected final JLabel housingTemp = new JLabel();
 
-	/** Note */
-	protected final JLabel dms_note = new JLabel();
+	/** Operation description label */
+	protected final JLabel operation = new JLabel();
 
-	/** Timing plan table component */
-	protected final JTable plan_table = new JTable();
-
-	/** Add AM plan button */
-	protected final JButton am_plan = new JButton("Add AM Plan");
-
-	/** Add PM plan button */
-	protected final JButton pm_plan = new JButton("Add PM Plan");
+	/** User Note */
+	protected final JLabel userNote = new JLabel();
 
 	/** Card layout for manufacturer panels */
 	protected final CardLayout cards = new CardLayout();
+
+	/** Card panel for manufacturer panels */
+	protected final JPanel card_panel = new JPanel(cards);
 
 	/** Sonar state */
 	protected final SonarState state;
@@ -275,18 +265,15 @@ public class DMSProperties extends TrafficDeviceForm {
 	/** SONAR user */
 	protected final User user;
 
-	/** Array of timing plans */
-	protected TimingPlan[] plans;
-
 	/** Create a new DMS properties form 
-	 *  @param tc TmsConnection
-	 *  @param id Dms ID, e.g. "V1"
+	 * @param tc TmsConnection
+	 * @param sign DMS proxy object
 	 */
-	public DMSProperties(TmsConnection tc, String id) {
-		super(TITLE + id, tc, id);
+	public DMSProperties(TmsConnection tc, DMS sign) {
+		super(TITLE, tc, sign);
 		state = tc.getSonarState();
 		user = state.lookupUser(tc.getUser().getName());
-		sign_group_model = new SignGroupModel(id,
+		sign_group_model = new SignGroupModel(sign.getName(),
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
 		pixelTest = new JButton(I18NMessages.get(
@@ -299,45 +286,22 @@ public class DMSProperties extends TrafficDeviceForm {
 			"DMSProperties.ResetButton"));
 	}
 
-	protected int h_pix;
-	protected int v_pix;
-	protected int c_pix;
-	protected int hp_mm;
-	protected int vp_mm;
-	protected int h_mm;
-	protected int hb_mm;
-
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		sign = (DMS)s.getElement(id);
-
-		h_pix = sign.getSignWidthPixels();
-		v_pix = sign.getLineHeightPixels();
-		c_pix = sign.getCharacterWidthPixels();
-		hp_mm = sign.getHorizontalPitch();
-		vp_mm = sign.getVerticalPitch();
-		h_mm = sign.getSignWidth();
-		hb_mm = sign.getHorizontalBorder();
-
-		ListModel model = state.getCameraModel();
-		camera.setModel(new WrapperComboBoxModel(model));
-		TimingPlanModel plan_model = new TimingPlanModel(
-			(TimingPlanList)tms.getTimingPlans().getList(), sign,
-			admin);
-		plan_table.setModel(plan_model);
-		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
 		super.initialize();
-		location.addRow("Camera", camera);
-
+		tab.add("Location", createLocationPanel());
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
 		tab.add("Manufacturer", createManufacturerPanel());
 		tab.add("Status", createStatusPanel());
+		updateAttribute(null);
+		setBackground(Color.LIGHT_GRAY);
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
+		location.dispose();
 		sign_group_model.dispose();
 		if(sign_text_model != null)
 			sign_text_model.dispose();
@@ -360,6 +324,46 @@ public class DMSProperties extends TrafficDeviceForm {
 					sign_text.destroy();
 			}
 		};
+	}
+
+	/** Create the location panel */
+	protected JPanel createLocationPanel() {
+		location = new LocationPanel(true, proxy.getGeoLoc(), state);
+		location.initialize();
+		location.addRow("Notes", notes);
+		new FocusJob(notes) {
+			public void perform() {
+				proxy.setNotes(notes.getText());
+			}
+		};
+		camera.setModel(new WrapperComboBoxModel(
+			state.getCameraModel()));
+		location.addRow("Camera", camera);
+		new ActionJob(this, camera) {
+			public void perform() {
+				proxy.setCamera(
+					(Camera)camera.getSelectedItem());
+			}
+		};
+		location.setCenter();
+		location.addRow(controller);
+		new ActionJob(this, controller) {
+			public void perform() throws Exception {
+				controllerPressed();
+			}
+		};
+		return location;
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() throws RemoteException {
+		Controller c = proxy.getController();
+		if(c == null)
+			controller.setEnabled(false);
+		else {
+			connection.getDesktop().show(
+				new ControllerForm(connection, c));
+		}
 	}
 
 	/** Create the message panel */
@@ -386,6 +390,7 @@ public class DMSProperties extends TrafficDeviceForm {
 		bag.weightx = 0;
 		bag.weighty = 0;
 		bag.fill = GridBagConstraints.NONE;
+		// FIXME: check SONAR roles here
 		if(admin) {
 			bag.gridx = 0;
 			bag.gridy = 1;
@@ -479,7 +484,8 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Initialize the sign text table */
 	protected void initSignTextTable() {
-		final ListSelectionModel s = sign_text_table.getSelectionModel();
+		final ListSelectionModel s =
+			sign_text_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
@@ -496,16 +502,40 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Select a new sign text message */
 	protected void selectSignText() {
-		SignText st = getSelectedSignText();
-		pixel_panel.setPhysicalDimensions(h_mm, v_pix * vp_mm,
-			hb_mm, 0, hp_mm, vp_mm);
-		pixel_panel.setLogicalDimensions(h_pix, v_pix, c_pix, 0);
+		Integer w = proxy.getFaceWidth();
+		Integer lh = getLineHeightPixels();
+		Integer hp = proxy.getHorizontalPitch();
+		Integer vp = proxy.getVerticalPitch();
+		Integer hb = proxy.getHorizontalBorder();
+		if(w != null && lh != null && hp != null && vp != null &&
+		   hb != null)
+		{
+			int h = lh * vp;
+			pixel_panel.setPhysicalDimensions(w, h, hb, 0, hp, vp);
+		}
+		Integer wp = proxy.getWidthPixels();
+		Integer cw = proxy.getCharWidthPixels();
+		if(wp != null && lh != null && cw != null)
+			pixel_panel.setLogicalDimensions(wp, lh, cw, 0);
 		pixel_panel.verifyDimensions();
+		SignText st = getSelectedSignText();
 		if(st != null)
 			pixel_panel.setGraphic(renderMessage(st));
 		else
 			pixel_panel.setGraphic(null);
 		delete_text.setEnabled(st != null);
+	}
+
+	/** Get the line height of the sign */
+	protected Integer getLineHeightPixels() {
+		Integer w = proxy.getWidthPixels();
+		Integer h = proxy.getHeightPixels();
+		Integer cw = proxy.getCharWidthPixels();
+		Integer ch = proxy.getCharHeightPixels();
+		if(w == null || h == null || cw == null || ch == null)
+			return null;
+		PixelMapBuilder b = new PixelMapBuilder(namespace, w, h, cw,ch);
+		return b.getLineHeightPixels();
 	}
 
 	/** Render a message to a bitmap graphic */
@@ -519,50 +549,17 @@ public class DMSProperties extends TrafficDeviceForm {
 	}
 
 	/** Render the pages of a text message */
-	protected TreeMap<Integer, BitmapGraphic> renderPages(
-		final MultiString multi)
+	protected TreeMap<Integer, BitmapGraphic> renderPages(MultiString multi)
 	{
-		final Font font = lookupFont();
-		if(font == null)
+		Integer w = proxy.getWidthPixels();
+		Integer h = getLineHeightPixels();
+		Integer cw = proxy.getCharWidthPixels();
+		Integer ch = proxy.getCharHeightPixels();
+		if(w == null || h == null || cw == null || ch == null)
 			return new TreeMap<Integer, BitmapGraphic>();
-		PixelMapBuilder builder = new PixelMapBuilder(namespace, h_pix,
-			v_pix, c_pix, font);
-		multi.parse(builder);
-		return builder.getPixmaps();
-	}
-
-	/** Lookup a font for the sign */
-	protected Font lookupFont() {
-		TypeCache<Font> fonts = state.getFonts();
-		Font f = fonts.findObject(new Checker<Font>() {
-			public boolean check(Font f) {
-				return f.getWidth() == c_pix &&
-					f.getHeight() == v_pix;
-			}
-		});
-		if(f != null || c_pix == 0)
-			return f;
-		return fonts.findObject(new Checker<Font>() {
-			public boolean check(Font f) {
-				return f.getWidth() == 0 &&
-					f.getHeight() == v_pix;
-			}
-		});
-	}
-
-	/** Lookup a glyph in the specified font */
-	protected Graphic lookupGlyph(final Font f, final int cp) {
-		TypeCache<Glyph> glyphs = state.getGlyphs();
-		Glyph g = glyphs.findObject(new Checker<Glyph>() {
-			public boolean check(Glyph g) {
-				return g.getFont() == f &&
-					g.getCodePoint() == cp;
-			}
-		});
-		if(g != null)
-			return g.getGraphic();
-		else
-			return null;
+		PixelMapBuilder b = new PixelMapBuilder(namespace, w, h, cw,ch);
+		multi.parse(b);
+		return b.getPixmaps();
 	}
 
 	/** Get the selected sign text message */
@@ -576,59 +573,55 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Create the travel time panel */
 	protected JPanel createTravelTimePanel() {
-		JPanel panel = new JPanel();
-		panel.setBorder(BORDER);
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		box.add(new JLabel("Travel template:"));
-		box.add(travel);
-		box.add(Box.createHorizontalGlue());
-		travel.setEnabled(admin);
-		panel.add(box);
-		panel.add(Box.createVerticalStrut(VGAP));
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Travel template", travel);
+		new FocusJob(travel) {
+			public void perform() {
+				proxy.setTravel(travel.getText());
+			}
+		};
+
+		// FIXME: this is b0rked
+		TimingPlanModel plan_model = new TimingPlanModel(
+			(TimingPlanList)tms.getTimingPlans().getList(), proxy);
+		plan_table.setModel(plan_model);
+		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
 		plan_table.setAutoCreateColumnsFromModel(false);
 		plan_table.setPreferredScrollableViewportSize(
 			new Dimension(300, 200));
-		JScrollPane scroll = new JScrollPane(plan_table);
-		box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		box.add(scroll);
-		box.add(Box.createHorizontalGlue());
-		panel.add(box);
-		if(admin) {
-			box = Box.createHorizontalBox();
-			box.add(Box.createHorizontalGlue());
-			box.add(am_plan);
-			box.add(Box.createHorizontalStrut(8));
-			box.add(pm_plan);
-			box.add(Box.createHorizontalGlue());
-			panel.add(box);
-			new ActionJob(this, am_plan) {
-				public void perform() throws Exception {
-					sign.addTimingPlan(Calendar.AM);
-				}
-			};
-			new ActionJob(this, pm_plan) {
-				public void perform() throws Exception {
-					sign.addTimingPlan(Calendar.PM);
-				}
-			};
-		}
+		panel.addRow(plan_table);
 		return panel;
 	}
 
 	/** Create the configuration panel */
 	protected JPanel createConfigurationPanel() {
+		make.setForeground(OK);
+		model.setForeground(OK);
+		version.setForeground(OK);
+		access.setForeground(OK);
+		type.setForeground(OK);
+		faceHeight.setForeground(OK);
+		pHeight.setForeground(OK);
+		faceWidth.setForeground(OK);
+		pWidth.setForeground(OK);
+		hBorder.setForeground(OK);
+		vBorder.setForeground(OK);
+		legend.setForeground(OK);
+		beacon.setForeground(OK);
+		tech.setForeground(OK);
+		cHeight.setForeground(OK);
+		cWidth.setForeground(OK);
+		hPitch.setForeground(OK);
+		vPitch.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Make", make);
 		panel.addRow("Model", model);
 		panel.addRow("Version", version);
 		panel.addRow("Access", access);
 		panel.addRow("Type", type);
-		panel.addRow("Sign height", height);
+		panel.addRow("Face height", faceHeight);
 		panel.addRow("Sign height", pHeight);
-		panel.addRow("Sign width", width);
+		panel.addRow("Face width", faceWidth);
 		panel.addRow("Sign width", pWidth);
 		panel.addRow("Horizontal border", hBorder);
 		panel.addRow("Vertical border", vBorder);
@@ -644,12 +637,10 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Create manufacturer-specific panel */
 	protected JPanel createManufacturerPanel() {
-		// FIXME select card when "Make" is updated
-		JPanel panel = new JPanel(cards);
-		panel.add(createGenericPanel(), "Generic");
-		panel.add(createLedstarPanel(), "Ledstar");
-		panel.add(createSkylinePanel(), "Skyline");
-		return panel;
+		card_panel.add(createGenericPanel(), MAKE_GENERIC);
+		card_panel.add(createLedstarPanel(), MAKE_LEDSTAR);
+		card_panel.add(createSkylinePanel(), MAKE_SKYLINE);
+		return card_panel;
 	}
 
 	/** Create generic manufacturer panel */
@@ -662,47 +653,63 @@ public class DMSProperties extends TrafficDeviceForm {
 
 	/** Create Ledstar-specific panel */
 	protected JPanel createLedstarPanel() {
+		new ChangeJob(this, ldcPotBaseSpn) {
+			public void perform() {
+				Number n = (Number)ldcPotBaseSpn.getValue();
+				proxy.setLdcPotBase(n.intValue());
+			}
+		};
+		new ChangeJob(this, currentLowSpn) {
+			public void perform() {
+				Number n = (Number)currentLowSpn.getValue();
+				proxy.setPixelCurrentLow(n.intValue());
+			}
+		};
+		new ChangeJob(this, currentHighSpn) {
+			public void perform() {
+				Number n = (Number)currentHighSpn.getValue();
+				proxy.setPixelCurrentHigh(n.intValue());
+			}
+		};
 		FormPanel panel = new FormPanel(true);
-		panel.setTitle("Ledstar");
+		panel.setTitle(MAKE_LEDSTAR);
 		panel.addRow("LDC pot base", ldcPotBaseSpn);
 		panel.addRow("Pixel current low threshold", currentLowSpn);
 		panel.addRow("Pixel current high threshold", currentHighSpn);
-		panel.addRow("Bad pixel limit", badLimitSpn);
-/*
-		// FIXME: add jobs for each spinner
-		int base = ((Integer)ldcPotBaseSpn.getValue()).intValue();
-		int low = ((Integer)currentLowSpn.getValue()).intValue();
-		int high = ((Integer)currentHighSpn.getValue()).intValue();
-		int bad = ((Integer)badLimitSpn.getValue()).intValue();
-		sign.setLdcPotBase(base);
-		sign.setPixelCurrentLow(low);
-		sign.setPixelCurrentHigh(high);
-		sign.setBadPixelLimit(bad);
-*/
 		return panel;
 	}
 
 	/** Create Skyline-specific panel */
 	protected JPanel createSkylinePanel() {
+		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.setTitle("Skyline");
+		panel.setTitle(MAKE_SKYLINE);
 		power_table.setAutoCreateColumnsFromModel(false);
 		power_table.setPreferredScrollableViewportSize(
 			new Dimension(300, 200));
 		panel.addRow(power_table);
-		panel.addRow("Heat tape", heat_tape);
+		panel.addRow("Heat tape", heatTapeStatus);
 		return panel;
 	}
 
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
+		badPixels.setForeground(OK);
+		lamp.setForeground(OK);
+		fan.setForeground(OK);
+		cabinetTemp.setForeground(OK);
+		ambientTemp.setForeground(OK);
+		housingTemp.setForeground(OK);
+		operation.setForeground(OK);
+		userNote.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.add("Bad pixels", badPixels);
 		if(SystemAttributeHelper.isDmsPixelTestEnabled()) {
 			panel.add(pixelTest);
 			new ActionJob(this, pixelTest) {
 				public void perform() {
-					sign.testPixels();
+					proxy.setSignRequest(
+						SignRequest.TEST_PIXELS);
 				}
 			};
 		}
@@ -713,7 +720,8 @@ public class DMSProperties extends TrafficDeviceForm {
 			panel.add(fanTest);
 			new ActionJob(this, fanTest) {
 				public void perform() {
-					sign.testFans();
+					proxy.setSignRequest(
+						SignRequest.TEST_FANS);
 				}
 			};
 		}
@@ -722,139 +730,152 @@ public class DMSProperties extends TrafficDeviceForm {
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
 		panel.add("Operation", operation);
-		operation.setForeground(Color.BLACK);
 		if(SystemAttributeHelper.isDmsStatusEnabled()) {
 			getStatusButton.setToolTipText(I18NMessages.get(
 				"DMSProperties.GetStatusButton.ToolTip"));
 			panel.add(getStatusButton);
 			new ActionJob(this, getStatusButton) {
 				public void perform() throws Exception {
-					sign.getSignMessage();
+					proxy.setSignRequest(
+						SignRequest.QUERY_MESSAGE);
 				}
 			};
 		}
 		panel.finishRow();
-		panel.addRow("Note", dms_note);
+		panel.addRow("User Note", userNote);
 		if(SystemAttributeHelper.isDmsResetEnabled()) {
 			resetButton.setToolTipText(I18NMessages.get(
 				"DMSProperties.ResetButton.ToolTip"));
 			panel.addRow(resetButton);
 			new ActionJob(this, resetButton) {
 				public void perform() {
-					sign.reset();
+					proxy.setSignRequest(
+						SignRequest.RESET_DMS);
 				}
 			};
 		}
 		return panel;
 	}
 
-	/** Update the form with the current state of the sign */
-	protected void doUpdate() {
-		super.doUpdate();
-		camera.setSelectedItem(state.lookupCamera(sign.getCamera()));
-		String t = sign.getTravel();
-		Color color = Color.GRAY;
-		if(sign.isActive())
-			color = OK;
-		make.setForeground(color);
-		model.setForeground(color);
-		version.setForeground(color);
-		access.setForeground(color);
-		type.setForeground(color);
-		height.setForeground(color);
-		pHeight.setForeground(color);
-		width.setForeground(color);
-		pWidth.setForeground(color);
-		hBorder.setForeground(color);
-		vBorder.setForeground(color);
-		legend.setForeground(color);
-		beacon.setForeground(color);
-		tech.setForeground(color);
-		cHeight.setForeground(color);
-		cWidth.setForeground(color);
-		hPitch.setForeground(color);
-		vPitch.setForeground(color);
-		badPixels.setForeground(color);
-		lamp.setForeground(color);
-		fan.setForeground(color);
-		heat_tape.setForeground(color);
-		cabinetTemp.setForeground(color);
-		ambientTemp.setForeground(color);
-		housingTemp.setForeground(color);
-		dms_note.setForeground(color);
-		travel.setText(t);
-	}
-
-	/** Get the station index for the given item */
-	protected int stationIndex(Object item) {
-		if(item instanceof String) {
-			String st = ((String)item).substring(0, 4).trim();
-			try { return Integer.parseInt(st); }
-			catch(NumberFormatException e) {
-				return -1;
-			}
+	/** Update one attribute on the form */
+	protected void updateAttribute(String a) {
+		if(a == null || a.equals("notes"))
+			notes.setText(proxy.getNotes());
+		if(a == null || a.equals("camera"))
+			camera.setSelectedItem(proxy.getCamera());
+		if(a == null || a.equals("travel"))
+			travel.setText(proxy.getTravel());
+		if(a == null || a.equals("make")) {
+			String m = proxy.getMake();
+			make.setText(m);
+			updateMake(m.toUpper());
 		}
-		return -1;
+		if(a == null || a.equals("model"))
+			model.setText(proxy.getModel());
+		if(a == null || a.equals("version"))
+			version.setText(proxy.getVersion());
+		if(a == null || a.equals("signAccess"))
+			access.setText(proxy.getSignAccess());
+		if(a == null || a.equals("FIXME"))
+			type.setText(proxy.getSignMatrixTypeDescription());
+		if(a == null || a.equals("faceHeight"))
+			faceHeight.setText(formatMM(proxy.getFaceHeight()));
+		if(a == null || a.equals("faceWidth"))
+			faceWidth.setText(formatMM(proxy.getFaceWidth()));
+		if(a == null || a.equals("heightPixels"))
+			pHeight.setText(formatPixels(proxy.getHeightPixels()));
+		if(a == null || a.equals("widthPixels"))
+			pWidth.setText(formatPixels(proxy.getWidthPixels()));
+		if(a == null || a.equals("horizontalBorder"))
+			hBorder.setText(formatMM(proxy.getHorizontalBorder()));
+		if(a == null || a.equals("verticalBorder"))
+			vBorder.setText(formatMM(proxy.getVerticalBorder()));
+		if(a == null || a.equals("legend"))
+			legend.setText(proxy.getSignLegend());
+		if(a == null || a.equals("beaconType"))
+			beacon.setText(proxy.getBeaconType());
+		if(a == null || a.equals("signTechnology"))
+			tech.setText(proxy.getSignTechnology());
+		if(a == null || a.equals("charHeightPixels")) {
+			cHeight.setText(formatPixels(
+				proxy.getCharHeightPixels()));
+		}
+		if(a == null || a.equals("charWidthPixels")) {
+			cWidth.setText(formatPixels(
+				proxy.getCharWidthPixels()));
+		}
+		if(a == null || a.equals("horizontalPitch"))
+			hPitch.setText(formatMM(proxy.getHorizontalPitch()));
+		if(a == null || a.equals("verticalPitch"))
+			vPitch.setText(formatMM(proxy.getVerticalPitch()));
+		// NOTE: messageCurrent attribute changes after all sign
+		//       dimension attributes are updated.
+		if(a == null || a.equals("messageCurrent"))
+			selectSignText();
+		if(a == null || a.equals("ldcPotBase"))
+			ldcPotBaseSpn.setValue(proxy.getLdcPotBase());
+		if(a == null || a.equals("pixelCurrentLow"))
+			currentLowSpn.setValue(proxy.getPixelCurrentLow());
+		if(a == null || a.equals("pixelCurrentHigh"))
+			currentHighSpn.setValue(proxy.getPixelCurrentHigh());
+		if(a == null || a.equals("powerStatus")) {
+			StatusTableModel m = new StatusTableModel(
+				proxy.getPowerStatus());
+			power_table.setColumnModel(m.createColumnModel());
+			power_table.setDefaultRenderer(Object.class,
+				m.getRenderer());
+			power_table.setModel(m);
+		}
+		if(a == null || a.equals("heatTapeStatus"))
+			heatTapeStatus.setText(proxy.getHeatTapeStatus());
+		if(a == null || a.equals("stuckOnBitmap"))
+			updatePixelErrors();
+		if(a == null || a.equals("stuckOffBitmap"))
+			updatePixelErrors();
+		if(a == null || a.equals("lampStatus"))
+			lamp.setText(proxy.getLampStatus());
+		if(a == null || a.equals("fanStatus"))
+			fan.setText(proxy.getFanStatus());
+		if(a == null || a.equals("minCabinetTemp") ||
+		   a.equals("maxCabinetTemp"))
+		{
+			cabinetTemp.setText(formatTemp(
+				proxy.getMinCabinetTemp(),
+				proxy.getMaxCabinetTemp()));
+		}
+		if(a == null || a.equals("minAmbientTemp") ||
+		   a.equals("maxAmbientTemp"))
+		{
+			ambientTemp.setText(formatTemp(
+				proxy.getMinAmbientTemp(),
+				proxy.getMaxAmbientTemp()));
+		}
+		if(a == null || a.equals("minHousingTemp") ||
+		   a.equals("maxHousingTemp"))
+		{
+			housingTemp.setText(formatTemp(
+				proxy.getMinHousingTemp(),
+				proxy.getMaxHousingTemp()));
+		}
+		if(a == null || a.equals("operation"))
+			operation.setText(proxy.getOperation());
+		if(a == null || a.equals("userNote"))
+			userNote.setText(proxy.getUserNote());
 	}
 
-	/** Refresh the status of the object */
-	protected void doStatus() {
-		super.doStatus();
-		make.setText(sign.getMake());
-		model.setText(sign.getModel());
-		version.setText(sign.getVersion());
-		access.setText(sign.getSignAccess());
-		type.setText(sign.getSignMatrixTypeDescription());
-		height.setText(formatMM(sign.getSignHeight()));
-		pHeight.setText(formatPixels(sign.getSignHeightPixels()));
-		width.setText(formatMM(sign.getSignWidth()));
-		pWidth.setText(formatPixels(sign.getSignWidthPixels()));
-		hBorder.setText(formatMM(sign.getHorizontalBorder()));
-		vBorder.setText(formatMM(sign.getVerticalBorder()));
-		legend.setText(sign.getSignLegend());
-		beacon.setText(sign.getBeaconType());
-		tech.setText(sign.getSignTechnology());
-		cWidth.setText(formatPixels(sign.getCharacterWidthPixels()));
-		cHeight.setText(formatPixels(sign.getCharacterHeightPixels()));
-		hPitch.setText(formatMM(sign.getHorizontalPitch()));
-		vPitch.setText(formatMM(sign.getVerticalPitch()));
-		StatusTableModel m = new StatusTableModel(
-			sign.getPowerSupplyTable());
-		power_table.setColumnModel(m.createColumnModel());
-		power_table.setDefaultRenderer(Object.class, m.getRenderer());
-		power_table.setModel(m);
-		badPixels.setText(String.valueOf(sign.getPixelFailureCount()));
-		ldcPotBaseSpn.setValue(sign.getLdcPotBase());
-		currentLowSpn.setValue(sign.getPixelCurrentLow());
-		currentHighSpn.setValue(sign.getPixelCurrentHigh());
-		badLimitSpn.setValue(sign.getBadPixelLimit());
-		lamp.setText(sign.getLampStatus());
-		fan.setText(sign.getFanStatus());
-		heat_tape.setText(sign.getHeatTapeStatus());
-		cabinetTemp.setText(formatTemp(sign.getMinCabinetTemp(),
-			sign.getMaxCabinetTemp()));
-		ambientTemp.setText(formatTemp(sign.getMinAmbientTemp(),
-			sign.getMaxAmbientTemp()));
-		housingTemp.setText(formatTemp(sign.getMinHousingTemp(),
-			sign.getMaxHousingTemp()));
-		dms_note.setText(sign.getUserNote());
-		operation.setText(sign.getOperation());
-
-		h_pix = sign.getSignWidthPixels();
-		v_pix = sign.getLineHeightPixels();
-		c_pix = sign.getCharacterWidthPixels();
-		hp_mm = sign.getHorizontalPitch();
-		vp_mm = sign.getVerticalPitch();
-		h_mm = sign.getSignWidth();
-		hb_mm = sign.getHorizontalBorder();
-		selectSignText();
+	/** Select card on manufacturer panel for the given make */
+	protected void updateMake(String m) {
+		if(m.contains(MAKE_LEDSTAR.toUpper()))
+			cards.show(card_panel, MAKE_LEDSTAR);
+		else if(m.contains(MAKE_SKYLINE.toUpper()))
+			cards.show(card_panel, MAKE_SKYLINE);
+		else
+			cards.show(card_panel, MAKE_GENERIC);
 	}
 
-	/** Apply button is pressed */
-	protected void applyPressed() throws Exception {
-		super.applyPressed();
-		sign.setCamera(getCameraName((Camera)camera.getSelectedItem()));
-		sign.setTravel(travel.getText());
-		sign.notifyUpdate();
+	/** Update the pixel error bitmaps */
+	protected void updatePixelErrors() {
+		// FIXME: count errors in stuck on and stuck off bitmaps
+		badPixels.setText(String.valueOf(proxy.getPixelFailureCount()));
 	}
 }

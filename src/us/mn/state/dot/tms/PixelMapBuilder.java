@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +88,11 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 			return SystemAttributeHelper.getDmsDefaultFontHeight();
 	}
 
+	/** Get the optimal line height (pixels) */
+	public int getLineHeightPixels() {
+		return getLineHeightPixels(0);
+	}
+
 	/** Calculate the line spacing for a given font height */
 	protected int calculateLineSpacing(int font_height) {
 		int extra = height % font_height;
@@ -101,7 +106,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Lookup the best font.
-	 * @param n Font number.
+	 * @param n Font number.  Zero matches any font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
@@ -114,7 +119,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Lookup the best font.
-	 * @param n Font number.
+	 * @param n Font number.  Zero matches any font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
@@ -131,12 +136,12 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Check if a font matches criteria.
-	 * @param n Font number.
+	 * @param n Font number.  Zero matches any font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
 	protected boolean checkFont(Font f, int n, int h, int w, int ls) {
-		boolean n_match = n == f.getNumber();
+		boolean n_match = (n == 0) || n == f.getNumber();
 		boolean ls_match = (ls == 0) || ls == f.getLineSpacing();
 		boolean h_match = (h == 0) || h == f.getHeight();
 		boolean w_match = (w == 0) || w == f.getWidth();
