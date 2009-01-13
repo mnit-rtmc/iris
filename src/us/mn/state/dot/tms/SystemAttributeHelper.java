@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -484,6 +484,12 @@ public class SystemAttributeHelper {
 	/** Is Camera PTZ panel enabled? */
 	static public boolean isCameraPTZPanelEnabled() {
 		return getValueBoolean(SystemAttribute.CAMERA_PTZ_PANEL_ENABLE,
+			false);
+	}
+
+	/** Is Fahrenheit temperature enabled? */
+	static public boolean isTempFahrenheitEnabled() {
+		return getValueBoolean(SystemAttribute.TEMP_FAHRENHEIT_ENABLE,
 			false);
 	}
 }

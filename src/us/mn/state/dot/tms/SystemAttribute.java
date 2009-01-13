@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS pixel on limit (near a message) */
 	String DMS_PIXEL_ON_LIMIT = "dms_pixel_on_limit";
 
-	/** DMS high temp cutoff (degrees Celcius) */
+	/** DMS high temp cutoff (degrees Celsius) */
 	String DMS_HIGH_TEMP_CUTOFF = "dms_high_temp_cutoff";
 
 	/** DMS default line justification */
@@ -89,6 +89,9 @@ public interface SystemAttribute extends SonarObject {
 
 	/** DMS enable reset (boolean) */
 	String DMS_RESET_ENABLE = "dms_reset_enable";
+
+	/** Temperature fahrenheit enable (boolean) */
+	String TEMP_FAHRENHEIT_ENABLE = "temp_fahrenheit_enable";
 
 	/** Meter green time */
 	String METER_GREEN_SECS = "meter_green_secs";
