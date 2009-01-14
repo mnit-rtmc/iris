@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public class DMSDispatcher extends FormPanel
 	/** Button used to clear the DMS.
 	 * FIXME: should just use ClearDmsAction */
 	protected final JButton btnClear =
-		new JButton(I18NMessages.get("dms.clear_button"));
+		new JButton(I18NMessages.get("dms.clear"));
 
 	/** Button used to get the DMS status (optional) */
 	protected final JButton btnGetStatus = new JButton(I18NMessages.get(

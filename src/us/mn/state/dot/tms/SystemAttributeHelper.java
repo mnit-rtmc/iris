@@ -465,15 +465,9 @@ public class SystemAttributeHelper {
 	}
 
 	/** Is DMS pixel testing enabled? */
-	static public boolean isDmsPixelTestEnabled() {
+	static public boolean isDmsPixelStatusEnabled() {
 		return getValueBoolean(
-			SystemAttribute.DMS_PIXEL_TEST_ENABLE, true);
-	}
-
-	/** Is DMS fan testing enabled? */
-	static public boolean isDmsFanTestEnabled() {
-		return getValueBoolean(
-			SystemAttribute.DMS_FAN_TEST_ENABLE, true);
+			SystemAttribute.DMS_PIXEL_STATUS_ENABLE, true);
 	}
 
 	/** Is DMS reset enabled? */

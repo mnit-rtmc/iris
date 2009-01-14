@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,9 @@ public class ClearDmsAction extends ProxyAction<DMS> {
 	/** Create a new action to clear the selected DMS */
 	public ClearDmsAction(DMS p, String user) {
 		super(p);
-		putValue(Action.NAME, I18NMessages.get("dms.clear_button"));
+		putValue(Action.NAME, I18NMessages.get("dms.clear"));
 		putValue(Action.SHORT_DESCRIPTION,
-			I18NMessages.get("dms.clear_button.tooltip"));
+			I18NMessages.get("dms.clear.tooltip"));
 		userName = user;
 	}
 
