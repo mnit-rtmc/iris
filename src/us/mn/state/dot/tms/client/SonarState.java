@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
@@ -275,6 +276,14 @@ public class SonarState extends Client {
 		return warn_signs;
 	}
 
+	/** Cache of dynamic message signs */
+	protected final TypeCache<DMS> dmss;
+
+	/** Get the dynamic message sign cache */
+	public TypeCache<DMS> getDMSs() {
+		return dmss;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -350,6 +359,7 @@ public class SonarState extends Client {
 		camera_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
+		dmss = new TypeCache<DMS>(DMS.class, this);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
@@ -378,13 +388,14 @@ public class SonarState extends Client {
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
+		populate(monitors);
 		populate(alarms);
 		populate(r_nodes);
 		populate(detectors);
 		populate(stations);
 		populate(cameras);
 		populate(warn_signs);
-		populate(monitors);
+		populate(dmss);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
