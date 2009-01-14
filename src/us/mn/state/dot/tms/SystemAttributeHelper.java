@@ -470,6 +470,12 @@ public class SystemAttributeHelper {
 			SystemAttribute.DMS_PIXEL_STATUS_ENABLE, true);
 	}
 
+	/** Is DMS manufacturer-specific tab enabled? */
+	static public boolean isDmsManufacturerEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_MANUFACTURER_ENABLE, true);
+	}
+
 	/** Is DMS reset enabled? */
 	static public boolean isDmsResetEnabled() {
 		return getValueBoolean(SystemAttribute.DMS_RESET_ENABLE, false);

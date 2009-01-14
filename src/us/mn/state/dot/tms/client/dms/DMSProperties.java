@@ -289,10 +289,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		tab.add("Messages", createMessagePanel());
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
-		tab.add("Manufacturer", createManufacturerPanel());
 		tab.add("Status", createStatusPanel());
 		if(SystemAttributeHelper.isDmsPixelStatusEnabled())
 			tab.add("Pixels", createPixelPanel());
+		if(SystemAttributeHelper.isDmsManufacturerEnabled())
+			tab.add("Manufacturer", createManufacturerPanel());
 		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
