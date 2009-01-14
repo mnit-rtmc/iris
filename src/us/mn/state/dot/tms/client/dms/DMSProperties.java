@@ -123,7 +123,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JComboBox camera = new JComboBox();
 
 	/** Controller button */
-	protected final JButton controller = new JButton("Controller");
+	protected final JButton controllerBtn = new JButton("Controller");
 
 	/** Sign group model */
 	protected final SignGroupModel sign_group_model;
@@ -224,12 +224,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Power supply status table */
 	protected final JTable power_table = new JTable();
 
-	/** Pixel test activation button */
-	protected final JButton testPixelsBtn = new JButton("Test Pixels");
-
-	/** Reset sign button (optional) */
-	protected final JButton resetButton;
-
 	/** Stuck off pixel panel */
 	protected final SignPixelPanel stuck_off_pnl = new SignPixelPanel();
 
@@ -280,8 +274,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		sign_group_model = new SignGroupModel(sign.getName(),
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
-		resetButton = new JButton(I18NMessages.get(
-			"DMSProperties.ResetButton"));
 	}
 
 	/** Get the SONAR type cache */
@@ -353,8 +345,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			}
 		};
 		location.setCenter();
-		location.addRow(controller);
-		new ActionJob(this, controller) {
+		location.addRow(controllerBtn);
+		new ActionJob(this, controllerBtn) {
 			public void perform() throws Exception {
 				controllerPressed();
 			}
@@ -366,7 +358,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c == null)
-			controller.setEnabled(false);
+			controllerBtn.setEnabled(false);
 		else {
 			connection.getDesktop().show(
 				new ControllerForm(connection, c));
@@ -730,10 +722,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.finishRow();
 		panel.addRow("User Note", userNote);
 		if(SystemAttributeHelper.isDmsResetEnabled()) {
-			resetButton.setToolTipText(I18NMessages.get(
-				"DMSProperties.ResetButton.ToolTip"));
-			panel.addRow(resetButton);
-			new ActionJob(this, resetButton) {
+			JButton btn = new JButton(I18NMessages.get(
+				"dms.reset"));
+			btn.setToolTipText(I18NMessages.get(
+				"dms.reset.tooltip"));
+			panel.addRow(btn);
+			new ActionJob(this, btn) {
 				public void perform() {
 					proxy.setSignRequest(SignRequest.
 						RESET_DMS.ordinal());
@@ -750,8 +744,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Stuck Off", stuck_off_pnl);
 		panel.addRow("Stuck On", stuck_on_pnl);
 		panel.add("Pixel errors", badPixels);
-		panel.add(testPixelsBtn);
-		new ActionJob(this, testPixelsBtn) {
+		JButton btn = new JButton("Test Pixels");
+		panel.add(btn);
+		new ActionJob(this, btn) {
 			public void perform() {
 				proxy.setSignRequest(
 					SignRequest.TEST_PIXELS.ordinal());
