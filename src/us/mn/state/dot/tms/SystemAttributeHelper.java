@@ -470,6 +470,12 @@ public class SystemAttributeHelper {
 			SystemAttribute.DMS_PIXEL_STATUS_ENABLE, true);
 	}
 
+	/** Is DMS brightness tab enabled? */
+	static public boolean isDmsBrightnessEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_BRIGHTNESS_ENABLE, true);
+	}
+
 	/** Is DMS manufacturer-specific tab enabled? */
 	static public boolean isDmsManufacturerEnabled() {
 		return getValueBoolean(

@@ -236,6 +236,19 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Lamp status label */
 	protected final JLabel lamp = new JLabel();
 
+	/** Light output label */
+	protected final JLabel lightOutput = new JLabel();
+
+	/** Brightness feedback combo box */
+	protected final JComboBox feedback = new JComboBox(
+		new SignRequest[] {
+			SignRequest.NO_REQUEST,
+			SignRequest.BRIGHTNESS_GOOD,
+			SignRequest.BRIGHTNESS_TOO_DIM,
+			SignRequest.BRIGHTNESS_TOO_BRIGHT
+		}
+	);
+
 	/** Cabinet temperature label */
 	protected final JLabel cabinetTemp = new JLabel();
 
@@ -292,6 +305,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		tab.add("Status", createStatusPanel());
 		if(SystemAttributeHelper.isDmsPixelStatusEnabled())
 			tab.add("Pixels", createPixelPanel());
+		if(SystemAttributeHelper.isDmsBrightnessEnabled())
+			tab.add("Brightness", createBrightnessPanel());
 		if(SystemAttributeHelper.isDmsManufacturerEnabled())
 			tab.add("Manufacturer", createManufacturerPanel());
 		add(tab);
@@ -638,14 +653,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
-		lamp.setForeground(OK);
 		cabinetTemp.setForeground(OK);
 		ambientTemp.setForeground(OK);
 		housingTemp.setForeground(OK);
 		operation.setForeground(OK);
 		userNote.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Lamp status", lamp);
 		panel.addRow("Cabinet temp", cabinetTemp);
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
@@ -697,6 +710,25 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			}
 		};
 		panel.finishRow();
+		return panel;
+	}
+
+	/** Create brightness panel */
+	protected JPanel createBrightnessPanel() {
+		lamp.setForeground(OK);
+		lightOutput.setForeground(OK);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Lamp status", lamp);
+		panel.addRow("Light output", lightOutput);
+		panel.addRow("Feedback", feedback);
+		new ActionJob(this, feedback) {
+			public void perform() {
+				SignRequest sr =
+					(SignRequest)feedback.getSelectedItem();
+				proxy.setSignRequest(sr.ordinal());
+				feedback.setEnabled(false);
+			}
+		};
 		return panel;
 	}
 
@@ -827,6 +859,15 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			updatePixelStatus();
 		if(a == null || a.equals("lampStatus"))
 			updateLampStatus();
+		if(a == null || a.equals("lightOutput")) {
+			Integer o = proxy.getLightOutput();
+			if(o != null)
+				lightOutput.setText("" + o + "%");
+			else
+				lightOutput.setText(UNKNOWN);
+			// FIXME: should check SONAR roles
+			feedback.setEnabled(true);
+		}
 		if(a == null || a.equals("minCabinetTemp") ||
 		   a.equals("maxCabinetTemp"))
 		{

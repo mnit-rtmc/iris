@@ -84,6 +84,9 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS enable pixel status (boolean) */
 	String DMS_PIXEL_STATUS_ENABLE = "dms_pixel_status_enable";
 
+	/** DMS enable brightness tab (boolean) */
+	String DMS_BRIGHTNESS_ENABLE = "dms_brightness_enable";
+
 	/** DNS enable manufacturer-specific tab (boolean) */
 	String DMS_MANUFACTURER_ENABLE = "dms_manufacturer_enable";
 
