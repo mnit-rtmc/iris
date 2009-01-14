@@ -110,6 +110,7 @@ public class PowerTableModel extends AbstractTableModel {
 			return lookupBit(current, row);
 		default:
 			return null;
+		}
 	}
 
 	/** Create the table column model */
