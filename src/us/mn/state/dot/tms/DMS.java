@@ -140,6 +140,22 @@ public interface DMS extends Device2 {
 	 *         If the lamp status is not known, null is returned. */
 	String[] getLampStatus();
 
+	/** Index of power fail bitmap in power status array */
+	int FAIL_BITMAP = 0;
+
+	/** Index of voltage out-of-spec bitmap in power status array */
+	int VOLTAGE_BITMAP = 1;
+
+	/** Index of current out-of-spec bitmap in power status array */
+	int CURRENT_BITMAP = 2;
+
+	/** Get power supply status.
+	 * @return Power status as an array of three Base64-encoded bitmaps.
+	 *         The first is "power fail", the second is "voltage out of
+	 *         spec", and the third is "current out of spec".  If the
+	 *         power status is not known, null is returned. */
+	String[] getPowerStatus();
+
 	/** Request a sign operation (query message, test pixels, etc.) */
 	void setSignRequest(int r);
 
@@ -181,7 +197,4 @@ public interface DMS extends Device2 {
 
 	/** Get sign face heat tape status (Skyline) */
 	String getHeatTapeStatus();
-
-	/** Get power supply enum values (Skyline) */
-	String[] getPowerStatus();
 }

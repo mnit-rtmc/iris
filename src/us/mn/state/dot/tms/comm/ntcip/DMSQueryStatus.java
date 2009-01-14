@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  * @author Douglas Lau
  */
 public class DMSQueryStatus extends DMSOperation {
-
-	/** Skyline power supply status table columns */
-	static protected final String[] SKYLINE_POWER_COLUMNS = {
-		"Power Supply", "Status"
-	};
 
 	/** Short Error status */
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();
@@ -162,17 +157,18 @@ public class DMSQueryStatus extends DMSOperation {
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
 			if(shortError.checkError(ShortErrorStatus.LAMP |
-				ShortErrorStatus.FAN |
 				ShortErrorStatus.CONTROLLER))
 			{
 				mess.getRequest();
 			}
-	 		String[] lamp = new String[2];
-			lamp[DMS.STUCK_OFF_BITMAP] =
-				Base64.encode(l_off.getOctetString());
-			lamp[DMS.STUCK_ON_BITMAP] =
-				Base64.encode(l_on.getOctetString());
-			dms.setLampStatus(lamp);
+			if(shortError.checkError(ShortErrorStatus.LAMP)) {
+		 		String[] lamp = new String[2];
+				lamp[DMS.STUCK_OFF_BITMAP] =
+					Base64.encode(l_off.getOctetString());
+				lamp[DMS.STUCK_ON_BITMAP] =
+					Base64.encode(l_on.getOctetString());
+				dms.setLampStatus(lamp);
+			}
 			DMS_LOG.log(dms.getId() + ": " + con);
 			return new LedstarStatus();
 		}
@@ -192,14 +188,16 @@ public class DMSQueryStatus extends DMSOperation {
 			mess.add(low);
 			mess.add(high);
 			mess.add(bad);
-			try { mess.getRequest(); }
+			try {
+				mess.getRequest();
+			}
 			catch(SNMP.Message.NoSuchName e) {
 				return new SkylineStatus();
 			}
 			dms.setLdcPotBase(potBase.getInteger(), false);
 			dms.setPixelCurrentLow(low.getInteger(), false);
 			dms.setPixelCurrentHigh(high.getInteger(), false);
-			dms.setBadPixelLimit(bad.getInteger(), false);
+			DMS_LOG.log(dms.getId() + ": " + bad);
 			return null;
 		}
 	}
@@ -209,16 +207,16 @@ public class DMSQueryStatus extends DMSOperation {
 
 		/** Query Skyline-specific status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			IllumPowerStatus power = new IllumPowerStatus();
-			mess.add(power);
 			SignFaceHeatStatus heat = new SignFaceHeatStatus();
 			mess.add(heat);
+			IllumPowerStatus power = new IllumPowerStatus();
+			mess.add(power);
 			SensorFailures sensor = new SensorFailures();
 			mess.add(sensor);
 			try {
 				mess.getRequest();
-				dms.setPowerStatus(power.getStatus());
 				dms.setHeatTapeStatus(heat.getValue());
+				dms.setPowerStatus(power.getBitmaps());
 				DMS_LOG.log(dms.getId() + ": " + sensor);
 			}
 			catch(SNMP.Message.NoSuchName e) {
@@ -226,12 +224,5 @@ public class DMSQueryStatus extends DMSOperation {
 			}
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(success)
-			dms.notifyUpdate();
-		super.cleanup();
 	}
 }

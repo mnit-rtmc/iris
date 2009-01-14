@@ -713,6 +713,22 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return lampStatus;
 	}
 
+	/** Power supply status.  This is an array of three Base64-encoded
+	 * bitmaps. */
+	protected transient String[] powerStatus;
+
+	/** Set the power supply status table */
+	public void setPowerStatus(String[] t) {
+		assert t.length == 3;
+		powerStatus = t;
+		notifyAttribute("powerStatus");
+	}
+
+	/** Get the power supply status table */
+	public String[] getPowerStatus() {
+		return powerStatus;
+	}
+
 	/** Request a sign operation (query message, test pixels, etc.) */
 	public void setSignRequest(int r) {
 		SignRequest sr = SignRequest.fromOrdinal(r);
@@ -979,20 +995,6 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Get sign face heat tape status */
 	public String getHeatTapeStatus() {
 		return heatTapeStatus;
-	}
-
-	/** Power supply status table */
-	protected transient String[] powerStatus;
-
-	/** Set the power supply status table */
-	public void setPowerStatus(String[] t) {
-		powerStatus = t;
-		notifyAttribute("powerStatus");
-	}
-
-	/** Get the power supply status table */
-	public String[] getPowerStatus() {
-		return powerStatus;
 	}
 
 	/** Update the travel times for this sign */

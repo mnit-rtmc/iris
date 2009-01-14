@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2008  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,10 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import us.mn.state.dot.tms.Base64;
+
 /**
- * Ntcip IllumPowerStatus object
+ * Skyline IllumPowerStatus object
  *
  * @author Douglas Lau
  */
@@ -80,11 +82,52 @@ public class IllumPowerStatus extends SkylineDmsStatus
 		return b.toString();
 	}
 
-	/** Get status strings for a StatusTable */
-	public String[] getStatus() {
-		String[] rows = new String[power.length];
-		for(int i = 0; i < power.length; i++)
-			rows[i] = STATUS[power[i]];
+	/** Get power status bitmaps */
+	public String[] getBitmaps() throws IOException {
+		String[] rows = new String[3];
+		rows[DMS.FAIL_BITMAP] = createBase64(new PowerTester() {
+			public boolean check(int p) {
+				return p == LOW || p == HIGH;
+			}
+		});
+		rows[DMS.VOLTAGE_BITMAP] = createBase64(new PowerTester() {
+			public boolean check(int p) {
+				return p != OK && p != UNAVAILABLE;
+			}
+		});
+		rows[DMS.CURRENT_BITMAP] = createBase64(new PowerTester() {
+			public boolean check(int p) {
+				return false;
+			}
+		});
 		return rows;
+	}
+
+	/** Create a power status bitmap encoded in Base64 */
+	protected String createBase64(PowerTester tester) throws IOException {
+		return Base64.encode(createBitmap(tester));
+	}
+
+	/** Create a power status bitmap */
+	protected byte[] createBitmap(PowerTester tester) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			for(int i = 0; i < power.length; ) {
+				int v = 0;
+				for(int b = 0; b < 8; b++) {
+					if(tester.check(power[i]))
+						v |= 1 << b;
+					i++;
+					if(i >= power.length)
+						break;
+				}
+				dos.writeByte(v);
+			}
+			return bos.toByteArray();
+		}
+		finally {
+			bos.close();
+		}
 	}
 }
