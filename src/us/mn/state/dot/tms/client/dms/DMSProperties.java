@@ -636,60 +636,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		return panel;
 	}
 
-	/** Create manufacturer-specific panel */
-	protected JPanel createManufacturerPanel() {
-		card_panel.add(createGenericPanel(), MAKE_GENERIC);
-		card_panel.add(createLedstarPanel(), MAKE_LEDSTAR);
-		card_panel.add(createSkylinePanel(), MAKE_SKYLINE);
-		return card_panel;
-	}
-
-	/** Create generic manufacturer panel */
-	protected JPanel createGenericPanel() {
-		FormPanel panel = new FormPanel(true);
-		panel.setTitle("Unknown manufacturer");
-		panel.addRow(new JLabel("Nothing to see here"));
-		return panel;
-	}
-
-	/** Create Ledstar-specific panel */
-	protected JPanel createLedstarPanel() {
-		new ChangeJob(this, ldcPotBaseSpn) {
-			public void perform() {
-				Number n = (Number)ldcPotBaseSpn.getValue();
-				proxy.setLdcPotBase(n.intValue());
-			}
-		};
-		new ChangeJob(this, currentLowSpn) {
-			public void perform() {
-				Number n = (Number)currentLowSpn.getValue();
-				proxy.setPixelCurrentLow(n.intValue());
-			}
-		};
-		new ChangeJob(this, currentHighSpn) {
-			public void perform() {
-				Number n = (Number)currentHighSpn.getValue();
-				proxy.setPixelCurrentHigh(n.intValue());
-			}
-		};
-		FormPanel panel = new FormPanel(true);
-		panel.setTitle(MAKE_LEDSTAR);
-		panel.addRow("LDC pot base", ldcPotBaseSpn);
-		panel.addRow("Pixel current low threshold", currentLowSpn);
-		panel.addRow("Pixel current high threshold", currentHighSpn);
-		return panel;
-	}
-
-	/** Create Skyline-specific panel */
-	protected JPanel createSkylinePanel() {
-		heatTapeStatus.setForeground(OK);
-		FormPanel panel = new FormPanel(true);
-		panel.setTitle(MAKE_SKYLINE);
-		panel.addRow(power_table);
-		panel.addRow("Heat tape", heatTapeStatus);
-		return panel;
-	}
-
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
 		lamp.setForeground(OK);
@@ -751,6 +697,60 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			}
 		};
 		panel.finishRow();
+		return panel;
+	}
+
+	/** Create manufacturer-specific panel */
+	protected JPanel createManufacturerPanel() {
+		card_panel.add(createGenericPanel(), MAKE_GENERIC);
+		card_panel.add(createLedstarPanel(), MAKE_LEDSTAR);
+		card_panel.add(createSkylinePanel(), MAKE_SKYLINE);
+		return card_panel;
+	}
+
+	/** Create generic manufacturer panel */
+	protected JPanel createGenericPanel() {
+		FormPanel panel = new FormPanel(true);
+		panel.setTitle("Unknown manufacturer");
+		panel.addRow(new JLabel("Nothing to see here"));
+		return panel;
+	}
+
+	/** Create Ledstar-specific panel */
+	protected JPanel createLedstarPanel() {
+		new ChangeJob(this, ldcPotBaseSpn) {
+			public void perform() {
+				Number n = (Number)ldcPotBaseSpn.getValue();
+				proxy.setLdcPotBase(n.intValue());
+			}
+		};
+		new ChangeJob(this, currentLowSpn) {
+			public void perform() {
+				Number n = (Number)currentLowSpn.getValue();
+				proxy.setPixelCurrentLow(n.intValue());
+			}
+		};
+		new ChangeJob(this, currentHighSpn) {
+			public void perform() {
+				Number n = (Number)currentHighSpn.getValue();
+				proxy.setPixelCurrentHigh(n.intValue());
+			}
+		};
+		FormPanel panel = new FormPanel(true);
+		panel.setTitle(MAKE_LEDSTAR);
+		panel.addRow("LDC pot base", ldcPotBaseSpn);
+		panel.addRow("Pixel current low threshold", currentLowSpn);
+		panel.addRow("Pixel current high threshold", currentHighSpn);
+		return panel;
+	}
+
+	/** Create Skyline-specific panel */
+	protected JPanel createSkylinePanel() {
+		heatTapeStatus.setForeground(OK);
+		FormPanel panel = new FormPanel(true);
+		panel.setTitle(MAKE_SKYLINE);
+		panel.addRow(power_table);
+		panel.addRow("Heat tape", heatTapeStatus);
 		return panel;
 	}
 
