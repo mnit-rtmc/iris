@@ -791,7 +791,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps2(SignMessage m, String pixels)
+	protected void validateBitmaps(SignMessage m, String[] pixels)
 		throws IOException, ChangeVetoException
 	{
 		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
