@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,17 +122,23 @@ public interface DMS extends Device2 {
 	/** Get the light output (percentage) */
 	Integer getLightOutput();
 
-	/** Get the pixel stuck-on bitmap (Base64-encoded) */
-	String getStuckOnBitmap();
+	/** Index of stuck-off bitmap in pixel and lamp status arrays */
+	int STUCK_OFF_BITMAP = 0;
 
-	/** Get the pixel stuck-off bitmap (Base64-encoded) */
-	String getStuckOffBitmap();
+	/** Index of stuck-on bitmap in pixel and lamp status arrays */
+	int STUCK_ON_BITMAP = 1;
 
-	/** Get the lamp status */
-	int[] getLampStatus();
+	/** Get the pixel status.
+	 * @return Pixel status as an array of two Base64-encoded bitmaps.  The
+	 *         first bitmap is "stuck off", and the second is "stuck on".
+	 *         If the pixel status is not known, null is returned. */
+	String[] getPixelStatus();
 
-	/** Get the fan status */
-	int[] getFanStatus();
+	/** Get the lamp status.
+	 * @return Lamp status as an array of two Base64-encoded bitmaps.  The
+	 *         first bitmap is "stuck off", and the second is "stuck on".
+	 *         If the lamp status is not known, null is returned. */
+	String[] getLampStatus();
 
 	/** Request a sign operation (query message, test pixels, etc.) */
 	void setSignRequest(int r);

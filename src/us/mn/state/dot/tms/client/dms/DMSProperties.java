@@ -226,9 +226,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Pixel test activation button (optional) */
 	protected final JButton pixelTest;
 
-	/** Fan test activation button (optional) */
-	protected final JButton fanTest;
-
 	/** Get sign status button (optional) */
 	protected final JButton getStatusButton;
 
@@ -284,8 +281,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			connection.isAdmin());
 		pixelTest = new JButton(I18NMessages.get(
 			"DMSProperties.PixelTestButton"));
-		fanTest = new JButton(I18NMessages.get(
-			"DMSProperties.FanTestButton"));
 		getStatusButton = new JButton(I18NMessages.get(
 			"DMSProperties.GetStatusButton"));
 		resetButton = new JButton(I18NMessages.get(
@@ -729,17 +724,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		}
 		panel.finishRow();
 		panel.addRow("Lamp status", lamp);
-		panel.add("Fan status", fan);
-		if(SystemAttributeHelper.isDmsFanTestEnabled()) {
-			panel.add(fanTest);
-			new ActionJob(this, fanTest) {
-				public void perform() {
-					proxy.setSignRequest(SignRequest.
-						TEST_FANS.ordinal());
-				}
-			};
-		}
-		panel.finishRow();
 		panel.addRow("Cabinet temp", cabinetTemp);
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
@@ -834,24 +818,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			currentLowSpn.setValue(proxy.getPixelCurrentLow());
 		if(a == null || a.equals("pixelCurrentHigh"))
 			currentHighSpn.setValue(proxy.getPixelCurrentHigh());
-		if(a == null || a.equals("powerStatus")) {
-			StatusTableModel m = new StatusTableModel(
-				proxy.getPowerStatus());
-			power_table.setColumnModel(m.createColumnModel());
-			power_table.setDefaultRenderer(Object.class,
-				m.getRenderer());
-			power_table.setModel(m);
-		}
+		if(a == null || a.equals("powerStatus"))
+			updatePowerStatus();
 		if(a == null || a.equals("heatTapeStatus"))
 			heatTapeStatus.setText(proxy.getHeatTapeStatus());
-		if(a == null || a.equals("stuckOnBitmap"))
-			updatePixelErrors();
-		if(a == null || a.equals("stuckOffBitmap"))
-			updatePixelErrors();
+		if(a == null || a.equals("pixelStatus"))
+			updatePixelStatus();
 		if(a == null || a.equals("lampStatus"))
-			lamp.setText(proxy.getLampStatus());
-		if(a == null || a.equals("fanStatus"))
-			fan.setText(proxy.getFanStatus());
+			updateLampStatus();
 		if(a == null || a.equals("minCabinetTemp") ||
 		   a.equals("maxCabinetTemp"))
 		{
@@ -889,9 +863,26 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			cards.show(card_panel, MAKE_GENERIC);
 	}
 
-	/** Update the pixel error bitmaps */
-	protected void updatePixelErrors() {
+	/** Update the power status */
+	protected void updatePowerStatus() {
+		// FIXME: decode Base64 values
+		StatusTableModel m = new StatusTableModel(
+			proxy.getPowerStatus());
+		power_table.setColumnModel(m.createColumnModel());
+		power_table.setDefaultRenderer(Object.class,
+			m.getRenderer());
+		power_table.setModel(m);
+	}
+
+	/** Update the pixel status */
+	protected void updatePixelStatus() {
 		// FIXME: count errors in stuck on and stuck off bitmaps
 		badPixels.setText(String.valueOf(proxy.getPixelFailureCount()));
+	}
+
+	/** Update the lamp status */
+	protected void updateLampStatus() {
+		// FIXME: decode Base64 values
+		lamp.setText(proxy.getLampStatus());
 	}
 }

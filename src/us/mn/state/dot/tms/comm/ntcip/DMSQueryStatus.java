@@ -158,9 +158,6 @@ public class DMSQueryStatus extends DMSOperation {
 				mess.add(l_off);
 				mess.add(l_on);
 			}
-			FanFailures fan = new FanFailures();
-			if(shortError.checkError(ShortErrorStatus.FAN))
-				mess.add(fan);
 			ControllerErrorStatus con = new ControllerErrorStatus();
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
@@ -170,13 +167,12 @@ public class DMSQueryStatus extends DMSOperation {
 			{
 				mess.getRequest();
 			}
-			String lamp = l_off.getValue();
-			if(lamp.equals("OK"))
-				lamp = l_on.getValue();
-			else if(!l_on.getValue().equals("OK"))
-				lamp += ", " + l_on.getValue();
+	 		String[] lamp = new String[2];
+			lamp[DMS.STUCK_OFF_BITMAP] =
+				Base64.encode(l_off.getOctetString());
+			lamp[DMS.STUCK_ON_BITMAP] =
+				Base64.encode(l_on.getOctetString());
 			dms.setLampStatus(lamp);
-			dms.setFanStatus(fan.getValue());
 			DMS_LOG.log(dms.getId() + ": " + con);
 			return new LedstarStatus();
 		}

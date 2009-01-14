@@ -104,10 +104,12 @@ public class DMSQueryPixelFailures extends DMSOperation {
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(success) {
-			String on = Base64.encode(stuck_on.getBitmap());
-			String off = Base64.encode(stuck_off.getBitmap());
-			dms.setStuckOnBitmap(on);
-			dms.setStuckOffBitmap(off);
+			String[] status = new String[2];
+			status[DMS.STUCK_OFF_BITMAP] =
+				Base64.encode(stuck_off.getBitmap());
+			status[DMS.STUCK_ON_BITMAP] =
+				Base64.encode(stuck_on.getBitmap());
+			dms.setPixelStatus(status);
 		}
 		super.cleanup();
 	}

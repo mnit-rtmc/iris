@@ -683,64 +683,34 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return lightOutput;
 	}
 
-	/** Pixel stuck-on bitmap (Base64-encoded) */
-	protected transient String stuckOnBitmap;
+	/** Pixel status.  This is an array of two Base64-encoded bitmaps.
+	 * The first indicates stuck-off pixels, the second stuck-on pixels. */
+	protected transient String[] pixelStatus;
 
-	/** Set the pixel stuck-on bitmap (Base64-encoded) */
-	public void setStuckOnBitmap(String b) {
-		if(!b.equals(stuckOnBitmap)) {
-			stuckOnBitmap = b;
-			notifyAttribute("stuckOnBitmap");
-		}
+	/** Set the pixel status array */
+	public void setPixelStatus(String[] p) {
+		pixelStatus = p;
+		notifyAttribute("pixelStatus");
 	}
 
-	/** Get the pixel stuck-on bitmap (Base64-encoded) */
-	public String getStuckOnBitmap() {
-		return stuckOnBitmap;
+	/** Get the pixel status array */
+	public String[] getPixelStatus() {
+		return pixelStatus;
 	}
 
-	/** Pixel stuck-off bitmap (Base64-encoded) */
-	protected transient String stuckOffBitmap;
-
-	/** Set the pixel stuck-off bitmap (Base64-encoded) */
-	public void setStuckOffBitmap(String b) {
-		if(!b.equals(stuckOffBitmap)) {
-			stuckOffBitmap = b;
-			notifyAttribute("stuckOffBitmap");
-		}
-	}
-
-	/** Get the pixel stuck-off bitmap (Base64-encoded) */
-	public String getStuckOffBitmap() {
-		return stuckOffBitmap;
-	}
-
-	/** Lamp status */
-	protected transient int[] lampStatus;
+	/** Lamp status.  This is an array of two Base64-encoded bitmaps.
+	 * The first indicates stuck-off lamps, the second stuck-on lamps. */
+	protected transient String[] lampStatus;
 
 	/** Set the lamp status */
-	public void setLampStatus(int[] l) {
+	public void setLampStatus(String[] l) {
 		lampStatus = l;
 		notifyAttribute("lampStatus");
 	}
 
 	/** Get the lamp status */
-	public int[] getLampStatus() {
+	public String[] getLampStatus() {
 		return lampStatus;
-	}
-
-	/** Fan status */
-	protected transient int[] fanStatus;
-
-	/** Set the fan status */
-	public void setFanStatus(int[] f) {
-		fanStatus = f;
-		notifyAttribute("fanStatus");
-	}
-
-	/** Get the fan status */
-	public int[] getFanStatus() {
-		return fanStatus;
 	}
 
 	/** Request a sign operation (query message, test pixels, etc.) */
@@ -807,40 +777,47 @@ public class DMSImpl extends Device2Impl implements DMS {
 	protected void validateBitmaps(SignMessage m)
 		throws ChangeVetoException
 	{
-		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
-		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
-		BitmapGraphic bitmap = createBlankBitmap();
-		BitmapGraphic stuckOn = createBlankBitmap();
-		BitmapGraphic stuckOff = createBlankBitmap();
 		try {
-			stuckOn.setBitmap(Base64.decode(stuckOnBitmap));
-			stuckOff.setBitmap(Base64.decode(stuckOffBitmap));
-			for(String b64: m.getBitmaps()) {
-				byte[] b = Base64.decode(b64);
-				bitmap.setBitmap(b);
-				bitmap.union(stuckOff);
-				int n_lit = bitmap.getLitCount();
-				if(n_lit > off_limit) {
-					throw new ChangeVetoException(
-						"Too many stuck off pixels: " +
-						n_lit);
-				}
-				bitmap.setBitmap(b);
-				bitmap.outline();
-				bitmap.union(stuckOn);
-				n_lit = bitmap.getLitCount();
-				if(n_lit > on_limit) {
-					throw new ChangeVetoException(
-						"Too many stuck on pixels: " +
-						n_lit);
-				}
-			}
+			String[] pixels = pixelStatus;	// Avoid races
+			if(pixels != null && pixels.length == 2)
+				validateBitmaps(m, pixels);
 		}
 		catch(IOException e) {
 			throw new ChangeVetoException("Base64 decode error");
 		}
 		catch(IndexOutOfBoundsException e) {
 			throw new ChangeVetoException(e.getMessage());
+		}
+	}
+
+	/** Validate the message bitmaps */
+	protected void validateBitmaps2(SignMessage m, String pixels)
+		throws IOException, ChangeVetoException
+	{
+		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
+		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
+		BitmapGraphic bitmap = createBlankBitmap();
+		BitmapGraphic stuckOff = createBlankBitmap();
+		BitmapGraphic stuckOn = createBlankBitmap();
+		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
+		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
+		for(String b64: m.getBitmaps()) {
+			byte[] b = Base64.decode(b64);
+			bitmap.setBitmap(b);
+			bitmap.union(stuckOff);
+			int n_lit = bitmap.getLitCount();
+			if(n_lit > off_limit) {
+				throw new ChangeVetoException(
+					"Too many stuck off pixels: " + n_lit);
+			}
+			bitmap.setBitmap(b);
+			bitmap.outline();
+			bitmap.union(stuckOn);
+			n_lit = bitmap.getLitCount();
+			if(n_lit > on_limit) {
+				throw new ChangeVetoException(
+					"Too many stuck on pixels: " + n_lit);
+			}
 		}
 	}
 
