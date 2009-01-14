@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2002  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,15 +11,12 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
 /**
- * Ntcip FanFailures object
+ * Ntcip FanFailures object.  This object has been deprecated by
+ * NTCIP 1203 v2.
  *
  * @author Douglas Lau
  */
@@ -33,7 +30,9 @@ public class FanFailures extends StatError implements ASN1OctetString {
 	}
 
 	/** Get the object name */
-	protected String getName() { return "fanFailures"; }
+	protected String getName() {
+		return "fanFailures";
+	}
 
 	/** Fan failures bitmap */
 	protected byte[] failures = new byte[0];
@@ -49,7 +48,9 @@ public class FanFailures extends StatError implements ASN1OctetString {
 	}
 
 	/** Get the octet string value */
-	public byte[] getOctetString() { return failures; }
+	public byte[] getOctetString() {
+		return failures;
+	}
 
 	/** Get the object value */
 	public String getValue() {
@@ -66,7 +67,9 @@ public class FanFailures extends StatError implements ASN1OctetString {
 				}
 			}
 		}
-		if(buffer.length() == 0) return "OK";
-		else return buffer.toString();
+		if(buffer.length() == 0)
+			return "OK";
+		else
+			return buffer.toString();
 	}
 }

@@ -242,9 +242,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Lamp status label */
 	protected final JLabel lamp = new JLabel();
 
-	/** Fan status label */
-	protected final JLabel fan = new JLabel();
-
 	/** Cabinet temperature label */
 	protected final JLabel cabinetTemp = new JLabel();
 
@@ -706,7 +703,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
 		lamp.setForeground(OK);
-		fan.setForeground(OK);
 		cabinetTemp.setForeground(OK);
 		ambientTemp.setForeground(OK);
 		housingTemp.setForeground(OK);
