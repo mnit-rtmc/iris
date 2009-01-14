@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,9 @@ import java.rmi.RemoteException;
 public interface TMSObject extends Remote {
 
 	/** Cross street direction strings to use for detector names */
-	public String[] DIRECTION =
-		{ " ", "NB", "SB", "EB", "WB" };
+	public String[] DIRECTION = {
+		" ", "NB", "SB", "EB", "WB", "NS", "EW", "IN", "OUT"
+	};
 
 	/** Freeway direction strings to use for detector names */
 	public String[] DIR_FREEWAY = {
