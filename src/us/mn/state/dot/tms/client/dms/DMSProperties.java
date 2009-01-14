@@ -684,9 +684,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(MAKE_SKYLINE);
-		power_table.setAutoCreateColumnsFromModel(false);
-		power_table.setPreferredScrollableViewportSize(
-			new Dimension(300, 200));
 		panel.addRow(power_table);
 		panel.addRow("Heat tape", heatTapeStatus);
 		return panel;
@@ -868,13 +865,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Update the power status */
 	protected void updatePowerStatus() {
-		// FIXME: decode Base64 values
-		StatusTableModel m = new StatusTableModel(
-			proxy.getPowerStatus());
-		power_table.setColumnModel(m.createColumnModel());
-		power_table.setDefaultRenderer(Object.class,
-			m.getRenderer());
-		power_table.setModel(m);
+		String[] s = proxy.getPowerStatus();
+		if(s != null) {
+			PowerTableModel m = new PowerTableModel(s);
+			power_table.setAutoCreateColumnsFromModel(false);
+			power_table.setColumnModel(m.createColumnModel());
+			power_table.setModel(m);
+		}
 	}
 
 	/** Update the pixel status */
