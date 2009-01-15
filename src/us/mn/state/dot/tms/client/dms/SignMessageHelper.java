@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,13 +33,14 @@ public class SignMessageHelper {
 	/** Create an array of lines from the given message */
 	static public String[] createLines(SignMessage m) {
 		final LinkedList<String> ls = new LinkedList<String>();
-		MultiString multi = m.getMulti();
+		MultiString multi = new MultiString(m.getMulti());
 		multi.parse(new MultiString.SpanCallback() {
-			public void addSpan(int p,
-				MultiString.JustificationPage jp, int l,
-				MultiString.JustificationLine jl, String t)
+			public void addSpan(
+				int p, MultiString.JustificationPage jp,
+				int l, MultiString.JustificationLine jl,
+				int f_num, String t)
 			{
-				int m_lines = Math.max(text_lines, l + 1);
+				int m_lines = Math.max(3, l + 1);
 				while(ls.size() < (p + 1) * m_lines)
 					ls.add("");
 				int i = p * m_lines + l;

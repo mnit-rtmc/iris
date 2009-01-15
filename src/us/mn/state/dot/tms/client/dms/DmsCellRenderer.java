@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,10 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
@@ -58,6 +61,21 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Font for rendering */
 	static protected final Font FONT = new Font("Dialog", Font.BOLD, 12);
+
+	/** Get the verification camera name */
+	static protected String getCameraName(DMS proxy) {
+		Camera camera = proxy.getCamera();
+		if(camera == null)
+			return " ";
+		else
+			return camera.getName();
+	}
+
+	/** Test if a message is deployed */
+	static public boolean isDeployed(SignMessage m) {
+		MultiString ms = new MultiString(m.getMulti());
+		return !ms.isBlank();
+	}
 
 	/** The label that displays the camera id */
 	private final JLabel lblCamera = new JLabel();
@@ -157,23 +175,27 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Format the message expriation */
 	static protected String formatExpiration(SignMessage m) {
-		int duration = m.getDuration();
+		Integer duration = m.getDuration();
+		if(duration == null)
+			return NO_EXPIRE;
 		if(duration <= 0 || duration >= 65535)
 			return NO_EXPIRE;
 		Calendar c = Calendar.getInstance();
-		c.setTime(m.getDeployTime());
+		c.setTimeInMillis(m.getDeployTime());
 		c.add(Calendar.MINUTE, duration);
 		return "E-" + HOUR_MINUTE.format(c.getTime());
 	}
 
 	/** Set the DMS to be displayed */
 	protected void setDms(DMS proxy) {
-		lblID.setText(proxy.getId());
-		lblLocation.setText(proxy.getDescription());
-		lblCamera.setText(proxy.getCameraId());
-		SignMessage message = proxy.getMessage();
-		if(message != null && !message.isBlank()) {
-			lblUser.setText(formatOwner(message.getOwner()));
+		lblID.setText(proxy.getName());
+		lblLocation.setText(GeoLocHelper.getDescription(
+			proxy.getGeoLoc()));
+		lblCamera.setText(getCameraName(proxy));
+		SignMessage message = proxy.getMessageCurrent();
+		if(isDeployed(message)) {
+			lblUser.setText(formatOwner(
+				message.getOwner().getName()));
 			lblDeployed.setText(formatDeployed(message));
 			lblExpires.setText(formatExpiration(message));
 		} else {
@@ -181,7 +203,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			lblDeployed.setText("");
 			lblExpires.setText("");
 		}
-		String[] lines = proxy.getLines();
+		String[] lines = SignMessageHelper.createLines(message);
 		for(int i = 0; i < lblLine.length; i++) {
 			if(i < lines.length)
 				lblLine[i].setText(lines[i]);
