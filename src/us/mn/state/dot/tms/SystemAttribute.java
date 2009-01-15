@@ -69,6 +69,9 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS message minimum available pages */
 	String DMS_MESSAGE_MIN_PAGES = "dms_message_min_pages";
 
+	/** DMS enable blank lines in messages (boolean) */
+	String DMS_MESSAGE_BLANK_LINE_ENABLE = "dms_message_blank_line_enable";
+
 	/** DMS travel time duration (minutes) */
 	String DMS_TRAVEL_DURATION_MINS = "dms_travel_duration_mins";
 

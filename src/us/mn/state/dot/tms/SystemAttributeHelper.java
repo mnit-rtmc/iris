@@ -469,6 +469,12 @@ public class SystemAttributeHelper {
 			SystemAttribute.DMS_FONT_SELECTION_ENABLE, false);
 	}
 
+	/** Is DMS message blank lines enabled? */
+	static public boolean isDmsMessageBlankLineEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_MESSAGE_BLANK_LINE_ENABLE, true);
+	}
+
 	/** Is DMS pixel testing enabled? */
 	static public boolean isDmsPixelStatusEnabled() {
 		return getValueBoolean(

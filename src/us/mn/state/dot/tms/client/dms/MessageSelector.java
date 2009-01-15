@@ -175,17 +175,13 @@ public class MessageSelector extends JPanel {
 			if(mess[i].length() > 0)
 				m = i + 1;
 		}
-		String ret=null;
-		if(m > 0) {
-			if (SystemAttributeHelper.isAgencyCaltransD10())
-				ret = buildMultiPageOriented(mess, m).toString();
-			else
-				ret = buildMultiLineOriented(mess, m).toString();
-		}
-		return ret;
+		if(m > 0)
+			return buildMulti(mess, m).toString();
+		else
+			return null;
 	}
 
-	/** get text from combobox line */
+	/** Get text from combobox line */
 	protected String getMessageFromCB(int line) {
 		assert line >= 0 && line < cmbLine.length;
 		Object o = cmbLine[line].getSelectedItem();
@@ -198,7 +194,7 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** Build a line oriened MULTI string from an array of line strings */
-	protected MultiString buildMultiLineOriented(String[] mess, int m) {
+	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
@@ -208,34 +204,6 @@ public class MessageSelector extends JPanel {
 					multi.addLine();
 			}
 			multi.addText(mess[i]);
-		}
-		return multi;
-	}
-
-	/** 
-	 * Build a page oriented MULTI string from an array of line strings.
-	 * Each line of text on a page is moved towards the top of the page
-	 * as much as possible. This is important if vertical centering is
-	 * used to position text lines on the sign. For example, if this 
-	 * array is received: [LINE1][][LINE2][][LINE3][], this string will 
-	 * be returned: "LINE1[nl]LINE2[nl][np]LINE3[nl]".
-	 */
-	protected MultiString buildMultiPageOriented(String[] mess, int m) {
-		MultiString multi = new MultiString();
-		int lastTerminatedPage = 0;
-		int pageNum = -1;
-		for(int i = 0; i < m; i++) {
-			if(i % n_lines == 0)
-				++pageNum;
-			if(mess[i] == null || mess[i].length() <= 0)
-				continue;
-			// new page so terminate previous page
-			if(pageNum > lastTerminatedPage) {
-				lastTerminatedPage = pageNum;
-				multi.addPage();
-			}
-			multi.addText(mess[i]);
-			multi.addLine();
 		}
 		return multi;
 	}

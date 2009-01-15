@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,6 +113,9 @@ public class MultiString {
 	/** MULTI string buffer */
 	protected final StringBuilder b = new StringBuilder();
 
+	/** Flag for trailing message text */
+	protected boolean trailing = false;
+
 	/** Test if the MULTI string is equal to another MULTI string */
 	public boolean equals(Object o) {
 		if(o instanceof MultiString)
@@ -138,17 +141,26 @@ public class MultiString {
 
 	/** Add text to the current line */
 	public void addText(String s) {
-		b.append(s);
+		if(s.length() > 0) {
+			b.append(s);
+			trailing = true;
+		}
 	}
 
 	/** Add a new line */
 	public void addLine() {
-		b.append(NEWLINE);
+		if(trailing ||
+		   SystemAttributeHelper.isDmsMessageBlankLineEnabled())
+		{
+			b.append(NEWLINE);
+			trailing = false;
+		}
 	}
 
 	/** Add a new page */
 	public void addPage() {
 		b.append(NEWPAGE);
+		trailing = false;
 	}
 
 	/** Set a new font number */
