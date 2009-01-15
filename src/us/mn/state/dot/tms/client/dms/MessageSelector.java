@@ -213,24 +213,24 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** 
-	 *  Build a page oriented MULTI string from an array of line strings.
-	 *  Each line of text on a page is moved towards the top of the page
-	 *  as much as possible. This is important if vertical centering is
-	 *  used to position text lines on the sign. For example, if this 
-	 *  array is received: [LINE1][][LINE2][][LINE3][], this string will 
-	 *  be returned: "LINE1[nl]LINE2[nl][np]LINE3[nl]".
+	 * Build a page oriented MULTI string from an array of line strings.
+	 * Each line of text on a page is moved towards the top of the page
+	 * as much as possible. This is important if vertical centering is
+	 * used to position text lines on the sign. For example, if this 
+	 * array is received: [LINE1][][LINE2][][LINE3][], this string will 
+	 * be returned: "LINE1[nl]LINE2[nl][np]LINE3[nl]".
 	 */
 	protected MultiString buildMultiPageOriented(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		int lastTerminatedPage = 0;
-		int pageNum=-1;
+		int pageNum = -1;
 		for(int i = 0; i < m; i++) {
 			if(i % n_lines == 0)
 				++pageNum;
-			if(mess[i]==null || mess[i].length()<=0)
+			if(mess[i] == null || mess[i].length() <= 0)
 				continue;
 			// new page so terminate previous page
-			if(pageNum>lastTerminatedPage) {
+			if(pageNum > lastTerminatedPage) {
 				lastTerminatedPage = pageNum;
 				multi.addPage();
 			}
