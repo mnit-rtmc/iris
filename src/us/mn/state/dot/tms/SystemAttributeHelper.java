@@ -431,6 +431,11 @@ public class SystemAttributeHelper {
 		return getValue(SystemAttribute.DMS_PREFERRED_FONT, "");
 	}
 
+	/** Get the minimum available pages for DMS messages */
+	static public int getDmsMessageMinPages() {
+		return getValueInt(SystemAttribute.DMS_MESSAGE_MIN_PAGES, 1);
+	}
+
 	/** Return number of video frames before stream is stopped */
 	public static int numVideoFramesBeforeStop() {
 		final int MIN = 0;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,8 +46,6 @@ import us.mn.state.dot.tms.client.TmsConnection;
  * @author Douglas Lau
  */
 public class MessageSelector extends JPanel {
-
-	protected SignMessage lastMessage = null;
 
 	/** Cell renderer for sign text in combo boxes */
 	protected final SignTextCellRenderer renderer =
@@ -244,17 +242,8 @@ public class MessageSelector extends JPanel {
 
 	/** Set the currently selected message */
 	public void setMessage(DMS proxy) {
-		SignMessage message = proxy.getMessage();
-		if(message == null) {
-			if(lastMessage != null) {
-				clearSelections();
-				lastMessage = null;
-			}
-			return;
-		} else if(message.equals(lastMessage))
-			return;
-		lastMessage = message;
-		String[] lines = proxy.getLines();
+		SignMessage m = proxy.getMessageCurrent();
+		String[] lines = SignMessageHelper.createLines(m);
 		for(int i = 0; i < cmbLine.length; i++) {
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);
@@ -272,7 +261,6 @@ public class MessageSelector extends JPanel {
 
 	/** Clear the combobox selections */
 	public void clearSelections() {
-		lastMessage = null;
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i].setSelectedIndex(-1);
 	}
@@ -286,13 +274,11 @@ public class MessageSelector extends JPanel {
 
 	/** Update the message combo box models */
 	public void updateModel(DMS proxy) {
-		lastMessage = null;
-		createMessageModel(proxy.getId());
+		createMessageModel(proxy.getName());
 		int ml = mess_model.getMaxLine();
 		int nl = proxy.getTextLines();
-// FIXME: should this be here?
-if(nl == 0) nl = 3;
-		int np = calculateSignPages(ml, nl);
+		int np = Math.max(calculateSignPages(ml, nl),
+			SystemAttributeHelper.getDmsMessageMinPages());
 		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
 			cmbLine[i].setModel(mess_model.getLineModel(
@@ -314,17 +300,10 @@ if(nl == 0) nl = 3;
 
 	/** Calculate the number of pages for the sign */
 	protected int calculateSignPages(int ml, int nl) {
-		int ret=0;
-
 		if(nl > 0)
-			ret = 1 + Math.max(0, (ml - 1) / nl);
+			return 1 + Math.max(0, (ml - 1) / nl);
 		else
-			ret = 1;
-
-		// D10 has a minimum of 2 pages
-		if(SystemAttributeHelper.isAgencyCaltransD10())
-			ret = ret < 2 ? 2 : ret;
-		return ret;
+			return 1;
 	}
 
 	/** Update the message library with the currently selected messages */

@@ -66,6 +66,9 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS default page justification */
 	String DMS_DEFAULT_JUSTIFICATION_PAGE ="dms_default_justification_page";
 
+	/** DMS message minimum available pages */
+	String DMS_MESSAGE_MIN_PAGES = "dms_message_min_pages";
+
 	/** DMS travel time duration (minutes) */
 	String DMS_TRAVEL_DURATION_MINS = "dms_travel_duration_mins";
 
