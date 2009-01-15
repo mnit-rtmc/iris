@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,9 +115,9 @@ public class DMSForm extends AbstractForm {
 		};
 		bag.gridx = 1;
 		bag.gridy = 1;
-		del_camera.setEnabled(false);
-		panel.add(del_camera, bag);
-		new ActionJob(this, del_camera) {
+		del_sign.setEnabled(false);
+		panel.add(del_sign, bag);
+		new ActionJob(this, del_sign) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
 				if(row >= 0)
@@ -131,7 +131,7 @@ public class DMSForm extends AbstractForm {
 	protected void selectSign() {
 		int row = d_table.getSelectedRow();
 		properties.setEnabled(row >= 0 && !d_model.isLastRow(row));
-		del_camera.setEnabled(row >= 0 && !d_model.isLastRow(row));
+		del_sign.setEnabled(row >= 0 && !d_model.isLastRow(row));
 	}
 
 	/** Show the properties form */
