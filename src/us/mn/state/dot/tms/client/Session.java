@@ -158,7 +158,8 @@ public class Session {
 			lstates.add(rwisLayer.createState());
 		lstates.add(dmsLayer.createState());
 		lstates.add(warnLayer.createState());
-		tabs.add(new DMSTab(lstates, vlayer, st, tmsConnection));
+		tabs.add(new DMSTab(lstates, vlayer, dms_manager, st,
+			tmsConnection));
 	}
 
 	/** Add the meter tab */
