@@ -114,7 +114,8 @@ public class DMSDispatcher extends FormPanel
 			st.getSignText(),st.lookupUser(tc.getUser().getName()));
 		userName = manager.getUser().getName();
 		selectionModel = manager.getSelectionModel();
-		pnlSign = new DMSPanel(st.getSystemAttributes());
+		pnlSign = new DMSPanel(st.getNamespace(),
+			st.getSystemAttributes());
 
 		txtId.setEditable(false);
 		txtCamera.setEditable(false);

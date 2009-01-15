@@ -29,12 +29,15 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * Scale GUI representation of a DMS with pixel resolution.
@@ -127,6 +130,9 @@ public class DMSPanel extends JPanel {
 	/** Current message displayed */
 	protected SignMessage message = null;
 
+	/** Bitmaps for each page */
+	protected BitmapGraphic[] bitmaps = new BitmapGraphic[0];
+
 	/** Transform from user (mm) to screen coordinates */
 	protected AffineTransform transform = new AffineTransform();
 
@@ -154,14 +160,18 @@ public class DMSPanel extends JPanel {
 	/** Multipage message off time, read from system attributes */
 	protected int offTimeMS = 0;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** System attribute type cache */
 	protected final TypeCache<SystemAttribute> cache;
 
 	/** Create a new DMS panel */
-	public DMSPanel(TypeCache<SystemAttribute> c) {
+	public DMSPanel(Namespace ns, TypeCache<SystemAttribute> c) {
 		super(true);
-		_setSign(null);
+		namespace = ns;
 		cache = c;
+		_setSign(null);
 		cache.addProxyListener(sa_listener);
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
@@ -256,8 +266,10 @@ public class DMSPanel extends JPanel {
 		charWidth = p.getCharWidthPixels();
 		horizontalPitch = p.getHorizontalPitch();
 		verticalPitch = p.getVerticalPitch();
-		lineCount = p.getTextLines();
-		lineHeight = p.getLineHeightPixels();
+		PixelMapBuilder builder = new PixelMapBuilder(namespace,
+			widthPixels, heightPixels, charWidth, charHeight);
+		lineHeight = builder.getLineHeightPixels();
+		lineCount = heightPixels / lineHeight;
 		validateSignDimensions();
 		_setMessage(p.getMessageCurrent());
 	}
@@ -283,7 +295,23 @@ public class DMSPanel extends JPanel {
 	/** Set the message displayed on the DMS */
 	protected void _setMessage(SignMessage m) {
 		message = m;
+		PixelMapBuilder builder = new PixelMapBuilder(namespace,
+			widthPixels, heightPixels, charWidth, charHeight);
+		if(m != null) {
+			MultiString multi = new MultiString(m.getMulti());
+			multi.parse(builder);
+			bitmaps = builder.getPixmaps();
+		} else {
+			bitmaps = new BitmapGraphic[] {
+				createBlankPage()
+			};
+		}
 		bufferDirty = true;
+	}
+
+	/** Create a blank bitmap graphic */
+	protected BitmapGraphic createBlankPage() {
+		return new BitmapGraphic(widthPixels, heightPixels);
 	}
 
 	/** Set the message displayed on the DMS */
@@ -345,7 +373,7 @@ public class DMSPanel extends JPanel {
 		SignMessage m = message;	// Avoid NPE race
 		if(m == null)
 			return;
-		int np = m.getNumPages();
+		int np = new MultiString(m.getMulti()).getNumPages();
 		if(np <= 1) {
 			displayBlankPage = false;
 			pagenumber = 0;
@@ -388,13 +416,18 @@ public class DMSPanel extends JPanel {
 		g.fillRect(0, 0, faceWidth, faceHeight);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
-		SignMessage m = message;	// Avoid NPE race
-		if(m != null) {
-			BitmapGraphic b = displayBlankPage ?
-				m.getBlankBitmap() : m.getBitmap(pagenumber);
-			if(b != null)
-				paintPixels(g, b);
-		}
+		BitmapGraphic b = getCurrentPage();
+		paintPixels(g, b);
+	}
+
+	/** Get the current page */
+	protected BitmapGraphic getCurrentPage() {
+		int p_num = pagenumber;
+		BitmapGraphic[] bmaps = bitmaps;
+		if(displayBlankPage || p_num >= bmaps.length)
+			return createBlankPage();
+		else
+			return bmaps[p_num];
 	}
 
 	/** Update the screen buffer to reflect current sign state */
