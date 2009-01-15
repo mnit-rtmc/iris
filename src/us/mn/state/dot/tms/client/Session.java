@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -212,16 +212,12 @@ public class Session {
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer(st);
 
-		// create agency specific incident layer
-		if(SystemAttributeHelper.isAgencyMnDOT()) {
-			incLayer = new TmsIncidentLayer(props, logger);
-			rwisLayer = null;
-		} else if(SystemAttributeHelper.isAgencyCaltransD10()) {
+		// Create agency specific incident layer
+		if(SystemAttributeHelper.isAgencyCaltransD10()) {
 			incLayer = new D10IncidentLayer(props, logger);
 			rwisLayer = new D10RwisLayer(props, logger);
 		} else {
-			assert false : "unknown agencyid";
-			incLayer = null;
+			incLayer = new TmsIncidentLayer(props, logger);
 			rwisLayer = null;
 		}
 
