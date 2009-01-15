@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ public class DMSQueryMessage extends DMSOperation {
 		protected void processBrightness() {
 			dms.setPhotocellLevel(p_level.getInteger());
 			dms.setBrightnessLevel(b_level.getInteger());
-			dms.setLightOutput(light.getInteger());
+			dms.setLightOutput(light.getPercent());
 			if(control.isManual())
 				dms.setManualBrightness(true);
 			else {

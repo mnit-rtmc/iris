@@ -58,7 +58,7 @@ public class DMSQueryStatus extends DMSOperation {
 			mess.getRequest();
 			dms.setPhotocellLevel(p_level.getInteger());
 			dms.setBrightnessLevel(b_level.getInteger());
-			dms.setLightOutput(light.getInteger());
+			dms.setLightOutput(light.getPercent());
 			if(control.isManual())
 				dms.setManualBrightness(true);
 			else {

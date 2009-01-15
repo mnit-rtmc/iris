@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,5 +47,10 @@ public class DmsIllumLightOutputStatus extends Illum implements ASN1Integer {
 	/** Get the object value */
 	public String getValue() {
 		return String.valueOf(light);
+	}
+
+	/** Get the light output as percent */
+	public int getPercent() {
+		return Math.round(light / 655.35f);
 	}
 }

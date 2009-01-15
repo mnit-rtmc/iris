@@ -133,14 +133,14 @@ public class DMSDispatcher extends FormPanel
 		} else
 			addRow("Operation", txtOperation);
 		addRow(pnlSign);
-		addRow(createDeployBox());
+		addRow(createDeployBox(st));
 
 		clearSelected();
 		selectionModel.addTmsSelectionListener(this);
 	}
 
 	/** Create a component to deploy signs */
-	protected Box createDeployBox() {
+	protected Box createDeployBox(SonarState st) {
 		Box boxRight = Box.createVerticalBox();
 		boxRight.add(Box.createVerticalGlue());
 		if(SystemAttributeHelper.isDmsDurationEnabled())
@@ -195,8 +195,8 @@ public class DMSDispatcher extends FormPanel
 				"DMSDispatcher.GetStatusButton.ToolTip"));
 			new ActionJob(this, btnGetStatus) {
 				public void perform() throws Exception {
-					selectedSign.setSignRequest(
-						SignRequest.QUERY_STATUS);
+					selectedSign.setSignRequest(SignRequest.
+						QUERY_STATUS.ordinal());
 				}
 			};
 			box.add(btnGetStatus);
@@ -297,7 +297,7 @@ public class DMSDispatcher extends FormPanel
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
 			fontName = cmbFont.getSelectedItemName();
 		if(proxy != null && message != null) {
-			proxy.setNextMessage(userName, message,
+			proxy.setMessageNext(userName, message,
 				getDuration(), fontName);
 			messageSelector.updateMessageLibrary();
 		}
@@ -334,7 +334,7 @@ public class DMSDispatcher extends FormPanel
 		DMS dms = selectedSign;	// Avoid NPE race
 		if(dms == null)
 			return;
-		SignMessage m = dms.getMessage();
+		SignMessage m = dms.getMessageCurrent();
 		pnlSign.setMessage(m);
 		messageSelector.setMessage(dms);
 		txtOperation.setText(dms.getOperation());
@@ -345,8 +345,7 @@ public class DMSDispatcher extends FormPanel
 			txtOperation.setForeground(null);
 			txtOperation.setBackground(null);
 		}
-		txtBrightness.setText("" + Math.round(
-			dms.getLightOutput() / 655.35f));
+		txtBrightness.setText("" + dms.getLightOutput() + "%");
 
 		// optional controller status field
 		if(SystemAttributeHelper.isDmsStatusEnabled())
