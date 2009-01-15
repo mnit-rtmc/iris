@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Dimension;
-import java.rmi.RemoteException;
 import us.mn.state.dot.data.DataFactory;
 import us.mn.state.dot.data.plot.Plotlet;
 import us.mn.state.dot.tms.Detector;
@@ -42,7 +41,7 @@ public class MeterDataForm extends AbstractForm {
 	}
 
 	/** Initialize the form */
-	public void initialize() throws RemoteException {
+	public void initialize() {
 		Plotlet plot = new Plotlet(factory);
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));

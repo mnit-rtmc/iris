@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,8 +58,13 @@ abstract public class TMSObjectForm extends AbstractForm {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
-		startObserving(obj);
+	protected void initialize() {
+		try {
+			startObserving(obj);
+		}
+		catch(RemoteException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Update the form with the current state of the object */

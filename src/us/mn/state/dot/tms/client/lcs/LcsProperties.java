@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ public class LcsProperties extends TrafficDeviceForm {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getLCSList().getList();
 		lcs = (LaneControlSignal)s.getElement(id);

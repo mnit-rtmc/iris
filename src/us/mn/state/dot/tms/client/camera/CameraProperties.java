@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
-import java.rmi.RemoteException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
@@ -83,7 +82,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
@@ -120,7 +119,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() throws RemoteException {
+	protected void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c == null)
 			controller.setEnabled(false);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.meter;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.rmi.RemoteException;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -161,7 +160,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getMeterList();
 		meter = (RampMeter)s.getElement(id);
@@ -411,7 +410,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	}
 
 	/** Update the form with the current state of the ramp meter */
-	protected void doUpdate() throws RemoteException {
+	protected void doUpdate() {
 		super.doUpdate();
 		camera.setSelectedItem(state.lookupCamera(meter.getCamera()));
 		wait.setText("" + meter.getMaxWait());
@@ -425,7 +424,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	}
 
 	/** Refresh the status of the ramp meter */
-	protected void doStatus() throws RemoteException {
+	protected void doStatus() {
 		Color color = Color.GRAY;
 		String s_status = UNKNOWN;
 		String s_minimum = UNKNOWN;
