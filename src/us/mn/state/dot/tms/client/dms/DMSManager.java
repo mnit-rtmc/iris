@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,17 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
@@ -73,6 +77,43 @@ public class DMSManager extends ProxyManager<DMS> {
 		return ctr != null && ctr.getActive();
 	}
 
+	/** Test if a DMS is deployed */
+	static public boolean isDeployed(DMS proxy) {
+		SignMessage m = proxy.getMessageCurrent();
+		MultiString ms = new MultiString(m.getMulti());
+		return !ms.isBlank();
+	}
+
+	/** Test if a DMS has a travel time message deployed */
+	static public boolean isTravelTime(DMS proxy) {
+		SignMessage m = proxy.getMessageCurrent();
+		return m.getRunTimePriority() ==
+		       DMSMessagePriority.TRAVEL_TIME.ordinal();
+	}
+
+	/** Test if a DMS has an AWS message deployed */
+	static public boolean isAws(DMS proxy) {
+		SignMessage m = proxy.getMessageCurrent();
+		return m.getRunTimePriority() ==
+		       DMSMessagePriority.AWS.ordinal();
+	}
+
+	/** Test if a DMS needs maintenance */
+	static public boolean needsMaintenance(DMS proxy) {
+		Controller ctr = proxy.getController();
+		if(ctr != null && ctr.getStatus().equals("")) {
+			String e = ctr.getError();
+			return !e.equals("") && !e.equals("OK");
+		} else
+			return false;
+	}
+
+	/** Test if a DMS if failed */
+	static public boolean isFailed(DMS proxy) {
+		Controller ctr = proxy.getController();
+		return ctr != null && (!"".equals(ctr.getStatus()));
+	}
+
 	/** TMS connection */
 	protected final TmsConnection connection;
 
@@ -92,7 +133,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a styled theme for DMSs */
 	protected StyledTheme createTheme() {
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
-			getProxyType(), new DMSMarker());
+			getProxyType(), new DmsMarker());
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_TRAVEL_TIME, Color.ORANGE);
@@ -109,7 +150,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
-		return new DmsCellRenderer(this);
+		return new DmsCellRenderer();
 	}
 
 	/** Create a proxy JList for the given style */
@@ -130,7 +171,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, DMS proxy) {
 		if(STYLE_AVAILABLE.equals(s))
-			return isActive(proxy);
+			return isActive(proxy) && !isDeployed(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
 			return isDeployed(proxy);
 		else if(STYLE_TRAVEL_TIME.equals(s))
@@ -138,7 +179,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		else if(STYLE_AWS.equals(s))
 			return isAws(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
-			return isMaintenance(proxy);
+			return needsMaintenance(proxy);
 		else if(STYLE_FAILED.equals(s))
 			return isFailed(proxy);
 		else if(STYLE_NO_CONTROLLER.equals(s))
