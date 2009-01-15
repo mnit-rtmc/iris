@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 
 /**
@@ -80,6 +81,11 @@ public class IllumPowerStatus extends SkylineDmsStatus
 		if(b.length() == 0)
 			b.append("None");
 		return b.toString();
+	}
+
+	/** Simple interface to test a power supply for something */
+	static public interface PowerTester {
+		boolean check(int p);
 	}
 
 	/** Get power status bitmaps */
