@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,11 +49,11 @@ import us.mn.state.dot.sonar.client.ProxyListener;
  */
 public class DMSPanel extends JPanel {
 
-	/** Default sign width (mm) */
-	static protected final int SIGN_WIDTH = 9347;
+	/** Default face width (mm) */
+	static protected final int FACE_WIDTH = 9347;
 
-	/** Default sign height (mm) */
-	static protected final int SIGN_HEIGHT = 2591;
+	/** Default face height (mm) */
+	static protected final int FACE_HEIGHT = 2591;
 
 	/** Default pixel diameter (mm) */
 	static protected final int PIXEL_DIAMETER = 70;
@@ -82,11 +82,11 @@ public class DMSPanel extends JPanel {
 	/** Currently displayed sign */
 	protected DMS proxy;
 
-	/** Sign width (mm) */
-	protected int signWidth = SIGN_WIDTH;
+	/** Face width (mm) */
+	protected int faceWidth = FACE_WIDTH;
 
-	/** Sign height (mm) */
-	protected int signHeight = SIGN_HEIGHT;
+	/** Face height (mm) */
+	protected int faceHeight = FACE_HEIGHT;
 
 	/** Sign pixel width */
 	protected int widthPixels = LINE_WIDTH;
@@ -101,10 +101,10 @@ public class DMSPanel extends JPanel {
 	protected int verticalBorder;
 
 	/** Pixel height of character */
-	protected int characterHeight = CHAR_HEIGHT;
+	protected int charHeight = CHAR_HEIGHT;
 
 	/** Pixel width of character */
-	protected int characterWidth = CHAR_WIDTH;
+	protected int charWidth = CHAR_WIDTH;
 
 	/** Width of individual pixels (mm) */
 	protected int horizontalPitch;
@@ -120,9 +120,6 @@ public class DMSPanel extends JPanel {
 
 	/** Optimal line height (pixels) */
 	protected int lineHeight;
-
-	/** Character height (mm) */
-	protected int charHeight;
 
 	/** Spacing between characters (mm) */
 	protected float charGap;
@@ -183,7 +180,7 @@ public class DMSPanel extends JPanel {
 
 	/** Calculate the height of the gap between lines (mm) */
 	protected float calculateLineGap() {
-		float excess = signHeight - 2 * verticalBorder -
+		float excess = faceHeight - 2 * verticalBorder -
 			heightPixels * verticalPitch;
 		int gaps = lineCount - 1;
 		if(excess > 0 && gaps > 0)
@@ -194,11 +191,11 @@ public class DMSPanel extends JPanel {
 
 	/** Calculate the width of the gap between characters (mm) */
 	protected float calculateCharGap() {
-		float excess = signWidth - 2 * horizontalBorder -
+		float excess = faceWidth - 2 * horizontalBorder -
 			widthPixels * verticalPitch;
 		int gaps = 0;
-		if(characterWidth > 0)
-			gaps = widthPixels / characterWidth - 1;
+		if(charWidth > 0)
+			gaps = widthPixels / charWidth - 1;
 		if(excess > 0 && gaps > 0)
 			return excess / gaps;
 		else
@@ -207,18 +204,18 @@ public class DMSPanel extends JPanel {
 
 	/** Validate the dimensions of the sign */
 	protected void validateSignDimensions() {
-		if(signWidth <= 0)
-			signWidth = SIGN_WIDTH;
-		if(signHeight <= 0)
-			signHeight = SIGN_HEIGHT;
+		if(faceWidth <= 0)
+			faceWidth = FACE_WIDTH;
+		if(faceHeight <= 0)
+			faceHeight = FACE_HEIGHT;
 		if(horizontalBorder <= 0)
 			horizontalBorder = SIGN_MARGIN;
 		if(verticalBorder <= 0)
 			verticalBorder = LINE_SPACE;
-		if(characterHeight < 0)
-			characterHeight = CHAR_HEIGHT;
-		if(characterWidth < 0)
-			characterWidth = CHAR_WIDTH;
+		if(charHeight < 0)
+			charHeight = CHAR_HEIGHT;
+		if(charWidth < 0)
+			charWidth = CHAR_WIDTH;
 		if(horizontalPitch <= 0)
 			horizontalPitch = PIXEL_DIAMETER;
 		if(verticalPitch <= 0)
@@ -227,19 +224,18 @@ public class DMSPanel extends JPanel {
 			lineHeight = CHAR_HEIGHT;
 		charGap = calculateCharGap();
 		lineGap = calculateLineGap();
-		charHeight = lineHeight * verticalPitch;
 	}
 
 	/** Set the DMS panel to the default size */
 	protected void setToDefaultSize() {
-		signWidth = SIGN_WIDTH;
-		signHeight = SIGN_HEIGHT;
+		faceWidth = FACE_WIDTH;
+		faceHeight = FACE_HEIGHT;
 		widthPixels = LINE_WIDTH;
 		heightPixels = CHAR_HEIGHT * LINE_COUNT;
 		horizontalBorder = SIGN_MARGIN;
 		verticalBorder = LINE_SPACE;
-		characterHeight = CHAR_HEIGHT;
-		characterWidth = CHAR_WIDTH;
+		charHeight = CHAR_HEIGHT;
+		charWidth = CHAR_WIDTH;
 		horizontalPitch = PIXEL_DIAMETER;
 		verticalPitch = PIXEL_DIAMETER;
 		lineCount = LINE_COUNT;
@@ -250,20 +246,20 @@ public class DMSPanel extends JPanel {
 
 	/** Set the size of the DMS */
 	protected void updateSignSize(DMS p) {
-		signWidth = p.getSignWidth();
-		signHeight = p.getSignHeight();
-		widthPixels = p.getSignWidthPixels();
-		heightPixels = p.getSignHeightPixels();
+		faceWidth = p.getFaceWidth();
+		faceHeight = p.getFaceHeight();
+		widthPixels = p.getWidthPixels();
+		heightPixels = p.getHeightPixels();
 		horizontalBorder = p.getHorizontalBorder();
 		verticalBorder = p.getVerticalBorder();
-		characterHeight = p.getCharacterHeightPixels();
-		characterWidth = p.getCharacterWidthPixels();
+		charHeight = p.getCharHeightPixels();
+		charWidth = p.getCharWidthPixels();
 		horizontalPitch = p.getHorizontalPitch();
 		verticalPitch = p.getVerticalPitch();
 		lineCount = p.getTextLines();
 		lineHeight = p.getLineHeightPixels();
 		validateSignDimensions();
-		_setMessage(p.getMessage());
+		_setMessage(p.getMessageCurrent());
 	}
 
 	/** Set the sign to render */
@@ -298,8 +294,8 @@ public class DMSPanel extends JPanel {
 
 	/** Get the character offset (for character-matrix signs only) */
 	protected float getCharacterOffset(int x) {
-		if(characterWidth > 0)
-			return charGap * (x / characterWidth);
+		if(charWidth > 0)
+			return charGap * (x / charWidth);
 		else
 			return 0;
 	}
@@ -389,7 +385,7 @@ public class DMSPanel extends JPanel {
 		g.fillRect(0, 0, getWidth(), getHeight());
 		g.transform(transform);
 		g.setColor(Color.BLACK);
-		g.fillRect(0, 0, signWidth, signHeight);
+		g.fillRect(0, 0, faceWidth, faceHeight);
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
 		SignMessage m = message;	// Avoid NPE race
@@ -428,11 +424,11 @@ public class DMSPanel extends JPanel {
 		double w = getWidth();
 		if(w > 0 && h > 0) {
 			AffineTransform t = new AffineTransform();
-			double sx = w / SIGN_WIDTH;
-			double sy = h / SIGN_HEIGHT;
+			double sx = w / FACE_WIDTH;
+			double sy = h / FACE_HEIGHT;
 			t.scale(sx, sy);
-			double tx = (SIGN_WIDTH - signWidth) / 2;
-			double ty = (SIGN_HEIGHT - signHeight) / 2;
+			double tx = (FACE_WIDTH - faceWidth) / 2;
+			double ty = (FACE_HEIGHT - faceHeight) / 2;
 			t.translate(tx, ty);
 			transform = t;
 		}
@@ -440,12 +436,12 @@ public class DMSPanel extends JPanel {
 
 	/** Get the preferred size of the sign panel */
 	public Dimension getPreferredSize() {
-		return new Dimension(SIGN_WIDTH / 24, SIGN_HEIGHT / 24);
+		return new Dimension(FACE_WIDTH / 24, FACE_HEIGHT / 24);
 	}
 
 	/** Get the minimum size of the sign panel */
 	public Dimension getMinimumSize() {
-		return new Dimension(SIGN_WIDTH / 36, SIGN_HEIGHT / 36);
+		return new Dimension(FACE_WIDTH / 36, FACE_HEIGHT / 36);
 	}
 
 	/** 
