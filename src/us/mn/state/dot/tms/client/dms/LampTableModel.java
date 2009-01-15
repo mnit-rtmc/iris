@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,26 +20,23 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 /**
- * PowerTableModel is a table model for power supply status.
+ * LampTableModel is a table model for lamp status.
  *
  * @author Douglas Lau
  */
-public class PowerTableModel extends AbstractTableModel {
+public class LampTableModel extends AbstractTableModel {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 4;
+	static protected final int COLUMN_COUNT = 3;
 
-	/** Power supply column number */
-	static protected final int COL_SUPPLY = 0;
+	/** Lamp column number */
+	static protected final int COL_LAMP = 0;
 
-	/** Power fail column number */
-	static protected final int COL_FAIL = 1;
+	/** Stuck off column number */
+	static protected final int COL_STUCK_OFF = 1;
 
-	/** Voltage out-of-spec column number */
-	static protected final int COL_VOLTAGE = 2;
-
-	/** Current out-of-spec column number */
-	static protected final int COL_CURRENT = 3;
+	/** Stuck on column number */
+	static protected final int COL_STUCK_ON = 2;
 
 	/** Create a new table column */
 	static protected TableColumn createColumn(int column, int width,
@@ -62,21 +59,17 @@ public class PowerTableModel extends AbstractTableModel {
 		}
 	}
 
-	/** Fail bitmap */
-	protected final byte[] fail;
+	/** Stuck-off bitmap */
+	protected final byte[] stuck_off;
 
-	/** Voltage bitmap */
-	protected final byte[] voltage;
+	/** Stuck-on bitmap */
+	protected final byte[] stuck_on;
 
-	/** Current bitmap */
-	protected final byte[] current;
-
-	/** Create a new power table model */
-	public PowerTableModel(String[] bmaps) throws IOException {
-		assert bmaps.length == 3;
-		fail = Base64.decode(bmap[DMS.FAIL_BITMAP]);
-		voltage = Base64.decode(bmap[DMS.VOLTAGE_BITMAP]);
-		current = Base64.decode(bmap[DMS.CURRENT_BITMAP]);
+	/** Create a new lamp table model */
+	public LampTableModel(String[] bmaps) throws IOException {
+		assert bmaps.length == 2;
+		stuck_off = Base64.decode(bmap[DMS.STUCK_OFF_BITMAP]);
+		stuck_on = Base64.decode(bmap[DMS.STUCK_ON_BITMAP]);
 	}
 
 	/** Get the column count */
@@ -86,7 +79,7 @@ public class PowerTableModel extends AbstractTableModel {
 
 	/** Get the column class */
 	public Class getColumnClass(int column) {
-		if(column == COL_SUPPLY)
+		if(column == COL_LAMP)
 			return Integer.class;
 		else
 			return Boolean.class;
@@ -94,20 +87,18 @@ public class PowerTableModel extends AbstractTableModel {
 
 	/** Get the row count */
 	public int getRowCount() {
-		return fail.length * 8;
+		return stuck_off.length * 8;
 	}
 
 	/** Get the value at a specific cell */
 	public Object getValueAt(int row, int column) {
 		switch(column) {
-		case COL_SUPPLY:
+		case COL_LAMP:
 			return row + 1;
-		case COL_FAIL:
-			return lookupBit(fail, row);
-		case COL_VOLTAGE:
-			return lookupBit(voltage, row);
-		case COL_CURRENT:
-			return lookupBit(current, row);
+		case COL_STUCK_OFF:
+			return lookupBit(stuck_off, row);
+		case COL_STUCK_ON:
+			return lookupBit(stuck_on, row);
 		default:
 			return null;
 		}
@@ -116,10 +107,9 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_SUPPLY, 64, "Supply"));
-		m.addColumn(createColumn(COL_FAIL, 64, "Fail"));
-		m.addColumn(createColumn(COL_VOLTAGE, 64, "Voltage"));
-		m.addColumn(createColumn(COL_CURRENT, 64, "Current"));
+		m.addColumn(createColumn(COL_LAMP, 64, "Lamp"));
+		m.addColumn(createColumn(COL_STUCK_OFF, 64, "Stuck Off"));
+		m.addColumn(createColumn(COL_STUCK_ON, 64, "Stuck On"));
 		return m;
 	}
 }

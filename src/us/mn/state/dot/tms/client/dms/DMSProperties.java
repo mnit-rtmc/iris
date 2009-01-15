@@ -222,7 +222,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JLabel heatTapeStatus = new JLabel();
 
 	/** Power supply status table */
-	protected final JTable power_table = new JTable();
+	protected final JTable powerTable = new JTable();
 
 	/** Stuck off pixel panel */
 	protected final SignPixelPanel stuck_off_pnl = new SignPixelPanel();
@@ -233,8 +233,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
 
-	/** Lamp status label */
-	protected final JLabel lamp = new JLabel();
+	/** Lamp status table */
+	protected final JTable lampTable = new JTable();
 
 	/** Light output label */
 	protected final JLabel lightOutput = new JLabel();
@@ -715,10 +715,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create brightness panel */
 	protected JPanel createBrightnessPanel() {
-		lamp.setForeground(OK);
 		lightOutput.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Lamp status", lamp);
+		panel.addRow("Lamp status", lampTable);
 		panel.addRow("Light output", lightOutput);
 		panel.addRow("Feedback", feedback);
 		new ActionJob(this, feedback) {
@@ -781,7 +780,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(MAKE_SKYLINE);
-		panel.addRow(power_table);
+		panel.addRow(powerTable);
 		panel.addRow("Heat tape", heatTapeStatus);
 		return panel;
 	}
@@ -910,9 +909,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		String[] s = proxy.getPowerStatus();
 		if(s != null) {
 			PowerTableModel m = new PowerTableModel(s);
-			power_table.setAutoCreateColumnsFromModel(false);
-			power_table.setColumnModel(m.createColumnModel());
-			power_table.setModel(m);
+			powerTable.setAutoCreateColumnsFromModel(false);
+			powerTable.setColumnModel(m.createColumnModel());
+			powerTable.setModel(m);
 		}
 	}
 
@@ -988,7 +987,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Update the lamp status */
 	protected void updateLampStatus() {
-		// FIXME: decode Base64 values
-		lamp.setText(proxy.getLampStatus());
+		String[] s = proxy.getLampStatus();
+		if(s != null) {
+			LampTableModel m = new LampTableModel(s);
+			lampTable.setAutoCreateColumnsFromModel(false);
+			lampTable.setColumnModel(m.createColumnModel());
+			lampTable.setModel(m);
+		}
 	}
 }
