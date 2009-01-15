@@ -14,10 +14,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.io.IOException;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 
 /**
  * LampTableModel is a table model for lamp status.
@@ -68,8 +71,8 @@ public class LampTableModel extends AbstractTableModel {
 	/** Create a new lamp table model */
 	public LampTableModel(String[] bmaps) throws IOException {
 		assert bmaps.length == 2;
-		stuck_off = Base64.decode(bmap[DMS.STUCK_OFF_BITMAP]);
-		stuck_on = Base64.decode(bmap[DMS.STUCK_ON_BITMAP]);
+		stuck_off = Base64.decode(bmaps[DMS.STUCK_OFF_BITMAP]);
+		stuck_on = Base64.decode(bmaps[DMS.STUCK_ON_BITMAP]);
 	}
 
 	/** Get the column count */

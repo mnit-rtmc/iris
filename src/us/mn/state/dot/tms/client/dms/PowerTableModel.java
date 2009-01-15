@@ -14,10 +14,13 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.io.IOException;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 
 /**
  * PowerTableModel is a table model for power supply status.
@@ -74,9 +77,9 @@ public class PowerTableModel extends AbstractTableModel {
 	/** Create a new power table model */
 	public PowerTableModel(String[] bmaps) throws IOException {
 		assert bmaps.length == 3;
-		fail = Base64.decode(bmap[DMS.FAIL_BITMAP]);
-		voltage = Base64.decode(bmap[DMS.VOLTAGE_BITMAP]);
-		current = Base64.decode(bmap[DMS.CURRENT_BITMAP]);
+		fail = Base64.decode(bmaps[DMS.FAIL_BITMAP]);
+		voltage = Base64.decode(bmaps[DMS.VOLTAGE_BITMAP]);
+		current = Base64.decode(bmaps[DMS.CURRENT_BITMAP]);
 	}
 
 	/** Get the column count */
