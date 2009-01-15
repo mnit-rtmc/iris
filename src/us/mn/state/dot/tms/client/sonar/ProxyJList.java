@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class ProxyJList<T extends SonarObject> extends JList {
 	public ProxyJList(StyleListModel<T> m) {
 		model = m;
 		setModel(m);
-		setSelectionModel(m.getManager().getSelectionModel());
+		setSelectionModel(m.getSelectionModel());
 		addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				if(e.getClickCount() > 1)
@@ -57,7 +57,7 @@ public class ProxyJList<T extends SonarObject> extends JList {
 	protected void doDoubleClick() {
 		new AbstractJob() {
 			public void perform() {
-				m.getManager().showPropertiesForm();
+				model.getManager().showPropertiesForm();
 			}
 		}.addToScheduler();
 	}
@@ -75,7 +75,7 @@ public class ProxyJList<T extends SonarObject> extends JList {
 		if(index >= 0) {
 			Rectangle bounds = getCellBounds(index, index);
 			if(bounds.contains(e.getPoint()))
-				m.getManager().showPopupMenu(e);
+				model.getManager().showPopupMenu(e);
 		}
 	}
 }
