@@ -399,7 +399,6 @@ public class SonarState extends Client {
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
-		populate(traffic_device_attributes);
 	}
 
 	/** Look up the specified user */
