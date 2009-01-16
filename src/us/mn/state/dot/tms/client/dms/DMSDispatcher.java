@@ -132,6 +132,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Currently selected DMS */
 	protected DMS selected = null;
 
+	/** Pager for DMS panel */
+	protected DMSPanelPager dmsPanelPager;
+
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSManager manager, final SonarState st,
 		TmsConnection tc)
@@ -141,8 +144,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		cache = st.getDMSs();
 		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();
-		dmsPanel = new DMSPanel(st.getNamespace(),
-			st.getSystemAttributes());
+		dmsPanel = new DMSPanel(st.getNamespace());
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(), user);
 
@@ -227,12 +229,21 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
-		dmsPanel.dispose();
+		clearPager();
 		messageSelector.dispose();
 		removeAll();
 		selected = null;
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
+	}
+
+	/** Clear the DMS panel pager */
+	protected void clearPager() {
+		DMSPanelPager pager = dmsPanelPager;
+		if(pager != null) {
+			pager.dispose();
+			dmsPanelPager = null;
+		}
 	}
 
 	/** Build the optional message duration box */
@@ -305,6 +316,8 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			if(SystemAttributeHelper.isAwsEnabled())
 				awsCheckBox.setProxy(getAwsProxyName());
 			dmsPanel.setSign(dms);
+			clearPager();
+			dmsPanelPager = new DMSPanelPager(dmsPanel);
 			messageSelector.setSign(dms);
 			updateAttribute(dms, null);
 		}
@@ -331,6 +344,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		clearBtn.setEnabled(false);
 		queryStatusBtn.setEnabled(false);
 		dmsPanel.setSign(null);
+		clearPager();
 		messageSelector.setEnabled(false);
 		messageSelector.clearSelections();
 	}
@@ -410,6 +424,8 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		if(a == null || a.equals("messageCurrent")) {
 			SignMessage m = dms.getMessageCurrent();
 			dmsPanel.setMessage(m);
+			clearPager();
+			dmsPanelPager = new DMSPanelPager(dmsPanel);
 			messageSelector.setMessage(dms);
 		}
 	}

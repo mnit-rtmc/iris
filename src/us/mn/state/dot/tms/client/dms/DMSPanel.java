@@ -25,19 +25,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
-import javax.swing.Timer;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.client.ProxyListener;
-import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * Scale GUI representation of a DMS with pixel resolution.
@@ -78,9 +71,6 @@ public class DMSPanel extends JPanel {
 
 	/** Default number of lines */
 	static protected final int LINE_COUNT = 3;
-
-	/** Time counter for amount of time message has been displayed */
-	static protected final int timerTickLengthMS = 100;
 
 	/** Currently displayed sign */
 	protected DMS proxy;
@@ -142,50 +132,26 @@ public class DMSPanel extends JPanel {
 	/** Flag that determines if buffer needs repainting */
 	protected boolean bufferDirty = false;
 
-	/** 
-	 * Display state. True to display actual page, false to display a blank
-	 * page. For single page messages it is always false.
-	 */
-	protected boolean displayBlankPage = false;
+	/** Blanking state -- true during blank time between pages */
+	protected boolean isBlanking = false;
 
-	/** current page number to render */
-	protected int pagenumber = 0;
-
-	/** time counter for amount of time message has been displayed */
-	protected int pageTimeCounterMS = 0;
-
-	/** Multipage message on time, read from system attributes */
-	protected int onTimeMS = 2000;
-
-	/** Multipage message off time, read from system attributes */
-	protected int offTimeMS = 0;
+	/** Current page number to render */
+	protected int page = 0;
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
-	/** System attribute type cache */
-	protected final TypeCache<SystemAttribute> cache;
-
 	/** Create a new DMS panel */
-	public DMSPanel(Namespace ns, TypeCache<SystemAttribute> c) {
+	public DMSPanel(Namespace ns) {
 		super(true);
 		namespace = ns;
-		cache = c;
 		_setSign(null);
-		cache.addProxyListener(sa_listener);
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
 				repaint();
 			}
 		});
-		readSystemDMSPageTimes();
-		Timer pt = new Timer(timerTickLengthMS, new ActionListener() { 
-			public void actionPerformed(ActionEvent e) {
-				pageTimerTick();
-			} 
-		});
-		pt.start();
 	}
 
 	/** Calculate the height of the gap between lines (mm) */
@@ -365,46 +331,30 @@ public class DMSPanel extends JPanel {
 		}
 	}
 
-	/** 
-	 * Page timer tick. Called periodically to change the sign contents
-	 * for multipage signs.
-	 */
-	protected void pageTimerTick() {
-		SignMessage m = message;	// Avoid NPE race
-		if(m == null)
-			return;
-		int np = new MultiString(m.getMulti()).getNumPages();
-		if(np <= 1) {
-			displayBlankPage = false;
-			pagenumber = 0;
-		} else if(doTick(np)) {
+	/** Make the display blank (without advanding the page number) */
+	public void makeBlank() {
+		if(isMultipage()) {
+			isBlanking = true;
 			bufferDirty = true;
 			repaint();
 		}
 	}
 
-	/** Update the timer for one tick.
-	 * @return True if panel needs repainting */
-	protected boolean doTick(int num_pages) {
-		pageTimeCounterMS += timerTickLengthMS;
-		if(displayBlankPage) {
-			if(pageTimeCounterMS >= offTimeMS) {
-				displayBlankPage = false;
-				pageTimeCounterMS = 0;
-				return true;
-			}
-		} else {
-			if(pageTimeCounterMS >= onTimeMS) {
-				if(offTimeMS > 0)
-					displayBlankPage = true;
-				pageTimeCounterMS = 0;
-				pagenumber++;
-				if(pagenumber >= num_pages)
-					pagenumber = 0;
-				return true;
-			}
+	/** Display the next page of the message */
+	public void nextPage() {
+		if(isMultipage()) {
+			isBlanking = false;
+			page++;
+			if(page >= bitmaps.length)
+				page = 0;
+			bufferDirty = true;
+			repaint();
 		}
-		return false;
+	}
+
+	/** Check if the current message has multiple pages */
+	protected boolean isMultipage() {
+		return bitmaps.length > 1;
 	}
 
 	/** Paint the DMS panel onto a graphics context */
@@ -422,12 +372,12 @@ public class DMSPanel extends JPanel {
 
 	/** Get the current page */
 	protected BitmapGraphic getCurrentPage() {
-		int p_num = pagenumber;
+		int p = page;
 		BitmapGraphic[] bmaps = bitmaps;
-		if(displayBlankPage || p_num >= bmaps.length)
+		if(isBlanking || p >= bmaps.length)
 			return createBlankPage();
 		else
-			return bmaps[p_num];
+			return bmaps[p];
 	}
 
 	/** Update the screen buffer to reflect current sign state */
@@ -475,36 +425,5 @@ public class DMSPanel extends JPanel {
 	/** Get the minimum size of the sign panel */
 	public Dimension getMinimumSize() {
 		return new Dimension(FACE_WIDTH / 36, FACE_HEIGHT / 36);
-	}
-
-	/** 
-	 * Read the system DMS page on and off times. These are the amount of
-	 * time each page is displayed and blanked for multipage messages.
-	 */
-	protected void readSystemDMSPageTimes() {
-		// note: the retrieve values are in seconds and converted to MS
-		onTimeMS = Math.round(1000 *
-			SystemAttributeHelper.getDmsPageOnSecs());
-		offTimeMS = Math.round(1000 *
-			SystemAttributeHelper.getDmsPageOffSecs());
-	}
-
-	/** Proxy listener for System Attribute proxies */
-	protected final ProxyListener<SystemAttribute> sa_listener =
-		new ProxyListener<SystemAttribute>()
-	{
-		public void proxyAdded(SystemAttribute p) { }
-		public void enumerationComplete() { }
-		public void proxyRemoved(SystemAttribute p) { }
-		public void proxyChanged(SystemAttribute p, String a) {
-			// FIXME: probably should only call on DMS_PAGE_ attrs
-			readSystemDMSPageTimes();
-		}
-	};
-
-	/** Dispose of the form */
-	protected void dispose() {
-		cache.removeProxyListener(sa_listener);
-		// FIXME: should kill the Timer as well
 	}
 }
