@@ -86,6 +86,16 @@ public class MessageSelector extends JPanel {
 		initializeWidgets(0, 1);
 	}
 
+	/** Dispose of the message selector */
+	public void dispose() {
+		removeAll();
+		SignMessageModel mm = mess_model;
+		if(mm != null) {
+			mm.dispose();
+			mess_model = null;
+		}
+	}
+
 	/** Set a page on one tab */
 	protected void setTab(int n, String title, JPanel page) {
 		if(n < tab.getTabCount()) {
@@ -241,7 +251,7 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void updateModel(DMS proxy) {
+	public void setSign(DMS proxy) {
 		createMessageModel(proxy.getName());
 		int ml = mess_model.getMaxLine();
 		int nl = proxy.getTextLines();

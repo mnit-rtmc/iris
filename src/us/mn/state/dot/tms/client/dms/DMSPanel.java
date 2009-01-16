@@ -505,5 +505,6 @@ public class DMSPanel extends JPanel {
 	/** Dispose of the form */
 	protected void dispose() {
 		cache.removeProxyListener(sa_listener);
+		// FIXME: should kill the Timer as well
 	}
 }
