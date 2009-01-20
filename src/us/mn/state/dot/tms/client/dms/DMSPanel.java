@@ -331,7 +331,7 @@ public class DMSPanel extends JPanel {
 		}
 	}
 
-	/** Make the display blank (without advanding the page number) */
+	/** Make the display blank (without advancing the page number) */
 	public void makeBlank() {
 		if(isMultipage()) {
 			isBlanking = true;
