@@ -36,7 +36,7 @@ public class MeterDataForm extends AbstractForm {
 
 	/** Create a new meter data form */
 	public MeterDataForm(RampMeter p, DataFactory f) {
-		super("Data for Meter: " + p.getId());
+		super("Data for Meter: " + p.getName());
 		proxy = p;
 		factory = f;
 	}

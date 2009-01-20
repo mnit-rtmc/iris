@@ -46,28 +46,25 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.MeterPlan;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SortedList;
-import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * This is a form for viewing and editing the properties of a ramp meter.
  *
  * @author Douglas Lau
  */
-public class RampMeterProperties extends TrafficDeviceForm {
+public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Frame title */
-	static private final String TITLE = "Ramp Meter: ";
+	static protected final String TITLE = "Ramp Meter: ";
 
 	/** Remote ramp meter object */
-	protected RampMeter meter;
+	protected final RampMeter meter;
 
 	/** Sonar state */
 	protected final SonarState state;
@@ -161,21 +158,13 @@ public class RampMeterProperties extends TrafficDeviceForm {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		TMSProxy tms = connection.getProxy();
-		SortedList s = (SortedList)tms.getMeterList();
-		meter = (RampMeter)s.getElement(id);
 		ListModel cameraModel = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(cameraModel));
-		setDevice(meter);
 		super.initialize();
 		location.addRow("Camera", camera);
-		JPanel panel = createSetupPanel();
-		tab.add("Setup", panel);
-		panel = createTimingPlanPanel();
-		tab.add("Timing Plans", panel);
-		panel = createStatusPanel();
-		panel.setBorder(BORDER);
-		tab.add("Status", panel);
+		tab.add("Setup", createSetupPanel());
+		tab.add("Timing Plans", createTimingPlanPanel());
+		tab.add("Status", createStatusPanel());
 	}
 
 	/** Create ramp meter setup panel */
@@ -304,6 +293,7 @@ public class RampMeterProperties extends TrafficDeviceForm {
 	protected JPanel createStatusPanel() {
 		GridBagLayout lay = new GridBagLayout();
 		JPanel panel = new JPanel(lay);
+		panel.setBorder(BORDER);
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets.top = VGAP;
 		bag.insets.right = HGAP;

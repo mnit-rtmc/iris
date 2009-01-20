@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.sonar.ProxyAction;
-import us.mn.state.dot.tms.client.tms.RampMeter;
 
 /**
  * Increases the size of the queue at the selected ramp.

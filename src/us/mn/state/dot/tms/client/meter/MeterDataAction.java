@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
 import us.mn.state.dot.data.DataFactory;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.sonar.ProxyAction;
-import us.mn.state.dot.tms.client.tms.RampMeter;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**

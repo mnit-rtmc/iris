@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.sonar.ProxyAction;
-import us.mn.state.dot.tms.client.tms.RampMeter;
 
 /**
  * Shrinks the queue at the selected RampMeter.

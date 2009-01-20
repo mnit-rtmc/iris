@@ -14,8 +14,10 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
+import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
@@ -23,8 +25,12 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.sonar.GeoLocManager;
+import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
+import us.mn.state.dot.tms.client.sonar.TeslaAction;
+import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
  * The MeterManager class provides proxies for RampMeter objects.
@@ -76,8 +82,13 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		       lck == RampMeterLock.KNOCK_DOWN;
 	}
 
+	/** Test if a meter is metering */
+	static protected boolean isMetering(RampMeter proxy) {
+		return proxy.getRate() != null;
+	}
+
 	/** Test if a DMS if failed */
-	static protected boolean isFailed(DMS proxy) {
+	static protected boolean isFailed(RampMeter proxy) {
 		Controller ctr = proxy.getController();
 		return ctr != null && (!"".equals(ctr.getStatus()));
 	}
@@ -107,7 +118,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		theme.addStyle(STYLE_METERING, Color.GREEN);
 		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
-		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.COLOR_LOCKED);
+		theme.addStyle(STYLE_LOCKED, null, Color.RED);
 		theme.addStyle(STYLE_UNAVAILABLE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_NO_CONTROLLER,
@@ -121,9 +132,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, RampMeter proxy) {
 		if(STYLE_AVAILABLE.equals(s))
-			return isActive(proxy) && proxy.getRate() == null;
+			return isActive(proxy) && !isMetering(proxy);
 		else if(STYLE_METERING.equals(s))
-			return proxy.getRate() != null;
+			return isMetering(proxy);
 		else if(STYLE_QUEUE_EXISTS.equals(s)) {
 			return proxy.getQueue() ==
 				RampMeterQueue.EXISTS.ordinal();
