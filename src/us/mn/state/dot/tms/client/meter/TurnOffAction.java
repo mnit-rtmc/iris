@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.tms.RampMeter;
 
 /**
  * Turns off the selected mamp meter.
@@ -22,7 +24,7 @@ import javax.swing.Action;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class TurnOffAction extends TrafficDeviceAction {
+public class TurnOffAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to turn off the selected ramp meter */
 	public TurnOffAction(RampMeter p) {
@@ -34,6 +36,6 @@ public class TurnOffAction extends TrafficDeviceAction {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		proxy.stopMetering();
+		proxy.setRate(null);
 	}
 }

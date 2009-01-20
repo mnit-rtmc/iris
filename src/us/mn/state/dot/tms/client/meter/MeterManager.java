@@ -14,75 +14,197 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
+import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterLock;
+import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
-import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
+import us.mn.state.dot.tms.client.sonar.ProxyManager;
+import us.mn.state.dot.tms.client.sonar.ProxyTheme;
 
 /**
  * The MeterManager class provides proxies for RampMeter objects.
  *
  * @author Douglas Lau
  */
-public class MeterManager extends DeviceHandlerImpl {
+public class MeterManager extends ProxyManager<RampMeter> {
 
-	/** Get the proxy type name of the manager */
-	public String getProxyType() {
-		return MeterProxy.PROXY_TYPE;
+	/** Name of available style */
+	static public final String STYLE_AVAILABLE = "Available";
+
+	/** Name of metering style */
+	static public final String STYLE_METERING = "Metering";
+
+	/** Name of queue exists style */
+	static public final String STYLE_QUEUE_EXISTS = "Queue exists";
+
+	/** Name of queue full style */
+	static public final String STYLE_QUEUE_FULL = "Queue full";
+
+	/** Name of locked style */
+	static public final String STYLE_LOCKED = "Locked";
+
+	/** Name of unavailable style */
+	static public final String STYLE_UNAVAILABLE = "Unavailable";
+
+	/** Name of failed style */
+	static public final String STYLE_FAILED = "Failed";
+
+	/** Name of "no controller" style */
+	static public final String STYLE_NO_CONTROLLER = "No controller";
+
+	/** Name of inactive style */
+	static public final String STYLE_INACTIVE = "Inactive";
+
+	/** Name of all style */
+	static public final String STYLE_ALL = "All";
+
+	/** Test if a meter is active */
+	static protected boolean isActive(RampMeter proxy) {
+		Controller ctr = proxy.getController();
+		return ctr != null && ctr.getActive();
 	}
 
+	/** Test if a meter is unavailable */
+	static protected boolean isUnavailable(RampMeter proxy) {
+		RampMeterLock lck = RampMeterLock.fromOrdinal(proxy.getLock());
+		return lck == RampMeterLock.POLICE_PANEL ||
+		       lck == RampMeterLock.KNOCK_DOWN;
+	}
+
+	/** Test if a DMS if failed */
+	static protected boolean isFailed(DMS proxy) {
+		Controller ctr = proxy.getController();
+		return ctr != null && (!"".equals(ctr.getStatus()));
+	}
+
+	/** TMS connection */
+	protected final TmsConnection connection;
+
 	/** Create a new meter manager */
-	protected MeterManager(TmsConnection c, SortedList meter_list) {
-		super(c, meter_list, new RampMeterTheme());
-		addStatusModel(RampMeter.STATUS_AVAILABLE);
-		addStatusModel(RampMeter.STATUS_LOCKED_OFF);
-		addStatusModel(RampMeter.STATUS_METERING);
-		addStatusModel(RampMeter.STATUS_QUEUE);
-		addStatusModel(RampMeter.STATUS_QUEUE_BACKUP);
-		addStatusModel(RampMeter.STATUS_CONGESTED);
-		addStatusModel(RampMeter.STATUS_WARNING);
-		addStatusModel(RampMeter.STATUS_LOCKED_ON);
-		addStatusModel(RampMeter.STATUS_UNAVAILABLE);
-		addStatusModel(RampMeter.STATUS_FAILED);
-		addStatusModel(RampMeter.STATUS_INACTIVE);
+	public MeterManager(TmsConnection tc, TypeCache<RampMeter> c,
+		GeoLocManager lm)
+	{
+		super(c, lm);
+		connection = tc;
 		initialize();
 	}
 
-	/** Load a MeterProxy by id */
-	protected TmsMapProxy loadProxy(Object id) {
-		RampMeter meter = (RampMeter)r_list.getElement((String)id);
-		return new MeterProxy(meter);
+	/** Get the proxy type name */
+	public String getProxyType() {
+		return "Ramp Meter";
 	}
 
-	/** Create the ramp meter layer */
-	static public TmsMapLayer createLayer(final TmsConnection c) {
-		SortedList meter_list = c.getProxy().getMeterList();
-		return new TmsMapLayer(new MeterManager(c, meter_list));
+	/** Create a styled theme for DMSs */
+	protected StyledTheme createTheme() {
+		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
+			getProxyType(), new MeterMarker());
+		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(STYLE_METERING, Color.GREEN);
+		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
+		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.COLOR_LOCKED);
+		theme.addStyle(STYLE_UNAVAILABLE, ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(STYLE_NO_CONTROLLER,
+			ProxyTheme.COLOR_NO_CONTROLLER);
+		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
+			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(STYLE_ALL);
+		return theme;
 	}
 
-	/** Show the properties form for the ramp meter */
-	public void showPropertiesForm(TmsConnection tc) {
-		tc.getDesktop().show(new RampMeterProperties(tc, id));
+	/** Check the style of the specified proxy */
+	public boolean checkStyle(String s, RampMeter proxy) {
+		if(STYLE_AVAILABLE.equals(s))
+			return isActive(proxy) && proxy.getRate() == null;
+		else if(STYLE_METERING.equals(s))
+			return proxy.getRate() != null;
+		else if(STYLE_QUEUE_EXISTS.equals(s)) {
+			return proxy.getQueue() ==
+				RampMeterQueue.EXISTS.ordinal();
+		} else if(STYLE_QUEUE_FULL.equals(s))
+			return proxy.getQueue() ==RampMeterQueue.FULL.ordinal();
+		else if(STYLE_LOCKED.equals(s))
+			return proxy.getLock() != RampMeterLock.OFF.ordinal();
+		else if(STYLE_UNAVAILABLE.equals(s))
+			return isUnavailable(proxy);
+		else if(STYLE_FAILED.equals(s))
+			return isFailed(proxy);
+		else if(STYLE_NO_CONTROLLER.equals(s))
+			return proxy.getController() == null;
+		else if(STYLE_INACTIVE.equals(s))
+			return !isActive(proxy);
+		else
+			return STYLE_ALL.equals(s);
 	}
 
-	/** Get a popup for this ramp meter */
-	public JPopupMenu getPopup(TmsConnection tc) {
-		JPopupMenu popup = makePopup(getShortDescription());
-		if(isMetering()) {
-			popup.add(new JMenuItem(new ShrinkQueueAction(this)));
-			popup.add(new JMenuItem(new GrowQueueAction(this)));
-			popup.add(new TurnOffAction(this));
+	/** Show the properties form for the selected proxy */
+	public void showPropertiesForm() {
+		if(s_model.getSelectedCount() == 1) {
+			for(RampMeter meter: s_model.getSelected())
+				showPropertiesForm(meter);
+		}
+	}
+
+	/** Show the properteis form for the given proxy */
+	protected void showPropertiesForm(RampMeter meter) {
+		SmartDesktop desktop = connection.getDesktop();
+		try {
+			desktop.show(new RampMeterProperties(connection,meter));
+		}
+		catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Create a popup menu for the selected proxy object(s) */
+	protected JPopupMenu createPopup() {
+		int n_selected = s_model.getSelectedCount();
+		if(n_selected < 1)
+			return null;
+		if(n_selected == 1) {
+			for(RampMeter meter: s_model.getSelected())
+				return createSinglePopup(meter);
+		}
+		JPopupMenu p = new JPopupMenu();
+		p.add(new JLabel("" + n_selected + " Meters"));
+		p.addSeparator();
+		// FIXME: add turn on/off all actions
+		return p;
+	}
+
+	/** Create a popup menu for a single ramp meter selection */
+	protected JPopupMenu createSinglePopup(final RampMeter proxy) {
+		JPopupMenu p = new JPopupMenu();
+		p.add(makeMenuLabel(getDescription(proxy)));
+		if(isMetering(proxy)) {
+			p.add(new ShrinkQueueAction(proxy));
+			p.add(new GrowQueueAction(proxy));
+			p.add(new TurnOffAction(proxy));
 		} else
-			popup.add(new TurnOnAction(this));
-		JCheckBoxMenuItem litem = new JCheckBoxMenuItem(
-			new LockMeterAction(this, tc.getDesktop()));
-		litem.setSelected(isLocked());
-		popup.add(litem);
-		popup.add(new JMenuItem(new LogDeviceAction(this, tc)));
-		popup.addSeparator();
-		popup.add(new JMenuItem(new PropertiesAction(this, tc)));
-		popup.add(new JMenuItem(new MeterDataAction(this,
-			tc.getDesktop(), tc.getDataFactory())));
-		return popup;
+			p.add(new TurnOnAction(proxy));
+		if(TeslaAction.isConfigured()) {
+			p.addSeparator();
+			p.add(new TeslaAction<RampMeter>(proxy));
+		}
+		p.addSeparator();
+		p.add(new PropertiesAction<RampMeter>(proxy) {
+			protected void do_perform() {
+				showPropertiesForm(proxy);
+			}
+		});
+		p.add(new MeterDataAction(proxy, connection.getDesktop(),
+			connnection.getDataFactory()));
+		return p;
+	}
+
+	/** Find the map geo location for a proxy */
+	protected GeoLoc getGeoLoc(RampMeter proxy) {
+		return proxy.getGeoLoc();
 	}
 }

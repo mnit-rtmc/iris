@@ -16,8 +16,9 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
 import us.mn.state.dot.data.DataFactory;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.tms.RampMeter;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
 
 /**
  * Action to display a plotlet containing ramp meter data
@@ -25,7 +26,7 @@ import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MeterDataAction extends TrafficDeviceAction {
+public class MeterDataAction extends ProxyAction<RampMeter> {
 
 	/** Desktop to put the plotlet */
 	protected final SmartDesktop desktop;

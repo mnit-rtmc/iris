@@ -134,7 +134,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
 			getProxyType(), new DmsMarker());
-		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_TRAVEL_TIME, Color.ORANGE);
 		theme.addStyle(STYLE_AWS, Color.RED);

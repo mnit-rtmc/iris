@@ -18,6 +18,7 @@ import java.awt.Dimension;
 import us.mn.state.dot.data.DataFactory;
 import us.mn.state.dot.data.plot.Plotlet;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 
 /**
@@ -45,7 +46,7 @@ public class MeterDataForm extends AbstractForm {
 		Plotlet plot = new Plotlet(factory);
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));
-		for(Detector det: proxy.meter.getDetectors())
+		for(Detector det: proxy.getDetectors())
 			plot.addDetector(det.getName());
 		add(plot);
 	}

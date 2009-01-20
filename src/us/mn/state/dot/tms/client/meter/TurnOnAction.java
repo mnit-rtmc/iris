@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.tms.RampMeter;
 
 /**
  * Turns on the selected RampMeter.
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class TurnOnAction extends TrafficDeviceAction {
+public class TurnOnAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to turn on the selected ramp meter */
 	public TurnOnAction(RampMeter p) {
@@ -36,6 +36,7 @@ public class TurnOnAction extends TrafficDeviceAction {
 
 	/** Actually perform the action */
 	protected void do_perform() {
+		// FIXME: use setRate here
 		proxy.startMetering();
 	}
 }

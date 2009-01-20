@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.tms.RampMeter;
 
 /**
  * Shrinks the queue at the selected RampMeter.
@@ -22,7 +24,7 @@ import javax.swing.Action;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class ShrinkQueueAction extends TrafficDeviceAction {
+public class ShrinkQueueAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action the shrink the queue at the selected meter */
 	public ShrinkQueueAction(RampMeter p) {
@@ -37,6 +39,7 @@ public class ShrinkQueueAction extends TrafficDeviceAction {
 
 	/** Actually perform the action */
 	protected void do_perform() {
+		// FIXME: use setRate here
 		proxy.shrinkQueue();
 	}
 }

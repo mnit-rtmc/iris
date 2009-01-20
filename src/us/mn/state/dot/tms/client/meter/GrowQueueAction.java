@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.tms.RampMeter;
 
 /**
  * Increases the size of the queue at the selected ramp.
@@ -22,7 +24,7 @@ import javax.swing.Action;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class GrowQueueAction extends TrafficDeviceAction {
+public class GrowQueueAction extends ProxyAction<RampMeter> {
 
 	/** Create a new action to grow the queue at the selected meter */
 	public GrowQueueAction(RampMeter p) {
@@ -37,6 +39,7 @@ public class GrowQueueAction extends TrafficDeviceAction {
 
 	/** Actually perform the action */
 	protected void do_perform() {
+		// FIXME: use setRate here
 		proxy.growQueue();
 	}
 }
