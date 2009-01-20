@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.rmi.RemoteException;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -106,7 +105,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		location = new LocationPanel(admin, proxy.getGeoLoc(),
 			connection.getSonarState());
 		det_model = new R_NodeDetectorModel(state.getDetectors(),

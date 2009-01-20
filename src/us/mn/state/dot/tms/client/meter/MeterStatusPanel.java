@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
-import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
@@ -47,7 +46,7 @@ import us.mn.state.dot.tms.client.TmsSelectionListener;
 public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 
 	/** Remote ramp meter object */
-	protected MeterProxy proxy = null;
+	protected RampMeter proxy = null;
 
 	/** ID component */
 	protected final JTextField txtId = new JTextField();
@@ -88,22 +87,24 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	/** Reason the meter was locked */
 	protected final JTextArea lockReason = new JTextArea();
 
+	/** Button for data plotlet */
 	protected final JButton dataButton = new JButton("Data");
 
-	protected final MeterHandler handler;
+	/** Ramp meter manager */
+	protected final MeterManager manager;
 
+	/** TMS connection */
 	protected final TmsConnection connection;
 
 	/** Create a new MeterStatusPanel */
-	public MeterStatusPanel(TmsConnection connection, MeterHandler handler)
-	{
+	public MeterStatusPanel(TmsConnection tc, MeterManager m) {
 		super(new GridBagLayout());
-		this.handler = handler;
-		this.connection = connection;
-		lockReason.setLineWrap( true );
-		lockReason.setEditable( false );
+		manager = m;
+		connection = tc;
+		lockReason.setLineWrap(true);
+		lockReason.setEditable(false);
 		lockReason.setBackground(getBackground());
-		handler.getSelectionModel().addTmsSelectionListener( this );
+		manager.getSelectionModel().addTmsSelectionListener(this);
 		setBorder(BorderFactory.createTitledBorder(
 			"Selected Ramp Meter"));
 		setEnabled(false);
@@ -202,7 +203,7 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	}
 
 	/** Select a new meter to display */
-	public void setMeter(final MeterProxy p) {
+	public void setMeter(final RampMeter p) {
 		proxy = p;
 		refreshUpdate();
 		refreshStatus();
@@ -224,9 +225,9 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 
 	/** Selection changed to another meter */
 	public void selectionChanged(TmsSelectionEvent e) {
-		final TMSObject o = e.getSelected();
-		if(o instanceof MeterProxy) {
-			MeterProxy p = (MeterProxy)o;
+		final Object o = e.getSelected();
+		if(o instanceof RampMeter) {
+			RampMeter p = (RampMeter)o;
 			if(p != null)
 				setMeter(p);
 			else
@@ -236,7 +237,7 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 
 	/** Refresh the update status of the selected ramp meter */
 	public void refreshUpdate() {
-		final MeterProxy p = proxy;
+		final RampMeter p = proxy;
 		dataButton.setAction(new MeterDataAction(p,
 			connection.getDesktop(), connection.getDataFactory()));
 		shrink.setAction(new ShrinkQueueAction(p));
@@ -252,7 +253,7 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 
 	/** Refresh the status of the ramp meter */
 	public void refreshStatus() {
-		final MeterProxy p = proxy;
+		final RampMeter p = proxy;
 		Color color = Color.GRAY;
 		String UNKNOWN = "???";
 		String s_status = UNKNOWN;
@@ -322,8 +323,9 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 		}
 	}
 
+	/** Dispose of the panel */
 	public void dispose() {
-		handler.getSelectionModel().removeTmsSelectionListener( this );
+		manager.getSelectionModel().removeTmsSelectionListener(this);
 		clearMeter();
 		this.removeAll();
 	}

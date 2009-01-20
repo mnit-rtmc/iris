@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.device.StatusSummary;
 import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * Gui for opererating ramp meters.
@@ -34,8 +33,8 @@ import us.mn.state.dot.tms.utils.TMSProxy;
  */
 public class RampMeterTab extends MapTab {
 
-	/** Meter device handler */
-	protected final MeterHandler handler;
+	/** Meter device manager */
+	protected final MeterManager manager;
 
 	/** Meter status panel */
 	protected final MeterStatusPanel statusPanel;
@@ -51,18 +50,15 @@ public class RampMeterTab extends MapTab {
 
 	/** Create a new ramp meter tab */
   	public RampMeterTab(List<LayerState> lstates, ViewLayer vlayer,
-		TmsConnection connection) throws IOException
+		MeterManager m, TmsConnection connection) throws IOException
 	{
 		super("Meter", "Operate Ramp Meters");
-		TmsMapLayer rampLayer = MeterHandler.createLayer(connection);
-		handler = (MeterHandler)rampLayer.getHandler();
-		TMSProxy tms = connection.getProxy();
-		tms.setRampMeters(handler);
+		manager = m;
 		map.addLayers(lstates);
 		map.addLayer(rampLayer.createState());
 		mainPanel = createMapPanel(vlayer);
-		statusPanel = new MeterStatusPanel(connection, handler);
-		meterList = new StatusSummary(handler);
+		statusPanel = new MeterStatusPanel(connection, manager);
+		meterList = new StatusSummary(manager);
 		tabPanel = createSideBar();
  	}
 
@@ -82,7 +78,7 @@ public class RampMeterTab extends MapTab {
 	/** Dispose of the ramp meter tab */
 	public void dispose() {
 		super.dispose();
-		handler.getSelectionModel().setSelected(null);
+		manager.getSelectionModel().setSelected(null);
 		meterList.removeAll();
 		statusPanel.dispose();
 		mainPanel.removeAll();

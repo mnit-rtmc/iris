@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.rmi.RemoteException;
 import javax.swing.JButton;
 import javax.swing.ListModel;
 import javax.swing.JComboBox;
@@ -75,7 +73,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
@@ -112,7 +110,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() throws RemoteException {
+	protected void controllerPressed() {
 		Controller c = proxy.getController();
 		if(c == null)
 			controller.setEnabled(false);
