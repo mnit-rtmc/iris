@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,31 +14,25 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import java.rmi.RemoteException;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SortedList;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.device.DeviceHandlerImpl;
 import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
 import us.mn.state.dot.tms.client.proxy.TmsMapProxy;
 
 /**
- * The MeterHandler class provides proxies for RampMeter objects.
+ * The MeterManager class provides proxies for RampMeter objects.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MeterHandler extends DeviceHandlerImpl {
+public class MeterManager extends DeviceHandlerImpl {
 
-	/** Get the proxy type name of the handler */
+	/** Get the proxy type name of the manager */
 	public String getProxyType() {
 		return MeterProxy.PROXY_TYPE;
 	}
 
-	/** Create a new meter handler */
-	protected MeterHandler(TmsConnection c, SortedList meter_list)
-		throws RemoteException
-	{
+	/** Create a new meter manager */
+	protected MeterManager(TmsConnection c, SortedList meter_list) {
 		super(c, meter_list, new RampMeterTheme());
 		addStatusModel(RampMeter.STATUS_AVAILABLE);
 		addStatusModel(RampMeter.STATUS_LOCKED_OFF);
@@ -55,16 +49,40 @@ public class MeterHandler extends DeviceHandlerImpl {
 	}
 
 	/** Load a MeterProxy by id */
-	protected TmsMapProxy loadProxy(Object id) throws RemoteException {
+	protected TmsMapProxy loadProxy(Object id) {
 		RampMeter meter = (RampMeter)r_list.getElement((String)id);
 		return new MeterProxy(meter);
 	}
 
 	/** Create the ramp meter layer */
-	static public TmsMapLayer createLayer(final TmsConnection c)
-		throws RemoteException
-	{
+	static public TmsMapLayer createLayer(final TmsConnection c) {
 		SortedList meter_list = c.getProxy().getMeterList();
-		return new TmsMapLayer(new MeterHandler(c, meter_list));
+		return new TmsMapLayer(new MeterManager(c, meter_list));
+	}
+
+	/** Show the properties form for the ramp meter */
+	public void showPropertiesForm(TmsConnection tc) {
+		tc.getDesktop().show(new RampMeterProperties(tc, id));
+	}
+
+	/** Get a popup for this ramp meter */
+	public JPopupMenu getPopup(TmsConnection tc) {
+		JPopupMenu popup = makePopup(getShortDescription());
+		if(isMetering()) {
+			popup.add(new JMenuItem(new ShrinkQueueAction(this)));
+			popup.add(new JMenuItem(new GrowQueueAction(this)));
+			popup.add(new TurnOffAction(this));
+		} else
+			popup.add(new TurnOnAction(this));
+		JCheckBoxMenuItem litem = new JCheckBoxMenuItem(
+			new LockMeterAction(this, tc.getDesktop()));
+		litem.setSelected(isLocked());
+		popup.add(litem);
+		popup.add(new JMenuItem(new LogDeviceAction(this, tc)));
+		popup.addSeparator();
+		popup.add(new JMenuItem(new PropertiesAction(this, tc)));
+		popup.add(new JMenuItem(new MeterDataAction(this,
+			tc.getDesktop(), tc.getDataFactory())));
+		return popup;
 	}
 }
