@@ -27,14 +27,14 @@ import us.mn.state.dot.tms.client.toast.AbstractForm;
  */
 public class MeterDataForm extends AbstractForm {
 
-	/** Ramp meter to display data */
-	protected final MeterProxy proxy;
+	/** Ramp meter proxy object */
+	protected final RampMeter proxy;
 
 	/** Traffic data factory */
 	protected final DataFactory factory;
 
 	/** Create a new meter data form */
-	public MeterDataForm(MeterProxy p, DataFactory f) {
+	public MeterDataForm(RampMeter p, DataFactory f) {
 		super("Data for Meter: " + p.getId());
 		proxy = p;
 		factory = f;

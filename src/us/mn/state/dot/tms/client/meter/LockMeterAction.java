@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,7 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import java.rmi.RemoteException;
 import javax.swing.Action;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -31,7 +29,7 @@ public class LockMeterAction extends TrafficDeviceAction {
 	protected final SmartDesktop desktop;
 
 	/** Create a new action to lock the selected ramp meter */
-	public LockMeterAction(MeterProxy p, SmartDesktop d) {
+	public LockMeterAction(RampMeter p, SmartDesktop d) {
 		super(p);
 		desktop = d;
 		putValue(Action.NAME, "Locked");
@@ -42,11 +40,10 @@ public class LockMeterAction extends TrafficDeviceAction {
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() throws RemoteException {
+	protected void do_perform() {
 		setEnabled(false);
-		MeterProxy p = (MeterProxy)proxy;
-		if(p.isLocked())
-			p.meter.setLocked(false, "");
+		if(proxy.isLocked())
+			proxy.setLocked(false, "");
 		else
 			desktop.show(new LockReasonForm(p));
 	}
