@@ -118,7 +118,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		theme.addStyle(STYLE_METERING, Color.GREEN);
 		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
-		theme.addStyle(STYLE_LOCKED, null, Color.RED);
+		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.OUTLINE_LOCKED);
 		theme.addStyle(STYLE_UNAVAILABLE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_NO_CONTROLLER,
@@ -190,27 +190,27 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Create a popup menu for a single ramp meter selection */
-	protected JPopupMenu createSinglePopup(final RampMeter proxy) {
+	protected JPopupMenu createSinglePopup(final RampMeter meter) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
-		if(isMetering(proxy)) {
-			p.add(new ShrinkQueueAction(proxy));
-			p.add(new GrowQueueAction(proxy));
-			p.add(new TurnOffAction(proxy));
+		p.add(makeMenuLabel(getDescription(meter)));
+		if(isMetering(meter)) {
+			p.add(new ShrinkQueueAction(meter));
+			p.add(new GrowQueueAction(meter));
+			p.add(new TurnOffAction(meter));
 		} else
-			p.add(new TurnOnAction(proxy));
+			p.add(new TurnOnAction(meter));
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
-			p.add(new TeslaAction<RampMeter>(proxy));
+			p.add(new TeslaAction<RampMeter>(meter));
 		}
 		p.addSeparator();
-		p.add(new PropertiesAction<RampMeter>(proxy) {
+		p.add(new PropertiesAction<RampMeter>(meter) {
 			protected void do_perform() {
-				showPropertiesForm(proxy);
+				showPropertiesForm(meter);
 			}
 		});
-		p.add(new MeterDataAction(proxy, connection.getDesktop(),
-			connnection.getDataFactory()));
+		p.add(new MeterDataAction(meter, connection.getDesktop(),
+			connection.getDataFactory()));
 		return p;
 	}
 
