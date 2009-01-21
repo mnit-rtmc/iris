@@ -22,8 +22,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.device.StatusSummary;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
+import us.mn.state.dot.tms.client.sonar.StyleSummary;
 
 /**
  * Gui for opererating ramp meters.
@@ -39,8 +38,8 @@ public class RampMeterTab extends MapTab {
 	/** Meter status panel */
 	protected final MeterStatusPanel statusPanel;
 
-	/** Summary of meter status lists */
-	protected final StatusSummary meterList;
+	/** Summary of meters of each status */
+	protected final StyleSummary<RampMeter> summary;
 
 	/** Tab panel */
 	protected final JPanel tabPanel;
@@ -58,7 +57,7 @@ public class RampMeterTab extends MapTab {
 		map.addLayer(rampLayer.createState());
 		mainPanel = createMapPanel(vlayer);
 		statusPanel = new MeterStatusPanel(connection, manager);
-		meterList = new StatusSummary(manager);
+		summary = new StyleSummary<RampMeter>(manager);
 		tabPanel = createSideBar();
  	}
 
@@ -66,7 +65,7 @@ public class RampMeterTab extends MapTab {
 	protected JPanel createSideBar() {
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(statusPanel, BorderLayout.NORTH);
-		p.add(meterList, BorderLayout.CENTER);
+		p.add(summary, BorderLayout.CENTER);
 		return p;
 	}
 
@@ -79,7 +78,7 @@ public class RampMeterTab extends MapTab {
 	public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().setSelected(null);
-		meterList.removeAll();
+		summary.dispose();
 		statusPanel.dispose();
 		mainPanel.removeAll();
 	}
