@@ -15,50 +15,45 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.TmsSelectionEvent;
 import us.mn.state.dot.tms.client.TmsSelectionListener;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
  * The MeterStatusPanel provides a GUI representation for RampMeter status
  * information.
  *
- * FIXME: This class was cut-and-pasted from RampMeterProperties.java
- * and has diverged significantly. These classes should be merged somehow.
- *
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
+public class MeterStatusPanel extends FormPanel
+	implements TmsSelectionListener
+{
+	/** Create a non-editable text field */
+	static protected JTextField createText() {
+		JTextField f = new JTextField();
+		f.setEditable(false);
+		return f;
+	}
 
-	/** Remote ramp meter object */
-	protected RampMeter proxy = null;
-
-	/** ID component */
-	protected final JTextField txtId = new JTextField();
+	/** Name component */
+	protected final JTextField txtName = createText();
 
 	/** Camera component */
-	protected final JTextField txtCamera = new JTextField();
+	protected final JTextField txtCamera = createText();
 
 	/** Location component */
-	protected final JTextField txtLocation = new JTextField();
+	protected final JTextField txtLocation = createText();
 
 	/** Status component */
-	protected final JTextField txtStatus = new JTextField();
+	protected final JTextField txtStatus = createText();
 
 	/** Metering on radio button */
 	protected final JRadioButton meter_on = new JRadioButton("On");
@@ -67,7 +62,7 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	protected final JRadioButton meter_off = new JRadioButton("Off");
 
 	/** Cycle time component */
-	protected final JTextField txtCycle = new JTextField();
+	protected final JTextField txtCycle = createText();
 
 	/** Queue component */
 	protected final JTextField txtQueue = new JTextField();
@@ -78,14 +73,9 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	/** Queue grow button */
 	protected final JButton grow = new JButton("Grow");
 
-	/** Meter locked button */
-	protected final JCheckBox locked = new JCheckBox("Locked:");
-
-	/** Name of user who locked the meter */
-	protected final JTextField txtLock = new JTextField();
-
 	/** Reason the meter was locked */
-	protected final JTextArea lockReason = new JTextArea();
+	protected final JComboBox lockReason = new JComboBox(
+		RampMeterLock.getDescriptions());
 
 	/** Button for data plotlet */
 	protected final JButton dataButton = new JButton("Data");
@@ -96,99 +86,36 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	/** TMS connection */
 	protected final TmsConnection connection;
 
+	/** Ramp meter proxy object */
+	protected RampMeter proxy = null;
+
 	/** Create a new MeterStatusPanel */
 	public MeterStatusPanel(TmsConnection tc, MeterManager m) {
-		super(new GridBagLayout());
-		manager = m;
+		super(true);
 		connection = tc;
-		lockReason.setLineWrap(true);
-		lockReason.setEditable(false);
-		lockReason.setBackground(getBackground());
-		manager.getSelectionModel().addTmsSelectionListener(this);
-		setBorder(BorderFactory.createTitledBorder(
-			"Selected Ramp Meter"));
+		manager = m;
+		setTitle("Selected Ramp Meter");
 		setEnabled(false);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.gridx = 0;
-		bag.insets = new Insets(2, 4, 2, 4);
-		bag.anchor = GridBagConstraints.EAST;
-		add(new JLabel("ID"), bag);
-		bag.gridx = 2;
-		add(new JLabel("Camera"), bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		add(new JLabel("Location"), bag);
-		bag.gridy = 2;
-		add(new JLabel("Status"), bag);
-		bag.gridy = 3;
-		add(new JLabel("Metering"), bag);
-		bag.gridy = 4;
-		add(new JLabel("Cycle Time"), bag);
-		bag.gridy = 5;
-		bag.gridheight = 2;
-		add(new JLabel("Queue"), bag);
-		bag.gridy = 7;
-		bag.gridheight = 1;
-		add(locked, bag);
-		bag.gridy = 8;
-		add(new JLabel("Reason"), bag);
-		bag.gridx = 1;
-		bag.gridy = 0;
-		bag.fill = GridBagConstraints.HORIZONTAL;
-		bag.weightx = 1;
-		txtId.setEditable(false);
-		add(txtId, bag);
-		bag.gridx = 3;
-		txtCamera.setEditable(false);
-		add(txtCamera, bag);
-		bag.gridx = 1;
-		bag.gridy = 1;
-		bag.gridwidth = 3;
-		txtLocation.setEditable(false);
-		add(txtLocation, bag);
-		bag.gridy = 2;
-		txtStatus.setEditable(false);
-		add(txtStatus, bag);
-		bag.gridy = 3;
-		bag.gridwidth = 1;
-		add(meter_on, bag);
-		bag.gridx = 2;
-		bag.gridwidth = 2;
-		add(meter_off, bag);
-		bag.gridx = 1;
-		bag.gridy = 4;
-		bag.gridwidth = 3;
-		txtCycle.setEditable(false);
-		add(txtCycle, bag);
-		bag.gridy = 5;
-		bag.gridheight = 2;
-		bag.gridwidth = 1;
-		txtQueue.setEditable(false);
-		add(txtQueue, bag);
-		bag.gridy = 7;
-		bag.gridheight = 1;
-		bag.gridwidth = 3;
-		txtLock.setEditable(false);
-		add(txtLock, bag);
-		bag.gridy = 8;
-		bag.fill = GridBagConstraints.BOTH;
-		JScrollPane scroll = new JScrollPane(lockReason);
-		scroll.setBorder(null);
-		scroll.setHorizontalScrollBarPolicy(
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		add(scroll, bag);
-		bag.gridx = 0;
-		bag.gridy = 9;
-		bag.gridwidth = 4;
-		bag.fill = GridBagConstraints.NONE;
-		bag.anchor = GridBagConstraints.CENTER;
-		add(dataButton, bag);
-		bag.gridx = 2;
-		bag.gridy = 5;
-		bag.gridwidth = 2;
-		add(shrink, bag);
-		bag.gridy = 6;
-		add(grow, bag);
+		add("Name", txtName);
+		addRow("Camera", txtCamera);
+		addRow("Location", txtLocation);
+		addRow("Status", txtStatus);
+		add("Metering", meter_on);
+		addRow(meter_off);
+		addRow("Cycle Time", txtCycle);
+		add("Queue", txtQueue);
+		add(shrink);
+		addRow(grow);
+		addRow("Lock", lockReason);
+		addRow(dataButton);
+		manager.getSelectionModel().addTmsSelectionListener(this);
+	}
+
+	/** Dispose of the panel */
+	public void dispose() {
+		manager.getSelectionModel().removeTmsSelectionListener(this);
+		setMeter(null);
+		removeAll();
 	}
 
 	/** Enable or disable the status panel */
@@ -198,26 +125,26 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 		meter_off.setEnabled(enabled);
 		shrink.setEnabled(enabled);
 		grow.setEnabled(enabled);
-		locked.setEnabled(enabled);
 		lockReason.setEnabled(enabled);
 	}
 
 	/** Select a new meter to display */
 	public void setMeter(final RampMeter p) {
 		proxy = p;
-		refreshUpdate();
-		refreshStatus();
-		setEnabled(true);
+		if(p != null) {
+			refreshUpdate();
+			refreshStatus();
+		} else
+			clearMeter();
+		setEnabled(p != null);
 	}
 
 	/** Clear the meter status panel */
 	protected void clearMeter() {
-		setEnabled(false);
-		txtId.setText("");
+		txtName.setText("");
 		txtCamera.setText("");
 		txtLocation.setText("");
 		txtStatus.setText("");
-		txtLock.setText("");
 		lockReason.setText("");
 		txtCycle.setText("");
 		txtQueue.setText("");
@@ -226,13 +153,8 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 	/** Selection changed to another meter */
 	public void selectionChanged(TmsSelectionEvent e) {
 		final Object o = e.getSelected();
-		if(o instanceof RampMeter) {
-			RampMeter p = (RampMeter)o;
-			if(p != null)
-				setMeter(p);
-			else
-				clearMeter();
-		}
+		if(o instanceof RampMeter)
+			setMeter((RampMeter)o);
 	}
 
 	/** Refresh the update status of the selected ramp meter */
@@ -244,9 +166,7 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 		grow.setAction(new GrowQueueAction(p));
 		meter_on.setAction(new TurnOnAction(p));
 		meter_off.setAction(new TurnOffAction(p));
-		locked.setAction(new LockMeterAction(p,
-			connection.getDesktop()));
-		txtId.setText(p.getId());
+		txtName.setText(p.getName());
 		txtCamera.setText(p.getCameraId());
 		txtLocation.setText(p.getLocationString());
 	}
@@ -304,10 +224,6 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 		} finally {
 			txtStatus.setBackground(color);
 			txtStatus.setText(s_status);
-			locked.setSelected(isLocked);
-			locked.setEnabled(meter_en);
-			txtLock.setBackground(color);
-			txtLock.setText(s_lockName);
 			lockReason.setText(s_lockReason);
 			meter_on.setEnabled(meter_en & !metering);
 			meter_on.setSelected(metering);
@@ -321,12 +237,5 @@ public class MeterStatusPanel extends JPanel implements TmsSelectionListener {
 			grow.setEnabled(meter_en && metering);
 			repaint();
 		}
-	}
-
-	/** Dispose of the panel */
-	public void dispose() {
-		manager.getSelectionModel().removeTmsSelectionListener(this);
-		clearMeter();
-		this.removeAll();
 	}
 }

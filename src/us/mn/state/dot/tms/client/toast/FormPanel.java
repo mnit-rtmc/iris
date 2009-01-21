@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,7 +94,7 @@ public class FormPanel extends JPanel {
 		comp.setEnabled(enable);
 	}
 
-	/** Add a centered component to the panel */
+	/** Add a component to the panel */
 	public void addRow(JComponent comp) {
 		setWidth(GridBagConstraints.REMAINDER);
 		add(comp);
@@ -103,6 +103,7 @@ public class FormPanel extends JPanel {
 
 	/** Add a pair of components to the panel */
 	public void add(JComponent c1, JComponent c2) {
+		setEast();
 		add(c1);
 		setWest();
 		add(c2);
@@ -115,6 +116,7 @@ public class FormPanel extends JPanel {
 
 	/** Add a pair of components to the panel */
 	public void addRow(JComponent c1, JComponent c2) {
+		setEast();
 		add(c1);
 		setWest();
 		setWidth(GridBagConstraints.REMAINDER);
@@ -129,6 +131,7 @@ public class FormPanel extends JPanel {
 
 	/** Add a text area component with a label on the left side */
 	public void addRow(String name, JTextArea area) {
+		setEast();
 		add(new JLabel(name));
 		setWest();
 		setWidth(GridBagConstraints.REMAINDER);
