@@ -36,24 +36,17 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class MeterStatusPanel extends FormPanel
 	implements TmsSelectionListener
 {
-	/** Create a non-editable text field */
-	static protected JTextField createText() {
-		JTextField f = new JTextField();
-		f.setEditable(false);
-		return f;
-	}
-
 	/** Name component */
-	protected final JTextField txtName = createText();
+	protected final JTextField txtName = createTextField();
 
 	/** Camera component */
-	protected final JTextField txtCamera = createText();
+	protected final JTextField txtCamera = createTextField();
 
 	/** Location component */
-	protected final JTextField txtLocation = createText();
+	protected final JTextField txtLocation = createTextField();
 
 	/** Status component */
-	protected final JTextField txtStatus = createText();
+	protected final JTextField txtStatus = createTextField();
 
 	/** Metering on radio button */
 	protected final JRadioButton meter_on = new JRadioButton("On");
@@ -62,7 +55,7 @@ public class MeterStatusPanel extends FormPanel
 	protected final JRadioButton meter_off = new JRadioButton("Off");
 
 	/** Cycle time component */
-	protected final JTextField txtCycle = createText();
+	protected final JTextField txtCycle = createTextField();
 
 	/** Queue component */
 	protected final JTextField txtQueue = new JTextField();
@@ -235,7 +228,6 @@ public class MeterStatusPanel extends FormPanel
 			txtQueue.setText(s_queue);
 			shrink.setEnabled(meter_en && metering);
 			grow.setEnabled(meter_en && metering);
-			repaint();
 		}
 	}
 }

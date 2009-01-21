@@ -86,22 +86,22 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	protected final MessageSelector messageSelector;
 
 	/** Displays the id of the DMS */
-	protected final JTextField nameTxt = new JTextField();
+	protected final JTextField nameTxt = createTextField();
 
 	/** Displays the verify camera for the DMS */
-	protected final JTextField cameraTxt = new JTextField();
+	protected final JTextField cameraTxt = createTextField();
 
 	/** Displays the location of the DMS */
-	protected final JTextField locationTxt = new JTextField();
+	protected final JTextField locationTxt = createTextField();
 
 	/** Displays the brightness of the DMS */
-	protected final JTextField brightnessTxt = new JTextField();
+	protected final JTextField brightnessTxt = createTextField();
 
 	/** Displays the current operation of the DMS */
-	protected final JTextField operationTxt = new JTextField();
+	protected final JTextField operationTxt = createTextField();
 
 	/** Displays the controller status (optional) */
-	protected final JTextField statusTxt = new JTextField();
+	protected final JTextField statusTxt = createTextField();
 
 	/** Used to select the expires time for a message (optional) */
 	protected final JComboBox durationCmb =
@@ -148,12 +148,6 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(), user);
 
-		nameTxt.setEditable(false);
-		cameraTxt.setEditable(false);
-		locationTxt.setEditable(false);
-		brightnessTxt.setEditable(false);
-		operationTxt.setEditable(false);
-
 		add("ID", nameTxt);
 		addRow("Camera", cameraTxt);
 		add("Location", locationTxt);
@@ -166,7 +160,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		addRow(dmsPanel);
 		addRow(createDeployBox(st));
 
-		clearSelected();
+		setSelected(null);
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
 	}

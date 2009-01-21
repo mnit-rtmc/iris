@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  * FormPanel is a panel for viewing and editing forms. It provides a simpler
@@ -31,6 +32,13 @@ import javax.swing.JTextArea;
  * @author Douglas Lau
  */
 public class FormPanel extends JPanel {
+
+	/** Create a non-editable text field */
+	static protected JTextField createTextField() {
+		JTextField f = new JTextField();
+		f.setEditable(false);
+		return f;
+	}
 
 	/** Flag if components should be enabled */
 	protected final boolean enable;
