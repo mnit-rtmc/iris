@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.sonar.ProxyAction;
 
 /**
@@ -36,7 +37,6 @@ public class TurnOnAction extends ProxyAction<RampMeter> {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		// FIXME: use setRate here
-		proxy.startMetering();
+		proxy.setRate(SystemAttributeHelper.getMeterMaxRelease());
 	}
 }
