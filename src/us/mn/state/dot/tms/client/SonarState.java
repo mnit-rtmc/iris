@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SignGroup;
@@ -276,6 +277,14 @@ public class SonarState extends Client {
 		return warn_signs;
 	}
 
+	/** Cache of ramp meters */
+	protected final TypeCache<RampMeter> ramp_meters;
+
+	/** Get the ramp meter cache */
+	public TypeCache<RampMeter> getRampMeters() {
+		return ramp_meters;
+	}
+
 	/** Cache of dynamic message signs */
 	protected final TypeCache<DMS> dmss;
 
@@ -359,6 +368,7 @@ public class SonarState extends Client {
 		camera_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
+		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
 		dmss = new TypeCache<DMS>(DMS.class, this);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
@@ -395,6 +405,7 @@ public class SonarState extends Client {
 		populate(stations);
 		populate(cameras);
 		populate(warn_signs);
+		populate(ramp_meters);
 		populate(dmss);
 		populate(sign_groups);
 		populate(dms_sign_groups);

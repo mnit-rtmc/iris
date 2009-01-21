@@ -20,8 +20,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
@@ -40,6 +44,24 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class MeterStatusPanel extends FormPanel
 	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
+	/** Get the verification camera name */
+	static protected String getCameraName(RampMeter proxy) {
+		Camera camera = proxy.getCamera();
+		if(camera == null)
+			return " ";
+		else
+			return camera.getName();
+	}
+
+	/** Get the controller status */
+	static protected String getControllerStatus(RampMeter proxy) {
+		Controller c = proxy.getController();
+		if(c == null)
+			return "???";
+		else
+			return c.getStatus();
+	}
+
 	/** Format the meter cycle time from the given release rate */
 	static protected String formatCycle(float rate) {
 		int i_cycle = Math.round(36000 / rate);
@@ -107,7 +129,7 @@ public class MeterStatusPanel extends FormPanel
 		connection = tc;
 		manager = m;
 		selectionModel = manager.getSelectionModel();
-		cache = st.getRampMeters();
+		cache = tc.getSonarState().getRampMeters();
 		ButtonGroup group = new ButtonGroup();
 		group.add(meterOnBtn);
 		group.add(meterOffBtn);
