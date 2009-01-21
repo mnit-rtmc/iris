@@ -136,11 +136,10 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	protected DMSPanelPager dmsPanelPager;
 
 	/** Create a new DMS dispatcher */
-	public DMSDispatcher(DMSManager manager, final SonarState st,
-		TmsConnection tc)
-	{
+	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
 		super(true);
 		setTitle(I18NMessages.get("dms.selected_title"));
+		SonarState st = tc.getSonarState();
 		cache = st.getDMSs();
 		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();

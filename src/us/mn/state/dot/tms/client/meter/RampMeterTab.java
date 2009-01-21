@@ -20,6 +20,7 @@ import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.StyleSummary;
@@ -48,15 +49,15 @@ public class RampMeterTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new ramp meter tab */
-  	public RampMeterTab(List<LayerState> lstates, ViewLayer vlayer,
-		MeterManager m, TmsConnection connection) throws IOException
+  	public RampMeterTab(MeterManager m, List<LayerState> lstates,
+		ViewLayer vlayer, TmsConnection tc) throws IOException
 	{
 		super("Meter", "Operate Ramp Meters");
 		manager = m;
 		map.addLayers(lstates);
-		map.addLayer(rampLayer.createState());
+		map.addLayer(m.getLayer().createState());
 		mainPanel = createMapPanel(vlayer);
-		statusPanel = new MeterStatusPanel(connection, manager);
+		statusPanel = new MeterStatusPanel(tc, manager);
 		summary = new StyleSummary<RampMeter>(manager);
 		tabPanel = createSideBar();
  	}

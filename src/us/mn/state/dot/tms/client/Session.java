@@ -28,7 +28,6 @@ import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
-import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
@@ -41,12 +40,12 @@ import us.mn.state.dot.tms.client.incidents.IncidentTab;
 import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
+import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
-import us.mn.state.dot.tms.client.sonar.SonarLayer;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
@@ -101,17 +100,17 @@ public class Session {
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
 
+	/** Warning sign manager */
+	protected final WarningSignManager warn_manager;
+
+	/** Ramp meter manager */
+	protected final MeterManager meter_manager;
+
 	/** FIXME: this is a hack */
 	static public CameraManager cam_manager_singleton;
 	static public DMSManager dms_manager_singleton;
 	static public DetectorManager det_manager_singleton;
 	static public WarningSignManager warn_manager_singleton;
-
-	/** Camera layer */
-	protected final SonarLayer<Camera> camLayer;
-
-	/** Warning sign manager */
-	protected final WarningSignManager warn_manager;
 
 	/** List of all tabs */
 	protected final List<IrisTab> tabs = new LinkedList<IrisTab>();
@@ -147,18 +146,15 @@ public class Session {
 	}
 
 	/** Add the DMS tab */
-	protected void addDMSTab(final SonarState st) {
-		SonarLayer<DMS> dmsLayer = dms_manager.getLayer();
-		Layer warnLayer = warn_manager.getLayer();
+	protected void addDMSTab() {
 		List<LayerState> lstates = createBaseLayers();
 		lstates.add(gpoly.createState());
-		lstates.add(camLayer.createState());
+		lstates.add(cam_manager.getLayer().createState());
 		lstates.add(incLayer.createState());
 		if(rwisLayer != null)
 			lstates.add(rwisLayer.createState());
-		lstates.add(dmsLayer.createState());
-		lstates.add(warnLayer.createState());
-		tabs.add(new DMSTab(lstates, vlayer, dms_manager, st,
+		lstates.add(warn_manager.getLayer().createState());
+		tabs.add(new DMSTab(dms_manager, lstates, vlayer,
 			tmsConnection));
 	}
 
@@ -171,7 +167,8 @@ public class Session {
 				gpolyState.setTheme(t);
 		}
 		lstates.add(gpolyState);
-		tabs.add(new RampMeterTab(lstates, vlayer, tmsConnection));
+		tabs.add(new RampMeterTab(meter_manager, lstates, vlayer,
+			tmsConnection));
 	}
 
 	/** Add the incident tab */
@@ -197,8 +194,6 @@ public class Session {
 	/** Add the roadway tab */
 	protected void addRoadwayTab() {
 		List<LayerState> lstates = createBaseLayers();
-		SonarLayer<R_Node> layer = r_node_manager.getLayer();
-		lstates.add(layer.createState());
 		tabs.add(new RoadwayTab(r_node_manager, lstates, vlayer,
 			tmsConnection));
 	}
@@ -226,7 +221,6 @@ public class Session {
 		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
 			loc_manager);
 		cam_manager_singleton = cam_manager;
-		camLayer = cam_manager.getLayer();
 		dms_manager = new DMSManager(tmsConnection, st.getDMSs(),
 			loc_manager);
 		dms_manager_singleton = dms_manager;
@@ -238,10 +232,12 @@ public class Session {
 		warn_manager = new WarningSignManager(tmsConnection,
 			st.getWarningSigns(), loc_manager);
 		warn_manager_singleton = warn_manager;
+		meter_manager = new MeterManager(tmsConnection,
+			st.getRampMeters(), loc_manager);
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
 		if(user.hasPermission(IrisPermission.DMS_TAB))
-			addDMSTab(st);
+			addDMSTab();
 		if(user.hasPermission(IrisPermission.METER_TAB))
 			addMeterTab();
 		if(user.hasPermission(IrisPermission.MAIN_TAB))

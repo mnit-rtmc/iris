@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.StyleSummary;
 import us.mn.state.dot.tms.utils.I18NMessages;
@@ -47,14 +46,15 @@ public class DMSTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new DMS tab */
-	public DMSTab(List<LayerState> lstates, ViewLayer vlayer,
-		DMSManager manager, SonarState st, TmsConnection tmsConnection)
+	public DMSTab(DMSManager manager, List<LayerState> lstates,
+		ViewLayer vlayer, TmsConnection tc)
 	{
 		super(I18NMessages.get("dms.abbreviation"),
 			I18NMessages.get("dms.title"));
-		dispatcher = new DMSDispatcher(manager, st, tmsConnection);
+		dispatcher = new DMSDispatcher(manager, tc);
 		summary = new StyleSummary<DMS>(manager);
 		map.addLayers(lstates);
+		map.addLayer(manager.getLayer().createState());
 		tabPanel = createSideBar();
 		mainPanel = createMapPanel(vlayer);
 	}
