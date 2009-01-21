@@ -37,41 +37,41 @@ public class MeterStatusPanel extends FormPanel
 	implements TmsSelectionListener
 {
 	/** Name component */
-	protected final JTextField txtName = createTextField();
+	protected final JTextField nameTxt = createTextField();
 
 	/** Camera component */
-	protected final JTextField txtCamera = createTextField();
+	protected final JTextField cameraTxt = createTextField();
 
 	/** Location component */
-	protected final JTextField txtLocation = createTextField();
+	protected final JTextField locationTxt = createTextField();
 
 	/** Status component */
-	protected final JTextField txtStatus = createTextField();
+	protected final JTextField statusTxt = createTextField();
 
 	/** Metering on radio button */
-	protected final JRadioButton meter_on = new JRadioButton("On");
+	protected final JRadioButton meterOnBtn = new JRadioButton("On");
 
 	/** Metering off radio button */
-	protected final JRadioButton meter_off = new JRadioButton("Off");
+	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
 
 	/** Cycle time component */
-	protected final JTextField txtCycle = createTextField();
+	protected final JTextField cycleTxt = createTextField();
 
 	/** Queue component */
-	protected final JTextField txtQueue = createTextField();
+	protected final JTextField queueTxt = createTextField();
 
 	/** Queue shrink button */
-	protected final JButton shrink = new JButton("Shrink");
+	protected final JButton shrinkBtn = new JButton("Shrink");
 
 	/** Queue grow button */
-	protected final JButton grow = new JButton("Grow");
+	protected final JButton growBtn = new JButton("Grow");
 
 	/** Reason the meter was locked */
-	protected final JComboBox lockReason = new JComboBox(
+	protected final JComboBox lockCmb = new JComboBox(
 		RampMeterLock.getDescriptions());
 
 	/** Button for data plotlet */
-	protected final JButton dataButton = new JButton("Data");
+	protected final JButton dataBtn = new JButton("Data");
 
 	/** Ramp meter manager */
 	protected final MeterManager manager;
@@ -89,18 +89,18 @@ public class MeterStatusPanel extends FormPanel
 		manager = m;
 		setTitle("Selected Ramp Meter");
 		setEnabled(false);
-		add("Name", txtName);
-		addRow("Camera", txtCamera);
-		addRow("Location", txtLocation);
-		addRow("Status", txtStatus);
-		add("Metering", meter_on);
-		addRow(meter_off);
-		addRow("Cycle Time", txtCycle);
-		add("Queue", txtQueue);
-		add(shrink);
-		addRow(grow);
-		addRow("Lock", lockReason);
-		addRow(dataButton);
+		add("Name", nameTxt);
+		addRow("Camera", cameraTxt);
+		addRow("Location", locationTxt);
+		addRow("Status", statusTxt);
+		add("Metering", meterOnBtn);
+		addRow(meterOffBtn);
+		addRow("Cycle Time", cycleTxt);
+		add("Queue", queueTxt);
+		add(shrinkBtn);
+		addRow(growBtn);
+		addRow("Lock", lockCmb);
+		addRow(dataBtn);
 		manager.getSelectionModel().addTmsSelectionListener(this);
 	}
 
@@ -114,11 +114,12 @@ public class MeterStatusPanel extends FormPanel
 	/** Enable or disable the status panel */
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		meter_on.setEnabled(enabled);
-		meter_off.setEnabled(enabled);
-		shrink.setEnabled(enabled);
-		grow.setEnabled(enabled);
-		lockReason.setEnabled(enabled);
+		meterOnBtn.setEnabled(enabled);
+		meterOffBtn.setEnabled(enabled);
+		shrinkBtn.setEnabled(enabled);
+		growBtn.setEnabled(enabled);
+		lockCmb.setEnabled(enabled);
+		dataBtn.setEnabled(enabled);
 	}
 
 	/** Select a new meter to display */
@@ -134,13 +135,13 @@ public class MeterStatusPanel extends FormPanel
 
 	/** Clear the meter status panel */
 	protected void clearMeter() {
-		txtName.setText("");
-		txtCamera.setText("");
-		txtLocation.setText("");
-		txtStatus.setText("");
-		lockReason.setText("");
-		txtCycle.setText("");
-		txtQueue.setText("");
+		nameTxt.setText("");
+		cameraTxt.setText("");
+		locationTxt.setText("");
+		statusTxt.setText("");
+		lockCmb.setText("");
+		cycleTxt.setText("");
+		queueTxt.setText("");
 	}
 
 	/** Selection changed to another meter */
@@ -153,15 +154,15 @@ public class MeterStatusPanel extends FormPanel
 	/** Refresh the update status of the selected ramp meter */
 	public void refreshUpdate() {
 		final RampMeter p = proxy;
-		dataButton.setAction(new MeterDataAction(p,
+		nameTxt.setText(p.getName());
+		cameraTxt.setText(p.getCameraId());
+		locationTxt.setText(p.getLocationString());
+		meterOnBtn.setAction(new TurnOnAction(p));
+		meterOffBtn.setAction(new TurnOffAction(p));
+		shrinkBtn.setAction(new ShrinkQueueAction(p));
+		growBtn.setAction(new GrowQueueAction(p));
+		dataBtn.setAction(new MeterDataAction(p,
 			connection.getDesktop(), connection.getDataFactory()));
-		shrink.setAction(new ShrinkQueueAction(p));
-		grow.setAction(new GrowQueueAction(p));
-		meter_on.setAction(new TurnOnAction(p));
-		meter_off.setAction(new TurnOffAction(p));
-		txtName.setText(p.getName());
-		txtCamera.setText(p.getCameraId());
-		txtLocation.setText(p.getLocationString());
 	}
 
 	/** Refresh the status of the ramp meter */
@@ -215,19 +216,19 @@ public class MeterStatusPanel extends FormPanel
 				s_queue = "No";
 			color = null;
 		} finally {
-			txtStatus.setBackground(color);
-			txtStatus.setText(s_status);
-			lockReason.setText(s_lockReason);
-			meter_on.setEnabled(meter_en & !metering);
-			meter_on.setSelected(metering);
-			meter_off.setEnabled(meter_en & metering);
-			meter_off.setSelected(!metering);
-			txtCycle.setBackground(color);
-			txtCycle.setText(s_cycle);
-			txtQueue.setBackground(color);
-			txtQueue.setText(s_queue);
-			shrink.setEnabled(meter_en && metering);
-			grow.setEnabled(meter_en && metering);
+			statusTxt.setBackground(color);
+			statusTxt.setText(s_status);
+			lockCmb.setText(s_lockReason);
+			meterOnBtn.setEnabled(meter_en & !metering);
+			meterOnBtn.setSelected(metering);
+			meterOffBtn.setEnabled(meter_en & metering);
+			meterOffBtn.setSelected(!metering);
+			cycleTxt.setBackground(color);
+			cycleTxt.setText(s_cycle);
+			queueTxt.setBackground(color);
+			queueTxt.setText(s_queue);
+			shrinkBtn.setEnabled(meter_en && metering);
+			growBtn.setEnabled(meter_en && metering);
 		}
 	}
 }
