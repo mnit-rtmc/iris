@@ -58,7 +58,7 @@ public class MeterStatusPanel extends FormPanel
 	protected final JTextField txtCycle = createTextField();
 
 	/** Queue component */
-	protected final JTextField txtQueue = new JTextField();
+	protected final JTextField txtQueue = createTextField();
 
 	/** Queue shrink button */
 	protected final JButton shrink = new JButton("Shrink");
