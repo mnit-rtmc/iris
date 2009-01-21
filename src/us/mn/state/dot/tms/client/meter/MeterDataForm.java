@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 
 /**
- * Action to display a plotlet containing ramp meter data
+ * Form containing a plotlet for ramp meter data
  *
  * @author Douglas Lau
  */
