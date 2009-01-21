@@ -15,15 +15,19 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
+import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.TmsSelectionEvent;
-import us.mn.state.dot.tms.client.TmsSelectionListener;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
@@ -34,8 +38,14 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
  * @author Douglas Lau
  */
 public class MeterStatusPanel extends FormPanel
-	implements TmsSelectionListener
+	implements ProxyListener<RampMeter>, ProxySelectionListener<RampMeter>
 {
+	/** Format the meter cycle time from the given release rate */
+	static protected String formatCycle(float rate) {
+		int i_cycle = Math.round(36000 / rate);
+		return "" + (i_cycle / 10) + "." + (i_cycle % 10) + " seconds";
+	}
+
 	/** Name component */
 	protected final JTextField nameTxt = createTextField();
 
@@ -44,6 +54,9 @@ public class MeterStatusPanel extends FormPanel
 
 	/** Location component */
 	protected final JTextField locationTxt = createTextField();
+
+	/** Operation component */
+	protected final JTextField operationTxt = createTextField();
 
 	/** Status component */
 	protected final JTextField statusTxt = createTextField();
@@ -73,25 +86,37 @@ public class MeterStatusPanel extends FormPanel
 	/** Button for data plotlet */
 	protected final JButton dataBtn = new JButton("Data");
 
-	/** Ramp meter manager */
-	protected final MeterManager manager;
-
 	/** TMS connection */
 	protected final TmsConnection connection;
 
-	/** Ramp meter proxy object */
-	protected RampMeter proxy = null;
+	/** Ramp meter manager */
+	protected final MeterManager manager;
+
+	/** Selection model */
+	protected final ProxySelectionModel<RampMeter> selectionModel;
+
+	/** Ramp meter proxy cache */
+	protected final TypeCache<RampMeter> cache;
+
+	/** Selected ramp meter */
+	protected RampMeter selected = null;
 
 	/** Create a new MeterStatusPanel */
 	public MeterStatusPanel(TmsConnection tc, MeterManager m) {
 		super(true);
 		connection = tc;
 		manager = m;
+		selectionModel = manager.getSelectionModel();
+		cache = st.getRampMeters();
+		ButtonGroup group = new ButtonGroup();
+		group.add(meterOnBtn);
+		group.add(meterOffBtn);
 		setTitle("Selected Ramp Meter");
 		setEnabled(false);
 		add("Name", nameTxt);
 		addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
+		addRow("Operation", operationTxt);
 		addRow("Status", statusTxt);
 		add("Metering", meterOnBtn);
 		addRow(meterOffBtn);
@@ -101,14 +126,90 @@ public class MeterStatusPanel extends FormPanel
 		addRow(growBtn);
 		addRow("Lock", lockCmb);
 		addRow(dataBtn);
-		manager.getSelectionModel().addTmsSelectionListener(this);
+
+		setSelected(null);
+		cache.addProxyListener(this);
+		selectionModel.addProxySelectionListener(this);
 	}
 
 	/** Dispose of the panel */
 	public void dispose() {
-		manager.getSelectionModel().removeTmsSelectionListener(this);
-		setMeter(null);
+		selectionModel.removeProxySelectionListener(this);
+		cache.removeProxyListener(this);
+		setSelected(null);
 		removeAll();
+	}
+
+	/** A new proxy has been added */
+	public void proxyAdded(RampMeter proxy) {
+		// we're not interested
+	}
+
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
+	}
+
+	/** A proxy has been removed */
+	public void proxyRemoved(RampMeter proxy) {
+		if(proxy == selected) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					setSelected(null);
+				}
+			});
+		}
+	}
+
+	/** A proxy has been changed */
+	public void proxyChanged(final RampMeter proxy, final String a) {
+		if(proxy == selected) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					updateAttribute(proxy, a);
+				}
+			});
+		}
+	}
+
+	/** Called whenever a meter is added to the selection */
+	public void selectionAdded(RampMeter s) {
+		if(selectionModel.getSelectedCount() <= 1)
+			setSelected(s);
+	}
+
+	/** Called whenever a meter is removed from the selection */
+	public void selectionRemoved(RampMeter s) {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(RampMeter m: selectionModel.getSelected())
+				setSelected(m);
+		} else if(s == selected)
+			setSelected(null);
+	}
+
+	/** Select a new meter to display */
+	public void setSelected(final RampMeter proxy) {
+		selected = proxy;
+		if(proxy != null) {
+			meterOnBtn.setAction(new TurnOnAction(proxy));
+			meterOffBtn.setAction(new TurnOffAction(proxy));
+			shrinkBtn.setAction(new ShrinkQueueAction(proxy));
+			growBtn.setAction(new GrowQueueAction(proxy));
+			dataBtn.setAction(new MeterDataAction(proxy,
+				connection.getDesktop(),
+				connection.getDataFactory()));
+			updateAttribute(proxy, null);
+		} else {
+			nameTxt.setText("");
+			cameraTxt.setText("");
+			locationTxt.setText("");
+			operationTxt.setText("");
+			statusTxt.setText("");
+			cycleTxt.setText("");
+			lockCmb.setSelectedIndex(0);
+			queueTxt.setText("");
+		}
+		setEnabled(proxy != null);
 	}
 
 	/** Enable or disable the status panel */
@@ -122,113 +223,47 @@ public class MeterStatusPanel extends FormPanel
 		dataBtn.setEnabled(enabled);
 	}
 
-	/** Select a new meter to display */
-	public void setMeter(final RampMeter p) {
-		proxy = p;
-		if(p != null) {
-			refreshUpdate();
-			refreshStatus();
-		} else
-			clearMeter();
-		setEnabled(p != null);
-	}
-
-	/** Clear the meter status panel */
-	protected void clearMeter() {
-		nameTxt.setText("");
-		cameraTxt.setText("");
-		locationTxt.setText("");
-		statusTxt.setText("");
-		lockCmb.setText("");
-		cycleTxt.setText("");
-		queueTxt.setText("");
-	}
-
-	/** Selection changed to another meter */
-	public void selectionChanged(TmsSelectionEvent e) {
-		final Object o = e.getSelected();
-		if(o instanceof RampMeter)
-			setMeter((RampMeter)o);
-	}
-
-	/** Refresh the update status of the selected ramp meter */
-	public void refreshUpdate() {
-		final RampMeter p = proxy;
-		nameTxt.setText(p.getName());
-		cameraTxt.setText(p.getCameraId());
-		locationTxt.setText(p.getLocationString());
-		meterOnBtn.setAction(new TurnOnAction(p));
-		meterOffBtn.setAction(new TurnOffAction(p));
-		shrinkBtn.setAction(new ShrinkQueueAction(p));
-		growBtn.setAction(new GrowQueueAction(p));
-		dataBtn.setAction(new MeterDataAction(p,
-			connection.getDesktop(), connection.getDataFactory()));
-	}
-
-	/** Refresh the status of the ramp meter */
-	public void refreshStatus() {
-		final RampMeter p = proxy;
-		Color color = Color.GRAY;
-		String UNKNOWN = "???";
-		String s_status = UNKNOWN;
-		boolean metering = false;
-		boolean meter_en = false;
-		boolean isLocked = false;
-		String s_lockName = "";
-		String s_lockReason = "";
-		String s_cycle = UNKNOWN;
-		String s_queue = UNKNOWN;
-		try {
-			if(p == null)
-				return;
-			s_status = p.getStatus();
-			if(s_status == null) {
-				s_status = UNKNOWN;
-				return;
-			}
-			isLocked = p.isLocked();
-			if(isLocked) {
-				RampMeterLock lock = p.getLock();
-				s_lockName = lock.getUser();
-				if(s_lockName.indexOf('.') > 0) {
-					s_lockName = s_lockName.substring(0,
-						s_lockName.indexOf('.'));
-				}
-				s_lockReason = lock.getReason();
-			}
-			int mode = p.getControlMode();
-			if(mode == RampMeter.MODE_STANDBY ||
-				mode == RampMeter.MODE_CENTRAL)
-			{
-				meter_en = true;
-			}
-			if(p.isMetering()) {
-				metering = true;
-				int r = p.getReleaseRate();
-				int i_cycle = Math.round(36000.0f / r);
-				s_cycle = (i_cycle / 10) + "." +
-					(i_cycle % 10) + " seconds";
-			} else
-				s_cycle = "N/A";
-			if(p.queueExists())
-				s_queue = "Yes";
-			else
-				s_queue = "No";
-			color = null;
-		} finally {
-			statusTxt.setBackground(color);
-			statusTxt.setText(s_status);
-			lockCmb.setText(s_lockReason);
-			meterOnBtn.setEnabled(meter_en & !metering);
-			meterOnBtn.setSelected(metering);
-			meterOffBtn.setEnabled(meter_en & metering);
-			meterOffBtn.setSelected(!metering);
-			cycleTxt.setBackground(color);
-			cycleTxt.setText(s_cycle);
-			queueTxt.setBackground(color);
-			queueTxt.setText(s_queue);
-			shrinkBtn.setEnabled(meter_en && metering);
-			growBtn.setEnabled(meter_en && metering);
+	/** Update one attribute on the form */
+	protected void updateAttribute(RampMeter meter, String a) {
+		if(a == null || a.equals("name"))
+			nameTxt.setText(meter.getName());
+		if(a == null || a.equals("camera"))
+			cameraTxt.setText(getCameraName(meter));
+		// FIXME: this won't update when geoLoc attributes change
+		if(a == null || a.equals("geoLoc")) {
+			locationTxt.setText(GeoLocHelper.getDescription(
+				meter.getGeoLoc()));
 		}
+		if(a == null || a.equals("operation")) {
+			operationTxt.setText(meter.getOperation());
+			String status = getControllerStatus(meter);
+			if("".equals(status)) {
+				statusTxt.setForeground(null);
+				statusTxt.setBackground(null);
+			} else {
+				statusTxt.setForeground(Color.WHITE);
+				statusTxt.setBackground(Color.GRAY);
+			}
+			statusTxt.setText(status);
+		}
+		if(a == null || a.equals("rate")) {
+			Integer rate = meter.getRate();
+			if(rate != null) {
+				meterOnBtn.setSelected(true);
+				cycleTxt.setText(formatCycle(rate));
+			} else {
+				meterOffBtn.setSelected(true);
+				cycleTxt.setText("N/A");
+			}
+			shrinkBtn.setEnabled(rate != null);
+			growBtn.setEnabled(rate != null);
+		}
+		if(a == null || a.equals("queue")) {
+			RampMeterQueue q = RampMeterQueue.fromOrdinal(
+				meter.getQueue());
+			queueTxt.setText(q.description);
+		}
+		if(a == null || a.equals("lock"))
+			lockCmb.setSelectedIndex(meter.getLock());
 	}
 }

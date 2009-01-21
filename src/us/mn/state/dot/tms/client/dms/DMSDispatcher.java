@@ -223,12 +223,12 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
+		selectionModel.removeProxySelectionListener(this);
+		cache.removeProxyListener(this);
+		setSelected(null);
 		clearPager();
 		messageSelector.dispose();
 		removeAll();
-		selected = null;
-		selectionModel.removeProxySelectionListener(this);
-		cache.removeProxyListener(this);
 	}
 
 	/** Clear the DMS panel pager */
@@ -286,6 +286,21 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			box.add(Box.createHorizontalGlue());
 		}
 		return box;
+	}
+
+	/** Called whenever a sign is added to the selection */
+	public void selectionAdded(DMS s) {
+		if(selectionModel.getSelectedCount() <= 1)
+			setSelected(s);
+	}
+
+	/** Called whenever a sign is removed from the selection */
+	public void selectionRemoved(DMS s) {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(DMS dms: selectionModel.getSelected())
+				setSelected(dms);
+		} else if(s == selected)
+			setSelected(null);
 	}
 
 	/** Set the selected DMS */
@@ -375,32 +390,17 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		}
 	}
 
-	/** Called whenever a sign is added to the selection */
-	public void selectionAdded(DMS s) {
-		if(selectionModel.getSelectedCount() <= 1)
-			setSelected(s);
-	}
-
-	/** Called whenever a sign is removed from the selection */
-	public void selectionRemoved(DMS s) {
-		if(selectionModel.getSelectedCount() == 1) {
-			for(DMS dms: selectionModel.getSelected())
-				setSelected(dms);
-		} else if(s == selected)
-			setSelected(null);
-	}
-
 	/** Update one attribute on the form */
 	protected void updateAttribute(DMS dms, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(dms.getName());
+		if(a == null || a.equals("camera"))
+			cameraTxt.setText(getCameraName(dms));
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			locationTxt.setText(GeoLocHelper.getDescription(
 				dms.getGeoLoc()));
 		}
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(dms));
 		if(a == null || a.equals("lightOutput"))
 			brightnessTxt.setText("" + dms.getLightOutput() + "%");
 		if(a == null || a.equals("operation")) {
