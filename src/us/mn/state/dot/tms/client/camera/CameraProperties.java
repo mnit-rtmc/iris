@@ -111,7 +111,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		location.setCenter();
 		location.addRow(controller);
 		new ActionJob(this, controller) {
-			public void perform() throws Exception {
+			public void perform() {
 				controllerPressed();
 			}
 		};

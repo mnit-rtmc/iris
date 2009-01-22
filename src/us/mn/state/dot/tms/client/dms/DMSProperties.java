@@ -363,7 +363,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location.setCenter();
 		location.addRow(controllerBtn);
 		new ActionJob(this, controllerBtn) {
-			public void perform() throws Exception {
+			public void perform() {
 				controllerPressed();
 			}
 		};
