@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
-import us.mn.state.dot.tms.client.meter.RampMeterListForm;
+import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.system.SystemAttributeForm;
@@ -118,7 +118,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('M');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RampMeterListForm(tc));
+				desktop.show(new RampMeterForm(tc,
+					st.getRampMeters()));
 			}
 		};
 		add(item);
