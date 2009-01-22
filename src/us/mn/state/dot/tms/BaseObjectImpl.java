@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		namespace = ns;
 		SystemAttributeImpl.loadAll();
 		HolidayImpl.loadAll();
-		TimingPlanImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();
@@ -60,6 +59,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		WarningSignImpl.loadAll();
 		RampMeterImpl.loadAll();
 		DMSImpl.loadAll();
+		TimingPlanImpl.loadAll();
 	}
 
 	/** Get the primary key name */

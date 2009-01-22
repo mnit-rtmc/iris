@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,9 @@ public interface TimingPlan extends SonarObject {
 
 	/** Get the plan type */
 	int getPlanType();
+
+	/** Get the device */
+	Device2 getDevice();
 
 	/** Set the start time (minute of day) */
 	void setStartMin(int t);

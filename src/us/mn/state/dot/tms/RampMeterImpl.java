@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.comm.MessagePoller;
@@ -55,14 +54,10 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		return Math.min(r0, r1);
 	}
 
-	/** Ramp meter / timing plan table mapping */
-	static protected TableMapping mapping;
-
 	/** Load all the ramp meters */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading ramp meters...");
 		namespace.registerType(SONAR_TYPE, RampMeterImpl.class);
-		mapping = new TableMapping(store, "ramp_meter", "timing_plan");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, camera, " +
 			"lock FROM " + SONAR_TYPE  + ";",
@@ -146,12 +141,6 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	/** Initialize the transient state */
 	public void initTransients() {
 		super.initTransients();
-		TreeSet<TimingPlanImpl> p = new TreeSet<TimingPlanImpl>();
-		for(Object o: mapping.lookup(SONAR_TYPE, this)) {
-			p.add((TimingPlanImpl)namespace.lookupObject(
-				TimingPlan.SONAR_TYPE, (String)o));
-		}
-		plans = p.toArray(new TimingPlanImpl[0]);
 		lookupGreenDetector();
 	}
 
@@ -328,49 +317,6 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 				return (MeterPoller)p;
 		}
 		return null;
-	}
-
-	/** Array of timing plans for this meter */
-	protected TimingPlanImpl[] plans = new TimingPlanImpl[0];
-
-	/** Set all current timing plans which affect this meter */
-	public void setTimingPlans(TimingPlan[] p) {
-		// NOTE: this is needed for RampMeter interface --
-		//       doSetTimingPlans will always be used
-	}
-
-	/** Set all current timing plans which affect this meter */
-	public void doSetTimingPlans(TimingPlan[] p) throws TMSException {
-		TreeSet<Storable> pset = new TreeSet<Storable>();
-		for(TimingPlan plan: p) {
-			if(plan instanceof TimingPlanImpl)
-				pset.add((TimingPlanImpl)plan);
-			else
-				throw new ChangeVetoException("Invalid plan");
-		}
-		mapping.update(SONAR_TYPE, this, pset);
-		plans = pset.toArray(new TimingPlanImpl[0]);
-	}
-
-	/** Get an array of all timing plans which affect this meter */
-	public TimingPlan[] getTimingPlans() {
-		TimingPlanImpl[] plans = this.plans;	// Avoid race
-		TimingPlan[] p = new TimingPlan[plans.length];
-		for(int i = 0; i < plans.length; i++)
-			p[i] = plans[i];
-		return p;
-	}
-
-	/** Get meter plan states */
-	protected TreeSet<MeterPlanState> getMeterPlanStates() {
-		TimingPlanImpl[] plans = this.plans;	// Avoid race
-		TreeSet<MeterPlanState> states = new TreeSet<MeterPlanState>();
-		for(TimingPlanImpl plan: plans) {
-			TimingPlanState s = plan.getState();
-			if(s instanceof MeterPlanState && s.isWithin())
-				states.add((MeterPlanState)s);
-		}
-		return states;
 	}
 
 	/** Get the minimum release rate (vehicles per hour) */

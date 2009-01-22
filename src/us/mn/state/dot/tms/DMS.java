@@ -33,12 +33,6 @@ public interface DMS extends Device2 {
 	/** Get the travel time message template */
 	String getTravel();
 
-	/** Set array of all timing plans */
-	void setTimingPlans(TimingPlan[] p);
-
-	/** Get array of all timing plans */
-	TimingPlan[] getTimingPlans();
-
 	/** Set verification camera */
 	void setCamera(Camera c);
 

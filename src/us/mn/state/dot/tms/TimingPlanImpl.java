@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,19 +32,20 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading timing plans...");
 		namespace.registerType(SONAR_TYPE, TimingPlanImpl.class);
-		store.query("SELECT name, plan_type, start_min, stop_min, " +
-			"active, testing, target FROM " + SONAR_TYPE  + ";",
-			new ResultFactory()
+		store.query("SELECT name, plan_type, device, start_min, " +
+			"stop_min, active, testing, target FROM " +
+			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new TimingPlanImpl(
 					row.getString(1),	// name
 					row.getInt(2),		// plan_type
-					row.getInt(3),		// start_min
-					row.getInt(4),		// stop_min
-					row.getBoolean(5),	// active
-					row.getBoolean(6),	// testing
-					row.getInt(7)		// target
+					row.getString(3),	// device_io
+					row.getInt(4),		// start_min
+					row.getInt(5),		// stop_min
+					row.getBoolean(6),	// active
+					row.getBoolean(7),	// testing
+					row.getInt(8)		// target
 				));
 			}
 		});
@@ -55,6 +56,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("plan_type", plan_type);
+		map.put("device", device);
 		map.put("start_min", start_min);
 		map.put("stop_min", stop_min);
 		map.put("active", active);
@@ -79,11 +81,12 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Create a new timing plan */
-	protected TimingPlanImpl(String n, int p, int st, int sp, boolean a,
-		boolean tst, int t)
+	protected TimingPlanImpl(String n, int p, String d, int st, int sp,
+		boolean a, boolean tst, int t)
 	{
 		this(n);
 		plan_type = p;
+		device = d;
 		start_min = st;
 		stop_min = sp;
 		active = a;
@@ -97,6 +100,14 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	/** Get the plan type */
 	public int getPlanType() {
 		return plan_type;
+	}
+
+	/** Device */
+	protected Device2 device;
+
+	/** Get the device */
+	public Device2 getDevice() {
+		return device;
 	}
 
 	/** Timing plan start time (minute of day) */

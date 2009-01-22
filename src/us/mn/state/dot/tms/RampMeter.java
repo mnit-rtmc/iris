@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,12 +45,6 @@ public interface RampMeter extends Device2 {
 
 	/** Get the maximum allowed meter wait time (in seconds) */
 	int getMaxWait();
-
-	/** Set array of all timing plans */
-	void setTimingPlans(TimingPlan[] p);
-
-	/** Get array of all timing plans */
-	TimingPlan[] getTimingPlans();
 
 	/** Set verification camera */
 	void setCamera(Camera c);
