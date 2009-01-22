@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Device2;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TimingPlan;
+import us.mn.state.dot.tms.TimingPlanType;
 
 /**
  * Table model for timing plans 

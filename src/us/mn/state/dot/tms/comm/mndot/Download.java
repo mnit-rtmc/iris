@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -390,7 +390,7 @@ public class Download extends Controller170Operation implements TimingTable {
 		if(meter.getControlMode() != RampMeter.MODE_CENTRAL)
 			return;
 		for(TimingPlan p: meter.getTimingPlans()) {
-			if(p.getPlanType() == TimingPlan.SIMPLE)
+			if(p.getPlanType() == TimingPlanType.SIMPLE.ordinal())
 				updateTable(meter, p, red, rate, start, stop);
 		}
 	}

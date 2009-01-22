@@ -55,7 +55,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("plan_type", plan_type);
+		map.put("plan_type", plan_type.ordinal());
 		map.put("device", device);
 		map.put("start_min", start_min);
 		map.put("stop_min", stop_min);
@@ -85,8 +85,8 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 		boolean a, boolean tst, int t)
 	{
 		this(n);
-		plan_type = p;
-		device = d;
+		plan_type = TimingPlanType.fromOrdinal(p);
+		device = d; // FIXME
 		start_min = st;
 		stop_min = sp;
 		active = a;
@@ -95,11 +95,11 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Timing plan type */
-	protected int plan_type;
+	protected TimingPlanType plan_type;
 
 	/** Get the plan type */
 	public int getPlanType() {
-		return plan_type;
+		return plan_type.ordinal();
 	}
 
 	/** Device */

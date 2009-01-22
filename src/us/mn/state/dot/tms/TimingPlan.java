@@ -26,15 +26,6 @@ public interface TimingPlan extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "timing_plan";
 
-	/** Travel time timing plan */
-	int TRAVEL = 0;
-
-	/** Simple metering plan */
-	int SIMPLE = 1;
-
-	/** Stratified metering plan */
-	int STRATIFIED = 2;
-
 	/** Get the plan type */
 	int getPlanType();
 
