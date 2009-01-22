@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,8 +73,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			props.getProperty("UserName"),
 			props.getProperty("Password")
 		);
-		TrafficDeviceImpl.plan_mapping = new TableMapping(store,
-			"traffic_device", "timing_plan");
 	}
 
 	/** Load the TMS root object from the ObjectVault */

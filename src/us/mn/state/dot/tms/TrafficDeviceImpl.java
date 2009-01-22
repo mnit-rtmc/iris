@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,6 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 {
 	/** ObjectVault table name */
 	static public final String tableName = "traffic_device";
-
-	/** Table mapping for traffic_device_timing_plan relation */
-	static public TableMapping plan_mapping;
 
 	/** Traffic device ID regex pattern */
 	static protected final Pattern ID_PATTERN =
