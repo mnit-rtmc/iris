@@ -24,14 +24,19 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.FocusJob;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -51,11 +56,26 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		return "" + (i_cycle / 10) + "." + (i_cycle % 10) + " seconds";
 	}
 
+	/** Get the controller status */
+	static protected String getControllerStatus(RampMeter proxy) {
+		Controller c = proxy.getController();
+		if(c == null)
+			return "???";
+		else
+			return c.getStatus();
+	}
+
+	/** Location panel */
+	protected LocationPanel location;
+
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
+
+	/** Controller button */
+	protected final JButton controllerBtn = new JButton("Controller");
 
 	/** Meter type combo box component */
 	protected final JComboBox meterType = new JComboBox(
@@ -76,9 +96,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Cycle time component */
 	protected final JLabel cycle = new JLabel();
 
-	/** Queue combo box component */
-	protected final JComboBox queue = new JComboBox(
-		RampMeterQueue.getDescriptions());
+	/** Queue label component */
+	protected final JLabel queue = new JLabel();
 
 	/** Meter lock combo box component */
 	protected final JComboBox lock = new JComboBox(
@@ -97,6 +116,11 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(TmsConnection tc, RampMeter meter) {
 		super(TITLE, tc, meter);
 		state = tc.getSonarState();
+	}
+
+	/** Get the SONAR type cache */
+	protected TypeCache<RampMeter> getTypeCache() {
+		return state.getRampMeters();
 	}
 
 	/** Initialize the widgets on the form */
@@ -214,7 +238,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if(a == null || a.equals("timingPlan"))
 			plan_table.setModel(new TimingPlanModel(proxy));
 		if(a == null || a.equals("release")) {
-			Integer rate = meter.getRate();
+			Integer rate = proxy.getRate();
 			if(rate !=  null) {
 				release.setText(rate.toString());
 				cycle.setText(formatCycle(rate));
@@ -232,8 +256,15 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			lock.setSelectedIndex(proxy.getLock());
 		if(a == null || a.equals("operation")) {
 			operation.setText(proxy.getOperation());
-			l_status.setForeground(color);
-			l_status.setText(s_status);
+			String s = getControllerStatus(proxy);
+			if("".equals(s)) {
+				l_status.setForeground(null);
+				l_status.setBackground(null);
+			} else {
+				l_status.setForeground(Color.WHITE);
+				l_status.setBackground(Color.GRAY);
+			}
+			l_status.setText(s);
 		}
 	}
 }
