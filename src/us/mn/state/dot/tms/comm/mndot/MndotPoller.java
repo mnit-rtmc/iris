@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,15 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.EOFException;
+import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneControlSignalImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
+import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -62,7 +65,7 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	 * @return Red time (seconds) */
 	static float calculateRedTime(RampMeterImpl meter, int rate) {
 		float secs_per_veh = Interval.HOUR / (float)rate;
-		if(meter.getMeterType() == RampMeterType.SINGLE)
+		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
 			secs_per_veh /= 2;
 		float green = SystemAttributeHelper.getMeterGreenSecs();
 		float yellow = SystemAttributeHelper.getMeterYellowSecs();
@@ -81,11 +84,11 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	/** Calculate the release rate
 	 * @param red_time Red time (seconds)
 	 * @return Release rate (vehicles per hour) */
-	static int calculateReleaseRate(float red_time) {
+	static int calculateReleaseRate(RampMeterImpl meter, float red_time) {
 		float green = SystemAttributeHelper.getMeterGreenSecs();
 		float yellow = SystemAttributeHelper.getMeterYellowSecs();
 		float secs_per_veh = red_time + yellow + green;
-		if(meter.getMeterType() == RampMeterType.SINGLE)
+		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
 			secs_per_veh *= 2;
 		return Math.round(Interval.HOUR / secs_per_veh);
 	}
