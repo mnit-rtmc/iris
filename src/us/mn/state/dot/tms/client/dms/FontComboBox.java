@@ -14,42 +14,31 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
 import javax.swing.JComboBox;
-
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.dms.DMSDispatcher;
 import us.mn.state.dot.tms.Font;
 
 /**
  * Combobox for font selection. This combobox contains sonar Font objects.
  * It is single selection and non-editable. The combobox is loaded with all
  * IRIS fonts via the model FontComboBoxModel, which extends ProxyListModel.
- * @see DMSDispatcher, ProxyListModel, Font, FontImpl, DMS, DMSImpl, TypeCache
+ *
+ * @see ProxyListModel, Font, TypeCache
  * @author Michael Darter
  */
-public class FontComboBox extends JComboBox 
-{
-	/* parent container */
-	DMSDispatcher m_dmsDispatcher;
+public class FontComboBox extends JComboBox {
 
-	/* constructor */
-	public FontComboBox(DMSDispatcher dmsDispatcher, TypeCache<Font> arg_fonts) {
-		super();
-		assert dmsDispatcher != null;
-		m_dmsDispatcher = dmsDispatcher;
+	/** Create a new font combo box */
+	public FontComboBox(TypeCache<Font> arg_fonts) {
 		setModel(new FontComboBoxModel(arg_fonts));
 	}
 
 	/** 
-	 *  Get the currently selected font.
-	 *  @return The selected font or null of nothing selected.
+	 * Get the currently selected font.
+	 * @return The selected font or null of nothing selected.
 	 */
-	public Font getSelectedItem()
-	{
+	public Font getSelectedItem() {
 		Object obj = super.getSelectedItem();
 		if(obj == null)
 			return null;
@@ -60,23 +49,23 @@ public class FontComboBox extends JComboBox
 	}
 
 	/** 
-	 *  Get the name of the currently selected font.
-	 *  @return The selected font name or null of nothing selected.
+	 * Get the name of the currently selected font.
+	 * @return The selected font name or null of nothing selected.
 	 */
-	public String getSelectedItemName()
-	{
+	public String getSelectedItemName() {
 		Font f = getSelectedItem();
 		if(f == null)
 			return null;
 		return f.getName();
 	}
 
-	/** return the combobox item index of a matching item or -1 if not found */
+	/** return the combobox item index of a matching item or -1 if not
+	 * found */
 	protected int search(String fontName) { 
 		final int NOTFOUND = -1;
-		if( fontName == null )
+		if(fontName == null)
 			return NOTFOUND;
-		for(int i=0; i<getItemCount(); ++i) {
+		for(int i = 0; i < getItemCount(); ++i) {
 			Font f = (Font)getItemAt(i);
 			if(f.getName().equals(fontName))
 				return i;
@@ -91,9 +80,9 @@ public class FontComboBox extends JComboBox
 	}
 
 	/** 
-	 *  return the combobox index of the font specified in the
-	 *  associated DMS.
-	 *  @return the index of the preferred font else -1 for no selection.
+	 * Return the combobox index of the font specified in the
+	 * associated DMS.
+	 * @return the index of the preferred font else -1 for no selection.
 	 */
 	protected int getDefaultSelectionIndex() {
 		final int NOTFOUND = -1;
@@ -103,4 +92,3 @@ public class FontComboBox extends JComboBox
 		return search(fname);
 	}
 }
-

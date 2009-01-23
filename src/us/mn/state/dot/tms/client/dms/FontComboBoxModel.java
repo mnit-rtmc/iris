@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,23 +12,16 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import javax.swing.JComboBox;
-import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
-
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.Font;
 
 /**
  * Combobox model for fonts.
- * @see FontComboBox, DMSDispatcher, ProxyListModel, Font, FontImpl, TypeCache
+ * @see FontComboBox, ProxyListModel, Font, TypeCache
  * @author Michael Darter
  */
 public class FontComboBoxModel extends ProxyListModel<Font>
@@ -68,18 +61,4 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 		else
 			assert false : "unexpected type in setSelectedItem().";
 	}
-
-	/** return a list of available fonts (for debugging) */
-	/*
-	protected List<String> getFontNames(TypeCache<Font> tcf) {
-		LinkedList<String> fontNames = new LinkedList();
-		Map<String,Font> fonts = tcf.getAll();
-		synchronized(fonts) {
-			for(Font proxy: fonts.values()) {
-				fontNames.add(proxy.getName());
-			}
-		}
-		return fontNames;
-	}
-	*/
 }
