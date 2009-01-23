@@ -57,6 +57,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
@@ -596,8 +597,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create the travel time panel */
 	protected JPanel createTravelTimePanel() {
-		FormPanel panel = new FormPanel(true);
-		panel.addRow("Travel template", travel);
 		new FocusJob(travel) {
 			public void perform() {
 				proxy.setTravel(travel.getText());
@@ -614,15 +613,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 					awsControlled.isSelected());
 			}
 		};
-
-		// FIXME: this is b0rked
-		TimingPlanModel plan_model = new TimingPlanModel(
-			(TimingPlanList)tms.getTimingPlans().getList(), proxy);
-		plan_table.setModel(plan_model);
-		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
 		plan_table.setAutoCreateColumnsFromModel(false);
-		plan_table.setPreferredScrollableViewportSize(
-			new Dimension(300, 200));
+		plan_table.setModel(new TimingPlanModel(state.getTimingPlans(),
+			proxy));
+		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Travel template", travel);
 		panel.addRow(plan_table);
 		panel.addRow(I18NMessages.get("dms.aws_allowed"), awsAllowed);
 		panel.addRow(I18NMessages.get("dms.aws_controlled"),

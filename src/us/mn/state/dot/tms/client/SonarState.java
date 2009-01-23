@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -317,6 +318,14 @@ public class SonarState extends Client {
 		return sign_text;
 	}
 
+	/** Cache of timing plans */
+	protected final TypeCache<TimingPlan> timing_plans;
+
+	/** Get the timing plan cache */
+	public TypeCache<TimingPlan> getTimingPlans() {
+		return timing_plans;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler handler)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -374,6 +383,7 @@ public class SonarState extends Client {
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
 		sign_text = new TypeCache<SignText>(SignText.class, this);
+		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		singleton = this;
 		// FIXME: this is an ugly hack
 		SystemAttributeHelper.namespace = getNamespace();
@@ -410,6 +420,7 @@ public class SonarState extends Client {
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
+		populate(timing_plans);
 	}
 
 	/** Look up the specified user */

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sonar.Namespace;
 
 /**
  * Timing plan for operating a traffic management device
@@ -37,7 +38,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new TimingPlanImpl(
+				namespace.add(new TimingPlanImpl(namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// plan_type
 					row.getString(3),	// device_io
@@ -49,6 +50,15 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 				));
 			}
 		});
+	}
+
+	/** Lookup a device (DMS or ramp meter) */
+	static protected Device2 lookupDevice(Namespace ns, String d) {
+		Device2 dv = (Device2)ns.lookupObject(DMS.SONAR_TYPE, d);
+		if(dv != null)
+			return dv;
+		else
+			return (Device2)ns.lookupObject(RampMeter.SONAR_TYPE,d);
 	}
 
 	/** Get a mapping of the columns */
@@ -81,12 +91,20 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Create a new timing plan */
-	protected TimingPlanImpl(String n, int p, String d, int st, int sp,
-		boolean a, boolean tst, int t)
+	protected TimingPlanImpl(Namespace ns, String n, int p, String d,
+		int st, int sp, boolean a, boolean tst, int t)
+	{
+		this(n, TimingPlanType.fromOrdinal(p), lookupDevice(ns, d),
+		     st, sp, a, tst, t);
+	}
+
+	/** Create a new timing plan */
+	protected TimingPlanImpl(String n, TimingPlanType p, Device2 d, int st,
+		int sp, boolean a, boolean tst, int t)
 	{
 		this(n);
-		plan_type = TimingPlanType.fromOrdinal(p);
-		device = d; // FIXME
+		plan_type = p;
+		device = d;
 		start_min = st;
 		stop_min = sp;
 		active = a;

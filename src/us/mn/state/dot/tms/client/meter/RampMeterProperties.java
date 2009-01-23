@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
@@ -206,6 +207,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create timing plan panel */
 	protected JPanel createTimingPlanPanel() {
+		plan_table.setAutoCreateColumnsFromModel(false);
+		plan_table.setModel(new TimingPlanModel(state.getTimingPlans(),
+			proxy));
+		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(plan_table);
 		return panel;
@@ -235,8 +240,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			storage.setText("" + proxy.getStorage());
 		if(a == null || a.equals("wait"))
 			wait.setText("" + proxy.getMaxWait());
-		if(a == null || a.equals("timingPlan"))
-			plan_table.setModel(new TimingPlanModel(proxy));
 		if(a == null || a.equals("release")) {
 			Integer rate = proxy.getRate();
 			if(rate !=  null) {
