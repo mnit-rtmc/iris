@@ -627,4 +627,16 @@ public class SystemAttributeHelper {
 		return getValueBoolean(
 			SystemAttribute.MAP_NORTHERN_HEMISPHERE,true);
 	}
+
+	/** server uptime log active or inactive */
+	public static boolean uptimeServerLogActive() {
+		return getValueBoolean(
+			SystemAttribute.LOG_UPTIME_ACTIVE, false);
+	}
+
+	/** server uptime log file name */
+	public static String uptimeServerLogFileName() {
+		return getValue(SystemAttribute.LOG_UPTIME_FILENAME, 
+			"/var/www/html/irisuptimelog.csv");
+	}
 }

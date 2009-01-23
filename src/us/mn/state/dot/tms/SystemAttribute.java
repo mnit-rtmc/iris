@@ -179,6 +179,10 @@ public interface SystemAttribute extends SonarObject {
 	String AGENCY_ID_MNDOT = "mndot";
 	String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
 
+	/** server logging related */
+	String LOG_UPTIME_ACTIVE = "log_uptime_active";		// boolean
+	String LOG_UPTIME_FILENAME = "log_uptime_filename";	// string
+
 	/** Set the attribute value */
 	void setValue(String arg_value);
 

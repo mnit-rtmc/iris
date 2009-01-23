@@ -459,6 +459,9 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 	protected void do1MinuteJobs(final Completer comp) {
 		// write kml file
 		KmlFile.writeServerFile(this);
+
+		// write uptime log
+		UptimeLog.writeServerLog(namespace);
 	}
 
 	/** Poll all controllers 5 minute interval */
