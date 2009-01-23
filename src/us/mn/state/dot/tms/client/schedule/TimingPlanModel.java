@@ -24,11 +24,11 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device2;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanType;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for timing plans 
@@ -73,7 +73,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	};
 
 	/** Parse a time string */
-	static protected Date parseTime(String t) throws ChangeVetoException {
+	static protected Date parseTime(String t) {
 		for(int i = 0; i < TIME_FORMATS.length; i++) {
 			try {
 				return TIME_FORMATS[i].parse(t);
@@ -82,11 +82,11 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 				// Ignore
 			}
 		}
-		throw new ChangeVetoException("Invalid time format");
+		return null;
 	}
 
 	/** Parse a time string and return the minute-of-day */
-	static protected int parseMinute(String t) throws ChangeVetoException {
+	static protected int parseMinute(String t) {
 		Calendar c = Calendar.getInstance();
 		c.setTime(parseTime(t));
 		return c.get(Calendar.HOUR_OF_DAY) * 60 +
@@ -125,7 +125,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, "Name", false));
 		m.addColumn(createColumn(COL_TYPE, "Plan Type", false));
-		m.addColumn(createColumn(COL_ASSOCIATED, "Device", false));
+		m.addColumn(createColumn(COL_DEVICE, "Device", false));
 		m.addColumn(createColumn(COL_START, "Start Time", true));
 		m.addColumn(createColumn(COL_STOP, "Stop Time", true));
 		m.addColumn(createColumn(COL_ACTIVE, "Active", false));
@@ -139,9 +139,17 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 
 	/** Create a new timing plan table model */
 	public TimingPlanModel(TypeCache<TimingPlan> c, Device2 d) {
-		super(c, false);
+		super(c, d != null);
 		device = d;
 		initialize();
+	}
+
+	/** Add a new proxy to the table model */
+	protected int doProxyAdded(TimingPlan proxy) {
+		if(device == null || device == proxy.getDevice())
+			return super.doProxyAdded(proxy);
+		else
+			return -1;
 	}
 
 	/** Get the count of columns in the table */
@@ -169,81 +177,57 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 			return p.getName();
 		case COL_TYPE:
 			return TimingPlanType.fromOrdinal(p.getPlanType());
+		case COL_DEVICE:
+			Device2 d = p.getDevice();
+			if(d != null)
+				return d.getName();
+			else
+				return null;
+		case COL_START:
+			return timeString(p.getStartMin());
+		case COL_STOP:
+			return timeString(p.getStopMin());
+		case COL_ACTIVE:
+			return p.getActive();
+		case COL_TESTING:
+			return p.getTesting();
+		case COL_TARGET:
+			return p.getTarget();
 		default:
 			return null;
 		}
 	}
 
-
-
-
-
-
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		if(column == COL_TYPE)
-			return false;
-		else
-			return true;
+		return column != COL_NAME && column != COL_TYPE &&
+		       column != COL_DEVICE;
 	}
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		TimingPlan p = getProxy(row);
 		if(p == null)
-			return null;
+			return;
 		switch(column) {
-		case COL_ASSOCIATED:
-			setPlan(p, value);
-			break;
 		case COL_START:
-			setStart(p, value);
+			p.setStartMin(parseMinute(value.toString()));
 			break;
 		case COL_STOP:
-			setStop(p, value);
+			p.setStopMin(parseMinute(value.toString()));
 			break;
 		case COL_ACTIVE:
-			setActive(p, value);
+			if(value instanceof Boolean)
+				p.setActive((Boolean)value);
 			break;
 		case COL_TESTING:
-			setTesting(p, value);
+			if(value instanceof Boolean)
+				p.setTesting((Boolean)value);
+			break;
+		case COL_TARGET:
+			if(value instanceof Integer)
+				p.setTarget((Integer)value);
 			break;
 		}
-	}
-
-	/** Set the timing plan association */
-	protected void setPlan(TimingPlan plan, Object value) {
-		boolean a = ((Boolean)value).booleanValue();
-		dms.setTimingPlan(plan, a);
-	}
-
-	/** Set the start time */
-	protected void setStart(TimingPlan plan, Object value)
-		throws TMSException
-	{
-		int minute = parseMinute(value.toString());
-		plan.setStartTime(minute);
-	}
-
-	/** Set the stop time */
-	protected void setStop(TimingPlan plan, Object value)
-		throws TMSException
-	{
-		int minute = parseMinute(value.toString());
-		plan.setStopTime(minute);
-	}
-
-	/** Set the plan active flag */
-	protected void setActive(TimingPlan plan, Object value)
-		throws TMSException
-	{
-		boolean active = ((Boolean)value).booleanValue();
-		plan.setActive(active);
-	}
-
-	/** Set the plan testing flag */
-	protected void setTesting(TimingPlan plan, Object value) {
-		boolean testing = ((Boolean)value).booleanValue();
-		plan.setTesting(testing);
 	}
 }
