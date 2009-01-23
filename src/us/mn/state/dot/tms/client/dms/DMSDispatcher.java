@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -123,8 +124,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	protected final JButton queryStatusBtn = new JButton(I18NMessages.get(
 		"dms.query_status"));
 
-	/** AWS checkbox (optional) */
-	protected AwsCheckBox awsCheckBox = null;
+	/** AWS controlled checkbox (optional) */
+	protected final JCheckBox awsControlledCbx = new JCheckBox(
+		I18NMessages.get("dms.aws_controlled"));
 
 	/** Currently logged in user */
 	protected final User user;
@@ -172,13 +174,8 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			boxRight.add(buildDurationBox());
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
 			boxRight.add(buildFontSelectorBox(st.getFonts()));
-		if(SystemAttributeHelper.isAwsEnabled()) {
-			awsCheckBox = new AwsCheckBox(getAwsProxyName(),
-				I18NMessages.get("dms.aws"));
-			JPanel p = new JPanel(new FlowLayout());
-			p.add(awsCheckBox);
-			boxRight.add(p);
-		}
+		if(SystemAttributeHelper.isAwsEnabled())
+			boxRight.add(buildAwsControlledBox());
 		boxRight.add(Box.createVerticalStrut(4));
 		boxRight.add(buildButtonPanel());
 		boxRight.add(Box.createVerticalGlue());
@@ -251,10 +248,26 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Build the font selector combo box */
 	protected JPanel buildFontSelectorBox(TypeCache<Font> tcf) {
 		assert tcf != null;
-		fontCmb = new FontComboBox(this, tcf);
+		fontCmb = new FontComboBox(tcf);
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel("Font"));
 		p.add(fontCmb);
+		return p;
+	}
+
+	/** Build the AWS controlled box */
+	protected JPanel buildAwsControlledBox() {
+		new ActionJob(awsControlledCbx) {
+			public void perform() {
+				DMS dms = selected;
+				if(dms != null) {
+					dms.setAwsControlled(
+						awsControlledCbx.isSelected());
+				}
+			}
+		};
+		JPanel p = new JPanel(new FlowLayout());
+		p.add(awsControlledCbx);
 		return p;
 	}
 
@@ -313,16 +326,13 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			clearBtn.setAction(new ClearDmsAction(dms,
 				user.getName()));
 			queryStatusBtn.setEnabled(true);
-			if(SystemAttributeHelper.isDmsDurationEnabled()) {
-				durationCmb.setEnabled(true);
-				durationCmb.setSelectedIndex(0);
-			}
+			durationCmb.setEnabled(true);
+			durationCmb.setSelectedIndex(0);
 			if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
 				fontCmb.setEnabled(true);
 				fontCmb.setDefaultSelection();
 			}
-			if(SystemAttributeHelper.isAwsEnabled())
-				awsCheckBox.setProxy(getAwsProxyName());
+			awsControlledCbx.setEnabled(true);
 			dmsPanel.setSign(dms);
 			clearPager();
 			dmsPanelPager = new DMSPanelPager(dmsPanel);
@@ -338,16 +348,13 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		cameraTxt.setText("");
 		locationTxt.setText("");
 		brightnessTxt.setText("");
-		if(SystemAttributeHelper.isDmsDurationEnabled()) {
-			durationCmb.setEnabled(false);
-			durationCmb.setSelectedIndex(0);
-		}
+		durationCmb.setEnabled(false);
+		durationCmb.setSelectedIndex(0);
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
 			fontCmb.setEnabled(false);
 			fontCmb.setDefaultSelection();
 		}
-		if(SystemAttributeHelper.isAwsEnabled())
-			awsCheckBox.setProxy(null);
+		awsControlledCbx.setEnabled(false);
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
 		queryStatusBtn.setEnabled(false);

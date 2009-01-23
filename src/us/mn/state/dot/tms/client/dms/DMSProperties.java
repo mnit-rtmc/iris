@@ -22,6 +22,7 @@ import java.awt.GridBagLayout;
 import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -151,6 +152,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Timing plan table component */
 	protected final JTable plan_table = new JTable();
+
+	/** AWS allowed component */
+	protected final JCheckBox awsAllowed = new JCheckBox();
+
+	/** AWS controlled component */
+	protected final JCheckBox awsControlled = new JCheckBox();
 
 	/** Make label */
 	protected final JLabel make = new JLabel();
@@ -596,6 +603,17 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				proxy.setTravel(travel.getText());
 			}
 		};
+		new ActionJob(this, awsAllowed) {
+			public void perform() {
+				proxy.setAwsAllowed(awsAllowed.isSelected());
+			}
+		};
+		new ActionJob(this, awsControlled) {
+			public void perform() {
+				proxy.setAwsControlled(
+					awsControlled.isSelected());
+			}
+		};
 
 		// FIXME: this is b0rked
 		TimingPlanModel plan_model = new TimingPlanModel(
@@ -606,6 +624,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		plan_table.setPreferredScrollableViewportSize(
 			new Dimension(300, 200));
 		panel.addRow(plan_table);
+		panel.addRow(I18NMessages.get("dms.aws_allowed"), awsAllowed);
+		panel.addRow(I18NMessages.get("dms.aws_controlled"),
+			awsControlled);
 		return panel;
 	}
 
@@ -793,6 +814,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			camera.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("travel"))
 			travel.setText(proxy.getTravel());
+		if(a == null || a.equals("awsAllowed"))
+			awsAllowed.setSelected(proxy.getAwsAllowed());
+		if(a == null || a.equals("awsControlled"))
+			awsControlled.setSelected(proxy.getAwsControlled());
 		if(a == null || a.equals("make")) {
 			String m = proxy.getMake();
 			make.setText(m);

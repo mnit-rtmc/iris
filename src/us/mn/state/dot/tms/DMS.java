@@ -39,6 +39,18 @@ public interface DMS extends Device2 {
 	/** Get verification camera */
 	Camera getCamera();
 
+	/** Allow (or deny) sign control by Automated Warning System */
+	void setAwsAllowed(boolean a);
+
+	/** Is sign allowed to be controlled by Automated Warning System? */
+	boolean getAwsAllowed();
+
+	/** Set sign to Automated Warning System controlled */
+	void setAwsControlled(boolean a);
+
+	/** Is sign controlled by Automated Warning System? */
+	boolean getAwsControlled();
+
 	/* Transient attributes (not stored in database) */
 
 	/** Get the make */

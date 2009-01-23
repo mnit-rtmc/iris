@@ -62,8 +62,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 		System.err.println("Loading DMS...");
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"travel, camera FROM " + SONAR_TYPE  + ";",
-			new ResultFactory()
+			"travel, camera, aws_allowed, aws_controlled FROM " +
+			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new DMSImpl(namespace,
@@ -73,7 +73,9 @@ public class DMSImpl extends Device2Impl implements DMS {
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
 					row.getString(6),	// travel
-					row.getString(7)	// camera
+					row.getString(7),	// camera
+					row.getBoolean(8),	// aws_allowed
+					row.getBoolean(9)      // aws_controlled
 				));
 			}
 		});
@@ -89,6 +91,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 		map.put("notes", notes);
 		map.put("travel", travel);
 		map.put("camera", camera);
+		map.put("aws_allowed", awsAllowed);
+		map.put("aws_controlled", awsControlled);
 		return map;
 	}
 
@@ -112,22 +116,24 @@ public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, String t, Camera cam)
+		int p, String nt, String t, Camera cam, boolean aa, boolean ac)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
 		travel = t;
 		camera = cam;
+		awsAllowed = aa;
+		awsControlled = ac;
 	}
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String t, String cam)
+		int p, String nt, String t, String cam, boolean aa, boolean ac)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-			(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
-			c), p, nt, t,
-			(Camera)ns.lookupObject(Camera.SONAR_TYPE, cam));
+		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
+		     p, nt, t, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
+		     aa, ac);
 	}
 
 	/** Initialize the transient state */
@@ -228,6 +234,48 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Get verification camera */
 	public Camera getCamera() {
 		return camera;
+	}
+
+	/** Administrator allowed AWS control */
+	protected boolean awsAllowed;
+
+	/** Allow (or deny) sign control by Automated Warning System */
+	public void setAwsAllowed(boolean a) {
+		awsAllowed = a;
+	}
+
+	/** Allow (or deny) sign control by Automated Warning System */
+	public void doSetAllowed(boolean a) throws TMSException {
+		if(a == awsAllowed)
+			return;
+		store.update(this, "awsAllowed", a);
+		setAwsAllowed(a);
+	}
+
+	/** Is sign allowed to be controlled by Automated Warning System? */
+	public boolean getAwsAllowed() {
+		return awsAllowed;
+	}
+
+	/** AWS controlled */
+	protected boolean awsControlled;
+
+	/** Set sign to Automated Warning System controlled */
+	public void setAwsControlled(boolean a) {
+		awsControlled = a;
+	}
+
+	/** Set sign to Automated Warning System controlled */
+	public void doSetControlled(boolean a) throws TMSException {
+		if(a == awsControlled)
+			return;
+		store.update(this, "awsControlled", a);
+		setAwsControlled(a);
+	}
+
+	/** Is sign controlled by Automated Warning System? */
+	public boolean getAwsControlled() {
+		return awsControlled;
 	}
 
 	/** Make (manufacturer) */
