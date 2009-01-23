@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2008  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ abstract public class DMSOperation extends Device2Operation {
 	public void handleException(IOException e) {
 		if(e instanceof ChecksumException) {
 			ChecksumException ce = (ChecksumException)e;
-			DMS_LOG.log(dms.getId() + " (" + toString() +
+			DMS_LOG.log(dms.getName() + " (" + toString() +
 				"), " + ce.getScannedData());
 		}
 		super.handleException(e);

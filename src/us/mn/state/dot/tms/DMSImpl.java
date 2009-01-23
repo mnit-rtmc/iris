@@ -1003,6 +1003,16 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return heatTapeStatus;
 	}
 
+	/** Feedback brightness sample data */
+	public void feedbackBrightness(BrightnessSample s) {
+		// FIXME: store brightness sample in database
+	}
+
+	/** Lookup recent brightness feedback sample data */
+	public void queryBrightnessFeedback(BrightnessSample.Handler h) {
+		// FIXME: lookup samples in database
+	}
+
 	/** Update the travel times for this sign */
 	public void updateTravelTimes() {
 		if(isWithin())

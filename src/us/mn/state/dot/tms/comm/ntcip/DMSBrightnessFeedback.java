@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class DMSBrightnessFeedback extends DMSOperation {
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
 			mess.getRequest();
-			DMS_LOG.log(dms.getId() + ": " + brightness);
+			DMS_LOG.log(dms.getName() + ": " + brightness);
 			if(!control.isPhotocell())
 				return new SetPhotocellControl();
 			else
@@ -96,10 +96,10 @@ public class DMSBrightnessFeedback extends DMSOperation {
 		}
 	}
 
-	/** Phase to set brightness control mode */
-	protected class SetBrightnessControl extends Phase {
+	/** Phase to set photocell control mode */
+	protected class SetPhotocellControl extends Phase {
 
-		/** Set the brightness control mode */
+		/** Set the photocell control mode */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			int mode = DmsIllumControl.PHOTOCELL;
 			mess.add(new DmsIllumControl(mode));
@@ -114,7 +114,7 @@ public class DMSBrightnessFeedback extends DMSOperation {
 		/** Set the brightness table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			brightness.setTable(calculateTable());
-			DMS_LOG.log(dms.getId() + ": " + brightness);
+			DMS_LOG.log(dms.getName() + ": " + brightness);
 			mess.add(brightness);
 //			mess.setRequest();
 			return null;
@@ -123,19 +123,21 @@ public class DMSBrightnessFeedback extends DMSOperation {
 
 	/** Get the brightness table as a list of samples */
 	protected int[][] calculateTable() throws IOException {
-		BrightnessMapping down = new BrightnessMapping(true);
-		BrightnessMapping up = new BrightnessMapping(false);
+		final BrightnessMapping down = new BrightnessMapping(true);
+		final BrightnessMapping up = new BrightnessMapping(false);
 		int[][] table = brightness.getTable();
 		for(int[] level: table) {
 			down.put(level[1], level[0], false);
 			up.put(level[2], level[0], false);
 		}
-		for(BrightnessSample s: dms.lookupBrightnessFeedback()) {
-			down.put(s.photocell, s.output,
-				s.request == SignRequest.BRIGHTNESS_TOO_DIM);
-			up.put(s.photocell, s.output,
-				s.request == SignRequest.BRIGHTNESS_TOO_BRIGHT);
-		}
+		dms.queryBrightnessFeedback(new BrightnessSample.Handler() {
+			public void handle(BrightnessSample s) {
+				down.put(s.photocell, s.output, s.feedback ==
+					SignRequest.BRIGHTNESS_TOO_DIM);
+				up.put(s.photocell, s.output, s.feedback ==
+					SignRequest.BRIGHTNESS_TOO_BRIGHT);
+			}
+		});
 		int[][] tbl = new int[table.length][3];
 		for(int i = 0; i < table.length; i++) {
 			int light = table[i][0];
