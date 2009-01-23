@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.TMSObjectImpl;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.MultiString;
@@ -47,13 +46,13 @@ public class DMSDefaultDownload extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsIllumMaxPhotocellLevel level =
 				new DmsIllumMaxPhotocellLevel();
-			mess.add(level);
 			DmsIllumNumBrightLevels levels =
 				new DmsIllumNumBrightLevels();
+			mess.add(level);
 			mess.add(levels);
 			mess.getRequest();
-			dms.setMaxPhotocellLevel(level.getInteger());
-			dms.setBrightnessLevels(levels.getInteger());
+			DMS_LOG.log(dms.getName() + ": " + level);
+			DMS_LOG.log(dms.getName() + ": " + levels);
 			return new BrightnessTable();
 		}
 	}
@@ -63,16 +62,15 @@ public class DMSDefaultDownload extends DMSOperation {
 
 		/** Get the brightness table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			int[] table = dms.getBrightnessTable();
 			DmsIllumBrightnessValues brightness =
-				new DmsIllumBrightnessValues(table);
-			mess.add(brightness);
+				new DmsIllumBrightnessValues();
 			DmsIllumControl control = new DmsIllumControl(
 				DmsIllumControl.PHOTOCELL);
+			mess.add(brightness);
 			mess.add(control);
 			mess.getRequest();
-			dms.setBrightnessTable(brightness.getTable());
-			DMS_LOG.log(dms.getId() + ": " + brightness);
+			DMS_LOG.log(dms.getName() + ": " + brightness);
+			DMS_LOG.log(dms.getName() + ": " + control);
 			return new CommLoss();
 		}
 	}
@@ -143,9 +141,10 @@ public class DMSDefaultDownload extends DMSOperation {
 
 		/** Set Ledstar-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new LedHighTempCutoff(DMS.HIGH_TEMP_CUTOFF));
+			mess.add(new LedHighTempCutoff(
+				SystemAttributeHelper.getDmsHighTempCutoff()));
 			mess.add(new LedSignErrorOverride());
-			mess.add(new LedBadPixelLimit(DMS.BAD_PIXEL_LIMIT));
+			mess.add(new LedBadPixelLimit(0));
 			try { mess.setRequest(); }
 			catch(SNMP.Message.NoSuchName e) {
 				// Must not be a Ledstar sign
@@ -160,7 +159,8 @@ public class DMSDefaultDownload extends DMSOperation {
 
 		/** Set Skyline-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsTempCritical(DMS.HIGH_TEMP_CUTOFF));
+			mess.add(new DmsTempCritical(
+				SystemAttributeHelper.getDmsHighTempCutoff()));
 			mess.add(new DynBrightDayNight(32));
 			mess.add(new DynBrightDayRate(1));
 			mess.add(new DynBrightNightRate(15));
@@ -190,9 +190,7 @@ public class DMSDefaultDownload extends DMSOperation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
-			dms.notifyUpdate();
-		else
+		if(!success)
 			controller.setError(null);
 		super.cleanup();
 	}

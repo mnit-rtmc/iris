@@ -252,6 +252,11 @@ public class SystemAttributeHelper {
 		return getValueInt(SystemAttribute.DMS_PIXEL_ON_LIMIT, 1);
 	}
 
+	/** Get the DMS high temperature cutoff (degress Celsius) */
+	static public int getDmsHighTempCutoff() {
+		return getValueInt(SystemAttribute.DMS_HIGH_TEMP_CUTOFF, 60);
+	}
+
 	/** Get the DMS page on time (seconds) */
 	static public float getDmsPageOnSecs() {
 		return getValueFloat(SystemAttribute.DMS_PAGE_ON_SECS, 2.0f);
