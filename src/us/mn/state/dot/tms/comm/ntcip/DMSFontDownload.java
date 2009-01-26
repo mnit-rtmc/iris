@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,12 +70,14 @@ public class DMSFontDownload extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontVersionID version = new FontVersionID(index);
 			mess.add(version);
-			try { mess.getRequest(); }
+			try {
+				mess.getRequest();
+			}
 			catch(SNMP.Message.NoSuchName e) {
 				return new CreateFont();
 			}
 			int v = version.getInteger();
-			DMS_LOG.log(dms.getId() + " Font #" + index +
+			DMS_LOG.log(dms.getName() + " Font #" + index +
 				" versionID:" + v);
 			if(fontMatches(v))
 				return null;
