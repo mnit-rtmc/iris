@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -27,12 +28,12 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 public class DMSSetTimeRemaining extends DMSOperation {
 
 	/** Sign message to update */
-	protected final SignMessage message;
+	protected final SignMessageImpl message;
 
 	/** Create a new DMS set time remaining operation */
 	public DMSSetTimeRemaining(DMSImpl d, SignMessage m) {
 		super(COMMAND, d);
-		message = m;
+		message = (SignMessageImpl)m;
 	}
 
 	/** Create the first real phase of the operation */
@@ -50,7 +51,7 @@ public class DMSSetTimeRemaining extends DMSOperation {
 				message.getDuration());
 			mess.add(remaining);
 			mess.setRequest();
-			dms.setActiveMessage(message);
+			message.setDeployTime(System.currentTimeMillis());
 			return null;
 		}
 	}
