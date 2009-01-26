@@ -71,15 +71,15 @@ public class OpQueryMsg extends OpDms
 	}
 
 	/**
-	 * create message text given a bitmap, with no message text or owner.
+	 * Create message text given a bitmap.
 	 * It is important to create message text for the message because
 	 * the cmsserver returns a message containing a bitmap but with
 	 * no message text. IRIS requires both a bitmap and message text,
 	 * so this method constructs message text so IRIS will think it's a
 	 * message, rather than a blank sign.
 	 * 
-	 * @returns If bitmap is not blank, a page indicating it is an other
-	 *          system message. If bitmap is blank, then "" is returned.
+	 * @return If bitmap is not blank, a page indicating it is an other
+	 *         system message. If bitmap is blank, then "" is returned.
 	 */
 	static protected MultiString createMessageTextUsingBitmap(int numpages,
 		byte[] bm)
