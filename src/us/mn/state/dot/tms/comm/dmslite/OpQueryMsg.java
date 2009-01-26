@@ -341,7 +341,7 @@ public class OpQueryMsg extends OpDms {
 					SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR);
-					// FIXME: owner no set
+					// FIXME: owner not set
 					sm.setDuration(duramins);
 					m_dms.setMessageCurrent(sm);
 
