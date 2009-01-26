@@ -89,10 +89,10 @@ public class OpQueryMsg extends OpDms {
 	 * @return If bitmap is not blank, a page indicating it is an other
 	 *         system message. If bitmap is blank, then "" is returned.
 	 */
-	static protected String createMessageTextUsingBitmap(int numpages,
-		byte[] bm)
+	static protected String createMessageTextUsingBitmap(
+		BitmapGraphic[] pages)
 	{
-		if(isBitmapBlank(bm))
+		if(areBitmapsBlank(pages))
 			return ""; 
 
 		MultiString multi = new MultiString();
@@ -101,9 +101,7 @@ public class OpQueryMsg extends OpDms {
 		final String TEXT1 = SDMS.flagIgnoredSignLineHack("OTHER");
 		final String TEXT2 = SDMS.flagIgnoredSignLineHack("SYSTEM");
 		final String TEXT3 = SDMS.flagIgnoredSignLineHack("MESSAGE");
-
-		// build message
-		for(int i = 0; i < numpages; i++) {
+		for(int i = 0; i < pages.length; i++) {
 			multi.addText(TEXT1);
 			multi.addLine();
 			multi.addText(TEXT2);
@@ -114,12 +112,10 @@ public class OpQueryMsg extends OpDms {
 		return multi.toString();
 	}
 
-	/** Check if a bitmap is blank or null */
-	static protected boolean isBitmapBlank(byte[] b) {
-		if(b == null)
-			return true;
-		for(int i = 0; i < b.length; i++)
-			if(b[i] != 0)
+	/** Check if an array of bitmaps is blank */
+	static protected boolean areBitmapsBlank(BitmapGraphic[] pages) {
+		for(int i = 0; i < pages.length; i++)
+			if(pages[i].getLitCount() > 0)
 				return false;
 		return true;
 	}
@@ -203,8 +199,7 @@ public class OpQueryMsg extends OpDms {
 		for(int pg = 0; pg < numpgs; pg++)
 			pages[pg] = extractBitmap(argbitmap, pg);
 
-		String multi = createMessageTextUsingBitmap(numpgs,
-			argbitmap);
+		String multi = createMessageTextUsingBitmap(pages);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"multistring=" + multi);
 
