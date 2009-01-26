@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +68,8 @@ public class RedTimeCommand extends Device2Operation {
 			mess.setRequest();
 			float red = red_time / 10.0f;
 			int rate = MndotPoller.calculateReleaseRate(meter, red);
-			meter.setReleaseRate(rate);
+			// FIXME: should happen on SONAR thread
+			meter.setRateNotify(rate);
 			return null;
 		}
 	}
