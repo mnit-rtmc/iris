@@ -40,7 +40,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-final class TMSImpl extends TMSObjectImpl implements TMS {
+public final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Detector sample file */
 	static protected final String SAMPLE_XML = "det_sample.xml";
@@ -497,5 +497,10 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		});
 		for(VideoMonitorImpl m: restricted)
 			m.selectCamera("");
+	}
+
+	/** Lookup timing plans plans */
+	static public void lookupTimingPlans(Checker<TimingPlan> checker) {
+		namespace.findObject(TimingPlan.SONAR_TYPE, checker);
 	}
 }

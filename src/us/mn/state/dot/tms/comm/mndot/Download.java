@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -27,6 +28,8 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
+import us.mn.state.dot.tms.TimingPlanType;
+import us.mn.state.dot.tms.TMSImpl;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DownloadRequestException;
@@ -384,15 +387,21 @@ public class Download extends Controller170Operation implements TimingTable {
 	}
 
 	/** Update the timing tables with active timing plans */
-	protected void updateTimingTables(RampMeterImpl meter, int[] red,
-		int[] rate, int[] start, int[] stop)
+	protected void updateTimingTables(final RampMeterImpl meter,
+		final int[] red, final int[] rate, final int[] start,
+		final int[] stop)
 	{
-		if(meter.getControlMode() != RampMeter.MODE_CENTRAL)
-			return;
-		for(TimingPlan p: meter.getTimingPlans()) {
-			if(p.getPlanType() == TimingPlanType.SIMPLE.ordinal())
-				updateTable(meter, p, red, rate, start, stop);
-		}
+		TMSImpl.lookupTimingPlans(new Checker<TimingPlan>() {
+			public boolean check(TimingPlan p) {
+				if(p.getPlanType() ==
+				   TimingPlanType.SIMPLE.ordinal() &&
+				   p.getDevice() == meter)
+				{
+					updateTable(meter, p, red, rate, start,
+						stop);
+				}
+			}
+		});
 	}
 
 	/** Update one timing table with a stratified plan */
