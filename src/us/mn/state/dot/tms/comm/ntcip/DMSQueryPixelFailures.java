@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -79,7 +80,7 @@ public class DMSQueryPixelFailures extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			PixelFailureXLocation x_loc =
 				new PixelFailureXLocation(row);
-			PixelFailureXLocation y_loc =
+			PixelFailureYLocation y_loc =
 				new PixelFailureYLocation(row);
 			PixelFailureStatus status =
 				new PixelFailureStatus(row);
@@ -90,9 +91,9 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
 			if(status.isStuckOn())
-				stuck_on.setPixel(x, y);
+				stuck_on.setPixel(x, y, 1);
 			else
-				stuck_off.setPixel(x, y);
+				stuck_off.setPixel(x, y, 1);
 			row++;
 			if(row > rows.getInteger())
 				return this;
