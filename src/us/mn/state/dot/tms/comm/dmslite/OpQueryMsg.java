@@ -115,6 +115,23 @@ public class OpQueryMsg extends OpDms
 		return true;
 	}
 
+	/** Calculate the number of pages in a bitmap */
+	static protected int calcNumPages(byte[] bm, int width, int height) {
+		if(width<=0 || height<=0)
+			return 0;
+
+		// calc size of 1 page
+		int lenpg = width * height / 8;
+		if(lenpg <= 0)
+			return 0;
+
+		// calculate number of pages based on bitmap length
+		int npgs = bm.length / lenpg;
+		if(npgs * lenpg != bm.length)
+			return 0;
+		return npgs;
+	}
+
 	/** Create a new DMS query status object */
 	public OpQueryMsg(DMSImpl d) {
 		super(DEVICE_DATA, d, "OpQueryMsg");
@@ -133,25 +150,6 @@ public class OpQueryMsg extends OpDms
 			return new PhaseQueryCurrentMessage();
 		else
 			return null;
-	}
-
-	/** calculate the number of pages in a bitmap */
-	protected int calcNumPages(byte[] bm, int width, int height) {
-		if(width<=0 || height<=0)
-			return 0;
-
-		// calc size of 1 page
-		//int lenpg = m_dms.getSignWidthPixels()*m_dms.getSignHeightPixels()/8;
-		int lenpg = width * height / 8;
-		if(lenpg <= 0)
-			return 0;
-
-		// calculate number of pages based on bitmap length
-		int npgs = bm.length / lenpg;
-		//System.err.println("OpQueryMsg.calcnumPages(): bm.length="+bm.length+",lenpg="+lenpg+",npgs="+npgs);
-		if(npgs * lenpg != bm.length)
-			return 0;
-		return npgs;
 	}
 
 	/**
@@ -201,7 +199,7 @@ public class OpQueryMsg extends OpDms
 		    + argbitmap.length + ", owner="+owner+".");
 
 		// calc number of pages
-		int numpgs=this.calcNumPages(argbitmap, BM_WIDTH, BM_HEIGHT);
+		int numpgs = calcNumPages(argbitmap, BM_WIDTH, BM_HEIGHT);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): numpages=" + numpgs);
 		if(numpgs <= 0)
 			return null;
