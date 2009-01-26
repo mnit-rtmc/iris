@@ -16,7 +16,9 @@ package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -33,10 +35,7 @@ public class DMSQueryMessage extends DMSOperation {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		if(dms.hasObserver())
-			return new QuerySourceAndBrightness();
-		else
-			return new QueryMessageSource();
+		return new QueryMessageSource();
 	}
 
 	/** Source table (memory type) or the currently displayed message */
@@ -44,14 +43,18 @@ public class DMSQueryMessage extends DMSOperation {
 
 	/** Process the message table source from the sign controller */
 	protected Phase processMessageSource() {
-		DMS_LOG.log(dms.getId() + ": " + source);
-		SignMessage m = dms.getMessage();
+		DMS_LOG.log(dms.getName() + ": " + source);
+		SignMessageImpl m = (SignMessageImpl)dms.getMessageCurrent();
 		if(DmsMessageMemoryType.isBlank(source.getMemory())) {
 			/* The sign is blank. If IRIS says there should
 			 * be a message on the sign, that's wrong and
 			 * needs to be updated */
-			if(!m.isBlank())
-				dms.setMessageFromController("", 0);
+			if(!m.isBlank()) {
+				// FIXME: this should be on SONAR thread
+				SignMessage blank = dms.createMessage("",
+					DMSMessagePriority.SCHEDULED);
+				dms.setMessageCurrent(blank);
+			}
 		} else {
 			/* The sign is not blank. If IRIS says it
 			 * should be blank, then we need to query the
@@ -73,53 +76,6 @@ public class DMSQueryMessage extends DMSOperation {
 		}
 	}
 
-	/** Phase to query the message source and brightness */
-	protected class QuerySourceAndBrightness extends Phase {
-
-		/** Photocell level status */
-		protected final DmsIllumPhotocellLevelStatus p_level =
-			new DmsIllumPhotocellLevelStatus();
-
-		/** Brightness level status */
-		protected final DmsIllumBrightLevelStatus b_level =
-			new DmsIllumBrightLevelStatus();
-
-		/** Light output status */
-		protected final DmsIllumLightOutputStatus light =
-			new DmsIllumLightOutputStatus();
-
-		/** Illumination control */
-		protected final DmsIllumControl control = new DmsIllumControl();
-
-		/** Process the brightness values read from the sign */
-		protected void processBrightness() {
-			dms.setPhotocellLevel(p_level.getInteger());
-			dms.setBrightnessLevel(b_level.getInteger());
-			dms.setLightOutput(light.getPercent());
-			if(control.isManual())
-				dms.setManualBrightness(true);
-			else {
-				dms.setManualBrightness(false);
-				if(!control.isPhotocell()) {
-					DMS_LOG.log(dms.getId() + ": " +
-						control);
-				}
-			}
-		}
-
-		/** Query the current message source */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(source);
-			mess.add(p_level);
-			mess.add(b_level);
-			mess.add(light);
-			mess.add(control);
-			mess.getRequest();
-			processBrightness();
-			return processMessageSource();
-		}
-	}
-
 	/** Phase to query the current message */
 	protected class QueryCurrentMessage extends Phase {
 
@@ -135,12 +91,15 @@ public class DMSQueryMessage extends DMSOperation {
 				new DmsMessageTimeRemaining();
 			mess.add(time);
 			mess.getRequest();
-			DMS_LOG.log(dms.getId() + ": " + multi);
-			DMS_LOG.log(dms.getId() + ": " + status);
-			DMS_LOG.log(dms.getId() + ": " + time);
+			DMS_LOG.log(dms.getName() + ": " + multi);
+			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ": " + time);
 			if(status.isValid() && time.getInteger() > 0) {
-				dms.setMessageFromController(multi.getValue(),
-					time.getInteger());
+				// FIXME: this should be on SONAR thread
+				SignMessage message = dms.createMessage(
+					multi.getValue(),
+					DMSMessagePriority.SCHEDULED);
+				dms.setMessageCurrent(message);
 			}
 			return null;
 		}
