@@ -14,8 +14,11 @@
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 
 /**
  * Skyline IllumPowerStatus object
