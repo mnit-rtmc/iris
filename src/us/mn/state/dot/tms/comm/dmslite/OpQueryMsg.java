@@ -128,20 +128,8 @@ public class OpQueryMsg extends OpDms {
 	}
 
 	/** Calculate the number of pages in a bitmap */
-	static protected int calcNumPages(byte[] bm, int width, int height) {
-		if(width <= 0 || height <= 0)
-			return 0;
-
-		// calc size of 1 page
-		int lenpg = width * height / 8;
-		if(lenpg <= 0)
-			return 0;
-
-		// calculate number of pages based on bitmap length
-		int npgs = bm.length / lenpg;
-		if(npgs * lenpg != bm.length)
-			return 0;
-		return npgs;
+	static protected int calcNumPages(byte[] bm) {
+		return bm.length / BM_PGLEN_BYTES;
 	}
 
 	/** Extract a single page from a byte array.
@@ -218,7 +206,7 @@ public class OpQueryMsg extends OpDms {
 		    + argbitmap.length + ", owner=" + owner + ".");
 
 		// calc number of pages
-		int numpgs = calcNumPages(argbitmap, BM_WIDTH, BM_HEIGHT);
+		int numpgs = calcNumPages(argbitmap);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): numpages=" + numpgs);
 		if(numpgs <= 0)
 			return null;
