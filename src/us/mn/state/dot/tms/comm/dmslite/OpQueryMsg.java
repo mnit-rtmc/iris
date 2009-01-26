@@ -202,26 +202,20 @@ public class OpQueryMsg extends OpDms {
 			owner = "unknown";
 		if(sbitmap == null)
 			return null;
-		if(sbitmap.length() % BM_SIZE_HEXCHAR != 0 ) {
-			System.err.println("WARNING: received bogus sbitmap size: len="+sbitmap.length());
+		if(BM_HEIGHT != m_dms.getHeightPixels())
 			return null;
-		}
-		if(BM_HEIGHT != m_dms.getHeightPixels()) {
-			assert false : "bogus bitmap size: " + BM_HEIGHT + ", " + m_dms.getHeightPixels();
+		if(sbitmap.length() % BM_SIZE_HEXCHAR != 0) {
+			System.err.println("WARNING: received bogus sbitmap size: len="+sbitmap.length());
 			return null;
 		}
 
 		// convert bitmap to byte array
 		byte[] argbitmap = new HexString(sbitmap).toByteArray();
-		if(argbitmap == null) {
-			assert false;
-			return null;
-		}
 
 		System.err.println(
 		    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
 		    + m_dms.getWidthPixels() + ", argbitmap.len="
-		    + argbitmap.length + ", owner="+owner+".");
+		    + argbitmap.length + ", owner=" + owner + ".");
 
 		// calc number of pages
 		int numpgs = calcNumPages(argbitmap, BM_WIDTH, BM_HEIGHT);
