@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -93,13 +95,19 @@ public class DMSLampTest extends DMSOperation {
 			mess.add(l_off);
 			mess.add(l_on);
 			mess.getRequest();
-			String lamp = l_off.getValue();
-			if(lamp.equals("OK"))
-				lamp = l_on.getValue();
-			else if(!l_on.getValue().equals("OK"))
-				lamp += ", " + l_on.getValue();
-			dms.setLampStatus(lamp);
+			dms.setLampStatus(createFailureBitmaps(l_off, l_on));
 			return null;
 		}
+	}
+
+	/** Encode failure bitmaps to Base64 */
+	protected String[] createFailureBitmaps(LampFailureStuckOff l_off,
+		LampFailureStuckOn l_on)
+	{
+		String[] b64 = new String[2];
+		b64[DMS.STUCK_OFF_BITMAP] =
+			Base64.encode(l_off.getOctetString());
+		b64[DMS.STUCK_ON_BITMAP] = Base64.encode(l_on.getOctetString());
+		return b64;
 	}
 }
