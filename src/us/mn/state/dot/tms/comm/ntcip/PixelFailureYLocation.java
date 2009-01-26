@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,13 +24,7 @@ public class PixelFailureYLocation extends PixelFailureTable
 {
 	/** Create a new pixel failure Y location object */
 	public PixelFailureYLocation(int r) {
-		this(r, 1);
-	}
-
-	/** Create a new pixel failure Y location object */
-	public PixelFailureYLocation(int r, int i) {
 		super(r);
-		index = i;
 	}
 
 	/** Get the object name */
