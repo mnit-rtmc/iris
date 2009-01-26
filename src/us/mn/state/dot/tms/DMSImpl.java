@@ -1075,6 +1075,27 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return new SignMessageImpl(m, bitmaps, p);
 	}
 
+	/** Create a message for the sign */
+	public SignMessage createMessage(String m, BitmapGraphic[] pages,
+		DMSMessagePriority p)
+	{
+		Integer w = widthPixels;
+		Integer h = heightPixels;
+		if(w == null || w < 1)
+			return null;
+		if(h == null || h < 1)
+			return null;
+		BitmapGraphic[] bmaps = new BitmapGraphic[pages.length];
+		for(int i = 0; i < bmaps.length; i++) {
+			bmaps[i] = new BitmapGraphic(w, h);
+			bmaps[i].copy(pages[i]);
+		}
+		String[] bitmaps = new String[bmaps.length];
+		for(int i = 0; i < bmaps.length; i++)
+			bitmaps[i] = Base64.encode(bmaps[i].getBitmap());
+		return new SignMessageImpl(m, bitmaps, p);
+	}
+
 	/** Compose a travel time message */
 	protected String composeTravelTimeMessage()
 		throws InvalidMessageException

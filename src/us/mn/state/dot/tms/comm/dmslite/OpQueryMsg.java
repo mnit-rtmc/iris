@@ -89,12 +89,13 @@ public class OpQueryMsg extends OpDms {
 	 * @return If bitmap is not blank, a page indicating it is an other
 	 *         system message. If bitmap is blank, then "" is returned.
 	 */
-	static protected MultiString createMessageTextUsingBitmap(int numpages,
+	static protected String createMessageTextUsingBitmap(int numpages,
 		byte[] bm)
 	{
-		MultiString multi = new MultiString();
 		if(isBitmapBlank(bm))
-			return multi; 
+			return ""; 
+
+		MultiString multi = new MultiString();
 
 		// default text if no bitmap, see comments in method for why this is a hack
 		final String TEXT1 = SDMS.flagIgnoredSignLineHack("OTHER");
@@ -110,7 +111,7 @@ public class OpQueryMsg extends OpDms {
 			multi.addText(TEXT3);
 			multi.addPage();
 		}
-		return multi;
+		return multi.toString();
 	}
 
 	/** Check if a bitmap is blank or null */
@@ -172,25 +173,15 @@ public class OpQueryMsg extends OpDms {
 
 	/**
 	 * Create a SignMessage using a bitmap and no message text.
-	 * @param owner message owner.
 	 * @param sbitmap Bitmap as hexstring associated with message text.
-	 * 	           This bitmap is assumed to be a 96x25 bitmap which
-	 *                 dmslite will always return and is specific to 
-	 *                 Caltrans. 
-	 * @param dura message duration in minutes.
+	 *                This bitmap is required to be a 96x25 bitmap which
+	 *                dmslite will always return.
 	 * @return A SignMessage that contains the text of the message and 
 	 *         a rendered bitmap.
 	 */
-	private SignMessage createSignMessageWithBitmap(String owner, 
-		String sbitmap, int dura) 
-	{
-		if(owner == null)
-			owner = "unknown";
+	private SignMessageImpl createSignMessageWithBitmap(String sbitmap) {
 		if(sbitmap == null)
 			return null;
-		if(BM_HEIGHT != m_dms.getHeightPixels())
-			return null;
-
 		byte[] argbitmap = new HexString(sbitmap).toByteArray();
 		if(argbitmap.length % BM_PGLEN_BYTES != 0) {
 			System.err.println("WARNING: received bogus bitmap " +
@@ -200,9 +191,7 @@ public class OpQueryMsg extends OpDms {
 		}
 
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap() " +
-			"called: m_dms.width=" + m_dms.getWidthPixels() +
-			", argbitmap.len=" + argbitmap.length +
-			", owner=" + owner + ".");
+			"called: argbitmap.len=" + argbitmap.length + ".");
 
 		int numpgs = calcNumPages(argbitmap);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
@@ -214,17 +203,12 @@ public class OpQueryMsg extends OpDms {
 		for(int pg = 0; pg < numpgs; pg++)
 			pages[pg] = extractBitmap(argbitmap, pg);
 
-		MultiString multi = createMessageTextUsingBitmap(numpgs,
+		String multi = createMessageTextUsingBitmap(numpgs,
 			argbitmap);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
-			"multistring=" + multi.toString());
+			"multistring=" + multi);
 
-		// FIXME: resize bitmaps to actual sign width
-/*		BitmapGraphic bmgResize = new BitmapGraphic(
-			m_dms.getWidthPixels(), bm.height);
-		bmgResize.copy(bm); */
-
-		return m_dms.createMessage(multi, pages,
+		return (SignMessageImpl)m_dms.createMessage(multi, pages,
 			DMSMessagePriority.SCHEDULED);
 	}
 
@@ -362,17 +346,25 @@ public class OpQueryMsg extends OpDms {
 					SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR);
+					// FIXME: owner no set
 					sm.setDuration(duramins);
 					m_dms.setMessageCurrent(sm);
 
 				// don't have text
 				} else {
-					SignMessage sm = null;
-					if(usebitmap)
-						sm = createSignMessageWithBitmap(owner, bitmap, duramins);
-					if(sm == null)
-						sm = m_dms.createMessage("", DMSMessagePriority.BLANK);
-					m_dms.setMessageCurrent(sm);
+					SignMessageImpl sm = null;
+					if(usebitmap) {
+						sm = createSignMessageWithBitmap(bitmap);
+						sm.setDuration(duramins);
+						// FIXME: owner not set
+						m_dms.setMessageCurrent(sm);
+					}
+					if(sm == null) {
+						m_dms.setMessageCurrent(
+							m_dms.createMessage("",
+							DMSMessagePriority.BLANK
+						));
+					}
 				}
 
 			// valid flag is false
