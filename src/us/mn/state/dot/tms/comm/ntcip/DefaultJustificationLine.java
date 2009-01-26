@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2006  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class DefaultJustificationLine extends MultiCfg implements ASN1Integer {
 
 	/** Set the integer value */
 	public void setInteger(int value) {
-		justification = MultiString.JustificationLine.fromInt(value);
+		justification =MultiString.JustificationLine.fromOrdinal(value);
 	}
 
 	/** Get the integer value */
