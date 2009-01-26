@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,9 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.add(new DmsMessageStatus(
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				DmsMessageStatus.MODIFY_REQ));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.GenError e) {
 				if(modify) {
 					modify = false;
@@ -109,7 +111,9 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.add(new DmsMessageStatus(
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				DmsMessageStatus.VALIDATE_REQ));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.GenError e) {
 				return new ValidateMessageError();
 			}
@@ -163,11 +167,14 @@ public class DMSCommandMessage extends DMSOperation {
 				MAX_MESSAGE_PRIORITY,
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				messageCRC, 0));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.GenError e) {
 				return new ActivateMessageError();
 			}
-			dms.setActiveMessage(message);
+			// FIXME: this should happen on SONAR thread
+			dms.setMessageCurrent(message);
 			return new TimeRemaining();
 		}
 	}
