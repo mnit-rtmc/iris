@@ -128,6 +128,17 @@ public class OpQueryMsg extends OpDms {
 		return bm.length / BM_PGLEN_BYTES;
 	}
 
+	/** Extract a single page bitmap from a byte array.
+	 * @param argbitmap Bitmap of all pages
+	 * @param pg Page number to extract
+	 * @return BitmapGraphic of requested page */
+	static protected BitmapGraphic extractBitmap(byte[] argbitmap, int pg) {
+		byte[] nbm = extractPage(argbitmap, pg);
+		BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
+		bm.setBitmap(nbm);
+		return bm;
+	}
+
 	/** Extract a single page from a byte array.
 	 * @param argbitmap Bitmap of all pages
 	 * @param pg Page number to extract
@@ -166,9 +177,9 @@ public class OpQueryMsg extends OpDms {
 	 * 	           This bitmap is assumed to be a 96x25 bitmap which
 	 *                 dmslite will always return and is specific to 
 	 *                 Caltrans. 
-	 * @param dura message duration in mins.
+	 * @param dura message duration in minutes.
 	 * @return A SignMessage that contains the text of the message and 
-	 *  a rendered bitmap.
+	 *         a rendered bitmap.
 	 */
 	private SignMessage createSignMessageWithBitmap(String owner, 
 		String sbitmap, int dura) 
@@ -188,10 +199,10 @@ public class OpQueryMsg extends OpDms {
 			return null;
 		}
 
-		System.err.println(
-		    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
-		    + m_dms.getWidthPixels() + ", argbitmap.len="
-		    + argbitmap.length + ", owner=" + owner + ".");
+		System.err.println("OpQueryMsg.createSignMessageWithBitmap() " +
+			"called: m_dms.width=" + m_dms.getWidthPixels() +
+			", argbitmap.len=" + argbitmap.length +
+			", owner=" + owner + ".");
 
 		int numpgs = calcNumPages(argbitmap);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
@@ -200,27 +211,21 @@ public class OpQueryMsg extends OpDms {
 			return null;
 
 		BitmapGraphic[] pages = new BitmapGraphic[numpgs];
-		for(int pg = 0; pg < numpgs; pg++) {
-			byte[] nbm = extractPage(argbitmap, pg);
-			BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
-			bm.setBitmap(nbm);
-			pages[pg] = bm;
-		}
+		for(int pg = 0; pg < numpgs; pg++)
+			pages[pg] = extractBitmap(argbitmap, pg);
 
-		// create multistring
 		MultiString multi = createMessageTextUsingBitmap(numpgs,
 			argbitmap);
-		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
-
-
+		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
+			"multistring=" + multi.toString());
 
 		// FIXME: resize bitmaps to actual sign width
-		BitmapGraphic bmgResize = new BitmapGraphic(
+/*		BitmapGraphic bmgResize = new BitmapGraphic(
 			m_dms.getWidthPixels(), bm.height);
-		bmgResize.copy(bm);
+		bmgResize.copy(bm); */
 
-		// create SignMessage
-		return new SignMessage(owner, multi, bitmaps, dura);
+		return m_dms.createMessage(multi, pages,
+			DMSMessagePriority.SCHEDULED);
 	}
 
 	/**
@@ -366,7 +371,7 @@ public class OpQueryMsg extends OpDms {
 					if(usebitmap)
 						sm = createSignMessageWithBitmap(owner, bitmap, duramins);
 					if(sm == null)
-						sm = m_dms.createMessage("", DMSMessagePriority.SCHEDULED);
+						sm = m_dms.createMessage("", DMSMessagePriority.BLANK);
 					m_dms.setMessageCurrent(sm);
 				}
 
