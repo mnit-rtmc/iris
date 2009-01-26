@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,10 +115,6 @@ public class QueryMeterStatus extends Controller170Operation {
 	public void cleanup() {
 		completer.down();
 		super.cleanup();
-		if(meter1 != null)
-			meter1.notifyStatus();
-		if(meter2 != null)
-			meter2.notifyStatus();
 	}
 
 	/** Parse meter data and process it */
