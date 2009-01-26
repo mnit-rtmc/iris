@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -56,16 +58,10 @@ public class DMSQueryStatus extends DMSOperation {
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
 			mess.getRequest();
-			dms.setPhotocellLevel(p_level.getInteger());
-			dms.setBrightnessLevel(b_level.getInteger());
+			DMS_LOG.log(dms.getName() + ": " + p_level);
+			DMS_LOG.log(dms.getName() + ": " + b_level);
+			DMS_LOG.log(dms.getName() + ": " + control);
 			dms.setLightOutput(light.getPercent());
-			if(control.isManual())
-				dms.setManualBrightness(true);
-			else {
-				dms.setManualBrightness(false);
-				if(!control.isPhotocell())
-					DMS_LOG.log(dms.getId() + ": "+control);
-			}
 			return new ControllerTemperature();
 		}
 	}
@@ -135,9 +131,9 @@ public class DMSQueryStatus extends DMSOperation {
 				new PixelFailureTableNumRows();
 			mess.add(rows);
 			mess.getRequest();
-			dms.setErrorStatus(shortError);
-//			DMS_LOG.log(dms.getId() + ": " + door);
-			dms.setPixelFailureCount(rows.getInteger());
+			controller.setError(shortError.toString());
+//			DMS_LOG.log(dms.getName() + ": " + door);
+			DMS_LOG.log(dms.getName() + ": " + rows);
 			return new MoreFailures();
 		}
 	}
@@ -169,7 +165,7 @@ public class DMSQueryStatus extends DMSOperation {
 					Base64.encode(l_on.getOctetString());
 				dms.setLampStatus(lamp);
 			}
-			DMS_LOG.log(dms.getId() + ": " + con);
+			DMS_LOG.log(dms.getName() + ": " + con);
 			return new LedstarStatus();
 		}
 	}
@@ -194,10 +190,10 @@ public class DMSQueryStatus extends DMSOperation {
 			catch(SNMP.Message.NoSuchName e) {
 				return new SkylineStatus();
 			}
-			dms.setLdcPotBase(potBase.getInteger(), false);
-			dms.setPixelCurrentLow(low.getInteger(), false);
-			dms.setPixelCurrentHigh(high.getInteger(), false);
-			DMS_LOG.log(dms.getId() + ": " + bad);
+			dms.setLdcPotBase(potBase.getInteger());
+			dms.setPixelCurrentLow(low.getInteger());
+			dms.setPixelCurrentHigh(high.getInteger());
+			DMS_LOG.log(dms.getName() + ": " + bad);
 			return null;
 		}
 	}
@@ -217,7 +213,7 @@ public class DMSQueryStatus extends DMSOperation {
 				mess.getRequest();
 				dms.setHeatTapeStatus(heat.getValue());
 				dms.setPowerStatus(power.getBitmaps());
-				DMS_LOG.log(dms.getId() + ": " + sensor);
+				DMS_LOG.log(dms.getName() + ": " + sensor);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Ignore; only Skyline has these objects
