@@ -117,7 +117,7 @@ public class OpQueryMsg extends OpDms
 
 	/** Calculate the number of pages in a bitmap */
 	static protected int calcNumPages(byte[] bm, int width, int height) {
-		if(width<=0 || height<=0)
+		if(width <= 0 || height <= 0)
 			return 0;
 
 		// calc size of 1 page
@@ -130,6 +130,20 @@ public class OpQueryMsg extends OpDms
 		if(npgs * lenpg != bm.length)
 			return 0;
 		return npgs;
+	}
+
+	/** Extract a single page from a byte array */
+	static private byte[] extractPage(int pg, int pglen, byte[] argbitmap) {
+		if(argbitmap == null || pg < 0 || pglen <= 0)
+			return null;
+		if(argbitmap.length % pglen != 0 ) {
+			System.err.println("WARNING: extractPage() received bogus bitmap size: len=" +
+				argbitmap.length + ", pglen=" + pglen);
+			return null;
+		}
+		byte[] nbm = new byte[pglen];
+		System.arraycopy(argbitmap, pg * pglen, nbm, 0, pglen);
+		return nbm;
 	}
 
 	/** Create a new DMS query status object */
@@ -204,18 +218,13 @@ public class OpQueryMsg extends OpDms
 		if(numpgs <= 0)
 			return null;
 
-		// create multistring
-		MultiString multi = createMessageTextUsingBitmap(numpgs,
-			argbitmap);
-		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
-
 		// create multipage bitmap
 		TreeMap<Integer, BitmapGraphic> bitmaps = new TreeMap<Integer, BitmapGraphic>();
-		for (int pg=0; pg<numpgs; ++pg) {
+		for(int pg = 0; pg < numpgs; pg++) {
 
 			// extract 1 page
 			byte[] nbm = extractPage(pg, BM_PGLEN_BYTES, argbitmap);
-			if(nbm==null)
+			if(nbm == null)
 				return null;
 			BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
 			bm.setBitmap(nbm);
@@ -228,22 +237,13 @@ public class OpQueryMsg extends OpDms
 			bitmaps.put(pg, bmgResize);
 		}
 
+		// create multistring
+		MultiString multi = createMessageTextUsingBitmap(numpgs,
+			argbitmap);
+		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
+
 		// create SignMessage
 		return new SignMessage(owner, multi, bitmaps, dura);
-	}
-
-	/** extract a single page from a byte array */
-	private byte[] extractPage(int pg, int pglen, byte[] argbitmap) {
-		if(argbitmap == null || pg <0 || pglen <=0)
-			return null;
-		if(argbitmap.length % pglen != 0 ) {
-			System.err.println("WARNING: extractPage() received bogus bitmap size: len=" +
-				argbitmap.length + ", pglen=" + pglen);
-			return null;
-		}
-		byte[] nbm = new byte[pglen];
-		System.arraycopy(argbitmap, pg * pglen, nbm, 0, pglen);
-		return nbm;
 	}
 
 	/**
