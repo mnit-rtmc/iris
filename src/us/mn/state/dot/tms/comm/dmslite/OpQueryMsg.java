@@ -36,8 +36,20 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class OpQueryMsg extends OpDms
-{
+public class OpQueryMsg extends OpDms {
+
+	/** Bitmap width for dmslite protocol */
+	static protected final int BM_WIDTH = 96;
+
+	/** Bitmap height for dmslite protocol */
+	static protected final int BM_HEIGHT = 25;
+
+	/** Bitmap page length for dmslite protocol */
+	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
+
+	/** Bitmap size (Hex characters) for dmslite protocol */
+	static protected final int BM_SIZE_HEXCHAR = BM_PGLEN_BYTES * 2;
+
 	/**
 	 * Calculate message duration
 	 *
@@ -132,17 +144,22 @@ public class OpQueryMsg extends OpDms
 		return npgs;
 	}
 
-	/** Extract a single page from a byte array */
-	static private byte[] extractPage(int pg, int pglen, byte[] argbitmap) {
-		if(argbitmap == null || pg < 0 || pglen <= 0)
+	/** Extract a single page from a byte array.
+	 * @param argbitmap Bitmap of all pages
+	 * @param pg Page number to extract
+	 * @return Bitmap of requested page only */
+	static protected byte[] extractPage(byte[] argbitmap, int pg) {
+		if(argbitmap == null || pg < 0)
 			return null;
-		if(argbitmap.length % pglen != 0 ) {
-			System.err.println("WARNING: extractPage() received bogus bitmap size: len=" +
-				argbitmap.length + ", pglen=" + pglen);
+		if(argbitmap.length % BM_PGLEN_BYTES != 0) {
+			System.err.println("WARNING: extractPage() received " +
+				"bogus bitmap size: len=" + argbitmap.length +
+				", BM_PGLEN_BYTES=" + BM_PGLEN_BYTES);
 			return null;
 		}
-		byte[] nbm = new byte[pglen];
-		System.arraycopy(argbitmap, pg * pglen, nbm, 0, pglen);
+		byte[] nbm = new byte[BM_PGLEN_BYTES];
+		System.arraycopy(argbitmap, pg * BM_PGLEN_BYTES, nbm, 0,
+			BM_PGLEN_BYTES);
 		return nbm;
 	}
 
@@ -180,12 +197,6 @@ public class OpQueryMsg extends OpDms
 	private SignMessage createSignMessageWithBitmap(String owner, 
 		String sbitmap, int dura) 
 	{
-		// assumed bitmap page size, specific to Caltrans
-		final int BM_WIDTH = 96;
-		final int BM_HEIGHT = 25;
-		final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
-		final int BM_SIZE_HEXCHAR = BM_PGLEN_BYTES * 2;
-
 		// sanity checks
 		if(owner == null)
 			owner = "unknown";
@@ -223,7 +234,7 @@ public class OpQueryMsg extends OpDms
 		for(int pg = 0; pg < numpgs; pg++) {
 
 			// extract 1 page
-			byte[] nbm = extractPage(pg, BM_PGLEN_BYTES, argbitmap);
+			byte[] nbm = extractPage(argbitmap, pg);
 			if(nbm == null)
 				return null;
 			BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
