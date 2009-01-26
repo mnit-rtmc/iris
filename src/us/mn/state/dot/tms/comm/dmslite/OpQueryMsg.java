@@ -70,7 +70,42 @@ public class OpQueryMsg extends OpDms
 		return (int)m;
 	}
 
-	/** return true if the bitmap is blank or null */
+	/**
+	 * create message text given a bitmap, with no message text or owner.
+	 * It is important to create message text for the message because
+	 * the cmsserver returns a message containing a bitmap but with
+	 * no message text. IRIS requires both a bitmap and message text,
+	 * so this method constructs message text so IRIS will think it's a
+	 * message, rather than a blank sign.
+	 * 
+	 * @returns If bitmap is not blank, a page indicating it is an other
+	 *          system message. If bitmap is blank, then "" is returned.
+	 */
+	static protected MultiString createMessageTextUsingBitmap(int numpages,
+		byte[] bm)
+	{
+		MultiString multi = new MultiString();
+		if(isBitmapBlank(bm))
+			return multi; 
+
+		// default text if no bitmap, see comments in method for why this is a hack
+		final String TEXT1 = SDMS.flagIgnoredSignLineHack("OTHER");
+		final String TEXT2 = SDMS.flagIgnoredSignLineHack("SYSTEM");
+		final String TEXT3 = SDMS.flagIgnoredSignLineHack("MESSAGE");
+
+		// build message
+		for(int i = 0; i < numpages; i++) {
+			multi.addText(TEXT1);
+			multi.addLine();
+			multi.addText(TEXT2);
+			multi.addLine();
+			multi.addText(TEXT3);
+			multi.addPage();
+		}
+		return multi;
+	}
+
+	/** Check if a bitmap is blank or null */
 	static protected boolean isBitmapBlank(byte[] b) {
 		if(b == null)
 			return true;
@@ -92,7 +127,6 @@ public class OpQueryMsg extends OpDms
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-
 		// has getConfig() been called yet? If not, don't do anything
 		// FIXME: there must be a better way to check for this condition
 		if(m_dms.getWidthPixels() > 0)
@@ -118,36 +152,6 @@ public class OpQueryMsg extends OpDms
 		if(npgs * lenpg != bm.length)
 			return 0;
 		return npgs;
-	}
-
-	/**
-	 * create message text given a bitmap, with no message text or owner.
-	 * It is important to create message text for the message because
-	 * the cmsserver returns a message containing a bitmap but with
-	 * no message text. IRIS requires both a bitmap and message text,
-	 * so this method constructs message text so IRIS will think it's a
-	 * message, rather than a blank sign.
-	 * 
-	 * @returns If bitmap is not blank, a page indicating it is an other
-	 *          system message. If bitmap is blank, then "" is returned.
-	 */
-	protected static String createMessageTextUsingBitmap(int numpages,byte[] bm) {
-
-		// is bitmap blank or null?
-		if(isBitmapBlank(bm))
-			return "";
-
-		// default text if no bitmap, see comments in method for why this is a hack
-		final String TEXT1 = SDMS.flagIgnoredSignLineHack("OTHER")+"[nl]";
-		final String TEXT2 = SDMS.flagIgnoredSignLineHack("SYSTEM")+"[nl]";
-		final String TEXT3 = SDMS.flagIgnoredSignLineHack("MESSAGE")+"[nl]";
-		final String UNKNOWN_PG_TEXT = TEXT1+TEXT2+TEXT3+"[np]";
-
-		// build message
-		String msg="";
-		for (int i=0; i<numpages; ++i)
-			msg+=UNKNOWN_PG_TEXT;
-		return msg;
 	}
 
 	/**
@@ -203,7 +207,8 @@ public class OpQueryMsg extends OpDms
 			return null;
 
 		// create multistring
-		MultiString multi = new MultiString(OpQueryMsg.createMessageTextUsingBitmap(numpgs,argbitmap));
+		MultiString multi = createMessageTextUsingBitmap(numpgs,
+			argbitmap);
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): multistring=" + multi.toString());
 
 		// create multipage bitmap
