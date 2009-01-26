@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.SDMS;
@@ -37,6 +38,48 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class OpQueryMsg extends OpDms
 {
+	/**
+	 * Calculate message duration
+	 *
+	 * @param useont true to use on time
+	 * @param useofft true to use off time else infinite message
+	 * @param ontime message on time
+	 * @param offtime message off time
+	 * @return Duration in minutes; null indicates no expiration.
+	 * @throws IllegalArgumentException if invalid args.
+	 */
+	static private Integer calcMsgDuration(boolean useont, boolean useofft,
+					   Calendar ontime, Calendar offtime)
+	{
+		if(!useont) {
+			throw new IllegalArgumentException("must have ontime in calcMsgDuration.");
+		}
+		if(!useofft)
+			return null;
+		if(ontime == null) {
+			throw new IllegalArgumentException("invalid null ontime in calcMsgDuration.");
+		}
+		if(offtime == null) {
+			throw new IllegalArgumentException("invalid null offtime in calcMsgDuration.");
+		}
+
+		// calc diff in mins
+		long delta = offtime.getTimeInMillis() -
+		             ontime.getTimeInMillis();
+		long m = ((delta < 0) ? 0 : delta / 1000 / 60);
+		return (int)m;
+	}
+
+	/** return true if the bitmap is blank or null */
+	static protected boolean isBitmapBlank(byte[] b) {
+		if(b == null)
+			return true;
+		for(int i = 0; i < b.length; i++)
+			if(b[i] != 0)
+				return false;
+		return true;
+	}
+
 	/** Create a new DMS query status object */
 	public OpQueryMsg(DMSImpl d) {
 		super(DEVICE_DATA, d, "OpQueryMsg");
@@ -50,27 +93,12 @@ public class OpQueryMsg extends OpDms
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 
-		//System.err.println(
-		//    "dmslite.OpQueryMsg.phaseOne() called: m_dms.getSignWidthPixels()="
-		//    + m_dms.getSignWidthPixels());
-
 		// has getConfig() been called yet? If not, don't do anything
 		// FIXME: there must be a better way to check for this condition
-		if(m_dms.getSignWidthPixels() <= 0) {
+		if(m_dms.getWidthPixels() > 0)
+			return new PhaseQueryCurrentMessage();
+		else
 			return null;
-		}
-
-		return new PhaseQueryCurrentMessage();
-	}
-
-	/** return true if the bitmap is blank or null */
-	public static boolean isBitmapBlank(byte[] b) {
-		if (b==null)
-			return true;
-		for (int i=0; i<b.length; ++i)
-			if (b[i]!=0)
-				return false;
-		return true;
 	}
 
 	/** calculate the number of pages in a bitmap */
@@ -106,9 +134,8 @@ public class OpQueryMsg extends OpDms
 	protected static String createMessageTextUsingBitmap(int numpages,byte[] bm) {
 
 		// is bitmap blank or null?
-		if (OpQueryMsg.isBitmapBlank(bm)) {
-			return("");
-		}
+		if(isBitmapBlank(bm))
+			return "";
 
 		// default text if no bitmap, see comments in method for why this is a hack
 		final String TEXT1 = SDMS.flagIgnoredSignLineHack("OTHER")+"[nl]";
@@ -152,8 +179,8 @@ public class OpQueryMsg extends OpDms
 			System.err.println("WARNING: received bogus sbitmap size: len="+sbitmap.length());
 			return null;
 		}
-		if(BM_HEIGHT != m_dms.getSignHeightPixels()) {
-			assert false : "bogus bitmap size: " + BM_HEIGHT + ", " + m_dms.getSignHeightPixels();
+		if(BM_HEIGHT != m_dms.getHeightPixels()) {
+			assert false : "bogus bitmap size: " + BM_HEIGHT + ", " + m_dms.getHeightPixels();
 			return null;
 		}
 
@@ -166,7 +193,7 @@ public class OpQueryMsg extends OpDms
 
 		System.err.println(
 		    "OpQueryMsg.createSignMessageWithBitmap() called: m_dms.width="
-		    + m_dms.getSignWidthPixels() + ", argbitmap.len="
+		    + m_dms.getWidthPixels() + ", argbitmap.len="
 		    + argbitmap.length + ", owner="+owner+".");
 
 		// calc number of pages
@@ -192,7 +219,7 @@ public class OpQueryMsg extends OpDms
 
 			// resize to actual sign width
 			BitmapGraphic bmgResize = new BitmapGraphic(
-				m_dms.getSignWidthPixels(), bm.height);
+				m_dms.getWidthPixels(), bm.height);
 			bmgResize.copy(bm);
 
 			bitmaps.put(pg, bmgResize);
@@ -214,42 +241,6 @@ public class OpQueryMsg extends OpDms
 		byte[] nbm = new byte[pglen];
 		System.arraycopy(argbitmap, pg * pglen, nbm, 0, pglen);
 		return nbm;
-	}
-	
-	/**
-	 * Calculate message duration
-	 *
-	 * @params useont true to use on time
-	 * @params useofft true to use off time else infinite message
-	 * @params ontime message on time
-	 * @params offtime message off time
-	 * @returns The duration of the message in minutes, which is always >= 0.
-	 * @throws IllegalArgumentException if invalid args.
-	 */
-	private static int calcMsgDuration(boolean useont, boolean useofft,
-					   Calendar ontime, Calendar offtime) {
-		//System.err.println("OpQueryMsg.calcMsgDuration:  useontime=" + useont + ",  ontime="+ontime.getTime());
-		//System.err.println("OpQueryMsg.calcMsgDuration: useofftime=" + useofft + ", offtime="+offtime.getTime());
-
-		if(!useont) {
-			throw new IllegalArgumentException("must have ontime in calcMsgDuration.");
-		}
-		if(!useofft) {
-			return SignMessage.DURATION_INFINITE;
-		}
-		if(ontime == null) {
-			throw new IllegalArgumentException("invalid null ontime in calcMsgDuration.");
-		}
-		if(offtime == null) {
-			throw new IllegalArgumentException("invalid null offtime in calcMsgDuration.");
-		}
-
-		// calc diff in mins
-		long delta=offtime.getTimeInMillis()-ontime.getTimeInMillis();
-		long m = ((delta < 0) ? 0 : delta / 1000 / 60);
-
-		//System.err.println("OpQueryMsg.calcMsgDuration: duration (mins)=" + m);
-		return ((int)m);
 	}
 
 	/**
@@ -378,15 +369,15 @@ public class OpQueryMsg extends OpDms
 				}
 
 				// calc message duration
-				int duramins=OpQueryMsg.calcMsgDuration(useont, useofft, ont, offt);
+				Integer duramins = calcMsgDuration(useont,
+					useofft, ont, offt);
 
 				// have text
 				if(msgtextavailable) {
-					SignMessage sm = m_dms.createMessage(
-						msgtext,
+					SignMessageImpl sm = (SignMessageImpl)
+						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR);
-					// FIXME: owner not set
-					// FIXME: duration not set
+					sm.setDuration(duramins);
 					m_dms.setMessageCurrent(sm);
 
 				// don't have text

@@ -140,6 +140,12 @@ public class SignMessageImpl implements SignMessage {
 	/** Duration of this message (minutes) */
 	protected Integer duration;
 
+	/** Set the message duration */
+	public void setDuration(Integer d) {
+		duration = d;
+		notifyAttribute("duration");
+	}
+
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */
 	public Integer getDuration() {
