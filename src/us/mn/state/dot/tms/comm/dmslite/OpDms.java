@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2008  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,6 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
-import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.utils.SString;
@@ -140,17 +138,6 @@ abstract public class OpDms extends DeviceOperation {
 		return new Long(System.currentTimeMillis()+m_rand.nextInt()).toString();
 	}
 
-	/** create a blank message */
-	public static SignMessage createBlankMsg(DMSImpl dms,String owner)
-	{
-		MultiString multi = new MultiString();
-		BitmapGraphic bbm = new BitmapGraphic(
-	    		dms.getSignWidthPixels(), 
-			dms.getSignHeightPixels());
-		SignMessage sm = new SignMessage(owner,multi,bbm,0);
-		return(sm);
-	}
-
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
 		m_dms.setUserNote(buildUserNote(m));
@@ -177,6 +164,4 @@ abstract public class OpDms extends DeviceOperation {
 		s = SString.truncate(s,MAXLEN);
 		m_dms.setStatus(getOpName() + ": " + s);
 	}
-
 }
-

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,6 +180,12 @@ public class SignMessageImpl implements SignMessage {
 
 	/** Message owner */
 	protected User owner;
+
+	/** Set the message owner */
+	public void setOwner(User o) {
+		owner = o;
+		notifyAttribute("owner");
+	}
 
 	/** Get the message owner.
 	 * @return User who deployed the message. */

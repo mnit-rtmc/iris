@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -117,9 +118,8 @@ public class OpResetModem extends OpDms
 			if(valid) {
 
 				// set blank message
-				String owner="";	//FIXME: how to get owner name? TMSObjectImpl.getUserName();
-				SignMessage sm=OpDms.createBlankMsg(m_dms,owner);
-                		m_dms.setActiveMessage(sm);
+				m_dms.setMessageCurrent(m_dms.createMessage("",
+					DMSMessagePriority.SCHEDULED));
 
 			// valid flag is false
 			} else {
