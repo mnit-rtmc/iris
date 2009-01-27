@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public class D10CmsMsg {
 	// fields
 	private final int m_cmsid;		// cms ID
 	private final Date m_date;		// message date and time
-	private final CawsMsgType m_type;	// predefined valid values
+	private final CawsMsgType m_type;	// message type
 	private final String m_multistring;	// message as multistring
 	private final double m_ontime;
 
@@ -56,10 +56,10 @@ public class D10CmsMsg {
 	 *     "20080403085910;25;Blank;Single Stroke;Single Stroke;;;;;;;0.0;"
 	 */
 	public D10CmsMsg(String line) throws IllegalArgumentException {
-		String[] f = (argline + ' ').split(";");
+		String[] f = (line + ' ').split(";");
 		if(f.length != 13) {
 			throw new IllegalArgumentException(
-			    "Bogus CMS message format (" + argline + ").");
+			    "Bogus CMS message format (" + line + ").");
 		}
 
 		m_date = convertDate(f[0]);
@@ -234,7 +234,7 @@ public class D10CmsMsg {
 			return false;
 
 		// is caws activated for the sign?
-		if(!dms.getAws()) {
+		if(!(dms.getAwsAllowed() && dms.getAwsControlled())) {
 			System.err.println("D10CmsMsg.shouldSendMessage(): DMS "
 				+ getIrisCmsId() +
 				" is NOT activated for CAWS control.");
@@ -247,14 +247,9 @@ public class D10CmsMsg {
 		boolean send = true;
 
 		// message already deployed?
-		if(dms.getStatusCode() == DMS.STATUS_DEPLOYED) {
-			SignMessage cur = dms.getMessage();
-			if(cur != null)
-				send = !cur.equals(m_multistring);
-			System.err.println("D10CmsMsg.shouldSendMessage(): " +
-				"DMS is deployed, m_multistring=" +
-				m_multistring + ", cur msg=" + cur.toString());
-		}
+		SignMessage cur = dms.getMessageCurrent();
+		if(cur != null)
+			send = !cur.getMulti().equals(m_multistring);
 
 		System.err.println("D10CmsMsg.shouldSendMessage(): should send="
 			+ send);
@@ -266,7 +261,7 @@ public class D10CmsMsg {
 	 * @params dms The associated DMS.
 	 */
 	protected void sendMessage(DMSImpl dms) {
-		switch(getCawsMsgType()) {
+		switch(m_type) {
 		case BLANK:
 		case ONEPAGEMSG:
 		case TWOPAGEMSG:
