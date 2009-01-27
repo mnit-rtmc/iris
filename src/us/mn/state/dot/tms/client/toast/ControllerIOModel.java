@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,8 @@ import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraManager;
+import us.mn.state.dot.tms.client.dms.DMSManager;
+import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
 /**
@@ -175,11 +177,13 @@ public class ControllerIOModel extends AbstractTableModel {
 			Session.det_manager_singleton.getStyleModel(
 			DetectorManager.STYLE_NO_CONTROLLER), true);
 		dms_model = new WrapperComboBoxModel(
-			tms.getAvailableDMSs().getModel(), true);
+			Session.dms_manager_singleton.getStyleModel(
+			DMSManager.STYLE_NO_CONTROLLER), true);
 		lcs_model = new WrapperComboBoxModel(
 			tms.getAvailableLCSs().getModel(), true);
 		m_model = new WrapperComboBoxModel(
-			tms.getAvailableMeters().getModel(), true);
+			Session.meter_manager_singleton.getStyleModel(
+			MeterManager.STYLE_NO_CONTROLLER), true);
 		w_model = new WrapperComboBoxModel(
 			Session.warn_manager_singleton.getStyleModel(
 			WarningSignManager.STYLE_NO_CONTROLLER), true);
@@ -310,7 +314,6 @@ public class ControllerIOModel extends AbstractTableModel {
 	{
 		if(d == null || value == null)
 			return null;
-		String v = value.toString();
 		switch(d) {
 			case Alarm:
 				return (Alarm)value;
@@ -319,11 +322,12 @@ public class ControllerIOModel extends AbstractTableModel {
 			case Detector:
 				return (Detector)value;
 			case DMS:
-				return lookupDMS(v);
+				return (DMS)value;
 			case LCS:
+				String v = value.toString();
 				return lookupLCS(v);
 			case Ramp_Meter:
-				return lookupRampMeter(v);
+				return (RampMeter)value;
 			case Warning_Sign:
 				return (WarningSign)value;
 			default:
@@ -331,19 +335,9 @@ public class ControllerIOModel extends AbstractTableModel {
 		}
 	}
 
-	protected DMS lookupDMS(String id) throws RemoteException {
-		DeviceList l = (DeviceList)tms.getDMSList();
-		return (DMS)l.getElement(id);
-	}
-
 	protected LaneControlSignal lookupLCS(String id) throws RemoteException{
 		DeviceList l = (DeviceList)tms.getLCSList().getList();
 		return (LaneControlSignal)l.getElement(id);
-	}
-
-	protected RampMeter lookupRampMeter(String id) throws RemoteException {
-		DeviceList l = (DeviceList)tms.getMeterList();
-		return (RampMeter)l.getElement(id);
 	}
 
 	/** Create the pin column */

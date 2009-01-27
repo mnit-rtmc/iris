@@ -110,6 +110,7 @@ public class Session {
 	static public CameraManager cam_manager_singleton;
 	static public DMSManager dms_manager_singleton;
 	static public DetectorManager det_manager_singleton;
+	static public MeterManager meter_manager_singleton;
 	static public WarningSignManager warn_manager_singleton;
 
 	/** List of all tabs */
@@ -234,6 +235,7 @@ public class Session {
 		warn_manager_singleton = warn_manager;
 		meter_manager = new MeterManager(tmsConnection,
 			st.getRampMeters(), loc_manager);
+		meter_manager_singleton = meter_manager;
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
 		if(user.hasPermission(IrisPermission.DMS_TAB))
