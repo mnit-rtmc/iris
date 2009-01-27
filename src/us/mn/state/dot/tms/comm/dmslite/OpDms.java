@@ -17,12 +17,13 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
 import java.util.Random;
+import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
 import us.mn.state.dot.tms.comm.ChecksumException;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -32,7 +33,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-abstract public class OpDms extends DeviceOperation {
+abstract public class OpDms extends Device2Operation {
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
@@ -69,11 +70,11 @@ abstract public class OpDms extends DeviceOperation {
 	* operations that fail.
 	*/
 	public void handleException(IOException e) {
-		if (e instanceof ChecksumException) {
-		    ChecksumException ce = (ChecksumException) e;
-		    DMS_LOG.log(m_dms.getId() + " (" + toString() + "), " + ce.getScannedData());
+		if(e instanceof ChecksumException) {
+			ChecksumException ce = (ChecksumException)e;
+			DMS_LOG.log(m_dms.getName() + " (" + toString() +
+				"), " + ce.getScannedData());
 		}
-
 		super.handleException(e);
 	}
 
@@ -113,9 +114,8 @@ abstract public class OpDms extends DeviceOperation {
 	  * handle a failed operation.
 	  * @return true if the operation should be retried else false.
 	  */
-	protected boolean flagFailureShouldRetry(String errmsg)
-	{
-	 	String msg=m_dms.getId()+" error: "+errmsg;
+	protected boolean flagFailureShouldRetry(String errmsg) {
+	 	String msg = m_dms.getName() + " error: " + errmsg;
 
 		// trigger error handling, changes status if necessary
 		handleException(new IOException(msg));
@@ -130,12 +130,10 @@ abstract public class OpDms extends DeviceOperation {
 	}
 
 	/* reset error counter for DMS */
-	protected void resetErrorCounter()
-	{
-	 	String id=m_dms.getId();
+	protected void resetErrorCounter() {
+	 	String id = m_dms.getName();
 		if(controller != null) {
 			controller.resetErrorCounter(id);
-			//System.err.println("OpQueryDms.resetErrorCounter(): reset comm counter");
 		}
 	}
 
@@ -152,25 +150,23 @@ abstract public class OpDms extends DeviceOperation {
 		m_dms.setUserNote(buildUserNote(m));
 	}
 
-	/** build user note */
+	/** Build user note */
 	public String buildUserNote(Message m) {
-		SignMessage sm=m_dms.getMessage();
-		StringBuilder note=new StringBuilder();
-		String deploytime="null";
-		if (sm!=null && sm.getDeployTime()!=null)
-			deploytime=sm.getDeployTime().toString();
-		note.append("Last operation at "+STime.getCurTimeShortString());
-		String delta=SString.doubleToString((((double)m.getCompletionTimeMS())/1000),2);
+		StringBuilder note = new StringBuilder();
+		note.append("Last operation at " +
+			STime.getCurTimeShortString());
+		String delta = SString.doubleToString((
+			((double)m.getCompletionTimeMS()) / 1000), 2);
 		note.append(" (").append(delta).append(" secs)");
-		//note.append(", last message deployed: "+deploytime);
 		note.append(".");
 		return note.toString();
 	}
 
-	/** set dms status */
-	public void setDmsStatus(String s) {
+	/** Set DMS status */
+	protected void setDmsStatus(String s) {
 		final int MAXLEN = 64;
-		s = SString.truncate(s,MAXLEN);
-		m_dms.setStatus(getOpName() + ": " + s);
+		s = SString.truncate(s, MAXLEN);
+		ControllerImpl c = (ControllerImpl)m_dms.getController();
+		c.setError(s);
 	}
 }
