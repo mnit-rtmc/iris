@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -144,42 +144,30 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	 * @see DMSImpl,DMS
 	 */
 	public void sendMessage(DMSImpl dms, SignMessage m)
-		throws InvalidMessageException {
-		//System.err.println("DmsLitePoller.sendMessage() called.");
-
+		throws InvalidMessageException
+	{
 		// sanity checks
-		if (dms==null || m==null)
+		if(dms == null || m == null)
 			return;
-		if (m.getBitmap()==null) {
+		if(m.getBitmaps() == null) {
 			System.err.println("Warning: DmsLitePoller.sendMessage(): bitmap is null, ignored.");
 			return;
 		}
-		if (m.getBitmap().getBitmap()==null) {
-			System.err.println("Warning: DmsLitePoller.sendMessage():m.getBitmap().getBitmap() is null, ignored.");
+		// Are the DMS width and height valid?  If not, it's probably
+		// because a OpQueryConfig message has not been received yet,
+		// so the DMS physical properties are not yet valid.
+		if(dms.getWidthPixels() == null || dms.getHeightPixels() ==null)
 			return;
-		}
-		// was bitmap rendered? If not, it's probably because a GetDMSConfig message has
-		// not been received yet, so the DMS physical properties are not yet valid.
-		if (m.getBitmap().getBitmap().length <= 0) {
-			//System.err.println("Warning: DmsLitePoller.sendMessage(): m.getBitmap().getBitmap().length<=0, ignored.");
-			return;
-		}
 
 		// blank the sign
-		if(m.getDuration() != null && m.getDuration <= 0) {
+		if(m.getDuration() != null && m.getDuration() <= 0) {
 			new OpBlank(dms, m).start();
 			return;
 		}
 
-		// Note: in the future, check for SV170 firmware version, if start and stop
-		//       times are supported, adjust the CMS stop time and send the message.
-
-		//System.err.println("DmsLitePoller.sendMessage(), SignMessage multistring="
-		//	+ m.getMulti().toString());
-		//System.err.println("DmsLitePoller.sendMessage(), bitmap len="
-		//	+m.getBitmap().getBitmap().length);
-		//System.err.println("DmsLitePoller.sendMessage(), bitmap="
-		//    + HexString.toHexString(m.getBitmap().getBitmap()));
+		// Note: in the future, check for SV170 firmware version, if
+		//       start and stop times are supported, adjust the CMS
+		//       stop time and send the message.
 
 		// finally, send message to field controller
 		OpMessage cmd = new OpMessage(dms, m);
