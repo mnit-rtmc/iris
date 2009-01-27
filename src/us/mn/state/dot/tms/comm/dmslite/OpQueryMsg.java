@@ -37,15 +37,6 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class OpQueryMsg extends OpDms {
 
-	/** Bitmap width for dmslite protocol */
-	static protected final int BM_WIDTH = 96;
-
-	/** Bitmap height for dmslite protocol */
-	static protected final int BM_HEIGHT = 25;
-
-	/** Bitmap page length for dmslite protocol */
-	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
-
 	/**
 	 * Calculate message duration
 	 *

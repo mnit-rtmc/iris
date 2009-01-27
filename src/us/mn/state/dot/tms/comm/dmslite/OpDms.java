@@ -37,6 +37,15 @@ abstract public class OpDms extends DeviceOperation {
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
 
+	/** Bitmap width for dmslite protocol */
+	static protected final int BM_WIDTH = 96;
+
+	/** Bitmap height for dmslite protocol */
+	static protected final int BM_HEIGHT = 25;
+
+	/** Bitmap page length for dmslite protocol */
+	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
+
 	/** DMS to operate */
 	protected final DMSImpl m_dms;
 
