@@ -36,6 +36,6 @@ public class TurnOffAction extends ProxyAction<RampMeter> {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		proxy.setRate(null);
+		proxy.setRateNext(null);
 	}
 }

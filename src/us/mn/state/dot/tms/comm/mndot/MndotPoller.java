@@ -163,40 +163,45 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		return test;
 	}
 
-	/** Send a new metering rate */
-	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
-		int n = getMeterNumber(meter);
-		if(n > 0)
-			new MeterRateCommand(meter, n, rate).start();
-	}
-
-	/** Start metering */
-/*
-	public void startMetering(RampMeterImpl meter) {
-		if(!meter.isFailed()) {
-			sendReleaseRate(meter, meter.getReleaseRate());
-			sendMeteringRate(meter, MeterRate.CENTRAL);
-		}
-	} */
-
-	/** Stop metering */
-/*	public void stopMetering(RampMeterImpl meter) {
-		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
-	} */
-
 	/** Send a new release rate to a ramp meter */
-	public void sendReleaseRate(RampMeterImpl meter) {
+	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
 		int n = getMeterNumber(meter);
 		if(n > 0) {
-			// Workaround for errors in rx only (good tx)
-			if(meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS)
+			if(shouldStop(meter, rate))
 				stopMetering(meter);
 			else {
 				float red = calculateRedTime(meter);
 				int r = Math.round(red * 10);
 				new RedTimeCommand(meter, n, r).start();
+				if(!meter.isMetering())
+					startMetering(meter);
 			}
 		}
+	}
+
+	/** Should we stop metering? */
+	protected boolean shouldStop(RampMeterImpl meter, Integer rate) {
+		// Workaround for errors in rx only (good tx)
+		return rate == null ||
+		       meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS;
+	}
+
+	/** Start metering */
+	protected void startMetering(RampMeterImpl meter) {
+		if(!meter.isFailed())
+			sendMeteringRate(meter, MeterRate.CENTRAL);
+	}
+
+	/** Stop metering */
+	protected void stopMetering(RampMeterImpl meter) {
+		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
+	}
+
+	/** Send a new metering rate */
+	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
+		int n = getMeterNumber(meter);
+		if(n > 0)
+			new MeterRateCommand(meter, n, rate).start();
 	}
 
 	/** Get the appropriate rate for the deployed state */

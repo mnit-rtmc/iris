@@ -61,7 +61,7 @@ public interface RampMeter extends Device2 {
 	/* Transient attributes (not stored in database) */
 
 	/** Set the release rate (vehicles per hour) */
-	void setRate(Integer r);
+	void setRateNext(Integer r);
 
 	/** Get the release rate (vehciels per hour) */
 	Integer getRate();

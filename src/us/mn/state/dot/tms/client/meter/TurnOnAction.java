@@ -37,6 +37,6 @@ public class TurnOnAction extends ProxyAction<RampMeter> {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		proxy.setRate(SystemAttributeHelper.getMeterMaxRelease());
+		proxy.setRateNext(SystemAttributeHelper.getMeterMaxRelease());
 	}
 }

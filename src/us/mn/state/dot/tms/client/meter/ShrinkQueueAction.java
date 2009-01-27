@@ -39,7 +39,8 @@ public class ShrinkQueueAction extends ProxyAction<RampMeter> {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		// FIXME: use setRate here
-		proxy.shrinkQueue();
+		Integer rate = proxy.getRate();
+		if(rate != null)
+			proxy.setRateNext(rate + 150);
 	}
 }

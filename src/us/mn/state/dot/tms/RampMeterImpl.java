@@ -371,31 +371,22 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		return queue.ordinal();
 	}
 
-	/** Current metering status */
-	protected boolean metering = false;
-
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
-		return metering;
+		return rate != null;
 	}
 
 	/** Release rate (vehicles per hour) */
 	protected transient Integer rate = null;
 
 	/** Set the release rate (vehicles per hour) */
-	public void setRate(Integer r) {
-		if(r != null) {
-			int m = getMinimum();
-			if(r < m)
-				r = m;
-			rate = filterRate(r);
-		} else
-			rate = null;
+	public void setRateNext(Integer r) {
+		sendReleaseRate(r);
 	}
 
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
-		setRate(r);
+		rate = r;
 		notifyAttribute("rate");
 	}
 
@@ -404,28 +395,30 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		return rate;
 	}
 
+	/** Validate all timing plans for this meter */
+	public void validateTimingPlans() {
+		updateQueue();
+		computeReleaseRate();
+	}
+
 	/** Compute the current release rate */
 	protected void computeReleaseRate() {
 		if(!isLocked()) {
 			Integer r = null;
 			for(MeterPlanState s: getMeterPlanStates())
 				r = minimum(r, s.getRate(this));
-			setRateNotify(r);
+			sendReleaseRate(r);
 		}
 	}
 
-	/** Validate all timing plans for this meter */
-	public void validateTimingPlans() {
-		updateQueue();
-		computeReleaseRate();
-		sendReleaseRate();
-	}
-
 	/** Send the ramp meter release rate */
-	public void sendReleaseRate() {
+	public void sendReleaseRate(Integer r) {
 		MeterPoller mp = getMeterPoller();
-		if(mp != null)
-			mp.sendReleaseRate(this);
+		if(mp != null) {
+			if(r != null)
+				r = filterRate(Math.max(r, getMinimum()));
+			mp.sendReleaseRate(this, r);
+		}
 	}
 
 	/** Get the detector set associated with the ramp meter */

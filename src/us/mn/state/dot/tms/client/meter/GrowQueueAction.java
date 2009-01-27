@@ -39,7 +39,8 @@ public class GrowQueueAction extends ProxyAction<RampMeter> {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		// FIXME: use setRate here
-		proxy.growQueue();
+		Integer rate = proxy.getRate();
+		if(rate != null)
+			proxy.setRateNext(rate - 150);
 	}
 }
