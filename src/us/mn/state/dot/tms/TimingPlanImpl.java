@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
@@ -28,6 +29,60 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Number of minutes in a day */
 	static protected final int MINUTES_PER_DAY = 24 * 60;
+
+	/** Calendar instance for calculating the minute of day */
+	static protected final Calendar STAMP = Calendar.getInstance();
+
+	/** Get the current minute of the day */
+	static protected int minute_of_day() {
+		synchronized(STAMP) {
+			STAMP.setTimeInMillis(System.currentTimeMillis());
+			return STAMP.get(Calendar.HOUR_OF_DAY) * 60 +
+				STAMP.get(Calendar.MINUTE);
+		}
+	}
+
+	/** Get the current second of the day */
+	static protected int second_of_day() {
+		synchronized(STAMP) {
+			STAMP.setTimeInMillis(System.currentTimeMillis());
+			return STAMP.get(Calendar.HOUR_OF_DAY) * Interval.HOUR +
+			       STAMP.get(Calendar.MINUTE) * Interval.MINUTE +
+			       STAMP.get(Calendar.SECOND);
+		}
+	}
+
+	/** Create a 4 character time stamp.
+	 * @param min Minute of the day (0-1440)
+	 * @return 4 character time stamp (1330 for 1:30 PM) */
+	static protected String stamp_hhmm(int min) {
+		StringBuilder b = new StringBuilder();
+		b.append(min / 60);
+		while(b.length() < 2)
+			b.insert(0, '0');
+		b.append(min % 60);
+		while(b.length() < 4)
+			b.insert(2, '0');
+		return b.toString();
+	}
+
+	/** Get a stamp of the current 30 second interval */
+	static public String stamp_30() {
+		int i30 = second_of_day() / 30 + 1;
+		StringBuilder b = new StringBuilder();
+		b.append(i30 / 120);
+		while(b.length() < 2)
+			b.insert(0, '0');
+		b.append(':');
+		b.append((i30 % 120) / 2);
+		while(b.length() < 5)
+			b.insert(3, '0');
+		b.append(':');
+		b.append((i30 % 2) * 30);
+		while(b.length() < 8)
+			b.insert(6, '0');
+		return b.toString();
+	}
 
 	/** Load all the timing plans */
 	static protected void loadAll() throws TMSException {
@@ -174,6 +229,12 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 		return stop_min;
 	}
 
+	/** Get the timing plan range */
+	public String getRange() {
+		return stamp_hhmm(getStartMin()) + '-' +
+		       stamp_hhmm(getStopMin());
+	}
+
 	/** Active status */
 	protected boolean active;
 
@@ -237,11 +298,54 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 		return target;
 	}
 
+	/** Flag to determine if timing plan is operating */
+	protected transient boolean operating;
+
+	/** Check if the timing plan is operating */
+	public boolean isOperating() {
+		return operating;
+	}
+
+	/** Validate the timing plan */
+	public void validate() {
+		if(shouldOperate()) {
+			if(!isOperating())
+				start();
+		} else if(isOperating())
+			stop();
+		TimingPlanState s = getState();
+		if(s != null)
+			s.validate(this);
+	}
+
 	/** Current timing plan state data */
 	protected transient TimingPlanState state;
 
+	/** Check if the timing plan should be operating */
+	protected boolean shouldOperate() {
+		return getActive() && isWithin();
+	}
+
+	/** Check if the current time is within the timing plan window */
+	public boolean isWithin() {
+		int m = minute_of_day();
+		return m >= getStartMin() && m < getStopMin();
+	}
+
+	/** Start operating the timing plan */
+	protected void start() {
+		operating = true;
+		state = null;
+	}
+
+	/** Stop operating the timing plan */
+	protected void stop() {
+		operating = false;
+		state = null;
+	}
+
 	/** Get the current timing plan state */
-	public TimingPlanState getState() {
+	protected TimingPlanState getState() {
 		if(state == null)
 			state = createState();
 		return state;
@@ -251,13 +355,25 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	protected TimingPlanState createState() {
 		switch(plan_type) {
 		case TRAVEL:
-			return new TimingPlanState(this);
+			return new TimingPlanState();
 		case SIMPLE:
-			return new SimplePlanState(this);
+			return new SimplePlanState();
 		case STRATIFIED:
-			return new StratifiedPlanState(this);
+			return lookupOrCreateStratified();
 		default:
 			return null;
 		}
+	}
+
+	/** Lookup or create a stratified plan state */
+	protected TimingPlanState lookupOrCreateStratified() {
+		Device2 d = device;
+		if(d instanceof RampMeterImpl) {
+			RampMeterImpl meter = (RampMeterImpl)d;
+			Corridor c = meter.getCorridor();
+			if(c != null)
+				return StratifiedPlanState.lookupCorridor(c);
+		}
+		return null;
 	}
 }

@@ -187,13 +187,6 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 		out.println("</traffic_sample>");
 	}
 
-	/** Calculate the 30-second interval for the given time stamp */
-	static protected int calculateInterval(Calendar stamp) {
-		return stamp.get(Calendar.HOUR_OF_DAY) * 120 +
-			stamp.get(Calendar.MINUTE) * 2 +
-			stamp.get(Calendar.SECOND) / 30;
-	}
-
 	/** Sign polling timer job */
 	protected class TimerJobSigns extends Job {
 
@@ -209,7 +202,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 
 		/** Create a new sign polling timer job */
 		protected TimerJobSigns(int intervalSecs) {
-			super(Calendar.SECOND, intervalSecs, Calendar.SECOND, 4);
+			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,4);
 			comp = new Completer("Sign Poll", TIMER, job);
 		}
 
@@ -251,13 +244,8 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 				catch(NamespaceError e) {
 					e.printStackTrace();
 				}
-				int interval = calculateInterval(stamp);
-				if(!isHoliday(stamp)) {
-					// FIXME: iterate through timing plans
-					// and validate them all
-					meters.validateTimingPlans(interval);
-					dmss.updateTravelTimes(interval);
-				}
+				if(!isHoliday(stamp))
+					validateTimingPlans();
 			}
 		};
 
@@ -282,6 +270,19 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 				comp.makeReady();
 			}
 		}
+	}
+
+	/** Validate all timing plans */
+	protected void validateTimingPlans() {
+		lookupTimingPlans(new Checker<TimingPlan>() {
+			public boolean check(TimingPlan p) {
+				TimingPlanImpl plan = (TimingPlanImpl)p;
+				plan.validate();
+			}
+		});
+		StratifiedPlanState.processAllStates();
+		// FIXME: send new rates to all ramp meters
+		// FIXME: update queue status, etc
 	}
 
 	/** 5-minute timer job */

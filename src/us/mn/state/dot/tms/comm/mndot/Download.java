@@ -21,14 +21,11 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorImpl;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TimingPlanType;
 import us.mn.state.dot.tms.TMSImpl;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -47,9 +44,9 @@ public class Download extends Controller170Operation implements TimingTable {
 
 	/** Check if a timing plan is for the given peak period */
 	static protected boolean checkPeriod(TimingPlan plan, int period) {
-		if(period == Calendar.AM && plan.getStartMin() < NOON)
+		if(period == Calendar.AM && plan.getStopMin() <= NOON)
 			return true;
-		if(period == Calendar.PM && plan.getStopMin() > NOON)
+		if(period == Calendar.PM && plan.getStartMin() >= NOON)
 			return true;
 		return false;
 	}
@@ -64,6 +61,11 @@ public class Download extends Controller170Operation implements TimingTable {
 	static protected int getYellowTime() {
 		float g = SystemAttributeHelper.getMeterYellowSecs();
 		return Math.round(g * 10);
+	}
+
+	/** Convert minute-of-day (0-1440) to 4-digit BCD */
+	static protected int minuteBCD(int v) {
+		return 100 * (v / 60) + v % 60;
 	}
 
 	/** Flag to perform a level-1 restart */
@@ -342,8 +344,8 @@ public class Download extends Controller170Operation implements TimingTable {
 	{
 		int[] red = {1, 1};
 		int[] rate = {MeterRate.FLASH, MeterRate.FLASH};
-		int[] start = {AM_START_TIME, PM_START_TIME};
-		int[] stop = {AM_START_TIME, PM_START_TIME};
+		int[] start = {AM_MID_TIME, PM_MID_TIME};
+		int[] stop = {AM_MID_TIME, PM_MID_TIME};
 		updateTimingTables(meter, red, rate, start, stop);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCD.OutputStream bcd = new BCD.OutputStream(os);
@@ -367,7 +369,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	protected void sendWarningSignTiming(AddressedMessage mess, int address)
 		throws IOException
 	{
-		int[] times = {AM_START_TIME, PM_START_TIME};
+		int[] times = {AM_MID_TIME, PM_MID_TIME};
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCD.OutputStream bcd = new BCD.OutputStream(os);
 		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
@@ -393,10 +395,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	{
 		TMSImpl.lookupTimingPlans(new Checker<TimingPlan>() {
 			public boolean check(TimingPlan p) {
-				if(p.getPlanType() ==
-				   TimingPlanType.SIMPLE.ordinal() &&
-				   p.getDevice() == meter)
-				{
+				if(p.getActive() && p.getDevice() == meter) {
 					updateTable(meter, p, red, rate, start,
 						stop);
 				}
@@ -410,14 +409,14 @@ public class Download extends Controller170Operation implements TimingTable {
 	{
 		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
 			if(checkPeriod(p, t)) {
-				int sta = p.getStartMin();
-				int sto = p.getStopMin();
+				int sta = minuteBCD(p.getStartMin());
+				int sto = minuteBCD(p.getStopMin());
 				float r = MndotPoller.calculateRedTime(meter,
 					p.getTarget());
 				red[t] = Math.round(r * 10);
 				rate[t] = MeterRate.TOD;
-				start[t] = 100 * (sta / 60) + sta % 60;
-				stop[t] = 100 * (sto / 60) + sto % 60;
+				start[t] = Math.min(start[t], sta);
+				stop[t] = Math.max(stop[t], sto);
 			}
 		}
 	}

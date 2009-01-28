@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,6 @@ abstract public class MeterPlanState extends TimingPlanState {
 	/** Get the absolute maximum release rate */
 	static protected int getMaxRelease() {
 		return SystemAttributeHelper.getMeterMaxRelease();
-	}
-
-	/** Create a new ramp meter timing plan */
-	public MeterPlanState(TimingPlanImpl p) {
-		super(p);
 	}
 
 	/** Check for the existance of a queue */

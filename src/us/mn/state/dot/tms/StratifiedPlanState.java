@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2008  Minnesota Department of Transportation
+ * Copyright (C) 2001-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,6 +83,32 @@ public class StratifiedPlanState extends MeterPlanState {
 	/** Number of minutes to flush meter before shutoff */
 	static protected final int FLUSH_MINUTES = 2;
 
+	/** States for all stratified zone corridors */
+	static protected HashMap<String, StratifiedPlanState> all_states =
+		new HashMap<String, StratifiedPlanState>();
+
+	/** Lookup the stratified zone state for one corridor */
+	static public StratifiedPlanState lookupCorridor(Corridor c) {
+		StratifiedPlanState state = all_states.get(c.getID());
+		if(state == null) {
+			state = new StratifiedPlanState(c);
+			all_states.put(c.getID(), state);
+		}
+		return state;
+	}
+
+	/** Process one interval for all stratified zone states */
+	static public void processAllStates() {
+		Iterator<StratifiedPlanState> it =
+			all_states.values().iterator();
+		while(it.hasNext()) {
+			StratifiedPlanState state = it.next();
+			state.processInterval();
+			if(state.isDone())
+				it.remove();
+		}
+	}
+
 	/** Get the number of metered lanes */
 	static protected int getMeteringLanes(RampMeter m) {
 		return RampMeterType.fromOrdinal(m.getMeterType()).lanes;
@@ -134,6 +160,9 @@ public class StratifiedPlanState extends MeterPlanState {
 	 *  in the stratified plan, there will be one MeterState object. */
 	protected class MeterState {
 
+		/** Timing plan for the meter */
+		protected final TimingPlanImpl plan;
+
 		/** Ramp meter */
 		protected final RampMeterImpl meter;
 
@@ -170,14 +199,17 @@ public class StratifiedPlanState extends MeterPlanState {
 		/** Flag if meter state is valid */
 		protected final boolean valid;
 
-		/** Minimum release rate assigned by stratified timing plan */
+		/** Minimum release rate */
 		protected int minimum;
 
-		/** Demand rate assigned by stratified timing plan */
+		/** Demand rate assigned */
 		protected int demand;
 
-		/** Release rate assigned by stratified timing plan */
+		/** Release rate assigned */
 		protected int release;
+
+		/** Metering flag */
+		protected boolean metering;
 
 		/** Warning flag for finding plan errors */
 		protected boolean warning;
@@ -211,7 +243,7 @@ public class StratifiedPlanState extends MeterPlanState {
 		/** Reset the meter's zone state */
 		protected void reset() {
 			if(congested)
-				release = meter.getTarget();
+				release = plan.getTarget();
 			else
 				release = getMaxRelease();
 			control = null;
@@ -256,15 +288,62 @@ public class StratifiedPlanState extends MeterPlanState {
 				return merge;
 		}
 
+		/** Validate a ramp meter state */
+		protected void validate() {
+			if(metering) {
+				if(isFlushing() && !has_queue)
+					stopMetering();
+			} else {
+				float thresh = rate_accum;
+				if(isFirstHalf())
+					thresh *= TURN_ON_THRESHOLD_1;
+				else
+					thresh *= TURN_ON_THRESHOLD_2;
+				if(demand > thresh)
+					startMetering();
+			}
+			if(metering)
+				computeDemand();
+		}
+
+		/** Check if we're in the flushing window */
+		protected boolean isFlushing() {
+			int min = TimingPlanImpl.minute_of_day();
+			int stop_min = plan.getStopMin();
+			return min >= stop_min - FLUSH_MINUTES &&
+			       min <= stop_min;
+		}
+
+		/** Check if we're in the first half of the plan window */
+		protected boolean isFirstHalf() {
+			int min = TimingPlanImpl.minute_of_day();
+			return min * 2 < plan.getStartMin() + plan.getStopMin();
+		}
+
+		/** Start metering */
+		protected void startMetering() {
+			metering = true;
+			has_queue = false;
+			queue_backup = false;
+		}
+
+		/** Stop metering */
+		protected void stopMetering() {
+			metering = false;
+			has_queue = false;
+			queue_backup = false;
+		}
+
 		/** Compute the demand for the ramp meter */
-		protected int computeDemand() {
+		protected void computeDemand() {
 			has_queue = false;
 			queue_backup = false;
 			warning = true;
 			congested = true;
 			if(!valid) {
 				minimum = getMinRelease();
-				return minimum;
+				demand = minimum;
+				return;
 			}
 			Integer r = meter.getRate();
 			if(r != null)
@@ -278,33 +357,34 @@ public class StratifiedPlanState extends MeterPlanState {
 			max_stored =density * storage / Constants.FEET_PER_MILE;
 			float max_cycle = meter.getMaxWait() / max_stored;
 			minimum = (int)(Interval.HOUR / max_cycle);
-			int demand = this.demand;
-			int p_demand = calculatePassageDemand(demand);
+			int p_demand = calculatePassageDemand();
+			int t_demand = demand;
 			q_prob = Math.min(p_flow / rate_accum, 1.0f);
 			if(queue.getMaxOccupancy() > QUEUE_OCC_THRESHOLD) {
 				q_prob = 1;
 				queue_backup = true;
-				demand += QUEUE_OVERRIDE_INCREMENT;
-				minimum = Math.max(minimum, demand);
+				t_demand += QUEUE_OVERRIDE_INCREMENT;
+				minimum = Math.max(minimum, t_demand);
 			} else if(queue.isPerfect()) {
-				demand += (int)(K * (queue.getFlow() - demand));
+				t_demand +=
+					(int)(K * (queue.getFlow() - t_demand));
 				minimum = Math.round(minimum * q_prob);
 				minimum = Math.min(minimum, p_demand);
 			} else {
-				demand = p_demand;
+				t_demand = p_demand;
 				minimum = p_demand;
 			}
-			if(!meter.isMetering()) {
+			if(!metering) {
 				q_prob = 0;
 				minimum = getMinRelease();
 			} else if(isFlushing())
 				minimum = getMaxRelease();
 			has_queue = q_prob > QUEUE_EXISTS_FACTOR;
-			return demand;
+			demand = t_demand;
 		}
 
 		/** Calculate the passage demand (and smoothed flow) */
-		protected int calculatePassageDemand(int demand) {
+		protected int calculatePassageDemand() {
 			int p;
 			if(passage.isPerfect())
 				p = passage.getFlow();
@@ -943,172 +1023,106 @@ public class StratifiedPlanState extends MeterPlanState {
 	/** Linked list of zones in this timing plan */
 	protected final LinkedList<Zone> zones = new LinkedList<Zone>();
 
-	/** Zone change debugging flag */
+	/** Zone change flag */
 	protected boolean zone_change = false;
 
-	/** Flag to indicate the start of the next interval */
-	protected boolean next_interval = false;
+	/** Corridor */
+	protected final Corridor corridor;
 
 	/** Current log file name */
 	protected File log_name;
 
-	/** Create a new stratified timing plan state */
-	public StratifiedPlanState(TimingPlanImpl p) {
-		super(p);
+	/** Create a new stratified plan */
+	protected StratifiedPlanState(Corridor c) {
+		corridor = c;
 	}
 
-	/** Compute the demand (and the minimum release rate) for the
-	    specified ramp meter */
-	public synchronized int computeDemand(RampMeter meter) {
-		// FIXME: move this to validate method
-		if(!plan.getActive())
-			return getMinRelease();
+	/** Validate a timing plan */
+	public void validate(TimingPlanImpl plan) {
+		MeterState state = getMeterState(plan);
+		if(state != null) {
+			if(plan.isOperating())
+				state.validate();
+			else
+				state.stopMetering();
+		}
+	}
+
+	/** Get the meter state for a given timing plan */
+	protected MeterState getMeterState(TimingPlanImpl plan) {
+		Device2 device = plan.getDevice();
+		if(!(device instanceof RampMeterImpl))
+			return null;
+		RampMeterImpl meter = (RampMeterImpl)device;
+		if(!meter.getCorridorID().equals(corridor.getID())) {
+			// Meter must have been changed to a different
+			// corridor; throw away old meter state
+			states.remove(meter.getName());
+			return null;
+		}
 		MeterState state = getMeterState(meter);
-		if(state == null)
-			return getMinRelease();
-		next_interval = true;
-		return state.computeDemand();
+		if(state != null)
+			return state;
+		state = new MeterState(meter);
+		if(state.valid) {
+			if(zones.isEmpty())
+				createAllLayers();
+			for(Zone zone: zones)
+				zone.addMeter(state);
+		}
+		states.put(meter.getName(), state);
+		return state;
 	}
 
-	/** Create all the layers for this stratified timing plan */
-	protected void createAllLayers(RampMeterImpl meter) {
-		zones.clear();
+	/** Create all the layers */
+	protected void createAllLayers() {
+		states.clear();
 		ZoneBuilder zone_builder = new ZoneBuilder();
-		Corridor c = meter.getCorridor();
-		if(c != null)
-			c.findNode(zone_builder);
+		corridor.findNode(zone_builder);
 		zones.addAll(zone_builder.getList());
 	}
 
-	/** Validate the timing plan for the start time */
-	protected int validateStart(RampMeterImpl meter) {
-		states.clear();
-		createAllLayers(meter);
-		return getMaxRelease();
+	/** Get the meter state for a specified meter */
+	protected MeterState getMeterState(RampMeter meter) {
+		return states.get(meter.getName());
 	}
 
-	/** Validate the timing plan for the stop time */
-	protected int validateStop(RampMeterImpl meter) {
-		for(MeterState state: states.values())
-			stopMetering(state.meter);
-		states.clear();
-		zones.clear();
-		printEnd();
-		return getMaxRelease();
+	/** Check for the existance of a queue */
+	public RampMeterQueue getQueue(RampMeter meter) {
+		MeterState state = getMeterState(meter);
+		if(state == null)
+			return RampMeterQueue.UNKNOWN;
+		else if(state.queue_backup)
+			return RampMeterQueue.FULL;
+		else if(state.has_queue)
+			return RampMeterQueue.EXISTS;
+		else
+			return RampMeterQueue.EMPTY;
 	}
 
-	/** Create a new log file */
-	protected PrintStream createLogFile(RampMeterImpl meter, String date)
-		throws IOException
-	{
-		File dir = new File(DATA_PATH + File.separator + date);
-		if(!dir.exists()) {
-			if(!dir.mkdir())
-				throw new IOException("mkdir failed: " + dir);
+	/** Get the release rate for the specified ramp meter */
+	public Integer getRate(RampMeter meter) {
+		MeterState state = getMeterState(meter);
+		if(state == null || !state.metering)
+			return null;
+		else
+			return state.release;
+	}
+
+	/** Process the stratified plan for the next interval */
+	protected void processInterval() {
+		if(zone_change) {
+			printSetup();
+			zone_change = false;
 		}
-		log_name = new File(dir.getCanonicalPath() + File.separator +
-			meter.getCorridorID() + '.' +
-			stamp_hhmm(plan.getStartMin()) + '-' +
-			stamp_hhmm(plan.getStopMin()) + ".xml");
-		FileOutputStream fos = new FileOutputStream(
-			log_name.getCanonicalPath());
-		return new PrintStream(fos);
+		calculateRates();
+		if(!isDone())
+			cleanupExpiredPlans();
 	}
 
-	/** Open log file for appending */
-	protected PrintStream appendLogFile() throws IOException {
-		if(log_name == null)
-			throw new FileNotFoundException("No log file");
-		FileOutputStream fos = new FileOutputStream(
-			log_name.getCanonicalPath(), true);
-		return new PrintStream(fos);
-	}
-
-	/** Print all meter setup information to a stream */
-	protected void printMeterSetup(PrintStream stream) {
-		for(MeterState state: states.values()) {
-			if(state.valid)
-				state.print(stream);
-		}
-	}
-
-	/** Print all zone setup information to a stream */
-	protected void printZoneSetup(PrintStream stream) {
-		for(Zone zone: zones)
-			zone.print(stream);
-	}
-
-	/** Print the setup information for all meters and zones */
-	protected void printSetup(RampMeterImpl meter) {
-		try {
-			String date = TrafficDataBuffer.date(
-				System.currentTimeMillis());
-			PrintStream stream = createLogFile(meter, date);
-			stream.println("<?xml version=\"1.0\"?>");
-			stream.println("<stratified_plan_log corridor='" +
-				meter.getCorridorID() + "' date='" + date +
-				"'>");
-			printMeterSetup(stream);
-			printZoneSetup(stream);
-			stream.close();
-		}
-		catch(IOException e) {
-			System.err.println("XML setup: " +
-				meter.getCorridorID() + ": " + e.getMessage());
-		}
-		zone_change = false;
-	}
-
-	/** Print all zone state information to a stream */
-	protected void printZoneState(PrintStream stream) {
-		for(Zone zone: zones)
-			zone.printState(stream);
-	}
-
-	/** Print all meter state information to a stream */
-	protected void printMeterState(PrintStream stream) {
-		for(MeterState state: states.values()) {
-			if(state.valid)
-				state.printState(stream);
-		}
-	}
-
-	/** Print the zone and meter state information */
-	protected void printStates() {
-		try {
-			PrintStream stream = appendLogFile();
-			stream.println("  <interval time='" + stamp_30() +"'>");
-			printZoneState(stream);
-			printMeterState(stream);
-			stream.println("  </interval>");
-			stream.close();
-		}
-		catch(IOException e) {
-			System.err.println("XML states: " + e.getMessage());
-		}
-	}
-
-	/** Print the end of the log file */
-	protected void printEnd() {
-		try {
-			PrintStream stream = appendLogFile();
-			stream.println("</stratified_plan_log>");
-			stream.close();
-		}
-		catch(IOException e) {
-			System.err.println("XML: " + e.getMessage());
-		}
-		log_name = null;
-	}
-
-	/** Get a list iterator of all zones starting with last zone */
-	protected ListIterator<Zone> getZoneIterator() {
-		int last = Math.max(zones.size() - 1, 0);
-		ListIterator<Zone> li = zones.listIterator(last);
-		// Make sure the iterator is past the end of the list
-		while(li.hasNext())
-			li.next();
-		return li;
+	/** Is this stratified zone done? */
+	protected boolean isDone() {
+		return states.isEmpty() && zones.isEmpty();
 	}
 
 	/** Calculate all the metering rates */
@@ -1129,83 +1143,132 @@ public class StratifiedPlanState extends MeterPlanState {
 			}
 		}
 		printStates();
-		next_interval = false;
 	}
 
-	/** Get the meter state for a specified meter */
-	protected MeterState getMeterState(RampMeter meter) {
-		return states.get(meter.getName());
+	/** Get a list iterator of all zones starting with last zone */
+	protected ListIterator<Zone> getZoneIterator() {
+		int last = Math.max(zones.size() - 1, 0);
+		ListIterator<Zone> li = zones.listIterator(last);
+		// Make sure the iterator is past the end of the list
+		while(li.hasNext())
+			li.next();
+		return li;
 	}
 
-	/** Get the meter state for a given ramp meter */
-	protected MeterState getOrCreateMeterState(RampMeterImpl meter) {
-		MeterState state = getMeterState(meter);
-		if(state != null)
-			return state;
-		state = new MeterState(meter);
-		states.put(meter.getName(), state);
-		if(state.valid) {
-			for(Zone zone: zones)
-				zone.addMeter(state);
+	/** Cleanup the meter states for expired plans */
+	protected void cleanupExpiredPlans() {
+		Iterator<MeterState> it = states.values().iterator();
+		while(it.hasNext()) {
+			MeterState state = it.next();
+			if(!state.plan.isOperating())
+				it.remove();
 		}
-		return state;
-	}
-
-	/** Check for the existance of a queue */
-	public synchronized RampMeterQueue getQueue(RampMeter meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return RampMeterQueue.UNKNOWN;
-		else if(state.queue_backup)
-			return RampMeterQueue.FULL;
-		else if(state.has_queue)
-			return RampMeterQueue.EXISTS;
-		else
-			return RampMeterQueue.EMPTY;
-	}
-
-	/** Get the release rate for the specified ramp meter */
-	public synchronized Integer getRate(RampMeter meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return null;
-		else
-			return state.release;
-	}
-
-	/** Check if we're in the first half of the timing plan window */
-	protected boolean isFirstHalf() {
-		int min = minute_of_day();
-		return min * 2 < plan.getStartMin() + plan.getStopMin();
-	}
-
-	/** Check if we're in the flushing window */
-	protected boolean isFlushing() {
-		int min = minute_of_day();
-		int stop_min = plan.getStopMin();
-		return min >= stop_min - FLUSH_MINUTES && min <= stop_min;
-	}
-
-	/** Validate the timing plan within the time frame */
-	protected int validateWithin(RampMeterImpl meter) {
-		if(zone_change)
-			printSetup(meter);
-		if(next_interval)
-			calculateRates();
-		MeterState state = getOrCreateMeterState(meter);
-		int demand = state.demand;
-		if(meter.isMetering()) {
-			if(isFlushing() && !state.has_queue)
-				stopMetering(meter);
-		} else {
-			float thresh = state.rate_accum;
-			if(isFirstHalf())
-				thresh *= TURN_ON_THRESHOLD_1;
-			else
-				thresh *= TURN_ON_THRESHOLD_2;
-			if(demand > thresh)
-				startMetering(meter);
+		if(states.isEmpty()) {
+			zones.clear();
+			printEnd();
 		}
-		return state.release;
+	}
+
+	/** Print the setup information for all meters and zones */
+	protected void printSetup() {
+		String cid = corridor.getID();
+		String name = cid + '.' + plan.getRange();
+		try {
+			String date = TrafficDataBuffer.date(
+				System.currentTimeMillis());
+			PrintStream stream = createLogFile(date, name);
+			stream.println("<?xml version=\"1.0\"?>");
+			stream.println("<stratified_plan_log corridor='" + cid +
+				"' date='" + date + "'>");
+			printMeterSetup(stream);
+			printZoneSetup(stream);
+			stream.close();
+		}
+		catch(IOException e) {
+			System.err.println("XML setup: " + cid + ": " +
+				e.getMessage());
+		}
+	}
+
+	/** Print all meter setup information to a stream */
+	protected void printMeterSetup(PrintStream stream) {
+		for(MeterState state: states.values()) {
+			if(state.valid)
+				state.print(stream);
+		}
+	}
+
+	/** Print all zone setup information to a stream */
+	protected void printZoneSetup(PrintStream stream) {
+		for(Zone zone: zones)
+			zone.print(stream);
+	}
+
+	/** Print the zone and meter state information */
+	protected void printStates() {
+		try {
+			PrintStream stream = appendLogFile();
+			stream.println("  <interval time='" +
+				TimingPlanImpl.stamp_30() +"'>");
+			printZoneState(stream);
+			printMeterState(stream);
+			stream.println("  </interval>");
+			stream.close();
+		}
+		catch(IOException e) {
+			System.err.println("XML states: " + e.getMessage());
+		}
+	}
+
+	/** Print all zone state information to a stream */
+	protected void printZoneState(PrintStream stream) {
+		for(Zone zone: zones)
+			zone.printState(stream);
+	}
+
+	/** Print all meter state information to a stream */
+	protected void printMeterState(PrintStream stream) {
+		for(MeterState state: states.values()) {
+			if(state.valid)
+				state.printState(stream);
+		}
+	}
+
+	/** Print the end of the log file */
+	protected void printEnd() {
+		try {
+			PrintStream stream = appendLogFile();
+			stream.println("</stratified_plan_log>");
+			stream.close();
+		}
+		catch(IOException e) {
+			System.err.println("XML: " + e.getMessage());
+		}
+		log_name = null;
+	}
+
+	/** Create a new log file */
+	protected PrintStream createLogFile(String date, String name)
+		throws IOException
+	{
+		File dir = new File(DATA_PATH + File.separator + date);
+		if(!dir.exists()) {
+			if(!dir.mkdir())
+				throw new IOException("mkdir failed: " + dir);
+		}
+		log_name = new File(dir.getCanonicalPath() + File.separator +
+			name + ".xml");
+		FileOutputStream fos = new FileOutputStream(
+			log_name.getCanonicalPath());
+		return new PrintStream(fos);
+	}
+
+	/** Open log file for appending */
+	protected PrintStream appendLogFile() throws IOException {
+		if(log_name == null)
+			throw new FileNotFoundException("No log file");
+		FileOutputStream fos = new FileOutputStream(
+			log_name.getCanonicalPath(), true);
+		return new PrintStream(fos);
 	}
 }

@@ -1014,17 +1014,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Update the travel times for this sign */
-	public void updateTravelTimes() {
-		if(isWithin())
-			updateTravelTime();
-		else {
-			s_routes.clear();
-			sendTravelTime("");
-		}
-	}
-
-	/** Update the travel times for this sign */
-	protected void updateTravelTime() {
+	public void updateTravelTime() {
 		try {
 			sendTravelTime(composeTravelTimeMessage());
 		}
@@ -1033,6 +1023,12 @@ public class DMSImpl extends Device2Impl implements DMS {
 				RouteBuilder.TRAVEL_LOG.log(e.getMessage());
 			sendTravelTime("");
 		}
+	}
+
+	/** Clear the travel time for this sign */
+	public void clearTravelTime() {
+		s_routes.clear();
+		sendTravelTime("");
 	}
 
 	/** Send a new travel time message */

@@ -319,24 +319,6 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		return null;
 	}
 
-	/** Get the minimum release rate (vehicles per hour) */
-	public int getMinimum() {
-		int m = SystemAttributeHelper.getMeterMinRelease();
-		if(isFailed())
-			m = Math.max(m, getTarget());
-		return filterRate(m);
-	}
-
-	/** Get the target rate for the current time */
-	public int getTarget() {
-		int t = SystemAttributeHelper.getMeterMaxRelease();
-		for(MeterPlanState s: getMeterPlanStates()) {
-			if(s instanceof SimplePlanState)
-				t = Math.min(t, s.getPlan().getTarget());
-		}
-		return t;
-	}
-
 	/** Ramp meter queue status */
 	protected RampMeterQueue queue = RampMeterQueue.UNKNOWN;
 
@@ -419,6 +401,14 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 				r = filterRate(Math.max(r, getMinimum()));
 			mp.sendReleaseRate(this, r);
 		}
+	}
+
+	/** Get the minimum release rate (vehicles per hour) */
+	protected int getMinimum() {
+		if(isFailed())
+			return SystemAttributeHelper.getMeterMaxRelease();
+		else
+			return SystemAttributeHelper.getMeterMinRelease();
 	}
 
 	/** Get the detector set associated with the ramp meter */
