@@ -30,7 +30,7 @@ import java.util.TreeSet;
  *
  * @author Douglas Lau
  */
-public class StratifiedPlanState extends MeterPlanState {
+public class StratifiedPlanState extends TimingPlanState {
 
 	/** Zone debug log */
 	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
@@ -82,6 +82,16 @@ public class StratifiedPlanState extends MeterPlanState {
 
 	/** Number of minutes to flush meter before shutoff */
 	static protected final int FLUSH_MINUTES = 2;
+
+	/** Get the absolute minimum release rate */
+	static protected int getMinRelease() {
+		return SystemAttributeHelper.getMeterMinRelease();
+	}
+
+	/** Get the absolute maximum release rate */
+	static protected int getMaxRelease() {
+		return SystemAttributeHelper.getMeterMaxRelease();
+	}
 
 	/** States for all stratified zone corridors */
 	static protected HashMap<String, StratifiedPlanState> all_states =
@@ -402,6 +412,31 @@ public class StratifiedPlanState extends MeterPlanState {
 			p_flow += K_RATE_ACCUM * (p - p_flow);
 			p *= PASSAGE_DEMAND_FACTOR;
 			return demand + (int)(K * (p - demand));
+		}
+
+		/** Send a release rate to the ramp meter */
+		protected void sendRate() {
+			if(!meter.isLocked()) {
+				if(metering)
+					meter.setRateNext(release);
+				else
+					meter.setRateNext(null);
+			}
+		}
+
+		/** Update the ramp meter queue status */
+		protected void updateQueueStatus() {
+			meter.setQueue(getQueue());
+		}
+
+		/** Check for the existance of a queue */
+		protected RampMeterQueue getQueue() {
+			if(queue_backup)
+				return RampMeterQueue.FULL;
+			else if(has_queue)
+				return RampMeterQueue.EXISTS;
+			else
+				return RampMeterQueue.EMPTY;
 		}
 
 		/** Print the meter setup */
@@ -1087,28 +1122,6 @@ public class StratifiedPlanState extends MeterPlanState {
 		return states.get(meter.getName());
 	}
 
-	/** Check for the existance of a queue */
-	public RampMeterQueue getQueue(RampMeter meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null)
-			return RampMeterQueue.UNKNOWN;
-		else if(state.queue_backup)
-			return RampMeterQueue.FULL;
-		else if(state.has_queue)
-			return RampMeterQueue.EXISTS;
-		else
-			return RampMeterQueue.EMPTY;
-	}
-
-	/** Get the release rate for the specified ramp meter */
-	public Integer getRate(RampMeter meter) {
-		MeterState state = getMeterState(meter);
-		if(state == null || !state.metering)
-			return null;
-		else
-			return state.release;
-	}
-
 	/** Process the stratified plan for the next interval */
 	protected void processInterval() {
 		if(zone_change) {
@@ -1118,6 +1131,7 @@ public class StratifiedPlanState extends MeterPlanState {
 		calculateRates();
 		if(!isDone())
 			cleanupExpiredPlans();
+		sendMeteringRates();
 	}
 
 	/** Is this stratified zone done? */
@@ -1169,9 +1183,18 @@ public class StratifiedPlanState extends MeterPlanState {
 		}
 	}
 
+	/** Send new metering rates to ramp meters */
+	protected void sendMeteringRates() {
+		for(MeterState state: states.values()) {
+			state.sendRate();
+			state.updateQueueStatus();
+		}
+	}
+
 	/** Print the setup information for all meters and zones */
 	protected void printSetup() {
 		String cid = corridor.getID();
+		// FIXME: find first MeterState and use its plan start time
 		String name = cid + '.' + plan.getRange();
 		try {
 			String date = TrafficDataBuffer.date(

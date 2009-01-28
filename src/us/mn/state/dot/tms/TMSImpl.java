@@ -281,8 +281,6 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 			}
 		});
 		StratifiedPlanState.processAllStates();
-		// FIXME: send new rates to all ramp meters
-		// FIXME: update queue status, etc
 	}
 
 	/** 5-minute timer job */

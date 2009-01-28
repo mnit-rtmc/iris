@@ -19,7 +19,12 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public class SimplePlanState extends MeterPlanState {
+public class SimplePlanState extends TimingPlanState {
+
+	/** Get the absolute maximum release rate */
+	static protected int getMaxRelease() {
+		return SystemAttributeHelper.getMeterMaxRelease();
+	}
 
 	/** Demand rate (vehicles per hour) */
 	protected Integer demand = null;
@@ -34,10 +39,11 @@ public class SimplePlanState extends MeterPlanState {
 				demand = getMaxRelease();
 		} else
 			demand = null;
-	}
-
-	/** Get the release rate for the specified ramp meter */
-	public Integer getRate(RampMeter meter) {
-		return demand;
+		Device2 device = plan.getDevice();
+		if(device instanceof RampMeterImpl) {
+			RampMeterImpl meter = (RampMeterImpl)device;
+			if(!meter.isLocked())
+				meter.setRateNext(demand);
+		}
 	}
 }
