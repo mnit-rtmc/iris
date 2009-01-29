@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -47,7 +48,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of the agency.
- * @see FontComboBox, Font, SignMessage, DMSPanel
+ * @see FontComboBox, Font, SignMessage, DMSPanelPager
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -74,6 +75,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			return c.getStatus();
 	}
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** Cache of DMS proxy objects */
 	protected final TypeCache<DMS> cache;
 
@@ -81,7 +85,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	protected final ProxySelectionModel<DMS> selectionModel;
 
 	/** Panel used for drawing a DMS */
-	protected final DMSPanel dmsPanel;
+	protected final SignPixelPanel dmsPanel = new SignPixelPanel();
 
 	/** Message selector widget */
 	protected final MessageSelector messageSelector;
@@ -142,10 +146,10 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		super(true);
 		setTitle(I18NMessages.get("dms.selected_title"));
 		SonarState st = tc.getSonarState();
+		namespace = st.getNamespace();
 		cache = st.getDMSs();
 		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();
-		dmsPanel = new DMSPanel(st.getNamespace());
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
 			st.getSignText(), user);
 
@@ -333,9 +337,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 				fontCmb.setDefaultSelection();
 			}
 			awsControlledCbx.setEnabled(true);
-			dmsPanel.setSign(dms);
 			clearPager();
-			dmsPanelPager = new DMSPanelPager(dmsPanel);
+			dmsPanelPager = new DMSPanelPager(namespace,
+				dmsPanel, dms);
 			messageSelector.setSign(dms);
 			updateAttribute(dms, null);
 		}
@@ -358,7 +362,6 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
 		queryStatusBtn.setEnabled(false);
-		dmsPanel.setSign(null);
 		clearPager();
 		messageSelector.setEnabled(false);
 		messageSelector.clearSelections();
@@ -422,10 +425,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			statusTxt.setText(status);
 		}
 		if(a == null || a.equals("messageCurrent")) {
-			SignMessage m = dms.getMessageCurrent();
-			dmsPanel.setMessage(m);
 			clearPager();
-			dmsPanelPager = new DMSPanelPager(dmsPanel);
+			dmsPanelPager = new DMSPanelPager(namespace, dmsPanel,
+				dms);
 			messageSelector.setMessage(dms);
 		}
 	}

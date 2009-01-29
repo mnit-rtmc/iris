@@ -17,12 +17,18 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
- * Pager for a DMSPanel.  This allows multiple page messages
- * to be displayed on a DMSPanel.  The SystemAttribute objects
- * DMS message on-time and off-time (blank time) are monitored.
+ * Pager for a SignPixelPanel.  This allows multiple page messages
+ * to be displayed on a SignPixelPanel.  The SystemAttribute objects
+ * DMS message on-time and off-time (blank time) are read first.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -44,8 +50,17 @@ public class DMSPanelPager {
 			SystemAttributeHelper.getDmsPageOffSecs());
 	}
 
-	/** DMS panel being controlled */
-	protected final DMSPanel panel;
+	/** Sign pixel panel being controlled */
+	protected final SignPixelPanel panel;
+
+	/** Selected DMS */
+	protected final DMS dms;
+
+	/** Bitmaps for each page */
+	protected final BitmapGraphic[] bitmaps;
+
+	/** Current page being displayed */
+	protected int page = 0;
 
 	/** Multipage message on time, read from system attributes */
 	protected final int onTimeMS;
@@ -63,8 +78,12 @@ public class DMSPanelPager {
 	protected boolean isBlanking = false;
 
 	/** Create a new DMS panel pager */
-	public DMSPanelPager(DMSPanel p) {
+	public DMSPanelPager(Namespace n, SignPixelPanel p, DMS proxy) {
 		panel = p;
+		dms = proxy;
+		setDimensions();
+		bitmaps = createBitmaps(n);
+		panel.setGraphic(bitmaps[page]);
 		onTimeMS = readSystemOnTime();
 		offTimeMS = readSystemOffTime();
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() { 
@@ -72,12 +91,76 @@ public class DMSPanelPager {
 				pageTimerTick();
 			} 
 		});
-		timer.start();
+		if(isMultipage())
+			timer.start();
 	}
 
 	/** Dispose of the pager */
 	public void dispose() {
 		timer.stop();
+	}
+
+	/** Set the dimensions of the pixel panel */
+	protected void setDimensions() {
+		setPhysicalDimensions();
+		setLogicalDimensions();
+		panel.verifyDimensions();
+	}
+
+	/** Set the physical dimensions of the pixel panel */
+	protected void setPhysicalDimensions() {
+		Integer w = dms.getFaceWidth();
+		Integer h = dms.getFaceHeight();
+		Integer hp = dms.getHorizontalPitch();
+		Integer vp = dms.getVerticalPitch();
+		Integer hb = dms.getHorizontalBorder();
+		Integer vb = dms.getVerticalBorder();
+		if(w != null && h != null && hp != null && vp != null &&
+		   hb != null && vb != null)
+		{
+			panel.setPhysicalDimensions(w, h, hb, vb, hp, vp);
+		}
+	}
+
+	/** Set the logical dimensions of the pixel panel */
+	protected void setLogicalDimensions() {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(wp != null && hp != null && cw != null && ch != null)
+			panel.setLogicalDimensions(wp, hp, cw, ch);
+	}
+
+	/** Create the bitmaps for each page */
+	protected BitmapGraphic[] createBitmaps(Namespace namespace) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		SignMessage m = dms.getMessageCurrent();
+		if(wp != null && hp != null && cw != null && ch != null &&
+		   m != null)
+		{
+			PixelMapBuilder builder = new PixelMapBuilder(namespace,
+				wp, hp, cw, ch);
+			MultiString multi = new MultiString(m.getMulti());
+			multi.parse(builder);
+			return builder.getPixmaps();
+		}
+		return new BitmapGraphic[] {
+			createBlankPage()
+		};
+	}
+
+	/** Create a blank bitmap graphic */
+	protected BitmapGraphic createBlankPage() {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
+		else
+			return new BitmapGraphic(0, 0);
 	}
 
 	/** 
@@ -87,9 +170,9 @@ public class DMSPanelPager {
 	protected void pageTimerTick() {
 		if(doTick()) {
 			if(isBlanking)
-				panel.makeBlank();
+				makeBlank();
 			else
-				panel.nextPage();
+				nextPage();
 		}
 	}
 
@@ -112,5 +195,26 @@ public class DMSPanelPager {
 			}
 		}
 		return false;
+	}
+
+	/** Make the display blank (without advancing the page number) */
+	protected void makeBlank() {
+		if(isMultipage())
+			panel.setGraphic(createBlankPage());
+	}
+
+	/** Display the next page of the message */
+	protected void nextPage() {
+		if(isMultipage()) {
+			page++;
+			if(page >= bitmaps.length)
+				page = 0;
+			panel.setGraphic(bitmaps[page]);
+		}
+	}
+
+	/** Check if the current message has multiple pages */
+	protected boolean isMultipage() {
+		return bitmaps.length > 1;
 	}
 }
