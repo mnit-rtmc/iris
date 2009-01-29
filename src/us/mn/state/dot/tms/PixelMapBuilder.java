@@ -65,32 +65,36 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Get a font with the given font number */
-	public Font getFont(int f_num) {
-		return lookupFont(f_num, getLineHeightPixels(f_num), c_width,0);
+	public Font getFont(final int f_num) {
+		if(f_num > 0) {
+			return (Font)namespace.findObject(Font.SONAR_TYPE,
+				new Checker<Font>()
+			{
+				public boolean check(Font f) {
+					return f.getNumber() == f_num;
+				}
+			});
+		} else
+			return lookupFont(getLineHeightPixels(), c_width, 0);
 	}
 
 	/** Get the optimal line height (pixels) */
-	protected int getLineHeightPixels(int f_num) {
+	public int getLineHeightPixels() {
 		if(c_height > 0)
 			return c_height;
 		for(int h = height; h > 0; h--) {
 			int ls = calculateLineSpacing(h);
 			if(ls != INVALID_LINE_SPACING) {
-				if(lookupFont(f_num, h, c_width, ls) != null)
+				if(lookupFont(h, c_width, ls) != null)
 					return h;
 			}
 		}
 		// No optimal height found; just grab a font...
-		Font f = lookupFont(f_num, 0, c_width, 0);
+		Font f = lookupFont(0, c_width, 0);
 		if(f != null)
 			return f.getHeight();
 		else
 			return SystemAttributeHelper.getDmsDefaultFontHeight();
-	}
-
-	/** Get the optimal line height (pixels) */
-	public int getLineHeightPixels() {
-		return getLineHeightPixels(0);
 	}
 
 	/** Calculate the line spacing for a given font height */
@@ -106,46 +110,40 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Lookup the best font.
-	 * @param n Font number.  Zero matches any font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected Font lookupFont(int n, int h, int w, int ls) {
-		Font f = _lookupFont(n, h, w, ls);
+	protected Font lookupFont(int h, int w, int ls) {
+		Font f = _lookupFont(h, w, ls);
 		if(f != null || w == 0)
 			return f;
 		else
-			return _lookupFont(n, h, 0, ls);
+			return _lookupFont(h, 0, ls);
 	}
 
 	/** Lookup the best font.
-	 * @param n Font number.  Zero matches any font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected Font _lookupFont(final int n, final int h, final int w,
-		final int ls)
-	{
+	protected Font _lookupFont(final int h, final int w, final int ls) {
 		return (Font)namespace.findObject(Font.SONAR_TYPE,
 			new Checker<Font>()
 		{
 			public boolean check(Font f) {
-				return checkFont(f, n, h, w, ls);
+				return checkFont(f, h, w, ls);
 			}
 		});
 	}
 
 	/** Check if a font matches criteria.
-	 * @param n Font number.  Zero matches any font number.
 	 * @param h Font height (pixels).  Zero matches any height.
 	 * @param w Font width (pixels).  Zero matches any width.
 	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected boolean checkFont(Font f, int n, int h, int w, int ls) {
-		boolean n_match = (n == 0) || n == f.getNumber();
+	protected boolean checkFont(Font f, int h, int w, int ls) {
 		boolean ls_match = (ls == 0) || ls == f.getLineSpacing();
 		boolean h_match = (h == 0) || h == f.getHeight();
 		boolean w_match = (w == 0) || w == f.getWidth();
-		return n_match && ls_match && h_match && h_match && w_match;
+		return ls_match && h_match && h_match && w_match;
 	}
 
 	/** Count of pages */

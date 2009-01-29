@@ -59,7 +59,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 
 	/** Download the font to a sign controller */
 	protected void downloadFonts(DMSImpl dms, int p) {
-		// FIXME: search for *best* fonts numbered 1 - 4
+		// FIXME: iterate through all valid fonts for sign
 		// FIXME: set default font number to first font found
 		boolean df = true;
 		FontImpl font = dms.getFont();
