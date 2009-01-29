@@ -26,7 +26,7 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
 abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** SONAR namespace */
-	static protected ServerNamespace namespace;
+	static public ServerNamespace namespace;
 
 	/** SQL connection to database */
 	static protected SQLConnection store;

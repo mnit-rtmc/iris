@@ -73,6 +73,13 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		});
 	}
 
+	/** Find all matching fonts */
+	public void findFonts(Checker<Font> checker) {
+		FontFinder ff = new FontFinder();
+		namespace.findObject(Font.SONAR_TYPE, ff);
+		ff.findFonts(checker);
+	}
+
 	/** Simple class to find matching fonts */
 	protected class FontFinder implements Checker<Font> {
 		protected final TreeMap<Integer, Font> fonts =
@@ -87,6 +94,10 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 				return fonts.get(fonts.firstKey());
 			else
 				return null;
+		}
+		protected void findFonts(Checker<Font> checker) {
+			for(Font f: fonts.values())
+				checker.check(f);
 		}
 	}
 
