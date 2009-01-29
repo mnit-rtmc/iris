@@ -47,7 +47,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of the agency.
- * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel
+ * @see FontComboBox, Font, SignMessage, DMSPanel
  *
  * @author Erik Engstrom
  * @author Douglas Lau
