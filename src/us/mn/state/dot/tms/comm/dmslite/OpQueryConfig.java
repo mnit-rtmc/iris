@@ -202,10 +202,11 @@ public class OpQueryConfig extends OpDms
 				// in the "Compose message" control to appear
 				dms.setFaceHeight(signHeight);    // mm
 				dms.setFaceWidth(signWidth);      // mm
-				dms.setCharHeightPixels(characterHeightPixels);
-				dms.setCharWidthPixels(characterWidthPixels);
 				dms.setHeightPixels(signHeightPixels);
 				dms.setWidthPixels(signWidthPixels);
+				// NOTE: these must be set last
+				dms.setCharHeightPixels(characterHeightPixels);
+				dms.setCharWidthPixels(characterWidthPixels);
 
 				// update message graphic because sign params may have changed
 				// dms.updateMessageGraphic(); //FIXME: enable this call?, but should not render from text

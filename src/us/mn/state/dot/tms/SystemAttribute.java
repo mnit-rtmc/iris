@@ -48,8 +48,8 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS preferred font name */
 	String DMS_PREFERRED_FONT = "dms_preferred_font";
 
-	/** DMS default font height */
-	String DMS_DEFAULT_FONT_HEIGHT = "dms_default_font_height";
+	/** DMS maximum number of lines */
+	String DMS_MAX_LINES = "dms_max_lines";
 
 	/** DMS pixel off limit (in a message) */
 	String DMS_PIXEL_OFF_LIMIT = "dms_pixel_off_limit";

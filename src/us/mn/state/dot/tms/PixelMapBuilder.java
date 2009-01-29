@@ -18,6 +18,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.TreeMap;
 
 /**
  * A pixel map builder creates pixel maps for DMS display.
@@ -25,9 +26,6 @@ import java.util.LinkedList;
  * @author Douglas Lau
  */
 public class PixelMapBuilder implements MultiString.SpanCallback {
-
-	/** Special value to indicate an invalid line spacing */
-	static protected final int INVALID_LINE_SPACING = -1;
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -66,84 +64,56 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 
 	/** Get a font with the given font number */
 	public Font getFont(final int f_num) {
-		if(f_num > 0) {
-			return (Font)namespace.findObject(Font.SONAR_TYPE,
-				new Checker<Font>()
-			{
-				public boolean check(Font f) {
-					return f.getNumber() == f_num;
-				}
-			});
-		} else
-			return lookupFont(getLineHeightPixels(), c_width, 0);
+		return (Font)namespace.findObject(Font.SONAR_TYPE,
+			new Checker<Font>()
+		{
+			public boolean check(Font f) {
+				return f.getNumber() == f_num;
+			}
+		});
+	}
+
+	/** Simple class to find matching fonts */
+	protected class FontFinder implements Checker<Font> {
+		protected final TreeMap<Integer, Font> fonts =
+			new TreeMap<Integer, Font>();
+		public boolean check(Font f) {
+			if(isFontUsable(f))
+				fonts.put(f.getNumber(), f);
+			return false;
+		}
+		public Font getFirstFont() {
+			if(fonts.size() > 0)
+				return fonts.get(fonts.firstKey());
+			else
+				return null;
+		}
+	}
+
+	/** Check if a font is usable */
+	protected boolean isFontUsable(Font f) {
+		if(f.getWidth() > width)
+			return false;
+		if(f.getHeight() > height)
+			return false;
+		if(c_width > 0 && c_width != f.getWidth())
+			return false;
+		if(c_height > 0 && c_height != f.getHeight())
+			return false;
+		return true;
 	}
 
 	/** Get the optimal line height (pixels) */
 	public int getLineHeightPixels() {
 		if(c_height > 0)
 			return c_height;
-		for(int h = height; h > 0; h--) {
-			int ls = calculateLineSpacing(h);
-			if(ls != INVALID_LINE_SPACING) {
-				if(lookupFont(h, c_width, ls) != null)
-					return h;
-			}
-		}
-		// No optimal height found; just grab a font...
-		Font f = lookupFont(0, c_width, 0);
+		FontFinder ff = new FontFinder();
+		namespace.findObject(Font.SONAR_TYPE, ff);
+		Font f = ff.getFirstFont();
 		if(f != null)
 			return f.getHeight();
 		else
-			return SystemAttributeHelper.getDmsDefaultFontHeight();
-	}
-
-	/** Calculate the line spacing for a given font height */
-	protected int calculateLineSpacing(int font_height) {
-		int extra = height % font_height;
-		int gaps = (height / font_height) - 1;
-		if(extra == 0)
-			return 0;
-		else if((gaps > 0) && (extra % gaps == 0))
-			return extra / gaps;
-		else
-			return INVALID_LINE_SPACING;
-	}
-
-	/** Lookup the best font.
-	 * @param h Font height (pixels).  Zero matches any height.
-	 * @param w Font width (pixels).  Zero matches any width.
-	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected Font lookupFont(int h, int w, int ls) {
-		Font f = _lookupFont(h, w, ls);
-		if(f != null || w == 0)
-			return f;
-		else
-			return _lookupFont(h, 0, ls);
-	}
-
-	/** Lookup the best font.
-	 * @param h Font height (pixels).  Zero matches any height.
-	 * @param w Font width (pixels).  Zero matches any width.
-	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected Font _lookupFont(final int h, final int w, final int ls) {
-		return (Font)namespace.findObject(Font.SONAR_TYPE,
-			new Checker<Font>()
-		{
-			public boolean check(Font f) {
-				return checkFont(f, h, w, ls);
-			}
-		});
-	}
-
-	/** Check if a font matches criteria.
-	 * @param h Font height (pixels).  Zero matches any height.
-	 * @param w Font width (pixels).  Zero matches any width.
-	 * @param ls Line spacing (pixels).  Zero matches any line spacing. */
-	protected boolean checkFont(Font f, int h, int w, int ls) {
-		boolean ls_match = (ls == 0) || ls == f.getLineSpacing();
-		boolean h_match = (h == 0) || h == f.getHeight();
-		boolean w_match = (w == 0) || w == f.getWidth();
-		return ls_match && h_match && h_match && w_match;
+			return height;
 	}
 
 	/** Count of pages */

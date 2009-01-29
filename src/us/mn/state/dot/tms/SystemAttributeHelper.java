@@ -237,9 +237,9 @@ public class SystemAttributeHelper {
 		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 
-	/** Get the DMS default font height */
-	static public int getDmsDefaultFontHeight() {
-		return getValueInt(SystemAttribute.DMS_DEFAULT_FONT_HEIGHT, 7);
+	/** Get the DMS maximum number of text lines */
+	static public int getDmsMaxLines() {
+		return getValueInt(SystemAttribute.DMS_MAX_LINES, 6);
 	}
 
 	/** Get the DMS pixel off limit (in a message) */

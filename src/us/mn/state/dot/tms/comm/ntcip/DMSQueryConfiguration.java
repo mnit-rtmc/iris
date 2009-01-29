@@ -139,12 +139,6 @@ public class DMSQueryConfiguration extends DMSOperation {
 
 		/** Query the VMS information */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			VmsCharacterHeightPixels c_height =
-				new VmsCharacterHeightPixels();
-			mess.add(c_height);
-			VmsCharacterWidthPixels c_width =
-				new VmsCharacterWidthPixels();
-			mess.add(c_width);
 			VmsSignHeightPixels s_height =
 				new VmsSignHeightPixels();
 			mess.add(s_height);
@@ -154,13 +148,20 @@ public class DMSQueryConfiguration extends DMSOperation {
 			mess.add(h_pitch);
 			VmsVerticalPitch v_pitch = new VmsVerticalPitch();
 			mess.add(v_pitch);
+			VmsCharacterHeightPixels c_height =
+				new VmsCharacterHeightPixels();
+			mess.add(c_height);
+			VmsCharacterWidthPixels c_width =
+				new VmsCharacterWidthPixels();
+			mess.add(c_width);
 			mess.getRequest();
-			dms.setCharHeightPixels(c_height.getInteger());
-			dms.setCharWidthPixels(c_width.getInteger());
 			dms.setHeightPixels(s_height.getInteger());
 			dms.setWidthPixels(s_width.getInteger());
 			dms.setHorizontalPitch(h_pitch.getInteger());
 			dms.setVerticalPitch(v_pitch.getInteger());
+			// NOTE: these must be set last
+			dms.setCharHeightPixels(c_height.getInteger());
+			dms.setCharWidthPixels(c_width.getInteger());
 			return null;
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,5 +59,10 @@ public enum DMSType {
 				return t;
 		}
 		return UNKNOWN;
+	}
+
+	/** Check if a DMS type is fixed-height VMS */
+	static public boolean isFixedHeight(DMSType t) {
+		return t == VMS_CHAR || t == VMS_LINE;
 	}
 }

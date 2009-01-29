@@ -539,15 +539,33 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return widthPixels;
 	}
 
-	/** Character height (pixels) */
+	/** Character height (pixels; 0 means variable) */
 	protected transient Integer charHeightPixels;
 
 	/** Set character height (pixels) */
 	public void setCharHeightPixels(Integer h) {
+		// NOTE: some crazy vendors think line-matrix signs should have
+		//       a variable character height, so we have to fix their
+		//       mistake here ... uggh
+		if(h == 0 && DMSType.isFixedHeight(dms_type))
+			h = estimateLineHeight();
 		if(!h.equals(charHeightPixels)) {
 			charHeightPixels = h;
 			notifyAttribute("charHeightPixels");
 		}
+	}
+
+	/** Estimate the line height (pixels) */
+	protected Integer estimateLineHeight() {
+		Integer h = heightPixels;
+		if(h != null) {
+			int m = SystemAttributeHelper.getDmsMaxLines();
+			for(int i = m; i > 0; i--) {
+				if(h % i == 0)
+					return h / i;
+			}
+		}
+		return null;
 	}
 
 	/** Get character height (pixels) */
