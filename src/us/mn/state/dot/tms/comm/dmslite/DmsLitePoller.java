@@ -68,11 +68,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
 	}
 
-	/** Download the font to a sign controller */
-	protected void downloadFonts(DMSImpl dms, int p) {
-		//System.err.println("DmsLitePoller.downloadFonts() called, ignored.");
-	}
-
 	/** 
 	 * Perform a controller download. Called when the IRIS server is shutting down, 
 	 * when the 'reset' button is pressed on the controller status tab. 
