@@ -35,21 +35,22 @@ public class DMSFontDownload extends DMSOperation {
 	/** Font to download to the sign */
 	protected final FontImpl font;
 
-	/** Font index */
+	/** Should this be the default font */
+	protected final boolean _default;
+
+	/** Font index.
+	 * On some signs (ADDCO), font index 1 is read-only (apparently). */
 	protected final int index;
 
 	/** Glyph mapping */
 	protected final SortedMap<Integer, GlyphImpl> glyphs;
 
 	/** Create a new DMS font download operation */
-	public DMSFontDownload(DMSImpl d, FontImpl f) {
+	public DMSFontDownload(DMSImpl d, FontImpl f, int i, boolean df) {
 		super(DOWNLOAD, d);
 		font = f;
-		// On ADDCO signs, font 1 is read-only (apparently)
-		if(d.getMake().contains("ADDCO"))
-			index = 2;
-		else
-			index = 1;
+		index = i;
+		_default = df;
 		glyphs = f.getGlyphs();
 	}
 
@@ -102,7 +103,7 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Create a new font in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontNumber(index, index));
+			mess.add(new FontNumber(index, font.getNumber()));
 			mess.add(new FontName(index, font.getName()));
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.add(new FontCharSpacing(index,
@@ -164,7 +165,10 @@ public class DMSFontDownload extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.setRequest();
-			return new SetDefaultFont();
+			if(_default)
+				return new SetDefaultFont();
+			else
+				return null;
 		}
 	}
 
