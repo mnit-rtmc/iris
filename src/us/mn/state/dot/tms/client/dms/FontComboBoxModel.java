@@ -27,19 +27,13 @@ import us.mn.state.dot.tms.Font;
 public class FontComboBoxModel extends ProxyListModel<Font>
 	implements ComboBoxModel 
 {
-	/** currently selected font */
-	Font m_selected;
+	/** Currently selected font */
+	protected Font m_selected;
 
-	/** constructor */
+	/** Create a new font combo box model */
 	public FontComboBoxModel(TypeCache<Font> arg_fonts) {
 		super(arg_fonts);
 		initialize();
-	}
-
-	/** Get the item at the specified index */
-	public Object getElementAt(int index) {
-		Font f = (Font)super.getElementAt(index);
-		return f;
 	}
 
 	/** Get the selected item */
