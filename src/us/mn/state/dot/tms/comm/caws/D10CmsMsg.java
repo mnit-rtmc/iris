@@ -77,6 +77,7 @@ public class D10CmsMsg {
 
 		// create message-pg1
 		MultiString m = new MultiString();
+		// FIXME: should use default font number, instead of 1 here
 		if(page_1_font != 1)
 			m.setFont(page_1_font);
 		m.addText(row1);
@@ -200,6 +201,7 @@ public class D10CmsMsg {
 	 * @return Font number.
 	 */
 	static protected int parseFont(String f) {
+		// FIXME: should lookup font number from name
 		if(f.equals(SINGLESTROKE))
 			return 1;
 		else if(f.equals(DOUBLESTROKE))
@@ -208,6 +210,7 @@ public class D10CmsMsg {
 			// FIXME: should throw InvalidArgumentException
 			System.err.println("WARNING: unknown font received " +
 				"in D10CmsMsg.parseFont(): " + f);
+			// FIXME: should return default font number for DMS
 			return 1;
 		}
 	}
