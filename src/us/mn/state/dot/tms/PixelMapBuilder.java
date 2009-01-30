@@ -102,7 +102,7 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Check if a font is usable */
-	protected boolean isFontUsable(Font f) {
+	public boolean isFontUsable(Font f) {
 		if(f.getWidth() > width)
 			return false;
 		if(f.getHeight() > height)

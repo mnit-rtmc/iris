@@ -51,7 +51,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of the agency.
- * @see FontComboBox, Font, SignMessage, DMSPanelPager
+ * @see Font, FontComboBoxModel, SignMessage, DMSPanelPager
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -83,6 +83,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Cache of DMS proxy objects */
 	protected final TypeCache<DMS> cache;
+
+	/** Cache of font proxy objects */
+	protected final TypeCache<Font> fonts;
 
 	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
@@ -116,7 +119,10 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		new JComboBox(Expiration.values());
 
 	/** Used to select the DMS font for a message (optional) */
-	protected FontComboBox fontCmb = null;
+	protected final JComboBox fontCmb = new JComboBox();
+
+	/** Font combo box model */
+	protected FontComboBoxModel fontModel;
 
 	/** Button used to send a message to the DMS */
 	protected final JButton sendBtn =
@@ -151,6 +157,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		SonarState st = tc.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getDMSs();
+		fonts = st.getFonts();
 		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();
 		messageSelector = new MessageSelector(st.getDmsSignGroups(),
@@ -166,7 +173,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		} else
 			addRow("Operation", operationTxt);
 		addRow(dmsPanel);
-		addRow(createDeployBox(st));
+		addRow(createDeployBox());
 
 		setSelected(null);
 		cache.addProxyListener(this);
@@ -174,13 +181,13 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	}
 
 	/** Create a component to deploy signs */
-	protected Box createDeployBox(SonarState st) {
+	protected Box createDeployBox() {
 		Box boxRight = Box.createVerticalBox();
 		boxRight.add(Box.createVerticalGlue());
 		if(SystemAttributeHelper.isDmsDurationEnabled())
 			boxRight.add(buildDurationBox());
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
-			boxRight.add(buildFontSelectorBox(st.getFonts()));
+			boxRight.add(buildFontSelectorBox());
 		if(SystemAttributeHelper.isAwsEnabled())
 			boxRight.add(buildAwsControlledBox());
 		boxRight.add(Box.createVerticalStrut(4));
@@ -253,9 +260,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	}
 
 	/** Build the font selector combo box */
-	protected JPanel buildFontSelectorBox(TypeCache<Font> tcf) {
-		assert tcf != null;
-		fontCmb = new FontComboBox(tcf);
+	protected JPanel buildFontSelectorBox() {
 		JPanel p = new JPanel(new FlowLayout());
 		p.add(new JLabel("Font"));
 		p.add(fontCmb);
@@ -335,13 +340,17 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			queryStatusBtn.setEnabled(true);
 			durationCmb.setEnabled(true);
 			durationCmb.setSelectedIndex(0);
-			if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
-				fontCmb.setEnabled(true);
-				fontCmb.setDefaultSelection();
-			}
+			PixelMapBuilder builder = createPixelMapBuilder(dms);
+			FontComboBoxModel m = new FontComboBoxModel(fonts,
+				builder);
+			fontCmb.setModel(m);
+			if(fontModel != null)
+				fontModel.dispose();
+			fontModel = m;
+			fontCmb.setEnabled(true);
+			fontCmb.setSelectedIndex(0);
 			awsControlledCbx.setEnabled(true);
 			clearPager();
-			PixelMapBuilder builder = createPixelMapBuilder(dms);
 			BitmapGraphic[] bmaps = getBitmaps(builder);
 			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
 			messageSelector.setSign(dms,
@@ -385,10 +394,12 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		locationTxt.setText("");
 		brightnessTxt.setText("");
 		durationCmb.setEnabled(false);
-		durationCmb.setSelectedIndex(0);
-		if(SystemAttributeHelper.isDmsFontSelectionEnabled()) {
-			fontCmb.setEnabled(false);
-			fontCmb.setDefaultSelection();
+		durationCmb.setSelectedItem(null);
+		fontCmb.setEnabled(false);
+		fontCmb.setSelectedItem(null);
+		if(fontModel != null) {
+			fontModel.dispose();
+			fontModel = null;
 		}
 		awsControlledCbx.setEnabled(false);
 		sendBtn.setEnabled(false);
@@ -420,13 +431,11 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	protected void sendMessage(DMS dms) {
 		assert dms != null;
 		String message = messageSelector.getMessage();
-		String fontName = null;
-		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
-			fontName = fontCmb.getSelectedItemName();
+		Font font = (Font)fontCmb.getSelectedItem();
 		if(message != null) {
 			// FIXME: build a new message
 			dms.setMessageNext(user, message,
-				getDuration(), fontName);
+				getDuration(), font);
 			messageSelector.updateMessageLibrary();
 		}
 	}

@@ -45,9 +45,6 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS status polling frequency */
 	String DMS_POLL_FREQ_SECS = "dms_poll_freq_secs";
 
-	/** DMS preferred font name */
-	String DMS_PREFERRED_FONT = "dms_preferred_font";
-
 	/** DMS maximum number of lines */
 	String DMS_MAX_LINES = "dms_max_lines";
 

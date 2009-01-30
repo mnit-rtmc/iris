@@ -431,11 +431,6 @@ public class SystemAttributeHelper {
 		return np;
 	}
 
-	/** Return the preferred font name */
-	static public String preferredFontName() {
-		return getValue(SystemAttribute.DMS_PREFERRED_FONT, "");
-	}
-
 	/** Get the minimum available pages for DMS messages */
 	static public int getDmsMessageMinPages() {
 		return getValueInt(SystemAttribute.DMS_MESSAGE_MIN_PAGES, 1);
