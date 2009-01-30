@@ -1194,8 +1194,10 @@ public class StratifiedPlanState extends TimingPlanState {
 	/** Print the setup information for all meters and zones */
 	protected void printSetup() {
 		String cid = corridor.getID();
-		// FIXME: find first MeterState and use its plan start time
-		String name = cid + '.' + plan.getRange();
+		MeterState state = getOneMeterState();
+		if(state == null)
+			return;
+		String name = cid + '.' + state.plan.getStamp();
 		try {
 			String date = TrafficDataBuffer.date(
 				System.currentTimeMillis());
@@ -1211,6 +1213,13 @@ public class StratifiedPlanState extends TimingPlanState {
 			System.err.println("XML setup: " + cid + ": " +
 				e.getMessage());
 		}
+	}
+
+	/** Get one meter state which has been defined */
+	protected MeterState getOneMeterState() {
+		for(MeterState state: states.values())
+			return state;
+		return null;
 	}
 
 	/** Print all meter setup information to a stream */

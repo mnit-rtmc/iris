@@ -229,10 +229,9 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 		return stop_min;
 	}
 
-	/** Get the timing plan range */
-	public String getRange() {
-		return stamp_hhmm(getStartMin()) + '-' +
-		       stamp_hhmm(getStopMin());
+	/** Get the timing plan start stamp */
+	public String getStamp() {
+		return stamp_hhmm(getStartMin());
 	}
 
 	/** Active status */
