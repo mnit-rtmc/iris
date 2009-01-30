@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.SonarException;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic
@@ -50,7 +51,9 @@ public class SignMessageImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, String[] b, DMSMessagePriority p) {
+	public SignMessageImpl(String m, String[] b, DMSMessagePriority p)
+		throws SonarException
+	{
 		name = createUniqueName();
 		multi = m;
 		bitmaps = b;

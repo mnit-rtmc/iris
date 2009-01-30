@@ -139,13 +139,20 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Initialize the transient state */
 	public void initTransients() {
 		super.initTransients();
-		messageCurrent = createBlankMessage(
-			DMSMessagePriority.SCHEDULED);
+		try {
+			messageCurrent = createBlankMessage(
+				DMSMessagePriority.SCHEDULED);
+		}
+		catch(SonarException e) {
+			e.printStackTrace();
+		}
 		s_routes = new HashMap<String, Route>();
 	}
 
 	/** Create a blank message for the sign */
-	protected SignMessage createBlankMessage(DMSMessagePriority p) {
+	protected SignMessage createBlankMessage(DMSMessagePriority p)
+		throws SonarException
+	{
 		String[] bitmaps = new String[] {
 			Base64.encode(new byte[0])
 		};
@@ -1055,17 +1062,20 @@ public class DMSImpl extends Device2Impl implements DMS {
 			return;
 		// FIXME: bail out if t is blank and the current message is not
 		//        a travel time
-		SignMessage m = createMessage(t,DMSMessagePriority.TRAVEL_TIME);
 		try {
+			SignMessage m = createMessage(t,
+				DMSMessagePriority.TRAVEL_TIME);
 			sendMessage(m);
 		}
-		catch(TMSException e) {
+		catch(Exception e) {
 			RouteBuilder.TRAVEL_LOG.log(e.getMessage());
 		}
 	}
 
 	/** Create a message for the sign */
-	public SignMessage createMessage(String m, DMSMessagePriority p) {
+	public SignMessage createMessage(String m, DMSMessagePriority p)
+		throws SonarException
+	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
 		Integer cw = charWidthPixels;
@@ -1091,7 +1101,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Create a message for the sign */
 	public SignMessage createMessage(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p)
+		DMSMessagePriority p) throws SonarException
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;

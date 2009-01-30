@@ -167,7 +167,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	}
 
 	/** Set the ramp meter type */
-	public void doSetMeterType(int t) {
+	public void doSetMeterType(int t) throws TMSException {
 		if(t == meter_type.ordinal())
 			return;
 		store.update(this, "meter_type", t);
@@ -281,6 +281,16 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Set the status of the police panel switch */
 	public void setPolicePanel(boolean p) {
+		try {
+			_setPolicePanel(p);
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set the status of the police panel switch */
+	protected void _setPolicePanel(boolean p) throws TMSException {
 		if(p) {
 			if(lock == RampMeterLock.OFF) {
 				setLock(RampMeterLock.POLICE_PANEL);
@@ -296,6 +306,16 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Set the status of manual metering */
 	public void setManual(boolean m) {
+		try {
+			_setManual(m);
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set the status of manual metering */
+	protected void _setManual(boolean m) throws TMSException {
 		if(m) {
 			if(lock == RampMeterLock.OFF) {
 				setLock(RampMeterLock.MANUAL);
