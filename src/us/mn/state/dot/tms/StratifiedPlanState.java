@@ -243,8 +243,9 @@ public class StratifiedPlanState extends TimingPlanState {
 		protected boolean done;
 
 		/** Create a new ramp meter state */
-		protected MeterState(RampMeterImpl meter) {
-			this.meter = meter;
+		protected MeterState(RampMeterImpl m, TimingPlanImpl p) {
+			meter = m;
+			plan = p;
 			valid = findDetectors();
 			rate_accum = getMaxRelease();
 			p_flow = getMaxRelease();
@@ -1098,7 +1099,7 @@ public class StratifiedPlanState extends TimingPlanState {
 		MeterState state = getMeterState(meter);
 		if(state != null)
 			return state;
-		state = new MeterState(meter);
+		state = new MeterState(meter, plan);
 		if(state.valid) {
 			if(zones.isEmpty())
 				createAllLayers();
