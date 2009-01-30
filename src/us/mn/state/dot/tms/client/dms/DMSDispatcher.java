@@ -29,11 +29,14 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttributeHelper;
@@ -338,11 +341,40 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			}
 			awsControlledCbx.setEnabled(true);
 			clearPager();
-			dmsPanelPager = new DMSPanelPager(namespace,
-				dmsPanel, dms);
-			messageSelector.setSign(dms);
+			PixelMapBuilder builder = createPixelMapBuilder(dms);
+			BitmapGraphic[] bmaps = getBitmaps(builder);
+			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
+			messageSelector.setSign(dms,
+				builder.getLineHeightPixels());
 			updateAttribute(dms, null);
 		}
+	}
+
+	/** Create the pixel map builder */
+	protected PixelMapBuilder createPixelMapBuilder(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		SignMessage m = dms.getMessageCurrent();
+		if(wp != null && hp != null && cw != null && ch != null &&
+		   m != null)
+		{
+			PixelMapBuilder builder = new PixelMapBuilder(namespace,
+				wp, hp, cw, ch);
+			MultiString multi = new MultiString(m.getMulti());
+			multi.parse(builder);
+			return builder;
+		} else
+			return null;
+	}
+
+	/** Get the bitmap graphic for all pages */
+	protected BitmapGraphic[] getBitmaps(PixelMapBuilder builder) {
+		if(builder != null)
+			return builder.getPixmaps();
+		else
+			return null;
 	}
 
 	/** Clear the selected DMS */
@@ -426,8 +458,9 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		}
 		if(a == null || a.equals("messageCurrent")) {
 			clearPager();
-			dmsPanelPager = new DMSPanelPager(namespace, dmsPanel,
-				dms);
+			PixelMapBuilder builder = createPixelMapBuilder(dms);
+			BitmapGraphic[] bmaps = getBitmaps(builder);
+			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
 			messageSelector.setMessage(dms);
 		}
 	}

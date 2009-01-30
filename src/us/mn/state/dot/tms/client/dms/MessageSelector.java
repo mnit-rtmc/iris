@@ -251,10 +251,10 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void setSign(DMS proxy) {
+	public void setSign(DMS proxy, int lineHeight) {
 		createMessageModel(proxy.getName());
 		int ml = mess_model.getMaxLine();
-		int nl = proxy.getTextLines();
+		int nl = getLineCount(proxy, lineHeight);
 		int np = Math.max(calculateSignPages(ml, nl),
 			SystemAttributeHelper.getDmsMessageMinPages());
 		initializeWidgets(nl, np);
@@ -263,6 +263,15 @@ public class MessageSelector extends JPanel {
 				(short)(i + 1)));
 			cmbLine[i].setEnabled(true);
 		}
+	}
+
+	/** Get the number of lines on the sign */
+	protected int getLineCount(DMS proxy, int lineHeight) {
+		Integer h = proxy.getHeightPixels();
+		if(h != null && lineHeight > 0)
+			return h / lineHeight;
+		else
+			return SystemAttributeHelper.getDmsMaxLines();
 	}
 
 	/** Create a new message model */

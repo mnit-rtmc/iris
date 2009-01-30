@@ -17,12 +17,8 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
@@ -78,11 +74,11 @@ public class DMSPanelPager {
 	protected boolean isBlanking = false;
 
 	/** Create a new DMS panel pager */
-	public DMSPanelPager(Namespace n, SignPixelPanel p, DMS proxy) {
+	public DMSPanelPager(SignPixelPanel p, DMS proxy, BitmapGraphic[] b) {
 		panel = p;
 		dms = proxy;
+		bitmaps = getBitmaps(b);
 		setDimensions();
-		bitmaps = createBitmaps(n);
 		panel.setGraphic(bitmaps[page]);
 		onTimeMS = readSystemOnTime();
 		offTimeMS = readSystemOffTime();
@@ -98,6 +94,17 @@ public class DMSPanelPager {
 	/** Dispose of the pager */
 	public void dispose() {
 		timer.stop();
+	}
+
+	/** Get bitmaps to display on the panel */
+	protected BitmapGraphic[] getBitmaps(BitmapGraphic[] b) {
+		if(b != null)
+			return b;
+		else {
+			return new BitmapGraphic[] {
+				createBlankPage()
+			};
+		}
 	}
 
 	/** Set the dimensions of the pixel panel */
@@ -130,27 +137,6 @@ public class DMSPanelPager {
 		Integer ch = dms.getCharHeightPixels();
 		if(wp != null && hp != null && cw != null && ch != null)
 			panel.setLogicalDimensions(wp, hp, cw, ch);
-	}
-
-	/** Create the bitmaps for each page */
-	protected BitmapGraphic[] createBitmaps(Namespace namespace) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		SignMessage m = dms.getMessageCurrent();
-		if(wp != null && hp != null && cw != null && ch != null &&
-		   m != null)
-		{
-			PixelMapBuilder builder = new PixelMapBuilder(namespace,
-				wp, hp, cw, ch);
-			MultiString multi = new MultiString(m.getMulti());
-			multi.parse(builder);
-			return builder.getPixmaps();
-		}
-		return new BitmapGraphic[] {
-			createBlankPage()
-		};
 	}
 
 	/** Create a blank bitmap graphic */
