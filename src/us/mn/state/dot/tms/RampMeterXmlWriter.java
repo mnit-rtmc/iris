@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,35 +17,34 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
- * This class writes out the current detector configuration to an XML file.
+ * This class writes out the current ramp meter configuration to an XML file.
  *
  * @author Douglas Lau
  */
-public class DetectorXmlWriter extends XmlWriter {
+public class RampMeterXmlWriter extends XmlWriter {
 
-	/** Detector list XML file */
-	static protected final String DETS_XML = "detectors.xml";
+	/** Ramp meter list XML file */
+	static protected final String METER_XML = "ramp_meters.xml";
 
 	/** SONAR namespace */
 	protected final ServerNamespace namespace;
 
-	/** Create a new detector XML writer */
-	public DetectorXmlWriter(ServerNamespace ns) {
-		super(DETS_XML, false);
+	/** Create a new ramp meter XML writer */
+	public RampMeterXmlWriter(ServerNamespace ns) {
+		super(METER_XML, false);
 		namespace = ns;
 	}
 
-	/** Print the body of the detector list XML file */
+	/** Print the body of the ramp meter list XML file */
 	public void print(final PrintWriter out) {
-		namespace.findObject(Detector.SONAR_TYPE,
-			new Checker<DetectorImpl>()
+		namespace.findObject(RampMeter.SONAR_TYPE,
+			new Checker<RampMeterImpl>()
 		{
-			public boolean check(DetectorImpl det) {
-				det.printXmlElement(out);
+			public boolean check(RampMeterImpl meter) {
+				meter.printXmlElement(out);
 				return false;
 			}
 		});

@@ -144,7 +144,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 		new DetectorXmlWriter(namespace).write();
 		corridors = new CorridorManager(namespace);
 		new R_NodeXmlWriter(corridors).write();
-		new RampMeterWriter(namespace).write();
+		new RampMeterXmlWriter(namespace).write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 
@@ -278,6 +278,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 			public boolean check(TimingPlan p) {
 				TimingPlanImpl plan = (TimingPlanImpl)p;
 				plan.validate();
+				return false;
 			}
 		});
 		StratifiedPlanState.processAllStates();
