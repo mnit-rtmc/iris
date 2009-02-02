@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Color;
+import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -22,7 +22,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Namespace;
@@ -30,11 +30,8 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
@@ -44,7 +41,6 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
-import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -57,27 +53,9 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
+public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	ProxySelectionListener<DMS>
 {
-	/** Get the verification camera name */
-	static protected String getCameraName(DMS proxy) {
-		Camera camera = proxy.getCamera();
-		if(camera == null)
-			return " ";
-		else
-			return camera.getName();
-	}
-
-	/** Get the controller status */
-	static protected String getControllerStatus(DMS proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return "???";
-		else
-			return c.getStatus();
-	}
-
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
@@ -90,29 +68,14 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
 
+	/** Single sign tab */
+	protected final SingleSignTab singleTab = new SingleSignTab();
+
 	/** Panel used for drawing a DMS */
-	protected final SignPixelPanel dmsPanel = new SignPixelPanel();
+	protected final SignPixelPanel dmsPanel;
 
 	/** Message composer widget */
 	protected final SignMessageComposer composer;
-
-	/** Displays the id of the DMS */
-	protected final JTextField nameTxt = createTextField();
-
-	/** Displays the verify camera for the DMS */
-	protected final JTextField cameraTxt = createTextField();
-
-	/** Displays the location of the DMS */
-	protected final JTextField locationTxt = createTextField();
-
-	/** Displays the brightness of the DMS */
-	protected final JTextField brightnessTxt = createTextField();
-
-	/** Displays the current operation of the DMS */
-	protected final JTextField operationTxt = createTextField();
-
-	/** Displays the controller status (optional) */
-	protected final JTextField statusTxt = createTextField();
 
 	/** Used to select the expires time for a message (optional) */
 	protected final JComboBox durationCmb =
@@ -149,8 +112,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
-		super(true);
-		setTitle(I18NMessages.get("dms.selected_title"));
+		setLayout(new BorderLayout());
 		SonarState st = tc.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getDMSs();
@@ -159,19 +121,11 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		selectionModel = manager.getSelectionModel();
 		composer = new SignMessageComposer(st.getDmsSignGroups(),
 			st.getSignText(), user);
-
-		add("ID", nameTxt);
-		addRow("Camera", cameraTxt);
-		add("Location", locationTxt);
-		addRow("Brightness", brightnessTxt);
-		if(SystemAttributeHelper.isDmsStatusEnabled()) {
-			add("Operation", operationTxt);
-			addRow("Status", statusTxt);
-		} else
-			addRow("Operation", operationTxt);
-		addRow(dmsPanel);
-		addRow(createDeployBox());
-
+		dmsPanel = singleTab.getCurrentPanel();
+		JTabbedPane tab = new JTabbedPane();
+		tab.addTab("Single", singleTab);
+		add(tab, BorderLayout.CENTER);
+		add(createDeployBox(), BorderLayout.SOUTH);
 		setSelected(null);
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
@@ -388,10 +342,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Clear the selected DMS */
 	protected void clearSelected() {
-		nameTxt.setText("");
-		cameraTxt.setText("");
-		locationTxt.setText("");
-		brightnessTxt.setText("");
+		singleTab.clearSelected();
 		durationCmb.setEnabled(false);
 		durationCmb.setSelectedItem(null);
 		fontCmb.setEnabled(false);
@@ -444,29 +395,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(DMS dms, String a) {
-		if(a == null || a.equals("name"))
-			nameTxt.setText(dms.getName());
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(dms));
-		// FIXME: this won't update when geoLoc attributes change
-		if(a == null || a.equals("geoLoc")) {
-			locationTxt.setText(GeoLocHelper.getDescription(
-				dms.getGeoLoc()));
-		}
-		if(a == null || a.equals("lightOutput"))
-			brightnessTxt.setText("" + dms.getLightOutput() + "%");
-		if(a == null || a.equals("operation")) {
-			String status = getControllerStatus(dms);
-			if("".equals(status)) {
-				operationTxt.setForeground(null);
-				operationTxt.setBackground(null);
-			} else {
-				operationTxt.setForeground(Color.WHITE);
-				operationTxt.setBackground(Color.GRAY);
-			}
-			operationTxt.setText(dms.getOperation());
-			statusTxt.setText(status);
-		}
+		singleTab.updateAttribute(dms, a);
 		if(a == null || a.equals("messageCurrent")) {
 			clearPager();
 			PixelMapBuilder builder = createPixelMapBuilder(dms);
