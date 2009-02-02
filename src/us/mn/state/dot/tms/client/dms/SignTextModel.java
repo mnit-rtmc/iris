@@ -26,10 +26,10 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 
 /**
- * Model for sign text messages. This object is instantiated and contained by
- * MessageSelector. One SignTextModel is associated with a single DMS.
+ * Model for sign text messages.  This class is instantiated and contained by
+ * SignMessageComposer.  One SignTextModel is associated with a single DMS.
  * It creates and contains SignTextComboBoxModel objects for each combobox 
- * in MessageSelector. This object listens for changes to sign_text and 
+ * in SignMessageComposer.  This object listens for changes to sign_text and 
  * dms_sign_groups and is responsible for updating its model accordingly. 
  *
  * @author Douglas Lau

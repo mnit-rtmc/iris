@@ -93,8 +93,8 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Panel used for drawing a DMS */
 	protected final SignPixelPanel dmsPanel = new SignPixelPanel();
 
-	/** Message selector widget */
-	protected final MessageSelector messageSelector;
+	/** Message composer widget */
+	protected final SignMessageComposer composer;
 
 	/** Displays the id of the DMS */
 	protected final JTextField nameTxt = createTextField();
@@ -160,7 +160,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		fonts = st.getFonts();
 		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();
-		messageSelector = new MessageSelector(st.getDmsSignGroups(),
+		composer = new SignMessageComposer(st.getDmsSignGroups(),
 			st.getSignText(), user);
 
 		add("ID", nameTxt);
@@ -194,7 +194,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		boxRight.add(buildButtonPanel());
 		boxRight.add(Box.createVerticalGlue());
 		Box deployBox = Box.createHorizontalBox();
-		deployBox.add(messageSelector);
+		deployBox.add(composer);
 		deployBox.add(boxRight);
 		return deployBox;
 	}
@@ -237,7 +237,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		cache.removeProxyListener(this);
 		setSelected(null);
 		clearPager();
-		messageSelector.dispose();
+		composer.dispose();
 		removeAll();
 	}
 
@@ -353,8 +353,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			clearPager();
 			BitmapGraphic[] bmaps = getBitmaps(builder);
 			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
-			messageSelector.setSign(dms,
-				builder.getLineHeightPixels());
+			composer.setSign(dms, builder.getLineHeightPixels());
 			updateAttribute(dms, null);
 		}
 	}
@@ -406,8 +405,8 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		clearBtn.setEnabled(false);
 		queryStatusBtn.setEnabled(false);
 		clearPager();
-		messageSelector.setEnabled(false);
-		messageSelector.clearSelections();
+		composer.setEnabled(false);
+		composer.clearSelections();
 	}
 
 	/** Get the selected duration */
@@ -430,13 +429,13 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Send a new message to the specified DMS */
 	protected void sendMessage(DMS dms) {
 		assert dms != null;
-		String message = messageSelector.getMessage();
+		String message = composer.getMessage();
 		Font font = (Font)fontCmb.getSelectedItem();
 		if(message != null) {
 			// FIXME: build a new message
 			dms.setMessageNext(user, message,
 				getDuration(), font);
-			messageSelector.updateMessageLibrary();
+			composer.updateMessageLibrary();
 		}
 	}
 
@@ -470,7 +469,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			PixelMapBuilder builder = createPixelMapBuilder(dms);
 			BitmapGraphic[] bmaps = getBitmaps(builder);
 			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
-			messageSelector.setMessage(dms);
+			composer.setMessage(dms);
 		}
 	}
 }

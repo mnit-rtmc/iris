@@ -40,12 +40,12 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
- * Gui for selecting messages for DMS.
+ * Gui for composing messages for DMS.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MessageSelector extends JPanel {
+public class SignMessageComposer extends JPanel {
 
 	/** Cell renderer for sign text in combo boxes */
 	protected final SignTextCellRenderer renderer =
@@ -75,8 +75,8 @@ public class MessageSelector extends JPanel {
 	/** SONAR user */
 	protected final User user;
 
-	/** Create a new message selector */
-	public MessageSelector(TypeCache<DmsSignGroup> d, 
+	/** Create a new sign message composer */
+	public SignMessageComposer(TypeCache<DmsSignGroup> d, 
 		TypeCache<SignText> t, User u)
 	{
 		dms_sign_groups = d;
