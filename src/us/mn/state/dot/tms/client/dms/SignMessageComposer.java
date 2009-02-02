@@ -23,9 +23,6 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
-import javax.swing.ComboBoxEditor;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -37,7 +34,6 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
  * Gui for composing messages for DMS.
