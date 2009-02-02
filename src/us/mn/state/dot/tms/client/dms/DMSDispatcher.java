@@ -292,9 +292,8 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		};
 		sendBtn.setToolTipText(I18NMessages.get("dms.send.tooltip"));
 		new ActionJob(this, queryStatusBtn) {
-			public void perform() throws Exception {
-				selected.setSignRequest(
-					SignRequest.QUERY_STATUS.ordinal());
+			public void perform() {
+				queryStatus();
 			}
 		};
 		queryStatusBtn.setToolTipText(I18NMessages.get(
@@ -310,6 +309,16 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			box.add(Box.createHorizontalGlue());
 		}
 		return box;
+	}
+
+	/** Query the status for the selected sign */
+	protected void queryStatus() {
+		for(DMS dms: selectionModel.getSelected()) {
+			dms.setSignRequest(SignRequest.QUERY_STATUS.ordinal());
+			// Note: queryStatus() should only ever be called with
+			//       one sign selected, but let's stop just in case.
+			break;
+		}
 	}
 
 	/** Called whenever a sign is added to the selection */
