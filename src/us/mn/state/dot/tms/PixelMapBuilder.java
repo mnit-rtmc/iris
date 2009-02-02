@@ -62,17 +62,6 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		c_height = ch;
 	}
 
-	/** Get a font with the given font number */
-	public Font getFont(final int f_num) {
-		return (Font)namespace.findObject(Font.SONAR_TYPE,
-			new Checker<Font>()
-		{
-			public boolean check(Font f) {
-				return f.getNumber() == f_num;
-			}
-		});
-	}
-
 	/** Find all matching fonts */
 	public void findFonts(Checker<Font> checker) {
 		FontFinder ff = new FontFinder();
@@ -207,6 +196,17 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		Font font = getFont(f_num);
 		spans.add(new TextSpan(page, jp, line, jl, font, text));
 		n_pages = Math.max(page + 1, n_pages);
+	}
+
+	/** Get a font with the given font number */
+	protected Font getFont(final int f_num) {
+		return (Font)namespace.findObject(Font.SONAR_TYPE,
+			new Checker<Font>()
+		{
+			public boolean check(Font f) {
+				return f.getNumber() == f_num;
+			}
+		});
 	}
 
 	/** Get the pixmap graphics */
