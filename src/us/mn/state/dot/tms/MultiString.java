@@ -191,6 +191,7 @@ public class MultiString {
 		int line = 0;
 		JustificationLine justl = JustificationLine.fromOrdinal(
 			SystemAttributeHelper.getDmsDefaultJustificationLine());
+		// FIXME: support default font numbers for each sign
 		int f_num = 1;
 		Matcher m = TAG.matcher(b);
 		for(String span: TAG.split(b)) {
