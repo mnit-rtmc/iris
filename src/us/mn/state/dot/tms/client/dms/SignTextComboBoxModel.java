@@ -14,12 +14,10 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.SwingUtilities;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.utils.SDMS;
