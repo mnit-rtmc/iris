@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -49,9 +50,6 @@ public class SingleSignTab extends FormPanel {
 			return c.getStatus();
 	}
 
-	/** Panel for drawing current pixel status */
-	protected final SignPixelPanel currentPnl = new SignPixelPanel();
-
 	/** Displays the id of the DMS */
 	protected final JTextField nameTxt = createTextField();
 
@@ -70,6 +68,15 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
 
+	/** Panel for drawing current pixel status */
+	protected final SignPixelPanel currentPnl = new SignPixelPanel();
+
+	/** Panel for drawing preview pixel status */
+	protected final SignPixelPanel previewPnl = new SignPixelPanel();
+
+	/** Tabbed pane for current/preview panels */
+	protected final JTabbedPane tab = new JTabbedPane();
+
 	/** Create a new single sign tab */
 	public SingleSignTab() {
 		super(true);
@@ -82,12 +89,27 @@ public class SingleSignTab extends FormPanel {
 			addRow("Status", statusTxt);
 		} else
 			addRow("Operation", operationTxt);
-		addRow(currentPnl);
+		tab.add("Current", currentPnl);
+		tab.add("Preview", previewPnl);
+		addRow(tab);
 	}
 
 	/** Get the panel for drawing current pixel status */
 	public SignPixelPanel getCurrentPanel() {
 		return currentPnl;
+	}
+
+	/** Get the panel for drawing preview pixel status */
+	public SignPixelPanel getPreviewPanel() {
+		return previewPnl;
+	}
+
+	/** Select the preview (or current) tab */
+	public void selectPreview(boolean p) {
+		if(p)
+			tab.setSelectedComponent(previewPnl);
+		else
+			tab.setSelectedComponent(currentPnl);
 	}
 
 	/** Clear the selected DMS */
