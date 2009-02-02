@@ -144,9 +144,6 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Currently logged in user */
 	protected final User user;
 
-	/** Currently selected DMS */
-	protected DMS selected = null;
-
 	/** Pager for DMS panel */
 	protected DMSPanelPager dmsPanelPager;
 
@@ -211,24 +208,28 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** A proxy has been removed */
 	public void proxyRemoved(DMS proxy) {
-		if(proxy == selected) {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					setSelected(null);
-				}
-			});
-		}
+		// Note: the DMSManager will remove the proxy from the
+		//       ProxySelectionModel, so we can ignore this.
 	}
 
 	/** A proxy has been changed */
 	public void proxyChanged(final DMS proxy, final String a) {
-		if(proxy == selected) {
+		if(proxy == getSingleSelection()) {
 			SwingUtilities.invokeLater(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
 				}
 			});
 		}
+	}
+
+	/** Get the selected DMS (if a single sign is selected) */
+	protected DMS getSingleSelection() {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(DMS dms: selectionModel.getSelected())
+				return dms;
+		}
+		return null;
 	}
 
 	/** Dispose of the dispatcher */
@@ -271,7 +272,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	protected JPanel buildAwsControlledBox() {
 		new ActionJob(awsControlledCbx) {
 			public void perform() {
-				DMS dms = selected;
+				DMS dms = getSingleSelection();
 				if(dms != null) {
 					dms.setAwsControlled(
 						awsControlledCbx.isSelected());
@@ -313,32 +314,23 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Query the status for the selected sign */
 	protected void queryStatus() {
-		for(DMS dms: selectionModel.getSelected()) {
+		DMS dms = getSingleSelection();
+		if(dms != null)
 			dms.setSignRequest(SignRequest.QUERY_STATUS.ordinal());
-			// Note: queryStatus() should only ever be called with
-			//       one sign selected, but let's stop just in case.
-			break;
-		}
 	}
 
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(DMS s) {
-		if(selectionModel.getSelectedCount() <= 1)
-			setSelected(s);
+		setSelected(getSingleSelection());
 	}
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(DMS s) {
-		if(selectionModel.getSelectedCount() == 1) {
-			for(DMS dms: selectionModel.getSelected())
-				setSelected(dms);
-		} else if(s == selected)
-			setSelected(null);
+		setSelected(getSingleSelection());
 	}
 
-	/** Set the selected DMS */
+	/** Set a single selected DMS */
 	protected void setSelected(DMS dms) {
-		selected = dms;
 		if(dms == null)
 			clearSelected();
 		else {
@@ -396,7 +388,6 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Clear the selected DMS */
 	protected void clearSelected() {
-		selected = null;
 		nameTxt.setText("");
 		cameraTxt.setText("");
 		locationTxt.setText("");
@@ -430,7 +421,7 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 
 	/** Send a new message to the selected DMS */
 	protected void sendMessage() {
-		DMS dms = selected;	// Avoid NPE race
+		DMS dms = getSingleSelection();
 		if(dms != null)
 			sendMessage(dms);
 	}
