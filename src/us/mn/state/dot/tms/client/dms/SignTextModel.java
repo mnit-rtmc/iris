@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
@@ -36,8 +37,8 @@ import us.mn.state.dot.tms.SignText;
  */
 public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
-	/** DMS id associated with this object */
-	protected final String dms_id;
+	/** DMS associated with this object */
+	protected final DMS dms;
 
 	/** DMS sign group type cache, relates dms to sign groups */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
@@ -55,10 +56,10 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	protected final SignTextCreator creator;
 
 	/** Create a new sign text model */
-	public SignTextModel(String dms, TypeCache<DmsSignGroup> d,
+	public SignTextModel(DMS proxy, TypeCache<DmsSignGroup> d,
 		TypeCache<SignText> t, User u)
 	{
-		dms_id = dms;
+		dms = proxy;
 		dms_sign_groups = d;
 		sign_text = t;
 		user = u;
@@ -94,7 +95,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** Add a new proxy to the model */
 	public void proxyAdded(DmsSignGroup proxy) {
-		if(dms_id.equals(proxy.getDms()))
+		if(dms == proxy.getDms())
 			addGroup(proxy.getSignGroup());
 	}
 
@@ -105,7 +106,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** Remove a proxy from the model */
 	public void proxyRemoved(DmsSignGroup proxy) {
-		if(dms_id.equals(proxy.getDms()))
+		if(dms == proxy.getDms())
 			removeGroup(proxy.getSignGroup());
 	}
 
@@ -142,7 +143,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** Check if the given sign group is a local group for the DMS */
 	protected boolean isLocalSignGroup(DmsSignGroup g) {
-		return g.getDms().equals(dms_id) && g.getSignGroup().getLocal();
+		return g.getDms() == dms && g.getSignGroup().getLocal();
 	}
 
 	/** 

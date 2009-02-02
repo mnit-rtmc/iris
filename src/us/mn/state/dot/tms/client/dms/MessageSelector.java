@@ -252,7 +252,7 @@ public class MessageSelector extends JPanel {
 
 	/** Update the message combo box models */
 	public void setSign(DMS proxy, int lineHeight) {
-		createMessageModel(proxy.getName());
+		createMessageModel(proxy);
 		int ml = mess_model.getMaxLine();
 		int nl = getLineCount(proxy, lineHeight);
 		int np = Math.max(calculateSignPages(ml, nl),
@@ -275,9 +275,9 @@ public class MessageSelector extends JPanel {
 	}
 
 	/** Create a new message model */
-	protected void createMessageModel(String dms_id) {
-		SignTextModel mm = new SignTextModel(dms_id,
-			dms_sign_groups, sign_text, user);
+	protected void createMessageModel(DMS proxy) {
+		SignTextModel mm = new SignTextModel(proxy, dms_sign_groups,
+			sign_text, user);
 		mm.initialize();
 		SignTextModel omm = mess_model;
 		mess_model = mm;
