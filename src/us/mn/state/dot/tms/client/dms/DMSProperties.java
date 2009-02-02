@@ -292,7 +292,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		super(TITLE, tc, sign);
 		state = tc.getSonarState();
 		user = state.lookupUser(tc.getUser().getName());
-		sign_group_model = new SignGroupModel(sign.getName(),
+		sign_group_model = new SignGroupModel(sign,
 			state.getDmsSignGroups(), state.getSignGroups(),
 			connection.isAdmin());
 	}

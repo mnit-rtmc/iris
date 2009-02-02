@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -54,7 +55,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 		return dms_sign_groups.findObject(new Checker<DmsSignGroup>() {
 			public boolean check(DmsSignGroup g) {
 				return g.getSignGroup() == group &&
-					g.getDms().equals(dms_id);
+				       g.getDms() == dms;
 			}
 		});
 	}
@@ -68,7 +69,8 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	protected boolean isListed(SignGroup group) {
 		if(!group.getLocal())
 			return true;
-		return dms_id.equals(group.getName());
+		else
+			return dms.getName().equals(group.getName());
 	}
 
 	/** Add a new proxy to the table model */
@@ -80,7 +82,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	}
 
 	/** DMS identifier */
-	protected final String dms_id;
+	protected final DMS dms;
 
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
@@ -89,16 +91,16 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	protected final ProxyListener<DmsSignGroup> listener;
 
 	/** 
-	 * Create a new sign group table model 
-	 * @param dms DMS id.
+	 * Create a new sign group table model.
+	 * @param dms DMS proxy object.
 	 * @param d Sonar type cache
 	 * @param a True if user has admin privileges.
 	 */
-	public SignGroupModel(String dms, TypeCache<DmsSignGroup> d,
+	public SignGroupModel(DMS proxy, TypeCache<DmsSignGroup> d,
 		TypeCache<SignGroup> g, boolean a)
 	{
 		super(g, a);
-		dms_id = dms;
+		dms = proxy;
 		dms_sign_groups = d;
 		initialize();
 		final SignGroupModel model = this;
@@ -174,7 +176,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 		case COL_NAME:
 			String v = value.toString().trim();
 			if(v.length() > 0)
-				createSignGroup(v, v.equals(dms_id));
+				createSignGroup(v);
 			break;
 		case COL_MEMBER:
 			if(g != null) {
@@ -189,7 +191,8 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	}
 
 	/** Create a new sign group */
-	protected void createSignGroup(String name, boolean local) {
+	protected void createSignGroup(String name) {
+		boolean local = name.equals(dms.getName());
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("local", local);
 		cache.createObject(name, attrs);
@@ -197,9 +200,9 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 
 	/** Create a new DMS sign group */
 	protected void createDmsSignGroup(SignGroup g) {
-		String name = g.getName() + "_" + dms_id;
+		String name = g.getName() + "_" + dms.getName();
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("dms", dms_id);
+		attrs.put("dms", dms);
 		attrs.put("sign_group", g);
 		dms_sign_groups.createObject(name, attrs);
 	}
