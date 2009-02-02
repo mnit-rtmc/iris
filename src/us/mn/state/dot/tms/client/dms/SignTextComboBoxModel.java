@@ -47,8 +47,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** combobox line number */
 	protected final short m_cbline;
 
-	/** shortcut to container */
-	protected final SignMessageModel m_signMsgModel;
+	/** Shortcut to container */
+	protected final SignTextModel m_signTextModel;
 
 	/** 
 	 * Create a new line model.
@@ -56,9 +56,9 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 * SignTextComboBoxModel.
 	 * @param smm The container.
 	 */
-	protected SignTextComboBoxModel(short cbline, SignMessageModel smm) {
+	protected SignTextComboBoxModel(short cbline, SignTextModel stm) {
 		m_cbline = cbline;
-		m_signMsgModel = smm;
+		m_signTextModel = stm;
 		m_items.add(BLANK_SIGN_TEXT);
 	}
 
@@ -188,9 +188,9 @@ public class SignTextComboBoxModel extends AbstractListModel
 
 	/** Add a message to the local sign group library */
 	protected void addMsgToLib(String message) {
-		SignGroup lsg = m_signMsgModel.getLocalSignGroup();
+		SignGroup lsg = m_signTextModel.getLocalSignGroup();
 		if(lsg != null) {
-			m_signMsgModel.createSignText(lsg, m_cbline, message,
+			m_signTextModel.createSignText(lsg, m_cbline, message,
 				ON_THE_FLY_PRIORITY);
 		}
 	}

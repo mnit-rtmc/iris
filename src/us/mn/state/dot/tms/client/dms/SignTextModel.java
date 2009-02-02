@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.SignText;
 
 /**
  * Model for sign text messages. This object is instantiated and contained by
- * MessageSelector. One SignMessageModel is associated with a single DMS.
+ * MessageSelector. One SignTextModel is associated with a single DMS.
  * It creates and contains SignTextComboBoxModel objects for each combobox 
  * in MessageSelector. This object listens for changes to sign_text and 
  * dms_sign_groups and is responsible for updating its model accordingly. 
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.SignText;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignMessageModel implements ProxyListener<DmsSignGroup> {
+public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** DMS id associated with this object */
 	protected final String dms_id;
@@ -54,8 +54,8 @@ public class SignMessageModel implements ProxyListener<DmsSignGroup> {
 	/** Sign text creator */
 	protected final SignTextCreator creator;
 
-	/** Create a new sign message model */
-	public SignMessageModel(String dms, TypeCache<DmsSignGroup> d,
+	/** Create a new sign text model */
+	public SignTextModel(String dms, TypeCache<DmsSignGroup> d,
 		TypeCache<SignText> t, User u)
 	{
 		dms_id = dms;

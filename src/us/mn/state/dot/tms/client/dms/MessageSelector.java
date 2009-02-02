@@ -60,8 +60,8 @@ public class MessageSelector extends JPanel {
 	/** Tab pane to hold pages */
 	protected final JTabbedPane tab = new JTabbedPane();
 
-	/** Sign message model */
-	protected SignMessageModel mess_model;
+	/** Sign text model */
+	protected SignTextModel mess_model;
 
 	/** Number of pages on the currently selected sign */
 	protected int n_pages;
@@ -89,7 +89,7 @@ public class MessageSelector extends JPanel {
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
-		SignMessageModel mm = mess_model;
+		SignTextModel mm = mess_model;
 		if(mm != null) {
 			mm.dispose();
 			mess_model = null;
@@ -276,10 +276,10 @@ public class MessageSelector extends JPanel {
 
 	/** Create a new message model */
 	protected void createMessageModel(String dms_id) {
-		SignMessageModel mm = new SignMessageModel(dms_id,
+		SignTextModel mm = new SignTextModel(dms_id,
 			dms_sign_groups, sign_text, user);
 		mm.initialize();
-		SignMessageModel omm = mess_model;
+		SignTextModel omm = mess_model;
 		mess_model = mm;
 		if(omm != null)
 			omm.dispose();
