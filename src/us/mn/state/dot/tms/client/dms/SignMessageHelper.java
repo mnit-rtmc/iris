@@ -40,6 +40,7 @@ public class SignMessageHelper {
 				int l, MultiString.JustificationLine jl,
 				int f_num, String t)
 			{
+				// FIXME: shouldn't hardcode 3 lines here
 				int m_lines = Math.max(3, l + 1);
 				while(ls.size() < (p + 1) * m_lines)
 					ls.add("");
