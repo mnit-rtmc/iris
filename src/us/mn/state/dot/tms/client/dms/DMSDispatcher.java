@@ -72,7 +72,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final SingleSignTab singleTab = new SingleSignTab();
 
 	/** Panel used for drawing a DMS */
-	protected final SignPixelPanel dmsPanel;
+	protected final SignPixelPanel currentPnl;
 
 	/** Message composer widget */
 	protected final SignMessageComposer composer;
@@ -107,8 +107,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Currently logged in user */
 	protected final User user;
 
-	/** Pager for DMS panel */
-	protected DMSPanelPager dmsPanelPager;
+	/** Pager for current DMS panel */
+	protected DMSPanelPager currentPnlPager;
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
@@ -121,7 +121,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		selectionModel = manager.getSelectionModel();
 		composer = new SignMessageComposer(st.getDmsSignGroups(),
 			st.getSignText(), user);
-		dmsPanel = singleTab.getCurrentPanel();
+		currentPnl = singleTab.getCurrentPanel();
 		JTabbedPane tab = new JTabbedPane();
 		tab.addTab("Single", singleTab);
 		add(tab, BorderLayout.CENTER);
@@ -198,10 +198,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Clear the DMS panel pager */
 	protected void clearPager() {
-		DMSPanelPager pager = dmsPanelPager;
+		DMSPanelPager pager = currentPnlPager;
 		if(pager != null) {
 			pager.dispose();
-			dmsPanelPager = null;
+			currentPnlPager = null;
 		}
 	}
 
@@ -307,7 +307,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			awsControlledCbx.setEnabled(true);
 			clearPager();
 			BitmapGraphic[] bmaps = getBitmaps(builder);
-			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
+			currentPnlPager = new DMSPanelPager(currentPnl, dms,
+				bmaps);
 			composer.setSign(dms, builder.getLineHeightPixels());
 			updateAttribute(dms, null);
 		}
@@ -400,7 +401,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			clearPager();
 			PixelMapBuilder builder = createPixelMapBuilder(dms);
 			BitmapGraphic[] bmaps = getBitmaps(builder);
-			dmsPanelPager = new DMSPanelPager(dmsPanel, dms, bmaps);
+			currentPnlPager = new DMSPanelPager(currentPnl, dms,
+				bmaps);
 			composer.setMessage(dms);
 		}
 	}
