@@ -61,7 +61,7 @@ public class SignMessageComposer extends JPanel {
 	protected final JTabbedPane tab = new JTabbedPane();
 
 	/** Sign text model */
-	protected SignTextModel mess_model;
+	protected SignTextModel st_model;
 
 	/** Number of pages on the currently selected sign */
 	protected int n_pages;
@@ -89,10 +89,10 @@ public class SignMessageComposer extends JPanel {
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
-		SignTextModel mm = mess_model;
-		if(mm != null) {
-			mm.dispose();
-			mess_model = null;
+		SignTextModel stm = st_model;
+		if(stm != null) {
+			stm.dispose();
+			st_model = null;
 		}
 	}
 
@@ -111,8 +111,8 @@ public class SignMessageComposer extends JPanel {
 			return;
 		n_lines = n;
 		n_pages = p;
-		boolean can_add = mess_model != null &&
-			mess_model.canAddSignText("arbitrary_name");
+		boolean can_add = st_model != null &&
+			st_model.canAddSignText("arbitrary_name");
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i] = new JComboBox();
@@ -232,7 +232,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set the selected message for a message line combo box */
 	protected void setLineSelection(int i, String m) {
-		SignTextComboBoxModel model = mess_model.getLineModel(
+		assert st_model != null;
+		SignTextComboBoxModel model = st_model.getLineModel(
 			(short)(i + 1));
 		model.setSelectedItem(m);
 	}
@@ -253,13 +254,13 @@ public class SignMessageComposer extends JPanel {
 	/** Update the message combo box models */
 	public void setSign(DMS proxy, int lineHeight) {
 		createMessageModel(proxy);
-		int ml = mess_model.getMaxLine();
+		int ml = st_model.getMaxLine();
 		int nl = getLineCount(proxy, lineHeight);
 		int np = Math.max(calculateSignPages(ml, nl),
 			SystemAttributeHelper.getDmsMessageMinPages());
 		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
-			cmbLine[i].setModel(mess_model.getLineModel(
+			cmbLine[i].setModel(st_model.getLineModel(
 				(short)(i + 1)));
 			cmbLine[i].setEnabled(true);
 		}
@@ -276,13 +277,13 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new message model */
 	protected void createMessageModel(DMS proxy) {
-		SignTextModel mm = new SignTextModel(proxy, dms_sign_groups,
+		SignTextModel stm = new SignTextModel(proxy, dms_sign_groups,
 			sign_text, user);
-		mm.initialize();
-		SignTextModel omm = mess_model;
-		mess_model = mm;
-		if(omm != null)
-			omm.dispose();
+		stm.initialize();
+		SignTextModel om = st_model;
+		st_model = stm;
+		if(om != null)
+			om.dispose();
 	}
 
 	/** Calculate the number of pages for the sign */
@@ -295,7 +296,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
-		if(mess_model != null)
-			mess_model.updateMessageLibrary();
+		if(st_model != null)
+			st_model.updateMessageLibrary();
 	}
 }
