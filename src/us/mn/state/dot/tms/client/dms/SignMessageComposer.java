@@ -199,7 +199,7 @@ public class SignMessageComposer extends JPanel {
 		return "";
 	}
 
-	/** Build a line oriened MULTI string from an array of line strings */
+	/** Build a MULTI string from an array of line strings */
 	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		for(int i = 0; i < m; i++) {
