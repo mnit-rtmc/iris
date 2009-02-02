@@ -168,7 +168,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 
 	/** 
 	 * Lookup a SignText in the database.
-	 * @parm line Message line number (1 based)
+	 * @param line Message line number (1 based)
 	 * @return the matching SignText else null if it doesn't exist.
 	 */
 	protected SignText lookupSignText(final short line, final String msg,
@@ -270,7 +270,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		for(SignTextComboBoxModel m: lines.values())
 			m.remove(t);
 		// add to associated model
-		this.addSignText(t);
+		addSignText(t);
 	}
 
 	/** Update the message library with the currently selected messages */
