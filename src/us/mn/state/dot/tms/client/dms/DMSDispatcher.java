@@ -291,6 +291,14 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 			}
 		};
 		sendBtn.setToolTipText(I18NMessages.get("dms.send.tooltip"));
+		new ActionJob(this, queryStatusBtn) {
+			public void perform() throws Exception {
+				selected.setSignRequest(
+					SignRequest.QUERY_STATUS.ordinal());
+			}
+		};
+		queryStatusBtn.setToolTipText(I18NMessages.get(
+			"dms.query_status.tooltip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
@@ -298,14 +306,6 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 		box.add(clearBtn);
 		box.add(Box.createHorizontalGlue());
 		if(SystemAttributeHelper.isDmsStatusEnabled()) {
-			queryStatusBtn.setToolTipText(I18NMessages.get(
-				"dms.query_status.tooltip"));
-			new ActionJob(this, queryStatusBtn) {
-				public void perform() throws Exception {
-					selected.setSignRequest(SignRequest.
-						QUERY_STATUS.ordinal());
-				}
-			};
 			box.add(queryStatusBtn);
 			box.add(Box.createHorizontalGlue());
 		}
@@ -429,13 +429,16 @@ public class DMSDispatcher extends FormPanel implements ProxyListener<DMS>,
 	/** Send a new message to the specified DMS */
 	protected void sendMessage(DMS dms) {
 		assert dms != null;
-		String message = composer.getMessage();
 		Font font = (Font)fontCmb.getSelectedItem();
-		if(message != null) {
-			// FIXME: build a new message
-			dms.setMessageNext(user, message,
-				getDuration(), font);
-			composer.updateMessageLibrary();
+		if(font != null) {
+			String multi = composer.getMessage(font.getNumber());
+			if(multi != null) {
+				// FIXME: this is asynchronous
+				SignMessage message = creator.create(user,
+					 multi, getDuration());
+				dms.setMessageNext(message);
+				composer.updateMessageLibrary();
+			}
 		}
 	}
 
