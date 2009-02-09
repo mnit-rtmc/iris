@@ -43,11 +43,12 @@ public class MeterDataForm extends AbstractForm {
 
 	/** Initialize the form */
 	public void initialize() {
-		Plotlet plot = new Plotlet(factory);
+		// FIXME: this whole thing is broke
+/*		Plotlet plot = new Plotlet(factory);
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));
 		for(Detector det: proxy.getDetectors())
 			plot.addDetector(det.getName());
-		add(plot);
+		add(plot); */
 	}
 }
