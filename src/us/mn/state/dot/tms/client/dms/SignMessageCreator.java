@@ -91,6 +91,7 @@ public class SignMessageCreator {
 				// Ignore
 			}
 		}
+		return null;
 	}
 
 	/** Create a sign message name */
