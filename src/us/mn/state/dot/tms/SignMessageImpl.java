@@ -34,6 +34,9 @@ public class SignMessageImpl implements SignMessage {
 	/** Create a unique sign message name */
 	static protected synchronized String createUniqueName() {
 		last_id++;
+		// Check if the ID has rolled over to negative numbers
+		if(last_id < 0)
+			last_id = 0;
 		return "system_" + last_id;
 	}
 
