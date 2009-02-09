@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.IOException;
 import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -929,10 +930,16 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void updatePowerStatus() {
 		String[] s = proxy.getPowerStatus();
 		if(s != null) {
-			PowerTableModel m = new PowerTableModel(s);
-			powerTable.setAutoCreateColumnsFromModel(false);
-			powerTable.setColumnModel(m.createColumnModel());
-			powerTable.setModel(m);
+			try {
+				PowerTableModel m = new PowerTableModel(s);
+				powerTable.setAutoCreateColumnsFromModel(false);
+				powerTable.setColumnModel(
+					m.createColumnModel());
+				powerTable.setModel(m);
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -941,17 +948,22 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		updatePixelPanel(stuck_off_pnl);
 		updatePixelPanel(stuck_on_pnl);
 		String[] pixels = proxy.getPixelStatus();
-		if(pixels != null && pixels.length == 2)
-			updatePixelStatus(pixels);
-		else {
-			stuck_off_pnl.setGraphic(null);
-			stuck_on_pnl.setGraphic(null);
-			badPixels.setText(UNKNOWN);
+		if(pixels != null && pixels.length == 2) {
+			try {
+				updatePixelStatus(pixels);
+				return;
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
+		stuck_off_pnl.setGraphic(null);
+		stuck_on_pnl.setGraphic(null);
+		badPixels.setText(UNKNOWN);
 	}
 
 	/** Update the pixel status */
-	protected void updatePixelStatus(String[] pixels) {
+	protected void updatePixelStatus(String[] pixels) throws IOException {
 		BitmapGraphic stuckOff = createBlankBitmap();
 		BitmapGraphic stuckOn = createBlankBitmap();
 		BitmapGraphic errors = createBlankBitmap();
@@ -1010,10 +1022,15 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void updateLampStatus() {
 		String[] s = proxy.getLampStatus();
 		if(s != null) {
-			LampTableModel m = new LampTableModel(s);
-			lampTable.setAutoCreateColumnsFromModel(false);
-			lampTable.setColumnModel(m.createColumnModel());
-			lampTable.setModel(m);
+			try {
+				LampTableModel m = new LampTableModel(s);
+				lampTable.setAutoCreateColumnsFromModel(false);
+				lampTable.setColumnModel(m.createColumnModel());
+				lampTable.setModel(m);
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }
