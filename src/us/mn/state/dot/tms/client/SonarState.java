@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
@@ -294,6 +295,14 @@ public class SonarState extends Client {
 		return dmss;
 	}
 
+	/** Cache of sign messages */
+	protected final TypeCache<SignMessage> sign_messages;
+
+	/** Get the sign message cache */
+	public TypeCache<SignMessage> getSignMessages() {
+		return sign_messages;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -379,6 +388,8 @@ public class SonarState extends Client {
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
 		dmss = new TypeCache<DMS>(DMS.class, this);
+		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
+			this);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
@@ -417,6 +428,7 @@ public class SonarState extends Client {
 		populate(warn_signs);
 		populate(ramp_meters);
 		populate(dmss);
+		populate(sign_messages);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);

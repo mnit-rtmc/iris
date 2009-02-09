@@ -122,6 +122,12 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	/** List of all text spans */
 	protected final LinkedList<TextSpan> spans = new LinkedList<TextSpan>();
 
+	/** Clear the pixel map builder */
+	public void clear() {
+		n_pages = 0;
+		spans.clear();
+	}
+
 	/** Text span encapsulation */
 	protected class TextSpan {
 		final int page;

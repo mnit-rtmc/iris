@@ -60,7 +60,6 @@ public class SignMessageImpl implements SignMessage {
 		name = createUniqueName();
 		multi = m;
 		bitmaps = b;
-		deployTime = System.currentTimeMillis();
 		duration = null;
 		activationPriority = p.ordinal();
 		if(isBlank())
@@ -128,7 +127,7 @@ public class SignMessageImpl implements SignMessage {
 	}
 
 	/** Message deploy time */
-	protected long deployTime;
+	protected long deployTime = System.currentTimeMillis();
 
 	/** Set the message deploy time */
 	public void setDeployTime(long t) {

@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Font;
@@ -107,8 +108,14 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Currently logged in user */
 	protected final User user;
 
+	/** Sign message creator */
+	protected final SignMessageCreator creator;
+
 	/** Pager for current DMS panel */
 	protected DMSPanelPager currentPnlPager;
+
+	/** Pixel map builder */
+	protected PixelMapBuilder builder;
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
@@ -118,6 +125,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		cache = st.getDMSs();
 		fonts = st.getFonts();
 		user = st.lookupUser(tc.getUser().getName());
+		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
 		composer = new SignMessageComposer(st.getDmsSignGroups(),
 			st.getSignText(), user);
@@ -295,7 +303,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			queryStatusBtn.setEnabled(true);
 			durationCmb.setEnabled(true);
 			durationCmb.setSelectedIndex(0);
-			PixelMapBuilder builder = createPixelMapBuilder(dms);
+			builder = createPixelMapBuilder(dms);
 			FontComboBoxModel m = new FontComboBoxModel(fonts,
 				builder);
 			fontCmb.setModel(m);
@@ -306,10 +314,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			fontCmb.setSelectedIndex(0);
 			awsControlledCbx.setEnabled(true);
 			clearPager();
-			BitmapGraphic[] bmaps = getBitmaps(builder);
+			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps);
-			composer.setSign(dms, builder.getLineHeightPixels());
+			composer.setSign(dms, getLineHeightPixels());
 			updateAttribute(dms, null);
 		}
 	}
@@ -320,25 +328,34 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		Integer hp = dms.getHeightPixels();
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
-		SignMessage m = dms.getMessageCurrent();
-		if(wp != null && hp != null && cw != null && ch != null &&
-		   m != null)
-		{
-			PixelMapBuilder builder = new PixelMapBuilder(namespace,
-				wp, hp, cw, ch);
-			MultiString multi = new MultiString(m.getMulti());
-			multi.parse(builder);
-			return builder;
-		} else
+		if(wp != null && hp != null && cw != null && ch != null)
+			return new PixelMapBuilder(namespace, wp, hp, cw, ch);
+		else
 			return null;
 	}
 
 	/** Get the bitmap graphic for all pages */
-	protected BitmapGraphic[] getBitmaps(PixelMapBuilder builder) {
-		if(builder != null)
-			return builder.getPixmaps();
+	protected BitmapGraphic[] getBitmaps(DMS dms) {
+		PixelMapBuilder b = builder;
+		if(b != null && dms != null) {
+			SignMessage m = dms.getMessageCurrent();
+			if(m != null) {
+				b.clear();
+				MultiString multi=new MultiString(m.getMulti());
+				multi.parse(b);
+				return b.getPixmaps();
+			}
+		}
+		return null;
+	}
+
+	/** Get the line height */
+	protected int getLineHeightPixels() {
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.getLineHeightPixels();
 		else
-			return null;
+			return 7;
 	}
 
 	/** Clear the selected DMS */
@@ -359,6 +376,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		clearPager();
 		composer.setEnabled(false);
 		composer.clearSelections();
+		builder = null;
 	}
 
 	/** Get the selected duration */
@@ -374,24 +392,44 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Send a new message to the selected DMS */
 	protected void sendMessage() {
 		DMS dms = getSingleSelection();
-		if(dms != null)
-			sendMessage(dms);
+		if(dms != null) {
+			SignMessage m = createMessage();
+			if(m != null)
+				dms.setMessageNext(m);
+			composer.updateMessageLibrary();
+		}
 	}
 
-	/** Send a new message to the specified DMS */
-	protected void sendMessage(DMS dms) {
-		assert dms != null;
+	/** Create a new message from the widgets */
+	protected SignMessage createMessage() {
 		Font font = (Font)fontCmb.getSelectedItem();
 		if(font != null) {
 			String multi = composer.getMessage(font.getNumber());
 			if(multi != null) {
-				// FIXME: this is asynchronous
-				SignMessage message = creator.create(user,
-					 multi, getDuration());
-				dms.setMessageNext(message);
-				composer.updateMessageLibrary();
+				String[] bitmaps = createBitmaps(multi);
+				if(bitmaps != null) {
+					return creator.create(multi, bitmaps,
+					       getDuration());
+				}
 			}
 		}
+		return null;
+	}
+
+	/** Create bitmap graphics for a MULTI string */
+	protected String[] createBitmaps(String multi) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			b.clear();
+			MultiString m = new MultiString(multi);
+			m.parse(b);
+			BitmapGraphic[] bmaps = b.getPixmaps();
+			String[] bitmaps = new String[bmaps.length];
+			for(int i = 0; i < bmaps.length; i++)
+				bitmaps[i] =Base64.encode(bmaps[i].getBitmap());
+			return bitmaps;
+		} else
+			return null;
 	}
 
 	/** Update one attribute on the form */
@@ -399,8 +437,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		singleTab.updateAttribute(dms, a);
 		if(a == null || a.equals("messageCurrent")) {
 			clearPager();
-			PixelMapBuilder builder = createPixelMapBuilder(dms);
-			BitmapGraphic[] bmaps = getBitmaps(builder);
+			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps);
 			composer.setMessage(dms);
