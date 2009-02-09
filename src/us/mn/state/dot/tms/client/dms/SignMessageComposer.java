@@ -173,7 +173,7 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Get the text of the message to send to the sign */
-	public String getMessage() {
+	public String getMessage(Integer font) {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
 		for(int i = 0; i < cmbLine.length; i++) {
@@ -182,7 +182,7 @@ public class SignMessageComposer extends JPanel {
 				m = i + 1;
 		}
 		if(m > 0)
-			return buildMulti(mess, m).toString();
+			return buildMulti(font, mess, m).toString();
 		else
 			return null;
 	}
@@ -200,8 +200,10 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Build a MULTI string from an array of line strings */
-	protected MultiString buildMulti(String[] mess, int m) {
+	protected MultiString buildMulti(Integer font, String[] mess, int m) {
 		MultiString multi = new MultiString();
+		if(font != null)
+			multi.setFont(font);
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0)

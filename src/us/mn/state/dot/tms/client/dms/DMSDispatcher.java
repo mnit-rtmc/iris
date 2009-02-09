@@ -311,7 +311,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				fontModel.dispose();
 			fontModel = m;
 			fontCmb.setEnabled(true);
-			fontCmb.setSelectedIndex(0);
 			awsControlledCbx.setEnabled(true);
 			clearPager();
 			BitmapGraphic[] bmaps = getBitmaps(dms);
@@ -402,18 +401,24 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Create a new message from the widgets */
 	protected SignMessage createMessage() {
-		Font font = (Font)fontCmb.getSelectedItem();
-		if(font != null) {
-			String multi = composer.getMessage(font.getNumber());
-			if(multi != null) {
-				String[] bitmaps = createBitmaps(multi);
-				if(bitmaps != null) {
-					return creator.create(multi, bitmaps,
-					       getDuration());
-				}
+		String multi = composer.getMessage(getFontNumber());
+		if(multi != null) {
+			String[] bitmaps = createBitmaps(multi);
+			if(bitmaps != null) {
+				return creator.create(multi, bitmaps,
+				       getDuration());
 			}
 		}
 		return null;
+	}
+
+	/** Get the selected font number */
+	protected Integer getFontNumber() {
+		Font font = (Font)fontCmb.getSelectedItem();
+		if(font != null)
+			return font.getNumber();
+		else
+			return null;
 	}
 
 	/** Create bitmap graphics for a MULTI string */
