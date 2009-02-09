@@ -156,9 +156,8 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	protected void createSignText(SignGroup sg, short line, String messarg,
 		short priority)
 	{
-		if(sg==null || line<1 || messarg==null || messarg.length()<=0)
-			return;
-		creator.create(sg, line, messarg, priority);
+		if(messarg.length() > 0)
+			creator.create(sg, line, messarg, priority);
 	}
 
 	/** Check if the user can add the named sign text */
