@@ -29,9 +29,6 @@ abstract public class BaseEvent implements Storable {
 	/** SQL connection */
 	static public SQLConnection store;
 
-	/** Base object name */
-	protected final String name;
-
 	/** Event type */
 	protected final EventType event_type;
 
@@ -51,7 +48,7 @@ abstract public class BaseEvent implements Storable {
 
 	/** Get the primary key */
 	public String getKey() {
-		return name;
+		return null;
 	}
 
 	/** Store an object */
