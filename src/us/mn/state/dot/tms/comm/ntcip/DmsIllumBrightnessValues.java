@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,16 +91,21 @@ public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		int[][] table = getTable();
-		b.append(table.length);
-		for(int[] level: table) {
-			b.append(", (");
-			b.append(level[0]);
-			b.append(",");
-			b.append(level[1]);
-			b.append(",");
-			b.append(level[2]);
-			b.append(")");
+		try {
+			int[][] table = getTable();
+			b.append(table.length);
+			for(int[] level: table) {
+				b.append(", (");
+				b.append(level[0]);
+				b.append(",");
+				b.append(level[1]);
+				b.append(",");
+				b.append(level[2]);
+				b.append(")");
+			}
+		}
+		catch(IOException e) {
+			e.printStackTrace();
 		}
 		return b.toString();
 	}

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
@@ -51,9 +52,14 @@ public class DMSQueryMessage extends DMSOperation {
 			 * needs to be updated */
 			if(!m.isBlank()) {
 				// FIXME: this should be on SONAR thread
-				SignMessage blank = dms.createMessage("",
-					DMSMessagePriority.SCHEDULED);
-				dms.setMessageCurrent(blank);
+				try {
+					SignMessage blank = dms.createMessage("",
+						DMSMessagePriority.SCHEDULED);
+					dms.setMessageCurrent(blank);
+				}
+				catch(SonarException e) {
+					e.printStackTrace();
+				}
 			}
 		} else {
 			/* The sign is not blank. If IRIS says it
@@ -95,11 +101,16 @@ public class DMSQueryMessage extends DMSOperation {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + time);
 			if(status.isValid() && time.getInteger() > 0) {
-				// FIXME: this should be on SONAR thread
-				SignMessage message = dms.createMessage(
-					multi.getValue(),
-					DMSMessagePriority.SCHEDULED);
-				dms.setMessageCurrent(message);
+				try {
+					// FIXME: this should be on SONAR thread
+					SignMessage message = dms.createMessage(
+						multi.getValue(),
+						DMSMessagePriority.SCHEDULED);
+					dms.setMessageCurrent(message);
+				}
+				catch(SonarException e) {
+					e.printStackTrace();
+				}
 			}
 			return null;
 		}
