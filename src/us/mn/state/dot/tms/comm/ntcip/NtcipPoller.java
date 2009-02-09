@@ -63,10 +63,11 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 
 	/** Simple class to download fonts to a sign */
 	protected class FontDownloader implements Checker<Font> {
+		// On ADDCO signs, font index 1 is not writable ...
 		static protected final int FIRST_INDEX = 2;
 		protected final DMSImpl dms;
 		protected final int priority;
-		protected int index = 2;
+		protected int index = FIRST_INDEX;
 		protected FontDownloader(DMSImpl d, int p) {
 			dms = d;
 			priority = p;
