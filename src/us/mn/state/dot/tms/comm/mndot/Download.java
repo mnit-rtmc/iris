@@ -399,6 +399,7 @@ public class Download extends Controller170Operation implements TimingTable {
 					updateTable(meter, p, red, rate, start,
 						stop);
 				}
+				return false;
 			}
 		});
 	}

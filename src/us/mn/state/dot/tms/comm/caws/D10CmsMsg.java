@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.caws;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -273,7 +274,7 @@ public class D10CmsMsg {
 			try {
 				dms.sendMessage(toSignMessage(dms));
 			}
-			catch(TMSException e) {
+			catch(Exception e) {
 				System.err.println("D10CmsMsg.sendMessage(): " +
 					"exception:" + e);
 			}
@@ -293,7 +294,9 @@ public class D10CmsMsg {
 	 * @return A SignMessage that contains the text of the message and
 	 *         rendered bitmap(s).
 	 */
-	public SignMessage toSignMessage(DMSImpl dms) {
+	public SignMessage toSignMessage(DMSImpl dms) throws SonarException,
+		TMSException
+	{
 		return dms.createMessage(m_multistring, DMSMessagePriority.AWS);
 	}
 

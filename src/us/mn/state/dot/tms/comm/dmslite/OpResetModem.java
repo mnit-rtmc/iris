@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
@@ -118,8 +119,14 @@ public class OpResetModem extends OpDms
 			if(valid) {
 
 				// set blank message
-				m_dms.setMessageCurrent(m_dms.createMessage("",
-					DMSMessagePriority.SCHEDULED));
+				try {
+					m_dms.setMessageCurrent(
+						m_dms.createMessage("",
+						DMSMessagePriority.SCHEDULED));
+				}
+				catch(SonarException e) {
+					e.printStackTrace();
+				}
 
 			// valid flag is false
 			} else {

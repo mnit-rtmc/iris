@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -194,8 +195,14 @@ public class OpQueryMsg extends OpDms {
 		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"multistring=" + multi);
 
-		return (SignMessageImpl)m_dms.createMessage(multi, pages,
-			DMSMessagePriority.SCHEDULED);
+		try {
+			return (SignMessageImpl)m_dms.createMessage(multi,
+				pages, DMSMessagePriority.SCHEDULED);
+		}
+		catch(SonarException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/**
@@ -211,7 +218,8 @@ public class OpQueryMsg extends OpDms {
 	{
 		/** Query current message */
 		protected Phase poll(AddressedMessage argmess)
-			throws IOException {
+			throws IOException
+		{
 			//System.err.println(
 			//    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) called.");
 			assert argmess instanceof Message :
@@ -329,12 +337,17 @@ public class OpQueryMsg extends OpDms {
 
 				// have text
 				if(msgtextavailable) {
-					SignMessageImpl sm = (SignMessageImpl)
+					try {
+						SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR);
-					// FIXME: owner not set
-					sm.setDuration(duramins);
-					m_dms.setMessageCurrent(sm);
+						// FIXME: owner not set
+						sm.setDuration(duramins);
+						m_dms.setMessageCurrent(sm);
+					}
+					catch(SonarException e) {
+						e.printStackTrace();
+					}
 
 				// don't have text
 				} else {
@@ -346,10 +359,15 @@ public class OpQueryMsg extends OpDms {
 						m_dms.setMessageCurrent(sm);
 					}
 					if(sm == null) {
-						m_dms.setMessageCurrent(
-							m_dms.createMessage("",
-							DMSMessagePriority.BLANK
-						));
+						try {
+							m_dms.setMessageCurrent(
+								m_dms.createMessage("",
+								DMSMessagePriority.BLANK
+							));
+						}
+						catch(SonarException e) {
+							e.printStackTrace();
+						}
 					}
 				}
 
