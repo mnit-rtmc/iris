@@ -179,8 +179,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
-		io_model = new ControllerIOModel(proxy, state,
-			connection.getProxy());
+		try {
+			io_model = new ControllerIOModel(proxy, state,
+				connection.getProxy());
+		}
+		catch(java.rmi.RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		cabinets.addProxyListener(cab_listener);
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));

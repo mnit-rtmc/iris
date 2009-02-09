@@ -84,10 +84,16 @@ public class LcsProperties extends TrafficDeviceForm {
 	protected void initialize() {
 		TMSProxy tms = connection.getProxy();
 		SortedList s = (SortedList)tms.getLCSList().getList();
-		lcs = (LaneControlSignal)s.getElement(id);
-		ListModel cameraModel = state.getCameraModel();
-		camera.setModel(new WrapperComboBoxModel(cameraModel));
-		numberOfLanes = lcs.getLanes();
+		try {
+			lcs = (LaneControlSignal)s.getElement(id);
+			ListModel cameraModel = state.getCameraModel();
+			camera.setModel(new WrapperComboBoxModel(cameraModel));
+			numberOfLanes = lcs.getLanes();
+		}
+		catch(RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		setDevice(lcs);
 		super.initialize();
 		location.addRow("Camera", camera);

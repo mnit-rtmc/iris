@@ -70,8 +70,14 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		location = new LocationPanel(admin, device.getGeoLoc(),
-			connection.getSonarState());
+		try {
+			location = new LocationPanel(admin, device.getGeoLoc(),
+				connection.getSonarState());
+		}
+		catch(RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		location.initialize();
 		location.addRow("Notes", notes);
 		location.setCenter();
@@ -99,8 +105,16 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 
 	/** Controller lookup button pressed */
 	protected void controllerPressed() {
+		String cont;
+		try {
+			cont = device.getController();
+		}
+		catch(RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		Controller c = connection.getSonarState().lookupController(
-			device.getController());
+			cont);
 		if(c == null)
 			controller.setEnabled(false);
 		else {
