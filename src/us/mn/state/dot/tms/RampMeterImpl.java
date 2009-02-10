@@ -159,7 +159,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	}
 
 	/** Ramp meter type */
-	protected RampMeterType meter_type;
+	protected RampMeterType meter_type = RampMeterType.DUAL_ALTERNATE;
 
 	/** Set ramp meter type */
 	public void setMeterType(int t) {
