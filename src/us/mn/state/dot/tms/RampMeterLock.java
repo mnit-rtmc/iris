@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2008  Minnesota Department of Transportation
+ * Copyright (C) 2003-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,6 @@ import java.util.LinkedList;
  * @author Douglas Lau
  */
 public enum RampMeterLock {
-
-	/** Lock off status */
-	OFF(""),
 
 	/** Lock knock down status */
 	KNOCK_DOWN("Knocked down"),
@@ -55,7 +52,7 @@ public enum RampMeterLock {
 			if(lock.ordinal() == o)
 				return lock;
 		}
-		return OFF;
+		return null;
 	}
 
 	/** Get an array of lock descriptions */
@@ -67,7 +64,7 @@ public enum RampMeterLock {
 	}
 
 	/** Check if a lock value is a "controller-only" lock */
-	static public boolean isControllerLock(int l) {
+	static public boolean isControllerLock(Integer l) {
 		if(l == RampMeterLock.POLICE_PANEL.ordinal())
 			return true;
 		if(l == RampMeterLock.MANUAL.ordinal())

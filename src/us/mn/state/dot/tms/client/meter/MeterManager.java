@@ -141,7 +141,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		} else if(STYLE_QUEUE_FULL.equals(s))
 			return proxy.getQueue() ==RampMeterQueue.FULL.ordinal();
 		else if(STYLE_LOCKED.equals(s))
-			return proxy.getMLock() != RampMeterLock.OFF.ordinal();
+			return proxy.getMLock() != null;
 		else if(STYLE_UNAVAILABLE.equals(s))
 			return isUnavailable(proxy);
 		else if(STYLE_FAILED.equals(s))

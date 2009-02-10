@@ -92,7 +92,8 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		map.put("storage", storage);
 		map.put("max_wait", max_wait);
 		map.put("camera", camera);
-		map.put("m_lock", m_lock.ordinal());
+		if(m_lock != null)
+			map.put("m_lock", m_lock.ordinal());
 		return map;
 	}
 
@@ -116,7 +117,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Create a ramp meter */
 	protected RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, int t, int st, int w, Camera cam, int lk)
+		int p, String nt, int t, int st, int w, Camera cam, Integer lk)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -124,18 +125,21 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		storage = st;
 		max_wait = w;
 		camera = cam;
-		m_lock = RampMeterLock.fromOrdinal(lk);
+		if(lk != null)
+			m_lock = RampMeterLock.fromOrdinal(lk);
+		else
+			m_lock = null;
 		rate = null;
 	}
 
 	/** Create a ramp meter */
 	protected RampMeterImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, int t, int st, int w, String cam, int lk)
+		int p, String nt, int t, int st, int w, String cam, Integer lk)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-			(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
-			c), p, nt, t, st, w,
-			(Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), lk);
+		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
+		     p, nt, t, st, w,
+		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), lk);
 	}
 
 	/** Initialize the transient state */
@@ -247,36 +251,48 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	}
 
 	/** Metering rate lock status */
-	protected RampMeterLock m_lock = RampMeterLock.OFF;
+	protected RampMeterLock m_lock = null;
 
 	/** Set the ramp meter lock status */
-	public void setMLock(int l) {
-		m_lock = RampMeterLock.fromOrdinal(l);
+	public void setMLock(Integer l) {
+		if(l != null)
+			m_lock = RampMeterLock.fromOrdinal(l);
+		else
+			m_lock = null;
 	}
 
 	/** Set the ramp meter lock (update) */
 	protected void setMLock(RampMeterLock l) throws TMSException {
 		if(l == m_lock)
 			return;
-		store.update(this, "m_lock", l.ordinal());
+		if(l != null)
+			store.update(this, "m_lock", l.ordinal());
+		else
+			store.update(this, "m_lock", null);
 		m_lock = l;
 	}
 
 	/** Set the ramp meter lock status */
-	public void doSetLock(int l) throws TMSException {
+	public void doSetLock(Integer l) throws TMSException {
 		if(RampMeterLock.isControllerLock(l))
 			throw new ChangeVetoException("Invalid lock value");
-		setMLock(RampMeterLock.fromOrdinal(l));
+		if(l != null)
+			setMLock(RampMeterLock.fromOrdinal(l));
+		else
+			setMLock((RampMeterLock)null);
 	}
 
 	/** Get the ramp meter lock status */
-	public int getMLock() {
-		return m_lock.ordinal();
+	public Integer getMLock() {
+		if(m_lock != null)
+			return m_lock.ordinal();
+		else
+			return null;
 	}
 
 	/** Is the metering rate locked? */
 	public boolean isLocked() {
-		return m_lock != RampMeterLock.OFF;
+		return m_lock != null;
 	}
 
 	/** Set the status of the police panel switch */
@@ -292,13 +308,13 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	/** Set the status of the police panel switch */
 	protected void _setPolicePanel(boolean p) throws TMSException {
 		if(p) {
-			if(m_lock == RampMeterLock.OFF) {
+			if(m_lock == null) {
 				setMLock(RampMeterLock.POLICE_PANEL);
 				notifyAttribute("mLock");
 			}
 		} else {
 			if(m_lock == RampMeterLock.POLICE_PANEL) {
-				setMLock(RampMeterLock.OFF);
+				setMLock((RampMeterLock)null);
 				notifyAttribute("mLock");
 			}
 		}
@@ -317,13 +333,13 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	/** Set the status of manual metering */
 	protected void _setManual(boolean m) throws TMSException {
 		if(m) {
-			if(m_lock == RampMeterLock.OFF) {
+			if(m_lock == null) {
 				setMLock(RampMeterLock.MANUAL);
 				notifyAttribute("mLock");
 			}
 		} else {
 			if(m_lock == RampMeterLock.MANUAL) {
-				setMLock(RampMeterLock.OFF);
+				setMLock((RampMeterLock)null);
 				notifyAttribute("mLock");
 			}
 		}
@@ -463,6 +479,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Adjust the green count for single release meters */
 	protected int adjustGreenCount(int g) {
+		// FIXME: this should go into comm/mndot package
 		if(meter_type == RampMeterType.SINGLE) {
 			if((g % 2) != 0)
 				g++;

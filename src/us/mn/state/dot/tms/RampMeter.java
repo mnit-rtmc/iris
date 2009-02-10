@@ -53,10 +53,10 @@ public interface RampMeter extends Device2 {
 	Camera getCamera();
 
 	/** Set the meter lock status code */
-	void setMLock(int c);
+	void setMLock(Integer c);
 
 	/** Get the meter lock status code */
-	int getMLock();
+	Integer getMLock();
 
 	/* Transient attributes (not stored in database) */
 
