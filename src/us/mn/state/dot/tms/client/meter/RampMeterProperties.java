@@ -255,8 +255,13 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				proxy.getQueue());
 			queue.setText(q.description);
 		}
-		if(a == null || a.equals("mLock"))
-			m_lock.setSelectedIndex(proxy.getMLock());
+		if(a == null || a.equals("mLock")) {
+			Integer ml = proxy.getMLock();
+			if(ml != null)
+				m_lock.setSelectedIndex(ml);
+			else
+				m_lock.setSelectedIndex(0);
+		}
 		if(a == null || a.equals("operation")) {
 			operation.setText(proxy.getOperation());
 			String s = getControllerStatus(proxy);

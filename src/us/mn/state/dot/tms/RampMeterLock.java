@@ -23,6 +23,9 @@ import java.util.LinkedList;
  */
 public enum RampMeterLock {
 
+	/** Placeholder for lock-off status */
+	OFF(" "),
+
 	/** Lock knock down status */
 	KNOCK_DOWN("Knocked down"),
 
@@ -47,12 +50,11 @@ public enum RampMeterLock {
 	public final String description;
 
 	/** Get a ramp meter lock from an ordinal value */
-	static public RampMeterLock fromOrdinal(int o) {
-		for(RampMeterLock lock: RampMeterLock.values()) {
-			if(lock.ordinal() == o)
-				return lock;
-		}
-		return null;
+	static public RampMeterLock fromOrdinal(Integer o) {
+		if(o != null && o > 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 
 	/** Get an array of lock descriptions */
