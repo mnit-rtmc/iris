@@ -285,7 +285,7 @@ public class MeterStatusPanel extends FormPanel
 				meter.getQueue());
 			queueTxt.setText(q.description);
 		}
-		if(a == null || a.equals("lock"))
-			lockCmb.setSelectedIndex(meter.getLock());
+		if(a == null || a.equals("mLock"))
+			lockCmb.setSelectedIndex(meter.getMLock());
 	}
 }

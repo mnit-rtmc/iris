@@ -45,6 +45,6 @@ public class LockMeterAction extends ProxyAction<RampMeter> {
 	protected void do_perform() {
 		int s = lockCmb.getSelectedIndex();
 		if(s >= 0)
-			proxy.setLock(s);
+			proxy.setMLock(s);
 	}
 }

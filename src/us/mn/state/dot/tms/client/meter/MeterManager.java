@@ -77,7 +77,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Test if a meter is unavailable */
 	static protected boolean isUnavailable(RampMeter proxy) {
-		RampMeterLock lck = RampMeterLock.fromOrdinal(proxy.getLock());
+		RampMeterLock lck = RampMeterLock.fromOrdinal(proxy.getMLock());
 		return lck == RampMeterLock.POLICE_PANEL ||
 		       lck == RampMeterLock.KNOCK_DOWN;
 	}
@@ -141,7 +141,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		} else if(STYLE_QUEUE_FULL.equals(s))
 			return proxy.getQueue() ==RampMeterQueue.FULL.ordinal();
 		else if(STYLE_LOCKED.equals(s))
-			return proxy.getLock() != RampMeterLock.OFF.ordinal();
+			return proxy.getMLock() != RampMeterLock.OFF.ordinal();
 		else if(STYLE_UNAVAILABLE.equals(s))
 			return isUnavailable(proxy);
 		else if(STYLE_FAILED.equals(s))

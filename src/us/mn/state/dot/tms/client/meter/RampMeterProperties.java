@@ -101,7 +101,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected final JLabel queue = new JLabel();
 
 	/** Meter lock combo box component */
-	protected final JComboBox lock = new JComboBox(
+	protected final JComboBox m_lock = new JComboBox(
 		RampMeterLock.getDescriptions());
 
 	/** Operation description label */
@@ -222,7 +222,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		panel.addRow("Release rate", release);
 		panel.addRow("Cycle time", cycle);
 		panel.addRow("Queue", queue);
-		panel.addRow("Lock", lock);
+		panel.addRow("Lock", m_lock);
 		panel.addRow("Operation", operation);
 		panel.addRow("Status", l_status);
 		return panel;
@@ -255,8 +255,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				proxy.getQueue());
 			queue.setText(q.description);
 		}
-		if(a == null || a.equals("lock"))
-			lock.setSelectedIndex(proxy.getLock());
+		if(a == null || a.equals("mLock"))
+			m_lock.setSelectedIndex(proxy.getMLock());
 		if(a == null || a.equals("operation")) {
 			operation.setText(proxy.getOperation());
 			String s = getControllerStatus(proxy);
