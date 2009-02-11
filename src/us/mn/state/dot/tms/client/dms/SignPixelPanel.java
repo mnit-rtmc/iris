@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -83,6 +84,7 @@ public class SignPixelPanel extends JPanel {
 				rescale();
 			}
 		});
+		setPreferredSize(new Dimension(256, 32));
 	}
 
 	/** Rescale when the component is resized or the sign changes */
