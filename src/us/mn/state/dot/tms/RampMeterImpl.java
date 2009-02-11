@@ -60,7 +60,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		namespace.registerType(SONAR_TYPE, RampMeterImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"meter_type, storage, max_wait, camera, " +
-			"m_lock FROM " + SONAR_TYPE  + ";",
+			"m_lock FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {

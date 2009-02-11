@@ -89,7 +89,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 		System.err.println("Loading timing plans...");
 		namespace.registerType(SONAR_TYPE, TimingPlanImpl.class);
 		store.query("SELECT name, plan_type, device, start_min, " +
-			"stop_min, active, testing, target FROM " +
+			"stop_min, active, testing, target FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -132,7 +132,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

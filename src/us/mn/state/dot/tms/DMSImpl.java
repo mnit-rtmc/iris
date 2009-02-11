@@ -63,7 +63,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"travel, camera, aws_allowed, aws_controlled FROM " +
-			SONAR_TYPE  + ";", new ResultFactory()
+			"iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new DMSImpl(namespace,
