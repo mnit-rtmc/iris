@@ -96,7 +96,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 				namespace.add(new TimingPlanImpl(namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// plan_type
-					row.getString(3),	// device_io
+					row.getString(3),	// device
 					row.getInt(4),		// start_min
 					row.getInt(5),		// stop_min
 					row.getBoolean(6),	// active
