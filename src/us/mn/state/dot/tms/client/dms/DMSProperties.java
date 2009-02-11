@@ -35,7 +35,6 @@ import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
-
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
@@ -76,21 +75,22 @@ import us.mn.state.dot.tms.utils.I18NMessages;
 public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Format milimeter units for display */
-	static protected String formatMM(int i) {
-		if(i > 0)
+	static protected String formatMM(Integer i) {
+		if(i != null && i > 0)
 			return i + " mm";
 		else
 			return UNKNOWN;
 	}
 
 	/** Format pixel units for display */
-	static protected String formatPixels(int i) {
-		if(i > 0)
-			return i + " pixels";
-		else if(i == 0)
-			return "Variable";
-		else
-			return UNKNOWN;
+	static protected String formatPixels(Integer i) {
+		if(i != null) {
+			if(i > 0)
+				return i + " pixels";
+			else if(i == 0)
+				return "Variable";
+		}
+		return UNKNOWN;
 	}
 
 	/** Format the temperature */
@@ -866,12 +866,21 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			selectSignText();
 			updatePixelStatus();
 		}
-		if(a == null || a.equals("ldcPotBase"))
-			ldcPotBaseSpn.setValue(proxy.getLdcPotBase());
-		if(a == null || a.equals("pixelCurrentLow"))
-			currentLowSpn.setValue(proxy.getPixelCurrentLow());
-		if(a == null || a.equals("pixelCurrentHigh"))
-			currentHighSpn.setValue(proxy.getPixelCurrentHigh());
+		if(a == null || a.equals("ldcPotBase")) {
+			Integer b = proxy.getLdcPotBase();
+			if(b != null)
+				ldcPotBaseSpn.setValue(b);
+		}
+		if(a == null || a.equals("pixelCurrentLow")) {
+			Integer c = proxy.getPixelCurrentLow();
+			if(c != null)
+				currentLowSpn.setValue(c);
+		}
+		if(a == null || a.equals("pixelCurrentHigh")) {
+			Integer c = proxy.getPixelCurrentHigh();
+			if(c != null)
+				currentHighSpn.setValue(c);
+		}
 		if(a == null || a.equals("powerStatus"))
 			updatePowerStatus();
 		if(a == null || a.equals("heatTapeStatus"))
@@ -929,7 +938,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update the power status */
 	protected void updatePowerStatus() {
 		String[] s = proxy.getPowerStatus();
-		if(s != null) {
+		if(s != null && s.length == 3) {
 			try {
 				PowerTableModel m = new PowerTableModel(s);
 				powerTable.setAutoCreateColumnsFromModel(false);
@@ -1021,7 +1030,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update the lamp status */
 	protected void updateLampStatus() {
 		String[] s = proxy.getLampStatus();
-		if(s != null) {
+		if(s != null && s.length == 2) {
 			try {
 				LampTableModel m = new LampTableModel(s);
 				lampTable.setAutoCreateColumnsFromModel(false);
