@@ -52,10 +52,10 @@ public class SignPixelPanel extends JPanel {
 	protected float vpitch_mm = 1;
 
 	/** Sign pixel width */
-	protected int width_pix = 1;
+	protected int width_pix = 0;
 
 	/** Sign pixel height */
-	protected int height_pix = 1;
+	protected int height_pix = 0;
 
 	/** Width of characters (pixels), zero for variable */
 	protected int width_char;
@@ -123,8 +123,8 @@ public class SignPixelPanel extends JPanel {
 
 	/** Set the logical sign dimensions */
 	public void setLogicalDimensions(int w, int h, int wc, int hl) {
-		width_pix = Math.max(1, w);
-		height_pix = Math.max(1, h);
+		width_pix = Math.max(0, w);
+		height_pix = Math.max(0, h);
 		width_char = Math.max(0, wc);
 		height_line = Math.max(0, hl);
 	}
@@ -132,10 +132,10 @@ public class SignPixelPanel extends JPanel {
 	/** Verify the sign dimensions */
 	public void verifyDimensions() {
 		float w = width_mm - hborder_mm * 2;
-		if(width_pix * hpitch_mm > w)
+		if(width_pix > 0 && width_pix * hpitch_mm > w)
 			hpitch_mm = w / width_pix;
 		float h = height_mm - vborder_mm * 2;
-		if(height_pix * vpitch_mm > h)
+		if(height_pix > 0 && height_pix * vpitch_mm > h)
 			vpitch_mm = h / height_pix;
 		rescale();
 	}
