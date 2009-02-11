@@ -130,6 +130,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		else
 			m_lock = null;
 		rate = null;
+		initTransients();
 	}
 
 	/** Create a ramp meter */
