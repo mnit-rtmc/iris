@@ -133,7 +133,7 @@ public class ViewMenu extends JMenu {
 		add(item);
 
 		// get DMS menu item name
-		String dmsmenuitem=I18NMessages.get("MesgSignLabel");
+		String dmsmenuitem = I18NMessages.get("dms.abbreviation");
 		item = new JMenuItem(dmsmenuitem, Icons.getIcon("drum-inactive"));
 		// use 1st char as mnemonic
 		if (dmsmenuitem.length()>0)
