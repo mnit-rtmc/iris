@@ -287,20 +287,20 @@ public class SonarState extends Client {
 		return ramp_meters;
 	}
 
-	/** Cache of dynamic message signs */
-	protected final TypeCache<DMS> dmss;
-
-	/** Get the dynamic message sign cache */
-	public TypeCache<DMS> getDMSs() {
-		return dmss;
-	}
-
 	/** Cache of sign messages */
 	protected final TypeCache<SignMessage> sign_messages;
 
 	/** Get the sign message cache */
 	public TypeCache<SignMessage> getSignMessages() {
 		return sign_messages;
+	}
+
+	/** Cache of dynamic message signs */
+	protected final TypeCache<DMS> dmss;
+
+	/** Get the dynamic message sign cache */
+	public TypeCache<DMS> getDMSs() {
+		return dmss;
 	}
 
 	/** Cache of sign groups */
@@ -387,9 +387,9 @@ public class SonarState extends Client {
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
-		dmss = new TypeCache<DMS>(DMS.class, this);
 		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
 			this);
+		dmss = new TypeCache<DMS>(DMS.class, this);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
@@ -427,8 +427,8 @@ public class SonarState extends Client {
 		populate(cameras);
 		populate(warn_signs);
 		populate(ramp_meters);
-		populate(dmss);
 		populate(sign_messages);
+		populate(dmss);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
