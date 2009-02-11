@@ -109,7 +109,6 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
-System.err.println("DMSImpl constructor: " + n);
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
@@ -147,7 +146,6 @@ System.err.println("DMSImpl constructor: " + n);
 			return createMessage("", bitmaps, p);
 		}
 		catch(SonarException e) {
-System.err.println("DMSImpl.createBlankMessage: " + name);
 			e.printStackTrace();
 			return null;
 		}
