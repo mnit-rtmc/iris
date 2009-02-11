@@ -200,8 +200,11 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		return column != COL_NAME && column != COL_TYPE &&
-		       column != COL_DEVICE;
+		if(isLastRow(row))
+			return column == COL_TYPE;
+		else
+			return column != COL_NAME && column != COL_TYPE &&
+			       column != COL_DEVICE;
 	}
 
 	/** Set the value at the specified cell */
@@ -210,6 +213,10 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		if(p == null)
 			return;
 		switch(column) {
+		case COL_TYPE:
+			// FIXME: create a new timing plan
+			// name is device name plus _N suffix
+			break;
 		case COL_START:
 			p.setStartMin(parseMinute(value.toString()));
 			break;
