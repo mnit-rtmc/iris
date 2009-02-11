@@ -109,6 +109,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
+System.err.println("DMSImpl constructor: " + n);
 		GeoLocImpl g = new GeoLocImpl(name);
 		MainServer.server.createObject(g);
 		geo_loc = g;
@@ -124,6 +125,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		camera = cam;
 		awsAllowed = aa;
 		awsControlled = ac;
+		initTransients();
 	}
 
 	/** Create a dynamic message sign */
@@ -136,27 +138,19 @@ public class DMSImpl extends Device2Impl implements DMS {
 		     aa, ac);
 	}
 
-	/** Initialize the transient state */
-	public void initTransients() {
-		super.initTransients();
-		try {
-			messageCurrent = createBlankMessage(
-				DMSMessagePriority.SCHEDULED);
-		}
-		catch(SonarException e) {
-			e.printStackTrace();
-		}
-		s_routes = new HashMap<String, Route>();
-	}
-
 	/** Create a blank message for the sign */
-	protected SignMessage createBlankMessage(DMSMessagePriority p)
-		throws SonarException
-	{
+	protected SignMessage createBlankMessage(DMSMessagePriority p) {
 		String[] bitmaps = new String[] {
 			Base64.encode(new byte[0])
 		};
-		return new SignMessageImpl("", bitmaps, p);
+		try {
+			return createMessage("", bitmaps, p);
+		}
+		catch(SonarException e) {
+System.err.println("DMSImpl.createBlankMessage: " + name);
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	/** Destroy an object */
@@ -199,7 +193,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Travel time message template */
-	protected String travel;
+	protected String travel = "";
 
 	/** Set the travel time message template */
 	public void setTravel(String t) {
@@ -908,13 +902,16 @@ public class DMSImpl extends Device2Impl implements DMS {
 		}
 	}
 
-	/** Get the next (in process) sign message */
+	/** Get the next (in process) sign message.
+	 * @return Next message to be displayed on the sign, or null if no
+	 *         message is in process. */
 	public SignMessage getMessageNext() {
 		return messageNext;
 	}
 
-	/** Current message */
-	protected transient SignMessage messageCurrent;
+	/** Current message (Shall not be null) */
+	protected transient SignMessage messageCurrent =
+		createBlankMessage(DMSMessagePriority.SCHEDULED);
 
 	/** Set the current message */
 	public void setMessageCurrent(SignMessage m) {
@@ -1096,7 +1093,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		String[] bitmaps = new String[bmaps.length];
 		for(int i = 0; i < bmaps.length; i++)
 			bitmaps[i] = Base64.encode(bmaps[i].getBitmap());
-		return new SignMessageImpl(m, bitmaps, p);
+		return createMessage(m, bitmaps, p);
 	}
 
 	/** Create a message for the sign */
@@ -1117,7 +1114,19 @@ public class DMSImpl extends Device2Impl implements DMS {
 		String[] bitmaps = new String[bmaps.length];
 		for(int i = 0; i < bmaps.length; i++)
 			bitmaps[i] = Base64.encode(bmaps[i].getBitmap());
-		return new SignMessageImpl(m, bitmaps, p);
+		return createMessage(m, bitmaps, p);
+	}
+
+	/** Create a sign message */
+	protected SignMessage createMessage(String m, String[] b,
+		DMSMessagePriority p) throws SonarException
+	{
+		SignMessageImpl sm = new SignMessageImpl(m, b, p);
+		if(MainServer.server != null)
+			MainServer.server.createObject(sm);
+		else
+			namespace.add(sm);
+		return sm;
 	}
 
 	/** Compose a travel time message */
@@ -1173,7 +1182,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Mapping of station IDs to routes */
-	protected transient HashMap<String, Route> s_routes;
+	protected transient final HashMap<String, Route> s_routes =
+		new HashMap<String, Route>();
 
 	/** Lookup a route by station ID */
 	protected Route lookupRoute(String sid) {
