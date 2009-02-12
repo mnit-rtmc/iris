@@ -244,10 +244,10 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Allow (or deny) sign control by Automated Warning System */
-	public void doSetAllowed(boolean a) throws TMSException {
+	public void doSetAwsAllowed(boolean a) throws TMSException {
 		if(a == awsAllowed)
 			return;
-		store.update(this, "awsAllowed", a);
+		store.update(this, "aws_allowed", a);
 		setAwsAllowed(a);
 	}
 
@@ -265,10 +265,10 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Set sign to Automated Warning System controlled */
-	public void doSetControlled(boolean a) throws TMSException {
+	public void doSetAwsControlled(boolean a) throws TMSException {
 		if(a == awsControlled)
 			return;
-		store.update(this, "awsControlled", a);
+		store.update(this, "aws_controlled", a);
 		setAwsControlled(a);
 	}
 
