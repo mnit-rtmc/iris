@@ -152,7 +152,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		store.destroy(geo_loc);
+		MainServer.server.removeObject(geo_loc);
 	}
 
 	/** Device location */

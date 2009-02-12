@@ -154,7 +154,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		store.destroy(geo_loc);
+		MainServer.server.removeObject(geo_loc);
 	}
 
 	/** Set the controller to which this DMS is assigned */

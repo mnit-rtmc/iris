@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
-		store.destroy(geo_loc);
+		MainServer.server.removeObject(geo_loc);
 	}
 
 	/** Device location */
