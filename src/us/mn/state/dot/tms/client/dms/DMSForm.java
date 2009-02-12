@@ -14,12 +14,10 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -27,7 +25,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.client.toast.ZTable;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -44,7 +44,7 @@ public class DMSForm extends AbstractForm {
 	protected DMSModel d_model;
 
 	/** Table to hold the DMS list */
-	protected final JTable d_table = new JTable();
+	protected final ZTable d_table = new ZTable();
 
 	/** Button to display the properties */
 	protected final JButton properties = new JButton("Properties");
@@ -78,14 +78,6 @@ public class DMSForm extends AbstractForm {
 
 	/** Create DMS panel */
 	protected JPanel createDMSPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
-		bag.gridheight = 2;
 		final ListSelectionModel s = d_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -94,15 +86,6 @@ public class DMSForm extends AbstractForm {
 					selectSign();
 			}
 		};
-		d_table.setModel(d_model);
-		d_table.setAutoCreateColumnsFromModel(false);
-		d_table.setColumnModel(d_model.createColumnModel());
-		JScrollPane pane = new JScrollPane(d_table);
-		panel.add(pane, bag);
-		bag.gridheight = 1;
-		bag.anchor = GridBagConstraints.CENTER;
-		properties.setEnabled(false);
-		panel.add(properties, bag);
 		new ActionJob(this, properties) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -113,10 +96,12 @@ public class DMSForm extends AbstractForm {
 				}
 			}
 		};
-		bag.gridx = 1;
-		bag.gridy = 1;
-		del_sign.setEnabled(false);
-		panel.add(del_sign, bag);
+		d_table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2)
+					properties.doClick();
+			}
+		});
 		new ActionJob(this, del_sign) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -124,6 +109,16 @@ public class DMSForm extends AbstractForm {
 					d_model.deleteRow(row);
 			}
 		};
+		d_table.setModel(d_model);
+		d_table.setAutoCreateColumnsFromModel(false);
+		d_table.setColumnModel(d_model.createColumnModel());
+		d_table.setVisibleRowCount(12);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(d_table);
+		panel.add(properties);
+		panel.addRow(del_sign);
+		properties.setEnabled(false);
+		del_sign.setEnabled(false);
 		return panel;
 	}
 

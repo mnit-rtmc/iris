@@ -154,7 +154,9 @@ public class FormPanel extends JPanel {
 
 	/** Add a table component */
 	public void addRow(JTable table) {
-		setCenter();
+		bag.anchor = GridBagConstraints.CENTER;
+		bag.fill = GridBagConstraints.BOTH;
+		bag.gridwidth = GridBagConstraints.REMAINDER;
 		bag.weightx = 1;
 		bag.weighty = 1;
 		addRow(new JScrollPane(table,

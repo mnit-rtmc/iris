@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,10 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -27,7 +25,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying and editing cameras
@@ -43,13 +43,13 @@ public class CameraForm extends AbstractForm {
 	protected CameraModel c_model;
 
 	/** Table to hold the camera list */
-	protected final JTable c_table = new JTable();
+	protected final ZTable c_table = new ZTable();
 
 	/** Button to display the camera properties */
 	protected final JButton properties = new JButton("Properties");
 
 	/** Button to delete the selected camera */
-	protected final JButton del_camera = new JButton("Delete Camera");
+	protected final JButton del_camera = new JButton("Delete");
 
 	/** TMS connection */
 	protected final TmsConnection connection;
@@ -77,14 +77,6 @@ public class CameraForm extends AbstractForm {
 
 	/** Create camera panel */
 	protected JPanel createCameraPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
-		bag.gridheight = 2;
 		final ListSelectionModel s = c_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -96,12 +88,7 @@ public class CameraForm extends AbstractForm {
 		c_table.setModel(c_model);
 		c_table.setAutoCreateColumnsFromModel(false);
 		c_table.setColumnModel(c_model.createColumnModel());
-		JScrollPane pane = new JScrollPane(c_table);
-		panel.add(pane, bag);
-		bag.gridheight = 1;
-		bag.anchor = GridBagConstraints.CENTER;
-		properties.setEnabled(false);
-		panel.add(properties, bag);
+		c_table.setVisibleRowCount(12);
 		new ActionJob(this, properties) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -112,10 +99,12 @@ public class CameraForm extends AbstractForm {
 				}
 			}
 		};
-		bag.gridx = 1;
-		bag.gridy = 1;
-		del_camera.setEnabled(false);
-		panel.add(del_camera, bag);
+		c_table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2)
+					properties.doClick();
+			}
+		});
 		new ActionJob(this, del_camera) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -123,6 +112,12 @@ public class CameraForm extends AbstractForm {
 					c_model.deleteRow(row);
 			}
 		};
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(c_table);
+		panel.add(properties);
+		panel.addRow(del_camera);
+		properties.setEnabled(false);
+		del_camera.setEnabled(false);
 		return panel;
 	}
 

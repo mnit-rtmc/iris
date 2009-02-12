@@ -14,9 +14,10 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -26,6 +27,7 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying a table of ramp meters.
@@ -41,7 +43,7 @@ public class RampMeterForm extends AbstractForm {
 	protected RampMeterModel model;
 
 	/** Table to hold the ramp meter list */
-	protected final JTable table = new JTable();
+	protected final ZTable table = new ZTable();
 
 	/** Button to display the properties */
 	protected final JButton propertiesBtn = new JButton("Properties");
@@ -66,6 +68,7 @@ public class RampMeterForm extends AbstractForm {
 	protected void initialize() {
 		model = new RampMeterModel(cache);
 		add(createRampMeterPanel());
+		table.setVisibleRowCount(16);
 	}
 
 	/** Dispose of the form */
@@ -93,6 +96,12 @@ public class RampMeterForm extends AbstractForm {
 				}
 			}
 		};
+		table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2)
+					propertiesBtn.doClick();
+			}
+		});
 		new ActionJob(this, deleteBtn) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -100,14 +109,15 @@ public class RampMeterForm extends AbstractForm {
 					model.deleteRow(row);
 			}
 		};
-		propertiesBtn.setEnabled(false);
-		deleteBtn.setEnabled(false);
 		FormPanel panel = new FormPanel(true);
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		panel.addRow(table);
-		panel.addRow(propertiesBtn, deleteBtn);
+		panel.add(propertiesBtn);
+		panel.addRow(deleteBtn);
+		propertiesBtn.setEnabled(false);
+		deleteBtn.setEnabled(false);
 		return panel;
 	}
 

@@ -14,17 +14,13 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -45,11 +41,11 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records
@@ -287,18 +283,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the I/O panel */
 	protected JPanel createIOPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BORDER);
-		JTable table = new JTable();
+		FormPanel panel = new FormPanel(true);
+		ZTable table = new ZTable();
 		table.setAutoCreateColumnsFromModel(false);
 		table.setModel(io_model);
 		table.setColumnModel(io_model.createColumnModel());
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setRowHeight(ROW_HEIGHT);
-		table.setPreferredScrollableViewportSize(new Dimension(
-			table.getPreferredSize().width, ROW_HEIGHT * 8));
-		JScrollPane pane = new JScrollPane(table);
-		panel.add(pane);
+		table.setVisibleRowCount(8);
+		panel.addRow(table);
 		return panel;
 	}
 

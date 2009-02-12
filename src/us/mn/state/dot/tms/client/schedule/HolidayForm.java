@@ -14,18 +14,16 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying and editing holidays
@@ -41,10 +39,10 @@ public class HolidayForm extends AbstractForm {
 	protected HolidayModel model;
 
 	/** Table to hold the holiday list */
-	protected final JTable table = new JTable();
+	protected final ZTable table = new ZTable();
 
 	/** Button to delete the selected holiday */
-	protected final JButton del_holiday = new JButton("Delete Holiday");
+	protected final JButton del_holiday = new JButton("Delete");
 
 	/** Holiday type cache */
 	protected final TypeCache<Holiday> cache;
@@ -68,13 +66,6 @@ public class HolidayForm extends AbstractForm {
 
 	/** Create holiday */
 	protected JPanel createHolidayPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
 		final ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -83,14 +74,6 @@ public class HolidayForm extends AbstractForm {
 					selectHoliday();
 			}
 		};
-		table.setModel(model);
-		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(model.createColumnModel());
-		table.setRowHeight(22);
-		JScrollPane pane = new JScrollPane(table);
-		panel.add(pane, bag);
-		del_holiday.setEnabled(false);
-		panel.add(del_holiday, bag);
 		new ActionJob(this, del_holiday) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -98,6 +81,15 @@ public class HolidayForm extends AbstractForm {
 					model.deleteRow(row);
 			}
 		};
+		table.setModel(model);
+		table.setAutoCreateColumnsFromModel(false);
+		table.setColumnModel(model.createColumnModel());
+		table.setRowHeight(22);
+		table.setVisibleRowCount(16);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(table);
+		panel.addRow(del_holiday);
+		del_holiday.setEnabled(false);
 		// FIXME: add a calendar widget (for holiday feedback)
 		return panel;
 	}
