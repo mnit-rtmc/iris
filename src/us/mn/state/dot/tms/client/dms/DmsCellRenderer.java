@@ -73,8 +73,11 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Test if a message is deployed */
 	static public boolean isDeployed(SignMessage m) {
-		MultiString ms = new MultiString(m.getMulti());
-		return !ms.isBlank();
+		if(m != null) {
+			MultiString ms = new MultiString(m.getMulti());
+			return !ms.isBlank();
+		} else
+			return false;
 	}
 
 	/** The label that displays the camera id */
@@ -192,6 +195,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		lblLocation.setText(GeoLocHelper.getDescription(
 			proxy.getGeoLoc()));
 		lblCamera.setText(getCameraName(proxy));
+		// Note: getMessageCurrent will only return null after the
+		//       DMS proxy has been destroyed.
 		SignMessage message = proxy.getMessageCurrent();
 		if(isDeployed(message)) {
 			lblUser.setText(formatOwner(
