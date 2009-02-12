@@ -73,6 +73,14 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  */
 public class DMSProperties extends SonarObjectForm<DMS> {
 
+	/** Format a string field */
+	static protected String formatString(String s) {
+		if(s != null && s.length() > 0)
+			return s;
+		else
+			return UNKNOWN;
+	}
+
 	/** Format milimeter units for display */
 	static protected String formatMM(Integer i) {
 		if(i != null && i > 0)
@@ -816,16 +824,16 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(a == null || a.equals("awsControlled"))
 			awsControlled.setSelected(proxy.getAwsControlled());
 		if(a == null || a.equals("make")) {
-			String m = proxy.getMake();
+			String m = formatString(proxy.getMake());
 			make.setText(m);
 			updateMake(m.toUpperCase());
 		}
 		if(a == null || a.equals("model"))
-			model.setText(proxy.getModel());
+			model.setText(formatString(proxy.getModel()));
 		if(a == null || a.equals("version"))
-			version.setText(proxy.getVersion());
+			version.setText(formatString(proxy.getVersion()));
 		if(a == null || a.equals("signAccess"))
-			access.setText(proxy.getSignAccess());
+			access.setText(formatString(proxy.getSignAccess()));
 		if(a == null || a.equals("dmsType")) {
 			DMSType t = DMSType.fromOrdinal(proxy.getDmsType());
 			type.setText(t.description);
@@ -843,11 +851,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(a == null || a.equals("verticalBorder"))
 			vBorder.setText(formatMM(proxy.getVerticalBorder()));
 		if(a == null || a.equals("legend"))
-			legend.setText(proxy.getLegend());
+			legend.setText(formatString(proxy.getLegend()));
 		if(a == null || a.equals("beaconType"))
-			beacon.setText(proxy.getBeaconType());
+			beacon.setText(formatString(proxy.getBeaconType()));
 		if(a == null || a.equals("technology"))
-			tech.setText(proxy.getTechnology());
+			tech.setText(formatString(proxy.getTechnology()));
 		if(a == null || a.equals("charHeightPixels")) {
 			cHeight.setText(formatPixels(
 				proxy.getCharHeightPixels()));
