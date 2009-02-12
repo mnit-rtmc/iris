@@ -133,8 +133,13 @@ public class SingleSignTab extends FormPanel {
 			locationTxt.setText(GeoLocHelper.getDescription(
 				dms.getGeoLoc()));
 		}
-		if(a == null || a.equals("lightOutput"))
-			brightnessTxt.setText("" + dms.getLightOutput() + "%");
+		if(a == null || a.equals("lightOutput")) {
+			Integer o = dms.getLightOutput();
+			if(o != null)
+				brightnessTxt.setText("" + o + "%");
+			else
+				brightnessTxt.setText("");
+		}
 		if(a == null || a.equals("operation")) {
 			String status = getControllerStatus(dms);
 			if("".equals(status)) {
