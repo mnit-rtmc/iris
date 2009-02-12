@@ -70,7 +70,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JSpinner drop_id = new JSpinner();
 
 	/** Controller notes text */
-	protected final JTextArea notes = new JTextArea();
+	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Active checkbox */
 	protected final JCheckBox active = new JCheckBox();
@@ -283,13 +283,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the I/O panel */
 	protected JPanel createIOPanel() {
-		FormPanel panel = new FormPanel(true);
 		ZTable table = new ZTable();
 		table.setAutoCreateColumnsFromModel(false);
 		table.setModel(io_model);
 		table.setColumnModel(io_model.createColumnModel());
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(8);
+		FormPanel panel = new FormPanel(true);
 		panel.addRow(table);
 		return panel;
 	}
