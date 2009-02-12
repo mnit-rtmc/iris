@@ -35,10 +35,10 @@ import us.mn.state.dot.tms.BitmapGraphic;
 public class SignPixelPanel extends JPanel {
 
 	/** Sign width (mm) */
-	protected int width_mm = 1;
+	protected int width_mm = 0;
 
 	/** Sign height (mm) */
-	protected int height_mm = 1;
+	protected int height_mm = 0;
 
 	/** Width of horizontal border (mm) */
 	protected int hborder_mm;
@@ -99,14 +99,16 @@ public class SignPixelPanel extends JPanel {
 	protected void rescale(double w, double h) {
 		buffer = null;
 		dirty = true;
-		double sx = w / width_mm;
-		double sy = h / height_mm;
-		double scale = Math.min(sx, sy);
-		double tx = width_mm * (sx - scale) / 2;
-		double ty = height_mm * (sy - scale) / 2;
 		AffineTransform t = new AffineTransform();
-		t.translate(tx, ty);
-		t.scale(scale, scale);
+		if(width_mm > 0 && height_mm > 0) {
+			double sx = w / width_mm;
+			double sy = h / height_mm;
+			double scale = Math.min(sx, sy);
+			double tx = width_mm * (sx - scale) / 2;
+			double ty = height_mm * (sy - scale) / 2;
+			t.translate(tx, ty);
+			t.scale(scale, scale);
+		}
 		transform = t;
 		repaint();
 	}
@@ -115,8 +117,8 @@ public class SignPixelPanel extends JPanel {
 	public void setPhysicalDimensions(int w, int h, int hb, int vb, int hp,
 		int vp)
 	{
-		width_mm = Math.max(1, w);
-		height_mm = Math.max(1, h);
+		width_mm = Math.max(0, w);
+		height_mm = Math.max(0, h);
 		hborder_mm = Math.max(0, hb);
 		vborder_mm = Math.max(0, vb);
 		hpitch_mm = Math.max(1, hp);
@@ -134,10 +136,10 @@ public class SignPixelPanel extends JPanel {
 	/** Verify the sign dimensions */
 	public void verifyDimensions() {
 		float w = width_mm - hborder_mm * 2;
-		if(width_pix > 0 && width_pix * hpitch_mm > w)
+		if(width_pix > 0 && w > 0 && width_pix * hpitch_mm > w)
 			hpitch_mm = w / width_pix;
 		float h = height_mm - vborder_mm * 2;
-		if(height_pix > 0 && height_pix * vpitch_mm > h)
+		if(height_pix > 0 && h > 0 && height_pix * vpitch_mm > h)
 			vpitch_mm = h / height_pix;
 		rescale();
 	}
