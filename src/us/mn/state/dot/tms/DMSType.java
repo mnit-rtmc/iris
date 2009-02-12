@@ -24,7 +24,7 @@ package us.mn.state.dot.tms;
 public enum DMSType {
 
 	/** Unknown sign type */
-	UNKNOWN("Unknown sign type"),
+	UNKNOWN("???"),
 
 	/** Other sign type */
 	OTHER("Other sign type"),

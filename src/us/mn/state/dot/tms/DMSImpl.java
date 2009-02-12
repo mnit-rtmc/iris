@@ -345,7 +345,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Sign type enum value */
-	protected transient DMSType dms_type = DMSType.VMS_CHAR;
+	protected transient DMSType dms_type = DMSType.UNKNOWN;
 
 	/** Set sign type */
 	public void setDmsType(DMSType t) {
