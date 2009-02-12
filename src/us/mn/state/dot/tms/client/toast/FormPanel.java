@@ -143,8 +143,6 @@ public class FormPanel extends JPanel {
 		add(new JLabel(name));
 		setWest();
 		setWidth(GridBagConstraints.REMAINDER);
-		bag.weightx = 1;
-		bag.weighty = 1;
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
 		addRow(new JScrollPane(area,
