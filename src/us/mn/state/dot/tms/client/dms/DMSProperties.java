@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
@@ -63,6 +61,7 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.toast.ZTable;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -135,13 +134,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected SignTextTableModel sign_text_model;
 
 	/** Sign group table component */
-	protected final JTable group_table = new JTable();
+	protected final ZTable group_table = new ZTable();
 
 	/** Button to delete a sign group */
 	protected final JButton delete_group = new JButton("Delete Group");
 
 	/** Sign text table component */
-	protected final JTable sign_text_table = new JTable();
+	protected final ZTable sign_text_table = new ZTable();
 
 	/** Button to delete sign text message */
 	protected final JButton delete_text = new JButton("Delete Message");
@@ -150,16 +149,18 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final SignPixelPanel pixel_panel = new SignPixelPanel();
 
 	/** Travel time template string field */
-	protected final JTextArea travel = new JTextArea(3, 24);
+	protected final JTextArea travel = new JTextArea(10, 24);
 
 	/** Timing plan table component */
-	protected final JTable plan_table = new JTable();
+	protected final ZTable plan_table = new ZTable();
 
 	/** AWS allowed component */
-	protected final JCheckBox awsAllowed = new JCheckBox();
+	protected final JCheckBox awsAllowed = new JCheckBox(
+		I18NMessages.get("dms.aws_allowed"));
 
 	/** AWS controlled component */
-	protected final JCheckBox awsControlled = new JCheckBox();
+	protected final JCheckBox awsControlled = new JCheckBox(
+		I18NMessages.get("dms.aws_controlled"));
 
 	/** Make label */
 	protected final JLabel make = new JLabel();
@@ -227,11 +228,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JSpinner currentHighSpn = new JSpinner(
 		new SpinnerNumberModel(40, 0, 100, 1));
 
+	/** Power supply status table */
+	protected final ZTable powerTable = new ZTable();
+
 	/** Heat tape status label */
 	protected final JLabel heatTapeStatus = new JLabel();
-
-	/** Power supply status table */
-	protected final JTable powerTable = new JTable();
 
 	/** Stuck off pixel panel */
 	protected final SignPixelPanel stuck_off_pnl = new SignPixelPanel();
@@ -243,7 +244,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final JLabel badPixels = new JLabel();
 
 	/** Lamp status table */
-	protected final JTable lampTable = new JTable();
+	protected final ZTable lampTable = new ZTable();
 
 	/** Light output label */
 	protected final JLabel lightOutput = new JLabel();
@@ -352,30 +353,42 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location = new LocationPanel(true, proxy.getGeoLoc(), state);
-		location.initialize();
-		location.addRow("Notes", notes);
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
 			}
 		};
-		camera.setModel(new WrapperComboBoxModel(
-			state.getCameraModel()));
-		location.addRow("Camera", camera);
 		new ActionJob(this, camera) {
 			public void perform() {
 				proxy.setCamera(
 					(Camera)camera.getSelectedItem());
 			}
 		};
-		location.setCenter();
-		location.addRow(controllerBtn);
+		new ActionJob(this, awsAllowed) {
+			public void perform() {
+				proxy.setAwsAllowed(awsAllowed.isSelected());
+			}
+		};
+		new ActionJob(this, awsControlled) {
+			public void perform() {
+				proxy.setAwsControlled(
+					awsControlled.isSelected());
+			}
+		};
 		new ActionJob(this, controllerBtn) {
 			public void perform() {
 				controllerPressed();
 			}
 		};
+		location = new LocationPanel(true, proxy.getGeoLoc(), state);
+		location.initialize();
+		location.addRow("Notes", notes);
+		camera.setModel(new WrapperComboBoxModel(
+			state.getCameraModel()));
+		location.add("Camera", camera);
+		location.finishRow();
+		location.setCenter();
+		location.addRow(controllerBtn);
 		return location;
 	}
 
@@ -398,8 +411,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		bag.insets.left = 5;
 		bag.insets.right = 5;
 		bag.insets.bottom = 5;
-		bag.weightx = 1;
-		bag.weighty = 1;
 		bag.fill = GridBagConstraints.BOTH;
 		initGroupTable();
 		JScrollPane scroll = new JScrollPane(group_table);
@@ -411,8 +422,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		bag.gridx = 1;
 		bag.gridy = 0;
 		panel.add(scroll, bag);
-		bag.weightx = 0;
-		bag.weighty = 0;
 		bag.fill = GridBagConstraints.NONE;
 		// FIXME: check SONAR roles here
 		if(admin) {
@@ -428,14 +437,18 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		bag.gridx = 0;
 		bag.gridy = 2;
 		bag.gridwidth = 2;
-		pixel_panel.setMinimumSize(new Dimension(540, 40));
-		pixel_panel.setPreferredSize(new Dimension(540, 40));
-		pixel_panel.setSize(new Dimension(540, 40));
+		bag.fill = GridBagConstraints.BOTH;
 		JPanel pnl = new JPanel();
 		pnl.setBorder(BorderFactory.createTitledBorder(
 			"Message Preview"));
 		pnl.add(pixel_panel);
 		panel.add(pnl, bag);
+		bag.gridy = 3;
+		bag.gridwidth = 1;
+		bag.fill = GridBagConstraints.NONE;
+		panel.add(awsAllowed, bag);
+		bag.gridx = 1;
+		panel.add(awsControlled, bag);
 		return panel;
 	}
 
@@ -452,8 +465,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		group_table.setAutoCreateColumnsFromModel(false);
 		group_table.setColumnModel(SignGroupModel.createColumnModel());
 		group_table.setModel(sign_group_model);
-		group_table.setPreferredScrollableViewportSize(
-			new Dimension(260, 200));
+		group_table.setVisibleRowCount(12);
 	}
 
 	/** Select a new sign group */
@@ -520,8 +532,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		sign_text_table.setAutoCreateColumnsFromModel(false);
 		sign_text_table.setColumnModel(
 			SignTextTableModel.createColumnModel());
-		sign_text_table.setPreferredScrollableViewportSize(
-			new Dimension(280, 200));
+		sign_text_table.setVisibleRowCount(12);
 	}
 
 	/** Select a new sign text message */
@@ -603,27 +614,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				proxy.setTravel(travel.getText());
 			}
 		};
-		new ActionJob(this, awsAllowed) {
-			public void perform() {
-				proxy.setAwsAllowed(awsAllowed.isSelected());
-			}
-		};
-		new ActionJob(this, awsControlled) {
-			public void perform() {
-				proxy.setAwsControlled(
-					awsControlled.isSelected());
-			}
-		};
 		plan_table.setAutoCreateColumnsFromModel(false);
 		plan_table.setModel(new TimingPlanModel(state.getTimingPlans(),
 			proxy));
 		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
+		plan_table.setVisibleRowCount(4);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Travel template", travel);
 		panel.addRow(plan_table);
-		panel.addRow(I18NMessages.get("dms.aws_allowed"), awsAllowed);
-		panel.addRow(I18NMessages.get("dms.aws_controlled"),
-			awsControlled);
 		return panel;
 	}
 
@@ -795,6 +793,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create Skyline-specific panel */
 	protected JPanel createSkylinePanel() {
+		powerTable.setAutoCreateColumnsFromModel(false);
+		powerTable.setVisibleRowCount(8);
 		heatTapeStatus.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.setTitle(MAKE_SKYLINE);
@@ -941,7 +941,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(s != null && s.length == 3) {
 			try {
 				PowerTableModel m = new PowerTableModel(s);
-				powerTable.setAutoCreateColumnsFromModel(false);
 				powerTable.setColumnModel(
 					m.createColumnModel());
 				powerTable.setModel(m);
@@ -1036,6 +1035,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				lampTable.setAutoCreateColumnsFromModel(false);
 				lampTable.setColumnModel(m.createColumnModel());
 				lampTable.setModel(m);
+				lampTable.setVisibleRowCount(8);
 			}
 			catch(IOException e) {
 				e.printStackTrace();
