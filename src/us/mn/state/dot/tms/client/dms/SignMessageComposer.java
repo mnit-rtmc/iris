@@ -79,7 +79,7 @@ public class SignMessageComposer extends JPanel {
 		sign_text = t;
 		user = u;
 		add(tab);
-		initializeWidgets(0, 1);
+		initializeWidgets(SystemAttributeHelper.getDmsMaxLines(), 1);
 	}
 
 	/** Dispose of the message selector */

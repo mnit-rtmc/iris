@@ -239,7 +239,7 @@ public class SystemAttributeHelper {
 
 	/** Get the DMS maximum number of text lines */
 	static public int getDmsMaxLines() {
-		return getValueInt(SystemAttribute.DMS_MAX_LINES, 6);
+		return getValueInt(SystemAttribute.DMS_MAX_LINES, 3);
 	}
 
 	/** Get the DMS pixel off limit (in a message) */
