@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.io.IOException;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -442,20 +443,28 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create pixel panel */
 	protected JPanel createPixelPanel() {
-		badPixels.setForeground(OK);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow("Stuck Off", stuck_off_pnl);
-		panel.addRow("Stuck On", stuck_on_pnl);
-		panel.add("Pixel errors", badPixels);
 		JButton btn = new JButton("Test Pixels");
-		panel.add(btn);
 		new ActionJob(this, btn) {
 			public void perform() {
 				proxy.setSignRequest(
 					SignRequest.TEST_PIXELS.ordinal());
 			}
 		};
-		panel.finishRow();
+		badPixels.setForeground(OK);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Pixel errors", badPixels);
+		panel.addRow(createTitledPanel("Stuck Off", stuck_off_pnl));
+		panel.addRow(createTitledPanel("Stuck On", stuck_on_pnl));
+		panel.setCenter();
+		panel.add(btn);
+		return panel;
+	}
+
+	/** Create a panel with a titled border */
+	protected JPanel createTitledPanel(String title, JPanel p) {
+		JPanel panel = new JPanel();
+		panel.setBorder(BorderFactory.createTitledBorder(title));
+		panel.add(p);
 		return panel;
 	}
 
