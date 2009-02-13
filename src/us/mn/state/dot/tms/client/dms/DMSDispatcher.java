@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -43,6 +42,7 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -142,20 +142,28 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Create a component to deploy signs */
 	protected Box createDeployBox() {
-		Box boxRight = Box.createVerticalBox();
-		boxRight.add(Box.createVerticalGlue());
+		durationCmb.setSelectedIndex(0);
+		new ActionJob(awsControlledCbx) {
+			public void perform() {
+				DMS dms = getSingleSelection();
+				if(dms != null) {
+					dms.setAwsControlled(
+						awsControlledCbx.isSelected());
+				}
+			}
+		};
+		FormPanel panel = new FormPanel(true);
 		if(SystemAttributeHelper.isDmsDurationEnabled())
-			boxRight.add(buildDurationBox());
+			panel.addRow("Duration", durationCmb);
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
-			boxRight.add(buildFontSelectorBox());
+			panel.addRow("Font", fontCmb);
 		if(SystemAttributeHelper.isAwsEnabled())
-			boxRight.add(buildAwsControlledBox());
-		boxRight.add(Box.createVerticalStrut(4));
-		boxRight.add(buildButtonPanel());
-		boxRight.add(Box.createVerticalGlue());
+			panel.addRow(awsControlledCbx);
+		panel.setCenter();
+		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
 		deployBox.add(composer);
-		deployBox.add(boxRight);
+		deployBox.add(panel);
 		return deployBox;
 	}
 
@@ -214,39 +222,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		}
 	}
 
-	/** Build the optional message duration box */
-	protected JPanel buildDurationBox() {
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JLabel("Duration"));
-		p.add(durationCmb);
-		durationCmb.setSelectedIndex(0);
-		return p;
-	}
-
-	/** Build the font selector combo box */
-	protected JPanel buildFontSelectorBox() {
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JLabel("Font"));
-		p.add(fontCmb);
-		return p;
-	}
-
-	/** Build the AWS controlled box */
-	protected JPanel buildAwsControlledBox() {
-		new ActionJob(awsControlledCbx) {
-			public void perform() {
-				DMS dms = getSingleSelection();
-				if(dms != null) {
-					dms.setAwsControlled(
-						awsControlledCbx.isSelected());
-				}
-			}
-		};
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(awsControlledCbx);
-		return p;
-	}
-
 	/** Build the button panel */
 	protected Box buildButtonPanel() {
 		new ActionJob(sendBtn) {
@@ -265,13 +240,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
-		box.add(Box.createHorizontalGlue());
+		box.add(Box.createHorizontalStrut(4));
 		box.add(clearBtn);
-		box.add(Box.createHorizontalGlue());
 		if(SystemAttributeHelper.isDmsStatusEnabled()) {
+			box.add(Box.createHorizontalStrut(4));
 			box.add(queryStatusBtn);
-			box.add(Box.createHorizontalGlue());
 		}
+		box.add(Box.createHorizontalGlue());
 		return box;
 	}
 
