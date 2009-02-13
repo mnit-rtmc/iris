@@ -63,4 +63,9 @@ public enum Expiration {
 		label = l;
 		duration = d;
 	}
+
+	/** Get a string representation of the expiration */
+	public String toString() {
+		return label;
+	}
 }
