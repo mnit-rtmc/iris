@@ -19,6 +19,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -87,21 +88,25 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
 
+	/** SONAR user */
+	protected final User user;
+
 	/** Listener for DMS sign group proxies */
 	protected final ProxyListener<DmsSignGroup> listener;
 
 	/** 
 	 * Create a new sign group table model.
 	 * @param dms DMS proxy object.
-	 * @param d Sonar type cache
-	 * @param a True if user has admin privileges.
+	 * @param d Sonar type cache.
+	 * @param u Logged-in user.
 	 */
 	public SignGroupModel(DMS proxy, TypeCache<DmsSignGroup> d,
-		TypeCache<SignGroup> g, boolean a)
+		TypeCache<SignGroup> g, User u)
 	{
-		super(g, a);
+		super(g, true);
 		dms = proxy;
 		dms_sign_groups = d;
+		user = u;
 		initialize();
 		final SignGroupModel model = this;
 		listener = new ProxyListener<DmsSignGroup>() {

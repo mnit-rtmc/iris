@@ -16,28 +16,18 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.io.IOException;
-import java.util.TreeMap;
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.table.DefaultTableModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
-import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
@@ -45,13 +35,8 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignRequest;
-import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -135,40 +120,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Controller button */
 	protected final JButton controllerBtn = new JButton("Controller");
 
-	/** Sign group model */
-	protected final SignGroupModel sign_group_model;
-
-	/** Sign text table model */
-	protected SignTextTableModel sign_text_model;
-
-	/** Sign group table component */
-	protected final ZTable group_table = new ZTable();
-
-	/** Button to delete a sign group */
-	protected final JButton delete_group = new JButton("Delete Group");
-
-	/** Sign text table component */
-	protected final ZTable sign_text_table = new ZTable();
-
-	/** Button to delete sign text message */
-	protected final JButton delete_text = new JButton("Delete Message");
-
-	/** Sign pixel panel */
-	protected final SignPixelPanel pixel_panel = new SignPixelPanel();
+	/** Messages tab */
+	protected final MessagesTab messagesTab;
 
 	/** Travel time template string field */
 	protected final JTextArea travel = new JTextArea(10, 24);
 
 	/** Timing plan table component */
 	protected final ZTable plan_table = new ZTable();
-
-	/** AWS allowed component */
-	protected final JCheckBox awsAllowed = new JCheckBox(
-		I18NMessages.get("dms.aws_allowed"));
-
-	/** AWS controlled component */
-	protected final JCheckBox awsControlled = new JCheckBox(
-		I18NMessages.get("dms.aws_controlled"));
 
 	/** Make label */
 	protected final JLabel make = new JLabel();
@@ -302,9 +261,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		super(TITLE, tc, sign);
 		state = tc.getSonarState();
 		user = state.lookupUser(tc.getUser().getName());
-		sign_group_model = new SignGroupModel(sign,
-			state.getDmsSignGroups(), state.getSignGroups(),
-			connection.isAdmin());
+		messagesTab = new MessagesTab(tc, sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -317,7 +274,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
-		tab.add("Messages", createMessagePanel());
+		tab.add("Messages", messagesTab);
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
 		tab.add("Status", createStatusPanel());
@@ -335,28 +292,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Dispose of the form */
 	protected void dispose() {
 		location.dispose();
-		sign_group_model.dispose();
-		if(sign_text_model != null)
-			sign_text_model.dispose();
+		messagesTab.dispose();
 		super.dispose();
-	}
-
-	/** Add a actions for the delete buttons */
-	protected void addDeleteActions() {
-		new ActionJob(this, delete_group) {
-			public void perform() {
-				SignGroup group = getSelectedGroup();
-				if(group != null)
-					group.destroy();
-			}
-		};
-		new ActionJob(this, delete_text) {
-			public void perform() throws Exception {
-				SignText sign_text = getSelectedSignText();
-				if(sign_text != null)
-					sign_text.destroy();
-			}
-		};
 	}
 
 	/** Create the location panel */
@@ -370,17 +307,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			public void perform() {
 				proxy.setCamera(
 					(Camera)camera.getSelectedItem());
-			}
-		};
-		new ActionJob(this, awsAllowed) {
-			public void perform() {
-				proxy.setAwsAllowed(awsAllowed.isSelected());
-			}
-		};
-		new ActionJob(this, awsControlled) {
-			public void perform() {
-				proxy.setAwsControlled(
-					awsControlled.isSelected());
 			}
 		};
 		new ActionJob(this, controllerBtn) {
@@ -409,210 +335,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			connection.getDesktop().show(
 				new ControllerForm(connection, c));
 		}
-	}
-
-	/** Create the message panel */
-	protected JPanel createMessagePanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.top = 5;
-		bag.insets.left = 5;
-		bag.insets.right = 5;
-		bag.insets.bottom = 5;
-		bag.fill = GridBagConstraints.BOTH;
-		initGroupTable();
-		JScrollPane scroll = new JScrollPane(group_table);
-		bag.gridx = 0;
-		bag.gridy = 0;
-		panel.add(scroll, bag);
-		initSignTextTable();
-		scroll = new JScrollPane(sign_text_table);
-		bag.gridx = 1;
-		bag.gridy = 0;
-		panel.add(scroll, bag);
-		bag.fill = GridBagConstraints.NONE;
-		// FIXME: check SONAR roles here
-		if(admin) {
-			bag.gridx = 0;
-			bag.gridy = 1;
-			delete_group.setEnabled(false);
-			panel.add(delete_group, bag);
-			bag.gridx = 1;
-			delete_text.setEnabled(false);
-			panel.add(delete_text, bag);
-			addDeleteActions();
-		}
-		bag.gridx = 0;
-		bag.gridy = 2;
-		bag.gridwidth = 2;
-		bag.fill = GridBagConstraints.BOTH;
-		JPanel pnl = new JPanel();
-		pnl.setBorder(BorderFactory.createTitledBorder(
-			"Message Preview"));
-		pnl.add(pixel_panel);
-		panel.add(pnl, bag);
-		bag.gridy = 3;
-		bag.gridwidth = 1;
-		bag.fill = GridBagConstraints.NONE;
-		panel.add(awsAllowed, bag);
-		bag.gridx = 1;
-		panel.add(awsControlled, bag);
-		return panel;
-	}
-
-	/** Initialize the sign group table */
-	protected void initGroupTable() {
-		final ListSelectionModel s = group_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectGroup();
-			}
-		};
-		group_table.setAutoCreateColumnsFromModel(false);
-		group_table.setColumnModel(SignGroupModel.createColumnModel());
-		group_table.setModel(sign_group_model);
-		group_table.setVisibleRowCount(12);
-	}
-
-	/** Select a new sign group */
-	protected void selectGroup() {
-		SignGroup group = getSelectedGroup();
-		if(group != null) {
-			if(sign_text_model != null)
-				sign_text_model.dispose();
-			sign_text_model = new SignTextTableModel(group,
-				state.getSignText(), user);
-			sign_text_table.setModel(sign_text_model);
-			delete_group.setEnabled(isGroupDeletable(group));
-		} else {
-			sign_text_table.setModel(new DefaultTableModel());
-			delete_group.setEnabled(false);
-		}
-	}
-
-	/** Check if a sign group is deletable */
-	protected boolean isGroupDeletable(SignGroup group) {
-		return !(hasMembers(group) || hasSignText(group));
-	}
-
-	/** Check if a sign group has any members */
-	protected boolean hasMembers(final SignGroup group) {
-		TypeCache<DmsSignGroup> dms_sign_groups =
-			state.getDmsSignGroups();
-		return null != dms_sign_groups.findObject(
-			new Checker<DmsSignGroup>()
-		{
-			public boolean check(DmsSignGroup g) {
-				return g.getSignGroup() == group;
-			}
-		});
-	}
-
-	/** Check if a sign group has any sign text messages */
-	protected boolean hasSignText(final SignGroup group) {
-		TypeCache<SignText> sign_text = state.getSignText();
-		return null != sign_text.findObject(new Checker<SignText>() {
-			public boolean check(SignText t) {
-				return t.getSignGroup() == group;
-			}
-		});
-	}
-
-	/** Get the selected sign group */
-	protected SignGroup getSelectedGroup() {
-		ListSelectionModel s = group_table.getSelectionModel();
-		return sign_group_model.getProxy(s.getMinSelectionIndex());
-	}
-
-	/** Initialize the sign text table */
-	protected void initSignTextTable() {
-		final ListSelectionModel s =
-			sign_text_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectSignText();
-			}
-		};
-		sign_text_table.setAutoCreateColumnsFromModel(false);
-		sign_text_table.setColumnModel(
-			SignTextTableModel.createColumnModel());
-		sign_text_table.setVisibleRowCount(12);
-	}
-
-	/** Select a new sign text message */
-	protected void selectSignText() {
-		Integer w = proxy.getFaceWidth();
-		Integer lh = getLineHeightPixels();
-		Integer hp = proxy.getHorizontalPitch();
-		Integer vp = proxy.getVerticalPitch();
-		Integer hb = proxy.getHorizontalBorder();
-		if(w != null && lh != null && hp != null && vp != null &&
-		   hb != null)
-		{
-			int h = lh * vp;
-			pixel_panel.setPhysicalDimensions(w, h, hb, 0, hp, vp);
-		}
-		Integer wp = proxy.getWidthPixels();
-		Integer cw = proxy.getCharWidthPixels();
-		if(wp != null && lh != null && cw != null)
-			pixel_panel.setLogicalDimensions(wp, lh, cw, 0);
-		pixel_panel.verifyDimensions();
-		SignText st = getSelectedSignText();
-		if(st != null)
-			pixel_panel.setGraphic(renderMessage(st));
-		else
-			pixel_panel.setGraphic(null);
-		delete_text.setEnabled(st != null);
-	}
-
-	/** Get the line height of the sign */
-	protected Integer getLineHeightPixels() {
-		Integer w = proxy.getWidthPixels();
-		Integer h = proxy.getHeightPixels();
-		Integer cw = proxy.getCharWidthPixels();
-		Integer ch = proxy.getCharHeightPixels();
-		if(w == null || h == null || cw == null || ch == null)
-			return null;
-		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
-			w, h, cw, ch);
-		return b.getLineHeightPixels();
-	}
-
-	/** Render a message to a bitmap graphic */
-	protected BitmapGraphic renderMessage(SignText st) {
-		MultiString multi = new MultiString(st.getMessage());
-		BitmapGraphic[] pages = renderPages(multi);
-		if(pages.length > 0)
-			return pages[0];
-		else
-			return null;
-	}
-
-	/** Render the pages of a text message */
-	protected BitmapGraphic[] renderPages(MultiString multi) {
-		Integer w = proxy.getWidthPixels();
-		Integer h = getLineHeightPixels();
-		Integer cw = proxy.getCharWidthPixels();
-		Integer ch = proxy.getCharHeightPixels();
-		if(w == null || h == null || cw == null || ch == null)
-			return new BitmapGraphic[0];
-		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
-			w, h, cw, ch);
-		multi.parse(b);
-		return b.getPixmaps();
-	}
-
-	/** Get the selected sign text message */
-	protected SignText getSelectedSignText() {
-		SignTextTableModel m = sign_text_model;
-		if(m == null)
-			return null;
-		ListSelectionModel s = sign_text_table.getSelectionModel();
-		return m.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Create the travel time panel */
@@ -813,16 +535,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
+		messagesTab.updateAttribute(a);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
 			camera.setSelectedItem(proxy.getCamera());
 		if(a == null || a.equals("travel"))
 			travel.setText(proxy.getTravel());
-		if(a == null || a.equals("awsAllowed"))
-			awsAllowed.setSelected(proxy.getAwsAllowed());
-		if(a == null || a.equals("awsControlled"))
-			awsControlled.setSelected(proxy.getAwsControlled());
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);
@@ -870,10 +589,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			vPitch.setText(formatMM(proxy.getVerticalPitch()));
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if(a == null || a.equals("messageCurrent")) {
-			selectSignText();
+		if(a == null || a.equals("messageCurrent"))
 			updatePixelStatus();
-		}
 		if(a == null || a.equals("ldcPotBase")) {
 			Integer b = proxy.getLdcPotBase();
 			if(b != null)
