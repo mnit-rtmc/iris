@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -311,7 +312,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				fontModel.dispose();
 			fontModel = m;
 			fontCmb.setEnabled(true);
-			awsControlledCbx.setEnabled(true);
 			clearPager();
 			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
@@ -447,5 +447,15 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				bmaps);
 			composer.setMessage(dms);
 		}
+		if(a == null || a.equals("awsAllowed"))
+			awsControlledCbx.setEnabled(isAwsPermitted(dms));
+		if(a == null || a.equals("awsControlled"))
+			awsControlledCbx.setSelected(dms.getAwsControlled());
+	}
+
+	/** Check is AWS is allowed and user has permission to change */
+	protected boolean isAwsPermitted(DMS dms) {
+		Name name = new Name(dms, "awsControlled");
+		return dms.getAwsAllowed() && user.canUpdate(name.toString());
 	}
 }

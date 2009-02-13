@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
@@ -44,6 +45,9 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  */
 public class DMSManager extends ProxyManager<DMS> {
 
+	/** Color definition for AWS controlled style */
+	static protected final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
+
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
 
@@ -53,8 +57,11 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Name of travel time style */
 	static public final String STYLE_TRAVEL_TIME = "Travel Time";
 
-	/** Name of automated warning system style */
-	static public final String STYLE_AWS = "AWS";
+	/** Name of automated warning system controlled style */
+	static public final String STYLE_AWS_CONTROLLED = "AWS Controlled";
+
+	/** Name of automated warning system deployed style */
+	static public final String STYLE_AWS_DEPLOYED = "AWS Deployed";
 
 	/** Name of maintenance style */
 	static public final String STYLE_MAINTENANCE = "Maintenance";
@@ -91,8 +98,13 @@ public class DMSManager extends ProxyManager<DMS> {
 		       DMSMessagePriority.TRAVEL_TIME.ordinal();
 	}
 
+	/** Test if a DMS can be controlled by AWS */
+	static public boolean isAwsControlled(DMS proxy) {
+		return proxy.getAwsAllowed() && proxy.getAwsControlled();
+	}
+
 	/** Test if a DMS has an AWS message deployed */
-	static public boolean isAws(DMS proxy) {
+	static public boolean isAwsDeployed(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
 		return m.getRunTimePriority() ==
 		       DMSMessagePriority.AWS.ordinal();
@@ -137,7 +149,10 @@ public class DMSManager extends ProxyManager<DMS> {
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_TRAVEL_TIME, Color.ORANGE);
-		theme.addStyle(STYLE_AWS, Color.RED);
+		if(SystemAttributeHelper.isAwsEnabled()) {
+			theme.addStyle(STYLE_AWS_CONTROLLED, COLOR_HELIOTROPE);
+			theme.addStyle(STYLE_AWS_DEPLOYED, Color.RED);
+		}
 		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_NO_CONTROLLER,
@@ -176,8 +191,10 @@ public class DMSManager extends ProxyManager<DMS> {
 			return isDeployed(proxy);
 		else if(STYLE_TRAVEL_TIME.equals(s))
 			return isTravelTime(proxy);
-		else if(STYLE_AWS.equals(s))
-			return isAws(proxy);
+		else if(STYLE_AWS_CONTROLLED.equals(s))
+			return isAwsControlled(proxy);
+		else if(STYLE_AWS_DEPLOYED.equals(s))
+			return isAwsDeployed(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
 			return needsMaintenance(proxy);
 		else if(STYLE_FAILED.equals(s))

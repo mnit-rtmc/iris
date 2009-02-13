@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.ZTable;
@@ -143,12 +144,14 @@ public class MessagesTab extends JPanel {
 		bag.gridwidth = 2;
 		bag.fill = GridBagConstraints.BOTH;
 		add(createPreviewPanel(), bag);
-		bag.gridy = 3;
-		bag.gridwidth = 1;
-		bag.fill = GridBagConstraints.NONE;
-		add(awsAllowed, bag);
-		bag.gridx = 1;
-		add(awsControlled, bag);
+		if(SystemAttributeHelper.isAwsEnabled()) {
+			bag.gridy = 3;
+			bag.gridwidth = 1;
+			bag.fill = GridBagConstraints.NONE;
+			add(awsAllowed, bag);
+			bag.gridx = 1;
+			add(awsControlled, bag);
+		}
 	}
 
 	/** Create a message preview panel */
