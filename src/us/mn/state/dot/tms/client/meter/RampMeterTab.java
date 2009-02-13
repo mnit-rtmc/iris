@@ -78,7 +78,7 @@ public class RampMeterTab extends MapTab {
 	/** Dispose of the ramp meter tab */
 	public void dispose() {
 		super.dispose();
-		manager.getSelectionModel().setSelected(null);
+		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 		statusPanel.dispose();
 		mainPanel.removeAll();
