@@ -48,35 +48,42 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Color definition for AWS controlled style */
 	static protected final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
 
-	/** Name of available style */
-	static public final String STYLE_AVAILABLE = "Available";
-
-	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "Deployed";
-
-	/** Name of travel time style */
-	static public final String STYLE_TRAVEL_TIME = "Travel Time";
-
-	/** Name of automated warning system controlled style */
-	static public final String STYLE_AWS_CONTROLLED = "AWS Controlled";
-
-	/** Name of automated warning system deployed style */
-	static public final String STYLE_AWS_DEPLOYED = "AWS Deployed";
-
-	/** Name of maintenance style */
-	static public final String STYLE_MAINTENANCE = "Maintenance";
+	/** Name of inactive style */
+	static public final String STYLE_INACTIVE = "Inactive";
 
 	/** Name of failed style */
 	static public final String STYLE_FAILED = "Failed";
 
+	/** Name of travel time style */
+	static public final String STYLE_TRAVEL_TIME = "Travel Time";
+
+	/** Name of automated warning system deployed style */
+	static public final String STYLE_AWS_DEPLOYED = "AWS Deployed";
+
+	/** Name of deployed style */
+	static public final String STYLE_DEPLOYED = "Deployed";
+
+	/** Name of maintenance style */
+	static public final String STYLE_MAINTENANCE = "Maintenance";
+
+	/** Name of automated warning system controlled style */
+	static public final String STYLE_AWS_CONTROLLED = "AWS Controlled";
+
+	/** Name of available style */
+	static public final String STYLE_AVAILABLE = "Available";
+
 	/** Name of "no controller" style */
 	static public final String STYLE_NO_CONTROLLER = "No controller";
 
-	/** Name of inactive style */
-	static public final String STYLE_INACTIVE = "Inactive";
-
 	/** Name of all style */
 	static public final String STYLE_ALL = "All";
+
+	/** Test if a DMS is available */
+	static public boolean isAvailable(DMS proxy) {
+		return isActive(proxy) &&
+		       !isDeployed(proxy) &&
+		       !isFailed(proxy);
+	}
 
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
@@ -84,18 +91,18 @@ public class DMSManager extends ProxyManager<DMS> {
 		return ctr != null && ctr.getActive();
 	}
 
-	/** Test if a DMS is deployed */
-	static public boolean isDeployed(DMS proxy) {
-		SignMessage m = proxy.getMessageCurrent();
-		MultiString ms = new MultiString(m.getMulti());
-		return !ms.isBlank();
-	}
-
 	/** Test if a DMS has a travel time message deployed */
 	static public boolean isTravelTime(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
 		return m.getRunTimePriority() ==
 		       DMSMessagePriority.TRAVEL_TIME.ordinal();
+	}
+
+	/** Test if a DMS is deployed */
+	static public boolean isDeployed(DMS proxy) {
+		SignMessage m = proxy.getMessageCurrent();
+		MultiString ms = new MultiString(m.getMulti());
+		return !ms.isBlank();
 	}
 
 	/** Test if a DMS can be controlled by AWS */
@@ -146,19 +153,19 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
 			getProxyType(), new DmsMarker());
-		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_TRAVEL_TIME, Color.ORANGE);
-		if(SystemAttributeHelper.isAwsEnabled()) {
-			theme.addStyle(STYLE_AWS_CONTROLLED, COLOR_HELIOTROPE);
-			theme.addStyle(STYLE_AWS_DEPLOYED, Color.RED);
-		}
-		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(STYLE_NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(STYLE_TRAVEL_TIME, Color.ORANGE);
+		if(SystemAttributeHelper.isAwsEnabled())
+			theme.addStyle(STYLE_AWS_DEPLOYED, Color.RED);
+		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
+		if(SystemAttributeHelper.isAwsEnabled())
+			theme.addStyle(STYLE_AWS_CONTROLLED, COLOR_HELIOTROPE);
+		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(STYLE_NO_CONTROLLER,
+			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
@@ -185,24 +192,24 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, DMS proxy) {
-		if(STYLE_AVAILABLE.equals(s))
-			return isActive(proxy) && !isDeployed(proxy);
-		else if(STYLE_DEPLOYED.equals(s))
-			return isDeployed(proxy);
-		else if(STYLE_TRAVEL_TIME.equals(s))
-			return isTravelTime(proxy);
-		else if(STYLE_AWS_CONTROLLED.equals(s))
-			return isAwsControlled(proxy);
-		else if(STYLE_AWS_DEPLOYED.equals(s))
-			return isAwsDeployed(proxy);
-		else if(STYLE_MAINTENANCE.equals(s))
-			return needsMaintenance(proxy);
+		if(STYLE_INACTIVE.equals(s))
+			return !isActive(proxy);
 		else if(STYLE_FAILED.equals(s))
 			return isFailed(proxy);
+		else if(STYLE_TRAVEL_TIME.equals(s))
+			return isTravelTime(proxy);
+		else if(STYLE_AWS_DEPLOYED.equals(s))
+			return isAwsDeployed(proxy);
+		else if(STYLE_DEPLOYED.equals(s))
+			return isDeployed(proxy);
+		else if(STYLE_MAINTENANCE.equals(s))
+			return needsMaintenance(proxy);
+		else if(STYLE_AWS_CONTROLLED.equals(s))
+			return isAwsControlled(proxy);
+		else if(STYLE_AVAILABLE.equals(s))
+			return isAvailable(proxy);
 		else if(STYLE_NO_CONTROLLER.equals(s))
 			return proxy.getController() == null;
-		else if(STYLE_INACTIVE.equals(s))
-			return !isActive(proxy);
 		else
 			return STYLE_ALL.equals(s);
 	}
