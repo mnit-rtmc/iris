@@ -49,9 +49,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CabinetStyleImpl.loadAll();
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
-		SignGroupImpl.loadAll();
-		DmsSignGroupImpl.loadAll();
-		SignTextImpl.loadAll();
 		R_NodeImpl.loadAll();
 		AlarmImpl.loadAll();
 		DetectorImpl.loadAll();
@@ -59,6 +56,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		WarningSignImpl.loadAll();
 		RampMeterImpl.loadAll();
 		DMSImpl.loadAll();
+		SignGroupImpl.loadAll();
+		DmsSignGroupImpl.loadAll();
+		SignTextImpl.loadAll();
 		TimingPlanImpl.loadAll();
 	}
 
