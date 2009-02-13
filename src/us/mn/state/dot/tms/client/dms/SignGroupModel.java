@@ -34,6 +34,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class SignGroupModel extends ProxyTableModel<SignGroup> {
 
+	/** Create a SONAR sign group name to check for allowed updates */
+	static public String createSignGroupName(String name) {
+		return SignGroup.SONAR_TYPE + "/" + name;
+	}
+
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
 
@@ -168,10 +173,31 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
+		SignGroup g = getProxy(row);
 		if(column == COL_MEMBER)
-			return admin;
+			return canEditDmsSignGroup(g);
 		else
-			return admin && isLastRow(row);
+			return (g == null) && canAddSignGroup("arbitrary_name");
+	}
+
+	/** Check if the user is allowed to add / destroy a DMS sign group */
+	protected boolean canEditDmsSignGroup(SignGroup g) {
+		return g != null && canAddAndRemove(createDmsSignGroupName(g));
+	}
+
+	/** Create a DMS sign group name */
+	protected String createDmsSignGroupName(SignGroup g) {
+		return g.getName() + "_" + dms.getName();
+	}
+
+	/** Check if the user can add and remove the specified name */
+	protected boolean canAddAndRemove(String name) {
+		return user.canAdd(name) && user.canRemove(name);
+	}
+
+	/** Check if the user is allowed to add a sign group */
+	protected boolean canAddSignGroup(String name) {
+		return user.canAdd(createSignGroupName(name));
 	}
 
 	/** Set the value at the specified cell */
@@ -205,7 +231,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 
 	/** Create a new DMS sign group */
 	protected void createDmsSignGroup(SignGroup g) {
-		String name = g.getName() + "_" + dms.getName();
+		String name = createDmsSignGroupName(g);
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("dms", dms);
 		attrs.put("sign_group", g);

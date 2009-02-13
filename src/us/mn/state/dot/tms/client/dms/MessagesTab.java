@@ -48,6 +48,11 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  */
 public class MessagesTab extends JPanel {
 
+	/** Create a SONAR sign text name to check for allowed updates */
+	static public String createSignTextName(String name) {
+		return SignText.SONAR_TYPE + "/" + name;
+	}
+
 	/** Sign group model */
 	protected final SignGroupModel sign_group_model;
 
@@ -218,6 +223,11 @@ public class MessagesTab extends JPanel {
 
 	/** Check if a sign group is deletable */
 	protected boolean isGroupDeletable(SignGroup group) {
+		return hasNoReferences(group) && canRemove(group);
+	}
+
+	/** Check if a sign group has no references */
+	protected boolean hasNoReferences(SignGroup group) {
 		return !(hasMembers(group) || hasSignText(group));
 	}
 
@@ -242,6 +252,12 @@ public class MessagesTab extends JPanel {
 				return t.getSignGroup() == group;
 			}
 		});
+	}
+
+	/** Check if the user can remove the specified sign group */
+	protected boolean canRemove(SignGroup group) {
+		return user.canRemove(SignGroupModel.createSignGroupName(
+			group.getName()));
 	}
 
 	/** Get the selected sign group */
@@ -290,7 +306,13 @@ public class MessagesTab extends JPanel {
 			pixel_panel.setGraphic(renderMessage(st));
 		else
 			pixel_panel.setGraphic(null);
-		delete_text.setEnabled(st != null);
+		delete_text.setEnabled(canRemove(st));
+	}
+
+	/** Check if the user can remove the specified sign text */
+	protected boolean canRemove(SignText st) {
+		return st != null &&
+		       user.canRemove(createSignTextName(st.getName()));
 	}
 
 	/** Get the line height of the sign */
