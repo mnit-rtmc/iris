@@ -294,31 +294,54 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Set a single selected DMS */
 	protected void setSelected(DMS dms) {
-		if(dms == null)
-			clearSelected();
-		else {
-			sendBtn.setEnabled(true);
-			clearBtn.setEnabled(true);
+		if(dms == null) {
+			singleTab.clearSelected();
+			disableWidgets();
+		} else if(DMSManager.isActive(dms)) {
+			builder = createPixelMapBuilder(dms);
+			updateAttribute(dms, null);
 			clearBtn.setAction(new ClearDmsAction(dms,
 				user.getName()));
-			queryStatusBtn.setEnabled(true);
-			durationCmb.setEnabled(true);
-			durationCmb.setSelectedIndex(0);
-			builder = createPixelMapBuilder(dms);
-			FontComboBoxModel m = new FontComboBoxModel(fonts,
-				builder);
-			fontCmb.setModel(m);
-			if(fontModel != null)
-				fontModel.dispose();
-			fontModel = m;
-			fontCmb.setEnabled(true);
-			clearPager();
-			BitmapGraphic[] bmaps = getBitmaps(dms);
-			currentPnlPager = new DMSPanelPager(currentPnl, dms,
-				bmaps);
-			composer.setSign(dms, getLineHeightPixels());
-			updateAttribute(dms, null);
+			enableWidgets();
+		} else {
+			disableWidgets();
+			singleTab.updateAttribute(dms, null);
 		}
+	}
+
+	/** Disable the dispatcher widgets */
+	protected void disableWidgets() {
+		clearPager();
+		composer.setEnabled(false);
+		composer.clearSelections();
+		durationCmb.setEnabled(false);
+		durationCmb.setSelectedItem(null);
+		fontCmb.setEnabled(false);
+		fontCmb.setSelectedItem(null);
+		if(fontModel != null) {
+			fontModel.dispose();
+			fontModel = null;
+		}
+		awsControlledCbx.setEnabled(false);
+		sendBtn.setEnabled(false);
+		clearBtn.setEnabled(false);
+		queryStatusBtn.setEnabled(false);
+		builder = null;
+	}
+
+	/** Enable the dispatcher widgets */
+	protected void enableWidgets() {
+		durationCmb.setEnabled(true);
+		durationCmb.setSelectedIndex(0);
+		FontComboBoxModel m = new FontComboBoxModel(fonts, builder);
+		fontCmb.setModel(m);
+		if(fontModel != null)
+			fontModel.dispose();
+		fontModel = m;
+		fontCmb.setEnabled(true);
+		sendBtn.setEnabled(true);
+		clearBtn.setEnabled(true);
+		queryStatusBtn.setEnabled(true);
 	}
 
 	/** Create the pixel map builder */
@@ -355,37 +378,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return b.getLineHeightPixels();
 		else
 			return 7;
-	}
-
-	/** Clear the selected DMS */
-	protected void clearSelected() {
-		singleTab.clearSelected();
-		durationCmb.setEnabled(false);
-		durationCmb.setSelectedItem(null);
-		fontCmb.setEnabled(false);
-		fontCmb.setSelectedItem(null);
-		if(fontModel != null) {
-			fontModel.dispose();
-			fontModel = null;
-		}
-		awsControlledCbx.setEnabled(false);
-		sendBtn.setEnabled(false);
-		clearBtn.setEnabled(false);
-		queryStatusBtn.setEnabled(false);
-		clearPager();
-		composer.setEnabled(false);
-		composer.clearSelections();
-		builder = null;
-	}
-
-	/** Get the selected duration */
-	protected Integer getDuration() {
-		if(SystemAttributeHelper.isDmsDurationEnabled()) {
-			Expiration e =(Expiration)durationCmb.getSelectedItem();
-			if(e != null)
-				return e.duration;
-		}
-		return null;
 	}
 
 	/** Send a new message to the selected DMS */
@@ -437,6 +429,15 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return null;
 	}
 
+	/** Get the selected duration */
+	protected Integer getDuration() {
+		Expiration e = (Expiration)durationCmb.getSelectedItem();
+		if(e != null)
+			return e.duration;
+		else
+			return null;
+	}
+
 	/** Update one attribute on the form */
 	protected void updateAttribute(DMS dms, String a) {
 		singleTab.updateAttribute(dms, a);
@@ -445,6 +446,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps);
+			if(a == null)
+				composer.setSign(dms, getLineHeightPixels());
 			composer.setMessage(dms);
 		}
 		if(a == null || a.equals("awsAllowed"))
