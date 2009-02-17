@@ -125,13 +125,13 @@ public class MultipleSignTab extends JPanel implements
 		SignGroup group = getSelectedGroup();
 		List<DMS> selected = selectionModel.getSelected();
 		List<DMS> in_group = createGroupList(group);
-		for(DMS dms: selected) {
-			if(!in_group.contains(dms))
-				selectionModel.removeSelected(dms);
-		}
 		for(DMS dms: in_group) {
 			if(!selected.contains(dms))
 				selectionModel.addSelected(dms);
+		}
+		for(DMS dms: selected) {
+			if(!in_group.contains(dms))
+				selectionModel.removeSelected(dms);
 		}
 	}
 
