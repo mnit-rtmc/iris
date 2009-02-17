@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.toast.ZTable;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -118,10 +119,10 @@ public class MessagesTab extends JPanel {
 	/** Initialize the widgets on the tab */
 	protected void initWidgets() {
 		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.top = 5;
-		bag.insets.left = 5;
-		bag.insets.right = 5;
-		bag.insets.bottom = 5;
+		bag.insets.top = TmsForm.VGAP;
+		bag.insets.left = TmsForm.HGAP;
+		bag.insets.right = TmsForm.HGAP;
+		bag.insets.bottom = TmsForm.VGAP;
 		bag.fill = GridBagConstraints.BOTH;
 		bag.gridx = 0;
 		bag.gridy = 0;
