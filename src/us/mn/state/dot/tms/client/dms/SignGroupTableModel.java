@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  *
  * @author Douglas Lau
  */
-public class SignGroupModel extends ProxyTableModel<SignGroup> {
+public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Create a SONAR sign group name to check for allowed updates */
 	static public String createSignGroupName(String name) {
@@ -105,7 +105,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 	 * @param d Sonar type cache.
 	 * @param u Logged-in user.
 	 */
-	public SignGroupModel(DMS proxy, TypeCache<DmsSignGroup> d,
+	public SignGroupTableModel(DMS proxy, TypeCache<DmsSignGroup> d,
 		TypeCache<SignGroup> g, User u)
 	{
 		super(g, true);
@@ -113,7 +113,7 @@ public class SignGroupModel extends ProxyTableModel<SignGroup> {
 		dms_sign_groups = d;
 		user = u;
 		initialize();
-		final SignGroupModel model = this;
+		final SignGroupTableModel model = this;
 		listener = new ProxyListener<DmsSignGroup>() {
 			public void proxyAdded(DmsSignGroup proxy) {
 				model.proxyChanged(proxy.getSignGroup(),

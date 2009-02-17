@@ -54,8 +54,8 @@ public class MessagesTab extends JPanel {
 		return SignText.SONAR_TYPE + "/" + name;
 	}
 
-	/** Sign group model */
-	protected final SignGroupModel sign_group_model;
+	/** Sign group table model */
+	protected final SignGroupTableModel sign_group_model;
 
 	/** Sign group table component */
 	protected final ZTable group_table = new ZTable();
@@ -100,7 +100,7 @@ public class MessagesTab extends JPanel {
 		state = tc.getSonarState();
 		proxy = sign;
 		user = state.lookupUser(tc.getUser().getName());
-		sign_group_model = new SignGroupModel(sign,
+		sign_group_model = new SignGroupTableModel(sign,
 			state.getDmsSignGroups(), state.getSignGroups(), user);
 		initGroupTable();
 		initSignTextTable();
@@ -211,7 +211,8 @@ public class MessagesTab extends JPanel {
 			}
 		};
 		group_table.setAutoCreateColumnsFromModel(false);
-		group_table.setColumnModel(SignGroupModel.createColumnModel());
+		group_table.setColumnModel(
+			SignGroupTableModel.createColumnModel());
 		group_table.setModel(sign_group_model);
 		group_table.setVisibleRowCount(12);
 	}
@@ -267,7 +268,7 @@ public class MessagesTab extends JPanel {
 
 	/** Check if the user can remove the specified sign group */
 	protected boolean canRemove(SignGroup group) {
-		return user.canRemove(SignGroupModel.createSignGroupName(
+		return user.canRemove(SignGroupTableModel.createSignGroupName(
 			group.getName()));
 	}
 
