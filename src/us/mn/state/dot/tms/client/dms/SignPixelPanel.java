@@ -84,7 +84,7 @@ public class SignPixelPanel extends JPanel {
 				rescale();
 			}
 		});
-		setPreferredSize(new Dimension(256, 32));
+		setMinimumSize(new Dimension(256, 32));
 	}
 
 	/** Rescale when the component is resized or the sign changes */

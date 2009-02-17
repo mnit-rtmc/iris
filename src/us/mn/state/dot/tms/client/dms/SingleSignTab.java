@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.Camera;
@@ -80,6 +81,8 @@ public class SingleSignTab extends FormPanel {
 	/** Create a new single sign tab */
 	public SingleSignTab() {
 		super(true);
+		currentPnl.setPreferredSize(new Dimension(390, 108));
+		previewPnl.setPreferredSize(new Dimension(390, 108));
 		add("Name", nameTxt);
 		addRow("Camera", cameraTxt);
 		add("Location", locationTxt);
