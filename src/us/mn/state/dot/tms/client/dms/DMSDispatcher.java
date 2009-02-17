@@ -73,6 +73,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Single sign tab */
 	protected final SingleSignTab singleTab = new SingleSignTab();
 
+	/** Multiple sign tab */
+	protected final MultipleSignTab multipleTab = new MultipleSignTab();
+
 	/** Panel used for drawing a DMS */
 	protected final SignPixelPanel currentPnl;
 
@@ -133,6 +136,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		currentPnl = singleTab.getCurrentPanel();
 		JTabbedPane tab = new JTabbedPane();
 		tab.addTab("Single", singleTab);
+		tab.addTab("Multiple", multipleTab);
 		add(tab, BorderLayout.CENTER);
 		add(createDeployBox(), BorderLayout.SOUTH);
 		setSelected(null);
