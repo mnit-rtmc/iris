@@ -65,7 +65,8 @@ public class SignMessageCreator {
 				new HashMap<String, Object>();
 			attrs.put("multi", multi);
 			attrs.put("bitmaps", bitmaps);
-			attrs.put("duration", duration);
+			if(duration != null)
+				attrs.put("duration", duration);
 			attrs.put("activationPriority", new Integer(
 				DMSMessagePriority.OPERATOR.ordinal()));
 			attrs.put("runTimePriority", new Integer(
