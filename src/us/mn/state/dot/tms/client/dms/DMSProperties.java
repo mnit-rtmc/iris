@@ -130,6 +130,97 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Timing plan table component */
 	protected final ZTable plan_table = new ZTable();
 
+	/** Sign type label */
+	protected final JLabel type = new JLabel();
+
+	/** Sign technology label */
+	protected final JLabel tech = new JLabel();
+
+	/** Sign access label */
+	protected final JLabel access = new JLabel();
+
+	/** Sign legend label */
+	protected final JLabel legend = new JLabel();
+
+	/** Beacon label */
+	protected final JLabel beacon = new JLabel();
+
+	/** Sign face width label */
+	protected final JLabel faceWidth = new JLabel();
+
+	/** Sign face height label */
+	protected final JLabel faceHeight = new JLabel();
+
+	/** Horizontal border label */
+	protected final JLabel hBorder = new JLabel();
+
+	/** Vertical border label */
+	protected final JLabel vBorder = new JLabel();
+
+	/** Horizontal pitch label */
+	protected final JLabel hPitch = new JLabel();
+
+	/** Vertical pitch label */
+	protected final JLabel vPitch = new JLabel();
+
+	/** Sign width (pixels) label */
+	protected final JLabel pWidth = new JLabel();
+
+	/** Sign height (pixels) label */
+	protected final JLabel pHeight = new JLabel();
+
+	/** Character width label */
+	protected final JLabel cWidth = new JLabel();
+
+	/** Character height label */
+	protected final JLabel cHeight = new JLabel();
+
+	/** Cabinet temperature label */
+	protected final JLabel cabinetTemp = new JLabel();
+
+	/** Ambient temperature label */
+	protected final JLabel ambientTemp = new JLabel();
+
+	/** Housing temperature label */
+	protected final JLabel housingTemp = new JLabel();
+
+	/** Operation description label */
+	protected final JLabel operation = new JLabel();
+
+	/** User Note */
+	protected final JLabel userNote = new JLabel();
+
+	/** Bad pixel count label */
+	protected final JLabel badPixels = new JLabel();
+
+	/** Stuck off pixel panel */
+	protected final SignPixelPanel stuck_off_pnl = new SignPixelPanel();
+
+	/** Stuck on pixel panel */
+	protected final SignPixelPanel stuck_on_pnl = new SignPixelPanel();
+
+	/** Lamp status table */
+	protected final ZTable lampTable = new ZTable();
+
+	/** Light output label */
+	protected final JLabel lightOutput = new JLabel();
+
+	/** Brightness feedback combo box */
+	protected final JComboBox feedback = new JComboBox(
+		new SignRequest[] {
+			SignRequest.NO_REQUEST,
+			SignRequest.BRIGHTNESS_GOOD,
+			SignRequest.BRIGHTNESS_TOO_DIM,
+			SignRequest.BRIGHTNESS_TOO_BRIGHT
+		}
+	);
+
+	/** Card layout for manufacturer panels */
+	protected final CardLayout cards = new CardLayout();
+
+	/** Card panel for manufacturer panels */
+	protected final JPanel card_panel = new JPanel(cards);
+
 	/** Make label */
 	protected final JLabel make = new JLabel();
 
@@ -138,51 +229,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Version label */
 	protected final JLabel version = new JLabel();
-
-	/** Sign access label */
-	protected final JLabel access = new JLabel();
-
-	/** Sign type label */
-	protected final JLabel type = new JLabel();
-
-	/** Sign face height label */
-	protected final JLabel faceHeight = new JLabel();
-
-	/** Sign face width label */
-	protected final JLabel faceWidth = new JLabel();
-
-	/** Horizontal border label */
-	protected final JLabel hBorder = new JLabel();
-
-	/** Vertical border label */
-	protected final JLabel vBorder = new JLabel();
-
-	/** Sign legend label */
-	protected final JLabel legend = new JLabel();
-
-	/** Beacon label */
-	protected final JLabel beacon = new JLabel();
-
-	/** Sign technology label */
-	protected final JLabel tech = new JLabel();
-
-	/** Character height label */
-	protected final JLabel cHeight = new JLabel();
-
-	/** Character width label */
-	protected final JLabel cWidth = new JLabel();
-
-	/** Sign height (pixels) label */
-	protected final JLabel pHeight = new JLabel();
-
-	/** Sign width (pixels) label */
-	protected final JLabel pWidth = new JLabel();
-
-	/** Horizontal pitch label */
-	protected final JLabel hPitch = new JLabel();
-
-	/** Vertical pitch label */
-	protected final JLabel vPitch = new JLabel();
 
 	/** Spinner to adjuct LDC pot base */
 	protected final JSpinner ldcPotBaseSpn = new JSpinner(
@@ -202,51 +248,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Heat tape status label */
 	protected final JLabel heatTapeStatus = new JLabel();
 
-	/** Stuck off pixel panel */
-	protected final SignPixelPanel stuck_off_pnl = new SignPixelPanel();
-
-	/** Stuck on pixel panel */
-	protected final SignPixelPanel stuck_on_pnl = new SignPixelPanel();
-
-	/** Bad pixel count label */
-	protected final JLabel badPixels = new JLabel();
-
-	/** Lamp status table */
-	protected final ZTable lampTable = new ZTable();
-
-	/** Light output label */
-	protected final JLabel lightOutput = new JLabel();
-
-	/** Brightness feedback combo box */
-	protected final JComboBox feedback = new JComboBox(
-		new SignRequest[] {
-			SignRequest.NO_REQUEST,
-			SignRequest.BRIGHTNESS_GOOD,
-			SignRequest.BRIGHTNESS_TOO_DIM,
-			SignRequest.BRIGHTNESS_TOO_BRIGHT
-		}
-	);
-
-	/** Cabinet temperature label */
-	protected final JLabel cabinetTemp = new JLabel();
-
-	/** Ambient temperature label */
-	protected final JLabel ambientTemp = new JLabel();
-
-	/** Housing temperature label */
-	protected final JLabel housingTemp = new JLabel();
-
-	/** Operation description label */
-	protected final JLabel operation = new JLabel();
-
-	/** User Note */
-	protected final JLabel userNote = new JLabel();
-
-	/** Card layout for manufacturer panels */
-	protected final CardLayout cards = new CardLayout();
-
-	/** Card panel for manufacturer panels */
-	protected final JPanel card_panel = new JPanel(cards);
 
 	/** Sonar state */
 	protected final SonarState state;
@@ -358,43 +359,37 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create the configuration panel */
 	protected JPanel createConfigurationPanel() {
-		make.setForeground(OK);
-		model.setForeground(OK);
-		version.setForeground(OK);
-		access.setForeground(OK);
 		type.setForeground(OK);
-		faceHeight.setForeground(OK);
-		pHeight.setForeground(OK);
-		faceWidth.setForeground(OK);
-		pWidth.setForeground(OK);
-		hBorder.setForeground(OK);
-		vBorder.setForeground(OK);
+		tech.setForeground(OK);
+		access.setForeground(OK);
 		legend.setForeground(OK);
 		beacon.setForeground(OK);
-		tech.setForeground(OK);
-		cHeight.setForeground(OK);
-		cWidth.setForeground(OK);
+		faceWidth.setForeground(OK);
+		faceHeight.setForeground(OK);
+		hBorder.setForeground(OK);
+		vBorder.setForeground(OK);
 		hPitch.setForeground(OK);
 		vPitch.setForeground(OK);
+		pWidth.setForeground(OK);
+		pHeight.setForeground(OK);
+		cWidth.setForeground(OK);
+		cHeight.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
-		panel.addRow("Make", make);
-		panel.addRow("Model", model);
-		panel.addRow("Version", version);
-		panel.addRow("Access", access);
 		panel.addRow("Type", type);
-		panel.addRow("Face height", faceHeight);
-		panel.addRow("Sign height", pHeight);
-		panel.addRow("Face width", faceWidth);
-		panel.addRow("Sign width", pWidth);
-		panel.addRow("Horizontal border", hBorder);
-		panel.addRow("Vertical border", vBorder);
+		panel.addRow("Technology", tech);
+		panel.addRow("Access", access);
 		panel.addRow("Legend", legend);
 		panel.addRow("Beacon", beacon);
-		panel.addRow("Technology", tech);
-		panel.addRow("Character height", cHeight);
-		panel.addRow("Character width", cWidth);
+		panel.addRow("Face width", faceWidth);
+		panel.addRow("Face height", faceHeight);
+		panel.addRow("Horizontal border", hBorder);
+		panel.addRow("Vertical border", vBorder);
 		panel.addRow("Horizontal pitch", hPitch);
 		panel.addRow("Vertical pitch", vPitch);
+		panel.addRow("Sign width", pWidth);
+		panel.addRow("Sign height", pHeight);
+		panel.addRow("Character width", cWidth);
+		panel.addRow("Character height", cHeight);
 		return panel;
 	}
 
@@ -488,10 +483,18 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create manufacturer-specific panel */
 	protected JPanel createManufacturerPanel() {
+		make.setForeground(OK);
+		model.setForeground(OK);
+		version.setForeground(OK);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Make", make);
+		panel.addRow("Model", model);
+		panel.addRow("Version", version);
+		panel.addRow(card_panel);
 		card_panel.add(createGenericPanel(), MAKE_GENERIC);
 		card_panel.add(createLedstarPanel(), MAKE_LEDSTAR);
 		card_panel.add(createSkylinePanel(), MAKE_SKYLINE);
-		return card_panel;
+		return panel;
 	}
 
 	/** Create generic manufacturer panel */

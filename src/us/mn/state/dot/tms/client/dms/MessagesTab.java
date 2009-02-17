@@ -123,9 +123,11 @@ public class MessagesTab extends JPanel {
 		bag.insets.right = 5;
 		bag.insets.bottom = 5;
 		bag.fill = GridBagConstraints.BOTH;
-		JScrollPane scroll = new JScrollPane(group_table);
 		bag.gridx = 0;
 		bag.gridy = 0;
+		bag.weightx = 1;
+		bag.weighty = 1;
+		JScrollPane scroll = new JScrollPane(group_table);
 		add(scroll, bag);
 		scroll = new JScrollPane(sign_text_table);
 		bag.gridx = 1;
@@ -134,6 +136,8 @@ public class MessagesTab extends JPanel {
 		bag.fill = GridBagConstraints.NONE;
 		bag.gridx = 0;
 		bag.gridy = 1;
+		bag.weightx = 0;
+		bag.weighty = 0;
 		delete_group.setEnabled(false);
 		add(delete_group, bag);
 		bag.gridx = 1;
@@ -143,11 +147,15 @@ public class MessagesTab extends JPanel {
 		bag.gridy = 2;
 		bag.gridwidth = 2;
 		bag.fill = GridBagConstraints.BOTH;
+		bag.weightx = 0.1f;
+		bag.weighty = 0.1f;
 		add(createPreviewPanel(), bag);
 		if(SystemAttributeHelper.isAwsEnabled()) {
 			bag.gridy = 3;
 			bag.gridwidth = 1;
 			bag.fill = GridBagConstraints.NONE;
+			bag.weightx = 0;
+			bag.weighty = 0;
 			add(awsAllowed, bag);
 			bag.gridx = 1;
 			add(awsControlled, bag);
