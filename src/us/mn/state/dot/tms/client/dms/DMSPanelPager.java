@@ -98,7 +98,7 @@ public class DMSPanelPager {
 
 	/** Get bitmaps to display on the panel */
 	protected BitmapGraphic[] getBitmaps(BitmapGraphic[] b) {
-		if(b != null)
+		if(b != null && b.length > 0)
 			return b;
 		else {
 			return new BitmapGraphic[] {
