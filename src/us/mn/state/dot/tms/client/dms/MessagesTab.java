@@ -78,11 +78,11 @@ public class MessagesTab extends JPanel {
 
 	/** AWS allowed component */
 	protected final JCheckBox awsAllowed = new JCheckBox(
-		I18NMessages.get("dms.aws_allowed"));
+		I18NMessages.get("dms.aws") + " allowed");
 
 	/** AWS controlled component */
 	protected final JCheckBox awsControlled = new JCheckBox(
-		I18NMessages.get("dms.aws_controlled"));
+		I18NMessages.get("dms.aws") + " controlled");
 
 	/** Sonar state */
 	protected final SonarState state;

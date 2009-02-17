@@ -70,6 +70,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
 
+	/** Selection tab pane */
+	protected final JTabbedPane tabPane = new JTabbedPane();
+
 	/** Single sign tab */
 	protected final SingleSignTab singleTab = new SingleSignTab();
 
@@ -106,8 +109,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		"dms.query_status"));
 
 	/** AWS controlled checkbox (optional) */
-	protected final JCheckBox awsControlledCbx = new JCheckBox(
-		I18NMessages.get("dms.aws_controlled"));
+	protected final JCheckBox awsControlledCbx =
+		new JCheckBox("Controlled");
+
+	/** AMBER Alert checkbox */
+	protected final JCheckBox alertCbx = new JCheckBox("(AMBER)");
 
 	/** Currently logged in user */
 	protected final User user;
@@ -136,10 +142,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		currentPnl = singleTab.getCurrentPanel();
 		multipleTab = new MultipleSignTab(st.getSignGroups(),
 			st.getDmsSignGroups(), selectionModel);
-		JTabbedPane tab = new JTabbedPane();
-		tab.addTab("Single", singleTab);
-		tab.addTab("Multiple", multipleTab);
-		add(tab, BorderLayout.CENTER);
+		tabPane.addTab("Single", singleTab);
+		tabPane.addTab("Multiple", multipleTab);
+		add(tabPane, BorderLayout.CENTER);
 		add(createDeployBox(), BorderLayout.SOUTH);
 		setSelected(null);
 		cache.addProxyListener(this);
@@ -163,8 +168,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			panel.addRow("Duration", durationCmb);
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
 			panel.addRow("Font", fontCmb);
-		if(SystemAttributeHelper.isAwsEnabled())
-			panel.addRow(awsControlledCbx);
+		if(SystemAttributeHelper.isAwsEnabled()) {
+			panel.addRow(I18NMessages.get("dms.aws"),
+				awsControlledCbx);
+		}
+		panel.addRow("Alert", alertCbx);
 		panel.setCenter();
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
@@ -267,11 +275,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(DMS s) {
 		setSelected(getSingleSelection());
+		setSelectedTab();
 	}
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(DMS s) {
 		setSelected(getSingleSelection());
+		setSelectedTab();
 	}
 
 	/** Set a single selected DMS */
@@ -289,6 +299,30 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			disableWidgets();
 			singleTab.updateAttribute(dms, null);
 		}
+	}
+
+	/** Set the "single" or "multiple" selected tab */
+	protected void setSelectedTab() {
+		if(selectionModel.getSelectedCount() < 2)
+			selectSingleTab();
+		else
+			selectMultipleTab();
+	}
+
+	/** Select the single selection tab */
+	protected void selectSingleTab() {
+		alertCbx.setEnabled(false);
+		if(tabPane.getSelectedComponent() != singleTab) {
+			alertCbx.setSelected(false);
+			tabPane.setSelectedComponent(singleTab);
+		}
+	}
+
+	/** Select the multiple selection tab */
+	protected void selectMultipleTab() {
+		alertCbx.setEnabled(true);
+		if(tabPane.getSelectedComponent() != multipleTab)
+			tabPane.setSelectedComponent(multipleTab);
 	}
 
 	/** Disable the dispatcher widgets */

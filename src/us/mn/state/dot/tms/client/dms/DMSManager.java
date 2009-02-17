@@ -58,7 +58,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	static public final String STYLE_TRAVEL_TIME = "Travel Time";
 
 	/** Name of automated warning system deployed style */
-	static public final String STYLE_AWS_DEPLOYED = "AWS Deployed";
+	static public final String STYLE_AWS_DEPLOYED =
+		I18NMessages.get("dms.aws") + " Deployed";
 
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "Deployed";
@@ -67,7 +68,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	static public final String STYLE_MAINTENANCE = "Maintenance";
 
 	/** Name of automated warning system controlled style */
-	static public final String STYLE_AWS_CONTROLLED = "AWS Controlled";
+	static public final String STYLE_AWS_CONTROLLED =
+		I18NMessages.get("dms.aws") + " Controlled";
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
