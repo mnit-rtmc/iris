@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
 import java.io.IOException;
@@ -448,7 +449,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		badPixels.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Pixel errors", badPixels);
+		panel.setFill();
 		panel.addRow(createTitledPanel("Stuck Off", stuck_off_pnl));
+		panel.setFill();
 		panel.addRow(createTitledPanel("Stuck On", stuck_on_pnl));
 		panel.setCenter();
 		panel.add(btn);
@@ -457,9 +460,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create a panel with a titled border */
 	protected JPanel createTitledPanel(String title, JPanel p) {
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(title));
-		panel.add(p);
+		panel.add(p, BorderLayout.CENTER);
 		return panel;
 	}
 

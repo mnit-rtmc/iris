@@ -90,6 +90,15 @@ public class FormPanel extends JPanel {
 		bag.gridwidth = GridBagConstraints.REMAINDER;
 	}
 
+	/** Set the fill mode */
+	public void setFill() {
+		bag.anchor = GridBagConstraints.CENTER;
+		bag.fill = GridBagConstraints.BOTH;
+		bag.gridwidth = GridBagConstraints.REMAINDER;
+		bag.weightx = 1;
+		bag.weighty = 1;
+	}
+
 	/** Set the anchor state to EAST */
 	public void setEast() {
 		bag.anchor = GridBagConstraints.EAST;
