@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
@@ -165,10 +166,10 @@ public class MessagesTab extends JPanel {
 
 	/** Create a message preview panel */
 	protected JPanel createPreviewPanel() {
-		JPanel panel = new JPanel();
+		JPanel panel = new JPanel(new BorderLayout());
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"Message Preview"));
-		panel.add(pixel_panel);
+		panel.add(pixel_panel, BorderLayout.CENTER);
 		return panel;
 	}
 
