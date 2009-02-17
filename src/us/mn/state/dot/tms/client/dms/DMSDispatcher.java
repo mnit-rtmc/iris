@@ -74,7 +74,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final SingleSignTab singleTab = new SingleSignTab();
 
 	/** Multiple sign tab */
-	protected final MultipleSignTab multipleTab = new MultipleSignTab();
+	protected final MultipleSignTab multipleTab;
 
 	/** Panel used for drawing a DMS */
 	protected final SignPixelPanel currentPnl;
@@ -134,6 +134,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer = new SignMessageComposer(st.getDmsSignGroups(),
 			st.getSignText(), user);
 		currentPnl = singleTab.getCurrentPanel();
+		multipleTab = new MultipleSignTab(st.getSignGroups(),
+			st.getDmsSignGroups(), selectionModel);
 		JTabbedPane tab = new JTabbedPane();
 		tab.addTab("Single", singleTab);
 		tab.addTab("Multiple", multipleTab);
@@ -209,6 +211,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
+		multipleTab.dispose();
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		setSelected(null);
