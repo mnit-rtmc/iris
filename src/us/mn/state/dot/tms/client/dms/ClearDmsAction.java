@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.Action;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.sonar.ProxyAction;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -27,26 +27,22 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  */
 public class ClearDmsAction extends ProxyAction<DMS> {
 
-	/** Name of logged-in user */
-	protected final String userName;
+	/** DMS dispatcher */
+	protected final DMSDispatcher dispatcher;
 
 	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(DMS p, String user) {
+	public ClearDmsAction(DMS p, DMSDispatcher d) {
 		super(p);
+		dispatcher = d;
 		putValue(Action.NAME, I18NMessages.get("dms.clear"));
 		putValue(Action.SHORT_DESCRIPTION,
 			I18NMessages.get("dms.clear.tooltip"));
-		userName = user;
-	}
-
-	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(DMS p, TmsConnection c) {
-		this(p, c.getUser().getName());
 	}
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		// FIXME: create new blank SignMessageImpl using SONAR
-		proxy.setMessageNext(null);
+		SignMessage m = dispatcher.createBlankMessage();
+		if(m != null)
+			proxy.setMessageNext(m);
 	}
 }

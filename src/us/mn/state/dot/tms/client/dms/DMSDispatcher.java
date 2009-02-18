@@ -292,8 +292,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		} else if(DMSManager.isActive(dms)) {
 			builder = createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
-			clearBtn.setAction(new ClearDmsAction(dms,
-				user.getName()));
+			clearBtn.setAction(new ClearDmsAction(dms, this));
 			enableWidgets();
 		} else {
 			disableWidgets();
@@ -418,6 +417,16 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			}
 		}
 		return null;
+	}
+
+	/** Create a new blank message */
+	protected SignMessage createBlankMessage() {
+		String multi = "";
+		String[] bitmaps = createBitmaps(multi);
+		if(bitmaps != null)
+			return creator.create(multi, bitmaps, 0);
+		else
+			return null;
 	}
 
 	/** Get the selected font number */
