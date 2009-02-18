@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2005  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
@@ -49,43 +45,57 @@ public class DmsActivateMessage extends SignControl implements ASN1OctetString {
 	}
 
 	/** Get the object name */
-	protected String getName() { return "dmsActivateMessage"; }
+	protected String getName() {
+		return "dmsActivateMessage";
+	}
 
 	/** Message duration */
 	protected int duration;
 
 	/** Get the message duration */
-	public int getDuration() { return duration; }
+	public int getDuration() {
+		return duration;
+	}
 
 	/** Activation priority */
 	protected int priority;
 
 	/** Get the activation priority */
-	public int getPriority() { return priority; }
+	public int getPriority() {
+		return priority;
+	}
 
 	/** Memory type */
 	protected int memory;
 
 	/** Get the memory type */
-	public int getMemory() { return memory; }
+	public int getMemory() {
+		return memory;
+	}
 
 	/** Message number */
 	protected int number;
 
 	/** Get the message number */
-	public int getNumber() { return number; }
+	public int getNumber() {
+		return number;
+	}
 
 	/** Cyclic redundancy check */
 	protected int crc;
 
 	/** Get the CRC */
-	public int getCrc() { return crc; }
+	public int getCrc() {
+		return crc;
+	}
 
 	/** Source address */
 	protected int address;
 
 	/** Get the source address */
-	public int getAddress() { return address; }
+	public int getAddress() {
+		return address;
+	}
 
 	/** Get the object value */
 	public String getValue() {
