@@ -132,7 +132,7 @@ public class OpResetModem extends OpDms
 			} else {
 				System.err.println(
 				    "OpResetModem: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
-				setDmsStatus(errmsg);
+				errorStatus = errmsg;
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {

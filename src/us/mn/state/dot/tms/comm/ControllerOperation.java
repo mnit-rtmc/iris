@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An operation which is performed on a field controller.
@@ -37,6 +38,9 @@ abstract public class ControllerOperation extends Operation {
 
 	/** Device ID */
 	protected final String id;
+
+	/** Error status message */
+	protected String errorStatus = "";
 
 	/** Create a new controller operation */
 	protected ControllerOperation(int p, ControllerImpl c, String i) {
@@ -68,12 +72,20 @@ abstract public class ControllerOperation extends Operation {
 		controller.logException(id, s);
 		if(controller.retry(id))
 			return;
-		else
+		else {
+			if(s != null && s.length() > 0)
+				errorStatus = s;
+			else
+				errorStatus = e.getClass().getSimpleName();
 			super.handleException(e);
+		}
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
+		final int MAXLEN = 64;
+		String s = SString.truncate(errorStatus, MAXLEN);
+		controller.setError(s);
 		controller.completeOperation(id, success);
 	}
 }

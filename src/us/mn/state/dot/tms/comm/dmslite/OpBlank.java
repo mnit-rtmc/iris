@@ -159,7 +159,7 @@ public class OpBlank extends OpDms
 				System.err.println(
 				    "OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="
 				    + errmsg);
-				setDmsStatus(errmsg);
+				errorStatus = errmsg;
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {

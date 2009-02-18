@@ -131,7 +131,8 @@ public class DMSQueryStatus extends DMSOperation {
 				new PixelFailureTableNumRows();
 			mess.add(rows);
 			mess.getRequest();
-			controller.setError(shortError.toString());
+			if(shortError.getInteger() != 0)
+				errorStatus = shortError.getValue();
 //			DMS_LOG.log(dms.getName() + ": " + door);
 			DMS_LOG.log(dms.getName() + ": " + rows);
 			return new MoreFailures();

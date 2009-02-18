@@ -31,7 +31,6 @@ public class DMSDefaultDownload extends DMSOperation {
 	/** Create a new DMS default download object */
 	public DMSDefaultDownload(DMSImpl d) {
 		super(DOWNLOAD, d);
-		controller.setError("OK");
 	}
 
 	/** Create the first real phase of the operation */
@@ -186,12 +185,5 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.setRequest("administrator");
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(!success)
-			controller.setError(null);
-		super.cleanup();
 	}
 }

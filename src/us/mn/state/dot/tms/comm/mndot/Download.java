@@ -80,7 +80,6 @@ public class Download extends Controller170Operation implements TimingTable {
 	public Download(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c);
 		restart = r;
-		controller.setError("OK");
 	}
 
 	/** Handle an exception */
@@ -138,7 +137,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	protected void checkCabinetStyle(int dips) {
 		Integer d = lookupDips();
 		if(d != null && d != dips)
-			controller.setError("CABINET STYLE " + dips);
+			errorStatus = "CABINET STYLE " + dips;
 	}
 
 	/** Lookup the correct dip switch setting to the controller */
@@ -329,13 +328,6 @@ public class Download extends Controller170Operation implements TimingTable {
 			mess.setRequest();
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(!success)
-			controller.setError(null);
-		super.cleanup();
 	}
 
 	/** Send both AM and PM timing tables to the specified ramp meter */

@@ -375,7 +375,7 @@ public class OpQueryMsg extends OpDms {
 			} else {
 				System.err.println(
 				    "OpQueryMsg: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
-				setDmsStatus(errmsg);
+				errorStatus = errmsg;
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {

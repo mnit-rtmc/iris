@@ -124,7 +124,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		Controller ctr = proxy.getController();
 		if(ctr != null && ctr.getStatus().equals("")) {
 			String e = ctr.getError();
-			return !e.equals("") && !e.equals("OK");
+			return !e.equals("");
 		} else
 			return false;
 	}

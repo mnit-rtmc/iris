@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
 import java.util.Random;
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.SignMessage;
@@ -160,13 +159,5 @@ abstract public class OpDms extends Device2Operation {
 		note.append(" (").append(delta).append(" secs)");
 		note.append(".");
 		return note.toString();
-	}
-
-	/** Set DMS status */
-	protected void setDmsStatus(String s) {
-		final int MAXLEN = 64;
-		s = SString.truncate(s, MAXLEN);
-		ControllerImpl c = (ControllerImpl)m_dms.getController();
-		c.setError(s);
 	}
 }

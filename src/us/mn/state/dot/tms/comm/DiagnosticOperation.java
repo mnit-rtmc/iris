@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2008  Minnesota Department of Transportation
+ * Copyright (C) 2003-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ abstract public class DiagnosticOperation extends ControllerOperation {
 
 	/** Handle an exception */
 	public void handleException(IOException e) {
-		status = e.getMessage();
+		errorStatus = e.getMessage();
 		controller.incrementCounter(ErrorCounter.TYPE_FAIL);
 	}
 

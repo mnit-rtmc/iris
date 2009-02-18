@@ -256,7 +256,7 @@ public class OpMessage extends OpDms {
 					System.err.println(
 					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
-					setDmsStatus(errmsg);
+					errorStatus = errmsg;
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
@@ -421,7 +421,7 @@ public class OpMessage extends OpDms {
 					System.err.println(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
 					    errmsg+",id="+id);
-					setDmsStatus(errmsg);
+					errorStatus = errmsg;
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
