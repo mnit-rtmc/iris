@@ -52,6 +52,11 @@ public class DMSCommandMessage extends DMSOperation {
 			return null;
 	}
 
+	/** Get the message duration */
+	protected int getDuration() {
+		return getDuration(message.getDuration());
+	}
+
 	/** Phase to set the status to modify request */
 	protected class ModifyRequest extends Phase {
 
@@ -163,7 +168,7 @@ public class DMSCommandMessage extends DMSOperation {
 
 		/** Activate the message */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsActivateMessage(message.getDuration(),
+			mess.add(new DmsActivateMessage(getDuration(),
 				MAX_MESSAGE_PRIORITY,
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				messageCRC, 0));
@@ -220,8 +225,7 @@ public class DMSCommandMessage extends DMSOperation {
 
 		/** Set the message time remaining */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsMessageTimeRemaining(
-				message.getDuration()));
+			mess.add(new DmsMessageTimeRemaining(getDuration()));
 			mess.setRequest();
 			return null;
 		}

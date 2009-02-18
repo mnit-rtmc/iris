@@ -41,14 +41,18 @@ public class DMSSetTimeRemaining extends DMSOperation {
 		return new SetTimeRemaining();
 	}
 
+	/** Get the message duration */
+	protected int getDuration() {
+		return getDuration(message.getDuration());
+	}
+
 	/** Phase to set message time remaining */
 	protected class SetTimeRemaining extends Phase {
 
 		/** Set the message time remaining */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageTimeRemaining remaining =
-				new DmsMessageTimeRemaining(
-				message.getDuration());
+				new DmsMessageTimeRemaining(getDuration());
 			mess.add(remaining);
 			mess.setRequest();
 			message.setDeployTime(System.currentTimeMillis());

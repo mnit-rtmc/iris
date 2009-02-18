@@ -30,6 +30,19 @@ abstract public class DMSOperation extends Device2Operation {
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
 
+	/** Special duration value for indefinite duration */
+	static protected final int DURATION_INDEFINITE = 65535;
+
+	/** Filter message duration (valid for NTCIP) */
+	static protected int getDuration(Integer d) {
+		if(d == null || d >= DURATION_INDEFINITE)
+			return DURATION_INDEFINITE;
+		else if(d < 0)
+			return 0;
+		else
+			return d;
+	}
+
 	/** DMS to operate */
 	protected final DMSImpl dms;
 
