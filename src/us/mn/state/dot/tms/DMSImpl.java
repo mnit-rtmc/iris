@@ -785,9 +785,9 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Set the next sign message */
-	public void doSetMessageNext(SignMessage m) throws TMSException {
-		// FIXME: needs to be synchronized, since this can be called
-		// by server and clients
+	public synchronized void doSetMessageNext(SignMessage m)
+		throws TMSException
+	{
 		final DMSPoller p = getDMSPoller();
 		if(p == null)
 			throw new ChangeVetoException("No active poller");
