@@ -16,14 +16,9 @@ package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.BaseObjectImpl;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.FontImpl;
-import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -61,40 +56,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		return drop > 0 && drop <= HDLC.NTCIP_MAX_ADDRESS;
 	}
 
-	/** Simple class to download fonts to a sign */
-	protected class FontDownloader implements Checker<Font> {
-		// On ADDCO signs, font index 1 is not writable ...
-		static protected final int FIRST_INDEX = 2;
-		protected final DMSImpl dms;
-		protected final int priority;
-		protected int index = FIRST_INDEX;
-		protected FontDownloader(DMSImpl d, int p) {
-			dms = d;
-			priority = p;
-		}
-		public boolean check(Font font) {
-			DMSFontDownload f = new DMSFontDownload(dms,
-				(FontImpl)font, index, index == FIRST_INDEX);
-			f.setPriority(priority);
-			f.start();
-			index++;
-			return false;
-		}
-	}
-
-	/** Download the font to a sign controller */
-	protected void downloadFonts(DMSImpl dms, int p) {
-		Integer w = dms.getWidthPixels();
-		Integer h = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(w != null && h != null && cw != null && ch != null) {
-			PixelMapBuilder builder = new PixelMapBuilder(
-				BaseObjectImpl.namespace, w, h, cw, ch);
-			builder.findFonts(new FontDownloader(dms, p));
-		}
-	}
-
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
 		DMSImpl dms = c.getActiveSign();
@@ -104,8 +65,9 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 				r.setPriority(p);
 				r.start();
 			}
-			if(dms.hasProportionalFonts())
-				downloadFonts(dms, p);
+			DMSFontDownload d = new DMSFontDownload(dms);
+			d.setPriority(p);
+			d.start();
 			DMSDefaultDownload o = new DMSDefaultDownload(dms);
 			o.setPriority(p);
 			o.start();

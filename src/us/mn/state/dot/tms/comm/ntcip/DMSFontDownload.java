@@ -17,51 +17,99 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.SortedMap;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.BaseObjectImpl;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontImpl;
 import us.mn.state.dot.tms.GlyphImpl;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
- * Operation to send a font to a DMS controller
+ * Operation to send a set of fonts to a DMS controller.
  *
  * @author Douglas Lau
  */
 public class DMSFontDownload extends DMSOperation {
 
-	/** Font to download to the sign */
-	protected final FontImpl font;
+	/** Default font index */
+	static protected final int DEFAULT_FONT = 1;
 
-	/** Should this be the default font */
-	protected final boolean _default;
+	/** Number of fonts supported */
+	protected final NumFonts num_fonts = new NumFonts();
 
-	/** Font index.
+	/** List of fonts to be sent to the sign */
+	protected final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
+
+	/** Font index (starts at 1, not 0).
 	 * On some signs (ADDCO), font index 1 is read-only (apparently). */
-	protected final int index;
-
-	/** Glyph mapping */
-	protected final SortedMap<Integer, GlyphImpl> glyphs;
+	protected int index = DEFAULT_FONT;
 
 	/** Create a new DMS font download operation */
-	public DMSFontDownload(DMSImpl d, FontImpl f, int i, boolean df) {
+	public DMSFontDownload(DMSImpl d) {
 		super(DOWNLOAD, d);
-		font = f;
-		index = i;
-		_default = df;
-		glyphs = f.getGlyphs();
+		Integer w = dms.getWidthPixels();
+		Integer h = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(w != null && h != null && cw != null && ch != null) {
+			PixelMapBuilder builder = new PixelMapBuilder(
+				BaseObjectImpl.namespace, w, h, cw, ch);
+			builder.findFonts(new Checker<Font>() {
+				public boolean check(Font font) {
+					fonts.add((FontImpl)font);
+					return false;
+				}
+			});
+		}
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		return new QueryNumFonts();
+	}
+
+	/** Phase to query the number of supported fonts */
+	protected class QueryNumFonts extends Phase {
+
+		/** Query the number of supported fonts */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(num_fonts);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + num_fonts);
+			return currentFontPhase();
+		}
+	}
+
+	/** Get the current font */
+	protected FontImpl currentFont() {
+		return fonts.get(index - 1);
+	}
+
+	/** Get the first phase of the current font */
+	protected Phase currentFontPhase() {
+		if(index < 1 || index > fonts.size())
+			return null;
+		if(index > num_fonts.getInteger()) {
+			DMS_LOG.log(dms.getName() + ": Too many fonts");
+			for(int i = index - 1; i < fonts.size(); i++) {
+				DMS_LOG.log(dms.getName() + ": Skipping font " +
+					fonts.get(i).getName());
+			}
+			return null;
+		}
 		return new CheckVersionID();
 	}
 
-	/** Check if the font version ID matches */
-	protected boolean fontMatches(int v) {
-		return v == font.getVersionID();
+	/** Move to the first phase of the next font */
+	protected Phase nextFontPhase() {
+		index++;
+		return currentFontPhase();
 	}
 
 	/** Check version ID */
@@ -69,20 +117,28 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Check the font version ID */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontImpl font = currentFont();
+			DMS_LOG.log(dms.getName() + " Font #" + index +
+				", name: " + font.getName() + ", number: " +
+				 font.getNumber());
 			FontVersionID version = new FontVersionID(index);
 			mess.add(version);
 			try {
 				mess.getRequest();
 			}
+			// Note: some vendors respond with NoSuchName if the
+			//       font is not valid
 			catch(SNMP.Message.NoSuchName e) {
 				return new CreateFont();
 			}
 			int v = version.getInteger();
 			DMS_LOG.log(dms.getName() + " Font #" + index +
 				" versionID:" + v);
-			if(fontMatches(v))
-				return null;
-			else
+			if(v == font.getVersionID()) {
+				DMS_LOG.log(dms.getName() + " Font #" + index +
+					" is valid");
+				return nextFontPhase();
+			} else
 				return new InvalidateFont();
 		}
 	}
@@ -103,6 +159,7 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Create a new font in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontImpl font = currentFont();
 			mess.add(new FontNumber(index, font.getNumber()));
 			mess.add(new FontName(index, font.getName()));
 			mess.add(new FontHeight(index, font.getHeight()));
@@ -111,10 +168,12 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(new FontLineSpacing(index,
 				font.getLineSpacing()));
 			mess.setRequest();
-			if(!glyphs.isEmpty())
-				return new AddCharacter(glyphs.values());
-			else
+
+			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
+			if(glyphs.isEmpty())
 				return new ValidateFont();
+			else
+				return new AddCharacter(glyphs.values());
 		}
 	}
 
@@ -163,12 +222,13 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontImpl font = currentFont();
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.setRequest();
-			if(_default)
+			if(index == DEFAULT_FONT)
 				return new SetDefaultFont();
 			else
-				return null;
+				return nextFontPhase();
 		}
 	}
 
@@ -177,9 +237,11 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Set the default font numbmer */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DefaultFont(index));
+			DefaultFont dfont = new DefaultFont(index);
+			DMS_LOG.log(dms.getName() + ": " + dfont);
+			mess.add(dfont);
 			mess.setRequest();
-			return null;
+			return nextFontPhase();
 		}
 	}
 }
