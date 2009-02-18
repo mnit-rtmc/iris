@@ -29,6 +29,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -163,12 +164,16 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Prune the owner string to the first dot */
-	static protected String formatOwner(String o) {
-		int i = o.indexOf('.');
-		if(i > -1)
-			return o.substring(0, i);
-		else
-			return o;
+	static protected String formatOwner(User owner) {
+		if(owner != null) {
+			String o = owner.getName();
+			int i = o.indexOf('.');
+			if(i >= 0)
+				return o.substring(0, i);
+			else
+				return o;
+		} else
+			return "";
 	}
 
 	/** Format the message deployed time */
@@ -199,8 +204,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		//       DMS proxy has been destroyed.
 		SignMessage message = proxy.getMessageCurrent();
 		if(isDeployed(message)) {
-			lblUser.setText(formatOwner(
-				message.getOwner().getName()));
+			lblUser.setText(formatOwner(message.getOwner()));
 			lblDeployed.setText(formatDeployed(message));
 			lblExpires.setText(formatExpiration(message));
 		} else {
