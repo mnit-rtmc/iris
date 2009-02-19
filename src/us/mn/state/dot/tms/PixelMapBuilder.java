@@ -96,10 +96,24 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 			return false;
 		if(f.getHeight() > height)
 			return false;
-		if(c_width > 0 && c_width != f.getWidth())
-			return false;
-		if(c_height > 0 && c_height != f.getHeight())
-			return false;
+		if(c_width > 0) {
+			// char-matrix signs must match font width
+			if(c_width != f.getWidth())
+				return false;
+		} else {
+			// line- or full-matrix signs must have char spacing
+			if(f.getCharSpacing() == 0)
+				return false;
+		}
+		if(c_height > 0) {
+			// char- or line-matrix signs must match font height
+			if(c_height != f.getHeight())
+				return false;
+		} else {
+			// full-matrix signs must have line spacing
+			if(f.getLineSpacing() == 0)
+				return false;
+		}
 		return true;
 	}
 
