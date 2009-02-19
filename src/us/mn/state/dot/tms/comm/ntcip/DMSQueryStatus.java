@@ -125,12 +125,9 @@ public class DMSQueryStatus extends DMSOperation {
 		/** Query the DMS failure status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(shortError);
-//			DmsStatDoorOpen door = new DmsStatDoorOpen();
-//			mess.add(door);
 			mess.getRequest();
 			if(shortError.getInteger() != 0)
 				errorStatus = shortError.getValue();
-//			DMS_LOG.log(dms.getName() + ": " + door);
 			return new MoreFailures();
 		}
 	}
