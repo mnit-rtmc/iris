@@ -75,7 +75,7 @@ abstract public class DiagnosticOperation extends ControllerOperation {
 
 	/** Handle an exception */
 	public void handleException(IOException e) {
-		errorStatus = e.getMessage();
+		// FIXME: exception detail should be recorded somewhere ...
 		controller.incrementCounter(ErrorCounter.TYPE_FAIL);
 	}
 
