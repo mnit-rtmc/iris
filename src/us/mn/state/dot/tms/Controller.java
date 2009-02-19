@@ -65,6 +65,9 @@ public interface Controller extends SonarObject {
 	/** Get the controller communication status */
 	String getStatus();
 
+	/** Set the controller error status */
+	void setError(String e);
+
 	/** Get the controller error status */
 	String getError();
 

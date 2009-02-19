@@ -105,6 +105,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Firmware version */
 	protected final JLabel version = new JLabel();
 
+	/** Clear error status button */
+	protected final JButton clearErrorBtn = new JButton("Clear Error");
+
 	/** Download button */
 	protected final JButton download =
 		new JButton(I18NMessages.get("ControllerForm.DownloadButton"));
@@ -296,23 +299,30 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the status panel */
 	protected JPanel createStatusPanel() {
-		FormPanel panel = new FormPanel(admin);
-		panel.addRow("Status:", status);
-		panel.addRow("Error Detail:", error);
-		panel.addRow("Version:", version);
-		panel.add(download);
 		new ActionJob(this, download) {
 			public void perform() {
 				proxy.setDownload(false);
 			}
 		};
-		panel.setCenter();
-		panel.add(reset);
 		new ActionJob(this, reset) {
 			public void perform() {
 				proxy.setDownload(true);
 			}
 		};
+		new ActionJob(this, clearErrorBtn) {
+			public void perform() {
+				proxy.setError("");
+			}
+		};
+		JPanel buttonPnl = new JPanel();
+		buttonPnl.add(clearErrorBtn);
+		buttonPnl.add(download);
+		buttonPnl.add(reset);
+		FormPanel panel = new FormPanel(admin);
+		panel.addRow("Status:", status);
+		panel.addRow("Error Detail:", error);
+		panel.addRow("Version:", version);
+		panel.addRow(buttonPnl);
 		return panel;
 	}
 

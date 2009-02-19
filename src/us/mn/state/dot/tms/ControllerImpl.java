@@ -593,6 +593,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notifyAttribute("error");
 	}
 
+	/** Set the controller error detail */
+	public void doSetError(String s) {
+		if(s == null)
+			error = "";
+		else
+			error = s;
+	}
+
 	/** Get the controller error detail */
 	public String getError() {
 		if(isFailed())
