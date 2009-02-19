@@ -256,6 +256,11 @@ public class SystemAttributeHelper {
 		return getValueInt(SystemAttribute.DMS_PIXEL_TEST_TIMEOUT, 30);
 	}
 
+	/** Get the DMS lamp test timeout (seconds) */
+	static public int getDmsLampTestTimeout() {
+		return getValueInt(SystemAttribute.DMS_LAMP_TEST_TIMEOUT, 30);
+	}
+
 	/** Get the DMS pixel off limit (in a message) */
 	static public int getDmsPixelOffLimit() {
 		return getValueInt(SystemAttribute.DMS_PIXEL_OFF_LIMIT, 2);

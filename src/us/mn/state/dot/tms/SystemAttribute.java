@@ -51,6 +51,9 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS pixel test timeout */
 	String DMS_PIXEL_TEST_TIMEOUT = "dms_pixel_test_timeout_secs";
 
+	/** DMS lamp test timeout */
+	String DMS_LAMP_TEST_TIMEOUT = "dms_lamp_test_timeout_secs";
+
 	/** DMS pixel off limit (in a message) */
 	String DMS_PIXEL_OFF_LIMIT = "dms_pixel_off_limit";
 
