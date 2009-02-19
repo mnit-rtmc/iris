@@ -478,11 +478,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create brightness panel */
 	protected JPanel createBrightnessPanel() {
-		lightOutput.setForeground(OK);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow("Lamp status", lampTable);
-		panel.addRow("Light output", lightOutput);
-		panel.addRow("Feedback", feedback);
 		new ActionJob(this, feedback) {
 			public void perform() {
 				SignRequest sr =
@@ -491,6 +486,20 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				feedback.setEnabled(false);
 			}
 		};
+		JButton testBtn = new JButton("Test Lamps");
+		new ActionJob(this, testBtn) {
+			public void perform() {
+				proxy.setSignRequest(
+					SignRequest.TEST_LAMPS.ordinal());
+			}
+		};
+		lightOutput.setForeground(OK);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Lamp status", lampTable);
+		panel.addRow("Light output", lightOutput);
+		panel.addRow("Feedback", feedback);
+		panel.setCenter();
+		panel.addRow(testBtn);
 		return panel;
 	}
 

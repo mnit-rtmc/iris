@@ -45,7 +45,14 @@ public class DMSLampTest extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			LampTestActivation test = new LampTestActivation();
 			mess.add(test);
-			mess.getRequest();
+			try {
+				mess.getRequest();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				DMS_LOG.log(dms.getName() + ": " +
+					e.getMessage());
+				return null;
+			}
 			if(test.getInteger() == LampTestActivation.NO_TEST)
 				return new ActivateLampTest();
 			else {
