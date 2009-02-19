@@ -266,11 +266,13 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the number of lines on the sign */
 	protected int getLineCount(DMS proxy, int lineHeight) {
+		int ml = SystemAttributeHelper.getDmsMaxLines();
 		Integer h = proxy.getHeightPixels();
-		if(h != null && lineHeight > 0)
-			return h / lineHeight;
-		else
-			return SystemAttributeHelper.getDmsMaxLines();
+		if(h != null && && h > 0 && lineHeight >= h) {
+			int nl = h / lineHeight;
+			return Math.min(nl, ml);
+		} else
+			return ml;
 	}
 
 	/** Create a new message model */
