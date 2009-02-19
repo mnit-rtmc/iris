@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
@@ -24,6 +25,9 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  * @author Douglas Lau
  */
 public class DMSReset extends DMSOperation {
+
+	/** Timeout (ms) to wait for a controller reset */
+	static protected final long RESET_TIMEOUT = 45 * 1000;
 
 	/** Create a new DMS reset object */
 	public DMSReset(DMSImpl d) {
@@ -42,8 +46,6 @@ public class DMSReset extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsSWReset());
 			mess.setRequest();
-			try { Thread.sleep(5000); }
-			catch(InterruptedException e) {}
 			return new CheckResetCompletion();
 		}
 	}
@@ -51,22 +53,27 @@ public class DMSReset extends DMSOperation {
 	/** Phase to check for completion of the DMS reset */
 	protected class CheckResetCompletion extends Phase {
 
-		/** Maximum number of checks for completion */
-		static protected final int MAX_CHECKS = 20;
-
-		/** Count of checks made for completion */
-		protected int checks = 0;
+		/** Time to stop checking if the test has completed */
+		protected final long expire = System.currentTimeMillis() + 
+			RESET_TIMEOUT;
 
 		/** Check for reset completion */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsSWReset reset = new DmsSWReset();
 			mess.add(reset);
-			mess.getRequest();
-			if(reset.getInteger() == 0)
+			try {
+				mess.getRequest();
+				if(reset.getInteger() == 0)
+					return null;
+			}
+			catch(SocketTimeoutException e) {
+				// Controller must still be offline
+			}
+			if(System.currentTimeMillis() > expire) {
+				DMS_LOG.log(dms.getName() + ": reset " +
+					"timeout expired -- giving up");
 				return null;
-			if(++checks > MAX_CHECKS)
-				throw new NtcipException(reset.toString());
-			else
+			} else
 				return this;
 		}
 	}
