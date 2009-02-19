@@ -144,6 +144,13 @@ public class SignPixelPanel extends JPanel {
 		rescale();
 	}
 
+	/** Clear the pixel panel */
+	public void clear() {
+		setPhysicalDimensions(0, 0, 0, 0, 1, 1);
+		setLogicalDimensions(0, 0, 0, 0);
+		verifyDimensions();
+	}
+
 	/** Set the bitmap graphic displayed */
 	public void setGraphic(BitmapGraphic g) {
 		dirty = true;

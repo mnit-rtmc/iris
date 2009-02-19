@@ -327,6 +327,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
 		clearPager();
+		currentPnl.clear();
 		composer.setEnabled(false);
 		composer.clearSelections();
 		durationCmb.setEnabled(false);
