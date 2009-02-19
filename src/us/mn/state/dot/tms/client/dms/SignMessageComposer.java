@@ -268,7 +268,7 @@ public class SignMessageComposer extends JPanel {
 	protected int getLineCount(DMS proxy, int lineHeight) {
 		int ml = SystemAttributeHelper.getDmsMaxLines();
 		Integer h = proxy.getHeightPixels();
-		if(h != null && && h > 0 && lineHeight >= h) {
+		if(h != null && h > 0 && lineHeight >= h) {
 			int nl = h / lineHeight;
 			return Math.min(nl, ml);
 		} else
