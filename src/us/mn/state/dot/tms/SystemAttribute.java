@@ -48,6 +48,9 @@ public interface SystemAttribute extends SonarObject {
 	/** DMS maximum number of lines */
 	String DMS_MAX_LINES = "dms_max_lines";
 
+	/** DMS pixel test timeout */
+	String DMS_PIXEL_TEST_TIMEOUT = "dms_pixel_test_timeout_secs";
+
 	/** DMS pixel off limit (in a message) */
 	String DMS_PIXEL_OFF_LIMIT = "dms_pixel_off_limit";
 

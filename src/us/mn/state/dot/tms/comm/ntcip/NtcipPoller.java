@@ -113,10 +113,10 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 			new DMSQueryStatus(dms).start();
 			break;
 		case QUERY_PIXEL_FAILURES:
-			new DMSQueryPixelFailures(dms).start();
+			new DMSQueryPixelFailures(dms, false).start();
 			break;
 		case TEST_PIXELS:
-			new DMSPixelTest(dms).start();
+			new DMSQueryPixelFailures(dms, true).start();
 			break;
 		case TEST_LAMPS:
 			new DMSLampTest(dms).start();

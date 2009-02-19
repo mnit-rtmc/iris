@@ -439,13 +439,23 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create pixel panel */
 	protected JPanel createPixelPanel() {
-		JButton btn = new JButton("Test Pixels");
-		new ActionJob(this, btn) {
+		JButton queryBtn = new JButton("Query Pixel Failures");
+		new ActionJob(this, queryBtn) {
+			public void perform() {
+				proxy.setSignRequest(SignRequest.
+					QUERY_PIXEL_FAILURES.ordinal());
+			}
+		};
+		JButton testBtn = new JButton("Test Pixels");
+		new ActionJob(this, testBtn) {
 			public void perform() {
 				proxy.setSignRequest(
 					SignRequest.TEST_PIXELS.ordinal());
 			}
 		};
+		JPanel buttonPnl = new JPanel();
+		buttonPnl.add(queryBtn);
+		buttonPnl.add(testBtn);
 		badPixels.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Pixel errors", badPixels);
@@ -454,7 +464,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.setFill();
 		panel.addRow(createTitledPanel("Stuck On", stuck_on_pnl));
 		panel.setCenter();
-		panel.add(btn);
+		panel.add(buttonPnl);
 		return panel;
 	}
 

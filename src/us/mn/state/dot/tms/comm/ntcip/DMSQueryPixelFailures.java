@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -27,6 +28,9 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  * @author Douglas Lau
  */
 public class DMSQueryPixelFailures extends DMSOperation {
+
+	/** Flag to indicate whether a pixel test should be performed */
+	protected final boolean perform_test;
 
 	/** Stuck ON bitmap */
 	protected final BitmapGraphic stuck_on;
@@ -39,8 +43,9 @@ public class DMSQueryPixelFailures extends DMSOperation {
 		new PixelFailureTableNumRows();
 
 	/** Create a new DMS query pixel failures operation */
-	public DMSQueryPixelFailures(DMSImpl d) {
+	public DMSQueryPixelFailures(DMSImpl d, boolean p) {
 		super(DEVICE_DATA, d);
+		perform_test = p;
 		Integer w = d.getWidthPixels();
 		Integer h = d.getHeightPixels();
 		if(w == null)
@@ -53,7 +58,64 @@ public class DMSQueryPixelFailures extends DMSOperation {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new QueryRows();
+		if(perform_test)
+			return new QueryTestStatus();
+		else
+			return new QueryRows();
+	}
+
+	/** Phase to query the status of pixel test activation */
+	protected class QueryTestStatus extends Phase {
+
+		/** Query the status of pixel test activation */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			PixelTestActivation test = new PixelTestActivation();
+			mess.add(test);
+			mess.getRequest();
+			if(test.getInteger() == PixelTestActivation.NO_TEST)
+				return new ActivatePixelTest();
+			else {
+				DMS_LOG.log(dms.getName() + ": " + test);
+				return new QueryRows();
+			}
+		}
+	}
+
+	/** Phase to activate the pixel test */
+	protected class ActivatePixelTest extends Phase {
+
+		/** Activate the pixel test */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(new PixelTestActivation());
+			mess.setRequest();
+			return new CheckTestCompletion();
+		}
+	}
+
+	/** Phase to check for test completion */
+	protected class CheckTestCompletion extends Phase {
+
+		/** Pixel test activation */
+		protected final PixelTestActivation test =
+			new PixelTestActivation();
+
+		/** Time to stop checking if the test has completed */
+		protected final long expire = System.currentTimeMillis() + 
+			SystemAttributeHelper.getDmsPixelTestTimeout() * 1000;
+
+		/** Check for test completion */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(test);
+			mess.getRequest();
+			if(test.getInteger() == PixelTestActivation.NO_TEST)
+				return new QueryRows();
+			if(System.currentTimeMillis() > expire) {
+				DMS_LOG.log(dms.getName() + ": pixel test " +
+					"timeout expired -- giving up");
+				return new QueryRows();
+			} else
+				return this;
+		}
 	}
 
 	/** Phase to query the rows in the pixel failure table */
