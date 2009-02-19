@@ -795,14 +795,6 @@ public class DMSImpl extends Device2Impl implements DMS {
 			throw new ChangeVetoException("Invalid message: " +
 				m.getMulti());
 		}
-		ControllerImpl c = (ControllerImpl)getController();
-		if(c != null) {
-			String error = c.getError();
-			if(error.length() > 0) {
-				throw new ChangeVetoException(
-					"Controller error: " + error);
-			}
-		}
 		if(!checkPriority(m.getActivationPriority()))
 			throw new ChangeVetoException("Priority too low");
 		// FIXME: only blank sign if activation priority equals

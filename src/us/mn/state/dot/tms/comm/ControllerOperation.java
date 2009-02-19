@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,21 @@ import us.mn.state.dot.tms.utils.SString;
  */
 abstract public class ControllerOperation extends Operation {
 
+	/** Get a message describing an IO exception */
+	static protected String exceptionMessage(IOException e) {
+		String m = e.getMessage();
+		if(m != null && m.length() > 0)
+			return m;
+		else
+			return e.getClass().getSimpleName();
+	}
+
+	/** Filter a message */
+	static protected String filterMessage(String m) {
+		final int MAXLEN = 64;
+		return SString.truncate(m, MAXLEN);
+	}
+
 	/** Controller to be polled */
 	protected final ControllerImpl controller;
 
@@ -40,7 +55,7 @@ abstract public class ControllerOperation extends Operation {
 	protected final String id;
 
 	/** Error status message */
-	protected String errorStatus = "";
+	protected String errorStatus = null;
 
 	/** Create a new controller operation */
 	protected ControllerOperation(int p, ControllerImpl c, String i) {
@@ -68,24 +83,15 @@ abstract public class ControllerOperation extends Operation {
 
 	/** Handle an exception */
 	public void handleException(IOException e) {
-		String s = e.getMessage();
-		controller.logException(id, s);
-		if(controller.retry(id))
-			return;
-		else {
-			if(s != null && s.length() > 0)
-				errorStatus = s;
-			else
-				errorStatus = e.getClass().getSimpleName();
+		controller.logException(id, filterMessage(exceptionMessage(e)));
+		if(!controller.retry(id))
 			super.handleException(e);
-		}
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		final int MAXLEN = 64;
-		String s = SString.truncate(errorStatus, MAXLEN);
-		controller.setError(s);
+		if(errorStatus != null)
+			controller.setError(filterMessage(errorStatus));
 		controller.completeOperation(id, success);
 	}
 }

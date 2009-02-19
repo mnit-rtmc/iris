@@ -138,9 +138,10 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.add(multi);
 			mess.getRequest();
 			if(error.isSyntaxMulti())
-				throw new NtcipException(multi.toString());
+				errorStatus = multi.toString();
 			else
-				throw new NtcipException(error.toString());
+				errorStatus = error.toString();
+			return null;
 		}
 	}
 
@@ -196,15 +197,16 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.getRequest();
 			switch(error.getInteger()) {
 				case DmsActivateMsgError.SYNTAX_MULTI:
-					throw new NtcipException(
-						multi.toString());
+					errorStatus = multi.toString();
+					break;
 				case DmsActivateMsgError.OTHER:
 					// FIXME: ADDCO does this too ...
 					return new LedstarActivateError();
 				default:
-					throw new NtcipException(
-						error.toString());
+					errorStatus = error.toString();
+					break;
 			}
+			return null;
 		}
 	}
 
@@ -216,7 +218,8 @@ public class DMSCommandMessage extends DMSOperation {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
 			mess.getRequest();
-			throw new NtcipException(error.toString());
+			errorStatus = error.toString();
+			return null;
 		}
 	}
 
