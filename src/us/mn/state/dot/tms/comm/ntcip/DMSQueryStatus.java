@@ -127,14 +127,10 @@ public class DMSQueryStatus extends DMSOperation {
 			mess.add(shortError);
 //			DmsStatDoorOpen door = new DmsStatDoorOpen();
 //			mess.add(door);
-			PixelFailureTableNumRows rows =
-				new PixelFailureTableNumRows();
-			mess.add(rows);
 			mess.getRequest();
 			if(shortError.getInteger() != 0)
 				errorStatus = shortError.getValue();
 //			DMS_LOG.log(dms.getName() + ": " + door);
-			DMS_LOG.log(dms.getName() + ": " + rows);
 			return new MoreFailures();
 		}
 	}
