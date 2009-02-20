@@ -37,18 +37,17 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  */
 public class DMSFontDownload extends DMSOperation {
 
-	/** Default font index */
-	static protected final int DEFAULT_FONT = 1;
-
 	/** Number of fonts supported */
 	protected final NumFonts num_fonts = new NumFonts();
 
 	/** List of fonts to be sent to the sign */
 	protected final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
 
-	/** Font index (starts at 1, not 0).
-	 * On some signs (ADDCO), font index 1 is read-only (apparently). */
-	protected int index = DEFAULT_FONT;
+	/** Font index for font table */
+	protected int index = 0;
+
+	/** Flag for determining the default font */
+	protected boolean first = true;
 
 	/** Create a new DMS font download operation */
 	public DMSFontDownload(DMSImpl d) {
@@ -82,17 +81,13 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(num_fonts);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + num_fonts);
-			return currentFontPhase();
+			return nextFontPhase();
 		}
 	}
 
-	/** Get the current font */
-	protected FontImpl currentFont() {
-		return fonts.get(index - 1);
-	}
-
-	/** Get the first phase of the current font */
-	protected Phase currentFontPhase() {
+	/** Get the first phase of the next font */
+	protected Phase nextFontPhase() {
+		index++;
 		if(index < 1 || index > fonts.size())
 			return null;
 		if(index > num_fonts.getInteger()) {
@@ -106,10 +101,9 @@ public class DMSFontDownload extends DMSOperation {
 		return new CheckVersionID();
 	}
 
-	/** Move to the first phase of the next font */
-	protected Phase nextFontPhase() {
-		index++;
-		return currentFontPhase();
+	/** Get the current font */
+	protected FontImpl currentFont() {
+		return fonts.get(index - 1);
 	}
 
 	/** Check version ID */
@@ -225,7 +219,7 @@ public class DMSFontDownload extends DMSOperation {
 			FontImpl font = currentFont();
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.setRequest();
-			if(index == DEFAULT_FONT)
+			if(first)
 				return new SetDefaultFont();
 			else
 				return nextFontPhase();
@@ -241,6 +235,7 @@ public class DMSFontDownload extends DMSOperation {
 			DMS_LOG.log(dms.getName() + ": " + dfont);
 			mess.add(dfont);
 			mess.setRequest();
+			first = false;
 			return nextFontPhase();
 		}
 	}
