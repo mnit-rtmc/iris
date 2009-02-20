@@ -106,13 +106,13 @@ public class DMSFontDownload extends DMSOperation {
 			font = font_iterator.next();
 		else
 			return null;
-		return new CheckVersionID();
+		return new VerifyFont();
 	}
 
-	/** Check version ID */
-	protected class CheckVersionID extends Phase {
+	/** Phase to verify a font */
+	protected class VerifyFont extends Phase {
 
-		/** Check the font version ID */
+		/** Verify a font */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DMS_LOG.log(dms.getName() + " Font #" + index +
 				", name: " + font.getName() + ", number: " +
