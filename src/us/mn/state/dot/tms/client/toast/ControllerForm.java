@@ -40,6 +40,8 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
@@ -152,8 +154,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		cams.findObject(new ControllerIOFinder<Camera>(io));
 		TypeCache<Detector> dets = state.getDetectors();
 		dets.findObject(new ControllerIOFinder<Detector>(io));
+		TypeCache<DMS> dmss = state.getDMSs();
+		dmss.findObject(new ControllerIOFinder<DMS>(io));
 		TypeCache<WarningSign> w_signs = state.getWarningSigns();
 		w_signs.findObject(new ControllerIOFinder<WarningSign>(io));
+		TypeCache<RampMeter> meters = state.getRampMeters();
+		meters.findObject(new ControllerIOFinder<RampMeter>(io));
 		return io;
 	}
 
