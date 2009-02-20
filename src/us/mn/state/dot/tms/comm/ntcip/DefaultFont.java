@@ -15,7 +15,8 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 /**
- * Ntcip DefaultFont object
+ * Ntcip DefaultFont object.  Note: this references the font number, not the
+ * font index.
  *
  * @author Douglas Lau
  */

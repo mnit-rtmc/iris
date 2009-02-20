@@ -231,7 +231,8 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Set the default font numbmer */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			DefaultFont dfont = new DefaultFont(index);
+			FontImpl font = currentFont();
+			DefaultFont dfont = new DefaultFont(font.getNumber());
 			DMS_LOG.log(dms.getName() + ": " + dfont);
 			mess.add(dfont);
 			mess.setRequest();
