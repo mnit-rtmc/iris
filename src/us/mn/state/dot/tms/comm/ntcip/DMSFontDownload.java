@@ -40,8 +40,11 @@ public class DMSFontDownload extends DMSOperation {
 	/** Number of fonts supported */
 	protected final NumFonts num_fonts = new NumFonts();
 
-	/** List of fonts to be sent to the sign */
-	protected final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
+	/** Iterator of fonts to be sent to the sign */
+	protected final Iterator<FontImpl> font_iterator;
+
+	/** Current font */
+	protected FontImpl font;
 
 	/** Font index for font table */
 	protected int index = 0;
@@ -52,6 +55,7 @@ public class DMSFontDownload extends DMSOperation {
 	/** Create a new DMS font download operation */
 	public DMSFontDownload(DMSImpl d) {
 		super(DOWNLOAD, d);
+		final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
 		Integer w = dms.getWidthPixels();
 		Integer h = dms.getHeightPixels();
 		Integer cw = dms.getCharWidthPixels();
@@ -66,6 +70,7 @@ public class DMSFontDownload extends DMSOperation {
 				}
 			});
 		}
+		font_iterator = fonts.iterator();
 	}
 
 	/** Create the first real phase of the operation */
@@ -88,22 +93,20 @@ public class DMSFontDownload extends DMSOperation {
 	/** Get the first phase of the next font */
 	protected Phase nextFontPhase() {
 		index++;
-		if(index < 1 || index > fonts.size())
-			return null;
 		if(index > num_fonts.getInteger()) {
 			DMS_LOG.log(dms.getName() + ": Too many fonts");
-			for(int i = index - 1; i < fonts.size(); i++) {
+			while(font_iterator.hasNext()) {
+				font = font_iterator.next();
 				DMS_LOG.log(dms.getName() + ": Skipping font " +
-					fonts.get(i).getName());
+					font.getName());
 			}
 			return null;
 		}
+		if(font_iterator.hasNext())
+			font = font_iterator.next();
+		else
+			return null;
 		return new CheckVersionID();
-	}
-
-	/** Get the current font */
-	protected FontImpl currentFont() {
-		return fonts.get(index - 1);
 	}
 
 	/** Check version ID */
@@ -111,7 +114,6 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Check the font version ID */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontImpl font = currentFont();
 			DMS_LOG.log(dms.getName() + " Font #" + index +
 				", name: " + font.getName() + ", number: " +
 				 font.getNumber());
@@ -153,7 +155,6 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Create a new font in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontImpl font = currentFont();
 			mess.add(new FontNumber(index, font.getNumber()));
 			mess.add(new FontName(index, font.getName()));
 			mess.add(new FontHeight(index, font.getHeight()));
@@ -216,7 +217,6 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontImpl font = currentFont();
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.setRequest();
 			if(first)
@@ -231,7 +231,6 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Set the default font numbmer */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontImpl font = currentFont();
 			DefaultFont dfont = new DefaultFont(font.getNumber());
 			DMS_LOG.log(dms.getName() + ": " + dfont);
 			mess.add(dfont);
