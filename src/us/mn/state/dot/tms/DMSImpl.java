@@ -1072,7 +1072,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		PixelMapBuilder builder = new PixelMapBuilder(namespace, w, h,
 			cw, ch);
 		MultiString multi = new MultiString(m);
-		multi.parse(builder);
+		multi.parse(builder, builder.getDefaultFontNumber());
 		BitmapGraphic[] bmaps = builder.getPixmaps();
 		String[] bitmaps = new String[bmaps.length];
 		for(int i = 0; i < bmaps.length; i++)

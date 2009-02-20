@@ -380,7 +380,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			if(m != null) {
 				b.clear();
 				MultiString multi=new MultiString(m.getMulti());
-				multi.parse(b);
+				multi.parse(b, b.getDefaultFontNumber());
 				return b.getPixmaps();
 			}
 		}
@@ -445,7 +445,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		if(b != null) {
 			b.clear();
 			MultiString m = new MultiString(multi);
-			m.parse(b);
+			m.parse(b, b.getDefaultFontNumber());
 			BitmapGraphic[] bmaps = b.getPixmaps();
 			String[] bitmaps = new String[bmaps.length];
 			for(int i = 0; i < bmaps.length; i++)

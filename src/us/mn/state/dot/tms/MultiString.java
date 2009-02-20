@@ -183,16 +183,15 @@ public class MultiString {
 	}
 
 	/** Parse the MULTI string 
-	 * @param cb SpanCallback, called per span. */
-	public void parse(SpanCallback cb) {
+	 * @param cb SpanCallback, called per span.
+	 * @param f_num Default font number */
+	public void parse(SpanCallback cb, int f_num) {
 		int page = 0;
 		JustificationPage justp = JustificationPage.fromOrdinal(
 			SystemAttributeHelper.getDmsDefaultJustificationPage());
 		int line = 0;
 		JustificationLine justl = JustificationLine.fromOrdinal(
 			SystemAttributeHelper.getDmsDefaultJustificationLine());
-		// FIXME: support default font numbers for each sign
-		int f_num = 1;
 		Matcher m = TAG.matcher(b);
 		for(String span: TAG.split(b)) {
 			if(span.length() > 0)
@@ -227,7 +226,7 @@ public class MultiString {
 			{
 				_b.append(t);
 			}
-		});
+		}, 1);
 		return _b.toString().trim().equals("");
 	}
 
@@ -244,7 +243,7 @@ public class MultiString {
 	/** Get the number of pages in the multistring */
 	public int getNumPages() {
 		PageCounter pc = new PageCounter();
-		parse(pc);
+		parse(pc, 1);
 		return pc.num_pages;
 	}
 

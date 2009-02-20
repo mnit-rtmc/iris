@@ -362,7 +362,7 @@ public class MessagesTab extends JPanel {
 			return new BitmapGraphic[0];
 		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
 			w, h, cw, ch);
-		multi.parse(b);
+		multi.parse(b, b.getDefaultFontNumber());
 		return b.getPixmaps();
 	}
 

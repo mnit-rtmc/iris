@@ -131,11 +131,9 @@ public class DMSFontDownload extends DMSOperation {
 				version.setInteger(-1);
 			}
 			int v = version.getInteger();
-			DMS_LOG.log(dms.getName() + " Font #" + index +
-				" versionID:" + v);
+			DMS_LOG.log(dms.getName() + ": " + version);
 			if(v == font.getVersionID()) {
-				DMS_LOG.log(dms.getName() + " Font #" + index +
-					" is valid");
+				DMS_LOG.log(dms.getName() + ": Font is valid");
 				return nextFontPhase();
 			} else {
 				if(font_status_support)

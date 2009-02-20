@@ -121,13 +121,27 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	public int getLineHeightPixels() {
 		if(c_height > 0)
 			return c_height;
-		FontFinder ff = new FontFinder();
-		namespace.findObject(Font.SONAR_TYPE, ff);
-		Font f = ff.getFirstFont();
+		Font f = getDefaultFont();
 		if(f != null)
 			return f.getHeight();
 		else
 			return height;
+	}
+
+	/** Get the default font */
+	protected Font getDefaultFont() {
+		FontFinder ff = new FontFinder();
+		namespace.findObject(Font.SONAR_TYPE, ff);
+		return ff.getFirstFont();
+	}
+
+	/** Get the default font number */
+	public int getDefaultFontNumber() {
+		Font f = getDefaultFont();
+		if(f != null)
+			return f.getNumber();
+		else
+			return 1;
 	}
 
 	/** Count of pages */

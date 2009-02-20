@@ -48,7 +48,7 @@ public class SignMessageHelper {
 				String v = ls.get(i);
 				ls.set(i, trimJoin(v, t));
 			}
-		});
+		}, 1);
 		return ls.toArray(new String[0]);
 	}
 
