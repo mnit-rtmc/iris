@@ -884,19 +884,11 @@ public class DMSImpl extends Device2Impl implements DMS {
 	public void sendMessage(SignMessage m) throws TMSException {
 		try {
 			doSetMessageNext(m);
-			notifyAttribute("messageNext");
 		}
 		catch(TMSException e) {
 			// FIXME: destroy SignMessage
 			throw e;
 		}
-	}
-
-	/** Get the next (in process) sign message.
-	 * @return Next message to be displayed on the sign, or null if no
-	 *         message is in process. */
-	public SignMessage getMessageNext() {
-		return messageNext;
 	}
 
 	/** Current message (Shall not be null) */
@@ -910,6 +902,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 		logMessage(m);
 		messageCurrent = m;
 		notifyAttribute("messageCurrent");
+		if(messageCurrent == messageNext)
+			setMessageNext(null);
 		// FIXME: destroy the previous message if no other signs are
 		// using it
 	}

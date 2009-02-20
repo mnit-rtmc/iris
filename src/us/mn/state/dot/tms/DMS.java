@@ -171,9 +171,6 @@ public interface DMS extends Device2 {
 	/** Set the next sign message */
 	void setMessageNext(SignMessage m);
 
-	/** Get the next (in process) sign message */
-	SignMessage getMessageNext();
-
 	/** Get the current sign message */
 	SignMessage getMessageCurrent();
 
