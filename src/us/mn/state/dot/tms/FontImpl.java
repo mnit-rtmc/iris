@@ -17,9 +17,11 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import us.mn.state.dot.sonar.Checker;
 
 /**
  * The FontImpl class defines all the attributes of a pixel font. These
@@ -29,6 +31,23 @@ import java.util.TreeMap;
  * @author Douglas Lau
  */
 public class FontImpl extends BaseObjectImpl implements Font {
+
+	/** Fint the lowest unused font number */
+	static protected int findUnusedFontNumber() {
+		final HashSet<Integer> numbers = new HashSet<Integer>();
+		namespace.findObject(Font.SONAR_TYPE, new Checker<Font>() {
+			public boolean check(Font f) {
+				numbers.add(f.getNumber());
+				return false;
+			}
+		});
+		for(int i = 1; i < 256; i++) {
+			if(!numbers.contains(i))
+				return i;
+		}
+		// This can only happen if we already have 255 fonts defined
+		return 0;
+	}
 
 	/** Load all the fonts */
 	static protected void loadAll() throws TMSException {
@@ -78,6 +97,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Create a new font */
 	public FontImpl(String n) {
 		super(n);
+		f_number = findUnusedFontNumber();
 	}
 
 	/** Create a new font */
@@ -128,7 +148,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Font number */
-	protected int f_number = 1;
+	protected int f_number;
 
 	/** Set the font number */
 	public void setNumber(int n) {
@@ -139,7 +159,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	public void doSetNumber(int n) throws TMSException {
 		if(n == f_number)
 			return;
-		if(n < 1 || n > 4)
+		if(n < 1 || n > 255)
 			throw new ChangeVetoException("Invalid number");
 		store.update(this, "f_number", n);
 		setNumber(n);
