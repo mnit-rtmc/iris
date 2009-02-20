@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,25 +29,28 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class FontModel extends ProxyTableModel<Font> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 6;
+	static protected final int COLUMN_COUNT = 7;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
 
+	/** Font number column number */
+	static protected final int COL_NUMBER = 1;
+
 	/** Height column number */
-	static protected final int COL_HEIGHT = 1;
+	static protected final int COL_HEIGHT = 2;
 
 	/** Width column number */
-	static protected final int COL_WIDTH = 2;
+	static protected final int COL_WIDTH = 3;
 
 	/** Line spacing column number */
-	static protected final int COL_LINE_SPACING = 3;
+	static protected final int COL_LINE_SPACING = 4;
 
 	/** Character spacing column number */
-	static protected final int COL_CHAR_SPACING = 4;
+	static protected final int COL_CHAR_SPACING = 5;
 
 	/** Version ID column number */
-	static protected final int COL_VERSION_ID = 5;
+	static protected final int COL_VERSION_ID = 6;
 
 	/** Create a new font table model */
 	public FontModel(TypeCache<Font> c, boolean a) {
@@ -68,6 +71,8 @@ public class FontModel extends ProxyTableModel<Font> {
 		switch(column) {
 			case COL_NAME:
 				return f.getName();
+			case COL_NUMBER: 
+				return f.getNumber();
 			case COL_HEIGHT:
 				return f.getHeight();
 			case COL_WIDTH:
@@ -112,6 +117,9 @@ public class FontModel extends ProxyTableModel<Font> {
 				if(v.length() > 0)
 					cache.createObject(v);
 				break;
+			case COL_NUMBER:
+				f.setNumber((Integer)value);
+				break;
 			case COL_HEIGHT:
 				f.setHeight((Integer)value);
 				break;
@@ -134,6 +142,7 @@ public class FontModel extends ProxyTableModel<Font> {
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 200, "Font"));
+		m.addColumn(createColumn(COL_NUMBER, 100, "Number"));
 		m.addColumn(createColumn(COL_HEIGHT, 100, "Height"));
 		m.addColumn(createColumn(COL_WIDTH, 100, "Width"));
 		m.addColumn(createColumn(COL_LINE_SPACING, 100,
