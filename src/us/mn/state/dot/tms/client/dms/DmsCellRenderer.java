@@ -137,6 +137,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(location);
 		add(pnlPage);
 		add(box1);
+
+		setPreferredSize(new Dimension(190, 102));
 	}
 
 	/** Check if the background is opaque */
@@ -215,7 +217,5 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			else
 				lblLine[i].setText(" ");
 		}
-		// FIXME: set preferred size based on DMS
-		setPreferredSize(new Dimension(186, 102));
 	}
 }
