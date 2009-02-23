@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -29,11 +30,14 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
@@ -51,12 +55,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	static protected final SimpleDateFormat HOUR_MINUTE =
 		new SimpleDateFormat("HH:mm");
 
-	/** Number of message lines to render */
-	static protected final int MESSAGE_LINES = 3;
-
 	/** Get the verification camera name */
-	static protected String getCameraName(DMS proxy) {
-		Camera camera = proxy.getCamera();
+	static protected String getCameraName(DMS dms) {
+		Camera camera = dms.getCamera();
 		if(camera == null)
 			return " ";
 		else
@@ -72,17 +73,20 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			return false;
 	}
 
-	/** The label that displays the camera id */
-	private final JLabel lblCamera = new JLabel();
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
-	/** The array of labels that display the lines of the sign */
-	protected final JLabel[] lblLine = new JLabel[MESSAGE_LINES];
+	/** The label that displays the camera id */
+	protected final JLabel lblCamera = new JLabel();
+
+	/** Sign pixel panel to display sign message */
+	protected final SignPixelPanel pixelPnl = new SignPixelPanel();
 
 	/** The label that displays the time the sign was deployed */
-	private final JLabel lblDeployed = new JLabel();
+	protected final JLabel lblDeployed = new JLabel();
 
 	/** The label that displays the time the current message will expire */
-	private final JLabel lblExpires = new JLabel();
+	protected final JLabel lblExpires = new JLabel();
 
 	/** List cell renderer (needed for colors) */
 	protected final DefaultListCellRenderer cell =
@@ -104,39 +108,35 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel lblLocation = new JLabel();
 
 	/** Create a new DMS cell renderer */
-	public DmsCellRenderer() {
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+	public DmsCellRenderer(Namespace ns) {
+		super(new BorderLayout());
+		namespace = ns;
 		setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createEmptyBorder(2, 2, 2, 2),
 			BorderFactory.createRaisedBevelBorder()));
-		JPanel pnlPage = new JPanel(new GridLayout(lblLine.length, 1));
-		pnlPage.setBackground(Color.BLACK);
-		pnlPage.setBorder(BorderFactory.createLineBorder(
-			Color.BLACK, 2));
-		for(int i = 0; i < lblLine.length; i++) {
-			lblLine[i] = new DmsLineLabel();
-			pnlPage.add(lblLine[i]);
-		}
+
+		Box topBox = Box.createVerticalBox();
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(lblID);
 		title.add(Box.createGlue());
 		title.add(lblUser);
+		topBox.add(title);
 		location.add(lblLocation);
 		location.add(Box.createGlue());
+		topBox.add(location);
 
-		Box box1 = Box.createHorizontalBox();
-		box1.add(lblDeployed);
-		box1.add(Box.createGlue());
-		box1.add(Box.createHorizontalStrut(8));
-		box1.add(lblExpires);
-		box1.add(Box.createHorizontalStrut(8));
-		box1.add(Box.createGlue());
-		box1.add(lblCamera);
+		Box bottomBox = Box.createHorizontalBox();
+		bottomBox.add(lblDeployed);
+		bottomBox.add(Box.createGlue());
+		bottomBox.add(Box.createHorizontalStrut(8));
+		bottomBox.add(lblExpires);
+		bottomBox.add(Box.createHorizontalStrut(8));
+		bottomBox.add(Box.createGlue());
+		bottomBox.add(lblCamera);
 
-		add(title);
-		add(location);
-		add(pnlPage);
-		add(box1);
+		add(topBox, BorderLayout.NORTH);
+		add(pixelPnl, BorderLayout.CENTER);
+		add(bottomBox, BorderLayout.SOUTH);
 
 		setPreferredSize(new Dimension(190, 102));
 	}
@@ -193,29 +193,98 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Set the DMS to be displayed */
-	protected void setDms(DMS proxy) {
-		lblID.setText(proxy.getName());
+	protected void setDms(DMS dms) {
+		lblID.setText(dms.getName());
 		lblLocation.setText(GeoLocHelper.getDescription(
-			proxy.getGeoLoc()));
-		lblCamera.setText(getCameraName(proxy));
+			dms.getGeoLoc()));
+		lblCamera.setText(getCameraName(dms));
+		setDimensions(dms);
+		pixelPnl.setGraphic(null);
 		// Note: getMessageCurrent will only return null after the
 		//       DMS proxy has been destroyed.
-		SignMessage message = proxy.getMessageCurrent();
+		SignMessage message = dms.getMessageCurrent();
 		if(isDeployed(message)) {
 			lblUser.setText(formatOwner(message.getOwner()));
 			lblDeployed.setText(formatDeployed(message));
 			lblExpires.setText(formatExpiration(message));
+			BitmapGraphic b = getPageOne(dms);
+			if(b != null)
+				pixelPnl.setGraphic(b);
 		} else {
 			lblUser.setText("");
 			lblDeployed.setText("");
 			lblExpires.setText("");
 		}
-		String[] lines = SignMessageHelper.createLines(message);
-		for(int i = 0; i < lblLine.length; i++) {
-			if(i < lines.length)
-				lblLine[i].setText(lines[i]);
-			else
-				lblLine[i].setText(" ");
+	}
+
+	/** Set the dimensions of the pixel panel */
+	protected void setDimensions(DMS dms) {
+		setPhysicalDimensions(dms);
+		setLogicalDimensions(dms);
+		pixelPnl.verifyDimensions();
+	}
+
+	/** Set the physical dimensions of the pixel panel */
+	protected void setPhysicalDimensions(DMS dms) {
+		Integer w = dms.getFaceWidth();
+		Integer h = dms.getFaceHeight();
+		Integer hp = dms.getHorizontalPitch();
+		Integer vp = dms.getVerticalPitch();
+		Integer hb = dms.getHorizontalBorder();
+		Integer vb = dms.getVerticalBorder();
+		if(w != null && h != null && hp != null && vp != null &&
+		   hb != null && vb != null)
+		{
+			pixelPnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
+		} else
+			pixelPnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+	}
+
+	/** Set the logical dimensions of the pixel panel */
+	protected void setLogicalDimensions(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(wp != null && hp != null && cw != null && ch != null)
+			pixelPnl.setLogicalDimensions(wp, hp, cw, ch);
+		else
+			pixelPnl.setLogicalDimensions(0, 0, 0, 0);
+	}
+
+	/** Get the bitmap graphic for page one */
+	protected BitmapGraphic getPageOne(DMS dms) {
+		BitmapGraphic[] bitmaps = getBitmaps(dms);
+		if(bitmaps != null && bitmaps.length > 0)
+			return bitmaps[0];
+		else
+			return null;
+	}
+
+	/** Get the bitmap graphic for all pages */
+	protected BitmapGraphic[] getBitmaps(DMS dms) {
+		PixelMapBuilder b = createPixelMapBuilder(dms);
+		if(b != null && dms != null) {
+			SignMessage m = dms.getMessageCurrent();
+			if(m != null) {
+				b.clear();
+				MultiString multi=new MultiString(m.getMulti());
+				multi.parse(b, b.getDefaultFontNumber());
+				return b.getPixmaps();
+			}
 		}
+		return null;
+	}
+
+	/** Create the pixel map builder */
+	protected PixelMapBuilder createPixelMapBuilder(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(wp != null && hp != null && cw != null && ch != null)
+			return new PixelMapBuilder(namespace, wp, hp, cw, ch);
+		else
+			return null;
 	}
 }

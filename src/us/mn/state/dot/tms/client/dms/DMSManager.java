@@ -174,7 +174,8 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
-		return new DmsCellRenderer();
+		return new DmsCellRenderer(
+			connection.getSonarState().getNamespace());
 	}
 
 	/** Create a proxy JList for the given style */
