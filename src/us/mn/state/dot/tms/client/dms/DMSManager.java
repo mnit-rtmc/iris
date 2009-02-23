@@ -62,7 +62,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		I18NMessages.get("dms.aws") + " Deployed";
 
 	/** Name of deployed style */
-	static public final String STYLE_DEPLOYED = "Deployed";
+	static public final String STYLE_DEPLOYED = "User Deployed";
 
 	/** Name of maintenance style */
 	static public final String STYLE_MAINTENANCE = "Maintenance";
@@ -117,6 +117,13 @@ public class DMSManager extends ProxyManager<DMS> {
 		SignMessage m = proxy.getMessageCurrent();
 		return m.getRunTimePriority() ==
 		       DMSMessagePriority.AWS.ordinal();
+	}
+
+	/** Test if a DMS has been deployed by a user */
+	static public boolean isUserDeployed(DMS proxy) {
+		return isDeployed(proxy) &&
+		       !isTravelTime(proxy) &&
+		       !isAwsDeployed(proxy);
 	}
 
 	/** Test if a DMS needs maintenance */
@@ -204,7 +211,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		else if(STYLE_AWS_DEPLOYED.equals(s))
 			return isAwsDeployed(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
-			return isDeployed(proxy);
+			return isUserDeployed(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
 			return needsMaintenance(proxy);
 		else if(STYLE_AWS_CONTROLLED.equals(s))
