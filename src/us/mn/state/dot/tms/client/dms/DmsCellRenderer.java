@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -54,9 +53,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Number of message lines to render */
 	static protected final int MESSAGE_LINES = 3;
-
-	/** Font for rendering */
-	static protected final Font FONT = new Font("Dialog", Font.BOLD, 12);
 
 	/** Get the verification camera name */
 	static protected String getCameraName(DMS proxy) {
@@ -121,27 +117,21 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			lblLine[i] = new DmsLineLabel();
 			pnlPage.add(lblLine[i]);
 		}
-		lblID.setFont(FONT);
-		lblUser.setFont(FONT);
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(lblID);
 		title.add(Box.createGlue());
 		title.add(lblUser);
 		location.add(lblLocation);
-		lblLocation.setFont(FONT);
 		location.add(Box.createGlue());
 
 		Box box1 = Box.createHorizontalBox();
 		box1.add(lblDeployed);
-		lblDeployed.setFont(FONT);
 		box1.add(Box.createGlue());
 		box1.add(Box.createHorizontalStrut(8));
 		box1.add(lblExpires);
-		lblExpires.setFont(FONT);
 		box1.add(Box.createHorizontalStrut(8));
 		box1.add(Box.createGlue());
 		box1.add(lblCamera);
-		lblCamera.setFont(FONT);
 
 		add(title);
 		add(location);
