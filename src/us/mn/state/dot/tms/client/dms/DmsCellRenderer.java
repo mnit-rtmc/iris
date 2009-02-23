@@ -264,16 +264,15 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	/** Get the bitmap graphic for all pages */
 	protected BitmapGraphic[] getBitmaps(DMS dms) {
 		PixelMapBuilder b = createPixelMapBuilder(dms);
-		if(b != null && dms != null) {
+		if(b != null) {
 			SignMessage m = dms.getMessageCurrent();
 			if(m != null) {
-				b.clear();
 				MultiString multi=new MultiString(m.getMulti());
 				multi.parse(b, b.getDefaultFontNumber());
-				return b.getPixmaps();
 			}
-		}
-		return null;
+			return b.getPixmaps();
+		} else
+			return null;
 	}
 
 	/** Create the pixel map builder */
