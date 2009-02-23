@@ -24,6 +24,7 @@ import java.util.Calendar;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -43,12 +44,6 @@ import us.mn.state.dot.tms.SignMessage;
  * @author Douglas Lau
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
-
-	/** Title bar color when not selected */
-	static protected final Color TITLE_COLOR = new Color(218, 218, 239);
-
-	/** Title bar color when selected */
-	static protected final Color SELECTED_COLOR = Color.YELLOW;
 
 	/** Non-expiring message time */
 	static protected final String NO_EXPIRE = "E-XX:XX";
@@ -92,6 +87,10 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** The label that displays the time the current message will expire */
 	private final JLabel lblExpires = new JLabel();
+
+	/** List cell renderer (needed for colors) */
+	protected final DefaultListCellRenderer cell =
+		new DefaultListCellRenderer();
 
 	/** Title bar */
 	protected final JPanel title = new JPanel();
@@ -150,16 +149,23 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(box1);
 	}
 
+	/** Check if the background is opaque */
+	public boolean isOpaque() {
+		return true;
+	}
+
 	/** Get a component configured to render a cell of the list */
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
 		if(value instanceof DMS)
 			setDms((DMS)value);
-		if(isSelected)
-			title.setBackground(SELECTED_COLOR);
-		else
-			title.setBackground(TITLE_COLOR);
+		if(isSelected) {
+			Component temp = cell.getListCellRendererComponent(list,
+				value, index, isSelected, cellHasFocus);
+			title.setBackground(temp.getBackground());
+		} else
+			title.setBackground(lblID.getBackground());
 		return this;
 	}
 
