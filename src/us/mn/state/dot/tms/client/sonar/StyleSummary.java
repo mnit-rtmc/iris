@@ -127,7 +127,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Set the selected style */
 	public void setStyle(String style) {
-		manager.getSelectionModel().clearSelection();
 		s_label.setText(manager.getProxyType() + " status: " + style);
 		cards.show(list_panel, style);
 	}

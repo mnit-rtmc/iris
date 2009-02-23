@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,11 @@ public class ProxySelectionModel<T extends SonarObject> {
 	/** Get a list of the selected proxies */
 	public List<T> getSelected() {
 		return new LinkedList<T>(selected);
+	}
+
+	/** Test if a proxy is selected */
+	public boolean isSelected(T proxy) {
+		return selected.contains(proxy);
 	}
 
 	/** Get the count of selected objects */
