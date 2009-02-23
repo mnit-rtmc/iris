@@ -19,6 +19,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.BaseObjectImpl;
 import us.mn.state.dot.tms.Base64;
@@ -39,6 +41,10 @@ public class DMSFontDownload extends DMSOperation {
 
 	/** Number of fonts supported */
 	protected final NumFonts num_fonts = new NumFonts();
+
+	/** Mapping of font numbers to font index (row in font table) */
+	protected final TreeMap<Integer, Integer> font_numbers =
+		new TreeMap<Integer, Integer>();
 
 	/** Iterator of fonts to be sent to the sign */
 	protected final Iterator<FontImpl> font_iterator;
@@ -73,6 +79,8 @@ public class DMSFontDownload extends DMSOperation {
 				}
 			});
 		}
+		for(FontImpl f: fonts)
+			font_numbers.put(f.getNumber(), null);
 		font_iterator = fonts.iterator();
 	}
 
@@ -89,25 +97,60 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(num_fonts);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + num_fonts);
+			return new QueryFontNumbers();
+		}
+	}
+
+	/** Phase to query all font numbers */
+	protected class QueryFontNumbers extends Phase {
+
+		/** Array of font number objects */
+		protected FontNumber[] number = new FontNumber[
+			num_fonts.getInteger()];
+
+		/** Query the font numbers for all fonts */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			for(int i = 0; i < number.length; i++) {
+				Integer row = i + 1;	// fontIndex
+				number[i] = new FontNumber(row);
+				mess.add(number[i]);
+			}
+			mess.getRequest();
+			populateFontNumbers();
 			return nextFontPhase();
+		}
+
+		/** Populate the font_numbers hash */
+		protected void populateFontNumbers() {
+			TreeSet<Integer> open_rows = new TreeSet<Integer>();
+			for(int i = 0; i < number.length; i++) {
+				Integer row = i + 1;	// fontIndex
+				Integer n = number[i].getInteger();
+				if(font_numbers.containsKey(n))
+					font_numbers.put(n, row);
+				else
+					open_rows.add(row);
+			}
+			for(Integer n: font_numbers.keySet()) {
+				if(font_numbers.get(n) == null) {
+					Integer row = open_rows.pollFirst();
+					if(row != null)
+						font_numbers.put(n, row);
+					else {
+						DMS_LOG.log(dms.getName() +
+							": Skipping font " + n);
+					}
+				}
+			}
 		}
 	}
 
 	/** Get the first phase of the next font */
 	protected Phase nextFontPhase() {
-		index++;
-		if(index > num_fonts.getInteger()) {
-			DMS_LOG.log(dms.getName() + ": Too many fonts");
-			while(font_iterator.hasNext()) {
-				font = font_iterator.next();
-				DMS_LOG.log(dms.getName() + ": Skipping font " +
-					font.getName());
-			}
-			return null;
-		}
-		if(font_iterator.hasNext())
+		if(font_iterator.hasNext()) {
 			font = font_iterator.next();
-		else
+			index = font_numbers.get(font.getNumber());
+		} else
 			return null;
 		return new VerifyFont();
 	}
