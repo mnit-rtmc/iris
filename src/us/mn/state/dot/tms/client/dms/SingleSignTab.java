@@ -70,10 +70,10 @@ public class SingleSignTab extends FormPanel {
 	protected final JTextField statusTxt = createTextField();
 
 	/** Panel for drawing current pixel status */
-	protected final SignPixelPanel currentPnl = new SignPixelPanel();
+	protected final SignPixelPanel currentPnl = new SignPixelPanel(true);
 
 	/** Panel for drawing preview pixel status */
-	protected final SignPixelPanel previewPnl = new SignPixelPanel();
+	protected final SignPixelPanel previewPnl = new SignPixelPanel(true);
 
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();

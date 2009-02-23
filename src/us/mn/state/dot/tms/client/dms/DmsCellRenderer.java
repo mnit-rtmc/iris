@@ -80,7 +80,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel lblCamera = new JLabel();
 
 	/** Sign pixel panel to display sign message */
-	protected final SignPixelPanel pixelPnl = new SignPixelPanel();
+	protected final SignPixelPanel pixelPnl = new SignPixelPanel(false);
 
 	/** The label that displays the time the sign was deployed */
 	protected final JLabel lblDeployed = new JLabel();

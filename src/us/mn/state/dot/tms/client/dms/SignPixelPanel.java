@@ -22,7 +22,6 @@ import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -33,6 +32,9 @@ import us.mn.state.dot.tms.BitmapGraphic;
  * @author Douglas Lau
  */
 public class SignPixelPanel extends JPanel {
+
+	/** Flag to turn on antialiasing */
+	protected final boolean antialias;
 
 	/** Sign width (mm) */
 	protected int width_mm = 0;
@@ -73,12 +75,16 @@ public class SignPixelPanel extends JPanel {
 	/** Buffer for screen display */
 	protected BufferedImage buffer;
 
+	/** Bloom size relative to pixel size (0 means no blooming) */
+	protected float bloom = 0f;
+
 	/** Flag that determines if buffer needs repainting */
 	protected boolean dirty = false;
 
 	/** Create a new sign pixel panel */
-	public SignPixelPanel() {
+	public SignPixelPanel(boolean a) {
 		super(true);
+		antialias = a;
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
@@ -186,31 +192,61 @@ public class SignPixelPanel extends JPanel {
 		g.transform(transform);
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, width_mm, height_mm);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-			RenderingHints.VALUE_ANTIALIAS_ON);
-		paintPixels(g, graphic);
+		if(antialias) {
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		}
+		if(graphic != null)
+			paintPixels(g, graphic);
 	}
 
 	/** Paint the pixels of the sign */
 	protected void paintPixels(Graphics2D g, BitmapGraphic b) {
-		Ellipse2D pixel = new Ellipse2D.Float();
+		// NOTE: unlit pixels are drawn first to allow blooming to
+		//       overdraw for lit pixels
+		if(antialias)
+			setBloom(0);
+		else
+			setBloom(1);
+		g.setColor(Color.GRAY);
+		int px = Math.round(hpitch_mm + getBloomX());
+		int py = Math.round(vpitch_mm + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
-			float yy = getPixelY(y);
+			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
-				float xx = getPixelX(x);
-				if(b != null && b.getPixel(x, y) > 0)
-					g.setColor(Color.YELLOW);
-				else
-					g.setColor(Color.GRAY);
-				pixel.setFrame(xx, yy, hpitch_mm, vpitch_mm);
-				g.fill(pixel);
+				int xx = Math.round(getPixelX(x));
+				if(b.getPixel(x, y) == 0)
+					g.fillOval(xx, yy, px, py);
+			}
+		}
+		setBloom(1);
+		g.setColor(Color.YELLOW);
+		px = Math.round(hpitch_mm + getBloomX());
+		py = Math.round(vpitch_mm + getBloomY());
+		for(int y = 0; y < height_pix; y++) {
+			int yy = Math.round(getPixelY(y));
+			for(int x = 0; x < width_pix; x++) {
+				int xx = Math.round(getPixelX(x));
+				if(b.getPixel(x, y) > 0)
+					g.fillOval(xx, yy, px, py);
 			}
 		}
 	}
 
+	/** Set the bloom factor */
+	protected void setBloom(float b) {
+		bloom = b;
+	}
+
+	/** Get the bloom in the y-direction */
+	protected float getBloomY() {
+		return vpitch_mm * bloom / 2;
+	}
+
 	/** Get the y-distance to the given pixel */
 	protected float getPixelY(int y) {
-		return vborder_mm + getLineOffset(y) + vpitch_mm * y;
+		return vborder_mm + getLineOffset(y) + vpitch_mm * y -
+			getBloomY() / 2;
 	}
 
 	/** Get the line offset (for line- or character-matrix signs) */
@@ -233,9 +269,15 @@ public class SignPixelPanel extends JPanel {
 			return 0;
 	}
 
+	/** Get the bloom in the x-direction */
+	protected float getBloomX() {
+		return hpitch_mm * bloom / 2;
+	}
+
 	/** Get the x-distance to the given pixel */
 	protected float getPixelX(int x) {
-		return hborder_mm + getCharacterOffset(x) + hpitch_mm * x;
+		return hborder_mm + getCharacterOffset(x) + hpitch_mm * x -
+			getBloomX() / 2;
 	}
 
 	/** Get the character offset (for character-matrix signs only) */
