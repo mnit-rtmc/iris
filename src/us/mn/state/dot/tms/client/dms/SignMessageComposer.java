@@ -57,7 +57,7 @@ public class SignMessageComposer extends JPanel {
 	protected final TypeCache<SignText> sign_text;
 
 	/** Tab pane to hold pages */
-	protected final JTabbedPane tab = new JTabbedPane();
+	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.RIGHT);
 
 	/** SONAR user */
 	protected final User user;
@@ -182,10 +182,10 @@ public class SignMessageComposer extends JPanel {
 		}
 		for(p = 0; p < n_pages; p++) {
 			JPanel page = createPage(p);
-			setTab(p, "Page " + (p + 1), page);
+			setTab(p, "p." + (p + 1), page);
 		}
-		for(p = n_pages; p < tab.getTabCount(); p++)
-			tab.removeTabAt(p);
+		while(n_pages < tab.getTabCount())
+			tab.removeTabAt(n_pages);
 	}
 
 	/** Create a new page panel */
