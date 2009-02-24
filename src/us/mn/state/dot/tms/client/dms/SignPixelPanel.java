@@ -231,7 +231,10 @@ public class SignPixelPanel extends JPanel {
 					g.fillOval(xx, yy, px, py);
 			}
 		}
-		setBloom(1);
+		if(antialias)
+			setBloom(0.6f);
+		else
+			setBloom(1);
 		g.setColor(lit_color);
 		px = Math.round(hpitch_mm + getBloomX());
 		py = Math.round(vpitch_mm + getBloomY());
