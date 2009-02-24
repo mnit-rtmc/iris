@@ -93,12 +93,12 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void setSign(DMS proxy, int n_lines) {
+	public void setSign(DMS proxy, int nl) {
 		SignTextModel stm = createSignTextModel(proxy);
 		int ml = stm.getMaxLine();
-		int np = Math.max(calculateSignPages(ml, n_lines),
+		int np = Math.max(calculateSignPages(ml, nl),
 			SystemAttributeHelper.getDmsMessageMinPages());
-		initializeWidgets(n_lines, np);
+		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
 			cmbLine[i].setModel(stm.getLineModel(
 				(short)(i + 1)));
