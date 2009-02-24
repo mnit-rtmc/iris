@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
