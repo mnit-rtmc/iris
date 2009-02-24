@@ -407,7 +407,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		PixelMapBuilder b = builder;
 		if(b != null) {
 			b.clear();
-			MultiString multi = new MultiString(m);
+			MultiString multi = new MultiString();
+			if(m != null)
+				multi.addText(m);
 			multi.parse(b, b.getDefaultFontNumber());
 			return b.getPixmaps();
 		} else
