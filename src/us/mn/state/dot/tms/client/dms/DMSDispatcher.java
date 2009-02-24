@@ -387,15 +387,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		return null;
 	}
 
-	/** Get the line height */
-	protected int getLineHeightPixels() {
-		PixelMapBuilder b = builder;
-		if(b != null)
-			return b.getLineHeightPixels();
-		else
-			return 7;
-	}
-
 	/** Send a new message to the selected DMS */
 	protected void sendMessage() {
 		DMS dms = getSingleSelection();
@@ -473,13 +464,34 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps);
 			if(a == null)
-				composer.setSign(dms, getLineHeightPixels());
+				composer.setSign(dms, getLineCount(dms));
 			composer.setMessage(dms);
 		}
 		if(a == null || a.equals("awsAllowed"))
 			awsControlledCbx.setEnabled(isAwsPermitted(dms));
 		if(a == null || a.equals("awsControlled"))
 			awsControlledCbx.setSelected(dms.getAwsControlled());
+	}
+
+	/** Get the number of lines on a sign */
+	protected int getLineCount(DMS dms) {
+		int ml = SystemAttributeHelper.getDmsMaxLines();
+		int lh = getLineHeightPixels();
+		Integer h = dms.getHeightPixels();
+		if(h != null && h > 0 && lh >= h) {
+			int nl = h / lh;
+			return Math.min(nl, ml);
+		} else
+			return ml;
+	}
+
+	/** Get the line height */
+	protected int getLineHeightPixels() {
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.getLineHeightPixels();
+		else
+			return 7;
 	}
 
 	/** Check is AWS is allowed and user has permission to change */

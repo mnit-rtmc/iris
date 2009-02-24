@@ -93,13 +93,12 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void setSign(DMS proxy, int lineHeight) {
+	public void setSign(DMS proxy, int n_lines) {
 		SignTextModel stm = createSignTextModel(proxy);
 		int ml = stm.getMaxLine();
-		int nl = getLineCount(proxy, lineHeight);
-		int np = Math.max(calculateSignPages(ml, nl),
+		int np = Math.max(calculateSignPages(ml, n_lines),
 			SystemAttributeHelper.getDmsMessageMinPages());
-		initializeWidgets(nl, np);
+		initializeWidgets(n_lines, np);
 		for(short i = 0; i < cmbLine.length; i++) {
 			cmbLine[i].setModel(stm.getLineModel(
 				(short)(i + 1)));
@@ -119,18 +118,9 @@ public class SignMessageComposer extends JPanel {
 		return stm;
 	}
 
-	/** Get the number of lines on the sign */
-	protected int getLineCount(DMS proxy, int lineHeight) {
-		int ml = SystemAttributeHelper.getDmsMaxLines();
-		Integer h = proxy.getHeightPixels();
-		if(h != null && h > 0 && lineHeight >= h) {
-			int nl = h / lineHeight;
-			return Math.min(nl, ml);
-		} else
-			return ml;
-	}
-
-	/** Calculate the number of pages for the sign */
+	/** Calculate the number of pages for the sign.
+	 * @param ml Number of lines in message library.
+	 * @param nl Number of lines on sign face. */
 	protected int calculateSignPages(int ml, int nl) {
 		if(nl > 0)
 			return 1 + Math.max(0, (ml - 1) / nl);
