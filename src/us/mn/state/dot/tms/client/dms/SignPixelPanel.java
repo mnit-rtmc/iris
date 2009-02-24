@@ -36,6 +36,12 @@ public class SignPixelPanel extends JPanel {
 	/** Flag to turn on antialiasing */
 	protected final boolean antialias;
 
+	/** Color of sign face */
+	protected final Color face_color;
+
+	/** Color to paint a lit pixel */
+	protected final Color lit_color = Color.YELLOW;
+
 	/** Sign width (mm) */
 	protected int width_mm = 0;
 
@@ -83,8 +89,14 @@ public class SignPixelPanel extends JPanel {
 
 	/** Create a new sign pixel panel */
 	public SignPixelPanel(boolean a) {
+		this(a, Color.BLACK);
+	}
+
+	/** Create a new sign pixel panel */
+	public SignPixelPanel(boolean a, Color f) {
 		super(true);
 		antialias = a;
+		face_color = f;
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
@@ -190,7 +202,7 @@ public class SignPixelPanel extends JPanel {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 		g.transform(transform);
-		g.setColor(Color.BLACK);
+		g.setColor(face_color);
 		g.fillRect(0, 0, width_mm, height_mm);
 		if(antialias) {
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -220,7 +232,7 @@ public class SignPixelPanel extends JPanel {
 			}
 		}
 		setBloom(1);
-		g.setColor(Color.YELLOW);
+		g.setColor(lit_color);
 		px = Math.round(hpitch_mm + getBloomX());
 		py = Math.round(vpitch_mm + getBloomY());
 		for(int y = 0; y < height_pix; y++) {

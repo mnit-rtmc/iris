@@ -74,13 +74,16 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final JTabbedPane tabPane = new JTabbedPane();
 
 	/** Single sign tab */
-	protected final SingleSignTab singleTab = new SingleSignTab();
+	protected final SingleSignTab singleTab = new SingleSignTab(this);
 
 	/** Multiple sign tab */
 	protected final MultipleSignTab multipleTab;
 
 	/** Panel used for drawing a DMS */
 	protected final SignPixelPanel currentPnl;
+
+	/** Panel used for drawing a preview DMS */
+	protected final SignPixelPanel previewPnl;
 
 	/** Message composer widget */
 	protected final SignMessageComposer composer;
@@ -124,6 +127,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Pager for current DMS panel */
 	protected DMSPanelPager currentPnlPager;
 
+	/** Pager for preview DMS panel */
+	protected DMSPanelPager previewPnlPager;
+
 	/** Pixel map builder */
 	protected PixelMapBuilder builder;
 
@@ -137,9 +143,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		user = st.lookupUser(tc.getUser().getName());
 		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
-		composer = new SignMessageComposer(st.getDmsSignGroups(),
+		composer = new SignMessageComposer(this, st.getDmsSignGroups(),
 			st.getSignText(), user);
 		currentPnl = singleTab.getCurrentPanel();
+		previewPnl = singleTab.getPreviewPanel();
 		multipleTab = new MultipleSignTab(st.getSignGroups(),
 			st.getDmsSignGroups(), selectionModel);
 		tabPane.addTab("Single", singleTab);
@@ -223,17 +230,27 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		setSelected(null);
-		clearPager();
+		clearCurrentPager();
+		clearPreviewPager();
 		composer.dispose();
 		removeAll();
 	}
 
-	/** Clear the DMS panel pager */
-	protected void clearPager() {
+	/** Clear the current DMS panel pager */
+	protected void clearCurrentPager() {
 		DMSPanelPager pager = currentPnlPager;
 		if(pager != null) {
 			pager.dispose();
 			currentPnlPager = null;
+		}
+	}
+
+	/** Clear the preview DMS panel pager */
+	protected void clearPreviewPager() {
+		DMSPanelPager pager = previewPnlPager;
+		if(pager != null) {
+			pager.dispose();
+			previewPnlPager = null;
 		}
 	}
 
@@ -326,8 +343,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		clearPager();
+		clearCurrentPager();
+		clearPreviewPager();
 		currentPnl.clear();
+		previewPnl.clear();
 		composer.setEnabled(false);
 		composer.clearSelections();
 		durationCmb.setEnabled(false);
@@ -358,6 +377,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
 		queryStatusBtn.setEnabled(true);
+		selectPreview(false);
 	}
 
 	/** Create the pixel map builder */
@@ -374,17 +394,24 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Get the bitmap graphic for all pages */
 	protected BitmapGraphic[] getBitmaps(DMS dms) {
-		PixelMapBuilder b = builder;
-		if(b != null && dms != null) {
+		if(dms != null) {
 			SignMessage m = dms.getMessageCurrent();
-			if(m != null) {
-				b.clear();
-				MultiString multi=new MultiString(m.getMulti());
-				multi.parse(b, b.getDefaultFontNumber());
-				return b.getPixmaps();
-			}
+			if(m != null)
+				return getBitmaps(m.getMulti());
 		}
 		return null;
+	}
+
+	/** Get the bitmap graphic for the given message */
+	protected BitmapGraphic[] getBitmaps(String m) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			b.clear();
+			MultiString multi = new MultiString(m);
+			multi.parse(b, b.getDefaultFontNumber());
+			return b.getPixmaps();
+		} else
+			return null;
 	}
 
 	/** Send a new message to the selected DMS */
@@ -395,6 +422,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			if(m != null)
 				dms.setMessageNext(m);
 			composer.updateMessageLibrary();
+			selectPreview(false);
 		}
 	}
 
@@ -459,13 +487,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected void updateAttribute(DMS dms, String a) {
 		singleTab.updateAttribute(dms, a);
 		if(a == null || a.equals("messageCurrent")) {
-			clearPager();
+			clearCurrentPager();
 			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps);
 			if(a == null)
 				composer.setSign(dms, getLineCount(dms));
-			composer.setMessage(dms);
+			composer.setMessage();
 		}
 		if(a == null || a.equals("awsAllowed"))
 			awsControlledCbx.setEnabled(isAwsPermitted(dms));
@@ -498,5 +526,25 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected boolean isAwsPermitted(DMS dms) {
 		Name name = new Name(dms, "awsControlled");
 		return dms.getAwsAllowed() && user.canUpdate(name.toString());
+	}
+
+	/** Select the preview mode */
+	public void selectPreview(boolean p) {
+		if(p)
+			updatePreviewPanel();
+		composer.selectPreview(p);
+		singleTab.selectPreview(p);
+	}
+
+	/** Update the preview panel */
+	protected void updatePreviewPanel() {
+		clearPreviewPager();
+		DMS dms = getSingleSelection();
+		if(dms != null) {
+			String multi = composer.getMessage(getFontNumber());
+			BitmapGraphic[] bmaps = getBitmaps(multi);
+			previewPnlPager = new DMSPanelPager(previewPnl, dms,
+				bmaps);
+		}
 	}
 }

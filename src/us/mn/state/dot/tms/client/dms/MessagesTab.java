@@ -75,7 +75,8 @@ public class MessagesTab extends JPanel {
 	protected final JButton delete_text = new JButton("Delete Message");
 
 	/** Sign pixel panel */
-	protected final SignPixelPanel pixel_panel = new SignPixelPanel(true);
+	protected final SignPixelPanel pixel_panel = new SignPixelPanel(true,
+		new Color(0, 0, 0.4f));
 
 	/** AWS allowed component */
 	protected final JCheckBox awsAllowed = new JCheckBox(

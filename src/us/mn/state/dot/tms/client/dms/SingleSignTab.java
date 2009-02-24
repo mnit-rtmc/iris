@@ -18,6 +18,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -69,18 +71,29 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
 
+	/** DMS dispatcher */
+	protected final DMSDispatcher dispatcher;
+
 	/** Panel for drawing current pixel status */
 	protected final SignPixelPanel currentPnl = new SignPixelPanel(true);
 
 	/** Panel for drawing preview pixel status */
-	protected final SignPixelPanel previewPnl = new SignPixelPanel(true);
+	protected final SignPixelPanel previewPnl = new SignPixelPanel(true,
+		new Color(0, 0, 0.4f));
 
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();
 
+	/** Preview mode */
+	protected boolean preview;
+
+	/** Adjusting counter */
+	protected int adjusting = 0;
+
 	/** Create a new single sign tab */
-	public SingleSignTab() {
+	public SingleSignTab(DMSDispatcher d) {
 		super(true);
+		dispatcher = d;
 		currentPnl.setPreferredSize(new Dimension(390, 108));
 		previewPnl.setPreferredSize(new Dimension(390, 108));
 		add("Name", nameTxt);
@@ -95,6 +108,12 @@ public class SingleSignTab extends FormPanel {
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
+		tab.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				if(adjusting == 0)
+					togglePreview();
+			}
+		});
 	}
 
 	/** Get the panel for drawing current pixel status */
@@ -107,12 +126,24 @@ public class SingleSignTab extends FormPanel {
 		return previewPnl;
 	}
 
+	/** Toggle the preview mode */
+	protected void togglePreview() {
+		preview = !preview;
+		dispatcher.selectPreview(preview);
+	}
+
 	/** Select the preview (or current) tab */
 	public void selectPreview(boolean p) {
-		if(p)
-			tab.setSelectedComponent(previewPnl);
-		else
-			tab.setSelectedComponent(currentPnl);
+		preview = p;
+		if(adjusting == 0) {
+			adjusting++;
+			if(p)
+				tab.setSelectedComponent(previewPnl);
+			else
+				tab.setSelectedComponent(currentPnl);
+			dispatcher.selectPreview(p);
+			adjusting--;
+		}
 	}
 
 	/** Clear the selected DMS */

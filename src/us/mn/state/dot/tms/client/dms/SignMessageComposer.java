@@ -47,6 +47,9 @@ public class SignMessageComposer extends JPanel {
 	protected final SignTextCellRenderer renderer =
 		new SignTextCellRenderer();
 
+	/** DMS dispatcher */
+	protected final DMSDispatcher dispatcher;
+
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
 
@@ -56,6 +59,12 @@ public class SignMessageComposer extends JPanel {
 	/** Tab pane to hold pages */
 	protected final JTabbedPane tab = new JTabbedPane();
 
+	/** SONAR user */
+	protected final User user;
+
+	/** Currently selected DMS */
+	protected DMS dms;
+
 	/** Sign text model */
 	protected SignTextModel st_model;
 
@@ -63,18 +72,30 @@ public class SignMessageComposer extends JPanel {
 	protected int n_pages;
 
 	/** Line combo box widgets */
-	protected JComboBox cmbLine[];
+	protected JComboBox[] cmbLine = new JComboBox[0];
 
 	/** Number of lines on the currently selected sign */
 	protected int n_lines;
 
-	/** SONAR user */
-	protected final User user;
+	/** Preview mode */
+	protected boolean preview = false;
+
+	/** Counter to indicate we're adjusting combo boxes */
+	protected int adjusting = 0;
+
+	/** Listener for combo box events */
+	protected final ActionListener comboListener = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if(adjusting == 0)
+				selectPreview(true);
+		}
+	};
 
 	/** Create a new sign message composer */
-	public SignMessageComposer(TypeCache<DmsSignGroup> d, 
+	public SignMessageComposer(DMSDispatcher ds, TypeCache<DmsSignGroup> d, 
 		TypeCache<SignText> t, User u)
 	{
+		dispatcher = ds;
 		dms_sign_groups = d;
 		sign_text = t;
 		user = u;
@@ -92,8 +113,20 @@ public class SignMessageComposer extends JPanel {
 		}
 	}
 
+	/** Set the preview mode */
+	public void selectPreview(boolean p) {
+		preview = p;
+		if(adjusting == 0) {
+			adjusting++;
+			dispatcher.selectPreview(p);
+			setMessage();
+			adjusting--;
+		}
+	}
+
 	/** Update the message combo box models */
 	public void setSign(DMS proxy, int nl) {
+		dms = proxy;
 		SignTextModel stm = createSignTextModel(proxy);
 		int ml = stm.getMaxLine();
 		int np = Math.max(calculateSignPages(ml, nl),
@@ -132,6 +165,8 @@ public class SignMessageComposer extends JPanel {
 	protected void initializeWidgets(int n, int p) {
 		if(n == n_lines && p == n_pages)
 			return;
+		for(int i = 0; i < cmbLine.length; i++)
+			cmbLine[i].removeActionListener(comboListener);
 		n_lines = n;
 		n_pages = p;
 		boolean can_add = st_model != null &&
@@ -143,6 +178,7 @@ public class SignMessageComposer extends JPanel {
 				createEditor(cmbLine[i]);
 			cmbLine[i].setMaximumRowCount(21);
 			cmbLine[i].setRenderer(renderer);
+			cmbLine[i].addActionListener(comboListener);
 		}
 		for(p = 0; p < n_pages; p++) {
 			JPanel page = createPage(p);
@@ -257,8 +293,17 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Set the currently selected message */
-	public void setMessage(DMS proxy) {
-		SignMessage m = proxy.getMessageCurrent();
+	public void setMessage() {
+		DMS proxy = dms;	// Avoid races
+		if(proxy == null || preview)
+			return;
+		adjusting++;
+		setMessage(proxy.getMessageCurrent());
+		adjusting--;
+	}
+
+	/** Set the currently selected message */
+	protected void setMessage(SignMessage m) {
 		String[] lines = SignMessageHelper.createLines(m);
 		for(int i = 0; i < cmbLine.length; i++) {
 			if(i < lines.length)
@@ -278,8 +323,10 @@ public class SignMessageComposer extends JPanel {
 
 	/** Clear the combobox selections */
 	public void clearSelections() {
+		adjusting++;
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i].setSelectedIndex(-1);
+		adjusting--;
 	}
 
 	/** Update the message library with the currently selected messages */
