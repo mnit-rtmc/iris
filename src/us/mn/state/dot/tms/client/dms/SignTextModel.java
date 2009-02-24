@@ -81,7 +81,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 		};
 	}
 
-	/** Initialize the sign message model */
+	/** Initialize the sign text model */
 	public void initialize() {
 		dms_sign_groups.addProxyListener(this);
 		sign_text.addProxyListener(listener);
@@ -166,7 +166,7 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	}
 
 	/** 
-	 * Lookup a SignText in the database.
+	 * Lookup a SignText in the namespace.
 	 * @param line Message line number (1 based)
 	 * @return the matching SignText else null if it doesn't exist.
 	 */

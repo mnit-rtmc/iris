@@ -94,7 +94,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Update the message combo box models */
 	public void setSign(DMS proxy, int lineHeight) {
-		createMessageModel(proxy);
+		createSignTextModel(proxy);
 		int ml = st_model.getMaxLine();
 		int nl = getLineCount(proxy, lineHeight);
 		int np = Math.max(calculateSignPages(ml, nl),
@@ -107,8 +107,8 @@ public class SignMessageComposer extends JPanel {
 		}
 	}
 
-	/** Create a new message model */
-	protected void createMessageModel(DMS proxy) {
+	/** Create a new sign text model */
+	protected void createSignTextModel(DMS proxy) {
 		SignTextModel stm = new SignTextModel(proxy, dms_sign_groups,
 			sign_text, user);
 		stm.initialize();
