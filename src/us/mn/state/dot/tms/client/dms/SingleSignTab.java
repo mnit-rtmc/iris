@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
@@ -24,6 +26,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 
@@ -53,6 +56,35 @@ public class SingleSignTab extends FormPanel {
 			return c.getStatus();
 	}
 
+	/** Formatter for displaying the hour and minute */
+	static protected final SimpleDateFormat HOUR_MINUTE =
+		new SimpleDateFormat("HH:mm");
+
+	/** Milliseconds per day */
+	static protected final long MS_PER_DAY = 24 * 60 * 60 * (long)1000;
+
+	/** Format the message deployed time */
+	static protected String formatDeploy(SignMessage m) {
+		long deploy = m.getDeployTime();
+		if(System.currentTimeMillis() < deploy + MS_PER_DAY)
+			return HOUR_MINUTE.format(m.getDeployTime());
+		else
+			return "";
+	}
+
+	/** Format the message expriation */
+	static protected String formatExpires(SignMessage m) {
+		Integer duration = m.getDuration();
+		if(duration == null)
+			return "";
+		if(duration <= 0 || duration >= 65535)
+			return "";
+		Calendar c = Calendar.getInstance();
+		c.setTimeInMillis(m.getDeployTime());
+		c.add(Calendar.MINUTE, duration);
+		return HOUR_MINUTE.format(c.getTime());
+	}
+
 	/** Displays the id of the DMS */
 	protected final JTextField nameTxt = createTextField();
 
@@ -70,6 +102,12 @@ public class SingleSignTab extends FormPanel {
 
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
+
+	/** Displays the current message deploy time */
+	protected final JTextField deployTxt = createTextField();
+
+	/** Displays the current message expiration */
+	protected final JTextField expiresTxt = createTextField();
 
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
@@ -105,6 +143,8 @@ public class SingleSignTab extends FormPanel {
 			addRow("Status", statusTxt);
 		} else
 			addRow("Operation", operationTxt);
+		add("Deployed", deployTxt);
+		addRow("Expires", expiresTxt);
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
@@ -185,6 +225,11 @@ public class SingleSignTab extends FormPanel {
 			}
 			operationTxt.setText(dms.getOperation());
 			statusTxt.setText(status);
+		}
+		if(a == null || a.equals("messageCurrent")) {
+			SignMessage m = dms.getMessageCurrent();
+			deployTxt.setText(formatDeploy(m));
+			expiresTxt.setText(formatExpires(m));
 		}
 	}
 }

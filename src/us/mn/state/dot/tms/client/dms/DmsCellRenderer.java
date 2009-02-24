@@ -15,12 +15,8 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -29,11 +25,9 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import javax.swing.SwingConstants;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
@@ -48,22 +42,6 @@ import us.mn.state.dot.tms.SignMessage;
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
-	/** Non-expiring message time */
-	static protected final String NO_EXPIRE = "E-XX:XX";
-
-	/** Formatter for displaying the hour and minute */
-	static protected final SimpleDateFormat HOUR_MINUTE =
-		new SimpleDateFormat("HH:mm");
-
-	/** Get the verification camera name */
-	static protected String getCameraName(DMS dms) {
-		Camera camera = dms.getCamera();
-		if(camera == null)
-			return " ";
-		else
-			return camera.getName();
-	}
-
 	/** Test if a message is deployed */
 	static public boolean isDeployed(SignMessage m) {
 		if(m != null) {
@@ -76,17 +54,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
-	/** The label that displays the camera id */
-	protected final JLabel lblCamera = new JLabel();
-
 	/** Sign pixel panel to display sign message */
 	protected final SignPixelPanel pixelPnl = new SignPixelPanel(false);
-
-	/** The label that displays the time the sign was deployed */
-	protected final JLabel lblDeployed = new JLabel();
-
-	/** The label that displays the time the current message will expire */
-	protected final JLabel lblExpires = new JLabel();
 
 	/** List cell renderer (needed for colors) */
 	protected final DefaultListCellRenderer cell =
@@ -112,33 +81,18 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		super(new BorderLayout());
 		namespace = ns;
 		setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createEmptyBorder(2, 2, 2, 2),
-			BorderFactory.createRaisedBevelBorder()));
-
-		Box topBox = Box.createVerticalBox();
+		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
+		          BorderFactory.createRaisedBevelBorder()));
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(lblID);
 		title.add(Box.createGlue());
 		title.add(lblUser);
-		topBox.add(title);
 		location.add(lblLocation);
 		location.add(Box.createGlue());
-		topBox.add(location);
-
-		Box bottomBox = Box.createHorizontalBox();
-		bottomBox.add(lblDeployed);
-		bottomBox.add(Box.createGlue());
-		bottomBox.add(Box.createHorizontalStrut(8));
-		bottomBox.add(lblExpires);
-		bottomBox.add(Box.createHorizontalStrut(8));
-		bottomBox.add(Box.createGlue());
-		bottomBox.add(lblCamera);
-
-		add(topBox, BorderLayout.NORTH);
+		add(title, BorderLayout.NORTH);
 		add(pixelPnl, BorderLayout.CENTER);
-		add(bottomBox, BorderLayout.SOUTH);
-
-		setPreferredSize(new Dimension(190, 102));
+		add(location, BorderLayout.SOUTH);
+		setPreferredSize(new Dimension(190, 92));
 	}
 
 	/** Check if the background is opaque */
@@ -161,6 +115,14 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		return this;
 	}
 
+	/** Format the owner of the given sign message */
+	static protected String formatOwner(SignMessage m) {
+		if(m != null)
+			return formatOwner(m.getOwner());
+		else
+			return "";
+	}
+
 	/** Prune the owner string to the first dot */
 	static protected String formatOwner(User owner) {
 		if(owner != null) {
@@ -174,47 +136,15 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			return "";
 	}
 
-	/** Format the message deployed time */
-	static protected String formatDeployed(SignMessage m) {
-		return "D-" + HOUR_MINUTE.format(m.getDeployTime());
-	}
-
-	/** Format the message expriation */
-	static protected String formatExpiration(SignMessage m) {
-		Integer duration = m.getDuration();
-		if(duration == null)
-			return NO_EXPIRE;
-		if(duration <= 0 || duration >= 65535)
-			return NO_EXPIRE;
-		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(m.getDeployTime());
-		c.add(Calendar.MINUTE, duration);
-		return "E-" + HOUR_MINUTE.format(c.getTime());
-	}
-
 	/** Set the DMS to be displayed */
 	protected void setDms(DMS dms) {
 		lblID.setText(dms.getName());
 		lblLocation.setText(GeoLocHelper.getDescription(
 			dms.getGeoLoc()));
-		lblCamera.setText(getCameraName(dms));
 		setDimensions(dms);
-		pixelPnl.setGraphic(null);
-		// Note: getMessageCurrent will only return null after the
-		//       DMS proxy has been destroyed.
+		pixelPnl.setGraphic(getPageOne(dms));
 		SignMessage message = dms.getMessageCurrent();
-		if(isDeployed(message)) {
-			lblUser.setText(formatOwner(message.getOwner()));
-			lblDeployed.setText(formatDeployed(message));
-			lblExpires.setText(formatExpiration(message));
-			BitmapGraphic b = getPageOne(dms);
-			if(b != null)
-				pixelPnl.setGraphic(b);
-		} else {
-			lblUser.setText("");
-			lblDeployed.setText("");
-			lblExpires.setText("");
-		}
+		lblUser.setText(formatOwner(message));
 	}
 
 	/** Set the dimensions of the pixel panel */
@@ -266,7 +196,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		PixelMapBuilder b = createPixelMapBuilder(dms);
 		if(b != null) {
 			SignMessage m = dms.getMessageCurrent();
-			if(m != null) {
+			if(isDeployed(m)) {
 				MultiString multi=new MultiString(m.getMulti());
 				multi.parse(b, b.getDefaultFontNumber());
 			}
