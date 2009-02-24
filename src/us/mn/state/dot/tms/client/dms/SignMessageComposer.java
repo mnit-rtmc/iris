@@ -92,13 +92,49 @@ public class SignMessageComposer extends JPanel {
 		}
 	}
 
-	/** Set a page on one tab */
-	protected void setTab(int n, String title, JPanel page) {
-		if(n < tab.getTabCount()) {
-			tab.setComponentAt(n, page);
-			tab.setTitleAt(n, title);
+	/** Update the message combo box models */
+	public void setSign(DMS proxy, int lineHeight) {
+		createMessageModel(proxy);
+		int ml = st_model.getMaxLine();
+		int nl = getLineCount(proxy, lineHeight);
+		int np = Math.max(calculateSignPages(ml, nl),
+			SystemAttributeHelper.getDmsMessageMinPages());
+		initializeWidgets(nl, np);
+		for(short i = 0; i < cmbLine.length; i++) {
+			cmbLine[i].setModel(st_model.getLineModel(
+				(short)(i + 1)));
+			cmbLine[i].setEnabled(true);
+		}
+	}
+
+	/** Create a new message model */
+	protected void createMessageModel(DMS proxy) {
+		SignTextModel stm = new SignTextModel(proxy, dms_sign_groups,
+			sign_text, user);
+		stm.initialize();
+		SignTextModel om = st_model;
+		st_model = stm;
+		if(om != null)
+			om.dispose();
+	}
+
+	/** Get the number of lines on the sign */
+	protected int getLineCount(DMS proxy, int lineHeight) {
+		int ml = SystemAttributeHelper.getDmsMaxLines();
+		Integer h = proxy.getHeightPixels();
+		if(h != null && h > 0 && lineHeight >= h) {
+			int nl = h / lineHeight;
+			return Math.min(nl, ml);
 		} else
-			tab.addTab(title, page);
+			return ml;
+	}
+
+	/** Calculate the number of pages for the sign */
+	protected int calculateSignPages(int ml, int nl) {
+		if(nl > 0)
+			return 1 + Math.max(0, (ml - 1) / nl);
+		else
+			return 1;
 	}
 
 	/** Initialize the page tabs and message combo boxes */
@@ -119,13 +155,29 @@ public class SignMessageComposer extends JPanel {
 		}
 		for(p = 0; p < n_pages; p++) {
 			JPanel page = createPage(p);
-			if(n_pages > 1)
-				setTab(p, "Page " + (p + 1), page);
-			else
-				setTab(p, "Compose Message", page);
+			setTab(p, "Page " + (p + 1), page);
 		}
 		for(p = n_pages; p < tab.getTabCount(); p++)
 			tab.removeTabAt(p);
+	}
+
+	/** Create a new page panel */
+	protected JPanel createPage(int p) {
+		JPanel panel = new JPanel(new GridLayout(n_lines, 1, 6, 6));
+		panel.setBackground(Color.BLACK);
+		panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
+		for(int i = 0; i < n_lines; i++)
+			panel.add(cmbLine[i + p * n_lines]);
+		return panel;
+	}
+
+	/** Set a page on one tab */
+	protected void setTab(int n, String title, JPanel page) {
+		if(n < tab.getTabCount()) {
+			tab.setComponentAt(n, page);
+			tab.setTitleAt(n, title);
+		} else
+			tab.addTab(title, page);
 	}
 
 	/** Key event saved when making combobox editable */
@@ -162,14 +214,11 @@ public class SignMessageComposer extends JPanel {
 		});
 	}
 
-	/** Create a new page panel */
-	protected JPanel createPage(int p) {
-		JPanel panel = new JPanel(new GridLayout(n_lines, 1, 6, 6));
-		panel.setBackground(Color.BLACK);
-		panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-		for(int i = 0; i < n_lines; i++)
-			panel.add(cmbLine[i + p * n_lines]);
-		return panel;
+	/** Enable or Disable the message selector */
+	public void setEnabled(boolean b) {
+		super.setEnabled(b);
+		for(int i = 0; i < cmbLine.length; i++)
+			cmbLine[i].setEnabled(b);
 	}
 
 	/** Get the text of the message to send to the sign */
@@ -240,58 +289,6 @@ public class SignMessageComposer extends JPanel {
 	public void clearSelections() {
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i].setSelectedIndex(-1);
-	}
-
-	/** Enable or Disable the message selector */
-	public void setEnabled(boolean b) {
-		super.setEnabled(b);
-		for(int i = 0; i < cmbLine.length; i++)
-			cmbLine[i].setEnabled(b);
-	}
-
-	/** Update the message combo box models */
-	public void setSign(DMS proxy, int lineHeight) {
-		createMessageModel(proxy);
-		int ml = st_model.getMaxLine();
-		int nl = getLineCount(proxy, lineHeight);
-		int np = Math.max(calculateSignPages(ml, nl),
-			SystemAttributeHelper.getDmsMessageMinPages());
-		initializeWidgets(nl, np);
-		for(short i = 0; i < cmbLine.length; i++) {
-			cmbLine[i].setModel(st_model.getLineModel(
-				(short)(i + 1)));
-			cmbLine[i].setEnabled(true);
-		}
-	}
-
-	/** Get the number of lines on the sign */
-	protected int getLineCount(DMS proxy, int lineHeight) {
-		int ml = SystemAttributeHelper.getDmsMaxLines();
-		Integer h = proxy.getHeightPixels();
-		if(h != null && h > 0 && lineHeight >= h) {
-			int nl = h / lineHeight;
-			return Math.min(nl, ml);
-		} else
-			return ml;
-	}
-
-	/** Create a new message model */
-	protected void createMessageModel(DMS proxy) {
-		SignTextModel stm = new SignTextModel(proxy, dms_sign_groups,
-			sign_text, user);
-		stm.initialize();
-		SignTextModel om = st_model;
-		st_model = stm;
-		if(om != null)
-			om.dispose();
-	}
-
-	/** Calculate the number of pages for the sign */
-	protected int calculateSignPages(int ml, int nl) {
-		if(nl > 0)
-			return 1 + Math.max(0, (ml - 1) / nl);
-		else
-			return 1;
 	}
 
 	/** Update the message library with the currently selected messages */
