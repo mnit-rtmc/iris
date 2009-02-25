@@ -195,6 +195,8 @@ public class SingleSignTab extends FormPanel {
 		brightnessTxt.setText("");
 		operationTxt.setText("");
 		statusTxt.setText("");
+		deployTxt.setText("");
+		expiresTxt.setText("");
 	}
 
 	/** Update one attribute on the form */
