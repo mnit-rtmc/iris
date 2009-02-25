@@ -138,7 +138,9 @@ public class SingleSignTab extends FormPanel {
 		add("Name", nameTxt);
 		addRow("Location", locationTxt);
 		add("Camera", cameraTxt);
-		addRow("Brightness", brightnessTxt);
+		if(SystemAttributeHelper.isDmsBrightnessEnabled())
+			add("Brightness", brightnessTxt);
+		finishRow();
 		addRow("Operation", operationTxt);
 		if(SystemAttributeHelper.isDmsStatusEnabled())
 			addRow("Status", statusTxt);
