@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -27,11 +28,11 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
@@ -184,35 +185,42 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Get the bitmap graphic for page one */
 	protected BitmapGraphic getPageOne(DMS dms) {
-		BitmapGraphic[] bitmaps = getBitmaps(dms);
-		if(bitmaps != null && bitmaps.length > 0)
-			return bitmaps[0];
-		else
+		if(dms == null)
 			return null;
+		SignMessage m = dms.getMessageCurrent();
+		if(m == null)
+			return null;
+		byte[] bmaps = decodeBitmaps(m.getBitmaps());
+		if(bmaps == null || bmaps.length == 0)
+			return null;
+		BitmapGraphic bg = createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.getBitmap().length;
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		byte[] b = new byte[blen];
+		System.arraycopy(bmaps, 0, b, 0, blen);
+		bg.setBitmap(b);
+		return bg;
 	}
 
-	/** Get the bitmap graphic for all pages */
-	protected BitmapGraphic[] getBitmaps(DMS dms) {
-		PixelMapBuilder b = createPixelMapBuilder(dms);
-		if(b != null) {
-			SignMessage m = dms.getMessageCurrent();
-			if(isDeployed(m)) {
-				MultiString multi=new MultiString(m.getMulti());
-				multi.parse(b, b.getDefaultFontNumber());
-			}
-			return b.getPixmaps();
-		} else
+	/** Decode the bitmaps */
+	protected byte[] decodeBitmaps(String bitmaps) {
+		try {
+			return Base64.decode(bitmaps);
+		}
+		catch(IOException e) {
 			return null;
+		}
 	}
 
-	/** Create the pixel map builder */
-	protected PixelMapBuilder createPixelMapBuilder(DMS dms) {
+	/** Create a bitmap graphic */
+	protected BitmapGraphic createBitmapGraphic(DMS dms) {
 		Integer wp = dms.getWidthPixels();
 		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
-			return new PixelMapBuilder(namespace, wp, hp, cw, ch);
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
 		else
 			return null;
 	}

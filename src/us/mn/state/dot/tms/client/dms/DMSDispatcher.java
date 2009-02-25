@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.io.IOException;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -403,25 +404,48 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Get the bitmap graphic for all pages */
 	protected BitmapGraphic[] getBitmaps(DMS dms) {
-		if(dms != null) {
-			SignMessage m = dms.getMessageCurrent();
-			if(m != null)
-				return getBitmaps(m.getMulti());
+		if(dms == null)
+			return null;
+		SignMessage m = dms.getMessageCurrent();
+		if(m == null)
+			return null;
+		byte[] bmaps = decodeBitmaps(m.getBitmaps());
+		if(bmaps == null)
+			return null;
+		BitmapGraphic bg = createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.getBitmap().length;
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		int n_pages = bmaps.length / blen;
+		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
+		for(int i = 0; i < n_pages; i++) {
+			bitmaps[i] = createBitmapGraphic(dms);
+			byte[] b = new byte[blen];
+			System.arraycopy(bmaps, i * blen, b, 0, blen);
+			bitmaps[i].setBitmap(b);
 		}
-		return null;
+		return bitmaps;
 	}
 
-	/** Get the bitmap graphic for the given message */
-	protected BitmapGraphic[] getBitmaps(String m) {
-		PixelMapBuilder b = builder;
-		if(b != null) {
-			b.clear();
-			MultiString multi = new MultiString();
-			if(m != null)
-				multi.addText(m);
-			multi.parse(b, b.getDefaultFontNumber());
-			return b.getPixmaps();
-		} else
+	/** Decode the bitmaps */
+	protected byte[] decodeBitmaps(String bitmaps) {
+		try {
+			return Base64.decode(bitmaps);
+		}
+		catch(IOException e) {
+			return null;
+		}
+	}
+
+	/** Create a bitmap graphic */
+	protected BitmapGraphic createBitmapGraphic(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
+		else
 			return null;
 	}
 
@@ -564,5 +588,19 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			previewPnlPager = new DMSPanelPager(previewPnl, dms,
 				bmaps);
 		}
+	}
+
+	/** Get the bitmap graphic for the given message */
+	protected BitmapGraphic[] getBitmaps(String m) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			b.clear();
+			MultiString multi = new MultiString();
+			if(m != null)
+				multi.addText(m);
+			multi.parse(b, b.getDefaultFontNumber());
+			return b.getPixmaps();
+		} else
+			return null;
 	}
 }
