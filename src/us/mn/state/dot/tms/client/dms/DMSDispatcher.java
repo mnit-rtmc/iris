@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
@@ -109,19 +108,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final JButton clearBtn =
 		new JButton(I18NMessages.get("dms.clear"));
 
-	/** Button used to get the DMS status (optional) */
-	protected final JButton queryStatusBtn = new JButton(I18NMessages.get(
-		"dms.query_status"));
-
-	/** Card layout for aws / alert panel */
+	/** Card layout for alert panel */
 	protected final CardLayout cards = new CardLayout();
 
-	/** Card panel for aws / alert panels */
+	/** Card panel for alert panels */
 	protected final JPanel card_panel = new JPanel(cards);
-
-	/** AWS controlled checkbox (optional) */
-	protected final JCheckBox awsControlledCbx =
-		new JCheckBox(I18NMessages.get("dms.aws"));
 
 	/** AMBER Alert checkbox */
 	protected final JCheckBox alertCbx =
@@ -170,25 +161,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Create a component to deploy signs */
 	protected Box createDeployBox() {
 		durationCmb.setSelectedIndex(0);
-		new ActionJob(awsControlledCbx) {
-			public void perform() {
-				DMS dms = getSingleSelection();
-				if(dms != null) {
-					dms.setAwsControlled(
-						awsControlledCbx.isSelected());
-				}
-			}
-		};
 		FormPanel panel = new FormPanel(true);
 		if(SystemAttributeHelper.isDmsDurationEnabled())
 			panel.addRow("Duration", durationCmb);
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
 			panel.addRow("Font", fontCmb);
 		panel.addRow(card_panel);
-		if(SystemAttributeHelper.isAwsEnabled())
-			card_panel.add(awsControlledCbx, "AWS");
-		else
-			card_panel.add(new JLabel(), "AWS");
+		card_panel.add(new JLabel(), "Blank");
 		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
 		panel.addRow(buildButtonPanel());
@@ -272,31 +251,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			}
 		};
 		sendBtn.setToolTipText(I18NMessages.get("dms.send.tooltip"));
-		new ActionJob(this, queryStatusBtn) {
-			public void perform() {
-				queryStatus();
-			}
-		};
-		queryStatusBtn.setToolTipText(I18NMessages.get(
-			"dms.query_status.tooltip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
 		box.add(Box.createHorizontalStrut(4));
 		box.add(clearBtn);
-		if(SystemAttributeHelper.isDmsStatusEnabled()) {
-			box.add(Box.createHorizontalStrut(4));
-			box.add(queryStatusBtn);
-		}
 		box.add(Box.createHorizontalGlue());
 		return box;
-	}
-
-	/** Query the status for the selected sign */
-	protected void queryStatus() {
-		DMS dms = getSingleSelection();
-		if(dms != null)
-			dms.setSignRequest(SignRequest.QUERY_STATUS.ordinal());
 	}
 
 	/** Called whenever a sign is added to the selection */
@@ -341,7 +302,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			alertCbx.setSelected(false);
 			tabPane.setSelectedComponent(singleTab);
 		}
-		cards.show(card_panel, "AWS");
+		cards.show(card_panel, "Blank");
 	}
 
 	/** Select the multiple selection tab */
@@ -367,10 +328,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			fontModel.dispose();
 			fontModel = null;
 		}
-		awsControlledCbx.setEnabled(false);
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
-		queryStatusBtn.setEnabled(false);
 		builder = null;
 	}
 
@@ -386,7 +345,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		fontCmb.setEnabled(true);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
-		queryStatusBtn.setEnabled(true);
 		selectPreview(false);
 	}
 
@@ -539,10 +497,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				composer.setSign(dms, getLineCount(dms));
 			composer.setMessage();
 		}
-		if(a == null || a.equals("awsAllowed"))
-			awsControlledCbx.setEnabled(isAwsPermitted(dms));
-		if(a == null || a.equals("awsControlled"))
-			awsControlledCbx.setSelected(dms.getAwsControlled());
 	}
 
 	/** Get the number of lines on a sign */
@@ -564,12 +518,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return b.getLineHeightPixels();
 		else
 			return 7;
-	}
-
-	/** Check is AWS is allowed and user has permission to change */
-	protected boolean isAwsPermitted(DMS dms) {
-		Name name = new Name(dms, "awsControlled");
-		return dms.getAwsAllowed() && user.canUpdate(name.toString());
 	}
 
 	/** Select the preview mode */
@@ -604,5 +552,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return b.getPixmaps();
 		} else
 			return null;
+	}
+
+	/** Check is AWS is allowed and user has permission to change */
+	public boolean isAwsPermitted(DMS dms) {
+		Name name = new Name(dms, "awsControlled");
+		return dms.getAwsAllowed() && user.canUpdate(name.toString());
 	}
 }

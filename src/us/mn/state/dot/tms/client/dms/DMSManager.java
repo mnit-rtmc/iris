@@ -59,7 +59,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Name of automated warning system deployed style */
 	static public final String STYLE_AWS_DEPLOYED =
-		I18NMessages.get("dms.aws") + " Deployed";
+		I18NMessages.get("dms.aws.deployed");
 
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "User Deployed";
@@ -69,7 +69,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Name of automated warning system controlled style */
 	static public final String STYLE_AWS_CONTROLLED =
-		I18NMessages.get("dms.aws") + " Controlled";
+		I18NMessages.get("dms.aws.controlled");
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";

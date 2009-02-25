@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.toast;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -144,6 +145,18 @@ public class FormPanel extends JPanel {
 	/** Add a component with a label on the left side */
 	public void addRow(String name, JComponent comp) {
 		addRow(new JLabel(name), comp);
+	}
+
+	/** Add a component with a label on the left side and a button */
+	public void addRow(String name, JComponent comp, JButton btn) {
+		setEast();
+		add(new JLabel(name));
+		setWest();
+		setWidth(4);
+		add(comp);
+		setCenter();
+		add(btn);
+		finishRow();
 	}
 
 	/** Add a text area component with a label on the left side */

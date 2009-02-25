@@ -18,17 +18,22 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * A SingleSignTab is a GUI component for displaying the status of a single
@@ -38,11 +43,14 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
  */
 public class SingleSignTab extends FormPanel {
 
+	/** Empty text field */
+	static protected final String EMPTY_TXT = "    ";
+
 	/** Get the verification camera name */
 	static protected String getCameraName(DMS proxy) {
 		Camera camera = proxy.getCamera();
 		if(camera == null)
-			return " ";
+			return EMPTY_TXT;
 		else
 			return camera.getName();
 	}
@@ -77,9 +85,9 @@ public class SingleSignTab extends FormPanel {
 		SignMessage m = dms.getMessageCurrent();
 		Integer duration = m.getDuration();
 		if(duration == null)
-			return "";
+			return EMPTY_TXT; 
 		if(duration <= 0 || duration >= 65535)
-			return "";
+			return EMPTY_TXT;
 		Calendar c = Calendar.getInstance();
 		c.setTimeInMillis(dms.getDeployTime());
 		c.add(Calendar.MINUTE, duration);
@@ -89,17 +97,24 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the id of the DMS */
 	protected final JTextField nameTxt = createTextField();
 
-	/** Displays the location of the DMS */
-	protected final JTextField locationTxt = createTextField();
+	/** Displays the brightness of the DMS */
+	protected final JTextField brightnessTxt = createTextField();
 
 	/** Displays the verify camera for the DMS */
 	protected final JTextField cameraTxt = createTextField();
 
-	/** Displays the brightness of the DMS */
-	protected final JTextField brightnessTxt = createTextField();
+	/** Displays the location of the DMS */
+	protected final JTextField locationTxt = createTextField();
+
+	/** AWS controlled checkbox (optional) */
+	protected final JCheckBox awsControlledCbx = new JCheckBox();
 
 	/** Displays the current operation of the DMS */
 	protected final JTextField operationTxt = createTextField();
+
+	/** Button used to get the DMS status (optional) */
+	protected final JButton queryStatusBtn = new JButton(I18NMessages.get(
+		"dms.query_status"));
 
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
@@ -123,6 +138,9 @@ public class SingleSignTab extends FormPanel {
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();
 
+	/** DMS proxy */
+	protected DMS proxy;
+
 	/** Preview mode */
 	protected boolean preview;
 
@@ -136,16 +154,26 @@ public class SingleSignTab extends FormPanel {
 		currentPnl.setPreferredSize(new Dimension(390, 108));
 		previewPnl.setPreferredSize(new Dimension(390, 108));
 		add("Name", nameTxt);
-		addRow("Location", locationTxt);
-		add("Camera", cameraTxt);
-		if(SystemAttributeHelper.isDmsBrightnessEnabled())
+		if(SystemAttributeHelper.isDmsBrightnessEnabled()) {
 			add("Brightness", brightnessTxt);
-		finishRow();
+			addRow("Camera", cameraTxt);
+		} else
+			addRow("Camera", cameraTxt);
+		addRow("Location", locationTxt);
 		addRow("Operation", operationTxt);
 		if(SystemAttributeHelper.isDmsStatusEnabled())
-			addRow("Status", statusTxt);
+			addRow("Status", statusTxt, queryStatusBtn);
 		add("Deployed", deployTxt);
-		addRow("Expires", expiresTxt);
+		if(SystemAttributeHelper.isDmsDurationEnabled()) {
+			if(SystemAttributeHelper.isAwsEnabled())
+				add("Expires", expiresTxt);
+			else
+				addRow("Expires", expiresTxt);
+		}
+		if(SystemAttributeHelper.isAwsEnabled()) {
+			addRow(I18NMessages.get("dms.aws.controlled"),
+				awsControlledCbx);
+		}
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
@@ -155,6 +183,24 @@ public class SingleSignTab extends FormPanel {
 					togglePreview();
 			}
 		});
+		new ActionJob(this, queryStatusBtn) {
+			public void perform() {
+				if(proxy != null) {
+					proxy.setSignRequest(SignRequest.
+						QUERY_STATUS.ordinal());
+				}
+			}
+		};
+		queryStatusBtn.setToolTipText(I18NMessages.get(
+			"dms.query_status.tooltip"));
+		new ActionJob(awsControlledCbx) {
+			public void perform() {
+				if(proxy != null) {
+					proxy.setAwsControlled(
+						awsControlledCbx.isSelected());
+				}
+			}
+		};
 	}
 
 	/** Get the panel for drawing current pixel status */
@@ -189,33 +235,38 @@ public class SingleSignTab extends FormPanel {
 
 	/** Clear the selected DMS */
 	public void clearSelected() {
-		nameTxt.setText("");
+		proxy = null;
+		nameTxt.setText(EMPTY_TXT);
+		brightnessTxt.setText(EMPTY_TXT);
+		cameraTxt.setText(EMPTY_TXT);
 		locationTxt.setText("");
-		cameraTxt.setText("");
-		brightnessTxt.setText("");
+		awsControlledCbx.setSelected(false);
+		awsControlledCbx.setEnabled(false);
 		operationTxt.setText("");
+		queryStatusBtn.setEnabled(false);
 		statusTxt.setText("");
 		deployTxt.setText("");
-		expiresTxt.setText("");
+		expiresTxt.setText(EMPTY_TXT);
 	}
 
 	/** Update one attribute on the form */
 	public void updateAttribute(DMS dms, String a) {
+		proxy = dms;
 		if(a == null || a.equals("name"))
 			nameTxt.setText(dms.getName());
-		// FIXME: this won't update when geoLoc attributes change
-		if(a == null || a.equals("geoLoc")) {
-			locationTxt.setText(GeoLocHelper.getDescription(
-				dms.getGeoLoc()));
-		}
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(dms));
 		if(a == null || a.equals("lightOutput")) {
 			Integer o = dms.getLightOutput();
 			if(o != null)
 				brightnessTxt.setText("" + o + "%");
 			else
 				brightnessTxt.setText("");
+		}
+		if(a == null || a.equals("camera"))
+			cameraTxt.setText(getCameraName(dms));
+		// FIXME: this won't update when geoLoc attributes change
+		if(a == null || a.equals("geoLoc")) {
+			locationTxt.setText(GeoLocHelper.getDescription(
+				dms.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation")) {
 			String status = getControllerStatus(dms);
@@ -227,11 +278,18 @@ public class SingleSignTab extends FormPanel {
 				operationTxt.setBackground(Color.GRAY);
 			}
 			operationTxt.setText(dms.getOperation());
+			queryStatusBtn.setEnabled(true);
 			statusTxt.setText(status);
 		}
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
 			expiresTxt.setText(formatExpires(dms));
 		}
+		if(a == null || a.equals("awsAllowed")) {
+			awsControlledCbx.setEnabled(
+				dispatcher.isAwsPermitted(dms));
+		}
+		if(a == null || a.equals("awsControlled"))
+			awsControlledCbx.setSelected(dms.getAwsControlled());
 	}
 }
