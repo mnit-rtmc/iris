@@ -64,23 +64,24 @@ public class SingleSignTab extends FormPanel {
 	static protected final long MS_PER_DAY = 24 * 60 * 60 * (long)1000;
 
 	/** Format the message deployed time */
-	static protected String formatDeploy(SignMessage m) {
-		long deploy = m.getDeployTime();
+	static protected String formatDeploy(DMS dms) {
+		long deploy = dms.getDeployTime();
 		if(System.currentTimeMillis() < deploy + MS_PER_DAY)
-			return HOUR_MINUTE.format(m.getDeployTime());
+			return HOUR_MINUTE.format(deploy);
 		else
 			return "";
 	}
 
 	/** Format the message expriation */
-	static protected String formatExpires(SignMessage m) {
+	static protected String formatExpires(DMS dms) {
+		SignMessage m = dms.getMessageCurrent();
 		Integer duration = m.getDuration();
 		if(duration == null)
 			return "";
 		if(duration <= 0 || duration >= 65535)
 			return "";
 		Calendar c = Calendar.getInstance();
-		c.setTimeInMillis(m.getDeployTime());
+		c.setTimeInMillis(dms.getDeployTime());
 		c.add(Calendar.MINUTE, duration);
 		return HOUR_MINUTE.format(c.getTime());
 	}
@@ -227,9 +228,8 @@ public class SingleSignTab extends FormPanel {
 			statusTxt.setText(status);
 		}
 		if(a == null || a.equals("messageCurrent")) {
-			SignMessage m = dms.getMessageCurrent();
-			deployTxt.setText(formatDeploy(m));
-			expiresTxt.setText(formatExpires(m));
+			deployTxt.setText(formatDeploy(dms));
+			expiresTxt.setText(formatExpires(dms));
 		}
 	}
 }

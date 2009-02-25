@@ -900,6 +900,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		if(m.equals(messageCurrent))
 			return;
 		logMessage(m);
+		setDeployTime();
 		messageCurrent = m;
 		notifyAttribute("messageCurrent");
 		if(messageCurrent == messageNext)
@@ -933,6 +934,22 @@ public class DMSImpl extends Device2Impl implements DMS {
 		catch(TMSException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/** Message deploy time */
+	protected long deployTime = 0;
+
+	/** Set the message deploy time */
+	protected void setDeployTime() {
+		deployTime = System.currentTimeMillis();
+		notifyAttribute("deployTime");
+	}
+
+	/** Get the message deploy time.
+	 * @return Time message was deployed (ms since epoch).
+	 * @see java.lang.System.currentTimeMillis */
+	public long getDeployTime() {
+		return deployTime;
 	}
 
 	/** Get the DMS poller */

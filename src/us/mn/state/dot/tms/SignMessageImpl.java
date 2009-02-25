@@ -127,22 +127,6 @@ public class SignMessageImpl implements SignMessage {
 		return bitmaps;
 	}
 
-	/** Message deploy time */
-	protected long deployTime = System.currentTimeMillis();
-
-	/** Set the message deploy time */
-	public void setDeployTime(long t) {
-		deployTime = t;
-		notifyAttribute("deployTime");
-	}
-
-	/** Get the message deploy time.
-	 * @return Time message was deployed (ms since epoch).
-	 * @see java.lang.System.currentTimeMillis */
-	public long getDeployTime() {
-		return deployTime;
-	}
-
 	/** Duration of this message (minutes) */
 	protected Integer duration;
 

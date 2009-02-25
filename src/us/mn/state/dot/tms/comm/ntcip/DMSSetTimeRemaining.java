@@ -55,7 +55,6 @@ public class DMSSetTimeRemaining extends DMSOperation {
 				new DmsMessageTimeRemaining(getDuration());
 			mess.add(remaining);
 			mess.setRequest();
-			message.setDeployTime(System.currentTimeMillis());
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message);
 			return null;

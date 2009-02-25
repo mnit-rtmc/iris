@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,11 +39,6 @@ public interface SignMessage extends SonarObject {
 	 * @return Array of Base64-encoded bitmaps, one for each page.
 	 * @see us.mn.state.dot.tms.Base64 */
 	String[] getBitmaps();
-
-	/** Get the message deploy time.
-	 * @return Time message was deployed (ms since epoch).
-	 * @see java.lang.System.currentTimeMillis */
-	long getDeployTime();
 
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */

@@ -174,6 +174,11 @@ public interface DMS extends Device2 {
 	/** Get the current sign message */
 	SignMessage getMessageCurrent();
 
+	/** Get the message deploy time.
+	 * @return Time message was deployed (ms since epoch).
+	 * @see java.lang.System.currentTimeMillis */
+	long getDeployTime();
+
 	/* Manufacturer-specific attributes */
 
 	/* LEDSTAR attributes */
