@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -111,12 +112,19 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final JButton queryStatusBtn = new JButton(I18NMessages.get(
 		"dms.query_status"));
 
+	/** Card layout for aws / alert panel */
+	protected final CardLayout cards = new CardLayout();
+
+	/** Card panel for aws / alert panels */
+	protected final JPanel card_panel = new JPanel(cards);
+
 	/** AWS controlled checkbox (optional) */
 	protected final JCheckBox awsControlledCbx =
-		new JCheckBox("Controlled");
+		new JCheckBox(I18NMessages.get("dms.aws"));
 
 	/** AMBER Alert checkbox */
-	protected final JCheckBox alertCbx = new JCheckBox("(AMBER)");
+	protected final JCheckBox alertCbx =
+		new JCheckBox(I18NMessages.get("dms.alert"));
 
 	/** Currently logged in user */
 	protected final User user;
@@ -175,11 +183,12 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			panel.addRow("Duration", durationCmb);
 		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
 			panel.addRow("Font", fontCmb);
-		if(SystemAttributeHelper.isAwsEnabled()) {
-			panel.addRow(I18NMessages.get("dms.aws"),
-				awsControlledCbx);
-		}
-		panel.addRow("Alert", alertCbx);
+		panel.addRow(card_panel);
+		if(SystemAttributeHelper.isAwsEnabled())
+			card_panel.add(awsControlledCbx, "AWS");
+		else
+			card_panel.add(new JLabel(), "AWS");
+		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
@@ -327,18 +336,18 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Select the single selection tab */
 	protected void selectSingleTab() {
-		alertCbx.setEnabled(false);
 		if(tabPane.getSelectedComponent() != singleTab) {
 			alertCbx.setSelected(false);
 			tabPane.setSelectedComponent(singleTab);
 		}
+		cards.show(card_panel, "AWS");
 	}
 
 	/** Select the multiple selection tab */
 	protected void selectMultipleTab() {
-		alertCbx.setEnabled(true);
 		if(tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
+		cards.show(card_panel, "Alert");
 	}
 
 	/** Disable the dispatcher widgets */
