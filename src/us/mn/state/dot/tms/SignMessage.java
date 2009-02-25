@@ -40,10 +40,6 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.Base64 */
 	String getBitmaps();
 
-	/** Get the message duration.
-	 * @return Duration in minutes; null means indefinite. */
-	Integer getDuration();
-
 	/** Get the message activation priority.
 	 * @return Activation priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
@@ -57,4 +53,8 @@ public interface SignMessage extends SonarObject {
 	/** Get the message owner.
 	 * @return User who deployed the message. */
 	User getOwner();
+
+	/** Get the message duration.
+	 * @return Duration in minutes; null means indefinite. */
+	Integer getDuration();
 }
