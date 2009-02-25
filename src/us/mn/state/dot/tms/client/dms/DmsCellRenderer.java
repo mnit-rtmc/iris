@@ -26,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -52,9 +51,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			return false;
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
 	/** Sign pixel panel to display sign message */
 	protected final SignPixelPanel pixelPnl = new SignPixelPanel(false);
 
@@ -78,9 +74,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel lblLocation = new JLabel();
 
 	/** Create a new DMS cell renderer */
-	public DmsCellRenderer(Namespace ns) {
+	public DmsCellRenderer() {
 		super(new BorderLayout());
-		namespace = ns;
 		setBorder(BorderFactory.createCompoundBorder(
 		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
 		          BorderFactory.createRaisedBevelBorder()));
