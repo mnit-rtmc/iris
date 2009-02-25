@@ -89,11 +89,11 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the id of the DMS */
 	protected final JTextField nameTxt = createTextField();
 
-	/** Displays the verify camera for the DMS */
-	protected final JTextField cameraTxt = createTextField();
-
 	/** Displays the location of the DMS */
 	protected final JTextField locationTxt = createTextField();
+
+	/** Displays the verify camera for the DMS */
+	protected final JTextField cameraTxt = createTextField();
 
 	/** Displays the brightness of the DMS */
 	protected final JTextField brightnessTxt = createTextField();
@@ -136,14 +136,12 @@ public class SingleSignTab extends FormPanel {
 		currentPnl.setPreferredSize(new Dimension(390, 108));
 		previewPnl.setPreferredSize(new Dimension(390, 108));
 		add("Name", nameTxt);
-		addRow("Camera", cameraTxt);
-		add("Location", locationTxt);
+		addRow("Location", locationTxt);
+		add("Camera", cameraTxt);
 		addRow("Brightness", brightnessTxt);
-		if(SystemAttributeHelper.isDmsStatusEnabled()) {
-			add("Operation", operationTxt);
+		addRow("Operation", operationTxt);
+		if(SystemAttributeHelper.isDmsStatusEnabled())
 			addRow("Status", statusTxt);
-		} else
-			addRow("Operation", operationTxt);
 		add("Deployed", deployTxt);
 		addRow("Expires", expiresTxt);
 		tab.add("Current", currentPnl);
@@ -190,8 +188,8 @@ public class SingleSignTab extends FormPanel {
 	/** Clear the selected DMS */
 	public void clearSelected() {
 		nameTxt.setText("");
-		cameraTxt.setText("");
 		locationTxt.setText("");
+		cameraTxt.setText("");
 		brightnessTxt.setText("");
 		operationTxt.setText("");
 		statusTxt.setText("");
@@ -203,13 +201,13 @@ public class SingleSignTab extends FormPanel {
 	public void updateAttribute(DMS dms, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(dms.getName());
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(dms));
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			locationTxt.setText(GeoLocHelper.getDescription(
 				dms.getGeoLoc()));
 		}
+		if(a == null || a.equals("camera"))
+			cameraTxt.setText(getCameraName(dms));
 		if(a == null || a.equals("lightOutput")) {
 			Integer o = dms.getLightOutput();
 			if(o != null)
