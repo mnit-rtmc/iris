@@ -53,7 +53,7 @@ public class SignMessageImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, String[] b, DMSMessagePriority p) {
+	public SignMessageImpl(String m, String b, DMSMessagePriority p) {
 		name = createUniqueName();
 		multi = m;
 		bitmaps = b;
@@ -94,11 +94,9 @@ public class SignMessageImpl implements SignMessage {
 	/** Check if the bitmap is blank */
 	protected boolean isBitmapBlank() {
 		try {
-			for(String bmap: bitmaps) {
-				for(byte b: Base64.decode(bmap)) {
-					if(b != 0)
-						return false;
-				}
+			for(byte b: Base64.decode(bitmaps)) {
+				if(b != 0)
+					return false;
 			}
 			return true;
 		}
@@ -117,13 +115,13 @@ public class SignMessageImpl implements SignMessage {
 		return multi;
 	}
 
-	/** Array of bitmaps for each page (Base64-encoded) */
-	protected String[] bitmaps;
+	/** Bitmap data for each page (Base64-encoded) */
+	protected String bitmaps;
 
 	/** Get the bitmaps for all pages of the message.
-	 * @return Array of Base64-encoded bitmaps, one for each page.
+	 * @return Base64-encoded bitmap data.
 	 * @see us.mn.state.dot.tms.Base64 */
-	public String[] getBitmaps() {
+	public String getBitmaps() {
 		return bitmaps;
 	}
 

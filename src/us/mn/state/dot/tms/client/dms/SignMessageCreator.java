@@ -52,11 +52,11 @@ public class SignMessageCreator {
 	/** 
 	 * Create a new sign message.
 	 * @param multi MULTI text.
-	 * @param bitmaps Base64-encoded array of bitmaps.
+	 * @param bitmaps Base64-encoded bitmaps.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message.
 	 */
-	public SignMessage create(String multi, String[] bitmaps,
+	public SignMessage create(String multi, String bitmaps,
 		Integer duration)
 	{
 		String name = createName();

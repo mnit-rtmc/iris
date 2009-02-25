@@ -441,7 +441,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected SignMessage createMessage() {
 		String multi = composer.getMessage(getFontNumber());
 		if(multi != null) {
-			String[] bitmaps = createBitmaps(multi);
+			String bitmaps = createBitmaps(multi);
 			if(bitmaps != null) {
 				return creator.create(multi, bitmaps,
 				       getDuration());
@@ -453,7 +453,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Create a new blank message */
 	protected SignMessage createBlankMessage() {
 		String multi = "";
-		String[] bitmaps = createBitmaps(multi);
+		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null)
 			return creator.create(multi, bitmaps, 0);
 		else
@@ -470,19 +470,26 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	}
 
 	/** Create bitmap graphics for a MULTI string */
-	protected String[] createBitmaps(String multi) {
+	protected String createBitmaps(String multi) {
 		PixelMapBuilder b = builder;
 		if(b != null) {
 			b.clear();
 			MultiString m = new MultiString(multi);
 			m.parse(b, b.getDefaultFontNumber());
-			BitmapGraphic[] bmaps = b.getPixmaps();
-			String[] bitmaps = new String[bmaps.length];
-			for(int i = 0; i < bmaps.length; i++)
-				bitmaps[i] =Base64.encode(bmaps[i].getBitmap());
-			return bitmaps;
+			return encodeBitmaps(b.getPixmaps());
 		} else
 			return null;
+	}
+
+	/** Encode the bitmaps to Base64 */
+	protected String encodeBitmaps(BitmapGraphic[] bmaps) {
+		int blen = bmaps[0].getBitmap().length;
+		byte[] bitmaps = new byte[bmaps.length * blen];
+		for(int i = 0; i < bmaps.length; i++) {
+			byte[] bm = bmaps[i].getBitmap();
+			System.arraycopy(bm, 0, bitmaps, i * blen,blen);
+		}
+		return Base64.encode(bitmaps);
 	}
 
 	/** Get the selected duration */

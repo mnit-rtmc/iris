@@ -51,8 +51,6 @@ public class OpMessage extends OpDms {
 	public OpMessage(DMSImpl d, SignMessage m) {
 		super(COMMAND, d, "OpMessage");
 		m_signMessage = m;
-		System.err.println("dmslite.OpMessage.OpMessage() called. Msg="
-		    + m + ",numpages=" + m_signMessage.getBitmaps().length);
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -67,32 +65,58 @@ public class OpMessage extends OpDms {
 	public String getBitmapPage(int pg) {
 		if(m_signMessage == null)
 			return "";
-		String[] pages = m_signMessage.getBitmaps();
-		if(pg < 0 || pg >= pages.length)
+		byte[] bitmaps = getBitmaps();
+		if(bitmaps == null)
 			return "";
-		Integer w = m_dms.getWidthPixels();
-		if(w == null || w < 1)
+		BitmapGraphic oldbmg = createBitmap();
+		if(oldbmg == null)
 			return "";
-		Integer h = m_dms.getHeightPixels();
-		if(h == null || h < 1)
+		int blen = oldbmg.getBitmap().length;
+		if(bitmaps.length % blen != 0)
 			return "";
-		BitmapGraphic oldbmg = new BitmapGraphic(w, h);
-		try {
-			oldbmg.setBitmap(Base64.decode(pages[pg]));
-		}
-		catch(IOException e) {
+		int pages = bitmaps.length / blen;
+		if(pg < 0 || pg >= pages)
 			return "";
-		}
+		byte[] bmap = new byte[blen];
+		System.arraycopy(bitmaps, pg * blen, bmap, 0, blen);
+		oldbmg.setBitmap(bmap);
 		BitmapGraphic newbmg = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
 		newbmg.copy(oldbmg);
 		return new HexString(newbmg.getBitmap()).toString();
+	}
+
+	/** Get the sign message bitmaps */
+	protected byte[] getBitmaps() {
+		try {
+			return Base64.decode(m_signMessage.getBitmaps());
+		}
+		catch(IOException e) {
+			return null;
+		}
+	}
+
+	/** Create a bitmap matching the sign dimensions */
+	protected BitmapGraphic createBitmap() {
+		Integer w = m_dms.getWidthPixels();
+		if(w == null || w < 1)
+			return null;
+		Integer h = m_dms.getHeightPixels();
+		if(h == null || h < 1)
+			return null;
+		return new BitmapGraphic(w, h);
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 		if(!m_dms.checkPriority(m_signMessage.getActivationPriority()))
 			return null;
-		int np = m_signMessage.getBitmaps().length;
+		byte[] bitmaps = getBitmaps();
+		if(bitmaps == null)
+			return null;
+		int blen = getPageLength();
+		if(blen == 0 || bitmaps.length % blen != 0)
+			return null;
+		int np = bitmaps.length / blen;
 		if(np <= 0)
 			return null;
 		else if(np == 1)
@@ -102,6 +126,15 @@ public class OpMessage extends OpDms {
 		System.err.println("WARNING: bogus number of pages (" + np +
 			") in dmslite.OpMessage.OpMessage(). Ignored.");
 		return null;
+	}
+
+	/** Get the length of one bitmap page */
+	protected int getPageLength() {
+		BitmapGraphic b = createBitmap();
+		if(b != null)
+			return b.getBitmap().length;
+		else
+			return 0;
 	}
 
 	/** 

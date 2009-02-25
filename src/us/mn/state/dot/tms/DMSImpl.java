@@ -139,9 +139,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Create a blank message for the sign */
 	protected SignMessage createBlankMessage(DMSMessagePriority p) {
-		String[] bitmaps = new String[] {
-			Base64.encode(new byte[0])
-		};
+		String bitmaps = Base64.encode(new byte[0]);
 		try {
 			return createMessage("", bitmaps, p);
 		}
@@ -832,8 +830,16 @@ public class DMSImpl extends Device2Impl implements DMS {
 		BitmapGraphic stuckOn = createBlankBitmap();
 		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
 		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
-		for(String b64: m.getBitmaps()) {
-			byte[] b = Base64.decode(b64);
+		byte[] bitmaps = Base64.decode(m.getBitmaps());
+		int blen = bitmap.getBitmap().length;
+		if(blen == 0)
+			throw new ChangeVetoException("Invalid sign size");
+		if(bitmaps.length % blen != 0)
+			throw new ChangeVetoException("Invalid bitmap length");
+		int n_pages = bitmaps.length / blen;
+		byte[] b = new byte[blen];
+		for(int p = 0; p < n_pages; p++) {
+			System.arraycopy(bitmaps, p * blen, b, 0, blen);
 			bitmap.setBitmap(b);
 			bitmap.union(stuckOff);
 			int n_lit = bitmap.getLitCount();
@@ -1090,11 +1096,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 			cw, ch);
 		MultiString multi = new MultiString(m);
 		multi.parse(builder, builder.getDefaultFontNumber());
-		BitmapGraphic[] bmaps = builder.getPixmaps();
-		String[] bitmaps = new String[bmaps.length];
-		for(int i = 0; i < bmaps.length; i++)
-			bitmaps[i] = Base64.encode(bmaps[i].getBitmap());
-		return createMessage(m, bitmaps, p);
+		BitmapGraphic[] pages = builder.getPixmaps();
+		return createMessageB(m, pages, p);
 	}
 
 	/** Create a message for the sign */
@@ -1112,14 +1115,25 @@ public class DMSImpl extends Device2Impl implements DMS {
 			bmaps[i] = new BitmapGraphic(w, h);
 			bmaps[i].copy(pages[i]);
 		}
-		String[] bitmaps = new String[bmaps.length];
-		for(int i = 0; i < bmaps.length; i++)
-			bitmaps[i] = Base64.encode(bmaps[i].getBitmap());
+		return createMessageB(m, bmaps, p);
+	}
+
+	/** Create a new message (B version) */
+	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
+		DMSMessagePriority p) throws SonarException
+	{
+		int blen = pages[0].getBitmap().length;
+		byte[] bitmap = new byte[pages.length * blen];
+		for(int i = 0; i < pages.length; i++) {
+			byte[] page = pages[i].getBitmap();
+			System.arraycopy(page, 0, bitmap, i * blen, blen);
+		}
+		String bitmaps = Base64.encode(bitmap);
 		return createMessage(m, bitmaps, p);
 	}
 
 	/** Create a sign message */
-	protected SignMessage createMessage(String m, String[] b,
+	protected SignMessage createMessage(String m, String b,
 		DMSMessagePriority p) throws SonarException
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, b, p);

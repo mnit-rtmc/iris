@@ -145,14 +145,14 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/** Count of pages */
-	protected int n_pages;
+	protected int n_pages = 1;
 
 	/** List of all text spans */
 	protected final LinkedList<TextSpan> spans = new LinkedList<TextSpan>();
 
 	/** Clear the pixel map builder */
 	public void clear() {
-		n_pages = 0;
+		n_pages = 1;
 		spans.clear();
 	}
 

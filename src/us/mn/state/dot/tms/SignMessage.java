@@ -36,9 +36,9 @@ public interface SignMessage extends SonarObject {
 	String getMulti();
 
 	/** Get the bitmaps for all pages of the message.
-	 * @return Array of Base64-encoded bitmaps, one for each page.
+	 * @return Base64-encoded bitmap data.
 	 * @see us.mn.state.dot.tms.Base64 */
-	String[] getBitmaps();
+	String getBitmaps();
 
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */
