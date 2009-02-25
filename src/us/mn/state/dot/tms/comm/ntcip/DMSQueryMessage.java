@@ -55,7 +55,7 @@ public class DMSQueryMessage extends DMSOperation {
 				try {
 					SignMessage blank = dms.createMessage("",
 						DMSMessagePriority.SCHEDULED);
-					dms.setMessageCurrent(blank);
+					dms.setMessageCurrent(blank, null);
 				}
 				catch(SonarException e) {
 					e.printStackTrace();
@@ -106,7 +106,7 @@ public class DMSQueryMessage extends DMSOperation {
 					SignMessage message = dms.createMessage(
 						multi.getValue(),
 						DMSMessagePriority.SCHEDULED);
-					dms.setMessageCurrent(message);
+					dms.setMessageCurrent(message, null);
 				}
 				catch(SonarException e) {
 					e.printStackTrace();

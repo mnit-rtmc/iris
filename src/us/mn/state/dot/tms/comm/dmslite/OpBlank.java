@@ -35,11 +35,15 @@ public class OpBlank extends OpDms
 	/** blank message, which contains owner, duration */
 	private final SignMessage m_mess;
 
+	/** Owner of message */
+	private final User m_owner;
+
 	/** Create a new DMS query configuration object */
-	public OpBlank(DMSImpl d, SignMessage mess) {
+	public OpBlank(DMSImpl d, SignMessage mess, User owner) {
 		super(DOWNLOAD, d, "OpBlank");
 		m_dms = d;
 		m_mess = mess;
+		m_owner = owner;
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -109,8 +113,7 @@ public class OpBlank extends OpDms
 			mess.add(rr1);
 
 			// owner
-			User _owner = m_mess.getOwner();
-			String owner = _owner != null ? _owner.getName() : "";
+			String owner = m_owner != null ? m_owner.getName() : "";
 			ReqRes rr2 = new ReqRes("Owner", owner, new String[0]);
 			mess.add(rr2);
 
@@ -154,7 +157,7 @@ public class OpBlank extends OpDms
 
 			// update dms
 			if(valid) {
-				m_dms.setMessageCurrent(m_mess);
+				m_dms.setMessageCurrent(m_mess, m_owner);
 			} else {
 				System.err.println(
 				    "OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="

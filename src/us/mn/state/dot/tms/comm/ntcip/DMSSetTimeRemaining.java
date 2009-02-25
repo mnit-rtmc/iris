@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageImpl;
@@ -30,10 +31,14 @@ public class DMSSetTimeRemaining extends DMSOperation {
 	/** Sign message to update */
 	protected final SignMessageImpl message;
 
+	/** User who deployed the message */
+	protected final User owner;
+
 	/** Create a new DMS set time remaining operation */
-	public DMSSetTimeRemaining(DMSImpl d, SignMessage m) {
+	public DMSSetTimeRemaining(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
 		message = (SignMessageImpl)m;
+		owner = o;
 	}
 
 	/** Create the first real phase of the operation */
@@ -56,7 +61,7 @@ public class DMSSetTimeRemaining extends DMSOperation {
 			mess.add(remaining);
 			mess.setRequest();
 			// FIXME: this should happen on SONAR thread
-			dms.setMessageCurrent(message);
+			dms.setMessageCurrent(message, owner);
 			return null;
 		}
 	}

@@ -319,7 +319,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		} else if(DMSManager.isActive(dms)) {
 			builder = createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
-			clearBtn.setAction(new ClearDmsAction(dms, this));
+			clearBtn.setAction(new ClearDmsAction(dms, this, user));
 			enableWidgets();
 		} else {
 			disableWidgets();
@@ -454,8 +454,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		DMS dms = getSingleSelection();
 		if(dms != null) {
 			SignMessage m = createMessage();
-			if(m != null)
+			if(m != null) {
+				dms.setOwnerNext(user);
 				dms.setMessageNext(m);
+			}
 			composer.updateMessageLibrary();
 			selectPreview(false);
 		}

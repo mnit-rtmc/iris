@@ -63,7 +63,6 @@ public class SignMessageImpl implements SignMessage {
 			runTimePriority = DMSMessagePriority.BLANK.ordinal();
 		else
 			runTimePriority = p.ordinal();
-		owner = null;
 	}
 
 	/** Get the SONAR type name */
@@ -170,21 +169,6 @@ public class SignMessageImpl implements SignMessage {
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	public int getRunTimePriority() {
 		return runTimePriority;
-	}
-
-	/** Message owner */
-	protected User owner;
-
-	/** Set the message owner */
-	public void setOwner(User o) {
-		owner = o;
-		notifyAttribute("owner");
-	}
-
-	/** Get the message owner.
-	 * @return User who deployed the message. */
-	public User getOwner() {
-		return owner;
 	}
 
 	/** Notify SONAR clients of a change to an attribute */

@@ -122,7 +122,8 @@ public class OpReset extends OpDms
 				try {
 	                		m_dms.setMessageCurrent(
 						m_dms.createMessage("",
-						DMSMessagePriority.SCHEDULED));
+						DMSMessagePriority.SCHEDULED),
+						null);
 				}
 				catch(SonarException e) {
 					e.printStackTrace();

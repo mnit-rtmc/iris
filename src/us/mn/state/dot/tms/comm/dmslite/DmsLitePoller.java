@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.EOFException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
@@ -138,12 +139,10 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	 * @throws InvalidMessageException
 	 * @see DMSImpl,DMS
 	 */
-	public void sendMessage(DMSImpl dms, SignMessage m)
+	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
 		// sanity checks
-		if(dms == null || m == null)
-			return;
 		if(m.getBitmaps() == null) {
 			System.err.println("Warning: DmsLitePoller.sendMessage(): bitmap is null, ignored.");
 			return;
@@ -156,7 +155,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 
 		// blank the sign
 		if(m.getDuration() != null && m.getDuration() <= 0) {
-			new OpBlank(dms, m).start();
+			new OpBlank(dms, m, o).start();
 			return;
 		}
 
@@ -165,7 +164,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		//       stop time and send the message.
 
 		// finally, send message to field controller
-		OpMessage cmd = new OpMessage(dms, m);
+		OpMessage cmd = new OpMessage(dms, m, o);
 		cmd.start();
 	}
 

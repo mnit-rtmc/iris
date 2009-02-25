@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.Action;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.sonar.ProxyAction;
@@ -30,10 +31,14 @@ public class ClearDmsAction extends ProxyAction<DMS> {
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
 
+	/** User who is sending message */
+	protected final User owner;
+
 	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(DMS p, DMSDispatcher d) {
+	public ClearDmsAction(DMS p, DMSDispatcher d, User o) {
 		super(p);
 		dispatcher = d;
+		owner = o;
 		putValue(Action.NAME, I18NMessages.get("dms.clear"));
 		putValue(Action.SHORT_DESCRIPTION,
 			I18NMessages.get("dms.clear.tooltip"));
@@ -42,7 +47,9 @@ public class ClearDmsAction extends ProxyAction<DMS> {
 	/** Actually perform the action */
 	protected void do_perform() {
 		SignMessage m = dispatcher.createBlankMessage();
-		if(m != null)
+		if(m != null) {
+			proxy.setOwnerNext(owner);
 			proxy.setMessageNext(m);
+		}
 	}
 }

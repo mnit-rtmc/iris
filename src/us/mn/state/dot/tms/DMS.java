@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.User;
+
 /**
  * DMS -- Dynamic Message Sign
  *
@@ -168,8 +170,15 @@ public interface DMS extends Device2 {
 	/** Get user note */
 	String getUserNote();
 
+	/** Set the next message owner */
+	void setOwnerNext(User o);
+
 	/** Set the next sign message */
 	void setMessageNext(SignMessage m);
+
+	/** Get the owner of the current message.
+	 * @return User who deployed the message. */
+	User getOwnerCurrent();
 
 	/** Get the current sign message */
 	SignMessage getMessageCurrent();

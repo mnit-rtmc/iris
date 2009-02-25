@@ -50,10 +50,6 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	int getRunTimePriority();
 
-	/** Get the message owner.
-	 * @return User who deployed the message. */
-	User getOwner();
-
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */
 	Integer getDuration();

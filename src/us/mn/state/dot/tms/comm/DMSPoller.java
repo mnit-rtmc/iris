@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm;
 
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
@@ -33,7 +34,8 @@ public interface DMSPoller extends SignPoller {
 	/** Send a message to the sign. If the message is already deployed on
 	 * the sign, restart the time remaining.
 	 * @param dms Sign to send message.
-	 * @param m Message to send. */
-	void sendMessage(DMSImpl dms, SignMessage m)
+	 * @param m Message to send.
+	 * @param o User who deployed message. */
+	void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException;
 }

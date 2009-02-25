@@ -71,7 +71,6 @@ public class SignMessageCreator {
 				DMSMessagePriority.OPERATOR.ordinal()));
 			attrs.put("runTimePriority", new Integer(
 				DMSMessagePriority.OPERATOR.ordinal()));
-			attrs.put("owner", user);
 			sign_messages.createObject(name, attrs);
 			return getProxy(name);
 		} else
@@ -136,10 +135,11 @@ public class SignMessageCreator {
 	 * @return A HashSet with entries as SignMessage names.
 	 */
 	protected HashSet<String> createSignMessageNameSet() {
+		final String name = user.getName();
 		final HashSet<String> names = new HashSet<String>();
 		sign_messages.findObject(new Checker<SignMessage>() {
 			public boolean check(SignMessage sm) {
-				if(sm.getOwner() == user)
+				if(sm.getName().startsWith(name))
 					names.add(sm.getName());
 				return false;
 			}

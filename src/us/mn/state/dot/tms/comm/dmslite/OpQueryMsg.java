@@ -341,9 +341,9 @@ public class OpQueryMsg extends OpDms {
 						SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR);
-						// FIXME: owner not set
 						sm.setDuration(duramins);
-						m_dms.setMessageCurrent(sm);
+						m_dms.setMessageCurrent(sm,
+							null);
 					}
 					catch(SonarException e) {
 						e.printStackTrace();
@@ -355,15 +355,15 @@ public class OpQueryMsg extends OpDms {
 					if(usebitmap) {
 						sm = createSignMessageWithBitmap(bitmap);
 						sm.setDuration(duramins);
-						// FIXME: owner not set
-						m_dms.setMessageCurrent(sm);
+						m_dms.setMessageCurrent(sm,
+							null);
 					}
 					if(sm == null) {
 						try {
 							m_dms.setMessageCurrent(
 								m_dms.createMessage("",
 								DMSMessagePriority.BLANK
-							));
+							), null);
 						}
 						catch(SonarException e) {
 							e.printStackTrace();

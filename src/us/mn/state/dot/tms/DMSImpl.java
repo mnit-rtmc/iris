@@ -774,6 +774,20 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return userNote;
 	}
 
+	/** Next message owner */
+	protected transient User ownerNext;
+
+	/** Set the message owner */
+	public synchronized void setOwnerNext(User o) {
+		if(ownerNext != null && o != null) {
+			System.err.println("DMSImpl.setOwnerNext: " + getName()+
+				", " + ownerNext.getName() + " vs. " +
+				o.getName());
+			ownerNext = null;
+		} else
+			ownerNext = o;
+	}
+
 	/** Next message to be displayed */
 	protected transient SignMessage messageNext;
 
@@ -783,7 +797,15 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Set the next sign message */
-	public synchronized void doSetMessageNext(SignMessage m)
+	public void doSetMessageNext(SignMessage m)
+		throws TMSException
+	{
+		doSetMessageNext(m, ownerNext);
+		ownerNext = null;
+	}
+
+	/** Set the next sign message */
+	protected synchronized void doSetMessageNext(SignMessage m, User o)
 		throws TMSException
 	{
 		final DMSPoller p = getDMSPoller();
@@ -798,7 +820,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		// FIXME: only blank sign if activation priority equals
 		// current runtime priority (unless priority is CLEAR).
 		validateBitmaps(m);
-		p.sendMessage(this, m);
+		p.sendMessage(this, m, o);
 		setMessageNext(m);
 	}
 
@@ -889,7 +911,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	/** Send a sign message creates by IRIS server */
 	public void sendMessage(SignMessage m) throws TMSException {
 		try {
-			doSetMessageNext(m);
+			doSetMessageNext(m, null);
 		}
 		catch(TMSException e) {
 			// FIXME: destroy SignMessage
@@ -902,13 +924,15 @@ public class DMSImpl extends Device2Impl implements DMS {
 		createBlankMessage(DMSMessagePriority.SCHEDULED);
 
 	/** Set the current message */
-	public void setMessageCurrent(SignMessage m) {
+	public void setMessageCurrent(SignMessage m, User o) {
 		if(m.equals(messageCurrent))
 			return;
-		logMessage(m);
+		logMessage(m, o);
 		setDeployTime();
 		messageCurrent = m;
 		notifyAttribute("messageCurrent");
+		ownerCurrent = o;
+		notifyAttribute("ownerCurrent");
 		if(messageCurrent == messageNext)
 			setMessageNext(null);
 		// FIXME: destroy the previous message if no other signs are
@@ -921,18 +945,26 @@ public class DMSImpl extends Device2Impl implements DMS {
 		return messageCurrent;
 	}
 
+	/** Owner of current message */
+	protected transient User ownerCurrent;
+
+	/** Get the current message owner.
+	 * @return User who deployed the current message. */
+	public User getOwnerCurrent() {
+		return ownerCurrent;
+	}
+
 	/** Log a message */
-	protected void logMessage(SignMessage m) {
+	protected void logMessage(SignMessage m, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = m.getMulti();
 		if(((SignMessageImpl)m).isBlank()) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
-		User user = m.getOwner();
 		String owner = null;
-		if(user != null)
-			owner = user.getName();
+		if(o != null)
+			owner = o.getName();
 		SignStatusEvent ev = new SignStatusEvent(et, name, text, owner);
 		try {
 			ev.doStore();

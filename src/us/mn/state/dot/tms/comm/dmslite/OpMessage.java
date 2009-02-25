@@ -44,13 +44,14 @@ public class OpMessage extends OpDms {
 	/** Sign message */
 	protected final SignMessage m_signMessage;
 
-	/** fixed message width flags */
-	final protected int FIXED_MSG_WIDTH_PIXELS = 96;
+	/** User who deployed the message */
+	protected final User m_owner;
 
 	/** Create a new DMS command message object */
-	public OpMessage(DMSImpl d, SignMessage m) {
+	public OpMessage(DMSImpl d, SignMessage m, User owner) {
 		super(COMMAND, d, "OpMessage");
 		m_signMessage = m;
+		m_owner = owner;
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -237,8 +238,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
-			User _owner = m_signMessage.getOwner();
-			String owner = _owner != null ? _owner.getName() : "";
+			String owner = m_owner != null ? m_owner.getName() : "";
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
@@ -284,7 +284,8 @@ public class OpMessage extends OpDms {
 				// parse rest of response
 				if (valid) {
 					// set new message
-					m_dms.setMessageCurrent(m_signMessage);
+					m_dms.setMessageCurrent(m_signMessage,
+						m_owner);
 				} else {
 					System.err.println(
 					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
@@ -401,8 +402,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(MSG_DISPLAY_MSG_TIME_MS).toString()));
 
 			// Owner
-			User _owner = m_signMessage.getOwner();
-			String owner = _owner != null ? _owner.getName() : "";
+			String owner = m_owner != null ? m_owner.getName() : "";
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
@@ -446,10 +446,9 @@ public class OpMessage extends OpDms {
 
 				// parse rest of response
 				if (valid) {
-
 					// set new message
-					m_dms.setMessageCurrent(m_signMessage);
-
+					m_dms.setMessageCurrent(m_signMessage,
+						m_owner);
 				} else {
 					System.err.println(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+

@@ -111,14 +111,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		return this;
 	}
 
-	/** Format the owner of the given sign message */
-	static protected String formatOwner(SignMessage m) {
-		if(m != null)
-			return formatOwner(m.getOwner());
-		else
-			return "";
-	}
-
 	/** Prune the owner string to the first dot */
 	static protected String formatOwner(User owner) {
 		if(owner != null) {
@@ -139,8 +131,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			dms.getGeoLoc()));
 		setDimensions(dms);
 		pixelPnl.setGraphic(getPageOne(dms));
-		SignMessage message = dms.getMessageCurrent();
-		lblUser.setText(formatOwner(message));
+		lblUser.setText(formatOwner(dms.getOwnerCurrent()));
 	}
 
 	/** Set the dimensions of the pixel panel */

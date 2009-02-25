@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.EOFException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
@@ -136,13 +137,13 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 	}
 
 	/** Send a new message to the sign */
-	public void sendMessage(DMSImpl dms, SignMessage m)
+	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
 		if(shouldSetTimeRemaining(dms, m))
-			new DMSSetTimeRemaining(dms, m).start();
+			new DMSSetTimeRemaining(dms, m, o).start();
 		else
-			new DMSCommandMessage(dms, m).start();
+			new DMSCommandMessage(dms, m, o).start();
 	}
 
 	/** Check if we should just set the message time remaining */

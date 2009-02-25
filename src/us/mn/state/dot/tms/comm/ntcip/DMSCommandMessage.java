@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -35,13 +36,17 @@ public class DMSCommandMessage extends DMSOperation {
 	/** Sign message */
 	protected final SignMessage message;
 
+	/** User who deployed the message */
+	protected final User owner;
+
 	/** Message CRC */
 	protected int messageCRC;
 
 	/** Create a new DMS command message object */
-	public DMSCommandMessage(DMSImpl d, SignMessage m) {
+	public DMSCommandMessage(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
 		message = m;
+		owner = o;
 	}
 
 	/** Create the first real phase of the operation */
@@ -180,7 +185,7 @@ public class DMSCommandMessage extends DMSOperation {
 				return new ActivateMessageError();
 			}
 			// FIXME: this should happen on SONAR thread
-			dms.setMessageCurrent(message);
+			dms.setMessageCurrent(message, owner);
 			return new TimeRemaining();
 		}
 	}
