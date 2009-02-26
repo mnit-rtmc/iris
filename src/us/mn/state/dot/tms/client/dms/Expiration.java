@@ -21,21 +21,17 @@ package us.mn.state.dot.tms.client.dms;
  */
 public enum Expiration {
 
-	INDEFINITE("Indefinite", null),
-	_5_MINUTES("5 Minutes", 5),
-	_15_MINUTES("15 Minutes", 15),
-	_30_MINUTES("30 Minutes", 30),
-	_45_MINUTES("45 Minutes", 45),
-	_1_HOUR("1 Hour", 60),
-	_1_5_HOURS("1.5 Hours", 90),
+	INDEFINITE("", null),
+	_5_MINUTES("5 Min", 5),
+	_15_MINUTES("15 Min", 15),
+	_30_MINUTES("30 Min", 30),
+	_45_MINUTES("45 Min", 45),
+	_1_HOUR("60 Min", 60),
+	_1_5_HOURS("90 Min", 90),
 	_2_HOURS("2 Hours", 120),
-	_2_5_HOURS("2.5 Hours", 150),
 	_3_HOURS("3 Hours", 180),
-	_3_5_HOURS("3.5 Hours", 210),
 	_4_HOURS("4 Hours", 240),
-	_4_5_HOURS("4.5 Hours", 270),
 	_5_HOURS("5 Hours", 300),
-	_5_5_HOURS("5.5 Hours", 330),
 	_6_HOURS("6 Hours", 360),
 	_7_HOURS("7 Hours", 420),
 	_8_HOURS("8 Hours", 480),
@@ -46,8 +42,7 @@ public enum Expiration {
 	_13_HOURS("13 Hours", 780),
 	_14_HOURS("14 Hours", 840),
 	_15_HOURS("15 Hours", 900),
-	_16_HOURS("16 Hours", 960),
-	_17_HOURS("17 Hours", 1020);
+	_16_HOURS("16 Hours", 960);
 
 	public final String label;
 
