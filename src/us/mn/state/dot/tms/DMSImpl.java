@@ -1166,7 +1166,28 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Create a sign message */
-	protected SignMessage createMessage(String m, String b,
+	protected SignMessage createMessage(final String m, final String b,
+		final DMSMessagePriority p, final Integer d)
+		throws SonarException
+	{
+		SignMessage esm = (SignMessage)namespace.findObject(
+			SignMessage.SONAR_TYPE, new Checker<SignMessage>()
+		{
+			public boolean check(SignMessage sm) {
+				return m.equals(sm.getMulti()) &&
+				       b.equals(sm.getBitmaps()) &&
+				       p.ordinal() == sm.getPriority() &&
+				       d == sm.getDuration();
+			}
+		});
+		if(esm != null)
+			return esm;
+		else
+			return createMessageC(m, b, p, d);
+	}
+
+	/** Create a new sign message (C version) */
+	protected SignMessage createMessageC(String m, String b,
 		DMSMessagePriority p, Integer d) throws SonarException
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, b, p, d);
