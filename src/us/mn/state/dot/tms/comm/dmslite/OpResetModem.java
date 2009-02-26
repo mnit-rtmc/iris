@@ -120,10 +120,10 @@ public class OpResetModem extends OpDms
 
 				// set blank message
 				try {
-					m_dms.setMessageCurrent(
-						m_dms.createMessage("",
-						DMSMessagePriority.SCHEDULED),
+					SignMessage m = m_dms.createMessage("",
+						DMSMessagePriority.SCHEDULED,
 						null);
+					m_dms.setMessageCurrent(m, null);
 				}
 				catch(SonarException e) {
 					e.printStackTrace();

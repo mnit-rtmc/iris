@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 import us.mn.state.dot.sonar.User;
 
 /**
@@ -25,7 +28,7 @@ import us.mn.state.dot.sonar.User;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignMessageImpl implements SignMessage {
+public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Last allocated system message ID */
 	static protected int last_id = 0;
@@ -39,30 +42,40 @@ public class SignMessageImpl implements SignMessage {
 		return "system_" + last_id;
 	}
 
-	/** Sign message name */
-	protected final String name;
-
-	/** Get the sign message */
-	public String getName() {
-		return name;
+	/** Load all the sign text */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading sign messages...");
+		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
+		store.query("SELECT name, multi, bitmaps, priority, " +
+			"duration FROM iris.sign_message;", new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new SignMessageImpl(
+					row.getString(1),	// name
+					row.getString(2),	// multi
+					row.getString(3),	// bitmaps
+					row.getInt(4),		// priority
+					row.getInt(5)		// duration
+				));
+			}
+		});
 	}
 
-	/** Create a new sign message (by SONAR clients) */
-	public SignMessageImpl(String n) {
-		name = n;
+	/** Get a mapping of the columns */
+	public Map<String, Object> getColumns() {
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("multi", multi);
+		map.put("bitmaps", bitmaps);
+		map.put("priority", priority);
+		if(duration != null)
+			map.put("duration", duration);
+		return map;
 	}
 
-	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, String b, DMSMessagePriority p) {
-		name = createUniqueName();
-		multi = m;
-		bitmaps = b;
-		duration = null;
-		activationPriority = p.ordinal();
-		if(isBlank())
-			runTimePriority = DMSMessagePriority.BLANK.ordinal();
-		else
-			runTimePriority = p.ordinal();
+	/** Get the database table name */
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
@@ -70,14 +83,31 @@ public class SignMessageImpl implements SignMessage {
 		return SONAR_TYPE;
 	}
 
-	/** Store an object */
-	public void doStore() {
-		// Not stored in database
+	/** Create a new sign message (by SONAR clients) */
+	public SignMessageImpl(String n) {
+		super(n);
 	}
 
-	/** Destroy an object */
-	public void destroy() {
-		// Not stored in database
+	/** Create a sign message */
+	protected SignMessageImpl(String n, String m, String b, int p,
+		Integer d)
+	{
+		super(n);
+		multi = m;
+		bitmaps = b;
+		priority = p;
+		duration = d;		
+	}
+
+	/** Create a new sign message (by IRIS) */
+	public SignMessageImpl(String m, String b, DMSMessagePriority p,
+		Integer d)
+	{
+		super(createUniqueName());
+		multi = m;
+		bitmaps = b;
+		priority = p.ordinal();
+		duration = d;
 	}
 
 	/** Check if the sign message is blank */
@@ -124,56 +154,32 @@ public class SignMessageImpl implements SignMessage {
 		return bitmaps;
 	}
 
-	/** Duration of this message (minutes) */
-	protected Integer duration;
-
-	/** Set the message duration */
-	public void setDuration(Integer d) {
-		duration = d;
-		notifyAttribute("duration");
-	}
-
-	/** Get the message duration.
-	 * @return Duration in minutes; null means indefinite. */
-	public Integer getDuration() {
-		return duration;
-	}
-
 	/** Message activation priority */
-	protected int activationPriority;
+	protected int priority;
 
-	/** Set the message activation priority */
-	public void setActivationPriority(int p) {
-		activationPriority = p;
-		notifyAttribute("activationPriority");
-	}
-
-	/** Get the message activation priority.
-	 * @return Activation priority ranging from 1 (low) to 255 (high).
+	/** Get the message priority.
+	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
-	public int getActivationPriority() {
-		return activationPriority;
-	}
-
-	/** Message run-time priority */
-	protected int runTimePriority;
-
-	/** Set the message run-time priority */
-	public void setRunTimePriority(int p) {
-		runTimePriority = p;
-		notifyAttribute("runTimePriority");
+	public int getPriority() {
+		return priority;
 	}
 
 	/** Get the message run-time priority.
 	 * @return Run-time priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	public int getRunTimePriority() {
-		return runTimePriority;
+		if(isBlank())
+			return DMSMessagePriority.BLANK.ordinal();
+		else
+			return getPriority();
 	}
 
-	/** Notify SONAR clients of a change to an attribute */
-	protected void notifyAttribute(String aname) {
-		if(MainServer.server != null)
-			MainServer.server.setAttribute(this, aname);
+	/** Duration of this message (minutes) */
+	protected Integer duration;
+
+	/** Get the message duration.
+	 * @return Duration in minutes; null means indefinite. */
+	public Integer getDuration() {
+		return duration;
 	}
 }

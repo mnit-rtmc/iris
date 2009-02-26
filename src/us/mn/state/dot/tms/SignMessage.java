@@ -40,15 +40,10 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.Base64 */
 	String getBitmaps();
 
-	/** Get the message activation priority.
-	 * @return Activation priority ranging from 1 (low) to 255 (high).
+	/** Get the message priority.
+	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
-	int getActivationPriority();
-
-	/** Get the message run-time priority.
-	 * @return Run-time priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
-	int getRunTimePriority();
+	int getPriority();
 
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */

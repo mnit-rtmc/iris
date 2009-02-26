@@ -297,7 +297,8 @@ public class D10CmsMsg {
 	public SignMessage toSignMessage(DMSImpl dms) throws SonarException,
 		TMSException
 	{
-		return dms.createMessage(m_multistring, DMSMessagePriority.AWS);
+		return dms.createMessage(m_multistring, DMSMessagePriority.AWS,
+			null);
 	}
 
 	/** toString */

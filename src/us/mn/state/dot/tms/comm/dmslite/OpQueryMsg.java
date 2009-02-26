@@ -164,10 +164,13 @@ public class OpQueryMsg extends OpDms {
 	 * @param sbitmap Bitmap as hexstring associated with message text.
 	 *                This bitmap is required to be a 96x25 bitmap which
 	 *                dmslite will always return.
+	 * @param duration Message duration (in minutes).
 	 * @return A SignMessage that contains the text of the message and 
 	 *         a rendered bitmap.
 	 */
-	private SignMessageImpl createSignMessageWithBitmap(String sbitmap) {
+	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
+		Integer duration)
+	{
 		if(sbitmap == null)
 			return null;
 		byte[] argbitmap = new HexString(sbitmap).toByteArray();
@@ -197,7 +200,7 @@ public class OpQueryMsg extends OpDms {
 
 		try {
 			return (SignMessageImpl)m_dms.createMessage(multi,
-				pages, DMSMessagePriority.SCHEDULED);
+				pages, DMSMessagePriority.SCHEDULED, duration);
 		}
 		catch(SonarException e) {
 			e.printStackTrace();
@@ -340,8 +343,7 @@ public class OpQueryMsg extends OpDms {
 					try {
 						SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
-						DMSMessagePriority.OPERATOR);
-						sm.setDuration(duramins);
+						DMSMessagePriority.OPERATOR, duramins);
 						m_dms.setMessageCurrent(sm,
 							null);
 					}
@@ -353,8 +355,7 @@ public class OpQueryMsg extends OpDms {
 				} else {
 					SignMessageImpl sm = null;
 					if(usebitmap) {
-						sm = createSignMessageWithBitmap(bitmap);
-						sm.setDuration(duramins);
+						sm = createSignMessageWithBitmap(bitmap, duramins);
 						m_dms.setMessageCurrent(sm,
 							null);
 					}
@@ -362,7 +363,7 @@ public class OpQueryMsg extends OpDms {
 						try {
 							m_dms.setMessageCurrent(
 								m_dms.createMessage("",
-								DMSMessagePriority.BLANK
+								DMSMessagePriority.BLANK, null
 							), null);
 						}
 						catch(SonarException e) {

@@ -109,7 +109,7 @@ public class OpMessage extends OpDms {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		if(!m_dms.checkPriority(m_signMessage.getActivationPriority()))
+		if(!m_dms.checkPriority(m_signMessage.getPriority()))
 			return null;
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)

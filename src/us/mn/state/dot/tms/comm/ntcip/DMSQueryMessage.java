@@ -53,9 +53,10 @@ public class DMSQueryMessage extends DMSOperation {
 			if(!m.isBlank()) {
 				// FIXME: this should be on SONAR thread
 				try {
-					SignMessage blank = dms.createMessage("",
-						DMSMessagePriority.SCHEDULED);
-					dms.setMessageCurrent(blank, null);
+					SignMessage sm = dms.createMessage("",
+						DMSMessagePriority.SCHEDULED,
+						null);
+					dms.setMessageCurrent(sm, null);
 				}
 				catch(SonarException e) {
 					e.printStackTrace();
@@ -103,10 +104,11 @@ public class DMSQueryMessage extends DMSOperation {
 			if(status.isValid() && time.getInteger() > 0) {
 				try {
 					// FIXME: this should be on SONAR thread
-					SignMessage message = dms.createMessage(
+					SignMessage sm = dms.createMessage(
 						multi.getValue(),
-						DMSMessagePriority.SCHEDULED);
-					dms.setMessageCurrent(message, null);
+						DMSMessagePriority.SCHEDULED,
+						null);
+					dms.setMessageCurrent(sm, null);
 				}
 				catch(SonarException e) {
 					e.printStackTrace();

@@ -141,7 +141,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	protected SignMessage createBlankMessage(DMSMessagePriority p) {
 		String bitmaps = Base64.encode(new byte[0]);
 		try {
-			return createMessage("", bitmaps, p);
+			return createMessage("", bitmaps, p, null);
 		}
 		catch(SonarException e) {
 			e.printStackTrace();
@@ -815,7 +815,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 			throw new ChangeVetoException("Invalid message: " +
 				m.getMulti());
 		}
-		if(!checkPriority(m.getActivationPriority()))
+		if(!checkPriority(m.getPriority()))
 			throw new ChangeVetoException("Priority too low");
 		// FIXME: only blank sign if activation priority equals
 		// current runtime priority (unless priority is CLEAR).
@@ -899,12 +899,13 @@ public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Check if a message has priority over "current" message */
 	protected boolean checkCurrentPriority(int ap) {
-		return ap >= messageCurrent.getRunTimePriority();
+		SignMessageImpl m = (SignMessageImpl)messageCurrent;
+		return ap >= m.getRunTimePriority();
 	}
 
 	/** Check if a message has priority over "next" message */
 	protected boolean checkNextPriority(int ap) {
-		SignMessage n = messageNext;
+		SignMessageImpl n = (SignMessageImpl)messageNext;
 		return n == null || ap >= n.getRunTimePriority();
 	}
 
@@ -1100,7 +1101,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		//        a travel time
 		try {
 			SignMessage m = createMessage(t,
-				DMSMessagePriority.TRAVEL_TIME);
+				DMSMessagePriority.TRAVEL_TIME, null);
 			sendMessage(m);
 		}
 		catch(Exception e) {
@@ -1109,8 +1110,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Create a message for the sign */
-	public SignMessage createMessage(String m, DMSMessagePriority p)
-		throws SonarException
+	public SignMessage createMessage(String m, DMSMessagePriority p,
+		Integer d) throws SonarException
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
@@ -1129,12 +1130,12 @@ public class DMSImpl extends Device2Impl implements DMS {
 		MultiString multi = new MultiString(m);
 		multi.parse(builder, builder.getDefaultFontNumber());
 		BitmapGraphic[] pages = builder.getPixmaps();
-		return createMessageB(m, pages, p);
+		return createMessageB(m, pages, p, d);
 	}
 
 	/** Create a message for the sign */
 	public SignMessage createMessage(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p) throws SonarException
+		DMSMessagePriority p, Integer d) throws SonarException
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
@@ -1147,12 +1148,12 @@ public class DMSImpl extends Device2Impl implements DMS {
 			bmaps[i] = new BitmapGraphic(w, h);
 			bmaps[i].copy(pages[i]);
 		}
-		return createMessageB(m, bmaps, p);
+		return createMessageB(m, bmaps, p, d);
 	}
 
 	/** Create a new message (B version) */
 	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p) throws SonarException
+		DMSMessagePriority p, Integer d) throws SonarException
 	{
 		int blen = pages[0].getBitmap().length;
 		byte[] bitmap = new byte[pages.length * blen];
@@ -1161,18 +1162,18 @@ public class DMSImpl extends Device2Impl implements DMS {
 			System.arraycopy(page, 0, bitmap, i * blen, blen);
 		}
 		String bitmaps = Base64.encode(bitmap);
-		return createMessage(m, bitmaps, p);
+		return createMessage(m, bitmaps, p, d);
 	}
 
 	/** Create a sign message */
 	protected SignMessage createMessage(String m, String b,
-		DMSMessagePriority p) throws SonarException
+		DMSMessagePriority p, Integer d) throws SonarException
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, b, p);
+		SignMessageImpl sm = new SignMessageImpl(m, b, p, d);
 		if(MainServer.server != null)
 			MainServer.server.createObject(sm);
 		else
-			namespace.add(sm);
+			namespace.storeObject(sm);
 		return sm;
 	}
 

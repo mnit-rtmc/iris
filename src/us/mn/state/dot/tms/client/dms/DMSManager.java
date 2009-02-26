@@ -96,7 +96,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Test if a DMS has a travel time message deployed */
 	static public boolean isTravelTime(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
-		return m.getRunTimePriority() ==
+		return m.getPriority() ==
 		       DMSMessagePriority.TRAVEL_TIME.ordinal();
 	}
 
@@ -115,8 +115,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Test if a DMS has an AWS message deployed */
 	static public boolean isAwsDeployed(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
-		return m.getRunTimePriority() ==
-		       DMSMessagePriority.AWS.ordinal();
+		return m.getPriority() == DMSMessagePriority.AWS.ordinal();
 	}
 
 	/** Test if a DMS has been deployed by a user */
