@@ -34,7 +34,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
@@ -50,7 +49,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of system attributes.
- * @see Font, FontComboBoxModel, SignMessage, DMSPanelPager
+ * @see SignMessage, DMSPanelPager
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -64,9 +63,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Cache of DMS proxy objects */
 	protected final TypeCache<DMS> cache;
-
-	/** Cache of font proxy objects */
-	protected final TypeCache<Font> fonts;
 
 	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
@@ -92,12 +88,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Used to select the expires time for a message (optional) */
 	protected final JComboBox durationCmb =
 		new JComboBox(Expiration.values());
-
-	/** Used to select the DMS font for a message (optional) */
-	protected final JComboBox fontCmb = new JComboBox();
-
-	/** Font combo box model */
-	protected FontComboBoxModel fontModel;
 
 	/** Button used to send a message to the DMS */
 	protected final JButton sendBtn =
@@ -139,12 +129,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		SonarState st = tc.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getDMSs();
-		fonts = st.getFonts();
 		user = st.lookupUser(tc.getUser().getName());
 		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
 		composer = new SignMessageComposer(this, st.getDmsSignGroups(),
-			st.getSignText(), user);
+			st.getSignText(), st.getFonts(), user);
 		currentPnl = singleTab.getCurrentPanel();
 		previewPnl = singleTab.getPreviewPanel();
 		multipleTab = new MultipleSignTab(st.getSignGroups(),
@@ -164,8 +153,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		FormPanel panel = new FormPanel(true);
 		if(SystemAttributeHelper.isDmsDurationEnabled())
 			panel.addRow("Duration", durationCmb);
-		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
-			panel.addRow("Font", fontCmb);
 		panel.addRow(card_panel);
 		card_panel.add(new JLabel(), "Blank");
 		card_panel.add(alertCbx, "Alert");
@@ -322,12 +309,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer.clearSelections();
 		durationCmb.setEnabled(false);
 		durationCmb.setSelectedItem(null);
-		fontCmb.setEnabled(false);
-		fontCmb.setSelectedItem(null);
-		if(fontModel != null) {
-			fontModel.dispose();
-			fontModel = null;
-		}
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
 		builder = null;
@@ -335,14 +316,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets() {
+		composer.setEnabled(true);
 		durationCmb.setEnabled(true);
 		durationCmb.setSelectedIndex(0);
-		FontComboBoxModel m = new FontComboBoxModel(fonts, builder);
-		fontCmb.setModel(m);
-		if(fontModel != null)
-			fontModel.dispose();
-		fontModel = m;
-		fontCmb.setEnabled(true);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
 		selectPreview(false);
@@ -423,7 +399,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Create a new message from the widgets */
 	protected SignMessage createMessage() {
-		String multi = composer.getMessage(getFontNumber());
+		String multi = composer.getMessage();
 		if(multi != null) {
 			String bitmaps = createBitmaps(multi);
 			if(bitmaps != null) {
@@ -440,15 +416,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null)
 			return creator.create(multi, bitmaps, 0);
-		else
-			return null;
-	}
-
-	/** Get the selected font number */
-	protected Integer getFontNumber() {
-		Font font = (Font)fontCmb.getSelectedItem();
-		if(font != null)
-			return font.getNumber();
 		else
 			return null;
 	}
@@ -493,8 +460,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps);
-			if(a == null)
-				composer.setSign(dms, getLineCount(dms));
+			if(a == null) {
+				composer.setSign(dms, getLineCount(dms),
+					builder);
+			}
 			composer.setMessage();
 		}
 	}
@@ -533,7 +502,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		clearPreviewPager();
 		DMS dms = getSingleSelection();
 		if(dms != null) {
-			String multi = composer.getMessage(getFontNumber());
+			String multi = composer.getMessage();
 			BitmapGraphic[] bmaps = getBitmaps(multi);
 			previewPnlPager = new DMSPanelPager(previewPnl, dms,
 				bmaps);

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -23,14 +24,18 @@ import java.awt.event.FocusEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
@@ -56,11 +61,14 @@ public class SignMessageComposer extends JPanel {
 	/** Sign text type cache */
 	protected final TypeCache<SignText> sign_text;
 
-	/** Tab pane to hold pages */
-	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.RIGHT);
+	/** Cache of font proxy objects */
+	protected final TypeCache<Font> fonts;
 
 	/** SONAR user */
 	protected final User user;
+
+	/** Tab pane to hold pages */
+	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.RIGHT);
 
 	/** Currently selected DMS */
 	protected DMS dms;
@@ -76,6 +84,12 @@ public class SignMessageComposer extends JPanel {
 
 	/** Number of lines on the currently selected sign */
 	protected int n_lines;
+
+	/** Font combo box widgets */
+	protected JComboBox[] fontCmb = new JComboBox[0];
+
+	/** Font combo box models */
+	protected FontComboBoxModel[] fontModel = new FontComboBoxModel[0];
 
 	/** Preview mode */
 	protected boolean preview = false;
@@ -93,24 +107,41 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new sign message composer */
 	public SignMessageComposer(DMSDispatcher ds, TypeCache<DmsSignGroup> d, 
-		TypeCache<SignText> t, User u)
+		TypeCache<SignText> t, TypeCache<Font> f, User u)
 	{
 		dispatcher = ds;
 		dms_sign_groups = d;
 		sign_text = t;
+		fonts = f;
 		user = u;
 		add(tab);
+		initializeFonts(1, null);
 		initializeWidgets(SystemAttributeHelper.getDmsMaxLines(), 1);
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
+		disposeLines();
+		disposeFonts();
 		SignTextModel stm = st_model;
 		if(stm != null) {
 			stm.dispose();
 			st_model = null;
 		}
+	}
+
+	/** Dispose of the existing line widgets */
+	protected void disposeLines() {
+		for(int i = 0; i < cmbLine.length; i++)
+			cmbLine[i].removeActionListener(comboListener);
+	}
+
+	/** Dispose of the existing font widgets */
+	protected void disposeFonts() {
+		for(int i = 0; i < fontModel.length; i++)
+			fontModel[i].dispose();
+		fontModel = new FontComboBoxModel[0];
 	}
 
 	/** Set the preview mode */
@@ -125,17 +156,17 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void setSign(DMS proxy, int nl) {
+	public void setSign(DMS proxy, int nl, PixelMapBuilder builder) {
 		dms = proxy;
 		SignTextModel stm = createSignTextModel(proxy);
 		int ml = stm.getMaxLine();
 		int np = Math.max(calculateSignPages(ml, nl),
 			SystemAttributeHelper.getDmsMessageMinPages());
+		initializeFonts(np, builder);
 		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
 			cmbLine[i].setModel(stm.getLineModel(
 				(short)(i + 1)));
-			cmbLine[i].setEnabled(true);
 		}
 	}
 
@@ -161,41 +192,81 @@ public class SignMessageComposer extends JPanel {
 			return 1;
 	}
 
+	/** Initialize the font combo boxes */
+	protected void initializeFonts(int np, PixelMapBuilder builder) {
+		disposeFonts();
+		fontCmb = new JComboBox[np];
+		if(builder != null)
+			fontModel = new FontComboBoxModel[np];
+		for(int i = 0; i < np; i++) {
+			fontCmb[i] = new JComboBox();
+			if(builder != null) {
+				fontModel[i] = new FontComboBoxModel(fonts,
+					builder);
+				fontCmb[i].setModel(fontModel[i]);
+			}
+		}
+	}
+
 	/** Initialize the page tabs and message combo boxes */
-	protected void initializeWidgets(int n, int p) {
-		if(n == n_lines && p == n_pages)
+	protected void initializeWidgets(int nl, int np) {
+		if(nl == n_lines && np == n_pages)
 			return;
-		for(int i = 0; i < cmbLine.length; i++)
-			cmbLine[i].removeActionListener(comboListener);
-		n_lines = n;
-		n_pages = p;
+		disposeLines();
+		n_lines = nl;
+		n_pages = np;
 		boolean can_add = st_model != null &&
 			st_model.canAddSignText("arbitrary_name");
 		cmbLine = new JComboBox[n_lines * n_pages];
-		for(int i = 0; i < cmbLine.length; i++) {
-			cmbLine[i] = new JComboBox();
-			if(can_add)
-				createEditor(cmbLine[i]);
-			cmbLine[i].setMaximumRowCount(21);
-			cmbLine[i].setRenderer(renderer);
-			cmbLine[i].addActionListener(comboListener);
-		}
-		for(p = 0; p < n_pages; p++) {
-			JPanel page = createPage(p);
-			setTab(p, "p." + (p + 1), page);
-		}
+		for(int i = 0; i < cmbLine.length; i++)
+			cmbLine[i] = createLineCombo(can_add);
+		for(int i = 0; i < n_pages; i++)
+			setTab(i, "p." + (i + 1), createPage(i));
 		while(n_pages < tab.getTabCount())
 			tab.removeTabAt(n_pages);
 	}
 
+	/** Create a line combo box */
+	protected JComboBox createLineCombo(boolean can_add) {
+		JComboBox cmb = new JComboBox();
+		if(can_add)
+			createEditor(cmb);
+		cmb.setMaximumRowCount(21);
+		cmb.setRenderer(renderer);
+		cmb.addActionListener(comboListener);
+		return cmb;
+	}
+
 	/** Create a new page panel */
 	protected JPanel createPage(int p) {
+		JPanel page = new JPanel(new BorderLayout());
 		JPanel panel = new JPanel(new GridLayout(n_lines, 1, 6, 6));
 		panel.setBackground(Color.BLACK);
 		panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
 		for(int i = 0; i < n_lines; i++)
 			panel.add(cmbLine[i + p * n_lines]);
-		return panel;
+		page.add(panel, BorderLayout.CENTER);
+		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
+			page.add(createFontBox(p), BorderLayout.SOUTH);
+		return page;
+	}
+
+	/** Create a font box */
+	protected Box createFontBox(int p) {
+		Box box = Box.createHorizontalBox();
+		box.add(new JLabel("Font"));
+		box.add(Box.createHorizontalStrut(4));
+		box.add(fontCmb[p]);
+		return box;
+	}
+
+	/** Get the selected font number */
+	protected Integer getFontNumber(int p) {
+		Font font = (Font)fontCmb[p].getSelectedItem();
+		if(font != null)
+			return font.getNumber();
+		else
+			return null;
 	}
 
 	/** Set a page on one tab */
@@ -246,10 +317,12 @@ public class SignMessageComposer extends JPanel {
 		super.setEnabled(b);
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i].setEnabled(b);
+		for(int i = 0; i < fontCmb.length; i++)
+			fontCmb[i].setEnabled(b);
 	}
 
 	/** Get the text of the message to send to the sign */
-	public String getMessage(Integer font) {
+	public String getMessage() {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
 		for(int i = 0; i < cmbLine.length; i++) {
@@ -258,7 +331,7 @@ public class SignMessageComposer extends JPanel {
 				m = i + 1;
 		}
 		if(m > 0)
-			return buildMulti(font, mess, m).toString();
+			return buildMulti(mess, m).toString();
 		else
 			return null;
 	}
@@ -276,15 +349,21 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Build a MULTI string from an array of line strings */
-	protected MultiString buildMulti(Integer font, String[] mess, int m) {
+	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
-		if(font != null)
-			multi.setFont(font);
+		int p = 0;
+		Integer f = getFontNumber(0);
+		if(f != null)
+			multi.setFont(f);
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
-				if(i % n_lines == 0)
+				if(i % n_lines == 0) {
 					multi.addPage();
-				else
+					p++;
+					f = getFontNumber(p);
+					if(f != null)
+						multi.setFont(f);
+				} else
 					multi.addLine();
 			}
 			multi.addText(mess[i]);
