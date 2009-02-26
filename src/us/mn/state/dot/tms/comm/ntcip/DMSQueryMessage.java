@@ -54,8 +54,7 @@ public class DMSQueryMessage extends DMSOperation {
 				// FIXME: this should be on SONAR thread
 				try {
 					SignMessage sm = dms.createMessage("",
-						DMSMessagePriority.SCHEDULED,
-						null);
+						DMSMessagePriority.BLANK, null);
 					dms.setMessageCurrent(sm, null);
 				}
 				catch(SonarException e) {
@@ -106,7 +105,7 @@ public class DMSQueryMessage extends DMSOperation {
 					// FIXME: this should be on SONAR thread
 					SignMessage sm = dms.createMessage(
 						multi.getValue(),
-						DMSMessagePriority.SCHEDULED,
+						DMSMessagePriority.OTHER_SYSTEM,
 						null);
 					dms.setMessageCurrent(sm, null);
 				}

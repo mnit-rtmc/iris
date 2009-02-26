@@ -121,7 +121,7 @@ public class OpReset extends OpDms
 				// set blank message
 				try {
 					SignMessage m = m_dms.createMessage("",
-						DMSMessagePriority.SCHEDULED,
+						DMSMessagePriority.BLANK,
 						null);
 	                		m_dms.setMessageCurrent(m, null);
 				}

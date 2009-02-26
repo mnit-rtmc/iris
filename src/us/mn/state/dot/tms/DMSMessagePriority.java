@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@ public enum DMSMessagePriority {
 	INVALID,	/* 0: invalid priority */
 	BLANK,		/* 1: blank message run-time priority */
 	TRAVEL_TIME,	/* 2: travel time priority */
-	SCHEDULED,	/* 3: scheduled priority */
-	ALERT,		/* 4: alert priority (AMBER alerts, etc.) */
-	OPERATOR,	/* 5: operator (override activation) priority */
-	AWS,		/* 6: automated warning system */
-	CLEAR		/* 7: operator clear activation priority */
+	OTHER_SYSTEM,	/* 3: other system priority */
+	SCHEDULED,	/* 4: scheduled priority (planned events) */
+	ALERT,		/* 5: alert priority (AMBER alerts, etc.) */
+	OPERATOR,	/* 6: operator (override activation) priority */
+	AWS,		/* 7: automated warning system */
+	CLEAR		/* 8: operator clear activation priority */
 }

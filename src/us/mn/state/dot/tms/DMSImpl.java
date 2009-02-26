@@ -138,10 +138,11 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Create a blank message for the sign */
-	protected SignMessage createBlankMessage(DMSMessagePriority p) {
+	protected SignMessage createBlankMessage() {
 		String bitmaps = Base64.encode(new byte[0]);
 		try {
-			return createMessage("", bitmaps, p, null);
+			return createMessage("", bitmaps,
+				DMSMessagePriority.BLANK, null);
 		}
 		catch(SonarException e) {
 			e.printStackTrace();
@@ -922,7 +923,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Current message (Shall not be null) */
 	protected transient SignMessage messageCurrent =
-		createBlankMessage(DMSMessagePriority.SCHEDULED);
+		createBlankMessage();
 
 	/** Set the current message */
 	public void setMessageCurrent(SignMessage m, User o) {

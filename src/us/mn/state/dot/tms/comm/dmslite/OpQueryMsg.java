@@ -200,7 +200,8 @@ public class OpQueryMsg extends OpDms {
 
 		try {
 			return (SignMessageImpl)m_dms.createMessage(multi,
-				pages, DMSMessagePriority.SCHEDULED, duration);
+				pages, DMSMessagePriority.OTHER_SYSTEM,
+				duration);
 		}
 		catch(SonarException e) {
 			e.printStackTrace();
