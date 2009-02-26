@@ -35,6 +35,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a unique sign message name */
 	static protected synchronized String createUniqueName() {
+		String n = createNextName();
+		while(namespace.lookupObject(SONAR_TYPE, n) != null)
+			n = createNextName();
+		return n;
+	}
+
+	/** Create the next system message name */
+	static protected String createNextName() {
 		last_id++;
 		// Check if the ID has rolled over to negative numbers
 		if(last_id < 0)
@@ -96,6 +104,12 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		multi = m;
 		bitmaps = b;
 		priority = p;
+		// FIXME: the ancient postgresql driver has a bug which makes
+		// a NULL column return 0 for numeric datatypes. This workaround
+		// can be removed after upgrading to newer JDBC driver. These
+		// fields cannot be 0 anyway, so this trick works in this case.
+		if(d == 0)
+			d = null;
 		duration = d;		
 	}
 
@@ -107,6 +121,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		multi = m;
 		bitmaps = b;
 		priority = p.ordinal();
+		if(d != null && d.equals(0))
+			d = null;
 		duration = d;
 	}
 
