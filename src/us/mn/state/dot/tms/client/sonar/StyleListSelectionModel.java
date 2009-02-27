@@ -36,7 +36,7 @@ public class StyleListSelectionModel<T extends SonarObject>
 	protected final ProxySelectionModel<T> sel;
 
 	/** The "valueIsAdjusting" crap doesn't work right */
-	protected boolean adjusting = false;
+	protected int adjusting = 0;
 
 	/** Create a new proxy list selection model */
 	public StyleListSelectionModel(StyleListModel<T> m,
@@ -46,25 +46,29 @@ public class StyleListSelectionModel<T extends SonarObject>
 		sel = manager.getSelectionModel();
 		sel.addProxySelectionListener(new ProxySelectionListener<T>() {
 			public void selectionAdded(T proxy) {
+				if(adjusting > 0)
+					return;
 				int i = model.getRow(proxy);
 				if(i >= 0) {
-					adjusting = true;
+					adjusting++;
 					addSelectionInterval(i, i);
-					adjusting = false;
+					adjusting--;
 				}
 			}
 			public void selectionRemoved(T proxy) {
+				if(adjusting > 0)
+					return;
 				int i = model.getRow(proxy);
 				if(i >= 0) {
-					adjusting = true;
+					adjusting++;
 					removeSelectionInterval(i, i);
-					adjusting = false;
+					adjusting--;
 				}
 			}
 		});
 		addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				if(adjusting || e.getValueIsAdjusting())
+				if(adjusting > 0 || e.getValueIsAdjusting())
 					return;
 				updateProxySelectionModel(e);
 			}
@@ -91,7 +95,7 @@ public class StyleListSelectionModel<T extends SonarObject>
 
 	/** Insert an interval into the model */
 	public void insertIndexInterval(int index, int length, boolean before) {
-		adjusting = true;
+		adjusting++;
 		super.insertIndexInterval(index, length, before);
 		// NOTE: if the proxies being added are already selected,
 		//       we need to add them to this selection model
@@ -100,25 +104,34 @@ public class StyleListSelectionModel<T extends SonarObject>
 			if(proxy != null && sel.isSelected(proxy))
 				addSelectionInterval(index, index);
 		}
-		adjusting = false;
+		adjusting--;
 	}
 
 	/** Remove an interval from the model */
 	public void removeIndexInterval(int index0, int index1) {
 		// NOTE: other style models should not be affected by removing
 		//       a proxy from this model
-		adjusting = true;
+		adjusting++;
 		super.removeIndexInterval(index0, index1);
-		adjusting = false;
+		adjusting--;
 	}
 
 	/** Set the selection interval */
 	public void setSelectionInterval(int index0, int index1) {
-		adjusting = true;
-		// NOTE: we need to clear the whole selection (not just this
-		//       style) before setting the new interval
-		sel.clearSelection();
+		adjusting++;
 		super.setSelectionInterval(index0, index1);
-		adjusting = false;
+		// NOTE: we need to deselect any selected items not in this
+		//       style list model.
+		for(T proxy: sel.getSelected()) {
+			int i = model.getRow(proxy);
+			if(i < index0 || i > index1)
+				sel.removeSelected(proxy);
+		}
+		for(int i = index0; i <= index1; i++) {
+			T proxy = model.getProxy(i);
+			if(proxy != null)
+				sel.addSelected(proxy);
+		}
+		adjusting--;
 	}
 }
