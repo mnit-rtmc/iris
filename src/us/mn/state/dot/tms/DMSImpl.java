@@ -840,9 +840,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		throws ChangeVetoException
 	{
 		try {
-			String[] pixels = pixelStatus;	// Avoid races
-			if(pixels != null && pixels.length == 2)
-				validateBitmaps(m, pixels);
+			validateBitmaps(m.getBitmaps());
 		}
 		catch(IOException e) {
 			throw new ChangeVetoException("Base64 decode error");
@@ -853,22 +851,32 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(SignMessage m, String[] pixels)
-		throws IOException, ChangeVetoException
+	protected void validateBitmaps(String bmaps) throws IOException,
+		ChangeVetoException
 	{
-		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
-		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
+		byte[] bitmaps = Base64.decode(bmaps);
 		BitmapGraphic bitmap = createBlankBitmap();
-		BitmapGraphic stuckOff = bitmap.createBlankCopy();
-		BitmapGraphic stuckOn = bitmap.createBlankCopy();
-		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
-		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
-		byte[] bitmaps = Base64.decode(m.getBitmaps());
 		int blen = bitmap.getBitmap().length;
 		if(blen == 0)
 			throw new ChangeVetoException("Invalid sign size");
 		if(bitmaps.length % blen != 0)
 			throw new ChangeVetoException("Invalid bitmap length");
+		String[] pixels = pixelStatus;	// Avoid races
+		if(pixels != null && pixels.length == 2)
+			validateBitmaps(bitmaps, pixels, bitmap);
+	}
+
+	/** Validate the message bitmaps */
+	protected void validateBitmaps(byte[] bitmaps, String[] pixels,
+		BitmapGraphic bitmap) throws IOException, ChangeVetoException
+	{
+		int blen = bitmap.getBitmap().length;
+		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
+		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
+		BitmapGraphic stuckOff = bitmap.createBlankCopy();
+		BitmapGraphic stuckOn = bitmap.createBlankCopy();
+		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
+		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
 		int n_pages = bitmaps.length / blen;
 		byte[] b = new byte[blen];
 		for(int p = 0; p < n_pages; p++) {
