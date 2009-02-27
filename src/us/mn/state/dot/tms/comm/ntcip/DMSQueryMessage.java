@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -50,17 +51,8 @@ public class DMSQueryMessage extends DMSOperation {
 			/* The sign is blank. If IRIS says there should
 			 * be a message on the sign, that's wrong and
 			 * needs to be updated */
-			if(!m.isBlank()) {
-				// FIXME: this should be on SONAR thread
-				try {
-					SignMessage sm = dms.createMessage("",
-						DMSMessagePriority.BLANK, null);
-					dms.setMessageCurrent(sm, null);
-				}
-				catch(SonarException e) {
-					e.printStackTrace();
-				}
-			}
+			if(!m.isBlank())
+				setCurrentMessage("", null);
 		} else {
 			/* The sign is not blank. If IRIS says it
 			 * should be blank, then we need to query the
@@ -69,6 +61,28 @@ public class DMSQueryMessage extends DMSOperation {
 				return new QueryCurrentMessage();
 		}
 		return null;
+	}
+
+	/** Set the current message on the sign */
+	protected void setCurrentMessage(String multi, Integer duration) {
+		try {
+			// FIXME: this should be on SONAR thread
+			SignMessage sm = dms.createMessage(multi,
+				getPriority(multi), duration);
+			dms.setMessageCurrent(sm, null);
+		}
+		catch(SonarException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Get the message priority for a MULTI string */
+	protected DMSMessagePriority getPriority(String multi) {
+		MultiString ms = new MultiString(multi);
+		if(ms.isBlank())
+			return DMSMessagePriority.BLANK;
+		else
+			return DMSMessagePriority.OTHER_SYSTEM;
 	}
 
 	/** Phase to query the current message source */
@@ -101,17 +115,8 @@ public class DMSQueryMessage extends DMSOperation {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			DMS_LOG.log(dms.getName() + ": " + time);
 			if(status.isValid() && time.getInteger() > 0) {
-				try {
-					// FIXME: this should be on SONAR thread
-					SignMessage sm = dms.createMessage(
-						multi.getValue(),
-						DMSMessagePriority.OTHER_SYSTEM,
-						null);
-					dms.setMessageCurrent(sm, null);
-				}
-				catch(SonarException e) {
-					e.printStackTrace();
-				}
+				Integer d = parseDuration(time.getInteger());
+				setCurrentMessage(multi.getValue(), d);
 			}
 			return null;
 		}

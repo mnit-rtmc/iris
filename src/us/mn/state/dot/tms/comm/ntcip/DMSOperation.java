@@ -43,6 +43,14 @@ abstract public class DMSOperation extends Device2Operation {
 			return d;
 	}
 
+	/** Parse an NTCIP duration value */
+	static protected Integer parseDuration(int d) {
+		if(d < 0 || d >= DURATION_INDEFINITE)
+			return null;
+		else
+			return d;
+	}
+
 	/** DMS to operate */
 	protected final DMSImpl dms;
 
