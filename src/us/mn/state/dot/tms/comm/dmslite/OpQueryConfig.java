@@ -208,9 +208,6 @@ public class OpQueryConfig extends OpDms
 				dms.setCharHeightPixels(characterHeightPixels);
 				dms.setCharWidthPixels(characterWidthPixels);
 
-				// update message graphic because sign params may have changed
-				// dms.updateMessageGraphic(); //FIXME: enable this call?, but should not render from text
-
 			// failure
 			} else {
 				System.err.println(
