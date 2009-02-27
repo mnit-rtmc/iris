@@ -48,8 +48,13 @@ public class ProxySelectionModel<T extends SonarObject> {
 
 	/** Set a proxy to be a single selection */
 	public void setSelected(T proxy) {
-		clearSelection();
+		List<T> sel = getSelected();
+		selected.clear();
 		addSelected(proxy);
+		for(T _proxy: sel) {
+			if(_proxy != proxy)
+				fireSelectionRemoved(_proxy);
+		}
 	}
 
 	/** Clear the proxy selection */
