@@ -53,27 +53,30 @@ public class SignMessageCreator {
 	 * Create a new sign message.
 	 * @param multi MULTI text.
 	 * @param bitmaps Base64-encoded bitmaps.
+	 * @param priority Message priority.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message.
 	 */
 	public SignMessage create(String multi, String bitmaps,
-		Integer duration)
+		DMSMessagePriority priority, Integer duration)
 	{
-		SignMessage sm = lookupMessage(multi, bitmaps, duration);
+		SignMessage sm = lookupMessage(multi, bitmaps, priority,
+			duration);
 		if(sm != null)
 			return sm;
 		String name = createName();
 		if(name != null)
-			return create(name, multi, bitmaps, duration);
+			return create(name, multi, bitmaps, priority, duration);
 		else
 			return null;
 	}
 
 	/** Lookup an existing sign message */
 	protected SignMessage lookupMessage(final String multi,
-		final String bitmaps, final Integer duration)
+		final String bitmaps, DMSMessagePriority priority,
+		final Integer duration)
 	{
-		final int p = DMSMessagePriority.OPERATOR.ordinal();
+		final int p = priority.ordinal();
 		return sign_messages.findObject(new Checker<SignMessage>() {
 			public boolean check(SignMessage sm) {
 				return multi.equals(sm.getMulti()) &&
@@ -89,17 +92,17 @@ public class SignMessageCreator {
 	 * @param name Sign message name.
 	 * @param multi MULTI text.
 	 * @param bitmaps Base64-encoded bitmaps.
+	 * @param priority Message priority.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message.
 	 */
 	protected SignMessage create(String name, String multi, String bitmaps,
-		Integer duration)
+		DMSMessagePriority priority, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("multi", multi);
 		attrs.put("bitmaps", bitmaps);
-		attrs.put("priority", new Integer(
-			DMSMessagePriority.OPERATOR.ordinal()));
+		attrs.put("priority", new Integer(priority.ordinal()));
 		if(duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);
