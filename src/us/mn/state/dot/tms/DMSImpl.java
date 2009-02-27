@@ -916,7 +916,6 @@ public class DMSImpl extends Device2Impl implements DMS {
 			doSetMessageNext(m, null);
 		}
 		catch(TMSException e) {
-			// FIXME: destroy SignMessage
 			throw e;
 		}
 	}
@@ -1097,8 +1096,6 @@ public class DMSImpl extends Device2Impl implements DMS {
 	protected void sendTravelTime(String t) {
 		if(!checkPriority(DMSMessagePriority.TRAVEL_TIME.ordinal()))
 			return;
-		// FIXME: bail out if t is blank and the current message is not
-		//        a travel time
 		try {
 			SignMessage m = createMessage(t,
 				DMSMessagePriority.TRAVEL_TIME, null);
