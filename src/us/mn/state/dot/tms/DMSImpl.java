@@ -202,7 +202,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 	public void doSetTravel(String t) throws TMSException {
 		if(t.equals(travel))
 			return;
-		if(!MultiString.isValid(t))
+		MultiString multi = new MultiString(t);
+		if(!multi.isValid())
 			throw new ChangeVetoException("Invalid travel: " + t);
 		store.update(this, "travel", t);
 		setTravel(t);
@@ -812,14 +813,23 @@ public class DMSImpl extends Device2Impl implements DMS {
 		final DMSPoller p = getDMSPoller();
 		if(p == null)
 			throw new ChangeVetoException("No active poller");
-		if(!MultiString.isValid(m.getMulti())) {
+		MultiString multi = new MultiString(m.getMulti());
+		if(!multi.isValid()) {
 			throw new ChangeVetoException("Invalid message: " +
 				m.getMulti());
 		}
-		if(!checkPriority(m.getPriority()))
+		int ap = m.getPriority();
+		if(!checkPriority(ap))
 			throw new ChangeVetoException("Priority too low");
-		// FIXME: only blank sign if activation priority equals
-		// current runtime priority (unless priority is CLEAR).
+		if(ap != DMSMessagePriority.CLEAR.ordinal()) {
+			// NOTE: only send a "blank" message if activation
+			//       priority matches current runtime priority.
+			//       This means that a blank AWS message will not
+			//       blank the sign unless the current message is
+			//       an AWS message.
+			if(multi.isBlank() && !checkPriorityBlank(ap))
+				return;
+		}
 		validateBitmaps(m);
 		p.sendMessage(this, m, o);
 		setMessageNext(m);
@@ -908,6 +918,12 @@ public class DMSImpl extends Device2Impl implements DMS {
 	protected boolean checkNextPriority(int ap) {
 		SignMessageImpl n = (SignMessageImpl)messageNext;
 		return n == null || ap >= n.getRunTimePriority();
+	}
+
+	/** Check if activation priority should allow blanking the sign */
+	protected boolean checkPriorityBlank(int ap) {
+		SignMessageImpl m = (SignMessageImpl)messageCurrent;
+		return ap == m.getRunTimePriority();
 	}
 
 	/** Send a sign message creates by IRIS server */

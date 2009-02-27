@@ -100,16 +100,6 @@ public class MultiString {
 	static protected final Pattern TRAVEL_TAG = Pattern.compile(
 		"(.*?)\\[tt([A-Za-z0-9]+)\\]");
 
-	/** Validate message text */
-	static public boolean isValid(String s) {
-		for(String t: TAG.split(s)) {
-			Matcher m = TEXT_PATTERN.matcher(t);
-			if(!m.matches())
-				return false;
-		}
-		return true;
-	}
-
 	/** MULTI string buffer */
 	protected final StringBuilder b = new StringBuilder();
 
@@ -137,6 +127,16 @@ public class MultiString {
 	/** Create a new MULTI string */
 	public MultiString(String t) {
 		addText(t);
+	}
+
+	/** Validate message text */
+	public boolean isValid() {
+		for(String t: TAG.split(b.toString())) {
+			Matcher m = TEXT_PATTERN.matcher(t);
+			if(!m.matches())
+				return false;
+		}
+		return true;
 	}
 
 	/** Add text to the current line */
