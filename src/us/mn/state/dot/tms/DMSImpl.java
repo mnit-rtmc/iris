@@ -935,8 +935,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 		notifyAttribute("messageCurrent");
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
-		if(messageCurrent == messageNext)
-			setMessageNext(null);
+		setMessageNext(null);
 		// FIXME: destroy the previous message if no other signs are
 		// using it
 	}
