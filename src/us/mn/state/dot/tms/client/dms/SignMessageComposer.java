@@ -376,14 +376,15 @@ public class SignMessageComposer extends JPanel {
 		DMS proxy = dms;	// Avoid races
 		if(proxy == null || preview)
 			return;
+		int n_lines = dispatcher.getLineCount(proxy);
 		adjusting++;
-		setMessage(proxy.getMessageCurrent());
+		setMessage(proxy.getMessageCurrent(), n_lines);
 		adjusting--;
 	}
 
 	/** Set the currently selected message */
-	protected void setMessage(SignMessage m) {
-		String[] lines = SignMessageHelper.createLines(m);
+	protected void setMessage(SignMessage m, int n_lines) {
+		String[] lines = SignMessageHelper.createLines(m, n_lines);
 		for(int i = 0; i < cmbLine.length; i++) {
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);

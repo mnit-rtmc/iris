@@ -472,7 +472,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	}
 
 	/** Get the number of lines on a sign */
-	protected int getLineCount(DMS dms) {
+	public int getLineCount(DMS dms) {
 		int ml = SystemAttributeHelper.getDmsMaxLines();
 		int lh = getLineHeightPixels();
 		Integer h = dms.getHeightPixels();

@@ -31,7 +31,7 @@ public class SignMessageHelper {
 	}
 
 	/** Create an array of lines from the given message */
-	static public String[] createLines(SignMessage m) {
+	static public String[] createLines(SignMessage m, final int n_lines) {
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiString multi = new MultiString(m.getMulti());
 		multi.parse(new MultiString.SpanCallback() {
@@ -40,8 +40,7 @@ public class SignMessageHelper {
 				int l, MultiString.JustificationLine jl,
 				int f_num, String t)
 			{
-				// FIXME: shouldn't hardcode 3 lines here
-				int m_lines = Math.max(3, l + 1);
+				int m_lines = Math.max(n_lines, l + 1);
 				while(ls.size() < (p + 1) * m_lines)
 					ls.add("");
 				int i = p * m_lines + l;
