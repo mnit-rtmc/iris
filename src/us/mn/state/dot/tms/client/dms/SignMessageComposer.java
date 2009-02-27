@@ -48,6 +48,10 @@ import us.mn.state.dot.tms.SystemAttributeHelper;
  */
 public class SignMessageComposer extends JPanel {
 
+	/** Prototype sign text */
+	static protected final SignText PROTOTYPE_SIGN_TEXT =
+		new ClientSignText("12345678901234567890");
+
 	/** Cell renderer for sign text in combo boxes */
 	protected final SignTextCellRenderer renderer =
 		new SignTextCellRenderer();
@@ -232,6 +236,11 @@ public class SignMessageComposer extends JPanel {
 		if(can_add)
 			createEditor(cmb);
 		cmb.setMaximumRowCount(21);
+		// NOTE: We use a prototype display value so that combo boxes
+		//       are always the same size.  This prevents all the
+		//       widgets from being rearranged whenever a new sign is
+		//       selected.
+		cmb.setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
 		cmb.setRenderer(renderer);
 		cmb.addActionListener(comboListener);
 		return cmb;
