@@ -415,7 +415,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		String multi = "";
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null)
-			return creator.create(multi, bitmaps, 0);
+			return creator.create(multi, bitmaps, null);
 		else
 			return null;
 	}
