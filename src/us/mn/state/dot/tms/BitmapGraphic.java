@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,5 +167,10 @@ public class BitmapGraphic {
 			for(int yy = ymin; yy < ymax; yy++)
 				setPixel(xx, yy, 1);
 		}
+	}
+
+	/** Create a blank copy */
+	public BitmapGraphic createBlankCopy() {
+		return new BitmapGraphic(width, height);
 	}
 }

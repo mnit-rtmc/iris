@@ -859,8 +859,8 @@ public class DMSImpl extends Device2Impl implements DMS {
 		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
 		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
 		BitmapGraphic bitmap = createBlankBitmap();
-		BitmapGraphic stuckOff = createBlankBitmap();
-		BitmapGraphic stuckOn = createBlankBitmap();
+		BitmapGraphic stuckOff = bitmap.createBlankCopy();
+		BitmapGraphic stuckOn = bitmap.createBlankCopy();
 		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
 		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
 		byte[] bitmaps = Base64.decode(m.getBitmaps());
