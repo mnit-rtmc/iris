@@ -141,15 +141,15 @@ public class FontModel extends ProxyTableModel<Font> {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Font"));
-		m.addColumn(createColumn(COL_NUMBER, 100, "Number"));
-		m.addColumn(createColumn(COL_HEIGHT, 100, "Height"));
-		m.addColumn(createColumn(COL_WIDTH, 100, "Width"));
-		m.addColumn(createColumn(COL_LINE_SPACING, 100,
+		m.addColumn(createColumn(COL_NAME, 140, "Font"));
+		m.addColumn(createColumn(COL_NUMBER, 70, "Number"));
+		m.addColumn(createColumn(COL_HEIGHT, 70, "Height"));
+		m.addColumn(createColumn(COL_WIDTH, 70, "Width"));
+		m.addColumn(createColumn(COL_LINE_SPACING, 90,
 			"Line Spacing"));
-		m.addColumn(createColumn(COL_CHAR_SPACING, 100,
+		m.addColumn(createColumn(COL_CHAR_SPACING, 90,
 			"Char Spacing"));
-		m.addColumn(createColumn(COL_VERSION_ID, 100, "Version ID"));
+		m.addColumn(createColumn(COL_VERSION_ID, 74, "Version ID"));
 		return m;
 	}
 }
