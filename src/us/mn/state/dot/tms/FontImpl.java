@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,11 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import us.mn.state.dot.sonar.Checker;
 
 /**
  * The FontImpl class defines all the attributes of a pixel font. These
@@ -30,22 +32,40 @@ import java.util.TreeMap;
  */
 public class FontImpl extends BaseObjectImpl implements Font {
 
+	/** Fint the lowest unused font number */
+	static protected int findUnusedFontNumber() {
+		final HashSet<Integer> numbers = new HashSet<Integer>();
+		namespace.findObject(Font.SONAR_TYPE, new Checker<Font>() {
+			public boolean check(Font f) {
+				numbers.add(f.getNumber());
+				return false;
+			}
+		});
+		for(int i = 1; i < 256; i++) {
+			if(!numbers.contains(i))
+				return i;
+		}
+		// This can only happen if we already have 255 fonts defined
+		return 0;
+	}
+
 	/** Load all the fonts */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS fonts...");
 		namespace.registerType(SONAR_TYPE, FontImpl.class);
-		store.query("SELECT name, height, width, line_spacing, " +
-			"char_spacing, version_id FROM font;",
+		store.query("SELECT name, f_number, height, width, " +
+			"line_spacing, char_spacing, version_id FROM font;",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.add(new FontImpl(
 					row.getString(1),	// name
-					row.getInt(2),		// height
-					row.getInt(3),		// width
-					row.getInt(4),		// line_spacing
-					row.getInt(5),		// char_spacing
-					row.getInt(6)		// version_id
+					row.getInt(2),		// f_number
+					row.getInt(3),		// height
+					row.getInt(4),		// width
+					row.getInt(5),		// line_spacing
+					row.getInt(6),		// char_spacing
+					row.getInt(7)		// version_id
 				));
 			}
 		});
@@ -55,6 +75,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("f_number", f_number);
 		map.put("height", height);
 		map.put("width", width);
 		map.put("line_spacing", lineSpacing);
@@ -76,11 +97,15 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Create a new font */
 	public FontImpl(String n) {
 		super(n);
+		f_number = findUnusedFontNumber();
 	}
 
 	/** Create a new font */
-	protected FontImpl(String n, int h, int w, int ls, int cs, int v) {
+	protected FontImpl(String n, int num, int h, int w, int ls, int cs,
+		int v)
+	{
 		this(n);
+		f_number = num;
 		height = h;
 		width = w;
 		lineSpacing = ls;
@@ -120,6 +145,29 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		synchronized(glyphs) {
 			return new TreeMap<Integer, GlyphImpl>(glyphs);
 		}
+	}
+
+	/** Font number */
+	protected int f_number;
+
+	/** Set the font number */
+	public void setNumber(int n) {
+		f_number = n;
+	}
+
+	/** Set the font number */
+	public void doSetNumber(int n) throws TMSException {
+		if(n == f_number)
+			return;
+		if(n < 1 || n > 255)
+			throw new ChangeVetoException("Invalid number");
+		store.update(this, "f_number", n);
+		setNumber(n);
+	}
+
+	/** Get the font number */
+	public int getNumber() {
+		return f_number;
 	}
 
 	/** Font height (in pixels) */
@@ -259,21 +307,5 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		}
 		throw new InvalidMessageException("Invalid code point: " +
 			code_point);
-	}
-
-	/** Test if the font matches a specified character height/width */
-	protected boolean matches(int h, int w) {
-		if(h == 0)
-			return w == getWidth();
-		else
-			return (h == height) && (w == getWidth());
-	}
-
-	/** Test if the font matches the specified parameters */
-	public boolean matches(int h, int w, int ls) {
-		if(ls == 0 || ls == lineSpacing)
-			return matches(h, w);
-		else
-			return false;
 	}
 }

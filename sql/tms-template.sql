@@ -140,6 +140,7 @@ CREATE TABLE graphic (
 
 CREATE TABLE font (
 	name TEXT PRIMARY KEY,
+	f_number INTEGER NOT NULL,
 	height INTEGER NOT NULL,
 	width INTEGER NOT NULL,
 	line_spacing INTEGER NOT NULL,

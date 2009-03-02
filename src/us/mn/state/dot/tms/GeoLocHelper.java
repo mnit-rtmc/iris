@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,7 +153,11 @@ public class GeoLocHelper {
 
 	/** Get the freeway corridor ID */
 	static public String getCorridorID(GeoLoc l) {
-		Road f = l.getFreeway();
+		return getCorridorID(l.getFreeway(), l.getFreeDir());
+	}
+
+	/** Get the freeway corridor ID */
+	static public String getCorridorID(Road f, short d) {
 		if(f == null)
 			return "null";
 		StringBuilder b = new StringBuilder();
@@ -162,7 +166,7 @@ public class GeoLocHelper {
 			b.append(ab);
 		else
 			return "null";
-		short fd = filterDirection(l.getFreeDir(), f);
+		short fd = filterDirection(d, f);
 		if(fd > 0 && fd < TMSObject.DIRECTION.length)
 			b.append(TMSObject.DIRECTION[fd]);
 		return b.toString();

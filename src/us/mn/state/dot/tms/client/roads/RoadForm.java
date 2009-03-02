@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,16 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying and editing roads
@@ -41,10 +39,10 @@ public class RoadForm extends AbstractForm {
 	protected RoadModel model;
 
 	/** Table to hold the road list */
-	protected final JTable table = new JTable();
+	protected final ZTable table = new ZTable();
 
 	/** Button to delete the selected road */
-	protected final JButton del_road = new JButton("Delete Road");
+	protected final JButton del_road = new JButton("Delete");
 
 	/** Road type cache */
 	protected final TypeCache<Road> cache;
@@ -68,13 +66,6 @@ public class RoadForm extends AbstractForm {
 
 	/** Create road panel */
 	protected JPanel createRoadPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
 		final ListSelectionModel s = table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -83,13 +74,6 @@ public class RoadForm extends AbstractForm {
 					selectRoad();
 			}
 		};
-		table.setModel(model);
-		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(model.createColumnModel());
-		JScrollPane pane = new JScrollPane(table);
-		panel.add(pane, bag);
-		del_road.setEnabled(false);
-		panel.add(del_road, bag);
 		new ActionJob(this, del_road) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -97,6 +81,14 @@ public class RoadForm extends AbstractForm {
 					model.deleteRow(row);
 			}
 		};
+		table.setModel(model);
+		table.setAutoCreateColumnsFromModel(false);
+		table.setColumnModel(model.createColumnModel());
+		table.setVisibleRowCount(20);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(table);
+		panel.addRow(del_road);
+		del_road.setEnabled(false);
 		return panel;
 	}
 

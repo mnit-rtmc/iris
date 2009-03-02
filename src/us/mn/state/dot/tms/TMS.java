@@ -24,15 +24,6 @@ import java.rmi.RemoteException;
  */
 public interface TMS extends Remote {
 
-	/** Get the timing plan list */
-	public TimingPlanList getTimingPlanList() throws RemoteException;
-
-	/** Get the ramp meter list */
-	public DeviceList getRampMeterList() throws RemoteException;
-
-	/** Get the dynamic message sign list */
-	public DMSList getDMSList() throws RemoteException;
-
 	/** Get the lane control signal list */
 	public LCSList getLCSList() throws RemoteException;
 

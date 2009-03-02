@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2005  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
@@ -22,17 +18,38 @@ import java.io.IOException;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.ChecksumException;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * Operation to be performed on a dynamic message sign
  *
  * @author Douglas Lau
  */
-abstract public class DMSOperation extends DeviceOperation {
+abstract public class DMSOperation extends Device2Operation {
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
+
+	/** Special duration value for indefinite duration */
+	static protected final int DURATION_INDEFINITE = 65535;
+
+	/** Filter message duration (valid for NTCIP) */
+	static protected int getDuration(Integer d) {
+		if(d == null || d >= DURATION_INDEFINITE)
+			return DURATION_INDEFINITE;
+		else if(d < 0)
+			return 0;
+		else
+			return d;
+	}
+
+	/** Parse an NTCIP duration value */
+	static protected Integer parseDuration(int d) {
+		if(d < 0 || d >= DURATION_INDEFINITE)
+			return null;
+		else
+			return d;
+	}
 
 	/** DMS to operate */
 	protected final DMSImpl dms;
@@ -47,7 +64,7 @@ abstract public class DMSOperation extends DeviceOperation {
 	public void handleException(IOException e) {
 		if(e instanceof ChecksumException) {
 			ChecksumException ce = (ChecksumException)e;
-			DMS_LOG.log(dms.getId() + " (" + toString() +
+			DMS_LOG.log(dms.getName() + " (" + toString() +
 				"), " + ce.getScannedData());
 		}
 		super.handleException(e);
@@ -55,7 +72,7 @@ abstract public class DMSOperation extends DeviceOperation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		dms.setReset(success);
+		dms.setConfigure(success);
 		super.cleanup();
 	}
 }

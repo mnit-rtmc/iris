@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,10 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -27,17 +29,26 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 public class DMSSetTimeRemaining extends DMSOperation {
 
 	/** Sign message to update */
-	protected final SignMessage message;
+	protected final SignMessageImpl message;
+
+	/** User who deployed the message */
+	protected final User owner;
 
 	/** Create a new DMS set time remaining operation */
-	public DMSSetTimeRemaining(DMSImpl d, SignMessage m) {
+	public DMSSetTimeRemaining(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
-		message = m;
+		message = (SignMessageImpl)m;
+		owner = o;
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 		return new SetTimeRemaining();
+	}
+
+	/** Get the message duration */
+	protected int getDuration() {
+		return getDuration(message.getDuration());
 	}
 
 	/** Phase to set message time remaining */
@@ -46,11 +57,11 @@ public class DMSSetTimeRemaining extends DMSOperation {
 		/** Set the message time remaining */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageTimeRemaining remaining =
-				new DmsMessageTimeRemaining(
-				message.getDuration());
+				new DmsMessageTimeRemaining(getDuration());
 			mess.add(remaining);
 			mess.setRequest();
-			dms.setActiveMessage(message);
+			// FIXME: this should happen on SONAR thread
+			dms.setMessageCurrent(message, owner);
 			return null;
 		}
 	}

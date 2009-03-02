@@ -40,7 +40,7 @@ public class DetectorXmlWriter extends XmlWriter {
 	}
 
 	/** Print the body of the detector list XML file */
-	public void print(final PrintWriter out) throws NamespaceError {
+	public void print(final PrintWriter out) {
 		namespace.findObject(Detector.SONAR_TYPE,
 			new Checker<DetectorImpl>()
 		{

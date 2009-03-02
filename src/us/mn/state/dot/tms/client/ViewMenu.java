@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,12 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
-import us.mn.state.dot.tms.client.dms.DMSListForm;
+import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.LcsListForm;
-import us.mn.state.dot.tms.client.meter.RampMeterListForm;
+import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
+import us.mn.state.dot.tms.client.schedule.HolidayForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.system.SystemAttributeForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
@@ -32,7 +33,6 @@ import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
 import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.Icons;
-import us.mn.state.dot.tms.client.toast.HolidayForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.utils.I18NMessages;
@@ -118,7 +118,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('M');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RampMeterListForm(tc));
+				desktop.show(new RampMeterForm(tc,
+					st.getRampMeters()));
 			}
 		};
 		add(item);
@@ -132,7 +133,7 @@ public class ViewMenu extends JMenu {
 		add(item);
 
 		// get DMS menu item name
-		String dmsmenuitem=I18NMessages.get("MesgSignLabel");
+		String dmsmenuitem = I18NMessages.get("dms.abbreviation");
 		item = new JMenuItem(dmsmenuitem, Icons.getIcon("drum-inactive"));
 		// use 1st char as mnemonic
 		if (dmsmenuitem.length()>0)
@@ -140,7 +141,7 @@ public class ViewMenu extends JMenu {
 
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DMSListForm(tc));
+				desktop.show(new DMSForm(tc, st.getDMSs()));
 			}
 		};
 		add(item);

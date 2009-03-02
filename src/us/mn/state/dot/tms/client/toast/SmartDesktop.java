@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,14 +76,17 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Add an abstract form to the desktop pane */
-	protected JInternalFrame addForm(AbstractForm form)
-		throws RemoteException
-	{
+	protected JInternalFrame addForm(AbstractForm form) {
 		form.initialize();
 		if(form instanceof TMSObjectForm) {
 			TMSObjectForm of = (TMSObjectForm)form;
-			of.doUpdate();
-			of.doStatus();
+			try {
+				of.doUpdate();
+				of.doStatus();
+			}
+			catch(RemoteException e) {
+				e.printStackTrace();
+			}
 		}
 		JInternalFrame frame = createFrame(form);
 		frame.pack();
@@ -101,7 +104,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Show the specified form */
-	public Component show(AbstractForm form) throws RemoteException {
+	public Component show(AbstractForm form) {
 		JInternalFrame frame = find(form.getTitle());
 		if(frame != null)
 			selectFrame(frame);

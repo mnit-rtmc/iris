@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,41 +12,64 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.List;
-import java.util.LinkedList;
-import java.util.Map;
-import javax.swing.JComboBox;
-import javax.swing.AbstractListModel;
+import java.util.Comparator;
+import java.util.TreeSet;
 import javax.swing.ComboBoxModel;
-
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.Font;
 
 /**
  * Combobox model for fonts.
- * @see FontComboBox, DMSDispatcher, ProxyListModel, Font, FontImpl, TypeCache
+ * @see FontComboBox, ProxyListModel, Font, TypeCache
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class FontComboBoxModel extends ProxyListModel<Font>
 	implements ComboBoxModel 
 {
-	/** currently selected font */
-	Font m_selected;
+	/** Pixel map builder */
+	protected final PixelMapBuilder builder;
 
-	/** constructor */
-	public FontComboBoxModel(TypeCache<Font> arg_fonts) {
+	/** Currently selected font */
+	protected Font m_selected;
+
+	/** Create a new font combo box model */
+	public FontComboBoxModel(TypeCache<Font> arg_fonts, PixelMapBuilder b) {
 		super(arg_fonts);
+		builder = b;
 		initialize();
 	}
 
-	/** Get the item at the specified index */
-	public Object getElementAt(int index) {
-		Font f = (Font)super.getElementAt(index);
-		return f;
+	/** Create an empty set of proxies */
+	protected TreeSet<Font> createProxySet() {
+		return new TreeSet<Font>(
+			new Comparator<Font>() {
+				public int compare(Font f0, Font f1) {
+					Integer n0 = f0.getNumber();
+					Integer n1 = f1.getNumber();
+					return n0.compareTo(n1);
+				}
+				public boolean equals(Object o) {
+					return o == this;
+				}
+				public int hashCode() {
+					return super.hashCode();
+				}
+			}
+		);
+	}
+
+	/** Add a new proxy to the table model */
+	protected int doProxyAdded(Font proxy) {
+		if(builder != null && builder.isFontUsable(proxy))
+			return super.doProxyAdded(proxy);
+		else
+			return -1;
 	}
 
 	/** Get the selected item */
@@ -68,18 +91,4 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 		else
 			assert false : "unexpected type in setSelectedItem().";
 	}
-
-	/** return a list of available fonts (for debugging) */
-	/*
-	protected List<String> getFontNames(TypeCache<Font> tcf) {
-		LinkedList<String> fontNames = new LinkedList();
-		Map<String,Font> fonts = tcf.getAll();
-		synchronized(fonts) {
-			for(Font proxy: fonts.values()) {
-				fontNames.add(proxy.getName());
-			}
-		}
-		return fontNames;
-	}
-	*/
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,11 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-
-import java.io.IOException;
 
 /**
  * Operation to blank the DMS.
@@ -35,11 +35,15 @@ public class OpBlank extends OpDms
 	/** blank message, which contains owner, duration */
 	private final SignMessage m_mess;
 
+	/** Owner of message */
+	private final User m_owner;
+
 	/** Create a new DMS query configuration object */
-	public OpBlank(DMSImpl d, SignMessage mess) {
+	public OpBlank(DMSImpl d, SignMessage mess, User owner) {
 		super(DOWNLOAD, d, "OpBlank");
 		m_dms = d;
 		m_mess = mess;
+		m_owner = owner;
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -50,15 +54,6 @@ public class OpBlank extends OpDms
 	/** Create the first phase of the operation */
 	protected Phase phaseOne() {
 		return new PhaseSetBlank();
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(success) {
-			m_dms.notifyUpdate();
-		}
-
-		super.cleanup();
 	}
 
 	/**
@@ -118,8 +113,8 @@ public class OpBlank extends OpDms
 			mess.add(rr1);
 
 			// owner
-			ReqRes rr2 = new ReqRes("Owner", m_mess.getOwner(),
-						new String[0]);
+			String owner = m_owner != null ? m_owner.getName() : "";
+			ReqRes rr2 = new ReqRes("Owner", owner, new String[0]);
 			mess.add(rr2);
 
 			// send msg
@@ -162,12 +157,12 @@ public class OpBlank extends OpDms
 
 			// update dms
 			if(valid) {
-				m_dms.setActiveMessage(m_mess);
+				m_dms.setMessageCurrent(m_mess, m_owner);
 			} else {
 				System.err.println(
 				    "OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="
 				    + errmsg);
-				setDmsStatus(errmsg);
+				errorStatus = errmsg;
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,248 +14,204 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.User;
 
 /**
  * DMS -- Dynamic Message Sign
  *
  * @author Douglas Lau
  */
-public interface DMS extends TrafficDevice {
+public interface DMS extends Device2 {
 
-	/** Bad pixel limit (threshold for activating messages) */
-	public int BAD_PIXEL_LIMIT = 35;
+	/** SONAR type name */
+	String SONAR_TYPE = "dms";
 
-	/** High temp cutoff (threshold for shutting off sign) */
-	public int HIGH_TEMP_CUTOFF = 60;
-
-	/** Travel time sign status code */
-	public int STATUS_TRAVEL_TIME = 5;
-
-	/** Set verification camera */
-	public void setCamera(String id) throws TMSException, RemoteException;
-
-	/** Get verification camera */
-	public String getCamera() throws RemoteException;
-
-	/** Get the miles downstream of reference point */
-	public Float getMile() throws RemoteException;
-
-	/** Set the miles downstream of reference point */
-	public void setMile(Float m) throws TMSException, RemoteException;
-
-	/** Get the travel time message template */
-	public String getTravel() throws RemoteException;
+	/** Get the device location */
+	GeoLoc getGeoLoc();
 
 	/** Set the travel time message template */
-	public void setTravel(String t) throws TMSException, RemoteException;
+	void setTravel(String t);
 
-	/** Add a new timing plan to the sign */
-	public void addTimingPlan(int period) throws TMSException,
-		RemoteException;
+	/** Get the travel time message template */
+	String getTravel();
 
-	/** Associate (or dissociate) a timing plan with this sign */
-	public void setTimingPlan(TimingPlan plan, boolean a)
-		throws TMSException, RemoteException;
+	/** Set verification camera */
+	void setCamera(Camera c);
 
-	/** Check if a timing plan is associated with this sign */
-	public boolean hasTimingPlan(TimingPlan plan) throws RemoteException;
+	/** Get verification camera */
+	Camera getCamera();
 
-	/** Set the message displayed on the sign */
-	public void setMessage(String owner, String text, int duration)
-		throws InvalidMessageException, RemoteException;
+	/** Allow (or deny) sign control by Automated Warning System */
+	void setAwsAllowed(boolean a);
 
-	/** Set the message displayed on the sign */
-	public void setMessage(String owner, String text, int duration, 
-		String font) throws InvalidMessageException, RemoteException;
+	/** Is sign allowed to be controlled by Automated Warning System? */
+	boolean getAwsAllowed();
 
-	/** Set the message displayed on the sign */
-	public void setMessage(String owner, String text, int duration, 
-		MsgActPriority ap, String font) 
-		throws InvalidMessageException, RemoteException;
+	/** Set sign to Automated Warning System controlled */
+	void setAwsControlled(boolean a);
 
-	/** Clear the message displayed on the sign */
-	public void clearMessage(String owner) throws RemoteException;
+	/** Is sign controlled by Automated Warning System? */
+	boolean getAwsControlled();
 
-	/** Get the sign message */
-	public SignMessage getMessage() throws RemoteException;
+	/* Transient attributes (not stored in database) */
 
 	/** Get the make */
-	public String getMake() throws RemoteException;
+	String getMake();
 
 	/** Get the model */
-	public String getModel() throws RemoteException;
+	String getModel();
 
 	/** Get the version */
-	public String getVersion() throws RemoteException;
+	String getVersion();
 
 	/** Get sign access description */
-	public String getSignAccess() throws RemoteException;
+	String getSignAccess();
 
-	/** Get sign matrix type as int  */
-	public int getSignMatrixType() throws RemoteException;
-
-	/** Get sign matrix type as a String */
-	public String getSignMatrixTypeDescription() throws RemoteException;
-
-	/** Get sign height (mm) */
-	public int getSignHeight() throws RemoteException;
-
-	/** Get sign width (mm) */
-	public int getSignWidth() throws RemoteException;
-
-	/** Get horizontal border (mm) */
-	public int getHorizontalBorder() throws RemoteException;
-
-	/** Get vertical border (mm) */
-	public int getVerticalBorder() throws RemoteException;
+	/** Get DMS type */
+	int getDmsType();
 
 	/** Get sign legend */
-	public String getSignLegend() throws RemoteException;
+	String getLegend();
 
 	/** Get beacon type description */
-	public String getBeaconType() throws RemoteException;
+	String getBeaconType();
 
 	/** Get sign technology description */
-	public String getSignTechnology() throws RemoteException;
+	String getTechnology();
 
-	/** Get character height (pixels) */
-	public int getCharacterHeightPixels() throws RemoteException;
+	/** Get height of the sign face (mm) */
+	Integer getFaceHeight();
 
-	/** Get character width (pixels) */
-	public int getCharacterWidthPixels() throws RemoteException;
+	/** Get width of the sign face (mm) */
+	Integer getFaceWidth();
 
-	/** Get sign height (pixels) */
-	public int getSignHeightPixels() throws RemoteException;
+	/** Get horizontal border (mm) */
+	Integer getHorizontalBorder();
 
-	/** Get sign width (pixels) */
-	public int getSignWidthPixels() throws RemoteException;
+	/** Get vertical border (mm) */
+	Integer getVerticalBorder();
 
 	/** Get horizontal pitch (mm) */
-	public int getHorizontalPitch() throws RemoteException;
+	Integer getHorizontalPitch();
 
 	/** Get vertical pitch (mm) */
-	public int getVerticalPitch() throws RemoteException;
+	Integer getVerticalPitch();
 
-	/** Get the pixel failure count */
-	public int getPixelFailureCount() throws RemoteException;
+	/** Get sign height (pixels) */
+	Integer getHeightPixels();
 
-	/** Constant definition for unknown temperature */
-	public int UNKNOWN_TEMP = Integer.MIN_VALUE;
+	/** Get sign width (pixels) */
+	Integer getWidthPixels();
 
-	/** Get the minimum cabinet temperature */
-	public int getMinCabinetTemp() throws RemoteException;
+	/** Get character height (pixels) */
+	Integer getCharHeightPixels();
 
-	/** Get the maximum cabinet temperature */
-	public int getMaxCabinetTemp() throws RemoteException;
+	/** Get character width (pixels) */
+	Integer getCharWidthPixels();
 
-	/** Get the minimum ambient temperature */
-	public int getMinAmbientTemp() throws RemoteException;
+	/** Get the minimum cabinet temperature (Celsius) */
+	Integer getMinCabinetTemp();
 
-	/** Get the maximum ambient temperature */
-	public int getMaxAmbientTemp() throws RemoteException;
+	/** Get the maximum cabinet temperature (Celsius) */
+	Integer getMaxCabinetTemp();
 
-	/** Get the minimum housing temperature */
-	public int getMinHousingTemp() throws RemoteException;
+	/** Get the minimum ambient temperature (Celsius) */
+	Integer getMinAmbientTemp();
 
-	/** Get the maximum housing temperature */
-	public int getMaxHousingTemp() throws RemoteException;
+	/** Get the maximum ambient temperature (Celsius) */
+	Integer getMaxAmbientTemp();
 
-	/** Get the number of supported brightness levels */
-	public int getBrightnessLevels() throws RemoteException;
+	/** Get the minimum housing temperature (Celsius) */
+	Integer getMinHousingTemp();
 
-	/** Get the current brightness level */
-	public int getBrightnessLevel() throws RemoteException;
+	/** Get the maximum housing temperature (Celsius) */
+	Integer getMaxHousingTemp();
 
-	/** Get the maximum photocell level */
-	public int getMaxPhotocellLevel() throws RemoteException;
+	/** Get the light output (percentage) */
+	Integer getLightOutput();
 
-	/** Get the current photocell level */
-	public int getPhotocellLevel() throws RemoteException;
+	/** Index of stuck-off bitmap in pixel and lamp status arrays */
+	int STUCK_OFF_BITMAP = 0;
 
-	/** Get the light output of the sign */
-	public int getLightOutput() throws RemoteException;
+	/** Index of stuck-on bitmap in pixel and lamp status arrays */
+	int STUCK_ON_BITMAP = 1;
 
-	/** Set the brightness table */
-	public void setBrightnessTable(int[] t) throws TMSException,
-		RemoteException;
+	/** Get the pixel status.
+	 * @return Pixel status as an array of two Base64-encoded bitmaps.  The
+	 *         first bitmap is "stuck off", and the second is "stuck on".
+	 *         If the pixel status is not known, null is returned. */
+	String[] getPixelStatus();
 
-	/** Get the brightness table */
-	public int[] getBrightnessTable() throws RemoteException;
+	/** Get the lamp status.
+	 * @return Lamp status as an array of two Base64-encoded bitmaps.  The
+	 *         first bitmap is "stuck off", and the second is "stuck on".
+	 *         If the lamp status is not known, null is returned. */
+	String[] getLampStatus();
 
-	/** Get manual brightness control (on or off) */
-	public boolean isManualBrightness() throws RemoteException;
+	/** Index of power fail bitmap in power status array */
+	int FAIL_BITMAP = 0;
 
-	/** Activate/deactivate manual brightness */
-	public void activateManualBrightness(boolean m) throws RemoteException;
+	/** Index of voltage out-of-spec bitmap in power status array */
+	int VOLTAGE_BITMAP = 1;
 
-	/** Set manual brightness level */
-	public void setManualBrightness(int l) throws RemoteException;
+	/** Index of current out-of-spec bitmap in power status array */
+	int CURRENT_BITMAP = 2;
 
-	/** Activate a pixel test */
-	public void testPixels() throws RemoteException;
+	/** Get power supply status.
+	 * @return Power status as an array of three Base64-encoded bitmaps.
+	 *         The first is "power fail", the second is "voltage out of
+	 *         spec", and the third is "current out of spec".  If the
+	 *         power status is not known, null is returned. */
+	String[] getPowerStatus();
 
-	/** Activate a lamp test */
-	public void testLamps() throws RemoteException;
-
-	/** Get the lamp status */
-	public String getLampStatus() throws RemoteException;
-
-	/** Activate a fan test */
-	public void testFans() throws RemoteException;
-
-	/** Activate a dms reset operation */
-	public void reset() throws RemoteException;
-
-	/** Activate a get sign message status operation */
-	public void getSignMessage() throws RemoteException;
-
-	/** Get the fan status */
-	public String getFanStatus() throws RemoteException;
-
-	/** Get the power supply status table */
-	public StatusTable getPowerSupplyTable() throws RemoteException;
-
-	/** Get sign face heat tape status */
-	public String getHeatTapeStatus() throws RemoteException;
+	/** Request a sign operation (query message, test pixels, etc.) */
+	void setSignRequest(int r);
 
 	/** Get user note */
-	public String getUserNote() throws RemoteException;
+	String getUserNote();
 
-	/** Set the time (in minutes) to heat the sign housing */
-	public void setHousingHeatTime(int minutes) throws RemoteException;
+	/** Set the next message owner */
+	void setOwnerNext(User o);
 
-	/** Get the remaining housing heat time (in minutes) */
-	public int getHousingHeatTime() throws RemoteException;
+	/** Set the next sign message */
+	void setMessageNext(SignMessage m);
 
-	/** Set the LDC pot base */
-	public void setLdcPotBase(int base) throws RemoteException;
+	/** Get the owner of the current message.
+	 * @return User who deployed the message. */
+	User getOwnerCurrent();
 
-	/** Get the LDC pot base */
-	public int getLdcPotBase() throws RemoteException;
+	/** Get the current sign message */
+	SignMessage getMessageCurrent();
 
-	/** Set the pixel low current threshold */
-	public void setPixelCurrentLow(int low) throws RemoteException;
+	/** Get the message deploy time.
+	 * @return Time message was deployed (ms since epoch).
+	 * @see java.lang.System.currentTimeMillis */
+	long getDeployTime();
 
-	/** Get the pixel low current threshold */
-	public int getPixelCurrentLow() throws RemoteException;
+	/* Manufacturer-specific attributes */
 
-	/** Set the pixel high curent threshold */
-	public void setPixelCurrentHigh(int high) throws RemoteException;
+	/* LEDSTAR attributes */
 
-	/** Get the pixel high current threshold */
-	public int getPixelCurrentHigh() throws RemoteException;
+	/** Set the LDC pot base (LEDSTAR) */
+	void setLdcPotBase(Integer base);
 
-	/** Set the bad pixel limit */
-	public void setBadPixelLimit(int bad) throws RemoteException;
+	/** Get the LDC pot base (LEDSTAR) */
+	Integer getLdcPotBase();
 
-	/** Get the bad pixel limit */
-	public int getBadPixelLimit() throws RemoteException;
+	/** Set the pixel low current threshold (LEDSTAR) */
+	void setPixelCurrentLow(Integer low);
 
-	/** Get the number of text lines */
-	public int getTextLines() throws RemoteException;
+	/** Get the pixel low current threshold (LEDSTAR) */
+	Integer getPixelCurrentLow();
 
-	/** Get the optimal line height (pixels) */
-	public int getLineHeightPixels() throws RemoteException;
+	/** Set the pixel high curent threshold (LEDSTAR) */
+	void setPixelCurrentHigh(Integer high);
+
+	/** Get the pixel high current threshold (LEDSTAR) */
+	Integer getPixelCurrentHigh();
+
+	/* Skyline attributes */
+
+	/** Get sign face heat tape status (Skyline) */
+	String getHeatTapeStatus();
 }
-

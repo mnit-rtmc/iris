@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,15 +11,17 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
+
 /**
- * Ntcip IllumPowerStatus object
+ * Skyline IllumPowerStatus object
  *
  * @author Douglas Lau
  */
@@ -39,23 +41,6 @@ public class IllumPowerStatus extends SkylineDmsStatus
 		"???", "low", "marginally low", "OK", "marginally high", "high"
 	};
 
-	/** Gray RGB color constant */
-	static protected final int GRAY = 0x888888;
-
-	/** Red RGB color constant */
-	static protected final int RED = 0xFF8888;
-
-	/** Yellow RGB color constant */
-	static protected final int YELLOW = 0xFFFF88;
-
-	/** Green RGB color constant */
-	static protected final int GREEN = 0x88FF88;
-
-	/** Background colors */
-	static protected final int[] COLOR = {
-		GRAY, RED, YELLOW, GREEN, YELLOW, RED
-	};
-
 	/** Create a new IllumPowerStatus object */
 	public IllumPowerStatus() {
 		super(2);
@@ -64,7 +49,9 @@ public class IllumPowerStatus extends SkylineDmsStatus
 	}
 
 	/** Get the object name */
-	protected String getName() { return "illumPowerStatus"; }
+	protected String getName() {
+		return "illumPowerStatus";
+	}
 
 	/** Power status */
 	protected byte[] power = new byte[0];
@@ -79,37 +66,77 @@ public class IllumPowerStatus extends SkylineDmsStatus
 	}
 
 	/** Get the octet string value */
-	public byte[] getOctetString() { return power; }
+	public byte[] getOctetString() {
+		return power;
+	}
 
 	/** Get the object value */
 	public String getValue() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder b = new StringBuilder();
 		for(int i = 0; i < power.length; i++) {
-			if(buffer.length() > 0) buffer.append(", ");
-			buffer.append("#");
-			buffer.append(i + 1);
-			buffer.append(": ");
-			buffer.append(STATUS[power[i]]);
+			if(b.length() > 0)
+				b.append(", ");
+			b.append("#");
+			b.append(i + 1);
+			b.append(": ");
+			b.append(STATUS[power[i]]);
 		}
-		if(buffer.length() == 0) buffer.append("None");
-		return buffer.toString();
+		if(b.length() == 0)
+			b.append("None");
+		return b.toString();
 	}
 
-	/** Get status strings for a StatusTable */
-	public String[] getStatus() {
-		String[] rows = new String[power.length];
-		for(int i = 0; i < power.length; i++) {
-			rows[i] = STATUS[power[i]];
-		}
+	/** Simple interface to test a power supply for something */
+	static public interface PowerTester {
+		boolean check(int p);
+	}
+
+	/** Get power status bitmaps */
+	public String[] getBitmaps() throws IOException {
+		String[] rows = new String[3];
+		rows[DMS.FAIL_BITMAP] = createBase64(new PowerTester() {
+			public boolean check(int p) {
+				return p == LOW || p == HIGH;
+			}
+		});
+		rows[DMS.VOLTAGE_BITMAP] = createBase64(new PowerTester() {
+			public boolean check(int p) {
+				return p != OK && p != UNAVAILABLE;
+			}
+		});
+		rows[DMS.CURRENT_BITMAP] = createBase64(new PowerTester() {
+			public boolean check(int p) {
+				return false;
+			}
+		});
 		return rows;
 	}
 
-	/** Get background colors for a StatusTable */
-	public int[] getBackground() {
-		int[] b = new int[power.length];
-		for(int i = 0; i < power.length; i++) {
-			b[i] = COLOR[power[i]];
+	/** Create a power status bitmap encoded in Base64 */
+	protected String createBase64(PowerTester tester) throws IOException {
+		return Base64.encode(createBitmap(tester));
+	}
+
+	/** Create a power status bitmap */
+	protected byte[] createBitmap(PowerTester tester) throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			for(int i = 0; i < power.length; ) {
+				int v = 0;
+				for(int b = 0; b < 8; b++) {
+					if(tester.check(power[i]))
+						v |= 1 << b;
+					i++;
+					if(i >= power.length)
+						break;
+				}
+				dos.writeByte(v);
+			}
+			return bos.toByteArray();
 		}
-		return b;
+		finally {
+			bos.close();
+		}
 	}
 }

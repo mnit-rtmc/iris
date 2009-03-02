@@ -367,10 +367,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if(s == null || s.equals(status))
 			return;
 		status = s;
-		if(MainServer.server != null) {
-			MainServer.server.setAttribute(this, "status",
-				new String[] { status });
-		}
+		notifyAttribute("status");
 	}
 
 	/** Get the communication status */

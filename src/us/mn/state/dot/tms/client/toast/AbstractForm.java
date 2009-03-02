@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Cursor;
 import java.net.MalformedURLException;
-import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
@@ -45,7 +44,7 @@ abstract public class AbstractForm extends JPanel implements TmsForm {
 	}
 
 	/** Initialize the form */
-	abstract protected void initialize() throws RemoteException;
+	abstract protected void initialize();
 
 	/** Dispose of the form */
 	protected void dispose() {}

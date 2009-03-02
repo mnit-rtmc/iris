@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,15 +68,6 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 
 	/** ObjectVault table name */
 	static public final String tableName = "tms_object";
-
-	/** Timing plan list */
-	static TimingPlanListImpl planList;
-
-	/** Ramp meter list */
-	static RampMeterListImpl meterList;
-
-	/** DMS list */
-	static public DMSListImpl dmsList;
 
 	/** LCS list */
 	static LCSListImpl lcsList;
@@ -319,5 +310,10 @@ abstract public class TMSObjectImpl extends UnicastRemoteObject
 			return null;
 		return (ControllerImpl)namespace.lookupObject(
 			Controller.SONAR_TYPE, c);
+	}
+
+	/** Lookup a DMS in the SONAR namespace */
+	static public DMSImpl lookupDms(String name) {
+		return (DMSImpl)namespace.lookupObject(DMS.SONAR_TYPE, name);
 	}
 }

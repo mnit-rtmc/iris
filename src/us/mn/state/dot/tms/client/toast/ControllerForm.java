@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,13 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.rmi.RemoteException;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTable;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -45,12 +40,14 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records
@@ -75,7 +72,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final JSpinner drop_id = new JSpinner();
 
 	/** Controller notes text */
-	protected final JTextArea notes = new JTextArea();
+	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Active checkbox */
 	protected final JCheckBox active = new JCheckBox();
@@ -109,6 +106,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Firmware version */
 	protected final JLabel version = new JLabel();
+
+	/** Clear error status button */
+	protected final JButton clearErrorBtn = new JButton("Clear Error");
 
 	/** Download button */
 	protected final JButton download =
@@ -154,8 +154,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		cams.findObject(new ControllerIOFinder<Camera>(io));
 		TypeCache<Detector> dets = state.getDetectors();
 		dets.findObject(new ControllerIOFinder<Detector>(io));
+		TypeCache<DMS> dmss = state.getDMSs();
+		dmss.findObject(new ControllerIOFinder<DMS>(io));
 		TypeCache<WarningSign> w_signs = state.getWarningSigns();
 		w_signs.findObject(new ControllerIOFinder<WarningSign>(io));
+		TypeCache<RampMeter> meters = state.getRampMeters();
+		meters.findObject(new ControllerIOFinder<RampMeter>(io));
 		return io;
 	}
 
@@ -178,10 +182,16 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		super.initialize();
-		io_model = new ControllerIOModel(proxy, state,
-			connection.getProxy());
+		try {
+			io_model = new ControllerIOModel(proxy, state,
+				connection.getProxy());
+		}
+		catch(java.rmi.RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		cabinets.addProxyListener(cab_listener);
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));
@@ -282,40 +292,43 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the I/O panel */
 	protected JPanel createIOPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BORDER);
-		JTable table = new JTable();
+		ZTable table = new ZTable();
 		table.setAutoCreateColumnsFromModel(false);
 		table.setModel(io_model);
 		table.setColumnModel(io_model.createColumnModel());
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setRowHeight(ROW_HEIGHT);
-		table.setPreferredScrollableViewportSize(new Dimension(
-			table.getPreferredSize().width, ROW_HEIGHT * 8));
-		JScrollPane pane = new JScrollPane(table);
-		panel.add(pane);
+		table.setVisibleRowCount(8);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(table);
 		return panel;
 	}
 
 	/** Create the status panel */
 	protected JPanel createStatusPanel() {
-		FormPanel panel = new FormPanel(admin);
-		panel.addRow("Status:", status);
-		panel.addRow("Error Detail:", error);
-		panel.addRow("Version:", version);
-		panel.add(download);
 		new ActionJob(this, download) {
 			public void perform() {
 				proxy.setDownload(false);
 			}
 		};
-		panel.setCenter();
-		panel.add(reset);
 		new ActionJob(this, reset) {
 			public void perform() {
 				proxy.setDownload(true);
 			}
 		};
+		new ActionJob(this, clearErrorBtn) {
+			public void perform() {
+				proxy.setError("");
+			}
+		};
+		JPanel buttonPnl = new JPanel();
+		buttonPnl.add(clearErrorBtn);
+		buttonPnl.add(download);
+		buttonPnl.add(reset);
+		FormPanel panel = new FormPanel(admin);
+		panel.addRow("Status:", status);
+		panel.addRow("Error Detail:", error);
+		panel.addRow("Version:", version);
+		panel.addRow(buttonPnl);
 		return panel;
 	}
 

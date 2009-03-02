@@ -17,10 +17,6 @@ package us.mn.state.dot.tms.comm.caws;
 
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;

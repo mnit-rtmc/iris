@@ -14,15 +14,14 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import java.awt.Dimension;
 import javax.swing.JButton;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * This is a tab for viewing and editing system attributes.
@@ -38,11 +37,11 @@ public class SystemAttributeTab extends FormPanel {
 	/** Table row height */
 	static protected final int ROW_HEIGHT = 20;
 
-	/** table model */
+	/** Table model */
 	protected final SystemAttributeTableModel m_tableModel;
 
-	/** traffic device attribute table */
-	protected final JTable m_table = new JTable();
+	/** Traffic device attribute table */
+	protected final ZTable m_table = new ZTable();
 
 	/** Button to delete the selected attribute */
 	protected final JButton del_attrib_btn = new JButton("Delete");
@@ -72,17 +71,7 @@ public class SystemAttributeTab extends FormPanel {
 	protected void createControls() {
 		initTable();
 		addRow(m_table);
-		setCenter();
 		addRow(del_attrib_btn);
-		new ActionJob(this, del_attrib_btn) {
-			public void perform() throws Exception {
-				final ListSelectionModel s = 
-					m_table.getSelectionModel();
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					m_tableModel.deleteRow(row);
-			}
-		};
 		del_attrib_btn.setEnabled(false);
 	}
 
@@ -100,8 +89,16 @@ public class SystemAttributeTab extends FormPanel {
 			SystemAttributeTableModel.createColumnModel());
 		m_table.setModel(m_tableModel);
 		m_table.setRowHeight(ROW_HEIGHT);
-		m_table.setPreferredScrollableViewportSize(new Dimension(
-			m_table.getPreferredSize().width, ROW_HEIGHT * 12));
+		m_table.setVisibleRowCount(12);
+		new ActionJob(this, del_attrib_btn) {
+			public void perform() throws Exception {
+				final ListSelectionModel s = 
+					m_table.getSelectionModel();
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					m_tableModel.deleteRow(row);
+			}
+		};
 	}
 
 	/** Select an attribute */

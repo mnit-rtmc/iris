@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2008  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,9 +89,6 @@ abstract public class Operation {
 	/** Success or failure of operation */
 	protected boolean success = true;
 
-	/** Status message */
-	protected String status = "OK";
-
 	/** Begin the operation */
 	abstract public void begin();
 
@@ -101,7 +98,6 @@ abstract public class Operation {
 	/** Handle an exception */
 	public void handleException(IOException e) {
 		success = false;
-		status = e.getMessage();
 		phase = null;
 	}
 

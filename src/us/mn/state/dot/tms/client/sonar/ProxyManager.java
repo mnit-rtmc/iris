@@ -21,6 +21,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.StyledTheme;
@@ -168,6 +169,18 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Get the proxy type cache */
 	public TypeCache<T> getCache() {
 		return cache;
+	}
+
+	/** Create a list cell renderer */
+	public ListCellRenderer createCellRenderer() {
+		return new ProxyCellRenderer<T>(this);
+	}
+
+	/** Create a proxy JList for the given style */
+	public ProxyJList<T> createList(String style) {
+		StyleListModel<T> m = getStyleModel(style);
+		assert m != null;
+		return new ProxyJList<T>(m);
 	}
 
 	/** Create a styled theme for this type of proxy */

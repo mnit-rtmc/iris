@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,15 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.EOFException;
+import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneControlSignalImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
-import us.mn.state.dot.tms.TrafficDeviceImpl;
+import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -38,6 +41,58 @@ import us.mn.state.dot.tms.comm.WarningSignPoller;
 public class MndotPoller extends MessagePoller implements MeterPoller,
 	WarningSignPoller
 {
+	/** Test if it is afternoon */
+	static protected boolean isAfternoon() {
+		return Calendar.getInstance().get(Calendar.AM_PM)== Calendar.PM;
+	}
+
+	/** Get the meter number on the controller. This does not belong in the
+	 * RampMeterImpl class because it only applies to the Mndot protocol. */
+	static protected int getMeterNumber(RampMeterImpl meter) {
+		if(meter.isActive()) {
+			int pin = meter.getPin();
+			if(pin == 2)
+				return 1;
+			if(pin == 3)
+				return 2;
+		}
+		return 0;
+	}
+
+	/** Calculate the red time for a ramp meter.
+	 * @param meter	Ramp meter to calculate red time.
+	 * @param rate Release rate (vehicles per hour).
+	 * @return Red time (seconds) */
+	static float calculateRedTime(RampMeterImpl meter, int rate) {
+		float secs_per_veh = Interval.HOUR / (float)rate;
+		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
+			secs_per_veh /= 2;
+		float green = SystemAttributeHelper.getMeterGreenSecs();
+		float yellow = SystemAttributeHelper.getMeterYellowSecs();
+		float min_red = SystemAttributeHelper.getMeterMinRedSecs();
+		float red_time = secs_per_veh - (green + yellow);
+		return Math.max(red_time, min_red);
+	}
+
+	/** Calculate the red time for a ramp meter.
+	 * @param meter	Ramp meter to calculate red time.
+	 * @return Red time (seconds) */
+	static float calculateRedTime(RampMeterImpl meter) {
+		return calculateRedTime(meter, meter.getRate());
+	}
+
+	/** Calculate the release rate
+	 * @param red_time Red time (seconds)
+	 * @return Release rate (vehicles per hour) */
+	static int calculateReleaseRate(RampMeterImpl meter, float red_time) {
+		float green = SystemAttributeHelper.getMeterGreenSecs();
+		float yellow = SystemAttributeHelper.getMeterYellowSecs();
+		float secs_per_veh = red_time + yellow + green;
+		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
+			secs_per_veh *= 2;
+		return Math.round(Interval.HOUR / secs_per_veh);
+	}
+
 	/** CommLink protocol (4-bit or 5-bit) */
 	protected final int protocol;
 
@@ -108,56 +163,49 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		return test;
 	}
 
-	/** Get the meter number on the controller. This does not belong in the
-	 * RampMeterImpl class because it only applies to the Mndot protocol. */
-	static protected int getMeterNumber(RampMeterImpl meter) {
-		if(meter.isActive()) {
-			int pin = meter.getPin();
-			if(pin == 2)
-				return 1;
-			if(pin == 3)
-				return 2;
+	/** Send a new release rate to a ramp meter */
+	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
+		int n = getMeterNumber(meter);
+		if(n > 0) {
+			if(shouldStop(meter, rate))
+				stopMetering(meter);
+			else {
+				float red = calculateRedTime(meter);
+				int r = Math.round(red * 10);
+				new RedTimeCommand(meter, n, r).start();
+				if(!meter.isMetering())
+					startMetering(meter);
+			}
 		}
-		return 0;
+	}
+
+	/** Should we stop metering? */
+	protected boolean shouldStop(RampMeterImpl meter, Integer rate) {
+		// Workaround for errors in rx only (good tx)
+		return rate == null ||
+		       meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS;
+	}
+
+	/** Start metering */
+	protected void startMetering(RampMeterImpl meter) {
+		if(!meter.isFailed())
+			sendMeteringRate(meter, MeterRate.CENTRAL);
+	}
+
+	/** Stop metering */
+	protected void stopMetering(RampMeterImpl meter) {
+		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
 	}
 
 	/** Send a new metering rate */
 	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
 		int n = getMeterNumber(meter);
 		if(n > 0)
-			new SetMeterRate(meter, n, rate).start();
-	}
-
-	/** Start metering */
-	public void startMetering(RampMeterImpl meter) {
-		if(!meter.isFailed()) {
-			sendReleaseRate(meter, meter.getReleaseRate());
-			sendMeteringRate(meter, MeterRate.CENTRAL);
-		}
-	}
-
-	/** Stop metering */
-	public void stopMetering(RampMeterImpl meter) {
-		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
-	}
-
-	/** Send a new release rate (vehicles per hour) */
-	public void sendReleaseRate(RampMeterImpl meter, int rate) {
-		int n = getMeterNumber(meter);
-		if(n > 0) {
-			// Workaround for errors in rx only (good tx)
-			if(meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS)
-				stopMetering(meter);
-			else {
-				float red = meter.calculateRedTime(rate);
-				int r = Math.round(red * 10);
-				new SetRedTime(meter, n, r).start();
-			}
-		}
+			new MeterRateCommand(meter, n, rate).start();
 	}
 
 	/** Get the appropriate rate for the deployed state */
-	protected int getDeployedRate(boolean d) {
+	static protected int getDeployedRate(boolean d) {
 		if(d)
 			return MeterRate.CENTRAL;
 		else

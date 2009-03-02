@@ -1,7 +1,7 @@
-INSERT INTO font (name, height, width, line_spacing,
-	char_spacing, version_id) VALUES ('NORMAL', 7, 0, 0, 2, 15555);
-INSERT INTO font (name, height, width, line_spacing,
-	char_spacing, version_id) VALUES ('MONO', 7, 5, 0, 0, 0);
+INSERT INTO font (name, f_number, height, width, line_spacing, char_spacing,
+	version_id) VALUES ('NORMAL', 1, 7, 0, 0, 2, 15555);
+INSERT INTO font (name, f_number, height, width, line_spacing, char_spacing,
+	version_id) VALUES ('MONO', 2, 7, 5, 0, 0, 0);
 
 INSERT INTO graphic (name, bpp, height, width, pixels)
 	VALUES ('NORMAL_32', 1, 7, 1, 'AA==');

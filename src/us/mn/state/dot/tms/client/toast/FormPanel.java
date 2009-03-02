@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,15 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 
 /**
  * FormPanel is a panel for viewing and editing forms. It provides a simpler
@@ -30,6 +33,13 @@ import javax.swing.JTextArea;
  * @author Douglas Lau
  */
 public class FormPanel extends JPanel {
+
+	/** Create a non-editable text field */
+	static protected JTextField createTextField() {
+		JTextField f = new JTextField();
+		f.setEditable(false);
+		return f;
+	}
 
 	/** Flag if components should be enabled */
 	protected final boolean enable;
@@ -46,6 +56,11 @@ public class FormPanel extends JPanel {
 		enable = e;
 		setBorder(TmsForm.BORDER);
 		finishRow();
+	}
+
+	/** Set the form title */
+	public void setTitle(String t) {
+		setBorder(BorderFactory.createTitledBorder(t));
 	}
 
 	/** Create default grid bag constraints */
@@ -76,6 +91,15 @@ public class FormPanel extends JPanel {
 		bag.gridwidth = GridBagConstraints.REMAINDER;
 	}
 
+	/** Set the fill mode */
+	public void setFill() {
+		bag.anchor = GridBagConstraints.CENTER;
+		bag.fill = GridBagConstraints.BOTH;
+		bag.gridwidth = GridBagConstraints.REMAINDER;
+		bag.weightx = 1;
+		bag.weighty = 1;
+	}
+
 	/** Set the anchor state to EAST */
 	public void setEast() {
 		bag.anchor = GridBagConstraints.EAST;
@@ -88,14 +112,16 @@ public class FormPanel extends JPanel {
 		comp.setEnabled(enable);
 	}
 
-	/** Add a centered component to the panel */
+	/** Add a component to the panel */
 	public void addRow(JComponent comp) {
+		setWidth(GridBagConstraints.REMAINDER);
 		add(comp);
 		finishRow();
 	}
 
 	/** Add a pair of components to the panel */
 	public void add(JComponent c1, JComponent c2) {
+		setEast();
 		add(c1);
 		setWest();
 		add(c2);
@@ -108,7 +134,11 @@ public class FormPanel extends JPanel {
 
 	/** Add a pair of components to the panel */
 	public void addRow(JComponent c1, JComponent c2) {
-		add(c1, c2);
+		setEast();
+		add(c1);
+		setWest();
+		setWidth(GridBagConstraints.REMAINDER);
+		add(c2);
 		finishRow();
 	}
 
@@ -117,15 +147,25 @@ public class FormPanel extends JPanel {
 		addRow(new JLabel(name), comp);
 	}
 
-	/** Add a text area component with a label on the left side */
-	public void addRow(String name, JTextArea area) {
+	/** Add a component with a label on the left side and a button */
+	public void addRow(String name, JComponent comp, JButton btn) {
+		setEast();
 		add(new JLabel(name));
 		setWest();
-		setWidth(GridBagConstraints.REMAINDER);
-		bag.weightx = 1;
-		bag.weighty = 1;
+		setWidth(4);
+		add(comp);
+		setCenter();
+		add(btn);
+		finishRow();
+	}
+
+	/** Add a text area component with a label on the left side */
+	public void addRow(String name, JTextArea area) {
+		setEast();
+		add(new JLabel(name));
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
+		setFill();
 		addRow(new JScrollPane(area,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
@@ -133,9 +173,7 @@ public class FormPanel extends JPanel {
 
 	/** Add a table component */
 	public void addRow(JTable table) {
-		setCenter();
-		bag.weightx = 1;
-		bag.weighty = 1;
+		setFill();
 		addRow(new JScrollPane(table,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));

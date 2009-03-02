@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * Detector for traffic data sampling
+ * Road lane type enumeration.
  *
  * @author Douglas Lau
  */

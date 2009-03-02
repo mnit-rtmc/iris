@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,10 +84,10 @@ public class DMSQueryConfiguration extends DMSOperation {
 				dms.setModel(model.getValue());
 				dms.setVersion(version.getValue());
 			}
-			DMS_LOG.log(dms.getId() + ": " + make);
-			DMS_LOG.log(dms.getId() + ": " + model);
-			DMS_LOG.log(dms.getId() + ": " + version);
-			DMS_LOG.log(dms.getId() + ": " + m_type);
+			DMS_LOG.log(dms.getName() + ": " + make);
+			DMS_LOG.log(dms.getName() + ": " + model);
+			DMS_LOG.log(dms.getName() + ": " + version);
+			DMS_LOG.log(dms.getName() + ": " + m_type);
 			mod += 1;
 			if(mod < count)
 				return this;
@@ -122,14 +122,14 @@ public class DMSQueryConfiguration extends DMSOperation {
 			mess.add(tech);
 			mess.getRequest();
 			dms.setSignAccess(access.getValue());
-			dms.setSignMatrixType(type.getValueEnum());
-			dms.setSignHeight(height.getInteger());
-			dms.setSignWidth(width.getInteger());
+			dms.setDmsType(type.getValueEnum());
+			dms.setFaceHeight(height.getInteger());
+			dms.setFaceWidth(width.getInteger());
 			dms.setHorizontalBorder(h_border.getInteger());
 			dms.setVerticalBorder(v_border.getInteger());
-			dms.setSignLegend(legend.getValue());
+			dms.setLegend(legend.getValue());
 			dms.setBeaconType(beacon.getValue());
-			dms.setSignTechnology(tech.getValue());
+			dms.setTechnology(tech.getValue());
 			return new QueryVmsInfo();
 		}
 	}
@@ -139,12 +139,6 @@ public class DMSQueryConfiguration extends DMSOperation {
 
 		/** Query the VMS information */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			VmsCharacterHeightPixels c_height =
-				new VmsCharacterHeightPixels();
-			mess.add(c_height);
-			VmsCharacterWidthPixels c_width =
-				new VmsCharacterWidthPixels();
-			mess.add(c_width);
 			VmsSignHeightPixels s_height =
 				new VmsSignHeightPixels();
 			mess.add(s_height);
@@ -154,22 +148,21 @@ public class DMSQueryConfiguration extends DMSOperation {
 			mess.add(h_pitch);
 			VmsVerticalPitch v_pitch = new VmsVerticalPitch();
 			mess.add(v_pitch);
+			VmsCharacterHeightPixels c_height =
+				new VmsCharacterHeightPixels();
+			mess.add(c_height);
+			VmsCharacterWidthPixels c_width =
+				new VmsCharacterWidthPixels();
+			mess.add(c_width);
 			mess.getRequest();
-			dms.setCharacterHeightPixels(c_height.getInteger());
-			dms.setCharacterWidthPixels(c_width.getInteger());
-			dms.setSignHeightPixels(s_height.getInteger());
-			dms.setSignWidthPixels(s_width.getInteger());
+			dms.setHeightPixels(s_height.getInteger());
+			dms.setWidthPixels(s_width.getInteger());
 			dms.setHorizontalPitch(h_pitch.getInteger());
 			dms.setVerticalPitch(v_pitch.getInteger());
-			dms.updateMessageGraphic();
+			// NOTE: these must be set last
+			dms.setCharHeightPixels(c_height.getInteger());
+			dms.setCharWidthPixels(c_width.getInteger());
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(success)
-			dms.notifyUpdate();
-		super.cleanup();
 	}
 }

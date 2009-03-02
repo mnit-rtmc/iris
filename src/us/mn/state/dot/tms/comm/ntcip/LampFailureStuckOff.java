@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2005  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
@@ -33,35 +29,41 @@ public class LampFailureStuckOff extends StatError implements ASN1OctetString {
 	}
 
 	/** Get the object name */
-	protected String getName() { return "lampFailureStuckOff"; }
+	protected String getName() {
+		return "lampFailureStuckOff";
+	}
 
 	/** Lamp failure (stuck off) bitmap */
 	protected byte[] failures = new byte[0];
 
 	/** Set the octet string value */
-	public void setOctetString(byte[] value) { failures = value; }
+	public void setOctetString(byte[] value) {
+		failures = value;
+	}
 
 	/** Get the octet string value */
-	public byte[] getOctetString() { return failures; }
+	public byte[] getOctetString() {
+		return failures;
+	}
 
 	/** Get the object value */
 	public String getValue() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		int f = 1;
 		for(int i = 0; i < failures.length; i++) {
 			for(int b = 0; b < 8; b++, f++) {
 				if((failures[i] & 1 << b) != 0) {
-					if(buffer.length() > 0)
-						buffer.append(", ");
-					buffer.append("#");
-					buffer.append(f);
-					buffer.append(" STUCK OFF");
+					if(buf.length() > 0)
+						buf.append(", ");
+					buf.append("#");
+					buf.append(f);
+					buf.append(" STUCK OFF");
 				}
 			}
 		}
-		if(buffer.length() == 0)
+		if(buf.length() == 0)
 			return "OK";
 		else
-			return buffer.toString();
+			return buf.toString();
 	}
 }

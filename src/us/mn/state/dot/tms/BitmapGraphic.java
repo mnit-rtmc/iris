@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,14 +14,12 @@
  */
 package us.mn.state.dot.tms;
 
-import java.io.Serializable;
-
 /**
  * BitmapGraphic is a simple 1-bit graphic bitmap for DMS display feedback.
  *
  * @author Douglas Lau
  */
-public class BitmapGraphic implements Serializable {
+public class BitmapGraphic {
 
 	/** Width of graphic */
 	public final int width;
@@ -41,9 +39,10 @@ public class BitmapGraphic implements Serializable {
 
 	/** Set the bitmap */
 	public void setBitmap(byte[] b) {
-		if(b.length != bitmap.length)
-			throw new IndexOutOfBoundsException("b="+b.length+
-			", bitmap.length="+bitmap.length);
+		if(b.length != bitmap.length) {
+			throw new IndexOutOfBoundsException("b=" + b.length +
+				", bitmap.length=" + bitmap.length);
+		}
 		System.arraycopy(b, 0, bitmap, 0, bitmap.length);
 	}
 
@@ -54,15 +53,19 @@ public class BitmapGraphic implements Serializable {
 
 	/** Get the bitmap length in bytes */
 	public int length() {
-		return (bitmap==null ? 0 : bitmap.length);
+		return bitmap.length;
 	}
 
 	/** Get the pixel index for the specified location */
 	protected int pixelIndex(int x, int y) {
-		if(x < 0 || x > width)
-			throw new IndexOutOfBoundsException("x="+x+", width="+width);
-		if(y < 0 || y > height)
-			throw new IndexOutOfBoundsException("y="+y+", height="+height);
+		if(x < 0 || x > width) {
+			throw new IndexOutOfBoundsException("x=" + x +
+				", width=" + width);
+		}
+		if(y < 0 || y > height) {
+			throw new IndexOutOfBoundsException("y=" + y +
+				", height=" + height);
+		}
 		return (y * width) + x;
 	}
 
@@ -85,80 +88,89 @@ public class BitmapGraphic implements Serializable {
 			bitmap[by] &= bi ^ 0xff;
 	}
 
+	/** Get the count of lit pixels */
+	public int getLitCount() {
+		int n_lit = 0;
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(getPixel(x, y) > 0)
+					n_lit++;
+			}
+		}
+		return n_lit;
+	}
+
 	/** Copy the common region of the specified bitmap */
 	public void copy(BitmapGraphic b) {
+		int x0 = Math.max(width - b.width, 0) / 2;
+		int x1 = Math.max(b.width - width, 0) / 2;
+		int y0 = Math.max(height - b.height, 0) / 2;
+		int y1 = Math.max(b.height - height, 0) / 2;
 		int w = Math.min(width, b.width);
 		int h = Math.min(height, b.height);
 		for(int x = 0; x < w; x++) {
-			for(int y = 0; y < h; y++)
-				setPixel(x, y, b.getPixel(x, y));
+			for(int y = 0; y < h; y++) {
+				int v = b.getPixel(x1 + x, y1 + y);
+				setPixel(x0 + x, y0 + y, v);
+			}
 		}
 	}
 
-	/** Return a narrower or wider bitmap. The existing bitmap is either
-	 *  truncated or space added on the left and right edges.
-	 *  @param newwidth The new width of the bitmap.
-	 */
-	public BitmapGraphic resizeWidth(int newwidth) {
-		if(newwidth < this.width)
-			return narrow(newwidth);
-		else if(newwidth > this.width)
-			return widen(newwidth,0);
-		return this;
+	/** Update the bitmap by clearing pixels not in another bitmap */
+	public void union(BitmapGraphic b) {
+		if(width != b.width)
+			throw new IndexOutOfBoundsException("width mismatch");
+		if(height != b.height)
+			throw new IndexOutOfBoundsException("height mismatch");
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(b.getPixel(x, y) == 0)
+					setPixel(x, y, 0);
+			}
+		}
 	}
 
-	/** Return a wider bitmap. The existing bitmap is centered within
-	 *  the new wider bitmap.
-	 *  @param newwidth The new width of the bitmap.
-	 *  @param newfill Bit value of the new space.
-	 */
-	public BitmapGraphic widen(int newwidth, int newfill) {
-		if(newwidth<=0 || newwidth == width)
-			return this;
-		if(newwidth <= width)
-			return this;
-		BitmapGraphic newbm = new BitmapGraphic(newwidth,this.height);
-		// edges of existing bitmap centered within wider bitmap
-		int diff = Math.abs(this.width - newbm.width)/2;
-		int ledgeidx = diff;
-		int redgeidx = Math.abs(newbm.width - diff) - 1;
-		assert ledgeidx > 0 && redgeidx > 0 : ledgeidx + ", "+redgeidx;
-		assert ledgeidx <= redgeidx : ledgeidx + ", "+redgeidx;
-		// insert existing bitmap into wider bitmap
-		for(int y=0; y<newbm.height; ++y)
-			for(int x=0; x<newbm.width; ++x) {
-				int newpix = newfill;
-				if(x >= ledgeidx && x <= redgeidx)
-					newpix = getPixel(x - ledgeidx, y);
-				newbm.setPixel(x,y,newpix);
+	/** Update the bitmap by clearing pixels in another bitmap */
+	public void difference(BitmapGraphic b) {
+		if(width != b.width)
+			throw new IndexOutOfBoundsException("width mismatch");
+		if(height != b.height)
+			throw new IndexOutOfBoundsException("height mismatch");
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(b.getPixel(x, y) > 0)
+					setPixel(x, y, 0);
 			}
-		return newbm;
+		}
 	}
 
-	/** Return a narrower bitmap. The existing bitmap is truncated on
-	 *  the left and right edges.
-	 *  @param newwidth The new width of the bitmap.
-	 */
-	public BitmapGraphic narrow(int newwidth) {
-		if(newwidth<=0 || newwidth == width)
-			return this;
-		if(newwidth >= width)
-			return this;
-		BitmapGraphic newbm = new BitmapGraphic(newwidth,this.height);
-		// edges of existing bitmap centered within wider bitmap
-		int diff = Math.abs(this.width - newbm.width)/2;
-		int ledgeidx = diff;
-		int redgeidx = Math.abs(this.width - diff) - 1;
-		assert ledgeidx > 0 && redgeidx > 0 : ledgeidx + ", "+redgeidx;
-		assert ledgeidx <= redgeidx : ledgeidx + ", "+redgeidx;
-		// copy center of old bitmap into new
-		for(int y=0; y<this.height; ++y)
-			for(int x=0; x<this.width; ++x) {
-				if(x >= ledgeidx && x <= redgeidx)
-					newbm.setPixel(x - ledgeidx, y, 
-						getPixel(x, y));
+	/** Set all pixels adjacent to lit pixels (clearing lit pixels) */
+	public void outline() {
+		BitmapGraphic b = new BitmapGraphic(width, height);
+		b.copy(this);
+		for(int x = 0; x < width; x++) {
+			for(int y = 0; y < height; y++) {
+				if(b.getPixel(x, y) > 0)
+					setNeighbors(x, y);
 			}
-		return newbm;
+		}
+		difference(b);
+	}
+
+	/** Set the neighbors of the specified pixel */
+	protected void setNeighbors(int x, int y) {
+		int xmin = Math.max(x - 1, 0);
+		int xmax = Math.min(x + 2, width);
+		int ymin = Math.max(y - 1, 0);
+		int ymax = Math.min(y + 2, height);
+		for(int xx = xmin; xx < xmax; xx++) {
+			for(int yy = ymin; yy < ymax; yy++)
+				setPixel(xx, yy, 1);
+		}
+	}
+
+	/** Create a blank copy */
+	public BitmapGraphic createBlankCopy() {
+		return new BitmapGraphic(width, height);
 	}
 }
-

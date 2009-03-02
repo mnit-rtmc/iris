@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,21 +32,23 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TrafficDeviceAttribute;
-import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
+import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -277,6 +279,30 @@ public class SonarState extends Client {
 		return warn_signs;
 	}
 
+	/** Cache of ramp meters */
+	protected final TypeCache<RampMeter> ramp_meters;
+
+	/** Get the ramp meter cache */
+	public TypeCache<RampMeter> getRampMeters() {
+		return ramp_meters;
+	}
+
+	/** Cache of sign messages */
+	protected final TypeCache<SignMessage> sign_messages;
+
+	/** Get the sign message cache */
+	public TypeCache<SignMessage> getSignMessages() {
+		return sign_messages;
+	}
+
+	/** Cache of dynamic message signs */
+	protected final TypeCache<DMS> dmss;
+
+	/** Get the dynamic message sign cache */
+	public TypeCache<DMS> getDMSs() {
+		return dmss;
+	}
+
 	/** Cache of sign groups */
 	protected final TypeCache<SignGroup> sign_groups;
 
@@ -301,15 +327,12 @@ public class SonarState extends Client {
 		return sign_text;
 	}
 
-	/** Cache of traffic device attributes */
-	protected final TypeCache<TrafficDeviceAttribute> 
-		traffic_device_attributes;
+	/** Cache of timing plans */
+	protected final TypeCache<TimingPlan> timing_plans;
 
-	/** Get the traffic device attribute cache */
-	public TypeCache<TrafficDeviceAttribute> 
-		getTrafficDeviceAttributes() 
-	{
-		return traffic_device_attributes;
+	/** Get the timing plan cache */
+	public TypeCache<TimingPlan> getTimingPlans() {
+		return timing_plans;
 	}
 
 	/** Create a new Sonar state */
@@ -363,17 +386,18 @@ public class SonarState extends Client {
 		camera_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
+		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
+		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
+			this);
+		dmss = new TypeCache<DMS>(DMS.class, this);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
 		sign_text = new TypeCache<SignText>(SignText.class, this);
-		traffic_device_attributes =
-			new TypeCache<TrafficDeviceAttribute>(
-			TrafficDeviceAttribute.class, this);
+		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		singleton = this;
 		// FIXME: this is an ugly hack
 		SystemAttributeHelper.namespace = getNamespace();
-		TrafficDeviceAttributeHelper.namespace = getNamespace();
 	}
 
 	/** Login to the SONAR server */
@@ -395,17 +419,20 @@ public class SonarState extends Client {
 		populate(graphics);
 		populate(fonts);
 		populate(glyphs);
+		populate(monitors);
 		populate(alarms);
 		populate(r_nodes);
 		populate(detectors);
 		populate(stations);
 		populate(cameras);
 		populate(warn_signs);
-		populate(monitors);
+		populate(ramp_meters);
+		populate(sign_messages);
+		populate(dmss);
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
-		populate(traffic_device_attributes);
+		populate(timing_plans);
 	}
 
 	/** Look up the specified user */
@@ -441,10 +468,5 @@ public class SonarState extends Client {
 	/** Look up the specified connection */
 	public Connection lookupConnection(String name) {
 		return connections.lookupObject(name);
-	}
-
-	/** Lookup a traffic device attribute */
-	public TrafficDeviceAttribute lookupTrafficDeviceAttribute(String name) {
-		return traffic_device_attributes.lookupObject(name);
 	}
 }

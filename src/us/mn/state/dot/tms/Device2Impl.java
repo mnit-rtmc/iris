@@ -175,22 +175,32 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 
 	/** Acquire ownership of the device */
 	public Device2Operation acquire(Device2Operation o) {
-		// Name used for unique device acquire/release lock
-		synchronized(name) {
-			if(owner == null)
-				owner = o;
-			return owner;
+		try {
+			// Name used for unique device acquire/release lock
+			synchronized(name) {
+				if(owner == null)
+					owner = o;
+				return owner;
+			}
+		}
+		finally {
+			notifyAttribute("operation");
 		}
 	}
 
 	/** Release ownership of the device */
 	public Device2Operation release(Device2Operation o) {
-		// Name used for unique device acquire/release lock
-		synchronized(name) {
-			Device2Operation _owner = owner;
-			if(owner == o)
-				owner = null;
-			return _owner;
+		try {
+			// Name used for unique device acquire/release lock
+			synchronized(name) {
+				Device2Operation _owner = owner;
+				if(owner == o)
+					owner = null;
+				return _owner;
+			}
+		}
+		finally {
+			notifyAttribute("operation");
 		}
 	}
 
@@ -201,10 +211,5 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 			return "None";
 		else
 			return o.getOperationDescription();
-	}
-
-	/** Notify clients of a status update */
-	public void notifyStatus() {
-		// FIXME: this is for the operation attribute
 	}
 }

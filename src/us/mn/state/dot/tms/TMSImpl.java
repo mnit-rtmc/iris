@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-final class TMSImpl extends TMSObjectImpl implements TMS {
+public final class TMSImpl extends TMSObjectImpl implements TMS {
 
 	/** Detector sample file */
 	static protected final String SAMPLE_XML = "det_sample.xml";
@@ -73,18 +73,12 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 			props.getProperty("UserName"),
 			props.getProperty("Password")
 		);
-		TrafficDeviceImpl.plan_mapping = new TableMapping(store,
-			"traffic_device", "timing_plan");
 	}
 
 	/** Load the TMS root object from the ObjectVault */
 	void loadFromVault() throws ObjectVaultException, TMSException,
 		RemoteException
 	{
-		System.err.println( "Loading meters..." );
-		meters.load( RampMeterImpl.class, "id" );
-		System.err.println( "Loading dms list..." );
-		dmss.load( DMSImpl.class, "id" );
 		System.err.println( "Loading lane control signals..." );
 		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
@@ -150,7 +144,7 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		new DetectorXmlWriter(namespace).write();
 		corridors = new CorridorManager(namespace);
 		new R_NodeXmlWriter(corridors).write();
-		meters.writeXml();
+		new RampMeterXmlWriter(namespace).write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 
@@ -193,13 +187,6 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		out.println("</traffic_sample>");
 	}
 
-	/** Calculate the 30-second interval for the given time stamp */
-	static protected int calculateInterval(Calendar stamp) {
-		return stamp.get(Calendar.HOUR_OF_DAY) * 120 +
-			stamp.get(Calendar.MINUTE) * 2 +
-			stamp.get(Calendar.SECOND) / 30;
-	}
-
 	/** Sign polling timer job */
 	protected class TimerJobSigns extends Job {
 
@@ -209,14 +196,13 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		/** Job to be performed on each completion */
 		protected final Job job = new Job() {
 			public void perform() {
-				dmss.notifyStatus();
 				lcss.notifyStatus();
 			}
 		};
 
 		/** Create a new sign polling timer job */
 		protected TimerJobSigns(int intervalSecs) {
-			super(Calendar.SECOND, intervalSecs, Calendar.SECOND, 4);
+			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,4);
 			comp = new Completer("Sign Poll", TIMER, job);
 		}
 
@@ -258,13 +244,8 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				catch(NamespaceError e) {
 					e.printStackTrace();
 				}
-				int interval = calculateInterval(stamp);
-				meters.computeDemand(interval);
-				if(!isHoliday(stamp)) {
-					meters.validateTimingPlans(interval);
-					dmss.updateTravelTimes(interval);
-				}
-				meters.notifyStatus();
+				if(!isHoliday(stamp))
+					validateTimingPlans();
 			}
 		};
 
@@ -289,6 +270,24 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 				comp.makeReady();
 			}
 		}
+	}
+
+	/** Validate all timing plans */
+	protected void validateTimingPlans() {
+		lookupTimingPlans(new Checker<TimingPlan>() {
+			public boolean check(TimingPlan p) {
+				TimingPlanImpl plan = (TimingPlanImpl)p;
+				plan.validate();
+				return false;
+			}
+		});
+		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
+			public boolean check(DMSImpl s) {
+				s.updateTravelTime();
+				return false;
+			}
+		});
+		StratifiedPlanState.processAllStates();
 	}
 
 	/** 5-minute timer job */
@@ -332,24 +331,12 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		}
 	}
 
-	/** Master timing plan list */
-	protected final TimingPlanListImpl plans;
-
-	/** Master ramp meter list */
-	protected final RampMeterListImpl meters;
-
-	/** Dynamic message sign list */
-	protected final DMSListImpl dmss;
-
 	/** Lane Control Signals list */
 	protected final LCSListImpl lcss;
 
 	/** Initialize the subset list */
 	protected void initialize() throws RemoteException {
 		// This is an ugly hack, but it works
-		planList = plans;
-		meterList = meters;
-		dmsList = dmss;
 		lcsList = lcss;
 	}
 
@@ -358,24 +345,10 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		ObjectVaultException
 	{
 		super();
-		plans = new TimingPlanListImpl();
-		meters = new RampMeterListImpl();
-		dmss = new DMSListImpl();
 		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
 	}
-
-	/** Get the timing plan list */
-	public TimingPlanList getTimingPlanList() { return plans; }
-
-	/** Get the ramp meter list */
-	public DeviceList getRampMeterList() {
-		return meters;
-	}
-
-	/** Get the dynamic message sign list */
-	public DMSList getDMSList() { return dmss; }
 
 	/** Get the lane control signal list */
 	public LCSList getLCSList() {
@@ -530,5 +503,10 @@ final class TMSImpl extends TMSObjectImpl implements TMS {
 		});
 		for(VideoMonitorImpl m: restricted)
 			m.selectCamera("");
+	}
+
+	/** Lookup timing plans plans */
+	static public void lookupTimingPlans(Checker<TimingPlan> checker) {
+		namespace.findObject(TimingPlan.SONAR_TYPE, checker);
 	}
 }

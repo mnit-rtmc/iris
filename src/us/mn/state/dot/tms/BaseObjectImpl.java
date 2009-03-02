@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 
 /**
@@ -22,10 +23,10 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
  *
  * @author Douglas Lau
  */
-abstract public class BaseObjectImpl implements Storable {
+abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** SONAR namespace */
-	static protected ServerNamespace namespace;
+	static public ServerNamespace namespace;
 
 	/** SQL connection to database */
 	static protected SQLConnection store;
@@ -48,15 +49,18 @@ abstract public class BaseObjectImpl implements Storable {
 		CabinetStyleImpl.loadAll();
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
-		SignGroupImpl.loadAll();
-		DmsSignGroupImpl.loadAll();
-		SignTextImpl.loadAll();
 		R_NodeImpl.loadAll();
 		AlarmImpl.loadAll();
 		DetectorImpl.loadAll();
 		CameraImpl.loadAll();
 		WarningSignImpl.loadAll();
-		TrafficDeviceAttributeImpl.loadAll();
+		RampMeterImpl.loadAll();
+		SignMessageImpl.loadAll();
+		DMSImpl.loadAll();
+		SignGroupImpl.loadAll();
+		DmsSignGroupImpl.loadAll();
+		SignTextImpl.loadAll();
+		TimingPlanImpl.loadAll();
 	}
 
 	/** Get the primary key name */
@@ -72,7 +76,7 @@ abstract public class BaseObjectImpl implements Storable {
 	/** Base object name */
 	protected final String name;
 
-	/** Get the graphic name */
+	/** Get the object name */
 	public String getName() {
 		return name;
 	}
@@ -107,5 +111,11 @@ abstract public class BaseObjectImpl implements Storable {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		// Override this to initialize new objects
+	}
+
+	/** Notify SONAR clients of a change to an attribute */
+	protected void notifyAttribute(String aname) {
+		if(MainServer.server != null)
+			MainServer.server.setAttribute(this, aname);
 	}
 }

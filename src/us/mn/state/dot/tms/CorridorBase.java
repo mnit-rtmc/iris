@@ -71,6 +71,11 @@ public class CorridorBase {
 		return free_dir;
 	}
 
+	/** Get the corridor ID */
+	public String getID() {
+		return GeoLocHelper.getCorridorID(freeway, free_dir);
+	}
+
 	/** Flag for downstream-to-upstream (backwards) order */
 	protected final boolean order_down_up;
 

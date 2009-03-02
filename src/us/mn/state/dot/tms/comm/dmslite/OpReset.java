@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,12 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
-import us.mn.state.dot.tms.BitmapGraphic;
+import java.io.IOException;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageMemoryType;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageMultiString;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageStatus;
-import us.mn.state.dot.tms.comm.ntcip.DmsMessageTimeRemaining;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.TMSObjectImpl;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * Operation to reset the DMS.
@@ -132,15 +119,21 @@ public class OpReset extends OpDms
 			if(valid) {
 
 				// set blank message
-				String owner="";	//FIXME: how to get owner name? TMSObjectImpl.getUserName();
-				SignMessage sm=OpDms.createBlankMsg(m_dms,owner);
-                		m_dms.setActiveMessage(sm);
+				try {
+					SignMessage m = m_dms.createMessage("",
+						DMSMessagePriority.BLANK,
+						null);
+	                		m_dms.setMessageCurrent(m, null);
+				}
+				catch(SonarException e) {
+					e.printStackTrace();
+				}
 
 			// valid flag is false
 			} else {
 				System.err.println(
 				    "OpReset: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
-				setDmsStatus(errmsg);
+				errorStatus = errmsg;
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {
@@ -154,4 +147,3 @@ public class OpReset extends OpDms
 		}
 	}
 }
-

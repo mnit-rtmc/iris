@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,39 +15,40 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Dimension;
-import java.rmi.RemoteException;
 import us.mn.state.dot.data.DataFactory;
 import us.mn.state.dot.data.plot.Plotlet;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 
 /**
- * Action to display a plotlet containing ramp meter data
+ * Form containing a plotlet for ramp meter data
  *
  * @author Douglas Lau
  */
 public class MeterDataForm extends AbstractForm {
 
-	/** Ramp meter to display data */
-	protected final MeterProxy proxy;
+	/** Ramp meter proxy object */
+	protected final RampMeter proxy;
 
 	/** Traffic data factory */
 	protected final DataFactory factory;
 
 	/** Create a new meter data form */
-	public MeterDataForm(MeterProxy p, DataFactory f) {
-		super("Data for Meter: " + p.getId());
+	public MeterDataForm(RampMeter p, DataFactory f) {
+		super("Data for Meter: " + p.getName());
 		proxy = p;
 		factory = f;
 	}
 
 	/** Initialize the form */
-	public void initialize() throws RemoteException {
-		Plotlet plot = new Plotlet(factory);
+	public void initialize() {
+		// FIXME: this whole thing is broke
+/*		Plotlet plot = new Plotlet(factory);
 		// FIXME: Plotlet's preferred size is broken
 		plot.setPreferredSize(new Dimension(800, 500));
-		for(Detector det: proxy.meter.getDetectors())
+		for(Detector det: proxy.getDetectors())
 			plot.addDetector(det.getName());
-		add(plot);
+		add(plot); */
 	}
 }

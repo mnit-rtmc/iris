@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.awt.BorderLayout;
-import java.rmi.RemoteException;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -58,7 +57,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		setLayout(new BorderLayout());
 		TypeCache<T> cache = getTypeCache();
 		cache.addProxyListener(this);

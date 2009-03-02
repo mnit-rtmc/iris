@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,10 @@
  */
 package us.mn.state.dot.tms.client.warning;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -27,7 +25,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying and editing warning signs
@@ -43,13 +43,13 @@ public class WarningSignForm extends AbstractForm {
 	protected WarningSignModel w_model;
 
 	/** Table to hold the warning signs */
-	protected final JTable w_table = new JTable();
+	protected final ZTable w_table = new ZTable();
 
 	/** Button to display the warning sign properties */
 	protected final JButton properties = new JButton("Properties");
 
 	/** Button to delete the selected warning sign */
-	protected final JButton del_sign = new JButton("Delete Sign");
+	protected final JButton del_sign = new JButton("Delete");
 
 	/** TMS connection */
 	protected final TmsConnection connection;
@@ -77,14 +77,6 @@ public class WarningSignForm extends AbstractForm {
 
 	/** Create warning sign panel */
 	protected JPanel createWarningSignPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
-		bag.gridheight = 2;
 		final ListSelectionModel s = w_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -96,12 +88,7 @@ public class WarningSignForm extends AbstractForm {
 		w_table.setModel(w_model);
 		w_table.setAutoCreateColumnsFromModel(false);
 		w_table.setColumnModel(w_model.createColumnModel());
-		JScrollPane pane = new JScrollPane(w_table);
-		panel.add(pane, bag);
-		bag.gridheight = 1;
-		bag.anchor = GridBagConstraints.CENTER;
-		properties.setEnabled(false);
-		panel.add(properties, bag);
+		w_table.setVisibleRowCount(12);
 		new ActionJob(this, properties) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -112,10 +99,12 @@ public class WarningSignForm extends AbstractForm {
 				}
 			}
 		};
-		bag.gridx = 1;
-		bag.gridy = 1;
-		del_sign.setEnabled(false);
-		panel.add(del_sign, bag);
+		w_table.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent e) {
+				if(e.getClickCount() == 2)
+					properties.doClick();
+			}
+		});
 		new ActionJob(this, del_sign) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -123,6 +112,12 @@ public class WarningSignForm extends AbstractForm {
 					w_model.deleteRow(row);
 			}
 		};
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(w_table);
+		panel.add(properties);
+		panel.addRow(del_sign);
+		properties.setEnabled(false);
+		del_sign.setEnabled(false);
 		return panel;
 	}
 

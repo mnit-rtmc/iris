@@ -28,7 +28,7 @@ public interface DmsSignGroup extends SonarObject {
 	String SONAR_TYPE = "dms_sign_group";
 
 	/** Get the DMS ID */
-	String getDms();
+	DMS getDms();
 
 	/** Get the sign group name */
 	SignGroup getSignGroup();

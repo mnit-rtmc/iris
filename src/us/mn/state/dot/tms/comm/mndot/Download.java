@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,18 +16,17 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
+import java.util.Calendar;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorImpl;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterImpl;
-import us.mn.state.dot.tms.StratifiedPlanImpl;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TMSObjectImpl;
+import us.mn.state.dot.tms.TMSImpl;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DownloadRequestException;
@@ -40,6 +39,18 @@ import us.mn.state.dot.tms.comm.MeterPoller;
  */
 public class Download extends Controller170Operation implements TimingTable {
 
+	/** Minute of 12 Noon in day */
+	static protected final int NOON = 12 * 60;
+
+	/** Check if a timing plan is for the given peak period */
+	static protected boolean checkPeriod(TimingPlan plan, int period) {
+		if(period == Calendar.AM && plan.getStopMin() <= NOON)
+			return true;
+		if(period == Calendar.PM && plan.getStartMin() >= NOON)
+			return true;
+		return false;
+	}
+
 	/** Get the system meter green time */
 	static protected int getGreenTime() {
 		float g = SystemAttributeHelper.getMeterGreenSecs();
@@ -50,6 +61,11 @@ public class Download extends Controller170Operation implements TimingTable {
 	static protected int getYellowTime() {
 		float g = SystemAttributeHelper.getMeterYellowSecs();
 		return Math.round(g * 10);
+	}
+
+	/** Convert minute-of-day (0-1440) to 4-digit BCD */
+	static protected int minuteBCD(int v) {
+		return 100 * (v / 60) + v % 60;
 	}
 
 	/** Flag to perform a level-1 restart */
@@ -64,7 +80,6 @@ public class Download extends Controller170Operation implements TimingTable {
 	public Download(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c);
 		restart = r;
-		controller.setError("OK");
 	}
 
 	/** Handle an exception */
@@ -122,7 +137,7 @@ public class Download extends Controller170Operation implements TimingTable {
 	protected void checkCabinetStyle(int dips) {
 		Integer d = lookupDips();
 		if(d != null && d != dips)
-			controller.setError("CABINET STYLE " + dips);
+			errorStatus = "CABINET STYLE " + dips;
 	}
 
 	/** Lookup the correct dip switch setting to the controller */
@@ -315,25 +330,18 @@ public class Download extends Controller170Operation implements TimingTable {
 		}
 	}
 
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(!success)
-			controller.setError(null);
-		super.cleanup();
-	}
-
 	/** Send both AM and PM timing tables to the specified ramp meter */
 	protected void sendTimingTables(AddressedMessage mess, int address,
 		RampMeterImpl meter) throws IOException
 	{
 		int[] red = {1, 1};
 		int[] rate = {MeterRate.FLASH, MeterRate.FLASH};
-		int[] start = {AM_START_TIME, PM_START_TIME};
-		int[] stop = {AM_START_TIME, PM_START_TIME};
+		int[] start = {AM_MID_TIME, PM_MID_TIME};
+		int[] stop = {AM_MID_TIME, PM_MID_TIME};
 		updateTimingTables(meter, red, rate, start, stop);
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCD.OutputStream bcd = new BCD.OutputStream(os);
-		for(int t = TimingPlan.AM; t <= TimingPlan.PM; t++) {
+		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
 			bcd.write16Bit(STARTUP_GREEN);
 			bcd.write16Bit(STARTUP_YELLOW);
 			bcd.write16Bit(getGreenTime());
@@ -353,10 +361,10 @@ public class Download extends Controller170Operation implements TimingTable {
 	protected void sendWarningSignTiming(AddressedMessage mess, int address)
 		throws IOException
 	{
-		int[] times = {AM_START_TIME, PM_START_TIME};
+		int[] times = {AM_MID_TIME, PM_MID_TIME};
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCD.OutputStream bcd = new BCD.OutputStream(os);
-		for(int t = TimingPlan.AM; t <= TimingPlan.PM; t++) {
+		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
 			bcd.write16Bit(1);		// Startup GREEN
 			bcd.write16Bit(1);		// Startup YELLOW
 			bcd.write16Bit(3);		// Metering GREEN
@@ -372,36 +380,36 @@ public class Download extends Controller170Operation implements TimingTable {
 		mess.setRequest();
 	}
 
-	/** Update one timing table with a stratified plan */
-	protected void updateTable(RampMeterImpl meter, StratifiedPlanImpl p,
-		int[] red, int[] rate, int[] start, int[] stop)
+	/** Update the timing tables with active timing plans */
+	protected void updateTimingTables(final RampMeterImpl meter,
+		final int[] red, final int[] rate, final int[] start,
+		final int[] stop)
 	{
-		for(int t = TimingPlan.AM; t <= TimingPlan.PM; t++) {
-			if(p.checkPeriod(t)) {
-				int sta = p.getStartTime();
-				int sto = p.getStopTime();
-				float r = meter.calculateRedTime(
-					meter.getTarget(sta));
-				red[t] = Math.round(r * 10);
-				rate[t] = MeterRate.TOD;
-				start[t] = 100 * (sta / 60) + sta % 60;
-				stop[t] = 100 * (sto / 60) + sto % 60;
+		TMSImpl.lookupTimingPlans(new Checker<TimingPlan>() {
+			public boolean check(TimingPlan p) {
+				if(p.getActive() && p.getDevice() == meter) {
+					updateTable(meter, p, red, rate, start,
+						stop);
+				}
+				return false;
 			}
-		}
+		});
 	}
 
-	/** Update the timing tables with active timing plans */
-	protected void updateTimingTables(RampMeterImpl meter, int[] red,
-		int[] rate, int[] start, int[] stop)
+	/** Update one timing table with a stratified plan */
+	protected void updateTable(RampMeterImpl meter, TimingPlan p,
+		int[] red, int[] rate, int[] start, int[] stop)
 	{
-		if(meter.getControlMode() != RampMeter.MODE_CENTRAL)
-			return;
-		TimingPlan[] plans = meter.getTimingPlans();
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i] instanceof StratifiedPlanImpl) {
-				StratifiedPlanImpl p =
-					(StratifiedPlanImpl)plans[i];
-				updateTable(meter, p, red, rate, start, stop);
+		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
+			if(checkPeriod(p, t)) {
+				int sta = minuteBCD(p.getStartMin());
+				int sto = minuteBCD(p.getStopMin());
+				float r = MndotPoller.calculateRedTime(meter,
+					p.getTarget());
+				red[t] = Math.round(r * 10);
+				rate[t] = MeterRate.TOD;
+				start[t] = Math.min(start[t], sta);
+				stop[t] = Math.max(stop[t], sto);
 			}
 		}
 	}

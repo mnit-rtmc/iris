@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2007  Minnesota Department of Transportation
+ * Copyright (C) 2003-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,34 +14,63 @@
  */
 package us.mn.state.dot.tms;
 
-import java.io.Serializable;
+import java.util.LinkedList;
 
 /**
- * MeterLock holds information associated with a metering rate lock.
+ * A ramp meter lock specifies the reason for locking a meter.
  *
- * @author Erik Engstrom
+ * @author Douglas Lau
  */
-public class RampMeterLock implements Serializable {
+public enum RampMeterLock {
 
-	/** Name of the user who created the lock */
-	protected final String user;
+	/** Placeholder for lock-off status */
+	OFF(" "),
 
-	/** Reason the user locked the metering rate */
-	protected String reason;
+	/** Lock knock down status */
+	KNOCK_DOWN("Knocked down"),
+
+	/** Lock testing status */
+	TESTING("Testing"),
+
+	/** Lock by police panel status */
+	POLICE_PANEL("Police panel"),
+
+	/** Lock by manual metering status */
+	MANUAL("Manual mode"),
+
+	/** Lock other status */
+	OTHER("Other reason");
 
 	/** Create a new meter lock */
-	public RampMeterLock(String u, String reason) {
-		this.user = u;
-		this.reason = reason;
+	private RampMeterLock(String d) {
+		description = d;
 	}
 
-	/** Get the username of the user who locked the meter */
-	public String getUser() {
-		return user;
+	/** Description of the lock reason */
+	public final String description;
+
+	/** Get a ramp meter lock from an ordinal value */
+	static public RampMeterLock fromOrdinal(Integer o) {
+		if(o != null && o > 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 
-	/** Get the reason for this metering lock */
-	public String getReason() {
-		return reason;
+	/** Get an array of lock descriptions */
+	static public String[] getDescriptions() {
+		LinkedList<String> d = new LinkedList<String>();
+		for(RampMeterLock lock: RampMeterLock.values())
+			d.add(lock.description);
+		return d.toArray(new String[0]);
+	}
+
+	/** Check if a lock value is a "controller-only" lock */
+	static public boolean isControllerLock(Integer l) {
+		if(l == RampMeterLock.POLICE_PANEL.ordinal())
+			return true;
+		if(l == RampMeterLock.MANUAL.ordinal())
+			return true;
+		return false;
 	}
 }

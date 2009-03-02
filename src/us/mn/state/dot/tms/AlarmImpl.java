@@ -215,18 +215,10 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			store.update(this, "state", s);
 			ev.doStore();
 			state = s;
-			notifyState();
+			notifyAttribute("state");
 		}
 		catch(TMSException e) {
 			e.printStackTrace();
-		}
-	}
-
-	/** Notify SONAR clients of changes to the alarm state */
-	protected void notifyState() {
-		if(MainServer.server != null) {
-			String[] s = new String[] { String.valueOf(state) };
-			MainServer.server.setAttribute(this, "state", s);
 		}
 	}
 

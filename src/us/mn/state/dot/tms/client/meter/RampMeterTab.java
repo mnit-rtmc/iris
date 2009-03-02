@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,10 @@ import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.device.StatusSummary;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
-import us.mn.state.dot.tms.utils.TMSProxy;
+import us.mn.state.dot.tms.client.sonar.StyleSummary;
 
 /**
  * Gui for opererating ramp meters.
@@ -34,14 +33,14 @@ import us.mn.state.dot.tms.utils.TMSProxy;
  */
 public class RampMeterTab extends MapTab {
 
-	/** Meter device handler */
-	protected final MeterHandler handler;
+	/** Meter device manager */
+	protected final MeterManager manager;
 
 	/** Meter status panel */
 	protected final MeterStatusPanel statusPanel;
 
-	/** Summary of meter status lists */
-	protected final StatusSummary meterList;
+	/** Summary of meters of each status */
+	protected final StyleSummary<RampMeter> summary;
 
 	/** Tab panel */
 	protected final JPanel tabPanel;
@@ -50,19 +49,16 @@ public class RampMeterTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new ramp meter tab */
-  	public RampMeterTab(List<LayerState> lstates, ViewLayer vlayer,
-		TmsConnection connection) throws IOException
+  	public RampMeterTab(MeterManager m, List<LayerState> lstates,
+		ViewLayer vlayer, TmsConnection tc) throws IOException
 	{
 		super("Meter", "Operate Ramp Meters");
-		TmsMapLayer rampLayer = MeterHandler.createLayer(connection);
-		handler = (MeterHandler)rampLayer.getHandler();
-		TMSProxy tms = connection.getProxy();
-		tms.setRampMeters(handler);
+		manager = m;
 		map.addLayers(lstates);
-		map.addLayer(rampLayer.createState());
+		map.addLayer(m.getLayer().createState());
 		mainPanel = createMapPanel(vlayer);
-		statusPanel = new MeterStatusPanel(connection, handler);
-		meterList = new StatusSummary(handler);
+		statusPanel = new MeterStatusPanel(tc, manager);
+		summary = new StyleSummary<RampMeter>(manager);
 		tabPanel = createSideBar();
  	}
 
@@ -70,7 +66,7 @@ public class RampMeterTab extends MapTab {
 	protected JPanel createSideBar() {
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(statusPanel, BorderLayout.NORTH);
-		p.add(meterList, BorderLayout.CENTER);
+		p.add(summary, BorderLayout.CENTER);
 		return p;
 	}
 
@@ -82,8 +78,8 @@ public class RampMeterTab extends MapTab {
 	/** Dispose of the ramp meter tab */
 	public void dispose() {
 		super.dispose();
-		handler.getSelectionModel().setSelected(null);
-		meterList.removeAll();
+		manager.getSelectionModel().clearSelection();
+		summary.dispose();
 		statusPanel.dispose();
 		mainPanel.removeAll();
 	}

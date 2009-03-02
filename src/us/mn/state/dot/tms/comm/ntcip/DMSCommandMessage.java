@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -35,18 +36,30 @@ public class DMSCommandMessage extends DMSOperation {
 	/** Sign message */
 	protected final SignMessage message;
 
+	/** User who deployed the message */
+	protected final User owner;
+
 	/** Message CRC */
 	protected int messageCRC;
 
 	/** Create a new DMS command message object */
-	public DMSCommandMessage(DMSImpl d, SignMessage m) {
+	public DMSCommandMessage(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
 		message = m;
+		owner = o;
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new ModifyRequest();
+		if(dms.checkPriority(message.getPriority()))
+			return new ModifyRequest();
+		else
+			return null;
+	}
+
+	/** Get the message duration */
+	protected int getDuration() {
+		return getDuration(message.getDuration());
 	}
 
 	/** Phase to set the status to modify request */
@@ -57,7 +70,9 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.add(new DmsMessageStatus(
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				DmsMessageStatus.MODIFY_REQ));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.GenError e) {
 				if(modify) {
 					modify = false;
@@ -106,7 +121,9 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.add(new DmsMessageStatus(
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				DmsMessageStatus.VALIDATE_REQ));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.GenError e) {
 				return new ValidateMessageError();
 			}
@@ -126,9 +143,10 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.add(multi);
 			mess.getRequest();
 			if(error.isSyntaxMulti())
-				throw new NtcipException(multi.toString());
+				errorStatus = multi.toString();
 			else
-				throw new NtcipException(error.toString());
+				errorStatus = error.toString();
+			return null;
 		}
 	}
 
@@ -156,15 +174,18 @@ public class DMSCommandMessage extends DMSOperation {
 
 		/** Activate the message */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsActivateMessage(message.getDuration(),
+			mess.add(new DmsActivateMessage(getDuration(),
 				MAX_MESSAGE_PRIORITY,
 				DmsMessageMemoryType.CHANGEABLE, 1,
 				messageCRC, 0));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.GenError e) {
 				return new ActivateMessageError();
 			}
-			dms.setActiveMessage(message);
+			// FIXME: this should happen on SONAR thread
+			dms.setMessageCurrent(message, owner);
 			return new TimeRemaining();
 		}
 	}
@@ -181,15 +202,16 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.getRequest();
 			switch(error.getInteger()) {
 				case DmsActivateMsgError.SYNTAX_MULTI:
-					throw new NtcipException(
-						multi.toString());
+					errorStatus = multi.toString();
+					break;
 				case DmsActivateMsgError.OTHER:
 					// FIXME: ADDCO does this too ...
 					return new LedstarActivateError();
 				default:
-					throw new NtcipException(
-						error.toString());
+					errorStatus = error.toString();
+					break;
 			}
+			return null;
 		}
 	}
 
@@ -201,7 +223,8 @@ public class DMSCommandMessage extends DMSOperation {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
 			mess.getRequest();
-			throw new NtcipException(error.toString());
+			errorStatus = error.toString();
+			return null;
 		}
 	}
 
@@ -210,8 +233,7 @@ public class DMSCommandMessage extends DMSOperation {
 
 		/** Set the message time remaining */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsMessageTimeRemaining(
-				message.getDuration()));
+			mess.add(new DmsMessageTimeRemaining(getDuration()));
 			mess.setRequest();
 			return null;
 		}

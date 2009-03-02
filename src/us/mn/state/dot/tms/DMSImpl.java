@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,25 +15,18 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.Arrays;
-import java.util.Calendar;
+import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
-import java.util.TreeMap;
-
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.comm.ntcip.ShortErrorStatus;
 import us.mn.state.dot.tms.event.EventType;
 import us.mn.state.dot.tms.event.SignStatusEvent;
-import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * Dynamic Message Sign
@@ -41,85 +34,989 @@ import us.mn.state.dot.vault.ObjectVaultException;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
-
-	/** ObjectVault table name */
-	static public final String tableName = "dms";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
-
-	/** Name to use for messages with no owner */
-	static protected final String NO_OWNER = "Nobody";
-
-	/** Default pitch between pixels (mm) */
-	static protected final int DEFAULT_PITCH = 69;
-
-	/** Default character height (pixels) */
-	static protected final int DEFAULT_CHARACTER_HEIGHT = 7;
-
-	/** Minimum speed for travel time trip calculation */
-	static protected final int MINIMUM_TRIP_SPEED = 15;
-
-	/** Validate travel time text */
-	static protected void validateTravel(String s)
-		throws ChangeVetoException
-	{
-		if(!MultiString.isValid(s))
-			throw new ChangeVetoException("Invalid travel: " + s);
-	}
+public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Special value to indicate an invalid line spacing */
 	static protected final int INVALID_LINE_SPACING = -1;
 
-	/** Calculate the line spacing for a given sign and font height */
-	static protected int calculateLineSpacing(int sign_height,
-		int font_height)
-	{
-		int extra = sign_height % font_height;
-		int gaps = (sign_height / font_height) - 1;
-		if(extra == 0)
-			return 0;
-		else if((gaps > 0) && (extra % gaps == 0))
-			return extra / gaps;
-		return INVALID_LINE_SPACING;
+	/** Calculate the maximum trip minute to display on the sign */
+	static protected int maximumTripMinutes(float miles) {
+		float hours = miles /
+			SystemAttributeHelper.getTravelTimeMinMPH();
+		return Math.round(hours * 60);
 	}
 
-	/** Maximum route legs */
-	static protected final int MAX_ROUTE_LEGS = 8;
-
-	/** Maximum route distance */
-	static protected final int MAX_ROUTE_DISTANCE = 16;
-
-	/** Notify all observers for an update */
-	public void notifyUpdate() {
-		super.notifyUpdate();
-		dmsList.update(id);
+	/** Round up to the next 5 minutes */
+	static protected int roundUp5Min(int min) {
+		return ((min - 1) / 5 + 1) * 5;
 	}
 
-	/** Create a new dynamic message sign */
-	public DMSImpl(String id) throws TMSException, RemoteException {
-		super(id);
-		mile = new Float(0);
-		plans = new TimingPlanImpl[0];
-		resetTransients();
-		message = createBlankMessage(NO_OWNER);
-		s_routes = new HashMap<String, Route>();
+	/** Lookup a station */
+	static protected StationImpl lookupStation(String sid) {
+		return (StationImpl)namespace.lookupObject(Station.SONAR_TYPE,
+			sid);
 	}
 
-	/** Constructor needed for ObjectVault */
-	protected DMSImpl(FieldMap fields) throws RemoteException {
-		super(fields);
-		message = createBlankMessage(NO_OWNER);
-		s_routes = new HashMap<String, Route>();
+	/** Load all the DMS */
+	static protected void loadAll() throws TMSException {
+		System.err.println("Loading DMS...");
+		namespace.registerType(SONAR_TYPE, DMSImpl.class);
+		store.query("SELECT name, geo_loc, controller, pin, notes, " +
+			"travel, camera, aws_allowed, aws_controlled FROM " +
+			"iris." + SONAR_TYPE  + ";", new ResultFactory()
+		{
+			public void create(ResultSet row) throws Exception {
+				namespace.add(new DMSImpl(namespace,
+					row.getString(1),	// name
+					row.getString(2),	// geo_loc
+					row.getString(3),	// controller
+					row.getInt(4),		// pin
+					row.getString(5),	// notes
+					row.getString(6),	// travel
+					row.getString(7),	// camera
+					row.getBoolean(8),	// aws_allowed
+					row.getBoolean(9)      // aws_controlled
+				));
+			}
+		});
 	}
 
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
-		// FIXME: implement this for SONAR
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("name", name);
+		map.put("geo_loc", geo_loc);
+		map.put("controller", controller);
+		map.put("pin", pin);
+		map.put("notes", notes);
+		map.put("travel", travel);
+		map.put("camera", camera);
+		map.put("aws_allowed", awsAllowed);
+		map.put("aws_controlled", awsControlled);
+		return map;
+	}
+
+	/** Get the database table name */
+	public String getTable() {
+		return "iris." + SONAR_TYPE;
+	}
+
+	/** Get the SONAR type name */
+	public String getTypeName() {
+		return SONAR_TYPE;
+	}
+
+	/** Create a new DMS with a string name */
+	public DMSImpl(String n) throws TMSException, SonarException {
+		super(n);
+		GeoLocImpl g = new GeoLocImpl(name);
+		MainServer.server.createObject(g);
+		geo_loc = g;
+	}
+
+	/** Create a dynamic message sign */
+	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
+		int p, String nt, String t, Camera cam, boolean aa, boolean ac)
+	{
+		super(n, c, p, nt);
+		geo_loc = loc;
+		travel = t;
+		camera = cam;
+		awsAllowed = aa;
+		awsControlled = ac;
+		initTransients();
+	}
+
+	/** Create a dynamic message sign */
+	protected DMSImpl(Namespace ns, String n, String loc, String c,
+		int p, String nt, String t, String cam, boolean aa, boolean ac)
+	{
+		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
+		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
+		     p, nt, t, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
+		     aa, ac);
+	}
+
+	/** Create a blank message for the sign */
+	protected SignMessage createBlankMessage() {
+		String bitmaps = Base64.encode(new byte[0]);
+		try {
+			return createMessage("", bitmaps,
+				DMSMessagePriority.BLANK, null);
+		}
+		catch(SonarException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		super.doDestroy();
+		MainServer.server.removeObject(geo_loc);
+	}
+
+	/** Set the controller to which this DMS is assigned */
+	public void setController(Controller c) {
+		super.setController(c);
+		if(c != null)
+			setConfigure(false);
+	}
+
+	/** Configure flag */
+	protected boolean configure;
+
+	/** Set the configure flag */
+	public void setConfigure(boolean c) {
+		if(c && !configure) {
+			DMSPoller p = getDMSPoller();
+			if(p != null) {
+				// NOTE: this avoids a stack overflow with
+				// DMSOperation.cleanup()
+				configure = true;
+				p.sendRequest(this,
+					SignRequest.QUERY_CONFIGURATION);
+			}
+		}
+		configure = c;
+	}
+
+	/** Device location */
+	protected GeoLocImpl geo_loc;
+
+	/** Get the device location */
+	public GeoLoc getGeoLoc() {
+		return geo_loc;
+	}
+
+	/** Travel time message template */
+	protected String travel = "";
+
+	/** Set the travel time message template */
+	public void setTravel(String t) {
+		travel = t;
+		s_routes.clear();
+	}
+
+	/** Set the travel time message template */
+	public void doSetTravel(String t) throws TMSException {
+		if(t.equals(travel))
+			return;
+		MultiString multi = new MultiString(t);
+		if(!multi.isValid())
+			throw new ChangeVetoException("Invalid travel: " + t);
+		store.update(this, "travel", t);
+		setTravel(t);
+	}
+
+	/** Get the travel time message template */
+	public String getTravel() {
+		return travel;
+	}
+
+	/** Camera from which this can be seen */
+	protected Camera camera;
+
+	/** Set the verification camera */
+	public void setCamera(Camera c) {
+		camera = c;
+	}
+
+	/** Set the verification camera */
+	public void doSetCamera(Camera c) throws TMSException {
+		if(c == camera)
+			return;
+		store.update(this, "camera", c);
+		setCamera(c);
+	}
+
+	/** Get verification camera */
+	public Camera getCamera() {
+		return camera;
+	}
+
+	/** Administrator allowed AWS control */
+	protected boolean awsAllowed;
+
+	/** Allow (or deny) sign control by Automated Warning System */
+	public void setAwsAllowed(boolean a) {
+		awsAllowed = a;
+	}
+
+	/** Allow (or deny) sign control by Automated Warning System */
+	public void doSetAwsAllowed(boolean a) throws TMSException {
+		if(a == awsAllowed)
+			return;
+		store.update(this, "aws_allowed", a);
+		setAwsAllowed(a);
+	}
+
+	/** Is sign allowed to be controlled by Automated Warning System? */
+	public boolean getAwsAllowed() {
+		return awsAllowed;
+	}
+
+	/** AWS controlled */
+	protected boolean awsControlled;
+
+	/** Set sign to Automated Warning System controlled */
+	public void setAwsControlled(boolean a) {
+		awsControlled = a;
+	}
+
+	/** Set sign to Automated Warning System controlled */
+	public void doSetAwsControlled(boolean a) throws TMSException {
+		if(a == awsControlled)
+			return;
+		store.update(this, "aws_controlled", a);
+		setAwsControlled(a);
+	}
+
+	/** Is sign controlled by Automated Warning System? */
+	public boolean getAwsControlled() {
+		return awsControlled;
+	}
+
+	/** Make (manufacturer) */
+	protected transient String make;
+
+	/** Set the make */
+	public void setMake(String m) {
+		if(!m.equals(make)) {
+			make = m;
+			notifyAttribute("make");
+		}
+	}
+
+	/** Get the make */
+	public String getMake() {
+		return make;
+	}
+
+	/** Model */
+	protected transient String model;
+
+	/** Set the model */
+	public void setModel(String m) {
+		if(!m.equals(model)) {
+			model = m;
+			notifyAttribute("model");
+		}
+	}
+
+	/** Get the model */
+	public String getModel() {
+		return model;
+	}
+
+	/** Software version */
+	protected transient String version;
+
+	/** Set the version */
+	public void setVersion(String v) {
+		if(!v.equals(version)) {
+			version = v;
+			notifyAttribute("version");
+			ControllerImpl c = (ControllerImpl)getController();
+			if(c != null)
+				c.setVersion(version);
+		}
+	}
+
+	/** Get the version */
+	public String getVersion() {
+		return version;
+	}
+
+	/** Sign access description */
+	protected transient String signAccess;
+
+	/** Set sign access description */
+	public void setSignAccess(String a) {
+		if(!a.equals(signAccess)) {
+			signAccess = a;
+			notifyAttribute("signAccess");
+		}
+	}
+
+	/** Get sign access description */
+	public String getSignAccess() {
+		return signAccess;
+	}
+
+	/** Sign type enum value */
+	protected transient DMSType dms_type = DMSType.UNKNOWN;
+
+	/** Set sign type */
+	public void setDmsType(DMSType t) {
+		if(t != dms_type) {
+			dms_type = t;
+			notifyAttribute("dmsType");
+		}
+	}
+
+	/** Get sign type as an int (via enum) */
+	public int getDmsType() {
+		return dms_type.ordinal();
+	}
+
+	/** Sign legend string */
+	protected transient String legend;
+
+	/** Set sign legend */
+	public void setLegend(String l) {
+		if(!l.equals(legend)) {
+			legend = l;
+			notifyAttribute("legend");
+		}
+	}
+
+	/** Get sign legend */
+	public String getLegend() {
+		return legend;
+	}
+
+	/** Beacon type description */
+	protected transient String beaconType;
+
+	/** Set beacon type description */
+	public void setBeaconType(String t) {
+		if(!t.equals(beaconType)) {
+			beaconType = t;
+			notifyAttribute("beaconType");
+		}
+	}
+
+	/** Get beacon type description */
+	public String getBeaconType() {
+		return beaconType;
+	}
+
+	/** Sign technology description */
+	protected transient String technology;
+
+	/** Set sign technology description */
+	public void setTechnology(String t) {
+		if(!t.equals(technology)) {
+			technology = t;
+			notifyAttribute("technology");
+		}
+	}
+
+	/** Get sign technology description */
+	public String getTechnology() {
+		return technology;
+	}
+
+	/** Height of sign face (mm) */
+	protected transient Integer faceHeight;
+
+	/** Set height of sign face (mm) */
+	public void setFaceHeight(Integer h) {
+		if(!h.equals(faceHeight)) {
+			faceHeight = h;
+			notifyAttribute("faceHeight");
+		}
+	}
+
+	/** Get height of the sign face (mm) */
+	public Integer getFaceHeight() {
+		return faceHeight;
+	}
+
+	/** Width of the sign face (mm) */
+	protected transient Integer faceWidth;
+
+	/** Set width of sign face (mm) */
+	public void setFaceWidth(Integer w) {
+		if(!w.equals(faceWidth)) {
+			faceWidth = w;
+			notifyAttribute("faceWidth");
+		}
+	}
+
+	/** Get width of the sign face (mm) */
+	public Integer getFaceWidth() {
+		return faceWidth;
+	}
+
+	/** Horizontal border (mm) */
+	protected transient Integer horizontalBorder;
+
+	/** Set horizontal border (mm) */
+	public void setHorizontalBorder(Integer b) {
+		if(!b.equals(horizontalBorder)) {
+			horizontalBorder = b;
+			notifyAttribute("horizontalBorder");
+		}
+	}
+
+	/** Get horizontal border (mm) */
+	public Integer getHorizontalBorder() {
+		return horizontalBorder;
+	}
+
+	/** Vertical border (mm) */
+	protected transient Integer verticalBorder;
+
+	/** Set vertical border (mm) */
+	public void setVerticalBorder(Integer b) {
+		if(!b.equals(verticalBorder)) {
+			verticalBorder = b;
+			notifyAttribute("verticalBorder");
+		}
+	}
+
+	/** Get vertical border (mm) */
+	public Integer getVerticalBorder() {
+		return verticalBorder;
+	}
+
+	/** Horizontal pitch (mm) */
+	protected transient Integer horizontalPitch;
+
+	/** Set horizontal pitch (mm) */
+	public void setHorizontalPitch(Integer p) {
+		if(!p.equals(horizontalPitch)) {
+			horizontalPitch = p;
+			notifyAttribute("horizontalPitch");
+		}
+	}
+
+	/** Get horizontal pitch (mm) */
+	public Integer getHorizontalPitch() {
+		return horizontalPitch;
+	}
+
+	/** Vertical pitch (mm) */
+	protected transient Integer verticalPitch;
+
+	/** Set vertical pitch (mm) */
+	public void setVerticalPitch(Integer p) {
+		if(!p.equals(verticalPitch)) {
+			verticalPitch = p;
+			notifyAttribute("verticalPitch");
+		}
+	}
+
+	/** Get vertical pitch (mm) */
+	public Integer getVerticalPitch() {
+		return verticalPitch;
+	}
+
+	/** Sign height (pixels) */
+	protected transient Integer heightPixels;
+
+	/** Set sign height (pixels) */
+	public void setHeightPixels(Integer h) {
+		if(!h.equals(heightPixels)) {
+			heightPixels = h;
+			// FIXME: update bitmap graphics plus stuck on/off
+			notifyAttribute("heightPixels");
+		}
+	}
+
+	/** Get sign height (pixels) */
+	public Integer getHeightPixels() {
+		return heightPixels;
+	}
+
+	/** Sign width in pixels */
+	protected transient Integer widthPixels;
+
+	/** Set sign width (pixels) */
+	public void setWidthPixels(Integer w) {
+		if(!w.equals(widthPixels)) {
+			widthPixels = w;
+			// FIXME: update bitmap graphics plus stuck on/off
+			notifyAttribute("widthPixels");
+		}
+	}
+
+	/** Get sign width (pixels) */
+	public Integer getWidthPixels() {
+		return widthPixels;
+	}
+
+	/** Character height (pixels; 0 means variable) */
+	protected transient Integer charHeightPixels;
+
+	/** Set character height (pixels) */
+	public void setCharHeightPixels(Integer h) {
+		// NOTE: some crazy vendors think line-matrix signs should have
+		//       a variable character height, so we have to fix their
+		//       mistake here ... uggh
+		if(h == 0 && DMSType.isFixedHeight(dms_type))
+			h = estimateLineHeight();
+		if(!h.equals(charHeightPixels)) {
+			charHeightPixels = h;
+			notifyAttribute("charHeightPixels");
+		}
+	}
+
+	/** Estimate the line height (pixels) */
+	protected Integer estimateLineHeight() {
+		Integer h = heightPixels;
+		if(h != null) {
+			int m = SystemAttributeHelper.getDmsMaxLines();
+			for(int i = m; i > 0; i--) {
+				if(h % i == 0)
+					return h / i;
+			}
+		}
 		return null;
+	}
+
+	/** Get character height (pixels) */
+	public Integer getCharHeightPixels() {
+		return charHeightPixels;
+	}
+
+	/** Character width (pixels; 0 means variable) */
+	protected transient Integer charWidthPixels;
+
+	/** Set character width (pixels) */
+	public void setCharWidthPixels(Integer w) {
+		if(!w.equals(charWidthPixels)) {
+			charWidthPixels = w;
+			notifyAttribute("charWidthPixels");
+		}
+	}
+
+	/** Get character width (pixels) */
+	public Integer getCharWidthPixels() {
+		return charWidthPixels;
+	}
+
+	/** Does the sign have proportional fonts? */
+	public boolean hasProportionalFonts() {
+		Integer w = charWidthPixels;
+		return w != null && w == 0;
+	}
+
+	/** Minimum cabinet temperature */
+	protected transient Integer minCabinetTemp;
+
+	/** Set the minimum cabinet temperature */
+	public void setMinCabinetTemp(Integer t) {
+		if(!t.equals(minCabinetTemp)) {
+			minCabinetTemp = t;
+			notifyAttribute("minCabinetTemp");
+		}
+	}
+
+	/** Get the minimum cabinet temperature */
+	public Integer getMinCabinetTemp() {
+		return minCabinetTemp;
+	}
+
+	/** Maximum cabinet temperature */
+	protected transient Integer maxCabinetTemp;
+
+	/** Set the maximum cabinet temperature */
+	public void setMaxCabinetTemp(Integer t) {
+		if(!t.equals(maxCabinetTemp)) {
+			maxCabinetTemp = t;
+			notifyAttribute("maxCabinetTemp");
+		}
+	}
+
+	/** Get the maximum cabinet temperature */
+	public Integer getMaxCabinetTemp() {
+		return maxCabinetTemp;
+	}
+
+	/** Minimum ambient temperature */
+	protected transient Integer minAmbientTemp;
+
+	/** Set the minimum ambient temperature */
+	public void setMinAmbientTemp(Integer t) {
+		if(!t.equals(minAmbientTemp)) {
+			minAmbientTemp = t;
+			notifyAttribute("minAmbientTemp");
+		}
+	}
+
+	/** Get the minimum ambient temperature */
+	public Integer getMinAmbientTemp() {
+		return minAmbientTemp;
+	}
+
+	/** Maximum ambient temperature */
+	protected transient Integer maxAmbientTemp;
+
+	/** Set the maximum ambient temperature */
+	public void setMaxAmbientTemp(Integer t) {
+		if(!t.equals(maxAmbientTemp)) {
+			maxAmbientTemp = t;
+			notifyAttribute("maxAmbientTemp");
+		}
+	}
+
+	/** Get the maximum ambient temperature */
+	public Integer getMaxAmbientTemp() {
+		return maxAmbientTemp;
+	}
+
+	/** Minimum housing temperature */
+	protected transient Integer minHousingTemp;
+
+	/** Set the minimum housing temperature */
+	public void setMinHousingTemp(Integer t) {
+		if(!t.equals(minHousingTemp)) {
+			minHousingTemp = t;
+			notifyAttribute("minHousingTemp");
+		}
+	}
+
+	/** Get the minimum housing temperature */
+	public Integer getMinHousingTemp() {
+		return minHousingTemp;
+	}
+
+	/** Maximum housing temperature */
+	protected transient Integer maxHousingTemp;
+
+	/** Set the maximum housing temperature */
+	public void setMaxHousingTemp(Integer t) {
+		if(!t.equals(maxHousingTemp)) {
+			maxHousingTemp = t;
+			notifyAttribute("maxHousingTemp");
+		}
+	}
+
+	/** Get the maximum housing temperature */
+	public Integer getMaxHousingTemp() {
+		return maxHousingTemp;
+	}
+
+	/** Current light output (percentage) of the sign */
+	protected transient Integer lightOutput;
+
+	/** Set the light output of the sign (percentage) */
+	public void setLightOutput(Integer l) {
+		if(!l.equals(lightOutput)) {
+			lightOutput = l;
+			notifyAttribute("lightOutput");
+		}
+	}
+
+	/** Get the light output of the sign (percentage) */
+	public Integer getLightOutput() {
+		return lightOutput;
+	}
+
+	/** Pixel status.  This is an array of two Base64-encoded bitmaps.
+	 * The first indicates stuck-off pixels, the second stuck-on pixels. */
+	protected transient String[] pixelStatus;
+
+	/** Set the pixel status array */
+	public void setPixelStatus(String[] p) {
+		pixelStatus = p;
+		notifyAttribute("pixelStatus");
+	}
+
+	/** Get the pixel status array */
+	public String[] getPixelStatus() {
+		return pixelStatus;
+	}
+
+	/** Lamp status.  This is an array of two Base64-encoded bitmaps.
+	 * The first indicates stuck-off lamps, the second stuck-on lamps. */
+	protected transient String[] lampStatus;
+
+	/** Set the lamp status */
+	public void setLampStatus(String[] l) {
+		lampStatus = l;
+		notifyAttribute("lampStatus");
+	}
+
+	/** Get the lamp status */
+	public String[] getLampStatus() {
+		return lampStatus;
+	}
+
+	/** Power supply status.  This is an array of three Base64-encoded
+	 * bitmaps. */
+	protected transient String[] powerStatus;
+
+	/** Set the power supply status table */
+	public void setPowerStatus(String[] t) {
+		assert t.length == 3;
+		powerStatus = t;
+		notifyAttribute("powerStatus");
+	}
+
+	/** Get the power supply status table */
+	public String[] getPowerStatus() {
+		return powerStatus;
+	}
+
+	/** Request a sign operation (query message, test pixels, etc.) */
+	public void setSignRequest(int r) {
+		SignRequest sr = SignRequest.fromOrdinal(r);
+		DMSPoller p = getDMSPoller();
+		if(p != null)
+			p.sendRequest(this, sr);
+	}
+
+	/** User note */
+	protected transient String userNote;
+
+	/** Set the user note */
+	public void setUserNote(String n) {
+		if(!n.equals(userNote)) {
+			userNote = n;
+			notifyAttribute("userNote");
+		}
+	}
+
+	/** Get the user note */
+	public String getUserNote() {
+		return userNote;
+	}
+
+	/** Next message owner */
+	protected transient User ownerNext;
+
+	/** Set the message owner */
+	public synchronized void setOwnerNext(User o) {
+		if(ownerNext != null && o != null) {
+			System.err.println("DMSImpl.setOwnerNext: " + getName()+
+				", " + ownerNext.getName() + " vs. " +
+				o.getName());
+			ownerNext = null;
+		} else
+			ownerNext = o;
+	}
+
+	/** Next message to be displayed */
+	protected transient SignMessage messageNext;
+
+	/** Set the next sign message */
+	public void setMessageNext(SignMessage m) {
+		messageNext = m;
+	}
+
+	/** Set the next sign message */
+	public void doSetMessageNext(SignMessage m)
+		throws TMSException
+	{
+		try {
+			doSetMessageNext(m, ownerNext);
+		}
+		finally {
+			// Clear the owner even if there was an exception
+			ownerNext = null;
+		}
+	}
+
+	/** Set the next sign message */
+	protected synchronized void doSetMessageNext(SignMessage m, User o)
+		throws TMSException
+	{
+		final DMSPoller p = getDMSPoller();
+		if(p == null)
+			throw new ChangeVetoException("No active poller");
+		MultiString multi = new MultiString(m.getMulti());
+		if(!multi.isValid()) {
+			throw new ChangeVetoException("Invalid message: " +
+				m.getMulti());
+		}
+		int ap = m.getPriority();
+		if(!checkPriority(ap))
+			throw new ChangeVetoException("Priority too low");
+		if(ap != DMSMessagePriority.CLEAR.ordinal()) {
+			// NOTE: only send a "blank" message if activation
+			//       priority matches current runtime priority.
+			//       This means that a blank AWS message will not
+			//       blank the sign unless the current message is
+			//       an AWS message.
+			if(multi.isBlank() && !checkPriorityBlank(ap))
+				return;
+		}
+		validateBitmaps(m);
+		p.sendMessage(this, m, o);
+		setMessageNext(m);
+	}
+
+	/** Validate the message bitmaps */
+	protected void validateBitmaps(SignMessage m)
+		throws ChangeVetoException
+	{
+		try {
+			validateBitmaps(m.getBitmaps());
+		}
+		catch(IOException e) {
+			throw new ChangeVetoException("Base64 decode error");
+		}
+		catch(IndexOutOfBoundsException e) {
+			throw new ChangeVetoException(e.getMessage());
+		}
+	}
+
+	/** Validate the message bitmaps */
+	protected void validateBitmaps(String bmaps) throws IOException,
+		ChangeVetoException
+	{
+		byte[] bitmaps = Base64.decode(bmaps);
+		BitmapGraphic bitmap = createBlankBitmap();
+		int blen = bitmap.getBitmap().length;
+		if(blen == 0)
+			throw new ChangeVetoException("Invalid sign size");
+		if(bitmaps.length % blen != 0)
+			throw new ChangeVetoException("Invalid bitmap length");
+		String[] pixels = pixelStatus;	// Avoid races
+		if(pixels != null && pixels.length == 2)
+			validateBitmaps(bitmaps, pixels, bitmap);
+	}
+
+	/** Validate the message bitmaps */
+	protected void validateBitmaps(byte[] bitmaps, String[] pixels,
+		BitmapGraphic bitmap) throws IOException, ChangeVetoException
+	{
+		int blen = bitmap.getBitmap().length;
+		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
+		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
+		BitmapGraphic stuckOff = bitmap.createBlankCopy();
+		BitmapGraphic stuckOn = bitmap.createBlankCopy();
+		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
+		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
+		int n_pages = bitmaps.length / blen;
+		byte[] b = new byte[blen];
+		for(int p = 0; p < n_pages; p++) {
+			System.arraycopy(bitmaps, p * blen, b, 0, blen);
+			bitmap.setBitmap(b);
+			bitmap.union(stuckOff);
+			int n_lit = bitmap.getLitCount();
+			if(n_lit > off_limit) {
+				throw new ChangeVetoException(
+					"Too many stuck off pixels: " + n_lit);
+			}
+			bitmap.setBitmap(b);
+			bitmap.outline();
+			bitmap.union(stuckOn);
+			n_lit = bitmap.getLitCount();
+			if(n_lit > on_limit) {
+				throw new ChangeVetoException(
+					"Too many stuck on pixels: " + n_lit);
+			}
+		}
+	}
+
+	/** Create a blank bitmap */
+	protected BitmapGraphic createBlankBitmap()
+		throws ChangeVetoException
+	{
+		Integer w = widthPixels;	// Avoid race
+		Integer h = heightPixels;	// Avoid race
+		if(w != null && h != null)
+			return new BitmapGraphic(w, h);
+		else
+			throw new ChangeVetoException("Width/height is null");
+	}
+
+	/** Check if a message has priority over existing messages */
+	public boolean checkPriority(int ap) {
+		return checkCurrentPriority(ap) && checkNextPriority(ap);
+	}
+
+	/** Check if a message has priority over "current" message */
+	protected boolean checkCurrentPriority(int ap) {
+		SignMessageImpl m = (SignMessageImpl)messageCurrent;
+		return ap >= m.getRunTimePriority();
+	}
+
+	/** Check if a message has priority over "next" message */
+	protected boolean checkNextPriority(int ap) {
+		SignMessageImpl n = (SignMessageImpl)messageNext;
+		return n == null || ap >= n.getRunTimePriority();
+	}
+
+	/** Check if activation priority should allow blanking the sign */
+	protected boolean checkPriorityBlank(int ap) {
+		SignMessageImpl m = (SignMessageImpl)messageCurrent;
+		return ap == m.getRunTimePriority();
+	}
+
+	/** Send a sign message creates by IRIS server */
+	public void sendMessage(SignMessage m) throws TMSException {
+		try {
+			doSetMessageNext(m, null);
+		}
+		catch(TMSException e) {
+			throw e;
+		}
+	}
+
+	/** Current message (Shall not be null) */
+	protected transient SignMessage messageCurrent =
+		createBlankMessage();
+
+	/** Set the current message */
+	public void setMessageCurrent(SignMessage m, User o) {
+		if(m.equals(messageCurrent))
+			return;
+		logMessage(m, o);
+		setDeployTime();
+		messageCurrent = m;
+		notifyAttribute("messageCurrent");
+		ownerCurrent = o;
+		notifyAttribute("ownerCurrent");
+		setMessageNext(null);
+		// FIXME: destroy the previous message if no other signs are
+		// using it
+	}
+
+	/** Get the current messasge.
+	 * @return Currently active message (cannot be null) */
+	public SignMessage getMessageCurrent() {
+		return messageCurrent;
+	}
+
+	/** Owner of current message */
+	protected transient User ownerCurrent;
+
+	/** Get the current message owner.
+	 * @return User who deployed the current message. */
+	public User getOwnerCurrent() {
+		return ownerCurrent;
+	}
+
+	/** Log a message */
+	protected void logMessage(SignMessage m, User o) {
+		EventType et = EventType.DMS_DEPLOYED;
+		String text = m.getMulti();
+		if(((SignMessageImpl)m).isBlank()) {
+			et = EventType.DMS_CLEARED;
+			text = null;
+		}
+		String owner = null;
+		if(o != null)
+			owner = o.getName();
+		SignStatusEvent ev = new SignStatusEvent(et, name, text, owner);
+		try {
+			ev.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Message deploy time */
+	protected long deployTime = 0;
+
+	/** Set the message deploy time */
+	protected void setDeployTime() {
+		deployTime = System.currentTimeMillis();
+		notifyAttribute("deployTime");
+	}
+
+	/** Get the message deploy time.
+	 * @return Time message was deployed (ms since epoch).
+	 * @see java.lang.System.currentTimeMillis */
+	public long getDeployTime() {
+		return deployTime;
 	}
 
 	/** Get the DMS poller */
@@ -132,323 +1029,216 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return null;
 	}
 
-	/** Previous message */
-	protected transient SignMessage old_mess;
+	/** LDC pot base (Ledstar-specific value) */
+	protected transient Integer ldcPotBase;
 
-	/** Test if the message has changed */
-	protected boolean isChanged() {
-		boolean changed = message != old_mess;
-		changed |= !message.equals(old_mess);
-		old_mess = message;
-		return changed;
-	}
-
-	/** Status code from last notification */
-	protected transient int status_code;
-
-	/** Notify all observers for a status change */
-	public void notifyStatus() {
-		int s = getStatusCode();
-		if(isChanged() || s != status_code) {
-			status_code = s;
-			dmsList.update(id);
+	/** Set the LDC pot base */
+	public void setLdcPotBase(Integer base) {
+		if(!base.equals(ldcPotBase)) {
+			ldcPotBase = base;
+			notifyAttribute("ldcPotBase");
 		}
-		super.notifyStatus();
 	}
 
-	/** Set the controller to which this DMS is assigned */
-	public void setController(String c) throws TMSException {
-		super.setController(c);
-		if(c != null)
-			setReset(false);
+	/** Get the LDC pot base */
+	public Integer getLdcPotBase() {
+		return ldcPotBase;
 	}
 
-	/** Reset flag */
-	protected transient boolean reset;
+	/** Pixel low current threshold (Ledstar-specific value) */
+	protected transient Integer pixelCurrentLow;
 
-	/** Set the reset flag */
-	public void setReset(boolean r) {
-		if(r && !reset) {
-			DMSPoller p = getDMSPoller();
-			if(p != null) {
-				resetTransients();
-				// NOTE: this avoids a stack overflow with
-				// DMSOperation.cleanup()
-				reset = true;
-				p.queryConfiguration(this);
-			}
+	/** Set the pixel low curent threshold */
+	public void setPixelCurrentLow(Integer low) {
+		if(!low.equals(pixelCurrentLow)) {
+			pixelCurrentLow = low;
+			notifyAttribute("pixelCurrentLow");
 		}
-		reset = r;
 	}
 
-	/** Initialize the transient state */
-	public void initTransients() throws ObjectVaultException,
-		TMSException, RemoteException
-	{
-		super.initTransients();
-		LinkedList p = new LinkedList();
-		Set s = plan_mapping.lookup("traffic_device", this);
-		Iterator it = s.iterator();
-		while(it.hasNext())
-			p.add(vault.load(it.next()));
-		plans = (TimingPlanImpl [])p.toArray(new TimingPlanImpl[0]);
-		Arrays.sort(plans);
-		for(int i = 0; i < plans.length; i++)
-			planList.append(plans[i]);
-		resetTransients();
+	/** Get the pixel low current threshold */
+	public Integer getPixelCurrentLow() {
+		return pixelCurrentLow;
 	}
 
-	/** Reset some transient fields */
-	protected void resetTransients() {
-		pixelFailureCount = 0;
-		minCabinetTemp = UNKNOWN_TEMP;
-		maxCabinetTemp = UNKNOWN_TEMP;
-		minAmbientTemp = UNKNOWN_TEMP;
-		maxAmbientTemp = UNKNOWN_TEMP;
-		minHousingTemp = UNKNOWN_TEMP;
-		maxHousingTemp = UNKNOWN_TEMP;
-		make = UNKNOWN;
-		model = UNKNOWN;
-		version = UNKNOWN;
-		signAccess = UNKNOWN;
-		signMatrixType = DMSType.VMS_CHAR;
-		signHeight = 0;
-		signWidth = 0;
-		horizontalBorder = 0;
-		verticalBorder = 0;
-		legend = UNKNOWN;
-		beaconType = UNKNOWN;
-		signTechnology = UNKNOWN;
-		characterHeightPixels = -1;
-		characterWidthPixels = -1;
-		signHeightPixels = 0;
-		signWidthPixels = 0;
-		horizontalPitch = 0;
-		verticalPitch = 0;
-		maxPhotocellLevel = 0;
-		photocellLevel = 0;
-		brightnessLevels = 0;
-		brightnessLevel = 0;
-		brightnessTable = new int[0];
-		lightOutput = 0;
-		manualBrightness = false;
-		lamp_status = UNKNOWN;
-		fan_status = UNKNOWN;
-		power_table = new StatusTable();
-		heat_tape = UNKNOWN;
-	}
+	/** Pixel high current threshold (Ledstar-specific value) */
+	protected transient Integer pixelCurrentHigh;
 
-	/** Camera from which this can be seen */
-	protected String camera = "";
-
-	/** Get verification camera */
-	public String getCamera() {
-		return camera;
-	}
-
-	/** Set the verification camera */
-	public synchronized void setCamera(String c) throws TMSException {
-		if(c.equals(camera))
-			return;
-		store.update(this, "camera", c);
-		camera = c;
-	}
-
-	/** Miles downstream of reference point */
-	protected Float mile;
-
-	/** Get the miles downstream of reference point */
-	public Float getMile() {
-		return mile;
-	}
-
-	/** Set the miles downstream of reference point */
-	public synchronized void setMile(Float m) throws TMSException {
-		if(m.equals(mile))
-			return;
-		store.update(this, "mile", m);
-		mile = m;
-	}
-
-	/** Travel time message template */
-	protected String travel;
-
-	/** Get the travel time message template */
-	public String getTravel() {
-		return travel;
-	}
-
-	/** Set the travel time message template */
-	public synchronized void setTravel(String t) throws TMSException {
-		if(t.equals(travel))
-			return;
-		validateTravel(t);
-		store.update(this, "travel", t);
-		travel = t;
-		s_routes.clear();
-	}
-
-	/** Array of timing plans for this sign */
-	protected transient TimingPlanImpl[] plans;
-
-	/** Add a timing plan to the sign */
-	protected synchronized void addTimingPlan(TimingPlanImpl plan)
-		throws TMSException
-	{
-		TimingPlanImpl[] p = new TimingPlanImpl[plans.length + 1];
-		for(int i = 0; i < plans.length; i++) {
-			p[i] = plans[i];
-			if(p[i].equals(plan))
-				return;
+	/** Set the pixel high curent threshold */
+	public void setPixelCurrentHigh(Integer high) {
+		if(!high.equals(pixelCurrentHigh)) {
+			pixelCurrentHigh = high;
+			notifyAttribute("pixelCurrentHigh");
 		}
-		p[plans.length] = plan;
-		try {
-			vault.save(plan, getUserName());
-		}
-		catch(ObjectVaultException e) {
-			throw new TMSException(e);
-		}
-		setTimingPlans(p);
 	}
 
-	/** Add a new timing plan to the sign */
-	public void addTimingPlan(int period) throws TMSException,
-		RemoteException
-	{
-		TimingPlanImpl plan = new TimingPlanImpl(period);
-		addTimingPlan(plan);
-		planList.append(plan);
+	/** Get the pixel high current threshold */
+	public Integer getPixelCurrentHigh() {
+		return pixelCurrentHigh;
 	}
 
-	/** Add an existing timing plan to the sign */
-	protected void addExistingTimingPlan(TimingPlan plan)
-		throws TMSException
-	{
-		TimingPlanImpl p = planList.lookup(plan);
-		if(p == null)
-			throw new ChangeVetoException("Cannot find plan");
-		addTimingPlan(p);
-	}
+	/** Sign face heat tape status */
+	protected transient String heatTapeStatus;
 
-	/** Remove a timing plan from the sign */
-	protected synchronized TimingPlanImpl removeTimingPlan(TimingPlan plan)
-		throws TMSException
-	{
-		TimingPlanImpl old_plan = null;
-		TimingPlanImpl[] p = new TimingPlanImpl[plans.length - 1];
-		for(int i = 0, j = 0; i < plans.length; i++) {
-			if(plans[i].equals(plan))
-				old_plan = plans[i];
-			else {
-				p[j] = plans[i];
-				j++;
-			}
+	/** Set sign face heat tape status */
+	public void setHeatTapeStatus(String h) {
+		if(!h.equals(heatTapeStatus)) {
+			heatTapeStatus = h;
+			notifyAttribute("heatTapeStatus");
 		}
-		if(old_plan == null)
-			throw new ChangeVetoException("Plan not found");
-		boolean lastReference = old_plan.isDeletable();
-		setTimingPlans(p);
-		if(lastReference)
-			return old_plan;
+	}
+
+	/** Get sign face heat tape status */
+	public String getHeatTapeStatus() {
+		return heatTapeStatus;
+	}
+
+	/** Feedback brightness sample data */
+	public void feedbackBrightness(BrightnessSample s) {
+		// FIXME: store brightness sample in database
+	}
+
+	/** Lookup recent brightness feedback sample data */
+	public void queryBrightnessFeedback(BrightnessSample.Handler h) {
+		// FIXME: lookup samples in database
+	}
+
+	/** Flag to indicate if a travel time plan is operating */
+	protected boolean travelOperating = false;
+
+	/** Set the travel time operating flag */
+	public void setTravelOperating(boolean o) {
+		travelOperating = o;
+	}
+
+	/** Update the travel times for this sign */
+	public void updateTravelTime() {
+		if(travelOperating)
+			sendTravelTime();
 		else
-			return null;
+			clearTravelTime();
+		setTravelOperating(false);
 	}
 
-	/** Associate (or dissociate) a timing plan with this sign */
-	public void setTimingPlan(TimingPlan plan, boolean a)
-		throws TMSException
-	{
-		if(a)
-			addExistingTimingPlan(plan);
-		else {
-			TimingPlanImpl p = removeTimingPlan(plan);
-			if(p != null) {
-				p.notifyDelete();
-				planList.remove(p);
-			}
-		}
-	}
-
-	/** Set all current timing plans which affect this sign */
-	protected void setTimingPlans(TimingPlanImpl[] p) throws TMSException {
-		Arrays.sort(p);
-		if(Arrays.equals(p, plans))
-			return;
-		plan_mapping.update("traffic_device", this, p);
-		plans = p;
-	}
-
-	/** Check if a timing plan is associated with this sign */
-	public boolean hasTimingPlan(TimingPlan plan) {
-		TimingPlanImpl[] plans = this.plans;	// Avoid races
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i].equals(plan))
-				return true;
-		}
-		return false;
-	}
-
-	/** Calculate the maximum trip time to display on the sign */
-	static protected int maximumTripTime(float distance) {
-		float hours = distance / MINIMUM_TRIP_SPEED;
-		return Math.round(hours * 60);
-	}
-
-	/** Round up to the next 5 minutes */
-	static protected int roundUp5Min(int minutes) {
-		return ((minutes - 1) / 5 + 1) * 5;
-	}
-
-	/** Calculate the travel time for the given route */
-	protected int calculateTravelTime(Route route, boolean final_dest)
-		throws InvalidMessageException
-	{
+	/** Send a travel time message to the sign */
+	protected void sendTravelTime() {
 		try {
-			float hours = route.getTravelTime(final_dest);
-			return (int)(hours * 60) + 1;
+			sendTravelTime(composeTravelTimeMessage());
 		}
-		catch(BadRouteException e) {
-			throw new InvalidMessageException("Bad route for " +
-				id + ": " + e.getMessage());
+		catch(InvalidMessageException e) {
+			if(RouteBuilder.TRAVEL_LOG.isOpen())
+				RouteBuilder.TRAVEL_LOG.log(e.getMessage());
+			sendTravelTime("");
 		}
 	}
 
-	/** Are all the routes confined to the same single corridor */
-	protected boolean isSingleCorridor() {
-		Corridor cor = null;
-		for(Route r: s_routes.values()) {
-			Corridor c = r.getOnlyCorridor();
-			if(c == null)
-				return false;
-			if(cor == null)
-				cor = c;
-			else if(c != cor)
-				return false;
-		}
-		return cor != null;
+	/** Clear the travel time for this sign */
+	protected void clearTravelTime() {
+		s_routes.clear();
+		sendTravelTime("");
 	}
 
-	/** Are two routes confined to the same single corridor */
-	protected boolean isSameCorridor(Route r1, Route r2) {
-		if(r1 != null && r2 != null) {
-			Corridor c1 = r1.getOnlyCorridor();
-			Corridor c2 = r2.getOnlyCorridor();
-			if(c1 != null && c2 != null)
-				return c1 == c2;
+	/** Send a new travel time message */
+	protected void sendTravelTime(String t) {
+		if(!checkPriority(DMSMessagePriority.TRAVEL_TIME.ordinal()))
+			return;
+		try {
+			SignMessage m = createMessage(t,
+				DMSMessagePriority.TRAVEL_TIME, null);
+			sendMessage(m);
 		}
-		return false;
+		catch(Exception e) {
+			RouteBuilder.TRAVEL_LOG.log(e.getMessage());
+		}
 	}
 
-	/** Check if the given route is a final destination */
-	protected boolean isFinalDest(Route r) {
-		for(Route ro: s_routes.values()) {
-			if(ro != r && isSameCorridor(r, ro) &&
-				r.getLength() < ro.getLength())
-			{
-				return false;
+	/** Create a message for the sign */
+	public SignMessage createMessage(String m, DMSMessagePriority p,
+		Integer d) throws SonarException
+	{
+		Integer w = widthPixels;
+		Integer h = heightPixels;
+		Integer cw = charWidthPixels;
+		Integer ch = charHeightPixels;
+		if(w == null)
+			w = 0;
+		if(h == null)
+			h = 0;
+		if(cw == null)
+			cw = 0;
+		if(ch == null)
+			ch = 0;
+		PixelMapBuilder builder = new PixelMapBuilder(namespace, w, h,
+			cw, ch);
+		MultiString multi = new MultiString(m);
+		multi.parse(builder, builder.getDefaultFontNumber());
+		BitmapGraphic[] pages = builder.getPixmaps();
+		return createMessageB(m, pages, p, d);
+	}
+
+	/** Create a message for the sign */
+	public SignMessage createMessage(String m, BitmapGraphic[] pages,
+		DMSMessagePriority p, Integer d) throws SonarException
+	{
+		Integer w = widthPixels;
+		Integer h = heightPixels;
+		if(w == null || w < 1)
+			return null;
+		if(h == null || h < 1)
+			return null;
+		BitmapGraphic[] bmaps = new BitmapGraphic[pages.length];
+		for(int i = 0; i < bmaps.length; i++) {
+			bmaps[i] = new BitmapGraphic(w, h);
+			bmaps[i].copy(pages[i]);
+		}
+		return createMessageB(m, bmaps, p, d);
+	}
+
+	/** Create a new message (B version) */
+	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
+		DMSMessagePriority p, Integer d) throws SonarException
+	{
+		int blen = pages[0].getBitmap().length;
+		byte[] bitmap = new byte[pages.length * blen];
+		for(int i = 0; i < pages.length; i++) {
+			byte[] page = pages[i].getBitmap();
+			System.arraycopy(page, 0, bitmap, i * blen, blen);
+		}
+		String bitmaps = Base64.encode(bitmap);
+		return createMessage(m, bitmaps, p, d);
+	}
+
+	/** Create a sign message */
+	protected SignMessage createMessage(final String m, final String b,
+		final DMSMessagePriority p, final Integer d)
+		throws SonarException
+	{
+		SignMessage esm = (SignMessage)namespace.findObject(
+			SignMessage.SONAR_TYPE, new Checker<SignMessage>()
+		{
+			public boolean check(SignMessage sm) {
+				return m.equals(sm.getMulti()) &&
+				       b.equals(sm.getBitmaps()) &&
+				       p.ordinal() == sm.getPriority() &&
+				       d == sm.getDuration();
 			}
-		}
-		return true;
+		});
+		if(esm != null)
+			return esm;
+		else
+			return createMessageC(m, b, p, d);
+	}
+
+	/** Create a new sign message (C version) */
+	protected SignMessage createMessageC(String m, String b,
+		DMSMessagePriority p, Integer d) throws SonarException
+	{
+		SignMessageImpl sm = new SignMessageImpl(m, b, p, d);
+		if(MainServer.server != null)
+			MainServer.server.createObject(sm);
+		else
+			namespace.storeObject(sm);
+		return sm;
 	}
 
 	/** Compose a travel time message */
@@ -473,12 +1263,12 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			{
 				Route r = lookupRoute(sid);
 				if(r == null) {
-					throw new InvalidMessageException(id +
+					throw new InvalidMessageException(name +
 						": NO ROUTE TO " + sid);
 				}
 				boolean final_dest = isFinalDest(r);
 				int m = calculateTravelTime(r, final_dest);
-				int slow = maximumTripTime(r.getLength());
+				int slow = maximumTripMinutes(r.getLength());
 				boolean over = m > slow;
 				if(over) {
 					any_over = true;
@@ -503,40 +1293,75 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 		return t;
 	}
 
-	/** Check if an interval is within an active timing plan */
-	protected boolean isWithin(int interval) {
-		TimingPlanImpl[] plans = this.plans;	// Avoid races
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i].isActive()) {
-				if(plans[i].checkWithin(interval))
-					return true;
-			}
-		}
-		return false;
-	}
-
-	/** Check if an interval is within an active testing timing plan */
-	protected boolean isTesting(int interval) {
-		TimingPlanImpl[] plans = this.plans;	// Avoid races
-		for(int i = 0; i < plans.length; i++) {
-			if(plans[i].isActive() && plans[i].isTesting()) {
-				if(plans[i].checkWithin(interval))
-					return true;
-			}
-		}
-		return false;
-	}
-
 	/** Mapping of station IDs to routes */
-	protected transient HashMap<String, Route> s_routes;
+	protected transient final HashMap<String, Route> s_routes =
+		new HashMap<String, Route>();
+
+	/** Lookup a route by station ID */
+	protected Route lookupRoute(String sid) {
+		if(!s_routes.containsKey(sid))
+			s_routes.put(sid, createRoute(sid));
+		return s_routes.get(sid);
+	}
+
+	/** Check if the given route is a final destination */
+	protected boolean isFinalDest(Route r) {
+		for(Route ro: s_routes.values()) {
+			if(ro != r && isSameCorridor(r, ro) &&
+				r.getLength() < ro.getLength())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/** Are two routes confined to the same single corridor */
+	protected boolean isSameCorridor(Route r1, Route r2) {
+		if(r1 != null && r2 != null) {
+			Corridor c1 = r1.getOnlyCorridor();
+			Corridor c2 = r2.getOnlyCorridor();
+			if(c1 != null && c2 != null)
+				return c1 == c2;
+		}
+		return false;
+	}
+
+	/** Calculate the travel time for the given route */
+	protected int calculateTravelTime(Route route, boolean final_dest)
+		throws InvalidMessageException
+	{
+		try {
+			float hours = route.getTravelTime(final_dest);
+			return (int)(hours * 60) + 1;
+		}
+		catch(BadRouteException e) {
+			throw new InvalidMessageException("Bad route for " +
+				name + ": " + e.getMessage());
+		}
+	}
+
+	/** Are all the routes confined to the same single corridor */
+	protected boolean isSingleCorridor() {
+		Corridor cor = null;
+		for(Route r: s_routes.values()) {
+			Corridor c = r.getOnlyCorridor();
+			if(c == null)
+				return false;
+			if(cor == null)
+				cor = c;
+			else if(c != cor)
+				return false;
+		}
+		return cor != null;
+	}
 
 	/** Create one route to a travel time destination */
 	protected Route createRoute(StationImpl s) {
 		GeoLoc dest = s.getR_Node().getGeoLoc();
-		RouteBuilder builder = new RouteBuilder(getId(), corridors,
-			MAX_ROUTE_LEGS, MAX_ROUTE_DISTANCE);
-		GeoLoc loc = lookupGeoLoc();
-		SortedSet<Route> routes = builder.findRoutes(loc, dest);
+		RouteBuilder builder = new RouteBuilder(getName(),
+			TMSImpl.corridors);
+		SortedSet<Route> routes = builder.findRoutes(geo_loc, dest);
 		if(routes.size() > 0)
 			return routes.first();
 		else
@@ -550,1165 +1375,5 @@ public class DMSImpl extends TrafficDeviceImpl implements DMS, Storable {
 			return createRoute(s);
 		else
 			return null;
-	}
-
-	/** Lookup a route by station ID */
-	protected Route lookupRoute(String sid) {
-		if(!s_routes.containsKey(sid))
-			s_routes.put(sid, createRoute(sid));
-		return s_routes.get(sid);
-	}
-
-	/** Update the travel times for this sign */
-	protected void updateTravelTime() {
-		try {
-			setTravelTime(composeTravelTimeMessage());
-		}
-		catch(InvalidMessageException e) {
-			if(RouteBuilder.TRAVEL_LOG.isOpen())
-				RouteBuilder.TRAVEL_LOG.log(e.getMessage());
-			clearTravelTime();
-		}
-	}
-
-	/** Update the travel times for this sign */
-	public void updateTravelTimes(int interval) {
-		if(isWithin(interval))
-			updateTravelTime();
-		else {
-			s_routes.clear();
-			clearTravelTime();
-		}
-	}
-
-	/** Create a blank message for the sign */
-	protected SignMessage createBlankMessage(String owner) {
-		return createBlankMessage(owner, MsgActPriority.PRI_OPER_BLANK);
-	}
-
-	/** Create a blank message for the sign w/ activation priority */
-	protected SignMessage createBlankMessage(String owner,
-		MsgActPriority ap)
-	{
-		MultiString multi = new MultiString();
-		BitmapGraphic bitmap = new BitmapGraphic(signWidthPixels,
-			signHeightPixels);
-		SignMessage sm = new SignMessage(owner, multi, bitmap, 0);
-		sm.setActivationPriority(ap);
-		return sm;
-	}
-
-	/** Currently displayed message */
-	protected transient SignMessage message;
-
-	/** Set a new message on the sign, all pages rendered, using the 
-	 *  default activation priority, and default font */
-	public void setMessage(String owner, String text, int duration)
-		throws InvalidMessageException
-	{
-		setMessage(owner, text, duration, MsgActPriority.PRI_OPER_MSG,
-			null);
-	}
-
-	/** Set a new message on the sign, all pages rendered, using the 
-	 *  default activation priority, and specified font */
-	public void setMessage(String owner, String text, int duration, 
-		String font) throws InvalidMessageException
-	{
-		setMessage(owner, text, duration, MsgActPriority.PRI_OPER_MSG,
-			font);
- 	}
-
- 	/** Set a new message on the sign, all pages rendered, ignoring
-	 *  activation priorities, using the specified font. */
- 	public void setMessage(String owner, String text, int duration,
-		MsgActPriority ap, String font) throws InvalidMessageException
- 	{
- 		MultiString multi = new MultiString(text);
-		if(font == null || font.length() <= 0)
-			font = getPreferredFontName();
- 		sendMessage(new SignMessage(owner, multi,
-			createPixelMaps(multi, font), duration, ap), true);
- 	}
-
-	/** Set a new message on the sign */
-	public void setMessage(SignMessage m) throws InvalidMessageException {
-		sendMessage(m,true);
-	}
-
-	/** Update graphic for all pages for the current message */
-	public void updateMessageGraphic() {
-		SignMessage m = message;	// Avoid races
-		m.setBitmaps(createPixelMaps(m.getMulti()));
-	}
-
-	/** 
-	 * Update graphic using a new bitmap. This is used by DMS that return
-	 * bitmaps (and possibly no text) on status querries.
-	 */
-	public void updateMessageGraphic(BitmapGraphic bm) {
-		message.setBitmap(bm);
-	}
-
-	/** Set a new alert on the sign */
-	public void setAlert(String owner, String text, boolean overwrite)
-		throws InvalidMessageException
-	{
-		if(!isActive())
-			return;
-		MultiString multi = new MultiString(text);
-		SignMessage sm = new SignAlert(owner, multi,
-			createPixelMaps(multi), SignMessage.DURATION_INFINITE,
-			overwrite);
-		sendMessage(sm,true);
-	}
-
-	/** Clear any alert on the sign */
-	public void clearAlert(String owner) {
-		if(message instanceof SignAlert)
-			clearMessage(owner);
-	}
-
-	/** Set a travel time message on the sign */
-	protected void setTravelTime(String text) throws InvalidMessageException
-	{
-		// only replace existing messages if they are TT, ie don't
-		// replace messages sent by operators.
-		// FIXME: use activation priority scheme
-		if(isActive() && (message.isBlank() ||
-			message instanceof SignTravelTime))
-		{
-			sendTravelTime(text);
-		}
-	}
-
-	/** Send a travel time message to the sign */
-	protected void sendTravelTime(String text)
-		throws InvalidMessageException
-	{
-		SignMessage m = message;
-		if(m.equals(text)) {
-			m.setDuration(SignTravelTime.MESSAGE_DURATION);
-			setMessageTimeRemaining(m);
-			return;
-		}
-		MultiString multi = new MultiString(text);
-		// FIXME: use activation priority here
-		sendMessage(new SignTravelTime(multi, createPixelMaps(multi)),
-			false);
-	}
-
-	/** Clear a travel time message */
-	protected void clearTravelTime() {
-		if(message instanceof SignTravelTime)
-			clearMessage(NO_OWNER);
-	}
-
-	/** Send a new message to the sign. The new message is activated if
-	 *  if it has a higher activation priority than the existing message
- 	 *  on the sign.
-	 *  @param m SignMessage to activate.
-	 *  @param useActPriority If false, activation priority is ignored.
-	 *  @see MsgActPriority, MsgActPriorityProc
-	 */
-	protected void sendMessage(SignMessage m, boolean useActPriority)
-		throws InvalidMessageException
-	{
-		if(m == null)
-			return;
-		// Note that below, we are asking the potential new message to
-		// evaluate if it supersedes the message on the sign, not the
-		// other way around. 
-		if(useActPriority ? m.supersede(message) : true) {
-			DMSPoller p = getDMSPoller();
-			if(p != null)
-				p.sendMessage(this, m);
-		} else {
- 			System.err.println(this + ", DMSImpl.sendMessage(): " +
-				"not activating new message: " +
-				m.toStringDebug() + " < " +
-				message.toStringDebug());
-		}
-	}
-
-	/** Set the time remaining for the currently displayed message */
-	protected void setMessageTimeRemaining(SignMessage m) {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.setMessageTimeRemaining(this, m);
-	}
-
-	/** Clear the message displayed on the sign */
-	public void clearMessage(String owner) {
-		setMessageTimeRemaining(createBlankMessage(owner));
-	}
-
-	/** Clear the message displayed on the sign using an activation
-	 *  priority */
-	public void clearMessageUsingActivationPriority(String owner,
-		MsgActPriority ap)
-	{
-		assert owner != null && ap != null : "An arg is null.";
-		if(owner == null || ap == null) 
-			return;
-		SignMessage m = createBlankMessage(owner, ap);
-
-		// activate blank only if it has a higher priority
-		if(m.supersede(message))
-			setMessageTimeRemaining(m);
-		else {
- 			System.err.println(this +
-				" clearMessageUsingActivationPriority(): " +
-				"NOT activating blank: m=" + m.toStringDebug() +
-				", mos=" + message.toStringDebug());
-		}
-	}
-
-	/** Set the active sign message (called after a message has been
-	 * successfully activated) */
-	public void setActiveMessage(SignMessage m) {
-		// If the new message is different from the old message
-		// then log it.  Required to prevent double-logging
-		// when users double-click the send.
-		if(m.isBlank()) {
-			if(!message.isBlank()) {
-				logMessage(EventType.DMS_CLEARED, id, null,
-					m.getOwner());
-			}
-		} else {
-			if(!message.equals(m)) {
-				logMessage(EventType.DMS_DEPLOYED, id,
-					m.getMulti().toString(), m.getOwner());
-			}
-		}
-		message = m;
-	}
-
-	/** 
-	 * Set the message from information read from the controller.
-	 * All pages are rendered. The message owner is set to nobody,
-	 * with a default activation priority.
-	 */
-	public void setMessageFromController(String text, int time) {
-		setMessageFromController(text, time, NO_OWNER,
-			MsgActPriority.PRI_OPER_MSG);
-	}
-
-	/** 
-	 * Set the message from information read from the controller.
-	 * All pages are rendered.
-	 */
-	public void setMessageFromController(String text, final int time,
-		String argowner, MsgActPriority ap)
-	{
-		// FIXME: this just tests if multistrings are identical, what
-		// if activation priority is different but text the same?
-		if(message.equals(text))
-			return;
-		MultiString multi = new MultiString(text);
-		setActiveMessage(new SignMessage(argowner, multi,
-			createPixelMaps(multi), time, ap));
-	}
-
-	/** Log a message */
-	protected void logMessage(EventType et, String id, String text, 
-		String owner)
-	{
-		if(NO_OWNER.equals(owner))
-			owner = null;
-		if(SignTravelTime.IRIS_OWNER.equals(owner))
-			owner = null;
-		SignStatusEvent sse = new SignStatusEvent(et, id, text, owner);
-		try {
-			sse.doStore();
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/** Get current sign messasge
-	 * @return Currently active message (cannot be null) */
-	public SignMessage getMessage() {
-		return message;
-	}
-
-	/** Get the number of text lines */
-	public int getTextLines() {
-		return signHeightPixels / getLineHeightPixels();
-	}
-
-	/** 
-	 * Create a pixel map of the message for all pages within the
-	 * MultiString message, using the default font.
-	 */
-	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi) {
-		return createPixelMaps(multi, "");
-	}
-
-	/** 
-	 * Create a pixel map of the message for all pages within the
-	 * MultiString message, using the specified font.
-	 * @param multi Multistring to render
-	 * @param fontname Name of font to render using. If zero length or null
-	 *	  the default font is used.
-	 */
-	public Map<Integer, BitmapGraphic> createPixelMaps(MultiString multi, 
-		String fontname) 
-	{
-		final FontImpl font = getFont(fontname);
-		if(font == null)
-			return new TreeMap<Integer, BitmapGraphic>();
-
-		PixelMapBuilder builder = new PixelMapBuilder(signWidthPixels,
-			signHeightPixels, characterWidthPixels, font,
-			new PixelMapBuilder.GlyphFinder() {
-				public Graphic lookupGraphic(int cp)
-					throws InvalidMessageException
-				{
-					return font.getGraphic(cp);
-				}
-			});
-		multi.parse(builder);
-		return builder.getPixmaps();
-	}
-
-	/** Get the appropriate named font for this sign.
-	 * @param pf Preferred font name. If not found the default font is used.
-	 */
-	public FontImpl getFont(String pfn) {
-		FontImpl font = lookupFontByName(pfn);
-		if(font != null)
-			return font;
-		else
-			return getFont();
-	}
-
-	/** Lookup a font by name */
-	static protected FontImpl lookupFontByName(String fontName) {
-		return (FontImpl)namespace.lookupObject(Font.SONAR_TYPE,
-			fontName);
-	}
-
-	/** Get the default font for this sign */
-	public FontImpl getFont() {
-		return lookupFont(getLineHeightPixels(), characterWidthPixels,
-			0);
-	}
-
-	/** Lookup the best font 
-	 *  @param h Line height in pixels for this DMS.
-	 *  @param w Line width in pixels for this DMS.
-	 *  @param ls Character width in pixels for this DMS.
-	 */
-	static protected FontImpl lookupFont(int h, int w, int ls) {
-		FontImpl f = _lookupFont(h, w, ls);
-		if(f != null || w == 0)
-			return f;
-		else
-			return _lookupFont(h, 0, ls);
-	}
-
-	/** Lookup the best font */
-	static protected FontImpl _lookupFont(final int h, final int w,
-		final int ls)
-	{
-		return (FontImpl)namespace.findObject(Font.SONAR_TYPE,
-			new Checker<FontImpl>()
-		{
-			public boolean check(FontImpl f) {
-				return f.matches(h, w, ls);
-			}
-		});
-	}
-
-	/** Test if the sign status is unavailable */
-	public boolean isUnavailable() {
-		return pixelFailureCount >= BAD_PIXEL_LIMIT ||
-			maxCabinetTemp >= HIGH_TEMP_CUTOFF ||
-			maxHousingTemp >= HIGH_TEMP_CUTOFF ||
-			hasErrorStatus(
-				ShortErrorStatus.POWER |
-				ShortErrorStatus.ATTACHED_DEVICE |
-				ShortErrorStatus.LAMP |
-				ShortErrorStatus.PHOTOCELL |
-				ShortErrorStatus.CONTROLLER |
-				ShortErrorStatus.TEMPERATURE
-			);
-	}
-
-	/** Get the current sign status code */
-	public int getStatusCode() {
-		if(!isActive())
-			return STATUS_INACTIVE;
-		if(isFailed())
-			return STATUS_FAILED;
-		if(message instanceof SignTravelTime)
-			return STATUS_TRAVEL_TIME;
-		if(!message.isBlank())
-			return STATUS_DEPLOYED;
-		if(isUnavailable())
-			return STATUS_UNAVAILABLE;
-		else
-			return STATUS_AVAILABLE;
-	}
-
-	/** Sign error status */
-	protected transient ShortErrorStatus error_status;
-
-	/** Check if a sign has the specified error status */
-	protected boolean hasErrorStatus(int mask) {
-		ShortErrorStatus s = error_status;
-		if(s == null)
-			return false;
-		return s.checkError(mask);
-	}
-
-	/** Set the error status */
-	public void setErrorStatus(ShortErrorStatus s) {
-		error_status = s;
-		ControllerImpl c = getControllerImpl();
-		if(c != null)
-			c.setError(s.getValue());
-	}
-
-	/** Pixel failure count */
-	protected transient int pixelFailureCount;
-
-	/** Set the pixel failure count */
-	public void setPixelFailureCount(int c) {
-		pixelFailureCount = c;
-	}
-
-	/** Get the pixel failure count */
-	public int getPixelFailureCount() {
-		return pixelFailureCount;
-	}
-
-	/** Minimum cabinet temperature */
-	protected transient int minCabinetTemp;
-
-	/** Set the minimum cabinet temperature */
-	public void setMinCabinetTemp(int t) {
-		minCabinetTemp = t;
-	}
-
-	/** Get the minimum cabinet temperature */
-	public int getMinCabinetTemp() {
-		return minCabinetTemp;
-	}
-
-	/** Maximum cabinet temperature */
-	protected transient int maxCabinetTemp;
-
-	/** Set the maximum cabinet temperature */
-	public void setMaxCabinetTemp(int t) {
-		maxCabinetTemp = t;
-	}
-
-	/** Get the maximum cabinet temperature */
-	public int getMaxCabinetTemp() {
-		return maxCabinetTemp;
-	}
-
-	/** Minimum ambient temperature */
-	protected transient int minAmbientTemp;
-
-	/** Set the minimum ambient temperature */
-	public void setMinAmbientTemp(int t) {
-		minAmbientTemp = t;
-	}
-
-	/** Get the minimum ambient temperature */
-	public int getMinAmbientTemp() {
-		return minAmbientTemp;
-	}
-
-	/** Maximum ambient temperature */
-	protected transient int maxAmbientTemp;
-
-	/** Set the maximum ambient temperature */
-	public void setMaxAmbientTemp(int t) {
-		maxAmbientTemp = t;
-	}
-
-	/** Get the maximum ambient temperature */
-	public int getMaxAmbientTemp() {
-		return maxAmbientTemp;
-	}
-
-	/** Minimum housing temperature */
-	protected transient int minHousingTemp;
-
-	/** Set the minimum housing temperature */
-	public void setMinHousingTemp(int t) {
-		minHousingTemp = t;
-	}
-
-	/** Get the minimum housing temperature */
-	public int getMinHousingTemp() {
-		return minHousingTemp;
-	}
-
-	/** Maximum housing temperature */
-	protected transient int maxHousingTemp;
-
-	/** Set the maximum housing temperature */
-	public void setMaxHousingTemp(int t) {
-		maxHousingTemp = t;
-	}
-
-	/** Get the maximum housing temperature */
-	public int getMaxHousingTemp() {
-		return maxHousingTemp;
-	}
-
-	/** Make (manufacturer) */
-	protected transient String make;
-
-	/** Set the make */
-	public void setMake(String m) {
-		make = m;
-	}
-
-	/** Get the make */
-	public String getMake() {
-		return make;
-	}
-
-	/** Model */
-	protected transient String model;
-
-	/** Set the model */
-	public void setModel(String m) {
-		model = m;
-	}
-
-	/** Get the model */
-	public String getModel() {
-		return model;
-	}
-
-	/** Software version */
-	protected transient String version;
-
-	/** Set the version */
-	public void setVersion(String v) {
-		version = v;
-		ControllerImpl c = getControllerImpl();
-		if(c != null)
-			c.setVersion(version);
-	}
-
-	/** Get the version */
-	public String getVersion() {
-		return version;
-	}
-
-	/** Sign access description */
-	protected transient String signAccess;
-
-	/** Set sign access description */
-	public void setSignAccess(String a) {
-		signAccess = a;
-	}
-
-	/** Get sign access description */
-	public String getSignAccess() {
-		return signAccess;
-	}
-
-	/** 
-	  * Sign type description, must contain "Full" or "Line"
-	  * to distinguish between types of signs.
-	  */
-	protected transient DMSType signMatrixType;
-
-	/** Set sign type */
-	public void setSignMatrixType(DMSType t) {
-		signMatrixType = t;
-	}
-
-	/** Get sign matrix type as an int (via enum) */
-	public int getSignMatrixType() {
-		return signMatrixType.ordinal();
-	}
-
-	/** Get sign matrix type as a String (via enum) */
-	public String getSignMatrixTypeDescription() {
-		return signMatrixType.description;
-	}
-
-	/** Sign height (mm) */
-	protected transient int signHeight;
-
-	/** Set sign height (mm) */
-	public void setSignHeight(int h) {
-		signHeight = h;
-	}
-
-	/** Get sign height (mm) */
-	public int getSignHeight() {
-		return signHeight;
-	}
-
-	/** Sign width (mm) */
-	protected transient int signWidth;
-
-	/** Set sign width (mm) */
-	public void setSignWidth(int w) {
-		signWidth = w;
-	}
-
-	/** Get sign width (mm) */
-	public int getSignWidth() {
-		return signWidth;
-	}
-
-	/** Horizontal border (mm) */
-	protected transient int horizontalBorder;
-
-	/** Set horizontal border (mm) */
-	public void setHorizontalBorder(int b) {
-		horizontalBorder = b;
-	}
-
-	/** Get horizontal border (mm) */
-	public int getHorizontalBorder() {
-		return horizontalBorder;
-	}
-
-	/** Vertical border (mm) */
-	protected transient int verticalBorder;
-
-	/** Set vertical border (mm) */
-	public void setVerticalBorder(int b) {
-		verticalBorder = b;
-	}
-
-	/** Get vertical border (mm) */
-	public int getVerticalBorder() {
-		return verticalBorder;
-	}
-
-	/** Sign legend string */
-	protected transient String legend;
-
-	/** Set sign legend */
-	public void setSignLegend(String l) {
-		legend = l;
-	}
-
-	/** Get sign legend */
-	public String getSignLegend() {
-		return legend;
-	}
-
-	/** Beacon type description */
-	protected transient String beaconType;
-
-	/** Set beacon type description */
-	public void setBeaconType(String t) {
-		beaconType = t;
-	}
-
-	/** Get beacon type description */
-	public String getBeaconType() {
-		return beaconType;
-	}
-
-	/** Sign technology description */
-	protected transient String signTechnology;
-
-	/** Set sign technology description */
-	public void setSignTechnology(String t) {
-		signTechnology = t;
-	}
-
-	/** Get sign technology description */
-	public String getSignTechnology() {
-		return signTechnology;
-	}
-
-	/** Character height (pixels) */
-	protected transient int characterHeightPixels;
-
-	/** Set character height (pixels) */
-	public void setCharacterHeightPixels(int h) {
-		characterHeightPixels = h;
-	}
-
-	/** Get character height (pixels) */
-	public int getCharacterHeightPixels() {
-		return characterHeightPixels;
-	}
-
-	/** Get the optimal line height (pixels) */
-	public int getLineHeightPixels() {
-		int h = characterHeightPixels;	// Avoid race
-		if(h > 0)
-			return h;
-		int s = signHeightPixels;	// Avoid race
-		int w = characterWidthPixels;	// Avoid race
-		for(int i = s; i > 0; i--) {
-			int ls = calculateLineSpacing(s, i);
-			if(ls != INVALID_LINE_SPACING) {
-				if(lookupFont(i, w, ls) != null)
-					return i;
-			}
-		}
-		// No optimal height found; just grab a font...
-		FontImpl font = lookupFont(0, w, 0);
-		if(font != null)
-			return font.getHeight();
-		else
-			return DEFAULT_CHARACTER_HEIGHT;
-	}
-
-	/** Character width (pixels; 0 means variable) */
-	protected transient int characterWidthPixels;
-
-	/** Set character width (pixels) */
-	public void setCharacterWidthPixels(int w) {
-		characterWidthPixels = w;
-	}
-
-	/** Get character width (pixels) */
-	public int getCharacterWidthPixels() {
-		return characterWidthPixels;
-	}
-
-	/** Does the sign have proportional fonts? */
-	public boolean hasProportionalFonts() {
-		return characterWidthPixels == 0;
-	}
-
-	/** Sign height (pixels) */
-	protected transient int signHeightPixels;
-
-	/** Set sign height (pixels) */
-	public void setSignHeightPixels(int h) {
-		signHeightPixels = h;
-	}
-
-	/** Get sign height (pixels) */
-	public int getSignHeightPixels() {
-		return signHeightPixels;
-	}
-
-	/** Sign width in pixels */
-	protected transient int signWidthPixels;
-
-	/** Set sign width (pixels) */
-	public void setSignWidthPixels(int w) {
-		signWidthPixels = w;
-	}
-
-	/** Get sign width (pixels) */
-	public int getSignWidthPixels() {
-		return signWidthPixels;
-	}
-
-	/** Horizontal pitch (mm) */
-	protected transient int horizontalPitch;
-
-	/** Set horizontal pitch (mm) */
-	public void setHorizontalPitch(int p) {
-		horizontalPitch = p;
-	}
-
-	/** Get horizontal pitch (mm) */
-	public int getHorizontalPitch() {
-		return horizontalPitch;
-	}
-
-	/** Get an estimate of the horizontal pitch (mm) */
-	public int getEstimatedHorizontalPitch() {
-		if(signMatrixType == DMSType.VMS_FULL ||
-		   signMatrixType == DMSType.VMS_LINE)
-		{
-			float w = signWidth - horizontalBorder / 2.0f;
-			int wp = signWidthPixels;	// Avoid race
-			if(w > 0 && wp > 0)
-				return Math.round(w / wp);
-		}
-		return DEFAULT_PITCH;
-	}
-
-	/** Vertical pitch (mm) */
-	protected transient int verticalPitch;
-
-	/** Set vertical pitch (mm) */
-	public void setVerticalPitch(int p) {
-		verticalPitch = p;
-	}
-
-	/** Get vertical pitch (mm) */
-	public int getVerticalPitch() {
-		return verticalPitch;
-	}
-
-	/** Get an estimate of the vertical pitch (mm) */
-	public int getEstimatedVerticalPitch() {
-		if(signMatrixType == DMSType.VMS_FULL) {
-			float h = signHeight - verticalBorder / 2.0f;
-			int hp = signHeightPixels;	// Avoid race
-			if(h > 0 && hp > 0)
-				return Math.round(h / hp);
-		}
-		return DEFAULT_PITCH;
-	}
-
-	/** Maximum photocell level */
-	protected transient int maxPhotocellLevel;
-
-	/** Set the maximum photocell level */
-	public void setMaxPhotocellLevel(int l) {
-		maxPhotocellLevel = l;
-	}
-
-	/** Get the maximum photocell level */
-	public int getMaxPhotocellLevel() {
-		return maxPhotocellLevel;
-	}
-
-	/** Photocell level */
-	protected transient int photocellLevel;
-
-	/** Set the current photocell level */
-	public void setPhotocellLevel(int l) {
-		photocellLevel = l;
-	}
-
-	/** Get the current photocell level */
-	public int getPhotocellLevel() {
-		return photocellLevel;
-	}
-
-	/** Number of supported brightness levels */
-	protected transient int brightnessLevels;
-
-	/** Set the number of supported brightness levels */
-	public void setBrightnessLevels(int l) {
-		brightnessLevels = l;
-	}
-
-	/** Get the number of supported brightness levels */
-	public int getBrightnessLevels() {
-		return brightnessLevels;
-	}
-
-	/** Current brightness level */
-	protected transient int brightnessLevel;
-
-	/** Set the current brightness level */
-	public void setBrightnessLevel(int l) {
-		brightnessLevel = l;
-	}
-
-	/** Get the current brightness level */
-	public int getBrightnessLevel() {
-		return brightnessLevel;
-	}
-
-	/** Current light output (percentage) of the sign */
-	protected transient int lightOutput;
-
-	/** Set the light output of the sign */
-	public void setLightOutput(int l) {
-		lightOutput = l;
-	}
-
-	/** Get the light output of the sign */
-	public int getLightOutput() {
-		return lightOutput;
-	}
-
-	/** Brightness table */
-	protected transient int[] brightnessTable;
-
-	/** Set the brightness table */
-	public void setBrightnessTable(int[] t) {
-		brightnessTable = t;
-	}
-
-	/** Get the brightness table */
-	public int[] getBrightnessTable() {
-		return brightnessTable;
-	}
-
-	/** Manual brightness control (on or off) */
-	protected transient boolean manualBrightness;
-
-	/** Set manual brightness control (on or off) */
-	public void setManualBrightness(boolean m) {
-		manualBrightness = m;
-	}
-
-	/** Get manual brightness control (on or off) */
-	public boolean isManualBrightness() {
-		return manualBrightness;
-	}
-
-	/** Send brightness level command to sign */
-	protected void _setBrightnessLevel(Integer l) {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.setBrightnessLevel(this, l);
-	}
-
-	/** Activate/deactivate manual brightness */
-	public void activateManualBrightness(boolean m) {
-		if(m == manualBrightness)
-			return;
-		if(m)
-			_setBrightnessLevel(brightnessLevel);
-		else
-			_setBrightnessLevel(null);
-	}
-
-	/** Set manual brightness level */
-	public void setManualBrightness(int l) {
-		if(manualBrightness) {
-			if(l != brightnessLevel)
-				_setBrightnessLevel(l);
-		}
-	}
-
-	/** Activate a pixel test */
-	public void testPixels() {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.testPixels(this);
-	}
-
-	/** Activate a lamp test */
-	public void testLamps() {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.testLamps(this);
-	}
-
-	/** Lamp status */
-	protected transient String lamp_status;
-
-	/** Set the lamp status */
-	public void setLampStatus(String l) {
-		lamp_status = l;
-	}
-
-	/** Get the lamp status */
-	public String getLampStatus() {
-		return lamp_status;
-	}
-
-	/** Activate a fan test */
-	public void testFans() {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.testFans(this);
-	}
-
-	/** reset the dms */
-	public void reset() {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.reset(this);
-	}
-
-	/** reset the dms modem */
-	public void resetModem() {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.resetModem(this);
-	}
-
-	/** get the current sign message */
-	public void getSignMessage() {
-		DMSPoller p = getDMSPoller();
-		if(p != null)
-			p.getSignMessage(this);
-	}
-
-	/** Fan status */
-	protected transient String fan_status;
-
-	/** Set the fan status */
-	public void setFanStatus(String f) {
-		fan_status = f;
-	}
-
-	/** Get the fan status */
-	public String getFanStatus() {
-		return fan_status;
-	}
-
-	/** Power supply status table */
-	protected transient StatusTable power_table;
-
-	/** Set the power supply status table */
-	public void setPowerSupplyTable(StatusTable t) {
-		power_table = t;
-	}
-
-	/** Get the power supply status table */
-	public StatusTable getPowerSupplyTable() {
-		return power_table;
-	}
-
-	/** Sign face heat tape status */
-	protected transient String heat_tape;
-
-	/** Set sign face heat tape status */
-	public void setHeatTapeStatus(String h) {
-		heat_tape = h;
-	}
-
-	/** Get sign face heat tape status */
-	public String getHeatTapeStatus() {
-		return heat_tape;
-	}
-
-	/** Set the time (in minutes) to heat the sign housing */
-	public void setHousingHeatTime(int minutes) {
-		// FIXME
-	}
-
-	/** Get the remaining housing heat time (in minutes) */
-	public int getHousingHeatTime() {
-		// FIXME
-		return 0;
-	}
-
-	/** text note */
-	protected transient String m_userNote;
-
-	/** Set the user note */
-	public void setUserNote(String s) {
-		m_userNote = s;
-	}
-
-	/** Get the user note */
-	public String getUserNote() {
-		return m_userNote;
-	}
-
-	/** Start a Ledstar pixel configuration operation */
-	protected void startLedstarPixel() {
-		DMSPoller p = getDMSPoller();
-		if(p != null) {
-			p.setLedstarPixel(this, ldcPotBase, pixelCurrentLow,
-				pixelCurrentHigh, badPixelLimit);
-		}
-	}
-
-	/** LDC pot base (Ledstar-specific value) */
-	protected transient int ldcPotBase;
-
-	/** Set the LDC pot base */
-	public void setLdcPotBase(int base, boolean send) {
-		if(base == ldcPotBase)
-			return;
-		ldcPotBase = base;
-		if(send)
-			startLedstarPixel();
-	}
-
-	/** Set the LDC pot base */
-	public void setLdcPotBase(int base) {
-		setLdcPotBase(base, true);
-	}
-
-	/** Get the LDC pot base */
-	public int getLdcPotBase() {
-		return ldcPotBase;
-	}
-
-	/** Pixel low current threshold (Ledstar-specific value) */
-	protected transient int pixelCurrentLow;
-
-	/** Set the pixel low curent threshold */
-	public void setPixelCurrentLow(int low, boolean send) {
-		if(low == pixelCurrentLow)
-			return;
-		pixelCurrentLow = low;
-		if(send)
-			startLedstarPixel();
-	}
-
-	/** Set the pixel low curent threshold */
-	public void setPixelCurrentLow(int low) {
-		setPixelCurrentLow(low, true);
-	}
-
-	/** Get the pixel low current threshold */
-	public int getPixelCurrentLow() {
-		return pixelCurrentLow;
-	}
-
-	/** Pixel high current threshold (Ledstar-specific value) */
-	protected transient int pixelCurrentHigh;
-
-	/** Set the pixel high curent threshold */
-	public void setPixelCurrentHigh(int high, boolean send) {
-		if(high == pixelCurrentHigh)
-			return;
-		pixelCurrentHigh = high;
-		if(send)
-			startLedstarPixel();
-	}
-
-	/** Set the pixel high curent threshold */
-	public void setPixelCurrentHigh(int high) {
-		setPixelCurrentHigh(high, true);
-	}
-
-	/** Get the pixel high current threshold */
-	public int getPixelCurrentHigh() {
-		return pixelCurrentHigh;
-	}
-
-	/** Bad pixel limit (Ledstar-specific value) */
-	protected transient int badPixelLimit;
-
-	/** Set the bad pixel limit */
-	public void setBadPixelLimit(int bad, boolean send) {
-		if(bad == badPixelLimit)
-			return;
-		badPixelLimit = bad;
-		if(send)
-			startLedstarPixel();
-	}
-
-	/** Set the bad pixel limit */
-	public void setBadPixelLimit(int bad) {
-		setBadPixelLimit(bad, true);
-	}
-
-	/** Get the bad pixel limit */
-	public int getBadPixelLimit() {
-		return badPixelLimit;
-	}
-
-	/** toString */
-	public String toString() {
-		return id;
-	}
-
-	/** toStringDebug */
-	public String toStringDebug() {
-		return "DMS="+(this.id==null?"null":id)+
-		", message="+(message==null?"null":message.toStringDebug());
-	}
-
-	/** Lookup a station */
-	static protected StationImpl lookupStation(String sid) {
-		return (StationImpl)namespace.lookupObject(Station.SONAR_TYPE,
-			sid);
-	}
-
-	/** Get the preferred system font name */
-	public String getPreferredFontName() {
-		return SystemAttributeHelper.preferredFontName();
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ public class InitializeCanoga extends ControllerOperation {
 	public InitializeCanoga(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c, c.toString());
 		restart = r;
-		controller.setError("OK");
 	}
 
 	/** Begin the sensor initialization operation */
@@ -75,8 +74,7 @@ public class InitializeCanoga extends ControllerOperation {
 		if(success) {
 			controller.setVersion(version.getValue() + " (" +
 				serial_number.getValue() + ")");
-		} else
-			controller.setError(null);
+		}
 		super.cleanup();
 	}
 }

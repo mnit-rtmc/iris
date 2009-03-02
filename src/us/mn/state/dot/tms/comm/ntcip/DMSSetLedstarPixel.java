@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,12 +38,12 @@ public class DMSSetLedstarPixel extends DMSOperation {
 	protected final LedBadPixelLimit badLimit;
 
 	/** Create a new DMS set pixel threshold operation */
-	public DMSSetLedstarPixel(DMSImpl d, int b, int l, int h, int bad) {
+	public DMSSetLedstarPixel(DMSImpl d) {
 		super(COMMAND, d);
-		potBase = new LedLdcPotBase(b);
-		currentLow = new LedPixelLow(l);
-		currentHigh = new LedPixelHigh(h);
-		badLimit = new LedBadPixelLimit(bad);
+		potBase = new LedLdcPotBase(d.getLdcPotBase());
+		currentLow = new LedPixelLow(d.getPixelCurrentLow());
+		currentHigh = new LedPixelHigh(d.getPixelCurrentHigh());
+		badLimit = new LedBadPixelLimit(0);
 	}
 
 	/** Create the first real phase of the operation */

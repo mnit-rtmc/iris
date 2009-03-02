@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,9 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.StatusTable;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -26,11 +27,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  * @author Douglas Lau
  */
 public class DMSQueryStatus extends DMSOperation {
-
-	/** Skyline power supply status table columns */
-	static protected final String[] SKYLINE_POWER_COLUMNS = {
-		"Power Supply", "Status"
-	};
 
 	/** Short Error status */
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();
@@ -62,16 +58,10 @@ public class DMSQueryStatus extends DMSOperation {
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
 			mess.getRequest();
-			dms.setPhotocellLevel(p_level.getInteger());
-			dms.setBrightnessLevel(b_level.getInteger());
-			dms.setLightOutput(light.getInteger());
-			if(control.isManual())
-				dms.setManualBrightness(true);
-			else {
-				dms.setManualBrightness(false);
-				if(!control.isPhotocell())
-					DMS_LOG.log(dms.getId() + ": "+control);
-			}
+			DMS_LOG.log(dms.getName() + ": " + p_level);
+			DMS_LOG.log(dms.getName() + ": " + b_level);
+			DMS_LOG.log(dms.getName() + ": " + control);
+			dms.setLightOutput(light.getPercent());
 			return new ControllerTemperature();
 		}
 	}
@@ -135,15 +125,9 @@ public class DMSQueryStatus extends DMSOperation {
 		/** Query the DMS failure status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(shortError);
-//			DmsStatDoorOpen door = new DmsStatDoorOpen();
-//			mess.add(door);
-			PixelFailureTableNumRows rows =
-				new PixelFailureTableNumRows();
-			mess.add(rows);
 			mess.getRequest();
-			dms.setErrorStatus(shortError);
-//			DMS_LOG.log(dms.getId() + ": " + door);
-			dms.setPixelFailureCount(rows.getInteger());
+			if(shortError.getInteger() != 0)
+				errorStatus = shortError.getValue();
 			return new MoreFailures();
 		}
 	}
@@ -159,26 +143,23 @@ public class DMSQueryStatus extends DMSOperation {
 				mess.add(l_off);
 				mess.add(l_on);
 			}
-			FanFailures fan = new FanFailures();
-			if(shortError.checkError(ShortErrorStatus.FAN))
-				mess.add(fan);
 			ControllerErrorStatus con = new ControllerErrorStatus();
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
 			if(shortError.checkError(ShortErrorStatus.LAMP |
-				ShortErrorStatus.FAN |
 				ShortErrorStatus.CONTROLLER))
 			{
 				mess.getRequest();
 			}
-			String lamp = l_off.getValue();
-			if(lamp.equals("OK"))
-				lamp = l_on.getValue();
-			else if(!l_on.getValue().equals("OK"))
-				lamp += ", " + l_on.getValue();
-			dms.setLampStatus(lamp);
-			dms.setFanStatus(fan.getValue());
-			DMS_LOG.log(dms.getId() + ": " + con);
+			if(shortError.checkError(ShortErrorStatus.LAMP)) {
+		 		String[] lamp = new String[2];
+				lamp[DMS.STUCK_OFF_BITMAP] =
+					Base64.encode(l_off.getOctetString());
+				lamp[DMS.STUCK_ON_BITMAP] =
+					Base64.encode(l_on.getOctetString());
+				dms.setLampStatus(lamp);
+			}
+			DMS_LOG.log(dms.getName() + ": " + con);
 			return new LedstarStatus();
 		}
 	}
@@ -197,14 +178,16 @@ public class DMSQueryStatus extends DMSOperation {
 			mess.add(low);
 			mess.add(high);
 			mess.add(bad);
-			try { mess.getRequest(); }
+			try {
+				mess.getRequest();
+			}
 			catch(SNMP.Message.NoSuchName e) {
 				return new SkylineStatus();
 			}
-			dms.setLdcPotBase(potBase.getInteger(), false);
-			dms.setPixelCurrentLow(low.getInteger(), false);
-			dms.setPixelCurrentHigh(high.getInteger(), false);
-			dms.setBadPixelLimit(bad.getInteger(), false);
+			dms.setLdcPotBase(potBase.getInteger());
+			dms.setPixelCurrentLow(low.getInteger());
+			dms.setPixelCurrentHigh(high.getInteger());
+			DMS_LOG.log(dms.getName() + ": " + bad);
 			return null;
 		}
 	}
@@ -214,47 +197,22 @@ public class DMSQueryStatus extends DMSOperation {
 
 		/** Query Skyline-specific status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			IllumPowerStatus power = new IllumPowerStatus();
-			mess.add(power);
 			SignFaceHeatStatus heat = new SignFaceHeatStatus();
 			mess.add(heat);
+			IllumPowerStatus power = new IllumPowerStatus();
+			mess.add(power);
 			SensorFailures sensor = new SensorFailures();
 			mess.add(sensor);
 			try {
 				mess.getRequest();
-				StatusTable t = createStatusTable(power);
-				dms.setPowerSupplyTable(t);
 				dms.setHeatTapeStatus(heat.getValue());
-				DMS_LOG.log(dms.getId() + ": " + sensor);
+				dms.setPowerStatus(power.getBitmaps());
+				DMS_LOG.log(dms.getName() + ": " + sensor);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Ignore; only Skyline has these objects
 			}
 			return null;
 		}
-
-		/** Create a power supply status table */
-		protected StatusTable createStatusTable(IllumPowerStatus p) {
-			StatusTable t = new StatusTable(SKYLINE_POWER_COLUMNS);
-			String[] s = p.getStatus();
-			int[] b = p.getBackground();
-			for(int i = 0; i < s.length; i++) {
-				String[] rs = new String[2];
-				int[] rb = new int[2];
-				rs[0] = "#" + (i + 1);
-				rs[1] = s[i];
-				rb[0] = 0xFFFFFF;
-				rb[1] = b[i];
-				t.addRow(rs, rb);
-			}
-			return t;
-		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(success)
-			dms.notifyUpdate();
-		super.cleanup();
 	}
 }

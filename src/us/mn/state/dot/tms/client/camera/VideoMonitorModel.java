@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Video Monitor"));
+		m.addColumn(createColumn(COL_NAME, 160, "Video Monitor"));
 		m.addColumn(createColumn(COL_DESCRIPTION, 300, "Description"));
 		m.addColumn(createColumn(COL_RESTRICTED, 120, "Restricted"));
 		return m;

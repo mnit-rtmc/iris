@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class SystemAttributeHelper {
 	static public SystemAttribute get(String aname) {
 		if(aname == null)
 			return null;
-		if(aname.length() > TrafficDeviceAttribute.MAXLEN_ANAME)
+		if(aname.length() > SystemAttribute.MAXLEN_ANAME)
 			return null;
 		return lookup(aname);
 	}
@@ -237,6 +237,69 @@ public class SystemAttributeHelper {
 		return (secs < MINIMUM ? MINIMUM : secs);
 	}
 
+	/** Get the DMS maximum number of text lines */
+	static public int getDmsMaxLines() {
+		final int MINIMUM = 1;
+		final int DEFAULT = 3;
+		final int MAXIMUM = 12;
+		int v = getValueInt(SystemAttribute.DMS_MAX_LINES, DEFAULT);
+		return getBoundedInt(v, MINIMUM, MAXIMUM);
+	}
+
+	/** Get an integer value bounded by minimum and maximum values */
+	static protected int getBoundedInt(int i, int min, int max) {
+		return Math.max(min, Math.min(i, max));
+	}
+
+	/** Get the DMS pixel test timeout (seconds) */
+	static public int getDmsPixelTestTimeout() {
+		return getValueInt(SystemAttribute.DMS_PIXEL_TEST_TIMEOUT, 30);
+	}
+
+	/** Get the DMS lamp test timeout (seconds) */
+	static public int getDmsLampTestTimeout() {
+		return getValueInt(SystemAttribute.DMS_LAMP_TEST_TIMEOUT, 30);
+	}
+
+	/** Get the DMS pixel off limit (in a message) */
+	static public int getDmsPixelOffLimit() {
+		return getValueInt(SystemAttribute.DMS_PIXEL_OFF_LIMIT, 2);
+	}
+
+	/** Get the DMS pixel on limit (near a message) */
+	static public int getDmsPixelOnLimit() {
+		return getValueInt(SystemAttribute.DMS_PIXEL_ON_LIMIT, 1);
+	}
+
+	/** Get the DMS high temperature cutoff (degress Celsius) */
+	static public int getDmsHighTempCutoff() {
+		return getValueInt(SystemAttribute.DMS_HIGH_TEMP_CUTOFF, 60);
+	}
+
+	/** Get the DMS page on time (seconds) */
+	static public float getDmsPageOnSecs() {
+		return getValueFloat(SystemAttribute.DMS_PAGE_ON_SECS, 2.0f);
+	}
+
+	/** Get the DMS page off time (seconds) */
+	static public float getDmsPageOffSecs() {
+		return getValueFloat(SystemAttribute.DMS_PAGE_OFF_SECS, 0.0f);
+	}
+
+	/** Get the DMS default line justification */
+	static public int getDmsDefaultJustificationLine() {
+		return getValueInt(
+		       SystemAttribute.DMS_DEFAULT_JUSTIFICATION_LINE,
+		       MultiString.JustificationLine.CENTER.ordinal());
+	}
+
+	/** Get the DMS default page justification */
+	static public int getDmsDefaultJustificationPage() {
+		return getValueInt(
+		       SystemAttribute.DMS_DEFAULT_JUSTIFICATION_PAGE,
+		       MultiString.JustificationPage.TOP.ordinal());
+	}
+
 	/** Get the meter green time (seconds) */
 	static public float getMeterGreenSecs() {
 		return getValueFloat(SystemAttribute.METER_GREEN_SECS, 1.3f);
@@ -252,14 +315,23 @@ public class SystemAttributeHelper {
 		return getValueFloat(SystemAttribute.METER_MIN_RED_SECS, 0.1f);
 	}
 
-	/** Get the DMS page on time (seconds) */
-	static public float getDmsPageOnSecs() {
-		return getValueFloat(SystemAttribute.DMS_PAGE_ON_SECS, 2.0f);
+	/** Get the meter maximum release rate (vehicles per hour) */
+	static public int getMeterMaxRelease() {
+		float cycle = getMeterGreenSecs() + getMeterYellowSecs() +
+			getMeterMinRedSecs();
+		return (int)(Interval.HOUR / cycle);
 	}
 
-	/** Get the DMS page off time (seconds) */
-	static public float getDmsPageOffSecs() {
-		return getValueFloat(SystemAttribute.DMS_PAGE_OFF_SECS, 0.0f);
+	/** Get the meter maximum red time (seconds) */
+	static public float getMeterMaxRedSecs() {
+		return getValueFloat(SystemAttribute.METER_MAX_RED_SECS, 13f);
+	}
+
+	/** Get the meter minimum release rate (vehicles per hour) */
+	static public int getMeterMinRelease() {
+		float cycle = getMeterGreenSecs() + getMeterYellowSecs() +
+			getMeterMaxRedSecs();
+		return (int)(Interval.HOUR / cycle);
 	}
 
 	/** Get the incident ring 1 miles */
@@ -280,6 +352,21 @@ public class SystemAttributeHelper {
 	/** Get the incident ring 4 miles */
 	static public int getIncidentRing4Miles() {
 		return getValueInt(SystemAttribute.INCIDENT_RING_4_MILES, 0);
+	}
+
+	/** Get the minimum overall speed for travel times */
+	static public int getTravelTimeMinMPH() {
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MIN_MPH, 15);
+	}
+
+	/** Get the maximum number of legs for travel time routes */
+	static public int getTravelTimeMaxLegs() {
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MAX_LEGS, 8);
+	}
+
+	/** Get the maximum distance of a travel time route */
+	static public int getTravelTimeMaxMiles() {
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MAX_MILES);
 	}
 
 	/** Get the TESLA host name (and port) */
@@ -351,18 +438,6 @@ public class SystemAttributeHelper {
 		}
 	}
 
-	/** Return true to use the DMSDispatcher get status button */
-	public static boolean useGetStatusBtn() {
-		return getValueBoolean(
-			SystemAttribute.DMSDISPATCHER_GETSTATUS_BTN, false);
-	}
-
-	/** Return true to display onscreen PTZ controls in CameraViewer */
-	public static boolean useOnScrnPTZ() {
-		return getValueBoolean(
-			SystemAttribute.CAMERAVIEWER_ONSCRN_PTZCTRLS, false);
-	}
-
 	/** Return number of CameraViewer PTZ preset buttons */
 	public static int numPresetBtns() {
 		final int MIN = 0;
@@ -375,9 +450,9 @@ public class SystemAttributeHelper {
 		return np;
 	}
 
-	/** Return the preferred font name */
-	static public String preferredFontName() {
-		return getValue(SystemAttribute.DMS_PREFERRED_FONT, "");
+	/** Get the minimum available pages for DMS messages */
+	static public int getDmsMessageMinPages() {
+		return getValueInt(SystemAttribute.DMS_MESSAGE_MIN_PAGES, 1);
 	}
 
 	/** Return number of video frames before stream is stopped */
@@ -390,9 +465,67 @@ public class SystemAttributeHelper {
 		return nf;
 	}
 
-	/** Return true to use the AWS checkbox in DMSDispatcher */
-	public static boolean useAwsCheckBox() {
-		return getValueBoolean(SystemAttribute.DMSDISPATCHER_AWS_CKBOX,
+	/** Is Automated Warning System enabled? */
+	static public boolean isAwsEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_AWS_ENABLE, false);
+	}
+
+	/** Is DMS status stuff enabled? */
+	static public boolean isDmsStatusEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_STATUS_ENABLE,
+			false);
+	}
+
+	/** Is DMS duration selection enabled? */
+	static public boolean isDmsDurationEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_DURATION_ENABLE,
+			true);
+	}
+
+	/** Is DMS font selection enabled? */
+	static public boolean isDmsFontSelectionEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_FONT_SELECTION_ENABLE, false);
+	}
+
+	/** Is DMS message blank lines enabled? */
+	static public boolean isDmsMessageBlankLineEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_MESSAGE_BLANK_LINE_ENABLE, true);
+	}
+
+	/** Is DMS pixel testing enabled? */
+	static public boolean isDmsPixelStatusEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_PIXEL_STATUS_ENABLE, true);
+	}
+
+	/** Is DMS brightness tab enabled? */
+	static public boolean isDmsBrightnessEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_BRIGHTNESS_ENABLE, true);
+	}
+
+	/** Is DMS manufacturer-specific tab enabled? */
+	static public boolean isDmsManufacturerEnabled() {
+		return getValueBoolean(
+			SystemAttribute.DMS_MANUFACTURER_ENABLE, true);
+	}
+
+	/** Is DMS reset enabled? */
+	static public boolean isDmsResetEnabled() {
+		return getValueBoolean(SystemAttribute.DMS_RESET_ENABLE, false);
+	}
+
+	/** Is Camera PTZ panel enabled? */
+	static public boolean isCameraPTZPanelEnabled() {
+		return getValueBoolean(SystemAttribute.CAMERA_PTZ_PANEL_ENABLE,
+			false);
+	}
+
+	/** Is Fahrenheit temperature enabled? */
+	static public boolean isTempFahrenheitEnabled() {
+		return getValueBoolean(SystemAttribute.TEMP_FAHRENHEIT_ENABLE,
 			false);
 	}
 }

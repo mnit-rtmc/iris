@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2008  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,23 +15,16 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import java.util.Random;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
-import us.mn.state.dot.tms.comm.ChecksumException;
-import us.mn.state.dot.tms.comm.DeviceOperation;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
-import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.comm.ChecksumException;
+import us.mn.state.dot.tms.comm.Device2Operation;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.Random;
 
 /**
  * Operation to be performed on a dynamic message sign
@@ -39,10 +32,19 @@ import java.util.Random;
  * @author Douglas Lau
  * @author Michael Darter
  */
-abstract public class OpDms extends DeviceOperation {
+abstract public class OpDms extends Device2Operation {
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
+
+	/** Bitmap width for dmslite protocol */
+	static protected final int BM_WIDTH = 96;
+
+	/** Bitmap height for dmslite protocol */
+	static protected final int BM_HEIGHT = 25;
+
+	/** Bitmap page length for dmslite protocol */
+	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
 
 	/** DMS to operate */
 	protected final DMSImpl m_dms;
@@ -67,18 +69,18 @@ abstract public class OpDms extends DeviceOperation {
 	* operations that fail.
 	*/
 	public void handleException(IOException e) {
-		if (e instanceof ChecksumException) {
-		    ChecksumException ce = (ChecksumException) e;
-		    DMS_LOG.log(m_dms.getId() + " (" + toString() + "), " + ce.getScannedData());
+		if(e instanceof ChecksumException) {
+			ChecksumException ce = (ChecksumException)e;
+			DMS_LOG.log(m_dms.getName() + " (" + toString() +
+				"), " + ce.getScannedData());
 		}
-
 		super.handleException(e);
 	}
 
 	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successful */
 	public void cleanup() {
 		//System.err.println("dmslite.OpDms.cleanup() called, success="+success);
-		m_dms.setReset(success);
+		m_dms.setConfigure(success);
 		super.cleanup();
 	}
 
@@ -111,9 +113,8 @@ abstract public class OpDms extends DeviceOperation {
 	  * handle a failed operation.
 	  * @return true if the operation should be retried else false.
 	  */
-	protected boolean flagFailureShouldRetry(String errmsg)
-	{
-	 	String msg=m_dms.getId()+" error: "+errmsg;
+	protected boolean flagFailureShouldRetry(String errmsg) {
+	 	String msg = m_dms.getName() + " error: " + errmsg;
 
 		// trigger error handling, changes status if necessary
 		handleException(new IOException(msg));
@@ -128,12 +129,10 @@ abstract public class OpDms extends DeviceOperation {
 	}
 
 	/* reset error counter for DMS */
-	protected void resetErrorCounter()
-	{
-	 	String id=m_dms.getId();
+	protected void resetErrorCounter() {
+	 	String id = m_dms.getName();
 		if(controller != null) {
 			controller.resetErrorCounter(id);
-			//System.err.println("OpQueryDms.resetErrorCounter(): reset comm counter");
 		}
 	}
 
@@ -145,43 +144,20 @@ abstract public class OpDms extends DeviceOperation {
 		return new Long(System.currentTimeMillis()+m_rand.nextInt()).toString();
 	}
 
-	/** create a blank message */
-	public static SignMessage createBlankMsg(DMSImpl dms,String owner)
-	{
-		MultiString multi = new MultiString();
-		BitmapGraphic bbm = new BitmapGraphic(
-	    		dms.getSignWidthPixels(), 
-			dms.getSignHeightPixels());
-		SignMessage sm = new SignMessage(owner,multi,bbm,0);
-		return(sm);
-	}
-
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
 		m_dms.setUserNote(buildUserNote(m));
 	}
 
-	/** build user note */
+	/** Build user note */
 	public String buildUserNote(Message m) {
-		SignMessage sm=m_dms.getMessage();
-		StringBuilder note=new StringBuilder();
-		String deploytime="null";
-		if (sm!=null && sm.getDeployTime()!=null)
-			deploytime=sm.getDeployTime().toString();
-		note.append("Last operation at "+STime.getCurTimeShortString());
-		String delta=SString.doubleToString((((double)m.getCompletionTimeMS())/1000),2);
+		StringBuilder note = new StringBuilder();
+		note.append("Last operation at " +
+			STime.getCurTimeShortString());
+		String delta = SString.doubleToString((
+			((double)m.getCompletionTimeMS()) / 1000), 2);
 		note.append(" (").append(delta).append(" secs)");
-		//note.append(", last message deployed: "+deploytime);
 		note.append(".");
 		return note.toString();
 	}
-
-	/** set dms status */
-	public void setDmsStatus(String s) {
-		final int MAXLEN = 64;
-		s = SString.truncate(s,MAXLEN);
-		m_dms.setStatus(getOpName() + ": " + s);
-	}
-
 }
-

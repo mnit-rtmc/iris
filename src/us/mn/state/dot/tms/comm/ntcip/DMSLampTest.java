@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,10 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -42,10 +45,20 @@ public class DMSLampTest extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			LampTestActivation test = new LampTestActivation();
 			mess.add(test);
-			mess.getRequest();
+			try {
+				mess.getRequest();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				DMS_LOG.log(dms.getName() + ": " +
+					e.getMessage());
+				return null;
+			}
 			if(test.getInteger() == LampTestActivation.NO_TEST)
 				return new ActivateLampTest();
-			throw new NtcipException(test.toString());
+			else {
+				DMS_LOG.log(dms.getName() + ": " + test);
+				return null;
+			}
 		}
 	}
 
@@ -63,22 +76,25 @@ public class DMSLampTest extends DMSOperation {
 	/** Phase to check for test completion */
 	protected class CheckTestCompletion extends Phase {
 
-		/** Maximum number of checks for test completion */
-		static protected final int MAX_CHECKS = 100;
+		/** Lamp test activation */
+		protected final LampTestActivation test =
+			new LampTestActivation();
 
-		/** Count of checks made for test completion */
-		protected int checks = 0;
+		/** Time to stop checking if the test has completed */
+		protected final long expire = System.currentTimeMillis() + 
+			SystemAttributeHelper.getDmsLampTestTimeout() * 1000;
 
 		/** Check for test completion */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			LampTestActivation test = new LampTestActivation();
 			mess.add(test);
 			mess.getRequest();
 			if(test.getInteger() == LampTestActivation.NO_TEST)
 				return new QueryLampStatus();
-			if(++checks > MAX_CHECKS)
-				throw new NtcipException(test.toString());
-			else
+			if(System.currentTimeMillis() > expire) {
+				DMS_LOG.log(dms.getName() + ": lamp test " +
+					"timeout expired -- giving up");
+				return null;
+			} else
 				return this;
 		}
 	}
@@ -93,13 +109,19 @@ public class DMSLampTest extends DMSOperation {
 			mess.add(l_off);
 			mess.add(l_on);
 			mess.getRequest();
-			String lamp = l_off.getValue();
-			if(lamp.equals("OK"))
-				lamp = l_on.getValue();
-			else if(!l_on.getValue().equals("OK"))
-				lamp += ", " + l_on.getValue();
-			dms.setLampStatus(lamp);
+			dms.setLampStatus(createFailureBitmaps(l_off, l_on));
 			return null;
 		}
+	}
+
+	/** Encode failure bitmaps to Base64 */
+	protected String[] createFailureBitmaps(LampFailureStuckOff l_off,
+		LampFailureStuckOn l_on)
+	{
+		String[] b64 = new String[2];
+		b64[DMS.STUCK_OFF_BITMAP] =
+			Base64.encode(l_off.getOctetString());
+		b64[DMS.STUCK_ON_BITMAP] = Base64.encode(l_on.getOctetString());
+		return b64;
 	}
 }

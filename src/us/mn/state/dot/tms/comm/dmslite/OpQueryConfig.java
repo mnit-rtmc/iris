@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,11 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.SString;
-
-import java.io.IOException;
 
 /**
  * Operation to query the configuration of a DMS.
@@ -47,15 +46,6 @@ public class OpQueryConfig extends OpDms
 	/** Create the first phase of the operation */
 	protected Phase phaseOne() {
 		return new PhaseGetConfig();
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		if(success) {
-			dms.notifyUpdate();
-		}
-
-		super.cleanup();
 	}
 
 	/** Phase to query the dms config */
@@ -197,37 +187,33 @@ public class OpQueryConfig extends OpDms
 				dms.setSignAccess(signAccess);    // wizard, modem
 				dms.setMake(make);
 				dms.setVersion(version);
-				dms.setSignMatrixType(type);
+				dms.setDmsType(type);
 				dms.setHorizontalBorder(horizBorder);    // in mm
 				dms.setVerticalBorder(vertBorder);    // in mm
 				dms.setHorizontalPitch(horizPitch);
 				dms.setVerticalPitch(vertPitch);
 
 				// values not set for these
-				dms.setSignLegend("sign legend");
+				dms.setLegend("sign legend");
 				dms.setBeaconType("beacon type");
-				dms.setSignTechnology("sign technology");
+				dms.setTechnology("sign technology");
 
 				// note, these must be defined for comboboxes
 				// in the "Compose message" control to appear
-				dms.setSignHeight(signHeight);    // mm
-				dms.setSignWidth(signWidth);      // mm
-				dms.setCharacterHeightPixels(
-				    characterHeightPixels);
-				dms.setCharacterWidthPixels(
-				    characterWidthPixels);
-				dms.setSignHeightPixels(signHeightPixels);
-				dms.setSignWidthPixels(signWidthPixels);
-
-				// update message graphic because sign params may have changed
-				// dms.updateMessageGraphic(); //FIXME: enable this call?, but should not render from text
+				dms.setFaceHeight(signHeight);    // mm
+				dms.setFaceWidth(signWidth);      // mm
+				dms.setHeightPixels(signHeightPixels);
+				dms.setWidthPixels(signWidthPixels);
+				// NOTE: these must be set last
+				dms.setCharHeightPixels(characterHeightPixels);
+				dms.setCharWidthPixels(characterWidthPixels);
 
 			// failure
 			} else {
 				System.err.println(
 				    "OpQueryConfig: response from cmsserver received, ignored because Xml valid field is false, errmsg="
 				    + errmsg);
-				setDmsStatus(errmsg);
+				errorStatus = errmsg;
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {

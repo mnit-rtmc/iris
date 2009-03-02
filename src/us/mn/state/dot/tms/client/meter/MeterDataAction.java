@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,9 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
 import us.mn.state.dot.data.DataFactory;
+import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.client.sonar.ProxyAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
 
 /**
  * Action to display a plotlet containing ramp meter data
@@ -25,10 +26,7 @@ import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class MeterDataAction extends TrafficDeviceAction {
-
-	/** Ramp meter to display data */
-	protected final MeterProxy proxy;
+public class MeterDataAction extends ProxyAction<RampMeter> {
 
 	/** Desktop to put the plotlet */
 	protected final SmartDesktop desktop;
@@ -37,9 +35,8 @@ public class MeterDataAction extends TrafficDeviceAction {
 	protected final DataFactory factory;
 
 	/** Create a new meter data action */
-	public MeterDataAction(MeterProxy p, SmartDesktop d, DataFactory f) {
+	public MeterDataAction(RampMeter p, SmartDesktop d, DataFactory f) {
 		super(p);
-		proxy = p;
 		desktop = d;
 		factory = f;
 		putValue(Action.NAME, "Data");

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,61 +14,49 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Color;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import javax.swing.SwingConstants;
+import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 
 /**
- * This class renders DMSs in a JList within the DmsStatusSummary.
+ * This class renders DMSs in a JList within the DMS StyleSummary.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
-	/** Title bar color when not selected */
-	static protected final Color TITLE_COLOR = new Color(218, 218, 239);
+	/** Test if a message is deployed */
+	static public boolean isDeployed(SignMessage m) {
+		if(m != null) {
+			MultiString ms = new MultiString(m.getMulti());
+			return !ms.isBlank();
+		} else
+			return false;
+	}
 
-	/** Title bar color when selected */
-	static protected final Color SELECTED_COLOR = Color.YELLOW;
+	/** Sign pixel panel to display sign message */
+	protected final SignPixelPanel pixelPnl = new SignPixelPanel(false);
 
-	/** Non-expiring message time */
-	static protected final String NO_EXPIRE = "E-XX:XX";
-
-	/** Formatter for displaying the hour and minute */
-	static protected final SimpleDateFormat HOUR_MINUTE =
-		new SimpleDateFormat("HH:mm");
-
-	/** Number of message lines to render */
-	static protected final int MESSAGE_LINES = 3;
-
-	/** Font for rendering */
-	static protected final Font FONT = new Font("Dialog", Font.BOLD, 12);
-
-	/** The label that displays the camera id */
-	private final JLabel lblCamera = new JLabel();
-
-	/** The array of labels that display the lines of the sign */
-	protected final JLabel[] lblLine = new JLabel[MESSAGE_LINES];
-
-	/** The label that displays the time the sign was deployed */
-	private final JLabel lblDeployed = new JLabel();
-
-	/** The label that displays the time the current message will expire */
-	private final JLabel lblExpires = new JLabel();
+	/** List cell renderer (needed for colors) */
+	protected final DefaultListCellRenderer cell =
+		new DefaultListCellRenderer();
 
 	/** Title bar */
 	protected final JPanel title = new JPanel();
@@ -87,107 +75,139 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Create a new DMS cell renderer */
 	public DmsCellRenderer() {
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		super(new BorderLayout());
 		setBorder(BorderFactory.createCompoundBorder(
-			BorderFactory.createEmptyBorder(2, 2, 2, 2),
-			BorderFactory.createRaisedBevelBorder()));
-		JPanel pnlPage = new JPanel(new GridLayout(lblLine.length, 1));
-		pnlPage.setBackground(Color.BLACK);
-		pnlPage.setBorder(BorderFactory.createLineBorder(
-			Color.BLACK, 2));
-		for(int i = 0; i < lblLine.length; i++) {
-			lblLine[i] = new DmsLineLabel();
-			pnlPage.add(lblLine[i]);
-		}
-		lblID.setFont(FONT);
-		lblUser.setFont(FONT);
+		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
+		          BorderFactory.createRaisedBevelBorder()));
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(lblID);
 		title.add(Box.createGlue());
 		title.add(lblUser);
 		location.add(lblLocation);
-		lblLocation.setFont(FONT);
 		location.add(Box.createGlue());
+		add(title, BorderLayout.NORTH);
+		add(pixelPnl, BorderLayout.CENTER);
+		add(location, BorderLayout.SOUTH);
+		setPreferredSize(new Dimension(190, 92));
+	}
 
-		Box box1 = Box.createHorizontalBox();
-		box1.add(lblDeployed);
-		lblDeployed.setFont(FONT);
-		box1.add(Box.createGlue());
-		box1.add(Box.createHorizontalStrut(8));
-		box1.add(lblExpires);
-		lblExpires.setFont(FONT);
-		box1.add(Box.createHorizontalStrut(8));
-		box1.add(Box.createGlue());
-		box1.add(lblCamera);
-		lblCamera.setFont(FONT);
-
-		add(title);
-		add(location);
-		add(pnlPage);
-		add(box1);
+	/** Check if the background is opaque */
+	public boolean isOpaque() {
+		return true;
 	}
 
 	/** Get a component configured to render a cell of the list */
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		if(value instanceof DMSProxy)
-			setDms((DMSProxy)value);
-		if(isSelected)
-			title.setBackground(SELECTED_COLOR);
-		else
-			title.setBackground(TITLE_COLOR);
+		if(value instanceof DMS)
+			setDms((DMS)value);
+		if(isSelected) {
+			Component temp = cell.getListCellRendererComponent(list,
+				value, index, isSelected, cellHasFocus);
+			title.setBackground(temp.getBackground());
+		} else
+			title.setBackground(lblID.getBackground());
 		return this;
 	}
 
 	/** Prune the owner string to the first dot */
-	static protected String formatOwner(String o) {
-		int i = o.indexOf('.');
-		if(i > -1)
-			return o.substring(0, i);
-		else
-			return o;
-	}
-
-	/** Format the message deployed time */
-	static protected String formatDeployed(SignMessage m) {
-		return "D-" + HOUR_MINUTE.format(m.getDeployTime());
-	}
-
-	/** Format the message expriation */
-	static protected String formatExpiration(SignMessage m) {
-		int duration = m.getDuration();
-		if(duration <= 0 || duration >= 65535)
-			return NO_EXPIRE;
-		Calendar c = Calendar.getInstance();
-		c.setTime(m.getDeployTime());
-		c.add(Calendar.MINUTE, duration);
-		return "E-" + HOUR_MINUTE.format(c.getTime());
+	static protected String formatOwner(User owner) {
+		if(owner != null) {
+			String o = owner.getName();
+			int i = o.indexOf('.');
+			if(i >= 0)
+				return o.substring(0, i);
+			else
+				return o;
+		} else
+			return "";
 	}
 
 	/** Set the DMS to be displayed */
-	protected void setDms(DMSProxy proxy) {
-		lblID.setText(proxy.getId());
-		lblLocation.setText(proxy.getDescription());
-		lblCamera.setText(proxy.getCameraId());
-		SignMessage message = proxy.getMessage();
-		if(message != null && !message.isBlank()) {
-			lblUser.setText(formatOwner(message.getOwner()));
-			lblDeployed.setText(formatDeployed(message));
-			lblExpires.setText(formatExpiration(message));
-		} else {
-			lblUser.setText("");
-			lblDeployed.setText("");
-			lblExpires.setText("");
+	protected void setDms(DMS dms) {
+		lblID.setText(dms.getName());
+		lblLocation.setText(GeoLocHelper.getDescription(
+			dms.getGeoLoc()));
+		setDimensions(dms);
+		pixelPnl.setGraphic(getPageOne(dms));
+		lblUser.setText(formatOwner(dms.getOwnerCurrent()));
+	}
+
+	/** Set the dimensions of the pixel panel */
+	protected void setDimensions(DMS dms) {
+		setPhysicalDimensions(dms);
+		setLogicalDimensions(dms);
+		pixelPnl.verifyDimensions();
+	}
+
+	/** Set the physical dimensions of the pixel panel */
+	protected void setPhysicalDimensions(DMS dms) {
+		Integer w = dms.getFaceWidth();
+		Integer h = dms.getFaceHeight();
+		Integer hp = dms.getHorizontalPitch();
+		Integer vp = dms.getVerticalPitch();
+		Integer hb = dms.getHorizontalBorder();
+		Integer vb = dms.getVerticalBorder();
+		if(w != null && h != null && hp != null && vp != null &&
+		   hb != null && vb != null)
+		{
+			pixelPnl.setPhysicalDimensions(w, h, hb, vb, hp, vp);
+		} else
+			pixelPnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+	}
+
+	/** Set the logical dimensions of the pixel panel */
+	protected void setLogicalDimensions(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(wp != null && hp != null && cw != null && ch != null)
+			pixelPnl.setLogicalDimensions(wp, hp, cw, ch);
+		else
+			pixelPnl.setLogicalDimensions(0, 0, 0, 0);
+	}
+
+	/** Get the bitmap graphic for page one */
+	protected BitmapGraphic getPageOne(DMS dms) {
+		if(dms == null)
+			return null;
+		SignMessage m = dms.getMessageCurrent();
+		if(m == null)
+			return null;
+		byte[] bmaps = decodeBitmaps(m.getBitmaps());
+		if(bmaps == null || bmaps.length == 0)
+			return null;
+		BitmapGraphic bg = createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.getBitmap().length;
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		byte[] b = new byte[blen];
+		System.arraycopy(bmaps, 0, b, 0, blen);
+		bg.setBitmap(b);
+		return bg;
+	}
+
+	/** Decode the bitmaps */
+	protected byte[] decodeBitmaps(String bitmaps) {
+		try {
+			return Base64.decode(bitmaps);
 		}
-		String[] lines = proxy.getLines();
-		for(int i = 0; i < lblLine.length; i++) {
-			if(i < lines.length)
-				lblLine[i].setText(lines[i]);
-			else
-				lblLine[i].setText(" ");
+		catch(IOException e) {
+			return null;
 		}
-		// FIXME: set preferred size based on DMS
-		setPreferredSize(new Dimension(186, 102));
+	}
+
+	/** Create a bitmap graphic */
+	protected BitmapGraphic createBitmapGraphic(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
+		else
+			return null;
 	}
 }

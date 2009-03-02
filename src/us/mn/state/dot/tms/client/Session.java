@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -29,25 +28,24 @@ import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
-import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
-import us.mn.state.dot.tms.client.dms.DMSHandler;
+import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
 import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
+import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
-import us.mn.state.dot.tms.client.sonar.SonarLayer;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
@@ -93,22 +91,27 @@ public class Session {
 	/** Camera manager */
 	protected final CameraManager cam_manager;
 
+	/** DMS manager */
+	protected final DMSManager dms_manager;
+
 	/** Detector manager */
 	protected final DetectorManager det_manager;
 
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
 
-	/** FIXME: this is a hack */
-	static public CameraManager cam_manager_singleton;
-	static public DetectorManager det_manager_singleton;
-	static public WarningSignManager warn_manager_singleton;
-
-	/** Camera layer */
-	protected final SonarLayer<Camera> camLayer;
-
 	/** Warning sign manager */
 	protected final WarningSignManager warn_manager;
+
+	/** Ramp meter manager */
+	protected final MeterManager meter_manager;
+
+	/** FIXME: this is a hack */
+	static public CameraManager cam_manager_singleton;
+	static public DMSManager dms_manager_singleton;
+	static public DetectorManager det_manager_singleton;
+	static public MeterManager meter_manager_singleton;
+	static public WarningSignManager warn_manager_singleton;
 
 	/** List of all tabs */
 	protected final List<IrisTab> tabs = new LinkedList<IrisTab>();
@@ -144,19 +147,16 @@ public class Session {
 	}
 
 	/** Add the DMS tab */
-	protected void addDMSTab(final SonarState st) throws RemoteException {
-		TmsMapLayer dmsLayer = DMSHandler.createLayer(tmsConnection);
-		Layer warnLayer = warn_manager.getLayer();
+	protected void addDMSTab() {
 		List<LayerState> lstates = createBaseLayers();
 		lstates.add(gpoly.createState());
-		lstates.add(camLayer.createState());
+		lstates.add(cam_manager.getLayer().createState());
 		lstates.add(incLayer.createState());
 		if(rwisLayer != null)
 			lstates.add(rwisLayer.createState());
-		lstates.add(dmsLayer.createState());
-		lstates.add(warnLayer.createState());
-		tabs.add(new DMSTab(lstates, vlayer,
-			(DMSHandler)dmsLayer.getHandler(),st,tmsConnection));
+		lstates.add(warn_manager.getLayer().createState());
+		tabs.add(new DMSTab(dms_manager, lstates, vlayer,
+			tmsConnection));
 	}
 
 	/** Add the meter tab */
@@ -168,16 +168,17 @@ public class Session {
 				gpolyState.setTheme(t);
 		}
 		lstates.add(gpolyState);
-		tabs.add(new RampMeterTab(lstates, vlayer, tmsConnection));
+		tabs.add(new RampMeterTab(meter_manager, lstates, vlayer,
+			tmsConnection));
 	}
 
 	/** Add the incident tab */
-	protected void addIncidentTab() throws RemoteException {
+	protected void addIncidentTab() {
 		tabs.add(new IncidentTab(incLayer));
 	}
 
 	/** Add the rwis tab */
-	protected void addRwisTab() throws RemoteException {
+	protected void addRwisTab() {
 		tabs.add(new RwisTab(rwisLayer));
 	}
 
@@ -194,8 +195,6 @@ public class Session {
 	/** Add the roadway tab */
 	protected void addRoadwayTab() {
 		List<LayerState> lstates = createBaseLayers();
-		SonarLayer<R_Node> layer = r_node_manager.getLayer();
-		lstates.add(layer.createState());
 		tabs.add(new RoadwayTab(r_node_manager, lstates, vlayer,
 			tmsConnection));
 	}
@@ -210,16 +209,12 @@ public class Session {
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer(st);
 
-		// create agency specific incident layer
-		if(SystemAttributeHelper.isAgencyMnDOT()) {
-			incLayer = new TmsIncidentLayer(props, logger);
-			rwisLayer = null;
-		} else if(SystemAttributeHelper.isAgencyCaltransD10()) {
+		// Create agency specific incident layer
+		if(SystemAttributeHelper.isAgencyCaltransD10()) {
 			incLayer = new D10IncidentLayer(props, logger);
 			rwisLayer = new D10RwisLayer(props, logger);
 		} else {
-			assert false : "unknown agencyid";
-			incLayer = null;
+			incLayer = new TmsIncidentLayer(props, logger);
 			rwisLayer = null;
 		}
 
@@ -227,7 +222,9 @@ public class Session {
 		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
 			loc_manager);
 		cam_manager_singleton = cam_manager;
-		camLayer = cam_manager.getLayer();
+		dms_manager = new DMSManager(tmsConnection, st.getDMSs(),
+			loc_manager);
+		dms_manager_singleton = dms_manager;
 		det_manager = new DetectorManager(tmsConnection,
 			st.getDetectors(), loc_manager);
 		det_manager_singleton = det_manager;
@@ -236,10 +233,13 @@ public class Session {
 		warn_manager = new WarningSignManager(tmsConnection,
 			st.getWarningSigns(), loc_manager);
 		warn_manager_singleton = warn_manager;
+		meter_manager = new MeterManager(tmsConnection,
+			st.getRampMeters(), loc_manager);
+		meter_manager_singleton = meter_manager;
 		vlayer = new ViewLayer();
 		IrisUser user = tmsConnection.getUser();
 		if(user.hasPermission(IrisPermission.DMS_TAB))
-			addDMSTab(st);
+			addDMSTab();
 		if(user.hasPermission(IrisPermission.METER_TAB))
 			addMeterTab();
 		if(user.hasPermission(IrisPermission.MAIN_TAB))

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,6 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 {
 	/** ObjectVault table name */
 	static public final String tableName = "traffic_device";
-
-	/** Table mapping for traffic_device_timing_plan relation */
-	static public TableMapping plan_mapping;
 
 	/** Traffic device ID regex pattern */
 	static protected final Pattern ID_PATTERN =
@@ -133,43 +130,4 @@ abstract public class TrafficDeviceImpl extends DeviceImpl
 
 	/** Get the current status code */
 	abstract public int getStatusCode();
-
-	/** Lookup a TrafficDeviceAttribute in the SONAR namespace */
-	static protected TrafficDeviceAttributeImpl lookupTrafficDeviceAttribute(
-		final String id, final String aname) 
-	{
-		if(aname==null || id==null || aname.length()<=0 || 
-			id.length()<=0) 
-		{
-			assert false;
-			return null;
-		}
-		String name = TrafficDeviceAttributeHelper.createName(id,aname);
-		return (TrafficDeviceAttributeImpl)namespace.lookupObject(
-			TrafficDeviceAttribute.SONAR_TYPE, name);
-	}
-
-	/** Get the value of the named attribute for a specific device. This 
-	  * is a server side method. 
-	  * @return null if the attribute doesn't exist else a String.
-	  */
-	static public String getAttributeValue(final String id,
-		final String aname)
-	{
-		TrafficDeviceAttribute a = 
-			lookupTrafficDeviceAttribute(id,aname);
-		return (a == null ? null : a.getAValue());
-	}
-
-	/** Get the value of the named attribute for a specific device. This 
-	  * is a server side method. 
-	  * @return false if the attribute doesn't exist else the value.
-	  */
-	static public boolean getAttributeValueBoolean(final String id,
-		final String aname)
-	{
-		TrafficDeviceAttributeImpl a = 
-			lookupTrafficDeviceAttribute(id,aname);
-		return (a == null ? false : a.getAValueBoolean());
-	}
 }

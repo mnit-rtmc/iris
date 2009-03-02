@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,13 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -33,11 +33,20 @@ import us.mn.state.dot.tms.BitmapGraphic;
  */
 public class SignPixelPanel extends JPanel {
 
+	/** Flag to turn on antialiasing */
+	protected final boolean antialias;
+
+	/** Color of sign face */
+	protected final Color face_color;
+
+	/** Color to paint a lit pixel */
+	protected final Color lit_color = Color.YELLOW;
+
 	/** Sign width (mm) */
-	protected int width_mm = 1;
+	protected int width_mm = 0;
 
 	/** Sign height (mm) */
-	protected int height_mm = 1;
+	protected int height_mm = 0;
 
 	/** Width of horizontal border (mm) */
 	protected int hborder_mm;
@@ -52,10 +61,10 @@ public class SignPixelPanel extends JPanel {
 	protected float vpitch_mm = 1;
 
 	/** Sign pixel width */
-	protected int width_pix = 1;
+	protected int width_pix = 0;
 
 	/** Sign pixel height */
-	protected int height_pix = 1;
+	protected int height_pix = 0;
 
 	/** Width of characters (pixels), zero for variable */
 	protected int width_char;
@@ -72,17 +81,28 @@ public class SignPixelPanel extends JPanel {
 	/** Buffer for screen display */
 	protected BufferedImage buffer;
 
+	/** Bloom size relative to pixel size (0 means no blooming) */
+	protected float bloom = 0f;
+
 	/** Flag that determines if buffer needs repainting */
 	protected boolean dirty = false;
 
 	/** Create a new sign pixel panel */
-	public SignPixelPanel() {
+	public SignPixelPanel(boolean a) {
+		this(a, Color.BLACK);
+	}
+
+	/** Create a new sign pixel panel */
+	public SignPixelPanel(boolean a, Color f) {
 		super(true);
+		antialias = a;
+		face_color = f;
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
 				rescale();
 			}
 		});
+		setMinimumSize(new Dimension(128, 32));
 	}
 
 	/** Rescale when the component is resized or the sign changes */
@@ -97,14 +117,16 @@ public class SignPixelPanel extends JPanel {
 	protected void rescale(double w, double h) {
 		buffer = null;
 		dirty = true;
-		double sx = w / width_mm;
-		double sy = h / height_mm;
-		double scale = Math.min(sx, sy);
-		double tx = width_mm * (sx - scale) / 2;
-		double ty = height_mm * (sy - scale) / 2;
 		AffineTransform t = new AffineTransform();
-		t.translate(tx, ty);
-		t.scale(scale, scale);
+		if(width_mm > 0 && height_mm > 0) {
+			double sx = w / width_mm;
+			double sy = h / height_mm;
+			double scale = Math.min(sx, sy);
+			double tx = width_mm * (sx - scale) / 2;
+			double ty = height_mm * (sy - scale) / 2;
+			t.translate(tx, ty);
+			t.scale(scale, scale);
+		}
 		transform = t;
 		repaint();
 	}
@@ -113,8 +135,8 @@ public class SignPixelPanel extends JPanel {
 	public void setPhysicalDimensions(int w, int h, int hb, int vb, int hp,
 		int vp)
 	{
-		width_mm = Math.max(1, w);
-		height_mm = Math.max(1, h);
+		width_mm = Math.max(0, w);
+		height_mm = Math.max(0, h);
 		hborder_mm = Math.max(0, hb);
 		vborder_mm = Math.max(0, vb);
 		hpitch_mm = Math.max(1, hp);
@@ -123,8 +145,8 @@ public class SignPixelPanel extends JPanel {
 
 	/** Set the logical sign dimensions */
 	public void setLogicalDimensions(int w, int h, int wc, int hl) {
-		width_pix = Math.max(1, w);
-		height_pix = Math.max(1, h);
+		width_pix = Math.max(0, w);
+		height_pix = Math.max(0, h);
 		width_char = Math.max(0, wc);
 		height_line = Math.max(0, hl);
 	}
@@ -132,12 +154,19 @@ public class SignPixelPanel extends JPanel {
 	/** Verify the sign dimensions */
 	public void verifyDimensions() {
 		float w = width_mm - hborder_mm * 2;
-		if(width_pix * hpitch_mm > w)
+		if(width_pix > 0 && w > 0 && width_pix * hpitch_mm > w)
 			hpitch_mm = w / width_pix;
 		float h = height_mm - vborder_mm * 2;
-		if(height_pix * vpitch_mm > h)
+		if(height_pix > 0 && h > 0 && height_pix * vpitch_mm > h)
 			vpitch_mm = h / height_pix;
 		rescale();
+	}
+
+	/** Clear the pixel panel */
+	public void clear() {
+		setPhysicalDimensions(0, 0, 0, 0, 1, 1);
+		setLogicalDimensions(0, 0, 0, 0);
+		verifyDimensions();
 	}
 
 	/** Set the bitmap graphic displayed */
@@ -173,33 +202,66 @@ public class SignPixelPanel extends JPanel {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 		g.transform(transform);
-		g.setColor(Color.BLACK);
+		g.setColor(face_color);
 		g.fillRect(0, 0, width_mm, height_mm);
-		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-			RenderingHints.VALUE_ANTIALIAS_ON);
-		paintPixels(g, graphic);
+		if(antialias) {
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		}
+		if(graphic != null)
+			paintPixels(g, graphic);
 	}
 
 	/** Paint the pixels of the sign */
 	protected void paintPixels(Graphics2D g, BitmapGraphic b) {
-		Ellipse2D pixel = new Ellipse2D.Float();
+		// NOTE: unlit pixels are drawn first to allow blooming to
+		//       overdraw for lit pixels
+		if(antialias)
+			setBloom(0);
+		else
+			setBloom(1);
+		g.setColor(Color.GRAY);
+		int px = Math.round(hpitch_mm + getBloomX());
+		int py = Math.round(vpitch_mm + getBloomY());
 		for(int y = 0; y < height_pix; y++) {
-			float yy = getPixelY(y);
+			int yy = Math.round(getPixelY(y));
 			for(int x = 0; x < width_pix; x++) {
-				float xx = getPixelX(x);
-				if(b != null && b.getPixel(x, y) > 0)
-					g.setColor(Color.YELLOW);
-				else
-					g.setColor(Color.GRAY);
-				pixel.setFrame(xx, yy, hpitch_mm, vpitch_mm);
-				g.fill(pixel);
+				int xx = Math.round(getPixelX(x));
+				if(b.getPixel(x, y) == 0)
+					g.fillOval(xx, yy, px, py);
+			}
+		}
+		if(antialias)
+			setBloom(0.6f);
+		else
+			setBloom(1);
+		g.setColor(lit_color);
+		px = Math.round(hpitch_mm + getBloomX());
+		py = Math.round(vpitch_mm + getBloomY());
+		for(int y = 0; y < height_pix; y++) {
+			int yy = Math.round(getPixelY(y));
+			for(int x = 0; x < width_pix; x++) {
+				int xx = Math.round(getPixelX(x));
+				if(b.getPixel(x, y) > 0)
+					g.fillOval(xx, yy, px, py);
 			}
 		}
 	}
 
+	/** Set the bloom factor */
+	protected void setBloom(float b) {
+		bloom = b;
+	}
+
+	/** Get the bloom in the y-direction */
+	protected float getBloomY() {
+		return vpitch_mm * bloom / 2;
+	}
+
 	/** Get the y-distance to the given pixel */
 	protected float getPixelY(int y) {
-		return vborder_mm + getLineOffset(y) + vpitch_mm * y;
+		return vborder_mm + getLineOffset(y) + vpitch_mm * y -
+			getBloomY() / 2;
 	}
 
 	/** Get the line offset (for line- or character-matrix signs) */
@@ -222,9 +284,15 @@ public class SignPixelPanel extends JPanel {
 			return 0;
 	}
 
+	/** Get the bloom in the x-direction */
+	protected float getBloomX() {
+		return hpitch_mm * bloom / 2;
+	}
+
 	/** Get the x-distance to the given pixel */
 	protected float getPixelX(int x) {
-		return hborder_mm + getCharacterOffset(x) + hpitch_mm * x;
+		return hborder_mm + getCharacterOffset(x) + hpitch_mm * x -
+			getBloomX() / 2;
 	}
 
 	/** Get the character offset (for character-matrix signs only) */

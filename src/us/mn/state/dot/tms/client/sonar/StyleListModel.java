@@ -54,6 +54,11 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 			removeListDataListener(l);
 	}
 
+	/** Get the proxy manager */
+	public ProxyManager<T> getManager() {
+		return manager;
+	}
+
 	/** Add a new proxy */
 	protected int doProxyAdded(T proxy) {
 		if(manager.checkStyle(name, proxy))

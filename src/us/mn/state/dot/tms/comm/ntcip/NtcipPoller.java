@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,13 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.EOFException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.FontImpl;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignTravelTime;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.DMSPoller;
@@ -57,16 +57,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		return drop > 0 && drop <= HDLC.NTCIP_MAX_ADDRESS;
 	}
 
-	/** Download the font to a sign controller */
-	protected void downloadFonts(DMSImpl dms, int p) {
-		FontImpl font = dms.getFont();
-		if(font != null) {
-			DMSFontDownload f = new DMSFontDownload(dms, font);
-			f.setPriority(p);
-			f.start();
-		}
-	}
-
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
 		DMSImpl dms = c.getActiveSign();
@@ -76,8 +66,9 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 				r.setPriority(p);
 				r.start();
 			}
-			if(dms.hasProportionalFonts())
-				downloadFonts(dms, p);
+			DMSFontDownload d = new DMSFontDownload(dms);
+			d.setPriority(p);
+			d.start();
 			DMSDefaultDownload o = new DMSDefaultDownload(dms);
 			o.setPriority(p);
 			o.start();
@@ -110,82 +101,63 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		return test;
 	}
 
-	/** Query the DMS configuration */
-	public void queryConfiguration(DMSImpl dms) {
-		new DMSQueryConfiguration(dms).start();
+	/** Send a sign request message to the sign */
+	public void sendRequest(DMSImpl dms, SignRequest r) {
+		switch(r) {
+		case QUERY_CONFIGURATION:
+			new DMSQueryConfiguration(dms).start();
+			break;
+		case QUERY_MESSAGE:
+			new DMSQueryMessage(dms).start();
+			break;
+		case QUERY_STATUS:
+			new DMSQueryStatus(dms).start();
+			break;
+		case QUERY_PIXEL_FAILURES:
+			new DMSQueryPixelFailures(dms, false).start();
+			break;
+		case TEST_PIXELS:
+			new DMSQueryPixelFailures(dms, true).start();
+			break;
+		case TEST_LAMPS:
+			new DMSLampTest(dms).start();
+			break;
+		case BRIGHTNESS_GOOD:
+		case BRIGHTNESS_TOO_DIM:
+		case BRIGHTNESS_TOO_BRIGHT:
+			new DMSBrightnessFeedback(dms, r).start();
+			break;
+		case SEND_LEDSTAR_SETTINGS:
+			new DMSSetLedstarPixel(dms).start();
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
 	}
 
 	/** Send a new message to the sign */
-	public void sendMessage(DMSImpl dms, SignMessage m)
+	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		DMSCommandMessage cmd = new DMSCommandMessage(dms, m);
-		if(m instanceof SignTravelTime) {
-			// Avoid race with user/alert messages
-			if(dms.acquire(cmd) != cmd)
-				return;
-		}
-		cmd.start();
+		if(shouldSetTimeRemaining(dms, m))
+			new DMSSetTimeRemaining(dms, m, o).start();
+		else
+			new DMSCommandMessage(dms, m, o).start();
 	}
 
-	/** Set the time remaining for the currently displayed message */
-	public void setMessageTimeRemaining(DMSImpl dms, SignMessage m) {
-		DMSSetTimeRemaining cmd = new DMSSetTimeRemaining(dms, m);
-		if(m instanceof SignTravelTime) {
-			// Avoid races with user/alert messages
-			if(dms.acquire(cmd) != cmd)
-				return;
-		}
-		cmd.start();
+	/** Check if we should just set the message time remaining */
+	protected boolean shouldSetTimeRemaining(DMSImpl dms, SignMessage m) {
+		return isDurationZero(m) || isMessageDeployed(dms, m);
 	}
 
-	/** Set manual brightness level (null for photocell control) */
-	public void setBrightnessLevel(DMSImpl dms, Integer l) {
-		if(l != null) {
-			// FIXME: combine these into one operation
-			new DMSManualBrightness(dms, l).start();
-			new DMSBrightnessControl(dms, true).start();
-		} else
-			new DMSBrightnessControl(dms, false).start();
+	/** Check if the duration of a message is zero */
+	protected boolean isDurationZero(SignMessage m) {
+		return m.getDuration() != null && m.getDuration() <= 0;
 	}
 
-	/** Activate a pixel test */
-	public void testPixels(DMSImpl dms) {
-		new DMSPixelTest(dms).start();
+	/** Check if the message is already deployed on the sign */
+	protected boolean isMessageDeployed(DMSImpl dms, SignMessage m) {
+		return m.getMulti().equals(dms.getMessageCurrent().getMulti());
 	}
-
-	/** Activate a lamp test */
-	public void testLamps(DMSImpl dms) {
-		new DMSLampTest(dms).start();
-	}
-
-	/** Activate a fan test */
-	public void testFans(DMSImpl dms) {
-		new DMSFanTest(dms).start();
-	}
-
-	/** Set Ledstar pixel configuration */
-	public void setLedstarPixel(DMSImpl dms, int ldcPotBase,
-		int pixelCurrentLow, int pixelCurrentHigh, int badPixelLimit)
-	{
-		new DMSSetLedstarPixel(dms, ldcPotBase, pixelCurrentLow,
-			pixelCurrentHigh, badPixelLimit).start();
-	}
-
-	/** reset the dms, called from DMSImpl.reset(), via button on dms status tab. */
-	public void reset(DMSImpl dms) {
-		// ignored
-	}
-
-	/** reset the dms modem, called from DMSImpl.reset(), via button on dms status tab. */
-	public void resetModem(DMSImpl dms) {
-		// ignored
-	}
-
-	/** get the sign message, called from DMSImpl.getSignMessage(). */
-	public void getSignMessage(DMSImpl dms) {
-		if(dms != null)
-			new DMSQueryMessage(dms).start();
-	}
-
 }

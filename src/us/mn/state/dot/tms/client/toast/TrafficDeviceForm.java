@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,10 +68,16 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 	}
 
 	/** Initialize the widgets on the form */
-	protected void initialize() throws RemoteException {
+	protected void initialize() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		location = new LocationPanel(admin, device.getGeoLoc(),
-			connection.getSonarState());
+		try {
+			location = new LocationPanel(admin, device.getGeoLoc(),
+				connection.getSonarState());
+		}
+		catch(RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		location.initialize();
 		location.addRow("Notes", notes);
 		location.setCenter();
@@ -98,9 +104,17 @@ abstract public class TrafficDeviceForm extends TMSObjectForm {
 	}
 
 	/** Controller lookup button pressed */
-	protected void controllerPressed() throws RemoteException {
+	protected void controllerPressed() {
+		String cont;
+		try {
+			cont = device.getController();
+		}
+		catch(RemoteException e) {
+			e.printStackTrace();
+			return;
+		}
 		Controller c = connection.getSonarState().lookupController(
-			device.getController());
+			cont);
 		if(c == null)
 			controller.setEnabled(false);
 		else {

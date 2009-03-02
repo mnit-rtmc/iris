@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.IOException;
@@ -44,6 +43,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying and editing DMS fonts
@@ -59,7 +59,7 @@ public class FontForm extends AbstractForm {
 	protected FontModel f_model;
 
 	/** Table to hold the font list */
-	protected final JTable f_table = new JTable();
+	protected final ZTable f_table = new ZTable();
 
 	/** Button to delete the selected font */
 	protected final JButton del_font = new JButton("Delete Font");
@@ -190,9 +190,7 @@ public class FontForm extends AbstractForm {
 		f_table.setModel(f_model);
 		f_table.setAutoCreateColumnsFromModel(false);
 		f_table.setColumnModel(f_model.createColumnModel());
-		// FIXME: why isn't there a JTable.setVisibleRowCount method???
-		f_table.setPreferredScrollableViewportSize(new Dimension(500,
-			100));
+		f_table.setVisibleRowCount(6);
 		JScrollPane pane = new JScrollPane(f_table);
 		panel.add(pane, bag);
 		if(admin) {

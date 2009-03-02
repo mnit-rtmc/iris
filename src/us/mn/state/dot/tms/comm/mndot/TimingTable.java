@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,15 +30,9 @@ public interface TimingTable {
 	/** HOV preempt time (tenths of a second) (obsolete) */
 	int HOV_PREEMPT = 80;
 
-	/** Default AM start time (minute of day) */
-	int AM_START_TIME = 630;
+	/** AM midpoint time (BCD; minute of day) */
+	int AM_MID_TIME = 730;
 
-	/** Default AM stop time (minute of day) */
-	int AM_STOP_TIME = 830;
-
-	/** Default PM start time (minute of day) */
-	int PM_START_TIME = 1530;
-
-	/** Default PM stop time (minute of day) */
-	int PM_STOP_TIME = 1730;
+	/** PM midpoint time (BCD; minute of day) */
+	int PM_MID_TIME = 1630;
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,17 @@
 
 package us.mn.state.dot.tms.comm.dmslite;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.MsgActPriority;
-import us.mn.state.dot.tms.MsgActPriorityD10;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.STime;
-
-import java.io.IOException;
-import java.lang.StringBuilder;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 /**
  * Operation to send a new message to a DMS.
@@ -47,17 +44,14 @@ public class OpMessage extends OpDms {
 	/** Sign message */
 	protected final SignMessage m_signMessage;
 
-	/** fixed message width flags */
-	final protected boolean m_fixedOutboundMessageWidth = true;
-	final protected int FIXED_MSG_WIDTH_PIXELS = 96;
+	/** User who deployed the message */
+	protected final User m_owner;
 
 	/** Create a new DMS command message object */
-	public OpMessage(DMSImpl d, SignMessage m) {
+	public OpMessage(DMSImpl d, SignMessage m, User owner) {
 		super(COMMAND, d, "OpMessage");
 		m_signMessage = m;
-		System.err.println(
-		    "dmslite.OpMessage.OpMessage() called. Msg="
-		    + m + ",numpages=" + m_signMessage.getNumPages());
+		m_owner = owner;
 	}
 
 	/** return description of operation, which is displayed in the client */
@@ -66,36 +60,82 @@ public class OpMessage extends OpDms {
 	}
 
 	/** 
-	  * Return the bitmap page as a hex string. The width of the 
-	  * bitmap is adjusted as necessary.
-	  */
+	 * Return the bitmap page as a hex string. The width of the 
+	 * bitmap is adjusted as necessary.
+	 */
 	public String getBitmapPage(int pg) {
 		if(m_signMessage == null)
 			return "";
-		BitmapGraphic oldbmg = m_signMessage.getBitmap(pg);
-		BitmapGraphic newbmg = null;
-		if(m_fixedOutboundMessageWidth)
-			newbmg = oldbmg.resizeWidth(FIXED_MSG_WIDTH_PIXELS);
-		else
-			newbmg = oldbmg;
-		if(newbmg == null)
+		byte[] bitmaps = getBitmaps();
+		if(bitmaps == null)
 			return "";
+		BitmapGraphic oldbmg = createBitmap();
+		if(oldbmg == null)
+			return "";
+		int blen = oldbmg.getBitmap().length;
+		if(bitmaps.length % blen != 0)
+			return "";
+		int pages = bitmaps.length / blen;
+		if(pg < 0 || pg >= pages)
+			return "";
+		byte[] bmap = new byte[blen];
+		System.arraycopy(bitmaps, pg * blen, bmap, 0, blen);
+		oldbmg.setBitmap(bmap);
+		BitmapGraphic newbmg = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
+		newbmg.copy(oldbmg);
 		return new HexString(newbmg.getBitmap()).toString();
+	}
+
+	/** Get the sign message bitmaps */
+	protected byte[] getBitmaps() {
+		try {
+			return Base64.decode(m_signMessage.getBitmaps());
+		}
+		catch(IOException e) {
+			return null;
+		}
+	}
+
+	/** Create a bitmap matching the sign dimensions */
+	protected BitmapGraphic createBitmap() {
+		Integer w = m_dms.getWidthPixels();
+		if(w == null || w < 1)
+			return null;
+		Integer h = m_dms.getHeightPixels();
+		if(h == null || h < 1)
+			return null;
+		return new BitmapGraphic(w, h);
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		int np = m_signMessage.getNumPages();
-		if (np <= 0)
+		if(!m_dms.checkPriority(m_signMessage.getPriority()))
 			return null;
-		else if (np == 1)
+		byte[] bitmaps = getBitmaps();
+		if(bitmaps == null)
+			return null;
+		int blen = getPageLength();
+		if(blen == 0 || bitmaps.length % blen != 0)
+			return null;
+		int np = bitmaps.length / blen;
+		if(np <= 0)
+			return null;
+		else if(np == 1)
 			return new PhaseSendOnePageMessage();
-		else if (np == 2)
+		else if(np == 2)
 			return new PhaseSendTwoPageMessage();
-		System.err.println(
-		    "WARNING: bogus number of pages (" + np
-		    + ") in dmslite.OpMessage.OpMessage(). Ignored.");
+		System.err.println("WARNING: bogus number of pages (" + np +
+			") in dmslite.OpMessage.OpMessage(). Ignored.");
 		return null;
+	}
+
+	/** Get the length of one bitmap page */
+	protected int getPageLength() {
+		BitmapGraphic b = createBitmap();
+		if(b != null)
+			return b.getBitmap().length;
+		else
+			return 0;
 	}
 
 	/** 
@@ -113,11 +153,11 @@ public class OpMessage extends OpDms {
 	 *  This method should not be called if duration is infinite.
 	 */
 	protected Calendar calcMsgOffTime(Calendar ontime) {
-		int mins=this.m_signMessage.getDuration();
-		assert mins!=SignMessage.DURATION_INFINITE;
-		Calendar offtime=(Calendar)ontime.clone();
-		offtime.add(Calendar.MINUTE,mins);
-		return(offtime);
+		Integer mins = m_signMessage.getDuration();
+		assert mins != null;
+		Calendar offtime = (Calendar)ontime.clone();
+		offtime.add(Calendar.MINUTE, mins);
+		return offtime;
 	}
 
 	/**
@@ -190,7 +230,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime=m_signMessage.getDuration()!=SignMessage.DURATION_INFINITE;
+			boolean useofftime = m_signMessage.getDuration() !=null;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
@@ -198,7 +238,8 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
-			mess.add(new ReqRes("Owner", m_signMessage.getOwner()));
+			String owner = m_owner != null ? m_owner.getName() : "";
+			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
 			mess.add(new ReqRes("Msg", getBitmapPage(0)));
@@ -243,12 +284,13 @@ public class OpMessage extends OpDms {
 				// parse rest of response
 				if (valid) {
 					// set new message
-					m_dms.setActiveMessage(m_signMessage);
+					m_dms.setMessageCurrent(m_signMessage,
+						m_owner);
 				} else {
 					System.err.println(
 					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
-					setDmsStatus(errmsg);
+					errorStatus = errmsg;
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
@@ -348,7 +390,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime=m_signMessage.getDuration()!=SignMessage.DURATION_INFINITE;
+			boolean useofftime = m_signMessage.getDuration() !=null;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
@@ -360,7 +402,8 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(MSG_DISPLAY_MSG_TIME_MS).toString()));
 
 			// Owner
-			mess.add(new ReqRes("Owner", m_signMessage.getOwner()));
+			String owner = m_owner != null ? m_owner.getName() : "";
+			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
 			mess.add(new ReqRes("Msg", getBitmapPage(0) + getBitmapPage(1)));
@@ -403,15 +446,14 @@ public class OpMessage extends OpDms {
 
 				// parse rest of response
 				if (valid) {
-
 					// set new message
-					m_dms.setActiveMessage(m_signMessage);
-
+					m_dms.setMessageCurrent(m_signMessage,
+						m_owner);
 				} else {
 					System.err.println(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
 					    errmsg+",id="+id);
-					setDmsStatus(errmsg);
+					errorStatus = errmsg;
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {

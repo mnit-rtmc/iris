@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,16 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.ZTable;
 
 /**
  * A form for displaying and editing video monitors
@@ -41,10 +39,10 @@ public class VideoMonitorForm extends AbstractForm {
 	protected VideoMonitorModel m_model;
 
 	/** Table to hold the video monitor list */
-	protected final JTable m_table = new JTable();
+	protected final ZTable m_table = new ZTable();
 
 	/** Button to delete the selected video monitor */
-	protected final JButton del_monitor = new JButton("Delete Monitor");
+	protected final JButton del_monitor = new JButton("Delete");
 
 	/** Video monitor type cache */
 	protected final TypeCache<VideoMonitor> cache;
@@ -68,13 +66,6 @@ public class VideoMonitorForm extends AbstractForm {
 
 	/** Create monitor panel */
 	protected JPanel createMonitorPanel() {
-		JPanel panel = new JPanel(new GridBagLayout());
-		panel.setBorder(BORDER);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = HGAP;
-		bag.insets.right = HGAP;
-		bag.insets.top = VGAP;
-		bag.insets.bottom = VGAP;
 		final ListSelectionModel s = m_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
@@ -86,10 +77,6 @@ public class VideoMonitorForm extends AbstractForm {
 		m_table.setModel(m_model);
 		m_table.setAutoCreateColumnsFromModel(false);
 		m_table.setColumnModel(m_model.createColumnModel());
-		JScrollPane pane = new JScrollPane(m_table);
-		panel.add(pane, bag);
-		del_monitor.setEnabled(false);
-		panel.add(del_monitor, bag);
 		new ActionJob(this, del_monitor) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -97,6 +84,10 @@ public class VideoMonitorForm extends AbstractForm {
 					m_model.deleteRow(row);
 			}
 		};
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(m_table);
+		panel.addRow(del_monitor);
+		del_monitor.setEnabled(false);
 		return panel;
 	}
 

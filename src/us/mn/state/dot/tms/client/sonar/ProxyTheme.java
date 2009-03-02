@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,9 +33,13 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	static public final Outline OUTLINE = Outline.createSolid(
 		Color.BLACK, 30);
 
-	/** Outline for stroking traffic devices */
+	/** Outline for stroking inactive traffic devices */
 	static public final Outline OUTLINE_INACTIVE = Outline.createSolid(
 		Color.BLACK, 10);
+
+	/** Outline for stroking locked traffic devices */
+	static public final Outline OUTLINE_LOCKED = Outline.createSolid(
+		Color.RED, 30);
 
 	/** Color to display inactive devices */
 	static public final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);

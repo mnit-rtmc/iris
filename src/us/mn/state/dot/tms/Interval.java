@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 /**
- * Time interval values.
+ * Time interval values.  All values are in seconds.
  *
  * @author Douglas Lau
  */
@@ -26,4 +26,7 @@ public interface Interval {
 
 	/** Number of seconds in an hour */
 	int HOUR = 60 * MINUTE;
+
+	/** Number of seconds in a day */
+	int DAY = 24 * HOUR;
 }

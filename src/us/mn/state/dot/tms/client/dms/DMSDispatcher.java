@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,470 +14,566 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.rmi.RemoteException;
-import javax.swing.BorderFactory;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.io.IOException;
+import java.util.List;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TrafficDeviceAttribute;
-import us.mn.state.dot.tms.TrafficDeviceAttributeHelper;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.TmsSelectionEvent;
-import us.mn.state.dot.tms.client.TmsSelectionListener;
-import us.mn.state.dot.tms.client.TmsSelectionModel;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.dms.FontComboBox;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18NMessages;
-import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
- * as a function of the agency.
- * @see FontComboBox, Font, FontImpl, SignMessage, DMSPanel, TmsSelectionModel
+ * as a function of system attributes.
+ * @see SignMessage, DMSPanelPager
+ *
  * @author Erik Engstrom
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSDispatcher extends JPanel implements TmsSelectionListener {
+public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
+	ProxySelectionListener<DMS>
+{
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** Cache of DMS proxy objects */
+	protected final TypeCache<DMS> cache;
+
+	/** Selection model */
+	protected final ProxySelectionModel<DMS> selectionModel;
+
+	/** Selection tab pane */
+	protected final JTabbedPane tabPane = new JTabbedPane();
+
+	/** Single sign tab */
+	protected final SingleSignTab singleTab = new SingleSignTab(this);
+
+	/** Multiple sign tab */
+	protected final MultipleSignTab multipleTab;
 
 	/** Panel used for drawing a DMS */
-	protected final DMSPanel pnlSign;
+	protected final SignPixelPanel currentPnl;
 
-	/** Displays the id of the DMS */
-	protected final JTextField txtId = new JTextField();
+	/** Panel used for drawing a preview DMS */
+	protected final SignPixelPanel previewPnl;
 
-	/** Displays the verify camera for the DMS */
-	protected final JTextField txtCamera = new JTextField();
-
-	/** Displays the location of the DMS */
-	protected final JTextField txtLocation = new JTextField();
-
-	/** Displays the current operation of the DMS */
-	protected final JTextField txtOperation = new JTextField();
-
-	/** Displays the controller status (optional) */
-	protected JTextField txtControllerStatus = new JTextField();
-
-	/** Displays the brightness of the DMS */
-	protected final JTextField txtBrightness = new JTextField();
+	/** Message composer widget */
+	protected final SignMessageComposer composer;
 
 	/** Used to select the expires time for a message (optional) */
-	protected JComboBox cmbExpire = new JComboBox();
-
-	/** Used to select the DMS font for a message (optional) */
-	protected FontComboBox cmbFont = null;
+	protected final JComboBox durationCmb =
+		new JComboBox(Expiration.values());
 
 	/** Button used to send a message to the DMS */
-	protected final JButton btnSend = 
-		new JButton(I18NMessages.get("DMSDispatcher.SendButton"));
+	protected final JButton sendBtn =
+		new JButton(I18NMessages.get("dms.send"));
 
-	/** Button used to clear the DMS. Text also set in ClearDmsAction */
-	protected final JButton btnClear = 
-		new JButton(I18NMessages.get("DMSDispatcher.ClearButton"));
+	/** Button used to clear the DMS */
+	protected final JButton clearBtn = new JButton();
 
-	/** Button used to get the DMS status (optional) */
-	protected final JButton btnGetStatus = new JButton(I18NMessages.get(
-		"DMSDispatcher.GetStatusButton"));
+	/** Action to clear selected DMS */
+	protected final ClearDmsAction clearAction;
 
-	/** AWS checkbox (optional) */
-	protected AwsCheckBox awsCheckBox = null;
+	/** Card layout for alert panel */
+	protected final CardLayout cards = new CardLayout();
 
-	/** Select model */
-	protected final TmsSelectionModel selectionModel;
+	/** Card panel for alert panels */
+	protected final JPanel card_panel = new JPanel(cards);
 
-	/** Currently logged in user name */
-	protected final String userName;
+	/** AMBER Alert checkbox */
+	protected final JCheckBox alertCbx =
+		new JCheckBox(I18NMessages.get("dms.alert"));
 
-	/** The currently selected DMS */
-	protected DMSProxy selectedSign = null;
+	/** Currently logged in user */
+	protected final User user;
 
-	/** Message selector widget */
-	protected final MessageSelector messageSelector;
+	/** Sign message creator */
+	protected final SignMessageCreator creator;
+
+	/** Pager for current DMS panel */
+	protected DMSPanelPager currentPnlPager;
+
+	/** Pager for preview DMS panel */
+	protected DMSPanelPager previewPnlPager;
+
+	/** Pixel map builder */
+	protected PixelMapBuilder builder;
 
 	/** Create a new DMS dispatcher */
-	public DMSDispatcher(DMSHandler handler, final SonarState st,
-		TmsConnection tc)
-	{
-		super( new GridBagLayout() );
-		setOptionalControlUse();
-		messageSelector = new MessageSelector(st.getDmsSignGroups(),
-			st.getSignText(),st.lookupUser(tc.getUser().getName()));
-		userName = handler.getUser().getName();
-		selectionModel = handler.getSelectionModel();
-		pnlSign = new DMSPanel(st.getSystemAttributes());
-		setBorder(BorderFactory.createTitledBorder(
-			I18NMessages.get("DMSDispatcher.GroupBoxTitle")));
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = new Insets(2, 4, 2, 4);
-		bag.anchor = GridBagConstraints.EAST;
-		add(new JLabel("ID"), bag);
-		bag.gridx = 2;
-		add(new JLabel("Camera"), bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		add(new JLabel("Location"), bag);
-		bag.gridx = 2;
-		add(new JLabel("Brightness"), bag);
-		bag.gridx = 0;
-		bag.gridy = 2;
-		add(new JLabel("Operation"), bag);
-
-		// label for optional controller status field
-		if(m_useControllerStatusField) {
-			bag.gridx = 0;
-			bag.gridy = 3;
-			add(new JLabel("Status"), bag);
-		}
-
-		bag.gridx = 1;
-		bag.gridy = 0;
-		bag.fill = GridBagConstraints.HORIZONTAL;
-		bag.weightx = 1;
-		txtId.setEditable(false);
-		add(txtId, bag);
-		bag.gridx = 3;
-		txtCamera.setEditable(false);
-		add(txtCamera, bag);
-		bag.gridx = 1;
-		bag.gridy = 1;
-		txtLocation.setEditable(false);
-		add(txtLocation, bag);
-		bag.gridx = 3;
-		txtBrightness.setEditable(false);
-		add(txtBrightness, bag);
-		bag.gridx = 1;
-		bag.gridy = 2;
-		bag.gridwidth = 3;
-		txtOperation.setEditable(false);
-		add(txtOperation, bag);
-
-		// add optional controller status field
-		if(m_useControllerStatusField) {
-			bag.gridx = 1;
-			bag.gridy = 3;
-			txtControllerStatus.setEditable(false);
-			add(txtControllerStatus, bag);
-		}
-
-		// add panel sign
-		bag.gridx = 0;
-		bag.gridy = 4;
-		bag.gridwidth = 4;
-		bag.insets.top = 6;
-		add(pnlSign, bag);
-		Box boxRight = Box.createVerticalBox();
-		boxRight.add(Box.createVerticalGlue());
-
-		// add optional duration combobox
-		if(m_useDurationComboBox)
-			boxRight.add(buildDurationBox());
-
-		// add optional font selection combo box
-		if(m_useFontsComboBox) {
-			JPanel fjp=buildFontSelectorBox(st.getFonts());
-			if(fjp != null)
-				boxRight.add(fjp);
-		}
-
-		// add optional AWS checkbox
-		if(m_useAwsCheckBox) {
-			awsCheckBox = new AwsCheckBox(getAwsProxyName(), 
-				I18NMessages.get("DMSDispatcher.AwsCheckBox"), 
-				st.getTrafficDeviceAttributes());
-			JPanel p = new JPanel(new FlowLayout());
-			p.add(awsCheckBox);
-			boxRight.add(p);
-		}
-
-		boxRight.add(Box.createVerticalStrut(4));
-		boxRight.add(buildButtonPanel());
-		boxRight.add(Box.createVerticalGlue());
-		Box deployBox = Box.createHorizontalBox();
-		deployBox.add(messageSelector);
-		deployBox.add(boxRight);
-		bag.gridy = 5;
-		add(deployBox, bag);
+	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
+		setLayout(new BorderLayout());
+		SonarState st = tc.getSonarState();
+		namespace = st.getNamespace();
+		cache = st.getDMSs();
+		user = st.lookupUser(tc.getUser().getName());
+		creator = new SignMessageCreator(st.getSignMessages(), user);
+		selectionModel = manager.getSelectionModel();
+		clearAction = new ClearDmsAction(selectionModel, this, user);
+		clearBtn.setAction(clearAction);
+		manager.setClearAction(clearAction);
+		composer = new SignMessageComposer(this, st.getDmsSignGroups(),
+			st.getSignText(), st.getFonts(), user);
+		currentPnl = singleTab.getCurrentPanel();
+		previewPnl = singleTab.getPreviewPanel();
+		multipleTab = new MultipleSignTab(st.getSignGroups(),
+			st.getDmsSignGroups(), selectionModel);
+		tabPane.addTab("Single", singleTab);
+		tabPane.addTab("Multiple", multipleTab);
+		add(tabPane, BorderLayout.CENTER);
+		add(createDeployBox(), BorderLayout.SOUTH);
 		clearSelected();
-		selectionModel.addTmsSelectionListener(this);
+		cache.addProxyListener(this);
+		selectionModel.addProxySelectionListener(this);
 	}
 
-	/** flags for optional controls */
-	protected boolean m_useFontsComboBox;
-	protected boolean m_useDurationComboBox;
-	protected boolean m_useControllerStatusField;
-	protected boolean m_useGetStatusButton;
-	protected boolean m_useAwsCheckBox;
+	/** Create a component to deploy signs */
+	protected Box createDeployBox() {
+		durationCmb.setSelectedIndex(0);
+		FormPanel panel = new FormPanel(true);
+		if(SystemAttributeHelper.isDmsDurationEnabled())
+			panel.addRow("Duration", durationCmb);
+		panel.addRow(card_panel);
+		card_panel.add(new JLabel(), "Blank");
+		card_panel.add(alertCbx, "Alert");
+		panel.setCenter();
+		panel.addRow(buildButtonPanel());
+		Box deployBox = Box.createHorizontalBox();
+		deployBox.add(composer);
+		deployBox.add(panel);
+		return deployBox;
+	}
 
-	/** set flags for optional controls */
-	protected void setOptionalControlUse() {
-		m_useFontsComboBox = 
-			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useDurationComboBox = 
-			!SystemAttributeHelper.isAgencyCaltransD10();
-		m_useControllerStatusField = 
-			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useGetStatusButton = 
-			SystemAttributeHelper.isAgencyCaltransD10();
-		m_useAwsCheckBox = 
-			SystemAttributeHelper.useAwsCheckBox();
+	/** A new proxy has been added */
+	public void proxyAdded(DMS proxy) {
+		// we're not interested
+	}
+
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
+	}
+
+	/** A proxy has been removed */
+	public void proxyRemoved(DMS proxy) {
+		// Note: the DMSManager will remove the proxy from the
+		//       ProxySelectionModel, so we can ignore this.
+	}
+
+	/** A proxy has been changed */
+	public void proxyChanged(final DMS proxy, final String a) {
+		if(proxy == getSingleSelection()) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					updateAttribute(proxy, a);
+				}
+			});
+		}
+	}
+
+	/** Get the selected DMS (if a single sign is selected) */
+	protected DMS getSingleSelection() {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(DMS dms: selectionModel.getSelected())
+				return dms;
+		}
+		return null;
 	}
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
+		multipleTab.dispose();
+		selectionModel.removeProxySelectionListener(this);
+		cache.removeProxyListener(this);
+		clearSelected();
+		clearCurrentPager();
+		clearPreviewPager();
+		composer.dispose();
 		removeAll();
-		selectedSign = null;
-		selectionModel.removeTmsSelectionListener(this);
 	}
 
+	/** Clear the current DMS panel pager */
+	protected void clearCurrentPager() {
+		DMSPanelPager pager = currentPnlPager;
+		if(pager != null) {
+			pager.dispose();
+			currentPnlPager = null;
+		}
+	}
+
+	/** Clear the preview DMS panel pager */
+	protected void clearPreviewPager() {
+		DMSPanelPager pager = previewPnlPager;
+		if(pager != null) {
+			pager.dispose();
+			previewPnlPager = null;
+		}
+	}
+
+	/** Build the button panel */
 	protected Box buildButtonPanel() {
-		new ActionJob(btnSend) {
-			public void perform() throws Exception {
+		new ActionJob(sendBtn) {
+			public void perform() {
 				sendMessage();
 			}
 		};
-		btnSend.setToolTipText(I18NMessages.get(
-			"DMSDispatcher.SendButton.ToolTip"));
+		sendBtn.setToolTipText(I18NMessages.get("dms.send.tooltip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
-		box.add(btnSend);
+		box.add(sendBtn);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(clearBtn);
 		box.add(Box.createHorizontalGlue());
-		box.add(btnClear);
-		box.add(Box.createHorizontalGlue());
-
-		// add optional 'get status' button
-		if(m_useGetStatusButton) {
-			btnGetStatus.setToolTipText(I18NMessages.get(
-				"DMSDispatcher.GetStatusButton.ToolTip"));
-			new ActionJob(this, btnGetStatus) {
-				public void perform() throws Exception {
-					selectedSign.dms.getSignMessage();
-				}
-			};
-			box.add(btnGetStatus);
-			box.add(Box.createHorizontalGlue());
-		}
 		return box;
 	}
 
-	/** Build the optional message duration box */
-	protected JPanel buildDurationBox() {
-		assert m_useDurationComboBox;
-		if(!m_useDurationComboBox)
-			return null;
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JLabel("Duration"));
-		p.add(cmbExpire);
-		cmbExpire.addItem(new Expiration("Indefinite",
-			SignMessage.DURATION_INFINITE));
-		cmbExpire.addItem( new Expiration( "5 Minutes", 5 ) );
-		cmbExpire.addItem( new Expiration( "15 Minutes", 15 ) );
-		cmbExpire.addItem( new Expiration( "30 Minutes", 30 ) );
-		cmbExpire.addItem( new Expiration( "45 Minutes", 45 ) );
-		cmbExpire.addItem( new Expiration( "1 Hour", 60 ) );
-		cmbExpire.addItem( new Expiration( "1.5 Hours", 90 ) );
-		cmbExpire.addItem( new Expiration( "2 Hours", 120 ) );
-		cmbExpire.addItem( new Expiration( "2.5 Hours", 150 ) );
-		cmbExpire.addItem( new Expiration( "3 Hours", 180 ) );
-		cmbExpire.addItem( new Expiration( "3.5 Hours", 210 ) );
-		cmbExpire.addItem( new Expiration( "4 Hours", 240 ) );
-		cmbExpire.addItem( new Expiration( "4.5 Hours", 270 ) );
-		cmbExpire.addItem( new Expiration( "5 Hours", 300 ) );
-		cmbExpire.addItem( new Expiration( "5.5 Hours", 330 ) );
-		cmbExpire.addItem( new Expiration( "6 Hours", 360 ) );
-		cmbExpire.addItem( new Expiration( "6.5 Hours", 390 ) );
-		cmbExpire.addItem( new Expiration( "7 Hours", 420 ) );
-		cmbExpire.addItem( new Expiration( "7.5 Hours", 420 ) );
-		cmbExpire.addItem( new Expiration( "8 Hours", 480 ) );
-		cmbExpire.addItem( new Expiration( "9 Hours", 540 ) );
-		cmbExpire.addItem( new Expiration( "10 Hours", 600 ) );
-		cmbExpire.addItem( new Expiration( "11 Hours", 660 ) );
-		cmbExpire.addItem( new Expiration( "12 Hours", 720 ) );
-		cmbExpire.addItem( new Expiration( "13 Hours", 780 ) );
-		cmbExpire.addItem( new Expiration( "14 Hours", 840 ) );
-		cmbExpire.addItem( new Expiration( "15 Hours", 900 ) );
-		cmbExpire.addItem( new Expiration( "16 Hours", 960 ) );
-		cmbExpire.addItem( new Expiration( "17 Hours", 1020 ) );
-		cmbExpire.setSelectedIndex( 0 );
-		return p;
+	/** Called whenever a sign is added to the selection */
+	public void selectionAdded(DMS s) {
+		updateSelected();
 	}
 
-	/** Build the font selector combo box */
-	protected JPanel buildFontSelectorBox(TypeCache<Font> tcf) {
-		assert m_useFontsComboBox;
-		if(!m_useFontsComboBox)
-			return null;
-		assert tcf != null;
-		if(tcf == null)
-			return null;
-		cmbFont = new FontComboBox(this, tcf);
-		JPanel p = new JPanel(new FlowLayout());
-		p.add(new JLabel("Font"));
-		p.add(cmbFont);
-		return p;
+	/** Called whenever a sign is removed from the selection */
+	public void selectionRemoved(DMS s) {
+		updateSelected();
 	}
 
-	/** Set the selected DMS */
-	protected void setSelected(DMSProxy proxy) throws RemoteException {
-		selectedSign = proxy;
-		if(proxy == null)
+	/** Update the selected sign(s) */
+	protected void updateSelected() {
+		List<DMS> selected = selectionModel.getSelected();
+		if(selected.size() == 0)
 			clearSelected();
-		else {
-			btnSend.setEnabled(true);
-			btnClear.setEnabled(true);
-			btnClear.setAction(new ClearDmsAction(proxy, userName));
-			if(m_useGetStatusButton)
-				btnGetStatus.setEnabled(true);
-			if(m_useDurationComboBox) {
-				cmbExpire.setEnabled(true);
-				cmbExpire.setSelectedIndex(0);
-			}
-			if(m_useFontsComboBox) {
-				cmbFont.setEnabled(true);
-				cmbFont.setDefaultSelection();
-			}
-			if(m_useAwsCheckBox) {
-				awsCheckBox.setProxy(getAwsProxyName());
-			}
-			proxy.updateUpdateInfo(); // update global messages
-			pnlSign.setSign(proxy);
-			refreshUpdate();
-			refreshStatus();
+		else if(selected.size() == 1) {
+			for(DMS dms: selected)
+				setSelected(dms);
+		} else {
+			singleTab.clearSelected();
+			enableWidgets();
+			selectMultipleTab();
 		}
 	}
 
-	/** Clear the selected DMS */
+	/** Clear the selection */
 	protected void clearSelected() {
-		selectedSign = null;
-		txtId.setText("");
-		txtCamera.setText("");
-		txtLocation.setText("");
-		txtBrightness.setText("");
-		if(m_useDurationComboBox) {
-			cmbExpire.setEnabled(false);
-			cmbExpire.setSelectedIndex(0);
+		disableWidgets();
+		singleTab.clearSelected();
+		selectSingleTab();
+	}
+
+	/** Set a single selected DMS */
+	protected void setSelected(DMS dms) {
+		if(DMSManager.isActive(dms)) {
+			builder = createPixelMapBuilder(dms);
+			updateAttribute(dms, null);
+			enableWidgets();
+		} else {
+			disableWidgets();
+			singleTab.updateAttribute(dms, null);
 		}
-		if(m_useFontsComboBox) {
-			cmbFont.setEnabled(false);
-			cmbFont.setDefaultSelection();
+		selectSingleTab();
+	}
+
+	/** Select the single selection tab */
+	protected void selectSingleTab() {
+		if(tabPane.getSelectedComponent() != singleTab) {
+			alertCbx.setSelected(false);
+			tabPane.setSelectedComponent(singleTab);
 		}
-		if(m_useAwsCheckBox) {
-			awsCheckBox.setProxy(null);
+		cards.show(card_panel, "Blank");
+	}
+
+	/** Select the multiple selection tab */
+	protected void selectMultipleTab() {
+		if(tabPane.getSelectedComponent() != multipleTab)
+			tabPane.setSelectedComponent(multipleTab);
+		cards.show(card_panel, "Alert");
+	}
+
+	/** Disable the dispatcher widgets */
+	protected void disableWidgets() {
+		clearCurrentPager();
+		clearPreviewPager();
+		currentPnl.clear();
+		previewPnl.clear();
+		composer.setEnabled(false);
+		composer.clearSelections();
+		durationCmb.setEnabled(false);
+		durationCmb.setSelectedItem(null);
+		sendBtn.setEnabled(false);
+		clearBtn.setEnabled(false);
+		builder = null;
+	}
+
+	/** Enable the dispatcher widgets */
+	protected void enableWidgets() {
+		composer.setEnabled(true);
+		durationCmb.setEnabled(true);
+		durationCmb.setSelectedIndex(0);
+		sendBtn.setEnabled(true);
+		clearBtn.setEnabled(true);
+		selectPreview(false);
+	}
+
+	/** Create the pixel map builder */
+	protected PixelMapBuilder createPixelMapBuilder(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(wp != null && hp != null && cw != null && ch != null)
+			return new PixelMapBuilder(namespace, wp, hp, cw, ch);
+		else
+			return null;
+	}
+
+	/** Get the bitmap graphic for all pages */
+	protected BitmapGraphic[] getBitmaps(DMS dms) {
+		if(dms == null)
+			return null;
+		SignMessage m = dms.getMessageCurrent();
+		if(m == null)
+			return null;
+		byte[] bmaps = decodeBitmaps(m.getBitmaps());
+		if(bmaps == null)
+			return null;
+		BitmapGraphic bg = createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.getBitmap().length;
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		int n_pages = bmaps.length / blen;
+		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
+		for(int i = 0; i < n_pages; i++) {
+			bitmaps[i] = createBitmapGraphic(dms);
+			byte[] b = new byte[blen];
+			System.arraycopy(bmaps, i * blen, b, 0, blen);
+			bitmaps[i].setBitmap(b);
 		}
-		messageSelector.setEnabled(false);
-		messageSelector.clearSelections();
-		btnSend.setEnabled(false);
-		btnClear.setEnabled(false);
-		if(m_useGetStatusButton)
-			btnGetStatus.setEnabled(false);
-		pnlSign.setSign(null);
+		return bitmaps;
+	}
+
+	/** Decode the bitmaps */
+	protected byte[] decodeBitmaps(String bitmaps) {
+		try {
+			return Base64.decode(bitmaps);
+		}
+		catch(IOException e) {
+			return null;
+		}
+	}
+
+	/** Create a bitmap graphic */
+	protected BitmapGraphic createBitmapGraphic(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
+		else
+			return null;
+	}
+
+	/** Send a new message to the selected DMS */
+	protected void sendMessage() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() > 0) {
+			SignMessage m = createMessage();
+			if(m != null)
+				sendMessage(m, sel);
+			composer.updateMessageLibrary();
+			selectPreview(false);
+		}
+	}
+
+	/** Send a message to a list of signs */
+	protected void sendMessage(SignMessage m, List<DMS> sel) {
+		for(DMS dms: sel) {
+			if(checkDimensions(dms)) {
+				dms.setOwnerNext(user);
+				dms.setMessageNext(m);
+			} else {
+				// NOTE: this sign does not match the proper
+				//       dimensions, so deselect it.
+				selectionModel.removeSelected(dms);
+			}
+		}
+	}
+
+	/** Create a new message from the widgets */
+	protected SignMessage createMessage() {
+		String multi = composer.getMessage();
+		if(multi != null) {
+			String bitmaps = createBitmaps(multi);
+			if(bitmaps != null) {
+				return creator.create(multi, bitmaps,
+				       getPriority(), getDuration());
+			}
+		}
+		return null;
+	}
+
+	/** Create a new blank message */
+	protected SignMessage createBlankMessage() {
+		String multi = "";
+		String bitmaps = createBitmaps(multi);
+		if(bitmaps != null) {
+			return creator.create(multi, bitmaps,
+				DMSMessagePriority.CLEAR, null);
+		} else
+			return null;
+	}
+
+	/** Create bitmap graphics for a MULTI string */
+	protected String createBitmaps(String multi) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			b.clear();
+			MultiString m = new MultiString(multi);
+			m.parse(b, b.getDefaultFontNumber());
+			return encodeBitmaps(b.getPixmaps());
+		} else
+			return null;
+	}
+
+	/** Encode the bitmaps to Base64 */
+	protected String encodeBitmaps(BitmapGraphic[] bmaps) {
+		int blen = bmaps[0].getBitmap().length;
+		byte[] bitmaps = new byte[bmaps.length * blen];
+		for(int i = 0; i < bmaps.length; i++) {
+			byte[] bm = bmaps[i].getBitmap();
+			System.arraycopy(bm, 0, bitmaps, i * blen,blen);
+		}
+		return Base64.encode(bitmaps);
+	}
+
+	/** Get the selected priority */
+	protected DMSMessagePriority getPriority() {
+		if(alertCbx.isSelected())
+		       return DMSMessagePriority.ALERT;
+		else
+		       return DMSMessagePriority.OPERATOR;
 	}
 
 	/** Get the selected duration */
-	protected int getDuration() {
-		if(!m_useDurationComboBox)
-			return SignMessage.DURATION_INFINITE;
-		Expiration e = (Expiration)cmbExpire.getSelectedItem();
+	protected Integer getDuration() {
+		Expiration e = (Expiration)durationCmb.getSelectedItem();
 		if(e != null)
-			return e.getDuration();
+			return e.duration;
 		else
-			return SignMessage.DURATION_INFINITE;
-	}
-
-	/** Send a new message to the selected DMS object */
-	protected void sendMessage() throws TMSException, RemoteException {
-		DMSProxy proxy = selectedSign;	// Avoid NPE race
-		String message = messageSelector.getMessage();
-		String fontName = (m_useFontsComboBox ? 
-			cmbFont.getSelectedItemName() : null);
-		if(proxy != null && message != null) {
-			proxy.dms.setMessage(userName, message, 
-				getDuration(), fontName);
-			messageSelector.updateMessageLibrary();
-		}
-	}
-
-	/** Called whenever the selected DMS changes */
-	public void selectionChanged(TmsSelectionEvent e) {
-		final TMSObject o = e.getSelected();
-		if(o instanceof DMSProxy) {
-			new AbstractJob() {
-				public void perform() throws RemoteException {
-					setSelected((DMSProxy)o);
-				}
-			}.addToScheduler();
-		}
-	}
-
-	/** Refresh the update status of the device */
-	public void refreshUpdate() {
-		DMSProxy proxy = selectedSign;	// Avoid NPE race
-		if(proxy != null) {
-			txtId.setText(proxy.getId());
-			txtLocation.setText(proxy.getDescription());
-			txtCamera.setText(proxy.getCameraId());
-			messageSelector.updateModel(proxy);
-		}
-	}
-
-	/** Refresh the status of the device */
-	public void refreshStatus() {
-		DMSProxy dms = selectedSign;	// Avoid NPE race
-		if(dms == null)
-			return;
-		SignMessage m = dms.getMessage();
-		pnlSign.setMessage(m);
-		messageSelector.setMessage(dms);
-		txtOperation.setText(dms.getOperation());
-		if(dms.isFailed()) {
-			txtOperation.setForeground(Color.WHITE);
-			txtOperation.setBackground(Color.GRAY);
-		} else {
-			txtOperation.setForeground(null);
-			txtOperation.setBackground(null);
-		}
-		txtBrightness.setText("" + Math.round(
-			dms.getLightOutput() / 655.35f));
-
-		// optional controller status field
-		if(m_useControllerStatusField)
-			txtControllerStatus.setText(dms.getControllerStatus());
-	}
-
-	/** get the currently selected DMS */
-	public DMSProxy getSelectedDms() {
-		return selectedSign;
-	}
-
-	/** get the currently selected DMS id, e.g. "V1" */
-	public String getSelectedDmsId() {
-		if( selectedSign == null )
 			return null;
-		return selectedSign.getId();
 	}
 
-	/** get the currently selected DMS id, e.g. "V1_AWS_controlled" */
-	public String getAwsProxyName() {
-		String name = TrafficDeviceAttributeHelper.createName(
-			getSelectedDmsId(),
-			TrafficDeviceAttribute.AWS_CONTROLLED);
-		return name;
+	/** Check the dimensions of a sign against the pixel map builder */
+	protected boolean checkDimensions(DMS dms) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			Integer w = dms.getWidthPixels();
+			Integer h = dms.getHeightPixels();
+			if(w != null && h != null)
+				return b.width == w && b.height == h;
+		}
+		return false;
+	}
+
+	/** Update one attribute on the form */
+	protected void updateAttribute(DMS dms, String a) {
+		singleTab.updateAttribute(dms, a);
+		if(a == null || a.equals("messageCurrent")) {
+			clearCurrentPager();
+			BitmapGraphic[] bmaps = getBitmaps(dms);
+			currentPnlPager = new DMSPanelPager(currentPnl, dms,
+				bmaps);
+			if(a == null) {
+				composer.setSign(dms, getLineCount(dms),
+					builder);
+			}
+			composer.setMessage();
+		}
+	}
+
+	/** Get the number of lines on a sign */
+	public int getLineCount(DMS dms) {
+		int ml = SystemAttributeHelper.getDmsMaxLines();
+		int lh = getLineHeightPixels();
+		Integer h = dms.getHeightPixels();
+		if(h != null && h > 0 && lh >= h) {
+			int nl = h / lh;
+			return Math.min(nl, ml);
+		} else
+			return ml;
+	}
+
+	/** Get the line height */
+	protected int getLineHeightPixels() {
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.getLineHeightPixels();
+		else
+			return 7;
+	}
+
+	/** Select the preview mode */
+	public void selectPreview(boolean p) {
+		if(p)
+			updatePreviewPanel();
+		composer.selectPreview(p);
+		singleTab.selectPreview(p);
+	}
+
+	/** Update the preview panel */
+	protected void updatePreviewPanel() {
+		clearPreviewPager();
+		DMS dms = getSingleSelection();
+		if(dms != null) {
+			String multi = composer.getMessage();
+			BitmapGraphic[] bmaps = getBitmaps(multi);
+			previewPnlPager = new DMSPanelPager(previewPnl, dms,
+				bmaps);
+		}
+	}
+
+	/** Get the bitmap graphic for the given message */
+	protected BitmapGraphic[] getBitmaps(String m) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			b.clear();
+			MultiString multi = new MultiString();
+			if(m != null)
+				multi.addText(m);
+			multi.parse(b, b.getDefaultFontNumber());
+			return b.getPixmaps();
+		} else
+			return null;
+	}
+
+	/** Check is AWS is allowed and user has permission to change */
+	public boolean isAwsPermitted(DMS dms) {
+		Name name = new Name(dms, "awsControlled");
+		return dms.getAwsAllowed() && user.canUpdate(name.toString());
 	}
 }
-

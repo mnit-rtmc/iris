@@ -334,16 +334,6 @@ public class DetectorImpl extends Device2Impl implements Detector,
 		return force_fail;
 	}
 
-	/** Notify SONAR clients of changes to "force_fail" attribute */
-	public void notifyForceFail() {
-		if(MainServer.server != null) {
-			String[] ff = new String[] {
-				String.valueOf(force_fail)
-			};
-			MainServer.server.setAttribute(this, "forceFail", ff);
-		}
-	}
-
 	/** Check if the detector is currently 'failed' */
 	public boolean isFailed() {
 		return force_fail || last_volume == Constants.MISSING_DATA;
@@ -570,7 +560,7 @@ public class DetectorImpl extends Device2Impl implements Detector,
 			return;
 		try {
 			doSetForceFail(true);
-			notifyForceFail();
+			notifyAttribute("forceFail");
 		}
 		catch(TMSException e) {
 			e.printStackTrace();

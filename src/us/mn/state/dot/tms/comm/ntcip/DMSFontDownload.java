@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,75 +17,208 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.BaseObjectImpl;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontImpl;
 import us.mn.state.dot.tms.GlyphImpl;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
- * Operation to send a font to a DMS controller
+ * Operation to send a set of fonts to a DMS controller.
  *
  * @author Douglas Lau
  */
 public class DMSFontDownload extends DMSOperation {
 
-	/** Font to download to the sign */
-	protected final FontImpl font;
+	/** Number of fonts supported */
+	protected final NumFonts num_fonts = new NumFonts();
 
-	/** Font index */
-	protected final int index;
+	/** Mapping of font numbers to font index (row in font table) */
+	protected final TreeMap<Integer, Integer> font_numbers =
+		new TreeMap<Integer, Integer>();
 
-	/** Glyph mapping */
-	protected final SortedMap<Integer, GlyphImpl> glyphs;
+	/** Iterator of fonts to be sent to the sign */
+	protected final Iterator<FontImpl> font_iterator;
+
+	/** Current font */
+	protected FontImpl font;
+
+	/** Font index for font table */
+	protected int index = 0;
+
+	/** Flag for determining the default font */
+	protected boolean first = true;
+
+	/** Flag for version 2 controller (with support for fontStatus) */
+	protected boolean font_status_support = true;
 
 	/** Create a new DMS font download operation */
-	public DMSFontDownload(DMSImpl d, FontImpl f) {
+	public DMSFontDownload(DMSImpl d) {
 		super(DOWNLOAD, d);
-		font = f;
-		// On ADDCO signs, font 1 is read-only (apparently)
-		if(d.getMake().contains("ADDCO"))
-			index = 2;
-		else
-			index = 1;
-		glyphs = f.getGlyphs();
+		final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
+		Integer w = dms.getWidthPixels();
+		Integer h = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(w != null && h != null && cw != null && ch != null) {
+			PixelMapBuilder builder = new PixelMapBuilder(
+				BaseObjectImpl.namespace, w, h, cw, ch);
+			builder.findFonts(new Checker<Font>() {
+				public boolean check(Font font) {
+					fonts.add((FontImpl)font);
+					return false;
+				}
+			});
+		}
+		for(FontImpl f: fonts)
+			font_numbers.put(f.getNumber(), null);
+		font_iterator = fonts.iterator();
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new CheckVersionID();
+		return new QueryNumFonts();
 	}
 
-	/** Check if the font version ID matches */
-	protected boolean fontMatches(int v) {
-		return v == font.getVersionID();
-	}
+	/** Phase to query the number of supported fonts */
+	protected class QueryNumFonts extends Phase {
 
-	/** Check version ID */
-	protected class CheckVersionID extends Phase {
-
-		/** Check the font version ID */
+		/** Query the number of supported fonts */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontVersionID version = new FontVersionID(index);
-			mess.add(version);
-			try { mess.getRequest(); }
-			catch(SNMP.Message.NoSuchName e) {
-				return new CreateFont();
-			}
-			int v = version.getInteger();
-			DMS_LOG.log(dms.getId() + " Font #" + index +
-				" versionID:" + v);
-			if(fontMatches(v))
-				return null;
-			else
-				return new InvalidateFont();
+			mess.add(num_fonts);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + num_fonts);
+			return new QueryFontNumbers();
 		}
 	}
 
-	/** Invalidate the font */
-	protected class InvalidateFont extends Phase {
+	/** Phase to query all font numbers */
+	protected class QueryFontNumbers extends Phase {
+
+		/** Array of font number objects */
+		protected FontNumber[] number = new FontNumber[
+			num_fonts.getInteger()];
+
+		/** Query the font numbers for all fonts */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			for(int i = 0; i < number.length; i++) {
+				Integer row = i + 1;	// fontIndex
+				number[i] = new FontNumber(row);
+				mess.add(number[i]);
+			}
+			mess.getRequest();
+			populateFontNumbers();
+			return nextFontPhase();
+		}
+
+		/** Populate the font_numbers hash */
+		protected void populateFontNumbers() {
+			TreeSet<Integer> open_rows = new TreeSet<Integer>();
+			for(int i = 0; i < number.length; i++) {
+				Integer row = i + 1;	// fontIndex
+				Integer n = number[i].getInteger();
+				if(font_numbers.containsKey(n))
+					font_numbers.put(n, row);
+				else
+					open_rows.add(row);
+			}
+			for(Integer n: font_numbers.keySet()) {
+				if(font_numbers.get(n) == null) {
+					Integer row = open_rows.pollFirst();
+					if(row != null)
+						font_numbers.put(n, row);
+					else {
+						DMS_LOG.log(dms.getName() +
+							": Skipping font " + n);
+					}
+				}
+			}
+		}
+	}
+
+	/** Get the first phase of the next font */
+	protected Phase nextFontPhase() {
+		if(font_iterator.hasNext()) {
+			font = font_iterator.next();
+			index = font_numbers.get(font.getNumber());
+		} else
+			return null;
+		return new VerifyFont();
+	}
+
+	/** Phase to verify a font */
+	protected class VerifyFont extends Phase {
+
+		/** Verify a font */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DMS_LOG.log(dms.getName() + " Font #" + index +
+				", name: " + font.getName() + ", number: " +
+				 font.getNumber());
+			FontVersionID version = new FontVersionID(index);
+			mess.add(version);
+			try {
+				mess.getRequest();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Note: some vendors respond with NoSuchName
+				//       if the font is not valid
+				version.setInteger(-1);
+			}
+			int v = version.getInteger();
+			DMS_LOG.log(dms.getName() + ": " + version);
+			if(v == font.getVersionID()) {
+				DMS_LOG.log(dms.getName() + ": Font is valid");
+				return nextFontPhase();
+			} else {
+				if(font_status_support)
+					return new QueryInitialStatus();
+				else
+					return new InvalidateFontV1();
+			}
+		}
+	}
+
+	/** Phase to query the initial font status */
+	protected class QueryInitialStatus extends Phase {
+
+		/** Query the initial font status */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(index);
+			mess.add(status);
+			try {
+				mess.getRequest();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				font_status_support = false;
+				return new InvalidateFontV1();
+			}
+			DMS_LOG.log(dms.getName() + ": " + status);
+			if(status.getInteger() == FontStatus.MODIFYING)
+				return new CreateFont();
+			if(status.getInteger() == FontStatus.PERMANENT)
+				return nextFontPhase();
+			if(status.getInteger() == FontStatus.UNMANAGED)
+				return new InvalidateFontV2();
+			if(status.getInteger() == FontStatus.IN_USE) {
+				DMS_LOG.log(dms.getName() +
+					": font download aborted");
+				return null;
+			}
+			return new SetStatusModifying();
+		}
+	}
+
+	/** Invalidate the font (v1) */
+	protected class InvalidateFontV1 extends Phase {
 
 		/** Invalidate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
@@ -95,12 +228,56 @@ public class DMSFontDownload extends DMSOperation {
 		}
 	}
 
+	/** Invalidate the font (v2) */
+	protected class InvalidateFontV2 extends Phase {
+
+		/** Invalidate the font entry in the font table */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(index);
+			status.setInteger(FontStatus.NOT_USED_REQ);
+			mess.add(status);
+			mess.setRequest();
+			return new SetStatusModifying();
+		}
+	}
+
+	/** Phase to set the font status to modifying */
+	protected class SetStatusModifying extends Phase {
+
+		/** Set the font status to modifying */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(index);
+			status.setInteger(FontStatus.MODIFY_REQ);
+			mess.add(status);
+			mess.setRequest();
+			return new VerifyStatusModifying();
+		}
+	}
+
+	/** Phase to verify the font status is modifying */
+	protected class VerifyStatusModifying extends Phase {
+
+		/** Verify the font status is modifying */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(index);
+			mess.add(status);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			if(status.getInteger() != FontStatus.MODIFYING) {
+				DMS_LOG.log(dms.getName() +
+					": font download aborted");
+				return null;
+			}
+			return new CreateFont();
+		}
+	}
+
 	/** Create the font */
 	protected class CreateFont extends Phase {
 
 		/** Create a new font in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontNumber(index, index));
+			mess.add(new FontNumber(index, font.getNumber()));
 			mess.add(new FontName(index, font.getName()));
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.add(new FontCharSpacing(index,
@@ -108,10 +285,15 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(new FontLineSpacing(index,
 				font.getLineSpacing()));
 			mess.setRequest();
-			if(!glyphs.isEmpty())
+
+			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
+			if(glyphs.isEmpty()) {
+				if(font_status_support)
+					return new ValidateFontV2();
+				else
+					return new ValidateFontV1();
+			} else
 				return new AddCharacter(glyphs.values());
-			else
-				return new ValidateFont();
 		}
 	}
 
@@ -150,19 +332,73 @@ public class DMSFontDownload extends DMSOperation {
 			if(chars.hasNext()) {
 				glyph = chars.next();
 				return this;
-			} else
-				return new ValidateFont();
+			} else {
+				if(font_status_support)
+					return new ValidateFontV2();
+				else
+					return new ValidateFontV1();
+			}
 		}
 	}
 
-	/** Validate the font. This forces a LedStar fontVersionID update. */
-	protected class ValidateFont extends Phase {
+	/** Validate the font. This forces a fontVersionID update on some signs
+	 * which implement 1203 version 1 (LedStar). */
+	protected class ValidateFontV1 extends Phase {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new FontHeight(index, font.getHeight()));
 			mess.setRequest();
-			return new SetDefaultFont();
+			if(first)
+				return new SetDefaultFont();
+			else
+				return nextFontPhase();
+		}
+	}
+
+	/** Validate the font on a 1203 version 2 sign. */
+	protected class ValidateFontV2 extends Phase {
+
+		/** Validate a font entry in the font table */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(index);
+			status.setInteger(FontStatus.READY_FOR_USE_REQ);
+			mess.add(status);
+			mess.setRequest();
+			return new VerifyStatusReadyForUse();
+		}
+	}
+
+	/** Phase to verify the font status is ready for use */
+	protected class VerifyStatusReadyForUse extends Phase {
+
+		/** Time to stop checking if the font is ready for use */
+		protected final long expire = System.currentTimeMillis() + 
+			10 * 1000;
+
+		/** Verify the font status is ready for use */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(index);
+			mess.add(status);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			if(status.getInteger() == FontStatus.READY_FOR_USE) {
+				if(first)
+					return new SetDefaultFont();
+				else
+					return nextFontPhase();
+			}
+			if(status.getInteger() != FontStatus.CALCULATING_ID) {
+				DMS_LOG.log(dms.getName() + ": font status " +
+					"unexpected -- aborted");
+				return null;
+			}
+			if(System.currentTimeMillis() > expire) {
+				DMS_LOG.log(dms.getName() + ": font status " +
+					"timeout expired -- aborted");
+				return null;
+			} else
+				return this;
 		}
 	}
 
@@ -171,9 +407,12 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Set the default font numbmer */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DefaultFont(index));
+			DefaultFont dfont = new DefaultFont(font.getNumber());
+			DMS_LOG.log(dms.getName() + ": " + dfont);
+			mess.add(dfont);
 			mess.setRequest();
-			return null;
+			first = false;
+			return nextFontPhase();
 		}
 	}
 }
