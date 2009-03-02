@@ -26,6 +26,7 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
@@ -126,10 +127,16 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected final MessagesTab messagesTab;
 
 	/** Travel time template string field */
-	protected final JTextArea travel = new JTextArea(10, 24);
+	protected final JTextArea travel = new JTextArea(6, 24);
 
 	/** Timing plan table component */
 	protected final ZTable plan_table = new ZTable();
+
+	/** Timing plan model */
+	protected final TimingPlanModel plan_model;
+
+	/** Button to delete a timing plan */
+	protected final JButton deleteBtn = new JButton("Delete");
 
 	/** Sign type label */
 	protected final JLabel type = new JLabel();
@@ -249,7 +256,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Heat tape status label */
 	protected final JLabel heatTapeStatus = new JLabel();
 
-
 	/** Sonar state */
 	protected final SonarState state;
 
@@ -265,6 +271,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		state = tc.getSonarState();
 		user = state.lookupUser(tc.getUser().getName());
 		messagesTab = new MessagesTab(tc, sign);
+		plan_model = new TimingPlanModel(state.getTimingPlans(), sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -342,19 +349,28 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create the travel time panel */
 	protected JPanel createTravelTimePanel() {
+		final ListSelectionModel s = plan_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new FocusJob(travel) {
 			public void perform() {
 				proxy.setTravel(travel.getText());
 			}
 		};
+		new ActionJob(deleteBtn) {
+			public void perform() {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					plan_model.deleteRow(row);
+			}
+		};
 		plan_table.setAutoCreateColumnsFromModel(false);
-		plan_table.setModel(new TimingPlanModel(state.getTimingPlans(),
-			proxy));
+		plan_table.setModel(plan_model);
 		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
 		plan_table.setVisibleRowCount(4);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Travel template", travel);
 		panel.addRow(plan_table);
+		panel.addRow(deleteBtn);
 		return panel;
 	}
 
