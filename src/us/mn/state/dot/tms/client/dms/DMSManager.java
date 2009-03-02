@@ -144,6 +144,14 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** TMS connection */
 	protected final TmsConnection connection;
 
+	/** Action to clear the selected DMS */
+	protected ClearDmsAction clearAction;
+
+	/** Set the clear DMS action */
+	public void setClearAction(ClearDmsAction a) {
+		clearAction = a;
+	}
+
 	/** Create a new DMS manager */
 	public DMSManager(TmsConnection tc, TypeCache<DMS> c, GeoLocManager lm)
 	{
@@ -253,7 +261,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(new javax.swing.JLabel("" + n_selected + " DMSs"));
 		p.addSeparator();
-		// FIXME: add clear all action
+		if(clearAction != null)
+			p.add(clearAction);
 		return p;
 	}
 
@@ -262,6 +271,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
+		if(clearAction != null)
+			p.add(clearAction);
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<DMS>(proxy));
 		p.add(new PropertiesAction<DMS>(proxy) {

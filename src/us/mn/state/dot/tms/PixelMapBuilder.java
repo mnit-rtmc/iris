@@ -31,10 +31,10 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	protected final Namespace namespace;
 
 	/** Pixel width of sign */
-	protected final int width;
+	public final int width;
 
 	/** Pixel height of sign */
-	protected final int height;
+	public final int height;
 
 	/** Character width (pixels) for character-matrix signs.  Use 0 for
 	 * line-matrix or full-matrix signs. */

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.io.IOException;
+import java.util.List;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -94,10 +95,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final JButton sendBtn =
 		new JButton(I18NMessages.get("dms.send"));
 
-	/** Button used to clear the DMS.
-	 * FIXME: should just use ClearDmsAction */
-	protected final JButton clearBtn =
-		new JButton(I18NMessages.get("dms.clear"));
+	/** Button used to clear the DMS */
+	protected final JButton clearBtn = new JButton();
+
+	/** Action to clear selected DMS */
+	protected final ClearDmsAction clearAction;
 
 	/** Card layout for alert panel */
 	protected final CardLayout cards = new CardLayout();
@@ -133,6 +135,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		user = st.lookupUser(tc.getUser().getName());
 		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
+		clearAction = new ClearDmsAction(selectionModel, this, user);
+		clearBtn.setAction(clearAction);
+		manager.setClearAction(clearAction);
 		composer = new SignMessageComposer(this, st.getDmsSignGroups(),
 			st.getSignText(), st.getFonts(), user);
 		currentPnl = singleTab.getCurrentPanel();
@@ -143,7 +148,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		tabPane.addTab("Multiple", multipleTab);
 		add(tabPane, BorderLayout.CENTER);
 		add(createDeployBox(), BorderLayout.SOUTH);
-		setSelected(null);
+		clearSelected();
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
 	}
@@ -206,7 +211,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		multipleTab.dispose();
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
-		setSelected(null);
+		clearSelected();
 		clearCurrentPager();
 		clearPreviewPager();
 		composer.dispose();
@@ -250,38 +255,47 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(DMS s) {
-		setSelected(getSingleSelection());
-		setSelectedTab();
+		updateSelected();
 	}
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(DMS s) {
-		setSelected(getSingleSelection());
-		setSelectedTab();
+		updateSelected();
+	}
+
+	/** Update the selected sign(s) */
+	protected void updateSelected() {
+		List<DMS> selected = selectionModel.getSelected();
+		if(selected.size() == 0)
+			clearSelected();
+		else if(selected.size() == 1) {
+			for(DMS dms: selected)
+				setSelected(dms);
+		} else {
+			singleTab.clearSelected();
+			enableWidgets();
+			selectMultipleTab();
+		}
+	}
+
+	/** Clear the selection */
+	protected void clearSelected() {
+		disableWidgets();
+		singleTab.clearSelected();
+		selectSingleTab();
 	}
 
 	/** Set a single selected DMS */
 	protected void setSelected(DMS dms) {
-		if(dms == null) {
-			singleTab.clearSelected();
-			disableWidgets();
-		} else if(DMSManager.isActive(dms)) {
+		if(DMSManager.isActive(dms)) {
 			builder = createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
-			clearBtn.setAction(new ClearDmsAction(dms, this, user));
 			enableWidgets();
 		} else {
 			disableWidgets();
 			singleTab.updateAttribute(dms, null);
 		}
-	}
-
-	/** Set the "single" or "multiple" selected tab */
-	protected void setSelectedTab() {
-		if(selectionModel.getSelectedCount() < 2)
-			selectSingleTab();
-		else
-			selectMultipleTab();
+		selectSingleTab();
 	}
 
 	/** Select the single selection tab */
@@ -386,15 +400,27 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Send a new message to the selected DMS */
 	protected void sendMessage() {
-		DMS dms = getSingleSelection();
-		if(dms != null) {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() > 0) {
 			SignMessage m = createMessage();
-			if(m != null) {
-				dms.setOwnerNext(user);
-				dms.setMessageNext(m);
-			}
+			if(m != null)
+				sendMessage(m, sel);
 			composer.updateMessageLibrary();
 			selectPreview(false);
+		}
+	}
+
+	/** Send a message to a list of signs */
+	protected void sendMessage(SignMessage m, List<DMS> sel) {
+		for(DMS dms: sel) {
+			if(checkDimensions(dms)) {
+				dms.setOwnerNext(user);
+				dms.setMessageNext(m);
+			} else {
+				// NOTE: this sign does not match the proper
+				//       dimensions, so deselect it.
+				selectionModel.removeSelected(dms);
+			}
 		}
 	}
 
@@ -453,6 +479,18 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return e.duration;
 		else
 			return null;
+	}
+
+	/** Check the dimensions of a sign against the pixel map builder */
+	protected boolean checkDimensions(DMS dms) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			Integer w = dms.getWidthPixels();
+			Integer h = dms.getHeightPixels();
+			if(w != null && h != null)
+				return b.width == w && b.height == h;
+		}
+		return false;
 	}
 
 	/** Update one attribute on the form */

@@ -14,19 +14,26 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ActionEvent;
+import java.util.List;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.client.sonar.ProxyAction;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 
 /**
- * Action to clear the selected DMS.
+ * Action to clear all selected DMS.
  *
  * @author Douglas Lau
  */
-public class ClearDmsAction extends ProxyAction<DMS> {
+public class ClearDmsAction extends AbstractAction {
+
+	/** Selection model */
+	protected final ProxySelectionModel<DMS> selectionModel;
 
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
@@ -35,8 +42,10 @@ public class ClearDmsAction extends ProxyAction<DMS> {
 	protected final User owner;
 
 	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(DMS p, DMSDispatcher d, User o) {
-		super(p);
+	public ClearDmsAction(ProxySelectionModel<DMS> s, DMSDispatcher d,
+		User o)
+	{
+		selectionModel = s;
 		dispatcher = d;
 		owner = o;
 		putValue(Action.NAME, I18NMessages.get("dms.clear"));
@@ -44,12 +53,26 @@ public class ClearDmsAction extends ProxyAction<DMS> {
 			I18NMessages.get("dms.clear.tooltip"));
 	}
 
+	/** Schedule the action to be performed */
+	public void actionPerformed(ActionEvent e) {
+		new AbstractJob() {
+			public void perform() {
+				do_perform();
+			}
+		}.addToScheduler();
+	}
+
 	/** Actually perform the action */
 	protected void do_perform() {
-		SignMessage m = dispatcher.createBlankMessage();
-		if(m != null) {
-			proxy.setOwnerNext(owner);
-			proxy.setMessageNext(m);
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() > 0) {
+			SignMessage m = dispatcher.createBlankMessage();
+			if(m != null) {
+				for(DMS dms: sel) {
+					dms.setOwnerNext(owner);
+					dms.setMessageNext(m);
+				}
+			}
 		}
 	}
 }
