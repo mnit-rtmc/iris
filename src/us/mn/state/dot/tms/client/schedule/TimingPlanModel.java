@@ -129,7 +129,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 
 	/** Create the month column */
 	static protected TableColumn createTypeColumn() {
-		TableColumn c = new TableColumn(COL_TYPE, 100);
+		TableColumn c = new TableColumn(COL_TYPE, 140);
 		c.setHeaderValue("Plan Type");
 		JComboBox combo = new JComboBox(
 			TimingPlanType.getDescriptions());
@@ -228,7 +228,8 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	public void setValueAt(Object value, int row, int column) {
 		TimingPlan p = getProxy(row);
 		if(p == null && column == COL_TYPE) {
-			createPlan((String)value);
+			if(value instanceof String)
+				createPlan((String)value);
 			return;
 		}
 		switch(column) {
