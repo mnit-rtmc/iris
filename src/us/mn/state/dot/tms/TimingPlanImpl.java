@@ -120,7 +120,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("plan_type", plan_type.ordinal());
+		map.put("plan_type", plan_type);
 		map.put("device", device);
 		map.put("start_min", start_min);
 		map.put("stop_min", stop_min);
@@ -149,13 +149,12 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	protected TimingPlanImpl(Namespace ns, String n, int p, String d,
 		int st, int sp, boolean a, boolean tst, int t)
 	{
-		this(n, TimingPlanType.fromOrdinal(p), lookupDevice(ns, d),
-		     st, sp, a, tst, t);
+		this(n, p, lookupDevice(ns, d), st, sp, a, tst, t);
 	}
 
 	/** Create a new timing plan */
-	protected TimingPlanImpl(String n, TimingPlanType p, Device2 d, int st,
-		int sp, boolean a, boolean tst, int t)
+	protected TimingPlanImpl(String n, int p, Device2 d, int st, int sp,
+		boolean a, boolean tst, int t)
 	{
 		this(n);
 		plan_type = p;
@@ -168,11 +167,11 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Timing plan type */
-	protected TimingPlanType plan_type;
+	protected int plan_type;
 
 	/** Get the plan type */
 	public int getPlanType() {
-		return plan_type.ordinal();
+		return plan_type;
 	}
 
 	/** Device */
@@ -352,7 +351,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Create the timing plan state */
 	protected TimingPlanState createState() {
-		switch(plan_type) {
+		switch(TimingPlanType.fromOrdinal(plan_type)) {
 		case TRAVEL:
 			return new TimingPlanState();
 		case SIMPLE:
