@@ -19,13 +19,20 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device2;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanType;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -120,11 +127,21 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		return c;
 	}
 
+	/** Create the month column */
+	static protected TableColumn createTypeColumn() {
+		TableColumn c = new TableColumn(COL_TYPE, 100);
+		c.setHeaderValue("Plan Type");
+		JComboBox combo = new JComboBox(
+			TimingPlanType.getDescriptions());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, "Name", false));
-		m.addColumn(createColumn(COL_TYPE, "Plan Type", false));
+		m.addColumn(createTypeColumn());
 		m.addColumn(createColumn(COL_DEVICE, "Device", false));
 		m.addColumn(createColumn(COL_START, "Start Time", true));
 		m.addColumn(createColumn(COL_STOP, "Stop Time", true));
@@ -210,13 +227,11 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		TimingPlan p = getProxy(row);
-		if(p == null)
+		if(p == null && column == COL_TYPE) {
+			createPlan((String)value);
 			return;
+		}
 		switch(column) {
-		case COL_TYPE:
-			// FIXME: create a new timing plan
-			// name is device name plus _N suffix
-			break;
 		case COL_START:
 			p.setStartMin(parseMinute(value.toString()));
 			break;
@@ -236,5 +251,66 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 				p.setTarget((Integer)value);
 			break;
 		}
+	}
+
+	/** Create a new timing plan */
+	protected void createPlan(String pdesc) {
+		if(pdesc.equals(TimingPlanType.TRAVEL.description)) {
+			if(device instanceof DMS)
+				create(TimingPlanType.TRAVEL);
+		} else if(pdesc.equals(TimingPlanType.SIMPLE.description)) {
+			if(device instanceof RampMeter)
+				create(TimingPlanType.SIMPLE);
+		} else if(pdesc.equals(TimingPlanType.STRATIFIED.description)) {
+			if(device instanceof RampMeter)
+				create(TimingPlanType.STRATIFIED);
+		}
+	}
+
+	/** 
+	 * Create a new timing plan.
+	 * @param ptype Timing plan type.
+	 */
+	protected void create(TimingPlanType ptype) {
+		String name = createUniqueName();
+		if(name != null) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("plan_type", ptype.ordinal());
+			attrs.put("device", device);
+			cache.createObject(name, attrs);
+		}
+	}
+
+	/** 
+	 * Create a TimingPlan name, which is in this form: 
+	 *    device.name + "_" + uniqueid
+	 *    where uniqueid is a sequential integer.
+	 * @return A unique string for a new TimingPlan name
+	 */
+	protected String createUniqueName() {
+		HashSet<String> names = createTimingPlanNameSet();
+		int uid_max = names.size() + 2;
+		for(int uid = 1; uid <= uid_max; uid++) {
+			String n = device.getName() + "_" + uid;
+			if(!names.contains(n))
+				return n;
+		}
+		assert false;
+		return null;
+	}
+
+	/** Create a HashSet containing all TimingPlan names for the device.
+	 * @return A HashSet with entries as TimingPlan names */
+	protected HashSet<String> createTimingPlanNameSet() {
+		final HashSet<String> names = new HashSet<String>();
+		cache.findObject(new Checker<TimingPlan>() {
+			public boolean check(TimingPlan tp) {
+				if(tp.getDevice() == device)
+					names.add(tp.getName());
+				return false;
+			}
+		});
+		return names;
 	}
 }
