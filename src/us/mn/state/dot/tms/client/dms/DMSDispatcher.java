@@ -431,8 +431,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			String bitmaps = createBitmaps(multi);
 			if(bitmaps != null) {
 				return creator.create(multi, bitmaps,
-				       DMSMessagePriority.OPERATOR,
-				       getDuration());
+				       getPriority(), getDuration());
 			}
 		}
 		return null;
@@ -470,6 +469,14 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			System.arraycopy(bm, 0, bitmaps, i * blen,blen);
 		}
 		return Base64.encode(bitmaps);
+	}
+
+	/** Get the selected priority */
+	protected DMSMessagePriority getPriority() {
+		if(alertCbx.isSelected())
+		       return DMSMessagePriority.ALERT;
+		else
+		       return DMSMessagePriority.OPERATOR;
 	}
 
 	/** Get the selected duration */
