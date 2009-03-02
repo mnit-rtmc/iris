@@ -200,7 +200,7 @@ public class SignMessageComposer extends JPanel {
 	protected void initializeFonts(int np, PixelMapBuilder builder) {
 		disposeFonts();
 		fontCmb = new JComboBox[np];
-		if(builder != null)
+		if(builder != null && builder != null)
 			fontModel = new FontComboBoxModel[np];
 		for(int i = 0; i < np; i++) {
 			fontCmb[i] = new JComboBox();
