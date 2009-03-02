@@ -1098,8 +1098,25 @@ public class DMSImpl extends Device2Impl implements DMS {
 		// FIXME: lookup samples in database
 	}
 
+	/** Flag to indicate if a travel time plan is operating */
+	protected boolean travelOperating = false;
+
+	/** Set the travel time operating flag */
+	public void setTravelOperating(boolean o) {
+		travelOperating = o;
+	}
+
 	/** Update the travel times for this sign */
 	public void updateTravelTime() {
+		if(travelOperating)
+			sendTravelTime();
+		else
+			clearTravelTime();
+		setTravelOperating(false);
+	}
+
+	/** Send a travel time message to the sign */
+	protected void sendTravelTime() {
 		try {
 			sendTravelTime(composeTravelTimeMessage());
 		}
@@ -1111,7 +1128,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 	}
 
 	/** Clear the travel time for this sign */
-	public void clearTravelTime() {
+	protected void clearTravelTime() {
 		s_routes.clear();
 		sendTravelTime("");
 	}

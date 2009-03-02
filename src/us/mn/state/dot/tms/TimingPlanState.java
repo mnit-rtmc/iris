@@ -27,9 +27,7 @@ public class TimingPlanState {
 		if(device instanceof DMSImpl) {
 			DMSImpl dms = (DMSImpl)device;
 			if(plan.isOperating())
-				dms.updateTravelTime();
-			else
-				dms.clearTravelTime();
+				dms.setTravelOperating(true);
 		}
 	}
 }
