@@ -163,10 +163,9 @@ public class FormPanel extends JPanel {
 	public void addRow(String name, JTextArea area) {
 		setEast();
 		add(new JLabel(name));
-		setWest();
-		setWidth(GridBagConstraints.REMAINDER);
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
+		setFill();
 		addRow(new JScrollPane(area,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
@@ -174,11 +173,7 @@ public class FormPanel extends JPanel {
 
 	/** Add a table component */
 	public void addRow(JTable table) {
-		bag.anchor = GridBagConstraints.CENTER;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.gridwidth = GridBagConstraints.REMAINDER;
-		bag.weightx = 1;
-		bag.weighty = 1;
+		setFill();
 		addRow(new JScrollPane(table,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
