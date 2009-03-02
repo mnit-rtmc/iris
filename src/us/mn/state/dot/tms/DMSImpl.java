@@ -802,8 +802,13 @@ public class DMSImpl extends Device2Impl implements DMS {
 	public void doSetMessageNext(SignMessage m)
 		throws TMSException
 	{
-		doSetMessageNext(m, ownerNext);
-		ownerNext = null;
+		try {
+			doSetMessageNext(m, ownerNext);
+		}
+		finally {
+			// Clear the owner even if there was an exception
+			ownerNext = null;
+		}
 	}
 
 	/** Set the next sign message */
