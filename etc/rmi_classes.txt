@@ -20,6 +20,8 @@ us/mn/state/dot/tms/Device.class
 us/mn/state/dot/tms/Device2.class
 us/mn/state/dot/tms/DeviceList.class
 us/mn/state/dot/tms/DMS.class
+us/mn/state/dot/tms/DMSMessagePriority.class
+us/mn/state/dot/tms/DMSType.class
 us/mn/state/dot/tms/DmsSignGroup.class
 us/mn/state/dot/tms/ErrorCounter.class
 us/mn/state/dot/tms/Font.class
@@ -42,6 +44,8 @@ us/mn/state/dot/tms/R_NodeTransition.class
 us/mn/state/dot/tms/R_NodeType.class
 us/mn/state/dot/tms/RampMeter.class
 us/mn/state/dot/tms/RampMeterLock.class
+us/mn/state/dot/tms/RampMeterQueue.class
+us/mn/state/dot/tms/RampMeterType.class
 us/mn/state/dot/tms/RemoteIterator.class
 us/mn/state/dot/tms/RemoteList.class
 us/mn/state/dot/tms/RemoteListImpl.class
@@ -52,6 +56,7 @@ us/mn/state/dot/tms/RemoteObserverImpl??.class
 us/mn/state/dot/tms/Road.class
 us/mn/state/dot/tms/SignGroup.class
 us/mn/state/dot/tms/SignMessage.class
+us/mn/state/dot/tms/SignRequest.class
 us/mn/state/dot/tms/SignText.class
 us/mn/state/dot/tms/SortedList.class
 us/mn/state/dot/tms/Station.class
@@ -59,6 +64,7 @@ us/mn/state/dot/tms/StationMap.class
 us/mn/state/dot/tms/SystemAttribute.class
 us/mn/state/dot/tms/SystemAttributeHelper.class
 us/mn/state/dot/tms/TimingPlan.class
+us/mn/state/dot/tms/TimingPlanType.class
 us/mn/state/dot/tms/TMS.class
 us/mn/state/dot/tms/TMSException.class
 us/mn/state/dot/tms/TMSObject.class
