@@ -23,6 +23,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -91,6 +92,12 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Timing plan table component */
 	protected final JTable plan_table = new JTable();
 
+	/** Timing plan model */
+	protected final TimingPlanModel plan_model;
+
+	/** Button to delete a timing plan */
+	protected final JButton deleteBtn = new JButton("Delete");
+
 	/** Release rate component */
 	protected final JLabel release = new JLabel();
 
@@ -117,6 +124,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(TmsConnection tc, RampMeter meter) {
 		super(TITLE, tc, meter);
 		state = tc.getSonarState();
+		plan_model = new TimingPlanModel(state.getTimingPlans(), meter);
 	}
 
 	/** Get the SONAR type cache */
@@ -207,12 +215,21 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create timing plan panel */
 	protected JPanel createTimingPlanPanel() {
+		final ListSelectionModel s = plan_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ActionJob(deleteBtn) {
+			public void perform() {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					plan_model.deleteRow(row);
+			}
+		};
 		plan_table.setAutoCreateColumnsFromModel(false);
-		plan_table.setModel(new TimingPlanModel(state.getTimingPlans(),
-			proxy));
+		plan_table.setModel(plan_model);
 		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(plan_table);
+		panel.addRow(deleteBtn);
 		return panel;
 	}
 
