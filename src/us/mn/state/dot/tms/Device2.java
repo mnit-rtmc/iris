@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,15 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public interface Device2 extends ControllerIO_SONAR {
+
+	/** SONAR type names */
+	String[] SONAR_TYPES = {
+		Camera.SONAR_TYPE,
+		Detector.SONAR_TYPE,
+		DMS.SONAR_TYPE,
+		RampMeter.SONAR_TYPE,
+		WarningSign.SONAR_TYPE
+	};
 
 	/** Set the administrator notes */
 	void setNotes(String n);
