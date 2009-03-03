@@ -235,6 +235,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create ramp meter status panel */
 	protected JPanel createStatusPanel() {
+		m_lock.setAction(new LockMeterAction(proxy, m_lock));
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Release rate", release);
 		panel.addRow("Cycle time", cycle);

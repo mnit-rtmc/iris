@@ -146,8 +146,9 @@ public class MeterStatusPanel extends FormPanel
 		add("Queue", queueTxt);
 		add(shrinkBtn);
 		addRow(growBtn);
-		addRow("Lock", lockCmb);
-		addRow(dataBtn);
+		add("Lock", lockCmb);
+		finishRow();
+// FIXME	addRow(dataBtn);
 
 		setSelected(null);
 		cache.addProxyListener(this);
@@ -217,6 +218,7 @@ public class MeterStatusPanel extends FormPanel
 			meterOffBtn.setAction(new TurnOffAction(proxy));
 			shrinkBtn.setAction(new ShrinkQueueAction(proxy));
 			growBtn.setAction(new GrowQueueAction(proxy));
+			lockCmb.setAction(new LockMeterAction(proxy, lockCmb));
 			dataBtn.setAction(new MeterDataAction(proxy,
 				connection.getDesktop(),
 				connection.getDataFactory()));
@@ -228,7 +230,6 @@ public class MeterStatusPanel extends FormPanel
 			operationTxt.setText("");
 			statusTxt.setText("");
 			cycleTxt.setText("");
-			lockCmb.setSelectedIndex(0);
 			queueTxt.setText("");
 		}
 		setEnabled(proxy != null);
