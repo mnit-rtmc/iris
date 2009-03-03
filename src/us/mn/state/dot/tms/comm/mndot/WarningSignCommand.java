@@ -15,35 +15,36 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.RampMeterImpl;
+import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
- * Operation to update a 170 controller metering rate
+ * Operation to command a 170 controller warning sign
  *
  * @author Douglas Lau
  */
-public class MeterRateCommand extends Device2Operation {
+public class WarningSignCommand extends Device2Operation {
 
-	/** Ramp meter */
-	protected final RampMeterImpl meter;
+	/** Get the appropriate rate for the deployed state */
+	static protected byte getDeployedRate(boolean d) {
+		if(d)
+			return MeterRate.CENTRAL;
+		else
+			return MeterRate.FORCED_FLASH;
+	}
 
 	/** Controller memory address */
 	protected final int address;
 
-	/** New metering rate */
+	/** New "metering rate" for deploying to warning sign */
 	protected final byte rate;
 
-	/** Create a new meter rate command operation */
-	public MeterRateCommand(RampMeterImpl m, int i, int r) {
-		super(COMMAND, m);
-		meter = m;
-		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
-		if(i == 2)
-			a += Address.OFF_METER_2;
-		address = a;
-		rate = (byte)r;
+	/** Create a new warning sign command operation */
+	public WarningSignCommand(WarningSignImpl s, boolean d) {
+		super(COMMAND, s);
+		address = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
+		rate = getDeployedRate(d);
 	}
 
 	/** Create the first real phase of the operation */
@@ -51,7 +52,7 @@ public class MeterRateCommand extends Device2Operation {
 		return new SetRate();
 	}
 
-	/** Phase to set the metering rate */
+	/** Phase to set the metering rate (which controls warning sign) */
 	protected class SetRate extends Phase {
 
 		/** Write the meter rate to the controller */
@@ -59,8 +60,6 @@ public class MeterRateCommand extends Device2Operation {
 			byte[] data = { rate };
 			mess.add(new MemoryRequest(address, data));
 			mess.setRequest();
-			if(!MeterRate.isMetering(rate))
-				meter.setRateNotify(null);
 			return null;
 		}
 	}

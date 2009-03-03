@@ -197,16 +197,8 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 			new MeterRateCommand(meter, n, rate).start();
 	}
 
-	/** Get the appropriate rate for the deployed state */
-	static protected int getDeployedRate(boolean d) {
-		if(d)
-			return MeterRate.CENTRAL;
-		else
-			return MeterRate.FORCED_FLASH;
-	}
-
 	/** Set the deployed status of the sign */
 	public void setDeployed(WarningSignImpl sign, boolean d) {
-		new MeterRateCommand(sign, 1, getDeployedRate(d)).start();
+		new WarningSignCommand(sign, d).start();
 	}
 }
