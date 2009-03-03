@@ -125,10 +125,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		storage = st;
 		max_wait = w;
 		camera = cam;
-		if(lk != null)
-			m_lock = RampMeterLock.fromOrdinal(lk);
-		else
-			m_lock = null;
+		m_lock = RampMeterLock.fromOrdinal(lk);
 		rate = null;
 		initTransients();
 	}
@@ -256,10 +253,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Set the ramp meter lock status */
 	public void setMLock(Integer l) {
-		if(l != null)
-			m_lock = RampMeterLock.fromOrdinal(l);
-		else
-			m_lock = null;
+		m_lock = RampMeterLock.fromOrdinal(l);
 	}
 
 	/** Set the ramp meter lock (update) */
@@ -277,10 +271,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	public void doSetMLock(Integer l) throws TMSException {
 		if(RampMeterLock.isControllerLock(l))
 			throw new ChangeVetoException("Invalid lock value");
-		if(l != null)
-			setMLock(RampMeterLock.fromOrdinal(l));
-		else
-			setMLock((RampMeterLock)null);
+		setMLock(RampMeterLock.fromOrdinal(l));
 	}
 
 	/** Get the ramp meter lock status */
