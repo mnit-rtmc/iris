@@ -80,9 +80,6 @@ public class MeterStatusPanel extends FormPanel
 	/** Operation component */
 	protected final JTextField operationTxt = createTextField();
 
-	/** Status component */
-	protected final JTextField statusTxt = createTextField();
-
 	/** Metering on radio button */
 	protected final JRadioButton meterOnBtn = new JRadioButton("On");
 
@@ -139,7 +136,6 @@ public class MeterStatusPanel extends FormPanel
 		addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
 		addRow("Operation", operationTxt);
-		addRow("Status", statusTxt);
 		add("Metering", meterOnBtn);
 		addRow(meterOffBtn);
 		addRow("Cycle Time", cycleTxt);
@@ -228,7 +224,6 @@ public class MeterStatusPanel extends FormPanel
 			cameraTxt.setText("");
 			locationTxt.setText("");
 			operationTxt.setText("");
-			statusTxt.setText("");
 			cycleTxt.setText("");
 			queueTxt.setText("");
 		}
@@ -258,16 +253,15 @@ public class MeterStatusPanel extends FormPanel
 				meter.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation")) {
-			operationTxt.setText(meter.getOperation());
 			String status = getControllerStatus(meter);
 			if("".equals(status)) {
-				statusTxt.setForeground(null);
-				statusTxt.setBackground(null);
+				operationTxt.setForeground(null);
+				operationTxt.setBackground(null);
 			} else {
-				statusTxt.setForeground(Color.WHITE);
-				statusTxt.setBackground(Color.GRAY);
+				operationTxt.setForeground(Color.WHITE);
+				operationTxt.setBackground(Color.GRAY);
 			}
-			statusTxt.setText(status);
+			operationTxt.setText(meter.getOperation());
 		}
 		if(a == null || a.equals("rate")) {
 			Integer rate = meter.getRate();
