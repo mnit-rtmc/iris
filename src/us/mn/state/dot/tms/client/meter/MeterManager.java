@@ -42,20 +42,20 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
 
-	/** Name of metering style */
-	static public final String STYLE_METERING = "Metering";
-
 	/** Name of queue exists style */
 	static public final String STYLE_QUEUE_EXISTS = "Queue exists";
 
 	/** Name of queue full style */
 	static public final String STYLE_QUEUE_FULL = "Queue full";
 
+	/** Name of metering style */
+	static public final String STYLE_METERING = "Metering";
+
 	/** Name of locked style */
 	static public final String STYLE_LOCKED = "Locked";
 
-	/** Name of unavailable style */
-	static public final String STYLE_UNAVAILABLE = "Unavailable";
+	/** Name of maintenance style */
+	static public final String STYLE_MAINTENANCE = "Maintenance";
 
 	/** Name of failed style */
 	static public final String STYLE_FAILED = "Failed";
@@ -75,8 +75,15 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return ctr != null && ctr.getActive();
 	}
 
-	/** Test if a meter is unavailable */
-	static protected boolean isUnavailable(RampMeter proxy) {
+	/** Test if a meter is available */
+	static protected boolean isAvailable(RampMeter proxy) {
+		return isActive(proxy) &&
+		       !isFailed(proxy) &&
+		       !isMetering(proxy);
+	}
+
+	/** Test if a meter needs maintenance */
+	static protected boolean needsMaintenance(RampMeter proxy) {
 		RampMeterLock lck = RampMeterLock.fromOrdinal(proxy.getMLock());
 		return lck == RampMeterLock.POLICE_PANEL ||
 		       lck == RampMeterLock.KNOCK_DOWN;
@@ -85,6 +92,20 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Test if a meter is metering */
 	static protected boolean isMetering(RampMeter proxy) {
 		return proxy.getRate() != null;
+	}
+
+	/** Test if a meter has a queue */
+	static protected boolean queueExists(RampMeter proxy) {
+		return isActive(proxy) &&
+		       !isFailed(proxy) &&
+		       proxy.getQueue() == RampMeterQueue.EXISTS.ordinal();
+	}
+
+	/** Test if a meter has a full queue */
+	static protected boolean queueFull(RampMeter proxy) {
+		return isActive(proxy) &&
+		       !isFailed(proxy) &&
+		       proxy.getQueue() == RampMeterQueue.FULL.ordinal();
 	}
 
 	/** Test if a DMS if failed */
@@ -115,11 +136,11 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			getProxyType(), new MeterMarker());
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_METERING, Color.GREEN);
 		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
+		theme.addStyle(STYLE_METERING, Color.GREEN);
 		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.OUTLINE_LOCKED);
-		theme.addStyle(STYLE_UNAVAILABLE, ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
@@ -132,18 +153,17 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, RampMeter proxy) {
 		if(STYLE_AVAILABLE.equals(s))
-			return isActive(proxy) && !isMetering(proxy);
+			return isAvailable(proxy);
+		else if(STYLE_QUEUE_EXISTS.equals(s))
+			return queueExists(proxy);
+		else if(STYLE_QUEUE_FULL.equals(s))
+			return queueFull(proxy);
 		else if(STYLE_METERING.equals(s))
 			return isMetering(proxy);
-		else if(STYLE_QUEUE_EXISTS.equals(s)) {
-			return proxy.getQueue() ==
-				RampMeterQueue.EXISTS.ordinal();
-		} else if(STYLE_QUEUE_FULL.equals(s))
-			return proxy.getQueue() ==RampMeterQueue.FULL.ordinal();
 		else if(STYLE_LOCKED.equals(s))
 			return proxy.getMLock() != null;
-		else if(STYLE_UNAVAILABLE.equals(s))
-			return isUnavailable(proxy);
+		else if(STYLE_MAINTENANCE.equals(s))
+			return needsMaintenance(proxy);
 		else if(STYLE_FAILED.equals(s))
 			return isFailed(proxy);
 		else if(STYLE_NO_CONTROLLER.equals(s))
