@@ -29,6 +29,9 @@ public enum RampMeterLock {
 	/** Lock knock down status */
 	KNOCK_DOWN("Knocked down"),
 
+	/** Lock for incident status */
+	INCIDENT("Incident"),
+
 	/** Lock testing status */
 	TESTING("Testing"),
 
