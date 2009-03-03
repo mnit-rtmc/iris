@@ -33,6 +33,10 @@ import us.mn.state.dot.tms.comm.MeterPoller;
  */
 public class RampMeterImpl extends Device2Impl implements RampMeter {
 
+	/** Ordinal value for lock "OFF" */
+	static protected final Integer OFF_ORDINAL =
+		new Integer(RampMeterLock.OFF.ordinal());
+
 	/** Default maximum wait time (in seconds) */
 	static protected final int DEFAULT_MAX_WAIT = 240;
 
@@ -269,7 +273,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Set the ramp meter lock status */
 	public void doSetMLock(Integer l) throws TMSException {
-		if(RampMeterLock.isControllerLock(l))
+		if(RampMeterLock.isControllerLock(l) || OFF_ORDINAL.equals(l))
 			throw new ChangeVetoException("Invalid lock value");
 		setMLock(RampMeterLock.fromOrdinal(l));
 	}

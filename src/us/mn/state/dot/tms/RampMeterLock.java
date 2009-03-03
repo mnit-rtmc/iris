@@ -70,10 +70,12 @@ public enum RampMeterLock {
 
 	/** Check if a lock value is a "controller-only" lock */
 	static public boolean isControllerLock(Integer l) {
-		if(l == RampMeterLock.POLICE_PANEL.ordinal())
-			return true;
-		if(l == RampMeterLock.MANUAL.ordinal())
-			return true;
+		if(l != null) {
+			if(l == RampMeterLock.POLICE_PANEL.ordinal())
+				return true;
+			if(l == RampMeterLock.MANUAL.ordinal())
+				return true;
+		}
 		return false;
 	}
 }
