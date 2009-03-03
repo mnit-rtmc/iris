@@ -62,10 +62,21 @@ public class MeterStatusPanel extends FormPanel
 			return c.getStatus();
 	}
 
+	/** Format the meter release rate */
+	static public String formatRelease(Integer rate) {
+		if(rate !=  null)
+			return rate.toString() + " veh/hour";
+		else
+			return "N/A";
+	}
+
 	/** Format the meter cycle time from the given release rate */
-	static protected String formatCycle(float rate) {
-		int i_cycle = Math.round(36000 / rate);
-		return "" + (i_cycle / 10) + "." + (i_cycle % 10) + " seconds";
+	static public String formatCycle(Integer rate) {
+		if(rate != null) {
+			int c = Math.round(36000f / rate);
+			return "" + (c / 10) + "." + (c % 10) + " seconds";
+		} else
+			return "N/A";
 	}
 
 	/** Name component */
@@ -85,6 +96,9 @@ public class MeterStatusPanel extends FormPanel
 
 	/** Metering off radio button */
 	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
+
+	/** Release rate component */
+	protected final JTextField releaseTxt = createTextField();
 
 	/** Cycle time component */
 	protected final JTextField cycleTxt = createTextField();
@@ -138,6 +152,7 @@ public class MeterStatusPanel extends FormPanel
 		addRow("Operation", operationTxt);
 		add("Metering", meterOnBtn);
 		addRow(meterOffBtn);
+		add("Release Rate", releaseTxt);
 		addRow("Cycle Time", cycleTxt);
 		add("Queue", queueTxt);
 		add(shrinkBtn);
@@ -224,6 +239,7 @@ public class MeterStatusPanel extends FormPanel
 			cameraTxt.setText("");
 			locationTxt.setText("");
 			operationTxt.setText("");
+			releaseTxt.setText("");
 			cycleTxt.setText("");
 			queueTxt.setText("");
 		}
@@ -265,13 +281,12 @@ public class MeterStatusPanel extends FormPanel
 		}
 		if(a == null || a.equals("rate")) {
 			Integer rate = meter.getRate();
-			if(rate != null) {
+			releaseTxt.setText(formatRelease(rate));
+			cycleTxt.setText(formatCycle(rate));
+			if(rate != null)
 				meterOnBtn.setSelected(true);
-				cycleTxt.setText(formatCycle(rate));
-			} else {
+			else
 				meterOffBtn.setSelected(true);
-				cycleTxt.setText("N/A");
-			}
 			shrinkBtn.setEnabled(rate != null);
 			growBtn.setEnabled(rate != null);
 		}

@@ -52,12 +52,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Frame title */
 	static protected final String TITLE = "Ramp Meter: ";
 
-	/** Format the meter cycle time from the given release rate */
-	static protected String formatCycle(float rate) {
-		int i_cycle = Math.round(36000 / rate);
-		return "" + (i_cycle / 10) + "." + (i_cycle % 10) + " seconds";
-	}
-
 	/** Get the controller status */
 	static protected String getControllerStatus(RampMeter proxy) {
 		Controller c = proxy.getController();
@@ -261,13 +255,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			wait.setText("" + proxy.getMaxWait());
 		if(a == null || a.equals("rate")) {
 			Integer rate = proxy.getRate();
-			if(rate !=  null) {
-				release.setText(rate.toString());
-				cycle.setText(formatCycle(rate));
-			} else {
-				release.setText("N/A");
-				cycle.setText("N/A");
-			}
+			cycle.setText(MeterStatusPanel.formatCycle(rate));
+			release.setText(MeterStatusPanel.formatRelease(rate));
 		}
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(
@@ -285,11 +274,11 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			operation.setText(proxy.getOperation());
 			String s = getControllerStatus(proxy);
 			if("".equals(s)) {
-				l_status.setForeground(null);
-				l_status.setBackground(null);
+				operation.setForeground(null);
+				operation.setBackground(null);
 			} else {
-				l_status.setForeground(Color.WHITE);
-				l_status.setBackground(Color.GRAY);
+				operation.setForeground(Color.WHITE);
+				operation.setBackground(Color.GRAY);
 			}
 			l_status.setText(s);
 		}
