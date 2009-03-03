@@ -281,13 +281,21 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 				return false;
 			}
 		});
+		StratifiedPlanState.processAllStates();
+		namespace.findObject(RampMeter.SONAR_TYPE,
+			new Checker<RampMeterImpl>()
+		{
+			public boolean check(RampMeterImpl m) {
+				m.updateRatePlanned();
+				return false;
+			}
+		});
 		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
 			public boolean check(DMSImpl s) {
 				s.updateTravelTime();
 				return false;
 			}
 		});
-		StratifiedPlanState.processAllStates();
 	}
 
 	/** 5-minute timer job */

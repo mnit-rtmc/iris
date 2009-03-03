@@ -417,12 +417,8 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Send a release rate to the ramp meter */
 		protected void sendRate() {
-			if(!meter.isLocked()) {
-				if(metering)
-					meter.setRateNext(release);
-				else
-					meter.setRateNext(null);
-			}
+			if(metering)
+				meter.setRatePlanned(release);
 		}
 
 		/** Update the ramp meter queue status */
@@ -1075,12 +1071,10 @@ public class StratifiedPlanState extends TimingPlanState {
 
 	/** Validate a timing plan */
 	public void validate(TimingPlanImpl plan) {
-		MeterState state = getMeterState(plan);
-		if(state != null) {
-			if(plan.isOperating())
+		if(plan.isOperating()) {
+			MeterState state = getMeterState(plan);
+			if(state != null)
 				state.validate();
-			else
-				state.stopMetering();
 		}
 	}
 

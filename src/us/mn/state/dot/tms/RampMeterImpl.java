@@ -375,6 +375,25 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 		return rate != null;
 	}
 
+	/** Planned next release rate */
+	protected transient Integer ratePlanned = null;
+
+	/** Set the planned next release rate */
+	public void setRatePlanned(Integer r) {
+		Integer rp = ratePlanned;
+		if(r != null && rp != null)
+			ratePlanned = Math.min(rp, r);
+		else
+			ratePlanned = r;
+	}
+
+	/** Update the planned rate */
+	public void updateRatePlanned() {
+		if(!isLocked())
+			setRateNext(ratePlanned);
+		setRatePlanned(null);
+	}
+
 	/** Release rate (vehicles per hour) */
 	protected transient Integer rate = null;
 
