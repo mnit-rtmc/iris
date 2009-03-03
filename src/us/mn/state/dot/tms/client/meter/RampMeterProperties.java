@@ -259,7 +259,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			storage.setText("" + proxy.getStorage());
 		if(a == null || a.equals("wait"))
 			wait.setText("" + proxy.getMaxWait());
-		if(a == null || a.equals("release")) {
+		if(a == null || a.equals("rate")) {
 			Integer rate = proxy.getRate();
 			if(rate !=  null) {
 				release.setText(rate.toString());
