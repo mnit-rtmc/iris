@@ -74,13 +74,6 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		return Math.max(red_time, min_red);
 	}
 
-	/** Calculate the red time for a ramp meter.
-	 * @param meter	Ramp meter to calculate red time.
-	 * @return Red time (seconds) */
-	static float calculateRedTime(RampMeterImpl meter) {
-		return calculateRedTime(meter, meter.getRate());
-	}
-
 	/** Calculate the release rate
 	 * @param red_time Red time (seconds)
 	 * @return Release rate (vehicles per hour) */
@@ -170,7 +163,7 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 			if(shouldStop(meter, rate))
 				stopMetering(meter);
 			else {
-				float red = calculateRedTime(meter);
+				float red = calculateRedTime(meter, rate);
 				int r = Math.round(red * 10);
 				new RedTimeCommand(meter, n, r).start();
 				if(!meter.isMetering())
@@ -182,7 +175,7 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	/** Should we stop metering? */
 	protected boolean shouldStop(RampMeterImpl meter, Integer rate) {
 		// Workaround for errors in rx only (good tx)
-		return rate == null ||
+		return rate == null || rate == 0 ||
 		       meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS;
 	}
 
