@@ -214,21 +214,28 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the controller setup panel */
 	protected JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(admin);
-		panel.addRow("Comm Link", comm_link);
 		new ActionJob(this, comm_link) {
 			public void perform() {
 				proxy.setCommLink(
 					(CommLink)comm_link.getSelectedItem());
 			}
 		};
-		panel.addRow("Drop", drop_id);
 		new ChangeJob(this, drop_id) {
 			public void perform() {
 				Number n = (Number)drop_id.getValue();
 				proxy.setDrop(n.shortValue());
 			}
 		};
+		new ActionJob(this, active) {
+			public void perform() {
+				proxy.setActive(active.isSelected());
+			}
+		};
+		FormPanel panel = new FormPanel(admin);
+		panel.add("Comm Link", comm_link);
+		panel.finishRow();
+		panel.add("Drop", drop_id);
+		panel.finishRow();
 		panel.addRow("Notes", notes);
 		new FocusJob(notes) {
 			public void perform() {
@@ -242,19 +249,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.addRow(new javax.swing.JLabel());
 		active.setEnabled(connection.isAdmin() ||
 			connection.isActivate());
-		new ActionJob(this, active) {
-			public void perform() {
-				proxy.setActive(active.isSelected());
-			}
-		};
 		return panel;
 	}
 
 	/** Create the cabinet panel */
 	protected JPanel createCabinetPanel() {
-		location = new LocationPanel(admin, cabinet.getGeoLoc(), state);
-		location.initialize();
-		location.addRow("Milepoint", mile);
 		new FocusJob(mile) {
 			public void perform() {
 				if(wasLost()) {
@@ -269,13 +268,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				}
 			}
 		};
-		location.addRow("Style", cab_style);
 		new ActionJob(this, cab_style) {
 			public void perform() {
 				cabinet.setStyle((CabinetStyle)
 					cab_style.getSelectedItem());
 			}
 		};
+		location = new LocationPanel(admin, cabinet.getGeoLoc(), state);
+		location.initialize();
+		location.add("Milepoint", mile);
+		location.finishRow();
+		location.add("Style", cab_style);
+		location.finishRow();
 		return location;
 	}
 
