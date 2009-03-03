@@ -168,7 +168,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		location.addRow("Notes", notes);
 		camera.setModel(new WrapperComboBoxModel(
 			state.getCameraModel()));
-		location.addRow("Camera", camera);
+		location.add("Camera", camera);
+		location.finishRow();
 		location.setCenter();
 		location.addRow(controllerBtn);
 		return location;
