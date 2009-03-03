@@ -193,6 +193,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	protected JPopupMenu createSinglePopup(final RampMeter meter) {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
+		p.addSeparator();
 		if(isMetering(meter)) {
 			p.add(new ShrinkQueueAction(meter));
 			p.add(new GrowQueueAction(meter));
@@ -209,8 +210,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 				showPropertiesForm(meter);
 			}
 		});
-		p.add(new MeterDataAction(meter, connection.getDesktop(),
-			connection.getDataFactory()));
+// FIXME	p.add(new MeterDataAction(meter, connection.getDesktop(),
+//			connection.getDataFactory()));
 		return p;
 	}
 
