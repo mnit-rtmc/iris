@@ -91,12 +91,6 @@ public class MeterStatusPanel extends FormPanel
 	/** Operation component */
 	protected final JTextField operationTxt = createTextField();
 
-	/** Metering on radio button */
-	protected final JRadioButton meterOnBtn = new JRadioButton("On");
-
-	/** Metering off radio button */
-	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
-
 	/** Release rate component */
 	protected final JTextField releaseTxt = createTextField();
 
@@ -115,6 +109,12 @@ public class MeterStatusPanel extends FormPanel
 	/** Reason the meter was locked */
 	protected final JComboBox lockCmb = new JComboBox(
 		RampMeterLock.getDescriptions());
+
+	/** Metering on radio button */
+	protected final JRadioButton meterOnBtn = new JRadioButton("On");
+
+	/** Metering off radio button */
+	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
 
 	/** Button for data plotlet */
 	protected final JButton dataBtn = new JButton("Data");
@@ -150,8 +150,6 @@ public class MeterStatusPanel extends FormPanel
 		addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
 		addRow("Operation", operationTxt);
-		add("Metering", meterOnBtn);
-		addRow(meterOffBtn);
 		add("Release Rate", releaseTxt);
 		addRow("Cycle Time", cycleTxt);
 		add("Queue", queueTxt);
@@ -159,6 +157,8 @@ public class MeterStatusPanel extends FormPanel
 		addRow(growBtn);
 		add("Lock", lockCmb);
 		finishRow();
+		add("Metering", meterOnBtn);
+		addRow(meterOffBtn);
 // FIXME	addRow(dataBtn);
 
 		setSelected(null);
@@ -225,11 +225,11 @@ public class MeterStatusPanel extends FormPanel
 	public void setSelected(final RampMeter proxy) {
 		selected = proxy;
 		if(proxy != null) {
-			meterOnBtn.setAction(new TurnOnAction(proxy));
-			meterOffBtn.setAction(new TurnOffAction(proxy));
 			shrinkBtn.setAction(new ShrinkQueueAction(proxy));
 			growBtn.setAction(new GrowQueueAction(proxy));
 			lockCmb.setAction(new LockMeterAction(proxy, lockCmb));
+			meterOnBtn.setAction(new TurnOnAction(proxy));
+			meterOffBtn.setAction(new TurnOffAction(proxy));
 			dataBtn.setAction(new MeterDataAction(proxy,
 				connection.getDesktop(),
 				connection.getDataFactory()));
@@ -249,11 +249,11 @@ public class MeterStatusPanel extends FormPanel
 	/** Enable or disable the status panel */
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		meterOnBtn.setEnabled(enabled);
-		meterOffBtn.setEnabled(enabled);
 		shrinkBtn.setEnabled(enabled);
 		growBtn.setEnabled(enabled);
 		lockCmb.setEnabled(enabled);
+		meterOnBtn.setEnabled(enabled);
+		meterOffBtn.setEnabled(enabled);
 		dataBtn.setEnabled(enabled);
 	}
 
