@@ -242,6 +242,8 @@ public class MeterStatusPanel extends FormPanel
 			releaseTxt.setText("");
 			cycleTxt.setText("");
 			queueTxt.setText("");
+			shrinkBtn.setEnabled(false);
+			growBtn.setEnabled(false);
 		}
 		setEnabled(proxy != null);
 	}
@@ -249,8 +251,6 @@ public class MeterStatusPanel extends FormPanel
 	/** Enable or disable the status panel */
 	public void setEnabled(boolean enabled) {
 		super.setEnabled(enabled);
-		shrinkBtn.setEnabled(enabled);
-		growBtn.setEnabled(enabled);
 		lockCmb.setEnabled(enabled);
 		meterOnBtn.setEnabled(enabled);
 		meterOffBtn.setEnabled(enabled);
