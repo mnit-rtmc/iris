@@ -1,5 +1,5 @@
 --
--- PostgreSQL database dump
+-- PostgreSQL database template for IRIS
 --
 
 SET client_encoding = 'UTF8';
@@ -17,12 +17,10 @@ SET SESSION AUTHORIZATION 'tms';
 
 SET search_path = public, pg_catalog;
 
-CREATE SEQUENCE tms_log_seq
-    INCREMENT BY 1
-    MAXVALUE 2147483647
-    NO MINVALUE
-    CACHE 1
-    CYCLE;
+CREATE TABLE system_attribute (
+	name VARCHAR(32) PRIMARY KEY,
+	value VARCHAR(64) NOT NULL
+);
 
 CREATE TABLE iris_user (
 	name VARCHAR(15) PRIMARY KEY,
@@ -140,7 +138,7 @@ CREATE TABLE graphic (
 
 CREATE TABLE font (
 	name TEXT PRIMARY KEY,
-	f_number INTEGER NOT NULL,
+	f_number INTEGER UNIQUE NOT NULL,
 	height INTEGER NOT NULL,
 	width INTEGER NOT NULL,
 	line_spacing INTEGER NOT NULL,
@@ -244,6 +242,22 @@ CREATE TABLE r_node_transition (
 	name text NOT NULL
 );
 
+CREATE TABLE iris.r_node (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
+	node_type integer NOT NULL REFERENCES r_node_type(n_type),
+	pickable boolean NOT NULL,
+	transition integer NOT NULL REFERENCES r_node_transition(n_transition),
+	lanes integer NOT NULL,
+	attach_side boolean NOT NULL,
+	shift integer NOT NULL,
+	station_id VARCHAR(10),
+	speed_limit integer NOT NULL,
+	notes text NOT NULL
+);
+
+CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
+
 CREATE TABLE comm_link (
 	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
@@ -318,22 +332,6 @@ CREATE RULE alarm_update AS ON UPDATE TO iris.alarm DO INSTEAD
 
 CREATE RULE alarm_delete AS ON DELETE TO iris.alarm DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
-
-CREATE TABLE iris.r_node (
-	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
-	node_type integer NOT NULL REFERENCES r_node_type(n_type),
-	pickable boolean NOT NULL,
-	transition integer NOT NULL REFERENCES r_node_transition(n_transition),
-	lanes integer NOT NULL,
-	attach_side boolean NOT NULL,
-	shift integer NOT NULL,
-	station_id VARCHAR(10),
-	speed_limit integer NOT NULL,
-	notes text NOT NULL
-);
-
-CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
 CREATE TABLE iris._detector (
 	name VARCHAR(10) PRIMARY KEY,
@@ -467,19 +465,126 @@ CREATE RULE warning_sign_update AS ON UPDATE TO iris.warning_sign DO INSTEAD
 CREATE RULE warning_sign_delete AS ON DELETE TO iris.warning_sign DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
-CREATE TABLE traffic_device_attribute (
-	name VARCHAR(32) PRIMARY KEY,
-	id text NOT NULL,
-	aname VARCHAR(32) NOT NULL,
-	avalue VARCHAR(64) NOT NULL
+CREATE TABLE iris.meter_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
+	lanes INTEGER NOT NULL
 );
 
-CREATE TABLE system_attribute (
-	name VARCHAR(32) PRIMARY KEY,
-	value VARCHAR(64) NOT NULL
+CREATE TABLE iris.meter_lock (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+CREATE TABLE iris._ramp_meter (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	notes text NOT NULL,
+	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
+	storage INTEGER NOT NULL,
+	max_wait INTEGER NOT NULL,
+	camera VARCHAR(10) REFERENCES iris._camera(name),
+	m_lock INTEGER REFERENCES iris.meter_lock(id)
+);
+
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.ramp_meter AS SELECT
+	m.name, geo_loc, controller, pin, notes, meter_type, storage,
+	max_wait, camera, m_lock
+	FROM iris._ramp_meter m JOIN iris._device_io d ON m.name = d.name;
+
+CREATE RULE ramp_meter_insert AS ON INSERT TO iris.ramp_meter DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._ramp_meter VALUES (NEW.name, NEW.geo_loc, NEW.notes,
+		NEW.meter_type, NEW.storage, NEW.max_wait, NEW.camera,
+		NEW.m_lock);
+);
+
+CREATE RULE ramp_meter_update AS ON UPDATE TO iris.ramp_meter DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._ramp_meter SET
+		geo_loc = NEW.geo_loc,
+		notes = NEW.notes,
+		meter_type = NEW.meter_type,
+		storage = NEW.storage,
+		max_wait = NEW.max_wait,
+		camera = NEW.camera,
+		m_lock = NEW.m_lock
+	WHERE name = OLD.name;
+);
+
+CREATE RULE ramp_meter_delete AS ON DELETE TO iris.ramp_meter DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+
+CREATE TABLE iris._dms (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES geo_loc,
+	notes text NOT NULL,
+	travel text NOT NULL,
+	camera VARCHAR(10) REFERENCES iris._camera,
+	aws_allowed BOOLEAN NOT NULL,
+	aws_controlled BOOLEAN NOT NULL
+);
+
+ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.dms AS SELECT
+	d.name, geo_loc, controller, pin, notes, travel, camera, aws_allowed,
+	aws_controlled
+	FROM iris._dms dms JOIN iris._device_io d ON dms.name = d.name;
+
+CREATE RULE dms_insert AS ON INSERT TO iris.dms DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._dms VALUES (NEW.name, NEW.geo_loc, NEW.notes,
+		NEW.travel, NEW.camera, NEW.aws_allowed, NEW.aws_controlled);
+);
+
+CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._dms SET
+		geo_loc = NEW.geo_loc,
+		notes = NEW.notes,
+		travel = NEW.travel,
+		camera = NEW.camera,
+		aws_allowed = NEW.aws_allowed,
+		aws_controlled = NEW.aws_controlled
+	WHERE name = OLD.name;
+);
+
+CREATE RULE dms_delete AS ON DELETE TO iris.dms DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+
+CREATE TABLE iris.timing_plan_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE iris.timing_plan (
+	name VARCHAR(16) PRIMARY KEY,
+	plan_type INTEGER NOT NULL REFERENCES iris.timing_plan_type,
+	device VARCHAR(10) NOT NULL REFERENCES iris._device_io,
+	start_min INTEGER NOT NULL,
+	stop_min INTEGER NOT NULL,
+	active BOOLEAN NOT NULL,
+	testing BOOLEAN NOT NULL,
+	target INTEGER NOT NULL
 );
 
 
+-- FIXME: this will be removed soon
 CREATE TABLE vault_object (
     vault_oid integer NOT NULL,
     vault_type integer NOT NULL,
@@ -575,39 +680,6 @@ CREATE TABLE traffic_device (
 )
 INHERITS (device);
 
-CREATE TABLE dms (
-    camera VARCHAR(10) NOT NULL,
-    mile real NOT NULL,
-    travel text NOT NULL
-)
-INHERITS (traffic_device);
-
-CREATE UNIQUE INDEX dms_pkey ON dms USING btree (vault_oid);
-CREATE UNIQUE INDEX dms_id_index ON dms USING btree (id);
-
-CREATE TABLE sign_group (
-	name VARCHAR(16) PRIMARY KEY,
-	local BOOLEAN NOT NULL
-);
-
-CREATE TABLE dms_sign_group (
-	name VARCHAR(24) PRIMARY KEY,
-	dms text NOT NULL REFERENCES dms(id),
-	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group
-);
-
-CREATE TABLE sign_text (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group,
-	line smallint NOT NULL,
-	message VARCHAR(24) NOT NULL,
-	priority smallint NOT NULL,
-	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
-	CONSTRAINT sign_text_priority CHECK
-		((priority >= 1) AND (priority <= 99))
-);
-
-
 CREATE TABLE vault_map (
     "mapId" integer NOT NULL,
     "keyId" integer NOT NULL,
@@ -623,57 +695,6 @@ CREATE TABLE "java_util_TreeMap" (
     comparator integer NOT NULL
 )
 INHERITS ("java_util_AbstractMap");
-
-CREATE TABLE ramp_meter (
-    "controlMode" integer NOT NULL,
-    "singleRelease" boolean NOT NULL,
-    "storage" integer NOT NULL,
-    "maxWait" integer NOT NULL,
-    camera VARCHAR(10) NOT NULL
-)
-INHERITS (traffic_device);
-
-CREATE TABLE timing_plan (
-    "startTime" integer NOT NULL,
-    "stopTime" integer NOT NULL,
-    active boolean NOT NULL
-)
-INHERITS (tms_object);
-
-CREATE TABLE meter_plan (
-    dummy_43417 boolean
-)
-INHERITS (timing_plan);
-
-CREATE TABLE simple_plan (
-    target integer NOT NULL
-)
-INHERITS (meter_plan);
-
-REVOKE ALL ON TABLE simple_plan FROM PUBLIC;
-GRANT SELECT ON TABLE simple_plan TO PUBLIC;
-
-CREATE TABLE time_plan_log (
-    event_id integer DEFAULT nextval('tms_log_seq'::text) NOT NULL,
-    vault_oid integer,
-    event_date timestamp with time zone NOT NULL,
-    logged_by text NOT NULL,
-    start_time text NOT NULL,
-    stop_time text NOT NULL,
-    target integer NOT NULL
-);
-
-REVOKE ALL ON TABLE time_plan_log FROM PUBLIC;
-GRANT SELECT ON TABLE time_plan_log TO PUBLIC;
-
-
-CREATE TABLE stratified_plan (
-    dummy_48294 boolean
-)
-INHERITS (meter_plan);
-
-REVOKE ALL ON TABLE stratified_plan FROM PUBLIC;
-GRANT SELECT ON TABLE stratified_plan TO PUBLIC;
 
 CREATE TABLE lcs_module (
     "sfoRed" integer NOT NULL,
@@ -694,24 +715,6 @@ INHERITS (traffic_device);
 REVOKE ALL ON TABLE lcs FROM PUBLIC;
 GRANT SELECT ON TABLE lcs TO PUBLIC;
 
-CREATE FUNCTION time_plan_log() RETURNS "trigger"
-    AS '
-	begin if (OLD."startTime" != NEW."startTime" or OLD."stopTime"!= NEW."stopTime" or OLD.target!=NEW.target) 
-	then insert into time_plan_log(vault_oid, event_date, logged_by, start_time, stop_time, target) 
-	values(OLD.vault_oid, CURRENT_TIMESTAMP, user, OLD."startTime", OLD."stopTime", OLD.target); end if; return old; 
-	end; '
-    LANGUAGE plpgsql;
-
-CREATE TABLE traffic_device_timing_plan (
-    traffic_device text,
-    timing_plan integer
-);
-
-REVOKE ALL ON TABLE traffic_device_timing_plan FROM PUBLIC;
-GRANT SELECT ON TABLE traffic_device_timing_plan TO PUBLIC;
-
-
-
 CREATE FUNCTION get_next_oid() RETURNS integer
     AS '
 	DECLARE
@@ -723,6 +726,39 @@ CREATE FUNCTION get_next_oid() RETURNS integer
 	END;
 '
     LANGUAGE plpgsql;
+-- FIXME: cut up to here
+
+
+
+CREATE TABLE sign_group (
+	name VARCHAR(16) PRIMARY KEY,
+	local BOOLEAN NOT NULL
+);
+
+CREATE TABLE dms_sign_group (
+	name VARCHAR(24) PRIMARY KEY,
+	dms VARCHAR(10) NOT NULL REFERENCES iris._dms,
+	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group
+);
+
+CREATE TABLE sign_text (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group,
+	line smallint NOT NULL,
+	message VARCHAR(24) NOT NULL,
+	priority smallint NOT NULL,
+	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
+	CONSTRAINT sign_text_priority CHECK
+		((priority >= 1) AND (priority <= 99))
+);
+
+CREATE TABLE iris.sign_message (
+	name VARCHAR(20) PRIMARY KEY,
+	multi VARCHAR(256) NOT NULL,
+	bitmaps text NOT NULL,
+	priority INTEGER NOT NULL,
+	duration INTEGER
+);
 
 CREATE FUNCTION hour_min(integer) RETURNS text
     AS '
@@ -747,23 +783,13 @@ BEGIN
 END;'
     LANGUAGE plpgsql;
 
-
-CREATE VIEW time_plan_log_view AS
-    SELECT t.event_id, rm.id AS ramp_id, t.event_date, t.logged_by, hour_min(int4(t.start_time)) AS start_time, hour_min(int4(t.stop_time)) AS stop_time, t.target FROM ((ramp_meter rm JOIN traffic_device_timing_plan tp ON ((rm.id = tp.traffic_device))) JOIN time_plan_log t ON ((t.vault_oid = tp.timing_plan)));
-
-REVOKE ALL ON TABLE time_plan_log_view FROM PUBLIC;
-GRANT SELECT ON TABLE time_plan_log_view TO PUBLIC;
-
-CREATE VIEW "simple" AS
-    SELECT rm.id, hour_min(sp."startTime") AS start_time, hour_min(sp."stopTime") AS stop_time, sp.target, sp.active FROM ((ramp_meter rm JOIN traffic_device_timing_plan tp ON ((rm.id = tp.traffic_device))) JOIN simple_plan sp ON ((tp.timing_plan = sp.vault_oid)));
-
-REVOKE ALL ON TABLE "simple" FROM PUBLIC;
-GRANT SELECT ON TABLE "simple" TO PUBLIC;
-
-CREATE VIEW stratified AS
-    SELECT rm.id, hour_min(sp."startTime") AS start_time, hour_min(sp."stopTime") AS stop_time, sp.active FROM ((ramp_meter rm JOIN traffic_device_timing_plan tp ON ((rm.id = tp.traffic_device))) JOIN stratified_plan sp ON ((tp.timing_plan = sp.vault_oid)));
-
-GRANT SELECT ON TABLE stratified TO PUBLIC;
+CREATE VIEW timing_plan_view AS
+	SELECT name, pt.description AS plan_type, device,
+	hour_min(start_min) AS start_time, hour_min(stop_min) AS stop_time,
+	active, testing, target
+	FROM iris.timing_plan
+	LEFT JOIN iris.timing_plan_type pt ON plan_type = pt.id;
+GRANT SELECT ON timing_plan_view TO PUBLIC;
 
 CREATE VIEW road_view AS
 	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
@@ -772,7 +798,6 @@ CREATE VIEW road_view AS
 	LEFT JOIN road_class rcl ON road.r_class = rcl.id
 	LEFT JOIN direction dir ON road.direction = dir.id
 	LEFT JOIN direction adir ON road.alt_dir = adir.id;
-
 GRANT SELECT ON road_view TO PUBLIC;
 
 CREATE VIEW geo_loc_view AS
@@ -828,10 +853,11 @@ CREATE VIEW alarm_view AS
 GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.id, d.notes, d.camera, d.mile, d.travel, d.geo_loc,
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.travel,
+	d.camera, d.aws_allowed, d.aws_controlled,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.east_off, l.northing, l.north_off, d.controller
-	FROM dms d
+	l.easting, l.east_off, l.northing, l.north_off
+	FROM iris.dms d
 	JOIN geo_loc_view l ON d.geo_loc = l.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
@@ -840,17 +866,18 @@ CREATE VIEW sign_text_view AS
 	FROM dms_sign_group
 	JOIN sign_group ON dms_sign_group.sign_group = sign_group.name
 	JOIN sign_text ON sign_group.name = sign_text.sign_group;
-
 GRANT SELECT ON sign_text_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
-	SELECT m.vault_oid, m.id, m.notes,
-	m."controlMode" AS control_mode, m."singleRelease" AS single_release,
-	m."storage", m."maxWait" AS max_wait, m.camera, m.geo_loc,
+	SELECT m.name, geo_loc, controller, pin, notes,
+	mt.description AS meter_type, storage, max_wait, camera,
+	ml.description AS meter_lock,
 	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.easting, l.northing, l.east_off, l.north_off, m.controller
-	FROM ramp_meter m
-	JOIN geo_loc_view l ON m.geo_loc = l.name;
+	l.easting, l.northing, l.east_off, l.north_off
+	FROM iris.ramp_meter m
+	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
+	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
+	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
@@ -978,37 +1005,35 @@ CREATE VIEW controller_report AS
 		d2.pin = 3 AND d2.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
 
+
+-- FIXME: this will be removed soon
 COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM stdin;
 3	4	0	vault_object	java.lang.Object
 2	4	1	vault_counter	us.mn.state.dot.vault.Counter
 24	4	0	java_util_AbstractCollection	java.util.AbstractCollection
 23	4	0	java_util_AbstractList	java.util.AbstractList
-23834	4	0	ramp_meter	us.mn.state.dot.tms.RampMeterImpl
 30	4	0	java_lang_Number	java.lang.Number
 41	4	0	tms_object	us.mn.state.dot.tms.TMSObjectImpl
 40	4	0	abstract_list	us.mn.state.dot.tms.AbstractListImpl
 60	4	0	device	us.mn.state.dot.tms.DeviceImpl
 59	4	0	traffic_device	us.mn.state.dot.tms.TrafficDeviceImpl
 64	4	0	java_util_AbstractMap	java.util.AbstractMap
-43417	4	0	meter_plan	us.mn.state.dot.tms.MeterPlanImpl
 1395	4	0	java_util_TreeMap	java.util.TreeMap
 52732	4	0	lcs_module	us.mn.state.dot.tms.LCSModuleImpl
 52736	4	0	lcs	us.mn.state.dot.tms.LaneControlSignalImpl
 1532	4	0	java_lang_Integer	java.lang.Integer
 1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
-51458	4	0	stratified_plan	us.mn.state.dot.tms.StratifiedPlanImpl
 38	4	0	java_util_ArrayList	java.util.ArrayList
-63230	4	0	timing_plan	us.mn.state.dot.tms.TimingPlanImpl
-58	4	0	dms	us.mn.state.dot.tms.DMSImpl
-43415	4	0	simple_plan	us.mn.state.dot.tms.SimplePlanImpl
 37	4	0	vault_list	us.mn.state.dot.vault.ListElement
 4	4	52	vault_types	us.mn.state.dot.vault.Type
 \.
 
-
 COPY vault_counter (vault_oid, vault_type, vault_refs, id, logging) FROM stdin;
 1	2	1	92319	f
 \.
+-- FIXME: cut up to here
+
+
 
 COPY direction (id, direction, dir) FROM stdin;
 0		
@@ -1029,6 +1054,18 @@ COPY road_class (id, description, grade) FROM stdin;
 5	expressway	E
 6	freeway	F
 7	CD road	
+\.
+
+COPY road_modifier (id, modifier, mod) FROM stdin;
+0	@	
+1	N of	N
+2	S of	S
+3	E of	E
+4	W of	W
+5	N Junction	Nj
+6	S Junction	Sj
+7	E Junction	Ej
+8	W Junction	Wj
 \.
 
 COPY cabinet_style (name, dip) FROM stdin;
@@ -1066,22 +1103,33 @@ COPY lane_type (id, description, dcode) FROM stdin;
 15	HOT	HT
 \.
 
-COPY road_modifier (id, modifier, mod) FROM stdin;
-0	@	
-1	N of	N
-2	S of	S
-3	E of	E
-4	W of	W
-5	N Junction	Nj
-6	S Junction	Sj
-7	E Junction	Ej
-8	W Junction	Wj
+COPY iris.meter_type (id, description, lanes) FROM stdin;
+0	One Lane	1
+1	Two Lane, Alternate Release	2
+2	Two Lane, Simultaneous Release	2
+\.
+
+COPY iris.meter_lock (id, description) FROM stdin;
+1	Knocked down
+2	Incident
+3	Testing
+4	Police panel
+5	Manual mode
+6	Other reason
+\.
+
+COPY iris.timing_plan_type (id, description) FROM stdin;
+0	Travel Time
+1	Simple Metering
+2	Stratified Metering
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.80.0
+database_version	3.81.0
 dms_page_on_secs	2.0
 dms_page_off_secs	0.0
+dms_default_justification_line	3
+dms_default_justification_page	2
 meter_green_secs	1.3
 meter_yellow_secs	0.7
 meter_min_red_secs	0.1
@@ -1126,61 +1174,29 @@ role_admin	role/.*	t	t	t	t
 view	.*	t	f	f	f
 \.
 
+
+-- FIXME: all of this stuff will be removed soon
 CREATE UNIQUE INDEX vault_object_vault_oid_key ON vault_object USING btree (vault_oid);
-
 CREATE UNIQUE INDEX vault_object_pkey ON vault_object USING btree (vault_oid);
-
 CREATE UNIQUE INDEX vault_types_pkey ON vault_types USING btree (vault_oid);
-
 CREATE UNIQUE INDEX vault_counter_pkey ON vault_counter USING btree (vault_oid);
-
 CREATE UNIQUE INDEX vault_log_entry_pkey ON vault_log_entry USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "va_util_AbstractCollection_pkey" ON "java_util_AbstractCollection" USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_util_AbstractList_pkey" ON "java_util_AbstractList" USING btree (vault_oid);
-
 CREATE UNIQUE INDEX vault_transaction_pkey ON vault_transaction USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_lang_Number_pkey" ON "java_lang_Number" USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_lang_Integer_pkey" ON "java_lang_Integer" USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_util_ArrayList_pkey" ON "java_util_ArrayList" USING btree (vault_oid);
-
 CREATE UNIQUE INDEX tms_object_pkey ON tms_object USING btree (vault_oid);
-
 CREATE UNIQUE INDEX abstract_list_pkey ON abstract_list USING btree (vault_oid);
-
 CREATE UNIQUE INDEX device_pkey ON device USING btree (vault_oid);
-
 CREATE UNIQUE INDEX traffic_device_pkey ON traffic_device USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_util_AbstractMap_pkey" ON "java_util_AbstractMap" USING btree (vault_oid);
-
 CREATE UNIQUE INDEX "java_util_TreeMap_pkey" ON "java_util_TreeMap" USING btree (vault_oid);
-
-CREATE UNIQUE INDEX ramp_meter_pkey ON ramp_meter USING btree (vault_oid);
-
-CREATE UNIQUE INDEX timing_plan_pkey ON timing_plan USING btree (vault_oid);
-
-CREATE UNIQUE INDEX simple_plan_pkey ON simple_plan USING btree (vault_oid);
-
-CREATE UNIQUE INDEX stratified_plan_pkey ON stratified_plan USING btree (vault_oid);
-
 CREATE UNIQUE INDEX lcs_module_pkey ON lcs_module USING btree (vault_oid);
-
 CREATE UNIQUE INDEX lcs_pkey ON lcs USING btree (vault_oid);
+-- FIXME: up until here
 
-ALTER TABLE ONLY time_plan_log
-    ADD CONSTRAINT time_plan_log_pkey PRIMARY KEY (event_id);
-
-CREATE TRIGGER time_plan_log_trig
-    AFTER UPDATE ON simple_plan
-    FOR EACH ROW
-    EXECUTE PROCEDURE time_plan_log();
-
-SELECT pg_catalog.setval('tms_log_seq', 8284, true);
 
 SET search_path = event, public, pg_catalog;
 
