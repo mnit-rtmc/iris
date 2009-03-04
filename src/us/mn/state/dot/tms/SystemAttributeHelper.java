@@ -366,7 +366,7 @@ public class SystemAttributeHelper {
 
 	/** Get the maximum distance of a travel time route */
 	static public int getTravelTimeMaxMiles() {
-		return getValueInt(SystemAttribute.TRAVEL_TIME_MAX_MILES);
+		return getValueInt(SystemAttribute.TRAVEL_TIME_MAX_MILES, 16);
 	}
 
 	/** Get the TESLA host name (and port) */
