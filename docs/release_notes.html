@@ -11,6 +11,51 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.81.0 (4 March 2008)</dt>
+	<dd><ul>
+		<li>
+			DMS, ramp meters and timing plans converted to SONAR.
+		</li>
+		<li>
+			Many user interface enhancements were made in DMS tab.
+			Message preview, multiple sign selection, pixel failure
+			feedback, brightness feedback, plus much more is
+			included. Some enhancements were also made for the
+			ramp meter tab.
+		</li>
+		<li>
+			AMBER alert functionality has changed to match normal
+			DMS operation interface.
+		</li>
+		<li>
+			Added ability to select a font for each page of a
+			sign message.
+		</li>
+		<li>
+			Timing plans can no longer be shared by devices.
+			Each timing plan is now associated with a single
+			device (DMS or ramp meter).
+		</li>
+		<li>
+			Many new system attributes have been added to allow
+			a great degree of system customization.
+		</li>
+		<li>
+			Lots of code cleanups and bug fixes.
+		</li>
+		<li>
+			SONAR dependency updated to 2.6.0.
+		</li>
+		<li>
+			Scheduler dependency updated to 0.2.1.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.81.sql</code>
+		</li>
+	</ul></dd>
+
 	<dt>3.80.0 (3 November 2008)</dt>
 	<dd><ul>
 		<li>
