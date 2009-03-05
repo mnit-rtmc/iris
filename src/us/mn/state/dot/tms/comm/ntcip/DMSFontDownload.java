@@ -46,6 +46,9 @@ public class DMSFontDownload extends DMSOperation {
 	protected final TreeMap<Integer, Integer> font_numbers =
 		new TreeMap<Integer, Integer>();
 
+	/** Set of open rows in the font table */
+	protected final TreeSet<Integer> open_rows = new TreeSet<Integer>();
+
 	/** Iterator of fonts to be sent to the sign */
 	protected final Iterator<FontImpl> font_iterator;
 
@@ -97,6 +100,8 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(num_fonts);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + num_fonts);
+			for(int row = 1; row <= num_fonts.getInteger(); row++)
+				open_rows.add(row);
 			return new QueryFontNumbers();
 		}
 	}
@@ -104,55 +109,58 @@ public class DMSFontDownload extends DMSOperation {
 	/** Phase to query all font numbers */
 	protected class QueryFontNumbers extends Phase {
 
-		/** Array of font number objects */
-		protected FontNumber[] number = new FontNumber[
-			num_fonts.getInteger()];
+		/** Current row in the font table */
+		protected int row = 1;
 
-		/** Query the font numbers for all fonts */
+		/** Query the font number for one font */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			for(int i = 0; i < number.length; i++) {
-				Integer row = i + 1;	// fontIndex
-				number[i] = new FontNumber(row);
-				mess.add(number[i]);
+			FontNumber number = new FontNumber(row);
+			mess.add(number);
+			try {
+				mess.getRequest();
 			}
-			mess.getRequest();
-			populateFontNumbers();
-			return nextFontPhase();
+			catch(SNMP.Message.NoSuchName e) {
+				return populateFontNumbers();
+			}
+			Integer f_num = number.getInteger();
+			if(font_numbers.containsKey(f_num)) {
+				font_numbers.put(f_num, row);
+				open_rows.remove(row);
+			}
+			if(row < num_fonts.getInteger()) {
+				row++;
+				return this;
+			} else
+				return populateFontNumbers();
 		}
+	}
 
-		/** Populate the font_numbers hash */
-		protected void populateFontNumbers() {
-			TreeSet<Integer> open_rows = new TreeSet<Integer>();
-			for(int i = 0; i < number.length; i++) {
-				Integer row = i + 1;	// fontIndex
-				Integer n = number[i].getInteger();
-				if(font_numbers.containsKey(n))
-					font_numbers.put(n, row);
+	/** Populate the font_numbers hash */
+	protected Phase populateFontNumbers() {
+		for(Integer f_num: font_numbers.keySet()) {
+			if(font_numbers.get(f_num) == null) {
+				Integer row = open_rows.pollFirst();
+				if(row != null)
+					font_numbers.put(f_num, row);
 				else
-					open_rows.add(row);
-			}
-			for(Integer n: font_numbers.keySet()) {
-				if(font_numbers.get(n) == null) {
-					Integer row = open_rows.pollFirst();
-					if(row != null)
-						font_numbers.put(n, row);
-					else {
-						DMS_LOG.log(dms.getName() +
-							": Skipping font " + n);
-					}
-				}
+					font_numbers.remove(f_num);
 			}
 		}
+		return nextFontPhase();
 	}
 
 	/** Get the first phase of the next font */
 	protected Phase nextFontPhase() {
-		if(font_iterator.hasNext()) {
+		while(font_iterator.hasNext()) {
 			font = font_iterator.next();
-			index = font_numbers.get(font.getNumber());
-		} else
-			return null;
-		return new VerifyFont();
+			Integer f_num = font.getNumber();
+			if(font_numbers.containsKey(f_num)) {
+				index = font_numbers.get(f_num);
+				return new VerifyFont();
+			}
+			DMS_LOG.log(dms.getName() + ": Skipping font " + f_num);
+		}
+		return null;
 	}
 
 	/** Phase to verify a font */
