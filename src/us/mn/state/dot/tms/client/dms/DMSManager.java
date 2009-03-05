@@ -104,8 +104,11 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Test if a DMS is deployed */
 	static public boolean isDeployed(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
-		MultiString ms = new MultiString(m.getMulti());
-		return !ms.isBlank();
+		if(m != null) {
+			MultiString ms = new MultiString(m.getMulti());
+			return !ms.isBlank();
+		} else
+			return false;
 	}
 
 	/** Test if a DMS is active, not failed and deployed */
