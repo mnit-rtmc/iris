@@ -697,6 +697,11 @@ public class StratifiedPlanState extends TimingPlanState {
 				else
 					demand += state.demand;
 			}
+			if(demand == 0) {
+				for(MeterState state: meters)
+					state.done = true;
+				return 0;
+			}
 			for(MeterState state: meters) {
 				if(state.done)
 					continue;
