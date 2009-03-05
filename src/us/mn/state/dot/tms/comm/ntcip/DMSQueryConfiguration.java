@@ -165,4 +165,10 @@ public class DMSQueryConfiguration extends DMSOperation {
 			return null;
 		}
 	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		super.cleanup();
+		dms.setConfigure(success);
+	}
 }

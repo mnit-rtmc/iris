@@ -72,7 +72,7 @@ abstract public class DMSOperation extends Device2Operation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		dms.setConfigure(success);
+		dms.setConfigureRequest(success);
 		super.cleanup();
 	}
 }

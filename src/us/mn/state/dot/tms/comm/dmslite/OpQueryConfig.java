@@ -226,4 +226,10 @@ public class OpQueryConfig extends OpDms
 			return null;
 		}
 	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		super.cleanup();
+		m_dms.setConfigure(success);
+	}
 }
