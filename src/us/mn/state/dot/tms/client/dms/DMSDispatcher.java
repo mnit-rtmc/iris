@@ -443,7 +443,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
 			return creator.create(multi, bitmaps,
-				DMSMessagePriority.CLEAR, null);
+				DMSMessagePriority.CLEAR, 0);
 		} else
 			return null;
 	}
