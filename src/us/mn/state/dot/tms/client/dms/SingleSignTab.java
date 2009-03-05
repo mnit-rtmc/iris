@@ -169,7 +169,8 @@ public class SingleSignTab extends FormPanel {
 				add("Expires", expiresTxt);
 			else
 				addRow("Expires", expiresTxt);
-		}
+		} else
+			finishRow();
 		if(SystemAttributeHelper.isAwsEnabled()) {
 			addRow(I18NMessages.get("dms.aws.controlled"),
 				awsControlledCbx);
