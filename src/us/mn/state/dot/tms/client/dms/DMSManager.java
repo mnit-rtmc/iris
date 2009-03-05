@@ -97,8 +97,11 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Test if a DMS has a travel time message deployed */
 	static public boolean isTravelTime(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
-		return m.getPriority() ==
-		       DMSMessagePriority.TRAVEL_TIME.ordinal();
+		if(m != null) {
+			return m.getPriority() ==
+			       DMSMessagePriority.TRAVEL_TIME.ordinal();
+		} else
+			return false;
 	}
 
 	/** Test if a DMS is deployed */
