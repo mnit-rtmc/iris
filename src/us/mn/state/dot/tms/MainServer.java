@@ -26,10 +26,10 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
-import us.mn.state.dot.sonar.PropertyLoader;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.event.BaseEvent;
+import us.mn.state.dot.tms.utils.PropertyLoader;
 
 /**
  * This is the main class to start the IRIS server.
