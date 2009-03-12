@@ -148,6 +148,21 @@ public interface SystemAttribute extends SonarObject {
 	String CAMERAVIEWER_NUM_PRESET_BTNS = "cameraviewer_num_preset_btns";
 	String CAMERAVIEWER_NUM_VIDEO_FRAMES = "cameraviewer_num_video_frames";
 
+	/** SMTP host name */
+	String EMAIL_SMTP_HOST = "email_smtp_host";
+
+	/** Name of sender for server emails */
+	String EMAIL_SENDER_SERVER = "email_sender_server";
+
+	/** Name of sender for client emails */
+	String EMAIL_SENDER_CLIENT = "email_sender_client";
+
+	/** Address of recipient of AWS emails */
+	String EMAIL_RECIPIENT_AWS = "email_recipient_aws";
+
+	/** Address of recipient of BUG emails */
+	String EMAIL_RECIPIENT_BUGS = "email_recipient_bugs";
+
 	String AGENCY_ID = "agency_id";
 
 	/** possible values for the AGENCY_ID attribute */

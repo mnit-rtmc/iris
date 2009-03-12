@@ -528,4 +528,29 @@ public class SystemAttributeHelper {
 		return getValueBoolean(SystemAttribute.TEMP_FAHRENHEIT_ENABLE,
 			false);
 	}
+
+	/** SMTP host name */
+	static public String getEmailSmtpHost() {
+		return getValue(SystemAttribute.EMAIL_SMTP_HOST);
+	}
+
+	/** Name of sender for server emails */
+	static public String getEmailSenderServer() {
+		return getValue(SystemAttribute.EMAIL_SENDER_SERVER);
+	}
+
+	/** Name of sender for client emails */
+	static public String getEmailSenderClient() {
+		return getValue(SystemAttribute.EMAIL_SENDER_CLIENT);
+	}
+
+	/** Address of recipient of AWS emails */
+	static public String getEmailRecipientAws() {
+		return getValue(SystemAttribute.EMAIL_RECIPIENT_AWS);
+	}
+
+	/** Address of recipient of BUG emails */
+	static public String getEmailRecipientBugs() {
+		return getValue(SystemAttribute.EMAIL_RECIPIENT_BUGS);
+	}
 }

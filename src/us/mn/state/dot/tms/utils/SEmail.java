@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,68 +21,82 @@ import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.Properties;
 import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
- * email convenience methods.
+ * A simple email abstraction.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class SEmail {
 
-	/** 
-	 *  Send an email to the specified recipient 
-	 *  @param props Property file, the 'mail.smtp.host' entry is required.
-	 *  @param sender e.g. bob@example.com
-	 *  @param recipient e.g. bob@example.com
-	 *  @param subject Message subject
-	 *  @param msgtext Text of the message to send
-	 *  @return true on success.
-	 */
-	public static boolean sendEmail(Properties props,String sender, String recipient, 
-		String subject, String msgtext) {
+	/** Address of sender */
+	protected final String sender;
 
-		if(sender==null || recipient==null || sender.length()<=0 || recipient.length()<=0)
-			return false;
-		subject = (subject==null ? "no subject" : subject);
-		msgtext = (msgtext==null ? "no message" : msgtext);
+	/** Address of recipient */
+	protected final String recipient;
 
-		boolean ok;
+	/** Message subject */
+	protected final String subject;
 
+	/** Message text */
+	protected final String text;
+
+	/** Create a new email.
+	 * @param snd Sender (e.g. bob@example.com)
+	 * @param rcp Recipient (e.g. bob@example.com)
+	 * @param sbj Message subject
+	 * @param txt Message text */
+	public SEmail(String snd, String rcp, String sbj, String txt) {
+		assert snd != null;
+		assert rcp != null;
+		assert sbj != null;
+		assert txt != null;
+		sender = snd;
+		recipient = rcp;
+		subject = sbj;
+		text = txt;
+	}
+
+	/** Send the email */
+	public void send() throws MessagingException {
+		MimeMessage message = createMessage();
+		message.setFrom(new InternetAddress(sender));
+		InternetAddress[] to = InternetAddress.parse(recipient);
+		message.addRecipients(Message.RecipientType.TO, to);
+		message.setSubject(subject);
+		message.setText(buildText());
+		Transport.send(message);
+	}
+
+	/** Create a MIME Message */
+	protected MimeMessage createMessage() {
+		Properties props = new Properties();
+		props.setProperty("mail.smtp.host",
+			SystemAttributeHelper.getEmailSmtpHost());
+		Session session = Session.getInstance(props, null);
+		return new MimeMessage(session);
+	}
+
+	/** Build message text */
+	protected String buildText() {
+		StringWriter writer = new StringWriter();
+		PrintWriter print = new PrintWriter(writer);
+		print.print(new Date().toString() + ": ");
 		try {
-			Session session = Session.getInstance(props, null);
-			MimeMessage message = new MimeMessage(session);
-			message.setFrom(new InternetAddress(sender));
-			InternetAddress[] to = InternetAddress.parse(recipient);
-			message.addRecipients(Message.RecipientType.TO, to);
-			message.setSubject(subject);
-
-			// build message text
-			StringWriter writer = new StringWriter(200);
-			PrintWriter print = new PrintWriter(writer);
-			print.print(new Date().toString() + ": ");
-			try {
-				print.println("Host: " +
-				InetAddress.getLocalHost().getHostName());
-			}
-			catch(UnknownHostException ee) {
-				print.println("Host unknown");
-			}
-			print.println(msgtext);
-			message.setText(writer.toString());
-
-			Transport.send(message);
-			ok=true;
-		} catch(Exception ex) {
-			System.err.println("Warning: SEmail.sendEmail() failed: ex="+ex);
-			ok=false;
+			print.println("Host: " +
+			InetAddress.getLocalHost().getHostName());
 		}
-
-		return ok;
+		catch(UnknownHostException ee) {
+			print.println("Host unknown");
+		}
+		print.println(text);
+		return writer.toString();
 	}
 }
-

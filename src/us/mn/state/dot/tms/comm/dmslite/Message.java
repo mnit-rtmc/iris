@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
-import java.util.Properties;
-import us.mn.state.dot.tms.MainServer;
+import javax.mail.MessagingException;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 import us.mn.state.dot.tms.utils.SEmail;
-import us.mn.state.dot.tms.utils.PropertyFile;
 
 /**
  * DMS Lite Message. A Message represents the bytes sent and
@@ -301,10 +300,6 @@ public class Message implements AddressedMessage
 	  * @param errmsgnote Optional error message, appended to generated message.
 	  */
 	public void handleCAWSFailure(String errmsgnote) {
-		if(MainServer.m_serverprops==null)
-			return;
-		if(MainServer.m_serverprops==null)
-			return;
 		if(errmsgnote==null)
 			errmsgnote="";
 
@@ -317,19 +312,25 @@ public class Message implements AddressedMessage
 		System.err.println("Warning: failure to send CAWS message to CMS: "+errmsg);
 
 		// build email
-		Properties props = MainServer.getServerProps();
-		String sender=PropertyFile.get(props,"d10.caws.email_sender");
-		String recipient=PropertyFile.get(props,"d10.caws.email_recipient");
-		String subject="IRIS could not send CAWS message to CMS";
+		String sender = SystemAttributeHelper.getEmailSenderServer();
+		String recipient = SystemAttributeHelper.getEmailRecipientAws();
+		String subject = "IRIS could not send CAWS message to CMS";
 
 		// send
-		if(recipient==null || sender==null || recipient.length()<=0 || 
-			sender.length()<=0)
+		if(recipient == null || sender == null ||
+			recipient.length() <= 0 || sender.length() <= 0)
+		{
 			System.err.println("Message.handleCAWSFailure(): didn't try to send CAWS error email.");
-		else {
-			boolean sendflag=SEmail.sendEmail(props, sender, 
-				recipient, subject, errmsg);
-			System.err.println("Message.handleCAWSFailure(): sent email, success="+sendflag);
+		} else {
+			SEmail email = new SEmail(sender, recipient, subject,
+				errmsg);
+			try {
+				email.send();
+				System.err.println("Message.handleCAWSFailure(): sent email");
+			}
+			catch(MessagingException e) {
+				System.err.println("Message.handleCAWSFailure(): email failed: " + e.getMessage());
+			}
 		}
 	}
 

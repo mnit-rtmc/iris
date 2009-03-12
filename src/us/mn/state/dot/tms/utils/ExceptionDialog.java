@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,21 +21,11 @@ import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.BindException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
 import java.rmi.RemoteException;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.Properties;
-
-import javax.mail.Message;
 import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import javax.naming.AuthenticationException;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -50,6 +40,7 @@ import us.mn.state.dot.sonar.client.SonarShowException;
 import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
  * A swing dialog for displaying exception stack traces.
@@ -225,41 +216,13 @@ public class ExceptionDialog extends JDialog {
 		addText("IRIS system administrator.");
 	}
 
-	/** Send an email alert to the specified recipient */
-	protected void sendEmailAlert(Exception e, Properties props,
-		String sender, String recipient) throws MessagingException
-	{
-		InternetAddress[] to = InternetAddress.parse(recipient);
-		Session session = Session.getInstance(props, null);
-		MimeMessage message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(sender));
-		message.addRecipients(Message.RecipientType.TO, to);
-		message.setSubject("IRIS Exception");
-		StringWriter writer = new StringWriter(200);
-		PrintWriter print = new PrintWriter(writer);
-		print.print(new Date().toString() + ": ");
-		try {
-			print.println("Host: " +
-			InetAddress.getLocalHost().getHostName());
-		}
-		catch(UnknownHostException ee) {
-			print.println("Host unknown");
-		}
-		e.printStackTrace(new PrintWriter(writer));
-		message.setText(writer.toString());
-		Transport.send(message);
-	}
-
 	/** Send an e-mail alert to the system administrators */
 	protected void sendEmailAlert(Exception e) {
-		Properties props = System.getProperties();
-		String sender = props.getProperty("email_sender");
-		String recipient = props.getProperty("email_recipient");
-		if(sender != null && recipient != null &&
-			props.getProperty("mail.smtp.host") != null)
-		{
+		String sender = SystemAttributeHelper.getEmailSenderClient();
+		String recipient =SystemAttributeHelper.getEmailRecipientBugs();
+		if(sender != null && recipient != null) {
 			try {
-				sendEmailAlert(e, props, sender, recipient);
+				sendEmailAlert(sender, recipient, e);
 				box.add(Box.createVerticalStrut(6));
 				addText("A detailed error report");
 				addText("has been emailed to:");
@@ -273,6 +236,17 @@ public class ExceptionDialog extends JDialog {
 				addText(recipient);
 			}
 		}
+	}
+
+	/** Send an email alert to the specified recipient */
+	protected void sendEmailAlert(String sender, String recipient,
+		Exception e) throws MessagingException
+	{
+		StringWriter writer = new StringWriter(200);
+		e.printStackTrace(new PrintWriter(writer));
+		SEmail email = new SEmail(sender, recipient, "IRIS Exception",
+			writer.toString());
+		email.send();
 	}
 
 	/** Centered label component */
