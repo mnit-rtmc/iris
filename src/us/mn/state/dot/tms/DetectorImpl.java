@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class DetectorImpl extends Device2Impl implements Detector,
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new DetectorImpl(namespace,
+				namespace.addObject(new DetectorImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// controller
 					row.getInt(3),		// pin

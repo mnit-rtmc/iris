@@ -58,7 +58,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new FontImpl(
+				namespace.addObject(new FontImpl(
 					row.getString(1),	// name
 					row.getInt(2),		// f_number
 					row.getInt(3),		// height

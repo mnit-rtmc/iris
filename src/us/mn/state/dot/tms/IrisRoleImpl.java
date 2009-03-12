@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 			"priv_d FROM role;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.add(new IrisRoleImpl(
+				ns.addObject(new IrisRoleImpl(
 					row.getString(1),  // name
 					row.getString(2),  // pattern
 					row.getBoolean(3), // priv_r

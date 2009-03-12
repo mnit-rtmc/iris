@@ -58,7 +58,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 			"duration FROM iris.sign_message;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new SignMessageImpl(
+				namespace.addObject(new SignMessageImpl(
 					row.getString(1),	// name
 					row.getString(2),	// multi
 					row.getString(3),	// bitmaps

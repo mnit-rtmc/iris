@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new R_NodeImpl(namespace,
+				namespace.addObject(new R_NodeImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getInt(3),		// node_type
@@ -142,7 +142,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		station = createStation(station_id);
 		if(station != null) {
 			try {
-				namespace.add(station);
+				namespace.addObject(station);
 			}
 			catch(NamespaceError e) {
 				e.printStackTrace();

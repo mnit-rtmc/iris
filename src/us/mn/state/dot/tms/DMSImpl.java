@@ -66,7 +66,7 @@ public class DMSImpl extends Device2Impl implements DMS {
 			"iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new DMSImpl(namespace,
+				namespace.addObject(new DMSImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller

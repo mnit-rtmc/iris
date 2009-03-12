@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new ControllerImpl(namespace,
+				namespace.addObject(new ControllerImpl(
+					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// cabinet
 					row.getString(3),	// comm_link
@@ -64,10 +65,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		if(cabinet != null)
-			map.put("cabinet", cabinet.getName());
-		if(comm_link != null)
-			map.put("comm_link", comm_link.getName());
+		map.put("cabinet", cabinet);
+		map.put("comm_link", comm_link);
 		map.put("drop_id", drop_id);
 		map.put("active", active);
 		map.put("notes", notes);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new GeoLocImpl(namespace,
+				namespace.addObject(new GeoLocImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// freeway
 					row.getShort(3),	// free_dir
@@ -56,11 +56,9 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		if(freeway != null)
-			map.put("freeway", freeway.getName());
+		map.put("freeway", freeway);
 		map.put("free_dir", free_dir);
-		if(cross_street != null)
-			map.put("cross_street", cross_street.getName());
+		map.put("cross_street", cross_street);
 		map.put("cross_dir", cross_dir);
 		map.put("cross_mod", cross_mod);
 		map.put("easting", easting);

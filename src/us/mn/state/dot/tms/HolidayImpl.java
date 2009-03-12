@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2008  Minnesota Department of Transportation
+ * Copyright (C) 2003-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new HolidayImpl(
+				namespace.addObject(new HolidayImpl(
 					row.getString(1),	// name
 					row.getInt(2),		// month
 					row.getInt(3),		// day

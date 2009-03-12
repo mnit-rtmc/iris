@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 			" FROM sign_text;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new SignTextImpl(namespace,
+				namespace.addObject(new SignTextImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// sign_group
 					row.getShort(3),	// line

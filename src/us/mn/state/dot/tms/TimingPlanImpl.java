@@ -93,7 +93,8 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new TimingPlanImpl(namespace,
+				namespace.addObject(new TimingPlanImpl(
+					namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// plan_type
 					row.getString(3),	// device

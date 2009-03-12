@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new CabinetStyleImpl(
+				namespace.addObject(new CabinetStyleImpl(
 					row.getString(1),	// name
 					(Integer)row.getObject(2) // dip
 				));

@@ -39,7 +39,8 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new WarningSignImpl(namespace,
+				namespace.addObject(new WarningSignImpl(
+					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
@@ -56,13 +57,11 @@ public class WarningSignImpl extends Device2Impl implements WarningSign {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("geo_loc", geo_loc.getName());
-		if(controller != null)
-			map.put("controller", controller.getName());
+		map.put("geo_loc", geo_loc);
+		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		if(camera != null)
-			map.put("camera", camera.getName());
+		map.put("camera", camera);
 		map.put("message", message);
 		return map;
 	}

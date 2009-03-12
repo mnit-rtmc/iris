@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new AlarmImpl(namespace,
+				namespace.addObject(new AlarmImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// description
 					row.getString(3),	// controller
@@ -60,8 +60,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
-		if(controller != null)
-			map.put("controller", controller.getName());
+		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("state", state);
 		return map;

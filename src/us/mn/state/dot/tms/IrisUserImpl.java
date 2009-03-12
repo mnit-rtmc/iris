@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.add(new IrisUserImpl(ns,
+				ns.addObject(new IrisUserImpl(ns,
 					row.getString(1),	// name
 					row.getString(2),	// dn
 					row.getString(3)	// full_name

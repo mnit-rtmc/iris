@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 			"FROM graphic;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new GraphicImpl(
+				namespace.addObject(new GraphicImpl(
 					row.getString(1),	// name
 					row.getInt(2),		// bpp
 					row.getInt(3),		// height

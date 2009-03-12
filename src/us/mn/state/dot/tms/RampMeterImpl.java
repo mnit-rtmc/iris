@@ -68,7 +68,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new RampMeterImpl(namespace,
+				namespace.addObject(new RampMeterImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller

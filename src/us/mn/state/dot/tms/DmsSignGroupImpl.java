@@ -36,7 +36,8 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 			" FROM dms_sign_group;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.add(new DmsSignGroupImpl(namespace,
+				namespace.addObject(new DmsSignGroupImpl(
+					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// dms
 					row.getString(3)	// sign_group
