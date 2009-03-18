@@ -153,10 +153,9 @@ public class OpQueryMsg extends OpDms {
 	protected Phase phaseOne() {
 		// has getConfig() been called yet? If not, don't do anything
 		// FIXME: there must be a better way to check for this condition
-		if(m_dms.getWidthPixels() > 0)
-			return new PhaseQueryCurrentMessage();
-		else
+		if(m_dms.getWidthPixels() == null)
 			return null;
+		return new PhaseQueryCurrentMessage();
 	}
 
 	/**
