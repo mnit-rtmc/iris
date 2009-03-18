@@ -199,6 +199,7 @@ public class OpMessage extends OpDms {
 			 *           <Id>...</Id>
 			 *           <Address>...</Address>
 			 *           <MsgText>...</MsgText>             multistring cms message text
+			 *	     <FontName>...</FontName>		font name
 			 *           <UseOnTime>...</UseOnTime>         true to use on time, else now
 			 *           <OnTime>...</OnTime>             	message on time
 			 *           <UseOffTime>...</UseOffTime>       true to use off time, else indefinite
@@ -224,6 +225,10 @@ public class OpMessage extends OpDms {
 
 			// MsgText
 			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
+
+			// FontName
+			String fn = m_signMessage.getFontName();
+			mess.add(new ReqRes("FontName", (fn == null ? "" : fn)));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
@@ -351,6 +356,7 @@ public class OpMessage extends OpDms {
 			 *          <Id>...</Id>
 			 *          <Address>...</Address>
 			 *          <MsgText>...</MsgText>               multistring cms message text
+			 *	    <FontName>...</FontName>		 font name
 			 *          <UseOnTime>...</UseOnTime>         	 true to use on time, else now
 			 *          <OnTime>...</OnTime>             	 message on time
 			 *          <UseOffTime>...</UseOffTime>       	 true to use off time, else indefinite
@@ -384,6 +390,10 @@ public class OpMessage extends OpDms {
 
 			// MsgText
 			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
+
+			// FontName
+			String fn = m_signMessage.getFontName();
+			mess.add(new ReqRes("FontName", (fn == null ? "" : fn)));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));

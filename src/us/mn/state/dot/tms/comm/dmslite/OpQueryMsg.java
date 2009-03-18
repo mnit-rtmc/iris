@@ -241,7 +241,7 @@ public class OpQueryMsg extends OpDms {
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", "MsgText",
-				"Owner", "UseOnTime", "OnTime", "UseOffTime",
+				"FontName", "Owner", "UseOnTime", "OnTime", "UseOffTime",
 				"OffTime", "UseBitmap", "Bitmap"});
 
 			// send msg
@@ -255,6 +255,7 @@ public class OpQueryMsg extends OpDms {
 			String errmsg = "";
 			boolean msgtextavailable = false;
 			String msgtext = "";
+			String fontname = "";
 			String owner = "";
 			boolean useont = false;
 			Calendar ont = new GregorianCalendar();
@@ -277,9 +278,17 @@ public class OpQueryMsg extends OpDms {
 					errmsg="request failed";
 
 				if(valid) {
+					// msg text available
 					msgtextavailable = new Boolean(
 					    rr1.getResVal("MsgTextAvailable"));
+
+					// msg text
 					msgtext = rr1.getResVal("MsgText");
+
+					// font name
+					fontname = rr1.getResVal("FontName");
+
+					// owner
 					owner = rr1.getResVal("Owner");
 
 					// ontime
@@ -302,9 +311,9 @@ public class OpQueryMsg extends OpDms {
 					    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) parsed msg values: IsValid:"
 					    + valid + ", MsgTextAvailable:"
 					    + msgtextavailable + ", MsgText:"
-					    + msgtext + ", OnTime:" + ont.getTime() 
-					    + ", OffTime:" + offt.getTime() + ", bitmap:"
-					    + bitmap);
+					    + msgtext + "FontName:" + fontname + ", OnTime:" 
+					    + ont.getTime() + ", OffTime:" + offt.getTime() 
+					    + ", bitmap:" + bitmap);
 				}
 			} catch (IllegalArgumentException ex) {
 				System.err.println("OpQueryMsg.PhaseQueryCurrentMessage: Malformed XML received:"
@@ -319,6 +328,7 @@ public class OpQueryMsg extends OpDms {
 
 			// process response
 			if(valid) {
+
 				// error checking: have on time? if not, create new ontime
 				if (!useont) {
 					useont=true;
@@ -344,7 +354,9 @@ public class OpQueryMsg extends OpDms {
 						SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR, duramins);
-						m_dms.setMessageCurrent(sm,
+//FIXME: mtod from r8p9 merge: something should be done with fontname here to update current message, 8p9 code:
+//+ m_dms.setMessageFromController(msgtext, duramins, owner, MsgActPriorityD10.PRI_D10_OPER_MSG, fontname);
+						m_dms.setMessageCurrent(sm, 
 							null);
 					}
 					catch(SonarException e) {
