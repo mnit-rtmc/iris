@@ -86,23 +86,43 @@ abstract public class OpDms extends Device2Operation {
 		super.cleanup();
 	}
 
+	/** sign access type */
+	public enum SignAccessType {DIALUPMODEM, WIZARD, UNKNOWN};
+
+	/** return DMS sign access type */
+	public static SignAccessType getSignAccessType(DMSImpl dms) {
+		assert dms != null;
+		if(dms == null)
+			return SignAccessType.UNKNOWN;
+		String a = dms.getSignAccess();
+		if(a == null)
+			return SignAccessType.UNKNOWN;
+		else if(a.toLowerCase().contains("modem"))
+			return SignAccessType.DIALUPMODEM;
+		else if(a.toLowerCase().contains("wizard"))
+			return SignAccessType.WIZARD;
+		// unknown sign type, this happens when the first 
+		// OpQueryConfig message is being sent.
+		return SignAccessType.UNKNOWN;
+	}
+
 	/** return the timeout for this operation */
 	public int calcTimeoutMS() {
-		int secs = 60;
+		int secs = 60; //FIXME: use existing sys attribute
 		assert m_dms != null : "m_dms is null in OpDms.getTimeoutMS()";
-		String a = m_dms.getSignAccess();
-		if (a.toLowerCase().contains("modem")) {
+		SignAccessType at = getSignAccessType(m_dms);
+		if(at == SignAccessType.DIALUPMODEM) {
 			secs = SystemAttributeHelperD10.dmsliteModemOpTimeoutSecs();
-			System.err.println("connection type is modem:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
-		} else if (a.toLowerCase().contains("wizard")) {
+			System.err.println("connection type is modem" +
+				", dms="+m_dms.toString()+", timeout secs="+secs);
+		} else if(at == SignAccessType.WIZARD) {
 			secs = SystemAttributeHelperD10.dmsliteOpTimeoutSecs();
-			System.err.println("connection type is wizard:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
-		} else {
-			// unknown sign type, this happens when the first 
-			// OpDmsQueryConfig message is being sent, so a 
-			// default timeout should be used.
-			//System.err.println("OpDms.calcTimeoutMS(): unknown sign access type:"+a+", dms="+m_dms.toString());
+			System.err.println("connection type is wizard" +
+				", dms="+m_dms.toString()+", timeout secs="+secs);
 		}
+		// if unknown access type, this happens when the first 
+		// OpQueryConfig message is being sent, so a default 
+		// timeout should be used.
 		return secs * 1000;
 	}
 
