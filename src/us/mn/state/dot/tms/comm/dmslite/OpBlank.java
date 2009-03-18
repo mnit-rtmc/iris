@@ -46,7 +46,9 @@ public class OpBlank extends OpDms
 	public String getOperationDescription() {
 		String text = "Blanking the sign";
 		if(m_mess!=null)
-			text += " (" + m_mess.getOwner() + ")";
+			text += " (" + "ABCD" + ")";
+			//FIXME: mtod from r8p9 merge
+			//text += " (" + m_mess.getOwner() + ")";
 		return text;
 	}
 

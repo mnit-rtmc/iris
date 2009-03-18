@@ -58,8 +58,9 @@ public class OpMessage extends OpDms {
 	/** return description of operation, which is displayed in the client */
 	public String getOperationDescription() {
 		String text = "Sending new message";
-		if(m_signMessage!=null)
-			text += " (" + m_signMessage.getOwner() + ")";
+		// FIXME: mtod from r8p9 merge
+		//if(m_signMessage!=null)
+		//	text += " (" + m_signMessage.getOwner() + ")";
 		return text;
 	}
 
@@ -230,7 +231,8 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
 
 			// FontName
-			String fn = m_signMessage.getFontName();
+			// FIXME: mtod from r8p9 merge
+			String fn = "fontname"; //m_signMessage.getFontName();
 			mess.add(new ReqRes("FontName", (fn == null ? "" : fn)));
 
 			// UseOnTime, always true
@@ -398,7 +400,8 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
 
 			// FontName
-			String fn = m_signMessage.getFontName();
+			// FIXME: mtod from r8p9 merge
+			String fn = "fontname"; //m_signMessage.getFontName();
 			mess.add(new ReqRes("FontName", (fn == null ? "" : fn)));
 
 			// UseOnTime, always true
