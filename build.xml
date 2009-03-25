@@ -15,7 +15,6 @@
 <project name="iris" default="dist" basedir=".">
 	<property file="project.properties"/>
 	<property file="${user.home}/.ant.properties"/>
- 	<property name="spbase.dir" value=".."/>
 	<property name="src.dir" value="src"/>
 	<property name="etc.dir" value="etc"/>
 	<property name="images.dir" value="images"/>
@@ -23,6 +22,7 @@
 	<property name="lib.dir" value="lib"/>
  	<property name="MessagesBundle.dir" value="etc/MessagesBundle"/>
 	<property name="docs.dir" value="docs"/>
+ 	<property name="spbase.dir" value="deps"/>
 	<property name="build.dir" value="build"/>
 	<property name="build.etc" value="${build.dir}/etc"/>
 	<property name="build.src" value="${build.dir}/src"/>
@@ -69,8 +69,45 @@
 		      message="Missing dependency: ${lib.dir}/${file.dep}"/>
 	</target>
 
+	<!-- Check for one subproject dependancy -->
+	<target name="check-subproject">
+		<available property="file.exists"
+			   file="${lib.dir}/${file.dep}"/>
+		<antcall target="build-subproject"/>
+	</target>
+
+	<!-- Build a subproject -->
+	<target name="build-subproject" unless="file.exists">
+		<antcall target="hg-check"/>
+		<copy todir="${spbase.dir}/${repo.name}/lib">
+			<fileset dir="${lib.dir}"/>
+		</copy>
+		<ant dir="${spbase.dir}/${repo.name}"
+		     target="jar" inheritAll="false"/>
+		<copy todir="${lib.dir}">
+			<fileset dir="${spbase.dir}/${repo.name}/build/lib/"/>
+		</copy>
+	</target>
+
+	<!-- Clone a mercurial subproject -->
+	<target name="hg-check" unless="file.exists">
+		<available property="dir.exists"
+		           file="${spbase.dir}/${repo.name}"/>
+		<antcall target="hg-clone"/>
+	</target>
+
+	<!-- Clone a mercurial subproject -->
+	<target name="hg-clone" unless="dir.exists">
+		<exec executable="hg" dir="${spbase.dir}" failonerror="true">
+			<arg value="clone"/>
+			<arg value="-r${repo.version}"/>
+			<arg value="${hgbase.url}${repo.name}"/>
+		</exec>
+	</target>
+
 	<!-- Check for dependencies -->
 	<target name="check">
+		<mkdir dir="${spbase.dir}"/>
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-client.properties"/>
 		</antcall>
@@ -87,37 +124,66 @@
 			<param name="file.dep" value="mail.jar"/>
 		</antcall>
 		<antcall target="check-dep">
-			<param name="file.dep" value="${scheduler.jar}"/>
+			<param name="file.dep" value="jnlp.jar"/>
 		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${vault.jar}"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${sonar.server.jar}"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${sonar.client.jar}"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${mapbean.jar}"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${trafmap.jar}"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${shapes.jar}"/>
-		</antcall>
-		<antcall target="check-dep">
+		<antcall target="check-subproject">
 			<param name="file.dep" value="${tms-log.jar}"/>
+			<param name="repo.name" value="log"/>
+			<param name="repo.version" value="${tms-log.version}"/>
 		</antcall>
-		<antcall target="check-dep">
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${scheduler.jar}"/>
+			<param name="repo.name" value="scheduler"/>
+			<param name="repo.version"
+			       value="${scheduler.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${vault.jar}"/>
+			<param name="repo.name" value="vault"/>
+			<param name="repo.version"
+			       value="${vault.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${sonar.server.jar}"/>
+			<param name="repo.name" value="sonar"/>
+			<param name="repo.version" value="${sonar.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${sonar.client.jar}"/>
+			<param name="repo.name" value="sonar"/>
+			<param name="repo.version" value="${sonar.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
 			<param name="file.dep" value="${tdxml.jar}"/>
+			<param name="repo.name" value="tdxml"/>
+			<param name="repo.version" value="${tdxml.version}"/>
 		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="${datatools.jar}"/>
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${mapbean.jar}"/>
+			<param name="repo.name" value="mapbean"/>
+			<param name="repo.version" value="${mapbean.version}"/>
 		</antcall>
-		<antcall target="check-dep">
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${trafmap.jar}"/>
+			<param name="repo.name" value="trafmap"/>
+			<param name="repo.version" value="${trafmap.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${shapes.jar}"/>
+			<param name="repo.name" value="shapes"/>
+			<param name="repo.version" value="${shapes.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
 			<param name="file.dep" value="${videoclient.jar}"/>
+			<param name="repo.name" value="video"/>
+			<param name="repo.version"
+			       value="${videoclient.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
+			<param name="file.dep" value="${datatools.jar}"/>
+			<param name="repo.name" value="datatools"/>
+			<param name="repo.version"
+			       value="${datatools.version}"/>
 		</antcall>
 	</target>
 
@@ -242,6 +308,7 @@
 		</copy>
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
+				<include name="activation.jar"/>
 				<include name="mail.jar"/>
 				<include name="postgresql.jar"/>
 				<include name="${scheduler.jar}"/>
@@ -371,82 +438,25 @@
 		<delete dir="${dist.client}"/>
 	</target>
 
-	<!-- Build all dependencies in the proper order -->
-	<target name="buildall"
-		description="Build iris and dependencies">
-		<antcall target="deps">
-			<param name="target" value="jar"/>
-		</antcall>
-		<antcall target="dist"/>
-	</target>	
-
-	<!-- Clean all build directories -->
-	<target name="cleanall" description="clean iris and dependencies">
-		<antcall target="deps">
-			<param name="target" value="clean"/>
-		</antcall>
-		<antcall target="clean"/>
-	</target>
-
-	<!-- top-level iris, apply any $target arg                  -->
-	<!-- set property 'target' to apply across all dependencies -->
-	<target name="deps"
-		depends="do-shapes,do-vault,do-datatools,do-sonar,
-			 do-videoclient,do-tms-log,do-tdxml,do-trafmap,
-			 do-mapbean">
-	</target>
-
-	<!-- subproject shapes, apply any $target arg               -->
-	<target name="do-shapes">
-		<ant dir="${spbase.dir}/shapes-${shapes.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject vault, apply any $target arg                -->
-	<target name="do-vault">
-		<ant dir="${spbase.dir}/vault-${vault.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject datatools, apply any $target arg            -->
-	<target name="do-datatools" >
-		<ant dir="${spbase.dir}/datatools-${datatools.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject sonar, apply any $target arg               -->
-	<target name="do-sonar" >
-		<ant dir="${spbase.dir}/sonar-${sonar.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject tmslog, apply any $target arg               -->
-	<target name="do-tms-log" >
-		<ant dir="${spbase.dir}/tms-log-${tms-log.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject mapbean, apply any $target arg               -->
-	<target name="do-mapbean" >
-		<ant dir="${spbase.dir}/mapbean-${mapbean.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject video, apply any $target arg               -->
-	<target name="do-videoclient" depends="do-tms-log">
-		<ant dir="${spbase.dir}/video-${videoclient.version}"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject tdxml, apply any $target arg               -->
-	<target name="do-tdxml" depends="do-tms-log">
-		<ant dir="${spbase.dir}/tdxml-${tdxml.version}/client"
-			target="${target}" inheritAll="false"/>
-	</target>
-
-	<!-- subproject trafmap, apply any $target arg               -->
-	<target name="do-trafmap" depends="do-tdxml,do-mapbean">
-		<ant dir="${spbase.dir}/trafmap-${trafmap.version}"
-			target="${target}" inheritAll="false"/>
+	<!-- Clean up everything -->
+	<target name="distclean"
+	        description="Clean to the base repository distribution"
+	        depends="clean">
+		<delete dir="${spbase.dir}"/>
+		<delete>
+			<fileset dir="${lib.dir}">
+				<include name="${scheduler.jar}"/>
+				<include name="${datatools.jar}"/>
+				<include name="${tdxml.jar}"/>
+				<include name="${mapbean.jar}"/>
+				<include name="${trafmap.jar}"/>
+				<include name="${shapes.jar}"/>
+				<include name="${sonar.client.jar}"/>
+				<include name="${sonar.server.jar}"/>
+				<include name="${tms-log.jar}"/>
+				<include name="${vault.jar}"/>
+				<include name="${videoclient.jar}"/>
+			</fileset>
+		</delete>
 	</target>
 </project>
