@@ -13,8 +13,8 @@
      GNU General Public License for more details.  -->
 
 <project name="iris" default="dist" basedir=".">
-	<property file="project.properties"/>
-	<property file="${user.home}/.ant.properties"/>
+
+	<!-- Base directory configuration -->
 	<property name="src.dir" value="src"/>
 	<property name="etc.dir" value="etc"/>
 	<property name="images.dir" value="images"/>
@@ -23,18 +23,30 @@
  	<property name="MessagesBundle.dir" value="etc/MessagesBundle"/>
 	<property name="docs.dir" value="docs"/>
  	<property name="spbase.dir" value="deps"/>
+
+	<!-- Property configuration -->
+	<property file="project.properties"/>
+	<property file="${user.home}/.ant.properties"/>
+	<property file="${lib.dir}/iris-build.properties"/>
+
+	<!-- File locations -->
+	<property name="manifest.server" value="server-MANIFEST.MF"/>
+	<property name="manifest.client" value="client-MANIFEST.MF"/>
+	<property name="dist.server" value="${name}-server-${version}"/>
+	<property name="dist.client" value="${name}-client-${version}"/>
+
+	<!-- Build directory configuration -->
 	<property name="build.dir" value="build"/>
 	<property name="build.etc" value="${build.dir}/etc"/>
 	<property name="build.src" value="${build.dir}/src"/>
 	<property name="build.lib" value="${build.dir}/lib"/>
-	<property name="build.MessagesBundle" value="${build.dir}/MessagesBundle"/>
+	<property name="build.MessagesBundle"
+	          value="${build.dir}/MessagesBundle"/>
 	<property name="build.images" value="${build.dir}/images"/>
 	<property name="build.classes" value="${build.dir}/classes"/>
 	<property name="build.javadocs" value="${build.dir}/javadocs"/>
-	<property name="dist.server" value="${name}-server-${version}"/>
-	<property name="dist.client" value="${name}-client-${version}"/>
-	<property name="manifest.server" value="server-MANIFEST.MF"/>
-	<property name="manifest.client" value="client-MANIFEST.MF"/>
+
+	<!-- Dependent jar configuration -->
 	<property name="vault.jar" value="vault-${vault.version}.jar"/>
 	<property name="scheduler.jar"
 		  value="scheduler-${scheduler.version}.jar"/>
@@ -55,8 +67,9 @@
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="utils.jar" value="${name}-utils-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
+
+	<!-- Compiler configuration -->
 	<property name="build.compiler.pedantic" value="true"/>
-	<property file="${lib.dir}/iris-client.properties"/>
 	<path id="classpath">
 		<fileset dir="${lib.dir}" includes="*.jar"/>
 	</path>
@@ -108,6 +121,9 @@
 	<!-- Check for dependencies -->
 	<target name="check">
 		<mkdir dir="${spbase.dir}"/>
+		<antcall target="check-dep">
+			<param name="file.dep" value="iris-build.properties"/>
+		</antcall>
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-client.properties"/>
 		</antcall>
@@ -223,8 +239,8 @@
 					value="${videoclient.version}"/>
 				<filter token="SHAPES.VERSION"
 					value="${shapes.version}"/>
-				<filter token="IRIS-WEBSTART.HOST"
-					value="${iris-webstart.host}"/>
+				<filter token="WEBSTART.HOST"
+					value="${webstart.host}"/>
 			</filterset>
 		</copy>
 
