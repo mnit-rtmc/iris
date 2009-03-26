@@ -125,15 +125,6 @@
 			<param name="file.dep" value="iris-build.properties"/>
 		</antcall>
 		<antcall target="check-dep">
-			<param name="file.dep" value="iris-client.properties"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="iris-client.keystore"/>
-		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="postgresql.jar"/>
-		</antcall>
-		<antcall target="check-dep">
 			<param name="file.dep" value="activation.jar"/>
 		</antcall>
 		<antcall target="check-dep">
@@ -311,9 +302,16 @@
 		</jar>
 	</target>
 
+	<!-- Check for server dependencies -->
+	<target name="check-server">
+		<antcall target="check-dep">
+			<param name="file.dep" value="postgresql.jar"/>
+		</antcall>
+	</target>
+
 	<!-- Create the iris server distribution -->
 	<target name="server"
-		depends="server-jar,rmi-jar,utils-jar"
+		depends="check-server,server-jar,rmi-jar,utils-jar"
 		description="Create the iris server distribution">
 		<copy todir="${dist.server}">
 			<fileset dir="${build.lib}">
@@ -344,9 +342,16 @@
 		</jar>
 	</target>
 
+	<!-- Check for client jar dependencies -->
+	<target name="check-client-jar">
+		<antcall target="check-dep">
+			<param name="file.dep" value="iris-client.keystore"/>
+		</antcall>
+	</target>
+
 	<!-- Create the client jar -->
 	<target name="client-jar"
-	        depends="compile"
+	        depends="check-client-jar,compile"
 	        description="Create the iris-client jar">
 		<jar jarfile="${build.lib}/${client.jar}"
 		     manifest="${build.etc}/${manifest.client}">
@@ -362,9 +367,16 @@
 		</jar>
 	</target>
 
+	<!-- Check for client dependencies -->
+	<target name="check-client">
+		<antcall target="check-dep">
+			<param name="file.dep" value="iris-client.properties"/>
+		</antcall>
+	</target>
+
 	<!-- Create the iris client distribution -->
 	<target name="client"
-	        depends="rmi-jar,utils-jar,client-jar"
+	        depends="check-client,client-jar,rmi-jar,utils-jar"
 	        description="Create the iris client distribution">
 		<mkdir dir="${dist.client}"/>
 		<copy todir="${dist.client}">
