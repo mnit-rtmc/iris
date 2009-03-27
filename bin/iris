@@ -11,35 +11,39 @@
 . /etc/rc.d/init.d/functions
 
 RETVAL=0
-prog="iris"
-PROG=/usr/local/tms/iris
-WD=/usr/local/tms/iris-server
+SERVICE=$(basename $0)
+PROG=java_service
+DIR=/usr/share/java/iris-server
 USER=tms
-JAVA_HOME=/usr/java/current
-OPTIONS=$"$JAVA_HOME/bin/java -server -Xmx256m -jar $WD/iris-server-*.jar"
+OPTIONS=$"java -server -Xmx256m -jar $DIR/iris-server-*.jar"
 
-start()
-{
-	# Check for server already running...
-	pid=`pidof -s $prog`
+# SELinux requires runuser instead of su
+if [ -x /sbin/runuser ]
+then
+	SU=/sbin/runuser
+else
+	SU=su
+fi
+
+function start() {
+	pid=`pidof -s $PROG`
 	if [ $pid ]
 	then
-		echo $"$prog already running."
+		echo $"$SERVICE already running."
 	else
-		echo -n $"Starting $prog:"
-		su -l $USER -s /bin/sh -c "cd $WD && $PROG $OPTIONS &" && success || failure
+		echo -n $"Starting $SERVICE:"
+		$SU -l $USER -s /bin/sh -c "cd $DIR && $PROG $OPTIONS &" && success || failure
 		RETVAL=$?
-		[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$prog
+		[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$SERVICE
 		echo
 	fi
 }
 
-stop()
-{
-	echo -n $"Stopping $prog:"
+function stop() {
+	echo -n $"Stopping $SERVICE:"
 	killproc $PROG -TERM
 	RETVAL=$?
-	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/$prog
+	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/$SERVICE
 	echo
 }
 
@@ -52,6 +56,7 @@ case "$1" in
 		;;
 	restart)
 		stop
+		sleep 1
 		start
 		;;
 	status)
@@ -62,4 +67,5 @@ case "$1" in
 		echo $"Usage: $0 {start|stop|restart|status}"
 		RETVAL=1
 esac
+
 exit $RETVAL

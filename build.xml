@@ -22,7 +22,6 @@
 	<property name="lib.dir" value="lib"/>
  	<property name="MessagesBundle.dir" value="etc/MessagesBundle"/>
 	<property name="docs.dir" value="docs"/>
- 	<property name="spbase.dir" value="deps"/>
 
 	<!-- Property configuration -->
 	<property file="project.properties"/>
@@ -38,6 +37,7 @@
 	<!-- Build directory configuration -->
 	<property name="build.dir" value="build"/>
 	<property name="build.etc" value="${build.dir}/etc"/>
+	<property name="build.bin" value="${build.dir}/bin"/>
 	<property name="build.src" value="${build.dir}/src"/>
 	<property name="build.lib" value="${build.dir}/lib"/>
 	<property name="build.MessagesBundle"
@@ -45,6 +45,10 @@
 	<property name="build.images" value="${build.dir}/images"/>
 	<property name="build.classes" value="${build.dir}/classes"/>
 	<property name="build.javadocs" value="${build.dir}/javadocs"/>
+ 	<property name="build.deps" value="${build.dir}/deps"/>
+
+	<!-- Install directory configuration -->
+	<property name="install.dir" value="${build.dir}/install"/>
 
 	<!-- Dependent jar configuration -->
 	<property name="vault.jar" value="vault-${vault.version}.jar"/>
@@ -92,26 +96,27 @@
 	<!-- Build a subproject -->
 	<target name="build-subproject" unless="file.exists">
 		<antcall target="hg-check"/>
-		<copy todir="${spbase.dir}/${repo.name}/lib">
+		<copy todir="${build.deps}/${repo.name}/lib">
 			<fileset dir="${lib.dir}"/>
 		</copy>
-		<ant dir="${spbase.dir}/${repo.name}"
+		<ant dir="${build.deps}/${repo.name}"
 		     target="jar" inheritAll="false"/>
 		<copy todir="${lib.dir}">
-			<fileset dir="${spbase.dir}/${repo.name}/build/lib/"/>
+			<fileset dir="${build.deps}/${repo.name}/build/lib/"/>
 		</copy>
 	</target>
 
 	<!-- Clone a mercurial subproject -->
 	<target name="hg-check" unless="file.exists">
 		<available property="dir.exists"
-		           file="${spbase.dir}/${repo.name}"/>
+		           file="${build.deps}/${repo.name}"/>
 		<antcall target="hg-clone"/>
 	</target>
 
 	<!-- Clone a mercurial subproject -->
 	<target name="hg-clone" unless="dir.exists">
-		<exec executable="hg" dir="${spbase.dir}" failonerror="true">
+		<mkdir dir="${build.deps}"/>
+		<exec executable="hg" dir="${build.deps}" failonerror="true">
 			<arg value="clone"/>
 			<arg value="-r${repo.version}"/>
 			<arg value="${hgbase.url}${repo.name}"/>
@@ -120,7 +125,6 @@
 
 	<!-- Check for dependencies -->
 	<target name="check">
-		<mkdir dir="${spbase.dir}"/>
 		<antcall target="check-dep">
 			<param name="file.dep" value="iris-build.properties"/>
 		</antcall>
@@ -207,8 +211,8 @@
 
 		<copy todir="${build.etc}">
 			<fileset dir="${etc.dir}" />
-			<fileset dir="${bin.dir}" />
 			<filterset begintoken="@@" endtoken="@@">
+				<filter token="NAME" value="${name}"/>
 				<filter token="VERSION" value="${version}"/>
 				<filter token="SCHEDULER.VERSION"
 				        value="${scheduler.version}"/>
@@ -232,6 +236,17 @@
 					value="${shapes.version}"/>
 				<filter token="WEBSTART.HOST"
 					value="${webstart.host}"/>
+				<filter token="INSTALL.DIR"
+				        value="${install.dir}"/>
+				<filter token="DISTRIBUTION.URL"
+				        value="${distribution.url}"/>
+			</filterset>
+		</copy>
+
+		<copy todir="${build.bin}">
+			<fileset dir="${bin.dir}" />
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
 			</filterset>
 		</copy>
 
@@ -385,6 +400,8 @@
 			</fileset>
 			<fileset dir="${build.etc}">
 				<include name="*.jnlp"/>
+			</fileset>
+			<fileset dir="${build.bin}">
 				<include name="iris.sh"/>
 				<include name="iris.bat"/>
 			</fileset>
@@ -441,6 +458,32 @@
 		</signjar>
 	</target>
 
+	<!-- Install iris client and server -->
+	<target name="install"
+	        depends="dist"
+	        description="Install the full iris distribution">
+
+		<copy todir="${install.dir}/etc/iris">
+			<fileset file="${lib.dir}/iris-server.properties"/>
+			<fileset file="${lib.dir}/iris-server.keystore"/>
+		</copy>
+		<chmod file="${install.dir}/etc/iris/*" perm="660"/>
+
+		<copy todir="${install.dir}/etc/rc.d/init.d">
+			<fileset file="${build.bin}/${name}"/>
+		</copy>
+		<chmod file="${install.dir}/etc/rc.d/init.d/${name}"
+		       perm="755"/>
+
+		<copy todir="${install.dir}/usr/share/java/${dist.server}">
+			<fileset dir="${dist.server}"/>
+		</copy>
+
+		<copy todir="${install.dir}/var/www/html/${dist.client}">
+			<fileset dir="${dist.client}"/>
+		</copy>
+	</target>
+
 	<!-- Create the API documentation -->
 	<target name="docs"
 	        depends="prepare"
@@ -470,7 +513,6 @@
 	<target name="distclean"
 	        description="Clean to the base repository distribution"
 	        depends="clean">
-		<delete dir="${spbase.dir}"/>
 		<delete>
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
