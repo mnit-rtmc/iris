@@ -547,6 +547,14 @@
 		<copy todir="${build.rpm}/SPECS">
 			<fileset file="${build.etc}/iris.spec"/>
 		</copy>
+		<exec executable="rpmbuild"
+		      dir="${build.rpm}"
+		      failonerror="true">
+			<arg value="-ba"/>
+			<arg value="--buildroot"/>
+			<arg value="${build.rpm}/BUILDROOT"/>
+			<arg value="${build.rpm}/SPECS/iris.spec"/>
+		</exec>
 	</target>
 
 	<!-- Create the API documentation -->
