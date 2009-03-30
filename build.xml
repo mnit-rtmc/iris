@@ -505,7 +505,8 @@
 		</copy>
 
 		<copy todir="${install.dir}/var/www/html/${dist.client}">
-			<fileset dir="${dist.client}"/>
+			<fileset dir="${dist.client}"
+			         excludes="iris.bat,iris.sh"/>
 		</copy>
 	</target>
 

@@ -91,15 +91,11 @@ echo "Done with install in spec."
 /etc/rc.d/init.d/%{name}
 
 # /usr/share/java/iris-server-x.x.x
-%defattr(0755,tms,tms)
-%{_serverdir}
-
-# /usr/share/java/iris-server-x.x.x
 %defattr(0644,tms,tms)
-%{_serverdir}/%{name}
 %{_serverdir}/%{name}-rmi-%{version}.jar
 %{_serverdir}/%{name}-server-%{version}.jar
 %{_serverdir}/%{name}-utils-%{version}.jar
+%{_serverdir}/activation.jar
 %{_serverdir}/mail.jar
 %{_serverdir}/postgresql.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
@@ -107,10 +103,6 @@ echo "Done with install in spec."
 %{_serverdir}/vault-@@VAULT.VERSION@@.jar
 
 # client: /var/www/html/iris-client-x.x.x
-%defattr(0555,apache,apache)
-%{_clientdir}/images
-%{_clientdir}/lib
-
 %defattr(0444,apache,apache)
 %{_clientdir}/index.html
 %{_clientdir}/activation.jnlp
