@@ -78,12 +78,13 @@ echo "Done with install in spec."
 %files
 
 # /etc/iris
+%dir %attr(0750,tms,tms) /etc/iris
 %defattr(0640,tms,tms)
 %config /etc/iris/%{name}-server.properties
 %config /etc/iris/%{name}-server.keystore
 
 # /usr/bin
-%defattr(0755,tms,tms)
+%defattr(0755,root,root)
 /usr/bin/iris_service
 
 # /etc/rc.d/init.d
@@ -91,6 +92,7 @@ echo "Done with install in spec."
 /etc/rc.d/init.d/%{name}
 
 # /usr/share/java/iris-server-x.x.x
+%dir %attr(0755,tms,tms) %{_serverdir}
 %defattr(0644,tms,tms)
 %{_serverdir}/%{name}-rmi-%{version}.jar
 %{_serverdir}/%{name}-server-%{version}.jar
@@ -103,6 +105,9 @@ echo "Done with install in spec."
 %{_serverdir}/vault-@@VAULT.VERSION@@.jar
 
 # client: /var/www/html/iris-client-x.x.x
+%dir %attr(0755,apache,apache) %{_clientdir}
+%dir %attr(0755,apache,apache) %{_clientdir}/images
+%dir %attr(0755,apache,apache) %{_clientdir}/lib
 %defattr(0444,apache,apache)
 %{_clientdir}/index.html
 %{_clientdir}/activation.jnlp
