@@ -162,6 +162,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			new OpQueryConfig(dms).start();
 			break;
 		case QUERY_MESSAGE:
+		case QUERY_STATUS:
 			new OpQueryMsg(dms).start();
 			break;
 		case RESET_DMS:
@@ -172,6 +173,9 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			break;
 		default:
 			// Ignore other requests
+			//System.err.println("Warning: DmsLitePoller: "+
+			//	"unknown request in sendRequest(). "+
+			//	r="+r+", desc="+r.description);
 			break;
 		}
 	}
