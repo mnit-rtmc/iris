@@ -35,7 +35,7 @@
 	<property name="dist.client" value="${name}-client-${version}"/>
 
 	<!-- Build directory configuration -->
-	<property name="build.dir" value="build"/>
+	<property name="build.dir" value="${basedir}/build"/>
 	<property name="build.etc" value="${build.dir}/etc"/>
 	<property name="build.bin" value="${build.dir}/bin"/>
 	<property name="build.src" value="${build.dir}/src"/>
@@ -46,6 +46,10 @@
 	<property name="build.classes" value="${build.dir}/classes"/>
 	<property name="build.javadocs" value="${build.dir}/javadocs"/>
  	<property name="build.deps" value="${build.dir}/deps"/>
+ 	<property name="build.tar" value= "${build.dir}/${name}-${version}"/>
+ 	<property name="build.rpm" value="${build.dir}/rpm"/>
+ 	<property name="tar.file"
+ 	          value="${build.rpm}/SOURCES/${name}-${version}.tar"/>
 
 	<!-- Install directory configuration -->
 	<property name="install.dir" value="${build.dir}/install"/>
@@ -198,16 +202,9 @@
 		</antcall>
 	</target>
 
-	<!-- Prepare the build directory -->
-	<target name="prepare"
-	        description="Prepare the build directory">
-
-		<copy todir="${build.src}" filtering="true">
-			<fileset dir="${src.dir}"/>
-			<filterset begintoken="@@" endtoken="@@">
-				<filter token="VERSION" value="${version}"/>
-			</filterset>
-		</copy>
+	<!-- Prepare the build/etc directory -->
+	<target name="prepare-etc"
+	        description="Prepare the build/etc directory">
 
 		<copy todir="${build.etc}">
 			<fileset dir="${etc.dir}" />
@@ -236,10 +233,23 @@
 					value="${shapes.version}"/>
 				<filter token="WEBSTART.HOST"
 					value="${webstart.host}"/>
-				<filter token="INSTALL.DIR"
-				        value="${install.dir}"/>
 				<filter token="DISTRIBUTION.URL"
 				        value="${distribution.url}"/>
+				<filter token="BUILD.RPM"
+				        value="${build.rpm}"/>
+			</filterset>
+		</copy>
+	</target>
+
+	<!-- Prepare the build directory -->
+	<target name="prepare"
+	        depends="prepare-etc"
+	        description="Prepare the build directory">
+
+		<copy todir="${build.src}" filtering="true">
+			<fileset dir="${src.dir}"/>
+			<filterset begintoken="@@" endtoken="@@">
+				<filter token="VERSION" value="${version}"/>
 			</filterset>
 		</copy>
 
@@ -458,9 +468,19 @@
 		</signjar>
 	</target>
 
+	<!-- Compile the service binary -->
+	<target name="compile-service"
+	        depends="prepare"
+	        description="Compile the iris_service binary">
+		<exec executable="gcc" dir="${build.bin}" failonerror="true">
+			<arg value="iris_service.c"/>
+			<arg value="-oiris_service"/>
+		</exec>
+	</target>
+
 	<!-- Install iris client and server -->
 	<target name="install"
-	        depends="dist"
+	        depends="dist,compile-service"
 	        description="Install the full iris distribution">
 
 		<copy todir="${install.dir}/etc/iris">
@@ -475,12 +495,56 @@
 		<chmod file="${install.dir}/etc/rc.d/init.d/${name}"
 		       perm="755"/>
 
+		<copy todir="${install.dir}/usr/bin">
+			<fileset file="${build.bin}/iris_service"/>
+		</copy>
+		<chmod file="${install.dir}/usr/bin/iris_service" perm="755"/>
+
 		<copy todir="${install.dir}/usr/share/java/${dist.server}">
 			<fileset dir="${dist.server}"/>
 		</copy>
 
 		<copy todir="${install.dir}/var/www/html/${dist.client}">
 			<fileset dir="${dist.client}"/>
+		</copy>
+	</target>
+
+	<!-- Create a source tarball -->
+	<target name="tarball"
+	        description="Create a source tarball">
+		<mkdir dir="${build.rpm}/SOURCES"/>
+		<exec executable="hg"
+		      failonerror="true">
+			<arg value="archive"/>
+			<arg value="-ttar"/>
+			<arg value="${tar.file}"/>
+		</exec>
+		<copy todir="${build.tar}/lib">
+			<fileset dir="${lib.dir}"/>
+		</copy>
+		<exec executable="tar" failonerror="true">
+			<arg value="--directory=build"/>
+			<arg value="--append"/>
+			<arg value="--file=${tar.file}"/>
+			<arg value="${name}-${version}/lib"/>
+		</exec>
+		<exec executable="gzip" failonerror="true">
+			<arg value="${tar.file}"/>
+		</exec>
+	</target>
+
+	<!-- Create an RPM package -->
+	<target name="rpm"
+	        depends="prepare-etc,tarball"
+	        description="Create an RPM package">
+		<mkdir dir="${build.rpm}/BUILD"/>
+		<mkdir dir="${build.rpm}/BUILDROOT"/>
+		<mkdir dir="${build.rpm}/RPMS"/>
+		<mkdir dir="${build.rpm}/SOURCES"/>
+		<mkdir dir="${build.rpm}/SPECS"/>
+		<mkdir dir="${build.rpm}/SRPMS"/>
+		<copy todir="${build.rpm}/SPECS">
+			<fileset file="${build.etc}/iris.spec"/>
 		</copy>
 	</target>
 

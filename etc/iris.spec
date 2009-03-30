@@ -1,6 +1,7 @@
 #
 # RPM Spec file for IRIS
 # Written by Michael Darter, December 2008
+#     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
 # Copyright (C) 2009  Minnesota Department of Transportation
@@ -15,19 +16,18 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 
-# Note: many args are passed in via the command line from within
-# the build.xml ant file.
-
-%define name		%{_name}
-%define version		%{_version}
-%define _tmppath	%{_topdir}/tmp
-%define _prefix		/usr/share
-%define _defaultdocdir	%{_prefix}/share/doc
-%define _mandir		%{_prefix}/man
-%define buildroot	%{_tmppath}/%{name}-%{version}
+%define name		@@NAME@@
+%define version		@@VERSION@@
+%define _topdir		@@BUILD.RPM@@
+%define _installdir	%{_topdir}/BUILDROOT
+%define _serverlink	/usr/share/java/%{name}-server
+%define _serverdir	%{_serverlink}-%{version}
+%define _clientlink	/var/www/html/%{name}-client
+%define _clientdir	%{_clientlink}-%{version}
+%define _url		@@DISTRIBUTION.URL@@
 
 Name:		%{name}
-Summary:	The open-source IRIS advanced traffic management system (ATMS).
+Summary:	The IRIS advanced traffic management system (ATMS).
 Version:	%{version}
 Release:	1
 License:	GPL
@@ -39,8 +39,15 @@ Buildroot:	%{buildroot}
 
 Vendor:		%{_vendor}
 Packager:	%{_vendor}
+
 %Description
-%{_rpmdesc}
+IRIS, or Intelligent Roadway Information System, is an advanced traffic
+management system (ATMS) developed by the Minnesota Department of
+Transportation.
+
+This software can be used in traffic management centers for controlling
+Dynamic Message Signs (DMS), ramp meters, closed-circuit cameras, and
+other traffic control devices.
 
 # untar the source
 %prep
@@ -50,7 +57,7 @@ echo name is %{name}.
 echo version is %{version}.
 echo _topdir is %{_topdir}.
 echo Buildroot is %{buildroot}.
-echo Appinstalldir is %{_appinstalldir}.
+echo Installdir is %{_installdir}.
 %setup -q 
 echo "Done with prep in spec."
 
@@ -62,75 +69,67 @@ echo "Done with build in spec."
 
 # install the distro files
 %install
-echo "-----------Starting install to %{buildroot}."
-ant -Dinstall.base.dir=%{buildroot} install
+echo "-----------Starting install to %{_installdir}."
+ant -Dinstall.dir=%{_installdir} install
 echo "Done with install in spec."
-
-# clean up the mess
-%clean
-echo "-----------Starting clean."
-rm -rf %{buildroot}
-echo "Done with clean in spec."
 
 # All files that will be placed in the RPM are listed
 # here. This includes both the client and server
 %files
 
-# /usr/share/java/iris
-%defattr(0755,tms,tms)
-%{_appinstalldir}
-
-# /usr/share/java/iris
-%defattr(0644,tms,tms)
-%{_appinstalldir}/%{name}
-%{_appinstalldir}/%{name}-rmi-%{version}.jar
-%{_appinstalldir}/%{name}-server-%{version}.jar
-%{_appinstalldir}/%{name}-utils-%{version}.jar
-%{_appinstalldir}/mail.jar
-%{_appinstalldir}/postgresql.jar
-%{_appinstalldir}/scheduler-%{_version_scheduler}.jar
-%{_appinstalldir}/sonar-server-%{_version_sonar}.jar
-%{_appinstalldir}/vault-%{_version_vault}.jar
-%{_appinstalldir}/%{name}.logging.properties
-
 # /etc/iris
-%defattr(0644,tms,tms)
-/etc/iris/%{name}-server.properties
-/etc/iris/%{_server_sonar_keystore}
+%defattr(0640,tms,tms)
+%config /etc/iris/%{name}-server.properties
+%config /etc/iris/%{name}-server.keystore
 
-# /usr/share/java/iris
-%defattr(0744,tms,tms)
-%{_appinstalldir}/run_%{name}
+# /usr/bin
+%defattr(0755,tms,tms)
+/usr/bin/iris_service
 
 # /etc/rc.d/init.d
 %defattr(0755,root,root)
 /etc/rc.d/init.d/%{name}
 
+# /usr/share/java/iris-server-x.x.x
+%defattr(0755,tms,tms)
+%{_serverdir}
+
+# /usr/share/java/iris-server-x.x.x
+%defattr(0644,tms,tms)
+%{_serverdir}/%{name}
+%{_serverdir}/%{name}-rmi-%{version}.jar
+%{_serverdir}/%{name}-server-%{version}.jar
+%{_serverdir}/%{name}-utils-%{version}.jar
+%{_serverdir}/mail.jar
+%{_serverdir}/postgresql.jar
+%{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
+%{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
+%{_serverdir}/vault-@@VAULT.VERSION@@.jar
+
 # client: /var/www/html/iris-client-x.x.x
 %defattr(0555,apache,apache)
-/var/www/html/iris-client-%{version}/activation.jnlp
-/var/www/html/iris-client-%{version}/images
-/var/www/html/iris-client-%{version}/index.html
-/var/www/html/iris-client-%{version}/iris.bat
-/var/www/html/iris-client-%{version}/iris-client.jnlp
-/var/www/html/iris-client-%{version}/iris-client.properties
-/var/www/html/iris-client-%{version}/iris.sh
-/var/www/html/iris-client-%{version}/lib
-/var/www/html/iris-client-%{version}/mail.jnlp
+%{_clientdir}/images
+%{_clientdir}/lib
 
-# client: /var/www/html/iris-client-x.x.x/lib
-%defattr(0555,apache,apache)
-/var/www/html/iris-client-%{version}/lib/activation.jar
-/var/www/html/iris-client-%{version}/lib/mail.jar
-/var/www/html/iris-client-%{version}/lib/iris-client-%{version}.jar
-/var/www/html/iris-client-%{version}/lib/datatools-%{_version_datatools}.jar
-/var/www/html/iris-client-%{version}/lib/iris-rmi-%{version}.jar
-/var/www/html/iris-client-%{version}/lib/iris-utils-%{version}.jar
-/var/www/html/iris-client-%{version}/lib/MapBean-%{_version_mapbean}.jar
-/var/www/html/iris-client-%{version}/lib/scheduler-%{_version_scheduler}.jar
-/var/www/html/iris-client-%{version}/lib/Shapes-%{_version_shapes}.jar
-/var/www/html/iris-client-%{version}/lib/sonar-client-%{_version_sonar}.jar
-/var/www/html/iris-client-%{version}/lib/tdxml-%{_version_tdxml}.jar
-/var/www/html/iris-client-%{version}/lib/tms-log-%{_version_log}.jar
-/var/www/html/iris-client-%{version}/lib/TrafMap-%{_version_trafmap}.jar
-/var/www/html/iris-client-%{version}/lib/video-client-%{_version_videoclient}.jar
+%defattr(0444,apache,apache)
+%{_clientdir}/index.html
+%{_clientdir}/activation.jnlp
+%{_clientdir}/mail.jnlp
+%{_clientdir}/iris-client.jnlp
+%{_clientdir}/iris-client.properties
+%{_clientdir}/images/iris.gif
+%{_clientdir}/images/iris_icon.png
+%{_clientdir}/lib/activation.jar
+%{_clientdir}/lib/mail.jar
+%{_clientdir}/lib/%{name}-client-%{version}.jar
+%{_clientdir}/lib/%{name}-rmi-%{version}.jar
+%{_clientdir}/lib/%{name}-utils-%{version}.jar
+%{_clientdir}/lib/datatools-@@DATATOOLS.VERSION@@.jar
+%{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
+%{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
+%{_clientdir}/lib/Shapes-@@SHAPES.VERSION@@.jar
+%{_clientdir}/lib/sonar-client-@@SONAR.VERSION@@.jar
+%{_clientdir}/lib/tdxml-@@TDXML.VERSION@@.jar
+%{_clientdir}/lib/tms-log-@@TMSLOG.VERSION@@.jar
+%{_clientdir}/lib/TrafMap-@@TRAFMAP.VERSION@@.jar
+%{_clientdir}/lib/video-client-@@VIDEOCLIENT.VERSION@@.jar

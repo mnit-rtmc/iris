@@ -12,7 +12,7 @@
 
 RETVAL=0
 SERVICE=$(basename $0)
-PROG=java_service
+PROG=iris_service
 DIR=/usr/share/java/iris-server
 USER=tms
 OPTIONS=$"java -server -Xmx256m -jar $DIR/iris-server-*.jar"
