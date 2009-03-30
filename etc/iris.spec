@@ -24,7 +24,6 @@
 %define _serverdir	%{_serverlink}-%{version}
 %define _clientlink	/var/www/html/%{name}-client
 %define _clientdir	%{_clientlink}-%{version}
-%define _url		@@DISTRIBUTION.URL@@
 
 Name:		%{name}
 Summary:	The IRIS advanced traffic management system (ATMS).
@@ -34,20 +33,13 @@ License:	GPL
 Group:		Applications/Engineering
 Provides:	%{name}
 Source:		%{name}-%{version}.tar.gz
-URL:		%{_url}
+URL:		@@RPM.URL@@
 Buildroot:	%{buildroot}
-
-Vendor:		%{_vendor}
-Packager:	%{_vendor}
+Vendor:		@@RPM.PACKAGER@@
+Packager:	@@RPM.PACKAGER@@
 
 %Description
-IRIS, or Intelligent Roadway Information System, is an advanced traffic
-management system (ATMS) developed by the Minnesota Department of
-Transportation.
-
-This software can be used in traffic management centers for controlling
-Dynamic Message Signs (DMS), ramp meters, closed-circuit cameras, and
-other traffic control devices.
+@@RPM.DESCRIPTION@@
 
 # untar the source
 %prep

@@ -233,10 +233,12 @@
 					value="${shapes.version}"/>
 				<filter token="WEBSTART.HOST"
 					value="${webstart.host}"/>
-				<filter token="DISTRIBUTION.URL"
-				        value="${distribution.url}"/>
-				<filter token="BUILD.RPM"
-				        value="${build.rpm}"/>
+				<filter token="BUILD.RPM" value="${build.rpm}"/>
+				<filter token="RPM.URL" value="${rpm.url}"/>
+				<filter token="RPM.PACKAGER"
+				        value="${rpm.packager}"/>
+				<filter token="RPM.DESCRIPTION"
+				        value="${rpm.description}"/>
 			</filterset>
 		</copy>
 	</target>
