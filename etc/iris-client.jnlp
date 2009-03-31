@@ -12,7 +12,7 @@
 	<offline/>
     </information>
     <resources>
-	<j2se version="1.5+" max-heap-size="256m"/>
+	<j2se version="1.6+" max-heap-size="256m"/>
 	<jar href="lib/iris-client-@@VERSION@@.jar"/>
 	<jar href="lib/iris-rmi-@@VERSION@@.jar"/>
 	<jar href="lib/iris-utils-@@VERSION@@.jar"/>
@@ -26,7 +26,6 @@
 	<jar href="lib/datatools-@@DATATOOLS.VERSION@@.jar"/>
 	<jar href="lib/video-client-@@VIDEOCLIENT.VERSION@@.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
-	<extension name="activation" href="activation.jnlp"/>
     </resources>
     <security>
        <all-permissions/>

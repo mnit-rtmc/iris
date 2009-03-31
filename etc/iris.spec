@@ -105,7 +105,6 @@ fi
 %{_serverdir}/%{name}-rmi-%{version}.jar
 %{_serverdir}/%{name}-server-%{version}.jar
 %{_serverdir}/%{name}-utils-%{version}.jar
-%{_serverdir}/activation.jar
 %{_serverdir}/mail.jar
 %{_serverdir}/postgresql.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
@@ -128,13 +127,11 @@ fi
 %dir %attr(0755,apache,apache) %{_clientdir}/lib
 %defattr(0444,apache,apache)
 %{_clientdir}/index.html
-%{_clientdir}/activation.jnlp
 %{_clientdir}/mail.jnlp
 %{_clientdir}/iris-client.jnlp
 %{_clientdir}/iris-client.properties
 %{_clientdir}/images/iris.gif
 %{_clientdir}/images/iris_icon.png
-%{_clientdir}/lib/activation.jar
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/%{name}-client-%{version}.jar
 %{_clientdir}/lib/%{name}-rmi-%{version}.jar

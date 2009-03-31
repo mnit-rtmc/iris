@@ -133,9 +133,6 @@
 			<param name="file.dep" value="iris-build.properties"/>
 		</antcall>
 		<antcall target="check-dep">
-			<param name="file.dep" value="activation.jar"/>
-		</antcall>
-		<antcall target="check-dep">
 			<param name="file.dep" value="mail.jar"/>
 		</antcall>
 		<antcall target="check-dep">
@@ -349,7 +346,6 @@
 		</copy>
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
-				<include name="activation.jar"/>
 				<include name="mail.jar"/>
 				<include name="postgresql.jar"/>
 				<include name="${scheduler.jar}"/>
@@ -438,7 +434,6 @@
 		<mkdir dir="${dist.client}/lib"/>
 		<copy todir="${dist.client}/lib">
 			<fileset dir="${lib.dir}">
-				<include name="activation.jar"/>
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
 				<include name="${datatools.jar}"/>
