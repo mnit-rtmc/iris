@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -32,14 +33,9 @@ public class OpQueryConfig extends OpDms
 	/** associated DMS */
 	protected final DMSImpl dms;
 
-	/** return description of operation, which is displayed in the client */
-	public String getOperationDescription() {
-		return "Retrieving CMS configuration";
-	}
-
-	/** Create a new DMS query configuration object */
-	public OpQueryConfig(DMSImpl d) {
-		super(DOWNLOAD, d, "OpQueryConfig");
+	/** constructor */
+	public OpQueryConfig(DMSImpl d, User u) {
+		super(DOWNLOAD, d, "Retrieving sign configuration", u);
 		dms = d;
 	}
 
@@ -72,12 +68,9 @@ public class OpQueryConfig extends OpDms
 			setMsgAttributes(mess);
 
 			// build req msg
-			String reqname = "GetDmsConfigReqMsg";
-			String resname = "GetDmsConfigRespMsg";
-
-			mess.setName(reqname);
-			mess.setReqMsgName(reqname);
-			mess.setRespMsgName(resname);
+			mess.setName(getOpName());
+			mess.setReqMsgName("GetDmsConfigReqMsg");
+			mess.setRespMsgName("GetDmsConfigRespMsg");
 
 			String drop = Integer.toString(controller.getDrop());
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
 import java.util.Random;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.SignMessage;
@@ -49,22 +50,27 @@ abstract public class OpDms extends Device2Operation {
 	/** Bitmap page length for dmslite protocol */
 	static protected final int BM_PGLEN_BYTES = BM_WIDTH * BM_HEIGHT / 8;
 
+	/** User who deployed the message */
+	protected final User m_user;
+
 	/** DMS to operate */
 	protected final DMSImpl m_dms;
 
+	/** operation description */
+	private String m_opDesc = "";
+
 	/** Create a new DMS operation */
-	public OpDms(int p, DMSImpl d, String opName) {
+	public OpDms(int p, DMSImpl d, String opDesc, User user) 
+	{
 		super(p, d);
 		m_dms = d;
-		m_opName = opName;
+		m_opDesc = opDesc;
+		m_user = user;
 	}
-
-	/** operation name */
-	private String m_opName = "";
 
 	/** get operation name */
 	public String getOpName() {
-		return m_opName;
+		return getClass().getName();
 	}
 
 	/** 
@@ -184,5 +190,13 @@ abstract public class OpDms extends Device2Operation {
 		note.append(" (").append(delta).append(" secs)");
 		note.append(".");
 		return note.toString();
+	}
+
+	/** return description of operation */
+	public String getOperationDescription() {
+		m_opDesc = (m_opDesc == null ? "Unnamed operation" : m_opDesc);
+		if(m_user == null)
+			return m_opDesc;
+		return m_opDesc + " (" + m_user.getFullName() + ")";
 	}
 }

@@ -31,6 +31,9 @@ public interface DMSPoller extends SignPoller {
 	/** Send a sign request */
 	void sendRequest(DMSImpl dms, SignRequest r);
 
+	/** Send a sign request from a specific user */
+	void sendRequest(DMSImpl dms, SignRequest r, User u);
+
 	/** Send a message to the sign. If the message is already deployed on
 	 * the sign, restart the time remaining.
 	 * @param dms Sign to send message.

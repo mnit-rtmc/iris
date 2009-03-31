@@ -45,23 +45,10 @@ public class OpMessage extends OpDms {
 	/** Sign message */
 	protected final SignMessage m_signMessage;
 
-	/** User who deployed the message */
-	protected final User m_owner;
-
 	/** Create a new DMS command message object */
-	public OpMessage(DMSImpl d, SignMessage m, User owner) {
-		super(COMMAND, d, "OpMessage");
+	public OpMessage(DMSImpl d, SignMessage m, User u) {
+		super(COMMAND, d, "Sending new message", u);
 		m_signMessage = m;
-		m_owner = owner;
-	}
-
-	/** return description of operation, which is displayed in the client */
-	public String getOperationDescription() {
-		String text = "Sending new message";
-		// FIXME: mtod from r8p9 merge
-		//if(m_signMessage!=null)
-		//	text += " (" + m_signMessage.getOwner() + ")";
-		return text;
 	}
 
 	/** 
@@ -215,7 +202,7 @@ public class OpMessage extends OpDms {
 			final String reqname = "SetSnglPgReqMsg";
 			final String resname = "SetSnglPgRespMsg";
 
-			mess.setName(reqname);
+			mess.setName(getOpName());
 			mess.setReqMsgName(reqname);
 			mess.setRespMsgName(resname);
 
@@ -251,7 +238,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
-			String owner = m_owner != null ? m_owner.getName() : "";
+			String owner = m_user != null ? m_user.getFullName() : "";
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
@@ -298,7 +285,7 @@ public class OpMessage extends OpDms {
 				if (valid) {
 					// set new message
 					m_dms.setMessageCurrent(m_signMessage,
-						m_owner);
+						m_user);
 				} else {
 					System.err.println(
 					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
@@ -376,12 +363,9 @@ public class OpMessage extends OpDms {
 			ReqRes rr0;
 			ReqRes rr1;
 			{
-				final String reqname = "SetMultPgReqMsg";
-				final String resname = "SetMultPgRespMsg";
-
-				mess.setName(reqname);
-				mess.setReqMsgName(reqname);
-				mess.setRespMsgName(resname);
+				mess.setName(getOpName());
+				mess.setReqMsgName("SetMultPgReqMsg");
+				mess.setRespMsgName("SetMultPgRespMsg");
 
 				// id
 				rr0 = new ReqRes("Id", generateId(), 
@@ -424,7 +408,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(dt).toString()));
 
 			// Owner
-			String owner = m_owner != null ? m_owner.getName() : "";
+			String owner = m_user != null ? m_user.getFullName() : "";
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
@@ -469,8 +453,8 @@ public class OpMessage extends OpDms {
 				// parse rest of response
 				if (valid) {
 					// set new message
-					m_dms.setMessageCurrent(m_signMessage,
-						m_owner);
+					m_dms.setMessageCurrent(
+						m_signMessage, m_user);
 				} else {
 					System.err.println(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+

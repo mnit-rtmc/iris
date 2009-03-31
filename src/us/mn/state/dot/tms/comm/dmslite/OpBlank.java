@@ -32,24 +32,10 @@ public class OpBlank extends OpDms
 	/** blank message, which contains owner, duration */
 	private final SignMessage m_mess;
 
-	/** Owner of message */
-	private final User m_owner;
-
 	/** Create a new DMS query configuration object */
-	public OpBlank(DMSImpl d, SignMessage mess, User owner) {
-		super(DOWNLOAD, d, "OpBlank");
+	public OpBlank(DMSImpl d, SignMessage mess, User u) {
+		super(DOWNLOAD, d, "Blanking the CMS", u);
 		m_mess = mess;
-		m_owner = owner;
-	}
-
-	/** return description of operation, which is displayed in the client */
-	public String getOperationDescription() {
-		String text = "Blanking the sign";
-		if(m_mess!=null)
-			text += " (" + "ABCD" + ")";
-			//FIXME: mtod from r8p9 merge
-			//text += " (" + m_mess.getOwner() + ")";
-		return text;
 	}
 
 	/** Create the first phase of the operation */
@@ -97,7 +83,7 @@ public class OpBlank extends OpDms
 			String reqname = "SetBlankMsgReqMsg";
 			String resname = "SetBlankMsgRespMsg";
 
-			mess.setName(reqname);
+			mess.setName(getOpName());
 			mess.setReqMsgName(reqname);
 			mess.setRespMsgName(resname);
 
@@ -114,8 +100,8 @@ public class OpBlank extends OpDms
 			mess.add(rr1);
 
 			// owner
-			String owner = m_owner != null ? m_owner.getName() : "";
-			ReqRes rr2 = new ReqRes("Owner", owner, new String[0]);
+			String user = m_user != null ? m_user.getName() : "";
+			ReqRes rr2 = new ReqRes("Owner", user, new String[0]);
 			mess.add(rr2);
 
 			// send msg
@@ -158,7 +144,7 @@ public class OpBlank extends OpDms
 
 			// update dms
 			if(valid) {
-				m_dms.setMessageCurrent(m_mess, m_owner);
+				m_dms.setMessageCurrent(m_mess, m_user);
 			} else {
 				System.err.println(
 				    "OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="

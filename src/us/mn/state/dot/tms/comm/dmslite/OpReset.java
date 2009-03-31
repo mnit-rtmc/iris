@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
@@ -31,13 +32,8 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 public class OpReset extends OpDms
 {
 	/** Create a new DMS query status object */
-	public OpReset(DMSImpl d) {
-		super(DEVICE_DATA, d, "OpReset");
-	}
-
-	/** return description of operation, which is displayed in the client */
-	public String getOperationDescription() {
-		return "Reinitializing the CMS";
+	public OpReset(DMSImpl d, User u) {
+		super(DEVICE_DATA, d, "Reinitializing the CMS", u);
 	}
 
 	/** Create the first real phase of the operation */

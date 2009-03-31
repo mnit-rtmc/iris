@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -38,9 +39,13 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class OpQueryMsg extends OpDms {
 
+	/** constructor */
+	public OpQueryMsg(DMSImpl d, User u) {
+		super(DEVICE_DATA, d, "Retrieving message", u);
+	}
+
 	/**
 	 * Calculate message duration
-	 *
 	 * @param useont true to use on time
 	 * @param useofft true to use off time else infinite message
 	 * @param ontime message on time
@@ -139,16 +144,6 @@ public class OpQueryMsg extends OpDms {
 		return nbm;
 	}
 
-	/** Create a new DMS query status object */
-	public OpQueryMsg(DMSImpl d) {
-		super(DEVICE_DATA, d, "OpQueryMsg");
-	}
-
-	/** return description of operation, which is displayed in the client */
-	public String getOperationDescription() {
-		return "Retrieving message";
-	}
-
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 		// has getConfig() been called yet? If not, don't do anything
@@ -234,7 +229,7 @@ public class OpQueryMsg extends OpDms {
 			setMsgAttributes(mess);
 
 			// build req msg and expected response
-			mess.setName("StatusReqMsg");
+			mess.setName(getOpName());
 			mess.setReqMsgName("StatusReqMsg");
 			mess.setRespMsgName("StatusRespMsg");
 			String addr = Integer.toString(controller.getDrop());

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
@@ -80,20 +81,15 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			return;
 
 		// reset button pressed
-		if (reset) {
+		if (reset)
 			sendRequest(dms, SignRequest.RESET_DMS);
-
 		// download button pressed
-		} else {
-			// start operation
-			new OpQueryMsg(dms).start();
-		}
+		else
+			sendRequest(dms, SignRequest.QUERY_MESSAGE);
 	}
 
 	/** Perform a sign status poll. Called every 60 seconds, via TimerJobSigns */
 	public void pollSigns(ControllerImpl c, Completer comp) {
-		//System.err.println("DmsLitePoller.pollSigns() called.");
-
 		DMSImpl dms = c.getActiveSign();
 		if (dms == null)
 			return;
@@ -103,17 +99,15 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			return;
 
 		// start operation
-		new OpQueryMsg(dms).start();
+		sendRequest(dms, SignRequest.QUERY_MESSAGE);
 	}
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		//System.err.println("DmsLitePoller.poll30Second() called, ignored.");
 	}
 
 	/** Perform a 5-minute poll */
 	public void poll5Minute(ControllerImpl c, Completer comp) {
-		//System.err.println("DmsLitePoller.poll5Minute() called, ignored.");
 	}
 
 	/** Start a test for the given controller */
@@ -129,15 +123,12 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		// sanity checks
-		if(m.getBitmaps() == null) {
-			System.err.println("Warning: DmsLitePoller.sendMessage(): bitmap is null, ignored.");
+		if (dms == null || m == null || m.getBitmaps() == null)
 			return;
-		}
 		// Are the DMS width and height valid?  If not, it's probably
 		// because a OpQueryConfig message has not been received yet,
 		// so the DMS physical properties are not yet valid.
-		if(dms.getWidthPixels() == null || dms.getHeightPixels() ==null)
+		if(dms.getWidthPixels() == null || dms.getHeightPixels() == null)
 			return;
 
 		// blank the sign
@@ -146,30 +137,36 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			return;
 		}
 
-		// Note: in the future, check for SV170 firmware version, if
-		//       start and stop times are supported, adjust the CMS
-		//       stop time and send the message.
-
-		// finally, send message to field controller
-		OpMessage cmd = new OpMessage(dms, m, o);
-		cmd.start();
+		// send message to field controller
+		new OpMessage(dms, m, o).start();
 	}
 
-	/** Send a sign request message to the sign */
+
+	/** Send a sign request message to the sign, no user specified */
 	public void sendRequest(DMSImpl dms, SignRequest r) {
+		// user assumed to be IRIS
+		User u = null; //UserImpl.create("IRIS");
+		//u.setFullName("IRIS");
+		sendRequest(dms, r, u);
+	}
+
+	/** Send a sign request message to the sign from a specific user */
+	public void sendRequest(DMSImpl dms, SignRequest r, User u) {
+		if(dms == null)
+			return;
 		switch(r) {
 		case QUERY_CONFIGURATION:
-			new OpQueryConfig(dms).start();
+			new OpQueryConfig(dms, u).start();
 			break;
 		case QUERY_MESSAGE:
 		case QUERY_STATUS:
-			new OpQueryMsg(dms).start();
+			new OpQueryMsg(dms, u).start();
 			break;
 		case RESET_DMS:
-			new OpReset(dms).start();
+			new OpReset(dms, u).start();
 			break;
 		case RESET_MODEM:
-			new OpResetModem(dms).start();
+			new OpResetModem(dms, u).start();
 			break;
 		default:
 			// Ignore other requests

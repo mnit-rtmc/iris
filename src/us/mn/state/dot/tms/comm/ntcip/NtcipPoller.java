@@ -102,6 +102,12 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		return test;
 	}
 
+	/** Send a sign request message to the sign from a specific user */
+	public void sendRequest(DMSImpl dms, SignRequest r, User u) {
+		// user is ignored here
+		sendRequest(dms, r);
+	}
+
 	/** Send a sign request message to the sign */
 	public void sendRequest(DMSImpl dms, SignRequest r) {
 		switch(r) {
