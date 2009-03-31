@@ -117,6 +117,7 @@ fi
 %dir %attr(3775,tms,tms) /var/lib/tms/backups
 %dir %attr(3775,tms,tms) /var/lib/tms/meter
 %dir %attr(3775,tms,tms) /var/lib/tms/traffic
+%dir %attr(3775,tms,tms) /var/lib/tms/xml
 
 # /var/log/tms
 %dir %attr(3775,tms,tms) /var/log/tms

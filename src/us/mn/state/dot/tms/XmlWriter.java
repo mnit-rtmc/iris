@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 abstract public class XmlWriter {
 
 	/** Filesystem directory to write XML files */
-	static protected final String XML_DIR = "/var/local/tms/dds";
+	static protected final String XML_DIR = "/var/lib/tms/xml";
 
 	/** Regex pattern to match an ampersand */
 	static protected final Pattern AMPERSAND = Pattern.compile("&");
