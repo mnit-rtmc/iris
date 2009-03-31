@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+	<meta name="Author" content="Douglas Lau"/>
+	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
+	<title>Mn/DOT IRIS Configuration and Installation</title>
+</head>
+
+<body>
+<h1>Mn/DOT IRIS Configuration and Installation</h1>
+<h2>Configuring and Building the IRIS RPM package</h2>
+<ol>
+	<li>
+		Install Fedora 10 onto a development machine.
+	</li>
+	<li>
+		Install needed development packages.
+		This is the only step to build the package which should be
+		done as the root user.
+<pre>
+yum install java-1.6.0-openjdk-devel ant mercurial rpm-build gcc
+</pre>
+	</li>
+	<li>
+		Clone iris mercurial repository (in home directory):
+<pre>
+hg clone http://iris.dot.state.mn.us/hg/index.cgi/iris
+</pre>
+	</li>
+	<li>
+		Create lib/ directory (in repository root):
+<pre>
+mkdir lib/
+</pre>
+	</li>
+	<li>
+		Download the <a href="http://java.sun.com/products/javamail/downloads/index.html">JavaMail API</a> from Sun.
+	</li>
+	<li>
+		Unzip the JavaMail archive and locate the mail.jar file.
+		Copy the mail.jar file to the lib/ directory in the iris
+		repository.
+	</li>
+	<li>
+		Receive special postgresql.jar from Mn/DOT developers.
+		Copy postgresql.jar to lib/ directory.
+	</li>
+	<li>
+		Copy iris-build.properties, iris-client.properties and
+		iris-server.properties from etc/ to lib/.
+	</li>
+	<li>
+		Edit the three lib/iris-*.properties files as necessary for
+		your organization.
+	</li>
+	<li>
+		Create the server keystore file for SSL encryption.
+<pre>
+keytool -genkeypair -alias iris-sonar -keystore lib/iris-server.keystore
+</pre>
+	</li>
+	<li>
+		(Optional) If LDAP server is using SSL for authentication,
+		obtain SSL certificate from LDAP administrator.
+		Let's say it's called "ldap.cert".
+<pre>
+keytool -import -alias ldap-cert -keystore lib/iris-server.keystore -file ldap.cert
+</pre>
+	</li>
+	<li>
+		Extract the certificate from the server keystore.
+<pre>
+keytool -export -alias iris-sonar -keystore lib/iris-server.keystore -file iris-sonar-public.cert
+</pre>
+	</li>
+	<li>
+		Create the client keystore file for SSL encryption.
+<pre>
+keytool -import -alias iris-sonar -keystore lib/iris-client.keystore -file iris-sonar-public.cert
+</pre>
+	</li>
+	<li>
+		Create the key for signing jar packages.  This should go into
+		your default keystore (~/.keystore).
+<pre>
+keytool -genkeypair -alias signing-key
+</pre>
+	</li>
+	<li>
+		Put the following lines into your ~/.ant.properties file.
+<pre>
+debug=off
+sign.store=${user.home}/.keystore
+sign.store.pass=password
+sign.alias=signing-key
+sign.alias.pass=signing-password
+hgbase.url=http://iris.dot.state.mn.us/hg/index/cgi/
+</pre>		
+	</li>
+	<li>
+		Now it's time to build the iris RPM file.
+<pre>
+ant rpm
+</pre>
+	</li>
+	<li>
+		Locate the RPM file in build/rpm/RPMS/i386/.
+	</li>
+</ol>
+<h2>Installing IRIS onto a production system</h2>
+All commands in this section must be run as the root user.
+<ol>
+	<li>
+		Install Fedora 10 onto the server machine.
+	</li>
+	<li>
+		Install needed packages.
+<pre>
+yum install java-1.6.0-openjdk postgresql-server httpd
+</pre>
+	</li>
+	<li>
+		Install the iris package with the rpm command.
+<pre>
+rpm -i iris-*.rpm
+</pre>
+	</li>
+	<li>
+		Initialize the PostgreSQL database.
+<pre>
+service postgresql initdb
+</pre>
+	</li>
+	<li>
+		Allow password access for localhost PostgreSQL connections.
+		Edit /var/lib/pgsql/data/pg_hba.conf to include this line:
+<pre>
+host    all         all         127.0.0.1/32          password
+</pre>
+	</li>
+	<li>
+		Configure PostgreSQL to start up automatically:
+<pre>
+chkconfig postgresql on
+</pre>
+	</li>
+	<li>
+		Start up PostgreSQL server:
+<pre>
+service postgresql start
+</pre>
+	</li>
+	<li>
+		Create the tms user within PostgreSQL.
+		This user is used by the iris server for connecting to the
+		PostgreSQL database.
+<pre>
+su postgres
+createuser -S -D -R tms
+</pre>
+	</li>
+	<li>
+		Populate the tms database with sql/tms-template.sql file.
+<pre>
+su tms
+psql tms -f tms-template.sql
+exit
+</pre>
+	</li>
+	<li>
+		Setup LDAP server. FIXME
+	</li>
+	<li>
+		Add a valid LDAP user to the iris_user table within the
+		tms database.  Let's assume the user name is "user", the
+		distinguished name is "dn", and the full name is "full name".
+<pre>
+su tms
+psql tms
+INSERT INTO iris_user VALUES('user', 'dn', 'full name');
+INSERT INTO iris_user_role VALUES('user', 'admin');
+UPDATE role SET pattern = '.*', priv_r = 't', priv_w = 't', priv_c = 't', priv_d = 't' WHERE name = 'admin';
+\q
+exit
+</pre>
+	</li>
+	<li>
+		Create symbolic links to installed version of iris.
+<pre>
+ln -snf /usr/share/java/iris-server-3.xx.y /usr/share/java/iris-server
+ln -snf /var/www/html/iris-client-3.xx.y /var/www/html/iris-client
+</pre>
+	</li>
+	<li>
+		Start the iris service.
+<pre>
+service iris start
+</pre>
+	</li>
+	<li>
+		Check that everything started OK.
+<pre>
+tail -f -n 40 /var/log/tms/iris.stderr
+</pre>
+	</li>
+</ol>
+
+</body>
+</html>
