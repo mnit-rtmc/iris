@@ -220,7 +220,7 @@ public class Message implements AddressedMessage
 		if(owner == null)
 			return false;
 		return owner.toLowerCase().equals(
-			CawsPoller.CAWS_OWNER.toLowerCase());
+			CawsPoller.awsName().toLowerCase());
 	}
 
 	/** 

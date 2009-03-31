@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.SignPoller;
-
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * Caltrans D10 CAWS Poller. This class provides a Caltrans D10
@@ -36,9 +36,6 @@ import us.mn.state.dot.tms.comm.SignPoller;
  */
 public class CawsPoller extends MessagePoller implements SignPoller
 {
-	/** identifier used elsewhere, e.g. message author */
-	public static final String CAWS_OWNER = "CAWS";
-
 	/** the only valid drop address */
 	static public final int VALID_DROP_ADDRESS = 1;
 
@@ -94,5 +91,10 @@ public class CawsPoller extends MessagePoller implements SignPoller
 	public DiagnosticOperation startTest(ControllerImpl c) {
 		// System.err.println("CawsPoller.startTest() called.");
 		return null;
+	}
+
+	/** return name of AWS system */
+	public static String awsName() {
+		return I18NMessages.get("Aws.Name");
 	}
 }
