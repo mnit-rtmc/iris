@@ -112,6 +112,15 @@ fi
 %{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
 %{_serverdir}/vault-@@VAULT.VERSION@@.jar
 
+# /var/lib/tms
+%dir %attr(3775,tms,tms) /var/lib/tms
+%dir %attr(3775,tms,tms) /var/lib/tms/backups
+%dir %attr(3775,tms,tms) /var/lib/tms/meter
+%dir %attr(3775,tms,tms) /var/lib/tms/traffic
+
+# /var/log/tms
+%dir %attr(3775,tms,tms) /var/log/tms
+
 # client: /var/www/html/iris-client-x.x.x
 %dir %attr(0755,apache,apache) %{_clientdir}
 %dir %attr(0755,apache,apache) %{_clientdir}/images

@@ -502,6 +502,11 @@
 		</copy>
 		<chmod file="${install.dir}/usr/bin/iris_service" perm="755"/>
 
+		<mkdir dir="${install.dir}/var/lib/tms/backups"/>
+		<mkdir dir="${install.dir}/var/lib/tms/meter"/>
+		<mkdir dir="${install.dir}/var/lib/tms/traffic"/>
+		<mkdir dir="${install.dir}/var/log/tms"/>
+
 		<copy todir="${install.dir}/usr/share/java/${dist.server}">
 			<fileset dir="${dist.server}"/>
 		</copy>
