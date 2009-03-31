@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import java.net.SocketTimeoutException;
-
 import java.util.GregorianCalendar;
 
 /**
@@ -107,12 +105,12 @@ public class TokenStreamReader
 		while(true) {
 
 			// read
-			//System.err.println("Waiting for bytes to read.");
+			//System.err.println("TokenStreamReader:Waiting for bytes to read.");
 			try {
 				numread = m_inps.read(fragment, 0,fragment.length);
 			} catch (SocketTimeoutException ex) {
 
-				// Log.finest("Ignored SocketTimeoutException:"+ex);
+				// System.err.println("TokenStreamReader:Ignored SocketTimeoutException:"+ex);
 				// check if timed out
 				if(this.timedOut(start, timeout)) {
 					return (null);
@@ -124,28 +122,28 @@ public class TokenStreamReader
 
 				continue;
 			} catch (IOException ex) {
-				//System.err.println("Client disconnected.");
+				//System.err.println("TokenStreamReader:Client disconnected.");
 				throw ex;
 			}
 
-			//System.err.println("Read " + numread + " bytes from client.");
+			//System.err.println("TokenStreamReader:Read " + numread + " bytes from client.");
 
 			// bytes received
 			if(numread > 0) {
 
 				// add to existing parse buffer, throws IllegalStateException if cap exceeded
-				// Log.finest("parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
-				// Log.finest("Adding "+numread+" chars to existing ParseBuffer.");
+				// System.err.println("TokenStreamReader:parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
+				// System.err.println("TokenStreamReader:Adding "+numread+" chars to existing ParseBuffer.");
 				m_pb.append(numread, fragment);
 
-				// Log.finest("parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
+				// System.err.println("TokenStreamReader:parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
 
 				// is a complete token in buffer? if yes, extract it,
 				// and delete text in buffer preceeding token, if any.
 				token = m_pb.getToken(ParseBuffer.ExtractType.DDK,
 					tokenstart, tokenend);
 
-				// Log.finest("Extracted token, length now "+m_pb.length()+".");
+				// System.err.println("TokenStreamReader:Extracted token, length now "+m_pb.length()+".");
 
 				// read again with no sleep
 				if(token == null) {
@@ -154,14 +152,14 @@ public class TokenStreamReader
 					// found token
 				} else {
 
-					// Log.finest("Found complete token:"+token);
+					// System.err.println("TokenStreamReader:Found complete token:"+token);
 					return (token);
 				}
 
 				// disconnect
 			} else if(numread < 0) {
 
-				// Log.finer("Client disconnected (numread<0).");
+				// System.err.println("TokenStreamReader:Client disconnected (numread<0).");
 				throw new IOException("client disconnected");
 			}
 
@@ -190,7 +188,7 @@ public class TokenStreamReader
 		}
 
 		if(TokenStreamReader.calcTimeDeltaMS(start) + m_sleeptime > timeout) {
-			// Log.finer("Timed out, waited "+timeout/1000+" secs.");
+			// System.err.println("TokenStreamReader:Timed out, waited "+timeout/1000+" secs.");
 			return (true);
 		}
 
@@ -204,8 +202,7 @@ public class TokenStreamReader
 	private static long calcTimeDeltaMS(long startInUTC) {
 		java.util.Date d = new GregorianCalendar().getTime();
 		long t = d.getTime() - startInUTC;
-
-		return (t);
+		return t;
 	}
 
 	/**
@@ -221,8 +218,7 @@ public class TokenStreamReader
 	 */
 	static public boolean test() {
 		boolean ok = true;
-		//System.err.println("Test done, return=" + ok);
+		System.err.println("TokenStreamReader:Test done, return=" + ok);
 		return (ok);
 	}
 }
-
