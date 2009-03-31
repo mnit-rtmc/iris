@@ -116,12 +116,6 @@ public class MeterStatusPanel extends FormPanel
 	/** Metering off radio button */
 	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
 
-	/** Button for data plotlet */
-	protected final JButton dataBtn = new JButton("Data");
-
-	/** TMS connection */
-	protected final TmsConnection connection;
-
 	/** Ramp meter manager */
 	protected final MeterManager manager;
 
@@ -137,7 +131,6 @@ public class MeterStatusPanel extends FormPanel
 	/** Create a new MeterStatusPanel */
 	public MeterStatusPanel(TmsConnection tc, MeterManager m) {
 		super(true);
-		connection = tc;
 		manager = m;
 		selectionModel = manager.getSelectionModel();
 		cache = tc.getSonarState().getRampMeters();
@@ -159,7 +152,6 @@ public class MeterStatusPanel extends FormPanel
 		finishRow();
 		add("Metering", meterOnBtn);
 		addRow(meterOffBtn);
-// FIXME	addRow(dataBtn);
 
 		setSelected(null);
 		cache.addProxyListener(this);
@@ -230,9 +222,6 @@ public class MeterStatusPanel extends FormPanel
 			lockCmb.setAction(new LockMeterAction(proxy, lockCmb));
 			meterOnBtn.setAction(new TurnOnAction(proxy));
 			meterOffBtn.setAction(new TurnOffAction(proxy));
-			dataBtn.setAction(new MeterDataAction(proxy,
-				connection.getDesktop(),
-				connection.getDataFactory()));
 			updateAttribute(proxy, null);
 		} else {
 			nameTxt.setText("");
@@ -254,7 +243,6 @@ public class MeterStatusPanel extends FormPanel
 		lockCmb.setEnabled(enabled);
 		meterOnBtn.setEnabled(enabled);
 		meterOffBtn.setEnabled(enabled);
-		dataBtn.setEnabled(enabled);
 	}
 
 	/** Update one attribute on the form */

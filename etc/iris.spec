@@ -136,7 +136,6 @@ fi
 %{_clientdir}/lib/%{name}-client-%{version}.jar
 %{_clientdir}/lib/%{name}-rmi-%{version}.jar
 %{_clientdir}/lib/%{name}-utils-%{version}.jar
-%{_clientdir}/lib/datatools-@@DATATOOLS.VERSION@@.jar
 %{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_clientdir}/lib/Shapes-@@SHAPES.VERSION@@.jar

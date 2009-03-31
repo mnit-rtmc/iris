@@ -67,8 +67,6 @@
 	<property name="shapes.jar" value="Shapes-${shapes.version}.jar"/>
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
-	<property name="datatools.jar"
-		  value="datatools-${datatools.version}.jar"/>
 	<property name="videoclient.jar"
 		  value="video-client-${videoclient.version}.jar"/>
 	<property name="rmi.jar" value="${name}-rmi-${version}.jar"/>
@@ -135,9 +133,6 @@
 		<antcall target="check-dep">
 			<param name="file.dep" value="mail.jar"/>
 		</antcall>
-		<antcall target="check-dep">
-			<param name="file.dep" value="jnlp.jar"/>
-		</antcall>
 		<antcall target="check-subproject">
 			<param name="file.dep" value="${tms-log.jar}"/>
 			<param name="repo.name" value="log"/>
@@ -191,12 +186,6 @@
 			<param name="repo.version"
 			       value="${videoclient.version}"/>
 		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${datatools.jar}"/>
-			<param name="repo.name" value="datatools"/>
-			<param name="repo.version"
-			       value="${datatools.version}"/>
-		</antcall>
 	</target>
 
 	<!-- Prepare the build/etc directory -->
@@ -222,8 +211,6 @@
 					value="${mapbean.version}"/>
 				<filter token="TRAFMAP.VERSION"
 					value="${trafmap.version}"/>
-				<filter token="DATATOOLS.VERSION"
-					value="${datatools.version}"/>
 				<filter token="VIDEOCLIENT.VERSION"
 					value="${videoclient.version}"/>
 				<filter token="SHAPES.VERSION"
@@ -436,7 +423,6 @@
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
-				<include name="${datatools.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${trafmap.jar}"/>
@@ -594,7 +580,6 @@
 		<delete>
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
-				<include name="${datatools.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${trafmap.jar}"/>

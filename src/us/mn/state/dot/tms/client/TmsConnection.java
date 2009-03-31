@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,8 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.net.URL;
 import java.rmi.NotBoundException;
 import java.util.Properties;
-import javax.xml.parsers.ParserConfigurationException;
-import us.mn.state.dot.data.DataFactory;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.security.UserManager;
@@ -49,22 +46,12 @@ public class TmsConnection {
 	/** Currently login user */
 	protected final UserManager userManager;
 
-	/** Traffic data factory */
-	protected final DataFactory factory;
-
-	/** Get the traffic data factory */
-	public DataFactory getDataFactory() {
-		return factory;
-	}
-
 	/** Create a new TmsConnection that is closed */
 	public TmsConnection(SmartDesktop desktop, UserManager userManager,
-		Properties props) throws IOException,
-		ParserConfigurationException
+		Properties props)
 	{
 		this.desktop = desktop;
 		this.userManager = userManager;
-		factory = DataFactory.create(props);
 	}
 
 	/** Get the desktop used by the client */
