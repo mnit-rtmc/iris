@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.utils.I18NMessages;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -113,6 +114,14 @@ abstract public class OpDms extends Device2Operation {
 		// unknown sign type, this happens when the first 
 		// OpQueryConfig message is being sent.
 		return SignAccessType.UNKNOWN;
+	}
+
+	/** Return true if the message is owned by the AWS */
+	public static boolean ownerIsAws(final String msg_owner) {
+		if(msg_owner == null)
+			return false;
+		final String awsName = I18NMessages.get("Aws.Name");
+		return msg_owner.toLowerCase().equals(awsName.toLowerCase());
 	}
 
 	/** return the timeout for this operation */

@@ -159,9 +159,9 @@ public class OpBlank extends OpDms
 
 				// give up
 				} else {
-					// if caws failure, handle it
-					if( mess.checkCAWSFailure() )
-						mess.handleCAWSFailure("was blanking a message.");						
+					// if aws failure, handle it
+					if(mess.checkAwsFailure())
+						mess.handleAwsFailure("was blanking a message.");						
 				}
 			}
 

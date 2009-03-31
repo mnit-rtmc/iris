@@ -52,7 +52,8 @@ public class Message implements AddressedMessage
 	private int m_completiontimeMS=0;
 
 	/** List of objects set or get with this message */
-	protected final LinkedList<Object> m_objlist = new LinkedList<Object>();
+	protected final LinkedList<Object> m_objlist = 
+		new LinkedList<Object>();
 	private final TokenStreamReader m_is;
 	private final OutputStream m_os;
 
@@ -140,7 +141,6 @@ public class Message implements AddressedMessage
 
 	/**
 	 * Send a get request message
-	 *
 	 * @throws IOException if received response is malformed or timed out.
 	 */
 	public void getRequest() throws IOException {
@@ -151,7 +151,8 @@ public class Message implements AddressedMessage
 
 		// send message
 		long starttime=STime.getCurTimeUTCinMillis();
-		System.err.print("Writing " + array.length+" bytes to cmsserver....");
+		System.err.print("Writing " + array.length + 
+			" bytes to cmsserver....");
 		m_is.resetBuffer();
 		m_os.write(array);
 		m_os.flush();
@@ -162,23 +163,37 @@ public class Message implements AddressedMessage
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,
 		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
-			this.setCompletionTimeMS((int)STime.calcTimeDeltaMS(starttime));
-		} catch (IllegalStateException ex) {
-			this.handleCAWSFailure("Illegal state reading response from cmsserver.");
-			throw new IOException(
-			    "SEVERE error: capacity exceeded in dmslite.Message.getRequest(): "+ex);
-		} catch (IOException ex) {
-			throw new IOException("CMS disconnected:" + ex);
+			setCompletionTimeMS((int)STime.
+				calcTimeDeltaMS(starttime));
+			System.err.println("Response received in " + 
+				getCompletionTimeMS() + " ms.");
+		} catch(IllegalStateException ex) {
+			String msg = "Contact AHMCT: buffer capacity exceeded.";
+			handleAwsFailure(msg);
+			throw new IOException(msg);
+		} catch(IOException ex) {
+			String msg = "Unable to connect to cmsserver.";
+			handleAwsFailure(msg);
+			System.err.println(msg);
+			throw new IOException(msg);
+		} catch(Exception ex) {
+			String msg = "Unexpected problem: " + ex;
+			handleAwsFailure(msg);
+			throw new IOException(msg);
 		}
 
 		// timed out?
 		if(token == null) {
-			this.handleCAWSFailure("Possibly timed out waiting for response from cmserver.");
 			String err="";
-			err+="SEVERE error: dmslite.Message.getRequest(): timed out waiting for CMS ("+
-			    (getCompletionTimeMS()/1000)+"seconds). Timeout is "+m_dmsTimeoutMS / 1000 + " secs). ";
+			err+="SEVERE error: dmslite.Message.getRequest(): " +
+				"timed out waiting for CMS (" + 
+				(getCompletionTimeMS()/1000) + 
+				"seconds). Timeout is " + m_dmsTimeoutMS 
+				/ 1000 + " secs). ";
+			handleAwsFailure(err);
 			System.err.println(err);
-			System.err.println("Sent operation="+SString.byteArrayToString(array));
+			System.err.println("Sent operation=" + 
+				SString.byteArrayToString(array));
 			throw new IOException(err);
 
 		// parse response
@@ -191,7 +206,7 @@ public class Message implements AddressedMessage
 			for(Object i : m_objlist) {
 				assert i instanceof ReqRes;
 				ReqRes rr = (ReqRes) i;
-				rr.parseRes(DMSLITEMSGTAG,this.getRespMsgName(),
+				rr.parseRes(DMSLITEMSGTAG, getRespMsgName(),
 			    		token);    // throws IOException on error
 			}
 		}
@@ -214,25 +229,24 @@ public class Message implements AddressedMessage
 		return null;
 	}
 
-	/** return true if message owner is CAWS */
-	protected boolean ownerCaws() {
-		String owner=this.searchForReqResItem("Owner");
+	/** Return true if message is owned by the AWS */
+	protected boolean ownerIsAws() {
+		String owner = this.searchForReqResItem("Owner");
 		if(owner == null)
 			return false;
-		return owner.toLowerCase().equals(
-			CawsPoller.awsName().toLowerCase());
+		return OpDms.ownerIsAws(owner);
 	}
 
 	/** 
-	  * Determine if a failure sending a CAWS message to the cmsserver
+	  * Determine if failure sending an AWS message to the cmsserver
 	  * occurred. 
 	  * @return true on failure else false.
 	  */
-	protected boolean checkCAWSFailure() {
-		System.err.println("Message.checkCAWSFailure() called. this="+this.toString()+", ownerCAWS="+ownerCaws());
-		if (m_objlist==null)
+	protected boolean checkAwsFailure() {
+		System.err.println("Message.checkAwsFailure() called. this=" + 
+			toString() + ", ownerIsAws=" + ownerIsAws());
+ 		if(m_objlist == null)
 			return false;
-
 		String ret=null;
 
 		// IsValid: was there an error?
@@ -240,96 +254,100 @@ public class Message implements AddressedMessage
 		if(isvalid == null || isvalid.toLowerCase().equals("true"))
 			return false;
 
-		// owner isn't caws?
-		if(!ownerCaws())
+		// owner isn't aws?
+		if(!ownerIsAws())
 			return false;
 
 		// at this point we know there was an error to report
 		return true;
 	}
 
-	/** Generate a CAWS failure message */
-	protected String getCAWSFailureMessage() {
-		if (m_objlist==null)
+	/** Generate an aws failure message */
+	protected String getAwsFailureMessage() {
+		if(m_objlist == null)
 			return "";
 
-		String ret="";
+		String ret = "";
 
-		// Owner: was owner CAWS?
-		String owner=this.searchForReqResItem("Owner");
+		// Owner: was owner the aws?
+		String owner = this.searchForReqResItem("Owner");
 		if(owner == null)
-			owner="";
+			owner = "";
 
 		// ErrMsg: get the error description
-		String errmsg=this.searchForReqResItem("ErrMsg");
+		String errmsg = this.searchForReqResItem("ErrMsg");
 		if(errmsg == null)
-			errmsg="";
+			errmsg = "";
 
 		// Id: get message id
-		String id=this.searchForReqResItem("Id");
+		String id = this.searchForReqResItem("Id");
 		if(id == null)
-			id="";
+			id = "";
 
 		// Address: get cms number
-		String address=this.searchForReqResItem("Address");
+		String address = this.searchForReqResItem("Address");
 		if(address == null)
-			address="";
+			address = "";
 
 		// MsgText: actual message
-		String msg=this.searchForReqResItem("MsgText");
+		String msg = this.searchForReqResItem("MsgText");
 		if(msg == null)
-			msg="";
+			msg = "";
 
 		// build error string
-		ret="";
-		ret+="Could not send a CAWS message to a CMS: reason="+errmsg;
-		ret+=", CMS="+address;
-		ret+=", message id="+id;
-		ret+=", time="+STime.getCurDateTimeString(true);
-		ret+=", message="+msg;
-		ret+=", author="+owner;
-		ret+=", note=";	// appended to by handleCawsFailure()
-
-		//System.err.println("Message.getCAWSFailureMessage() returning="+ret);
+		StringBuilder b = new StringBuilder();
+		b.append("Could not send an AWS message to a DMS: reason=");
+		b.append(errmsg);
+		b.append(", DMS=");
+		b.append(address);
+		b.append(", message id=");
+		b.append(id);
+		b.append(", time=");
+		b.append(STime.getCurDateTimeString(true));
+		b.append(", message=");
+		b.append(msg);
+		b.append(", author=");
+		b.append(owner);
+		b.append(", note=");	// appended to by handleAwsFailure()
 		return ret;
 	}
 
 	/** 
-	  * This method handles a failure when IRIS fails to send a CAWS 
-	  * message to a CMS.
+	  * This method handles a failure when IRIS fails to send an AWS 
+	  * message to a DMS.
 	  * @param errmsgnote Optional error message, appended to generated message.
 	  */
-	public void handleCAWSFailure(String errmsgnote) {
-		if(errmsgnote==null)
-			errmsgnote="";
+	public void handleAwsFailure(String errmsgnote) {
+		if(errmsgnote == null)
+			errmsgnote = "";
 
-		// owner isn't caws?
-		if(!ownerCaws())
+		// owner is not aws?
+		if(!ownerIsAws())
 			return;
 
 		// generate an error message
-		String errmsg = getCAWSFailureMessage() + errmsgnote;
-		System.err.println("Warning: failure to send CAWS message to CMS: "+errmsg);
+		String errmsg = getAwsFailureMessage() + errmsgnote;
+		System.err.println("Warning: failure to send AWS message to DMS: " + errmsg);
 
 		// build email
 		String sender = SystemAttributeHelper.getEmailSenderServer();
 		String recipient = SystemAttributeHelper.getEmailRecipientAws();
-		String subject = "IRIS could not send CAWS message to CMS";
+		String subject = "IRIS could not send AWS message to DMS";
 
 		// send
 		if(recipient == null || sender == null ||
 			recipient.length() <= 0 || sender.length() <= 0)
 		{
-			System.err.println("Message.handleCAWSFailure(): didn't try to send CAWS error email.");
+			System.err.println("Message.handleAwsFailure(): didn't try to send AWS error email.");
 		} else {
 			SEmail email = new SEmail(sender, recipient, subject,
 				errmsg);
 			try {
 				email.send();
-				System.err.println("Message.handleCAWSFailure(): sent email");
+				System.err.println("Message.handleAwsFailure(): sent email");
 			}
 			catch(MessagingException e) {
-				System.err.println("Message.handleCAWSFailure(): email failed: " + e.getMessage());
+				System.err.println("Message.handleAwsFailure(): email failed: " + e.getMessage());
 			}
 		}
 	}
