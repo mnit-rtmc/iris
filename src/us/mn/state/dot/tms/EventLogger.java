@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import java.util.Calendar;
 public class EventLogger {
 
 	/** Path where traffic data files are stored */
-	static protected final String DATA_PATH = "/data/traffic";
+	static protected final String DATA_PATH = "/var/lib/tms/traffic";
 
 	/** Create a date string (eg YYYYMMDD) from the given date stamp */
 	static public String date(Calendar stamp) {

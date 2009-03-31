@@ -36,7 +36,7 @@ public class StratifiedPlanState extends TimingPlanState {
 	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
 
 	/** Path where meter data files are stored */
-	static protected final String DATA_PATH = "/data/meter";
+	static protected final String DATA_PATH = "/var/lib/tms/meter";
 
 	/** Constant for standard filter equation */
 	static protected final float K = 0.15f;

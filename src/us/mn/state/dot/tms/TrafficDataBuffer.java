@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ abstract public class TrafficDataBuffer {
 	static protected final DebugLog TRAFFIC_LOG = new DebugLog("traffic");
 
 	/** Path where traffic data files are stored */
-	static protected final String DATA_PATH = "/data/traffic";
+	static protected final String DATA_PATH = "/var/lib/tms/traffic";
 
 	/** Buffer size is 10 minutes (one record every 30 seconds) */
 	static protected final int BUFFERED_RECORDS = 20;
