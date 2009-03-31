@@ -425,6 +425,8 @@
 		<fixcrlf srcDir="${dist.client}" eol="crlf" includes="*.bat"/>
 		<fixcrlf srcDir="${dist.client}" eol="lf" includes="*.sh"/>
 
+		<touch file="${dist.client}/session_ids"/>
+
 		<mkdir dir="${dist.client}/images"/>
 		<copy todir="${dist.client}/images">
 			<fileset dir="${images.dir}">

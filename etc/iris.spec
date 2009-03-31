@@ -147,3 +147,4 @@ fi
 %{_clientdir}/lib/tms-log-@@TMSLOG.VERSION@@.jar
 %{_clientdir}/lib/TrafMap-@@TRAFMAP.VERSION@@.jar
 %{_clientdir}/lib/video-client-@@VIDEOCLIENT.VERSION@@.jar
+%attr(0644,tms,apache) %{_clientdir}/session_ids
