@@ -88,8 +88,8 @@ fi
 # /etc/iris
 %dir %attr(0750,tms,tms) /etc/iris
 %defattr(0640,tms,tms)
-%config /etc/iris/iris-client.properties
-%config /etc/iris/iris-server.properties
+%config(noreplace) /etc/iris/iris-client.properties
+%config(noreplace) /etc/iris/iris-server.properties
 %config /etc/iris/iris-server.keystore
 
 # /usr/bin
