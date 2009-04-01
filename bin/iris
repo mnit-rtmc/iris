@@ -59,10 +59,10 @@ function update_hostname() {
 }
 
 function create_links() {
-	version=`ls -d -1 /usr/share/java/iris-server-* | head -n 1`
-	ln -snf $version /usr/share/java/iris-server
-	version=`ls -d -1 /var/www/html/iris-client-* | head -n 1`
-	ln -snf $version /var/www/html/iris-client
+	version=`ls -d -1 /usr/share/java/iris-server-* | head -n 1 | cut -f 3 -d-`
+	echo "Creating IRIS links for verion $version"
+	ln -snf /usr/share/java/iris-server-$version /usr/share/java/iris-server
+	ln -snf /var/www/html/iris-client-$version /var/www/html/iris-client
 }
 
 function check_initialized() {
@@ -115,6 +115,9 @@ case "$1" in
 		update_hostname
 		create_links
 		;;
+	links)
+		create_links
+		;;
 	start)
 		start
 		;;
@@ -131,7 +134,7 @@ case "$1" in
 		RETVAL=$?
 		;;
 	*)
-		echo $"Usage: $0 {start|stop|restart|status}"
+		echo $"Usage: $0 {init|links|start|stop|restart|status}"
 		RETVAL=1
 esac
 
