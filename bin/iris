@@ -50,12 +50,49 @@ function create_keystores() {
 	sed -i ''$sed_c'' $p_client
 }
 
+function update_hostname() {
+	host=`hostname -f`
+	p_client=/etc/iris/iris-client.properties
+	sed -i ''s,.*TMSIpAddress=.*,TMSIpAddress=$host,'' $p_client
+	sed -i ''s,.*keystore.file=.*,keystore.file=http://$host/iris-client/iris-client.keystore,'' $p_client
+	sed -i ''s,.*sonar.host=.*,sonar.host=$host,'' $p_client
+}
+
+function create_links() {
+	version=`ls -d -1 /usr/share/java/iris-server-* | head -n 1`
+	ln -snf $version /usr/share/java/iris-server
+	version=`ls -d -1 /var/www/html/iris-client-* | head -n 1`
+	ln -snf $version /var/www/html/iris-client
+}
+
+function check_initialized() {
+	if [ ! -r /etc/iris/iris-server.keystore ]
+	then
+		echo "/etc/iris/iris-server.keystore not found."
+		return 1
+	fi
+	if [ ! -r /etc/iris/iris-client.keystore ]
+	then
+		echo "/etc/iris/iris-client.keystore not found."
+		return 1
+	fi
+	return 0
+}
+
 function start() {
 	pid=`pidof -s $PROG`
 	if [ $pid ]
 	then
 		echo $"$SERVICE already running."
 	else
+		check_initialized
+		if [ "$?" != "0" ]
+		then
+			echo "Have you tried 'service iris init'?"
+			exit 1
+		fi
+		install -o apache -g apache -m 0444 /etc/iris/iris-client.keystore /var/www/html/iris-client/
+		install -o apache -g apache -m 0444 /etc/iris/iris-client.properties /var/www/html/iris-client/
 		echo -n $"Starting $SERVICE:"
 		$SU $USER -s /bin/sh -c "$PROG $OPTIONS &" && success || failure
 		RETVAL=$?
@@ -75,6 +112,8 @@ function stop() {
 case "$1" in
 	init)
 		create_keystores
+		update_hostname
+		create_links
 		;;
 	start)
 		start
