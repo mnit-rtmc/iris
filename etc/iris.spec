@@ -113,10 +113,11 @@ fi
 
 # /var/lib/tms
 %dir %attr(0775,tms,tms) /var/lib/tms
-%dir %attr(0775,tms,tms) /var/lib/tms/backups
+%dir %attr(0775,tms,tms) /var/lib/tms/sql
 %dir %attr(0775,tms,tms) /var/lib/tms/meter
 %dir %attr(0775,tms,tms) /var/lib/tms/traffic
 %dir %attr(0775,tms,tms) /var/lib/tms/xml
+%attr(0444,tms,tms) /var/lib/tms/sql/
 
 # /var/log/tms
 %dir %attr(3775,tms,tms) /var/log/tms

@@ -22,6 +22,7 @@
 	<property name="lib.dir" value="lib"/>
  	<property name="MessagesBundle.dir" value="etc/MessagesBundle"/>
 	<property name="docs.dir" value="docs"/>
+	<property name="sql.dir" value="sql"/>
 
 	<!-- Property configuration -->
 	<property file="project.properties"/>
@@ -485,7 +486,11 @@
 		</copy>
 		<chmod file="${install.dir}/usr/bin/iris_service" perm="755"/>
 
-		<mkdir dir="${install.dir}/var/lib/tms/backups"/>
+		<mkdir dir="${install.dir}/var/lib/tms/sql"/>
+		<copy todir="${install.dir}/var/lib/tms/sql">
+			<fileset file="${sql.dir}/tms-template.sql"/>
+			<fileset file="${sql.dir}/migrate-*.sql"/>
+		</copy>
 		<mkdir dir="${install.dir}/var/lib/tms/meter"/>
 		<mkdir dir="${install.dir}/var/lib/tms/traffic"/>
 		<mkdir dir="${install.dir}/var/lib/tms/xml"/>
