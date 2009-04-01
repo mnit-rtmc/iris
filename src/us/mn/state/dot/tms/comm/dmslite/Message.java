@@ -144,14 +144,14 @@ public class Message implements AddressedMessage
 	 * @throws IOException if received response is malformed or timed out.
 	 */
 	public void getRequest() throws IOException {
-		System.err.println("dmslite.Message.getRequest() called.");
+		//System.err.println("dmslite.Message.getRequest() called.");
 
 		// build message
 		byte[] array = this.buildReqMsg();
 
 		// send message
 		long starttime=STime.getCurTimeUTCinMillis();
-		System.err.print("Writing " + array.length + 
+		System.err.print("getRequest(): Writing " + array.length + 
 			" bytes to cmsserver....");
 		m_is.resetBuffer();
 		m_os.write(array);

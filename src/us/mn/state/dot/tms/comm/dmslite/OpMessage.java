@@ -101,6 +101,19 @@ public class OpMessage extends OpDms {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		// dms is configured
+		if(dmsConfigured())
+			return createPhaseTwo();
+
+		// dms not configured
+		Phase phase2 = createPhaseTwo();
+		Phase phase1 = new PhaseGetConfig(phase2);
+		return phase1;
+	}
+
+	/** create 2nd phase */
+	private Phase createPhaseTwo()
+	{
 		if(!m_dms.checkPriority(m_signMessage.getPriority()))
 			return null;
 		byte[] bitmaps = getBitmaps();

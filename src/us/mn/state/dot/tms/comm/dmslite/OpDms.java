@@ -19,9 +19,11 @@ import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelperD10;
+import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.Device2Operation;
 import us.mn.state.dot.tms.utils.I18NMessages;
@@ -203,5 +205,201 @@ abstract public class OpDms extends Device2Operation {
 		if(m_user == null)
 			return m_opDesc;
 		return m_opDesc + " (" + m_user.getFullName() + ")";
+	}
+
+	/** return true if dms has been configured */
+	public boolean dmsConfigured() {
+		// FIXME: there must be a better way to check for this condition
+		return m_dms.getWidthPixels() != null;
+	}
+
+	/** Phase to query the dms config, which is used by subclasses */
+	protected class PhaseGetConfig extends Phase
+	{
+		/** next phase to execute or null */
+		private Phase m_next = null;
+
+		/** constructor */
+		protected PhaseGetConfig() {}
+
+		/** 
+		 *  constructor
+		 *  @param next Phase to execute after this phase else null.
+		 */
+		protected PhaseGetConfig(Phase next) {
+			m_next = next;
+		}
+
+		/**
+		 * Get the DMS configuration. This phase is used by subclassed
+		 * operations if the DMS configuration has not been requested.
+		 * Note, the type of exception throw here determines
+		 * if the messenger reopens the connection on failure.
+		 * @see MessagePoller#doPoll()
+		 * @see Messenger#handleException()
+		 * @see Messenger#shouldReopen()
+		 */
+		protected Phase poll(AddressedMessage argmess)
+			throws IOException {
+
+			// System.err.println("dmslite.OpQueryConfig.PhaseGetConfig.poll(msg) called.");
+			assert argmess instanceof Message : "wrong message type";
+
+			Message mess = (Message) argmess;
+
+			// set message attributes as a function of the operation
+			setMsgAttributes(mess);
+
+			// build req msg
+			mess.setName(getOpName());
+			mess.setReqMsgName("GetDmsConfigReqMsg");
+			mess.setRespMsgName("GetDmsConfigRespMsg");
+
+			String drop = Integer.toString(controller.getDrop());
+			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
+			ReqRes rr1 = new ReqRes("Address", drop, new String[] {
+				"IsValid", "ErrMsg", "signAccess", "model", "make",
+				"version", "type", "horizBorder", "vertBorder",
+				"horizPitch", "vertPitch", "signHeight",
+				"signWidth", "characterHeightPixels",
+				"characterWidthPixels", "signHeightPixels",
+				"signWidthPixels"
+			});
+			mess.add(rr0);
+			mess.add(rr1);
+
+			// send msg
+            		mess.getRequest();	// throws IOException
+
+			// parse resp msg
+			long id = 0;
+			boolean valid = false;
+			String errmsg = "";
+			String model = "";
+			String signAccess = "";
+			String make = "";
+			String version = "";
+			DMSType type = DMSType.VMS_FULL;
+			int horizBorder = 0;
+			int vertBorder = 0;
+			int horizPitch = 0;
+			int vertPitch = 0;
+			int signHeight = 0;
+			int signWidth = 0;
+			int characterHeightPixels = 0;
+			int characterWidthPixels = 0;
+			int signHeightPixels = 0;
+			int signWidthPixels = 0;
+
+			try {
+				// id
+				id = new Long(rr0.getResVal("Id"));
+
+				// valid flag
+				valid = new Boolean(rr1.getResVal("IsValid"));
+
+				// error message text
+				errmsg = rr1.getResVal("ErrMsg");
+				if(!valid && errmsg.length() <= 0)
+					errmsg = FAILURE_UNKNOWN;
+
+				// update 
+				complete(mess);
+
+				// valid message received?
+				if(valid) {
+					signAccess = rr1.getResVal("signAccess");
+					model = rr1.getResVal("model");
+					make = rr1.getResVal("make");
+					version = rr1.getResVal("version");
+
+					// determine matrix type
+					String stype = rr1.getResVal("type");
+					if (stype.toLowerCase().contains("full"))
+						type = DMSType.VMS_FULL;
+					else
+						System.err.println("SEVERE: Unknown matrix type read ("+stype+")");
+
+					horizBorder = SString.stringToInt(
+						rr1.getResVal("horizBorder"));
+					vertBorder = SString.stringToInt(
+						rr1.getResVal("vertBorder"));
+					horizPitch = SString.stringToInt(
+						rr1.getResVal("horizPitch"));
+					vertPitch = SString.stringToInt(
+						rr1.getResVal("vertPitch"));
+					signHeight = SString.stringToInt(
+						rr1.getResVal("signHeight"));
+					signWidth = SString.stringToInt(
+						rr1.getResVal("signWidth"));
+					characterHeightPixels = SString.stringToInt(
+						rr1.getResVal(
+							"characterHeightPixels"));
+					characterWidthPixels = SString.stringToInt(
+						rr1.getResVal(
+							"characterWidthPixels"));
+					signHeightPixels = SString.stringToInt(
+						rr1.getResVal(
+							"signHeightPixels"));
+					signWidthPixels = SString.stringToInt(
+						rr1.getResVal(
+							"signWidthPixels"));
+
+					// System.err.println("PhaseGetConfig.poll(msg) parsed msg values: valid:"+
+					// valid+", model:"+model+", make:"+make+"...etc.");
+				}
+			} catch (IllegalArgumentException ex) {
+				System.err.println(
+				    "PhaseGetConfig: Malformed XML received:"+ex+", id="+id);
+				valid = false;
+				errmsg = ex.getMessage();
+				handleException(new IOException(errmsg));
+			}
+
+			// set config values
+			// these values are displayed in the DMS dialog, Configuration tab
+			if(valid) {
+				m_dms.setModel(model);
+				m_dms.setSignAccess(signAccess);    // wizard, modem
+				m_dms.setMake(make);
+				m_dms.setVersion(version);
+				m_dms.setDmsType(type);
+				m_dms.setHorizontalBorder(horizBorder);    // in mm
+				m_dms.setVerticalBorder(vertBorder);    // in mm
+				m_dms.setHorizontalPitch(horizPitch);
+				m_dms.setVerticalPitch(vertPitch);
+
+				// values not set for these
+				m_dms.setLegend("sign legend");
+				m_dms.setBeaconType("beacon type");
+				m_dms.setTechnology("sign technology");
+
+				// note, these must be defined for comboboxes
+				// in the "Compose message" control to appear
+				m_dms.setFaceHeight(signHeight);    // mm
+				m_dms.setFaceWidth(signWidth);      // mm
+				m_dms.setHeightPixels(signHeightPixels);
+				m_dms.setWidthPixels(signWidthPixels);
+				// NOTE: these must be set last
+				m_dms.setCharHeightPixels(characterHeightPixels);
+				m_dms.setCharWidthPixels(characterWidthPixels);
+
+			// failure
+			} else {
+				System.err.println(
+				    "PhaseGetConfig: response from cmsserver received, ignored because Xml valid field is false, errmsg="
+				    + errmsg);
+				errorStatus = errmsg;
+
+				// try again
+				if(flagFailureShouldRetry(errmsg)) {
+					System.err.println("PhaseGetConfig: will retry failed operation");
+					return this;
+				}
+			}
+
+			// if non-null, execute subsequent phase
+			return m_next;
+		}
 	}
 }

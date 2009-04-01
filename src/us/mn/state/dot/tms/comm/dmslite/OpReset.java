@@ -38,8 +38,13 @@ public class OpReset extends OpDms
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		System.err.println("dmslite.OpReset.phaseOne() called.");
-		return new PhaseResetDms();
+		if(dmsConfigured())
+			return new PhaseResetDms();
+
+		// dms not configured
+		Phase phase2 = new PhaseResetDms();
+		Phase phase1 = new PhaseGetConfig(phase2);
+		return phase1;
 	}
 
 	/**
@@ -129,7 +134,7 @@ public class OpReset extends OpDms
 			// valid flag is false
 			} else {
 				System.err.println(
-				    "OpReset: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
+				    "OpReset: isvalid is false, errmsg="+errmsg);
 				errorStatus = errmsg;
 
 				// try again

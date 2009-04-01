@@ -40,7 +40,13 @@ public class OpBlank extends OpDms
 
 	/** Create the first phase of the operation */
 	protected Phase phaseOne() {
-		return new PhaseSetBlank();
+		if(dmsConfigured())
+			return new PhaseSetBlank();
+
+		// dms not configured
+		Phase phase2 = new PhaseSetBlank();
+		Phase phase1 = new PhaseGetConfig(phase2);
+		return phase1;
 	}
 
 	/**

@@ -146,11 +146,14 @@ public class OpQueryMsg extends OpDms {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		// has getConfig() been called yet? If not, don't do anything
-		// FIXME: there must be a better way to check for this condition
-		if(m_dms.getWidthPixels() == null)
-			return null;
-		return new PhaseQueryCurrentMessage();
+
+		if(dmsConfigured())
+			return new PhaseQueryCurrentMessage();
+
+		// dms not configured
+		Phase phase2 = new PhaseQueryCurrentMessage();
+		Phase phase1 = new PhaseGetConfig(phase2);
+		return phase1;
 	}
 
 	/**
@@ -218,8 +221,8 @@ public class OpQueryMsg extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException
 		{
-			//System.err.println(
-			//    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) called.");
+			System.err.println(
+			    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) called.");
 			assert argmess instanceof Message :
 			       "wrong message type";
 

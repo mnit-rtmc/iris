@@ -77,11 +77,11 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	 */
 	public void download(ControllerImpl c, boolean reset, int p) {
 		DMSImpl dms = c.getActiveSign();
-		if (dms == null)
+		if(dms == null)
 			return;
 
 		// reset button pressed
-		if (reset)
+		if(reset)
 			sendRequest(dms, SignRequest.RESET_DMS);
 		// download button pressed
 		else
@@ -91,7 +91,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	/** Perform a sign status poll. Called every 60 seconds, via TimerJobSigns */
 	public void pollSigns(ControllerImpl c, Completer comp) {
 		DMSImpl dms = c.getActiveSign();
-		if (dms == null)
+		if(dms == null)
 			return;
 
 		// don't poll signs connected by modem
@@ -123,7 +123,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		if (dms == null || m == null || m.getBitmaps() == null)
+		if(dms == null || m == null || m.getBitmaps() == null)
 			return;
 		// Are the DMS width and height valid?  If not, it's probably
 		// because a OpQueryConfig message has not been received yet,
@@ -166,13 +166,13 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			new OpReset(dms, u).start();
 			break;
 		case RESET_MODEM:
-			new OpResetModem(dms, u).start();
+			//new OpResetModem(dms, u).start();
 			break;
 		default:
 			// Ignore other requests
-			//System.err.println("Warning: DmsLitePoller: "+
-			//	"unknown request in sendRequest(). "+
-			//	r="+r+", desc="+r.description);
+			System.err.println("Warning: DmsLitePoller: "+
+				"unknown request in sendRequest(). "+
+				"r="+r+", desc="+r.description);
 			break;
 		}
 	}
