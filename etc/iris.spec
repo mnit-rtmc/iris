@@ -111,16 +111,16 @@ fi
 %{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
 %{_serverdir}/vault-@@VAULT.VERSION@@.jar
 
-# /var/lib/tms
-%dir %attr(0775,tms,tms) /var/lib/tms
-%dir %attr(0775,tms,tms) /var/lib/tms/sql
-%dir %attr(0775,tms,tms) /var/lib/tms/meter
-%dir %attr(0775,tms,tms) /var/lib/tms/traffic
-%dir %attr(0775,tms,tms) /var/lib/tms/xml
-%attr(0444,tms,tms) /var/lib/tms/sql/
+# /var/lib/iris
+%dir %attr(0775,tms,tms) /var/lib/iris
+%dir %attr(0775,tms,tms) /var/lib/iris/sql
+%dir %attr(0775,tms,tms) /var/lib/iris/meter
+%dir %attr(0775,tms,tms) /var/lib/iris/traffic
+%dir %attr(0775,tms,tms) /var/lib/iris/xml
+%attr(0444,tms,tms) /var/lib/iris/sql/
 
-# /var/log/tms
-%dir %attr(3775,tms,tms) /var/log/tms
+# /var/log/iris
+%dir %attr(3775,tms,tms) /var/log/iris
 
 # client: /var/www/html/iris-client-x.x.x
 %dir %attr(0755,apache,apache) %{_clientdir}

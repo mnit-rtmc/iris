@@ -165,7 +165,7 @@ createuser -S -D -R tms
 		Populate the tms database with template file.
 <pre>
 su tms
-psql tms -f /var/lib/tms/sql/tms-template.sql
+psql tms -f /var/lib/iris/sql/tms-template.sql
 exit
 </pre>
 	</li>
@@ -202,7 +202,7 @@ service iris start
 	<li>
 		Check that everything started OK.
 <pre>
-tail -f -n 40 /var/log/tms/iris.stderr
+tail -f -n 40 /var/log/iris/iris.stderr
 </pre>
 	</li>
 </ol>

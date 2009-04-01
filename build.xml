@@ -486,15 +486,15 @@
 		</copy>
 		<chmod file="${install.dir}/usr/bin/iris_service" perm="755"/>
 
-		<mkdir dir="${install.dir}/var/lib/tms/sql"/>
-		<copy todir="${install.dir}/var/lib/tms/sql">
+		<mkdir dir="${install.dir}/var/lib/iris/sql"/>
+		<copy todir="${install.dir}/var/lib/iris/sql">
 			<fileset file="${sql.dir}/tms-template.sql"/>
 			<fileset file="${sql.dir}/migrate-*.sql"/>
 		</copy>
-		<mkdir dir="${install.dir}/var/lib/tms/meter"/>
-		<mkdir dir="${install.dir}/var/lib/tms/traffic"/>
-		<mkdir dir="${install.dir}/var/lib/tms/xml"/>
-		<mkdir dir="${install.dir}/var/log/tms"/>
+		<mkdir dir="${install.dir}/var/lib/iris/meter"/>
+		<mkdir dir="${install.dir}/var/lib/iris/traffic"/>
+		<mkdir dir="${install.dir}/var/lib/iris/xml"/>
+		<mkdir dir="${install.dir}/var/log/iris"/>
 
 		<copy todir="${install.dir}/usr/share/java/${dist.server}">
 			<fileset dir="${dist.server}"/>

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2008  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import java.io.IOException;
 public class DebugLog {
 
 	/** Directory to store IRIS log files */
-	static protected final String LOG_FILE_DIR = "/var/log/tms/";
+	static protected final String LOG_FILE_DIR = "/var/log/iris/";
 
 	/** Create a new debug log */
 	public DebugLog(String name) {

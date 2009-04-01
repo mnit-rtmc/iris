@@ -32,7 +32,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 abstract public class XmlWriter {
 
 	/** Filesystem directory to write XML files */
-	static protected final String XML_DIR = "/var/lib/tms/xml";
+	static protected final String XML_DIR = "/var/lib/iris/xml";
 
 	/** Regex pattern to match an ampersand */
 	static protected final Pattern AMPERSAND = Pattern.compile("&");

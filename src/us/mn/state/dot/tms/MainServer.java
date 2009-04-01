@@ -43,7 +43,7 @@ public class MainServer {
 		"/etc/iris/iris-server.properties";
 
 	/** Directory to store IRIS log files */
-	static protected final String LOG_FILE_DIR = "/var/log/tms/";
+	static protected final String LOG_FILE_DIR = "/var/log/iris/";
 
 	/** File to log standard out stream */
 	static protected final String STD_OUT = LOG_FILE_DIR + "iris.stdout";

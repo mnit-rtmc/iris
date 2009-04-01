@@ -27,7 +27,7 @@ import java.util.Calendar;
 public class EventLogger {
 
 	/** Path where traffic data files are stored */
-	static protected final String DATA_PATH = "/var/lib/tms/traffic";
+	static protected final String DATA_PATH = "/var/lib/iris/traffic";
 
 	/** Create a date string (eg YYYYMMDD) from the given date stamp */
 	static public String date(Calendar stamp) {

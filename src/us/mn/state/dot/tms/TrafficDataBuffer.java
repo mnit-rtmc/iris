@@ -35,7 +35,7 @@ abstract public class TrafficDataBuffer {
 	static protected final DebugLog TRAFFIC_LOG = new DebugLog("traffic");
 
 	/** Path where traffic data files are stored */
-	static protected final String DATA_PATH = "/var/lib/tms/traffic";
+	static protected final String DATA_PATH = "/var/lib/iris/traffic";
 
 	/** Buffer size is 10 minutes (one record every 30 seconds) */
 	static protected final int BUFFERED_RECORDS = 20;
