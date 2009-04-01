@@ -90,7 +90,6 @@ fi
 %defattr(0640,tms,tms)
 %config(noreplace) /etc/iris/iris-client.properties
 %config(noreplace) /etc/iris/iris-server.properties
-%config /etc/iris/iris-server.keystore
 
 # /usr/bin
 %defattr(0755,root,root)

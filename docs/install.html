@@ -24,7 +24,7 @@ yum install java-1.6.0-openjdk-devel ant mercurial rpm-build gcc
 </pre>
 	</li>
 	<li>
-		Clone iris mercurial repository (in home directory):
+		Clone the iris mercurial repository (in home directory):
 <pre>
 hg clone http://iris.dot.state.mn.us/hg/index.cgi/iris
 </pre>
@@ -53,32 +53,6 @@ mkdir lib/
 	<li>
 		Edit lib/iris-build.properties file as necessary for
 		your organization.
-	</li>
-	<li>
-		Create the server keystore file for SSL encryption.
-<pre>
-keytool -genkeypair -alias iris-sonar -keystore lib/iris-server.keystore
-</pre>
-	</li>
-	<li>
-		(Optional) If LDAP server is using SSL for authentication,
-		obtain SSL certificate from LDAP administrator.
-		Let's say it's called "ldap.cert".
-<pre>
-keytool -import -alias ldap-cert -keystore lib/iris-server.keystore -file ldap.cert
-</pre>
-	</li>
-	<li>
-		Extract the certificate from the server keystore.
-<pre>
-keytool -export -alias iris-sonar -keystore lib/iris-server.keystore -file iris-sonar-public.cert
-</pre>
-	</li>
-	<li>
-		Create the client keystore file for SSL encryption.
-<pre>
-keytool -import -alias iris-sonar -keystore lib/iris-client.keystore -file iris-sonar-public.cert
-</pre>
 	</li>
 	<li>
 		Create the key for signing jar packages.  This should go into
@@ -124,6 +98,24 @@ yum install java-1.6.0-openjdk postgresql-server httpd
 		Install the iris package with the rpm command.
 <pre>
 rpm -i iris-*.rpm
+</pre>
+	</li>
+
+	<li>
+		Initialize the IRIS server installation.
+		This creates a SSL key pair for encrypted communication.
+		You will be prompted for a Distinguished Name to use while
+		creating a new self-signed certificate.
+<pre>
+service iris init
+</pre>
+	</li>
+	<li>
+		(Optional) If your LDAP server is using SSL for authentication,
+		obtain SSL certificate from LDAP administrator.
+		Let's say it's called "ldap.cert".
+<pre>
+keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert
 </pre>
 	</li>
 	<li>

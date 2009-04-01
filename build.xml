@@ -353,21 +353,12 @@
 		</jar>
 	</target>
 
-	<!-- Check for client jar dependencies -->
-	<target name="check-client-jar">
-		<antcall target="check-dep">
-			<param name="file.dep" value="iris-client.keystore"/>
-		</antcall>
-	</target>
-
 	<!-- Create the client jar -->
 	<target name="client-jar"
-	        depends="check-client-jar,compile"
+	        depends="compile"
 	        description="Create the iris-client jar">
 		<jar jarfile="${build.lib}/${client.jar}"
 		     manifest="${build.etc}/${manifest.client}">
-			<fileset dir="${lib.dir}"
-				 includes="iris-client.keystore"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/client/**/*"/>
 			<fileset dir="${build.classes}"
@@ -462,7 +453,6 @@
 		<copy todir="${install.dir}/etc/iris">
 			<fileset file="${etc.dir}/iris-client.properties"/>
 			<fileset file="${etc.dir}/iris-server.properties"/>
-			<fileset file="${lib.dir}/iris-server.keystore"/>
 		</copy>
 		<chmod file="${install.dir}/etc/iris/*" perm="660"/>
 
