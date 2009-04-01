@@ -20,9 +20,9 @@
 %define version		@@VERSION@@
 %define _topdir		@@BUILD.RPM@@
 %define _installdir	%{_topdir}/BUILDROOT
-%define _serverlink	/usr/share/java/%{name}-server
+%define _serverlink	/usr/share/java/iris-server
 %define _serverdir	%{_serverlink}-%{version}
-%define _clientlink	/var/www/html/%{name}-client
+%define _clientlink	/var/www/html/iris-client
 %define _clientdir	%{_clientlink}-%{version}
 
 Name:		%{name}
@@ -88,8 +88,9 @@ fi
 # /etc/iris
 %dir %attr(0750,tms,tms) /etc/iris
 %defattr(0640,tms,tms)
-%config /etc/iris/%{name}-server.properties
-%config /etc/iris/%{name}-server.keystore
+%config /etc/iris/iris-client.properties
+%config /etc/iris/iris-server.properties
+%config /etc/iris/iris-server.keystore
 
 # /usr/bin
 %defattr(0755,root,root)
@@ -97,14 +98,14 @@ fi
 
 # /etc/rc.d/init.d
 %defattr(0755,root,root)
-/etc/rc.d/init.d/%{name}
+/etc/rc.d/init.d/iris
 
 # /usr/share/java/iris-server-x.x.x
 %dir %attr(0755,tms,tms) %{_serverdir}
 %defattr(0644,tms,tms)
-%{_serverdir}/%{name}-rmi-%{version}.jar
-%{_serverdir}/%{name}-server-%{version}.jar
-%{_serverdir}/%{name}-utils-%{version}.jar
+%{_serverdir}/iris-rmi-%{version}.jar
+%{_serverdir}/iris-server-%{version}.jar
+%{_serverdir}/iris-utils-%{version}.jar
 %{_serverdir}/mail.jar
 %{_serverdir}/postgresql.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
@@ -130,13 +131,12 @@ fi
 %{_clientdir}/index.html
 %{_clientdir}/mail.jnlp
 %{_clientdir}/iris-client.jnlp
-%{_clientdir}/iris-client.properties
 %{_clientdir}/images/iris.gif
 %{_clientdir}/images/iris_icon.png
 %{_clientdir}/lib/mail.jar
-%{_clientdir}/lib/%{name}-client-%{version}.jar
-%{_clientdir}/lib/%{name}-rmi-%{version}.jar
-%{_clientdir}/lib/%{name}-utils-%{version}.jar
+%{_clientdir}/lib/iris-client-%{version}.jar
+%{_clientdir}/lib/iris-rmi-%{version}.jar
+%{_clientdir}/lib/iris-utils-%{version}.jar
 %{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_clientdir}/lib/Shapes-@@SHAPES.VERSION@@.jar

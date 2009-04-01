@@ -378,22 +378,12 @@
 		</jar>
 	</target>
 
-	<!-- Check for client dependencies -->
-	<target name="check-client">
-		<antcall target="check-dep">
-			<param name="file.dep" value="iris-client.properties"/>
-		</antcall>
-	</target>
-
 	<!-- Create the iris client distribution -->
 	<target name="client"
-	        depends="check-client,client-jar,rmi-jar,utils-jar"
+	        depends="client-jar,rmi-jar,utils-jar"
 	        description="Create the iris client distribution">
 		<mkdir dir="${dist.client}"/>
 		<copy todir="${dist.client}">
-			<fileset dir="${lib.dir}">
-				<include name="iris-client.properties"/>
-			</fileset>
 			<fileset dir="${build.etc}">
 				<include name="*.jnlp"/>
 			</fileset>
@@ -470,7 +460,8 @@
 	        description="Install the full iris distribution">
 
 		<copy todir="${install.dir}/etc/iris">
-			<fileset file="${lib.dir}/iris-server.properties"/>
+			<fileset file="${etc.dir}/iris-client.properties"/>
+			<fileset file="${etc.dir}/iris-server.properties"/>
 			<fileset file="${lib.dir}/iris-server.keystore"/>
 		</copy>
 		<chmod file="${install.dir}/etc/iris/*" perm="660"/>

@@ -48,11 +48,10 @@ mkdir lib/
 		Copy postgresql.jar to lib/ directory.
 	</li>
 	<li>
-		Copy iris-build.properties, iris-client.properties and
-		iris-server.properties from etc/ to lib/.
+		Copy iris-build.properties from etc/ to lib/.
 	</li>
 	<li>
-		Edit the three lib/iris-*.properties files as necessary for
+		Edit lib/iris-build.properties file as necessary for
 		your organization.
 	</li>
 	<li>
@@ -126,6 +125,13 @@ yum install java-1.6.0-openjdk postgresql-server httpd
 <pre>
 rpm -i iris-*.rpm
 </pre>
+	</li>
+	<li>
+		Edit /etc/iris/iris-server.properties and
+		/etc/iris/iris-client.properties configuration files as
+		necessary.
+		All properties which have been commented out should be set
+		accordingly.
 	</li>
 	<li>
 		Initialize the PostgreSQL database.
