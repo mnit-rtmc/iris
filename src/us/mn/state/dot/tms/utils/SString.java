@@ -290,5 +290,15 @@ public class SString {
 		return String.valueOf(i);
 	}
 
+	/**
+	 *  Does a string contain another string?
+	 *  @return true if string1 contains string2, case insensitive.
+	 */
+	public static boolean containsIgnoreCase(String arg1, String arg2) {
+		if(arg1 == null || arg2 == null)
+			return false;
+		if(arg1.length() <= 0 || arg2.length() <= 0)
+			return false;
+		return arg1.toLowerCase().contains(arg2.toLowerCase());
+	}
 }
-
