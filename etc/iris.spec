@@ -28,7 +28,7 @@
 Name:		%{name}
 Summary:	The IRIS advanced traffic management system (ATMS).
 Version:	%{version}
-Release:	1
+Release:	@@RPM.RELEASE@@
 License:	GPL
 Group:		Applications/Engineering
 Provides:	%{name}

@@ -220,6 +220,8 @@
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.PACKAGER"
 				        value="${rpm.packager}"/>
+				<filter token="RPM.RELEASE"
+				        value="${rpm.release}"/>
 				<filter token="RPM.DESCRIPTION"
 				        value="${rpm.description}"/>
 			</filterset>
