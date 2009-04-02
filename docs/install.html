@@ -5,125 +5,31 @@
 <head>
 	<meta name="Author" content="Douglas Lau"/>
 	<link href="iris_doc.css" rel="stylesheet" type="text/css"/>
-	<title>Mn/DOT IRIS Configuration and Installation</title>
+	<title>Mn/DOT IRIS Installation and Configuration</title>
 </head>
 
 <body>
-<h1>Mn/DOT IRIS Configuration and Installation</h1>
-<h2>Configuring and Building the IRIS RPM package</h2>
+<div id="stamp">2 Apr 2009</div>
+<h1>Mn/DOT IRIS Installation and Configuration</h1>
+All commands must be run as the root user.
 <ol>
 	<li>
-		Install Fedora 10 onto a development machine.
+		Install <a href="http://fedoraproject.org">Fedora 10</a> onto
+		the server machine.
 	</li>
 	<li>
-		Install needed development packages.
-		This is the only step to build the package which should be
-		done as the root user.
-<pre>
-yum install java-1.6.0-openjdk-devel ant mercurial rpm-build gcc
-</pre>
-	</li>
-	<li>
-		Clone the iris mercurial repository (in home directory):
-<pre>
-hg clone http://iris.dot.state.mn.us/hg/index.cgi/iris
-</pre>
-	</li>
-	<li>
-		Create lib/ directory (in repository root):
-<pre>
-mkdir lib/
-</pre>
-	</li>
-	<li>
-		Download the <a href="http://java.sun.com/products/javamail/downloads/index.html">JavaMail API</a> from Sun.
-	</li>
-	<li>
-		Unzip the JavaMail archive and locate the mail.jar file.
-		Copy the mail.jar file to the lib/ directory in the iris
-		repository.
-	</li>
-	<li>
-		Receive special postgresql.jar from Mn/DOT developers.
-		Copy postgresql.jar to lib/ directory.
-	</li>
-	<li>
-		Copy iris-build.properties from etc/ to lib/.
-	</li>
-	<li>
-		Edit lib/iris-build.properties file as necessary for
-		your organization.
-	</li>
-	<li>
-		Create the key for signing jar packages.  This should go into
-		your default keystore (~/.keystore).
-<pre>
-keytool -genkeypair -alias signing-key
-</pre>
-	</li>
-	<li>
-		Put the following lines into your ~/.ant.properties file.
-<pre>
-debug=off
-sign.store=${user.home}/.keystore
-sign.store.pass=password
-sign.alias=signing-key
-sign.alias.pass=signing-password
-hgbase.url=http://iris.dot.state.mn.us/hg/index/cgi/
-</pre>		
-	</li>
-	<li>
-		Now it's time to build the iris RPM file.
-<pre>
-ant rpm
-</pre>
-	</li>
-	<li>
-		Locate the RPM file in build/rpm/RPMS/i386/.
-	</li>
-</ol>
-<h2>Installing IRIS onto a production system</h2>
-All commands in this section must be run as the root user.
-<ol>
-	<li>
-		Install Fedora 10 onto the server machine.
-	</li>
-	<li>
-		Install needed packages.
+		Install package dependencies.
 <pre>
 yum install java-1.6.0-openjdk postgresql-server httpd
 </pre>
 	</li>
 	<li>
-		Install the iris package with the rpm command.
-<pre>
-rpm -i iris-*.rpm
-</pre>
-	</li>
-
-	<li>
-		Initialize the IRIS server installation.
-		This creates a SSL key pair for encrypted communication.
-		You will be prompted for a Distinguished Name to use while
-		creating a new self-signed certificate.
-<pre>
-service iris init
-</pre>
-	</li>
-	<li>
-		(Optional) If your LDAP server is using SSL for authentication,
-		obtain SSL certificate from LDAP administrator.
-		Let's say it's called "ldap.cert".
-<pre>
-keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert
-</pre>
-	</li>
-	<li>
-		Edit /etc/iris/iris-server.properties and
-		/etc/iris/iris-client.properties configuration files as
-		necessary.
-		All properties which have been commented out should be set
-		accordingly.
+		Setup an LDAP server for user authentication.
+		If your organization already has an LDAP server, such as
+		Active Directory, you should use that.
+		Otherwise, you can install and configure OpenLDAP.
+		You will need the host name (or IP address) and port that
+		the IRIS server can use to authenticate users.
 	</li>
 	<li>
 		Initialize the PostgreSQL database.
@@ -151,6 +57,12 @@ service postgresql start
 </pre>
 	</li>
 	<li>
+		Install the iris package with the rpm command.
+<pre>
+rpm -i iris-xx.yy.zz.rpm
+</pre>
+	</li>
+	<li>
 		Create the tms user within PostgreSQL.
 		This user is used by the iris server for connecting to the
 		PostgreSQL database.
@@ -168,7 +80,28 @@ exit
 </pre>
 	</li>
 	<li>
-		Setup LDAP server. FIXME
+		Initialize the IRIS server installation.
+		This creates a SSL key pair for encrypted communication.
+		You will be prompted for a Distinguished Name to use while
+		creating a new self-signed certificate.
+<pre>
+service iris init
+</pre>
+	</li>
+	<li>
+		(Optional) If your LDAP server is using SSL for authentication,
+		obtain SSL certificate from LDAP administrator.
+		Let's say it's called "ldap.cert".
+<pre>
+keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file ldap.cert
+</pre>
+	</li>
+	<li>
+		Edit /etc/iris/iris-server.properties and
+		/etc/iris/iris-client.properties configuration files as
+		necessary.
+		All properties which have been commented out should be set
+		accordingly.
 	</li>
 	<li>
 		Add a valid LDAP user to the iris_user table within the
@@ -195,6 +128,24 @@ service iris start
 <pre>
 tail -f -n 40 /var/log/iris/iris.stderr
 </pre>
+	</li>
+	<li>
+		Configure Apache web server to start up automatically:
+<pre>
+chkconfig httpd on
+</pre>
+	</li>
+	<li>
+		Start up Apache web server:
+<pre>
+service httpd start
+</pre>
+	</li>
+	<li>
+		From a client computer with Java installed, point you web
+		browser at http://YOUR_SERVER_NAME/iris-client/.
+		From there, you should be able to launch the IRIS client
+		Web Start application.
 	</li>
 </ol>
 
