@@ -216,8 +216,6 @@
 					value="${videoclient.version}"/>
 				<filter token="SHAPES.VERSION"
 					value="${shapes.version}"/>
-				<filter token="WEBSTART.HOST"
-					value="${webstart.host}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.PACKAGER"

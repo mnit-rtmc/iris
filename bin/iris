@@ -59,10 +59,33 @@ function update_hostname() {
 }
 
 function create_links() {
+	host=`hostname -f`
 	version=`ls -d -1 /usr/share/java/iris-server-* | head -n 1 | cut -f 3 -d-`
 	echo "Creating IRIS links for verion $version"
 	ln -snf /usr/share/java/iris-server-$version /usr/share/java/iris-server
 	ln -snf /var/www/html/iris-client-$version /var/www/html/iris-client
+	sed -i ''s,@@WEBSTART.HOST@@,$host,'' /var/www/html/iris-client/*.jnlp
+}
+
+function start() {
+	pid=`pidof -s $PROG`
+	if [ $pid ]
+	then
+		echo $"$SERVICE already running."
+	else
+		check_initialized
+		if [ "$?" != "0" ]
+		then
+			echo "Have you tried 'service iris init'?"
+			exit 1
+		fi
+		prepare_client
+		echo -n $"Starting $SERVICE:"
+		$SU $USER -s /bin/sh -c "$PROG $OPTIONS &" && success || failure
+		RETVAL=$?
+		[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$SERVICE
+		echo
+	fi
 }
 
 function check_initialized() {
@@ -79,34 +102,23 @@ function check_initialized() {
 	return 0
 }
 
-function start() {
-	pid=`pidof -s $PROG`
-	if [ $pid ]
-	then
-		echo $"$SERVICE already running."
-	else
-		check_initialized
-		if [ "$?" != "0" ]
-		then
-			echo "Have you tried 'service iris init'?"
-			exit 1
-		fi
-		install -o apache -g apache -m 0444 /etc/iris/iris-client.keystore /var/www/html/iris-client/
-		install -o apache -g apache -m 0444 /etc/iris/iris-client.properties /var/www/html/iris-client/
-		echo -n $"Starting $SERVICE:"
-		$SU $USER -s /bin/sh -c "$PROG $OPTIONS &" && success || failure
-		RETVAL=$?
-		[ "$RETVAL" = 0 ] && touch /var/lock/subsys/$SERVICE
-		echo
-	fi
-}
-
 function stop() {
+	clean_client
 	echo -n $"Stopping $SERVICE:"
 	killproc $PROG -TERM
 	RETVAL=$?
 	[ "$RETVAL" = 0 ] && rm -f /var/lock/subsys/$SERVICE
 	echo
+}
+
+function prepare_client() {
+	install -o apache -g apache -m 0444 /etc/iris/iris-client.keystore /var/www/html/iris-client/
+	install -o apache -g apache -m 0444 /etc/iris/iris-client.properties /var/www/html/iris-client/
+}
+
+function clean_client() {
+	rm -f /var/www/html/iris-client/iris-client.properties
+	rm -f /var/www/html/iris-client/iris-client.keystore
 }
 
 case "$1" in
