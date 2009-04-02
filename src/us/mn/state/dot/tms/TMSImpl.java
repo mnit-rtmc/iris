@@ -58,20 +58,16 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 		TMSException, ObjectVaultException
 	{
 		vault = new ObjectVault(
-			props.getProperty( "HostName" ),
-			props.getProperty( "Port" ),
-			props.getProperty( "Database" ),
-			props.getProperty( "UserName" ),
-			props.getProperty( "Password" )
+			props.getProperty("db.url"),
+			props.getProperty("db.user"),
+			props.getProperty("db.password")
 		);
 		vault.addRootTable( UnicastRemoteObject.class );
 		vault.enableLogging( false );
 		store = new SQLConnection(
-			props.getProperty("HostName"),
-			props.getProperty("Port"),
-			props.getProperty("Database"),
-			props.getProperty("UserName"),
-			props.getProperty("Password")
+			props.getProperty("db.url"),
+			props.getProperty("db.user"),
+			props.getProperty("db.password")
 		);
 	}
 

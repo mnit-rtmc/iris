@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,8 +66,8 @@ public class SQLConnection {
 		new LinkedList<Statement>();
 
 	/** Create a new SQL connection */
-	public SQLConnection(String host, String port, String database,
-		String userName, String password) throws TMSException
+	public SQLConnection(String url, String usr, String pswd)
+		throws TMSException
 	{
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -75,10 +75,9 @@ public class SQLConnection {
 		catch(ClassNotFoundException e) {
 			throw new TMSException(e);
 		}
-		location = "jdbc:postgresql://" + host + ":" + port + "/" +
-			database;
-		user = userName;
-		this.password = password;
+		location = url;
+		user = usr;
+		password = pswd;
 	}
 
 	/** Close the current database connection */
