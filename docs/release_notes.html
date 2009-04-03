@@ -11,7 +11,69 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
-	<dt>3.81.0 (4 March 2008)</dt>
+	<dt>3.82.0 (3 April 2009)</dt>
+	<dd><ul>
+		<li>
+			The process to build and install IRIS has been greatly
+			simplified, using an RPM package.
+			All dependencies updated to new versions.
+			Datatools dependency is no longer required.
+			Instructions for building and installing IRIS are now
+			included in the docs/ directory.
+		</li>
+		<li>
+			Directory locations have been changed to be more
+			consistent.
+			<table>
+				<tr>
+					<th>Old Location</th>
+					<th>New Location</th>
+				</tr>
+				<tr>
+					<td>/data/meter/</td>
+					<td>/var/lib/iris/meter/</td>
+				</tr>
+				<tr>
+					<td>/data/traffic/</td>
+					<td>/var/lib/iris/traffic/</td>
+				</tr>
+				<tr>
+					<td>/usr/local/tms/</td>
+					<td>/usr/share/java/</td>
+				</tr>
+				<tr>
+					<td>/var/local/tms/dds/</td>
+					<td>/var/lib/iris/xml/</td>
+				</tr>
+				<tr>
+					<td>/var/log/tms/</td>
+					<td>/var/log/iris/</td>
+				</tr>
+				<tr>
+					<td>/var/www/html/iris/</td>
+					<td>/var/www/html/iris-client/</td>
+				</tr>
+			</table>
+		</li>
+		<li>
+			Properties files have been cleaned up, with some
+			properties being renamed.
+		</li>
+		<li>
+			Moved email configuration out of .properties files
+			to System Attributes.
+			New System Attributes are: email_smtp_host,
+			email_sender_server, email_sender_client,
+			email_recipient_aws, and email_recipient_bugs.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.82.sql</code>
+		</li>
+	</ul></dd>
+
+	<dt>3.81.0 (4 March 2009)</dt>
 	<dd><ul>
 		<li>
 			DMS, ramp meters and timing plans converted to SONAR.
