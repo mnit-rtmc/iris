@@ -69,16 +69,15 @@ echo "Done with install in spec."
 %pre
 if [ $1 == 1 ]; then
 	useradd -r -M tms
+	if [ "$?" == "9" ]
+	then
+		exit 0
+	fi
 fi
 
 %post
 if [ $1 == 1 ]; then
 	chkconfig --add iris
-fi
-
-%postun
-if [ $1 == 0 ]; then
-	userdel tms
 fi
 
 # All files that will be placed in the RPM are listed
