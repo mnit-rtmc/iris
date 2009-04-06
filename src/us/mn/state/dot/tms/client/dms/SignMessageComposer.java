@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.utils.I18NMessages;
 

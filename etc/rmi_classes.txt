@@ -57,6 +57,7 @@ us/mn/state/dot/tms/RemoteObserverImpl??.class
 us/mn/state/dot/tms/Road.class
 us/mn/state/dot/tms/SignGroup.class
 us/mn/state/dot/tms/SignMessage.class
+us/mn/state/dot/tms/SignMessageHelper*.class
 us/mn/state/dot/tms/SignRequest.class
 us/mn/state/dot/tms/SignText.class
 us/mn/state/dot/tms/SortedList.class

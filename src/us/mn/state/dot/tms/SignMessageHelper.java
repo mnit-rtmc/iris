@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms;
+package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
 import us.mn.state.dot.tms.MultiString;
