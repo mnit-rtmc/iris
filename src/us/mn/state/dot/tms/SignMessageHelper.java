@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Helper for dealing with sign messages.
@@ -45,15 +46,10 @@ public class SignMessageHelper {
 					ls.add("");
 				int i = p * m_lines + l;
 				String v = ls.get(i);
-				ls.set(i, trimJoin(v, t));
+				ls.set(i, SString.trimJoin(v, t));
 			}
 		}, 1);
 		return ls.toArray(new String[0]);
 	}
 
-	/** Join two strings with a space and then trim */
-	static protected String trimJoin(String a, String b) {
-		String j = a + " " + b;
-		return j.trim();
-	}
 }

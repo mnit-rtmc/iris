@@ -327,4 +327,10 @@ public class SString {
 				r.append(x).append(", ");
 		return SString.removeTail(r.toString(), ", ");
 	}
+
+	/** Join two strings with a space and then trim */
+	static public String trimJoin(String a, String b) {
+		String j = a + " " + b;
+		return j.trim();
+	}
 }
