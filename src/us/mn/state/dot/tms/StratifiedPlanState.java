@@ -301,6 +301,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Validate a ramp meter state */
 		protected void validate() {
+			computeDemand();
 			if(metering) {
 				if(isFlushing() && !has_queue)
 					stopMetering();
@@ -313,8 +314,6 @@ public class StratifiedPlanState extends TimingPlanState {
 				if(demand > thresh)
 					startMetering();
 			}
-			if(metering)
-				computeDemand();
 		}
 
 		/** Check if we're in the flushing window */
