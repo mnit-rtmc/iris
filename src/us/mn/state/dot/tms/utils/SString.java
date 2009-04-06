@@ -301,4 +301,18 @@ public class SString {
 			return false;
 		return arg1.toLowerCase().contains(arg2.toLowerCase());
 	}
+
+	/**
+	 *  If the specified string ends with the specified tail,
+	 *  the string is returned with the tail removed.
+	 */
+	static public String removeTail(String s, String tail) {
+		if(s == null)
+			return null;
+		if(tail == null || tail.isEmpty())
+			return s;
+		if((s.endsWith(tail)))
+			return s.substring(0, s.length() - tail.length());
+		return s;
+	}
 }
