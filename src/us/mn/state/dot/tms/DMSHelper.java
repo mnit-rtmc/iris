@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DMSHelper {
 
+	/** don't instantiate */
+	private DMSHelper() {
+		assert false;
+	}
+
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
 
