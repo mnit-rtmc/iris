@@ -315,4 +315,16 @@ public class SString {
 			return s.substring(0, s.length() - tail.length());
 		return s;
 	}
+
+	/** Convert String[] to a comma separated String. Null values are
+	 *  not added to the list, empty strings are. */
+	public static String toString(String[] s) {
+		if(s == null || s.length == 0)
+			return "";
+		StringBuilder r = new StringBuilder("");
+		for(String x : s)
+			if(x != null)
+				r.append(x).append(", ");
+		return SString.removeTail(r.toString(), ", ");
+	}
 }
