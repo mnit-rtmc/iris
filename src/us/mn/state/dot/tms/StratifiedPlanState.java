@@ -355,9 +355,8 @@ public class StratifiedPlanState extends TimingPlanState {
 				demand = minimum;
 				return;
 			}
-			Integer r = meter.getRate();
-			if(r != null)
-				rate_accum += K_RATE_ACCUM * (r - rate_accum);
+			int r = getReleaseRate();
+			rate_accum += K_RATE_ACCUM * (r - rate_accum);
 			density = DENSITY_SLOPE * rate_accum +
 				DENSITY_Y_INTERCEPT;
 			int storage = meter.getStorage();
@@ -391,6 +390,15 @@ public class StratifiedPlanState extends TimingPlanState {
 				minimum = getMaxRelease();
 			has_queue = q_prob > QUEUE_EXISTS_FACTOR;
 			demand = t_demand;
+		}
+
+		/** Get the most recent release rate from the meter */
+		protected int getReleaseRate() {
+			Integer r = meter.getRate();
+			if(r != null)
+				return r;
+			else
+				return release;
 		}
 
 		/** Calculate the passage demand (and smoothed flow) */
