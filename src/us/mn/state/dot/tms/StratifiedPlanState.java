@@ -696,13 +696,8 @@ public class StratifiedPlanState extends TimingPlanState {
 				else
 					demand += state.demand;
 			}
-			if(demand == 0) {
-				for(MeterState state: meters)
-					state.done = true;
-				return 0;
-			}
 			for(MeterState state: meters) {
-				if(state.done)
+				if(state.done || demand <= 0)
 					continue;
 				RampMeterImpl meter = state.meter;
 				int r = rate * state.demand / demand;
