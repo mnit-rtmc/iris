@@ -18,6 +18,8 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.File;
+import java.lang.IllegalStateException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -58,14 +60,24 @@ public final class JoystickThread extends Thread {
 		start();
 	}
 
-	/** Create the joystick polling process */
-	protected Process createJoystickProcess() throws IOException {
+	/** 
+	 *  Create the joystick polling process.
+	 *  @throws IllegalStateException If the joystick driver doesn't exist.
+	 *  @throws IOException For other exceptions.
+	 */
+	protected Process createJoystickProcess() 
+		throws IOException, IllegalStateException 
+	{
 		Runtime runtime = Runtime.getRuntime();
+		// assume linux
 		try {
 			JoyLinux joy = new JoyLinux();
 			return runtime.exec(joy.getCommand());
 		}
+		// try Windows
 		catch(IOException e) {
+			if(!windowsJoystickDriverExists())
+				throw new IllegalStateException();
 			return runtime.exec(JOY_WINDOWS);
 		}
 	}
@@ -86,7 +98,11 @@ public final class JoystickThread extends Thread {
 			}
 		}
 		catch(IOException e) {
+			System.err.println("Note: problem with joystick:" + e);
 			e.printStackTrace();
+		} catch(IllegalStateException e) {
+			System.err.println("The Windows joystick driver was" +
+				" not found (" + JOY_WINDOWS + ").");
 		}
 	}
 
@@ -184,5 +200,15 @@ public final class JoystickThread extends Thread {
 	protected void fireJoystickButtonEvent(JoystickButtonEvent e) {
 		for(JoystickListener l: listeners)
 			l.buttonChanged(e);
+	}
+
+	/** return true if the Windows joystick driver exists */
+	public static boolean windowsJoystickDriverExists()
+	{
+		try {
+			return new java.io.File(JOY_WINDOWS).exists();
+		} catch(Exception ex) {
+			return false;
+		}
 	}
 }
