@@ -26,6 +26,7 @@ us/mn/state/dot/tms/DMSType.class
 us/mn/state/dot/tms/DmsSignGroup.class
 us/mn/state/dot/tms/ErrorCounter.class
 us/mn/state/dot/tms/Font.class
+us/mn/state/dot/tms/FontHelper*.class
 us/mn/state/dot/tms/Glyph.class
 us/mn/state/dot/tms/GeoLoc.class
 us/mn/state/dot/tms/GeoLocHelper.class
