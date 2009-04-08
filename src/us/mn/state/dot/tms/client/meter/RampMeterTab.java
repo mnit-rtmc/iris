@@ -58,7 +58,7 @@ public class RampMeterTab extends MapTab {
 		map.addLayer(m.getLayer().createState());
 		mainPanel = createMapPanel(vlayer);
 		statusPanel = new MeterStatusPanel(tc, manager);
-		summary = new StyleSummary<RampMeter>(manager);
+		summary = manager.createStyleSummary();
 		tabPanel = createSideBar();
  	}
 

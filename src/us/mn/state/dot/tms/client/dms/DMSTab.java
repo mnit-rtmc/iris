@@ -52,7 +52,7 @@ public class DMSTab extends MapTab {
 		super(I18NMessages.get("dms.abbreviation"),
 			I18NMessages.get("dms.title"));
 		dispatcher = new DMSDispatcher(manager, tc);
-		summary = new StyleSummary<DMS>(manager);
+		summary = manager.createStyleSummary();
 		map.addLayers(lstates);
 		map.addLayer(manager.getLayer().createState());
 		tabPanel = createSideBar();
