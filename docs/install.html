@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id="stamp">2 Apr 2009</div>
+<div id="stamp">8 Apr 2009</div>
 <h1>Mn/DOT IRIS Installation and Configuration</h1>
 All commands must be run as the root user.
 <ol>
@@ -68,7 +68,7 @@ rpm -i iris-xx.yy.zz.rpm
 		PostgreSQL database.
 <pre>
 su postgres
-createuser -S -D -R tms
+createuser -S -D -R -W tms
 </pre>
 	</li>
 	<li>
