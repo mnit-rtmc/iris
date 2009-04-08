@@ -409,8 +409,18 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
-		rate = r;
-		notifyAttribute("rate");
+		if(rateChanged(r)) {
+			rate = r;
+			notifyAttribute("rate");
+		}
+	}
+
+	/** Test if the release rate has changed */
+	protected boolean rateChanged(Integer r) {
+		if(r == null)
+			return rate != null;
+		else
+			return !r.equals(rate);
 	}
 
 	/** Get the release rate (vehciels per hour) */
