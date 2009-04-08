@@ -79,7 +79,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	static protected boolean isAvailable(RampMeter proxy) {
 		return isActive(proxy) &&
 		       !isFailed(proxy) &&
-		       !isMetering(proxy);
+		       !isMetering(proxy) &&
+		       !needsMaintenance(proxy);
 	}
 
 	/** Test if a meter needs maintenance */
