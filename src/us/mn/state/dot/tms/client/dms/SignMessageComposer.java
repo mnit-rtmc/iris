@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * Gui for composing messages for DMS.
@@ -202,8 +203,11 @@ public class SignMessageComposer extends JPanel {
 		fontCmb = new JComboBox[np];
 		if(builder != null && builder != null)
 			fontModel = new FontComboBoxModel[np];
+		String tip = I18NMessages.get(
+			"DMSDispatcher.FontComboBox.ToolTip");
 		for(int i = 0; i < np; i++) {
 			fontCmb[i] = new JComboBox();
+			fontCmb[i].setToolTipText(tip);
 			if(builder != null) {
 				fontModel[i] = new FontComboBoxModel(fonts,
 					builder);
