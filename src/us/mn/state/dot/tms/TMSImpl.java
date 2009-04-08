@@ -23,6 +23,8 @@ import java.util.Properties;
 import java.util.Iterator;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
@@ -31,6 +33,12 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
+import us.mn.state.dot.tms.kml.KmlDocument;
+import us.mn.state.dot.tms.kml.KmlFolder;
+import us.mn.state.dot.tms.kml.KmlFeature;
+import us.mn.state.dot.tms.kml.KmlFile;
+import us.mn.state.dot.tms.kml.KmlRenderer;
+import us.mn.state.dot.tms.kml.KmlStyleSelector;
 import us.mn.state.dot.vault.ObjectVault;
 import us.mn.state.dot.vault.ObjectVaultException;
 
@@ -40,7 +48,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public final class TMSImpl extends TMSObjectImpl implements TMS {
+public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 
 	/** Detector sample file */
 	static protected final String SAMPLE_XML = "det_sample.xml";
@@ -88,6 +96,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 		TIMER.addJob(new TimerJobSigns(
 			SystemAttributeHelper.getDmsPollFreqSecs()));
 		TIMER.addJob(new TimerJob30Sec());
+		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
@@ -294,6 +303,49 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 		});
 	}
 
+	/** 1-minute timer job */
+	protected class TimerJob1Min extends Job {
+
+		/** Job completer */
+		protected final Completer comp;
+
+		/** Current time stamp */
+		protected Calendar stamp;
+
+		/** Job to be performed on completion */
+		protected final Job job = new Job(500) {
+			public void perform() throws NamespaceError {
+				flushDetectorData(stamp);
+			}
+		};
+
+		/** Create a new 1-minute timer job */
+		protected TimerJob1Min() {
+			// start the job at hh:mm:45
+			super(Calendar.MINUTE, 1, Calendar.SECOND, 45);
+			comp = new Completer("1-Minute", FLUSH, job);
+		}
+
+		/** Perform the 1-minute timer job */
+		public void perform() throws Exception {
+			if(!comp.checkComplete()) {
+				System.err.println("TimerJob1Min: failed " + 
+					"to complete at " + new Date());
+				return;
+			}
+			stamp = Calendar.getInstance();
+			Calendar s = (Calendar)stamp.clone();
+			s.add(Calendar.MINUTE, -1);
+			comp.reset(s);
+			try {
+				do1MinuteJobs(comp);
+			}
+			finally {
+				comp.makeReady();
+			}
+		}
+	}
+
 	/** 5-minute timer job */
 	protected class TimerJob5Min extends Job {
 
@@ -401,6 +453,12 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 				return false;
 			}
 		});
+	}
+
+	/** perform 1 minute jobs */
+	protected void do1MinuteJobs(final Completer comp) {
+		// write kml file
+		KmlFile.writeServerFile(this);
 	}
 
 	/** Poll all controllers 5 minute interval */
@@ -519,5 +577,35 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 	/** Lookup timing plans plans */
 	static public void lookupTimingPlans(Checker<TimingPlan> checker) {
 		namespace.findObject(TimingPlan.SONAR_TYPE, checker);
+	}
+
+	/** get kml document name (KmlDocument interface) */
+	public String getDocumentName() {
+		return "IRIS ATMS";
+	}
+
+	/** render to kml (KmlDocument interface) */
+	public String renderKml() {
+		return KmlRenderer.render(this);
+	}
+
+	/** render innert elements to kml (KmlPoint interface) */
+	public String renderInnerKml() {
+		return "";
+	}
+
+	/** return the kml document features (KmlDocument interface) */
+	public ArrayList<KmlFeature> getKmlFeatures() {
+		ArrayList<KmlFeature> ret = new ArrayList<KmlFeature>();
+		ret.add((KmlFolder)DMSList.get());
+		//ret.add((KmlFolder)getLCSList());
+		//ret.add((KmlFolder)getRampMeterList());
+		// cameras
+		return ret;
+	}
+
+	/** return kml style selector (KmlDocument interface) */
+	public KmlStyleSelector getKmlStyleSelector() {
+		return null;
 	}
 }

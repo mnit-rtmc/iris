@@ -14,12 +14,23 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.tms.Point;
+import us.mn.state.dot.tms.utils.Transform;
+
 /**
  * GeoLocHelper has static methods for dealing with geo locations.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class GeoLocHelper {
+
+	/** The system attribute for the UTM zone */
+	static protected final int UTM_ZONE = SystemAttributeHelper.utmZone();
+
+	/** The system attribute for nothern hemisphere */
+	static protected final boolean NORTHERN_HEMISPHERE = 
+		SystemAttributeHelper.northernHemisphere();
 
 	/** Don't create any instances */
 	private GeoLocHelper() {
@@ -343,5 +354,17 @@ public class GeoLocHelper {
 		return (l0.getCrossMod() == l1.getCrossMod()) &&
 			matchRootName(f0.getName(), f1.getName()) &&
 			matchRootName(x0.getName(), x1.getName());
+	}
+
+	/** return GeoLoc as Point in WGS84 */
+	static public Point getWgs84Point(GeoLoc p) {
+		if(p == null)
+			return new Point();
+		if(p.getEasting() == null || p.getNorthing() == null)
+			return null;
+		double easting_d = p.getEasting().doubleValue();
+		double northing_d = p.getNorthing().doubleValue();
+		return Transform.toLatLonPoint(easting_d, 
+			northing_d, UTM_ZONE, NORTHERN_HEMISPHERE);
 	}
 }

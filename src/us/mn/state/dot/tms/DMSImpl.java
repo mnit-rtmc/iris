@@ -16,6 +16,8 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -27,6 +29,22 @@ import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.event.EventType;
 import us.mn.state.dot.tms.event.SignStatusEvent;
+import us.mn.state.dot.tms.kml.Kml;
+import us.mn.state.dot.tms.kml.KmlColor;
+import us.mn.state.dot.tms.kml.KmlColorImpl;
+import us.mn.state.dot.tms.kml.KmlGeometry;
+import us.mn.state.dot.tms.kml.KmlIcon;
+import us.mn.state.dot.tms.kml.KmlIconImpl;
+import us.mn.state.dot.tms.kml.KmlIconStyle;
+import us.mn.state.dot.tms.kml.KmlIconStyleImpl;
+import us.mn.state.dot.tms.kml.KmlPlacemark;
+import us.mn.state.dot.tms.kml.KmlPoint;
+import us.mn.state.dot.tms.kml.KmlStyle;
+import us.mn.state.dot.tms.kml.KmlStyleImpl;
+import us.mn.state.dot.tms.kml.KmlStyleSelector;
+import us.mn.state.dot.tms.kml.KmlRenderer;
+import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Dynamic Message Sign
@@ -34,7 +52,7 @@ import us.mn.state.dot.tms.event.SignStatusEvent;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSImpl extends Device2Impl implements DMS {
+public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 
 	/** Special value to indicate an invalid line spacing */
 	static protected final int INVALID_LINE_SPACING = -1;
@@ -1381,5 +1399,123 @@ public class DMSImpl extends Device2Impl implements DMS {
 			return createRoute(s);
 		else
 			return null;
+	}
+
+	/** render to kml (KmlPlacemark interface) */
+	public String renderKml() {
+		return KmlRenderer.render(this);
+	}
+
+	/** render inner elements to kml (KmlPlacemark interface) */
+	public String renderInnerKml() {
+		return "";
+	}
+
+	/** get kml placemark name (KmlPlacemark interface) */
+	public String getPlacemarkName() {
+		return getName();
+	}
+
+	/** get geometry (KmlPlacemark interface) */
+	public KmlGeometry getGeometry() {
+		GeoLoc loc = getGeoLoc();
+		if(loc == null)
+			return null;
+		return GeoLocHelper.getWgs84Point(loc);
+	}
+
+	/** get placemark description (KmlPlacemark interface) */
+	public String getPlacemarkDesc() {
+		// DMS name, e.g. CMS or DMS
+		final String DMSABBR = I18NMessages.get("dms.abbreviation");
+
+		StringBuilder desc = new StringBuilder();
+
+		desc.append(Kml.descItem("Location", 
+			GeoLocHelper.getDescription(getGeoLoc())));
+
+		desc.append(Kml.descItem(DMSABBR + " Status", 
+			DMSHelper.getAllStyles((DMS)this)));
+
+		SignMessage sm = getMessageCurrent();
+		String[] ml = SignMessageHelper.createLines(sm);
+		if(ml == null || ml.length <=0)
+			desc.append(Kml.descItem("Messages Lines", "none"));
+		else
+			for(int i = 0; i < ml.length; ++i)
+				desc.append(Kml.descItem("Message Line " + 
+					Integer.toString(i+1), ml[i]));
+
+		String owner = (getOwnerCurrent() == null ? "none" : 
+			getOwnerCurrent().getFullName());
+		desc.append(Kml.descItem("Author", owner));
+
+		desc.append(Kml.descItem("Font", SString.toString(
+			SignMessageHelper.getFontName(sm, 1))));
+
+		desc.append(Kml.descItem("Notes", getNotes()));
+		desc.append(Kml.descItem("Last Operation", getUserNote()));
+
+		desc.append("<br>Updated by IRIS " + 
+			new Date().toString() + "<br><br>");
+
+		// links
+		desc.append("<br>");
+
+		// write agency specific links
+		// FIXME: generalize this, no hard coded IPs
+		/*
+		if(SystemAttributeHelper.isAgencyCaltransD10()) {
+			desc.append("<br>");
+			desc.append(Kml.htmlLink(
+				"http://10.80.11.2", "D10 IRIS Web Page"));
+			desc.append("<br>");
+			desc.append(Kml.htmlLink(
+				"http://10.80.11.2/cmsreport_2day.txt", "2 day " + 
+				DMSABBR + " history"));
+			desc.append("<br>");
+			desc.append(Kml.htmlLink(
+				"http://10.80.11.2/iris-client/iris-client.jnlp", 
+				"Start IRIS"));
+			desc.append("<br>");
+		}
+		*/
+
+		return Kml.htmlDesc(desc.toString());
+	}
+
+	/** get kml style selector (KmlFolder interface) */
+	public KmlStyleSelector getKmlStyleSelector() {
+		KmlStyle style = new KmlStyleImpl();
+		KmlIconStyle is = new KmlIconStyleImpl();
+		is.setKmlColor(getKmlIconColor());
+		is.setKmlScale(1);
+		String icon = "http://maps.google.com/mapfiles/kml/paddle/" +
+			"wht-blank.png";
+		is.setKmlIcon(new KmlIconImpl(icon));
+		style.setIconStyle(is);
+		return style;
+	}
+
+	/** get kml icon color, which is a function of the DMS state */
+	public KmlColor getKmlIconColor() {
+		// note: this is a prioritized list
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_AVAILABLE, this))
+			return KmlColorImpl.Blue;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_DEPLOYED, this))
+			return KmlColorImpl.Yellow;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_AWS_DEPLOYED, this))
+			return KmlColorImpl.Red;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_TRAVEL_TIME, this))
+			return KmlColorImpl.Orange;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_FAILED, this))
+			return KmlColorImpl.Gray;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_INACTIVE, this))
+			return KmlColorImpl.Gray;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_NO_CONTROLLER, this))
+			return KmlColorImpl.White;
+		System.err.println("Warning: unknown DMS state in DMSImpl:" + 
+			DMSHelper.getAllStyles(this));
+		return KmlColorImpl.Black;
 	}
 }

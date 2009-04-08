@@ -105,6 +105,10 @@ public interface SystemAttribute extends SonarObject {
 	/** Temperature fahrenheit enable (boolean) */
 	String TEMP_FAHRENHEIT_ENABLE = "temp_fahrenheit_enable";
 
+	/** kml related */
+	String KML_CREATE_FILE = "kml_create_file";			// boolean
+	String KML_FILENAME = "kml_filename";				// string
+
 	/** Meter green time */
 	String METER_GREEN_SECS = "meter_green_secs";
 
@@ -180,4 +184,10 @@ public interface SystemAttribute extends SonarObject {
 
 	/** Get the attribute value */
 	String getValue();
+
+	/** Map */
+	final String MAP_UTM_ZONE =
+		"map_utm_zone";
+	final String MAP_NORTHERN_HEMISPHERE =
+		"map_northern_hemisphere";
 }

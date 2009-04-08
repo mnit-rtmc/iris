@@ -79,6 +79,7 @@ public class MainServer {
 			ServerNamespace ns = new ServerNamespace();
 			// FIXME: static namespace hacks
 			TMSObjectImpl.namespace = ns;
+			DMSList.namespace = ns;
 			SystemAttributeHelper.namespace = ns;
 			FontHelper.namespace = ns;
 			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);

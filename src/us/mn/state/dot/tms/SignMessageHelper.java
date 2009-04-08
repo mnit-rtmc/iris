@@ -31,6 +31,43 @@ public class SignMessageHelper {
 		assert false;
 	}
 
+	/** Return an array of font numbers in a message.
+	 * @param f_num Default font number, one based.
+	 * @return An integer array with length equal to the number 
+	 *	    of pages in the message */
+	static public int[] getFont(SignMessage sm, int f_num) {
+		if(sm == null)
+			return new int[0];
+		MultiString m = new MultiString(sm.getMulti());
+		if(m == null)
+			return new int[0];
+		return m.getFont(f_num);
+	}
+
+	/** Return an array of font names in a message.
+	 * @param f_num Default font number, one based.
+	 * @return A string array with length equal to the number 
+	 *	    of pages in the message */
+	static public String[] getFontName(SignMessage sm, int f_num) {
+		int[] fn = getFont(sm, f_num);
+		if(fn == null || fn.length <= 0)
+			return new String[0];
+		String[] fns = new String[fn.length];
+		for(int i=0; i < fns.length; ++i) {
+			Font font = FontHelper.find(fn[i]);
+			if(font != null)
+				fns[i] = font.getName();
+			else
+				fns[i] = "Font #" + fn[i];
+		}
+		return fns;
+	}
+
+	/** Create an array of lines from the given message */
+	static public String[] createLines(SignMessage m) {
+		return createLines(m, 0);
+	}
+
 	/** Create an array of lines from the given message */
 	static public String[] createLines(SignMessage m, final int n_lines) {
 		final LinkedList<String> ls = new LinkedList<String>();
@@ -51,5 +88,4 @@ public class SignMessageHelper {
 		}, 1);
 		return ls.toArray(new String[0]);
 	}
-
 }

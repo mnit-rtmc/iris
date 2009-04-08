@@ -310,6 +310,7 @@
 				<include name="us/mn/state/dot/tms/*.class"/>
 				<include name="us/mn/state/dot/tms/comm/**/*"/>
 				<include name="us/mn/state/dot/tms/event/**/*"/>
+				<include name="us/mn/state/dot/tms/kml/**/*"/>
 			</fileset>
 		</jar>
 	</target>

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.ArrayList;
 
 /**
  * NTCIP -- MULTI (MarkUp Language for Transportation Information)
@@ -76,7 +77,10 @@ public class MultiString {
 		}
 	}
 
-	/** Parse a font number */
+	/** Parse a font number 
+	 *  @param f String that is an integer.
+	 *  @return The argument f converted to a string.
+	 */
 	static protected int parseFont(String f) {
 		try {
 			return Integer.parseInt(f);
@@ -170,6 +174,38 @@ public class MultiString {
 		b.append("]");
 	}
 
+	/** get an array of fonts
+	 * @param f_num Default font number, one based.
+	 * @return An integer array with length equal to the number 
+	 *	    of pages in the message */
+	public int[] getFont(int f_num) {
+		if(f_num<1 || f_num>255) {
+			assert false;
+			return new int[0];
+		}
+		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
+		parse(new SpanCallback() {
+			public void addSpan(int p, JustificationPage jp,
+				int l, JustificationLine jl, int f, String t)
+			{
+				al.add(new Integer(f));
+			}
+		}, f_num);
+		int np = getNumPages();
+		if(np > al.size()) {
+			assert false;
+			return new int[0];
+		}
+		int[] ret = new int[np];
+		for(int i = 0; i<np; ++i) {
+			if(i >= al.size())
+				ret[i] = f_num;
+			else
+				ret[i] = (int)al.get(i).intValue();
+		}
+		return ret;
+	}
+
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return b.toString();
@@ -245,6 +281,16 @@ public class MultiString {
 		PageCounter pc = new PageCounter();
 		parse(pc, 1);
 		return pc.num_pages;
+	}
+
+	/** Parsing callback to extract message text for each line */
+	protected class LineExtractor implements SpanCallback {
+		int num_pages = 0;
+		public void addSpan(int p, JustificationPage jp, int l,
+			JustificationLine jl, int f, String t)
+		{
+			num_pages = Math.max(p + 1, num_pages);
+		}
 	}
 
 	/** Travel time calculating callback interface */

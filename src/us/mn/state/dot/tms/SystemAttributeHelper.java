@@ -596,4 +596,35 @@ public class SystemAttributeHelper {
 			"SPECIFY_SYSTEM_ATTRIBUTE: " + 
 			SystemAttribute.MENU_HELP_TROUBLE_TICKET_URL);
 	}
+
+	/** create the kml file */
+	public static boolean createKmlFile() {
+		return getValueBoolean(
+			SystemAttribute.KML_CREATE_FILE, false);
+	}
+
+	/** create the kml file */
+	public static String kmlFileName() {
+		return getValue(
+			SystemAttribute.KML_FILENAME, 
+				"/var/www/html/iris.kmz");
+	}
+
+	/** Return the map UTM zone */
+	public static int utmZone() {
+		final int MIN = 1;
+		final int MAX = 60;
+		final int DEFAULT = 15;
+		int np = SystemAttributeHelper.getValueInt(
+			SystemAttribute.MAP_UTM_ZONE, DEFAULT);
+		np = (np < MIN ? MIN : np);
+		np = (np > MAX ? MAX : np);
+		return np;
+	}
+
+	/** Return true if map is in northern hemisphere */
+	public static boolean northernHemisphere() {
+		return getValueBoolean(
+			SystemAttribute.MAP_NORTHERN_HEMISPHERE,true);
+	}
 }
