@@ -62,15 +62,16 @@ public class UptimeLog
 		if(namespace == null)
 			return;
 		String fname = SystemAttributeHelper.uptimeServerLogFileName();
-		if(fname == null || fname.length() <=0 ) {
+		if(fname == null || fname.length() <= 0 ) {
 			System.err.println("UptimeLog.writeServerLog(): " +
 				"warning: bogus file name: "+fname);
 			return;
 		}
 		UptimeLog log = new UptimeLog(fname, namespace);
+		String msg = "Wrote uptime log: " + fname;
 		if(!log.write())
-			System.err.println("Warning: failed to append to " + 
-				fname);
+			msg = "Warning: failed to append to " + fname;
+		System.err.println(msg);
 	}
 
 	/** constructor 
