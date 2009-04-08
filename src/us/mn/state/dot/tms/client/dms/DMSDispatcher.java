@@ -126,6 +126,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Pixel map builder */
 	protected PixelMapBuilder builder;
 
+	/** Currently watching DMS */
+	protected DMS watching;
+
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
 		setLayout(new BorderLayout());
@@ -211,6 +214,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		multipleTab.dispose();
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
+		if(watching != null) {
+			cache.ignoreObject(watching);
+			watching = null;
+		}
 		clearSelected();
 		clearCurrentPager();
 		clearPreviewPager();
@@ -287,6 +294,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Set a single selected DMS */
 	protected void setSelected(DMS dms) {
+		if(watching != null)
+			cache.ignoreObject(watching);
+		watching = dms;
+		cache.watchObject(watching);
 		if(DMSManager.isActive(dms)) {
 			builder = createPixelMapBuilder(dms);
 			updateAttribute(dms, null);

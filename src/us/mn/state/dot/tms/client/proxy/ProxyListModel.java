@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,8 +80,10 @@ public class ProxyListModel<T extends SonarObject>
 	/** Add a new proxy to the model */
 	protected int doProxyAdded(T proxy) {
 		synchronized(proxies) {
-			proxies.add(proxy);
-			return getRow(proxy);
+			if(proxies.add(proxy))
+				return getRow(proxy);
+			else
+				return -1;
 		}
 	}
 

@@ -60,6 +60,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	protected void initialize() {
 		setLayout(new BorderLayout());
 		TypeCache<T> cache = getTypeCache();
+		cache.watchObject(proxy);
 		cache.addProxyListener(this);
 	}
 
@@ -105,5 +106,6 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	protected void dispose() {
 		TypeCache<T> cache = getTypeCache();
 		cache.removeProxyListener(this);
+		cache.ignoreObject(proxy);
 	}
 }

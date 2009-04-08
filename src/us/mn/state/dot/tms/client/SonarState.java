@@ -433,6 +433,9 @@ public class SonarState extends Client {
 		populate(dms_sign_groups);
 		populate(sign_text);
 		populate(timing_plans);
+
+		dmss.ignoreAttribute("operation");
+		ramp_meters.ignoreAttribute("operation");
 	}
 
 	/** Look up the specified user */

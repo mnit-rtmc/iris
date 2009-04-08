@@ -215,6 +215,10 @@ public class MeterStatusPanel extends FormPanel
 
 	/** Select a new meter to display */
 	public void setSelected(final RampMeter proxy) {
+		if(selected != null)
+			cache.ignoreObject(selected);
+		if(proxy != null)
+			cache.watchObject(proxy);
 		selected = proxy;
 		if(proxy != null) {
 			shrinkBtn.setAction(new ShrinkQueueAction(proxy));
