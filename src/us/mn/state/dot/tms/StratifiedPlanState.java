@@ -435,12 +435,15 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Check for the existance of a queue */
 		protected RampMeterQueue getQueue() {
-			if(queue_backup)
-				return RampMeterQueue.FULL;
-			else if(has_queue)
-				return RampMeterQueue.EXISTS;
-			else
-				return RampMeterQueue.EMPTY;
+			if(plan.isOperating() && metering) {
+				if(queue_backup)
+					return RampMeterQueue.FULL;
+				else if(has_queue)
+					return RampMeterQueue.EXISTS;
+				else
+					return RampMeterQueue.EMPTY;
+			}
+			return RampMeterQueue.UNKNOWN;
 		}
 
 		/** Print the meter setup */
@@ -1176,8 +1179,10 @@ public class StratifiedPlanState extends TimingPlanState {
 		Iterator<MeterState> it = states.values().iterator();
 		while(it.hasNext()) {
 			MeterState state = it.next();
-			if(!state.plan.isOperating())
+			if(!state.plan.isOperating()) {
+				state.updateQueueStatus();
 				it.remove();
+			}
 		}
 		if(states.isEmpty()) {
 			zones.clear();
