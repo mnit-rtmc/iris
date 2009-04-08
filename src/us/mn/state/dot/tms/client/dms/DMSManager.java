@@ -100,8 +100,11 @@ public class DMSManager extends ProxyManager<DMS> {
 		if(m != null) {
 			return m.getPriority() ==
 			       DMSMessagePriority.TRAVEL_TIME.ordinal();
-		} else
+		} else {
+			// messageCurrent should never be null, so this means
+			// the proxy has just been removed
 			return false;
+		}
 	}
 
 	/** Test if a DMS is deployed */
@@ -110,8 +113,11 @@ public class DMSManager extends ProxyManager<DMS> {
 		if(m != null) {
 			MultiString ms = new MultiString(m.getMulti());
 			return !ms.isBlank();
-		} else
+		} else {
+			// messageCurrent should never be null, so this means
+			// the proxy has just been removed
 			return false;
+		}
 	}
 
 	/** Test if a DMS is active, not failed and deployed */
