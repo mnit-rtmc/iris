@@ -350,6 +350,8 @@
 		<jar jarfile="${build.lib}/${utils.jar}">
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/utils/*.class"/>
+			<fileset dir="${build.dir}"
+				 includes="MessagesBundle/*"/>
 		</jar>
 	</target>
 
@@ -363,8 +365,6 @@
 				 includes="us/mn/state/dot/tms/client/**/*"/>
 			<fileset dir="${build.classes}"
 				 includes="gov/ca/dot/d10/tms/client/**/*"/>
-			<fileset dir="${build.dir}"
-				 includes="MessagesBundle/*"/>
 			<fileset dir="${build.dir}" includes="images/*"/>
 		</jar>
 	</target>
