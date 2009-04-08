@@ -31,7 +31,21 @@ public class HelpMenu extends JMenu {
 	public HelpMenu(final SmartDesktop desktop) { 
 		super("Help");
 		setMnemonic('H');
-		JMenuItem item = new JMenuItem("About IRIS");
+
+		JMenuItem item;
+
+		// Support menu item
+		item = new JMenuItem("Support");
+		item.setMnemonic('S');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new Support());
+			}
+		};
+		add(item);
+
+		// About menu item
+		item = new JMenuItem("About IRIS");
 		item.setMnemonic('A');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -39,5 +53,6 @@ public class HelpMenu extends JMenu {
 			}
 		};
 		add(item);
+
 	}
 }
