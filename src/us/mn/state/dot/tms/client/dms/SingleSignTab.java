@@ -160,7 +160,8 @@ public class SingleSignTab extends FormPanel {
 		} else
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
-		addRow("Operation", operationTxt);
+		addRow(I18NMessages.get("DMSDispatcher.OperationTitle"), 
+			operationTxt);
 		if(SystemAttributeHelper.isDmsStatusEnabled())
 			addRow("Status", statusTxt, queryStatusBtn);
 		add("Deployed", deployTxt);
