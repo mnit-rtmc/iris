@@ -64,9 +64,6 @@ public class SignTextCreator {
 	public void create(SignGroup sg, short line, String mess,
 		short priority)
 	{
-		// FIXME: this is a hack, see comments in method
-		if(SDMS.ignoreLineHack(mess))
-			return;
 		mess = SDMS.getValidText(mess);
 		String name = createUniqueSignTextName(sg);
 		if(canAddSignText(name)) {

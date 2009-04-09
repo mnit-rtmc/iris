@@ -54,6 +54,8 @@ public class SDMS {
 	  * in comm/dmslite (with a prepended and appended underscore). 
 	  */
 	public static boolean ignoreLineHack(String line) {
+		if(line == null)
+			return false;
 		return SString.enclosedBy(line,"_");
 	}
 	// see the above note

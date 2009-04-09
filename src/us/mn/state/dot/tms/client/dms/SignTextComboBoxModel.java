@@ -20,6 +20,7 @@ import javax.swing.ComboBoxModel;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.SDMS;
 
 /**
@@ -64,13 +65,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 	public Object getElementAt(int index) {
 		int i = 0;
 		for(SignText t: m_items) {
-			if(i == index) {
-				// this is a hack, see the note in
-				// ignoreLineHack()
-				if(t != null && SDMS.ignoreLineHack(t.toString()))
-					return BLANK_SIGN_TEXT;
+			if(i == index)
 				return t;
-			}
 			i++;
 		}
 		return null;
@@ -88,10 +84,10 @@ public class SignTextComboBoxModel extends AbstractListModel
 	public Object getSelectedItem() {
 		SignText st = m_selected;
 		// this is a hack, see the note in ignoreLineHack()
-		if(st != null && SDMS.ignoreLineHack(st.toString()))
-			return BLANK_SIGN_TEXT;
-		else
-			return st;
+		if(st != null && st instanceof ClientSignText)
+			if(SDMS.ignoreLineHack(st.getMessage()))
+				return BLANK_SIGN_TEXT;
+		return st;
 	}
 
 	/** 

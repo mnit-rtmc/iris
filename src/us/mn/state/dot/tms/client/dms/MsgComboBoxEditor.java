@@ -78,8 +78,6 @@ public class MsgComboBoxEditor implements ComboBoxEditor {
 			txt = ((SignText)o).getMessage();
 		else
 			txt = o.toString();
-		if(SDMS.ignoreLineHack(txt))
-			txt = "";
 		return SDMS.getValidText(txt);
 	}
 
