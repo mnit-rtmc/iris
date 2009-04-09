@@ -26,6 +26,8 @@ public enum RampMeterLock {
 	/** Placeholder for lock-off status */
 	OFF(" "),
 
+	// FIXME: change "Knocked down" to Maintenance
+	//        add Construnction status
 	/** Lock knock down status */
 	KNOCK_DOWN("Knocked down"),
 
