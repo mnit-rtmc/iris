@@ -33,7 +33,7 @@ import java.util.TreeSet;
 public class StratifiedPlanState extends TimingPlanState {
 
 	/** Zone debug log */
-	static protected final DebugLog ZONE_LOG = new DebugLog("zone");
+	static protected final DebugLog SZM_LOG = new DebugLog("szm");
 
 	/** Path where meter data files are stored */
 	static protected final String DATA_PATH = "/var/lib/iris/meter";
@@ -885,7 +885,7 @@ public class StratifiedPlanState extends TimingPlanState {
 				if(c.findNodeReverse(nf) != null)
 					return;
 			}
-			ZONE_LOG.log("Missing entrance detection @ " +
+			SZM_LOG.log("Missing entrance detection @ " +
 				GeoLocHelper.getDescription(branch));
 		}
 		protected void followExit(R_NodeImpl n) {
@@ -897,7 +897,7 @@ public class StratifiedPlanState extends TimingPlanState {
 				if(c.findNode(nf) != null)
 					return;
 			}
-			ZONE_LOG.log("Missing exit detection @ " +
+			SZM_LOG.log("Missing exit detection @ " +
 				GeoLocHelper.getDescription(branch));
 		}
 		public boolean check(R_NodeImpl n) {
@@ -1217,7 +1217,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			stream.close();
 		}
 		catch(IOException e) {
-			System.err.println("XML setup: " + cid + ": " +
+			SZM_LOG.log("printSetup: " + cid + ", " +
 				e.getMessage());
 		}
 	}
@@ -1255,7 +1255,8 @@ public class StratifiedPlanState extends TimingPlanState {
 			stream.close();
 		}
 		catch(IOException e) {
-			System.err.println("XML states: " + e.getMessage());
+			SZM_LOG.log("printStates: " + corridor.getID() + ", " +
+				e.getMessage());
 		}
 	}
 
@@ -1281,7 +1282,8 @@ public class StratifiedPlanState extends TimingPlanState {
 			stream.close();
 		}
 		catch(IOException e) {
-			System.err.println("XML: " + e.getMessage());
+			SZM_LOG.log("printEnd: " + corridor.getID() + ", " +
+				e.getMessage());
 		}
 		log_name = null;
 	}
