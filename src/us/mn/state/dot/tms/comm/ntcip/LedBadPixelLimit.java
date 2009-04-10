@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,15 +11,13 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
 /**
- * LedBadPixelLimit object
+ * LedBadPixelLimit object is the number of failed pixels needed before the
+ * sign will refuse to activate a message (with dmsActivateMsgError.OTHER).
+ * Setting this to zero disables the shortErrorStatus.PIXEL error reporting.
  *
  * @author Douglas Lau
  */
@@ -28,7 +26,7 @@ public class LedBadPixelLimit extends LedstarSignControl
 {
 	/** Create a new LedBadPixelLimit object */
 	public LedBadPixelLimit() {
-		this(0);
+		this(500);
 	}
 
 	/** Create a new LedBadPixelLimit object */
@@ -38,17 +36,25 @@ public class LedBadPixelLimit extends LedstarSignControl
 	}
 
 	/** Get the object name */
-	protected String getName() { return "LedBadPixelLimit"; }
+	protected String getName() {
+		return "LedBadPixelLimit";
+	}
 
 	/** Bad pixel limit */
 	protected int limit;
 
 	/** Set the integer value */
-	public void setInteger(int value) { limit = value; }
+	public void setInteger(int value) {
+		limit = value;
+	}
 
 	/** Get the integer value */
-	public int getInteger() { return limit; }
+	public int getInteger() {
+		return limit;
+	}
 
 	/** Get the object value */
-	public String getValue() { return String.valueOf(limit); }
+	public String getValue() {
+		return String.valueOf(limit);
+	}
 }

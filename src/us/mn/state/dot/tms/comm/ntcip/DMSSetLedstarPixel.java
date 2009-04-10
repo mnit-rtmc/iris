@@ -43,7 +43,7 @@ public class DMSSetLedstarPixel extends DMSOperation {
 		potBase = new LedLdcPotBase(d.getLdcPotBase());
 		currentLow = new LedPixelLow(d.getPixelCurrentLow());
 		currentHigh = new LedPixelHigh(d.getPixelCurrentHigh());
-		badLimit = new LedBadPixelLimit(0);
+		badLimit = new LedBadPixelLimit();
 	}
 
 	/** Create the first real phase of the operation */

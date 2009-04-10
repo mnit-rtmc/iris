@@ -143,7 +143,7 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.add(new LedHighTempCutoff(
 				SystemAttributeHelper.getDmsHighTempCutoff()));
 			mess.add(new LedSignErrorOverride());
-			mess.add(new LedBadPixelLimit(0));
+			mess.add(new LedBadPixelLimit());
 			try { mess.setRequest(); }
 			catch(SNMP.Message.NoSuchName e) {
 				// Must not be a Ledstar sign
