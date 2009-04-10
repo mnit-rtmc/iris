@@ -525,11 +525,6 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 			METER_LOG.log("No green det for " + getName());
 	}
 
-	/** Get the ID of the corridor containing the ramp meter */
-	public String getCorridorID() {
-		return GeoLocHelper.getCorridorID(geo_loc);
-	}
-
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
 		if(TMSImpl.corridors != null) {

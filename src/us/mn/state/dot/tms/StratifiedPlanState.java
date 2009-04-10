@@ -1094,10 +1094,13 @@ public class StratifiedPlanState extends TimingPlanState {
 		if(!(device instanceof RampMeterImpl))
 			return null;
 		RampMeterImpl meter = (RampMeterImpl)device;
-		if(!meter.getCorridorID().equals(corridor.getID())) {
+		if(meter.getCorridor() != corridor) {
 			// Meter must have been changed to a different
 			// corridor; throw away old meter state
 			states.remove(meter.getName());
+			String cid = corridor.getID();
+			SZM_LOG.log("getMeterState: " + meter.getName() +
+				", not on corridor " + cid);
 			return null;
 		}
 		MeterState state = getMeterState(meter);
