@@ -143,11 +143,15 @@ public class DMSQueryStatus extends DMSOperation {
 				mess.add(l_off);
 				mess.add(l_on);
 			}
+			DmsActivateMsgError msg_err = new DmsActivateMsgError();
+			if(shortError.checkError(ShortErrorStatus.MESSAGE))
+				mess.add(msg_err);
 			ControllerErrorStatus con = new ControllerErrorStatus();
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
 			if(shortError.checkError(ShortErrorStatus.LAMP |
-				ShortErrorStatus.CONTROLLER))
+			                         ShortErrorStatus.MESSAGE |
+			                         ShortErrorStatus.CONTROLLER))
 			{
 				mess.getRequest();
 			}
@@ -159,7 +163,10 @@ public class DMSQueryStatus extends DMSOperation {
 					Base64.encode(l_on.getOctetString());
 				dms.setLampStatus(lamp);
 			}
-			DMS_LOG.log(dms.getName() + ": " + con);
+			if(shortError.checkError(ShortErrorStatus.MESSAGE))
+				DMS_LOG.log(dms.getName() + ": " + msg_err);
+			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
+				DMS_LOG.log(dms.getName() + ": " + con);
 			return new LedstarStatus();
 		}
 	}
