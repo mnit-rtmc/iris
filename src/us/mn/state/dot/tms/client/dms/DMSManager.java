@@ -162,6 +162,10 @@ public class DMSManager extends ProxyManager<DMS> {
 	static public boolean needsMaintenance(DMS proxy) {
 		if(isFailed(proxy) || !isActive(proxy))
 			return false;
+		Integer h = proxy.getFaceHeight();
+		Integer w = proxy.getFaceWidth();
+		if(h == null || w == null || h <= 0 || w <= 0)
+			return true;
 		Controller ctr = proxy.getController();
 		if(ctr != null && ctr.getStatus().equals("")) {
 			String e = ctr.getError();
