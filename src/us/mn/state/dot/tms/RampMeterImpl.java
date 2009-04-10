@@ -528,7 +528,7 @@ public class RampMeterImpl extends Device2Impl implements RampMeter {
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
 		if(TMSImpl.corridors != null) {
-			String c = GeoLocHelper.getCorridor(geo_loc);
+			String c = GeoLocHelper.getCorridorName(geo_loc);
 			return TMSImpl.corridors.getCorridor(c);
 		}
 		return null;

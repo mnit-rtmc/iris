@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class CorridorManager {
 			public boolean check(R_NodeImpl r_node) {
 				findDownstreamLinks(r_node);
 				GeoLoc loc = r_node.getGeoLoc();
-				String cid = GeoLocHelper.getCorridor(loc);
+				String cid = GeoLocHelper.getCorridorName(loc);
 				if(cid != null) {
 					Corridor c = corridors.get(cid);
 					if(c == null) {
@@ -138,7 +138,7 @@ public class CorridorManager {
 
 	/** Lookup the corridor for an O/D pair */
 	protected Corridor getCorridor(ODPair od) {
-		return getCorridor(od.getCorridor());
+		return getCorridor(od.getCorridorName());
 	}
 
 	/** Print the body of the r_node configuration XML file */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,7 +67,7 @@ public class CorridorTrip {
 		name = n;
 		corridor = c;
 		od_pair = od;
-		if(!c.getName().equals(od.getCorridor()))
+		if(!c.getName().equals(od.getCorridorName()))
 			throwException("Bad trip");
 		origin = c.calculateMilePoint(od.getOrigin());
 		destination = c.calculateMilePoint(od.getDestination());

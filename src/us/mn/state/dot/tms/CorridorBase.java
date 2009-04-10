@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class CorridorBase {
 
 	/** Create a new corridor */
 	public CorridorBase(GeoLoc loc, boolean order) {
-		name = GeoLocHelper.getCorridor(loc);
+		name = GeoLocHelper.getCorridorName(loc);
 		freeway = loc.getFreeway();
 		free_dir = loc.getFreeDir();
 		order_down_up = order;

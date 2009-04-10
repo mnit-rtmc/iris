@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Add a new proxy to the r_node manager */
 	protected void proxyAddedSlow(R_Node n) {
 		super.proxyAddedSlow(n);
-		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
+		String c = GeoLocHelper.getCorridorName(n.getGeoLoc());
 		if(c != null)
 			addCorridor(c);
 	}
@@ -107,7 +107,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		else if(STYLE_NO_LOC.equals(s))
 			return GeoLocHelper.isNull(getGeoLoc(proxy));
 		else if(corridors.contains(s)) {
-			String c = GeoLocHelper.getCorridor(getGeoLoc(proxy));
+			String c=GeoLocHelper.getCorridorName(getGeoLoc(proxy));
 			return s.equals(c);
 		} else
 			return STYLE_ALL.equals(s);
@@ -169,7 +169,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Check the corridor of an r_node */
 	public boolean checkCorridor(R_Node n) {
-		String c = GeoLocHelper.getCorridor(n.getGeoLoc());
+		String c = GeoLocHelper.getCorridorName(n.getGeoLoc());
 		if(c != null)
 			return c.equals(corridor);
 		else

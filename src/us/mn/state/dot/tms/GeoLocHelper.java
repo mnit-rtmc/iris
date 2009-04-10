@@ -173,7 +173,7 @@ public class GeoLocHelper {
 	}
 
 	/** Get the corridor for a road */
-	static protected String getCorridor(Road r, short d) {
+	static protected String getCorridorName(Road r, short d) {
 		if(r == null)
 			return null;
 		StringBuilder b = new StringBuilder();
@@ -187,16 +187,16 @@ public class GeoLocHelper {
 	}
 
 	/** Get the freeway corridor */
-	static public String getCorridor(GeoLoc l) {
+	static public String getCorridorName(GeoLoc l) {
 		if(l != null)
-			return getCorridor(l.getFreeway(), l.getFreeDir());
+			return getCorridorName(l.getFreeway(), l.getFreeDir());
 		else
 			return null;
 	}
 
 	/** Get the linked freeway corridor */
 	static public String getLinkedCorridor(GeoLoc l) {
-		return getCorridor(l.getCrossStreet(), l.getCrossDir());
+		return getCorridorName(l.getCrossStreet(), l.getCrossDir());
 	}
 
 	/** Check if two locations are on the same corridor */
