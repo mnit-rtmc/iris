@@ -125,6 +125,7 @@ public class DMSQueryPixelFailures extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(rows);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + rows);
 			if(rows.getInteger() > 0)
 				return new QueryNextRow();
 			else
