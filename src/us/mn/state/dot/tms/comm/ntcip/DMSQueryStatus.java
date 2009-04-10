@@ -126,7 +126,10 @@ public class DMSQueryStatus extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(shortError);
 			mess.getRequest();
-			if(shortError.getInteger() != 0)
+			int se = shortError.getInteger();
+			// MESSAGE errors can pop up for lots of reasons,
+			// so we shouldn't consider them real errors
+			if(se != 0 && se != ShortErrorStatus.MESSAGE)
 				errorStatus = shortError.getValue();
 			return new MoreFailures();
 		}
