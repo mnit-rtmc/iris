@@ -73,7 +73,7 @@ public class SignPixelPanel extends JPanel {
 	protected int height_line;
 
 	/** Transform from user (mm) to screen coordinates */
-	protected AffineTransform transform = new AffineTransform();
+	protected AffineTransform transform;
 
 	/** Bitmap graphic to paint */
 	protected BitmapGraphic graphic;
@@ -117,17 +117,18 @@ public class SignPixelPanel extends JPanel {
 	protected void rescale(double w, double h) {
 		buffer = null;
 		dirty = true;
-		AffineTransform t = new AffineTransform();
 		if(width_mm > 0 && height_mm > 0) {
 			double sx = w / width_mm;
 			double sy = h / height_mm;
 			double scale = Math.min(sx, sy);
 			double tx = width_mm * (sx - scale) / 2;
 			double ty = height_mm * (sy - scale) / 2;
+			AffineTransform t = new AffineTransform();
 			t.translate(tx, ty);
 			t.scale(scale, scale);
-		}
-		transform = t;
+			transform = t;
+		} else
+			transform = null;
 		repaint();
 	}
 
@@ -201,6 +202,8 @@ public class SignPixelPanel extends JPanel {
 	protected void doPaint(Graphics2D g) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
+		if(transform == null)
+			return;
 		g.transform(transform);
 		g.setColor(face_color);
 		g.fillRect(0, 0, width_mm, height_mm);
