@@ -64,11 +64,16 @@ public class DmsValidateMessageError extends DmsMessage implements ASN1Integer {
 
 	/** Test for a MULTI syntax error */
 	public boolean isSyntaxMulti() {
-		return error == DmsValidateMessageError.SYNTAX_MULTI;
+		return error == SYNTAX_MULTI;
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		return DESCRIPTION[error];
+	}
+
+	/** Test if there is an error */
+	public boolean isError() {
+		return error != NONE;
 	}
 }

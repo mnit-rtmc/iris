@@ -144,7 +144,7 @@ public class DMSCommandMessage extends DMSOperation {
 			mess.getRequest();
 			if(error.isSyntaxMulti())
 				errorStatus = multi.toString();
-			else
+			else if(error.isError())
 				errorStatus = error.toString();
 			return null;
 		}
