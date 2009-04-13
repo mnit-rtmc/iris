@@ -156,6 +156,8 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			catch(SNMP.Message.NoSuchName e) {
 				DMS_LOG.log(dms.getName() + ": " +
 					e.getMessage());
+				errorStatus = e.getMessage();
+				return null;
 			}
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
