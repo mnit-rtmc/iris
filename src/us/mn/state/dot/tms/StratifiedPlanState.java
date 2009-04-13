@@ -701,17 +701,25 @@ public class StratifiedPlanState extends TimingPlanState {
 			int rate = M;
 			int demand = 0;
 			int delta = 0;
+			// Calculate the remaining demand and rates
 			for(MeterState state: meters) {
 				if(state.done)
 					rate -= state.release;
 				else
 					demand += state.demand;
 			}
+			// Distribute the metering rates within the zone
 			for(MeterState state: meters) {
-				if(state.done || demand <= 0)
+				if(state.done)
 					continue;
 				RampMeterImpl meter = state.meter;
-				int r = rate * state.demand / demand;
+				int r = 0;
+				if(demand > 0)
+					r = rate * state.demand / demand;
+				else {
+					SZM_LOG.log(meter.getName() +
+						" demand: " + state.demand);
+				}
 				state.prop = r;
 				rate -= r;
 				demand -= state.demand;
