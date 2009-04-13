@@ -215,7 +215,8 @@ public class StratifiedPlanState extends TimingPlanState {
 		/** Demand rate assigned */
 		protected int demand;
 
-		/** Release rate assigned */
+		/** Release rate assigned.  This rate is a combination of
+		 * rates assigned by all zones for the meter. */
 		protected int release;
 
 		/** Metering flag */
