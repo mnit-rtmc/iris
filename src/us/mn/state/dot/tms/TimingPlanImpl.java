@@ -345,7 +345,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Get the current timing plan state */
 	protected TimingPlanState getState() {
-		if(state == null)
+		if(isOperating() && state == null)
 			state = createState();
 		return state;
 	}
