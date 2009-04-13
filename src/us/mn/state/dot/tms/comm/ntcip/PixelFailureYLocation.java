@@ -25,6 +25,7 @@ public class PixelFailureYLocation extends PixelFailureTable
 	/** Create a new pixel failure Y location object */
 	public PixelFailureYLocation(int r) {
 		super(r);
+		y = 1;
 	}
 
 	/** Get the object name */
