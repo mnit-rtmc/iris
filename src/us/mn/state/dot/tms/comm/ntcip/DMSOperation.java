@@ -64,8 +64,8 @@ abstract public class DMSOperation extends Device2Operation {
 	public void handleException(IOException e) {
 		if(e instanceof ChecksumException) {
 			ChecksumException ce = (ChecksumException)e;
-			DMS_LOG.log(dms.getName() + " (" + toString() +
-				"), " + ce.getScannedData());
+			DMS_LOG.log(dms.getName() + ": " + toString() +
+				", BAD CHECKSUM " + ce.getScannedData());
 		}
 		super.handleException(e);
 	}
