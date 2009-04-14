@@ -250,6 +250,10 @@ public class StratifiedPlanState extends TimingPlanState {
 			valid = findDetectors();
 			rate_accum = getMaxRelease();
 			p_flow = getMaxRelease();
+			minimum = getMinRelease();
+			demand = getMinRelease();
+			has_queue = false;
+			queue_backup = false;
 		}
 
 		/** Reset the meter's zone state */
@@ -302,7 +306,8 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Validate a ramp meter state */
 		protected void validate() {
-			computeDemand();
+			if(valid)
+				computeDemand();
 			if(metering) {
 				if(isFlushing() && !has_queue)
 					stopMetering();
@@ -347,15 +352,10 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Compute the demand for the ramp meter */
 		protected void computeDemand() {
-			has_queue = false;
 			queue_backup = false;
 			warning = true;
 			congested = true;
-			if(!valid) {
-				minimum = getMinRelease();
-				demand = minimum;
-				return;
-			}
+
 			int r = getReleaseRate();
 			rate_accum += K_RATE_ACCUM * (r - rate_accum);
 			density = DENSITY_SLOPE * rate_accum +
