@@ -78,6 +78,7 @@ public class MeterStyleModel extends StyleListModel<RampMeter> {
 
 	/** Respond to a controller changed event */
 	protected void controllerChanged(final Controller c) {
+		// FIXME: a controller can have more than one ramp meter
 		RampMeter proxy = find(new ProxyFinder<RampMeter>() {
 			public boolean check(RampMeter proxy) {
 				return proxy.getController() == c;
