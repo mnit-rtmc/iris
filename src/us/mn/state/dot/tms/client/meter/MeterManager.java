@@ -18,6 +18,7 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
+import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
@@ -109,7 +111,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		       proxy.getQueue() == RampMeterQueue.FULL.ordinal();
 	}
 
-	/** Test if a DMS if failed */
+	/** Test if a ramp meter is failed */
 	static protected boolean isFailed(RampMeter proxy) {
 		Controller ctr = proxy.getController();
 		return ctr != null && (!"".equals(ctr.getStatus()));
@@ -127,12 +129,18 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		initialize();
 	}
 
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<RampMeter> createStyleListModel(Symbol s) {
+		return new MeterStyleModel(this, s.getLabel(), s.getLegend(),
+			connection.getSonarState().getControllers());
+	}
+
 	/** Get the proxy type name */
 	public String getProxyType() {
 		return "Ramp Meter";
 	}
 
-	/** Create a styled theme for DMSs */
+	/** Create a styled theme for ramp meters */
 	protected StyledTheme createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
 			getProxyType(), new MeterMarker());
