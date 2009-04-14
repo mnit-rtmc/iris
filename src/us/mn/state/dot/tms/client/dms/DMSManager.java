@@ -176,7 +176,7 @@ public class DMSManager extends ProxyManager<DMS> {
 			return false;
 	}
 
-	/** Test if a DMS if failed */
+	/** Test if a DMS is failed */
 	static public boolean isFailed(DMS proxy) {
 		Controller ctr = proxy.getController();
 		return ctr != null && (!"".equals(ctr.getStatus()));
