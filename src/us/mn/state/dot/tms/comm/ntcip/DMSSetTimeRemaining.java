@@ -48,7 +48,10 @@ public class DMSSetTimeRemaining extends DMSOperation {
 
 	/** Get the message duration */
 	protected int getDuration() {
-		return getDuration(message.getDuration());
+		if(message.isBlank())
+			return 0;
+		else
+			return getDuration(message.getDuration());
 	}
 
 	/** Phase to set message time remaining */

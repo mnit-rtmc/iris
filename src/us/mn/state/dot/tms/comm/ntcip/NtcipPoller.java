@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -148,12 +149,15 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 
 	/** Check if we should just set the message time remaining */
 	protected boolean shouldSetTimeRemaining(DMSImpl dms, SignMessage m) {
-		return isDurationZero(m) || isMessageDeployed(dms, m);
+		// FIXME: should create SignMessageHelper class
+		return isDurationZero((SignMessageImpl)m) ||
+		       isMessageDeployed(dms, m);
 	}
 
 	/** Check if the duration of a message is zero */
-	protected boolean isDurationZero(SignMessage m) {
-		return m.getDuration() != null && m.getDuration() <= 0;
+	protected boolean isDurationZero(SignMessageImpl m) {
+		Integer d = m.getDuration();
+		return (d != null && d <= 0) || m.isBlank();
 	}
 
 	/** Check if the message is already deployed on the sign */
