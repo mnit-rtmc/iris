@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,12 @@ abstract class PixelFailureTable extends StatError {
 	/** Create a new PixelFailureTable item
 	 * @param r Row in the pixel failure table */
 	protected PixelFailureTable(int r) {
-		super(4);
+		super(5);
 		row = r;
 		oid[node++] = 3;
 		oid[node++] = 1;
 		oid[node++] = getTableItem();
+		oid[node++] = 2; // FIXME: what does this reference?
 		oid[node] = row;
 	}
 
