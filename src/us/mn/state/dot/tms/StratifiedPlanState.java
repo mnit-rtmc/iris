@@ -680,7 +680,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Set meter states to congested if the zone is congested */
 		protected void testCongested() {
-			if(isCongested()) {
+			if(isCongested() || !valid) {
 				for(MeterState state: meters)
 					state.congested = true;
 			}
@@ -688,7 +688,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Check if the zone is congested */
 		protected boolean isCongested() {
-			return !(valid && mainline.isFlowing());
+			return !mainline.isFlowing();
 		}
 
 		/** Process the zone */
