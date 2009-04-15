@@ -225,8 +225,8 @@ public class StratifiedPlanState extends TimingPlanState {
 		/** Warning flag for finding plan errors */
 		protected boolean warning;
 
-		/** Congested mainline flag */
-		protected boolean congested;
+		/** Flag indicating at least one good zone */
+		protected boolean good;
 
 		/** Queue backup flag */
 		protected boolean queue_backup;
@@ -253,17 +253,17 @@ public class StratifiedPlanState extends TimingPlanState {
 			release = getMaxRelease();
 			minimum = getMinRelease();
 			demand = getMinRelease();
-			congested = false;
+			good = false;
 			has_queue = false;
 			queue_backup = false;
 		}
 
 		/** Reset the meter's zone state */
 		protected void reset() {
-			if(congested)
-				release = plan.getTarget();
-			else
+			if(good)
 				release = getMaxRelease();
+			else
+				release = plan.getTarget();
 			control = null;
 		}
 
@@ -505,8 +505,8 @@ public class StratifiedPlanState extends TimingPlanState {
 				buf.append("' Z='");
 				buf.append(control.getId());
 			}
-			if(warning && (!congested) &&
-				meter.isActive() && !meter.isFailed())
+			if(warning && good && meter.isActive() &&
+			   !meter.isFailed())
 			{
 				buf.append("' warning='1");
 			}
@@ -676,11 +676,11 @@ public class StratifiedPlanState extends TimingPlanState {
 			       meters.size() > 0;
 		}
 
-		/** Set meter states to congested if the zone is congested */
-		protected void testCongested() {
-			if(!isGood()) {
+		/** Set meter states to good if the zone is good */
+		protected void testGood() {
+			if(isGood()) {
 				for(MeterState state: meters)
-					state.congested = true;
+					state.good = true;
 			}
 		}
 
@@ -1153,7 +1153,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 	/** Calculate all the metering rates */
 	protected void calculateRates() {
-		testCongested();
+		testGood();
 		for(MeterState state: states.values())
 			state.reset();
 		for(Zone zone: zones) {
@@ -1176,12 +1176,12 @@ public class StratifiedPlanState extends TimingPlanState {
 		printStates();
 	}
 
-	/** Test the congested states */
-	protected void testCongested() {
+	/** Test the zones for goodness */
+	protected void testGood() {
 		for(MeterState state: states.values())
-			state.congested = false;
+			state.good = false;
 		for(Zone zone: zones)
-			zone.testCongested();
+			zone.testGood();
 	}
 
 	/** Get a list iterator of all zones starting with last zone */
