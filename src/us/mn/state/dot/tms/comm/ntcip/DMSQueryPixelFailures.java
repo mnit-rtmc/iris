@@ -150,15 +150,7 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			mess.add(x_loc);
 			mess.add(y_loc);
 			mess.add(status);
-			try {
-				mess.getRequest();
-			}
-			catch(SNMP.Message.NoSuchName e) {
-				DMS_LOG.log(dms.getName() + ": " +
-					e.getMessage());
-				errorStatus = e.getMessage();
-				return null;
-			}
+			mess.getRequest();
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
 			if(status.isStuckOn())
