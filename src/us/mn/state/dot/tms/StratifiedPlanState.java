@@ -572,9 +572,6 @@ public class StratifiedPlanState extends TimingPlanState {
 		/** Unmetered entrance flow rate (filtered) */
 		protected float U;
 
-		/** Flag to determine whether data is good */
-		protected boolean good;
-
 		/** Create a new zone */
 		protected Zone(int l, int n) {
 			layer = l;
@@ -660,27 +657,28 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Calculate the zone release rate */
 		protected void calculateRate() {
-			if(upstream.isGood() && entrance.isNotBad() &&
-				exit.isNotBad() && mainline.isFlowing() &&
-				meters.size() > 0)
-			{
-				A += K * (upstream.getFlow() - A);
-				U += K * (entrance.getFlow() - U);
-				X += K * (exit.getFlow() - X);
-				S = mainline.getUpstreamCapacity() *
-					upstream.size();
-				B = downstream.getCapacity();
-				M = Math.round(B + X + S - A - U);
-				if(M < 1)
-					M = 1;
-				good = true;
-			} else
-				good = false;
+			A += K * (upstream.getFlow() - A);
+			U += K * (entrance.getFlow() - U);
+			X += K * (exit.getFlow() - X);
+			S = mainline.getUpstreamCapacity() * upstream.size();
+			B = downstream.getCapacity();
+			M = Math.round(B + X + S - A - U);
+			if(M < 1)
+				M = 1;
+		}
+
+		/** Check if the zone data is good */
+		protected boolean isGood() {
+			return upstream.isGood() &&
+			       entrance.isNotBad() &&
+			       exit.isNotBad() &&
+			       mainline.isFlowing() &&
+			       meters.size() > 0;
 		}
 
 		/** Set meter states to congested if the zone is congested */
 		protected void testCongested() {
-			if(isCongested() || !good) {
+			if(!isGood()) {
 				for(MeterState state: meters)
 					state.congested = true;
 			}
@@ -693,8 +691,6 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Process the zone */
 		protected void process() {
-			if(!good)
-				return;
 			for(MeterState state: meters)
 				state.resetRule();
 			while(balance() != 0);
@@ -804,7 +800,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			StringBuffer buf = new StringBuffer();
 			buf.append("    <zone_state id='");
 			buf.append(getId());
-			if(good) {
+			if(isGood()) {
 				buf.append("' M='");
 				buf.append(M);
 				buf.append("' B='");
@@ -1161,16 +1157,20 @@ public class StratifiedPlanState extends TimingPlanState {
 		for(MeterState state: states.values())
 			state.reset();
 		for(Zone zone: zones) {
-			zone.calculateRate();
-			zone.process();
+			if(zone.isGood()) {
+				zone.calculateRate();
+				zone.process();
+			}
 		}
 		ListIterator<Zone> li = getZoneIterator();
 		while(li.hasPrevious()) {
 			Zone z = (Zone)li.previous();
 			if(z.isBroken()) {
 				z.resetControlled();
-				for(Zone zone: zones)
-					zone.process();
+				for(Zone zone: zones) {
+					if(zone.isGood())
+						zone.process();
+				}
 			}
 		}
 		printStates();
