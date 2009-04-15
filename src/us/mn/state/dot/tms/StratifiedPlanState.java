@@ -714,13 +714,7 @@ public class StratifiedPlanState extends TimingPlanState {
 				if(state.done)
 					continue;
 				RampMeterImpl meter = state.meter;
-				int r = 0;
-				if(demand > 0)
-					r = rate * state.demand / demand;
-				else {
-					SZM_LOG.log(meter.getName() +
-						" demand: " + state.demand);
-				}
+				int r = rate * state.demand / demand;
 				state.prop = r;
 				rate -= r;
 				demand -= state.demand;
