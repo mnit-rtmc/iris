@@ -678,11 +678,17 @@ public class StratifiedPlanState extends TimingPlanState {
 				valid = false;
 		}
 
-		/** Test if the zone is congested */
+		/** Set meter states to congested if the zone is congested */
 		protected void testCongested() {
-			boolean flowing = valid && mainline.isFlowing();
-			for(MeterState state: meters)
-				state.congested = !flowing;
+			if(isCongested()) {
+				for(MeterState state: meters)
+					state.congested = true;
+			}
+		}
+
+		/** Check if the zone is congested */
+		protected boolean isCongested() {
+			return !(valid && mainline.isFlowing());
 		}
 
 		/** Process the zone */
@@ -823,10 +829,10 @@ public class StratifiedPlanState extends TimingPlanState {
 				else
 					buf.append("bad");
 				buf.append("' S='");
-				if(mainline.isFlowing())
-					buf.append("flowing");
-				else
+				if(isCongested())
 					buf.append("congested");
+				else
+					buf.append("flowing");
 				buf.append("' A='");
 				if(upstream.isGood())
 					buf.append("good");
@@ -1151,8 +1157,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 	/** Calculate all the metering rates */
 	protected void calculateRates() {
-		for(Zone zone: zones)
-			zone.testCongested();
+		testCongested();
 		for(MeterState state: states.values())
 			state.reset();
 		for(Zone zone: zones) {
@@ -1169,6 +1174,14 @@ public class StratifiedPlanState extends TimingPlanState {
 			}
 		}
 		printStates();
+	}
+
+	/** Test the congested states */
+	protected void testCongested() {
+		for(MeterState state: states.values())
+			state.congested = false;
+		for(Zone zone: zones)
+			zone.testCongested();
 	}
 
 	/** Get a list iterator of all zones starting with last zone */
