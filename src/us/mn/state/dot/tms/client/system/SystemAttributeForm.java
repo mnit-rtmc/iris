@@ -218,6 +218,8 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Create the DMS policy panel */
 	protected JPanel createDMSPanel() {
 		FormPanel panel = new FormPanel(true);
+		panel.setCenter();
+		panel.addRow(new JLabel("Time values (seconds)"));
 		panel.addRow("Polling Frequency", poll_freq);
 		initSpinner(poll_freq, SystemAttribute.DMS_POLL_FREQ_SECS);
 		panel.addRow("Pixel Test Timeout", pxl_tst_timeout);
@@ -226,11 +228,9 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.addRow("Lamp Test Timeout", lmp_tst_timeout);
 		initSpinner(lmp_tst_timeout,
 			SystemAttribute.DMS_LAMP_TEST_TIMEOUT);
-		panel.setCenter();
-		panel.addRow(new JLabel("Page time (seconds)"));
-		panel.addRow("On", page_on);
+		panel.addRow("Page On Time", page_on);
 		initSpinner(page_on, SystemAttribute.DMS_PAGE_ON_SECS);
-		panel.addRow("Off", page_off);
+		panel.addRow("Page Off Time", page_off);
 		initSpinner(page_off, SystemAttribute.DMS_PAGE_OFF_SECS);
 		panel.setCenter();
 		JTextArea area = new JTextArea(CAUTION);
