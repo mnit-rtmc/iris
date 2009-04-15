@@ -89,6 +89,9 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Pixel test timeout spinner */
 	protected final JSpinner pxl_tst_timeout = createTimeSpinner();
 
+	/** Lamp test timeout spinner */
+	protected final JSpinner lmp_tst_timeout = createTimeSpinner();
+
 	/** Page on time spinner */
 	protected final JSpinner page_on = createSpinner();
 
@@ -220,6 +223,9 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.addRow("Pixel Test Timeout", pxl_tst_timeout);
 		initSpinner(pxl_tst_timeout,
 			SystemAttribute.DMS_PIXEL_TEST_TIMEOUT);
+		panel.addRow("Lamp Test Timeout", lmp_tst_timeout);
+		initSpinner(lmp_tst_timeout,
+			SystemAttribute.DMS_LAMP_TEST_TIMEOUT);
 		panel.setCenter();
 		panel.addRow(new JLabel("Page time (seconds)"));
 		panel.addRow("On", page_on);
@@ -295,6 +301,12 @@ public class SystemAttributeForm extends AbstractForm {
 		{
 			pxl_tst_timeout.setValue(
 				SystemAttributeHelper.getDmsPixelTestTimeout());
+		}
+		if(a == null ||
+		   a.equals(SystemAttribute.DMS_LAMP_TEST_TIMEOUT))
+		{
+			lmp_tst_timeout.setValue(
+				SystemAttributeHelper.getDmsLampTestTimeout());
 		}
 		if(a == null || a.equals(SystemAttribute.DMS_PAGE_ON_SECS)) {
 			page_on.setValue(
