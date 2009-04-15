@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,8 +58,8 @@ public class SystemAttributeForm extends AbstractForm {
 		return new JSpinner(new SpinnerNumberModel(0, 0, 5, 0.1));
 	}
 
-	/** Create a poll frequency spinner */
-	static protected JSpinner createPollSpinner() {
+	/** Create a longer time spinner */
+	static protected JSpinner createTimeSpinner() {
 		return new JSpinner(new SpinnerNumberModel(30, 5, 86400, 5));
 	}
 
@@ -84,7 +84,10 @@ public class SystemAttributeForm extends AbstractForm {
 	protected final JSpinner min_red = createSpinner();
 
 	/** Poll frequency spinner */
-	protected final JSpinner poll_freq = createPollSpinner();
+	protected final JSpinner poll_freq = createTimeSpinner();
+
+	/** Pixel test timeout spinner */
+	protected final JSpinner pxl_tst_timeout = createTimeSpinner();
 
 	/** Page on time spinner */
 	protected final JSpinner page_on = createSpinner();
@@ -214,6 +217,9 @@ public class SystemAttributeForm extends AbstractForm {
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Polling Frequency", poll_freq);
 		initSpinner(poll_freq, SystemAttribute.DMS_POLL_FREQ_SECS);
+		panel.addRow("Pixel Test Timeout", pxl_tst_timeout);
+		initSpinner(pxl_tst_timeout,
+			SystemAttribute.DMS_PIXEL_TEST_TIMEOUT);
 		panel.setCenter();
 		panel.addRow(new JLabel("Page time (seconds)"));
 		panel.addRow("On", page_on);
@@ -283,6 +289,12 @@ public class SystemAttributeForm extends AbstractForm {
 		if(a == null || a.equals(SystemAttribute.DMS_POLL_FREQ_SECS)) {
 			poll_freq.setValue(
 				SystemAttributeHelper.getDmsPollFreqSecs());
+		}
+		if(a == null ||
+		   a.equals(SystemAttribute.DMS_PIXEL_TEST_TIMEOUT))
+		{
+			pxl_tst_timeout.setValue(
+				SystemAttributeHelper.getDmsPixelTestTimeout());
 		}
 		if(a == null || a.equals(SystemAttribute.DMS_PAGE_ON_SECS)) {
 			page_on.setValue(
