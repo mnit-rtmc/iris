@@ -133,6 +133,7 @@ public class Session {
 	protected StationLayer createStationLayer(final SonarState st)
 		throws IOException, TdxmlException
 	{
+		// FIXME: this should work even if gpoly.shp can't be found
 		StationLayer layer = new StationLayer(props, logger);
 		layer.setLabels(new StationLayer.Labeller() {
 			public String getLabel(String sid) throws IOException {
