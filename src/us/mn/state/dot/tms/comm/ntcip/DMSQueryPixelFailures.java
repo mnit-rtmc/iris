@@ -151,6 +151,9 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			mess.add(y_loc);
 			mess.add(status);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + x_loc);
+			DMS_LOG.log(dms.getName() + ": " + y_loc);
+			DMS_LOG.log(dms.getName() + ": " + status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
 			if(status.isStuckOn())
