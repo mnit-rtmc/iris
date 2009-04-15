@@ -183,13 +183,13 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 				renderSpan(bg, font, text, x, y);
 			}
 			catch(IndexOutOfBoundsException e) {
-				log("Message text too long: " + text);
+//				PIXEL_LOG.log("Message text too long: " + text);
 			}
 			catch(InvalidMessageException e) {
-				log(e.getMessage() + ": " + text);
+//				PIXEL_LOG.log(e.getMessage() + ": " + text);
 			}
 			catch(IOException e) {
-				log("Invalid Base64 glyph data");
+//				PIXEL_LOG.log("Invalid Base64 glyph data");
 			}
 		}
 
@@ -409,10 +409,5 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 				       g.getCodePoint() == cp;
 			}
 		});
-	}
-
-	/** Log an error message */
-	protected void log(String m) {
-		System.err.println("PixelMapBuilder:" + m);
 	}
 }
