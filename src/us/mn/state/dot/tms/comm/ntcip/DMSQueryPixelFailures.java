@@ -161,7 +161,7 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			else
 				stuck_off.setPixel(x, y, 1);
 			row++;
-			if(row > rows.getInteger())
+			if(row <= rows.getInteger())
 				return this;
 			else
 				return null;
