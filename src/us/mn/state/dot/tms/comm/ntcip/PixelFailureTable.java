@@ -32,13 +32,13 @@ abstract class PixelFailureTable extends StatError {
 		oid[node++] = 3;
 		oid[node++] = 1;
 		oid[node++] = getTableItem();
-		oid[node++] = row;
+		oid[node++] = 2;	// what does 2 indicate here?
 		oid[node] = row;
 	}
 
 	/** Create an object description */
 	public final String toString() {
-		return getName() + "." + row + "." + row + ": " + getValue();
+		return getName() + ".2." + row + ": " + getValue();
 	}
 
 	/** Get the pixel failure table item (defined in subclasses) */
