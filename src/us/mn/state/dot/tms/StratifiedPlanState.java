@@ -572,8 +572,8 @@ public class StratifiedPlanState extends TimingPlanState {
 		/** Unmetered entrance flow rate (filtered) */
 		protected float U;
 
-		/** Flag to determine whether the zone is currently valid */
-		protected boolean valid;
+		/** Flag to determine whether data is good */
+		protected boolean good;
 
 		/** Create a new zone */
 		protected Zone(int l, int n) {
@@ -673,14 +673,14 @@ public class StratifiedPlanState extends TimingPlanState {
 				M = Math.round(B + X + S - A - U);
 				if(M < 1)
 					M = 1;
-				valid = true;
+				good = true;
 			} else
-				valid = false;
+				good = false;
 		}
 
 		/** Set meter states to congested if the zone is congested */
 		protected void testCongested() {
-			if(isCongested() || !valid) {
+			if(isCongested() || !good) {
 				for(MeterState state: meters)
 					state.congested = true;
 			}
@@ -693,7 +693,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Process the zone */
 		protected void process() {
-			if(!valid)
+			if(!good)
 				return;
 			for(MeterState state: meters)
 				state.resetRule();
@@ -804,7 +804,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			StringBuffer buf = new StringBuffer();
 			buf.append("    <zone_state id='");
 			buf.append(getId());
-			if(valid) {
+			if(good) {
 				buf.append("' M='");
 				buf.append(M);
 				buf.append("' B='");
