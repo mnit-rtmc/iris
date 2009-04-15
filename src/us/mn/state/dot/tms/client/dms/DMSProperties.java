@@ -749,14 +749,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void updatePixelStatus(String[] pixels) throws IOException {
 		BitmapGraphic stuckOff = createBlankBitmap();
 		BitmapGraphic stuckOn = createBlankBitmap();
-		BitmapGraphic errors = createBlankBitmap();
 		stuckOff.setBitmap(Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]));
 		stuck_off_pnl.setGraphic(stuckOff);
 		stuckOn.setBitmap(Base64.decode(pixels[DMS.STUCK_ON_BITMAP]));
 		stuck_on_pnl.setGraphic(stuckOn);
-		errors.copy(stuckOff);
-		errors.copy(stuckOn);
-		badPixels.setText(String.valueOf(errors.getLitCount()));
+		int n_off = stuckOff.getLitCount();
+		int n_on = stuckOn.getLitCount();
+		badPixels.setText(String.valueOf(n_off + n_on));
 	}
 
 	/** Create a blank bitmap */
