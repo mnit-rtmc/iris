@@ -253,6 +253,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			release = getMaxRelease();
 			minimum = getMinRelease();
 			demand = getMinRelease();
+			congested = false;
 			has_queue = false;
 			queue_backup = false;
 		}
@@ -679,10 +680,9 @@ public class StratifiedPlanState extends TimingPlanState {
 
 		/** Test if the zone is congested */
 		protected void testCongested() {
-			for(MeterState state: meters) {
-				state.congested =
-					!(valid && mainline.isFlowing());
-			}
+			boolean flowing = valid && mainline.isFlowing();
+			for(MeterState state: meters)
+				state.congested = !flowing;
 		}
 
 		/** Process the zone */
