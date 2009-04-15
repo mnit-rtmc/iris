@@ -250,6 +250,7 @@ public class StratifiedPlanState extends TimingPlanState {
 			valid = findDetectors();
 			rate_accum = getMaxRelease();
 			p_flow = getMaxRelease();
+			release = getMaxRelease();
 			minimum = getMinRelease();
 			demand = getMinRelease();
 			has_queue = false;
@@ -354,7 +355,6 @@ public class StratifiedPlanState extends TimingPlanState {
 		protected void computeDemand() {
 			queue_backup = false;
 			warning = true;
-			congested = true;
 
 			int r = getReleaseRate();
 			rate_accum += K_RATE_ACCUM * (r - rate_accum);
@@ -677,12 +677,11 @@ public class StratifiedPlanState extends TimingPlanState {
 				valid = false;
 		}
 
-		/** Reset all the meters in the zone */
-		protected void resetMeters() {
+		/** Test if the zone is congested */
+		protected void testCongested() {
 			for(MeterState state: meters) {
-				if(valid && mainline.isFlowing())
-					state.congested = false;
-				state.reset();
+				state.congested =
+					!(valid && mainline.isFlowing());
 			}
 		}
 
@@ -1153,7 +1152,9 @@ public class StratifiedPlanState extends TimingPlanState {
 	/** Calculate all the metering rates */
 	protected void calculateRates() {
 		for(Zone zone: zones)
-			zone.resetMeters();
+			zone.testCongested();
+		for(MeterState state: states.values())
+			state.reset();
 		for(Zone zone: zones) {
 			zone.calculateRate();
 			zone.process();
