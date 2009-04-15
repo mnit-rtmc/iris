@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
@@ -29,8 +27,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute> 
-{
+public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
@@ -41,28 +38,20 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 	/** value column number */
 	static protected final int COL_VALUE = 1;
 
-	/** Cell renderer for this table */
-	static protected final DefaultTableCellRenderer RENDERER =
-		new DefaultTableCellRenderer();
-	static {
-		RENDERER.setHorizontalAlignment(SwingConstants.CENTER);
-	}
-
 	/** Create a new table column */
 	static protected TableColumn createColumn(int column, int width,
 		String header)
 	{
 		TableColumn c = new TableColumn(column, width);
 		c.setHeaderValue(header);
-		c.setCellRenderer(RENDERER);
 		return c;
 	}
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 140, "Name"));
-		m.addColumn(createColumn(COL_VALUE, 180, "Value"));
+		m.addColumn(createColumn(COL_NAME, 200, "Name"));
+		m.addColumn(createColumn(COL_VALUE, 340, "Value"));
 		return m;
 	}
 
