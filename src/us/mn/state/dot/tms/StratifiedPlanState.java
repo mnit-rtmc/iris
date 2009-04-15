@@ -684,11 +684,6 @@ public class StratifiedPlanState extends TimingPlanState {
 			}
 		}
 
-		/** Check if the zone is congested */
-		protected boolean isCongested() {
-			return !mainline.isFlowing();
-		}
-
 		/** Process the zone */
 		protected void process() {
 			for(MeterState state: meters)
@@ -842,6 +837,11 @@ public class StratifiedPlanState extends TimingPlanState {
 			}
 			buf.append("' />");
 			stream.println(buf);
+		}
+
+		/** Check if the zone is congested */
+		protected boolean isCongested() {
+			return !mainline.isFlowing();
 		}
 	}
 
