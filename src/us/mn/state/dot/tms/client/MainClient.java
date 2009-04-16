@@ -21,7 +21,6 @@ import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Properties;
 import java.util.TimeZone;
-import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.utils.ExceptionDialog;
 import us.mn.state.dot.util.HTTPProxySelector;
@@ -126,12 +125,7 @@ public class MainClient {
 		bindSocket();
 		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
-		Scheduler.setHandler(new ExceptionHandler() {
-			public boolean handle(Exception e) {
-				new ExceptionDialog(e).setVisible(true);
-				return true;
-			}
-		});
+		Scheduler.setHandler(new SimpleHandler());
 		c.setVisible(true);
 	}
 

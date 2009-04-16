@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,17 +24,16 @@ import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.client.SimpleHandler;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.utils.ExceptionDialog;
 
 /**
  * The UserManager is used to display a login prompt and to verify that the
@@ -181,12 +180,7 @@ public class UserManager {
 	protected SonarState createSonarState() throws IOException,
 		ConfigurationError, NoSuchFieldException, IllegalAccessException
 	{
-		return new SonarState(props, new ExceptionHandler() {
-			public boolean handle(Exception e) {
-				new ExceptionDialog(e).setVisible(true);
-				return true;
-			}
-		});
+		return new SonarState(props, new SimpleHandler());
 	}
 
 	/** Create a new user */
