@@ -876,13 +876,18 @@ public class DMSImpl extends Device2Impl implements DMS {
 	protected void validateBitmaps(byte[] bitmaps, String[] pixels,
 		BitmapGraphic bitmap) throws IOException, ChangeVetoException
 	{
-		int blen = bitmap.getBitmap().length;
+		int blen = bitmap.length();
 		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
 		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
 		BitmapGraphic stuckOff = bitmap.createBlankCopy();
 		BitmapGraphic stuckOn = bitmap.createBlankCopy();
-		stuckOff.setBitmap(Base64.decode(pixels[STUCK_OFF_BITMAP]));
-		stuckOn.setBitmap(Base64.decode(pixels[STUCK_ON_BITMAP]));
+		byte[] b_off = Base64.decode(pixels[STUCK_OFF_BITMAP]);
+		byte[] b_on = Base64.decode(pixels[STUCK_ON_BITMAP]);
+		// Don't validate if the sign dimensions have changed
+		if(b_off.length != blen || b_on.length != blen)
+			return;
+		stuckOff.setBitmap(b_off);
+		stuckOn.setBitmap(b_on);
 		int n_pages = bitmaps.length / blen;
 		byte[] b = new byte[blen];
 		for(int p = 0; p < n_pages; p++) {
