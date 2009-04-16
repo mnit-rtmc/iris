@@ -133,8 +133,14 @@ public class Session {
 	protected StationLayer createStationLayer(final SonarState st)
 		throws IOException, TdxmlException
 	{
-		// FIXME: this should work even if gpoly.shp can't be found
-		StationLayer layer = new StationLayer(props, logger);
+		StationLayer layer;
+		try {
+			layer = new StationLayer(props, logger);
+		}
+		catch(IOException e) {
+			System.err.println("Station .shp file was not found");
+			return null;
+		}
 		layer.setLabels(new StationLayer.Labeller() {
 			public String getLabel(String sid) throws IOException {
 				Station s = st.lookupStation(sid);
@@ -150,7 +156,8 @@ public class Session {
 	/** Add the DMS tab */
 	protected void addDMSTab() {
 		List<LayerState> lstates = createBaseLayers();
-		lstates.add(gpoly.createState());
+		if(gpoly != null)
+			lstates.add(gpoly.createState());
 		lstates.add(cam_manager.getLayer().createState());
 		lstates.add(incLayer.createState());
 		if(rwisLayer != null)
@@ -163,12 +170,14 @@ public class Session {
 	/** Add the meter tab */
 	protected void addMeterTab() throws IOException {
 		List<LayerState> lstates = createBaseLayers();
-		LayerState gpolyState = gpoly.createState();
-		for(Theme t: gpolyState.getThemes()) {
-			if(t instanceof FreewayTheme)
-				gpolyState.setTheme(t);
+		if(gpoly != null) {
+			LayerState gpolyState = gpoly.createState();
+			for(Theme t: gpolyState.getThemes()) {
+				if(t instanceof FreewayTheme)
+					gpolyState.setTheme(t);
+			}
+			lstates.add(gpolyState);
 		}
-		lstates.add(gpolyState);
 		tabs.add(new RampMeterTab(meter_manager, lstates, vlayer,
 			tmsConnection));
 	}
@@ -258,7 +267,8 @@ public class Session {
 	public void dispose() {
 		for(IrisTab tab: tabs)
 			tab.dispose();
-		gpoly.dispose();
+		if(gpoly != null)
+			gpoly.dispose();
 		incLayer.dispose();
 		if(rwisLayer != null)
 			rwisLayer.dispose();
