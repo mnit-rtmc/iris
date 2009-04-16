@@ -163,22 +163,15 @@ public class DMSImpl extends Device2Impl implements DMS {
 			setConfigure(false);
 	}
 
-	/** Configure request flag */
-	protected boolean configureRequest;
-
-	/** Set the configure request flag */
-	public void setConfigureRequest(boolean c) {
-		if(!configureRequest) {
-			if(c && !configure) {
-				DMSPoller p = getDMSPoller();
-				if(p != null) {
-					configureRequest = true;
-					p.sendRequest(this, SignRequest.
-						QUERY_CONFIGURATION);
-				}
+	/** Request to query configuration of the DMS */
+	public void requestConfigure() {
+		if(!configure) {
+			DMSPoller p = getDMSPoller();
+			if(p != null) {
+				p.sendRequest(this,
+					SignRequest.QUERY_CONFIGURATION);
 			}
 		}
-		configureRequest = c;
 	}
 
 	/** Configure flag indicates that the sign has been configured */
@@ -186,7 +179,6 @@ public class DMSImpl extends Device2Impl implements DMS {
 
 	/** Set the configure flag */
 	public void setConfigure(boolean c) {
-		setConfigureRequest(false);
 		configure = c;
 	}
 

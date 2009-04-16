@@ -229,7 +229,7 @@ public class OpQueryConfig extends OpDms
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		super.cleanup();
 		m_dms.setConfigure(success);
+		super.cleanup();
 	}
 }
