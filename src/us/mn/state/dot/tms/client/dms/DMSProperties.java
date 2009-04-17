@@ -268,6 +268,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	 */
 	public DMSProperties(TmsConnection tc, DMS sign) {
 		super(TITLE, tc, sign);
+		setHelpPageName("Help.DMSProperties");
 		state = tc.getSonarState();
 		user = state.lookupUser(tc.getUser().getName());
 		messagesTab = new MessagesTab(tc, sign);

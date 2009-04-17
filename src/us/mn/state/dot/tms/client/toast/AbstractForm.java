@@ -20,6 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
 
+import us.mn.state.dot.tms.utils.I18NMessages;
+
 /**
  * An abstract form is a panel which contains a titled form. Most of the work
  * is done in the initialize method so the desktop can check the title before
@@ -31,6 +33,9 @@ abstract public class AbstractForm extends JPanel implements TmsForm {
 
 	/** Form title */
 	protected final String title;
+
+	/* help page name, which is an I18N string */
+	protected String helpPageName = Help.defaultHelpPageName;
 
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
@@ -73,5 +78,15 @@ abstract public class AbstractForm extends JPanel implements TmsForm {
 	protected void fireFormClosed(FormCloseEvent e) {
 		for(FormCloseListener l: listeners) 
 			l.formClosed(e);
+	}
+
+	/** get the form's help URL */
+	public String getHelpPageUrl() {
+		return I18NMessages.get(helpPageName);
+	}
+
+	/** set the form's help page name, which is an I18N name */
+	public void setHelpPageName(String n) {
+		helpPageName = n;
 	}
 }
