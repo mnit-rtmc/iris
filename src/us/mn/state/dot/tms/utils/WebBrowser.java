@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,32 +19,77 @@
 package us.mn.state.dot.tms.utils;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
+import javax.swing.JOptionPane;
 
 /**
  * Simple class to open a web browser in another process
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class WebBrowser {
 
-	static protected final String WINDOWS_EXECUTABLE =
-		"\"\\Program Files\\Internet Explorer\\IExplore\" ";
-
-	static protected final String OTHER_EXECUTABLE = "firefox ";
-
-	static protected final String EXECUTABLE;
-	static {
-		String osName = System.getProperties().getProperty(
-			"os.name").toLowerCase();
-		if(osName.indexOf("windows") >= 0)
-			EXECUTABLE = WINDOWS_EXECUTABLE;
-		else
-			EXECUTABLE = OTHER_EXECUTABLE;
-	}
-
 	/** Execute a subprocess with a web browser at the given URL */
 	static public void open(URL url) throws IOException {
-		Runtime.getRuntime().exec(EXECUTABLE + url.toString());
+		if(url == null)
+			return;
+		open(url.toString());
+	}
+
+	/**
+	 *  Bare Bones Browser Launch
+	 *  Version 1.5 (December 10, 2005)
+	 *  Dem Pilafian
+	 *  Supports: Mac OS X, GNU/Linux, Unix, Windows XP
+	 *  Originally released into the public domain
+	 */
+	public static void open(String url) {
+		String osName = System.getProperty("os.name");
+		try {
+			// mac
+			if(osName.startsWith("Mac OS")) {
+				Class fileMgr = Class.forName(
+					"com.apple.eio.FileManager");
+				Method openURL = 
+					fileMgr.getDeclaredMethod("openURL",
+				new Class[] {String.class});
+				openURL.invoke(null, new Object[] {url});
+
+			// windows
+			} else if(osName.startsWith("Windows")) {
+				Runtime.getRuntime().exec(
+				"rundll32 url.dll,FileProtocolHandler " + url);
+
+			// linux
+			} else {
+				String[] browsers = {"firefox", "opera", 
+					"konqueror", "epiphany", "mozilla", 
+					"netscape"};
+				String browser = null;
+				for(int count = 0; count < browsers.length && 
+					browser == null; count++) 
+				{
+					if(Runtime.getRuntime().exec(
+						new String[] {"which", 
+						browsers[count]}).waitFor() 
+						== 0)
+					{
+						browser = browsers[count];
+					}
+				}
+				if(browser == null)
+					throw new Exception(
+						"Could not find web browser");
+				else
+					Runtime.getRuntime().exec(
+						new String[] {browser, url});
+			}
+		} catch(Exception e) {
+			String m = "There was a problem starting the " +
+				"web browser: " + e;
+			JOptionPane.showMessageDialog(null, m);
+		}
 	}
 }
