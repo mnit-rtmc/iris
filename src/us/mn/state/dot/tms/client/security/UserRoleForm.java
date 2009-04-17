@@ -96,6 +96,7 @@ public class UserRoleForm extends AbstractForm {
 		TypeCache<Connection> cc)
 	{
 		super(TITLE);
+		setHelpPageName("Help.UserRoleForm");
 		cache = uc;
 		rcache = rc;
 		ccache = cc;

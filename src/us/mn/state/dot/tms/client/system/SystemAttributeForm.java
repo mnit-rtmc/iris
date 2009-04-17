@@ -139,6 +139,7 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Create a new system attribute form */
 	public SystemAttributeForm(TypeCache<SystemAttribute> c, User u) {
 		super(TITLE);
+		setHelpPageName("Help.SystemAttributeForm");
 		cache = c;
 		user = u;
 		systemAttributeTab = new SystemAttributeTab(cache, this);
