@@ -137,7 +137,7 @@ fi
 %{_clientdir}/lib/iris-utils-%{version}.jar
 %{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
-%{_clientdir}/lib/Shapes-@@SHAPES.VERSION@@.jar
+%{_clientdir}/lib/shapes-@@SHAPES.VERSION@@.jar
 %{_clientdir}/lib/sonar-client-@@SONAR.VERSION@@.jar
 %{_clientdir}/lib/tdxml-@@TDXML.VERSION@@.jar
 %{_clientdir}/lib/tms-log-@@TMSLOG.VERSION@@.jar

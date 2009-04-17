@@ -65,7 +65,7 @@
 		  value="sonar-client-${sonar.version}.jar"/>
 	<property name="mapbean.jar" value="MapBean-${mapbean.version}.jar"/>
 	<property name="trafmap.jar" value="TrafMap-${trafmap.version}.jar"/>
-	<property name="shapes.jar" value="Shapes-${shapes.version}.jar"/>
+	<property name="shapes.jar" value="shapes-${shapes.version}.jar"/>
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
 	<property name="videoclient.jar"
