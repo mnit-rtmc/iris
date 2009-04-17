@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -133,12 +134,15 @@ public class Session {
 	protected StationLayer createStationLayer(final SonarState st)
 		throws IOException, TdxmlException
 	{
+		String loc = props.getProperty("tdxml.station.url");
+		if(loc == null)
+			return null;
 		StationLayer layer;
 		try {
-			layer = new StationLayer(props, logger);
+			layer = new StationLayer(new URL(loc), logger);
 		}
 		catch(IOException e) {
-			System.err.println("Station .shp file was not found");
+			System.err.println("gpoly.shp file was not found");
 			return null;
 		}
 		layer.setLabels(new StationLayer.Labeller() {
@@ -159,7 +163,8 @@ public class Session {
 		if(gpoly != null)
 			lstates.add(gpoly.createState());
 		lstates.add(cam_manager.getLayer().createState());
-		lstates.add(incLayer.createState());
+		if(incLayer != null)
+			lstates.add(incLayer.createState());
 		if(rwisLayer != null)
 			lstates.add(rwisLayer.createState());
 		lstates.add(warn_manager.getLayer().createState());
@@ -184,7 +189,8 @@ public class Session {
 
 	/** Add the incident tab */
 	protected void addIncidentTab() {
-		tabs.add(new IncidentTab(incLayer));
+		if(incLayer != null)
+			tabs.add(new IncidentTab(incLayer));
 	}
 
 	/** Add the rwis tab */
@@ -219,12 +225,18 @@ public class Session {
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer(st);
 
-		// Create agency specific incident layer
-		if(SystemAttributeHelper.isAgencyCaltransD10()) {
-			incLayer = new D10IncidentLayer(props, logger);
-			rwisLayer = new D10RwisLayer(props, logger);
+		String i_loc = props.getProperty("tdxml.incident.url");
+		if(i_loc != null) {
+			URL u = new URL(i_loc);
+			if(SystemAttributeHelper.isAgencyCaltransD10()) {
+				incLayer = new D10IncidentLayer(u, logger);
+				rwisLayer = new D10RwisLayer(u, logger);
+			} else {
+				incLayer = new TmsIncidentLayer(u, logger);
+				rwisLayer = null;
+			}
 		} else {
-			incLayer = new TmsIncidentLayer(props, logger);
+			incLayer = null;
 			rwisLayer = null;
 		}
 
@@ -269,7 +281,8 @@ public class Session {
 			tab.dispose();
 		if(gpoly != null)
 			gpoly.dispose();
-		incLayer.dispose();
+		if(incLayer != null)
+			incLayer.dispose();
 		if(rwisLayer != null)
 			rwisLayer.dispose();
 	}

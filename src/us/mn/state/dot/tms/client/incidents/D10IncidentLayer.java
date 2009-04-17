@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,8 @@
 
 package us.mn.state.dot.tms.client.incidents;
 
+import java.net.URL;
 import java.util.logging.Logger;
-import java.util.Properties;
-
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tdxml.d10.CHPXmlIncidentClient;
 import us.mn.state.dot.tdxml.TdxmlException;
@@ -39,17 +38,14 @@ import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
 public class D10IncidentLayer extends TmsIncidentLayer {
 
 	/** Create a new D10 TMS incident layer */
-	public D10IncidentLayer(Properties props, Logger logger)
-		throws TdxmlException
-	{
-		super(props, logger);
+	public D10IncidentLayer(URL u, Logger logger) throws TdxmlException {
+		super(u, logger);
 	}
 
 	/** create incident client, called by constructor, may be overridden by each agency. */
-	protected XmlIncidentClient createIncidentClient(Properties props, Logger logger) 
+	protected XmlIncidentClient createIncidentClient(URL u, Logger logger) 
 		throws TdxmlException
-    {
-        return new CHPXmlIncidentClient(props, logger);
+	{
+		return new CHPXmlIncidentClient(u, logger);
 	}
-
 }

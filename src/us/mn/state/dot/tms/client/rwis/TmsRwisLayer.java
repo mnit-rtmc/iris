@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.rwis;
 
-import java.util.Properties;
+import java.net.URL;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tdxml.TdxmlException;
@@ -36,10 +36,8 @@ public class TmsRwisLayer extends RwisLayer {
 	protected final DirectionalIncidentTheme theme;
 
 	/** Create a new TMS incdent layer */
-	public TmsRwisLayer(Properties props, Logger logger)
-		throws TdxmlException
-	{
-		super(props, logger);
+	public TmsRwisLayer(URL u, Logger logger) throws TdxmlException {
+		super(u, logger);
 		theme = new DirectionalIncidentTheme();
 	}
 
