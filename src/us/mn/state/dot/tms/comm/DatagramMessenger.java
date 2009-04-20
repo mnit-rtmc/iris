@@ -119,12 +119,12 @@ public class DatagramMessenger extends Messenger {
 		/** Read a byte from a received datagram */
 		public int read() throws IOException {
 			try {
-				return buffer.get();
+				return buffer.get() & 0xFF;
 			}
 			catch(BufferUnderflowException e) {
 				receivePacket();
 				try {
-					return buffer.get();
+					return buffer.get() & 0xFF;
 				}
 				catch(BufferUnderflowException e2) {
 					throw new SocketTimeoutException("DIS");
@@ -141,6 +141,20 @@ public class DatagramMessenger extends Messenger {
 				buffer.position(0);
 				buffer.limit(packet.getLength());
 			}
+		}
+
+		/** Get the number of available bytes */
+		public int available() {
+			return buffer.remaining();
+		}
+
+		/** Skip the given number of bytes in the input stream */
+		public void skip(int b) {
+			if(b >= buffer.remaining()) {
+				buffer.clear();
+				buffer.limit(0);
+			} else
+				buffer.position(buffer.position() + b);
 		}
 	}
 }
