@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.tms.comm.DatagramMessenger;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
@@ -251,20 +252,30 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new SocketMessenger(createSocketAddress(url));
 	}
 
+	/** Create a datagram messenger */
+	protected Messenger createDatagramMessenger() throws IOException {
+		return new DatagramMessenger(createSocketAddress(url));
+	}
+
 	/** Create an http file messenger */
 	protected Messenger createHttpFileMessenger() throws IOException {
 		return new HttpFileMessenger(new URL(url));
 	}
 
-	/** Create an NTCIP Class C poller */
-	protected MessagePoller createNtcipCPoller() throws IOException {
-		return new NtcipPoller(name, createSocketMessenger());
+	/** Create an NTCIP Class A poller */
+	protected MessagePoller createNtcipAPoller() throws IOException {
+		return new NtcipPoller(name, createDatagramMessenger());
 	}
 
 	/** Create an NTCIP Class B poller */
 	protected MessagePoller createNtcipBPoller() throws IOException {
 		HDLCMessenger hdlc = new HDLCMessenger(createSocketMessenger());
 		return new NtcipPoller(name, hdlc);
+	}
+
+	/** Create an NTCIP Class C poller */
+	protected MessagePoller createNtcipCPoller() throws IOException {
+		return new NtcipPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Mn/DOT poller */
@@ -311,6 +322,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Try to open the communication link */
 	protected MessagePoller createPoller() throws IOException {
 		switch(protocol) {
+			case PROTO_NTCIP_A:
+				return createNtcipAPoller();
 			case PROTO_NTCIP_B:
 				return createNtcipBPoller();
 			case PROTO_NTCIP_C:

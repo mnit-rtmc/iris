@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,9 @@ public interface CommLink extends SonarObject {
 	/** CAWS protocol */
 	int PROTO_CAWS = 10;
 
+	/** NTCIP Class A protocol */
+	int PROTO_NTCIP_A = 11;
+
 	/** Protocol string constants */
 	String[] PROTOCOLS = {
 		"NTCIP Class B",
@@ -72,6 +75,7 @@ public interface CommLink extends SonarObject {
 		"Manchester",
 		"DMS Lite",
 		"CAWS",
+		"NTCIP Class A",
 	};
 
 	/** Set text description */
