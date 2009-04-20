@@ -40,7 +40,9 @@ public class I18NMessages {
 	static private ResourceBundle m_i18NMessages = null;
 
 	/** Class can't be instantiated */
-	private I18NMessages() {}
+	private I18NMessages() {
+		assert false;
+	}
 
 	/**
 	 * Read resource bundle and assign to public static field.
@@ -69,10 +71,10 @@ public class I18NMessages {
 			m_i18NMessages = null;
 		}
 		if(m_i18NMessages == null) {
-			System.err.println("I18N: error: failed to open " +
-				"I18N resource bundle: " + BASENAME + "_" + 
-				l + "_" + c + "_" + v);
-		}
+			System.err.println("Error: I18NMessages: can't do a " +
+				"get() before the message bundle loaded.");
+			return "NO_I18N_BUNDLE";
+ 		}
 	}
 
 	/** Get string using id */
