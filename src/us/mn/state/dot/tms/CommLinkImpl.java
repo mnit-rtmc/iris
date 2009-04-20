@@ -57,12 +57,12 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		String[] s = url.split(":");
 		if(s.length != 2)
 			throw new IOException("INVALID SOCKET ADDRESS");
-		int p = parseTcpPort(s[1]);
+		int p = parsePort(s[1]);
 		return new InetSocketAddress(s[0], p);
 	}
 
-	/** Parse a TCP port */
-	static protected int parseTcpPort(String p) throws IOException {
+	/** Parse the port number */
+	static protected int parsePort(String p) throws IOException {
 		try {
 			int i = Integer.parseInt(p);
 			if(i >= 0 && i <= 65535)
@@ -71,7 +71,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		catch(NumberFormatException e) {
 			// Fall out
 		}
-		throw new IOException("INVALID TCP PORT: " + p);
+		throw new IOException("INVALID PORT: " + p);
 	}
 
 	/** Load all the comm links */
