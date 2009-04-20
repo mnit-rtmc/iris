@@ -130,6 +130,9 @@ public class IrisClient extends JFrame {
 				loggedout();
 			}
 		});
+
+		// auto login if enabled
+		userManager.autoLogin();
 	}
 
 	/** Make the frame displayable (called by window toolkit) */

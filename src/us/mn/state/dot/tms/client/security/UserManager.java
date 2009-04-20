@@ -34,15 +34,19 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.utils.PropertyFile;
 
 /**
  * The UserManager is used to display a login prompt and to verify that the
  * user logging in has appropriate rights to use the client.  Checks for
  * administrative privaleges.  Also used to log out of the connection when
- * exiting the client.
+ * exiting the client. Auto-login functionality is enabled by adding
+ * properties 'autologin.username' and 'autologin.password' to the client
+ * properties file.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class UserManager {
 
@@ -117,6 +121,46 @@ public class UserManager {
 			desktop.show(new LoginForm());
 	}
 
+	/** auto-login the user if enabled */
+	public void autoLogin() throws Exception {
+		if(isLoggedIn())
+			return;
+		if(props == null)
+			return;
+
+		// get login values
+		String un = PropertyFile.get(props, "autologin.username");
+		String pws = PropertyFile.get(props, "autologin.password");
+		if(un == null || pws == null)
+			return;
+		if(un.length() <= 0 || pws.length() <= 0)
+			return;
+		char[] pw = pws.toCharArray();
+		pws = null;
+
+		// auto login enabled?
+		if(un.length() > 0 && pw.length > 0) {
+			try {
+				doUserLogin(un, pw);
+			}
+			catch(Exception ex) {
+				System.err.println("Auto-login failed.");
+			}
+		}
+
+		// blank the password
+		for(int i = 0; i < pw.length; ++i)
+			pw[i] = ' ';
+		pw = null;
+	}
+
+	/** perform user login */
+	protected void doUserLogin(String un, char[] pw) throws Exception {
+		state = createSonarState();
+		user = createUser(un, pw);
+		fireLogin();
+	}
+
 	/** Logout the current user */
 	public void logout() {
 		SonarState s = state;
@@ -170,9 +214,12 @@ public class UserManager {
 			char[] pwd = password.getPassword();
 			password.setText("");
 			close();
-			state = createSonarState();
-			user = createUser(user_name.getText(), pwd);
-			fireLogin();
+			doUserLogin(user_name.getText(), pwd);
+
+			// blank the password
+			for(int i = 0; i < pwd.length; ++i)
+				pwd[i] = ' ';
+			pwd = null;
 		}
 	}
 
