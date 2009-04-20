@@ -150,12 +150,8 @@ abstract public class OpDms extends Device2Operation {
 		// trigger error handling, changes status if necessary
 		handleException(new IOException(msg));
 
-		// enforce id length restriction due to database column size
-		final int DB_COLUMN_MAX_LEN=30;
-		String id=SString.truncate(msg,DB_COLUMN_MAX_LEN);
-
 		// retry?
-		boolean retry = (controller != null && controller.retry(id));
+		boolean retry = (controller != null && controller.retry(msg));
 		return retry;
 	}
 
