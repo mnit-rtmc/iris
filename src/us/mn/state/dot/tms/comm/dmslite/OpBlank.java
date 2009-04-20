@@ -29,9 +29,6 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  */
 public class OpBlank extends OpDms
 {
-	/** associated DMS */
-	private final DMSImpl m_dms;
-
 	/** blank message, which contains owner, duration */
 	private final SignMessage m_mess;
 
@@ -41,7 +38,6 @@ public class OpBlank extends OpDms
 	/** Create a new DMS query configuration object */
 	public OpBlank(DMSImpl d, SignMessage mess, User owner) {
 		super(DOWNLOAD, d, "OpBlank");
-		m_dms = d;
 		m_mess = mess;
 		m_owner = owner;
 	}

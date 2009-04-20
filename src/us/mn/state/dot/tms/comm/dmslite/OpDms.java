@@ -88,9 +88,9 @@ abstract public class OpDms extends Device2Operation {
 
 	/** return the timeout for this operation */
 	public int calcTimeoutMS() {
+		int secs = 60;
 		assert m_dms != null : "m_dms is null in OpDms.getTimeoutMS()";
 		String a = m_dms.getSignAccess();
-		int secs = 60;
 		if (a.toLowerCase().contains("modem")) {
 			secs = SystemAttributeHelperD10.dmsliteModemOpTimeoutSecs();
 			System.err.println("connection type is modem:"+a+", dms="+m_dms.toString()+", timeout secs="+secs);
