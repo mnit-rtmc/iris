@@ -83,6 +83,9 @@ public class IrisClient extends JFrame {
 	/** Login session information */
 	protected Session session;
 
+	/** the help menu changes after login */
+	protected HelpMenu m_helpmenu;
+
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws Exception {
 		super("IRIS: Login to Start");
@@ -141,8 +144,9 @@ public class IrisClient extends JFrame {
 	protected void buildMenus(UserManager a) {
 		JMenuBar menuBar = new JMenuBar();
 		menuBar.add(new SessionMenu(a));
-		menuBar.add(new HelpMenu(desktop));
-		this.setJMenuBar( menuBar );
+		m_helpmenu = new HelpMenu(desktop);
+		menuBar.add(m_helpmenu);
+		this.setJMenuBar(menuBar);
 	}
 
 	/** Get a list of all visible screen panes */
@@ -184,6 +188,11 @@ public class IrisClient extends JFrame {
 				userManager.getSonarState());
 			getJMenuBar().add(viewMenu, 1);
 		}
+
+		// post-login additions to help menu
+		if(m_helpmenu != null)
+			m_helpmenu.add(desktop);
+
 		setCursor(null);
 		validate();
 	}

@@ -48,6 +48,22 @@ public class Help implements ActionListener {
 		return KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0);
 	}
 
+	/** Invoke help with the specified URL.
+	 *  @param url HTTP URL of help page to load. */
+	static public void invokeHelpWithUrl(String url) {
+ 		// URL to load when no URL found
+		String DEFAULT_ERROR_URL = "NO_URL_SPECIFIED_IN_HELP";
+ 		WebBrowser.open(url == null ? 
+ 			DEFAULT_ERROR_URL : url);
+ 	}
+
+	/** Invoke help with the specified i18n page name.
+ 	 *  @param pn Page name (I18N string tag) of help page to load. */
+ 	static public void invokeHelpWithPageName(String pn) {
+		invokeHelpWithUrl(I18NMessages.get(pn == null ? 
+			defaultHelpPageName : pn));
+ 	}
+
 	/** Invoke help. The help URL is set by each form. */
 	static public void invokeHelp() {
 		AbstractForm cf = m_sd.findTopFrame();

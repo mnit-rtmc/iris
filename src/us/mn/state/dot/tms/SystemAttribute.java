@@ -163,6 +163,12 @@ public interface SystemAttribute extends SonarObject {
 	/** Address of recipient of BUG emails */
 	String EMAIL_RECIPIENT_BUGS = "email_recipient_bugs";
 
+	/** menu related */
+	String MENU_HELP_TROUBLE_TICKET = 
+		"menu_help_trouble_ticket";		// boolean
+	String MENU_HELP_TROUBLE_TICKET_URL = 
+		"menu_help_trouble_ticket_url";		// string
+
 	String AGENCY_ID = "agency_id";
 
 	/** possible values for the AGENCY_ID attribute */

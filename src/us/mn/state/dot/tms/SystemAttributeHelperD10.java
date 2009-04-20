@@ -12,12 +12,14 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 package us.mn.state.dot.tms;
 
 /**
  * Static System Attribute convenience methods accessible from
  * the client and server, and are specific to Caltrans D10.
  * @author Michael Darter
+ * @see SystemAttributeHelper, SystemAttribute
  */
 public class SystemAttributeHelperD10 extends SystemAttributeHelper {
 
@@ -30,9 +32,7 @@ public class SystemAttributeHelperD10 extends SystemAttributeHelper {
 		"caltrans_d10_mod_op_timeout_secs";
 
 	/** disallow instantiation */
-	protected SystemAttributeHelperD10() {
-		assert false;
-	}
+	private SystemAttributeHelperD10() {}
 
 	/** Return dmslite operation timeout in seconds */
 	public static int dmsliteOpTimeoutSecs() {

@@ -23,10 +23,12 @@ import us.mn.state.dot.tms.utils.SString;
  * system attributes and validate them. Agency specific methods
  * should be placed in a subclass.
  * @author Michael Darter
+ * @see SystemAttribute
  */
 public class SystemAttributeHelper {
 
-	/** SONAR namespace */
+	/** SONAR namespace. For server code this is set in TMSImpl and
+	 *  for client code this is set in SonarState. */
 	static public Namespace namespace;
 
 	/** Disallow instantiation */
@@ -36,8 +38,7 @@ public class SystemAttributeHelper {
 
 	/** Get the SystemAttribute with the specified name.
 	 *  @param aname Name of an existing attribute.
-	 *  @return SystemAttribute or null if not found.
-	 */
+	 *  @return SystemAttribute or null if not found. */
 	static public SystemAttribute get(String aname) {
 		if(aname == null)
 			return null;
@@ -132,8 +133,8 @@ public class SystemAttributeHelper {
 			return Float.parseFloat(getValue(aname));
 		}
 		catch(NumberFormatException e) {
-			throw new IllegalArgumentException("System Attribute " +
-				aname + " could not be parsed");
+			throw new IllegalArgumentException("System " +
+				"Attribute " + aname + " could not be parsed");
 		}
 	}
 
@@ -579,5 +580,20 @@ public class SystemAttributeHelper {
 	/** Address of recipient of BUG emails */
 	static public String getEmailRecipientBugs() {
 		return getValue(SystemAttribute.EMAIL_RECIPIENT_BUGS);
+	}
+
+	/** Return true if the menu item help / open trouble ticket should 
+	 *  be displayed. */
+	public static boolean useMenuItemHelpTroubleTicket() {
+		return getValueBoolean(
+			SystemAttribute.MENU_HELP_TROUBLE_TICKET, false);
+	}
+
+	/** Return the URL used for the menu item help / open trouble ticket */
+	public static String menuItemHelpTroubleTicketUrl() {
+		return getValue(SystemAttribute.
+			MENU_HELP_TROUBLE_TICKET_URL, 
+			"SPECIFY_SYSTEM_ATTRIBUTE: " + 
+			SystemAttribute.MENU_HELP_TROUBLE_TICKET_URL);
 	}
 }

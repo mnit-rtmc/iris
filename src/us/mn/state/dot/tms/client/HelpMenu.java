@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.client;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.tms.client.toast.Help;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /** 
  * Menu for help information.
@@ -27,6 +29,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class HelpMenu extends JMenu {
 
+	/** open trouble ticket menu item */
+	JMenuItem m_opentroubleticket;
+
 	/** Create a new HelpMenu */
 	public HelpMenu(final SmartDesktop desktop) { 
 		super("Help");
@@ -34,7 +39,7 @@ public class HelpMenu extends JMenu {
 
 		JMenuItem item;
 
-		// Support menu item
+		// add menu item: Support
 		item = new JMenuItem("Support");
 		item.setMnemonic('S');
 		new ActionJob(item) {
@@ -44,7 +49,7 @@ public class HelpMenu extends JMenu {
 		};
 		add(item);
 
-		// About menu item
+		// add menu item: About IRIS
 		item = new JMenuItem("About IRIS");
 		item.setMnemonic('A');
 		new ActionJob(item) {
@@ -53,6 +58,35 @@ public class HelpMenu extends JMenu {
 			}
 		};
 		add(item);
+	}
 
+	/** add additional menu items to the existing help menu */
+	public void add(final SmartDesktop desktop) { 
+		addOpenTroubleTicket(desktop);
+	}
+
+	/** Add the 'open trouble ticket' menu item. This menu item
+	 *  is inserted at the begining of the help menu and not removed
+	 *  when the user logs out. */
+	protected void addOpenTroubleTicket(final SmartDesktop desktop) { 
+	   	if(!SystemAttributeHelper.useMenuItemHelpTroubleTicket())
+			return;
+
+		// it's already on the menu
+		if(isMenuComponent(m_opentroubleticket))
+			return;
+
+		final String url = SystemAttributeHelper.
+			menuItemHelpTroubleTicketUrl();
+		m_opentroubleticket = new JMenuItem(
+			"Open Trouble Ticket");
+		m_opentroubleticket.setMnemonic('T');
+		new ActionJob(m_opentroubleticket) {
+			public void perform() throws Exception {
+				Help.invokeHelpWithUrl(url);
+			}
+		};
+		// add as 0th item in menu
+		insert(m_opentroubleticket, 0);
 	}
 }
