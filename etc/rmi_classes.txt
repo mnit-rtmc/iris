@@ -20,6 +20,7 @@ us/mn/state/dot/tms/Device.class
 us/mn/state/dot/tms/Device2.class
 us/mn/state/dot/tms/DeviceList.class
 us/mn/state/dot/tms/DMS.class
+us/mn/state/dot/tms/DMSHelper.class
 us/mn/state/dot/tms/DMSMessagePriority.class
 us/mn/state/dot/tms/DMSType.class
 us/mn/state/dot/tms/DmsSignGroup.class

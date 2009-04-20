@@ -35,6 +35,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
@@ -298,7 +299,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			cache.ignoreObject(watching);
 		watching = dms;
 		cache.watchObject(watching);
-		if(DMSManager.isActive(dms)) {
+		if(DMSHelper.isActive(dms)) {
 			builder = createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
 			enableWidgets();

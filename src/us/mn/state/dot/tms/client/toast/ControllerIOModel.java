@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneControlSignal;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TMSObject;
@@ -178,7 +179,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			DetectorManager.STYLE_NO_CONTROLLER), true);
 		dms_model = new WrapperComboBoxModel(
 			Session.dms_manager_singleton.getStyleModel(
-			DMSManager.STYLE_NO_CONTROLLER), true);
+			DMSHelper.STYLE_NO_CONTROLLER), true);
 		lcs_model = new WrapperComboBoxModel(
 			tms.getAvailableLCSs().getModel(), true);
 		m_model = new WrapperComboBoxModel(
