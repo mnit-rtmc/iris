@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -153,9 +153,7 @@ public class SNMP extends BER {
 			encoder.writeTo(os);
 			encoder.reset();
 			os.flush();
-			decodeSNMPMessage(is, community);
-			decodeResponsePDU(is);
-			decodeVarBindList(is);
+			decodeResponse(community);
 		}
 
 		/** Send an SNMP get request message */
@@ -172,14 +170,30 @@ public class SNMP extends BER {
 			encoder.writeTo(os);
 			encoder.reset();
 			os.flush();
-			decodeSNMPMessage(is, community);
-			decodeResponsePDU(is);
-			decodeVarBindList(is);
+			decodeResponse(community);
 		}
 
 		/** Send an SNMP set request message */
 		public void setRequest() throws IOException {
 			setRequest(PUBLIC);
+		}
+
+		/** Decode a response to a SET or GET request */
+		protected void decodeResponse(String community)
+			throws IOException
+		{
+			for(int i = 0; i < 5; i++) {
+				try {
+					decodeSNMPMessage(is, community);
+					decodeResponsePDU(is);
+					decodeVarBindList(is);
+					return;
+				}
+				catch(RequestIDException e) {
+					System.err.println(e.getMessage());
+					is.skip(is.available());
+				}
+			}
 		}
 
 		/** Encode the value of an MIB object */
@@ -269,9 +283,8 @@ public class SNMP extends BER {
 			if(decodeLength(is) > is.available()) throw new
 				ParsingException("INVALID PDU LENGTH");
 			int request = decodeInteger(is);
-			if(request != request_id) throw new ParsingException(
-				"SNMP REQUEST ID: " + request + " != " +
-				request_id);
+			if(request != request_id)
+				throw new RequestIDException(request);
 			int error = decodeInteger(is);
 			int index = decodeInteger(is);
 			switch(error) {
@@ -280,6 +293,16 @@ public class SNMP extends BER {
 				case BAD_VALUE: throw new BadValue(index);
 				case READ_ONLY: throw new ReadOnly(index);
 				case GEN_ERROR: throw new GenError(index);
+			}
+		}
+
+		/** Request ID mismatch exception */
+		public class RequestIDException extends ParsingException {
+
+			/** Create a new Request-ID exception */
+			protected RequestIDException(int request) {
+				super("SNMP REQUEST ID: " + request + " != " +
+					request_id);
 			}
 		}
 
