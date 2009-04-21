@@ -56,7 +56,8 @@ public class I18NMessages {
 		String c = PropertyFile.get(props, "country");
 		String v = PropertyFile.get(props, "variant");
 
-		System.err.println("I18N: opening I18N resources: Language=" +
+		System.err.println(
+			"Note: I18N: opening I18N resources: Language=" +
 			l + ", Country=" + c + ", Variant=" + v);
 		try {
 			if(v != null && l != null && c != null) {
@@ -66,14 +67,12 @@ public class I18NMessages {
 			}
 		}
 		catch(Exception ex) {
-			System.err.println("I18N: error: could not load " +
-				" message bundle: " + ex);
+			System.err.println("Error: could not load message bundle: "+ex);
 			m_i18NMessages = null;
 		}
 		if(m_i18NMessages == null) {
-			System.err.println("Error: I18NMessages: can't do a " +
-				"get() before the message bundle loaded.");
-			return "NO_I18N_BUNDLE";
+			System.err.println("Error: failed to open I18N resource bundle: "+
+			BASENAME+"_"+l+"_"+c+"_"+v);
  		}
 	}
 
@@ -90,8 +89,8 @@ public class I18NMessages {
 		}
 		catch(Exception ex) {
 			System.err.println(
-				"I18N: error while reading id (" + id +
-				") from bundle, ex=" + ex);
+				"Error: attempting to read id ("+id+
+				") from bundle, ex="+ex);
 			return NOT_READ;
 		}
 	}
