@@ -378,6 +378,13 @@ public final class TMSImpl extends TMSObjectImpl implements TMS {
 				return false;
 			}
 		});
+		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
+			public boolean check(DMSImpl s) {
+				s.setSignRequest(SignRequest.
+					QUERY_PIXEL_FAILURES.ordinal());
+				return false;
+			}
+		});
 	}
 
 	/** Poll all controllers 30 second interval */
