@@ -64,7 +64,7 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 	/** Mask of errors reportable for maintenance */
 	static protected final int REPORTABLE_MASK =
 		OTHER | COMMUNICATIONS | POWER | ATTACHED_DEVICE | LAMP |
-		PHOTOCELL | CONTROLLER | TEMPERATURE | FAN;
+		PHOTOCELL | CONTROLLER | TEMPERATURE;
 
 	/** Create a new ShortErrorStatus object */
 	public ShortErrorStatus() {
@@ -115,9 +115,11 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 
 	/** Check if we should report the error for maintenance */
 	public boolean shouldReport() {
-		// PIXEL errors are reported by DMSQueryPixelStatus operation
+		// PIXEL errors are reported by DMSQueryPixelStatus operation.
 		// MESSAGE errors can pop up for lots of reasons,
-		// so we shouldn't consider them real errors
+		// so we shouldn't consider them real errors.
+		// FAN errors are not reported because of too many false
+		// positives from existing signs (Mn/DOT).
 		return (status & REPORTABLE_MASK) != 0;
 	}
 }
