@@ -29,6 +29,9 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  */
 public class DMSQueryPixelFailures extends DMSOperation {
 
+	/** Number of pixel errors before reported for maintenance */
+	static protected final int REPORT_PIXEL_ERROR_COUNT = 35;
+
 	/** Flag to indicate whether a pixel test should be performed */
 	protected final boolean perform_test;
 
@@ -177,6 +180,10 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			status[DMS.STUCK_ON_BITMAP] =
 				Base64.encode(stuck_on.getBitmap());
 			dms.setPixelStatus(status);
+			if(rows.getInteger() > REPORT_PIXEL_ERROR_COUNT) {
+				errorStatus = "Too many pixel errors: " +
+					rows.getInteger();
+			}
 		}
 		super.cleanup();
 	}
