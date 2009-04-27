@@ -40,7 +40,7 @@ import us.mn.state.dot.sonar.client.SonarShowException;
 import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A swing dialog for displaying exception stack traces.
@@ -218,8 +218,9 @@ public class ExceptionDialog extends JDialog {
 
 	/** Send an e-mail alert to the system administrators */
 	protected void sendEmailAlert(Exception e) {
-		String sender = SystemAttributeHelper.getEmailSenderClient();
-		String recipient =SystemAttributeHelper.getEmailRecipientBugs();
+		String sender = SystemAttrEnum.EMAIL_SENDER_CLIENT.getString();
+		String recipient =
+			SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
 		if(sender != null && recipient != null) {
 			try {
 				sendEmailAlert(sender, recipient, e);

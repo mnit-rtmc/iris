@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
@@ -161,7 +161,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected Box createDeployBox() {
 		durationCmb.setSelectedIndex(0);
 		FormPanel panel = new FormPanel(true);
-		if(SystemAttributeHelper.isDmsDurationEnabled())
+		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
 			panel.addRow("Duration", durationCmb);
 		panel.addRow(card_panel);
 		card_panel.add(new JLabel(), "Blank");
@@ -530,7 +530,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Get the number of lines on a sign */
 	public int getLineCount(DMS dms) {
-		int ml = SystemAttributeHelper.getDmsMaxLines();
+		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		int lh = getLineHeightPixels();
 		Integer h = dms.getHeightPixels();
 		if(h != null && h > 0 && lh >= h) {

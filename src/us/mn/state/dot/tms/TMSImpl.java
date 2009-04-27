@@ -94,7 +94,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 	public void scheduleJobs() {
 		station_manager = new StationManager(namespace);
 		TIMER.addJob(new TimerJobSigns(
-			SystemAttributeHelper.getDmsPollFreqSecs()));
+			SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new TimerJob5Min());

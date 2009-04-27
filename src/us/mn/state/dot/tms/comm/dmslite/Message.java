@@ -20,7 +20,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import javax.mail.MessagingException;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.utils.SString;
@@ -330,8 +330,8 @@ public class Message implements AddressedMessage
 		System.err.println("Warning: failure to send AWS message to DMS: " + errmsg);
 
 		// build email
-		String sender = SystemAttributeHelper.getEmailSenderServer();
-		String recipient = SystemAttributeHelper.getEmailRecipientAws();
+		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
+		String recipient=SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
 		String subject = "IRIS could not send AWS message to DMS";
 
 		// send

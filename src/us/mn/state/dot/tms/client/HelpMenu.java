@@ -19,7 +19,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.toast.Help;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /** 
  * Menu for help information.
@@ -69,15 +69,15 @@ public class HelpMenu extends JMenu {
 	 *  is inserted at the begining of the help menu and not removed
 	 *  when the user logs out. */
 	protected void addOpenTroubleTicket(final SmartDesktop desktop) { 
-	   	if(!SystemAttributeHelper.useMenuItemHelpTroubleTicket())
+	   	if(!SystemAttrEnum.HELP_TROUBLE_TICKET_ENABLE.getBoolean())
 			return;
 
 		// it's already on the menu
 		if(isMenuComponent(m_opentroubleticket))
 			return;
 
-		final String url = SystemAttributeHelper.
-			menuItemHelpTroubleTicketUrl();
+		final String url =
+			SystemAttrEnum.HELP_TROUBLE_TICKET_URL.getString();
 		m_opentroubleticket = new JMenuItem(
 			"Open Trouble Ticket");
 		m_opentroubleticket.setMnemonic('T');

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.URL;
 import javax.swing.Action;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.WebBrowser;
 
 /**
@@ -30,7 +30,7 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 
 	/** Check if the TESLA system attribute is configured */
 	static public boolean isConfigured() {
-		return SystemAttributeHelper.getTeslaHost() != null;
+		return SystemAttrEnum.TESLA_HOST.getString() != null;
 	}
 
 	/** Create a new TESLA action */
@@ -46,7 +46,7 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 
 	/** Actually perform the action */
 	protected void do_perform() throws IOException {
-		String host = SystemAttributeHelper.getTeslaHost();
+		String host = SystemAttrEnum.TESLA_HOST.getString();
 		if(host != null) {
 			WebBrowser.open(new URL("http://" + host +
 				"/tesla/user/DeviceFailureEvent.do?" +

@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -122,7 +122,7 @@ public class SignMessageComposer extends JPanel {
 		user = u;
 		add(tab);
 		initializeFonts(1, null);
-		initializeWidgets(SystemAttributeHelper.getDmsMaxLines(), 1);
+		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
 	}
 
 	/** Dispose of the message selector */
@@ -167,7 +167,7 @@ public class SignMessageComposer extends JPanel {
 		SignTextModel stm = createSignTextModel(proxy);
 		int ml = stm.getMaxLine();
 		int np = Math.max(calculateSignPages(ml, nl),
-			SystemAttributeHelper.getDmsMessageMinPages());
+			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
 		initializeFonts(np, builder);
 		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
@@ -260,7 +260,7 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < n_lines; i++)
 			panel.add(cmbLine[i + p * n_lines]);
 		page.add(panel, BorderLayout.CENTER);
-		if(SystemAttributeHelper.isDmsFontSelectionEnabled())
+		if(SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean())
 			page.add(createFontBox(p), BorderLayout.SOUTH);
 		return page;
 	}

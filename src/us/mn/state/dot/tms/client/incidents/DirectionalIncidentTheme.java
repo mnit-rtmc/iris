@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.trafmap.IncidentLayer;
 
 /**
@@ -70,10 +70,10 @@ public class DirectionalIncidentTheme extends StyledTheme {
 		super("Incidents", IncidentLayer.TWO_WAY);
 		addStyle(new Style("default", null, Color.BLACK));
 		int[] r = new int[4];
-		r[0] = SystemAttributeHelper.getIncidentRing1Miles();
-		r[1] = SystemAttributeHelper.getIncidentRing2Miles();
-		r[2] = SystemAttributeHelper.getIncidentRing3Miles();
-		r[3] = SystemAttributeHelper.getIncidentRing4Miles();
+		r[0] = SystemAttrEnum.INCIDENT_RING_1_MILES.getInt();
+		r[1] = SystemAttrEnum.INCIDENT_RING_2_MILES.getInt();
+		r[2] = SystemAttrEnum.INCIDENT_RING_3_MILES.getInt();
+		r[3] = SystemAttrEnum.INCIDENT_RING_4_MILES.getInt();
 		ellipses = createEllipses(r);
 		addStyle(STYLE);
 	}

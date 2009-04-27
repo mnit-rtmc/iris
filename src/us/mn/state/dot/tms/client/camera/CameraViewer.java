@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.security.IrisUser;
@@ -57,13 +57,15 @@ public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
 	/** The system attribute for the number of frames to process (for streaming) */
-	static protected final int STREAM_DURATION = SystemAttributeHelper.numVideoFramesBeforeStop();
+	static protected final int STREAM_DURATION =
+		SystemAttrEnum.CAMERA_NUM_VIDEO_FRAMES.getInt();
 
 	/** Dead zone needed for too-precise joystick drivers */
 	static protected final float AXIS_DEADZONE = 3f / 64;
 
 	/** The system attribute for the number of button presets */
-	static protected final int NUMBER_BUTTON_PRESETS = SystemAttributeHelper.numPresetBtns();
+	static protected final int NUMBER_BUTTON_PRESETS =
+		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
 
 	/** Button number to select previous camera */
 	static protected final int BUTTON_PREVIOUS = 10;
@@ -203,7 +205,7 @@ public class CameraViewer extends JPanel
 		videoControls.add(stop);
 		add(videoControls, bag);
 		bag.gridy = 4;
-		if(SystemAttributeHelper.isCameraPTZPanelEnabled())
+		if(SystemAttrEnum.CAMERA_PTZ_PANEL_ENABLE.getBoolean())
 			add(ptz_panel, bag);
 		new ActionJob(NETWORKER, play) {
 			public void perform() throws Exception {

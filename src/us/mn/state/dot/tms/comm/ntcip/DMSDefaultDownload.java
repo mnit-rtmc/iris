@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -127,9 +127,9 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.add(new DefaultJustificationPage(
 				DefaultJustificationPage.TOP));
 			mess.add(new DefaultPageOnTime(Math.round(10 *
-				SystemAttributeHelper.getDmsPageOnSecs())));
+				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat())));
 			mess.add(new DefaultPageOffTime(Math.round(10 *
-				SystemAttributeHelper.getDmsPageOffSecs())));
+				SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat())));
 			mess.setRequest();
 			return new LedstarDefaults();
 		}
@@ -141,7 +141,7 @@ public class DMSDefaultDownload extends DMSOperation {
 		/** Set Ledstar-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new LedHighTempCutoff(
-				SystemAttributeHelper.getDmsHighTempCutoff()));
+				SystemAttrEnum.DMS_HIGH_TEMP_CUTOFF.getInt()));
 			mess.add(new LedSignErrorOverride());
 			mess.add(new LedBadPixelLimit());
 			try { mess.setRequest(); }
@@ -159,7 +159,7 @@ public class DMSDefaultDownload extends DMSOperation {
 		/** Set Skyline-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsTempCritical(
-				SystemAttributeHelper.getDmsHighTempCutoff()));
+				SystemAttrEnum.DMS_HIGH_TEMP_CUTOFF.getInt()));
 			mess.add(new DynBrightDayNight(32));
 			mess.add(new DynBrightDayRate(1));
 			mess.add(new DynBrightNightRate(15));

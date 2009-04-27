@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -82,7 +82,7 @@ public class DMSLampTest extends DMSOperation {
 
 		/** Time to stop checking if the test has completed */
 		protected final long expire = System.currentTimeMillis() + 
-			SystemAttributeHelper.getDmsLampTestTimeout() * 1000;
+			SystemAttrEnum.DMS_LAMP_TEST_TIMEOUT_SECS.getInt()*1000;
 
 		/** Check for test completion */
 		protected Phase poll(AddressedMessage mess) throws IOException {

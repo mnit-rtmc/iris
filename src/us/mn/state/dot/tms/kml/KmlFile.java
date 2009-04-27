@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,7 @@ import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttributeHelper;
-import us.mn.state.dot.tms.TMSObjectImpl;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -174,9 +173,9 @@ public class KmlFile
 	public static void writeServerFile(KmlDocument doc) {
 		if(doc == null)
 			return;
-		if(!SystemAttributeHelper.createKmlFile())
+		if(!SystemAttrEnum.KML_FILE_ENABLE.getBoolean())
 			return;
-		String fname = SystemAttributeHelper.kmlFileName();
+		String fname = SystemAttrEnum.KML_FILENAME.getString();
 		if(fname == null || fname.length() <=0 ) {
 			System.err.println("KmlFile.writeServerFile(): " +
 				"warning: bogus kml file name: "+fname);

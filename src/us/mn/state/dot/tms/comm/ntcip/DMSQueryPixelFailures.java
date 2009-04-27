@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -103,8 +103,8 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			new PixelTestActivation();
 
 		/** Time to stop checking if the test has completed */
-		protected final long expire = System.currentTimeMillis() + 
-			SystemAttributeHelper.getDmsPixelTestTimeout() * 1000;
+		protected final long expire = System.currentTimeMillis() + 1000*
+			SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
 
 		/** Check for test completion */
 		protected Phase poll(AddressedMessage mess) throws IOException {

@@ -28,7 +28,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18NMessages;
@@ -191,11 +191,12 @@ public class SystemAttributeForm extends AbstractForm {
 	}
 
 	/** Initialize one spinner widget */
-	protected void initSpinner(final JSpinner spinner, final String name) {
-		if(canChangeAttribute(name)) {
+	protected void initSpinner(final JSpinner spinner, SystemAttrEnum sa) {
+		final String aname = sa.aname();
+		if(canChangeAttribute(aname)) {
 			new ChangeJob(this, spinner) {
 				public void perform() {
-					setAttribute(name, spinner.getValue());
+					setAttribute(aname, spinner.getValue());
 				}
 			};
 		} else
@@ -208,11 +209,11 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Ramp Meter Interval Times (seconds)"));
 		panel.addRow("Green", green);
-		initSpinner(green, SystemAttribute.METER_GREEN_SECS);
+		initSpinner(green, SystemAttrEnum.METER_GREEN_SECS);
 		panel.addRow("Yellow", yellow);
-		initSpinner(yellow, SystemAttribute.METER_YELLOW_SECS);
+		initSpinner(yellow, SystemAttrEnum.METER_YELLOW_SECS);
 		panel.addRow("Minimum Red", min_red);
-		initSpinner(min_red, SystemAttribute.METER_MIN_RED_SECS);
+		initSpinner(min_red, SystemAttrEnum.METER_MIN_RED_SECS);
 		panel.setCenter();
 		JLabel area = new JLabel(CAUTION_RMETERS);
 		area.setBackground(null);
@@ -226,17 +227,17 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Time values (seconds)"));
 		panel.addRow("Polling Frequency", poll_freq);
-		initSpinner(poll_freq, SystemAttribute.DMS_POLL_FREQ_SECS);
+		initSpinner(poll_freq, SystemAttrEnum.DMS_POLL_FREQ_SECS);
 		panel.addRow("Pixel Test Timeout", pxl_tst_timeout);
 		initSpinner(pxl_tst_timeout,
-			SystemAttribute.DMS_PIXEL_TEST_TIMEOUT);
+			SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS);
 		panel.addRow("Lamp Test Timeout", lmp_tst_timeout);
 		initSpinner(lmp_tst_timeout,
-			SystemAttribute.DMS_LAMP_TEST_TIMEOUT);
+			SystemAttrEnum.DMS_LAMP_TEST_TIMEOUT_SECS);
 		panel.addRow("Page On Time", page_on);
-		initSpinner(page_on, SystemAttribute.DMS_PAGE_ON_SECS);
+		initSpinner(page_on, SystemAttrEnum.DMS_PAGE_ON_SECS);
 		panel.addRow("Page Off Time", page_off);
-		initSpinner(page_off, SystemAttribute.DMS_PAGE_OFF_SECS);
+		initSpinner(page_off, SystemAttrEnum.DMS_PAGE_OFF_SECS);
 		panel.setCenter();
 		JLabel area = new JLabel(CAUTION_DMS);
 		area.setBackground(null);
@@ -250,13 +251,13 @@ public class SystemAttributeForm extends AbstractForm {
 		panel.setCenter();
 		panel.addRow(new JLabel("Ring radii (miles)"));
 		panel.addRow("Ring 1", ring1);
-		initSpinner(ring1, SystemAttribute.INCIDENT_RING_1_MILES);
+		initSpinner(ring1, SystemAttrEnum.INCIDENT_RING_1_MILES);
 		panel.addRow("Ring 2", ring2);
-		initSpinner(ring2, SystemAttribute.INCIDENT_RING_2_MILES);
+		initSpinner(ring2, SystemAttrEnum.INCIDENT_RING_2_MILES);
 		panel.addRow("Ring 3", ring3);
-		initSpinner(ring3, SystemAttribute.INCIDENT_RING_3_MILES);
+		initSpinner(ring3, SystemAttrEnum.INCIDENT_RING_3_MILES);
 		panel.addRow("Ring 4", ring4);
-		initSpinner(ring4, SystemAttribute.INCIDENT_RING_4_MILES);
+		initSpinner(ring4, SystemAttrEnum.INCIDENT_RING_4_MILES);
 		return panel;
 	}
 
@@ -285,61 +286,77 @@ public class SystemAttributeForm extends AbstractForm {
 
 	/** Update one system attribute on the form */
 	protected void updateAttribute(String a) {
-		if(a == null || a.equals(SystemAttribute.METER_GREEN_SECS)) {
+		if(a == null ||
+		   a.equals(SystemAttrEnum.METER_GREEN_SECS.aname()))
+		{
 			green.setValue(
-				SystemAttributeHelper.getMeterGreenSecs());
+				SystemAttrEnum.METER_GREEN_SECS.getFloat());
 		}
-		if(a == null || a.equals(SystemAttribute.METER_YELLOW_SECS)) {
+		if(a == null ||
+		   a.equals(SystemAttrEnum.METER_YELLOW_SECS.aname()))
+		{
 			yellow.setValue(
-				SystemAttributeHelper.getMeterYellowSecs());
+				SystemAttrEnum.METER_YELLOW_SECS.getFloat());
 		}
-		if(a == null || a.equals(SystemAttribute.METER_MIN_RED_SECS)) {
+		if(a == null ||
+		   a.equals(SystemAttrEnum.METER_MIN_RED_SECS.aname()))
+		{
 			min_red.setValue(
-				SystemAttributeHelper.getMeterMinRedSecs());
+				SystemAttrEnum.METER_MIN_RED_SECS.getFloat());
 		}
-		if(a == null || a.equals(SystemAttribute.DMS_POLL_FREQ_SECS)) {
+		if(a == null ||
+		   a.equals(SystemAttrEnum.DMS_POLL_FREQ_SECS.aname()))
+		{
 			poll_freq.setValue(
-				SystemAttributeHelper.getDmsPollFreqSecs());
+				SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt());
 		}
 		if(a == null ||
-		   a.equals(SystemAttribute.DMS_PIXEL_TEST_TIMEOUT))
+		   a.equals(SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.aname()))
 		{
-			pxl_tst_timeout.setValue(
-				SystemAttributeHelper.getDmsPixelTestTimeout());
+			pxl_tst_timeout.setValue(SystemAttrEnum.
+				DMS_PIXEL_TEST_TIMEOUT_SECS.getInt());
 		}
 		if(a == null ||
-		   a.equals(SystemAttribute.DMS_LAMP_TEST_TIMEOUT))
+		   a.equals(SystemAttrEnum.DMS_LAMP_TEST_TIMEOUT_SECS.aname()))
 		{
-			lmp_tst_timeout.setValue(
-				SystemAttributeHelper.getDmsLampTestTimeout());
+			lmp_tst_timeout.setValue(SystemAttrEnum.
+				DMS_LAMP_TEST_TIMEOUT_SECS.getInt());
 		}
-		if(a == null || a.equals(SystemAttribute.DMS_PAGE_ON_SECS)) {
+		if(a == null ||
+		   a.equals(SystemAttrEnum.DMS_PAGE_ON_SECS.aname()))
+		{
 			page_on.setValue(
-				SystemAttributeHelper.getDmsPageOnSecs());
+				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat());
 		}
-		if(a == null || a.equals(SystemAttribute.DMS_PAGE_OFF_SECS)) {
+		if(a == null ||
+		   a.equals(SystemAttrEnum.DMS_PAGE_OFF_SECS.aname()))
+		{
 			page_off.setValue(
-				SystemAttributeHelper.getDmsPageOffSecs());
+				SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat());
 		}
-		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_1_MILES))
+		if(a == null ||
+		   a.equals(SystemAttrEnum.INCIDENT_RING_1_MILES.aname()))
 		{
 			ring1.setValue(
-				SystemAttributeHelper.getIncidentRing1Miles());
+				SystemAttrEnum.INCIDENT_RING_1_MILES.getInt());
 		}
-		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_2_MILES))
+		if(a == null ||
+		   a.equals(SystemAttrEnum.INCIDENT_RING_2_MILES.aname()))
 		{
 			ring2.setValue(
-				SystemAttributeHelper.getIncidentRing2Miles());
+				SystemAttrEnum.INCIDENT_RING_2_MILES.getInt());
 		}
-		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_3_MILES))
+		if(a == null ||
+		   a.equals(SystemAttrEnum.INCIDENT_RING_3_MILES.aname()))
 		{
 			ring3.setValue(
-				SystemAttributeHelper.getIncidentRing3Miles());
+				SystemAttrEnum.INCIDENT_RING_3_MILES.getInt());
 		}
-		if(a == null || a.equals(SystemAttribute.INCIDENT_RING_4_MILES))
+		if(a == null ||
+		   a.equals(SystemAttrEnum.INCIDENT_RING_4_MILES.aname()))
 		{
 			ring4.setValue(
-				SystemAttributeHelper.getIncidentRing4Miles());
+				SystemAttrEnum.INCIDENT_RING_4_MILES.getInt());
 		}
 	}
 }

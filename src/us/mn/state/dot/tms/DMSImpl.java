@@ -60,7 +60,7 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 	/** Calculate the maximum trip minute to display on the sign */
 	static protected int maximumTripMinutes(float miles) {
 		float hours = miles /
-			SystemAttributeHelper.getTravelTimeMinMPH();
+			SystemAttrEnum.TRAVEL_TIME_MIN_MPH.getInt();
 		return Math.round(hours * 60);
 	}
 
@@ -577,7 +577,7 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 	protected Integer estimateLineHeight() {
 		Integer h = heightPixels;
 		if(h != null) {
-			int m = SystemAttributeHelper.getDmsMaxLines();
+			int m = SystemAttrEnum.DMS_MAX_LINES.getInt();
 			for(int i = m; i > 0; i--) {
 				if(h % i == 0)
 					return h / i;
@@ -895,8 +895,8 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 		BitmapGraphic bitmap) throws IOException, ChangeVetoException
 	{
 		int blen = bitmap.length();
-		int off_limit = SystemAttributeHelper.getDmsPixelOffLimit();
-		int on_limit = SystemAttributeHelper.getDmsPixelOnLimit();
+		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
+		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
 		BitmapGraphic stuckOff = bitmap.createBlankCopy();
 		BitmapGraphic stuckOn = bitmap.createBlankCopy();
 		byte[] b_off = Base64.decode(pixels[STUCK_OFF_BITMAP]);

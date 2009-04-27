@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TmsForm;
@@ -155,7 +155,7 @@ public class MessagesTab extends JPanel {
 		bag.weightx = 0.1f;
 		bag.weighty = 0.1f;
 		add(createPreviewPanel(), bag);
-		if(SystemAttributeHelper.isAwsEnabled()) {
+		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			bag.gridy = 3;
 			bag.gridwidth = 1;
 			bag.fill = GridBagConstraints.NONE;

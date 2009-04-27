@@ -32,7 +32,7 @@ import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSManager;
@@ -228,7 +228,7 @@ public class Session {
 		String i_loc = props.getProperty("tdxml.incident.url");
 		if(i_loc != null) {
 			URL u = new URL(i_loc);
-			if(SystemAttributeHelper.isAgencyCaltransD10()) {
+			if(SystemAttrEnum.CALTRANS_ENABLE.getBoolean()) {
 				incLayer = new D10IncidentLayer(u, logger);
 				rwisLayer = new D10RwisLayer(u, logger);
 			} else {

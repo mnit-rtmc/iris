@@ -24,7 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * This class creates a Swing panel for controlling camera pan, tilt, and zoom.
@@ -66,7 +66,8 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 	protected final PTZButton m_zoomOut = new PTZButton("-", "Zoom out", new int[] {0, 0, -1});
 
 	/** Number of buttons used to go to preset location */
-	private final int NUMBER_PRESET_BUTTONS = SystemAttributeHelper.numPresetBtns();
+	static private final int NUMBER_PRESET_BUTTONS =
+		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
 
 	/** Array of buttons used to go to preset locations */
 	private final PresetButton[] m_preset = new PresetButton[NUMBER_PRESET_BUTTONS];

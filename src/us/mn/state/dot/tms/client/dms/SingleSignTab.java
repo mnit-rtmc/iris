@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
@@ -154,7 +154,7 @@ public class SingleSignTab extends FormPanel {
 		currentPnl.setPreferredSize(new Dimension(390, 108));
 		previewPnl.setPreferredSize(new Dimension(390, 108));
 		add("Name", nameTxt);
-		if(SystemAttributeHelper.isDmsBrightnessEnabled()) {
+		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
 			add("Brightness", brightnessTxt);
 			addRow("Camera", cameraTxt);
 		} else
@@ -162,17 +162,17 @@ public class SingleSignTab extends FormPanel {
 		addRow("Location", locationTxt);
 		addRow(I18NMessages.get("DMSDispatcher.OperationTitle"), 
 			operationTxt);
-		if(SystemAttributeHelper.isDmsStatusEnabled())
+		if(SystemAttrEnum.DMS_STATUS_ENABLE.getBoolean())
 			addRow("Status", statusTxt, queryStatusBtn);
 		add("Deployed", deployTxt);
-		if(SystemAttributeHelper.isDmsDurationEnabled()) {
-			if(SystemAttributeHelper.isAwsEnabled())
+		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
+			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
 				add("Expires", expiresTxt);
 			else
 				addRow("Expires", expiresTxt);
 		} else
 			finishRow();
-		if(SystemAttributeHelper.isAwsEnabled()) {
+		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			addRow(I18NMessages.get("dms.aws.controlled"),
 				awsControlledCbx);
 		}

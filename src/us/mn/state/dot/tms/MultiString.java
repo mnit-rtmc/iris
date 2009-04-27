@@ -154,7 +154,7 @@ public class MultiString {
 	/** Add a new line */
 	public void addLine() {
 		if(trailing ||
-		   SystemAttributeHelper.isDmsMessageBlankLineEnabled())
+		   SystemAttrEnum.DMS_MESSAGE_BLANK_LINE_ENABLE.getBoolean())
 		{
 			b.append(NEWLINE);
 			trailing = false;
@@ -224,10 +224,10 @@ public class MultiString {
 	public void parse(SpanCallback cb, int f_num) {
 		int page = 0;
 		JustificationPage justp = JustificationPage.fromOrdinal(
-			SystemAttributeHelper.getDmsDefaultJustificationPage());
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 		int line = 0;
 		JustificationLine justl = JustificationLine.fromOrdinal(
-			SystemAttributeHelper.getDmsDefaultJustificationLine());
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
 		Matcher m = TAG.matcher(b);
 		for(String span: TAG.split(b)) {
 			if(span.length() > 0)

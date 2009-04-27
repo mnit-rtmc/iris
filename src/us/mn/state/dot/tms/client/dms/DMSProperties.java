@@ -40,7 +40,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignRequest;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
@@ -289,11 +289,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
 		tab.add("Status", createStatusPanel());
-		if(SystemAttributeHelper.isDmsPixelStatusEnabled())
+		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add("Pixels", createPixelPanel());
-		if(SystemAttributeHelper.isDmsBrightnessEnabled())
+		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean())
 			tab.add("Brightness", createBrightnessPanel());
-		if(SystemAttributeHelper.isDmsManufacturerEnabled())
+		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
 			tab.add("Manufacturer", createManufacturerPanel());
 		add(tab);
 		updateAttribute(null);
@@ -423,7 +423,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
 		panel.add("Operation", operation);
-		if(SystemAttributeHelper.isDmsStatusEnabled()) {
+		if(SystemAttrEnum.DMS_STATUS_ENABLE.getBoolean()) {
 			JButton btn = new JButton(I18NMessages.get(
 				"dms.query_status"));
 			btn.setToolTipText(I18NMessages.get(
@@ -438,7 +438,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		}
 		panel.finishRow();
 		panel.addRow("User Note", userNote);
-		if(SystemAttributeHelper.isDmsResetEnabled()) {
+		if(SystemAttrEnum.DMS_RESET_ENABLE.getBoolean()) {
 			JButton btn = new JButton(I18NMessages.get(
 				"dms.reset"));
 			btn.setToolTipText(I18NMessages.get(

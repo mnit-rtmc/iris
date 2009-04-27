@@ -20,6 +20,7 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum SystemAttrEnum {
+	CALTRANS_ENABLE(false),
 	CAMERA_NUM_PRESET_BTNS(3, 0, 20),
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
 	CAMERA_PTZ_PANEL_ENABLE(false),
@@ -29,7 +30,7 @@ public enum SystemAttrEnum {
 	DMS_POLL_FREQ_SECS(30, 5),
 	DMS_MAX_LINES(3, 1, 12),
 	DMS_PIXEL_TEST_TIMEOUT_SECS(30, 5, 90),
-	DMS_LAMP_TEST_TIMEOUT(30, 5, 90),
+	DMS_LAMP_TEST_TIMEOUT_SECS(30, 5, 90),
 	DMS_PIXEL_OFF_LIMIT(2, 1),
 	DMS_PIXEL_ON_LIMIT(1, 1),
 	DMS_HIGH_TEMP_CUTOFF(60, 35, 100),
@@ -45,6 +46,8 @@ public enum SystemAttrEnum {
 	DMS_BRIGHTNESS_ENABLE(true),
 	DMS_MANUFACTURER_ENABLE(true),
 	DMS_RESET_ENABLE(false),
+	DMSLITE_OP_TIMEOUT_SECS(60 + 5, 5),
+	DMSLITE_MODEM_OP_TIMEOUT_SECS(5 * 60 + 5, 5),
 	EMAIL_SMTP_HOST(String.class),
 	EMAIL_SENDER_SERVER(String.class),
 	EMAIL_SENDER_CLIENT(String.class),
@@ -56,9 +59,9 @@ public enum SystemAttrEnum {
 	INCIDENT_RING_2_MILES(0, 0, 50),
 	INCIDENT_RING_3_MILES(0, 0, 50),
 	INCIDENT_RING_4_MILES(0, 0, 50),
-	KML_CREATE_FILE(false),
-	KML_FILENAME(String.class),
-	MAP_UTM_ZONE(String.class),
+	KML_FILE_ENABLE(false),
+	KML_FILENAME("/var/www/html/iris-client/iris.kmz"),
+	MAP_UTM_ZONE(15, 1, 60),
 	MAP_NORTHERN_HEMISPHERE(true),
 	METER_GREEN_SECS(1.3f, 0.1f, 10f),
 	METER_YELLOW_SECS(0.7f, 0.1f, 10f),
@@ -70,7 +73,7 @@ public enum SystemAttrEnum {
 	TRAVEL_TIME_MAX_LEGS(8, 1, 20),
 	TRAVEL_TIME_MAX_MILES(16, 1, 30),
 	UPTIME_LOG_ENABLE(false),
-	UPTIME_LOG_FILENAME(String.class);
+	UPTIME_LOG_FILENAME("/var/www/html/irisuptimelog.csv");
 
 	/** System attribute class */
 	protected final Class atype;
@@ -152,5 +155,158 @@ public enum SystemAttrEnum {
 		return (atype == String.class) &&
 		       (def_value == null || def_value instanceof String) &&
 		       min_value == null && max_value == null;
+	}
+
+	/** Get the attribute name */
+	public String aname() {
+		return toString().toLowerCase();
+	}
+
+	/** Get the value of the attribute as a string */
+	public String getString() {
+		assert atype == String.class;
+		return (String)get();
+	}
+
+	/** Get the value of the attribute as a boolean */
+	public boolean getBoolean() {
+		assert atype == Boolean.class;
+		return (Boolean)get();
+	}
+
+	/** Get the value of the attribute as an int */
+	public int getInt() {
+		assert atype == Integer.class;
+		return (Integer)get();
+	}
+
+	/** Get the value of the attribute as a float */
+	public float getFloat() {
+		assert atype == Float.class;
+		return (Float)get();
+	}
+
+	/** Get the value of the attribute */
+	protected Object get() {
+		return getValue(SystemAttributeHelper.get(aname()));
+	}
+
+	/** Get the value of a system attribute */
+	protected Object getValue(SystemAttribute attr) {
+		if(attr == null) {
+			System.err.println(warningDefault());
+			return def_value;
+		}
+		return parseValue(attr.getValue());
+	}
+
+	/** Get the value of a system attribute */
+	public Object parseValue(String v) {
+		Object value = parse(v);
+		if(value == null) {
+			System.err.println(warningParse());
+			return def_value;
+		}
+		return value;
+	}
+
+	/** Parse an attribute value */
+	protected Object parse(String v) {
+		if(atype == String.class)
+			return v;
+		if(atype == Boolean.class)
+			return parseBoolean(v);
+		if(atype == Integer.class)
+			return parseInteger(v);
+		if(atype == Float.class)
+			return parseFloat(v);
+		assert false;
+		return null;
+	}
+
+	/** Parse a boolean attribute value */
+	protected Boolean parseBoolean(String v) {
+		try {
+			return Boolean.parseBoolean(v);
+		}
+		catch(NumberFormatException e) {
+			return null;
+		}
+	}
+
+	/** Parse an integer attribute value */
+	protected Integer parseInteger(String v) {
+		int i;
+		try {
+			i = Integer.parseInt(v);
+		}
+		catch(NumberFormatException e) {
+			return null;
+		}
+		if(min_value != null) {
+			int m = min_value.intValue();
+			if(i < m) {
+				System.err.println(warningMinimum());
+				return m;
+			}
+		}
+		if(max_value != null) {
+			int m = max_value.intValue();
+			if(i > m) {
+				System.err.println(warningMaximum());
+				return m;
+			}
+		}
+		return i;
+	}
+
+	/** Parse a float attribute value */
+	protected Float parseFloat(String v) {
+		float f;
+		try {
+			f = Float.parseFloat(v);
+		}
+		catch(NumberFormatException e) {
+			return null;
+		}
+		if(min_value != null) {
+			float m = min_value.floatValue();
+			if(f < m) {
+				System.err.println(warningMinimum());
+				return m;
+			}
+		}
+		if(max_value != null) {
+			float m = max_value.floatValue();
+			if(f > m) {
+				System.err.println(warningMaximum());
+				return m;
+			}
+		}
+		return f;
+	}
+
+	/** Create a 'missing system attribute' warning message */
+	protected String warningDefault() {
+		return "Warning: " + toString() + " system attribute was not " +
+		       "found; using a default value (" + def_value + ").";
+	}
+
+	/** Create a parsing warning message */
+	protected String warningParse() {
+		return "Warning: " + toString() + " system attribute could " +
+		       "be parsed; using a default value (" + def_value + ").";
+	}
+
+	/** Create a minimum value warning message */
+	protected String warningMinimum() {
+		return "Warning: " + toString() + " system attribute was too " +
+		       "low; using a minimum value (" + min_value + ").";
+	}
+
+	/** Create a maximum value warning message */
+	protected String warningMaximum() {
+		return "Warning: " + toString() + " system attribute was too " +
+		       "high; using a maximum value (" + max_value + ").";
 	}
 }

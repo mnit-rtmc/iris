@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DetectorImpl;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.RampMeterImpl;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TMSImpl;
 import us.mn.state.dot.tms.WarningSignImpl;
@@ -53,13 +53,13 @@ public class Download extends Controller170Operation implements TimingTable {
 
 	/** Get the system meter green time */
 	static protected int getGreenTime() {
-		float g = SystemAttributeHelper.getMeterGreenSecs();
+		float g = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		return Math.round(g * 10);
 	}
 
 	/** Get the system meter yellow time */
 	static protected int getYellowTime() {
-		float g = SystemAttributeHelper.getMeterYellowSecs();
+		float g = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		return Math.round(g * 10);
 	}
 

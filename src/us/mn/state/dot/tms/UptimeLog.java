@@ -25,7 +25,7 @@ import java.util.Date;
 
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -57,11 +57,11 @@ public class UptimeLog
 
 	/** write to iris server uptime log */
 	public static void writeServerLog(ServerNamespace namespace) {
-		if(!SystemAttributeHelper.uptimeServerLogActive())
+		if(!SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
 			return;
 		if(namespace == null)
 			return;
-		String fname = SystemAttributeHelper.uptimeServerLogFileName();
+		String fname = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();
 		if(fname == null || fname.length() <= 0 ) {
 			System.err.println("UptimeLog.writeServerLog(): " +
 				"warning: bogus file name: "+fname);

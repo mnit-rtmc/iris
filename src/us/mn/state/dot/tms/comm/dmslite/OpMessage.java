@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.STime;
@@ -417,7 +417,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// DisplayTimeMS
-			int dt = (int)(SystemAttributeHelper.getDmsPageOnSecs()*1000);
+			int dt = (int)(SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat() * 1000);
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(dt).toString()));
 
 			// Owner

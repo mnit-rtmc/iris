@@ -98,8 +98,7 @@ public class MainServer {
 				Registry.REGISTRY_PORT);
 			Naming.bind("//localhost/login", login);
 			server = new Server(ns, props);
-			System.err.println("IRIS Server active for " +
-				SystemAttributeHelper.agencyId() + ".");
+			System.err.println("IRIS Server active");
 			server.join();
 		}
 		catch(Exception e) {

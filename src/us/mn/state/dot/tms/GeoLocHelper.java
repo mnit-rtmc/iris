@@ -26,11 +26,12 @@ import us.mn.state.dot.tms.utils.Transform;
 public class GeoLocHelper {
 
 	/** The system attribute for the UTM zone */
-	static protected final int UTM_ZONE = SystemAttributeHelper.utmZone();
+	static protected final int UTM_ZONE =
+		SystemAttrEnum.MAP_UTM_ZONE.getInt();
 
 	/** The system attribute for nothern hemisphere */
 	static protected final boolean NORTHERN_HEMISPHERE = 
-		SystemAttributeHelper.northernHemisphere();
+		SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean();
 
 	/** Don't create any instances */
 	private GeoLocHelper() {

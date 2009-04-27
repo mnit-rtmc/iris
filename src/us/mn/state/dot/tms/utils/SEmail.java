@@ -26,7 +26,7 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A simple email abstraction.
@@ -79,7 +79,7 @@ public class SEmail {
 	protected MimeMessage createMessage() {
 		Properties props = new Properties();
 		props.setProperty("mail.smtp.host",
-			SystemAttributeHelper.getEmailSmtpHost());
+			SystemAttrEnum.EMAIL_SMTP_HOST.getString());
 		Session session = Session.getInstance(props, null);
 		return new MimeMessage(session);
 	}

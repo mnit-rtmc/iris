@@ -17,10 +17,7 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A system attribute is a name mapped to a string value. This interface
- * contains predefined names of attributes common to all agencies. 
- * Attributes specific to an agency should be placed in an extended
- * helper class.
+ * A system attribute is a name mapped to a string value.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -33,165 +30,9 @@ public interface SystemAttribute extends SonarObject {
 	/** maximum length of an attribute name */
 	int MAXLEN_ANAME = 32;
 
-	/** attribute names common to all agencies */
-	String DATABASE_VERSION = "database_version";
-
-	/** DMS page on time */
-	String DMS_PAGE_ON_SECS = "dms_page_on_secs";
-
-	/** DMS page off time */
-	String DMS_PAGE_OFF_SECS = "dms_page_off_secs";
-
-	/** DMS status polling frequency */
-	String DMS_POLL_FREQ_SECS = "dms_poll_freq_secs";
-
-	/** DMS maximum number of lines */
-	String DMS_MAX_LINES = "dms_max_lines";
-
-	/** DMS pixel test timeout */
-	String DMS_PIXEL_TEST_TIMEOUT = "dms_pixel_test_timeout_secs";
-
-	/** DMS lamp test timeout */
-	String DMS_LAMP_TEST_TIMEOUT = "dms_lamp_test_timeout_secs";
-
-	/** DMS pixel off limit (in a message) */
-	String DMS_PIXEL_OFF_LIMIT = "dms_pixel_off_limit";
-
-	/** DMS pixel on limit (near a message) */
-	String DMS_PIXEL_ON_LIMIT = "dms_pixel_on_limit";
-
-	/** DMS high temp cutoff (degrees Celsius) */
-	String DMS_HIGH_TEMP_CUTOFF = "dms_high_temp_cutoff";
-
-	/** DMS default line justification */
-	String DMS_DEFAULT_JUSTIFICATION_LINE ="dms_default_justification_line";
-
-	/** DMS default page justification */
-	String DMS_DEFAULT_JUSTIFICATION_PAGE ="dms_default_justification_page";
-
-	/** DMS message minimum available pages */
-	String DMS_MESSAGE_MIN_PAGES = "dms_message_min_pages";
-
-	/** DMS enable blank lines in messages (boolean) */
-	String DMS_MESSAGE_BLANK_LINE_ENABLE = "dms_message_blank_line_enable";
-
-	/** DMS travel time duration (minutes) */
-	String DMS_TRAVEL_DURATION_MINS = "dms_travel_duration_mins";
-
-	/** DMS enable extra status (boolean) */
-	String DMS_STATUS_ENABLE = "dms_status_enable";
-
-	/** DMS enable automated warning system (boolean) */
-	String DMS_AWS_ENABLE = "dms_aws_enable";
-
-	/** DMS enable duration selection (boolean) */
-	String DMS_DURATION_ENABLE = "dms_duration_enable";
-
-	/** DMS enable font selection (boolean) */
-	String DMS_FONT_SELECTION_ENABLE = "dms_font_selection_enable";
-
-	/** DMS enable pixel status (boolean) */
-	String DMS_PIXEL_STATUS_ENABLE = "dms_pixel_status_enable";
-
-	/** DMS enable brightness tab (boolean) */
-	String DMS_BRIGHTNESS_ENABLE = "dms_brightness_enable";
-
-	/** DNS enable manufacturer-specific tab (boolean) */
-	String DMS_MANUFACTURER_ENABLE = "dms_manufacturer_enable";
-
-	/** DMS enable reset (boolean) */
-	String DMS_RESET_ENABLE = "dms_reset_enable";
-
-	/** Temperature fahrenheit enable (boolean) */
-	String TEMP_FAHRENHEIT_ENABLE = "temp_fahrenheit_enable";
-
-	/** kml related */
-	String KML_CREATE_FILE = "kml_create_file";			// boolean
-	String KML_FILENAME = "kml_filename";				// string
-
-	/** Meter green time */
-	String METER_GREEN_SECS = "meter_green_secs";
-
-	/** Meter yellow time */
-	String METER_YELLOW_SECS = "meter_yellow_secs";
-
-	/** Meter mimimum red time */
-	String METER_MIN_RED_SECS = "meter_min_red_secs";
-
-	/** Meter maximum red time */
-	String METER_MAX_RED_SECS = "meter_max_red_secs";
-
-	/** Incident ring 1 radius */
-	String INCIDENT_RING_1_MILES = "incident_ring_1_miles";
-
-	/** Incident ring 2 radius */
-	String INCIDENT_RING_2_MILES = "incident_ring_2_miles";
-
-	/** Incident ring 3 radius */
-	String INCIDENT_RING_3_MILES = "incident_ring_3_miles";
-
-	/** Incident ring 4 radius */
-	String INCIDENT_RING_4_MILES = "incident_ring_4_miles";
-
-	/** Minimum overall trip speed for a travel time estimate (mph) */
-	String TRAVEL_TIME_MIN_MPH = "travel_time_min_mph";
-
-	/** Maximum number of legs in a travel time route */
-	String TRAVEL_TIME_MAX_LEGS = "travel_time_max_legs";
-
-	/** Maximum route distance in a travel time route (miles) */
-	String TRAVEL_TIME_MAX_MILES = "travel_time_max_miles";
-
-	/** TESLA host name (and TCP port) */
-	String TESLA_HOST = "tesla_host";
-
-	/** Camera enable PTZ panel (boolean) */
-	String CAMERA_PTZ_PANEL_ENABLE = "camera_ptz_panel_enable";
-
-	/** CameraViewer */
-	String CAMERAVIEWER_NUM_PRESET_BTNS = "cameraviewer_num_preset_btns";
-	String CAMERAVIEWER_NUM_VIDEO_FRAMES = "cameraviewer_num_video_frames";
-
-	/** SMTP host name */
-	String EMAIL_SMTP_HOST = "email_smtp_host";
-
-	/** Name of sender for server emails */
-	String EMAIL_SENDER_SERVER = "email_sender_server";
-
-	/** Name of sender for client emails */
-	String EMAIL_SENDER_CLIENT = "email_sender_client";
-
-	/** Address of recipient of AWS emails */
-	String EMAIL_RECIPIENT_AWS = "email_recipient_aws";
-
-	/** Address of recipient of BUG emails */
-	String EMAIL_RECIPIENT_BUGS = "email_recipient_bugs";
-
-	/** menu related */
-	String MENU_HELP_TROUBLE_TICKET = 
-		"menu_help_trouble_ticket";		// boolean
-	String MENU_HELP_TROUBLE_TICKET_URL = 
-		"menu_help_trouble_ticket_url";		// string
-
-	String AGENCY_ID = "agency_id";
-
-	/** possible values for the AGENCY_ID attribute */
-	String AGENCY_ID_MNDOT = "mndot";
-	String AGENCY_ID_CALTRANS_D10 = "caltrans_d10";
-
-	/** server logging related */
-	String LOG_UPTIME_ACTIVE = "log_uptime_active";		// boolean
-	String LOG_UPTIME_FILENAME = "log_uptime_filename";	// string
-
 	/** Set the attribute value */
 	void setValue(String arg_value);
 
 	/** Get the attribute value */
 	String getValue();
-
-	/** Map */
-	final String MAP_UTM_ZONE =
-		"map_utm_zone";
-	final String MAP_NORTHERN_HEMISPHERE =
-		"map_northern_hemisphere";
 }

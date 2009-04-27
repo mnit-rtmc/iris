@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttributeHelperD10;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.Device2Operation;
@@ -128,22 +128,33 @@ abstract public class OpDms extends Device2Operation {
 
 	/** return the timeout for this operation */
 	public int calcTimeoutMS() {
-		int secs = 60; //FIXME: use existing sys attribute
-		assert m_dms != null : "m_dms is null in OpDms.getTimeoutMS()";
+		return getTimeoutSecs() * 1000;
+	}
+
+	/** Get the timeout for this operation (seconds) */
+	protected int getTimeoutSecs() {
+		assert m_dms != null;
 		SignAccessType at = getSignAccessType(m_dms);
 		if(at == SignAccessType.DIALUPMODEM) {
-			secs = SystemAttributeHelperD10.dmsliteModemOpTimeoutSecs();
+			int secs = SystemAttrEnum.DMSLITE_MODEM_OP_TIMEOUT_SECS.
+				getInt();
 			System.err.println("connection type is modem" +
-				", dms="+m_dms.toString()+", timeout secs="+secs);
+				", dms=" + m_dms.toString() +
+				", timeout secs=" + secs);
+			return secs;
 		} else if(at == SignAccessType.WIZARD) {
-			secs = SystemAttributeHelperD10.dmsliteOpTimeoutSecs();
+			int secs = SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS.
+				getInt();
 			System.err.println("connection type is wizard" +
-				", dms="+m_dms.toString()+", timeout secs="+secs);
+				", dms=" + m_dms.toString() +
+				", timeout secs=" + secs);
+			return secs;
+		} else {
+			// if unknown access type, this happens when the first 
+			// OpQueryConfig message is being sent, so a default 
+			// timeout should be used.
+			return SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS.getInt();
 		}
-		// if unknown access type, this happens when the first 
-		// OpQueryConfig message is being sent, so a default 
-		// timeout should be used.
-		return secs * 1000;
 	}
 
 	/** set message attributes which are a function of the operation, sign, etc. */

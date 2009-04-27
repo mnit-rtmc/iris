@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Simple temperature formatting helper.
@@ -47,7 +47,7 @@ public class Temperature {
 	static public String formatCelsius(Integer temp) {
 		if(temp == null)
 			return UNKNOWN;
-		if(SystemAttributeHelper.isTempFahrenheitEnabled())
+		if(SystemAttrEnum.TEMP_FAHRENHEIT_ENABLE.getBoolean())
 			return "" + toFahrenheit(temp) + FAHRENHEIT;
 		else
 			return "" + temp + CELSIUS;
@@ -58,7 +58,7 @@ public class Temperature {
 	static public String formatFahrenheit(Integer temp) {
 		if(temp == null)
 			return UNKNOWN;
-		if(SystemAttributeHelper.isTempFahrenheitEnabled())
+		if(SystemAttrEnum.TEMP_FAHRENHEIT_ENABLE.getBoolean())
 			return "" + temp + FAHRENHEIT;
 		else
 			return "" + toCelsius(temp) + CELSIUS;

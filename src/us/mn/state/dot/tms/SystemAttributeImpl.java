@@ -43,9 +43,40 @@ public class SystemAttributeImpl extends BaseObjectImpl
 			}
 		});
 
-		// validiate essential system attributes, shutdown if invalid
-		SystemAttributeHelper.validateDatabaseVersion();
-		SystemAttributeHelper.validateAgencyId();
+		validateDatabaseVersion();
+	}
+
+	/** Validate the database version */
+	static protected void validateDatabaseVersion() {
+		String c_version = "@@VERSION@@";
+		String db_version = SystemAttrEnum.DATABASE_VERSION.getString();
+		if(!validateVersions(c_version, db_version)) {
+			StringBuilder b = new StringBuilder();
+			b.append("Failure: database_version (");
+			b.append(db_version);
+			b.append(") does not match the required value (");
+			b.append(c_version);
+			b.append(").  Shutting down.");
+			System.err.println(b.toString());
+			System.exit(1);
+		}
+	}
+
+	/** Validate the database version */
+	static protected boolean validateVersions(String v0, String v1) {
+		String[] va0 = v0.split("\\.");
+		String[] va1 = v1.split("\\.");
+		// Versions must be "major.minor.micro"
+		if(va0.length != 3 || va1.length != 3)
+			return false;
+		// Check that major versions match
+		if(!va0[0].equals(va1[0]))
+			return false;
+		// Check that minor versions match
+		if(!va0[1].equals(va1[1]))
+			return false;
+		// It's OK if micro versions don't match
+		return true;
 	}
 
 	/** Get a mapping of the columns */

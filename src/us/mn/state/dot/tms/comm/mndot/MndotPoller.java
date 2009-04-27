@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneControlSignalImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.RampMeterType;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -67,9 +67,9 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		float secs_per_veh = Interval.HOUR / (float)rate;
 		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
 			secs_per_veh /= 2;
-		float green = SystemAttributeHelper.getMeterGreenSecs();
-		float yellow = SystemAttributeHelper.getMeterYellowSecs();
-		float min_red = SystemAttributeHelper.getMeterMinRedSecs();
+		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
+		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
+		float min_red = SystemAttrEnum.METER_MIN_RED_SECS.getFloat();
 		float red_time = secs_per_veh - (green + yellow);
 		return Math.max(red_time, min_red);
 	}
@@ -78,8 +78,8 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	 * @param red_time Red time (seconds)
 	 * @return Release rate (vehicles per hour) */
 	static int calculateReleaseRate(RampMeterImpl meter, float red_time) {
-		float green = SystemAttributeHelper.getMeterGreenSecs();
-		float yellow = SystemAttributeHelper.getMeterYellowSecs();
+		float green = SystemAttrEnum.METER_GREEN_SECS.getFloat();
+		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		float secs_per_veh = red_time + yellow + green;
 		if(meter.getMeterType() == RampMeterType.SINGLE.ordinal())
 			secs_per_veh *= 2;

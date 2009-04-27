@@ -19,7 +19,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.SystemAttributeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Pager for a SignPixelPanel.  This allows multiple page messages
@@ -37,13 +37,13 @@ public class DMSPanelPager {
 	/** Get the system DMS page on time (ms) */
 	static protected int readSystemOnTime() {
 		return Math.round(1000 *
-			SystemAttributeHelper.getDmsPageOnSecs());
+			SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat());
 	}
 
 	/** Get the system DMS page off time (ms) */
 	static protected int readSystemOffTime() {
 		return Math.round(1000 *
-			SystemAttributeHelper.getDmsPageOffSecs());
+			SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat());
 	}
 
 	/** Sign pixel panel being controlled */
