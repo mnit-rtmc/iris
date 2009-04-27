@@ -286,77 +286,46 @@ public class SystemAttributeForm extends AbstractForm {
 
 	/** Update one system attribute on the form */
 	protected void updateAttribute(String a) {
-		if(a == null ||
-		   a.equals(SystemAttrEnum.METER_GREEN_SECS.aname()))
-		{
-			green.setValue(
-				SystemAttrEnum.METER_GREEN_SECS.getFloat());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.METER_YELLOW_SECS.aname()))
-		{
-			yellow.setValue(
-				SystemAttrEnum.METER_YELLOW_SECS.getFloat());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.METER_MIN_RED_SECS.aname()))
-		{
-			min_red.setValue(
-				SystemAttrEnum.METER_MIN_RED_SECS.getFloat());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.DMS_POLL_FREQ_SECS.aname()))
-		{
-			poll_freq.setValue(
-				SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.aname()))
-		{
-			pxl_tst_timeout.setValue(SystemAttrEnum.
-				DMS_PIXEL_TEST_TIMEOUT_SECS.getInt());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.DMS_LAMP_TEST_TIMEOUT_SECS.aname()))
-		{
-			lmp_tst_timeout.setValue(SystemAttrEnum.
-				DMS_LAMP_TEST_TIMEOUT_SECS.getInt());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.DMS_PAGE_ON_SECS.aname()))
-		{
-			page_on.setValue(
-				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.DMS_PAGE_OFF_SECS.aname()))
-		{
-			page_off.setValue(
-				SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.INCIDENT_RING_1_MILES.aname()))
-		{
-			ring1.setValue(
-				SystemAttrEnum.INCIDENT_RING_1_MILES.getInt());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.INCIDENT_RING_2_MILES.aname()))
-		{
-			ring2.setValue(
-				SystemAttrEnum.INCIDENT_RING_2_MILES.getInt());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.INCIDENT_RING_3_MILES.aname()))
-		{
-			ring3.setValue(
-				SystemAttrEnum.INCIDENT_RING_3_MILES.getInt());
-		}
-		if(a == null ||
-		   a.equals(SystemAttrEnum.INCIDENT_RING_4_MILES.aname()))
-		{
-			ring4.setValue(
-				SystemAttrEnum.INCIDENT_RING_4_MILES.getInt());
-		}
+		updateFloatSpinner(green, a,
+			SystemAttrEnum.METER_GREEN_SECS);
+		updateFloatSpinner(yellow, a,
+			SystemAttrEnum.METER_YELLOW_SECS);
+		updateFloatSpinner(min_red, a,
+			SystemAttrEnum.METER_MIN_RED_SECS);
+		updateIntSpinner(poll_freq, a,
+			SystemAttrEnum.DMS_POLL_FREQ_SECS);
+		updateIntSpinner(pxl_tst_timeout, a,
+			SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS);
+		updateIntSpinner(lmp_tst_timeout, a,
+			SystemAttrEnum.DMS_LAMP_TEST_TIMEOUT_SECS);
+		updateFloatSpinner(page_on, a, SystemAttrEnum.DMS_PAGE_ON_SECS);
+		updateFloatSpinner(page_off, a,
+			SystemAttrEnum.DMS_PAGE_OFF_SECS);
+		updateIntSpinner(ring1, a,SystemAttrEnum.INCIDENT_RING_1_MILES);
+		updateIntSpinner(ring2, a,SystemAttrEnum.INCIDENT_RING_2_MILES);
+		updateIntSpinner(ring3, a,SystemAttrEnum.INCIDENT_RING_3_MILES);
+		updateIntSpinner(ring4, a,SystemAttrEnum.INCIDENT_RING_4_MILES);
+	}
+
+	/** Update a spinner for an int attribute
+	 * @param spn Spinner widget
+	 * @param a Name of attribute being updated
+	 * @param sa System attribute associated with spinner */
+	protected void updateIntSpinner(JSpinner spn, String a,
+		SystemAttrEnum sa)
+	{
+		if(a == null || a.equals(sa.aname()))
+			spn.setValue(sa.getInt());
+	}
+
+	/** Update a spinner for a float attribute
+	 * @param spn Spinner widget
+	 * @param a Name of attribute being updated
+	 * @param sa System attribute associated with spinner */
+	protected void updateFloatSpinner(JSpinner spn, String a,
+		SystemAttrEnum sa)
+	{
+		if(a == null || a.equals(sa.aname()))
+			spn.setValue(sa.getFloat());
 	}
 }
