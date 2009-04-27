@@ -20,7 +20,6 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum SystemAttrEnum {
-	CALTRANS_ENABLE(false),
 	CAMERA_NUM_PRESET_BTNS(3, 0, 20),
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
 	CAMERA_PTZ_PANEL_ENABLE(false),
@@ -55,6 +54,7 @@ public enum SystemAttrEnum {
 	EMAIL_RECIPIENT_BUGS(String.class),
 	HELP_TROUBLE_TICKET_ENABLE(false),
 	HELP_TROUBLE_TICKET_URL(String.class),
+	INCIDENT_CALTRANS_ENABLE(false),
 	INCIDENT_RING_1_MILES(0, 0, 50),
 	INCIDENT_RING_2_MILES(0, 0, 50),
 	INCIDENT_RING_3_MILES(0, 0, 50),

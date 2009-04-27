@@ -228,7 +228,8 @@ public class Session {
 		String i_loc = props.getProperty("tdxml.incident.url");
 		if(i_loc != null) {
 			URL u = new URL(i_loc);
-			if(SystemAttrEnum.CALTRANS_ENABLE.getBoolean()) {
+			if(SystemAttrEnum.INCIDENT_CALTRANS_ENABLE.getBoolean())
+			{
 				incLayer = new D10IncidentLayer(u, logger);
 				rwisLayer = new D10RwisLayer(u, logger);
 			} else {
