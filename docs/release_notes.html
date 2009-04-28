@@ -11,6 +11,69 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.85.0 (28 April 2009)</dt>
+	<dd><ul>
+		<li>
+			System attributes now have tooltips describing their
+			function.
+		</li>
+		<li>
+			System attributes have been changed to be more
+			consistent.
+			<table>
+				<tr>
+					<th>Old Attribute</th>
+					<th>New Attribute</th>
+				</tr>
+				<tr>
+					<td>cameraviewer_num_preset_btns</td>
+					<td>camera_num_presest_btns</td>
+				</tr>
+				<tr>
+					<td>cameraviewer_num_video_frames</td>
+					<td>camera_num_video_frames</td>
+				</tr>
+				<tr>
+					<td>agency_id</td>
+					<td>incident_caltrans_enable</td>
+				</tr>
+				<tr>
+					<td>caltrans_d10_op_timeout_secs</td>
+					<td>dmslite_op_timeout_secs</td>
+				</tr>
+				<tr>
+					<td>caltrans_d10_mod_op_timeout_secs</td>
+					<td>dmslite_modem_op_timeout_secs</td>
+				</tr>
+				<tr>
+					<td>kml_create_file</td>
+					<td>kml_file_enable</td>
+				</tr>
+				<tr>
+					<td>menu_help_trouble_ticket</td>
+					<td>help_trouble_ticket_enable</td>
+				</tr>
+				<tr>
+					<td>menu_help_trouble_ticket_url</td>
+					<td>help_trouble_ticket_url</td>
+				</tr>
+				<tr>
+					<td>log_uptime_active</td>
+					<td>uptime_log_enable</td>
+				</tr>
+				<tr>
+					<td>log_uptime_filename</td>
+					<td>uptime_log_filename</td>
+				</tr>
+			</table>
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.85.sql</code>
+		</li>
+	</ul></dd>
+
 	<dt>3.84.0 (23 April 2009)</dt>
 	<dd><ul>
 		<li>
