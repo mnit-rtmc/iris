@@ -66,9 +66,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	/** Form containing table */
 	protected final SystemAttributeForm m_form;
 
-	/** 
-	 *  Create a new table model.
-	 *  @param tc TypeCache for the table items being displayed/edited.
+	/**
+	 * Create a new table model.
+	 * @param tc TypeCache for the table items being displayed/edited.
 	 */
 	public SystemAttributeTableModel(TypeCache<SystemAttribute> arg_tc,
 		SystemAttributeForm f)
@@ -130,7 +130,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 			t.setValue(value.toString());
 		}
 	}
-	
+
 	/** Add a row to the table */
 	protected void addRow(Object value) {
 		String aname = value.toString();
