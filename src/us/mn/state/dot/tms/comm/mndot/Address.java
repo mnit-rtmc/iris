@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,19 +95,4 @@ public interface Address {
 
 	/** 5-minute data offset for meter 2 green count */
 	int OFF_GREEN_METER_2 = 73;
-
-	/** Drum sign rotor seek error counters */
-	int SEEK_COUNTS = 0x011D;
-
-	/** Drum sign rotor command position */
-	int ROTOR_COMMAND = 0x0120;
-
-	/** Drum sign rotor status data */
-	int ROTOR_STATUS = 0x00CE;
-
-	/** Size of each rotor status data */
-	int ROTOR_DATA_SIZE = 5;
-
-	/** Offset in rotor status data of rotor position verify */
-	int OFF_ROTOR_POSITION = 0;
 }
