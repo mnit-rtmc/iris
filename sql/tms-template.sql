@@ -1145,11 +1145,13 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.83.0
-dms_page_on_secs	2.0
-dms_page_off_secs	0.0
+database_version	3.85.0
 dms_default_justification_line	3
 dms_default_justification_page	2
+dms_max_lines	3
+dms_page_on_secs	2.0
+dms_page_off_secs	0.0
+dms_poll_freq_secs	30
 meter_green_secs	1.3
 meter_yellow_secs	0.7
 meter_min_red_secs	0.1
