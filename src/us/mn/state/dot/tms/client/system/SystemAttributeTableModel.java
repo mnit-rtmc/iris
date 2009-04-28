@@ -14,10 +14,17 @@
  */
 package us.mn.state.dot.tms.client.system;
 
+import java.awt.Color;
+import java.awt.Component;
+import java.util.HashSet;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
@@ -28,6 +35,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Michael Darter
  */
 public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
+
+	/** Set of all system attributes */
+	static protected final HashSet<String> ALL_ATTRIBUTES =
+		new HashSet<String>();
+	static {
+		for(SystemAttrEnum sa: SystemAttrEnum.values())
+			ALL_ATTRIBUTES.add(sa.aname());
+	}
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
@@ -50,7 +65,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Name"));
+		TableColumn column = createColumn(COL_NAME, 200, "Name");
+		column.setCellRenderer(new NameCellRenderer());
+		m.addColumn(column);
 		m.addColumn(createColumn(COL_VALUE, 340, "Value"));
 		return m;
 	}
@@ -124,5 +141,26 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		String aname = value.toString();
 		if(aname.length() > 0)
 			cache.createObject(aname);
+	}
+
+	/** Renderer for system attribute names in a table cell */
+	static protected class NameCellRenderer extends DefaultTableCellRenderer
+	{
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			JLabel label = (JLabel)
+				super.getTableCellRendererComponent(table,
+				value, isSelected, hasFocus, row, column);
+			if(value instanceof String) {
+				String v = (String)value;
+				if(ALL_ATTRIBUTES.contains(v))
+					label.setForeground(null);
+				else
+					label.setForeground(Color.RED);
+			}
+			return label;
+		}
 	}
 }
