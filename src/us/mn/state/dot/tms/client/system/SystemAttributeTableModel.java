@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.HashSet;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -35,14 +34,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Michael Darter
  */
 public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
-
-	/** Set of all system attributes */
-	static protected final HashSet<String> ALL_ATTRIBUTES =
-		new HashSet<String>();
-	static {
-		for(SystemAttrEnum sa: SystemAttrEnum.values())
-			ALL_ATTRIBUTES.add(sa.aname());
-	}
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
@@ -132,8 +123,12 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		if(t == null) {
 			if(col == COL_NAME)
 				addRow(value);
-		} else if(col == COL_VALUE)
+		} else if(col == COL_VALUE) {
+			SystemAttrEnum sa = SystemAttrEnum.lookup(t.getName());
+			if(sa != null)
+				value = sa.parseValue(value.toString());
 			t.setValue(value.toString());
+		}
 	}
 	
 	/** Add a row to the table */
@@ -155,10 +150,10 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 				value, isSelected, hasFocus, row, column);
 			if(value instanceof String) {
 				String v = (String)value;
-				if(ALL_ATTRIBUTES.contains(v))
-					label.setForeground(null);
-				else
+				if(SystemAttrEnum.lookup(v) == null)
 					label.setForeground(Color.RED);
+				else
+					label.setForeground(null);
 			}
 			return label;
 		}

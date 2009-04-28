@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.HashMap;
+
 /**
  * This enum defines all system attributes.
  *
@@ -160,6 +162,19 @@ public enum SystemAttrEnum {
 	/** Get the attribute name */
 	public String aname() {
 		return toString().toLowerCase();
+	}
+
+	/** Set of all system attributes */
+	static protected final HashMap<String, SystemAttrEnum> ALL_ATTRIBUTES =
+		new HashMap<String, SystemAttrEnum>();
+	static {
+		for(SystemAttrEnum sa: SystemAttrEnum.values())
+			ALL_ATTRIBUTES.put(sa.aname(), sa);
+	}
+
+	/** Lookup an attribute by name */
+	static public SystemAttrEnum lookup(String aname) {
+		return ALL_ATTRIBUTES.get(aname);
 	}
 
 	/** Get the value of the attribute as a string */
