@@ -64,6 +64,7 @@ us/mn/state/dot/tms/SignText.class
 us/mn/state/dot/tms/SortedList.class
 us/mn/state/dot/tms/Station.class
 us/mn/state/dot/tms/StationMap.class
+us/mn/state/dot/tms/SystemAttrEnum.class
 us/mn/state/dot/tms/SystemAttribute.class
 us/mn/state/dot/tms/SystemAttributeHelper.class
 us/mn/state/dot/tms/TimingPlan.class
