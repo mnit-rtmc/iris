@@ -23,7 +23,6 @@ import java.io.StringWriter;
 import java.net.BindException;
 import java.rmi.ConnectException;
 import java.rmi.ConnectIOException;
-import java.rmi.RemoteException;
 import java.text.ParseException;
 import javax.mail.MessagingException;
 import javax.naming.AuthenticationException;
@@ -106,14 +105,6 @@ public class ExceptionDialog extends JDialog {
 			setFatal(true);
 			addText("This program was unable to");
 			addText("communicate with the IRIS server.");
-			addAssistanceMessage();
-		}
-		catch(RemoteException ee) {
-			sendEmailAlert(e);
-			setFatal(true);
-			addText("This program has encountered");
-			addText("a problem while communicating");
-			addText("with the IRIS server.");
 			addAssistanceMessage();
 		}
 		catch(ChangeVetoException ee) {

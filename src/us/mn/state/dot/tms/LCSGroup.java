@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,16 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
-
 /**
- * DeviceList is an interface which contains the methods for
- * remotely maintaining a device list.
+ * Lane-Use Control Signal Group
  *
  * @author Douglas Lau
  */
-public interface DeviceList extends SortedList {
+public interface LCSGroup extends SonarObject {
 
-	/** Get the list of available devices */
-	public SortedList getAvailableList() throws RemoteException;
+	/** Set verification camera */
+	void setCamera(String id);
+
+	/** Get verification camera */
+	String getCamera();
 }

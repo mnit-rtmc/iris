@@ -20,16 +20,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Properties;
-import java.util.Iterator;
-import java.rmi.RemoteException;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
-
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
@@ -39,8 +36,6 @@ import us.mn.state.dot.tms.kml.KmlFeature;
 import us.mn.state.dot.tms.kml.KmlFile;
 import us.mn.state.dot.tms.kml.KmlRenderer;
 import us.mn.state.dot.tms.kml.KmlStyleSelector;
-import us.mn.state.dot.vault.ObjectVault;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * The TMSImpl class is an RMI object which contains all the global traffic
@@ -48,7 +43,7 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
+public final class TMSImpl implements KmlDocument {
 
 	/** Detector sample file */
 	static protected final String SAMPLE_XML = "det_sample.xml";
@@ -61,30 +56,24 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 	static public final Scheduler FLUSH =
 		new Scheduler("Scheduler: FLUSH");
 
-	/** Open the ObjectVault */
+	/** SQL connection */
+	static SQLConnection store;
+
+	/** SONAR namespace */
+	static ServerNamespace namespace;
+
+	/** Corridor manager */
+	static CorridorManager corridors;
+
+	/** Open the database connection */
 	static protected void openVault(Properties props) throws IOException,
-		TMSException, ObjectVaultException
+		TMSException
 	{
-		vault = new ObjectVault(
-			props.getProperty("db.url"),
-			props.getProperty("db.user"),
-			props.getProperty("db.password")
-		);
-		vault.addRootTable( UnicastRemoteObject.class );
-		vault.enableLogging( false );
 		store = new SQLConnection(
 			props.getProperty("db.url"),
 			props.getProperty("db.user"),
 			props.getProperty("db.password")
 		);
-	}
-
-	/** Load the TMS root object from the ObjectVault */
-	void loadFromVault() throws ObjectVaultException, TMSException,
-		RemoteException
-	{
-		System.err.println( "Loading lane control signals..." );
-		lcss.load( LaneControlSignalImpl.class, "id" );
 	}
 
 	/** Station manager */
@@ -198,17 +187,10 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 		/** Job completer */
 		protected final Completer comp;
 
-		/** Job to be performed on each completion */
-		protected final Job job = new Job() {
-			public void perform() {
-				lcss.notifyStatus();
-			}
-		};
-
 		/** Create a new sign polling timer job */
 		protected TimerJobSigns(int intervalSecs) {
 			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,4);
-			comp = new Completer("Sign Poll", TIMER, job);
+			comp = new Completer("Sign Poll", TIMER);
 		}
 
 		/** Perform the sign poll job */
@@ -275,6 +257,22 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 				comp.makeReady();
 			}
 		}
+	}
+
+	/** Check if the given date/time matches any holiday */
+	static protected boolean isHoliday(Calendar stamp) {
+		return lookupHoliday(stamp) != null;
+	}
+
+	/** Lookup a holiday which matches the given calendar */
+	static protected HolidayImpl lookupHoliday(final Calendar stamp) {
+		return (HolidayImpl)namespace.findObject(Holiday.SONAR_TYPE,
+			new Checker<HolidayImpl>()
+		{
+			public boolean check(HolidayImpl h) {
+				return h.matches(stamp);
+			}
+		});
 	}
 
 	/** Validate all timing plans */
@@ -387,37 +385,11 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 		}
 	}
 
-	/** Lane Control Signals list */
-	protected final LCSListImpl lcss;
-
-	/** Initialize the subset list */
-	protected void initialize() throws RemoteException {
-		// This is an ugly hack, but it works
-		lcsList = lcss;
-	}
-
 	/** Create a new TMS object */
-	TMSImpl(Properties props) throws IOException, TMSException,
-		ObjectVaultException
-	{
+	TMSImpl(Properties props) throws IOException, TMSException {
 		super();
-		lcss = new LCSListImpl();
 		initialize();
 		openVault(props);
-	}
-
-	/** Get the lane control signal list */
-	public LCSList getLCSList() {
-		return lcss;
-	}
-
-	/** Get a TMS object by its object ID */
-	public TMSObject getObject(int oid) {
-		Object obj = vault.getObject(oid);
-		if(obj instanceof TMSObject)
-			return (TMSObject)obj;
-		else
-			return null;
 	}
 
 	/** Download to all controllers */
@@ -580,6 +552,11 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 	/** Lookup timing plans plans */
 	static public void lookupTimingPlans(Checker<TimingPlan> checker) {
 		namespace.findObject(TimingPlan.SONAR_TYPE, checker);
+	}
+
+	/** Lookup a DMS in the SONAR namespace */
+	static public DMSImpl lookupDms(String name) {
+		return (DMSImpl)namespace.lookupObject(DMS.SONAR_TYPE, name);
 	}
 
 	/** get kml document name (KmlDocument interface) */

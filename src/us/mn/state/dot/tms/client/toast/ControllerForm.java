@@ -47,7 +47,6 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records
@@ -141,13 +140,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Get the ControllerIO array */
 	protected ControllerIO[] getControllerIO() {
-		Integer[] cio = proxy.getCio();
-		ControllerIO[] io = new ControllerIO[cio.length];
-		TMSProxy tms = connection.getProxy();
-		for(int i = 0; i < cio.length; i++) {
-			if(cio[i] != null)
-				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
-		}
+		ControllerIO[] io = new ControllerIO[Controller.ALL_PINS];
 		TypeCache<Alarm> alarms = state.getAlarms();
 		alarms.findObject(new ControllerIOFinder<Alarm>(io));
 		TypeCache<Camera> cams = state.getCameras();
@@ -160,6 +153,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		w_signs.findObject(new ControllerIOFinder<WarningSign>(io));
 		TypeCache<RampMeter> meters = state.getRampMeters();
 		meters.findObject(new ControllerIOFinder<RampMeter>(io));
+		TypeCache<LCS> lcss = state.getLCSs();
+		lcss.findObject(new ControllerIOFinder<LCS>(io));
 		return io;
 	}
 
@@ -184,14 +179,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
-		try {
-			io_model = new ControllerIOModel(proxy, state,
-				connection.getProxy());
-		}
-		catch(java.rmi.RemoteException e) {
-			e.printStackTrace();
-			return;
-		}
+		io_model = new ControllerIOModel(proxy, state);
 		cabinets.addProxyListener(cab_listener);
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));

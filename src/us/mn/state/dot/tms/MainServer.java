@@ -18,10 +18,6 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.rmi.Naming;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.RMISocketFactory;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
@@ -78,25 +74,19 @@ public class MainServer {
 			I18NMessages.initialize(props);
 			ServerNamespace ns = new ServerNamespace();
 			// FIXME: static namespace hacks
-			TMSObjectImpl.namespace = ns;
+			TMSImpl.namespace = ns;
 			DMSList.namespace = ns;
 			SystemAttributeHelper.namespace = ns;
 			FontHelper.namespace = ns;
-			IrisRoleImpl.lookup(TMSObjectImpl.store, ns);
-			IrisUserImpl.lookup(TMSObjectImpl.store, ns);
+			IrisRoleImpl.lookup(TMSImpl.store, ns);
+			IrisUserImpl.lookup(TMSImpl.store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);
 			ns.registerType(SignMessage.SONAR_TYPE,
 				SignMessageImpl.class);
-			BaseObjectImpl.loadAll(TMSObjectImpl.store, ns);
-			BaseEvent.store = TMSObjectImpl.store;
-			RMISocketFactory.setSocketFactory(
-				new TmsSocketFactory());
+			BaseObjectImpl.loadAll(TMSImpl.store, ns);
+			BaseEvent.store = TMSImpl.store;
 			tms.loadFromVault();
 			tms.scheduleJobs();
-			LoginImpl login = new LoginImpl(tms);
-			LocateRegistry.createRegistry(
-				Registry.REGISTRY_PORT);
-			Naming.bind("//localhost/login", login);
 			server = new Server(ns, props);
 			System.err.println("IRIS Server active");
 			server.join();

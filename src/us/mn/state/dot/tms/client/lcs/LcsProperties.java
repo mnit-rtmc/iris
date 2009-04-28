@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TrafficDeviceForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * LcsForm is a dialog for entering and editing lane control signal records
@@ -82,18 +81,10 @@ public class LcsProperties extends TrafficDeviceForm {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		TMSProxy tms = connection.getProxy();
-		SortedList s = (SortedList)tms.getLCSList().getList();
-		try {
-			lcs = (LaneControlSignal)s.getElement(id);
-			ListModel cameraModel = state.getCameraModel();
-			camera.setModel(new WrapperComboBoxModel(cameraModel));
-			numberOfLanes = lcs.getLanes();
-		}
-		catch(RemoteException e) {
-			e.printStackTrace();
-			return;
-		}
+		lcs = (LaneControlSignal)s.getElement(id);
+		ListModel cameraModel = state.getCameraModel();
+		camera.setModel(new WrapperComboBoxModel(cameraModel));
+		numberOfLanes = lcs.getLanes();
 		setDevice(lcs);
 		super.initialize();
 		location.addRow("Camera", camera);

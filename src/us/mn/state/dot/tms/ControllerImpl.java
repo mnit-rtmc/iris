@@ -283,20 +283,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return io;
 	}
 
-	/** Get all controller I/O pins */
-	public synchronized Integer[] getCio() {
-		// array of vault_oid for RMI objects
-		Integer[] io = new Integer[ALL_PINS];
-		for(int i: io_pins.keySet()) {
-			Object obj = io_pins.get(i);
-			if(obj instanceof TMSObjectImpl) {
-				TMSObjectImpl tobj = (TMSObjectImpl)obj;
-				io[i] = tobj.getOID();
-			}
-		}
-		return io;
-	}
-
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io)
 		throws TMSException
@@ -313,7 +299,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		if(io != null)
 			io_pins.put(pin, io);
-		notifyAttribute("cio");
 	}
 
 	/** Get a list of all traffic devices on the controller */
@@ -358,11 +343,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get an active LCS for the controller */
-	public synchronized LaneControlSignalImpl getActiveLcs() {
+	public synchronized LCSImpl getActiveLcs() {
 		if(getActive()) {
 			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof LaneControlSignalImpl)
-					return (LaneControlSignalImpl)io;
+				if(io instanceof LCSImpl)
+					return (LCSImpl)io;
 			}
 		}
 		return null;

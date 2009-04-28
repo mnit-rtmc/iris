@@ -15,19 +15,14 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.rmi.NotBoundException;
 import java.util.Properties;
 import us.mn.state.dot.tms.client.security.IrisPermission;
 import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * The TmsConnection class represents a connection to the TMS server.
- * Classes which use <code>the RemoteObserver</code> interface should listen
- * to the connection so that they can deregister with the remote object when
- * the connection closes.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -39,9 +34,6 @@ public class TmsConnection {
 
 	/** Is the connection open? */
 	private boolean connectionOpen = false;
-
-	/** TMSProxy used by this connection */
-	protected TMSProxy tms;
 
 	/** Currently login user */
 	protected final UserManager userManager;
@@ -57,11 +49,6 @@ public class TmsConnection {
 	/** Get the desktop used by the client */
 	public SmartDesktop getDesktop() {
 		return desktop;
-	}
-
-	/** Get the TMS proxy for the connection */
-	public TMSProxy getProxy() {
-		return tms;
 	}
 
 	/** Get the SONAR state */
@@ -100,20 +87,13 @@ public class TmsConnection {
 	}
 
 	/** Open the connection */
-	public void open(String hostName, String userName) throws IOException,
-		NotBoundException
-	{
-		tms = new TMSProxy(hostName, userName);
+	public void open(String hostName, String userName) throws IOException {
 		connectionOpen = true;
 	}
 
 	/** Close the connection */
 	public void close() {
 		desktop.closeFrames();
-		TMSProxy t = tms;
-		if(t != null)
-			t.dispose();
-		tms = null;
 		connectionOpen = false;
 	}
 }

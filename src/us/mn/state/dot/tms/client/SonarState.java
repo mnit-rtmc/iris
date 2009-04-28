@@ -448,11 +448,6 @@ public class SonarState extends Client {
 		return geo_locs.lookupObject(name);
 	}
 
-	/** Lookup a controller */
-	public Controller lookupController(String name) {
-		return controllers.lookupObject(name);
-	}
-
 	/** Lookup a detector */
 	public Detector lookupDetector(String name) {
 		return detectors.lookupObject(name);

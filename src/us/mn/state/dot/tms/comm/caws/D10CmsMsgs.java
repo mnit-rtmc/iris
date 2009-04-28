@@ -16,7 +16,7 @@
 package us.mn.state.dot.tms.comm.caws;
 
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.TMSObjectImpl;
+import us.mn.state.dot.tms.TMSImpl;
 import us.mn.state.dot.tms.utils.SString;
 
 import java.io.Serializable;
@@ -66,7 +66,7 @@ public class D10CmsMsgs implements Serializable
 		for(D10CmsMsg m: m_msgs) {
 			// get the iris cms id, e.g. "V30"
 			String irisCmsId = m.getIrisCmsId();
-			DMSImpl dms = TMSObjectImpl.lookupDms(irisCmsId);
+			DMSImpl dms = TMSImpl.lookupDms(irisCmsId);
 			if(dms != null)
 				m.activate(dms);
 		}

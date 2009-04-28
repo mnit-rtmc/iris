@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Component;
 import java.util.LinkedList;
-import java.rmi.RemoteException;
 import javax.swing.AbstractCellEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
@@ -36,23 +35,18 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
-import us.mn.state.dot.tms.ControllerIO_RMI;
 import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.DeviceList;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LaneControlSignal;
+import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.TMSObject;
-import us.mn.state.dot.tms.TrafficDevice;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.utils.ExceptionDialog;
-import us.mn.state.dot.tms.utils.TMSProxy;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
+import us.mn.state.dot.tms.client.lcs.LCSManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
@@ -104,7 +98,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Detector;
 		else if(cio instanceof DMS)
 			return DeviceType.DMS;
-		else if(cio instanceof LaneControlSignal)
+		else if(cio instanceof LCS)
 			return DeviceType.LCS;
 		else if(cio instanceof RampMeter)
 			return DeviceType.Ramp_Meter;
@@ -124,9 +118,6 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Controller object */
 	protected final Controller controller;
-
-	/** TMS proxy */
-	protected final TMSProxy tms;
 
 	/** Array of ControllerIO assignments */
 	protected ControllerIO[] io;
@@ -162,11 +153,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected final JComboBox d_combo = new JComboBox();
 
 	/** Create a new controller IO model */
-	public ControllerIOModel(Controller c, SonarState state, TMSProxy _tms)
-		throws RemoteException
-	{
+	public ControllerIOModel(Controller c, SonarState state) {
 		controller = c;
-		tms = _tms;
 		io = new ControllerIO[0];
 		types = new DeviceType[0];
 		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
@@ -181,7 +169,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			Session.dms_manager_singleton.getStyleModel(
 			DMSHelper.STYLE_NO_CONTROLLER), true);
 		lcs_model = new WrapperComboBoxModel(
-			tms.getAvailableLCSs().getModel(), true);
+			Session.lcs_manager_singleton.getStyleModel(
+			LCSManager.STYLE_NO_CONTROLLER), true);
 		m_model = new WrapperComboBoxModel(
 			Session.meter_manager_singleton.getStyleModel(
 			MeterManager.STYLE_NO_CONTROLLER), true);
@@ -256,16 +245,6 @@ public class ControllerIOModel extends AbstractTableModel {
 					(ControllerIO_SONAR)cio;
 				cio_s.setController(null);
 			}
-			if(cio instanceof ControllerIO_RMI) {
-				ControllerIO_RMI cio_r = (ControllerIO_RMI)cio;
-				try {
-					cio_r.setController(null);
-					((TMSObject)cio).notifyUpdate();
-				}
-				catch(Exception e) {
-					new ExceptionDialog(e).setVisible(true);
-				}
-			}
 			types[pin] = io_type;
 			io[pin] = null;
 		}
@@ -273,46 +252,26 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Set the device */
 	protected void setDevice(int pin, Object value) {
-		try {
-			clearDevice(pin);
-			ControllerIO cio = lookupControllerIO(types[pin],
-				value);
-			if(cio instanceof ControllerIO_SONAR) {
-				ControllerIO_SONAR cio_s =
-					(ControllerIO_SONAR)cio;
-				cio_s.setPin(pin);
-				cio_s.setController(controller);
-			}
-			if(cio instanceof ControllerIO_RMI) {
-				ControllerIO_RMI cio_r = (ControllerIO_RMI)cio;
-				cio_r.setPin(pin);
-				cio_r.setController(controller.getName());
-				((TMSObject)cio).notifyUpdate();
-			}
-		}
-		catch(Exception e) {
-			new ExceptionDialog(e).setVisible(true);
+		clearDevice(pin);
+		ControllerIO cio = lookupControllerIO(types[pin], value);
+		if(cio instanceof ControllerIO_SONAR) {
+			ControllerIO_SONAR cio_s = (ControllerIO_SONAR)cio;
+			cio_s.setPin(pin);
+			cio_s.setController(controller);
 		}
 	}
 
 	/** Clear the device at the specified pin */
-	protected void clearDevice(int pin) throws Exception {
+	protected void clearDevice(int pin) {
 		ControllerIO cio = io[pin];
 		if(cio instanceof ControllerIO_SONAR) {
 			ControllerIO_SONAR cio_s = (ControllerIO_SONAR)cio;
 			cio_s.setController(null);
 		}
-		if(cio instanceof ControllerIO_RMI) {
-			ControllerIO_RMI cio_r = (ControllerIO_RMI)cio;
-			cio_r.setController(null);
-			((TMSObject)cio).notifyUpdate();
-		}
 	}
 
 	/** Lookup the ControllerIO for the given value */
-	protected ControllerIO lookupControllerIO(DeviceType d, Object value)
-		throws RemoteException
-	{
+	protected ControllerIO lookupControllerIO(DeviceType d, Object value) {
 		if(d == null || value == null)
 			return null;
 		switch(d) {
@@ -325,8 +284,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			case DMS:
 				return (DMS)value;
 			case LCS:
-				String v = value.toString();
-				return lookupLCS(v);
+				return (LCS)value;
 			case Ramp_Meter:
 				return (RampMeter)value;
 			case Warning_Sign:
@@ -334,11 +292,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			default:
 				return null;
 		}
-	}
-
-	protected LaneControlSignal lookupLCS(String id) throws RemoteException{
-		DeviceList l = (DeviceList)tms.getLCSList().getList();
-		return (LaneControlSignal)l.getElement(id);
 	}
 
 	/** Create the pin column */
@@ -399,7 +352,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		{
 			int pin = row + 1;
 			ComboBoxModel model = getDeviceModel(types[pin]);
-			model.setSelectedItem(lookupId(value));
+			model.setSelectedItem(value);
 			d_combo.setModel(model);
 			return d_combo;
 		}
@@ -415,21 +368,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			int row, int column)
 		{
 			return super.getTableCellRendererComponent(table,
-				lookupId(value), isSelected, hasFocus, row,
-				column);
+				value, isSelected, hasFocus, row, column);
 		}
-	}
-
-	/** Lookup a device ID */
-	protected Object lookupId(Object value) {
-		try {
-			if(value instanceof TrafficDevice)
-				return ((TrafficDevice)value).getId();
-		}
-		catch(RemoteException e) {
-			new ExceptionDialog(e).setVisible(true);
-		}
-		return value;
 	}
 
 	/** Create the table column model */
