@@ -44,9 +44,13 @@ public class SystemAttributeTab extends FormPanel {
 	/** Traffic device attribute table */
 	protected final ZTable m_table = new ZTable() {
 		public String getToolTipText(int row, int column) {
-			String aname = m_tableModel.getValueAt(row,
-				SystemAttributeTableModel.COL_NAME).toString();
-			return I18NMessages.get(aname);
+			Object value = m_tableModel.getValueAt(row,
+				SystemAttributeTableModel.COL_NAME);
+			if(value instanceof String) {
+				String aname = (String)value;
+				return I18NMessages.get(aname);
+			} else
+				return null;
 		}
 	};
 
