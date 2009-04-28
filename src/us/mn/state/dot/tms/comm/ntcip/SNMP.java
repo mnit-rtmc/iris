@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
+import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
 
@@ -28,6 +29,9 @@ import us.mn.state.dot.tms.comm.ParsingException;
  * @author Douglas Lau
  */
 public class SNMP extends BER {
+
+	/** SNMP debug log */
+	static protected final DebugLog SNMP_LOG = new DebugLog("snmp");
 
  	/** SNMP error status codes */
 	static protected final int NO_ERROR = 0;
@@ -190,7 +194,7 @@ public class SNMP extends BER {
 					return;
 				}
 				catch(RequestIDException e) {
-					System.err.println(e.getMessage());
+					SNMP_LOG.log(e.getMessage());
 					is.skip(is.available());
 				}
 			}
