@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
 import javax.swing.JTable;
 
 /**
@@ -30,5 +32,21 @@ public class ZTable extends JTable {
 		Dimension d = new Dimension(getPreferredSize().width,
 			getRowHeight() * c);
 		setPreferredScrollableViewportSize(d);
+	}
+
+	/** Get tooltip text for a mouse event */
+	public String getToolTipText(MouseEvent e) {
+		Point p = e.getPoint();
+		int row = convertRowIndexToModel(rowAtPoint(p));
+		int column = convertColumnIndexToModel(columnAtPoint(p));
+		if(row >= 0 && column >= 0)
+			return getToolTipText(row, column);
+		else
+			return null;
+	}
+
+	/** Get tooltip text for a specific row and column */
+	public String getToolTipText(int row, int column) {
+		return null;
 	}
 }

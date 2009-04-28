@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * This is a tab for viewing and editing system attributes.
@@ -41,7 +42,13 @@ public class SystemAttributeTab extends FormPanel {
 	protected final SystemAttributeTableModel m_tableModel;
 
 	/** Traffic device attribute table */
-	protected final ZTable m_table = new ZTable();
+	protected final ZTable m_table = new ZTable() {
+		public String getToolTipText(int row, int column) {
+			String aname = m_tableModel.getValueAt(row,
+				SystemAttributeTableModel.COL_NAME).toString();
+			return I18NMessages.get(aname);
+		}
+	};
 
 	/** Button to delete the selected attribute */
 	protected final JButton del_attrib_btn = new JButton("Delete");

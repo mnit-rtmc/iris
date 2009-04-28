@@ -32,11 +32,11 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
 
-	/** name column number */
-	static protected final int COL_NAME = 0;
+	/** Name column number */
+	static public final int COL_NAME = 0;
 
-	/** value column number */
-	static protected final int COL_VALUE = 1;
+	/** Value column number */
+	static public final int COL_VALUE = 1;
 
 	/** Create a new table column */
 	static protected TableColumn createColumn(int column, int width,
