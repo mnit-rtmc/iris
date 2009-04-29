@@ -63,10 +63,10 @@ public class UptimeLog {
 			return;
 		}
 		UptimeLog log = new UptimeLog(fname, namespace);
-		String msg = "Wrote uptime log: " + fname;
-		if(!log.write())
-			msg = "Warning: failed to append to " + fname;
-		System.err.println(msg);
+		if(!log.write()) {
+			System.err.println("Warning: failed to append to " +
+				fname);
+		}
 	}
 
 	/** Create a new uptime log.
