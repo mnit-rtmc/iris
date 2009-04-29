@@ -58,13 +58,13 @@ public class SystemAttributeHelper {
 
 	/** Get the meter minimum release rate (vehicles per hour) */
 	static public int getMeterMinRelease() {
-		float red = SystemAttrEnum.METER_MIN_RED_SECS.getFloat();
+		float red = SystemAttrEnum.METER_MAX_RED_SECS.getFloat();
 		return calculateReleaseRate(red);
 	}
 
 	/** Get the meter maximum release rate (vehicles per hour) */
 	static public int getMeterMaxRelease() {
-		float red = SystemAttrEnum.METER_MAX_RED_SECS.getFloat();
+		float red = SystemAttrEnum.METER_MIN_RED_SECS.getFloat();
 		return calculateReleaseRate(red);
 	}
 
