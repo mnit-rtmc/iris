@@ -21,8 +21,6 @@ import java.io.OutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.Runtime;
-import java.util.Date;
-
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -37,10 +35,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @created 01/22/09
  * @see TMSImpl
  */
-public class UptimeLog 
-{
-	/** newline */
-	final static String R = "\n";
+public class UptimeLog {
 
 	/** log file name */
 	protected String m_fname = "";
@@ -74,7 +69,7 @@ public class UptimeLog
 		System.err.println(msg);
 	}
 
-	/** constructor 
+	/** Create a new uptime log.
 	 *  @param fname Log file name. */
 	public UptimeLog(String fname, ServerNamespace namespace) {
 		m_fname = fname;
@@ -90,23 +85,23 @@ public class UptimeLog
 			return false;
 		}
 
-		// write file
 		OutputStream os = null;
 		boolean ok = false;
 		try {
-			// open for appending
 			File f = new File(m_fname);
 			os = new FileOutputStream(f.getAbsolutePath(), true);
 			ok = appendLog(os);
-		} catch(IOException ex) {
+		}
+		catch(IOException ex) {
 			System.err.println("UptimeLog.write(): ex: " + ex);
 			return false;
-		// catch all exceptions
-		} catch(Exception ex) {
+		}
+		catch(Exception ex) {
 			System.err.println("UptimeLog.write(): ex: " + ex);
 			ex.printStackTrace();
 			return false;
-		} finally {
+		}
+		finally {
 			if(!close(os))
 				return false;
 		}
@@ -115,7 +110,7 @@ public class UptimeLog
 
 	/** append to log */
 	protected boolean appendLog(OutputStream os) {
-		if(os==null)
+		if(os == null)
 			return false;
 
 		StringBuilder sb = new StringBuilder();
@@ -124,17 +119,9 @@ public class UptimeLog
 		sb.append(STime.getCurDateTimeString(false));
 		sb.append(',');
 
-		// OS version
-		//sb.append(System.getProperty("os.version"));
-		//sb.append(',');
-
 		// cpu utilization in last 60 seconds as int, e.g. 13 is 13%
 		sb.append((int)Math.round(100 * m_osb.getSystemLoadAverage()));
 		sb.append(',');
-
-		// number of cores
-		//sb.append(m_rt.availableProcessors());
-		//sb.append(',');
 
 		// heap size
 		long heapsize = m_rt.totalMemory() - m_rt.freeMemory();
@@ -143,18 +130,20 @@ public class UptimeLog
 
 		// number of user connections
 		sb.append(m_namespace.getCount(Connection.SONAR_TYPE));
-		
 		sb.append('\n');
 
 		// write
 		try {
 			os.write(sb.toString().getBytes());
-		} catch(IOException ex) {
-			System.err.println("Warning: UptimeLog.appendLog(): ex: " + ex);
+		}
+		catch(IOException ex) {
+			System.err.println("Warning: UptimeLog.appendLog(): " +
+				ex);
 			return false;
-		// catch all exceptions
-		} catch(Exception ex) {
-			System.err.println("Warning: UptimeLog.appendLog(): ex: " + ex);
+		}
+		catch(Exception ex) {
+			System.err.println("Warning: UptimeLog.appendLog(): " +
+				ex);
 			ex.printStackTrace();
 			return false;
 		}
@@ -168,9 +157,8 @@ public class UptimeLog
 				os.close();
 			return true;
 		}
-		catch(Exception ex) {
-			System.err.println("Warning: UptimeLog.close(): " + ex);
-
+		catch(Exception e) {
+			System.err.println("Warning: UptimeLog.close(): " + e);
 		}
 		return false;
 	}
