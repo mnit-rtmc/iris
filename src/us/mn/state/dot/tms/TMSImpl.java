@@ -306,43 +306,15 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 	/** 1-minute timer job */
 	protected class TimerJob1Min extends Job {
 
-		/** Job completer */
-		protected final Completer comp;
-
-		/** Current time stamp */
-		protected Calendar stamp;
-
-		/** Job to be performed on completion */
-		protected final Job job = new Job(500) {
-			public void perform() throws NamespaceError {
-				flushDetectorData(stamp);
-			}
-		};
-
 		/** Create a new 1-minute timer job */
 		protected TimerJob1Min() {
 			// start the job at hh:mm:45
 			super(Calendar.MINUTE, 1, Calendar.SECOND, 45);
-			comp = new Completer("1-Minute", FLUSH, job);
 		}
 
 		/** Perform the 1-minute timer job */
 		public void perform() throws Exception {
-			if(!comp.checkComplete()) {
-				System.err.println("TimerJob1Min: failed " + 
-					"to complete at " + new Date());
-				return;
-			}
-			stamp = Calendar.getInstance();
-			Calendar s = (Calendar)stamp.clone();
-			s.add(Calendar.MINUTE, -1);
-			comp.reset(s);
-			try {
-				do1MinuteJobs(comp);
-			}
-			finally {
-				comp.makeReady();
-			}
+			do1MinuteJobs();
 		}
 	}
 
@@ -455,12 +427,9 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 		});
 	}
 
-	/** perform 1 minute jobs */
-	protected void do1MinuteJobs(final Completer comp) {
-		// write kml file
+	/** Perform 1 minute jobs */
+	protected void do1MinuteJobs() {
 		KmlFile.writeServerFile(this);
-
-		// write uptime log
 		UptimeLog.writeServerLog(namespace);
 	}
 
