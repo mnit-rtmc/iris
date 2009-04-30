@@ -183,9 +183,7 @@ public class KmlFile
 		}
 		KmlFile kf = new KmlFile(doc);
 		if(kf != null) {
-			if(kf.writeKmlKmz(fname))
-				System.err.println("Wrote " + fname);
-			else
+			if(!kf.writeKmlKmz(fname))
 				System.err.println("Failed to write " + fname);
 		}
 	}
