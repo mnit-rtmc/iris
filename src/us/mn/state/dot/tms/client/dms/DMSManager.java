@@ -87,17 +87,22 @@ public class DMSManager extends ProxyManager<DMS> {
 		//       to render the sign icon on the map
 		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
 			getProxyType(), new DmsMarker());
-		theme.addStyle(DMSHelper.STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(DMSHelper.STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
+		theme.addStyle(DMSHelper.STYLE_AVAILABLE,
+			ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(DMSHelper.STYLE_DEPLOYED,
+			ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(DMSHelper.STYLE_TRAVEL_TIME, Color.ORANGE);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
 			theme.addStyle(DMSHelper.STYLE_AWS_DEPLOYED, Color.RED);
-		theme.addStyle(DMSHelper.STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(DMSHelper.STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
-			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(DMSHelper.STYLE_MAINTENANCE,
+			ProxyTheme.COLOR_UNAVAILABLE);
+		theme.addStyle(DMSHelper.STYLE_INACTIVE,
+			ProxyTheme.COLOR_INACTIVE, ProxyTheme.OUTLINE_INACTIVE);
 		theme.addStyle(DMSHelper.STYLE_FAILED, ProxyTheme.COLOR_FAILED);
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-			theme.addStyle(DMSHelper.STYLE_AWS_CONTROLLED, COLOR_HELIOTROPE);
+		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+			theme.addStyle(DMSHelper.STYLE_AWS_CONTROLLED,
+				COLOR_HELIOTROPE);
+		}
 		theme.addStyle(DMSHelper.STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(DMSHelper.STYLE_ALL);
