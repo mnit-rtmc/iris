@@ -583,152 +583,57 @@ CREATE TABLE iris.timing_plan (
 	target INTEGER NOT NULL
 );
 
-
--- FIXME: this will be removed soon
-CREATE TABLE vault_object (
-    vault_oid integer NOT NULL,
-    vault_type integer NOT NULL,
-    vault_refs smallint DEFAULT 1 NOT NULL
+CREATE TABLE iris.lcs_array (
+	name VARCHAR(10) PRIMARY KEY
 );
 
-REVOKE ALL ON TABLE vault_object FROM PUBLIC;
-GRANT SELECT ON TABLE vault_object TO PUBLIC;
-
-CREATE TABLE vault_types (
-    "table" text NOT NULL,
-    "className" text NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE vault_counter (
-    id integer NOT NULL,
-    logging boolean NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE vault_log_entry (
-    redo text NOT NULL,
-    undo text NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE vault_list (
-    "listId" integer NOT NULL,
-    "index" integer NOT NULL,
-    "elementId" integer NOT NULL
+CREATE TABLE iris.lcs (
+	name VARCHAR(10) PRIMARY KEY REFERENCES iris._dms,
+	array VARCHAR(10) NOT NULL REFERENCES iris.lcs_array,
+	lane INTEGER NOT NULL
 );
 
-REVOKE ALL ON TABLE vault_list FROM PUBLIC;
-GRANT SELECT ON TABLE vault_list TO PUBLIC;
+CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (array, lane);
 
-CREATE TABLE "java_util_AbstractCollection" (
-    dummy_24 boolean
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_util_AbstractList" (
-    dummy_23 boolean
-)
-INHERITS ("java_util_AbstractCollection");
-
-CREATE TABLE vault_transaction (
-    stamp timestamp with time zone NOT NULL,
-    "user" text NOT NULL,
-    entries integer NOT NULL,
-    "lastId" integer NOT NULL
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_lang_Number" (
-    dummy_30 boolean
-)
-INHERITS (vault_object);
-
-CREATE TABLE "java_lang_Integer" (
-    value integer NOT NULL
-)
-INHERITS ("java_lang_Number");
-
-CREATE TABLE "java_util_ArrayList" (
-    size integer NOT NULL
-)
-INHERITS ("java_util_AbstractList");
-
-CREATE TABLE tms_object (
-    dummy_41 boolean
-)
-INHERITS (vault_object);
-
-REVOKE ALL ON TABLE tms_object FROM PUBLIC;
-GRANT SELECT ON TABLE tms_object TO PUBLIC;
-
-CREATE TABLE abstract_list (
-    dummy_40 boolean
-)
-INHERITS (tms_object);
-
-CREATE TABLE device (
-    controller VARCHAR(20) NOT NULL REFERENCES controller(name),
-    pin integer NOT NULL,
-    notes text NOT NULL,
-    geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name)
-)
-INHERITS (tms_object);
-
-CREATE TABLE traffic_device (
-    id text NOT NULL
-)
-INHERITS (device);
-
-CREATE TABLE vault_map (
-    "mapId" integer NOT NULL,
-    "keyId" integer NOT NULL,
-    "valueId" integer NOT NULL
+CREATE TABLE iris.lane_use_indication (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
 );
 
-CREATE TABLE "java_util_AbstractMap" (
-    dummy_64 boolean
-)
-INHERITS (vault_object);
+CREATE TABLE iris._lcs_indication (
+	name VARCHAR(10) PRIMARY KEY,
+	lcs VARCHAR(10) NOT NULL REFERENCES iris.lcs,
+	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
+);
 
-CREATE TABLE "java_util_TreeMap" (
-    comparator integer NOT NULL
-)
-INHERITS ("java_util_AbstractMap");
+ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE TABLE lcs_module (
-    "sfoRed" integer NOT NULL,
-    "sfoYellow" integer NOT NULL,
-    "sfoGreen" integer NOT NULL,
-    "sfiRed" integer NOT NULL,
-    "sfiYellow" integer NOT NULL,
-    "sfiGreen" integer NOT NULL
-)
-INHERITS (tms_object);
+CREATE VIEW iris.lcs_indication AS SELECT
+	d.name, controller, pin, lcs, indication
+	FROM iris._lcs_indication li JOIN iris._device_io d ON li.name = d.name;
 
-CREATE TABLE lcs (
-    camera VARCHAR(10) NOT NULL,
-    modules integer[] NOT NULL
-)
-INHERITS (traffic_device);
+CREATE RULE lcs_indication_insert AS ON INSERT TO iris.lcs_indication DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_indication VALUES (NEW.name, NEW.lcs,
+		NEW.indication);
+);
 
-REVOKE ALL ON TABLE lcs FROM PUBLIC;
-GRANT SELECT ON TABLE lcs TO PUBLIC;
+CREATE RULE lcs_indication_update AS ON UPDATE TO iris.lcs_indication DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._lcs_indication SET
+		lcs = NEW.lcs,
+		indication = NEW.indication
+	WHERE name = OLD.name;
+);
 
-CREATE FUNCTION get_next_oid() RETURNS integer
-    AS '
-	DECLARE
-		oid int;
-	BEGIN
-		UPDATE vault_counter SET id = id + 1;
-		SELECT INTO oid id FROM vault_counter;
-		RETURN oid;
-	END;
-'
-    LANGUAGE plpgsql;
--- FIXME: cut up to here
-
-
+CREATE RULE lcs_indication_delete AS ON DELETE TO iris.lcs_indication DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
 
 CREATE TABLE sign_group (
 	name VARCHAR(16) PRIMARY KEY,
@@ -813,13 +718,6 @@ CREATE VIEW geo_loc_view AS
 	LEFT JOIN direction f_dir ON l.free_dir = f_dir.id
 	LEFT JOIN direction c_dir ON l.cross_dir = c_dir.id;
 GRANT SELECT ON geo_loc_view TO PUBLIC;
-
-CREATE VIEW device_loc_view AS
-	SELECT d.vault_oid, d.controller, d.geo_loc,
-	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir
-	FROM device d
-	JOIN geo_loc_view l ON d.geo_loc = l.name;
-GRANT SELECT ON device_loc_view TO PUBLIC;
 
 CREATE VIEW r_node_view AS
 	SELECT n.name, freeway, free_dir, cross_mod, cross_street,
@@ -984,6 +882,11 @@ CREATE VIEW iris.controller_dms AS
 	FROM iris._device_io dio
 	JOIN iris.dms d ON dio.name = d.name;
 
+CREATE VIEW iris.controller_lcs AS
+	SELECT dio.name, dio.controller, dio.pin, d.geo_loc
+	FROM iris._device_io dio
+	JOIN iris.dms d ON dio.name = d.name;
+
 CREATE VIEW iris.controller_meter AS
 	SELECT dio.name, dio.controller, dio.pin, m.geo_loc
 	FROM iris._device_io dio
@@ -1001,6 +904,7 @@ CREATE VIEW iris.controller_camera AS
 
 CREATE VIEW iris.controller_device AS
 	SELECT * FROM iris.controller_dms UNION ALL
+	SELECT * FROM iris.controller_lcs UNION ALL
 	SELECT * FROM iris.controller_meter UNION ALL
 	SELECT * FROM iris.controller_warning_sign UNION ALL
 	SELECT * FROM iris.controller_camera;
@@ -1025,34 +929,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
-
--- FIXME: this will be removed soon
-COPY vault_types (vault_oid, vault_type, vault_refs, "table", "className") FROM stdin;
-3	4	0	vault_object	java.lang.Object
-2	4	1	vault_counter	us.mn.state.dot.vault.Counter
-24	4	0	java_util_AbstractCollection	java.util.AbstractCollection
-23	4	0	java_util_AbstractList	java.util.AbstractList
-30	4	0	java_lang_Number	java.lang.Number
-41	4	0	tms_object	us.mn.state.dot.tms.TMSObjectImpl
-40	4	0	abstract_list	us.mn.state.dot.tms.AbstractListImpl
-60	4	0	device	us.mn.state.dot.tms.DeviceImpl
-59	4	0	traffic_device	us.mn.state.dot.tms.TrafficDeviceImpl
-64	4	0	java_util_AbstractMap	java.util.AbstractMap
-1395	4	0	java_util_TreeMap	java.util.TreeMap
-52732	4	0	lcs_module	us.mn.state.dot.tms.LCSModuleImpl
-52736	4	0	lcs	us.mn.state.dot.tms.LaneControlSignalImpl
-1532	4	0	java_lang_Integer	java.lang.Integer
-1536	4	0	vault_map	us.mn.state.dot.vault.MapEntry
-38	4	0	java_util_ArrayList	java.util.ArrayList
-37	4	0	vault_list	us.mn.state.dot.vault.ListElement
-4	4	52	vault_types	us.mn.state.dot.vault.Type
-\.
-
-COPY vault_counter (vault_oid, vault_type, vault_refs, id, logging) FROM stdin;
-1	2	1	92319	f
-\.
--- FIXME: cut up to here
-
 
 
 COPY direction (id, direction, dir) FROM stdin;
@@ -1123,6 +999,20 @@ COPY lane_type (id, description, dcode) FROM stdin;
 15	HOT	HT
 \.
 
+COPY iris.lane_use_indication (id, description) FROM stdin;
+0	Dark
+1	Lane open
+2	Use caution
+3	Lane closed ahead
+4	Lane closed
+5	HOV / HOT
+6	Merge left
+7	Merge right
+8	Must exit
+9	Advisory variable speed limit
+10	Variable speed limit
+\.
+
 COPY iris.meter_type (id, description, lanes) FROM stdin;
 0	One Lane	1
 1	Two Lane, Alternate Release	2
@@ -1183,42 +1073,19 @@ COPY r_node_transition (n_transition, name) FROM stdin;
 COPY role (name, pattern, priv_r, priv_w, priv_c, priv_d) FROM stdin;
 admin		f	f	f	f
 alert		f	f	f	f
-dms	dms/.*/message	f	t	f	f
+dms	dms/.*/messageNext	f	t	f	f
+dms_owner	dms/.*/ownerNext	f	t	f	f
 font	font/.*	f	t	t	t
 glyph	glyph/.*	f	t	t	t
 graphic	graphic/.*	f	t	t	t
 incidents		f	f	f	f
 activate	.*/.*/active	f	t	f	f
-meter	meter/.*/metering	f	t	f	f
+meter	ramp_meter/.*/rateNext	f	t	f	f
 lcs	lcs/.*/signals	f	t	f	f
 user_admin	user/.*	t	t	t	t
 role_admin	role/.*	t	t	t	t
 view	.*	t	f	f	f
 \.
-
-
--- FIXME: all of this stuff will be removed soon
-CREATE UNIQUE INDEX vault_object_vault_oid_key ON vault_object USING btree (vault_oid);
-CREATE UNIQUE INDEX vault_object_pkey ON vault_object USING btree (vault_oid);
-CREATE UNIQUE INDEX vault_types_pkey ON vault_types USING btree (vault_oid);
-CREATE UNIQUE INDEX vault_counter_pkey ON vault_counter USING btree (vault_oid);
-CREATE UNIQUE INDEX vault_log_entry_pkey ON vault_log_entry USING btree (vault_oid);
-CREATE UNIQUE INDEX "va_util_AbstractCollection_pkey" ON "java_util_AbstractCollection" USING btree (vault_oid);
-CREATE UNIQUE INDEX "java_util_AbstractList_pkey" ON "java_util_AbstractList" USING btree (vault_oid);
-CREATE UNIQUE INDEX vault_transaction_pkey ON vault_transaction USING btree (vault_oid);
-CREATE UNIQUE INDEX "java_lang_Number_pkey" ON "java_lang_Number" USING btree (vault_oid);
-CREATE UNIQUE INDEX "java_lang_Integer_pkey" ON "java_lang_Integer" USING btree (vault_oid);
-CREATE UNIQUE INDEX "java_util_ArrayList_pkey" ON "java_util_ArrayList" USING btree (vault_oid);
-CREATE UNIQUE INDEX tms_object_pkey ON tms_object USING btree (vault_oid);
-CREATE UNIQUE INDEX abstract_list_pkey ON abstract_list USING btree (vault_oid);
-CREATE UNIQUE INDEX device_pkey ON device USING btree (vault_oid);
-CREATE UNIQUE INDEX traffic_device_pkey ON traffic_device USING btree (vault_oid);
-CREATE UNIQUE INDEX "java_util_AbstractMap_pkey" ON "java_util_AbstractMap" USING btree (vault_oid);
-CREATE UNIQUE INDEX "java_util_TreeMap_pkey" ON "java_util_TreeMap" USING btree (vault_oid);
-CREATE UNIQUE INDEX lcs_module_pkey ON lcs_module USING btree (vault_oid);
-CREATE UNIQUE INDEX lcs_pkey ON lcs USING btree (vault_oid);
--- FIXME: up until here
-
 
 SET search_path = event, public, pg_catalog;
 

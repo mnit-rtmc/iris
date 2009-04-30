@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,38 +18,30 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.tms.event.AlarmEvent;
-import us.mn.state.dot.tms.event.EventType;
 
 /**
- * AlarmImpl is a class for reading alarm inputs on controllers.
+ * A lane-use control sign indication is a mapping of a controller I/O pin
+ * with a specific lane-use indication.
  *
  * @author Douglas Lau
  */
-public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
+public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 
-	/** Get the event type for the new state */
-	static protected EventType getEventType(boolean s) {
-		if(s)
-			return EventType.ALARM_TRIGGERED;
-		else
-			return EventType.ALARM_CLEARED;
-	}
-
-	/** Load all the alarms */
+	/** Load all the LCS indications */
 	static protected void loadAll() throws TMSException {
-		System.err.println("Loading alarms...");
-		namespace.registerType(SONAR_TYPE, AlarmImpl.class);
-		store.query("SELECT name, description, controller, pin, state" +
-			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		System.err.println("Loading LCS indications...");
+		namespace.registerType(SONAR_TYPE, LCSIndicationImpl.class);
+		store.query("SELECT name, controller, pin, lcs, indication " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new AlarmImpl(namespace,
+				namespace.addObject(new LCSIndicationImpl(
+					namespace,
 					row.getString(1),	// name
-					row.getString(2),	// description
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getBoolean(5)	// state
+					row.getString(2),	// controller
+					row.getInt(3),		// pin
+					row.getString(4),	// lcs
+					row.getInt(5)		// indication
 				));
 			}
 		});
@@ -59,10 +51,10 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("description", description);
 		map.put("controller", controller);
 		map.put("pin", pin);
-		map.put("state", state);
+		map.put("lcs", lcs);
+		map.put("indication", indication);
 		return map;
 	}
 
@@ -76,33 +68,32 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new alarm */
-	public AlarmImpl(String n) {
+	/** Create a new LCS indication */
+	public LCSIndicationImpl(String n) {
 		super(n);
-		state = false;
 	}
 
-	/** Create a new alarm */
-	public AlarmImpl(String n, String d, ControllerImpl c, int p,
-		boolean s)
+	/** Create a new LCS indication */
+	public LCSIndicationImpl(Namespace ns, String n, String c, int p,
+		String l, int i)
+	{
+		this(n,(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,c),
+		     p, (LCSImpl)ns.lookupObject(LCS.SONAR_TYPE, l), i);
+	}
+
+	/** Create a new LCS indication */
+	public LCSIndicationImpl(String n, ControllerImpl c, int p, LCSImpl l,
+		int i)
 	{
 		this(n);
-		description = d;
 		controller = c;
 		pin = p;
-		state = s;
+		lcs = l;
+		indication = i;
 		initTransients();
 	}
 
-	/** Create a new alarm */
-	public AlarmImpl(Namespace ns, String n, String d, String c, int p,
-		boolean s)
-	{
-		this(n, d, (ControllerImpl)ns.lookupObject(
-			Controller.SONAR_TYPE, c), p, s);
-	}
-
-	/** Initialize the controller for this alarm */
+	/** Initialize the controller for this LCS indicaiton */
 	public void initTransients() {
 		try {
 			ControllerImpl c = controller;
@@ -110,34 +101,13 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 				c.setIO(pin, this);
 		}
 		catch(TMSException e) {
-			System.err.println("Alarm " + getName() +
+			System.err.println("LCS indication " + getName() +
 				" initialization error");
 			e.printStackTrace();
 		}
 	}
 
-	/** Description of the alarm */
-	protected String description = "";
-
-	/** Set the description */
-	public void setDescription(String d) {
-		description = d;
-	}
-
-	/** Set the description */
-	public void doSetDescription(String d) throws TMSException {
-		if(d.equals(description))
-			return;
-		store.update(this, "description", d);
-		setDescription(d);
-	}
-
-	/** Get the description */
-	public String getDescription() {
-		return description;
-	}
-
-	/** Controller associated with this alarm */
+	/** Controller associated with this LCS indication */
 	protected ControllerImpl controller;
 
 	/** Update the controller and/or pin */
@@ -157,12 +127,12 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		}
 	}
 
-	/** Set the controller of the alarm */
+	/** Set the controller of the LCS indication */
 	public void setController(Controller c) {
 		controller = (ControllerImpl)c;
 	}
 
-	/** Set the controller of the alarm */
+	/** Set the controller of the LCS indication */
 	public void doSetController(Controller c) throws TMSException {
 		if(c == controller)
 			return;
@@ -174,7 +144,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		setController(c);
 	}
 
-	/** Get the controller to which this alarm is assigned */
+	/** Get the controller to which this LCS indication is assigned */
 	public Controller getController() {
 		return controller;
 	}
@@ -201,28 +171,19 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		return pin;
 	}
 
-	/** Current state of the alarm */
-	protected boolean state;
+	/** LCS associated with this indication */
+	protected LCSImpl lcs;
 
-	/** Update the state of the alarm. This is not meant to be writable
-	 * by SONAR clients since it is updated by reading from controller. */
-	public void setStateNotify(boolean s) {
-		if(s == state)
-			return;
-		AlarmEvent ev = new AlarmEvent(getEventType(s), getName());
-		try {
-			store.update(this, "state", s);
-			ev.doStore();
-			state = s;
-			notifyAttribute("state");
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
+	/** Get the LCS */
+	public LCS getLcs() {
+		return lcs;
 	}
 
-	/** Get the state of the alarm */
-	public boolean getState() {
-		return state;
+	/** Ordinal of LaneUseIndication */
+	protected int indication;
+
+	/** Get the indication (ordinal of LaneUseIndication) */
+	public int getIndication() {
+		return indication;
 	}
 }

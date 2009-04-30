@@ -15,15 +15,19 @@
 package us.mn.state.dot.tms;
 
 /**
- * Lane-Use Control Signal Group
+ * A lane-use control sign indication is a mapping of a controller I/O pin
+ * with a specific lane-use indication.
  *
  * @author Douglas Lau
  */
-public interface LCSGroup extends SonarObject {
+public interface LCSIndication extends ControllerIO_SONAR {
 
-	/** Set verification camera */
-	void setCamera(String id);
+	/** SONAR type name */
+	String SONAR_TYPE = "lcs_indication";
 
-	/** Get verification camera */
-	String getCamera();
+	/** Get the LCS */
+	LCS getLcs();
+
+	/** Get the indication (ordinal of LaneUseIndication) */
+	int getIndication();
 }

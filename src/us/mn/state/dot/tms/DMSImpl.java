@@ -54,9 +54,6 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 
-	/** Special value to indicate an invalid line spacing */
-	static protected final int INVALID_LINE_SPACING = -1;
-
 	/** Calculate the maximum trip minute to display on the sign */
 	static protected int maximumTripMinutes(float miles) {
 		float hours = miles /
@@ -1439,12 +1436,14 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 
 		SignMessage sm = getMessageCurrent();
 		String[] ml = SignMessageHelper.createLines(sm);
-		if(ml == null || ml.length <=0)
+		if(ml == null || ml.length <= 0)
 			desc.append(Kml.descItem("Messages Lines", "none"));
-		else
-			for(int i = 0; i < ml.length; ++i)
+		else {
+			for(int i = 0; i < ml.length; ++i) {
 				desc.append(Kml.descItem("Message Line " + 
-					Integer.toString(i+1), ml[i]));
+					(i + 1), ml[i]));
+			}
+		}
 
 		String owner = (getOwnerCurrent() == null ? "none" : 
 			getOwnerCurrent().getFullName());
@@ -1459,27 +1458,7 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 		desc.append("<br>Updated by IRIS " + 
 			new Date().toString() + "<br><br>");
 
-		// links
 		desc.append("<br>");
-
-		// write agency specific links
-		// FIXME: generalize this, no hard coded IPs
-		/*
-		if(SystemAttributeHelper.isAgencyCaltransD10()) {
-			desc.append("<br>");
-			desc.append(Kml.htmlLink(
-				"http://10.80.11.2", "D10 IRIS Web Page"));
-			desc.append("<br>");
-			desc.append(Kml.htmlLink(
-				"http://10.80.11.2/cmsreport_2day.txt", "2 day " + 
-				DMSABBR + " history"));
-			desc.append("<br>");
-			desc.append(Kml.htmlLink(
-				"http://10.80.11.2/iris-client/iris-client.jnlp", 
-				"Start IRIS"));
-			desc.append("<br>");
-		}
-		*/
 
 		return Kml.htmlDesc(desc.toString());
 	}

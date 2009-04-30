@@ -40,19 +40,22 @@ public enum LaneUseIndication {
 	LANE_CLOSED("Lane closed"),
 
 	/** HOV / HOT vehicles only (white diamond) */
-	HOV("HOV"),
+	HOV("HOV / HOT"),
 
 	/** Merge left (not in MUTCD) */
-	MERGE_LEFT("Merge Left"),
+	MERGE_LEFT("Merge left"),
 
 	/** Merge right (not in MUTCD) */
-	MERGE_RIGHT("Merge Right"),
+	MERGE_RIGHT("Merge right"),
+
+	/** Must exit (not in MUTCD) */
+	MUST_EXIT("Must exit"),
 
 	/** Advisory variable speed limit (amber on black) */
 	AVSL("Advisory variable speed limit"),
 
 	/** Variable speed limit (black on white) */
-	VSL("Variable Speed Limit");
+	VSL("Variable speed limit");
 
 	/** Create a new lane use indication */
 	private LaneUseIndication(String d) {

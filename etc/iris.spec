@@ -108,7 +108,6 @@ fi
 %{_serverdir}/postgresql.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_serverdir}/sonar-server-@@SONAR.VERSION@@.jar
-%{_serverdir}/vault-@@VAULT.VERSION@@.jar
 
 # /var/lib/iris
 %dir %attr(0775,tms,tms) /var/lib/iris

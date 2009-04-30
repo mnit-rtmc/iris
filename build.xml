@@ -270,20 +270,9 @@
 		</javac>
 	</target>
 
-	<!-- Build the RMI stuff -->
-	<target name="rmi-build"
-		depends="compile"
-		description="Build the RMI code">
-		<rmic base="${build.classes}"
-		      classpathref="classpath"
-		      includes="**/*Impl.class"
-		      stubversion="1.2"
-		      verify="true"/>
-	</target>
-
 	<!-- Create the RMI jar -->
 	<target name="rmi-jar"
-		depends="rmi-build"
+		depends="compile"
 		description="Create the RMI jar">
 		<jar jarfile="${build.lib}/${rmi.jar}"
 		     basedir="${build.classes}"

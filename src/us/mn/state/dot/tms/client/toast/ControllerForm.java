@@ -155,6 +155,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		meters.findObject(new ControllerIOFinder<RampMeter>(io));
 		TypeCache<LCS> lcss = state.getLCSs();
 		lcss.findObject(new ControllerIOFinder<LCS>(io));
+		TypeCache<LCSIndication> lcsi = state.getLCSIndications();
+		lcsi.findObject(new ControllerIOFinder<LCSIndication>(io));
 		return io;
 	}
 

@@ -55,13 +55,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CameraImpl.loadAll();
 		WarningSignImpl.loadAll();
 		RampMeterImpl.loadAll();
-		LCSGroupImpl.loadAll();
-		LCSImpl.loadAll();
 		SignMessageImpl.loadAll();
 		DMSImpl.loadAll();
 		SignGroupImpl.loadAll();
 		DmsSignGroupImpl.loadAll();
 		SignTextImpl.loadAll();
+		LCSArrayImpl.loadAll();
+		LCSImpl.loadAll();
+		LCSIndicationImpl.loadAll();
 		TimingPlanImpl.loadAll();
 	}
 
