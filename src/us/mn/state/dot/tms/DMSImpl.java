@@ -1435,7 +1435,7 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 			GeoLocHelper.getDescription(getGeoLoc())));
 
 		desc.append(Kml.descItem(DMSABBR + " Status", 
-			DMSHelper.getAllStyles((DMS)this)));
+			DMSHelper.getAllStyles(this)));
 
 		SignMessage sm = getMessageCurrent();
 		String[] ml = SignMessageHelper.createLines(sm);
@@ -1508,12 +1508,12 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 			return KmlColorImpl.Red;
 		if(DMSHelper.checkStyle(DMSHelper.STYLE_TRAVEL_TIME, this))
 			return KmlColorImpl.Orange;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_MAINTENANCE, this))
+			return KmlColorImpl.Black;
+		if(DMSHelper.checkStyle(DMSHelper.STYLE_INACTIVE, this))
+			return KmlColorImpl.White;
 		if(DMSHelper.checkStyle(DMSHelper.STYLE_FAILED, this))
 			return KmlColorImpl.Gray;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_INACTIVE, this))
-			return KmlColorImpl.Gray;
-		if(DMSHelper.checkStyle(DMSHelper.STYLE_NO_CONTROLLER, this))
-			return KmlColorImpl.White;
 		System.err.println("Warning: unknown DMS state in DMSImpl:" + 
 			DMSHelper.getAllStyles(this));
 		return KmlColorImpl.Black;
