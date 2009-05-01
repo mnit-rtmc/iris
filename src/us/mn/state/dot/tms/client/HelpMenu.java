@@ -83,7 +83,7 @@ public class HelpMenu extends JMenu {
 		m_opentroubleticket.setMnemonic('T');
 		new ActionJob(m_opentroubleticket) {
 			public void perform() throws Exception {
-				Help.invokeHelpWithUrl(url);
+				Help.invokeHelp(url);
 			}
 		};
 		// add as 0th item in menu

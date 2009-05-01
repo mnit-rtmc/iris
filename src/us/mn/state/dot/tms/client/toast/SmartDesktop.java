@@ -17,14 +17,17 @@ package us.mn.state.dot.tms.client.toast;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
+import java.io.IOException;
 import java.rmi.RemoteException;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JComponent;
-
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.utils.Screen;
 
 /**
@@ -58,8 +61,25 @@ public class SmartDesktop extends JDesktopPane {
 
 		// register the keystroke that invokes the help system
 		setFocusable(true); // required to receive focus notification
-		registerKeyboardAction(new Help(this), Help.getSystemHelpKey(), 
+		registerKeyboardAction(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				invokeHelp();
+			}
+		}, Help.getSystemHelpKey(), 
 			JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+	}
+
+	/** Invoke the help system */
+	protected void invokeHelp() {
+		new AbstractJob() {
+			public void perform() throws IOException {
+				AbstractForm cf = findTopFrame();
+				if(cf != null)
+					Help.invokeHelp(cf.getHelpPageUrl());
+				else
+					Help.invokeHelp(null);
+			}
+		}.addToScheduler();
 	}
 
 	/** Create a new internal frame */
@@ -154,14 +174,12 @@ public class SmartDesktop extends JDesktopPane {
 		closeFrames();
 	}
 
-	/** return the top level frame */
+	/** Find the top level frame */
 	protected AbstractForm findTopFrame() {
 		for(JInternalFrame f: getAllFrames())
 			if(f.getFocusOwner() != null)
 				if(f.getContentPane() instanceof AbstractForm)
-					return (AbstractForm)
-						f.getContentPane();
+					return (AbstractForm)f.getContentPane();
 		return null;
 	}
-
 }

@@ -34,8 +34,8 @@ abstract public class AbstractForm extends JPanel implements TmsForm {
 	/** Form title */
 	protected final String title;
 
-	/* help page name, which is an I18N string */
-	protected String helpPageName = Help.defaultHelpPageName;
+	/** Help page name, which is an I18N string */
+	protected String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
 
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {

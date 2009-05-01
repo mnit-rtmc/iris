@@ -14,34 +14,25 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import javax.swing.KeyStroke;
-
 import us.mn.state.dot.tms.utils.WebBrowser;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * Help system functionality. A context sensitive web page is started
- * each time the user presses the F1 key. This class provides 1) static
- * help system methods invoked elsewhere and 2) the action listener
- * that handles keystroke invocations.
+ * each time the user presses the F1 key. This class provides static
+ * help system methods invoked elsewhere.
+ *
  * @author Michael Darter
- * @see SmartDesktop, AbstractForm, I18NMessages
+ * @author Douglas Lau
+ * @see I18NMessages
  */
-public class Help implements ActionListener {
+public class Help {
 
-	/** system default help page name */
-	public final static String defaultHelpPageName = "Help.Default";
-
-	/** smart desktop */
-	static SmartDesktop m_sd = null;
-
-	/** constructor */
-	public Help(SmartDesktop sd) {
-		m_sd = sd;
-	}
+	/** System default help page name */
+	public final static String DEFAULT_HELP_PAGE_NAME = "Help.Default";
 
 	/** get key that initiates help system */
 	static KeyStroke getSystemHelpKey() {
@@ -49,35 +40,12 @@ public class Help implements ActionListener {
 	}
 
 	/** Invoke help with the specified URL.
-	 *  @param url HTTP URL of help page to load. */
-	static public void invokeHelpWithUrl(String url) {
- 		// URL to load when no URL found
-		String DEFAULT_ERROR_URL = "NO_URL_SPECIFIED_IN_HELP";
- 		WebBrowser.open(url == null ? 
- 			DEFAULT_ERROR_URL : url);
- 	}
-
-	/** Invoke help with the specified i18n page name.
- 	 *  @param pn Page name (I18N string tag) of help page to load. */
- 	static public void invokeHelpWithPageName(String pn) {
-		invokeHelpWithUrl(I18NMessages.get(pn == null ? 
-			defaultHelpPageName : pn));
- 	}
-
-	/** Invoke help. The help URL is set by each form. */
-	static public void invokeHelp() {
-		AbstractForm cf = m_sd.findTopFrame();
-		//System.err.println("cf="+(cf == null ? "null" : cf.title));
-		String url = (cf == null ? 
-			I18NMessages.get(defaultHelpPageName) :
-			cf.getHelpPageUrl());
+	 * @param url HTTP URL of help page to load. */
+	static public void invokeHelp(String url) throws IOException {
 		WebBrowser.open(url == null ? 
-			"http://iris.dot.state.mn.us/" : url);
+			I18NMessages.get(DEFAULT_HELP_PAGE_NAME) : url);
 	}
 
-	/** Handle keystroke via ActionListener interface.
-	 *  @see SmartDesktop */
-	public void actionPerformed(ActionEvent e) {
-		Help.invokeHelp();
-	}
+	/** constructor */
+	private Help() { }
 }
