@@ -46,9 +46,8 @@ public class WebBrowser {
 
 	/** Execute a subprocess with a web browser at the given URL */
 	static public void open(URL url) throws IOException {
-		if(url == null)
-			return;
-		open(url.toString());
+		if(url != null)
+			open(url.toString());
 	}
 
 	/** Open a URL in a web browser */
