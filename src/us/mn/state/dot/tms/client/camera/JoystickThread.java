@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,10 +31,6 @@ import javax.swing.SwingUtilities;
  */
 public final class JoystickThread extends Thread {
 
-	/** Location of joystick polling script on Windows */
-	static protected final String JOY_WINDOWS =
-		"C:\\Python24\\python.exe C:\\Python24\\Scripts\\pygame_joy.py";
-
 	/** Regular expression to match axis events */
 	static protected final Pattern AXIS =
 		Pattern.compile("axis:(\\d),value:([-0-9.]+)");
@@ -58,22 +54,11 @@ public final class JoystickThread extends Thread {
 		start();
 	}
 
-	/** Create the joystick polling process */
-	protected Process createJoystickProcess() throws IOException {
-		Runtime runtime = Runtime.getRuntime();
-		try {
-			JoyLinux joy = new JoyLinux();
-			return runtime.exec(joy.getCommand());
-		}
-		catch(IOException e) {
-			return runtime.exec(JOY_WINDOWS);
-		}
-	}
-
 	/** Run the joystick thread */
 	public void run() {
 		try {
-			Process process = createJoystickProcess();
+			JoyScript joy = new JoyScript();
+			Process process = joy.createProcess();
 			InputStream is = process.getInputStream();
 			BufferedReader reader = new BufferedReader(
 				new InputStreamReader(is));
