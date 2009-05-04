@@ -27,14 +27,14 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
 public class CameraXmlWriter extends XmlWriter {
 
 	/** Camera XML file */
-	static protected final String METER_XML = "ramp_meters.xml";
+	static protected final String CAMERA_XML = "cameras.xml";
 
 	/** SONAR namespace */
 	protected final ServerNamespace namespace;
 
 	/** Create a new camera XML writer */
 	public CameraXmlWriter(ServerNamespace ns) {
-		super(METER_XML, false);
+		super(CAMERA_XML, false);
 		namespace = ns;
 	}
 
