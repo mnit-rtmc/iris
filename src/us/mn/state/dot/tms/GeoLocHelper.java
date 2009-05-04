@@ -374,10 +374,13 @@ public class GeoLocHelper {
 	/** Render the GeoLoc object as xml */
 	static public void printXmlElement(GeoLoc p, PrintWriter out){
 		out.print("<geo_loc id='" + p.getName() + "' ");
-		out.print("northing='" + GeoLocHelper.getTrueNorthing(p) + "' ");
-		out.print("easting='"  + GeoLocHelper.getTrueEasting(p)  + "' ");
-		out.print("freeway='"  + GeoLocHelper.getCorridorID(p) + "' ");
-		out.print("cross_street='" + GeoLocHelper.getCrossDescription(p) + "' ");
+		if(GeoLocHelper.hasGPS(p)){
+			out.print("northing='" + GeoLocHelper.getTrueNorthing(p) + "' ");
+			out.print("easting='"  + GeoLocHelper.getTrueEasting(p)  + "' ");
+		}
+		out.print("freeway='"  + p.getFreeway().getName() + "' ");
+		out.print("cross_mod='"  + TMSObject.MODIFIER[p.getCrossMod()] + "' ");
+		out.print("cross_street='" + p.getCrossStreet().getName() + "' ");
 		out.println("/>");
 	}
 
