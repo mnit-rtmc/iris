@@ -378,9 +378,12 @@ public class GeoLocHelper {
 			out.print("northing='" + GeoLocHelper.getTrueNorthing(p) + "' ");
 			out.print("easting='"  + GeoLocHelper.getTrueEasting(p)  + "' ");
 		}
-		out.print("freeway='"  + p.getFreeway().getName() + "' ");
-		out.print("cross_mod='"  + TMSObject.MODIFIER[p.getCrossMod()] + "' ");
-		out.print("cross_street='" + p.getCrossStreet().getName() + "' ");
+		if(p.getFreeway() != null)
+			out.print("freeway='"  + p.getFreeway().getName() + "' ");
+		if(p.getCrossStreet() != null){
+			out.print("cross_mod='"  + TMSObject.MODIFIER[p.getCrossMod()] + "' ");
+			out.print("cross_street='" + p.getCrossStreet().getName() + "' ");
+		}
 		out.println("/>");
 	}
 
