@@ -14,9 +14,11 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.PrintWriter;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.sql.ResultSet;
+
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
@@ -248,4 +250,7 @@ public class CameraImpl extends Device2Impl implements Camera {
 		}
 	}
 
+	/** Render the camera object as xml */
+	public void printXmlElement(PrintWriter out){
+	}
 }
