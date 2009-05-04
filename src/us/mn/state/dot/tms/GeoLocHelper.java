@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.PrintWriter;
+
 import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.utils.Transform;
 
@@ -368,4 +370,15 @@ public class GeoLocHelper {
 		return Transform.toLatLonPoint(easting_d, 
 			northing_d, UTM_ZONE, NORTHERN_HEMISPHERE);
 	}
+
+	/** Render the GeoLoc object as xml */
+	static public void printXmlElement(GeoLoc p, PrintWriter out){
+		out.print("<geo_loc id='" + p.getName() + "' ");
+		out.print("northing='" + GeoLocHelper.getTrueNorthing(p) + "' ");
+		out.print("easting='"  + GeoLocHelper.getTrueEasting(p)  + "' ");
+		out.print("freeway='"  + GeoLocHelper.getCorridorID(p) + "' ");
+		out.print("cross_street='" + GeoLocHelper.getCrossDescription(p) + "' ");
+		out.println("/>");
+	}
+
 }
