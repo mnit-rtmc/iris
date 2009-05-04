@@ -34,6 +34,10 @@ abstract public class XmlWriter {
 	/** Filesystem directory to write XML files */
 	static protected final String XML_DIR = "/var/lib/iris/xml";
 
+	/** XML version and encoding declaration */
+	static protected final String XML_DECLARATION =
+		"<?xml version='1.0' encoding='UTF-8'?>";
+	
 	/** Regex pattern to match an ampersand */
 	static protected final Pattern AMPERSAND = Pattern.compile("&");
 

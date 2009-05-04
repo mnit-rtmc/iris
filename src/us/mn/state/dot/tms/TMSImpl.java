@@ -168,7 +168,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 
 	/** Print the header of the detector sample XML file */
 	protected void printSampleXmlHead(PrintWriter out) {
-		out.println("<?xml version='1.0'?>");
+		out.println(XmlWriter.XML_DECLARATION);
 		out.println("<!DOCTYPE traffic_sample SYSTEM 'tms.dtd'>");
 		out.println("<traffic_sample time_stamp='" + new Date() +
 			"' period='30'>");
