@@ -1006,11 +1006,13 @@ COPY iris.lane_use_indication (id, description) FROM stdin;
 3	Lane closed ahead
 4	Lane closed
 5	HOV / HOT
-6	Merge left
-7	Merge right
-8	Must exit
-9	Advisory variable speed limit
-10	Variable speed limit
+6	Merge right
+7	Merge left
+8	Merge left or right
+9	Must exit right
+10	Must exit left
+11	Advisory variable speed limit
+12	Variable speed limit
 \.
 
 COPY iris.meter_type (id, description, lanes) FROM stdin;

@@ -42,14 +42,20 @@ public enum LaneUseIndication {
 	/** HOV / HOT vehicles only (white diamond) */
 	HOV("HOV / HOT"),
 
-	/** Merge left (not in MUTCD) */
-	MERGE_LEFT("Merge left"),
-
 	/** Merge right (not in MUTCD) */
 	MERGE_RIGHT("Merge right"),
 
-	/** Must exit (not in MUTCD) */
-	MUST_EXIT("Must exit"),
+	/** Merge left (not in MUTCD) */
+	MERGE_LEFT("Merge left"),
+
+	/** Merge left or right (not in MUTCD) */
+	MERGE_BOTH("Merge left or right"),
+
+	/** Must exit right (not in MUTCD) */
+	MUST_EXIT_RIGHT("Must exit right"),
+
+	/** Must exit left (not in MUTCD) */
+	MUST_EXIT_LEFT("Must exit left"),
 
 	/** Advisory variable speed limit (amber on black) */
 	AVSL("Advisory variable speed limit"),
