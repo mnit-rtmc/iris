@@ -94,6 +94,8 @@ public class SignMessageHelper {
 	static public void printXmlElement(SignMessage sm, PrintWriter out) {
 		out.print("<" + SignMessage.SONAR_TYPE + " ");
 		String[] ml = createLines(sm);
+		out.print("<font='" + SString.toString(
+				SignMessageHelper.getFontName(sm, 1)));
 		if(ml != null && ml.length > 0){
 			for(int i = 0; i < ml.length; ++i)
 				out.print("line_" + i+1 + "='" + ml[i] + "' ");
