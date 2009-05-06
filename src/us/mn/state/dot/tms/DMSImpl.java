@@ -1525,10 +1525,10 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 		out.print("<" + DMSABBR + " id='" + getName() + "' ");
 		String owner = (getOwnerCurrent() == null ? "none" : 
 			getOwnerCurrent().getFullName());
-		out.print("<status='" +	DMSHelper.getAllStyles(this) + "' ");
-		out.print("<owner='" + owner + "' ");
-		out.print("<notes='" + getNotes() + "' ");
-		out.print("<last_operation='" + getUserNote() + "' ");
+		out.print("status='" +	DMSHelper.getAllStyles(this) + "' ");
+		out.print("owner='" + owner + "' ");
+		out.print("notes='" + getNotes() + "' ");
+		out.print("last_operation='" + getUserNote() + "' ");
 		if(getGeoLoc() != null)
 			out.print("geoloc='" + getGeoLoc().getName() + "' ");
 		out.println("/>");
