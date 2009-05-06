@@ -80,6 +80,17 @@
 		<fileset dir="${lib.dir}" includes="*.jar"/>
 	</path>
 
+	<!-- junit related -->
+	<property name="testsrc.dir" location="test"/>
+	<property name="testbuild.dir" location="${build.dir}/test"/>
+	<property name="testdata.dir" location="${testbuild.dir}/data"/>
+	<property name="testreports.dir" location="${testbuild.dir}/reports"/>
+	<path id="junit.classpath">
+		<path refid="classpath"/>
+		<pathelement location="${build.dir}/classes"/>
+		<pathelement location="${build.dir}/test"/>
+	</path>
+
 	<!-- Check for one file dependancy -->
 	<target name="check-dep">
 		<available property="file.exists"
@@ -557,4 +568,48 @@
 			</fileset>
 		</delete>
 	</target>
+
+	<!-- init junit dirs-->
+	<target name="init-junit"
+		depends="prepare"
+		description="Init junit test cases">
+		<delete dir="${testdata.dir}"/>
+		<delete dir="${testreports.dir}"/>
+		<mkdir dir="${testbuild.dir}" />
+		<mkdir dir="${testdata.dir}" />
+		<mkdir dir="${testreports.dir}" />
+	</target>
+
+	<!-- compile junit test cases -->
+	<target name="compile-junit"
+		depends="compile, init-junit"
+		description="Compile junit test cases">
+		<javac srcdir="${testsrc.dir}"
+			includeAntRuntime="true"
+			destdir="${testbuild.dir}"
+			debug="true">
+			<classpath refid="junit.classpath"/>
+		</javac>
+	</target>
+
+	<!-- run junit test cases -->
+	<target name="test" depends="compile-junit"
+		description="Run junit test cases">
+		<junit printsummary="yes" 
+			fork="yes" 
+			haltonfailure="yes" 
+			errorProperty="test.failed" 
+			failureProperty="test.failed">
+			<classpath refid="junit.classpath"/>
+			<formatter type="plain" usefile="false"/>
+			<formatter type="xml" usefile="true"/>
+			<jvmarg value="-Ddebug=true"/>
+			<batchtest todir="${testreports.dir}">
+				<fileset dir="${testbuild.dir}" includes="**/*Test.class"/>
+			</batchtest>
+		</junit>
+		<fail message="Junit tests failed. Check log and/or reports."
+		       if="test.failed"/>
+	</target>
+
 </project>
