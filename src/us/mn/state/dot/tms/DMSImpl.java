@@ -360,6 +360,15 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 		return signAccess;
 	}
 
+	/** Check if the DMS is connected via modem */
+	public boolean isConnectedViaModem() {
+		// FIXME: signAccess is supposed to indicate the *physical*
+		//        access of the DMS.  It was never intended to be used
+		//        in this manner.  We should really lookup the comm link
+		//        and figure it out from there.
+		return SString.containsIgnoreCase(getSignAccess(), "modem");
+	}
+
 	/** Sign type enum value */
 	protected transient DMSType dms_type = DMSType.UNKNOWN;
 

@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.SocketMessenger;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * DmsLitePoller. This class provides a DMS Poller developed
@@ -86,20 +85,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		// download button pressed
 		else
 			sendRequest(dms, SignRequest.QUERY_MESSAGE);
-	}
-
-	/** Perform a sign status poll. Called every 60 seconds, via TimerJobSigns */
-	public void pollSigns(ControllerImpl c, Completer comp) {
-		DMSImpl dms = c.getActiveSign();
-		if(dms == null)
-			return;
-
-		// don't poll signs connected by modem
-		if(SString.containsIgnoreCase(dms.getSignAccess(), "modem"))
-			return;
-
-		// start operation
-		sendRequest(dms, SignRequest.QUERY_MESSAGE);
 	}
 
 	/** Perform a 30-second poll */

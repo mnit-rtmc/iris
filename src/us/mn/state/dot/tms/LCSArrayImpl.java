@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.sql.ResultSet;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -100,7 +101,7 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	protected synchronized void doSetIndicationsNext(int[] ind, User o)
 		throws TMSException
 	{
-		final DMSPoller p = getDMSPoller();
+		final LCSPoller p = getLCSPoller();
 		if(p == null)
 			throw new ChangeVetoException("No active poller");
 		// FIXME: check for the appropriate number of lanes
@@ -124,8 +125,7 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 
 	/** Set the current indications */
 	public void setIndicationsCurrent(int[] ind, User o) {
-		// FIXME: use Arrays static compare method
-		if(ind.equals(indicationsCurrent))
+		if(Arrays.equals(ind, indicationsCurrent))
 			return;
 		setDeployTime();
 		indicationsCurrent = ind;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,23 @@
  */
 package us.mn.state.dot.tms.comm;
 
-import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.LCSArrayImpl;
+import us.mn.state.dot.tms.SignRequest;
 
 /**
- * SignPoller is an interface for MessagePoller classes which can poll various
- * types of sign devices.
+ * LCSPoller is an interface for MessagePoller classes which can poll LCS
+ * arrays.
  *
  * @author Douglas Lau
  */
-public interface SignPoller {
+public interface LCSPoller {
 
-	/** Perform a sign status poll */
-	void pollSigns(ControllerImpl c, Completer comp);
+	/** Send a sign request */
+	void sendRequest(LCSArrayImpl lcs_array, SignRequest r);
+
+	/** Send new indications to an LCS array.
+	 * @param lcs_array LCS array.
+	 * @param ind New lane use indications.
+	 * @param o User who deployed the indications. */
+	void sendIndications(LCSArrayImpl lcs_array, int[] ind, User o);
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,24 +15,23 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.WarningSignImpl;
+import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
- * Query the status of a warning sign
+ * Operation to query the status of a Lane Control Signal array.
  *
  * @author Douglas Lau
  */
-public class WarningStatus extends Device2Operation {
+public class LCSQueryStatus extends LCSOperation {
 
-	/** Warning sign */
-	protected final WarningSignImpl warn;
+	/** LCS to query */
+	protected final LCSArrayImpl lcs_array;
 
-	/** Create a new warning status poll */
-	public WarningStatus(WarningSignImpl w) {
-		super(DATA_30_SEC, w);
-		warn = w;
+	/** Create a new operation to query the LCS */
+	public LCSQueryStatus(LCSArrayImpl l) {
+		super(DATA_30_SEC, l);
+		lcs_array = l;
 	}
 
 	/** Create the first real phase of the operation */
@@ -40,18 +39,24 @@ public class WarningStatus extends Device2Operation {
 		return new QueryStatus();
 	}
 
-	/** Phase to query the warning sign status */
+	/** Phase to query the LCS status */
 	protected class QueryStatus extends Phase {
 
-		/** Query the warning sign status */
+		/** Query the status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			byte[] b = new byte[1];
-			mess.add(new MemoryRequest(Address.RAMP_METER_DATA,
-				b));
+			mess.add(new MemoryRequest(Address.RAMP_METER_DATA, b));
 			mess.getRequest();
-			warn.setDeployedStatus(b[Address.OFF_STATUS] !=
+			lcs_array.setDeployedStatus(b[Address.OFF_STATUS] !=
 				MeterStatus.FLASH);
 			return null;
 		}
+	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		if(!success)
+			lcs_array.setStatus(errorStatus);
+		super.cleanup();
 	}
 }

@@ -26,13 +26,10 @@ import us.mn.state.dot.tms.SignRequest;
  *
  * @author Douglas Lau
  */
-public interface DMSPoller extends SignPoller {
+public interface DMSPoller {
 
 	/** Send a sign request */
 	void sendRequest(DMSImpl dms, SignRequest r);
-
-	/** Send a sign request from a specific user */
-	void sendRequest(DMSImpl dms, SignRequest r, User u);
 
 	/** Send a message to the sign. If the message is already deployed on
 	 * the sign, restart the time remaining.

@@ -76,13 +76,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		}
 	}
 
-	/** Perform a sign status poll */
-	public void pollSigns(ControllerImpl c, Completer comp) {
-		DMSImpl dms = c.getActiveSign();
-		if(dms != null)
-			new DMSQueryMessage(dms).start();
-	}
-
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
 		// Nothing to do here
@@ -100,12 +93,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		DiagnosticOperation test = new DiagnosticNtcip(c);
 		test.start();
 		return test;
-	}
-
-	/** Send a sign request message to the sign from a specific user */
-	public void sendRequest(DMSImpl dms, SignRequest r, User u) {
-		// user is ignored here
-		sendRequest(dms, r);
 	}
 
 	/** Send a sign request message to the sign */

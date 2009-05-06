@@ -27,9 +27,10 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.comm.DMSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
+import us.mn.state.dot.tms.comm.WarningSignPoller;
 import us.mn.state.dot.tms.kml.KmlDocument;
 import us.mn.state.dot.tms.kml.KmlFolder;
 import us.mn.state.dot.tms.kml.KmlFeature;
@@ -82,7 +83,7 @@ public final class TMSImpl implements KmlDocument {
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
 		station_manager = new StationManager(namespace);
-		TIMER.addJob(new TimerJobSigns(
+		TIMER.addJob(new TimerJobDMS(
 			SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
@@ -181,29 +182,17 @@ public final class TMSImpl implements KmlDocument {
 		out.println("</traffic_sample>");
 	}
 
-	/** Sign polling timer job */
-	protected class TimerJobSigns extends Job {
+	/** DMS polling timer job */
+	protected class TimerJobDMS extends Job {
 
-		/** Job completer */
-		protected final Completer comp;
-
-		/** Create a new sign polling timer job */
-		protected TimerJobSigns(int intervalSecs) {
+		/** Create a new DMS polling timer job */
+		protected TimerJobDMS(int intervalSecs) {
 			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,4);
-			comp = new Completer("Sign Poll", TIMER);
 		}
 
-		/** Perform the sign poll job */
+		/** Perform the DMS poll job */
 		public void perform() throws Exception {
-			if(!comp.checkComplete())
-				return;
-			comp.reset(Calendar.getInstance());
-			try {
-				pollSigns(comp);
-			}
-			finally {
-				comp.makeReady();
-			}
+			pollDMSs();
 		}
 	}
 
@@ -252,6 +241,8 @@ public final class TMSImpl implements KmlDocument {
 			comp.reset(stamp);
 			try {
 				poll30Second(comp);
+				pollLCSs();
+				pollWarningSigns();
 			}
 			finally {
 				comp.makeReady();
@@ -493,22 +484,60 @@ public final class TMSImpl implements KmlDocument {
 		});
 	}
 
-	/** Poll all controllers for sign status */
-	static protected void pollSigns(final Completer comp)
-		throws NamespaceError
-	{
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				MessagePoller p = c.getPoller();
-				if(p instanceof SignPoller) {
-					SignPoller sp = (SignPoller)p;
-					sp.pollSigns(c, comp);
-				}
+	/** Poll all DMS message status */
+	static protected void pollDMSs() throws NamespaceError {
+		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
+			public boolean check(DMSImpl d) {
+				if(!d.isConnectedViaModem())
+					pollDMS(d);
 				return false;
 			}
 		});
+	}
+
+	/** Poll one DMS message status */
+	static protected void pollDMS(DMSImpl d) {
+		DMSPoller p = d.getDMSPoller();
+		if(p != null)
+			p.sendRequest(d, SignRequest.QUERY_MESSAGE);
+	}
+
+	/** Poll all LCS status */
+	static protected void pollLCSs() throws NamespaceError {
+		namespace.findObject(LCSArray.SONAR_TYPE,
+			new Checker<LCSArrayImpl>()
+		{
+			public boolean check(LCSArrayImpl lcs_array) {
+				pollLCSArray(lcs_array);
+				return false;
+			}
+		});
+	}
+
+	/** Poll one LCS array status */
+	static protected void pollLCSArray(LCSArrayImpl lcs_array) {
+		LCSPoller p = lcs.getLCSPoller();
+		if(p != null)
+			p.sendRequest(lcs_array, SignRequest.QUERY_STATUS);
+	}
+
+	/** Poll all warning signs */
+	static protected void pollWarningSigns() throws NamespaceError {
+		namespace.findObject(WarningSign.SONAR_TYPE,
+			new Checker<WarningSignImpl>()
+		{
+			public boolean check(WarningSignImpl warn_sign) {
+				pollWarningSign(warn_sign);
+				return false;
+			}
+		});
+	}
+
+	/** Poll one warning sign status */
+	static protected void pollWarningSign(WarningSignImpl warn_sign) {
+		WarningSignPoller p = warn_sign.getWarningSignPoller();
+		if(p != null)
+			p.sendRequest(warn_sign, SignRequest.QUERY_STATUS);
 	}
 
 	/** Select a camera on a video monitor */
