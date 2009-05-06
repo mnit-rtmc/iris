@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.Operation;
 import us.mn.state.dot.tms.comm.ProtocolException;
-import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.comm.SocketMessenger;
 import us.mn.state.dot.tms.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.comm.caws.CawsPoller;
@@ -471,18 +470,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			synchronized(controllers) {
 				for(ControllerImpl c: controllers.values())
 					p.download(c, false);
-			}
-		}
-	}
-
-	/** Poll this communication link for sign status data */
-	public void pollSigns(Completer comp) {
-		MessagePoller p = getPoller();
-		if(p instanceof SignPoller) {
-			SignPoller sp = (SignPoller)p;
-			synchronized(controllers) {
-				for(ControllerImpl c: controllers.values())
-					sp.pollSigns(c, comp);
 			}
 		}
 	}
