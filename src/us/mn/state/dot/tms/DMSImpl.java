@@ -1017,7 +1017,7 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 	protected void logMessage(SignMessage m, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = m.getMulti();
-		if(((SignMessageImpl)m).isBlank()) {
+		if(SignMessageHelper.isBlank(m)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}

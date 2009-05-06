@@ -98,10 +98,9 @@ public class DMSHelper {
 	/** Test if a DMS is deployed */
 	static public boolean isDeployed(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
-		if(m != null) {
-			MultiString ms = new MultiString(m.getMulti());
-			return !ms.isBlank();
-		} else {
+		if(m != null)
+			return !SignMessageHelper.isBlank(m);
+		else {
 			// messageCurrent should never be null, so this means
 			// the proxy has just been removed
 			return false;

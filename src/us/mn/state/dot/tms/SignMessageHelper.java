@@ -14,9 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.util.LinkedList;
-import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -87,5 +86,35 @@ public class SignMessageHelper {
 			}
 		}, 1);
 		return ls.toArray(new String[0]);
+	}
+
+	/** Check if the duration of a message is zero */
+	static public boolean isDurationZero(SignMessage m) {
+		Integer d = m.getDuration();
+		return (d != null && d <= 0) || isBlank(m);
+	}
+
+	/** Check if a sign message is blank */
+	static public boolean isBlank(SignMessage m) {
+		return isMultiBlank(m) && isBitmapBlank(m);
+	}
+
+	/** Check if the MULTI string is blank */
+	static public boolean isMultiBlank(SignMessage m) {
+		return new MultiString(m.getMulti()).isBlank();
+	}
+
+	/** Check if the bitmap is blank */
+	static public boolean isBitmapBlank(SignMessage m) {
+		try {
+			for(byte b: Base64.decode(m.getBitmaps())) {
+				if(b != 0)
+					return false;
+			}
+			return true;
+		}
+		catch(IOException e) {
+			return false;
+		}
 	}
 }

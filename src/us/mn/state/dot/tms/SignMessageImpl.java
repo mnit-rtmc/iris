@@ -126,30 +126,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		duration = d;
 	}
 
-	/** Check if the sign message is blank */
-	public boolean isBlank() {
-		return isMultiBlank() && isBitmapBlank();
-	}
-
-	/** Check if the MULTI string is blank */
-	protected boolean isMultiBlank() {
-		return new MultiString(multi).isBlank();
-	}
-
-	/** Check if the bitmap is blank */
-	protected boolean isBitmapBlank() {
-		try {
-			for(byte b: Base64.decode(bitmaps)) {
-				if(b != 0)
-					return false;
-			}
-			return true;
-		}
-		catch(IOException e) {
-			return false;
-		}
-	}
-
 	/** Message MULTI string, contains message text for all pages */
 	protected String multi;
 
@@ -184,7 +160,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @return Run-time priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	public int getRunTimePriority() {
-		if(isBlank())
+		if(SignMessageHelper.isBlank(this))
 			return DMSMessagePriority.BLANK.ordinal();
 		else
 			return getPriority();

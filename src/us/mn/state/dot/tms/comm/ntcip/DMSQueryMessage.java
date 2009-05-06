@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMessageImpl;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -46,18 +46,18 @@ public class DMSQueryMessage extends DMSOperation {
 	/** Process the message table source from the sign controller */
 	protected Phase processMessageSource() {
 		DMS_LOG.log(dms.getName() + ": " + source);
-		SignMessageImpl m = (SignMessageImpl)dms.getMessageCurrent();
+		SignMessage m = dms.getMessageCurrent();
 		if(DmsMessageMemoryType.isBlank(source.getMemory())) {
 			/* The sign is blank. If IRIS says there should
 			 * be a message on the sign, that's wrong and
 			 * needs to be updated */
-			if(!m.isBlank())
+			if(!SignMessageHelper.isBlank(m))
 				setCurrentMessage("", null);
 		} else {
 			/* The sign is not blank. If IRIS says it
 			 * should be blank, then we need to query the
 			 * current message on the sign. */
-			if(m.isBlank())
+			if(SignMessageHelper.isBlank(m))
 				return new QueryCurrentMessage();
 		}
 		return null;
