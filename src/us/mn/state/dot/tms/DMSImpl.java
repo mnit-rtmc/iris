@@ -1525,17 +1525,8 @@ public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
 		out.print("<" + DMSABBR + " id='" + getName() + "' ");
 		if(getGeoLoc() != null)
 			out.print("geoloc='" + getGeoLoc().getName() + "' ");
-		SignMessage sm = getMessageCurrent();
-		String[] ml = SignMessageHelper.createLines(sm);
-		if(ml != null && ml.length > 0){
-			out.println(">");
-			out.print("<sign_message ");
-			for(int i = 0; i < ml.length; ++i)
-				out.print("line_" + i+1 + "='" + ml[i] + "' ");
-			out.println("/>");
-			out.println("/" + DMSABBR + ">");
-		}else{
-			out.println("/>");
-		}
+		out.println("/>");
+		SignMessageHelper.printXmlElement(getMessageCurrent(), out);
+		out.println("/" + DMSABBR + ">");
 	}
 }

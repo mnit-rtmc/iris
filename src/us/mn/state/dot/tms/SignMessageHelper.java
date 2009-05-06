@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -87,5 +88,16 @@ public class SignMessageHelper {
 			}
 		}, 1);
 		return ls.toArray(new String[0]);
+	}
+
+	/** Render the SignMessage object as xml */
+	static public void printXmlElement(SignMessage sm, PrintWriter out) {
+		out.print("<" + SignMessage.SONAR_TYPE + " ");
+		String[] ml = createLines(sm);
+		if(ml != null && ml.length > 0){
+			for(int i = 0; i < ml.length; ++i)
+				out.print("line_" + i+1 + "='" + ml[i] + "' ");
+		}
+		out.println("/" + SignMessage.SONAR_TYPE + ">");
 	}
 }
