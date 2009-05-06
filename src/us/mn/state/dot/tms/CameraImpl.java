@@ -252,11 +252,12 @@ public class CameraImpl extends Device2Impl implements Camera {
 
 	/** Render the camera object as xml */
 	public void printXmlElement(PrintWriter out){
-		out.print("<camera id='" + getName() + "' ");
-		out.print("encoder='" + getEncoder() + "' ");
-		out.print("encoder_channel='" + getEncoderChannel() + "' ");
+		out.print("<camera ");
+		out.print(XmlWriter.createAttribute("id", getName()));
+		out.print(XmlWriter.createAttribute("encoder", getEncoder()));
+		out.print(XmlWriter.createAttribute("encoder_channel", getEncoderChannel()));
 		if(getGeoLoc() != null)
-			out.print("geoloc='" + getGeoLoc().getName() + "' ");
+			out.print(XmlWriter.createAttribute("geoloc", getGeoLoc().getName()));
 		out.println("/>");
 	}
 }

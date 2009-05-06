@@ -41,7 +41,7 @@ public class CameraXmlWriter extends XmlWriter {
 	/** Print the body of the camera list XML file */
 	public void print(final PrintWriter out) {
 		out.println(XML_DECLARATION);
-		out.println("<camera_list>");
+		out.println("<list>");
 		namespace.findObject(Camera.SONAR_TYPE,
 			new Checker<CameraImpl>()
 		{
@@ -50,6 +50,6 @@ public class CameraXmlWriter extends XmlWriter {
 				return false;
 			}
 		});
-		out.println("</camera_list>");
+		out.println("</list>");
 	}
 }

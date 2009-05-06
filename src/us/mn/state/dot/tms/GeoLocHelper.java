@@ -373,16 +373,21 @@ public class GeoLocHelper {
 
 	/** Render the GeoLoc object as xml */
 	static public void printXmlElement(GeoLoc p, PrintWriter out){
-		out.print("<geo_loc id='" + p.getName() + "' ");
+		out.print("<" + p.SONAR_TYPE);
+		out.print(XmlWriter.createAttribute("id", p.getName()));
 		if(GeoLocHelper.hasGPS(p)){
-			out.print("northing='" + GeoLocHelper.getTrueNorthing(p) + "' ");
-			out.print("easting='"  + GeoLocHelper.getTrueEasting(p)  + "' ");
+			out.print(XmlWriter.createAttribute("northing",
+					GeoLocHelper.getTrueNorthing(p)));
+			out.print(XmlWriter.createAttribute("easting",
+					GeoLocHelper.getTrueEasting(p)));
 		}
 		if(p.getFreeway() != null)
-			out.print("freeway='"  + p.getFreeway().getName() + "' ");
+			out.print(XmlWriter.createAttribute("freeway", p.getFreeway().getName()));
 		if(p.getCrossStreet() != null){
-			out.print("cross_mod='"  + TMSObject.MODIFIER[p.getCrossMod()] + "' ");
-			out.print("cross_street='" + p.getCrossStreet().getName() + "' ");
+			out.print(XmlWriter.createAttribute("cross_mod",
+					TMSObject.MODIFIER[p.getCrossMod()]));
+			out.print(XmlWriter.createAttribute("cross_street",
+					p.getCrossStreet().getName()));
 		}
 		out.println("/>");
 	}

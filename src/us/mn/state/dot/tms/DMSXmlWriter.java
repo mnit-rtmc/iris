@@ -41,7 +41,7 @@ public class DMSXmlWriter extends XmlWriter {
 	/** Print the body of the DMS list XML file */
 	public void print(final PrintWriter out) {
 		out.println(XML_DECLARATION);
-		out.println("<dms_list>");
+		out.println("<list>");
 		namespace.findObject(DMS.SONAR_TYPE,
 			new Checker<DMSImpl>()
 		{
@@ -50,6 +50,6 @@ public class DMSXmlWriter extends XmlWriter {
 				return false;
 			}
 		});
-		out.println("</dms_list>");
+		out.println("</list>");
 	}
 }

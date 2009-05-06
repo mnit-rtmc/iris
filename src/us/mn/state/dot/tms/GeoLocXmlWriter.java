@@ -41,7 +41,7 @@ public class GeoLocXmlWriter extends XmlWriter {
 	/** Print the body of the GeoLoc list XML file */
 	public void print(final PrintWriter out) {
 		out.println(XML_DECLARATION);
-		out.println("<geoloc_list>");
+		out.println("<list>");
 		namespace.findObject(GeoLoc.SONAR_TYPE,
 			new Checker<GeoLocImpl>()
 		{
@@ -50,6 +50,6 @@ public class GeoLocXmlWriter extends XmlWriter {
 				return false;
 			}
 		});
-		out.println("</geoloc_list>");
+		out.println("</list>");
 	}
 }
