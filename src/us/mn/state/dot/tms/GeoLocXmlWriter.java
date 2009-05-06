@@ -26,13 +26,13 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
  */
 public class GeoLocXmlWriter extends XmlWriter {
 
-	/** Camera XML file */
+	/** GeoLoc XML file */
 	static protected final String GEOLOC_XML = "geoloc.xml";
 
 	/** SONAR namespace */
 	protected final ServerNamespace namespace;
 
-	/** Create a new camera XML writer */
+	/** Create a new GeoLoc XML writer */
 	public GeoLocXmlWriter(ServerNamespace ns) {
 		super(GEOLOC_XML, false);
 		namespace = ns;

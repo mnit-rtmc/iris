@@ -152,6 +152,7 @@ public final class TMSImpl extends TMSObjectImpl implements TMS, KmlDocument {
 		new RampMeterXmlWriter(namespace).write();
 		new CameraXmlWriter(namespace).write();
 		new GeoLocXmlWriter(namespace).write();
+		new DMSXmlWriter(namespace).write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 
