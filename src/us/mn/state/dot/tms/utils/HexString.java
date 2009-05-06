@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,107 +55,8 @@ final public class HexString
 		return hexStringToByteArray(m_hexstring);
 	}
 
-	/** test methods */
-	static public boolean test() {
-		boolean ok = true;
-
-		// charToByte
-		System.err.println("Testing charToByte");
-		ok = ok && (charToByte('0') == 0);
-		ok = ok && (charToByte('1') == 1);
-		ok = ok && (charToByte('2') == 2);
-		ok = ok && (charToByte('3') == 3);
-		ok = ok && (charToByte('4') == 4);
-		ok = ok && (charToByte('5') == 5);
-		ok = ok && (charToByte('a') == 10);
-		ok = ok && (charToByte('B') == 11);
-		ok = ok && (charToByte('c') == 12);
-		ok = ok && (charToByte('D') == 13);
-		ok = ok && (charToByte('e') == 14);
-		ok = ok && (charToByte('F') == 15);
-
-		// hexToByte
-		System.err.println("Testing hexToByte");
-		ok = ok && (hexToByte('1', '1') == 17);
-		ok = ok && (hexToByte('f', 'f') == 255);
-		ok = ok && (hexToByte('0', '0') == 0);
-		ok = ok && (hexToByte('1', '0') == 16);
-		ok = ok && (hexToByte('0', '1') == 1);
-		ok = ok && (hexToByte('E', 'E') == 238);
-
-		// isEven
-		System.err.println("Testing isEven");
-		ok = ok && isEven(0);
-		ok = ok && isEven(2);
-		ok = ok && isEven(-2);
-		ok = ok &&!isEven(1);
-		ok = ok &&!isEven(3);
-
-		// toHexString
-		System.err.println("Testing toHexString");
-		ok = ok && (toHexString((byte) 0).compareToIgnoreCase(
-			"00") == 0);
-		ok = ok && (toHexString((byte) 1).compareToIgnoreCase(
-			"01") == 0);
-		ok = ok && (toHexString((byte) 10).compareToIgnoreCase(
-			"0A") == 0);
-		ok = ok && (toHexString((byte) 11).compareToIgnoreCase(
-			"0B") == 0);
-		ok = ok && (toHexString((byte) 12).compareToIgnoreCase(
-			"0C") == 0);
-		ok = ok && (toHexString((byte) 13).compareToIgnoreCase(
-			"0D") == 0);
-		ok = ok && (toHexString((byte) 14).compareToIgnoreCase(
-			"0E") == 0);
-		ok = ok && (toHexString((byte) 15).compareToIgnoreCase(
-			"0F") == 0);
-		ok = ok && (toHexString((byte) 16).compareToIgnoreCase(
-			"10") == 0);
-		ok = ok && (toHexString((byte) 254).compareToIgnoreCase(
-			"FE") == 0);
-		ok = ok && (toHexString((byte) 255).compareToIgnoreCase(
-			"FF") == 0);
-
-		// appendToHexString
-		System.err.println("Testing appendToHexString");
-		{
-			StringBuilder sb = new StringBuilder(0);
-
-			sb = appendToHexString(sb, (byte) 255);
-			ok = ok && (sb.length() == 2);
-			ok = ok && (sb.toString().compareToIgnoreCase("FF")
-				    == 0);
-			sb = appendToHexString(sb, (byte) 254);
-			ok = ok && (sb.length() == 4);
-			ok = ok && (sb.toString().compareToIgnoreCase("FFFE")
-				    == 0);
-		}
-
-		// hexStringToByteArray
-		System.err.println("Testing hexStringToByteArray");
-		{
-			byte[] a;
-
-			a = hexStringToByteArray("0001090a0A0b0fFFfe");
-			ok = ok && (a.length == 9);
-			ok = ok && (a[0] == 0);
-			ok = ok && (a[1] == 1);
-			ok = ok && (a[2] == 9);
-			ok = ok && (a[3] == 10);
-			ok = ok && (a[4] == 10);
-			ok = ok && (a[5] == 11);
-			ok = ok && (a[6] == 15);
-			ok = ok && (a[7] == (byte) 255);
-			ok = ok && (a[8] == (byte) 254);
-		}
-
-		return ok;
-	}
-
-	/**
-	 * Convert byte array to a string of hex values with whitespace delimiter
-	 * e.g. {0,1,2,3} to "00 01 02 03"
-	 */
+	 /** Convert byte array to a string of hex values with whitespace 
+	  * delimiter e.g. {0,1,2,3} to "00 01 02 03". */
 	public static String toHexString(byte[] anArray) {
 		if(anArray == null)
 			return "";
@@ -176,7 +77,8 @@ final public class HexString
 		return output.toString().toUpperCase();
 	}
 
-	/** Convert byte array to a string of hex values with specified delimiter */
+	/** Convert byte array to a string of hex values with specified 
+	 *  delimiter. */
 	public static String toHexString(byte[] anArray, char aDelimiter) {
 		if(anArray == null)
 			return "";
@@ -199,11 +101,9 @@ final public class HexString
 		return output.toString().toUpperCase();
 	}
 
-	/**
-	 * Convert a string in hex format to a byte array. Note, because java has no
-	 * unsigned, ff will convert to 255 which is -1. e.g. "000102ff" converts to
-	 * {0,1,2,255}
-	 */
+	/** Convert a string in hex format to a byte array. Note, because 
+	 *  java has no unsigned, ff will convert to 255 which is -1. e.g. 
+	 *  "000102ff" converts to {0,1,2,255}. */
 	public static byte[] hexStringToByteArray(String hs) {
 
 		// sanity checks
@@ -276,7 +176,8 @@ final public class HexString
 		return (sb);
 	}
 
-	/** Convert a byte to a string containing a hex value e.g. 1 converts to "01" */
+	/** Convert a byte to a string containing a hex value e.g. 1 
+	 *  converts to "01". */
 	public static String toHexString(byte aByte) {
 		StringBuffer output = new StringBuffer(2);
 
@@ -289,7 +190,7 @@ final public class HexString
 
 
 	/** return true if the int is even else false */
-	private static boolean isEven(int n) {
+	public static boolean isEven(int n) {
 		return (n % 2 == 0);
 	}
 }
