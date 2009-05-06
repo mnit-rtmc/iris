@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,58 +23,6 @@ public class SString {
 
 	/** instance can't be created */
 	private SString(){}
-
-	/**
-	 *  test methods.
-	 */
-	static public boolean test() {
-		boolean ok = true;
-
-		// containsChar
-		ok = ok & !containsChar(null,'x');
-		ok = ok & !containsChar("",'x');
-		ok = ok & containsChar("abcdx",'x');
-		ok = ok & !containsChar("abcd",'x');
-
-		// union
-		ok = ok & union(null,"x")==null;
-		ok = ok & union("abc",null)==null;
-		ok = ok & union("abc","").equals("");
-		ok = ok & union("abcdefg","aceg").equals("aceg");
-		ok = ok & union("abcdefg","0123aceg123").equals("aceg");
-
-		// truncate
-		ok = ok && truncate(null,0).equals("");
-		ok = ok && truncate(null,5).equals("");
-		ok = ok && truncate("",0).equals("");
-		ok = ok && truncate("",3).equals("");
-		ok = ok && truncate("abcdef",0).equals("");
-		ok = ok && truncate("abcdef",1).equals("a");
-		ok = ok && truncate("abcdef",2).equals("ab");
-		ok = ok && truncate("abcdef",3).equals("abc");
-		ok = ok && truncate("abcdef",35).equals("abcdef");
-
-		// toRightField
-		// ok=ok && new String("").compareTo(SString.toRightField(null,""))==0;
-		// ok=ok && new String("").compareTo(SString.toRightField("",null))==0;
-		// ok=ok && new String("").compareTo(SString.toRightField(null,null))==0;
-		ok = ok && (new String("").compareTo(SString.toRightField("", "")) == 0);
-		ok = ok && (new String("1234a").compareTo(SString.toRightField("12345", "a")) == 0);
-		ok = ok && (new String("1abcd").compareTo(SString.toRightField("12345", "abcd")) == 0);
-		ok = ok && (new String("12345").compareTo(SString.toRightField("12345", "")) == 0);
-		ok = ok && (new String("abcdef").compareTo(SString.toRightField("123456", "abcdef")) == 0);
-		// ok=ok && new String("12345").compareTo(SString.toRightField("12345","abcdef"))==0;
-
-		// removeEnclosingQuotes
-		ok = ok && (new String("abcd").compareTo(SString.removeEnclosingQuotes("abcd")) == 0);
-		ok = ok && (new String("abcd").compareTo(SString.removeEnclosingQuotes("\"abcd\"")) == 0);
-		ok = ok && (new String("").compareTo(SString.removeEnclosingQuotes("")) == 0);
-		ok = ok && (null == SString.removeEnclosingQuotes(null));
-		ok = ok && (new String("\"abcd\" ").compareTo(SString.removeEnclosingQuotes("\"abcd\" ")) == 0);
-		ok = ok && (new String("x").compareTo(SString.removeEnclosingQuotes("\"x\"")) == 0);
-
-		return (ok);
-	}
 
 	/**
 	 *  Does a string contain the specified char?
@@ -332,5 +280,49 @@ public class SString {
 	static public String trimJoin(String a, String b) {
 		String j = a + " " + b;
 		return j.trim();
+	}
+
+	/** return true if the argument is numeric */
+	static public boolean isNumeric(String s) {
+		if(s == null || s.isEmpty())
+			return false;
+		boolean found_dec = false;
+		boolean found_minus = false;
+		for(int i = 0; i < s.length(); ++i) {
+			if(s.charAt(i) == '.') {
+				if(found_dec)
+					return false;
+				found_dec = true;
+				continue;
+			} else if(s.charAt(i) == '-') {
+				if(found_minus)
+					return false;
+				found_minus = true;
+				continue;
+			} else if(!Character.isDigit(s.charAt(i)))
+				return false;
+		}
+		return true;
+	}
+
+	/** Compare 2 strings that each may be alpha, numeric, or alpha 
+	 *  numeric. If both are numeric they are compared in numeric
+	 *  order as integers (unless they are numerically equal, then
+	 *  as strings), otherwise as strings. 
+	 *  @param a A string that may contain letters and/or numbers
+	 *  @param b A string that may contain letters and/or numbers
+	 *  @return A value < 0 if a is less than b, 0 if the strings
+	 *	    are identical, or > 0 if a is greater than b.
+	 */
+	public static int compareAlphaNumeric(String a, String b) {
+		if(SString.isNumeric(a) && SString.isNumeric(b)) {
+			int diff = SString.stringToInt(a) - 
+				SString.stringToInt(b);
+			// if numerically equal, compare as strings
+			if(diff == 0)
+				return a.compareTo(b);
+			return diff;
+		}
+		return a.compareTo(b);
 	}
 }
