@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.comm.LCSPoller;
+import us.mn.state.dot.tms.comm.MessagePoller;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -102,10 +104,11 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	protected synchronized void doSetIndicationsNext(int[] ind, User o)
 		throws TMSException
 	{
+		if(ind.length != lanes.length)
+			throw new ChangeVetoException("Wrong lane count");
 		final LCSPoller p = getLCSPoller();
 		if(p == null)
 			throw new ChangeVetoException("No active poller");
-		// FIXME: check for the appropriate number of lanes
 		// FIXME: check that the indications are valid
 		// FIXME: check the priority of each sign
 		p.sendIndications(this, ind, o);
@@ -155,6 +158,7 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	public synchronized void setLane(int lane, LCS lcs)
 		throws TMSException
 	{
+		// FIXME: throw an exception if the indications are not dark
 		if(lane < 1 || lane > 16)
 			throw new ChangeVetoException("Invalid lane number");
 		int n_lanes = Math.max(lanes.length, lane);
@@ -163,6 +167,7 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 			throw new ChangeVetoException("Lane already assigned");
 		lns[lane - 1] = lcs;
 		lanes = Arrays.copyOf(lns, getMaxLane(lns));
+		// FIXME: adjust the indications
 	}
 
 	/** Get the highest lane number */
@@ -173,5 +178,40 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 				lane = i + 1;
 		}
 		return lane;
+	}
+
+	/** Get an LCS poller for the array */
+	public LCSPoller getLCSPoller() {
+		DMSImpl[] signs = getDMSArray();
+		// Make sure all signs have LCS pollers
+		for(DMSImpl dms: signs) {
+			if(dms == null)
+				return null;
+			if(!(dms.getPoller() instanceof LCSPoller))
+				return null;
+		}
+		// Just grab the first poller we find ...
+		for(DMSImpl dms: signs) {
+			MessagePoller mp = dms.getPoller();
+			if(mp instanceof LCSPoller)
+				return (LCSPoller)mp;
+		}
+		return null;
+	}
+
+	/** Get an array of the DMS */
+	protected DMSImpl[] getDMSArray() {
+		LCS[] lcss = getLanes();
+		DMSImpl[] signs = new DMSImpl[lcss.length];
+		for(int i = 0; i < lcss.length; i++) {
+			LCS lcs = lcss[i];
+			if(lcs != null) {
+				DMSImpl dms = (DMSImpl)namespace.lookupObject(
+					DMS.SONAR_TYPE, lcs.getName());
+				if(dms.isActive())
+					signs[i] = dms;
+			}
+		}
+		return signs;
 	}
 }
