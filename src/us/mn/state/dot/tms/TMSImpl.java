@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.comm.DMSPoller;
+import us.mn.state.dot.tms.comm.LCSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.VideoMonitorPoller;
 import us.mn.state.dot.tms.comm.WarningSignPoller;
@@ -379,7 +380,6 @@ public final class TMSImpl implements KmlDocument {
 	/** Create a new TMS object */
 	TMSImpl(Properties props) throws IOException, TMSException {
 		super();
-		initialize();
 		openVault(props);
 	}
 
@@ -516,7 +516,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Poll one LCS array status */
 	static protected void pollLCSArray(LCSArrayImpl lcs_array) {
-		LCSPoller p = lcs.getLCSPoller();
+		LCSPoller p = lcs_array.getLCSPoller();
 		if(p != null)
 			p.sendRequest(lcs_array, SignRequest.QUERY_STATUS);
 	}

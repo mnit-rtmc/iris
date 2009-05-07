@@ -301,25 +301,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			io_pins.put(pin, io);
 	}
 
-	/** Get a list of all traffic devices on the controller */
-	protected synchronized LinkedList<TrafficDeviceImpl> getDevices() {
-		LinkedList<TrafficDeviceImpl> devices =
-			new LinkedList<TrafficDeviceImpl>();
-		for(ControllerIO io: io_pins.values()) {
-			if(io instanceof TrafficDeviceImpl)
-				devices.add((TrafficDeviceImpl)io);
-		}
-		return devices;
-	}
-
-	/** Set all controller devices to failed status */
-	protected void failDevices() {
-		for(TrafficDeviceImpl device: getDevices()) {
-			device.setStatus(null);
-			device.notifyStatus();
-		}
-	}
-
 	/** Determine whether this controller has an active ramp meter */
 	public synchronized boolean hasActiveMeter() {
 		if(getActive()) {
@@ -359,17 +340,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			for(ControllerIO io: io_pins.values()) {
 				if(io instanceof WarningSignImpl)
 					return (WarningSignImpl)io;
-			}
-		}
-		return null;
-	}
-
-	/** Get the first traffic device ID */
-	protected synchronized String getFirstDeviceId() {
-		for(ControllerIO io: io_pins.values()) {
-			if(io instanceof TrafficDeviceImpl) {
-				TrafficDeviceImpl d = (TrafficDeviceImpl)io;
-				return d.getId();
 			}
 		}
 		return null;
@@ -638,11 +608,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Reset the error counter */
 	public void resetErrorCounter() {
-		String id = getFirstDeviceId();
-		if(id != null)
-			resetErrorCounter(id);
-		else
-			resetErrorCounter(toString());
+		resetErrorCounter(toString());
 	}
 
 	/** Complete a controller operation */
@@ -650,10 +616,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if(success) {
 			resetErrorCounter(id);
 			incrementCounter(ErrorCounter.TYPE_GOOD);
-		} else {
-			failDevices();
+		} else
 			incrementCounter(ErrorCounter.TYPE_FAIL);
-		}
 	}
 
 	/** Get the message poller */

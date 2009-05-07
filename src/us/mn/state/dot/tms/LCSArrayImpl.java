@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sonar.User;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -127,7 +128,6 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	public void setIndicationsCurrent(int[] ind, User o) {
 		if(Arrays.equals(ind, indicationsCurrent))
 			return;
-		setDeployTime();
 		indicationsCurrent = ind;
 		notifyAttribute("indicationsCurrent");
 		ownerCurrent = o;

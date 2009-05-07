@@ -85,7 +85,6 @@ public class MainServer {
 				SignMessageImpl.class);
 			BaseObjectImpl.loadAll(TMSImpl.store, ns);
 			BaseEvent.store = TMSImpl.store;
-			tms.loadFromVault();
 			tms.scheduleJobs();
 			server = new Server(ns, props);
 			System.err.println("IRIS Server active");

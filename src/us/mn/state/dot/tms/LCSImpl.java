@@ -35,7 +35,7 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new LCSImpl(ns,
+				namespace.addObject(new LCSImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// array
 					row.getInt(3)		// lane

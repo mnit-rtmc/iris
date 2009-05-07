@@ -12,26 +12,29 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm;
+package us.mn.state.dot.tms.comm.mndot;
 
-import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.LCSArrayImpl;
-import us.mn.state.dot.tms.SignRequest;
 
 /**
- * LCSPoller is an interface for MessagePoller classes which can poll LCS
- * arrays.
+ * An LCS array operation.
  *
  * @author Douglas Lau
  */
-public interface LCSPoller {
+abstract public class LCSOperation extends Controller170Operation {
 
-	/** Send a sign request */
-	void sendRequest(LCSArrayImpl lcs_array, SignRequest r);
+	/** Get the controller for an LCS array */
+	static protected ControllerImpl getController(LCSArrayImpl l) {
+		// FIXME: figure out the controller
+	}
 
-	/** Send new indications to an LCS array.
-	 * @param lcs_array LCS array.
-	 * @param ind New lane use indications.
-	 * @param o User who deployed the indications. */
-	void sendIndications(LCSArrayImpl lcs_array, int[] ind, User o);
+	/** LCS array to query */
+	protected final LCSArrayImpl lcs_array;
+
+	/** Create a new LCS operation */
+	protected LCSOperation(int p, LCSArrayImpl l) {
+		super(p, getController(l));
+		lcs_array = l;
+	}
 }

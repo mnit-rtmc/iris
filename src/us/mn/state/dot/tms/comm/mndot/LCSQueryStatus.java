@@ -25,18 +25,20 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
  */
 public class LCSQueryStatus extends LCSOperation {
 
-	/** LCS to query */
-	protected final LCSArrayImpl lcs_array;
+	/** Device on/off status ("metering" status) */
+	protected final byte[] status = new byte[1];
+
+	/** Special function output buffer */
+	protected final byte[] outputs = new byte[4];
 
 	/** Create a new operation to query the LCS */
 	public LCSQueryStatus(LCSArrayImpl l) {
 		super(DATA_30_SEC, l);
-		lcs_array = l;
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
-		return new QueryStatus();
+	/** Begin the operation */
+	public void begin() {
+		phase = new QueryStatus();
 	}
 
 	/** Phase to query the LCS status */
@@ -44,19 +46,34 @@ public class LCSQueryStatus extends LCSOperation {
 
 		/** Query the status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			byte[] b = new byte[1];
-			mess.add(new MemoryRequest(Address.RAMP_METER_DATA, b));
+			mess.add(new MemoryRequest(Address.RAMP_METER_DATA,
+				status));
 			mess.getRequest();
-			lcs_array.setDeployedStatus(b[Address.OFF_STATUS] !=
-				MeterStatus.FLASH);
+			if(isDark())
+				return null;
+			else
+				return new QueryOutputs();
+		}
+	}
+
+	/** Phase to query the LCS special function outputs */
+	protected class QueryOutputs extends Phase {
+
+		/** Query the outputs */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(new MemoryRequest(
+				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
+			mess.getRequest();
 			return null;
 		}
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(!success)
-			lcs_array.setStatus(errorStatus);
+		if(success) {
+			lcs_array.setDeployedStatus(b[Address.OFF_STATUS] !=
+				MeterStatus.FLASH);
+		}
 		super.cleanup();
 	}
 }

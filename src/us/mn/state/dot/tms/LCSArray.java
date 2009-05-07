@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
