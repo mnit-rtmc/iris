@@ -225,4 +225,17 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	public boolean getState() {
 		return state;
 	}
+
+	/** Destroy an alarm */
+	public void doDestroy() throws TMSException {
+		// Don't allow an alarm to be destroyed if it is assigned to
+		// a controller.  This is needed because the Controller io_pins
+		// HashMap will still have a reference to the alarm.
+		if(controller != null) {
+			throw new ChangeVetoException("Alarm must be removed" +
+				" from controller before being destroyed: " +
+				name);
+		}
+		super.doDestroy();
+	}
 }

@@ -212,4 +212,17 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 		else
 			return o.getOperationDescription();
 	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		// Don't allow a device to be destroyed if it is assigned to
+		// a controller.  This is needed because the Controller io_pins
+		// HashMap will still have a reference to the device.
+		if(controller != null) {
+			throw new ChangeVetoException("Device must be removed" +
+				" from controller before being destroyed: " +
+				name);
+		}
+		super.doDestroy();
+	}
 }

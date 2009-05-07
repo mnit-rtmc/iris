@@ -186,4 +186,17 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	public int getIndication() {
 		return indication;
 	}
+
+	/** Destroy an indication */
+	public void doDestroy() throws TMSException {
+		// Don't allow an indication to be destroyed if it is assigned
+		// to a controller.  This is needed because the Controller
+		// io_pins HashMap will still have a reference to it.
+		if(controller != null) {
+			throw new ChangeVetoException("Indication must be " +
+				"removed from controller before being " +
+				"destroyed: " + name);
+		}
+		super.doDestroy();
+	}
 }
