@@ -140,4 +140,38 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	public int[] getIndicationsCurrent() {
 		return indicationsCurrent;
 	}
+
+	/** Array of all LCS lanes (right-to-left) */
+	protected transient LCS[] lanes = new LCS[0];
+
+	/** Get the LCS for all lanes (right-to-left) */
+	public synchronized LCS[] getLanes() {
+		return Arrays.copyOf(lanes, lanes.length);
+	}
+
+	/** Set the LCS for the given lane.
+	 * @param lane Lane number (right-to-left, starting from 1)
+	 * @param lcs Lane-Use Control Signal */
+	public synchronized void setLane(int lane, LCS lcs)
+		throws TMSException
+	{
+		if(lane < 1 || lane > 16)
+			throw new ChangeVetoException("Invalid lane number");
+		int n_lanes = Math.max(lanes.length, lane);
+		LCS[] lns = Arrays.copyOf(lanes, n_lanes);
+		if(lcs != null && lns[lane - 1] != null)
+			throw new ChangeVetoException("Lane already assigned");
+		lns[lane - 1] = lcs;
+		lanes = Arrays.copyOf(lns, getMaxLane(lns));
+	}
+
+	/** Get the highest lane number */
+	static protected int getMaxLane(LCS[] lns) {
+		int lane = 0;
+		for(int i = 0; i < lns.length; i++) {
+			if(lns[i] != null)
+				lane = i + 1;
+		}
+		return lane;
+	}
 }

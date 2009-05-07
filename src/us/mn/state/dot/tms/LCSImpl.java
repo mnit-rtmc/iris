@@ -79,6 +79,31 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 		this(n);
 		array = a;
 		lane = l;
+		initTransients();
+	}
+
+	/** Initialize the LCS array */
+	public void initTransients() {
+		try {
+			if(array instanceof LCSArrayImpl) {
+				LCSArrayImpl la = (LCSArrayImpl)array;
+				la.setLane(lane, this);
+			}
+		}
+		catch(TMSException e) {
+			System.err.println("LCS " + getName() +
+				" initialization error");
+			e.printStackTrace();
+		}
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		if(array instanceof LCSArrayImpl) {
+			LCSArrayImpl la = (LCSArrayImpl)array;
+			la.setLane(lane, null);
+		}
+		super.doDestroy();
 	}
 
 	/** LCS array containing this LCS */
