@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -84,8 +85,9 @@ public class LCSQueryStatus extends LCSOperation {
 
 	/** Get the displayed indications */
 	protected int[] getIndications() {
-		// Initially, all indications are 0 (DARK)
 		final int[] ind = new int[lcs_array.getLaneCount()];
+		for(int i; i < ind.length; i++)
+			ind[i] = LaneUseIndication.DARK.ordinal();
 		if(isTurnedOn()) {
 			lcs_array.findIndications(new Checker<LCSIndication>() {
 				public boolean check(LCSIndication li) {

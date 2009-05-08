@@ -84,6 +84,9 @@ public interface Address {
 	/** Meter data offset for 5-minute green count */
 	int OFF_GREEN_COUNT_5 = 5;
 
+	/** Meter data offset for meter 1 data */
+	int OFF_METER_1 = 0;
+
 	/** Meter data offset for meter 2 data */
 	int OFF_METER_2 = 6;
 
