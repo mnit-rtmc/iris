@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.comm.LCSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
@@ -129,6 +130,8 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 
 	/** Set the current indications */
 	public void setIndicationsCurrent(int[] ind, User o) {
+		if(ind.length != lanes.length)
+			return;
 		if(Arrays.equals(ind, indicationsCurrent))
 			return;
 		indicationsCurrent = ind;
@@ -145,11 +148,16 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	}
 
 	/** Array of all LCS lanes (right-to-left) */
-	protected transient LCS[] lanes = new LCS[0];
+	protected transient LCSImpl[] lanes = new LCSImpl[0];
 
 	/** Get the LCS for all lanes (right-to-left) */
-	public synchronized LCS[] getLanes() {
+	public synchronized LCSImpl[] getLanes() {
 		return Arrays.copyOf(lanes, lanes.length);
+	}
+
+	/** Get the count of lanes in the LCS array */
+	public synchronized int getLaneCount() {
+		return lanes.length;
 	}
 
 	/** Set the LCS for the given lane.
@@ -162,12 +170,12 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 		if(lane < 1 || lane > 16)
 			throw new ChangeVetoException("Invalid lane number");
 		int n_lanes = Math.max(lanes.length, lane);
-		LCS[] lns = Arrays.copyOf(lanes, n_lanes);
+		LCSImpl[] lns = Arrays.copyOf(lanes, n_lanes);
 		if(lcs != null && lns[lane - 1] != null)
 			throw new ChangeVetoException("Lane already assigned");
-		lns[lane - 1] = lcs;
+		lns[lane - 1] = (LCSImpl)lcs;
 		lanes = Arrays.copyOf(lns, getMaxLane(lns));
-		// FIXME: adjust the indications
+		// FIXME: adjust the indications (and notify)
 	}
 
 	/** Get the highest lane number */
@@ -213,5 +221,21 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 			}
 		}
 		return signs;
+	}
+
+	/** Find the indications for this LCS array */
+	public void findIndications(final Checker<LCSIndication> checker) {
+		final LCSArrayImpl lcs_array = this;
+		namespace.findObject(LCSIndication.SONAR_TYPE,
+			new Checker<LCSIndication>()
+		{
+			public boolean check(LCSIndication li) {
+				LCS lcs = li.getLcs();
+				if(lcs.getArray() == lcs_array)
+					return checker.check(li);
+				else
+					return false;
+			}
+		});
 	}
 }

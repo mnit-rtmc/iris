@@ -57,9 +57,6 @@ public interface Address {
 	/** PM timing table offset */
 	int OFF_PM_TIMING_TABLE = 0x1B;
 
-	/** LCS verify inputs */
-	int LCS_VERIFIES = 0x5003;
-
 	/** Alarm special function inputs */
 	int ALARM_INPUTS = 0x5005;
 

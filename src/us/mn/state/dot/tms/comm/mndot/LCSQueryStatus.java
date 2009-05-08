@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.LCSArrayImpl;
+import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -29,7 +31,7 @@ public class LCSQueryStatus extends LCSOperation {
 	protected final byte[] status = new byte[1];
 
 	/** Special function output buffer */
-	protected final byte[] outputs = new byte[4];
+	protected final byte[] outputs = new byte[2];
 
 	/** Create a new operation to query the LCS */
 	public LCSQueryStatus(LCSArrayImpl l) {
@@ -49,10 +51,10 @@ public class LCSQueryStatus extends LCSOperation {
 			mess.add(new MemoryRequest(Address.RAMP_METER_DATA,
 				status));
 			mess.getRequest();
-			if(isDark())
-				return null;
-			else
+			if(isTurnedOn())
 				return new QueryOutputs();
+			else
+				return null;
 		}
 	}
 
@@ -70,10 +72,52 @@ public class LCSQueryStatus extends LCSOperation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success) {
-			lcs_array.setDeployedStatus(b[Address.OFF_STATUS] !=
-				MeterStatus.FLASH);
-		}
+		if(success)
+			lcs_array.setIndicationsCurrent(getIndications(), null);
 		super.cleanup();
+	}
+
+	/** Test if the LCS array is turned on */
+	protected boolean isTurnedOn() {
+		return status[Address.OFF_STATUS] != MeterStatus.FLASH;
+	}
+
+	/** Get the displayed indications */
+	protected int[] getIndications() {
+		// Initially, all indications are 0 (DARK)
+		final int[] ind = new int[lcs_array.getLaneCount()];
+		if(isTurnedOn()) {
+			lcs_array.findIndications(new Checker<LCSIndication>() {
+				public boolean check(LCSIndication li) {
+					if(li.getController() == controller)
+						checkIndication(li, ind);
+					return false;
+				}
+			});
+		}
+		return ind;
+	}
+
+	/** Check if an indication is set */
+	protected void checkIndication(LCSIndication li, int[] ind) {
+		if(isPinSet(li.getPin())) {
+			LCS lcs = li.getLcs();
+			int i = lcs.getLane() - 1;
+			// We must check bounds here in case the LCSIndication
+			// was added after the "ind" array was created
+			if(i >= 0 && i < ind.length)
+				ind[i] = li.getIndication();
+		}
+	}
+
+	/** Test if a pin is set in the special function output buffer */
+	protected boolean isPinSet(int pin) {
+		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
+		if(i >= 0 && i < 8)
+			return ((outputs[0] >> i) & 1) != 0;
+		i -= 8;
+		if(i >= 0 && i < 8)
+			return ((outputs[1] >> i) & 1) != 0;
+		return false;
 	}
 }

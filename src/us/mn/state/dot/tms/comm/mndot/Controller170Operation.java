@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,9 @@ abstract public class Controller170Operation extends ControllerOperation {
 
 	/** I/O pin for second ramp meter */
 	static protected final int METER_2_PIN = 3;
+
+	/** I/O pin for the first special function output */
+	static protected final int SPECIAL_FUNCTION_OUTPUT_PIN = 19;
 
 	/** I/O pin for the first detector */
 	static protected final int FIRST_DETECTOR_PIN = 39;
