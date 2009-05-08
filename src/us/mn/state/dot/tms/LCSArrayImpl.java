@@ -128,8 +128,16 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	/** Current indications (Shall not be null) */
 	protected transient int[] indicationsCurrent = createDarkIndications();
 
+	/** Create an array of DARK indications */
+	protected int[] createDarkIndications() {
+		int[] ind = new int[lanes.length];
+		for(int i = 0; i < ind.length; i++)
+			ind[i] = LaneUseIndication.DARK.ordinal();
+		return ind;
+	}
+
 	/** Set the current indications */
-	public void setIndicationsCurrent(int[] ind, User o) {
+	public synchronized void setIndicationsCurrent(int[] ind, User o) {
 		if(ind.length != lanes.length)
 			return;
 		if(Arrays.equals(ind, indicationsCurrent))
@@ -175,7 +183,8 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 			throw new ChangeVetoException("Lane already assigned");
 		lns[lane - 1] = (LCSImpl)lcs;
 		lanes = Arrays.copyOf(lns, getMaxLane(lns));
-		// FIXME: adjust the indications (and notify)
+		indicationsCurrent = createDarkIndications();
+		notifyAttribute("indicationsCurrent");
 	}
 
 	/** Get the highest lane number */
