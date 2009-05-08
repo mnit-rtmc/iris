@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.LCSArrayImpl;
 
 /**
@@ -26,7 +27,15 @@ abstract public class LCSOperation extends Controller170Operation {
 
 	/** Get the controller for an LCS array */
 	static protected ControllerImpl getController(LCSArrayImpl l) {
-		// FIXME: figure out the controller
+		DMSImpl[] dmss = l.getDMSArray();
+		if(dmss.length > 0) {
+			// All the DMS should be assigned to the same
+			// controller, so just pick the first one.
+			Controller c = dmss[0].getController();
+			if(c instanceof ControllerImpl)
+				return (ControllerImpl)c;
+		}
+		return null;
 	}
 
 	/** LCS array to query */
