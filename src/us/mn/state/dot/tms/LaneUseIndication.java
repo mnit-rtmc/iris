@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
+import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * A lane-use indication is one of a set of possible states for a lane-use
@@ -25,43 +26,43 @@ import java.util.LinkedList;
 public enum LaneUseIndication {
 
 	/** Dark (no indication) */
-	DARK("Dark"),
+	DARK(I18NMessages.get("lane.use.dark")),
 
 	/** Lane open (green arrow) */
-	LANE_OPEN("Lane open"),
+	LANE_OPEN(I18NMessages.get("lane.use.lane.open")),
 
 	/** Use caution (flashing yellow arrow, not in MUTCD) */
-	USE_CAUTION("Use caution"),
+	USE_CAUTION(I18NMessages.get("lane.use.use.caution")),
 
 	/** Lane closed ahead (Yellow X) */
-	LANE_CLOSED_AHEAD("Lane closed ahead"),
+	LANE_CLOSED_AHEAD(I18NMessages.get("lane.use.lane.closed.ahead")),
 
 	/** Lane closed (red X) */
-	LANE_CLOSED("Lane closed"),
+	LANE_CLOSED(I18NMessages.get("lane.use.lane.closed")),
 
 	/** HOV / HOT vehicles only (white diamond) */
-	HOV("HOV / HOT"),
+	HOV(I18NMessages.get("lane.use.hov.hot")),
 
 	/** Merge right (not in MUTCD) */
-	MERGE_RIGHT("Merge right"),
+	MERGE_RIGHT(I18NMessages.get("lane.use.merge.right")),
 
 	/** Merge left (not in MUTCD) */
-	MERGE_LEFT("Merge left"),
+	MERGE_LEFT(I18NMessages.get("lane.use.merge.left")),
 
 	/** Merge left or right (not in MUTCD) */
-	MERGE_BOTH("Merge left or right"),
+	MERGE_BOTH(I18NMessages.get("lane.use.merge.both")),
 
 	/** Must exit right (not in MUTCD) */
-	MUST_EXIT_RIGHT("Must exit right"),
+	MUST_EXIT_RIGHT(I18NMessages.get("lane.use.must.exit.right")),
 
 	/** Must exit left (not in MUTCD) */
-	MUST_EXIT_LEFT("Must exit left"),
+	MUST_EXIT_LEFT(I18NMessages.get("lane.use.must.exit.left")),
 
 	/** Advisory variable speed limit (amber on black) */
-	AVSL("Advisory variable speed limit"),
+	AVSL(I18NMessages.get("lane.use.avsl")),
 
 	/** Variable speed limit (black on white) */
-	VSL("Variable speed limit");
+	VSL(I18NMessages.get("lane.use.vsl"));
 
 	/** Create a new lane use indication */
 	private LaneUseIndication(String d) {
