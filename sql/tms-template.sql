@@ -589,13 +589,13 @@ CREATE TABLE iris.lcs_lock (
 );
 
 CREATE TABLE iris.lcs_array (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(8) PRIMARY KEY,
 	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
 
 CREATE TABLE iris.lcs (
 	name VARCHAR(10) PRIMARY KEY REFERENCES iris._dms,
-	array VARCHAR(10) NOT NULL REFERENCES iris.lcs_array,
+	array VARCHAR(8) NOT NULL REFERENCES iris.lcs_array,
 	lane INTEGER NOT NULL
 );
 
@@ -607,7 +607,7 @@ CREATE TABLE iris.lane_use_indication (
 );
 
 CREATE TABLE iris._lcs_indication (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(12) PRIMARY KEY,
 	lcs VARCHAR(10) NOT NULL REFERENCES iris.lcs,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
 );
