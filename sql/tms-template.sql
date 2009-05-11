@@ -583,8 +583,14 @@ CREATE TABLE iris.timing_plan (
 	target INTEGER NOT NULL
 );
 
+CREATE TABLE iris.lcs_lock (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
 CREATE TABLE iris.lcs_array (
-	name VARCHAR(10) PRIMARY KEY
+	name VARCHAR(10) PRIMARY KEY,
+	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
 
 CREATE TABLE iris.lcs (
@@ -1013,6 +1019,13 @@ COPY iris.lane_use_indication (id, description) FROM stdin;
 10	Must exit left
 11	Advisory variable speed limit
 12	Variable speed limit
+\.
+
+COPY iris.lcs_lock (id, description) FROM stdin;
+1	Incident
+2	Maintenance
+3	Testing
+4	Other reason
 \.
 
 COPY iris.meter_type (id, description, lanes) FROM stdin;

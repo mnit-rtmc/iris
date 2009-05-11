@@ -28,6 +28,12 @@ public interface LCSArray extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "lcs_array";
 
+	/** Set the lock status code */
+	void setLcsLock(Integer c);
+
+	/** Get the lock status code */
+	Integer getLcsLock();
+
 	/** Set the next indications owner */
 	void setOwnerNext(User o);
 

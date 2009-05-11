@@ -31,16 +31,21 @@ import us.mn.state.dot.tms.comm.MessagePoller;
  */
 public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 
+	/** Ordinal value for lock "OFF" */
+	static protected final Integer OFF_ORDINAL =
+		new Integer(LCSArrayLock.OFF.ordinal());
+
 	/** Load all the LCS arrays */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading LCS arrays...");
 		namespace.registerType(SONAR_TYPE, LCSArrayImpl.class);
-		store.query("SELECT name FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+		store.query("SELECT name, lcs_lock FROM iris." + SONAR_TYPE  +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LCSArrayImpl(
-					row.getString(1)	// name
+					row.getString(1),	// name
+					row.getInt(2)		// lcs_lock
 				));
 			}
 		});
@@ -50,6 +55,8 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		if(lcs_lock != null)
+			map.put("lcs_lock", lcs_lock.ordinal());
 		return map;
 	}
 
@@ -66,6 +73,46 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	/** Create a new LCS array */
 	public LCSArrayImpl(String n) {
 		super(n);
+	}
+
+	/** Create an LCS array */
+	public LCSArrayImpl(String n, Integer lk) {
+		super(n);
+		lcs_lock = LCSArrayLock.fromOrdinal(lk);
+	}
+
+	/** Lock status */
+	protected LCSArrayLock lcs_lock = null;
+
+	/** Set the lock status */
+	public void setLcsLock(Integer l) {
+		lcs_lock = LCSArrayLock.fromOrdinal(l);
+	}
+
+	/** Set the lock (update) */
+	protected void setLcsLock(LCSArrayLock l) throws TMSException {
+		if(l == lcs_lock)
+			return;
+		if(l != null)
+			store.update(this, "lcs_lock", l.ordinal());
+		else
+			store.update(this, "lcs_lock", null);
+		lcs_lock = l;
+	}
+
+	/** Set the lock status */
+	public void doSetLcsLock(Integer l) throws TMSException {
+		if(OFF_ORDINAL.equals(l))
+			throw new ChangeVetoException("Invalid lock value");
+		setLcsLock(LCSArrayLock.fromOrdinal(l));
+	}
+
+	/** Get the lock status */
+	public Integer getLcsLock() {
+		if(lcs_lock != null)
+			return lcs_lock.ordinal();
+		else
+			return null;
 	}
 
 	/** Next indications owner */
@@ -178,7 +225,7 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	public synchronized void setLane(int lane, LCS lcs)
 		throws TMSException
 	{
-		for(int i; indicationsCurrent) {
+		for(int i: indicationsCurrent) {
 			if(i != LaneUseIndication.DARK.ordinal())
 				throw new ChangeVetoException("LCS in use");
 		}
