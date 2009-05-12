@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArrayImpl;
@@ -41,9 +42,9 @@ public class LCSSendIndications extends LCSOperation {
 		user = u;
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
-		return new TurnOffDevices();
+	/** Begin the operation */
+	public void begin() {
+		phase = new TurnOffDevices();
 	}
 
 	/** Phase to turn off devices */

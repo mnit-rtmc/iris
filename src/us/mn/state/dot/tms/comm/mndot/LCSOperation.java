@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.mndot;
 
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.LCSArrayImpl;

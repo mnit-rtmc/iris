@@ -123,12 +123,6 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		}
 	}
 
-	/** Send a sign request to an LCS array */
-	public void sendRequest(LCSArrayImpl lcs_array, SignRequest r) {
-		if(r == SignRequest.QUERY_STATUS)
-			new LCSQueryStatus(lcs_array).start();
-	}
-
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
 		if(c.getActive()) {
@@ -198,11 +192,25 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	/** Send a sign request to a warning sign */
 	public void sendRequest(WarningSignImpl sign, SignRequest r) {
 		if(r == SignRequest.QUERY_STATUS)
-			new WarningStatus(warn).start();
+			new WarningStatus(sign).start();
 	}
 
 	/** Set the deployed status of the sign */
 	public void setDeployed(WarningSignImpl sign, boolean d) {
 		new WarningSignCommand(sign, d).start();
+	}
+
+	/** Send a sign request to an LCS array */
+	public void sendRequest(LCSArrayImpl lcs_array, SignRequest r) {
+		if(r == SignRequest.QUERY_STATUS)
+			new LCSQueryStatus(lcs_array).start();
+	}
+
+	/** Send new indications to an LCS array.
+	 * @param lcs_array LCS array.
+	 * @param ind New lane use indications.
+	 * @param o User who deployed the indications. */
+	public void sendIndications(LCSArrayImpl lcs_array, int[] ind, User o) {
+		new LCSSendIndications(lcs_array, ind, o).start();
 	}
 }
