@@ -22,6 +22,7 @@ import java.util.ArrayList;
  * NTCIP -- MULTI (MarkUp Language for Transportation Information)
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class MultiString {
 
@@ -317,5 +318,47 @@ public class MultiString {
 		}
 		_b.append(b.substring(end));
 		return _b.toString();
+	}
+
+	/** Return the MULTI string as a normalized valid MULTI string.
+	 *  @return A normalized MULTI string with lowercase spans converted
+	 *	    to uppercase, invalid character removed, invalid tags
+	 *	    removed, etc. */
+	public String normalize() {
+		final StringBuilder _b = new StringBuilder();
+		parseNormalize(new NormalizeCallback() {
+			public void addSpan(String s) {
+				s = (s == null ? "" : s.toUpperCase());
+				Matcher m = TEXT_PATTERN.matcher(s);
+				while(m.find()) {
+					_b.append(m.group());
+				}
+			}
+			public void addTag(String tag) {
+				_b.append(tag);
+			}
+		});
+		return _b.toString();
+	}
+
+	/** MULTI string parsing callback interface */
+	public interface NormalizeCallback {
+		void addSpan(String span);
+		void addTag(String tag);
+	}
+
+	/** Parse the MULTI string. The addSpan and addTag methods
+	 *  are called for each span and tag that are found.
+	 * @param cb Normalization callback. */
+	public void parseNormalize(NormalizeCallback cb) {
+		Matcher m = TAG.matcher(b);
+		for(String span: TAG.split(b)) {
+			if(span.length() > 0)
+				cb.addSpan(span);
+			if(m.find()) {
+				String tag = m.group();
+				cb.addTag(tag);
+			}
+		}
 	}
 }
