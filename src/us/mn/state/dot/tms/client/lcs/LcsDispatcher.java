@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.rmi.RemoteException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -56,10 +55,10 @@ public class LcsDispatcher extends JPanel implements TmsSelectionListener {
 	protected final JTextField txtOperation = new JTextField();
 
 	/** Button used to send a new command to the LCS */
-	protected final JButton btnSend = new JButton("Send");
+	protected final JButton sendBtn = new JButton("Send");
 
 	/** Button used to make the LCS go dark */
-	protected final JButton btnClear = new JButton("Clear");
+	protected final JButton clearBtn = new JButton("Clear");
 
 	/** Currently logged in user name */
 	protected final String userName;
@@ -137,9 +136,9 @@ public class LcsDispatcher extends JPanel implements TmsSelectionListener {
 		if(lcs != null) {
 			messageSelector.setEnabled(true);
 			messageSelector.setSignals(lcs.getSignals());
-			btnSend.setEnabled(true);
-			btnClear.setEnabled(true);
-			btnClear.setAction(new ClearLcsAction(lcs,
+			sendBtn.setEnabled(true);
+			clearBtn.setEnabled(true);
+			clearBtn.setAction(new ClearLcsAction(lcs,
 				handler.getConnection()));
 		} else
 			clear();
@@ -183,14 +182,14 @@ public class LcsDispatcher extends JPanel implements TmsSelectionListener {
 	/** Build the panel that holds the send and clear buttons */
 	protected Component buildButtonPanel() {
 		Box pnlButtons = Box.createHorizontalBox();
-		new ActionJob(btnSend) {
+		new ActionJob(sendBtn) {
 			public void perform() throws Exception {
 				sendSignals();
 			}
 		};
-		pnlButtons.add(btnSend);
+		pnlButtons.add(sendBtn);
 		pnlButtons.add(Box.createHorizontalStrut(4));
-		pnlButtons.add(btnClear);
+		pnlButtons.add(clearBtn);
 		return pnlButtons;
 	}
 
@@ -204,13 +203,13 @@ public class LcsDispatcher extends JPanel implements TmsSelectionListener {
 		txtOperation.setBackground(null);
 		messageSelector.clearSelections();
 		messageSelector.setEnabled(false);
-		btnSend.setEnabled(false);
-		btnClear.setEnabled(false);
+		sendBtn.setEnabled(false);
+		clearBtn.setEnabled(false);
 		lcsPanel.clear();
 	}
 
 	/** Send the selected signals to the selected LCS object */
-	protected void sendSignals() throws RemoteException, TMSException {
+	protected void sendSignals() {
 		LcsProxy lcs = selectedLcs;	// Avoid NPE
 		if(lcs != null) {
 			int[] signals = messageSelector.getSignals();
