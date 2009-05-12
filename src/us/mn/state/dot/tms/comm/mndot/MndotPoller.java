@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.EOFException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Interval;
