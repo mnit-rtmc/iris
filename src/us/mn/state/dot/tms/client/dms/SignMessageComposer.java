@@ -402,8 +402,8 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < cmbLine.length; i++) {
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);
-			else
-				cmbLine[i].setSelectedIndex(0);
+			else if(cmbLine[i].getItemCount() > 0)
+					cmbLine[i].setSelectedIndex(0);
 		}
 	}
 
