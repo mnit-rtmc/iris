@@ -25,6 +25,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LCSArray;
 
 /**
  * Renderer for LCS array objects in a list.
@@ -47,7 +50,7 @@ public class LcsCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel userLbl = new JLabel();
 
 	/** LCS array panel */
-	protected final LcsPanel lcsPnl = new LcsPanel(30);
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(30);
 
 	/** Location bar */
 	protected final Box location = Box.createHorizontalBox();
@@ -100,7 +103,7 @@ public class LcsCellRenderer extends JPanel implements ListCellRenderer {
 	protected void setLcsArray(LCSArray lcs_array) {
 		nameLbl.setText(lcs_array.getName());
 		userLbl.setText(formatOwner(lcs_array.getOwnerCurrent()));
-		lcsPnl.setLcsArray(lcs_array);
+		lcsPnl.setIndications(lcs_array.getIndicationsCurrent());
 		locationLbl.setText(GeoLocHelper.getDescription(
 			findGeoLoc(lcs_array)));
 	}

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.Checker;
@@ -38,11 +39,11 @@ import us.mn.state.dot.tms.client.sonar.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
- * The LcsManager class provides proxies for LCSArray objects.
+ * The LCSArrayManager class provides proxies for LCSArray objects.
  *
  * @author Douglas Lau
  */
-public class LcsManager extends ProxyManager<LCSArray> {
+public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
@@ -125,7 +126,7 @@ public class LcsManager extends ProxyManager<LCSArray> {
 	protected final Namespace namespace;
 
 	/** Create a new LCS array manager */
-	public LcsManager(TmsConnection tc, TypeCache<LCSArray> c,
+	public LCSArrayManager(TmsConnection tc, TypeCache<LCSArray> c,
 		GeoLocManager lm)
 	{
 		super(c, lm);
@@ -150,6 +151,11 @@ public class LcsManager extends ProxyManager<LCSArray> {
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(STYLE_ALL);
 		return theme;
+	}
+
+	/** Create a list cell renderer */
+	public ListCellRenderer createCellRenderer() {
+		return new LcsCellRenderer();
 	}
 
 	/** Check the style of the specified proxy */

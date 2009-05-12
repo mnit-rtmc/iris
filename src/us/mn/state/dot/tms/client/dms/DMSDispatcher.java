@@ -132,7 +132,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
-		setLayout(new BorderLayout());
+		super(new BorderLayout());
 		SonarState st = tc.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getDMSs();

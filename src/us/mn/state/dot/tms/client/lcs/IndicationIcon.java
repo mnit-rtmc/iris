@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2005  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.client.lcs;
 
@@ -33,16 +29,14 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
-import javax.swing.JPanel;
-import us.mn.state.dot.tms.LCSModule;
+import us.mn.state.dot.tms.LaneUseIndication;
 
 /**
- * GUI for displaying one module of a LaneControlSignal.
+ * Renderer for LaneUseIndication
  *
- * @author    <a href="mailto:erik.engstrom@dot.state.mn.us">Erik Engstrom</a>
  * @author Douglas Lau
  */
-public class LcsModule extends JPanel implements Icon {
+abstract public class IndicationIcon implements Icon {
 
 	/** Border around LCS shapes */
 	static protected final float SHAPE_BORDER = 0.05f;
@@ -90,66 +84,52 @@ public class LcsModule extends JPanel implements Icon {
 		ARROW_SHAPE = path;
 	}
 
+	/** Create a new indication icon */
+	static public IndicationIcon create(int p, LaneUseIndication i) {
+		switch(i) {
+		case DARK:
+			return new DarkIndicationIcon(p);
+		case LANE_OPEN:
+			return new LaneOpenIndicationIcon(p);
+		case USE_CAUTION:
+			return new UseCautionIndicationIcon(p);
+		case LANE_CLOSED:
+			return new LaneClosedIndicationIcon(p);
+		default:
+			return new UnknownIndicationIcon(p);
+		}
+	}
+
+	/** Pixel size */
+	protected final int pixels;
+
 	/** Stroke for drawing symbol shadows */
 	protected final BasicStroke shadow;
 
 	/** Stroke for drawing symbols */
 	protected final BasicStroke stroke;
 
-	/** State of module */
-	protected int state = LCSModule.ERROR;
-
-	/** Create a new LCS module */
-	public LcsModule(int size) {
-		this(size, LCSModule.DARK);
-	}
-
 	/**
-	 * Constructor for the LcsModule object
+	 * Create a new IndicationIcon.
 	 *
-	 * @param size Sise to make the module.
-	 * @param signal  Current signal state
+	 * @param p Pixel size (height and width)
 	 */
-	public LcsModule(int size, int signal) {
-		setBackground(Color.BLACK);
-		state = signal;
-		if(size > 0) {
-			setPreferredSize(new Dimension(size, size));
-			setMinimumSize(new Dimension(size, size));
-			setSize(size, size);
-		}
-		shadow = new BasicStroke(5f / size, BasicStroke.CAP_ROUND,
+	private IndicationIcon(int p) {
+		pixels = p;
+		shadow = new BasicStroke(5f / pixels, BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_MITER);
-		stroke = new BasicStroke(3f / size, BasicStroke.CAP_ROUND,
+		stroke = new BasicStroke(3f / pixels, BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_MITER);
 	}
 
-	/** Set the signal */
-	public void setSignal(int signal) {
-		state = signal;
-	}
-
-	/** Get the signal */
-	public int getSignal() {
-		return state;
-	}
-
-	/** Get the icon's height */
+	/** Get the icon height */
 	public int getIconHeight() {
-		return getSize().height;
+		return pixels;
 	}
 
-	/** Get the icon's width */
+	/** Get the icon width */
 	public int getIconWidth() {
-		return this.getSize().width;
-	}
-
-	/** Paint the LCS module */
-	public void paintComponent(Graphics g) {
-		Dimension size = getSize();
-		g.setColor(getBackground());
-		g.fillRect(0, 0, size.width, size.height);
-		paintIcon(null, g, 0, 0);
+		return pixels;
 	}
 
 	/**
@@ -161,37 +141,80 @@ public class LcsModule extends JPanel implements Icon {
 	 * @param y          The y coordinate at which to paint.
 	 */
 	public void paintIcon(Component component, Graphics g, int x, int y) {
-		Dimension size = getSize();
 		Graphics2D g2 = (Graphics2D)g;
+		g2.translate(x, y);
+		g2.scale(pixels, pixels);
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.translate(x, y);
-		g2.scale(size.getWidth(), size.getHeight());
-		g2.setStroke(shadow);
-		g2.setColor(Color.BLACK);
-		switch(state) {
-			case LCSModule.GREEN:
-				g2.draw(ARROW_SHAPE);
-				g2.setStroke(stroke);
-				g2.setColor(Color.GREEN);
-				g2.draw(ARROW_SHAPE);
-				break;
-			case LCSModule.YELLOW:
-				g2.draw(ARROW_SHAPE);
-				g2.setStroke(stroke);
-				g2.setColor(Color.YELLOW);
-				g2.draw(ARROW_SHAPE);
-				break;
-			case LCSModule.RED:
-				g2.draw(CROSS_SHAPE);
-				g2.setStroke(stroke);
-				g2.setColor(Color.RED);
-				g2.draw(CROSS_SHAPE);
-				break;
-			case LCSModule.ERROR:
-				g2.setColor(Color.GRAY);
-				g2.fill(ERROR_SHAPE);
-				break;
+		paintIcon(g2);
+	}
+
+	/** Paint the indication icon */
+	abstract protected void paintIcon(Graphics2D g2);
+
+	/** Icon for DARK lane-use indication */
+	static protected class DarkIndicationIcon extends IndicationIcon {
+		protected DarkIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			// Leave background alone
+		}
+	}
+
+	/** Icon for LANE_OPEN lane-use indication */
+	static protected class LaneOpenIndicationIcon extends IndicationIcon {
+		protected LaneOpenIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(shadow);
+			g2.draw(ARROW_SHAPE);
+			g2.setColor(Color.GREEN);
+			g2.setStroke(stroke);
+			g2.draw(ARROW_SHAPE);
+		}
+	}
+
+	/** Icon for USE_CAUTION lane-use indication */
+	static protected class UseCautionIndicationIcon extends IndicationIcon {
+		protected UseCautionIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(shadow);
+			g2.draw(ARROW_SHAPE);
+			g2.setColor(Color.YELLOW);
+			g2.setStroke(stroke);
+			g2.draw(ARROW_SHAPE);
+		}
+	}
+
+	/** Icon for LANE_CLOSED lane-use indication */
+	static protected class LaneClosedIndicationIcon extends IndicationIcon {
+		protected LaneClosedIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(shadow);
+			g2.draw(CROSS_SHAPE);
+			g2.setColor(Color.RED);
+			g2.setStroke(stroke);
+			g2.draw(CROSS_SHAPE);
+		}
+	}
+
+	/** Icon for unknown lane-use indication */
+	static protected class UnknownIndicationIcon extends IndicationIcon {
+		protected UnknownIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.GRAY);
+			g2.fill(ERROR_SHAPE);
 		}
 	}
 }
