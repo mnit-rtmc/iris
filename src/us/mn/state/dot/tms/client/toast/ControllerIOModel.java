@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.WarningSign;
@@ -72,7 +71,7 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
-		Alarm, Camera, Detector, DMS, LCS, LCSIndication, Ramp_Meter,
+		Alarm, Camera, Detector, DMS, LCSIndication, Ramp_Meter,
 		Warning_Sign
 	}
 
@@ -85,7 +84,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Camera);
 		IO_TYPE.add(DeviceType.Detector);
 		IO_TYPE.add(DeviceType.DMS);
-		IO_TYPE.add(DeviceType.LCS);
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Warning_Sign);
@@ -101,8 +99,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Detector;
 		else if(cio instanceof DMS)
 			return DeviceType.DMS;
-		else if(cio instanceof LCS)
-			return DeviceType.LCS;
 		else if(cio instanceof LCSIndication)
 			return DeviceType.LCSIndication;
 		else if(cio instanceof RampMeter)
@@ -142,9 +138,6 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Available DMS model */
 	protected final WrapperComboBoxModel dms_model;
 
-	/** Available LCS model */
-	protected final WrapperComboBoxModel lcs_model;
-
 	/** Available LCS indication model */
 	protected final WrapperComboBoxModel lcsi_model;
 
@@ -176,9 +169,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		dms_model = new WrapperComboBoxModel(
 			Session.dms_manager_singleton.getStyleModel(
 			DMSHelper.STYLE_NO_CONTROLLER), true);
-		lcs_model = new WrapperComboBoxModel(
-			Session.lcs_manager_singleton.getStyleModel(
-			LCSManager.STYLE_NO_CONTROLLER), true);
 		lcsi_model = new WrapperComboBoxModel(
 			Session.lcsi_manager_singleton.getStyleModel(
 			LCSIManager.STYLE_NO_CONTROLLER), true);
@@ -294,8 +284,6 @@ public class ControllerIOModel extends AbstractTableModel {
 				return (Detector)value;
 			case DMS:
 				return (DMS)value;
-			case LCS:
-				return (LCS)value;
 			case LCSIndication:
 				return (LCSIndication)value;
 			case Ramp_Meter:
@@ -345,8 +333,6 @@ public class ControllerIOModel extends AbstractTableModel {
 				return dt_model;
 			case DMS:
 				return dms_model;
-			case LCS:
-				return lcs_model;
 			case LCSIndication:
 				return lcsi_model;
 			case Ramp_Meter:

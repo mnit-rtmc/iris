@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -27,6 +28,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
@@ -41,6 +43,15 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
+	/** Get the verification camera name */
+	static protected String getCameraName(DMS proxy) {
+		Camera camera = proxy.getCamera();
+		if(camera == null)
+			return EMPTY_TXT;
+		else
+			return camera.getName();
+	}
+
 	/** Cache of LCS array proxy objects */
 	protected final TypeCache<LCSArray> cache;
 
@@ -178,10 +189,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Set the selected LCS array */
 	public void setSelected(LCSArray lcs_array) {
 		messageSelector.setEnabled(true);
-		messageSelector.setSignals(lcs.getSignals());
+		messageSelector.setSignals(lcs_array.getIndicationsCurrent());
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
-		clearBtn.setAction(new ClearLcsAction(lcs,
+		clearBtn.setAction(new ClearLcsAction(lcs_array,
 			handler.getConnection()));
 		updateAttribute(lcs_array, null);
 	}
@@ -205,12 +216,20 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected void updateAttribute(LCSArray lcs_array, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(lcs_array.getName());
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(lcs.getCameraId());
+		if(a == null || a.equals("camera")) {
+			cameraTxt.setText(getCameraName(
+				LCSArrayHelper.lookupDMS(lcs_array)));
+		}
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
-		if(a == null || a.equals("geoLoc"))
-			locationTxt.setText(lcs.getDescription());
+		if(a == null || a.equals("geoLoc")) {
+			DMS dms = LCSArrayHelper.lookupDMS(lcs_array);
+			if(dms != null) {
+				locationTxt.setText(GeoLocHelper.getDescription(
+					dms.getGeoLoc()));
+			} else
+				locationTxt.setText("");
+		}
 		if(a == null || a.equals("operation")) {
 			String status = getControllerStatus(lcs_array);
 			if("".equals(status)) {
