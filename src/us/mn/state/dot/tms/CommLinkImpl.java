@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.comm.ntcip.NtcipPoller;
-import us.mn.state.dot.tms.comm.pelcod.PelcoPoller;
+import us.mn.state.dot.tms.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
 
@@ -299,9 +299,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new ViconPoller(name, createSocketMessenger());
 	}
 
-	/** Create a Pelco poller */
+	/** Create a PelcoD poller */
 	protected MessagePoller createPelcoPoller() throws IOException {
-		return new PelcoPoller(name, createSocketMessenger());
+		return new PelcoDPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Manchester poller */

@@ -26,18 +26,18 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 
 /**
- * PelcoPoller is a java implementation of the Pelco D camera control 
+ * PelcoDPoller is a java implementation of the Pelco D camera control 
  * communication protocol
  *
  * @author Douglas Lau
  */
-public class PelcoPoller extends MessagePoller implements CameraPoller {
+public class PelcoDPoller extends MessagePoller implements CameraPoller {
 
 	/** Highest allowed address for Pelco D protocol */
 	static public final int ADDRESS_MAX = 254;
 
 	/** Create a new Pelco poller */
-	public PelcoPoller(String n, Messenger m) {
+	public PelcoDPoller(String n, Messenger m) {
 		super(n, m);
 	}
 
