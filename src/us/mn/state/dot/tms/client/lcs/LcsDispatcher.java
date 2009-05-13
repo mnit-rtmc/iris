@@ -24,6 +24,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -54,15 +55,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			return DMSHelper.lookup(lcs.getName());
 		else
 			return null;
-	}
-
-	/** Get the verification camera name */
-	static protected String getCameraName(DMS proxy) {
-		Camera camera = proxy.getCamera();
-		if(camera == null)
-			return EMPTY_TXT;
-		else
-			return camera.getName();
 	}
 
 	/** Cache of LCS array proxy objects */
@@ -227,8 +219,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected void updateAttribute(LCSArray lcs_array, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(lcs_array.getName());
-		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(lookupDMS(lcs_array)));
+		if(a == null || a.equals("camera")) {
+			cameraTxt.setText(DMSHelper.getCameraName(
+				lookupDMS(lcs_array)));
+		}
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
 		if(a == null || a.equals("geoLoc")) {
