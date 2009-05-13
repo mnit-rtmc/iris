@@ -133,7 +133,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
 	/** Add a row to the table */
 	protected void addRow(Object value) {
-		String aname = value.toString();
+		String aname = value.toString().replace(" ","");
 		if(aname.length() > 0)
 			cache.createObject(aname);
 	}
