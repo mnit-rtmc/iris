@@ -23,7 +23,7 @@ package us.mn.state.dot.tms.comm.pelco;
 public class SelectMonitorRequest extends Request {
 
 	/** Command to select a new monitor */
-	static protected final String CODE = "M";
+	static protected final String CODE = "Ma";
 
 	/** Monitor to select */
 	protected final int monitor;

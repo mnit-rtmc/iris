@@ -18,20 +18,12 @@ package us.mn.state.dot.tms.comm.pelco;
  * Pelco Request
  *
  * @author Douglas Lau
+ * @author Timothy Johnson
  */
 abstract public class Request {
 
 	/** Value to indicate no selected camera */
 	static protected final int CAMERA_NONE = -1;
-
-	/** Command for getting the current camera */
-	static protected final String COMMAND_GET_CAMERA = "f";
-
-	/** Command for starting a tour */
-	static protected final String COMMAND_START_TOUR = "C";
-
-	/** Command for getting the current tour */
-	static protected final String COMMAND_GET_CURRENT_TOUR = "j";
 
 	/** Minimum value allowed for a request */
 	static protected final int MIN_VALUE = -256;

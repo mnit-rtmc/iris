@@ -23,7 +23,7 @@ package us.mn.state.dot.tms.comm.pelco;
 public class SelectCameraRequest extends Request {
 
 	/** Command to select a new camera */
-	static protected final String CODE = "#";
+	static protected final String CODE = "#a";
 
 	/** Camera to select */
 	protected final int camera;
