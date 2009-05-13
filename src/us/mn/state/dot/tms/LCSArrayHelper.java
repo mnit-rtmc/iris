@@ -32,7 +32,7 @@ public class LCSArrayHelper extends BaseHelper {
 	/** Lookup the LCS objects for an array */
 	static public LCS[] lookupLCSs(LCSArray lcs_array) {
 		final TreeMap<Integer, LCS> lanes = new TreeMap<Integer, LCS>();
-		lookupLCSs(lcs_array, new Checker<LCS>() {
+		lookupLCS(lcs_array, new Checker<LCS>() {
 			public boolean check(LCS lcs) {
 				lanes.put(lcs.getLane(), lcs);
 			}
@@ -48,7 +48,7 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Lookup the LCS in the specified lane */
 	static public LCS lookupLCS(LCSArray lcs_array, final int lane) {
-		return lookupLCSs(lcs_array, new Chceker<LCS>() {
+		return lookupLCS(lcs_array, new Checker<LCS>() {
 			public boolean check(LCS lcs) {
 				return lcs.getLane() == lane;
 			}
@@ -56,10 +56,12 @@ public class LCSArrayHelper extends BaseHelper {
 	}
 
 	/** Lookup the LCS objects for an array */
-	static public void lookupLCSs(final LCSArray lcs_array,
+	static public LCS lookupLCS(final LCSArray lcs_array,
 		final Checker<LCS> checker)
 	{
-		namespace.findObject(LCS.SONAR_TYPE, new Checker<LCS>() {
+		return (LCS)namespace.findObject(LCS.SONAR_TYPE,
+			new Checker<LCS>()
+		{
 			public boolean check(LCS lcs) {
 				if(lcs.getArray() == lcs_array)
 					return checker.check(lcs);
