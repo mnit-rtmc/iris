@@ -34,8 +34,11 @@ public class Message implements AddressedMessage {
 	/** Start Of Header byte */
 	static protected final byte SOH = (byte)1;
 
-	/** End Of Message byte */
-	static protected final byte EOM = (byte)'a';
+	/** Acknowledge response */
+	static protected final String ACK = "AK";
+
+	/** Negative Acknowledge response */
+	static protected final String NO_ACK = "NA";
 
 	/** End of Response byte */
 	static protected final int EOR = 'a';
@@ -84,7 +87,6 @@ public class Message implements AddressedMessage {
 		is.skip(is.available());
 		os.write(SOH);
 		os.write(req.getBytes());
-		os.write(EOM);
 		os.flush();
 		getResponse();
 	}
@@ -106,10 +108,6 @@ public class Message implements AddressedMessage {
 				break;
 			else if(resp.length() > MAX_RESPONSE)
 				break;
-		}
-		if(resp.indexOf("$") < 0) {
-			throw new ParsingException("PELCO ERROR: " +
-				resp.toString());
 		}
 		return resp.toString();
 	}
