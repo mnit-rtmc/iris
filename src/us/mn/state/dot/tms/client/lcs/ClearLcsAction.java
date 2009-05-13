@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms;
+package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -59,7 +59,7 @@ public class ClearLcsAction extends AbstractAction {
 			int[] ind = lcs_array.getIndicationsCurrent();
 			ind = new int[ind.length];
 			for(int i = 0; i < ind.length; i++)
-				ind[i] = LaneUseIndication.DARK;
+				ind[i] = LaneUseIndication.DARK.ordinal();
 			lcs_array.setOwnerNext(owner);
 			lcs_array.setIndicationsNext(ind);
 		}
