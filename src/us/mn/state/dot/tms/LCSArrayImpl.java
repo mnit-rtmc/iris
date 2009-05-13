@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.comm.LCSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
+import us.mn.state.dot.tms.comm.Operation;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -300,5 +301,48 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 					return false;
 			}
 		});
+	}
+
+	/** Operation which owns the LCS array */
+	protected transient Operation owner;
+
+	/** Acquire ownership of the LCS array */
+	public Operation acquire(Operation o) {
+		try {
+			// Name used for unique device acquire/release lock
+			synchronized(name) {
+				if(owner == null)
+					owner = o;
+				return owner;
+			}
+		}
+		finally {
+			notifyAttribute("operation");
+		}
+	}
+
+	/** Release ownership of the LCS array */
+	public Operation release(Operation o) {
+		try {
+			// Name used for unique device acquire/release lock
+			synchronized(name) {
+				Operation _owner = owner;
+				if(owner == o)
+					owner = null;
+				return _owner;
+			}
+		}
+		finally {
+			notifyAttribute("operation");
+		}
+	}
+
+	/** Get a description of the current operation */
+	public String getOperation() {
+		Operation o = owner;
+		if(o == null)
+			return "None";
+		else
+			return o.getOperationDescription();
 	}
 }

@@ -40,9 +40,9 @@ public class LCSQueryStatus extends LCSOperation {
 		super(DATA_30_SEC, l);
 	}
 
-	/** Begin the operation */
-	public void begin() {
-		phase = new QueryStatus();
+	/** Create the first real phase of the operation */
+	protected Phase phaseOne() {
+		return new QueryStatus();
 	}
 
 	/** Phase to query the LCS status */

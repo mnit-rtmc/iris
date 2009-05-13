@@ -42,9 +42,9 @@ public class LCSSendIndications extends LCSOperation {
 		user = u;
 	}
 
-	/** Begin the operation */
-	public void begin() {
-		phase = new TurnOffDevices();
+	/** Create the first real phase of the operation */
+	protected Phase phaseOne() {
+		return new TurnOffDevices();
 	}
 
 	/** Phase to turn off devices */

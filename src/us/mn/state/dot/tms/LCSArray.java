@@ -46,4 +46,7 @@ public interface LCSArray extends SonarObject {
 
 	/** Get the current lane-use indications */
 	int[] getIndicationsCurrent();
+
+	/** Get the operation description */
+	String getOperation();
 }
