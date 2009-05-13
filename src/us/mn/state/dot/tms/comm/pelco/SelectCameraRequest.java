@@ -18,11 +18,12 @@ package us.mn.state.dot.tms.comm.pelco;
  * A request to select a new camera
  *
  * @author Douglas Lau
+ * @author Timothy Johnson
  */
 public class SelectCameraRequest extends Request {
 
 	/** Command to select a new camera */
-	static protected final String CODE = "B";
+	static protected final String CODE = "#";
 
 	/** Camera to select */
 	protected final int camera;
@@ -34,6 +35,6 @@ public class SelectCameraRequest extends Request {
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		return CODE + camera;
+		return camera + CODE;
 	}
 }

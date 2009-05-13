@@ -35,10 +35,10 @@ public class Message implements AddressedMessage {
 	static protected final byte SOH = (byte)1;
 
 	/** End Of Message byte */
-	static protected final byte EOM = (byte)'\r';
+	static protected final byte EOM = (byte)'a';
 
 	/** End of Response byte */
-	static protected final int EOR = '\n';
+	static protected final int EOR = 'a';
 
 	/** Maximum size (in bytes) of a response from switcher */
 	static protected final int MAX_RESPONSE = 80;

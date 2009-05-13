@@ -23,7 +23,7 @@ package us.mn.state.dot.tms.comm.pelco;
 public class SelectMonitorRequest extends Request {
 
 	/** Command to select a new monitor */
-	static protected final String CODE = "A";
+	static protected final String CODE = "M";
 
 	/** Monitor to select */
 	protected final int monitor;
@@ -35,6 +35,6 @@ public class SelectMonitorRequest extends Request {
 
 	/** Get the code to send to the switcher */
 	public String toString() {
-		return CODE + monitor;
+		return monitor + CODE;
 	}
 }
