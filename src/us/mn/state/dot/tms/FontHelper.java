@@ -15,17 +15,13 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Namespace;
 
 /**
  * Font helper methods.
  *
  * @author Michael Darter
  */
-public class FontHelper {
-
-	/** SONAR namespace */
-	static public Namespace namespace;
+public class FontHelper extends BaseHelper {
 
 	/** Disallow instantiation */
 	protected FontHelper() {
@@ -34,26 +30,18 @@ public class FontHelper {
 
 	/** Find the font using a font number */
 	static public Font find(final int f_num) {
-		if(namespace == null) {
-			assert false;
-			return null;
-		}
 		return (Font)namespace.findObject(Font.SONAR_TYPE, 
 			new Checker<Font>()
-			{
-				public boolean check(Font f) {
-					return f.getNumber() == f_num;
-				}
-			});
+		{
+			public boolean check(Font f) {
+				return f.getNumber() == f_num;
+			}
+		});
 	}
 
 	/** Lookup a Font in the SONAR namespace. 
 	 *  @return The specified font or null if it does not exist. */
 	static protected Font lookup(String name) {
-		if(namespace == null) {
-			assert false;
-			return null;
-		}
 		return (Font)namespace.lookupObject(Font.SONAR_TYPE, name);
 	}
 }

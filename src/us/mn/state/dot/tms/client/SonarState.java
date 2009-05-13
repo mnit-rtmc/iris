@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.Camera;
@@ -47,7 +48,6 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
@@ -397,7 +397,7 @@ public class SonarState extends Client {
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		singleton = this;
 		// FIXME: this is an ugly hack
-		SystemAttributeHelper.namespace = getNamespace();
+		BaseHelper.namespace = getNamespace();
 	}
 
 	/** Login to the SONAR server */

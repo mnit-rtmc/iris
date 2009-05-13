@@ -76,8 +76,7 @@ public class MainServer {
 			// FIXME: static namespace hacks
 			TMSImpl.namespace = ns;
 			DMSList.namespace = ns;
-			SystemAttributeHelper.namespace = ns;
-			FontHelper.namespace = ns;
+			BaseHelper.namespace = ns;
 			IrisRoleImpl.lookup(TMSImpl.store, ns);
 			IrisUserImpl.lookup(TMSImpl.store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);

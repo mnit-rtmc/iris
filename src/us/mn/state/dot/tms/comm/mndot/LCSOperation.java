@@ -18,6 +18,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.LCSArrayImpl;
+import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DeviceContentionException;
 import us.mn.state.dot.tms.comm.Operation;
 

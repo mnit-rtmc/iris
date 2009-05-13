@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.utils.SString;
  *
  * @author Douglas Lau
  */
-public class SignMessageHelper {
+public class SignMessageHelper extends BaseHelper {
 
 	/** Do not allow objects of this class */
 	private SignMessageHelper() {

@@ -30,6 +30,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;

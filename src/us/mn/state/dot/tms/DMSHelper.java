@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSHelper {
+public class DMSHelper extends BaseHelper {
 
 	/** don't instantiate */
 	private DMSHelper() {
