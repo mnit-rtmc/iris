@@ -74,9 +74,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Panel for drawing an LCS array */
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
 
-	/** LCS message selector */
-	protected final LcsMessageSelector messageSelector =
-		new LcsMessageSelector();
+	/** LCS indicaiton selector */
+	protected final IndicaitonSelector indicationSelector =
+		new IndicationSelector();
 
 	/** Button to send new indications to the LCS array */
 	protected final JButton sendBtn = new JButton("Send");
