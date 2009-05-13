@@ -205,8 +205,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		indicationSelector.setLCSArray(lcs_array);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
-		clearBtn.setAction(new ClearLcsAction(lcs_array,
-			handler.getConnection()));
+		clearBtn.setAction(new ClearLcsAction(selectionModel, user));
 		updateAttribute(lcs_array, null);
 	}
 
