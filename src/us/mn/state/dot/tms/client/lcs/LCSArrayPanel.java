@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.LaneUseIndication;
  */
 public class LCSArrayPanel extends JPanel {
 
+	/** Maximum number of lanes */
+	static protected final int MAX_LANES = 6;
+
 	/** Pixel size (height and width) of each LCS */
 	protected final int pixels;
 
@@ -38,8 +41,8 @@ public class LCSArrayPanel extends JPanel {
 	public LCSArrayPanel(int p) {
 		super(new GridLayout(1, 0, 2, 0));
 		pixels = p;
-		setMinimumSize(new Dimension(128, pixels));
-		setPreferredSize(new Dimension(128, pixels));
+		setMinimumSize(new Dimension(MAX_LANES * pixels, pixels));
+		setPreferredSize(new Dimension(MAX_LANES * pixels, pixels));
 	}
 
 	/** Set new indications */
