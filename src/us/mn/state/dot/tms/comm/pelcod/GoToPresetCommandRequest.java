@@ -9,7 +9,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.pelco;
+package us.mn.state.dot.tms.comm.pelcod;
 
 /**
  * This class creates a Pelco D request to instruct the camera to go to

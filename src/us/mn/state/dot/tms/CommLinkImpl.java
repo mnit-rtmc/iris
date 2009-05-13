@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.comm.ntcip.NtcipPoller;
-import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
+import us.mn.state.dot.tms.comm.pelcod.PelcoPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
 
