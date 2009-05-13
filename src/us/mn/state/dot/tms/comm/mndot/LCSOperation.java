@@ -16,7 +16,10 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LCS;
+import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DeviceContentionException;
@@ -31,13 +34,16 @@ abstract public class LCSOperation extends Controller170Operation {
 
 	/** Get the controller for an LCS array */
 	static protected ControllerImpl getController(LCSArrayImpl l) {
-		DMSImpl[] dmss = l.getDMSArray();
-		if(dmss.length > 0) {
-			// All the DMS should be assigned to the same
-			// controller, so just pick the first one.
-			Controller c = dmss[0].getController();
-			if(c instanceof ControllerImpl)
-				return (ControllerImpl)c;
+		// All the DMS should be assigned to the same
+		// controller, so just pick the first one.
+		LCS lcs = LCSArrayHelper.lookupLCS(l, 1);
+		if(lcs != null) {
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null) {
+				Controller c = dms.getController();
+				if(c instanceof ControllerImpl)
+					return (ControllerImpl)c;
+			}
 		}
 		return null;
 	}

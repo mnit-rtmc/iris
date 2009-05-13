@@ -200,4 +200,9 @@ public class DMSHelper extends BaseHelper {
 				s.append(style).append(", ");
 		return SString.removeTail(s.toString(), ", ");
 	}
+
+	/** Lookup the DMS with the specified name */
+	static public DMS lookup(String name) {
+		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
+	}
 }

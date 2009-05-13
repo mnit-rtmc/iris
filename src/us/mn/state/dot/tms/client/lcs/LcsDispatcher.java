@@ -29,6 +29,9 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
@@ -44,6 +47,15 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
+	/** Lookup the DMS for the LCS in lane 1 */
+	static protected DMS lookupDMS(LCSArray lcs_array) {
+		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, 1);
+		if(lcs != null)
+			return DMSHelper.lookup(lcs.getName());
+		else
+			return null;
+	}
+
 	/** Get the verification camera name */
 	static protected String getCameraName(DMS proxy) {
 		Camera camera = proxy.getCamera();
@@ -75,7 +87,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
 
 	/** LCS indicaiton selector */
-	protected final IndicaitonSelector indicationSelector =
+	protected final IndicationSelector indicationSelector =
 		new IndicationSelector();
 
 	/** Button to send new indications to the LCS array */
@@ -101,8 +113,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	public void dispose() {
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
+		indicationSelector.dispose();
 		removeAll();
-		messageSelector.removeAll();
 	}
 
 	/** Create the dispatcher panel */
@@ -115,7 +127,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.addRow("Location", locationTxt);
 		panel.addRow("Operation", operationTxt);
 		panel.addRow(lcsPnl);
-		panel.addRow(messageSelector);
+		panel.addRow(indicationSelector);
 		panel.addRow(buildButtonPanel());
 	}
 
@@ -189,8 +201,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Set the selected LCS array */
 	public void setSelected(LCSArray lcs_array) {
-		messageSelector.setEnabled(true);
-		messageSelector.setSignals(lcs_array.getIndicationsCurrent());
+		indicationSelector.setEnabled(true);
+		indicationSelector.setLCSArray(lcs_array);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
 		clearBtn.setAction(new ClearLcsAction(lcs_array,
@@ -206,8 +218,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		operationTxt.setText("");
 		operationTxt.setForeground(null);
 		operationTxt.setBackground(null);
-		messageSelector.clearSelections();
-		messageSelector.setEnabled(false);
+		indicationSelector.setEnabled(false);
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
 		lcsPnl.clear();
@@ -217,14 +228,12 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected void updateAttribute(LCSArray lcs_array, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(lcs_array.getName());
-		if(a == null || a.equals("camera")) {
-			cameraTxt.setText(getCameraName(
-				LCSArrayHelper.lookupDMS(lcs_array)));
-		}
+		if(a == null || a.equals("camera"))
+			cameraTxt.setText(getCameraName(lookupDMS(lcs_array)));
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
 		if(a == null || a.equals("geoLoc")) {
-			DMS dms = LCSArrayHelper.lookupDMS(lcs_array);
+			DMS dms = lookupDMS(lcs_array);
 			if(dms != null) {
 				locationTxt.setText(GeoLocHelper.getDescription(
 					dms.getGeoLoc()));
@@ -259,7 +268,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Send new indications to the specified LCS array */
 	protected void sendIndications(LCSArray lcs_array) {
-		int[] indications = messageSelector.getSignals();
+		int[] indications = indicationSelector.getIndications();
 		if(indications != null) {
 			lcs_array.setOwnerNext(user);
 			lcs_array.setIndicationsNext(indications);

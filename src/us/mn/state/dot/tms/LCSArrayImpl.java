@@ -272,7 +272,7 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	}
 
 	/** Get an array of the DMS */
-	public DMSImpl[] getDMSArray() {
+	protected DMSImpl[] getDMSArray() {
 		LCS[] lcss = getLanes();
 		DMSImpl[] signs = new DMSImpl[lcss.length];
 		for(int i = 0; i < lcss.length; i++) {

@@ -30,7 +30,7 @@ public class LCSArrayHelper extends BaseHelper {
 	}
 
 	/** Lookup the LCS objects for an array */
-	public LCS[] lookupLCSs(LCSArray lcs_array) {
+	static public LCS[] lookupLCSs(LCSArray lcs_array) {
 		final TreeMap<Integer, LCS> lanes = new TreeMap<Integer, LCS>();
 		lookupLCSs(lcs_array, new Checker<LCS>() {
 			public boolean check(LCS lcs) {
@@ -46,8 +46,17 @@ public class LCSArrayHelper extends BaseHelper {
 		return lcss;
 	}
 
+	/** Lookup the LCS in the specified lane */
+	static public LCS lookupLCS(LCSArray lcs_array, final int lane) {
+		return lookupLCSs(lcs_array, new Chceker<LCS>() {
+			public boolean check(LCS lcs) {
+				return lcs.getLane() == lane;
+			}
+		});
+	}
+
 	/** Lookup the LCS objects for an array */
-	public void lookupLCSs(final LCSArray lcs_array,
+	static public void lookupLCSs(final LCSArray lcs_array,
 		final Checker<LCS> checker)
 	{
 		namespace.findObject(LCS.SONAR_TYPE, new Checker<LCS>() {

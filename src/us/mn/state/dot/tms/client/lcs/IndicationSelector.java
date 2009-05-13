@@ -45,6 +45,12 @@ public class IndicationSelector extends JPanel {
 		super(new GridLayout(1, 0, 1, 0));
 	}
 
+	/** Dispose of the indication selector */
+	public void dispose() {
+		removeAll();
+		indications.clear();
+	}
+
 	/** Set the LCS array */
 	public void setLCSArray(LCSArray lcs_array) {
 		removeAll();
