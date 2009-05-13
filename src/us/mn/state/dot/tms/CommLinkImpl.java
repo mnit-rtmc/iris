@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.comm.ntcip.NtcipPoller;
+import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
@@ -300,7 +301,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Create a PelcoD poller */
-	protected MessagePoller createPelcoPoller() throws IOException {
+	protected MessagePoller createPelcoDPoller() throws IOException {
 		return new PelcoDPoller(name, createSocketMessenger());
 	}
 
@@ -317,6 +318,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Create a CAWS poller */
 	protected MessagePoller createCawsPoller() throws IOException {
 		return new CawsPoller(name, createHttpFileMessenger());
+	}
+
+	/** Create a Pelco video switch poller */
+	protected MessagePoller createPelcoPoller() throws IOException {
+		return new PelcoPoller(name, createSocketMessenger());
 	}
 
 	/** Try to open the communication link */
@@ -337,14 +343,16 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				return createCanogaPoller();
 			case PROTO_VICON:
 				return createViconPoller();
-			case PROTO_PELCO:
-				return createPelcoPoller();
+			case PROTO_PELCO_D:
+				return createPelcoDPoller();
 			case PROTO_MANCHESTER:
 				return createManchesterPoller();
 			case PROTO_DMSLITE:
 				return createDmsLitePoller();
 			case PROTO_CAWS:
 				return createCawsPoller();
+			case PROTO_PELCO:
+				return createPelcoPoller();
 			default:
 				throw new ProtocolException("INVALID PROTOCOL");
 		}
