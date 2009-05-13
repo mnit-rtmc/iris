@@ -58,9 +58,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Selection model */
 	protected final ProxySelectionModel<LCSArray> selectionModel;
 
-	/** Panel for drawing an LCS array */
-	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
-
 	/** Name of the selected LCS array */
 	protected final JTextField nameTxt = new JTextField();
 
@@ -73,6 +70,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Operation of selected LCS array */
 	protected final JTextField operationTxt = new JTextField();
 
+	/** Panel for drawing an LCS array */
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
+
+	/** LCS message selector */
+	protected final LcsMessageSelector messageSelector =
+		new LcsMessageSelector();
+
 	/** Button to send new indications to the LCS array */
 	protected final JButton sendBtn = new JButton("Send");
 
@@ -81,10 +85,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Currently logged in user */
 	protected final User user;
-
-	/** LCS message selector */
-	protected final LcsMessageSelector messageSelector =
-		new LcsMessageSelector();
 
 	/** Create a new LCS dispatcher */
 	public LcsDispatcher(LCSArrayManager manager) {
@@ -239,7 +239,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				operationTxt.setForeground(Color.WHITE);
 				operationTxt.setBackground(Color.GRAY);
 			}
-			operationTxt.setText(lcs.getOperation());
+			operationTxt.setText(lcs_array.getOperation());
 		}
 		if(a == null || a.equals("indicationsCurrent")) {
 			lcsPnl.setIndications(
