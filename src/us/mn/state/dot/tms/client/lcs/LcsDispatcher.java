@@ -32,7 +32,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -259,12 +258,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
 		if(a == null || a.equals("geoLoc")) {
-			DMS dms = lookupDMS(lcs_array);
-			if(dms != null) {
-				locationTxt.setText(GeoLocHelper.getDescription(
-					dms.getGeoLoc()));
-			} else
-				locationTxt.setText("");
+			locationTxt.setText(LCSArrayHelper.lookupLocation(
+				lcs_array));
 		}
 		if(a == null || a.equals("operation")) {
 			String status = getControllerStatus(lcs_array);
