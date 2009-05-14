@@ -46,7 +46,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
-import us.mn.state.dot.tms.client.lcs.LCSManager;
+import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 

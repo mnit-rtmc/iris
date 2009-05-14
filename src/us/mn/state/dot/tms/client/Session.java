@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
 import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
+import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
@@ -95,6 +96,9 @@ public class Session {
 	/** DMS manager */
 	protected final DMSManager dms_manager;
 
+	/** LCS indication manager */
+	protected final LCSIManager lcsi_manager;
+
 	/** Detector manager */
 	protected final DetectorManager det_manager;
 
@@ -110,6 +114,7 @@ public class Session {
 	/** FIXME: this is a hack */
 	static public CameraManager cam_manager_singleton;
 	static public DMSManager dms_manager_singleton;
+	static public LCSIManager lcsi_manager_singleton;
 	static public DetectorManager det_manager_singleton;
 	static public MeterManager meter_manager_singleton;
 	static public WarningSignManager warn_manager_singleton;
@@ -248,6 +253,9 @@ public class Session {
 		dms_manager = new DMSManager(tmsConnection, st.getDMSs(),
 			loc_manager);
 		dms_manager_singleton = dms_manager;
+		lcsi_manager = new LCSIManager(st.getLCSIndications(),
+			loc_manager);
+		lcsi_manager_singleton = lcsi_manager;
 		det_manager = new DetectorManager(tmsConnection,
 			st.getDetectors(), loc_manager);
 		det_manager_singleton = det_manager;
