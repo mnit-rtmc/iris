@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,14 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
-import java.util.LinkedList;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.BaseMapLayer;
 import us.mn.state.dot.trafmap.TunnelLayer;
+import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.proxy.TmsMapLayer;
+import us.mn.state.dot.tms.client.sonar.StyleSummary;
 
 /**
  * GUI form for working with LaneControlSignal objects.
@@ -36,8 +36,8 @@ public class LcsTab extends MapTab {
 	/** LCS dispatcher */
 	protected final LcsDispatcher dispatcher;
 
-	/** LCS chooser */
-	protected final LcsChooser chooser;
+	/** Summary of LCS arrays of each status */
+	protected final StyleSummary<LCSArray> summary;
 
 	/** Tab panel */
 	protected final JPanel tabPanel;
@@ -46,21 +46,20 @@ public class LcsTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new LCS tab */
-	public LcsTab(TmsConnection connection) throws IOException {
+	public LcsTab(LCSArrayManager manager, TmsConnection connection)
+		throws IOException
+	{
 		super("LCS", "Operate Lane Control Signals");
+		dispatcher = new LcsDispatcher(manager);
+		summary = manager.createStyleSummary();
 		LayerState lstate =
 			BaseMapLayer.createTunnelMapLayer().createState();
 		LayerState tunnel = new TunnelLayer().createState();
-		TmsMapLayer lcsLayer = LcsHandler.createLayer(connection);
-		LcsHandler handler = (LcsHandler)lcsLayer.getHandler();
-		LayerState lcs = lcsLayer.createState();
 		map.addLayer(lstate);
 		map.addLayer(tunnel);
-		map.addLayer(lcs);
+		map.addLayer(manager.getLayer().createState());
 		map.setHomeExtent(lstate.getExtent());
 		mainPanel = createMapPanel(null);
-		dispatcher = new LcsDispatcher(handler);
-		chooser = new LcsChooser(handler);
 		tabPanel = createSideBar();
 	}
 
@@ -68,7 +67,7 @@ public class LcsTab extends MapTab {
 	protected JPanel createSideBar() {
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(dispatcher, BorderLayout.NORTH);
-		p.add(chooser, BorderLayout.CENTER);
+		p.add(summary, BorderLayout.CENTER);
 		return p;
 	}
 
@@ -81,7 +80,7 @@ public class LcsTab extends MapTab {
 	public void dispose() {
 		super.dispose();
 		dispatcher.dispose();
-		chooser.dispose();
+		summary.dispose();
 		mainPanel.removeAll();
 	}
 
