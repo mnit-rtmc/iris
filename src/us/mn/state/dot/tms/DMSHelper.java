@@ -210,7 +210,7 @@ public class DMSHelper extends BaseHelper {
 	static protected final String EMPTY_TXT = "    ";
 
 	/** Get the verification camera name */
-	static protected String getCameraName(DMS proxy) {
+	static public String getCameraName(DMS proxy) {
 		Camera camera = proxy.getCamera();
 		if(camera == null)
 			return EMPTY_TXT;
