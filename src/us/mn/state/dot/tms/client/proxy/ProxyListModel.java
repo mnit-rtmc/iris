@@ -24,6 +24,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.NumericAlphaComparator;
 
 /**
  * List model for IRIS proxies. This class contains a TypeCache for a single
@@ -33,6 +34,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
  * defines a TreeSet which contains proxy objects for the TypeCache objects.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class ProxyListModel<T extends SonarObject>
 	extends AbstractListModel implements ProxyListener<T>
@@ -45,7 +47,8 @@ public class ProxyListModel<T extends SonarObject>
 		return new TreeSet<T>(
 			new Comparator<T>() {
 				public int compare(T t0, T t1) {
-					return t0.getName().compareTo(
+					return NumericAlphaComparator.
+						compareStrings(t0.getName(), 
 						t1.getName());
 				}
 				public boolean equals(Object o) {

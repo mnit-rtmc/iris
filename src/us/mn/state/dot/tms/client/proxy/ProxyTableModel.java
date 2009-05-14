@@ -26,6 +26,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.NumericAlphaComparator;
 
 /**
  * Table model for IRIS proxies
@@ -55,7 +56,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		return new TreeSet<T>(
 			new Comparator<T>() {
 				public int compare(T t0, T t1) {
-					return t0.getName().compareTo(
+					return new NumericAlphaComparator().
+						compare(t0.getName(), 
 						t1.getName());
 				}
 				public boolean equals(Object o) {
