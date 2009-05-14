@@ -25,9 +25,8 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
 
 /**
  * Renderer for LCS array objects in a list.
@@ -104,13 +103,7 @@ public class LcsCellRenderer extends JPanel implements ListCellRenderer {
 		nameLbl.setText(lcs_array.getName());
 		userLbl.setText(formatOwner(lcs_array.getOwnerCurrent()));
 		lcsPnl.setIndications(lcs_array.getIndicationsCurrent());
-		locationLbl.setText(GeoLocHelper.getDescription(
-			findGeoLoc(lcs_array)));
-	}
-
-	/** Find the location of the LCS array */
-	static protected GeoLoc findGeoLoc(LCSArray lcs_array) {
-		// FIXME: find the geo loc of lane 1 DMS
+		locationLbl.setText(LCSArrayHelper.lookupLocation(lcs_array));
 	}
 
 	/** Prune the owner string to the first dot.

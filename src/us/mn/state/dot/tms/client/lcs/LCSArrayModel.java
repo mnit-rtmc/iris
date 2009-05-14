@@ -17,12 +17,8 @@ package us.mn.state.dot.tms.client.lcs;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -31,19 +27,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class LCSArrayModel extends ProxyTableModel<LCSArray> {
-
-	/** Lookup the location of the LCS array */
-	static protected String lookupLocation(LCSArray proxy) {
-		LCS lcs = LCSArrayHelper.lookupLCS(proxy, 1);
-		if(lcs != null) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null) {
-				return GeoLocHelper.getDescription(
-					dms.getGeoLoc());
-			}
-		}
-		return "";
-	}
 
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
@@ -74,7 +57,7 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 			case COL_NAME:
 				return proxy.getName();
 			case COL_LOCATION:
-				return lookupLocation(proxy);
+				return LCSArrayHelper.lookupLocation(proxy);
 		}
 		return null;
 	}

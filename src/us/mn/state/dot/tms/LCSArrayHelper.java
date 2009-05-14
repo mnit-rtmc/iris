@@ -71,4 +71,18 @@ public class LCSArrayHelper extends BaseHelper {
 			}
 		});
 	}
+
+	/** Lookup the location of the LCS array */
+	static public String lookupLocation(LCSArray lcs_array) {
+		// get the location of the DMS in lane 1
+		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, 1);
+		if(lcs != null) {
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null) {
+				return GeoLocHelper.getDescription(
+					dms.getGeoLoc());
+			}
+		}
+		return "";
+	}
 }

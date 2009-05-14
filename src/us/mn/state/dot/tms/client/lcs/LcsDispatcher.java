@@ -113,6 +113,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	public LcsDispatcher(LCSArrayManager manager, TmsConnection tc) {
 		super(new BorderLayout());
 		SonarState st = tc.getSonarState();
+		cache = st.getLCSArrays();
 		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearLcsAction(selectionModel, user);
@@ -144,6 +145,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.addRow(lcsPnl);
 		panel.addRow(indicationSelector);
 		panel.addRow(buildButtonPanel());
+		return panel;
 	}
 
 	/** Build the panel that holds the send and clear buttons */

@@ -87,7 +87,7 @@ public class LCSQueryStatus extends LCSOperation {
 	/** Get the displayed indications */
 	protected int[] getIndications() {
 		final int[] ind = new int[lcs_array.getLaneCount()];
-		for(int i; i < ind.length; i++)
+		for(int i = 0; i < ind.length; i++)
 			ind[i] = LaneUseIndication.DARK.ordinal();
 		if(isTurnedOn()) {
 			lcs_array.findIndications(new Checker<LCSIndication>() {

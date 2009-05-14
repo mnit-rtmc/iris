@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.comm.LCSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
@@ -78,7 +79,7 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 	}
 
 	/** Create a new LCS array */
-	public LCSArrayImpl(String n) {
+	public LCSArrayImpl(String n) throws TMSException, SonarException {
 		super(n);
 	}
 
