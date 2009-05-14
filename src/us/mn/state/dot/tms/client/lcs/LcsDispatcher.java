@@ -29,6 +29,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -55,6 +56,18 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			return DMSHelper.lookup(lcs.getName());
 		else
 			return null;
+	}
+
+	/** Get the controller status */
+	static protected String getControllerStatus(LCSArray lcs_array) {
+		// FIXME: check the controller for each DMS?
+		DMS dms = lookupDMS(lcs_array);
+		if(dms != null) {
+			Controller c = dms.getController();
+			if(c != null)
+				return c.getStatus();
+		}
+		return "???";
 	}
 
 	/** Cache of LCS array proxy objects */
@@ -164,6 +177,15 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				}
 			});
 		}
+	}
+
+	/** Get the selected LCS array (if a single array is selected) */
+	protected LCSArray getSingleSelection() {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(LCSArray lcs_array: selectionModel.getSelected())
+				return lcs_array;
+		}
+		return null;
 	}
 
 	/** Called whenever a sign is added to the selection */
