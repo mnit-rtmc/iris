@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.utils;
  * String convenience methods.
  *
  * @author Michael Darter
+ * @see SStringTest
  */
 public class SString {
 
@@ -152,9 +153,12 @@ public class SString {
 	 */
 	static public String toRightField(String f, String s) {
 		if (!((f != null) && (s != null)))
-			throw new IllegalArgumentException("SString.toRightField: arg f or s is null.");
+			throw new IllegalArgumentException(
+				"SString.toRightField: arg f or s is null.");
 		if (!(f.length() >= s.length()))
-	    		throw new IllegalArgumentException("SString.toRightField: arg length problem:" + f + "," + s);
+	    		throw new IllegalArgumentException("SString." +
+				"toRightField: arg length problem:" + 
+				f + "," + s);
 		int end = f.length() - s.length();
 		String ret = f.substring(0, end) + s;
 		return (ret);
@@ -305,24 +309,17 @@ public class SString {
 		return true;
 	}
 
-	/** Compare 2 strings that each may be alpha, numeric, or alpha 
-	 *  numeric. If both are numeric they are compared in numeric
-	 *  order as integers (unless they are numerically equal, then
-	 *  as strings), otherwise as strings. 
-	 *  @param a A string that may contain letters and/or numbers
-	 *  @param b A string that may contain letters and/or numbers
-	 *  @return A value < 0 if a is less than b, 0 if the strings
-	 *	    are identical, or > 0 if a is greater than b.
-	 */
-	public static int compareAlphaNumeric(String a, String b) {
-		if(SString.isNumeric(a) && SString.isNumeric(b)) {
-			int diff = SString.stringToInt(a) - 
-				SString.stringToInt(b);
-			// if numerically equal, compare as strings
-			if(diff == 0)
-				return a.compareTo(b);
-			return diff;
+	/** return the number of alpha prefix characters shared by 2 strings */
+	static public int alphaPrefixLen(String a, String b) {
+		if(a == null || b == null)
+			return 0;
+		int len = Math.min(a.length(), b.length());
+		for(int i = 0; i < len; ++i) {
+			if(a.charAt(i) == b.charAt(i))
+				if(!Character.isDigit(a.charAt(i)))
+					continue;
+			return i;
 		}
-		return a.compareTo(b);
+		return len;
 	}
 }

@@ -21,6 +21,7 @@ import junit.framework.TestCase;
  * SString test cases
  * @author Michael Darter
  * @created 05/05/09
+ * @see SString
  */
 public class SStringTest extends TestCase {
 
@@ -81,5 +82,18 @@ public class SStringTest extends TestCase {
 			SString.removeEnclosingQuotes("\"abcd\" ")) == 0));
 		assertTrue((new String("x").compareTo(
 			SString.removeEnclosingQuotes("\"x\"")) == 0));
+
+		// alphaPrefixLen
+		assertTrue(SString.alphaPrefixLen(null, "abcd") == 0);
+		assertTrue(SString.alphaPrefixLen("1234", null) == 0);
+		assertTrue(SString.alphaPrefixLen("", "abcd") == 0);
+		assertTrue(SString.alphaPrefixLen("abcd", "1234") == 0);
+		assertTrue(SString.alphaPrefixLen("abcd", "a1234") == 1);
+		assertTrue(SString.alphaPrefixLen("abc", "abcdef") == 3);
+		assertTrue(SString.alphaPrefixLen("abcdef", "abc") == 3);
+		assertTrue(SString.alphaPrefixLen("abcdef", "abcdef") == 6);
+		assertTrue(SString.alphaPrefixLen("abcdef1234", "abcdef1234") == 6);
+		assertTrue(SString.alphaPrefixLen("!@#$%3", "!@#$%3") == 5);
+		assertTrue(SString.alphaPrefixLen("1234", "1234") == 0);
 	}
 }
