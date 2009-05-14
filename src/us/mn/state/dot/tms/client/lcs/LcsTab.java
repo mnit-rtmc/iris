@@ -46,11 +46,11 @@ public class LcsTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new LCS tab */
-	public LcsTab(LCSArrayManager manager, TmsConnection connection)
+	public LcsTab(LCSArrayManager manager, TmsConnection tc)
 		throws IOException
 	{
 		super("LCS", "Operate Lane Control Signals");
-		dispatcher = new LcsDispatcher(manager);
+		dispatcher = new LcsDispatcher(manager, tc);
 		summary = manager.createStyleSummary();
 		LayerState lstate =
 			BaseMapLayer.createTunnelMapLayer().createState();

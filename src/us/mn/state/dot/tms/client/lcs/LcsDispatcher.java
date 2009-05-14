@@ -36,6 +36,8 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -99,15 +101,23 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final JButton sendBtn = new JButton("Send");
 
 	/** Button to clear the LCS array indications */
-	protected final JButton clearBtn = new JButton("Clear");
+	protected final JButton clearBtn = new JButton();
+
+	/** Action to clear selected LCS */
+	protected final ClearLcsAction clearAction;
 
 	/** Currently logged in user */
 	protected final User user;
 
 	/** Create a new LCS dispatcher */
-	public LcsDispatcher(LCSArrayManager manager) {
+	public LcsDispatcher(LCSArrayManager manager, TmsConnection tc) {
 		super(new BorderLayout());
+		SonarState st = tc.getSonarState();
+		user = st.lookupUser(tc.getUser().getName());
 		selectionModel = manager.getSelectionModel();
+		clearAction = new ClearLcsAction(selectionModel, user);
+		clearBtn.setAction(clearAction);
+		manager.setClearAction(clearAction);
 		add(createMainPanel(), BorderLayout.CENTER);
 		clearSelected();
 		cache.addProxyListener(this);
@@ -219,7 +229,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		indicationSelector.setLCSArray(lcs_array);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
-		clearBtn.setAction(new ClearLcsAction(selectionModel, user));
 		updateAttribute(lcs_array, null);
 	}
 
