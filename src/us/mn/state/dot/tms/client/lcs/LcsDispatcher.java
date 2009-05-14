@@ -29,7 +29,6 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
@@ -57,18 +56,6 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			return DMSHelper.lookup(lcs.getName());
 		else
 			return null;
-	}
-
-	/** Get the controller status */
-	static protected String getControllerStatus(LCSArray lcs_array) {
-		// FIXME: check the controller for each DMS?
-		DMS dms = lookupDMS(lcs_array);
-		if(dms != null) {
-			Controller c = dms.getController();
-			if(c != null)
-				return c.getStatus();
-		}
-		return "???";
 	}
 
 	/** Cache of LCS array proxy objects */
@@ -262,7 +249,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				lcs_array));
 		}
 		if(a == null || a.equals("operation")) {
-			String status = getControllerStatus(lcs_array);
+			String status = LCSArrayHelper.lookupStatus(lcs_array);
 			if("".equals(status)) {
 				operationTxt.setForeground(null);
 				operationTxt.setBackground(null);

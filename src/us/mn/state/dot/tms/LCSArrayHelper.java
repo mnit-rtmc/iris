@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.LinkedList;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 
@@ -84,5 +85,28 @@ public class LCSArrayHelper extends BaseHelper {
 			}
 		}
 		return "";
+	}
+
+	/** Get the controller status */
+	static public String lookupStatus(LCSArray lcs_array) {
+		final LinkedList<String> status = new LinkedList<String>();
+		status.add("???");
+		lookupLCS(lcs_array, new Checker<LCS>() {
+			public boolean check(LCS lcs) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null) {
+					Controller c = dms.getController();
+					if(c != null) {
+						String s = c.getStatus();
+						if(!"".equals(s)) {
+							status.add(s);
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+		});
+		return status.getLast();
 	}
 }
