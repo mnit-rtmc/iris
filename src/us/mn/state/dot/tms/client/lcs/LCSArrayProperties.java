@@ -16,20 +16,25 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextArea;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.ZTable;
@@ -55,6 +60,25 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Button to delete the selected LCS */
 	protected final JButton delete_btn = new JButton("Delete");
+
+	/** Notes text area */
+	protected final JTextArea notes = new JTextArea(3, 24);
+
+	/** Timing plan table component */
+	protected final ZTable plan_table = new ZTable();
+
+	/** Timing plan model */
+	protected final TimingPlanModel plan_model;
+
+	/** Button to delete the selected timing plan */
+	protected final JButton delete_plan_btn = new JButton("Delete");
+
+	/** LCS lock combo box component */
+	protected final JComboBox lcs_lock = new JComboBox(
+		LCSArrayLock.getDescriptions());
+
+	/** Operation description label */
+	protected final JLabel operation = new JLabel();
 
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(TmsConnection tc, LCSArray proxy) {
@@ -90,10 +114,16 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create setup panel */
 	protected JPanel createSetupPanel() {
+		new FocusJob(notes) {
+			public void perform() {
+				proxy.setNotes(notes.getText());
+			}
+		};
 		FormPanel panel = new FormPanel(true);
 		initTable();
 		panel.addRow(lcs_table);
 		panel.addRow(delete_btn);
+		panel.addRow("Notes", notes);
 		return panel;
 	}
 
@@ -131,8 +161,47 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		}
 	}
 
+	/** Create timing plan panel */
+	protected JPanel createTimingPlanPanel() {
+		final ListSelectionModel s = plan_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ActionJob(delete_plan_btn) {
+			public void perform() {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					plan_model.deleteRow(row);
+			}
+		};
+		plan_table.setAutoCreateColumnsFromModel(false);
+		plan_table.setModel(plan_model);
+		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(plan_table);
+		panel.addRow(delete_plan_btn);
+		return panel;
+	}
+
+	/** Create status panel */
+	protected JPanel createStatusPanel() {
+		lcs_lock.setAction(new LockLcsAction(proxy, lcs_lock));
+		FormPanel panel = new FormPanel(true);
+		panel.addRow("Lock", lcs_lock);
+		panel.addRow("Operation", operation);
+		return panel;
+	}
+
 	/** Update one attribute on the form */
 	protected void updateAttribute(String a) {
-		// FIXME
+		if(a == null || a.equals("notes"))
+			notes.setText(proxy.getNotes());
+		if(a == null || a.equals("lcsLock")) {
+			Integer lk = proxy.getLcsLock();
+			if(lk != null)
+				lcs_lock.setSelectedIndex(lk);
+			else
+				lcs_lock.setSelectedIndex(0);
+		}
+		if(a == null || a.equals("operation"))
+			operation.setText(proxy.getOperation());
 	}
 }
