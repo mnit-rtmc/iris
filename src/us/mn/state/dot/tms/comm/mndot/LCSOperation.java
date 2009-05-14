@@ -14,78 +14,22 @@
  */
 package us.mn.state.dot.tms.comm.mndot;
 
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayImpl;
-import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.DeviceContentionException;
-import us.mn.state.dot.tms.comm.Operation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
  * An LCS array operation.
  *
  * @author Douglas Lau
  */
-abstract public class LCSOperation extends Controller170Operation {
-
-	/** Get the controller for an LCS array */
-	static protected ControllerImpl getController(LCSArrayImpl l) {
-		// All the DMS should be assigned to the same
-		// controller, so just pick the first one.
-		LCS lcs = LCSArrayHelper.lookupLCS(l, 1);
-		if(lcs != null) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null) {
-				Controller c = dms.getController();
-				if(c instanceof ControllerImpl)
-					return (ControllerImpl)c;
-			}
-		}
-		return null;
-	}
-
-	/** This operation; needed for inner Phase classes */
-	protected final LCSOperation operation;
+abstract public class LCSOperation extends Device2Operation {
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;
 
 	/** Create a new LCS operation */
 	protected LCSOperation(int p, LCSArrayImpl l) {
-		super(p, getController(l));
-		operation = this;
+		super(p, l);
 		lcs_array = l;
-	}
-
-	/** Begin the operation */
-	public final void begin() {
-		phase = new AcquireArray();
-	}
-
-	/** Phase to acquire exclusive ownership of the LCS array */
-	protected class AcquireArray extends Phase {
-
-		/** Perform the acquire LCS array phase */
-		protected Phase poll(AddressedMessage mess)
-			throws DeviceContentionException
-		{
-			Operation owner = lcs_array.acquire(operation);
-			if(owner != operation)
-				throw new DeviceContentionException(owner);
-			return phaseOne();
-		}
-	}
-
-	/** Create the first real phase of the operation */
-	abstract protected Phase phaseOne();
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		lcs_array.release(operation);
-		super.cleanup();
 	}
 }

@@ -115,7 +115,8 @@ public class LCSQueryStatus extends LCSOperation {
 
 	/** Test if a pin is set in the special function output buffer */
 	protected boolean isPinSet(int pin) {
-		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
+		int i = pin -
+			Controller170Operation.SPECIAL_FUNCTION_OUTPUT_PIN;
 		if(i >= 0 && i < 8)
 			return ((outputs[0] >> i) & 1) != 0;
 		i -= 8;

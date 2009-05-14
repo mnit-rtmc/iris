@@ -33,7 +33,7 @@ abstract public class Controller170Operation extends ControllerOperation {
 	static protected final int METER_2_PIN = 3;
 
 	/** I/O pin for the first special function output */
-	static protected final int SPECIAL_FUNCTION_OUTPUT_PIN = 19;
+	static public final int SPECIAL_FUNCTION_OUTPUT_PIN = 19;
 
 	/** I/O pin for the first detector */
 	static protected final int FIRST_DETECTOR_PIN = 39;

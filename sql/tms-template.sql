@@ -588,14 +588,43 @@ CREATE TABLE iris.lcs_lock (
 	description VARCHAR(16) NOT NULL
 );
 
-CREATE TABLE iris.lcs_array (
-	name VARCHAR(8) PRIMARY KEY,
+CREATE TABLE iris._lcs_array (
+	name VARCHAR(10) PRIMARY KEY,
+	notes text NOT NULL,
 	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
 
+ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.lcs_array AS SELECT
+	d.name, controller, pin, notes, lcs_lock
+	FROM iris._lcs_array la JOIN iris._device_io d ON la.name = d.name;
+
+CREATE RULE lcs_array_insert AS ON INSERT TO iris.lcs_array DO INSTEAD
+(
+	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_array VALUES (NEW.name, NEW.notes, NEW.lcs_lock);
+);
+
+CREATE RULE lcs_array_update AS ON UPDATE TO iris.lcs_array DO INSTEAD
+(
+	UPDATE iris._device_io SET
+		controller = NEW.controller,
+		pin = NEW.pin
+	WHERE name = OLD.name;
+	UPDATE iris._lcs_array SET
+		notes = NEW.notes,
+		lcs_lock = NEW.lcs_lock
+	WHERE name = OLD.name;
+);
+
+CREATE RULE lcs_array_delete AS ON DELETE TO iris.lcs_array DO INSTEAD
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+
 CREATE TABLE iris.lcs (
 	name VARCHAR(10) PRIMARY KEY REFERENCES iris._dms,
-	array VARCHAR(8) NOT NULL REFERENCES iris.lcs_array,
+	array VARCHAR(10) NOT NULL REFERENCES iris.lcs_array,
 	lane INTEGER NOT NULL
 );
 

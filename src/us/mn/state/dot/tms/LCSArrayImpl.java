@@ -19,10 +19,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.comm.LCSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.comm.Operation;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.comm.Operation;
  *
  * @author Douglas Lau
  */
-public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
+public class LCSArrayImpl extends Device2Impl implements LCSArray {
 
 	/** Ordinal value for lock "OFF" */
 	static protected final Integer OFF_ORDINAL =
@@ -40,13 +40,16 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading LCS arrays...");
 		namespace.registerType(SONAR_TYPE, LCSArrayImpl.class);
-		store.query("SELECT name, lcs_lock FROM iris." + SONAR_TYPE  +
-			";", new ResultFactory()
+		store.query("SELECT name, controller, pin, notes, lcs_lock " +
+			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new LCSArrayImpl(
+				namespace.addObject(new LCSArrayImpl(namespace,
 					row.getString(1),	// name
-					row.getInt(2)		// lcs_lock
+					row.getString(2),	// controller
+					row.getInt(3),		// pin
+					row.getString(4),	// notes
+					row.getInt(5)		// lcs_lock
 				));
 			}
 		});
@@ -56,6 +59,9 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("controller", controller);
+		map.put("pin", pin);
+		map.put("notes", notes);
 		if(lcs_lock != null)
 			map.put("lcs_lock", lcs_lock.ordinal());
 		return map;
@@ -77,9 +83,43 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 	}
 
 	/** Create an LCS array */
-	public LCSArrayImpl(String n, Integer lk) {
-		super(n);
+	public LCSArrayImpl(Namespace ns, String n, String c, int p, String nt,
+		Integer lk)
+	{
+		this(n, (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
+		     c), p, nt, lk);
+	}
+
+	/** Create an LCS array */
+	public LCSArrayImpl(String n, ControllerImpl c, int p, String nt,
+		Integer lk)
+	{
+		super(n, c, p, nt);
 		lcs_lock = LCSArrayLock.fromOrdinal(lk);
+	}
+
+	/** Set the controller of the device */
+	public void doSetController(Controller c) throws TMSException {
+		throw new ChangeVetoException("Cannot assign controller");
+	}
+
+	/** Get the controller for an LCS array */
+	public synchronized Controller getController() {
+		// Get the controller for the DMS in lane 1
+		if(lanes.length > 0) {
+			LCS lcs = lanes[0];
+			if(lcs != null) {
+				DMS dms = DMSHelper.lookup(lcs.getName());
+				if(dms != null)
+					return dms.getController();
+			}
+		}
+		return null;
+	}
+
+	/** Set the controller I/O pin number */
+	public void doSetPin(int p) throws TMSException {
+		throw new ChangeVetoException("Cannot assign pin");
 	}
 
 	/** Lock status */
@@ -301,48 +341,5 @@ public class LCSArrayImpl extends BaseObjectImpl implements LCSArray {
 					return false;
 			}
 		});
-	}
-
-	/** Operation which owns the LCS array */
-	protected transient Operation owner;
-
-	/** Acquire ownership of the LCS array */
-	public Operation acquire(Operation o) {
-		try {
-			// Name used for unique device acquire/release lock
-			synchronized(name) {
-				if(owner == null)
-					owner = o;
-				return owner;
-			}
-		}
-		finally {
-			notifyAttribute("operation");
-		}
-	}
-
-	/** Release ownership of the LCS array */
-	public Operation release(Operation o) {
-		try {
-			// Name used for unique device acquire/release lock
-			synchronized(name) {
-				Operation _owner = owner;
-				if(owner == o)
-					owner = null;
-				return _owner;
-			}
-		}
-		finally {
-			notifyAttribute("operation");
-		}
-	}
-
-	/** Get a description of the current operation */
-	public String getOperation() {
-		Operation o = owner;
-		if(o == null)
-			return "None";
-		else
-			return o.getOperationDescription();
 	}
 }

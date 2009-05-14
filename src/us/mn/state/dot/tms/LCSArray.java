@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 
 /**
@@ -23,7 +22,7 @@ import us.mn.state.dot.sonar.User;
  *
  * @author Douglas Lau
  */
-public interface LCSArray extends SonarObject {
+public interface LCSArray extends Device2 {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "lcs_array";
