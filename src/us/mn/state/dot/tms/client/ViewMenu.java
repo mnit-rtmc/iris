@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
-import us.mn.state.dot.tms.client.lcs.LcsListForm;
+import us.mn.state.dot.tms.client.lcs.LcsForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.HolidayForm;
@@ -168,7 +168,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic( 'L' );
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new LcsListForm(tc));
+				desktop.show(new LcsForm(tc,
+					st.getLCSArrays()));
 			}
 		};
 		add(item);

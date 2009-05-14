@@ -35,6 +35,7 @@ public class LCSArrayHelper extends BaseHelper {
 		lookupLCS(lcs_array, new Checker<LCS>() {
 			public boolean check(LCS lcs) {
 				lanes.put(lcs.getLane(), lcs);
+				return false;
 			}
 		});
 		int n_lanes = 0;
