@@ -25,6 +25,7 @@ import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.LCSHelper;
 
 /**
  * Selector for lane-use control siganl arrays.
