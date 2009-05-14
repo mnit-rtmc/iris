@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * NTCIP -- MULTI (MarkUp Language for Transportation Information)
@@ -360,5 +361,24 @@ public class MultiString {
 				cb.addTag(tag);
 			}
 		}
+	}
+
+	/** 
+	  * This is a hack. It is used by the ComboBoxEditor and 
+	  * SignMessageModel to recognize when a sign message line
+	  * should be ignored. By convention, a line begining and
+	  * ending with an underscore is to be ignored. IRIS assumes
+	  * that non-blank DMS messages have both a bitmap and multistring,
+	  * which is not the case for D10, so a bogus multistring is created
+	  * in comm/dmslite (with a prepended and appended underscore). 
+	  */
+	public static boolean ignoreLineHack(String line) {
+		if(line == null)
+			return false;
+		return SString.enclosedBy(line,"_");
+	}
+	// see the above note
+	public static String flagIgnoredSignLineHack(String line) {
+		return "_"+line+"_";
 	}
 }

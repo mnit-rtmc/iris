@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageImpl;
-import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.STime;
@@ -94,10 +93,14 @@ public class OpQueryMsg extends OpDms {
 
 		MultiString multi = new MultiString();
 
-		// default text if no bitmap, see comments in method for why this is a hack
-		final String TEXT1 = SignTextHelper.flagIgnoredSignLineHack("OTHER");
-		final String TEXT2 = SignTextHelper.flagIgnoredSignLineHack("SYSTEM");
-		final String TEXT3 = SignTextHelper.flagIgnoredSignLineHack("MESSAGE");
+		// default text if no bitmap, see comments in 
+		// method for why this is a hack.
+		final String TEXT1 = MultiString.
+			flagIgnoredSignLineHack("OTHER");
+		final String TEXT2 = MultiString.
+			flagIgnoredSignLineHack("SYSTEM");
+		final String TEXT3 = MultiString.
+			flagIgnoredSignLineHack("MESSAGE");
 		for(int i = 0; i < pages.length; i++) {
 			multi.addText(TEXT1);
 			multi.addLine();

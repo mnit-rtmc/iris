@@ -19,9 +19,9 @@ import java.util.HashSet;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SignTextHelper;
 
 /**
  * This is a utility class to create sign text messages.
@@ -64,7 +64,7 @@ public class SignTextCreator {
 	public void create(SignGroup sg, short line, String mess,
 		short priority)
 	{
-		mess = SignTextHelper.getValidText(mess);
+		mess = new MultiString(mess).normalize();
 		String name = createUniqueSignTextName(sg);
 		if(canAddSignText(name)) {
 			HashMap<String, Object> attrs =

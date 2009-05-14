@@ -29,8 +29,8 @@ import java.awt.event.ActionListener;
 import javax.swing.border.Border;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JTextField;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SignTextHelper;
 
 /**
  * The editor for SignText combo boxes.
@@ -78,13 +78,13 @@ public class MsgComboBoxEditor implements ComboBoxEditor {
 			txt = ((SignText)o).getMessage();
 		else
 			txt = o.toString();
-		return SignTextHelper.getValidText(txt);
+		return new MultiString(txt).normalize();
 	}
 
 	/** return the edited item */
 	public Object getItem() {
-		String newValue = SignTextHelper.
-			getValidText(m_editor.getText());
+		String newValue = new MultiString(
+			m_editor.getText()).normalize();
 		m_editor.setText(newValue);
 		if(m_oldValue instanceof SignText) {
 			if(getItemText(newValue).equals(
