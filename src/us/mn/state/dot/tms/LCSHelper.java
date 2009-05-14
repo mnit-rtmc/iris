@@ -33,6 +33,8 @@ public class LCSHelper extends BaseHelper {
 	static public LaneUseIndication[] lookupIndications(LCS lcs) {
 		final TreeSet<LaneUseIndication> indications =
 			new TreeSet<LaneUseIndication>();
+		// DARK is always an available indication ...
+		indications.add(LaneUseIndication.DARK);
 		lookupIndication(lcs, new Checker<LCSIndication>() {
 			public boolean check(LCSIndication li) {
 				indications.add(LaneUseIndication.fromOrdinal(

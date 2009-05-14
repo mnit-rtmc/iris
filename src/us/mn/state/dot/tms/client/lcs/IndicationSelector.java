@@ -17,11 +17,13 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.Iterator;
 import java.util.LinkedList;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
@@ -63,8 +65,9 @@ public class IndicationSelector extends JPanel {
 			indications.add(createCombo(lcs));
 		}
 		addLabel("L");
-		for(JComboBox combo: indications.descendingIterator())
-			add(combo);
+		Iterator<JComboBox> it = indications.descendingIterator();
+		while(it.hasNext())
+			add(it.next());
 		addLabel("R");
 	}
 
@@ -84,5 +87,20 @@ public class IndicationSelector extends JPanel {
 	public void setEnabled(boolean enabled) {
 		for(Component c: getComponents())
 			c.setEnabled(enabled);
+	}
+
+	/** Get the selected indications */
+	public int[] getIndications() {
+		int[] ind = new int[indications.size()];
+		for(int i = 0; i < ind.length; i++) {
+			JComboBox combo = indications.get(i);
+			LaneUseIndication lui =
+				(LaneUseIndication)combo.getSelectedItem();
+			if(lui != null)
+				ind[i] = lui.ordinal();
+			else
+				return null;
+		}
+		return ind;
 	}
 }
