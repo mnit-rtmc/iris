@@ -624,11 +624,11 @@ CREATE RULE lcs_array_delete AS ON DELETE TO iris.lcs_array DO INSTEAD
 
 CREATE TABLE iris.lcs (
 	name VARCHAR(10) PRIMARY KEY REFERENCES iris._dms,
-	array VARCHAR(10) NOT NULL REFERENCES iris.lcs_array,
+	lcs_array VARCHAR(10) NOT NULL REFERENCES iris._lcs_array,
 	lane INTEGER NOT NULL
 );
 
-CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (array, lane);
+CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (lcs_array, lane);
 
 CREATE TABLE iris.lane_use_indication (
 	id INTEGER PRIMARY KEY,

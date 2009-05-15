@@ -31,13 +31,13 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading LCS...");
 		namespace.registerType(SONAR_TYPE, LCSImpl.class);
-		store.query("SELECT name, array, lane FROM iris." +
+		store.query("SELECT name, lcs_array, lane FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LCSImpl(namespace,
 					row.getString(1),	// name
-					row.getString(2),	// array
+					row.getString(2),	// lcs_array
 					row.getInt(3)		// lane
 				));
 			}
@@ -48,7 +48,7 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("array", array);
+		map.put("lcs_array", lcsArray);
 		map.put("lane", lane);
 		return map;
 	}
@@ -77,7 +77,7 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	/** Create an LCS */
 	protected LCSImpl(String n, LCSArray a, int l) {
 		this(n);
-		array = a;
+		lcsArray = a;
 		lane = l;
 		initTransients();
 	}
@@ -85,8 +85,8 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	/** Initialize the LCS array */
 	public void initTransients() {
 		try {
-			if(array instanceof LCSArrayImpl) {
-				LCSArrayImpl la = (LCSArrayImpl)array;
+			if(lcsArray instanceof LCSArrayImpl) {
+				LCSArrayImpl la = (LCSArrayImpl)lcsArray;
 				la.setLane(lane, this);
 			}
 		}
@@ -99,19 +99,19 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
-		if(array instanceof LCSArrayImpl) {
-			LCSArrayImpl la = (LCSArrayImpl)array;
+		if(lcsArray instanceof LCSArrayImpl) {
+			LCSArrayImpl la = (LCSArrayImpl)lcsArray;
 			la.setLane(lane, null);
 		}
 		super.doDestroy();
 	}
 
 	/** LCS array containing this LCS */
-	protected LCSArray array;
+	protected LCSArray lcsArray;
 
 	/** Get the LCS array */
 	public LCSArray getArray() {
-		return array;
+		return lcsArray;
 	}
 
 	/** Lane number */

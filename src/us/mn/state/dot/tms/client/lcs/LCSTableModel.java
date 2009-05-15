@@ -142,7 +142,7 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 		if(canAddLCS(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("array", lcs_array);
+			attrs.put("lcsArray", lcs_array);
 			attrs.put("lane", new Integer(lane));
 			cache.createObject(name, attrs);
 		}
