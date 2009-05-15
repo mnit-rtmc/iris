@@ -219,12 +219,12 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 	}
 
 	/** Current indications (Shall not be null) */
-	protected transient int[] indicationsCurrent = createDarkIndications();
+	protected transient int[] indicationsCurrent = createDarkIndications(0);
 
 	/** Create an array of DARK indications */
-	protected int[] createDarkIndications() {
-		int[] ind = new int[lanes.length];
-		for(int i = 0; i < ind.length; i++)
+	protected int[] createDarkIndications(int n_lanes) {
+		int[] ind = new int[n_lanes];
+		for(int i = 0; i < n_lanes; i++)
 			ind[i] = LaneUseIndication.DARK.ordinal();
 		return ind;
 	}
@@ -279,7 +279,7 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 			throw new ChangeVetoException("Lane already assigned");
 		lns[lane - 1] = (LCSImpl)lcs;
 		lanes = Arrays.copyOf(lns, getMaxLane(lns));
-		indicationsCurrent = createDarkIndications();
+		indicationsCurrent = createDarkIndications(lanes.length);
 		notifyAttribute("indicationsCurrent");
 	}
 
