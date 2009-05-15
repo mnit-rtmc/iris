@@ -1,5 +1,6 @@
 us/mn/state/dot/tms/Alarm.class
 us/mn/state/dot/tms/Base64.class
+us/mn/state/dot/tms/BaseHelper.class
 us/mn/state/dot/tms/BitmapGraphic.class
 us/mn/state/dot/tms/Cabinet.class
 us/mn/state/dot/tms/CabinetStyle.class
