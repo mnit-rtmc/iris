@@ -86,6 +86,8 @@ abstract public class IndicationIcon implements Icon {
 
 	/** Create a new indication icon */
 	static public IndicationIcon create(int p, LaneUseIndication i) {
+		if(i == null)
+			return new UnknownIndicationIcon(p);
 		switch(i) {
 		case DARK:
 			return new DarkIndicationIcon(p);
