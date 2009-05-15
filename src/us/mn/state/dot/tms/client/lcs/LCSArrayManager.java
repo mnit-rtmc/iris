@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
@@ -32,6 +33,7 @@ import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
+import us.mn.state.dot.tms.client.sonar.ProxyJList;
 import us.mn.state.dot.tms.client.sonar.ProxyManager;
 import us.mn.state.dot.tms.client.sonar.ProxyTheme;
 import us.mn.state.dot.tms.client.sonar.StyleListModel;
@@ -78,8 +80,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	static protected boolean isDeployed(LCSArray proxy) {
 		Integer[] ind = proxy.getIndicationsCurrent();
 		for(int i: ind) {
-			if(LaneUseIndication.fromOrdinal(i) !=
-			   LaneUseIndication.DARK)
+			if(i != LaneUseIndication.DARK.ordinal())
 				return true;
 		}
 		return false;
@@ -164,6 +165,14 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
 		return new LcsCellRenderer();
+	}
+
+	/** Create a proxy JList for the given style */
+	public ProxyJList<LCSArray> createList(String style) {
+		ProxyJList<LCSArray> list = super.createList(style);
+		list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		list.setVisibleRowCount(0);
+		return list;
 	}
 
 	/** Check the style of the specified proxy */
