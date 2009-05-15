@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
@@ -40,7 +41,7 @@ public class LcsCellRenderer extends JPanel implements ListCellRenderer {
 		new DefaultListCellRenderer();
 
 	/** Title bar */
-	protected final Box title = Box.createHorizontalBox();
+	protected final JPanel title = new JPanel();
 
 	/** LCS array name label */
 	protected final JLabel nameLbl = new JLabel();
@@ -63,6 +64,7 @@ public class LcsCellRenderer extends JPanel implements ListCellRenderer {
 		setBorder(BorderFactory.createCompoundBorder(
 		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
 		          BorderFactory.createRaisedBevelBorder()));
+		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(nameLbl);
 		title.add(Box.createGlue());
 		title.add(userLbl);
