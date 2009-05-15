@@ -65,6 +65,9 @@ public interface CommLink extends SonarObject {
 	/** Pelco video matrix switch protocol */
 	int PROTO_PELCO = 12;
 
+	/** Vicon camera control protocol */
+	int PROTO_VICON_PTZ = 13;
+
 	/** Protocol string constants */
 	String[] PROTOCOLS = {
 		"NTCIP Class B",
@@ -79,7 +82,8 @@ public interface CommLink extends SonarObject {
 		"DMS Lite",
 		"CAWS",
 		"NTCIP Class A",
-		"Pelco video switch"
+		"Pelco video switch",
+		"Vicon PTZ"
 	};
 
 	/** Set text description */

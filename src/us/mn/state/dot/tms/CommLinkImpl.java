@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
+import us.mn.state.dot.tms.comm.viconptz.ViconPTZPoller;
 
 /**
  * The CommLinkImpl class represents a single communication link which is
@@ -300,6 +301,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new ViconPoller(name, createSocketMessenger());
 	}
 
+	/** Create a Vicon PTZ poller */
+	protected MessagePoller createViconPTZPoller() throws IOException {
+		return new ViconPTZPoller(name, createSocketMessenger());
+	}
+
 	/** Create a PelcoD poller */
 	protected MessagePoller createPelcoDPoller() throws IOException {
 		return new PelcoDPoller(name, createSocketMessenger());
@@ -353,6 +359,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				return createCawsPoller();
 			case PROTO_PELCO:
 				return createPelcoPoller();
+			case PROTO_VICON_PTZ:
+				return createViconPTZPoller();
 			default:
 				throw new ProtocolException("INVALID PROTOCOL");
 		}
