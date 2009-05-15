@@ -211,7 +211,9 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
-	public void sendIndications(LCSArrayImpl lcs_array, int[] ind, User o) {
+	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
+		User o)
+	{
 		new LCSSendIndications(lcs_array, ind, o).start();
 	}
 }

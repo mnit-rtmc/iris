@@ -85,8 +85,8 @@ public class LCSQueryStatus extends LCSOperation {
 	}
 
 	/** Get the displayed indications */
-	protected int[] getIndications() {
-		final int[] ind = new int[lcs_array.getLaneCount()];
+	protected Integer[] getIndications() {
+		final Integer[] ind = new Integer[lcs_array.getLaneCount()];
 		for(int i = 0; i < ind.length; i++)
 			ind[i] = LaneUseIndication.DARK.ordinal();
 		if(isTurnedOn()) {
@@ -102,7 +102,7 @@ public class LCSQueryStatus extends LCSOperation {
 	}
 
 	/** Check if an indication is set */
-	protected void checkIndication(LCSIndication li, int[] ind) {
+	protected void checkIndication(LCSIndication li, Integer[] ind) {
 		if(isPinSet(li.getPin())) {
 			LCS lcs = li.getLcs();
 			int i = lcs.getLane() - 1;

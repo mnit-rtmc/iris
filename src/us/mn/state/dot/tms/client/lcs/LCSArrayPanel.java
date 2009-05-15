@@ -46,7 +46,7 @@ public class LCSArrayPanel extends JPanel {
 	}
 
 	/** Set new indications */
-	public void setIndications(int[] ind) {
+	public void setIndications(Integer[] ind) {
 		removeAll();
 		for(int i = ind.length - 1; i >= 0; i--) {
 			Icon icon = IndicationIcon.create(pixels,

@@ -30,13 +30,13 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 public class LCSSendIndications extends LCSOperation {
 
 	/** Indications to send */
-	protected final int[] indications;
+	protected final Integer[] indications;
 
 	/** User who sent the indications */
 	protected final User user;
 
 	/** Create a new operation to send LCS indications */
-	public LCSSendIndications(LCSArrayImpl l, int[] ind, User u) {
+	public LCSSendIndications(LCSArrayImpl l, Integer[] ind, User u) {
 		super(COMMAND, l);
 		indications = ind;
 		user = u;

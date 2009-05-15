@@ -37,14 +37,14 @@ public interface LCSArray extends Device2 {
 	void setOwnerNext(User o);
 
 	/** Set the next lane-use indications */
-	void setIndicationsNext(int[] ind);
+	void setIndicationsNext(Integer[] ind);
 
 	/** Get the owner of the current indications.
 	 * @return User who deployed the current indications. */
 	User getOwnerCurrent();
 
 	/** Get the current lane-use indications */
-	int[] getIndicationsCurrent();
+	Integer[] getIndicationsCurrent();
 
 	/** Get the operation description */
 	String getOperation();

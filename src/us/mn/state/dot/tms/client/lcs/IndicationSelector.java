@@ -90,8 +90,8 @@ public class IndicationSelector extends JPanel {
 	}
 
 	/** Get the selected indications */
-	public int[] getIndications() {
-		int[] ind = new int[indications.size()];
+	public Integer[] getIndications() {
+		Integer[] ind = new Integer[indications.size()];
 		for(int i = 0; i < ind.length; i++) {
 			JComboBox combo = indications.get(i);
 			LaneUseIndication lui =

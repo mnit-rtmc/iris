@@ -172,15 +172,15 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 	}
 
 	/** Next indications to be displayed */
-	protected transient int[] indicationsNext;
+	protected transient Integer[] indicationsNext;
 
 	/** Set the next indications */
-	public void setIndicationsNext(int[] ind) {
+	public void setIndicationsNext(Integer[] ind) {
 		indicationsNext = ind;
 	}
 
 	/** Set the next indications */
-	public void doSetIndicationsNext(int[] ind) throws TMSException {
+	public void doSetIndicationsNext(Integer[] ind) throws TMSException {
 		try {
 			doSetIndicationsNext(ind, ownerNext);
 		}
@@ -191,7 +191,7 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 	}
 
 	/** Set the next indications */
-	protected synchronized void doSetIndicationsNext(int[] ind, User o)
+	protected synchronized void doSetIndicationsNext(Integer[] ind, User o)
 		throws TMSException
 	{
 		if(ind.length != lanes.length)
@@ -219,18 +219,19 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 	}
 
 	/** Current indications (Shall not be null) */
-	protected transient int[] indicationsCurrent = createDarkIndications(0);
+	protected transient Integer[] indicationsCurrent =
+		createDarkIndications(0);
 
 	/** Create an array of DARK indications */
-	protected int[] createDarkIndications(int n_lanes) {
-		int[] ind = new int[n_lanes];
+	protected Integer[] createDarkIndications(int n_lanes) {
+		Integer[] ind = new Integer[n_lanes];
 		for(int i = 0; i < n_lanes; i++)
 			ind[i] = LaneUseIndication.DARK.ordinal();
 		return ind;
 	}
 
 	/** Set the current indications */
-	public synchronized void setIndicationsCurrent(int[] ind, User o) {
+	public synchronized void setIndicationsCurrent(Integer[] ind, User o) {
 		if(ind.length != lanes.length)
 			return;
 		if(Arrays.equals(ind, indicationsCurrent))
@@ -244,7 +245,7 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 
 	/** Get the current lane-use indications.
 	 * @return Currently active indications (cannot be null) */
-	public int[] getIndicationsCurrent() {
+	public Integer[] getIndicationsCurrent() {
 		return indicationsCurrent;
 	}
 

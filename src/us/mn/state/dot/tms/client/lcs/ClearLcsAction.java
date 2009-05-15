@@ -56,8 +56,8 @@ public class ClearLcsAction extends AbstractAction {
 	/** Actually perform the action */
 	protected void do_perform() {
 		for(LCSArray lcs_array: selectionModel.getSelected()) {
-			int[] ind = lcs_array.getIndicationsCurrent();
-			ind = new int[ind.length];
+			Integer[] ind = lcs_array.getIndicationsCurrent();
+			ind = new Integer[ind.length];
 			for(int i = 0; i < ind.length; i++)
 				ind[i] = LaneUseIndication.DARK.ordinal();
 			lcs_array.setOwnerNext(owner);

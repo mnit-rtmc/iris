@@ -76,7 +76,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Test if an LCS array is deployed */
 	static protected boolean isDeployed(LCSArray proxy) {
-		int[] ind = proxy.getIndicationsCurrent();
+		Integer[] ind = proxy.getIndicationsCurrent();
 		for(int i: ind) {
 			if(LaneUseIndication.fromOrdinal(i) !=
 			   LaneUseIndication.DARK)

@@ -33,5 +33,5 @@ public interface LCSPoller {
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
-	void sendIndications(LCSArrayImpl lcs_array, int[] ind, User o);
+	void sendIndications(LCSArrayImpl lcs_array, Integer[] ind, User o);
 }

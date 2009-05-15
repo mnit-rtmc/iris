@@ -276,7 +276,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Send new indications to the specified LCS array */
 	protected void sendIndications(LCSArray lcs_array) {
-		int[] indications = indicationSelector.getIndications();
+		Integer[] indications = indicationSelector.getIndications();
 		if(indications != null) {
 			lcs_array.setOwnerNext(user);
 			lcs_array.setIndicationsNext(indications);
