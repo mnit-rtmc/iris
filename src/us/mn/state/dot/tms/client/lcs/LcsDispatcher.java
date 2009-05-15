@@ -65,16 +65,16 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected final ProxySelectionModel<LCSArray> selectionModel;
 
 	/** Name of the selected LCS array */
-	protected final JTextField nameTxt = new JTextField();
+	protected final JTextField nameTxt = FormPanel.createTextField();
 
 	/** Verify camera name textfield */
-	protected final JTextField cameraTxt = new JTextField();
+	protected final JTextField cameraTxt = FormPanel.createTextField();
 
 	/** Location of LCS array */
-	protected final JTextField locationTxt = new JTextField();
+	protected final JTextField locationTxt = FormPanel.createTextField();
 
 	/** Operation of selected LCS array */
-	protected final JTextField operationTxt = new JTextField();
+	protected final JTextField operationTxt = FormPanel.createTextField();
 
 	/** Panel for drawing an LCS array */
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
