@@ -21,6 +21,7 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -34,6 +35,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
@@ -75,6 +77,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Operation of selected LCS array */
 	protected final JTextField operationTxt = FormPanel.createTextField();
+
+	/** LCS lock combo box component */
+	protected final JComboBox lcs_lock = new JComboBox(
+		LCSArrayLock.getDescriptions());
 
 	/** Panel for drawing an LCS array */
 	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
@@ -128,6 +134,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.addRow("Camera", cameraTxt);
 		panel.addRow("Location", locationTxt);
 		panel.addRow("Operation", operationTxt);
+		panel.add("Lock", lcs_lock);
+		panel.finishRow();
 		panel.addRow(lcsPnl);
 		panel.addRow(indicationSelector);
 		panel.addRow(buildButtonPanel());
@@ -215,6 +223,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	public void setSelected(LCSArray lcs_array) {
 		indicationSelector.setEnabled(true);
 		indicationSelector.setLCSArray(lcs_array);
+		lcs_lock.setEnabled(true);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
 		updateAttribute(lcs_array, null);
@@ -228,6 +237,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		operationTxt.setText("");
 		operationTxt.setForeground(null);
 		operationTxt.setBackground(null);
+		lcs_lock.setEnabled(false);
+		lcs_lock.setSelectedItem(null);
 		indicationSelector.setEnabled(false);
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
@@ -258,6 +269,13 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				operationTxt.setBackground(Color.GRAY);
 			}
 			operationTxt.setText(lcs_array.getOperation());
+		}
+		if(a == null || a.equals("lcsLock")) {
+			Integer lk = lcs_array.getLcsLock();
+			if(lk != null)
+				lcs_lock.setSelectedIndex(lk);
+			else
+				lcs_lock.setSelectedIndex(0);
 		}
 		if(a == null || a.equals("indicationsCurrent")) {
 			lcsPnl.setIndications(
