@@ -211,10 +211,11 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the verification camera name */
 	static public String getCameraName(DMS proxy) {
-		Camera camera = proxy.getCamera();
-		if(camera == null)
-			return EMPTY_TXT;
-		else
-			return camera.getName();
+		if(proxy != null) {
+			Camera camera = proxy.getCamera();
+			if(camera != null)
+				return camera.getName();
+		}
+		return EMPTY_TXT;
 	}
 }
