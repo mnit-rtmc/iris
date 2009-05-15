@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
+import java.awt.GridLayout;
+import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
@@ -23,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.JToggleButton;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
@@ -30,6 +33,7 @@ import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.SonarState;
@@ -69,6 +73,10 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Timing plan model */
 	protected final TimingPlanModel plan_model;
+
+	/** List of indication buttons */
+	protected final LinkedList<JToggleButton> indications =
+		new LinkedList<JToggleButton>();
 
 	/** Button to delete the selected timing plan */
 	protected final JButton delete_plan_btn = new JButton("Delete");
@@ -122,7 +130,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		};
 		FormPanel panel = new FormPanel(true);
 		initTable();
-		panel.addRow(lcs_table);
+		panel.add(lcs_table);
+		panel.addRow(createIndicationPanel());
 		panel.addRow(delete_btn);
 		panel.addRow("Notes", notes);
 		return panel;
@@ -150,6 +159,18 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 					table_model.deleteRow(row);
 			}
 		};
+	}
+
+	/** Create the indication panel */
+	protected JPanel createIndicationPanel() {
+		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 2));
+		for(LaneUseIndication i: LaneUseIndication.values()) {
+			JToggleButton btn = new JToggleButton(i.description,
+				IndicationIcon.create(30, i));
+			indications.add(btn);
+			panel.add(btn);
+		}
+		return panel;
 	}
 
 	/** Select an LCS in the table */
