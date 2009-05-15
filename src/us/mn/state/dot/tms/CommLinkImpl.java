@@ -303,7 +303,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create a Vicon PTZ poller */
 	protected MessagePoller createViconPTZPoller() throws IOException {
-		return new ViconPTZPoller(name, createSocketMessenger());
+		return new ViconPTZPoller(name, createDatagramMessenger());
 	}
 
 	/** Create a PelcoD poller */
