@@ -15,17 +15,15 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
-import java.awt.GridLayout;
 import java.util.LinkedList;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JToggleButton;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
@@ -75,8 +73,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected final TimingPlanModel plan_model;
 
 	/** List of indication buttons */
-	protected final LinkedList<JToggleButton> indications =
-		new LinkedList<JToggleButton>();
+	protected final LinkedList<JCheckBox> indications =
+		new LinkedList<JCheckBox>();
 
 	/** Button to delete the selected timing plan */
 	protected final JButton delete_plan_btn = new JButton("Delete");
@@ -130,9 +128,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		};
 		FormPanel panel = new FormPanel(true);
 		initTable();
-		panel.add(lcs_table);
+		FormPanel tpnl = new FormPanel(true);
+		tpnl.addRow(lcs_table);
+		tpnl.addRow(delete_btn);
+		// this panel is needed to make the widgets line up
+		panel.add(new JPanel());
+		panel.add(tpnl);
 		panel.addRow(createIndicationPanel());
-		panel.addRow(delete_btn);
 		panel.addRow("Notes", notes);
 		return panel;
 	}
@@ -163,12 +165,12 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create the indication panel */
 	protected JPanel createIndicationPanel() {
-		JPanel panel = new JPanel(new GridLayout(0, 1, 0, 2));
+		FormPanel panel = new FormPanel(true);
 		for(LaneUseIndication i: LaneUseIndication.values()) {
-			JToggleButton btn = new JToggleButton(i.description,
-				IndicationIcon.create(30, i));
+			JCheckBox btn = new JCheckBox();
 			indications.add(btn);
-			panel.add(btn);
+			panel.add(new JLabel(IndicationIcon.create(18, i)));
+			panel.addRow(btn, new JLabel(i.description));
 		}
 		return panel;
 	}
