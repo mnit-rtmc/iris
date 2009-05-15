@@ -636,7 +636,7 @@ CREATE TABLE iris.lane_use_indication (
 );
 
 CREATE TABLE iris._lcs_indication (
-	name VARCHAR(12) PRIMARY KEY,
+	name VARCHAR(10) PRIMARY KEY,
 	lcs VARCHAR(10) NOT NULL REFERENCES iris.lcs,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
 );

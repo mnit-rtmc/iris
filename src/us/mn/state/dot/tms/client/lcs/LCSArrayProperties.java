@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.util.LinkedList;
+import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -29,11 +30,15 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
+import us.mn.state.dot.tms.LCSHelper;
+import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
@@ -53,6 +58,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** SONAR state */
 	protected final SonarState state;
+
+	/** LCS Indication creator */
+	protected final LCSIndicationCreator creator;
 
 	/** LCS table model */
 	protected final LCSTableModel table_model;
@@ -91,6 +99,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		super(TITLE, tc, proxy);
 		state = tc.getSonarState();
 		User user = state.lookupUser(tc.getUser().getName());
+		creator = new LCSIndicationCreator(state.getLCSIndications(),
+			user);
 		table_model = new LCSTableModel(proxy, state.getLCSs(),
 			user);
 		plan_model = new TimingPlanModel(state.getTimingPlans(), proxy);
@@ -141,7 +151,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Initialize the table */
 	protected void initTable() {
-		ListSelectionModel s = lcs_table.getSelectionModel();
+		final ListSelectionModel s = lcs_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		new ListSelectionJob(this, s) {
 			public void perform() {
@@ -154,8 +164,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		lcs_table.setVisibleRowCount(12);
 		new ActionJob(this, delete_btn) {
 			public void perform() throws Exception {
-				final ListSelectionModel s = 
-					lcs_table.getSelectionModel();
 				int row = s.getMinSelectionIndex();
 				if(row >= 0)
 					table_model.deleteRow(row);
@@ -167,12 +175,46 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected JPanel createIndicationPanel() {
 		FormPanel panel = new FormPanel(true);
 		for(LaneUseIndication i: LaneUseIndication.values()) {
+			final int ind = i.ordinal();
 			JCheckBox btn = new JCheckBox();
+			new ActionJob(btn) {
+				public void perform() {
+					toggleIndication(ind);
+				}
+			};
 			indications.add(btn);
 			panel.add(new JLabel(IndicationIcon.create(18, i)));
 			panel.addRow(btn, new JLabel(i.description));
+			btn.setEnabled(false);
 		}
 		return panel;
+	}
+
+	/** Toggle one LCS indication checkbox */
+	protected void toggleIndication(int ind) {
+		ListSelectionModel s = lcs_table.getSelectionModel();
+		int row = s.getMinSelectionIndex();
+		LCS lcs = table_model.getProxy(row);
+		if(lcs != null) {
+			JCheckBox btn = indications.get(ind);
+			if(btn.isSelected())
+				creator.create(lcs, ind);
+			else
+				destroyLCSIndication(lcs, ind);
+		}
+	}
+
+	/** Destroy the specified LCS indication */
+	protected void destroyLCSIndication(LCS lcs, final int ind) {
+		LCSIndication li = LCSHelper.lookupIndication(lcs,
+			new Checker<LCSIndication>()
+		{
+			public boolean check(LCSIndication li) {
+				return li.getIndication() == ind;
+			}
+		});
+		if(li != null)
+			li.destroy();
 	}
 
 	/** Select an LCS in the table */
@@ -180,8 +222,41 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		final ListSelectionModel s = 
 			lcs_table.getSelectionModel();
 		int row = s.getMinSelectionIndex();
-		if(row >= 0) {
-			// FIXME: update indications
+		LCS lcs = table_model.getProxy(row);
+		if(lcs != null)
+			selectLCS(lcs);
+		else {
+			for(JCheckBox btn: indications) {
+				btn.setEnabled(false);
+				btn.setSelected(false);
+			}
+		}
+	}
+
+	/** Select an LCS in the table */
+	protected void selectLCS(LCS lcs) {
+		final HashMap<Integer, LCSIndication> ind =
+			new HashMap<Integer, LCSIndication>();
+		LCSHelper.lookupIndication(lcs, new Checker<LCSIndication>() {
+			public boolean check(LCSIndication li) {
+				ind.put(li.getIndication(), li);
+				return false;
+			}
+		});
+		String name = lcs.getName();
+		boolean can_add = creator.canAdd(name);
+		boolean can_remove = creator.canRemove(name);
+		for(LaneUseIndication i: LaneUseIndication.values()) {
+			JCheckBox btn = indications.get(i.ordinal());
+			if(ind.containsKey(i.ordinal())) {
+				LCSIndication li = ind.get(i.ordinal());
+				boolean no_c = li.getController() == null;
+				btn.setEnabled(can_remove && no_c);
+				btn.setSelected(true);
+			} else {
+				btn.setEnabled(can_add);
+				btn.setSelected(false);
+			}
 		}
 	}
 
