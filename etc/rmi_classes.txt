@@ -31,7 +31,10 @@ us/mn/state/dot/tms/Holiday.class
 us/mn/state/dot/tms/Interval.class
 us/mn/state/dot/tms/InvalidMessageException.class
 us/mn/state/dot/tms/LCS.class
+us/mn/state/dot/tms/LCSHelper*.class
 us/mn/state/dot/tms/LCSArray.class
+us/mn/state/dot/tms/LCSArrayHelper*.class
+us/mn/state/dot/tms/LCSArrayLock.class
 us/mn/state/dot/tms/LCSIndication.class
 us/mn/state/dot/tms/LaneType.class
 us/mn/state/dot/tms/LaneUseIndication.class
