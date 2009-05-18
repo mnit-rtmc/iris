@@ -28,15 +28,20 @@ import us.mn.state.dot.tms.LaneUseIndication;
  */
 public class IndicationRenderer extends DefaultListCellRenderer {
 
+	/** Size of renderer in pixels */
 	protected final int pixels;
 
+	/** Actual label widget to render indications */
 	protected final JLabel cell = new JLabel();
 
+	/** Create a new indication renderer */
 	public IndicationRenderer(int p) {
 		pixels = p;
+		cell.setOpaque(true);
 		setPreferredSize(new Dimension(pixels, pixels));
 	}
 
+	/** Get a configured cell renderer for an LCS indication */
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{

@@ -74,7 +74,7 @@ public class IndicationSelector extends JPanel {
 	/** Create a combo box for selecting lane-use indications */
 	protected JComboBox createCombo(LCS lcs) {
 		JComboBox c = new JComboBox(LCSHelper.lookupIndications(lcs));
-		c.setRenderer(new IndicationRenderer(30));
+		c.setRenderer(new IndicationRenderer(32));
 		return c;
 	}
 
