@@ -39,7 +39,13 @@ import us.mn.state.dot.tms.LaneUseIndication;
 abstract public class IndicationIcon implements Icon {
 
 	/** Border around LCS shapes */
-	static protected final float SHAPE_BORDER = 0.05f;
+	static protected final float SHAPE_BORDER = 0.1f;
+
+	/** Margin on left and right of HOV diamond */
+	static protected final float HOV_MARGIN = 0.2f;
+
+	/** Margin on top and bottom of chevron */
+	static protected final float CHEVRON_MARGIN = 0.25f;
 
 	/** String to display for error status */
 	static protected final String ERROR_STRING = "?";
@@ -61,17 +67,6 @@ abstract public class IndicationIcon implements Icon {
 		ERROR_SHAPE = a.createTransformedShape(s);
 	}
 
-	/** Shape to draw a red X */
-	static protected final Shape CROSS_SHAPE;
-	static {
-		GeneralPath path = new GeneralPath();
-		path.moveTo(SHAPE_BORDER, SHAPE_BORDER);
-		path.lineTo(1 - SHAPE_BORDER, 1 - SHAPE_BORDER);
-		path.moveTo(SHAPE_BORDER, 1 - SHAPE_BORDER);
-		path.lineTo(1 - SHAPE_BORDER, SHAPE_BORDER);
-		CROSS_SHAPE = path;
-	}
-
 	/** Shape to draw an arrow */
 	static protected final Shape ARROW_SHAPE;
 	static {
@@ -82,6 +77,39 @@ abstract public class IndicationIcon implements Icon {
 		path.lineTo(0.5f, 1 - SHAPE_BORDER);
 		path.lineTo(1 - SHAPE_BORDER, 0.5f);
 		ARROW_SHAPE = path;
+	}
+
+	/** Shape to draw an X */
+	static protected final Shape CROSS_SHAPE;
+	static {
+		GeneralPath path = new GeneralPath();
+		path.moveTo(SHAPE_BORDER, SHAPE_BORDER);
+		path.lineTo(1 - SHAPE_BORDER, 1 - SHAPE_BORDER);
+		path.moveTo(SHAPE_BORDER, 1 - SHAPE_BORDER);
+		path.lineTo(1 - SHAPE_BORDER, SHAPE_BORDER);
+		CROSS_SHAPE = path;
+	}
+
+	/** Shape to draw a diamond */
+	static protected final Shape DIAMOND_SHAPE;
+	static {
+		GeneralPath path = new GeneralPath();
+		path.moveTo(0.5f, SHAPE_BORDER);
+		path.lineTo(HOV_MARGIN, 0.5f);
+		path.lineTo(0.5f, 1 - SHAPE_BORDER);
+		path.lineTo(1 - HOV_MARGIN, 0.5f);
+		path.closePath();
+		DIAMOND_SHAPE = path;
+	}
+
+	/** Shape to draw a chevron */
+	static protected final Shape CHEVRON_SHAPE;
+	static {
+		GeneralPath path = new GeneralPath();
+		path.moveTo(SHAPE_BORDER, CHEVRON_MARGIN);
+		path.lineTo(SHAPE_BORDER + CHEVRON_MARGIN, 0.5f);
+		path.lineTo(SHAPE_BORDER, 1 - CHEVRON_MARGIN);
+		CHEVRON_SHAPE = path;
 	}
 
 	/** Create a new indication icon */
@@ -95,8 +123,16 @@ abstract public class IndicationIcon implements Icon {
 			return new LaneOpenIndicationIcon(p);
 		case USE_CAUTION:
 			return new UseCautionIndicationIcon(p);
+		case LANE_CLOSED_AHEAD:
+			return new LaneClosedAheadIndicationIcon(p);
 		case LANE_CLOSED:
 			return new LaneClosedIndicationIcon(p);
+		case HOV:
+			return new HovIndicationIcon(p);
+		case MERGE_RIGHT:
+			return new MergeRightIndicationIcon(p);
+		case MERGE_LEFT:
+			return new MergeLeftIndicationIcon(p);
 		default:
 			return new UnknownIndicationIcon(p);
 		}
@@ -194,6 +230,23 @@ abstract public class IndicationIcon implements Icon {
 		}
 	}
 
+	/** Icon for LANE_CLOSED_AHEAD lane-use indication */
+	static protected class LaneClosedAheadIndicationIcon
+		extends IndicationIcon
+	{
+		protected LaneClosedAheadIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(shadow);
+			g2.draw(CROSS_SHAPE);
+			g2.setColor(Color.YELLOW);
+			g2.setStroke(stroke);
+			g2.draw(CROSS_SHAPE);
+		}
+	}
+
 	/** Icon for LANE_CLOSED lane-use indication */
 	static protected class LaneClosedIndicationIcon extends IndicationIcon {
 		protected LaneClosedIndicationIcon(int p) {
@@ -206,6 +259,59 @@ abstract public class IndicationIcon implements Icon {
 			g2.setColor(Color.RED);
 			g2.setStroke(stroke);
 			g2.draw(CROSS_SHAPE);
+		}
+	}
+
+	/** Icon for HOV lane-use indication */
+	static protected class HovIndicationIcon extends IndicationIcon {
+		protected HovIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(shadow);
+			g2.draw(DIAMOND_SHAPE);
+			g2.setColor(Color.WHITE);
+			g2.setStroke(stroke);
+			g2.draw(DIAMOND_SHAPE);
+		}
+	}
+
+	/** Icon for merge right lane-use indication */
+	static protected class MergeRightIndicationIcon extends IndicationIcon {
+		protected MergeRightIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			for(int i = 0; i < 3; i++) {
+				g2.setColor(Color.BLACK);
+				g2.setStroke(shadow);
+				g2.draw(CHEVRON_SHAPE);
+				g2.setColor(Color.YELLOW);
+				g2.setStroke(stroke);
+				g2.draw(CHEVRON_SHAPE);
+				g2.translate(0.25f, 0);
+			}
+		}
+	}
+
+	/** Icon for merge left lane-use indication */
+	static protected class MergeLeftIndicationIcon extends IndicationIcon {
+		protected MergeLeftIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.scale(-1, 1);
+			g2.translate(-1, 0);
+			for(int i = 0; i < 3; i++) {
+				g2.setColor(Color.BLACK);
+				g2.setStroke(shadow);
+				g2.draw(CHEVRON_SHAPE);
+				g2.setColor(Color.YELLOW);
+				g2.setStroke(stroke);
+				g2.draw(CHEVRON_SHAPE);
+				g2.translate(0.25f, 0);
+			}
 		}
 	}
 
