@@ -86,6 +86,17 @@ public class IndicationSelector extends JPanel {
 			c.setEnabled(enabled);
 	}
 
+	/** Set the selected indications */
+	public void setIndications(Integer[] ind) {
+		if(ind.length != indications.size())
+			return;
+		for(int i = 0; i < ind.length; i++) {
+			JComboBox combo = indications.get(i);
+			combo.setSelectedItem(
+				LaneUseIndication.fromInt(ind[i]));
+		}
+	}
+
 	/** Get the selected indications */
 	public Integer[] getIndications() {
 		Integer[] ind = new Integer[indications.size()];

@@ -301,8 +301,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				lcs_lock.setSelectedIndex(0);
 		}
 		if(a == null || a.equals("indicationsCurrent")) {
-			lcsPnl.setIndications(
-				lcs_array.getIndicationsCurrent());
+			Integer[] ind = lcs_array.getIndicationsCurrent();
+			lcsPnl.setIndications(ind);
+			indicationSelector.setIndications(ind);
 		}
 	}
 
