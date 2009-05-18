@@ -14,8 +14,11 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,7 +32,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 public class LCSArrayPanel extends JPanel {
 
 	/** Maximum number of lanes */
-	static protected final int MAX_LANES = 6;
+	static protected final int MAX_LANES = 5;
 
 	/** Pixel size (height and width) of each LCS */
 	protected final int pixels;
@@ -39,20 +42,31 @@ public class LCSArrayPanel extends JPanel {
 	 * @param p Pixel size for each LCS.
 	 */
 	public LCSArrayPanel(int p) {
-		super(new GridLayout(1, 0, 2, 0));
+		super(new GridBagLayout());
 		pixels = p;
-		setMinimumSize(new Dimension(MAX_LANES * pixels, pixels));
-		setPreferredSize(new Dimension(MAX_LANES * pixels, pixels));
+		int w = MAX_LANES * pixels + MAX_LANES * 2;
+		setMinimumSize(new Dimension(w, pixels + 2));
+		setPreferredSize(new Dimension(w, pixels + 2));
 	}
 
 	/** Set new indications */
 	public void setIndications(Integer[] ind) {
 		removeAll();
+		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets = new Insets(1, 1, 1, 1);
+		bag.anchor = GridBagConstraints.EAST;
+		bag.gridy = 0;
 		for(int i = ind.length - 1; i >= 0; i--) {
 			Icon icon = IndicationIcon.create(pixels,
 				LaneUseIndication.fromOrdinal(ind[i]));
-			add(new JLabel(icon));
+			JLabel lbl = new JLabel(icon);
+			lbl.setOpaque(true);
+			lbl.setBackground(Color.BLACK);
+			add(lbl, bag);
+			bag.anchor = GridBagConstraints.WEST;
 		}
+		revalidate();
+		repaint();
 	}
 
 	/** Clear the LCS panel */

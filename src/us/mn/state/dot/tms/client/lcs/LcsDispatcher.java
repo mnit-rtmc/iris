@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -51,6 +52,9 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	ProxySelectionListener<LCSArray>
 {
+	/** Font for "L" and "R" labels */
+	static protected final Font FONT = new Font(null, Font.BOLD, 24);
+
 	/** Lookup the DMS for the LCS in lane 1 */
 	static protected DMS lookupDMS(LCSArray lcs_array) {
 		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, 1);
@@ -83,7 +87,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		LCSArrayLock.getDescriptions());
 
 	/** Panel for drawing an LCS array */
-	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(45);
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(58);
 
 	/** LCS indicaiton selector */
 	protected final IndicationSelector indicationSelector =
@@ -136,10 +140,30 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		panel.addRow("Operation", operationTxt);
 		panel.add("Lock", lcs_lock);
 		panel.finishRow();
-		panel.addRow(lcsPnl);
-		panel.addRow(indicationSelector);
+		panel.addRow(buildSelectorBox());
 		panel.addRow(buildButtonPanel());
 		return panel;
+	}
+
+	/** Build the indication selector box */
+	protected Box buildSelectorBox() {
+		Box box = Box.createHorizontalBox();
+		Box vbox = Box.createVerticalBox();
+		box.add(createLabel("L"));
+		box.add(Box.createHorizontalStrut(4));
+		vbox.add(lcsPnl);
+		vbox.add(indicationSelector);
+		box.add(vbox);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(createLabel("R"));
+		return box;
+	}
+
+	/** Create an "L" or "R" label */
+	protected JLabel createLabel(String t) {
+		JLabel label = new JLabel(t);
+		label.setFont(FONT);
+		return label;
 	}
 
 	/** Build the panel that holds the send and clear buttons */
@@ -150,11 +174,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				sendIndications();
 			}
 		};
-		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
 		box.add(Box.createHorizontalStrut(4));
 		box.add(clearBtn);
-		box.add(Box.createHorizontalGlue());
 		return box;
 	}
 

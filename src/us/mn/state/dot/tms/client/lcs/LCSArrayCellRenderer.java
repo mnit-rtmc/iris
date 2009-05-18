@@ -50,7 +50,7 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel userLbl = new JLabel();
 
 	/** LCS array panel */
-	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(30);
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(32);
 
 	/** Location bar */
 	protected final Box location = Box.createHorizontalBox();
@@ -73,7 +73,7 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 		add(title, BorderLayout.NORTH);
 		add(lcsPnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
-		setPreferredSize(new Dimension(190, 92));
+		setPreferredSize(new Dimension(190, 72));
 	}
 
 	/**
