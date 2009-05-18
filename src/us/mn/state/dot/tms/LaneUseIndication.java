@@ -80,6 +80,14 @@ public enum LaneUseIndication {
 			return null;
 	}
 
+	/** Get a lane use indication from an int value */
+	static public LaneUseIndication fromInt(int o) {
+		if(o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return DARK;
+	}
+
 	/** Get an array of lock descriptions */
 	static public String[] getDescriptions() {
 		LinkedList<String> d = new LinkedList<String>();

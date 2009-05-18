@@ -44,7 +44,7 @@ public class LCSArrayHelper extends BaseHelper {
 			n_lanes = lanes.lastKey();
 		LCS[] lcss = new LCS[n_lanes];
 		for(int i = 0; i < n_lanes; i++)
-			lcss[i] = lanes.get(i);
+			lcss[i] = lanes.get(i + 1);
 		return lcss;
 	}
 

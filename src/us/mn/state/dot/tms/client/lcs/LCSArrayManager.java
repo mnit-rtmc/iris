@@ -164,7 +164,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
-		return new LcsCellRenderer();
+		return new LCSArrayCellRenderer();
 	}
 
 	/** Create a proxy JList for the given style */
