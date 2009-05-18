@@ -179,11 +179,11 @@ public class DMSDefaultDownload extends DMSOperation {
 		/** Set Addco-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			// FIXME: this should be as a SignRequest, maybe...
-			mess.add(new DmsHorizontalBorder(50));
+/*			mess.add(new DmsHorizontalBorder(50));
 			mess.add(new DmsVerticalBorder(69));
 			mess.add(new VmsHorizontalPitch(69));
 			mess.add(new VmsVerticalPitch(69));
-			mess.setRequest("administrator");
+			mess.setRequest("administrator"); */
 			return null;
 		}
 	}
