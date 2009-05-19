@@ -27,6 +27,8 @@ public enum SystemAttrEnum {
 	CAMERA_PTZ_PANEL_ENABLE(false),
 	DATABASE_VERSION(String.class),
 	DMS_AWS_ENABLE(false),
+	DMS_AWS_LOG_ENABLE(false),
+	DMS_AWS_LOG_FILENAME("/var/www/html/awsreport.txt"),
 	DMS_BRIGHTNESS_ENABLE(true),
 	DMS_DEFAULT_JUSTIFICATION_LINE(3, 2, 5),
 	DMS_DEFAULT_JUSTIFICATION_PAGE(2, 2, 4),
