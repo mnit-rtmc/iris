@@ -200,7 +200,7 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 		if(p == null)
 			throw new ChangeVetoException("No active poller");
 		for(int i: ind) {
-			if(LaneUseIndication.fromOrdinal(i) == null)
+			if(i != 0 && LaneUseIndication.fromOrdinal(i) == null)
 				throw new ChangeVetoException(
 					"Invalid indication: " + i);
 		}
