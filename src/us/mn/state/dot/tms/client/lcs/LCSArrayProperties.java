@@ -141,6 +141,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		FormPanel tpnl = new FormPanel(true);
 		tpnl.addRow(lcs_table);
 		tpnl.addRow(delete_btn);
+		delete_btn.setEnabled(false);
 		// this panel is needed to make the widgets line up
 		panel.add(new JPanel());
 		panel.add(tpnl);
@@ -243,6 +244,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 				return false;
 			}
 		});
+		delete_btn.setEnabled(ind.isEmpty());
 		String name = lcs.getName();
 		boolean can_add = creator.canAdd(name);
 		boolean can_remove = creator.canRemove(name);
