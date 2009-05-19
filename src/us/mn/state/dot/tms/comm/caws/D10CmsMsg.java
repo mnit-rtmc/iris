@@ -168,8 +168,8 @@ public class D10CmsMsg {
 
 		} catch(Exception ex) {
 			Log.severe("D10CmsMsg.parse(): unexpected " +
-				"exception: " + ex + ", stack trace=" + 
-				SString.getStackTrace(ex));
+				"exception: " + ex + ", argline=" + argline +
+				", stack trace=" + SString.getStackTrace(ex));
 			ok = false;
 		}
 
@@ -412,11 +412,13 @@ public class D10CmsMsg {
 		int numrows = line.length;
 
 		// anything to write?
+		/*
 		int totallinelen = 0;
 		for(int i = 0; i < numrows; ++i)
 			totallinelen += line[i].length();
 		if(totallinelen <= 0)
 			return;
+		*/
 
 		// build report line
 		String rptline = "";

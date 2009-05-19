@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.STime;
 
 /**
  * This operation reads the DMS messages from the CAWS generated
@@ -62,9 +63,12 @@ public class OpProcessCawsMsgs extends ControllerOperation
 		 * @throws IOException received from getRequest call.
 		 */
 		protected Phase poll(AddressedMessage argmess)
-			throws IOException {
+			throws IOException 
+		{
 			Log.finest(
-			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll() called.");
+				"OpProcessCawsMsgs.PhaseReadMsgFile.poll() " +
+				"called: " + 
+				STime.getCurDateTimeMSString(true));
 			assert argmess instanceof Message : "wrong message type";
 
 			Message mess = (Message) argmess;
