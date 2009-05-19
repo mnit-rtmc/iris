@@ -19,22 +19,22 @@ import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 
 /**
- * Device2Impl is the base class for all field devices, including detectors,
+ * DeviceImpl is the base class for all field devices, including detectors,
  * cameras, ramp meters, dynamic message signs, etc.
  *
  * @author Douglas Lau
  */
-abstract public class Device2Impl extends BaseObjectImpl implements Device2,
+abstract public class DeviceImpl extends BaseObjectImpl implements Device2,
 	ControllerIO
 {
 	/** Create a new device */
-	protected Device2Impl(String n) throws TMSException, SonarException {
+	protected DeviceImpl(String n) throws TMSException, SonarException {
 		super(n);
 		notes = "";
 	}
 
 	/** Create a device */
-	protected Device2Impl(String n, ControllerImpl c, int p, String nt) {
+	protected DeviceImpl(String n, ControllerImpl c, int p, String nt) {
 		super(n);
 		controller = c;
 		pin = p;

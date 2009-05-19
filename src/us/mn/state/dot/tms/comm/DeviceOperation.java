@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.comm;
 
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.Device2Impl;
+import us.mn.state.dot.tms.DeviceImpl;
 
 /**
  * An operation on a traffic device, such as a ramp meter or DMS.
@@ -28,10 +28,10 @@ abstract public class DeviceOperation extends ControllerOperation {
 	protected final DeviceOperation operation;
 
 	/** Device on which to perform operation */
-	protected final Device2Impl device;
+	protected final DeviceImpl device;
 
 	/** Create a new device operation */
-	protected DeviceOperation(int p, Device2Impl d) {
+	protected DeviceOperation(int p, DeviceImpl d) {
 		super(p, (ControllerImpl)d.getController(), d.getName());
 		operation = this;
 		device = d;

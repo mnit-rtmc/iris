@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.event.EventType;
  *
  * @author Douglas Lau
  */
-public class DetectorImpl extends Device2Impl implements Detector,
+public class DetectorImpl extends DeviceImpl implements Detector,
 	Comparable<DetectorImpl>
 {
 	/** Detector debug log */

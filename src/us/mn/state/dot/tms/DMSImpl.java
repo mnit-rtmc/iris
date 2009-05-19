@@ -52,7 +52,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSImpl extends Device2Impl implements DMS, KmlPlacemark {
+public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Calculate the maximum trip minute to display on the sign */
 	static protected int maximumTripMinutes(float miles) {

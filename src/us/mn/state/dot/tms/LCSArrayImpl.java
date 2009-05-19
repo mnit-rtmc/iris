@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
  *
  * @author Douglas Lau
  */
-public class LCSArrayImpl extends Device2Impl implements LCSArray {
+public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Ordinal value for lock "OFF" */
 	static protected final Integer OFF_ORDINAL =
