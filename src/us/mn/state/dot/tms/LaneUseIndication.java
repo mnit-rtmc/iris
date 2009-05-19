@@ -74,18 +74,10 @@ public enum LaneUseIndication {
 
 	/** Get a lane use indication from an ordinal value */
 	static public LaneUseIndication fromOrdinal(Integer o) {
-		if(o != null && o > 0 && o < values().length)
+		if(o != null && o >= 0 && o < values().length)
 			return values()[o];
 		else
 			return null;
-	}
-
-	/** Get a lane use indication from an int value */
-	static public LaneUseIndication fromInt(int o) {
-		if(o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return DARK;
 	}
 
 	/** Get an array of lock descriptions */

@@ -35,7 +35,7 @@ public class LCSHelper extends BaseHelper {
 			new TreeSet<LaneUseIndication>();
 		lookupIndication(lcs, new Checker<LCSIndication>() {
 			public boolean check(LCSIndication li) {
-				indications.add(LaneUseIndication.fromInt(
+				indications.add(LaneUseIndication.fromOrdinal(
 					li.getIndication()));
 				return false;
 			}

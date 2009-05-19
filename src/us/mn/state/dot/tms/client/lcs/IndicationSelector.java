@@ -93,7 +93,7 @@ public class IndicationSelector extends JPanel {
 		for(int i = 0; i < ind.length; i++) {
 			JComboBox combo = indications.get(i);
 			combo.setSelectedItem(
-				LaneUseIndication.fromInt(ind[i]));
+				LaneUseIndication.fromOrdinal(ind[i]));
 		}
 	}
 
