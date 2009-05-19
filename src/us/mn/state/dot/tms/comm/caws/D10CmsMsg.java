@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.comm.caws;
 
+import java.io.FileWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -24,9 +25,12 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SFile;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
+import us.mn.state.dot.tms.utils.STime;
 
 /**
  * CAWS D10CmsMsg. This is a single CMS message.
@@ -44,7 +48,7 @@ public class D10CmsMsg {
 	private static final String DOUBLESTROKE = "Double Stroke";
 
 	// fields
-	private int m_cmsid;			// cms ID
+	private int m_dmsid;			// cms ID
 	private Date m_date;			// message date and time
 	private String m_desc;			// has predefined valid values
 	private CawsMsgType m_type;		// message type
@@ -68,13 +72,9 @@ public class D10CmsMsg {
 		try {
 			// add a space between successive delimiters. This is done so the
 			// tokenizer doesn't skip over delimeters with nothing between them.
-			// System.err.println("D10CmsMsg.D10CmsMsg() called, argline="+argline);
 			String line = argline.replace(";;", "; ;");
-
-			// System.err.println("D10CmsMsg.D10CmsMsg() called, line1="+line);
 			line = line.replace(";;", "; ;");
 
-			// System.err.println("D10CmsMsg.D10CmsMsg() called, line2="+line);
 			// verify syntax
 			StringTokenizer tok = new StringTokenizer(line, ";");
 
@@ -94,7 +94,7 @@ public class D10CmsMsg {
 			m_date = convertDate(tok.nextToken());
 
 			// #2, id: 39
-			m_cmsid = SString.stringToInt(tok.nextToken());
+			m_dmsid = SString.stringToInt(tok.nextToken());
 
 			// #3, message description
 			String f02 = tok.nextToken();
@@ -126,31 +126,35 @@ public class D10CmsMsg {
 
 			// #6 - #11, rows of text
 			{
-				String row1 = tok.nextToken().trim().toUpperCase();
-				String row2 = tok.nextToken().trim().toUpperCase();
-				String row3 = tok.nextToken().trim().toUpperCase();
-				String row4 = tok.nextToken().trim().toUpperCase();
-				String row5 = tok.nextToken().trim().toUpperCase();
-				String row6 = tok.nextToken().trim().toUpperCase();
+				final int numrows = 6;
+				String[] row = new String[numrows];
+				for(int i = 0; i < numrows; ++i)
+					row[i] = new MultiString(
+						tok.nextToken()).normalize();
+
+				// write AWS report
+				appendAwsReport(row);
 
 				// create message-pg1
 				StringBuilder m = new StringBuilder();
 
-				m.append(row1);
+				m.append(row[0]);
 				m.append("[nl]");
-				m.append(row2);
+				m.append(row[1]);
 				m.append("[nl]");
-				m.append(row3);
+				m.append(row[2]);
 				m.append("[nl]");
 
 				// pg2
-				if(row4.length() + row5.length() + row6.length() > 0) {
+				if(row[3].length() + row[4].length() + 
+					row[5].length() > 0) 
+				{
 					m.append("[np]");
-					m.append(row4);
+					m.append(row[3]);
 					m.append("[nl]");
-					m.append(row5);
+					m.append(row[4]);
 					m.append("[nl]");
-					m.append(row6);
+					m.append(row[5]);
 				}
 
 				m_multistring = m.toString();
@@ -163,8 +167,9 @@ public class D10CmsMsg {
 			//      there are 13 tokens.
 
 		} catch(Exception ex) {
-			System.err.println("D10CmsMsg.parse(): unexpected " +
-				"exception: " + ex);
+			Log.severe("D10CmsMsg.parse(): unexpected " +
+				"exception: " + ex + ", stack trace=" + 
+				SString.getStackTrace(ex));
 			ok = false;
 		}
 
@@ -263,8 +268,8 @@ public class D10CmsMsg {
 			String msg = "D10CmsMsg.parseDescription: WARNING: " +
 				"unknown message description (" + d + ").";
 			assert false: msg;
-			Log.finest(msg);
-			return CawsMsgType.BLANK;
+			Log.severe(msg);
+			return CawsMsgType.BLANK;	//FIXME: return a new UNKNOWN?
 		}
 	}
 
@@ -355,8 +360,8 @@ public class D10CmsMsg {
 			//FIXME: add in future
 			break;
 		default:
-			assert false:
-				"D10CmsMsg.sendMessage(): unknown CawsMsgType";
+			Log.severe("D10CmsMsg: unknown AWS message type:" 
+				+ m_type);
 		}
 	}
 
@@ -383,11 +388,55 @@ public class D10CmsMsg {
 
 	/** get the CMS id, e.g. "39" */
 	public int getCmsId() {
-		return m_cmsid;
+		return m_dmsid;
 	}
 
 	/** get the CMS id in IRIS form, e.g. "V39" */
 	public String getIrisCmsId() {
 		return "V" + getCmsId();
+	}
+
+	/** append a line to the AWS report file */
+	protected void appendAwsReport(String[] line) {
+		if(line == null)
+			return;
+
+		// write report?
+		if(!SystemAttrEnum.DMS_AWS_LOG_ENABLE.getBoolean())
+			return;
+		String fname = SystemAttrEnum.DMS_AWS_LOG_FILENAME.getString();
+		if(fname == null || fname.length() <= 0) {
+			Log.config("The AWS log file name is empty.");
+			return;
+		}
+		int numrows = line.length;
+
+		// anything to write?
+		int totallinelen = 0;
+		for(int i = 0; i < numrows; ++i)
+			totallinelen += line[i].length();
+		if(totallinelen <= 0)
+			return;
+
+		// build report line
+		String rptline = "";
+
+		// timestamp
+		rptline += STime.getCurDateTimeString(true) + ", ";
+
+		// dms id
+		rptline += Integer.toString(m_dmsid) + ", ";
+
+		// concatenate message lines
+		String lines = "";
+		for(int i = 0; i < numrows; ++i) {
+			lines += line[i];
+			if(i < numrows - 1)
+				lines += " / ";
+		}
+		rptline += lines;
+
+		// append line to file
+		SFile.writeStringToFile(fname, rptline + "\n", true);
 	}
 }
