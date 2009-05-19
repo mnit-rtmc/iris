@@ -21,7 +21,7 @@ import us.mn.state.dot.sonar.User;
  *
  * @author Douglas Lau
  */
-public interface DMS extends Device2 {
+public interface DMS extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "dms";

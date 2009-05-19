@@ -13,7 +13,7 @@ us/mn/state/dot/tms/ControllerIO.class
 us/mn/state/dot/tms/CorridorBase.class
 us/mn/state/dot/tms/Detector.class
 us/mn/state/dot/tms/DetectorHelper.class
-us/mn/state/dot/tms/Device2.class
+us/mn/state/dot/tms/Device.class
 us/mn/state/dot/tms/DMS.class
 us/mn/state/dot/tms/DMSHelper.class
 us/mn/state/dot/tms/DMSMessagePriority.class

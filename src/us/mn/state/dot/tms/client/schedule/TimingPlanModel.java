@@ -30,7 +30,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Device2;
+import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimingPlan;
@@ -152,10 +152,10 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	}
 
 	/** Device in question */
-	protected final Device2 device;
+	protected final Device device;
 
 	/** Create a new timing plan table model */
-	public TimingPlanModel(TypeCache<TimingPlan> c, Device2 d) {
+	public TimingPlanModel(TypeCache<TimingPlan> c, Device d) {
 		super(c, d != null);
 		device = d;
 		initialize();
@@ -195,7 +195,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		case COL_TYPE:
 			return TimingPlanType.fromOrdinal(p.getPlanType());
 		case COL_DEVICE:
-			Device2 d = p.getDevice();
+			Device d = p.getDevice();
 			if(d != null)
 				return d.getName();
 			else

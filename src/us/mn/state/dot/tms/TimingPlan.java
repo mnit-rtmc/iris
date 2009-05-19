@@ -30,7 +30,7 @@ public interface TimingPlan extends SonarObject {
 	int getPlanType();
 
 	/** Get the device */
-	Device2 getDevice();
+	Device getDevice();
 
 	/** Set the start time (minute of day) */
 	void setStartMin(int t);

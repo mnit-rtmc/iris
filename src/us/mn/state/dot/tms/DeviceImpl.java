@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
  *
  * @author Douglas Lau
  */
-abstract public class DeviceImpl extends BaseObjectImpl implements Device2,
+abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	ControllerIO
 {
 	/** Create a new device */

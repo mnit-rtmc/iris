@@ -22,7 +22,7 @@ import us.mn.state.dot.sonar.User;
  *
  * @author Douglas Lau
  */
-public interface LCSArray extends Device2 {
+public interface LCSArray extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "lcs_array";
