@@ -98,10 +98,8 @@ public class LCSArrayHelper extends BaseHelper {
 					Controller c = dms.getController();
 					if(c != null) {
 						String s = c.getStatus();
-						if(!"".equals(s)) {
-							status.add(s);
-							return true;
-						}
+						status.add(s);
+						return !"".equals(s);
 					}
 				}
 				return false;
