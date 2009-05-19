@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.utils;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
 /**
  * String convenience methods.
  *
@@ -321,5 +324,14 @@ public class SString {
 			return i;
 		}
 		return len;
+	}
+
+	/** Return an exception stack trace as a string */
+	public static String getStackTrace(Exception ex) {
+		if(ex == null)
+			return "";
+		StringWriter writer = new StringWriter(256);
+		ex.printStackTrace(new PrintWriter(writer));
+		return writer.toString();
 	}
 }

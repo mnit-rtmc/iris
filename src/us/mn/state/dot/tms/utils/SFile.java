@@ -47,9 +47,8 @@ public class SFile
 			f = new FileWriter(fname, append);
 			f.write(s);
 		} catch (Exception ex) {
-			System.out.println(
+			Log.warning(
 				"Warning: writeStringToFile(): " + ex);
-			ex.printStackTrace();
 			ok = false;
 		} finally {
 			try {
