@@ -14,10 +14,12 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
+import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.Checker;
@@ -154,11 +156,16 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
 			getProxyType(), new LcsMarker());
-		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
-		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(STYLE_LOCKED, null, ProxyTheme.OUTLINE_LOCKED);
-		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE,
+			Outline.createSolid(Color.BLACK, 10));
+		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED,
+			Outline.createSolid(Color.BLACK, 10));
+		theme.addStyle(STYLE_LOCKED, null,
+			Outline.createSolid(Color.RED, 10));
+		theme.addStyle(STYLE_MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE,
+			Outline.createSolid(Color.BLACK, 10));
+		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED,
+			Outline.createSolid(Color.BLACK, 10));
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
