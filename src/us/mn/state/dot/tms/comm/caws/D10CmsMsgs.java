@@ -51,8 +51,10 @@ public class D10CmsMsgs implements Serializable
 
 		while(lineTok.hasMoreTokens()) {
 			String line = lineTok.nextToken();
-			D10CmsMsg cmsmsg = new D10CmsMsg(line);
-			this.m_msgs.add(cmsmsg);
+			D10CmsMsg cmsmsg = new D10CmsMsg();
+			cmsmsg.parse(line);
+			if(cmsmsg.getValid())
+				m_msgs.add(cmsmsg);
 		}
 	}
 

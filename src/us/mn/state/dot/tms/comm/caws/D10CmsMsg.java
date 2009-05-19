@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.caws;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
@@ -43,71 +44,131 @@ public class D10CmsMsg {
 	private static final String DOUBLESTROKE = "Double Stroke";
 
 	// fields
-	private final int m_cmsid;		// cms ID
-	private final Date m_date;		// message date and time
-	private final CawsMsgType m_type;	// message type
-	private final String m_multistring;	// message as multistring
-	private final double m_ontime;
+	private int m_cmsid;			// cms ID
+	private Date m_date;			// message date and time
+	private String m_desc;			// has predefined valid values
+	private CawsMsgType m_type;		// message type
+	private String m_multistring;		// message as multistring
+	private boolean m_valid = false;	// is message valid?
+	private double m_ontime;
 
 	// types
 	public enum CawsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, TRAVELTIME }
 
 	/**
-	 * Create a new object using text line.
-	 * @param line A single line from the CAWS message file. e.g.
-	 *     "20080403085910;25;Blank;Single Stroke;Single Stroke;;;;;;;0.0;"
-	 */
-	public D10CmsMsg(String line) throws IllegalArgumentException {
-		String[] f = (line + ' ').split(";");
-		if(f.length != 13) {
-			throw new IllegalArgumentException(
-			    "Bogus CMS message format (" + line + ").");
+ 	 * Parse a string that contains a single DMS message.
+ 	 * @param argline a single DMS message, fields delimited with ';'.
+ 	 */
+	public void parse(String argline) {
+		if(argline == null)
+			argline = "";
+
+		boolean ok = true;
+
+		try {
+			// add a space between successive delimiters. This is done so the
+			// tokenizer doesn't skip over delimeters with nothing between them.
+			// System.err.println("D10CmsMsg.D10CmsMsg() called, argline="+argline);
+			String line = argline.replace(";;", "; ;");
+
+			// System.err.println("D10CmsMsg.D10CmsMsg() called, line1="+line);
+			line = line.replace(";;", "; ;");
+
+			// System.err.println("D10CmsMsg.D10CmsMsg() called, line2="+line);
+			// verify syntax
+			StringTokenizer tok = new StringTokenizer(line, ";");
+
+			// validity check, note that 12 or 13 tokens are expected
+			int numtoks = tok.countTokens();
+			final int EXPNUMTOKENS1 = 12;
+			final int EXPNUMTOKENS2 = 13;
+			if(numtoks != EXPNUMTOKENS1 && numtoks != EXPNUMTOKENS2) {
+				throw new IllegalArgumentException(
+					"Bogus CMS message format, numtoks was " + 
+					numtoks + ", expected " + EXPNUMTOKENS1 + 
+					" or " + EXPNUMTOKENS2 + " (" + argline + 
+					").");
+			}
+
+			// #1, date: 20080403085910
+			m_date = convertDate(tok.nextToken());
+
+			// #2, id: 39
+			m_cmsid = SString.stringToInt(tok.nextToken());
+
+			// #3, message description
+			String f02 = tok.nextToken();
+			if(!f02.equals(DESC_BLANK) &&!f02.equals(
+				DESC_ONEPAGENORM) &&!f02.equals(
+				DESC_TWOPAGENORM)) {    // FIXME: verify possibilities
+				String msg = "D10CmsMsg.parse(): unknown " +
+					"message description received in " +
+					"D10CmsMsg.parse(): " + f02;
+				throw new IllegalArgumentException(msg);
+			}
+			m_desc = f02;
+
+			// #4, pg 1 font
+			String f03 = tok.nextToken();
+			if(!f03.equals(SINGLESTROKE) &&!f03.equals(DOUBLESTROKE)) {
+				String msg = "D10CmsMsg.parse(): unknown pg " +
+					"1 font received: " + f03;
+				throw new IllegalArgumentException(msg);
+			}
+
+			// #5, pg 2 font
+			String f04 = tok.nextToken();
+			if(!f04.equals(SINGLESTROKE) &&!f04.equals(DOUBLESTROKE)) {
+				String msg = "D10CmsMsg.parse(): unknown pg " +
+					"2 font received: " + f04;
+				throw new IllegalArgumentException(msg);
+			}
+
+			// #6 - #11, rows of text
+			{
+				String row1 = tok.nextToken().trim().toUpperCase();
+				String row2 = tok.nextToken().trim().toUpperCase();
+				String row3 = tok.nextToken().trim().toUpperCase();
+				String row4 = tok.nextToken().trim().toUpperCase();
+				String row5 = tok.nextToken().trim().toUpperCase();
+				String row6 = tok.nextToken().trim().toUpperCase();
+
+				// create message-pg1
+				StringBuilder m = new StringBuilder();
+
+				m.append(row1);
+				m.append("[nl]");
+				m.append(row2);
+				m.append("[nl]");
+				m.append(row3);
+				m.append("[nl]");
+
+				// pg2
+				if(row4.length() + row5.length() + row6.length() > 0) {
+					m.append("[np]");
+					m.append(row4);
+					m.append("[nl]");
+					m.append(row5);
+					m.append("[nl]");
+					m.append(row6);
+				}
+
+				m_multistring = m.toString();
+			}
+
+			// #12, on time: 0.0
+			m_ontime = SString.stringToDouble(tok.nextToken());
+
+			// #13, ignore this field, follows last semicolon if
+			//      there are 13 tokens.
+
+		} catch(Exception ex) {
+			System.err.println("D10CmsMsg.parse(): unexpected " +
+				"exception: " + ex);
+			ok = false;
 		}
 
-		m_date = convertDate(f[0]);
-		m_cmsid = SString.stringToInt(f[1]);
-		m_type = parseDescription(f[2]);
-		int page_1_font = parseFont(f[3]);
-		int page_2_font = parseFont(f[4]);
-
-		String row1 = f[5].trim().toUpperCase();
-		String row2 = f[6].trim().toUpperCase();
-		String row3 = f[7].trim().toUpperCase();
-		String row4 = f[8].trim().toUpperCase();
-		String row5 = f[9].trim().toUpperCase();
-		String row6 = f[10].trim().toUpperCase();
-
-		// create message-pg1
-		MultiString m = new MultiString();
-		// FIXME: should use default font number, instead of 1 here
-		if(page_1_font != 1)
-			m.setFont(page_1_font);
-		m.addText(row1);
-		m.addLine();
-		m.addText(row2);
-		m.addLine();
-		m.addText(row3);
-
-		// page 2
-		if(row4.length() + row5.length() + row6.length() > 0) {
-			m.addPage();
-			if(page_1_font != page_2_font)
-				m.setFont(page_2_font);
-			m.addText(row4);
-			m.addLine();
-			m.addText(row5);
-			m.addLine();
-			m.addText(row6);
-		}
-		m_multistring = m.toString();
-
-		m_ontime = SString.stringToDouble(f[11]);
-
-		if(m_type != CawsMsgType.BLANK) {
-			Log.finest("D10CmsMsg.D10CmsMsg():" + m_date
-				+ "," + m_cmsid + "," + m_multistring + ","
-				+ m_ontime);
-		}
+		this.setValid(ok);
 	}
 
 	/**
@@ -171,6 +232,16 @@ public class D10CmsMsg {
 		// create Date
 		Calendar c = new GregorianCalendar(y, m, d, h, mi, s);
 		return c.getTime();
+	}
+
+	/** set valid */
+	private void setValid(boolean v) {
+		m_valid = v;
+	}
+
+	/** return true if the DMS message is valid else false */
+	public boolean getValid() {
+		return (m_valid);
 	}
 
 	/**
