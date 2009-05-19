@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
-import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -241,11 +240,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		int row = pin - 1;
 		if(io_type != types[pin]) {
 			ControllerIO cio = io[pin];
-			if(cio instanceof ControllerIO_SONAR) {
-				ControllerIO_SONAR cio_s =
-					(ControllerIO_SONAR)cio;
-				cio_s.setController(null);
-			}
+			if(cio != null)
+				cio.setController(null);
 			types[pin] = io_type;
 			io[pin] = null;
 		}
@@ -255,20 +251,17 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected void setDevice(int pin, Object value) {
 		clearDevice(pin);
 		ControllerIO cio = lookupControllerIO(types[pin], value);
-		if(cio instanceof ControllerIO_SONAR) {
-			ControllerIO_SONAR cio_s = (ControllerIO_SONAR)cio;
-			cio_s.setPin(pin);
-			cio_s.setController(controller);
+		if(cio != null) {
+			cio.setPin(pin);
+			cio.setController(controller);
 		}
 	}
 
 	/** Clear the device at the specified pin */
 	protected void clearDevice(int pin) {
 		ControllerIO cio = io[pin];
-		if(cio instanceof ControllerIO_SONAR) {
-			ControllerIO_SONAR cio_s = (ControllerIO_SONAR)cio;
-			cio_s.setController(null);
-		}
+		if(cio != null)
+			cio.setController(null);
 	}
 
 	/** Lookup the ControllerIO for the given value */

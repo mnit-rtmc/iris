@@ -20,7 +20,7 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public interface LCSIndication extends ControllerIO_SONAR {
+public interface LCSIndication extends ControllerIO {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "lcs_indication";

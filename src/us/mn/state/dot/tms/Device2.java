@@ -20,7 +20,7 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public interface Device2 extends ControllerIO_SONAR {
+public interface Device2 extends ControllerIO {
 
 	/** SONAR type names.  This is a list of sub-interfaces required by
 	 * SONAR for the TimingPlan interface, which references Device2. */

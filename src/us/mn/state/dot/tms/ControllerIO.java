@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,16 +14,24 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.SonarObject;
+
 /**
  * ControllerIO is an input/output connected to a controller (alarm or device)
  *
  * @author Douglas Lau
  */
-public interface ControllerIO {
+public interface ControllerIO extends SonarObject {
+
+	/** Set the controller for the I/O */
+	void setController(Controller c);
+
+	/** Get the controller for the I/O */
+	Controller getController();
 
 	/** Set the controller I/O pin number */
-	void setPin(int p) throws Exception;
+	void setPin(int p);
 
 	/** Get the controller I/O pin number */
-	int getPin() throws Exception;
+	int getPin();
 }

@@ -10,7 +10,6 @@ us/mn/state/dot/tms/CommLink.class
 us/mn/state/dot/tms/Constants.class
 us/mn/state/dot/tms/Controller.class
 us/mn/state/dot/tms/ControllerIO.class
-us/mn/state/dot/tms/ControllerIO_SONAR.class
 us/mn/state/dot/tms/CorridorBase.class
 us/mn/state/dot/tms/Detector.class
 us/mn/state/dot/tms/DetectorHelper.class

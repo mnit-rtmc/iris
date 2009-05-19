@@ -38,7 +38,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
-import us.mn.state.dot.tms.ControllerIO_SONAR;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSIndication;
@@ -160,18 +159,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** A controller IO finder helps locate IO for a controller */
-	protected class ControllerIOFinder<T extends ControllerIO_SONAR>
+	protected class ControllerIOFinder<T extends ControllerIO>
 		implements Checker<T>
 	{
 		protected final ControllerIO[] io;
 		protected ControllerIOFinder(ControllerIO[] _io) {
 			io = _io;
 		}
-		public boolean check(ControllerIO_SONAR cios) {
-			if(cios.getController() == proxy) {
-				int pin = cios.getPin();
+		public boolean check(ControllerIO cio) {
+			if(cio.getController() == proxy) {
+				int pin = cio.getPin();
 				if(pin > 0 && pin < io.length)
-					io[pin] = cios;
+					io[pin] = cio;
 			}
 			return false;
 		}
