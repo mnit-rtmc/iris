@@ -16,11 +16,13 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
@@ -139,8 +141,16 @@ public class SignMessageComposer extends JPanel {
 
 	/** Dispose of the existing line widgets */
 	protected void disposeLines() {
-		for(int i = 0; i < cmbLine.length; i++)
+		for(int i = 0; i < cmbLine.length; i++) {
 			cmbLine[i].removeActionListener(comboListener);
+			// dispose of focus listeners
+			Component c = cmbLine[i].getEditor().
+				getEditorComponent();
+			FocusListener[] listeners = cmbLine[i].getEditor().
+				getEditorComponent().getFocusListeners();
+			for(int j = 0; j < listeners.length; ++j)
+				c.removeFocusListener(listeners[j]);
+		}
 	}
 
 	/** Dispose of the existing font widgets */
