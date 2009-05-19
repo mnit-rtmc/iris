@@ -250,8 +250,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Set the device */
 	protected void setDevice(int pin, Object value) {
 		clearDevice(pin);
-		ControllerIO cio = lookupControllerIO(types[pin], value);
-		if(cio != null) {
+		if(value instanceof ControllerIO) {
+			ControllerIO cio = (ControllerIO)value;
 			cio.setPin(pin);
 			cio.setController(controller);
 		}
@@ -262,30 +262,6 @@ public class ControllerIOModel extends AbstractTableModel {
 		ControllerIO cio = io[pin];
 		if(cio != null)
 			cio.setController(null);
-	}
-
-	/** Lookup the ControllerIO for the given value */
-	protected ControllerIO lookupControllerIO(DeviceType d, Object value) {
-		if(d == null || value == null)
-			return null;
-		switch(d) {
-			case Alarm:
-				return (Alarm)value;
-			case Camera:
-				return (Camera)value;
-			case Detector:
-				return (Detector)value;
-			case DMS:
-				return (DMS)value;
-			case LCSIndication:
-				return (LCSIndication)value;
-			case Ramp_Meter:
-				return (RampMeter)value;
-			case Warning_Sign:
-				return (WarningSign)value;
-			default:
-				return null;
-		}
 	}
 
 	/** Create the pin column */
