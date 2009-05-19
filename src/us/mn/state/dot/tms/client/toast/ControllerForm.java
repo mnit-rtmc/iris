@@ -355,7 +355,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if(a == null || a.equals("style"))
 			cab_style.setSelectedItem(cabinet.getStyle());
-		if(a == null || a.equals("cio"))
-			io_model.setCio(getControllerIO());
+		// FIXME: ControllerIOModel should manage itself
+		io_model.setCio(getControllerIO());
 	}
 }
