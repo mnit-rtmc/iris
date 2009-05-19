@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@ import us.mn.state.dot.tms.Device2Impl;
  *
  * @author Douglas Lau
  */
-abstract public class Device2Operation extends ControllerOperation {
+abstract public class DeviceOperation extends ControllerOperation {
 
 	/** This operation; needed for inner Phase classes */
-	protected final Device2Operation operation;
+	protected final DeviceOperation operation;
 
 	/** Device on which to perform operation */
 	protected final Device2Impl device;
 
 	/** Create a new device operation */
-	protected Device2Operation(int p, Device2Impl d) {
+	protected DeviceOperation(int p, Device2Impl d) {
 		super(p, (ControllerImpl)d.getController(), d.getName());
 		operation = this;
 		device = d;
@@ -44,7 +44,7 @@ abstract public class Device2Operation extends ControllerOperation {
 		protected Phase poll(AddressedMessage mess)
 			throws DeviceContentionException
 		{
-			Device2Operation owner = device.acquire(operation);
+			DeviceOperation owner = device.acquire(operation);
 			if(owner != operation)
 				throw new DeviceContentionException(owner);
 			return phaseOne();

@@ -15,14 +15,14 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import us.mn.state.dot.tms.LCSArrayImpl;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * An LCS array operation.
  *
  * @author Douglas Lau
  */
-abstract public class LCSOperation extends Device2Operation {
+abstract public class LCSOperation extends DeviceOperation {
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;

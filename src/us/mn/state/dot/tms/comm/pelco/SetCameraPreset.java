@@ -14,16 +14,15 @@ package us.mn.state.dot.tms.comm.pelco;
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * Pelco operation to set a camera preset.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
- * @created July 2, 2008
  */
-public class SetCameraPreset extends Device2Operation {
+public class SetCameraPreset extends DeviceOperation {
 
 	/** The camera preset to set */
 	private final int m_preset;

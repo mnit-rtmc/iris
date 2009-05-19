@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 
 /**
@@ -171,10 +171,10 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 	}
 
 	/** Operation which owns the device */
-	protected transient Device2Operation owner;
+	protected transient DeviceOperation owner;
 
 	/** Acquire ownership of the device */
-	public Device2Operation acquire(Device2Operation o) {
+	public DeviceOperation acquire(DeviceOperation o) {
 		try {
 			// Name used for unique device acquire/release lock
 			synchronized(name) {
@@ -189,11 +189,11 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 	}
 
 	/** Release ownership of the device */
-	public Device2Operation release(Device2Operation o) {
+	public DeviceOperation release(DeviceOperation o) {
 		try {
 			// Name used for unique device acquire/release lock
 			synchronized(name) {
-				Device2Operation _owner = owner;
+				DeviceOperation _owner = owner;
 				if(owner == o)
 					owner = null;
 				return _owner;
@@ -206,7 +206,7 @@ abstract public class Device2Impl extends BaseObjectImpl implements Device2,
 
 	/** Get a description of the current device operation */
 	public String getOperation() {
-		Device2Operation o = owner;
+		DeviceOperation o = owner;
 		if(o == null)
 			return "None";
 		else
