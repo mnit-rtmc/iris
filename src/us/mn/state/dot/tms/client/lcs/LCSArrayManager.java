@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
@@ -247,14 +248,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Find the map geo location for a proxy */
 	protected GeoLoc getGeoLoc(final LCSArray proxy) {
-		LCS lcs = (LCS)namespace.findObject(LCS.SONAR_TYPE,
-		       new Checker<LCS>()
-		{
-			public boolean check(LCS lcs) {
-				return lcs.getArray() == proxy &&
-				       lcs.getLane() == 1;
-			}
-		});
+		LCS lcs = LCSArrayHelper.lookupLCS(proxy, 1);
 		if(lcs != null) {
 			String name = lcs.getName();
 			DMS dms = (DMS)namespace.lookupObject(DMS.SONAR_TYPE,
