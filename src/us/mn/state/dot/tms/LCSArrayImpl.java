@@ -204,6 +204,7 @@ public class LCSArrayImpl extends Device2Impl implements LCSArray {
 				throw new ChangeVetoException(
 					"Invalid indication: " + i);
 		}
+		// FIXME: check that all indications are either dark or lit
 		// FIXME: check the priority of each sign
 		p.sendIndications(this, ind, o);
 		setIndicationsNext(ind);
