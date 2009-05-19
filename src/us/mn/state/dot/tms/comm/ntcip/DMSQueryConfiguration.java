@@ -76,10 +76,7 @@ public class DMSQueryConfiguration extends DMSOperation {
 			ModuleType m_type = new ModuleType(mod);
 			mess.add(m_type);
 			mess.getRequest();
-			if(m_type.getInteger() == ModuleType.SOFTWARE ||
-			   // Old Ledstar version 1.9 has ModuleType.OTHER
-			   m_type.getInteger() == ModuleType.OTHER)
-			{
+			if(m_type.getInteger() == ModuleType.SOFTWARE) {
 				dms.setMake(make.getValue());
 				dms.setModel(model.getValue());
 				dms.setVersion(version.getValue());
