@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.utils;
 
+import java.awt.event.KeyEvent;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -22,7 +23,7 @@ import java.util.ResourceBundle;
  * Convenience class to handle I18N messages.
  *
  * @version Initial release, 06/03/08
- * @author p.w.wong, AHMCT
+ * @author P.W. Wong, AHMCT
  * @author Michael Darter
  */
 public class I18NMessages {
@@ -37,7 +38,7 @@ public class I18NMessages {
 	static protected final String NOT_READ = "Message bundle not read";
 
 	/** The resource bundle */
-	static private ResourceBundle m_i18NMessages = null;
+	static private ResourceBundle m_bundle = null;
 
 	/** Class can't be instantiated */
 	private I18NMessages() {
@@ -62,36 +63,118 @@ public class I18NMessages {
 		try {
 			if(v != null && l != null && c != null) {
 				Locale loc = new Locale(l, c, v);
-				m_i18NMessages = ResourceBundle.getBundle(
+				m_bundle = ResourceBundle.getBundle(
 					BASENAME, loc);
 			}
 		}
 		catch(Exception ex) {
-			Log.severe("Error: could not load message bundle: "+ex);
-			m_i18NMessages = null;
+			Log.severe("Error: could not load message " +
+				"bundle: " + ex);
+			m_bundle = null;
 		}
-		if(m_i18NMessages == null) {
-			Log.severe("Error: failed to open I18N resource bundle: "+
-			BASENAME+"_"+l+"_"+c+"_"+v);
+		if(m_bundle == null) {
+			Log.severe("Error: failed to open I18N resource " +
+				"bundle: " + BASENAME + "_" + l + "_" + c + 
+				"_" + v);
  		}
 	}
 
-	/** Get string using id */
+	/** Get the specified message.
+	 *  @param id Name of I18N string in the bundle.
+	 *  @return The I18N string cooresponding to id, else null on error */
+	static private String _get(String id) {
+		if(id == null || id.isEmpty())
+			return null;
+		if(m_bundle == null)
+			return null;
+		try {
+			return m_bundle.getString(id);
+		} catch(Exception ex) {
+			return null;
+		}
+	}
+
+	/** Get the specified message.
+	 *  @param id Name of I18N string in the bundle.
+	 *  @return The I18N string cooresponding to id, else error message */
 	static public String get(String id) {
-		if(id == null || id.length() == 0)
+		if(id == null || id.isEmpty())
 			return UNDEFINED;
-		if(m_i18NMessages == null) {
+		if(m_bundle == null) {
 			Log.severe("Error: message bundle not loaded.");
 			return NOT_READ;
 		}
 		try {
-			return m_i18NMessages.getString(id);
+			return m_bundle.getString(id);
 		}
 		catch(Exception ex) {
 			Log.warning(
 				"Error: attempting to read id ("+id+
 				") from bundle, ex="+ex);
 			return NOT_READ;
+		}
+	}
+
+	/** Return the implied key mnemonic in the specified I18N string.
+	 *  For example, if the I18N string is "<html><u>B</u>lank</html>"
+	 *  then VK_B is returned. 
+	 *  @param id Name of I18N string in the bundle.
+	 *  @return The KeyEvent code else 0 on failure.
+	 *  @see java.awt.event.KeyEvent */
+	static public int getKeyEvent(String id) {
+		final int FAILURE_CODE = 0;
+		String s = _get(id);
+		if(s == null)
+			return FAILURE_CODE;
+		String utext = SXml.extractUnderline(s);
+		if(utext == null || utext.isEmpty())
+			return FAILURE_CODE;
+		char c = utext.charAt(0);
+		return charToKeyCode(c, FAILURE_CODE);
+	}
+
+	/** Return KeyEvent representation of specified character */
+	static private int charToKeyCode(char c, int failure) {
+		// FIXME: is there a java method that already does this? 
+		c = Character.toUpperCase(c);
+		switch(c) {
+			case 'A': return KeyEvent.VK_A;
+			case 'B': return KeyEvent.VK_B;
+			case 'C': return KeyEvent.VK_C;
+			case 'D': return KeyEvent.VK_D;
+			case 'E': return KeyEvent.VK_E;
+			case 'F': return KeyEvent.VK_F;
+			case 'G': return KeyEvent.VK_G;
+			case 'H': return KeyEvent.VK_H;
+			case 'I': return KeyEvent.VK_I;
+			case 'J': return KeyEvent.VK_J;
+			case 'K': return KeyEvent.VK_K;
+			case 'L': return KeyEvent.VK_L;
+			case 'M': return KeyEvent.VK_M;
+			case 'N': return KeyEvent.VK_N;
+			case 'O': return KeyEvent.VK_O;
+			case 'P': return KeyEvent.VK_P;
+			case 'Q': return KeyEvent.VK_Q;
+			case 'R': return KeyEvent.VK_R;
+			case 'S': return KeyEvent.VK_S;
+			case 'T': return KeyEvent.VK_T;
+			case 'U': return KeyEvent.VK_U;
+			case 'V': return KeyEvent.VK_V;
+			case 'W': return KeyEvent.VK_W;
+			case 'X': return KeyEvent.VK_X;
+			case 'Y': return KeyEvent.VK_Y;
+			case 'Z': return KeyEvent.VK_Z;
+			case '0': return KeyEvent.VK_0;
+			case '1': return KeyEvent.VK_1;
+			case '2': return KeyEvent.VK_2;
+			case '3': return KeyEvent.VK_3;
+			case '4': return KeyEvent.VK_4;
+			case '5': return KeyEvent.VK_5;
+			case '6': return KeyEvent.VK_6;
+			case '7': return KeyEvent.VK_7;
+			case '8': return KeyEvent.VK_8;
+			case '9': return KeyEvent.VK_9;
+			default: return failure;
 		}
 	}
 }
