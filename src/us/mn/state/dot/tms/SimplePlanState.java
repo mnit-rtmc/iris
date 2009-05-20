@@ -37,7 +37,7 @@ public class SimplePlanState extends TimingPlanState {
 				demand += Math.round(diff / 2.0f);
 			} else
 				demand = getMaxRelease();
-			Device2 device = plan.getDevice();
+			Device device = plan.getDevice();
 			if(device instanceof RampMeterImpl) {
 				RampMeterImpl meter = (RampMeterImpl)device;
 				meter.setRatePlanned(demand);

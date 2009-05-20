@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +15,28 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * Query the status of a warning sign
  *
  * @author Douglas Lau
  */
-public class WarningStatus extends Device2Operation {
-
-	/** 30-Second completer */
-	protected final Completer completer;
+public class WarningStatus extends DeviceOperation {
 
 	/** Warning sign */
 	protected final WarningSignImpl warn;
 
 	/** Create a new warning status poll */
-	public WarningStatus(WarningSignImpl w, Completer comp) {
+	public WarningStatus(WarningSignImpl w) {
 		super(DATA_30_SEC, w);
-		completer = comp;
 		warn = w;
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		completer.up();
 		return new QueryStatus();
 	}
 
@@ -59,11 +53,5 @@ public class WarningStatus extends Device2Operation {
 				MeterStatus.FLASH);
 			return null;
 		}
-	}
-
-	/** Cleanup the operation */
-	public void cleanup() {
-		super.cleanup();
-		completer.down();
 	}
 }

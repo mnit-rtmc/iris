@@ -111,7 +111,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		return this;
 	}
 
-	/** Prune the owner string to the first dot */
+	/** Prune the owner string to the first dot.
+	 * FIXME: move to UserHelper */
 	static protected String formatOwner(User owner) {
 		if(owner != null) {
 			String o = owner.getName();

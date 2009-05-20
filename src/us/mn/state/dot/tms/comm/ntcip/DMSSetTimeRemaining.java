@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMessageImpl;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 
 /**
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 public class DMSSetTimeRemaining extends DMSOperation {
 
 	/** Sign message to update */
-	protected final SignMessageImpl message;
+	protected final SignMessage message;
 
 	/** User who deployed the message */
 	protected final User owner;
@@ -37,7 +37,7 @@ public class DMSSetTimeRemaining extends DMSOperation {
 	/** Create a new DMS set time remaining operation */
 	public DMSSetTimeRemaining(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
-		message = (SignMessageImpl)m;
+		message = m;
 		owner = o;
 	}
 
@@ -48,7 +48,7 @@ public class DMSSetTimeRemaining extends DMSOperation {
 
 	/** Get the message duration */
 	protected int getDuration() {
-		if(message.isBlank())
+		if(SignMessageHelper.isBlank(message))
 			return 0;
 		else
 			return getDuration(message.getDuration());

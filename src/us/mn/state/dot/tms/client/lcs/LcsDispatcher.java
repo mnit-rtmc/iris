@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,34 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.rmi.RemoteException;
+import java.awt.Font;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TMSObject;
-import us.mn.state.dot.tms.client.TmsSelectionEvent;
-import us.mn.state.dot.tms.client.TmsSelectionListener;
+import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LCS;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.LCSArrayLock;
+import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
  * GUI for controlling a LaneControlSignal object.
@@ -38,184 +49,279 @@ import us.mn.state.dot.tms.client.TmsSelectionListener;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class LcsDispatcher extends JPanel implements TmsSelectionListener {
+public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
+	ProxySelectionListener<LCSArray>
+{
+	/** Font for "L" and "R" labels */
+	static protected final Font FONT = new Font(null, Font.BOLD, 24);
 
-	/** Panel used for drawing an LCS */
-	protected final LcsPanel lcsPanel = new LcsPanel(45);
+	/** Lookup the DMS for the LCS in lane 1 */
+	static protected DMS lookupDMS(LCSArray lcs_array) {
+		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, 1);
+		if(lcs != null)
+			return DMSHelper.lookup(lcs.getName());
+		else
+			return null;
+	}
 
-	/** Displays the name of the selected LCS */
-	protected final JTextField txtId = new JTextField();
+	/** Cache of LCS array proxy objects */
+	protected final TypeCache<LCSArray> cache;
 
-	/** The texfield used to display the verify camera */
-	protected final JTextField txtCamera = new JTextField();
+	/** Selection model */
+	protected final ProxySelectionModel<LCSArray> selectionModel;
 
-	/** Displays the location of the LCS */
-	protected final JTextField txtLocation = new JTextField();
+	/** Name of the selected LCS array */
+	protected final JTextField nameTxt = FormPanel.createTextField();
 
-	/** Displays the current operation of the selected LCS */
-	protected final JTextField txtOperation = new JTextField();
+	/** Verify camera name textfield */
+	protected final JTextField cameraTxt = FormPanel.createTextField();
 
-	/** Button used to send a new command to the LCS */
-	protected final JButton btnSend = new JButton("Send");
+	/** Location of LCS array */
+	protected final JTextField locationTxt = FormPanel.createTextField();
 
-	/** Button used to make the LCS go dark */
-	protected final JButton btnClear = new JButton("Clear");
+	/** Operation of selected LCS array */
+	protected final JTextField operationTxt = FormPanel.createTextField();
 
-	/** Currently logged in user name */
-	protected final String userName;
+	/** LCS lock combo box component */
+	protected final JComboBox lcs_lock = new JComboBox(
+		LCSArrayLock.getDescriptions());
 
-	/** Device handler for LCS devices */
-	protected final LcsHandler handler;
+	/** Panel for drawing an LCS array */
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(58);
 
-	protected LcsProxy selectedLcs = null;
+	/** LCS indicaiton selector */
+	protected final IndicationSelector indicationSelector =
+		new IndicationSelector();
 
-	protected final LcsMessageSelector messageSelector =
-		new LcsMessageSelector();
+	/** Button to send new indications to the LCS array */
+	protected final JButton sendBtn = new JButton("Send");
+
+	/** Button to clear the LCS array indications */
+	protected final JButton clearBtn = new JButton();
+
+	/** Action to clear selected LCS */
+	protected final ClearLcsAction clearAction;
+
+	/** Currently logged in user */
+	protected final User user;
 
 	/** Create a new LCS dispatcher */
-	public LcsDispatcher(LcsHandler handler) {
-		super( new GridBagLayout() );
-		this.handler = handler;
-		handler.getSelectionModel().addTmsSelectionListener( this );
-		userName = handler.getUser().getName();
-		setBorder(BorderFactory.createTitledBorder(
-			"Selected Lane Control Signal"));
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = new Insets(2, 4, 2, 4);
-		bag.anchor = GridBagConstraints.EAST;
-		add(new JLabel("ID"), bag);
-		bag.gridx = 2;
-		add(new JLabel("Camera"), bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		add(new JLabel("Location"), bag);
-		bag.gridy = 2;
-		add(new JLabel("Operation"), bag);
-		bag.gridx = 1;
-		bag.gridy = 0;
-		bag.fill = GridBagConstraints.HORIZONTAL;
-		bag.weightx = 1;
-		txtId.setEditable(false);
-		add(txtId, bag);
-		bag.gridx = 3;
-		txtCamera.setEditable(false);
-		add(txtCamera, bag);
-		bag.gridx = 1;
-		bag.gridy = 1;
-		bag.gridwidth = 3;
-		txtLocation.setEditable(false);
-		add(txtLocation, bag);
-		bag.gridy = 2;
-		txtOperation.setEditable(false);
-		add(txtOperation, bag);
-		JPanel panel = new JPanel();
-		panel.add( lcsPanel );
-		bag.gridx = 0;
-		bag.gridy = 3;
-		bag.gridwidth = 4;
-		bag.anchor = GridBagConstraints.CENTER;
-		bag.fill = GridBagConstraints.NONE;
-		add(panel, bag);
-		bag.gridy = 4;
-		add(messageSelector, bag);
-		bag.gridy = 5;
-		add(buildButtonPanel(), bag);
-		clear();
+	public LcsDispatcher(LCSArrayManager manager, TmsConnection tc) {
+		super(new BorderLayout());
+		SonarState st = tc.getSonarState();
+		cache = st.getLCSArrays();
+		user = st.lookupUser(tc.getUser().getName());
+		selectionModel = manager.getSelectionModel();
+		clearAction = new ClearLcsAction(selectionModel, user);
+		clearBtn.setAction(clearAction);
+		manager.setClearAction(clearAction);
+		add(createMainPanel(), BorderLayout.CENTER);
+		clearSelected();
+		cache.addProxyListener(this);
+		selectionModel.addProxySelectionListener(this);
 	}
 
 	/** Dispose of the LCS dispatcher */
 	public void dispose() {
+		selectionModel.removeProxySelectionListener(this);
+		cache.removeProxyListener(this);
+		indicationSelector.dispose();
 		removeAll();
-		messageSelector.removeAll();
-		lcsPanel.removeAll();
-		selectedLcs = null;
 	}
 
-	/** Set the selected LaneControlSignal */
-	public void setSelected(LcsProxy lcs) {
-		selectedLcs = lcs;
-		if(lcs != null) {
-			messageSelector.setEnabled(true);
-			messageSelector.setSignals(lcs.getSignals());
-			btnSend.setEnabled(true);
-			btnClear.setEnabled(true);
-			btnClear.setAction(new ClearLcsAction(lcs,
-				handler.getConnection()));
-		} else
-			clear();
-		refreshUpdate();
-		refreshStatus();
+	/** Create the dispatcher panel */
+	protected JPanel createMainPanel() {
+		FormPanel panel = new FormPanel(true);
+		panel.setBorder(BorderFactory.createTitledBorder(
+			"Selected Lane-Use Control Signal"));
+		panel.add("Name", nameTxt);
+		panel.addRow("Camera", cameraTxt);
+		panel.addRow("Location", locationTxt);
+		panel.addRow("Operation", operationTxt);
+		panel.add("Lock", lcs_lock);
+		panel.finishRow();
+		panel.addRow(buildSelectorBox());
+		panel.addRow(buildButtonPanel());
+		return panel;
 	}
 
-	/** Called whenever the selected TMS object changes */
-	public void selectionChanged(TmsSelectionEvent e) {
-		final TMSObject o = e.getSelected();
-		if(o instanceof LcsProxy)
-			setSelected((LcsProxy)o);
+	/** Build the indication selector box */
+	protected Box buildSelectorBox() {
+		Box box = Box.createHorizontalBox();
+		Box vbox = Box.createVerticalBox();
+		box.add(createLabel("L"));
+		box.add(Box.createHorizontalStrut(4));
+		vbox.add(lcsPnl);
+		vbox.add(indicationSelector);
+		box.add(vbox);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(createLabel("R"));
+		return box;
 	}
 
-	/** Refresh the update status of the LCS */
-	public void refreshUpdate() {
-		LcsProxy lcs = selectedLcs;	// Avoid NPE
-		if(lcs != null) {
-			txtCamera.setText(lcs.getCameraId());
-			txtId.setText(lcs.getId());
-			txtLocation.setText(lcs.getDescription());
-		}
-	}
-
-	/** Refresh the status of the LCS */
-	public void refreshStatus() {
-		LcsProxy lcs = selectedLcs;	// Avoid NPE
-		lcsPanel.setLcs(lcs);
-		if(lcs != null) {
-			txtOperation.setText(lcs.getOperation());
-			if(lcs.isFailed()) {
-				txtOperation.setForeground(Color.WHITE);
-				txtOperation.setBackground(Color.GRAY);
-			} else {
-				txtOperation.setForeground(null);
-				txtOperation.setBackground(null);
-			}
-		}
+	/** Create an "L" or "R" label */
+	protected JLabel createLabel(String t) {
+		JLabel label = new JLabel(t);
+		label.setFont(FONT);
+		return label;
 	}
 
 	/** Build the panel that holds the send and clear buttons */
-	protected Component buildButtonPanel() {
-		Box pnlButtons = Box.createHorizontalBox();
-		new ActionJob(btnSend) {
-			public void perform() throws Exception {
-				sendSignals();
+	protected Box buildButtonPanel() {
+		Box box = Box.createHorizontalBox();
+		new ActionJob(sendBtn) {
+			public void perform() {
+				sendIndications();
 			}
 		};
-		pnlButtons.add(btnSend);
-		pnlButtons.add(Box.createHorizontalStrut(4));
-		pnlButtons.add(btnClear);
-		return pnlButtons;
+		box.add(sendBtn);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(clearBtn);
+		return box;
 	}
 
-	/** Clear all of the fields */
-	protected void clear() {
-		txtId.setText("");
-		txtCamera.setText("");
-		txtLocation.setText("");
-		txtOperation.setText("");
-		txtOperation.setForeground(null);
-		txtOperation.setBackground(null);
-		messageSelector.clearSelections();
-		messageSelector.setEnabled(false);
-		btnSend.setEnabled(false);
-		btnClear.setEnabled(false);
-		lcsPanel.clear();
+	/** A new proxy has been added */
+	public void proxyAdded(LCSArray proxy) {
+		// we're not interested
 	}
 
-	/** Send the selected signals to the selected LCS object */
-	protected void sendSignals() throws RemoteException, TMSException {
-		LcsProxy lcs = selectedLcs;	// Avoid NPE
-		if(lcs != null) {
-			int[] signals = messageSelector.getSignals();
-			if(signals != null)
-				lcs.setSignals(signals, userName);
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
+	}
+
+	/** A proxy has been removed */
+	public void proxyRemoved(LCSArray proxy) {
+		// Note: the LCSArrayManager will remove the proxy from the
+		//       ProxySelectionModel, so we can ignore this.
+	}
+
+	/** A proxy has been changed */
+	public void proxyChanged(final LCSArray proxy, final String a) {
+		if(proxy == getSingleSelection()) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					updateAttribute(proxy, a);
+				}
+			});
+		}
+	}
+
+	/** Get the selected LCS array (if a single array is selected) */
+	protected LCSArray getSingleSelection() {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(LCSArray lcs_array: selectionModel.getSelected())
+				return lcs_array;
+		}
+		return null;
+	}
+
+	/** Called whenever a sign is added to the selection */
+	public void selectionAdded(LCSArray s) {
+		updateSelected();
+	}
+
+	/** Called whenever a sign is removed from the selection */
+	public void selectionRemoved(LCSArray s) {
+		updateSelected();
+	}
+
+	/** Update the selected sign(s) */
+	protected void updateSelected() {
+		List<LCSArray> selected = selectionModel.getSelected();
+		if(selected.size() == 1) {
+			for(LCSArray lcs_array: selected)
+				setSelected(lcs_array);
+		} else
+			clearSelected();
+	}
+
+	/** Clear the selection */
+	protected void clearSelected() {
+		disableWidgets();
+	}
+
+	/** Set the selected LCS array */
+	public void setSelected(LCSArray lcs_array) {
+		indicationSelector.setEnabled(true);
+		indicationSelector.setLCSArray(lcs_array);
+		lcs_lock.setEnabled(true);
+		lcs_lock.setAction(new LockLcsAction(lcs_array, lcs_lock));
+		sendBtn.setEnabled(true);
+		clearBtn.setEnabled(true);
+		updateAttribute(lcs_array, null);
+	}
+
+	/** Disable the dispatcher widgets */
+	protected void disableWidgets() {
+		nameTxt.setText("");
+		cameraTxt.setText("");
+		locationTxt.setText("");
+		operationTxt.setText("");
+		operationTxt.setForeground(null);
+		operationTxt.setBackground(null);
+		lcs_lock.setEnabled(false);
+		lcs_lock.setSelectedItem(null);
+		indicationSelector.setEnabled(false);
+		sendBtn.setEnabled(false);
+		clearBtn.setEnabled(false);
+		lcsPnl.clear();
+	}
+
+	/** Update one attribute on the form */
+	protected void updateAttribute(LCSArray lcs_array, String a) {
+		if(a == null || a.equals("name"))
+			nameTxt.setText(lcs_array.getName());
+		if(a == null || a.equals("camera")) {
+			cameraTxt.setText(DMSHelper.getCameraName(
+				lookupDMS(lcs_array)));
+		}
+		// FIXME: this won't update when geoLoc attributes change
+		//        plus, geoLoc is not an LCSArray attribute
+		if(a == null || a.equals("geoLoc")) {
+			locationTxt.setText(LCSArrayHelper.lookupLocation(
+				lcs_array));
+		}
+		if(a == null || a.equals("operation")) {
+			String status = LCSArrayHelper.lookupStatus(lcs_array);
+			if("".equals(status)) {
+				operationTxt.setForeground(null);
+				operationTxt.setBackground(null);
+			} else {
+				operationTxt.setForeground(Color.WHITE);
+				operationTxt.setBackground(Color.GRAY);
+			}
+			operationTxt.setText(lcs_array.getOperation());
+		}
+		if(a == null || a.equals("lcsLock")) {
+			Integer lk = lcs_array.getLcsLock();
+			if(lk != null)
+				lcs_lock.setSelectedIndex(lk);
+			else
+				lcs_lock.setSelectedIndex(0);
+		}
+		if(a == null || a.equals("indicationsCurrent")) {
+			Integer[] ind = lcs_array.getIndicationsCurrent();
+			lcsPnl.setIndications(ind);
+			indicationSelector.setIndications(ind);
+		}
+	}
+
+	/** Send new indications to the selected LCS array */
+	protected void sendIndications() {
+		List<LCSArray> selected = selectionModel.getSelected();
+		if(selected.size() == 1) {
+			for(LCSArray lcs_array: selected)
+				sendIndications(lcs_array);
+		}
+	}
+
+	/** Send new indications to the specified LCS array */
+	protected void sendIndications(LCSArray lcs_array) {
+		Integer[] indications = indicationSelector.getIndications();
+		if(indications != null) {
+			lcs_array.setOwnerNext(user);
+			lcs_array.setIndicationsNext(indications);
 		}
 	}
 }

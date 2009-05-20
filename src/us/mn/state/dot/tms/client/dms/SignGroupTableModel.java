@@ -18,6 +18,7 @@ import java.util.HashMap;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -36,7 +37,12 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Create a SONAR sign group name to check for allowed updates */
 	static public String createSignGroupName(String name) {
-		return SignGroup.SONAR_TYPE + "/" + name;
+		return new Name(SignGroup.SONAR_TYPE, name).toString();
+	}
+
+	/** Create a SONAR DMS sign group name to check for allowed updates */
+	static public String createDmsSignGroupName(String name) {
+		return new Name(DmsSignGroup.SONAR_TYPE, name).toString();
 	}
 
 	/** Count of columns in table model */
@@ -182,7 +188,8 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Check if the user is allowed to add / destroy a DMS sign group */
 	protected boolean canEditDmsSignGroup(SignGroup g) {
-		return g != null && canAddAndRemove(createDmsSignGroupName(g));
+		return g != null && canAddAndRemove(createDmsSignGroupName(
+			createDmsSignGroupName(g)));
 	}
 
 	/** Create a DMS sign group name */

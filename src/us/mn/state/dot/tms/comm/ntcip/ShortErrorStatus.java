@@ -51,20 +51,34 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 	/** Temperature warning */
 	static public final int TEMPERATURE = 1 << 9;
 
-	/** Fan error */
-	static public final int FAN = 1 << 10;
+	/** Climate control system error */
+	static public final int CLIMATE_CONTROL = 1 << 10;
+
+	/** Critical temperature error */
+	static public final int CRITICAL_TEMPERATURE = 1 << 11;
+
+	/** Drum sign rotor error */
+	static public final int DRUM_ROTOR = 1 << 12;
+
+	/** Door open alarm */
+	static public final int DOOR_OPEN = 1 << 13;
+
+	/** Humidity warning */
+	static public final int HUMIDITY = 1 << 14;
 
 	/** Error descriptions */
 	static protected final String ERROR[] = {
 		"OTHER", "COMMUNICATIONS", "POWER", "ATTACHED DEVICE", "LAMP",
 		"PIXEL", "PHOTOCELL", "MESSAGE", "CONTROLLER", "TEMPERATURE",
-		"FAN"
+		"CLIMATE CONTROL", "CRITICAL TEMPERATURE", "DRUM ROTOR",
+		"DOOR OPEN", "HUMIDITY"
 	};
 
 	/** Mask of errors reportable for maintenance */
 	static protected final int REPORTABLE_MASK =
 		OTHER | COMMUNICATIONS | POWER | ATTACHED_DEVICE | LAMP |
-		PHOTOCELL | CONTROLLER | TEMPERATURE;
+		PHOTOCELL | CONTROLLER | TEMPERATURE | CRITICAL_TEMPERATURE |
+		DOOR_OPEN | HUMIDITY;
 
 	/** Create a new ShortErrorStatus object */
 	public ShortErrorStatus() {
@@ -118,8 +132,8 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 		// PIXEL errors are reported by DMSQueryPixelStatus operation.
 		// MESSAGE errors can pop up for lots of reasons,
 		// so we shouldn't consider them real errors.
-		// FAN errors are not reported because of too many false
-		// positives from existing signs (Mn/DOT).
+		// CLIMATE CONTROL errors are not reported because of too many
+		// false positives from existing signs (Mn/DOT).
 		return (status & REPORTABLE_MASK) != 0;
 	}
 }

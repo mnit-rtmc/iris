@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.Namespace;
-
 /**
  * Static System Attribute convenience methods accessible from
  * the client and server. These methods are used to retrieve
@@ -25,14 +23,10 @@ import us.mn.state.dot.sonar.Namespace;
  * @author Douglas Lau
  * @see SystemAttribute
  */
-public class SystemAttributeHelper {
-
-	/** SONAR namespace. For server code this is set in TMSImpl and
-	 * for client code this is set in SonarState. */
-	static public Namespace namespace;
+public class SystemAttributeHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	protected SystemAttributeHelper() {
+	private SystemAttributeHelper() {
 		assert false;
 	}
 

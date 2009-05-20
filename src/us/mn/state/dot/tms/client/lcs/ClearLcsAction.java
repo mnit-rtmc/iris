@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,37 +14,54 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.rmi.RemoteException;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.Action;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.device.TrafficDeviceAction;
+import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 
 /**
- * Turns all modules off on the LaneControlSignal.
+ * Action to clear all selected LCS arrays.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class ClearLcsAction extends TrafficDeviceAction {
+public class ClearLcsAction extends AbstractAction {
 
-	protected final String userName;
+	/** Selection model */
+	protected final ProxySelectionModel<LCSArray> selectionModel;
 
-	/** Create a new action to clear the selected LCS */
-	public ClearLcsAction(LcsProxy p, TmsConnection c) {
-		super(p);
+	/** User who is sending message */
+	protected final User owner;
+
+	/** Create a new action to clear the selected LCS array */
+	public ClearLcsAction(ProxySelectionModel<LCSArray> s, User o) {
+		selectionModel = s;
+		owner = o;
 		putValue(Action.NAME, "Clear");
-		putValue(Action.SHORT_DESCRIPTION, "Blank the LCS.");
-		putValue(Action.LONG_DESCRIPTION,
-			"Blank the Lane Control Signal.");
-		userName = c.getUser().getName();
+		putValue(Action.SHORT_DESCRIPTION, "Clear the selected LCS");
+	}
+
+	/** Schedule the action to be performed */
+	public void actionPerformed(ActionEvent e) {
+		new AbstractJob() {
+			public void perform() {
+				do_perform();
+			}
+		}.addToScheduler();
 	}
 
 	/** Actually perform the action */
-	protected void do_perform() throws TMSException, RemoteException {
-		LcsProxy lcs = (LcsProxy)proxy;
-		int lanes = lcs.getSignals().length;
-		int[] newSignals = new int[lanes];
-		lcs.setSignals(newSignals, userName);
+	protected void do_perform() {
+		for(LCSArray lcs_array: selectionModel.getSelected()) {
+			Integer[] ind = lcs_array.getIndicationsCurrent();
+			ind = new Integer[ind.length];
+			for(int i = 0; i < ind.length; i++)
+				ind[i] = LaneUseIndication.DARK.ordinal();
+			lcs_array.setOwnerNext(owner);
+			lcs_array.setIndicationsNext(ind);
+		}
 	}
 }

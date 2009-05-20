@@ -17,11 +17,7 @@ package us.mn.state.dot.tms.client.toast;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
-import java.io.IOException;
-import java.rmi.RemoteException;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
@@ -118,16 +114,6 @@ public class SmartDesktop extends JDesktopPane {
 	/** Add an abstract form to the desktop pane */
 	protected JInternalFrame addForm(AbstractForm form) {
 		form.initialize();
-		if(form instanceof TMSObjectForm) {
-			TMSObjectForm of = (TMSObjectForm)form;
-			try {
-				of.doUpdate();
-				of.doStatus();
-			}
-			catch(RemoteException e) {
-				e.printStackTrace();
-			}
-		}
 		JInternalFrame frame = createFrame(form);
 		frame.pack();
 		super.add(frame, FRAME_LAYER);

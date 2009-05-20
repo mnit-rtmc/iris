@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.utils.Transform;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class GeoLocHelper {
+public class GeoLocHelper extends BaseHelper {
 
 	/** The system attribute for the UTM zone */
 	static protected final int UTM_ZONE =

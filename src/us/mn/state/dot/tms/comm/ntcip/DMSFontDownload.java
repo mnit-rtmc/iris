@@ -122,6 +122,7 @@ public class DMSFontDownload extends DMSOperation {
 			catch(SNMP.Message.NoSuchName e) {
 				return populateFontNumbers();
 			}
+			DMS_LOG.log(dms.getName() + ": " + number);
 			Integer f_num = number.getInteger();
 			if(font_numbers.containsKey(f_num)) {
 				font_numbers.put(f_num, row);
@@ -139,7 +140,7 @@ public class DMSFontDownload extends DMSOperation {
 	protected Phase populateFontNumbers() {
 		for(Integer f_num: font_numbers.keySet()) {
 			if(font_numbers.get(f_num) == null) {
-				Integer row = open_rows.pollFirst();
+				Integer row = open_rows.pollLast();
 				if(row != null)
 					font_numbers.put(f_num, row);
 				else
@@ -230,8 +231,10 @@ public class DMSFontDownload extends DMSOperation {
 
 		/** Invalidate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontHeight(index, 0));
+			FontHeight height = new FontHeight(index, 0);
+			mess.add(height);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ": " + height);
 			return new CreateFont();
 		}
 	}
@@ -245,6 +248,7 @@ public class DMSFontDownload extends DMSOperation {
 			status.setInteger(FontStatus.NOT_USED_REQ);
 			mess.add(status);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
 			return new SetStatusModifying();
 		}
 	}
@@ -258,6 +262,7 @@ public class DMSFontDownload extends DMSOperation {
 			status.setInteger(FontStatus.MODIFY_REQ);
 			mess.add(status);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
 			return new VerifyStatusModifying();
 		}
 	}
@@ -293,7 +298,7 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(new FontLineSpacing(index,
 				font.getLineSpacing()));
 			mess.setRequest();
-
+			DMS_LOG.log(dms.getName() + ": create font #" + index);
 			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
 			if(glyphs.isEmpty()) {
 				if(font_status_support)
@@ -373,6 +378,7 @@ public class DMSFontDownload extends DMSOperation {
 			status.setInteger(FontStatus.READY_FOR_USE_REQ);
 			mess.add(status);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
 			return new VerifyStatusReadyForUse();
 		}
 	}

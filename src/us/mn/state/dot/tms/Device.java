@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,31 +14,30 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
-
 /**
  * Device is the base interface for all field devices, including detectors,
  * cameras, ramp meters, dynamic message signs, etc.
  *
  * @author Douglas Lau
  */
-public interface Device extends TMSObject, ControllerIO_RMI {
+public interface Device extends ControllerIO {
 
-	/** Get the active status */
-	public boolean isActive() throws RemoteException;
-
-	/** Get the failure status */
-	public boolean isFailed() throws RemoteException;
-
-	/** Get the device location */
-	String getGeoLoc() throws RemoteException;
-
-	/** Set the device location */
-	void setGeoLoc(String l) throws TMSException, RemoteException;
-
-	/** Get the administrator notes */
-	public String getNotes() throws RemoteException;
+	/** SONAR type names.  This is a list of sub-interfaces required by
+	 * SONAR for the TimingPlan interface, which references Device. */
+	String[] SONAR_TYPES = {
+		Camera.SONAR_TYPE,
+		Detector.SONAR_TYPE,
+		DMS.SONAR_TYPE,
+		RampMeter.SONAR_TYPE,
+		WarningSign.SONAR_TYPE
+	};
 
 	/** Set the administrator notes */
-	public void setNotes(String n) throws TMSException, RemoteException;
+	void setNotes(String n);
+
+	/** Get the administrator notes */
+	String getNotes();
+
+	/** Get the operation description */
+	String getOperation();
 }

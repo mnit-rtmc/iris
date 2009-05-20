@@ -14,15 +14,12 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-
 /**
  * TMSObject
  *
  * @author Douglas Lau
  */
-public interface TMSObject extends Remote {
+public interface TMSObject {
 
 	/** Cross street direction strings to use for detector names */
 	public String[] DIRECTION = {
@@ -51,19 +48,4 @@ public interface TMSObject extends Remote {
 		"N of", "S of", "E of", "W of",
 		"N Jct", "S Jct", "E Jct", "W Jct"
 	};
-
-	/** Is this object deletable? */
-	public boolean isDeletable() throws TMSException, RemoteException;
-
-	/** Add an observer to this object */
-	public void addObserver( RemoteObserver o ) throws RemoteException;
-
-	/** Delete an observer from this object */
-	public void deleteObserver( RemoteObserver o ) throws RemoteException;
-
-	/** Notify all observers of an update */
-	public void notifyUpdate() throws RemoteException;
-
-	/** Get the object ID */
-	public Integer getOID() throws RemoteException;
 }

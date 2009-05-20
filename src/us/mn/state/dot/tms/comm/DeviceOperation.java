@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.comm;
 
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.TrafficDeviceImpl;
+import us.mn.state.dot.tms.DeviceImpl;
 
 /**
  * An operation on a traffic device, such as a ramp meter or DMS.
@@ -28,11 +28,11 @@ abstract public class DeviceOperation extends ControllerOperation {
 	protected final DeviceOperation operation;
 
 	/** Device on which to perform operation */
-	protected final TrafficDeviceImpl device;
+	protected final DeviceImpl device;
 
 	/** Create a new device operation */
-	protected DeviceOperation(int p, TrafficDeviceImpl d) {
-		super(p, (ControllerImpl)d.getControllerImpl(), d.getId());
+	protected DeviceOperation(int p, DeviceImpl d) {
+		super(p, (ControllerImpl)d.getController(), d.getName());
 		operation = this;
 		device = d;
 	}
@@ -47,7 +47,6 @@ abstract public class DeviceOperation extends ControllerOperation {
 			DeviceOperation owner = device.acquire(operation);
 			if(owner != operation)
 				throw new DeviceContentionException(owner);
-			device.notifyStatus();
 			return phaseOne();
 		}
 	}
@@ -62,9 +61,7 @@ abstract public class DeviceOperation extends ControllerOperation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(success)
-			device.notifyStatus();
-		device.release(this);
+		device.release(operation);
 		super.cleanup();
 	}
 }

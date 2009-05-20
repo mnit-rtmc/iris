@@ -36,7 +36,7 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			return EventType.ALARM_CLEARED;
 	}
 
-	/** Load all the comm links */
+	/** Load all the alarms */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading alarms...");
 		namespace.registerType(SONAR_TYPE, AlarmImpl.class);
@@ -224,5 +224,18 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 	/** Get the state of the alarm */
 	public boolean getState() {
 		return state;
+	}
+
+	/** Destroy an alarm */
+	public void doDestroy() throws TMSException {
+		// Don't allow an alarm to be destroyed if it is assigned to
+		// a controller.  This is needed because the Controller io_pins
+		// HashMap will still have a reference to the alarm.
+		if(controller != null) {
+			throw new ChangeVetoException("Alarm must be removed" +
+				" from controller before being destroyed: " +
+				name);
+		}
+		super.doDestroy();
 	}
 }

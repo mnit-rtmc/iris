@@ -57,9 +57,6 @@ public interface Address {
 	/** PM timing table offset */
 	int OFF_PM_TIMING_TABLE = 0x1B;
 
-	/** LCS verify inputs */
-	int LCS_VERIFIES = 0x5003;
-
 	/** Alarm special function inputs */
 	int ALARM_INPUTS = 0x5005;
 
@@ -86,6 +83,9 @@ public interface Address {
 
 	/** Meter data offset for 5-minute green count */
 	int OFF_GREEN_COUNT_5 = 5;
+
+	/** Meter data offset for meter 1 data */
+	int OFF_METER_1 = 0;
 
 	/** Meter data offset for meter 2 data */
 	int OFF_METER_2 = 6;

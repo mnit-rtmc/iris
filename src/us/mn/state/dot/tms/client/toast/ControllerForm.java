@@ -31,23 +31,13 @@ import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
-import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerIO;
-import us.mn.state.dot.tms.ControllerIO_SONAR;
-import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.utils.I18NMessages;
-import us.mn.state.dot.tms.utils.TMSProxy;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records
@@ -139,59 +129,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return state.getControllers();
 	}
 
-	/** Get the ControllerIO array */
-	protected ControllerIO[] getControllerIO() {
-		Integer[] cio = proxy.getCio();
-		ControllerIO[] io = new ControllerIO[cio.length];
-		TMSProxy tms = connection.getProxy();
-		for(int i = 0; i < cio.length; i++) {
-			if(cio[i] != null)
-				io[i] = (ControllerIO)tms.getTMSObject(cio[i]);
-		}
-		TypeCache<Alarm> alarms = state.getAlarms();
-		alarms.findObject(new ControllerIOFinder<Alarm>(io));
-		TypeCache<Camera> cams = state.getCameras();
-		cams.findObject(new ControllerIOFinder<Camera>(io));
-		TypeCache<Detector> dets = state.getDetectors();
-		dets.findObject(new ControllerIOFinder<Detector>(io));
-		TypeCache<DMS> dmss = state.getDMSs();
-		dmss.findObject(new ControllerIOFinder<DMS>(io));
-		TypeCache<WarningSign> w_signs = state.getWarningSigns();
-		w_signs.findObject(new ControllerIOFinder<WarningSign>(io));
-		TypeCache<RampMeter> meters = state.getRampMeters();
-		meters.findObject(new ControllerIOFinder<RampMeter>(io));
-		return io;
-	}
-
-	/** A controller IO finder helps locate IO for a controller */
-	protected class ControllerIOFinder<T extends ControllerIO_SONAR>
-		implements Checker<T>
-	{
-		protected final ControllerIO[] io;
-		protected ControllerIOFinder(ControllerIO[] _io) {
-			io = _io;
-		}
-		public boolean check(ControllerIO_SONAR cios) {
-			if(cios.getController() == proxy) {
-				int pin = cios.getPin();
-				if(pin > 0 && pin < io.length)
-					io[pin] = cios;
-			}
-			return false;
-		}
-	}
-
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
-		try {
-			io_model = new ControllerIOModel(proxy, state,
-				connection.getProxy());
-		}
-		catch(java.rmi.RemoteException e) {
-			e.printStackTrace();
-			return;
-		}
+		io_model = new ControllerIOModel(proxy, state);
+		io_model.initialize();
 		cabinets.addProxyListener(cab_listener);
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));
 		cab_style.setModel(new WrapperComboBoxModel(sty_model, true));
@@ -207,6 +149,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Dispose of the form */
 	protected void dispose() {
+		io_model.dispose();
 		cabinets.removeProxyListener(cab_listener);
 		location.dispose();
 		super.dispose();
@@ -366,7 +309,5 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if(a == null || a.equals("style"))
 			cab_style.setSelectedItem(cabinet.getStyle());
-		if(a == null || a.equals("cio"))
-			io_model.setCio(getControllerIO());
 	}
 }

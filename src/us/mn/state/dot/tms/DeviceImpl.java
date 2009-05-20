@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
-import java.rmi.RemoteException;
+import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.vault.FieldMap;
-import us.mn.state.dot.vault.ObjectVaultException;
 
 /**
  * DeviceImpl is the base class for all field devices, including detectors,
@@ -25,74 +24,66 @@ import us.mn.state.dot.vault.ObjectVaultException;
  *
  * @author Douglas Lau
  */
-abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
-	Storable
+abstract public class DeviceImpl extends BaseObjectImpl implements Device,
+	ControllerIO
 {
-	/** ObjectVault table name */
-	static public final String tableName = "device";
-
-	/** Get the database table name */
-	public String getTable() {
-		return tableName;
-	}
-
 	/** Create a new device */
-	public DeviceImpl(String name) throws TMSException, RemoteException {
-		geo_loc = name;
-		GeoLocImpl loc = new GeoLocImpl(name);
-		loc.doStore();
-		MainServer.server.addObject(loc);
+	protected DeviceImpl(String n) throws TMSException, SonarException {
+		super(n);
 		notes = "";
 	}
 
-	/** Constructor needed for ObjectVault */
-	protected DeviceImpl(FieldMap fields) throws RemoteException {
-		// hmmm
+	/** Create a device */
+	protected DeviceImpl(String n, ControllerImpl c, int p, String nt) {
+		super(n);
+		controller = c;
+		pin = p;
+		notes = nt;
 	}
 
 	/** Initialize the controller for this device */
-	public void initTransients() throws ObjectVaultException,
-		TMSException, RemoteException
-	{
+	public void initTransients() {
 		try {
-			ControllerImpl c = getControllerImpl();
+			ControllerImpl c = controller;
 			if(c != null)
 				c.setIO(pin, this);
 		}
 		catch(TMSException e) {
-			System.err.println("Device " + getId() +
+			System.err.println("Device " + getName() +
 				" initialization error");
 			e.printStackTrace();
 		}
 	}
 
-	/** Get the "unique" string id for this object */
-	abstract String getId();
-
 	/** Get the active status */
 	public boolean isActive() {
-		ControllerImpl c = getControllerImpl();
+		ControllerImpl c = controller;	// Avoid race
 		if(c == null)
 			return false;
 		else
 			return c.getActive();
 	}
 
-	/** Is the device available for a controller? */
-	public boolean isAvailable() {
-		return getControllerImpl() == null;
+	/** Get the failure status */
+	public boolean isFailed() {
+		ControllerImpl c = controller;	// Avoid race
+		if(c == null)
+			return true;
+		else
+			return c.isFailed();
 	}
 
-	/** Is this object deletable? */
-	public boolean isDeletable() throws TMSException {
-		if(isActive())
-			return false;
+	/** Get the message poller */
+	public MessagePoller getPoller() {
+		ControllerImpl c = controller;	// Avoid race
+		if(c != null)
+			return c.getPoller();
 		else
-			return super.isDeletable();
+			return null;
 	}
 
 	/** Controller associated with this traffic device */
-	protected String controller = "";
+	protected ControllerImpl controller;
 
 	/** Update the controller and/or pin */
 	protected void updateController(ControllerImpl oc, ControllerImpl c,
@@ -112,49 +103,45 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 	}
 
 	/** Set the controller of the device */
-	public synchronized void setController(String c) throws TMSException {
-		if(c == null)
-			c = "";
-		if(c.equals(controller))
+	public void setController(Controller c) {
+		controller = (ControllerImpl)c;
+	}
+
+	/** Set the controller of the device */
+	public void doSetController(Controller c) throws TMSException {
+		if(c == controller)
 			return;
-		if(!c.equals("") && !controller.equals(""))
+		if(c != null && controller != null)
 			throw new ChangeVetoException("Device has controller");
-		updateController(lookupController(controller),
-			lookupController(c), pin);
-		store.update(this, "controller", c);
-		controller = c;
+		if(c != null && !(c instanceof ControllerImpl))
+			throw new ChangeVetoException("Invalid controller");
+		updateController(controller, (ControllerImpl)c, pin);
+		if(c == null)
+			store.update(this, "controller", null);
+		else
+			store.update(this, "controller", c.getName());
+		setController(c);
 	}
 
 	/** Get the controller to which this device is assigned */
-	public String getController() {
+	public Controller getController() {
 		return controller;
 	}
 
-	/** Get the controller to which this device is assigned */
-	public ControllerImpl getControllerImpl() {
-		return lookupController(controller);
-	}
-
-	/** Get the message poller */
-	public MessagePoller getPoller() {
-		ControllerImpl c = getControllerImpl();
-		if(c != null)
-			return c.getPoller();
-		else
-			return null;
-	}
-
 	/** Controller I/O pin number */
-	protected int pin;
+	protected int pin = 0;
 
 	/** Set the controller I/O pin number */
-	public synchronized void setPin(int p) throws TMSException {
+	public void setPin(int p) {
+		pin = p;
+	}
+
+	/** Set the controller I/O pin number */
+	public void doSetPin(int p) throws TMSException {
 		if(p == pin)
 			return;
-		ControllerImpl c = getControllerImpl();
-		updateController(c, c, p);
 		store.update(this, "pin", p);
-		pin = p;
+		setPin(p);
 	}
 
 	/** Get the controller I/O pin number */
@@ -162,49 +149,80 @@ abstract class DeviceImpl extends TMSObjectImpl implements Device, ControllerIO,
 		return pin;
 	}
 
-	/** Get the failure status */
-	public boolean isFailed() {
-		ControllerImpl c = getControllerImpl();
-		if(c == null)
-			return true;
-		else
-			return c.isFailed();
-	}
-
-	/** Device location */
-	protected String geo_loc;
-
-	/** Set the controller location */
-	public synchronized void setGeoLoc(String l) throws TMSException {
-		if(l == geo_loc)
-			return;
-		store.update(this, "geo_loc", l);
-		geo_loc = l;
-	}
-
-	/** Get the device location */
-	public String getGeoLoc() {
-		return geo_loc;
-	}
-
-	/** Lookup the geo location */
-	public GeoLocImpl lookupGeoLoc() {
-		return lookupGeoLoc(geo_loc);
-	}
-
 	/** Administrator notes for this device */
 	protected String notes;
+
+	/** Set the administrator notes */
+	public void setNotes(String n) {
+		notes = n;
+	}
+
+	/** Set the administrator notes */
+	public void doSetNotes(String n) throws TMSException {
+		if(n.equals(notes))
+			return;
+		store.update(this, "notes", n);
+		setNotes(n);
+	}
 
 	/** Get the administrator notes */
 	public String getNotes() {
 		return notes;
 	}
 
-	/** Set the administrator notes */
-	public synchronized void setNotes(String n) throws TMSException {
-		if(n.equals(notes))
-			return;
-		store.update(this, "notes", n);
-		notes = n;
+	/** Operation which owns the device */
+	protected transient DeviceOperation owner;
+
+	/** Acquire ownership of the device */
+	public DeviceOperation acquire(DeviceOperation o) {
+		try {
+			// Name used for unique device acquire/release lock
+			synchronized(name) {
+				if(owner == null)
+					owner = o;
+				return owner;
+			}
+		}
+		finally {
+			notifyAttribute("operation");
+		}
+	}
+
+	/** Release ownership of the device */
+	public DeviceOperation release(DeviceOperation o) {
+		try {
+			// Name used for unique device acquire/release lock
+			synchronized(name) {
+				DeviceOperation _owner = owner;
+				if(owner == o)
+					owner = null;
+				return _owner;
+			}
+		}
+		finally {
+			notifyAttribute("operation");
+		}
+	}
+
+	/** Get a description of the current device operation */
+	public String getOperation() {
+		DeviceOperation o = owner;
+		if(o == null)
+			return "None";
+		else
+			return o.getOperationDescription();
+	}
+
+	/** Destroy an object */
+	public void doDestroy() throws TMSException {
+		// Don't allow a device to be destroyed if it is assigned to
+		// a controller.  This is needed because the Controller io_pins
+		// HashMap will still have a reference to the device.
+		if(controller != null) {
+			throw new ChangeVetoException("Device must be removed" +
+				" from controller before being destroyed: " +
+				name);
+		}
+		super.doDestroy();
 	}
 }

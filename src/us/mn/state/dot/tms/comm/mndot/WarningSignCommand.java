@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * Operation to command a 170 controller warning sign
  *
  * @author Douglas Lau
  */
-public class WarningSignCommand extends Device2Operation {
+public class WarningSignCommand extends DeviceOperation {
 
 	/** Get the appropriate rate for the deployed state */
 	static protected byte getDeployedRate(boolean d) {

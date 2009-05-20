@@ -1094,7 +1094,7 @@ public class StratifiedPlanState extends TimingPlanState {
 
 	/** Get the meter state for a given timing plan */
 	protected MeterState getMeterState(TimingPlanImpl plan) {
-		Device2 device = plan.getDevice();
+		Device device = plan.getDevice();
 		if(!(device instanceof RampMeterImpl))
 			return null;
 		RampMeterImpl meter = (RampMeterImpl)device;

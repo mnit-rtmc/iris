@@ -35,7 +35,7 @@ import javax.swing.JTextField;
 public class FormPanel extends JPanel {
 
 	/** Create a non-editable text field */
-	static protected JTextField createTextField() {
+	static public JTextField createTextField() {
 		JTextField f = new JTextField();
 		f.setEditable(false);
 		return f;

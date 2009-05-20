@@ -109,12 +109,12 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Lookup a device (DMS or ramp meter) */
-	static protected Device2 lookupDevice(Namespace ns, String d) {
-		Device2 dv = (Device2)ns.lookupObject(DMS.SONAR_TYPE, d);
+	static protected Device lookupDevice(Namespace ns, String d) {
+		Device dv = (Device)ns.lookupObject(DMS.SONAR_TYPE, d);
 		if(dv != null)
 			return dv;
 		else
-			return (Device2)ns.lookupObject(RampMeter.SONAR_TYPE,d);
+			return (Device)ns.lookupObject(RampMeter.SONAR_TYPE, d);
 	}
 
 	/** Get a mapping of the columns */
@@ -154,7 +154,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Create a new timing plan */
-	protected TimingPlanImpl(String n, int p, Device2 d, int st, int sp,
+	protected TimingPlanImpl(String n, int p, Device d, int st, int sp,
 		boolean a, boolean tst, int t)
 	{
 		this(n);
@@ -176,10 +176,10 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	}
 
 	/** Device */
-	protected Device2 device;
+	protected Device device;
 
 	/** Get the device */
-	public Device2 getDevice() {
+	public Device getDevice() {
 		return device;
 	}
 
@@ -366,7 +366,7 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 
 	/** Lookup or create a stratified plan state */
 	protected TimingPlanState lookupOrCreateStratified() {
-		Device2 d = device;
+		Device d = device;
 		if(d instanceof RampMeterImpl) {
 			RampMeterImpl meter = (RampMeterImpl)d;
 			Corridor c = meter.getCorridor();

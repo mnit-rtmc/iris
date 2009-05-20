@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -164,7 +165,9 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.add(new DynBrightDayRate(1));
 			mess.add(new DynBrightNightRate(15));
 			mess.add(new DynBrightMaxNightManLvl(20));
-			try { mess.setRequest(); }
+			try {
+				mess.setRequest();
+			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Must not be a Skyline sign
 				return new AddcoDefaults();
@@ -173,17 +176,21 @@ public class DMSDefaultDownload extends DMSOperation {
 		}
 	}
 
-	/** Phase to set Addco-specific object defaults */
+	/** Phase to set ADDCO-specific object defaults */
 	protected class AddcoDefaults extends Phase {
 
-		/** Set Addco-specific object defaults */
+		/** Set ADDCO-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			// FIXME: this should be as a SignRequest, maybe...
-			mess.add(new DmsHorizontalBorder(50));
-			mess.add(new DmsVerticalBorder(69));
-			mess.add(new VmsHorizontalPitch(69));
-			mess.add(new VmsVerticalPitch(69));
-			mess.setRequest("administrator");
+			// ADDCO brick signs have these dimensions
+			if(dms.getMake().startsWith("ADDCO") &&
+			   dms.getDmsType() == DMSType.VMS_CHAR.ordinal())
+			{
+				mess.add(new DmsHorizontalBorder(50));
+				mess.add(new DmsVerticalBorder(69));
+				mess.add(new VmsHorizontalPitch(69));
+				mess.add(new VmsVerticalPitch(69));
+				mess.setRequest("administrator");
+			}
 			return null;
 		}
 	}

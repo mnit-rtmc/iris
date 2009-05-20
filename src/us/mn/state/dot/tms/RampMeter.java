@@ -20,7 +20,7 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  */
-public interface RampMeter extends Device2 {
+public interface RampMeter extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "ramp_meter";

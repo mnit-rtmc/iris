@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.SignPoller;
 import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
@@ -34,8 +33,8 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class CawsPoller extends MessagePoller implements SignPoller
-{
+public class CawsPoller extends MessagePoller {
+
 	/** the only valid drop address */
 	static public final int VALID_DROP_ADDRESS = 1;
 
@@ -68,9 +67,6 @@ public class CawsPoller extends MessagePoller implements SignPoller
 		//System.err.println("CawsPoller.download() called, reset="
 		//		   + reset);
 	}
-
-	/** Perform a sign status poll. Defined in SignPoller interface. */
-	public void pollSigns(ControllerImpl c, Completer comp) {}
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {

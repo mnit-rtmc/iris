@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.comm.MeterPoller;
  *
  * @author Douglas Lau
  */
-public class RampMeterImpl extends Device2Impl implements RampMeter {
+public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Ordinal value for lock "OFF" */
 	static protected final Integer OFF_ORDINAL =

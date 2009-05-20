@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,10 +11,6 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 package us.mn.state.dot.tms.comm.ntcip;
 
@@ -37,9 +33,12 @@ public class ControllerErrorStatus extends StatError implements ASN1Integer {
 	/** RAM error */
 	static public final int RAM = 1 << 3;
 
+	/** Controller-to-display interface error */
+	static public final int DISPLAY = 1 << 4;
+
 	/** Error descriptions */
 	static protected final String ERROR[] = {
-		"OTHER", "PROM", "PROGRAM/PROCESSOR", "RAM"
+		"OTHER", "PROM", "PROGRAM/PROCESSOR", "RAM", "DISPLAY"
 	};
 
 	/** Create a new ControllerErrorStatus object */
@@ -50,27 +49,35 @@ public class ControllerErrorStatus extends StatError implements ASN1Integer {
 	}
 
 	/** Get the object name */
-	protected String getName() { return "controllerErrorStatus"; }
+	protected String getName() {
+		return "controllerErrorStatus";
+	}
 
 	/** Short error status bitfield */
 	protected int status;
 
 	/** Set the integer value */
-	public void setInteger(int value) { status = value; }
+	public void setInteger(int value) {
+		status = value;
+	}
 
 	/** Get the integer value */
-	public int getInteger() { return status; }
+	public int getInteger() {
+		return status;
+	}
 
 	/** Get the object value */
 	public String getValue() {
-		StringBuffer buffer = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		for(int i = 0; i < ERROR.length; i++) {
 			if((status & 1 << i) != 0) {
-				if(buffer.length() > 0) buffer.append(", ");
-				buffer.append(ERROR[i] + " ERROR");
+				if(buf.length() > 0)
+					buf.append(", ");
+				buf.append(ERROR[i] + " ERROR");
 			}
 		}
-		if(buffer.length() == 0) buffer.append("OK");
-		return buffer.toString();
+		if(buf.length() == 0)
+			buf.append("OK");
+		return buf.toString();
 	}
 }

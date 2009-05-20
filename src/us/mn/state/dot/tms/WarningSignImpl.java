@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.comm.WarningSignPoller;
  *
  * @author Douglas Lau
  */
-public class WarningSignImpl extends Device2Impl implements WarningSign {
+public class WarningSignImpl extends DeviceImpl implements WarningSign {
 
 	/** Load all the warning signs */
 	static protected void loadAll() throws TMSException {

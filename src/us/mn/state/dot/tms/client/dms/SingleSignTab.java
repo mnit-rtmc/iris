@@ -28,6 +28,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
@@ -45,15 +46,6 @@ public class SingleSignTab extends FormPanel {
 
 	/** Empty text field */
 	static protected final String EMPTY_TXT = "    ";
-
-	/** Get the verification camera name */
-	static protected String getCameraName(DMS proxy) {
-		Camera camera = proxy.getCamera();
-		if(camera == null)
-			return EMPTY_TXT;
-		else
-			return camera.getName();
-	}
 
 	/** Get the controller status */
 	static protected String getControllerStatus(DMS proxy) {
@@ -264,7 +256,7 @@ public class SingleSignTab extends FormPanel {
 				brightnessTxt.setText("");
 		}
 		if(a == null || a.equals("camera"))
-			cameraTxt.setText(getCameraName(dms));
+			cameraTxt.setText(DMSHelper.getCameraName(dms));
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
 			locationTxt.setText(GeoLocHelper.getDescription(

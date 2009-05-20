@@ -17,16 +17,19 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.EOFException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Interval;
-import us.mn.state.dot.tms.LaneControlSignalImpl;
+import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
+import us.mn.state.dot.tms.comm.LCSPoller;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.MeterPoller;
@@ -39,7 +42,7 @@ import us.mn.state.dot.tms.comm.WarningSignPoller;
  * @author Douglas Lau
  */
 public class MndotPoller extends MessagePoller implements MeterPoller,
-	WarningSignPoller
+	WarningSignPoller, LCSPoller
 {
 	/** Test if it is afternoon */
 	static protected boolean isAfternoon() {
@@ -122,23 +125,13 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 	}
 
 	/** Perform a 30-second poll */
-	public void pollSigns(ControllerImpl c, Completer comp) {
-		if(c.getActive()) {
-			LaneControlSignalImpl lcs = c.getActiveLcs();
-			if(lcs != null)
-				new LCSQuerySignal(lcs, comp).start();
-			WarningSignImpl warn = c.getActiveWarningSign();
-			if(warn != null)
-				new WarningStatus(warn, comp).start();
-		}
-	}
-
-	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		if(c.hasActiveDetector())
-			new Data30Second(c, comp).start();
-		if(c.hasActiveMeter())
-			new QueryMeterStatus(c, comp).start();
+		if(c.getActive()) {
+			if(c.hasActiveDetector())
+				new Data30Second(c, comp).start();
+			if(c.hasActiveMeter())
+				new QueryMeterStatus(c, comp).start();
+		}
 	}
 
 	/** Perform a 5-minute poll */
@@ -197,8 +190,30 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 			new MeterRateCommand(meter, n, rate).start();
 	}
 
+	/** Send a sign request to a warning sign */
+	public void sendRequest(WarningSignImpl sign, SignRequest r) {
+		if(r == SignRequest.QUERY_STATUS)
+			new WarningStatus(sign).start();
+	}
+
 	/** Set the deployed status of the sign */
 	public void setDeployed(WarningSignImpl sign, boolean d) {
 		new WarningSignCommand(sign, d).start();
+	}
+
+	/** Send a sign request to an LCS array */
+	public void sendRequest(LCSArrayImpl lcs_array, SignRequest r) {
+		if(r == SignRequest.QUERY_STATUS)
+			new LCSQueryStatus(lcs_array).start();
+	}
+
+	/** Send new indications to an LCS array.
+	 * @param lcs_array LCS array.
+	 * @param ind New lane use indications.
+	 * @param o User who deployed the indications. */
+	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
+		User o)
+	{
+		new LCSSendIndications(lcs_array, ind, o).start();
 	}
 }

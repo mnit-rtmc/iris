@@ -23,7 +23,7 @@ public class TimingPlanState {
 
 	/** Validate a timing plan */
 	public void validate(TimingPlanImpl plan) {
-		Device2 device = plan.getDevice();
+		Device device = plan.getDevice();
 		if(device instanceof DMSImpl) {
 			DMSImpl dms = (DMSImpl)device;
 			if(plan.isOperating())

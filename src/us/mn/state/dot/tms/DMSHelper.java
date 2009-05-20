@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSHelper {
+public class DMSHelper extends BaseHelper {
 
 	/** don't instantiate */
 	private DMSHelper() {
@@ -98,10 +98,9 @@ public class DMSHelper {
 	/** Test if a DMS is deployed */
 	static public boolean isDeployed(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
-		if(m != null) {
-			MultiString ms = new MultiString(m.getMulti());
-			return !ms.isBlank();
-		} else {
+		if(m != null)
+			return !SignMessageHelper.isBlank(m);
+		else {
 			// messageCurrent should never be null, so this means
 			// the proxy has just been removed
 			return false;
@@ -110,7 +109,7 @@ public class DMSHelper {
 
 	/** Test if a DMS is active, not failed and deployed */
 	static public boolean isMessageDeployed(DMS proxy) {
-		return DMSHelper.isActive(proxy) &&
+		return isActive(proxy) &&
 		       !isFailed(proxy) &&
 		       isDeployed(proxy);
 	}
@@ -136,14 +135,14 @@ public class DMSHelper {
 	/** Test if a DMS has been deployed by a user */
 	static public boolean isUserDeployed(DMS proxy) {
 		return isMessageDeployed(proxy) &&
-		       !DMSHelper.isTravelTime(proxy) &&
+		       !isTravelTime(proxy) &&
 		       !isAwsDeployed(proxy);
 	}
 
 	/** Test if a DMS has been deployed for travel time */
 	static public boolean isTravelTimeDeployed(DMS proxy) {
 		return isMessageDeployed(proxy) &&
-		       DMSHelper.isTravelTime(proxy);
+		       isTravelTime(proxy);
 	}
 
 	/** Test if a DMS needs maintenance */
@@ -170,22 +169,24 @@ public class DMSHelper {
 
 	/** Check the style of the specified proxy */
 	static public boolean checkStyle(String s, DMS proxy) {
+		if(LCSHelper.lookup(proxy.getName()) != null)
+			return false;
 		if(STYLE_AVAILABLE.equals(s))
-			return DMSHelper.isAvailable(proxy);
+			return isAvailable(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
-			return DMSHelper.isUserDeployed(proxy);
+			return isUserDeployed(proxy);
 		else if(STYLE_TRAVEL_TIME.equals(s))
-			return DMSHelper.isTravelTimeDeployed(proxy);
+			return isTravelTimeDeployed(proxy);
 		else if(STYLE_AWS_DEPLOYED.equals(s))
-			return DMSHelper.isAwsMessageDeployed(proxy);
+			return isAwsMessageDeployed(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
-			return DMSHelper.needsMaintenance(proxy);
+			return needsMaintenance(proxy);
 		else if(STYLE_INACTIVE.equals(s))
-			return !DMSHelper.isActive(proxy);
+			return !isActive(proxy);
 		else if(STYLE_FAILED.equals(s))
-			return DMSHelper.isFailed(proxy);
+			return isFailed(proxy);
 		else if(STYLE_AWS_CONTROLLED.equals(s))
-			return DMSHelper.isAwsControlled(proxy);
+			return isAwsControlled(proxy);
 		else if(STYLE_NO_CONTROLLER.equals(s))
 			return proxy.getController() == null;
 		else
@@ -196,9 +197,27 @@ public class DMSHelper {
 	 *  separated by commas. */
 	static public String getAllStyles(DMS proxy) {
 		StringBuilder s = new StringBuilder("");
-		for(String style : STYLES_ALL)
-			if(DMSHelper.checkStyle(style, proxy))
+		for(String style: STYLES_ALL)
+			if(checkStyle(style, proxy))
 				s.append(style).append(", ");
 		return SString.removeTail(s.toString(), ", ");
+	}
+
+	/** Lookup the DMS with the specified name */
+	static public DMS lookup(String name) {
+		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
+	}
+
+	/** Empty text field */
+	static protected final String EMPTY_TXT = "    ";
+
+	/** Get the verification camera name */
+	static public String getCameraName(DMS proxy) {
+		if(proxy != null) {
+			Camera camera = proxy.getCamera();
+			if(camera != null)
+				return camera.getName();
+		}
+		return EMPTY_TXT;
 	}
 }

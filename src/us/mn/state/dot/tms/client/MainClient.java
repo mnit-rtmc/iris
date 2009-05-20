@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client;
 import java.io.File;
 import java.io.IOException;
 import java.net.ProxySelector;
-import java.net.ServerSocket;
 import java.net.URL;
 import java.util.Properties;
 import java.util.TimeZone;
@@ -39,17 +38,6 @@ public class MainClient {
 
 	/** Application name */
 	static protected final String NAME = "IRIS Client";
-
-	/** Socket to prevent more than one instance of IRIS per host */
-	static protected ServerSocket socket;
-
-	/** Bind to a socket to prevent multiple instances from running.
-	 * Only one instance of the IRIS client is allowed on any machine.
-	 * This is enforced by binding a server socket to port 1099.  If that
-	 * port is in use an error message will be displayed to the user. */
-	static protected void bindSocket() throws IOException {
-		socket = new ServerSocket(1099, 0);
-	}
 
 	/** Create a URL for the specified property file */
 	static protected URL createURL(String prop_file) throws IOException {
@@ -122,7 +110,6 @@ public class MainClient {
 	 */
 	static protected void execute(final String[] args) throws Exception {
 		sanityChecks();
-		bindSocket();
 		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
 		Scheduler.setHandler(new SimpleHandler());

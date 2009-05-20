@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ChecksumException;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.utils.I18NMessages;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-abstract public class OpDms extends Device2Operation {
+abstract public class OpDms extends DeviceOperation {
 
 	/** failure message for unknown reasons */
 	final static String FAILURE_UNKNOWN = "Failure, unknown reason";

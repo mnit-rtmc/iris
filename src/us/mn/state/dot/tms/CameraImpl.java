@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
  * @author Douglas Lau
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  */
-public class CameraImpl extends Device2Impl implements Camera {
+public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Load all the cameras */
 	static protected void loadAll() throws TMSException {

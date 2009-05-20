@@ -56,7 +56,6 @@
 	<property name="install.dir" value="${build.dir}/install"/>
 
 	<!-- Dependent jar configuration -->
-	<property name="vault.jar" value="vault-${vault.version}.jar"/>
 	<property name="scheduler.jar"
 		  value="scheduler-${scheduler.version}.jar"/>
 	<property name="sonar.server.jar"
@@ -146,12 +145,6 @@
 			       value="${scheduler.version}"/>
 		</antcall>
 		<antcall target="check-subproject">
-			<param name="file.dep" value="${vault.jar}"/>
-			<param name="repo.name" value="vault"/>
-			<param name="repo.version"
-			       value="${vault.version}"/>
-		</antcall>
-		<antcall target="check-subproject">
 			<param name="file.dep" value="${sonar.server.jar}"/>
 			<param name="repo.name" value="sonar"/>
 			<param name="repo.version" value="${sonar.version}"/>
@@ -200,8 +193,6 @@
 				<filter token="VERSION" value="${version}"/>
 				<filter token="SCHEDULER.VERSION"
 				        value="${scheduler.version}"/>
-				<filter token="VAULT.VERSION"
-					value="${vault.version}"/>
 				<filter token="SONAR.VERSION"
 					value="${sonar.version}"/>
 				<filter token="TMSLOG.VERSION"
@@ -279,20 +270,9 @@
 		</javac>
 	</target>
 
-	<!-- Build the RMI stuff -->
-	<target name="rmi-build"
-		depends="compile"
-		description="Build the RMI code">
-		<rmic base="${build.classes}"
-		      classpathref="classpath"
-		      includes="**/*Impl.class"
-		      stubversion="1.2"
-		      verify="true"/>
-	</target>
-
 	<!-- Create the RMI jar -->
 	<target name="rmi-jar"
-		depends="rmi-build"
+		depends="compile"
 		description="Create the RMI jar">
 		<jar jarfile="${build.lib}/${rmi.jar}"
 		     basedir="${build.classes}"
@@ -338,7 +318,6 @@
 				<include name="mail.jar"/>
 				<include name="postgresql.jar"/>
 				<include name="${scheduler.jar}"/>
-				<include name="${vault.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>
 		</copy>
@@ -574,7 +553,6 @@
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
 				<include name="${tms-log.jar}"/>
-				<include name="${vault.jar}"/>
 				<include name="${videoclient.jar}"/>
 			</fileset>
 		</delete>

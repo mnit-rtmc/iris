@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.comm.manchester;
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * Manchester operation to move a camera.
  *
  * @author Douglas Lau
  */
-public class MoveCamera extends Device2Operation {
+public class MoveCamera extends DeviceOperation {
 
 	/** Range of PTZ values */
 	static protected final int PTZ_RANGE = 8;

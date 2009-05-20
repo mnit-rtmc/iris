@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.Camera;
@@ -39,6 +40,9 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.LCS;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -47,7 +51,6 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
@@ -59,9 +62,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Douglas Lau
  */
 public class SonarState extends Client {
-
-	/** FIXME: this is a temporary hack */
-	static public SonarState singleton;
 
 	/** Cache of role proxies */
 	protected final TypeCache<Role> roles;
@@ -327,6 +327,30 @@ public class SonarState extends Client {
 		return sign_text;
 	}
 
+	/** Cache of LCS arrays */
+	protected final TypeCache<LCSArray> lcs_arrays;
+
+	/** Get the LCS array cache */
+	public TypeCache<LCSArray> getLCSArrays() {
+		return lcs_arrays;
+	}
+
+	/** Cache of LCS */
+	protected final TypeCache<LCS> lcss;
+
+	/** Get the LCS cache */
+	public TypeCache<LCS> getLCSs() {
+		return lcss;
+	}
+
+	/** Cache of LCS indications */
+	protected final TypeCache<LCSIndication> lcs_indications;
+
+	/** Get the LCS indication cache */
+	public TypeCache<LCSIndication> getLCSIndications() {
+		return lcs_indications;
+	}
+
 	/** Cache of timing plans */
 	protected final TypeCache<TimingPlan> timing_plans;
 
@@ -394,10 +418,13 @@ public class SonarState extends Client {
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
 		sign_text = new TypeCache<SignText>(SignText.class, this);
+		lcs_arrays = new TypeCache<LCSArray>(LCSArray.class, this);
+		lcss = new TypeCache<LCS>(LCS.class, this);
+		lcs_indications = new TypeCache<LCSIndication>(
+			LCSIndication.class, this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
-		singleton = this;
 		// FIXME: this is an ugly hack
-		SystemAttributeHelper.namespace = getNamespace();
+		BaseHelper.namespace = getNamespace();
 	}
 
 	/** Login to the SONAR server */
@@ -432,10 +459,14 @@ public class SonarState extends Client {
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
+		populate(lcs_arrays);
+		populate(lcss);
+		populate(lcs_indications);
 		populate(timing_plans);
 
 		dmss.ignoreAttribute("operation");
 		ramp_meters.ignoreAttribute("operation");
+		lcs_arrays.ignoreAttribute("operation");
 	}
 
 	/** Look up the specified user */
@@ -446,11 +477,6 @@ public class SonarState extends Client {
 	/** Lookup a geo location */
 	public GeoLoc lookupGeoLoc(String name) {
 		return geo_locs.lookupObject(name);
-	}
-
-	/** Lookup a controller */
-	public Controller lookupController(String name) {
-		return controllers.lookupObject(name);
 	}
 
 	/** Lookup a detector */

@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * Operation to update a 170 controller metering rate
  *
  * @author Douglas Lau
  */
-public class MeterRateCommand extends Device2Operation {
+public class MeterRateCommand extends DeviceOperation {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
