@@ -62,9 +62,6 @@ public class IrisClient extends JFrame {
 	/** Handles all user authentication */
 	protected final UserManager userManager;
 
-	/** Hostname of TMS server */
-	protected final String hostName;
-
 	/** Contains information about the current connection */
 	protected final TmsConnection tmsConnection;
 
@@ -117,8 +114,6 @@ public class IrisClient extends JFrame {
 		});
 		userManager = new UserManager(desktop, props);
 		tmsConnection = new TmsConnection(desktop, userManager, props);
-		hostName = props.getProperty( "TMSIpAddress" ) + ":" +
-			props.getProperty("TMSPort");
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
 		buildMenus( userManager );
@@ -182,7 +177,7 @@ public class IrisClient extends JFrame {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +
 			user.getFullName() + ")");
-		tmsConnection.open(hostName, user.getFullName());
+		tmsConnection.open(user.getFullName());
 		session = new Session(tmsConnection,
 			userManager.getSonarState(), props, logger);
 		arrangeTabs();

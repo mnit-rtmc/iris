@@ -87,7 +87,7 @@ public class TmsConnection {
 	}
 
 	/** Open the connection */
-	public void open(String hostName, String userName) throws IOException {
+	public void open(String userName) throws IOException {
 		connectionOpen = true;
 	}
 

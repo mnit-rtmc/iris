@@ -53,7 +53,6 @@ function create_keystores() {
 function update_hostname() {
 	host=`hostname -f`
 	p_client=/etc/iris/iris-client.properties
-	sed -i ''s,.*TMSIpAddress=.*,TMSIpAddress=$host,'' $p_client
 	sed -i ''s,.*keystore.file=.*,keystore.file=http://$host/iris-client/iris-client.keystore,'' $p_client
 	sed -i ''s,.*sonar.host=.*,sonar.host=$host,'' $p_client
 }
