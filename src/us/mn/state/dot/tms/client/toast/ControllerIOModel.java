@@ -29,6 +29,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -117,32 +118,56 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller object */
 	protected final Controller controller;
 
+	/** SONAR state */
+	protected final SonarState state;
+
 	/** Array of ControllerIO assignments */
-	protected ControllerIO[] io;
+	protected final ControllerIO[] io;
 
 	/** Array of ControllerIO device types */
-	protected DeviceType[] types;
+	protected final DeviceType[] types;
 
 	/** Available alarm model */
 	protected final WrapperComboBoxModel a_model;
 
+	/** Controller IO watcher for alarms */
+	protected final ControllerIOWatcher<Alarm> a_watcher;
+
 	/** Available camera model */
 	protected final WrapperComboBoxModel c_model;
+
+	/** Controller IO watcher for cameras */
+	protected final ControllerIOWatcher<Camera> c_watcher;
 
 	/** Available detector model */
 	protected final WrapperComboBoxModel dt_model;
 
+	/** Controller IO watcher for detectors */
+	protected final ControllerIOWatcher<Detector> det_watcher;
+
 	/** Available DMS model */
 	protected final WrapperComboBoxModel dms_model;
+
+	/** Controller IO watcher for DMSs */
+	protected final ControllerIOWatcher<DMS> dms_watcher;
 
 	/** Available LCS indication model */
 	protected final WrapperComboBoxModel lcsi_model;
 
+	/** Controller IO watcher for LCS indications */
+	protected final ControllerIOWatcher<LCSIndication> lcsi_watcher;
+
 	/** Available ramp meter model */
 	protected final WrapperComboBoxModel m_model;
 
+	/** Controller IO watcher for ramp meters */
+	protected final ControllerIOWatcher<RampMeter> m_watcher;
+
 	/** Available warning sign model */
 	protected final WrapperComboBoxModel w_model;
+
+	/** Controller IO watcher for warning signs */
+	protected final ControllerIOWatcher<WarningSign> w_watcher;
 
 	/** Model for null device type */
 	protected final ComboBoxModel no_model = new DefaultComboBoxModel();
@@ -151,10 +176,11 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected final JComboBox d_combo = new JComboBox();
 
 	/** Create a new controller IO model */
-	public ControllerIOModel(Controller c, SonarState state) {
+	public ControllerIOModel(Controller c, SonarState st) {
 		controller = c;
-		io = new ControllerIO[0];
-		types = new DeviceType[0];
+		state = st;
+		io = new ControllerIO[Controller.ALL_PINS];
+		types = new DeviceType[Controller.ALL_PINS];
 		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
 			 true);
 		c_model = new WrapperComboBoxModel(
@@ -175,19 +201,35 @@ public class ControllerIOModel extends AbstractTableModel {
 		w_model = new WrapperComboBoxModel(
 			Session.warn_manager_singleton.getStyleModel(
 			WarningSignManager.STYLE_NO_CONTROLLER), true);
+		a_watcher = new ControllerIOWatcher<Alarm>();
+		c_watcher = new ControllerIOWatcher<Camera>();
+		det_watcher = new ControllerIOWatcher<Detector>();
+		dms_watcher = new ControllerIOWatcher<DMS>();
+		lcsi_watcher = new ControllerIOWatcher<LCSIndication>();
+		m_watcher = new ControllerIOWatcher<RampMeter>();
+		w_watcher = new ControllerIOWatcher<WarningSign>();
 	}
 
-	/** Set the array of controller IO assignments */
-	public void setCio(ControllerIO[] cio) {
-		io = cio;
-		types = new DeviceType[cio.length];
-		for(int i = 0; i < cio.length; i++)
-			types[i] = getType(cio[i]);
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				fireTableDataChanged();
-			}
-		});
+	/** Initialize the model */
+	public void initialize() {
+		state.getAlarms().addProxyListener(a_watcher);
+		state.getCameras().addProxyListener(c_watcher);
+		state.getDetectors().addProxyListener(det_watcher);
+		state.getDMSs().addProxyListener(dms_watcher);
+		state.getLCSIndications().addProxyListener(lcsi_watcher);
+		state.getRampMeters().addProxyListener(m_watcher);
+		state.getWarningSigns().addProxyListener(w_watcher);
+	}
+
+	/** Dispose of the model */
+	public void dispose() {
+		state.getAlarms().removeProxyListener(a_watcher);
+		state.getCameras().removeProxyListener(c_watcher);
+		state.getDetectors().removeProxyListener(det_watcher);
+		state.getDMSs().removeProxyListener(dms_watcher);
+		state.getLCSIndications().removeProxyListener(lcsi_watcher);
+		state.getRampMeters().removeProxyListener(m_watcher);
+		state.getWarningSigns().removeProxyListener(w_watcher);
 	}
 
 	/** Get the count of columns in the table */
@@ -347,5 +389,58 @@ public class ControllerIOModel extends AbstractTableModel {
 		m.addColumn(createTypeColumn());
 		m.addColumn(createDeviceColumn());
 		return m;
+	}
+
+	/** Controller IO watcher */
+	protected class ControllerIOWatcher<T extends ControllerIO>
+		implements ProxyListener<T>
+	{
+		public void proxyAdded(ControllerIO p) {
+			addIO(p);
+		}
+		public void enumerationComplete() { }
+		public void proxyRemoved(ControllerIO p) {
+			removeIO(p);
+		}
+		public void proxyChanged(ControllerIO p, final String a) {
+			if("controller".equals(a) || "pin".equals(a)) {
+				removeIO(p);
+				addIO(p);
+			}
+		}
+	}
+
+	/** Add an IO to a pin on the controller */
+	protected void addIO(ControllerIO p) {
+		if(p.getController() == controller) {
+			int pin = p.getPin();
+			if(pin > 0 && pin < io.length) {
+				io[pin] = p;
+				types[pin] = getType(p);
+				final int row = pin - 1;
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						fireTableRowsUpdated(row, row);
+					}
+				});
+			}
+		}
+	}
+
+	/** Remove an IO from a pin on the controller */
+	protected void removeIO(ControllerIO p) {
+		for(int pin = 0; pin < io.length; pin++) {
+			if(io[pin] == p) {
+				io[pin] = null;
+				types[pin] = null;
+				final int row = pin - 1;
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						fireTableRowsUpdated(row, row);
+					}
+				});
+				return;
+			}
+		}
 	}
 }
