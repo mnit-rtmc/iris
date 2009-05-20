@@ -11,6 +11,29 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.86.0 (20 May 2009)</dt>
+	<dd><ul>
+		<li>
+			Lane-use control signals converted to SONAR.
+			All objects have now been converted; no more RMI.
+		</li>
+		<li>
+			Lots of old code related to RMI has been removed.
+		</li>
+		<li>
+			ObjectVault dependency has been removed.
+			Standard PostgreSQL JDBC driver should work (untested).
+		</li>
+		<li>
+			A few regressions introduced in 3.85.0 have been fixed.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.86.sql</code>
+		</li>
+	</ul></dd>
+
 	<dt>3.85.0 (28 April 2009)</dt>
 	<dd><ul>
 		<li>
