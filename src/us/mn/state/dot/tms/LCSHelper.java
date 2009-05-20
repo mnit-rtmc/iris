@@ -58,4 +58,9 @@ public class LCSHelper extends BaseHelper {
 			}
 		});
 	}
+
+	/** Lookup the LCS with the specified name */
+	static public LCS lookup(String name) {
+		return (LCS)namespace.lookupObject(LCS.SONAR_TYPE, name);
+	}
 }

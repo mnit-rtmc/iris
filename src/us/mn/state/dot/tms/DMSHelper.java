@@ -169,6 +169,8 @@ public class DMSHelper extends BaseHelper {
 
 	/** Check the style of the specified proxy */
 	static public boolean checkStyle(String s, DMS proxy) {
+		if(LCSHelper.lookup(proxy.getName()) != null)
+			return false;
 		if(STYLE_AVAILABLE.equals(s))
 			return isAvailable(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
