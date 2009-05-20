@@ -20,7 +20,9 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
@@ -37,6 +39,8 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.WarningSign;
@@ -181,6 +185,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		state = st;
 		io = new ControllerIO[Controller.ALL_PINS];
 		types = new DeviceType[Controller.ALL_PINS];
+		d_combo.setRenderer(new DeviceComboRenderer());
 		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
 			 true);
 		c_model = new WrapperComboBoxModel(
@@ -378,8 +383,33 @@ public class ControllerIOModel extends AbstractTableModel {
 			int row, int column)
 		{
 			return super.getTableCellRendererComponent(table,
-				value, isSelected, hasFocus, row, column);
+				getDeviceLabel(value), isSelected, hasFocus,
+				row, column);
 		}
+	}
+
+	/** Inner class for rendering combo editor in the device column */
+	protected class DeviceComboRenderer extends DefaultListCellRenderer {
+		public Component getListCellRendererComponent(JList list,
+			Object value, int index, boolean isSelected,
+			boolean cellHasFocus)
+		{
+			return super.getListCellRendererComponent(list,
+				getDeviceLabel(value), index, isSelected,
+				cellHasFocus);
+		}
+	}
+
+	/** Get a device label (normally name) */
+	protected Object getDeviceLabel(Object value) {
+		if(value instanceof LCSIndication) {
+			LCSIndication lcsi = (LCSIndication)value;
+			LCS lcs = lcsi.getLcs();
+			LaneUseIndication lui = LaneUseIndication.fromOrdinal(
+				lcsi.getIndication());
+			return lcs.getName() + " " + lui.description;
+		} else
+			return value;
 	}
 
 	/** Create the table column model */
