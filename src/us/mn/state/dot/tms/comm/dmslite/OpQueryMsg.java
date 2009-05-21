@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -175,17 +176,17 @@ public class OpQueryMsg extends OpDms {
 			return null;
 		byte[] argbitmap = new HexString(sbitmap).toByteArray();
 		if(argbitmap.length % BM_PGLEN_BYTES != 0) {
-			System.err.println("WARNING: received bogus bitmap " +
+			Log.severe("WARNING: received bogus bitmap " +
 				"size: len=" + argbitmap.length +
 				", BM_PGLEN_BYTES=" + BM_PGLEN_BYTES);
 			return null;
 		}
 
-		System.err.println("OpQueryMsg.createSignMessageWithBitmap() " +
+		Log.finest("OpQueryMsg.createSignMessageWithBitmap() " +
 			"called: argbitmap.len=" + argbitmap.length + ".");
 
 		int numpgs = calcNumPages(argbitmap);
-		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
+		Log.finest("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"numpages=" + numpgs);
 		if(numpgs <= 0)
 			return null;
@@ -195,7 +196,7 @@ public class OpQueryMsg extends OpDms {
 			pages[pg] = extractBitmap(argbitmap, pg);
 
 		String multi = createMessageTextUsingBitmap(pages);
-		System.err.println("OpQueryMsg.createSignMessageWithBitmap(): "+
+		Log.finest("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"multistring=" + multi);
 
 		try {
@@ -224,7 +225,7 @@ public class OpQueryMsg extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException
 		{
-			System.err.println(
+			Log.finest(
 			    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) called.");
 			assert argmess instanceof Message :
 			       "wrong message type";
@@ -308,7 +309,7 @@ public class OpQueryMsg extends OpDms {
 					usebitmap = new Boolean(rr1.getResVal("UseBitmap"));
 					bitmap = rr1.getResVal("Bitmap");
 
-					System.err.println(
+					Log.finest(
 					    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) parsed msg values: IsValid:"
 					    + valid + ", MsgTextAvailable:"
 					    + msgtextavailable + ", MsgText:"
@@ -317,7 +318,7 @@ public class OpQueryMsg extends OpDms {
 					    + ", bitmap:" + bitmap);
 				}
 			} catch (IllegalArgumentException ex) {
-				System.err.println("OpQueryMsg.PhaseQueryCurrentMessage: Malformed XML received:"
+				Log.severe("OpQueryMsg.PhaseQueryCurrentMessage: Malformed XML received:"
 				    + ex+", id="+id);
 				valid=false;
 				errmsg=ex.getMessage();
@@ -334,14 +335,14 @@ public class OpQueryMsg extends OpDms {
 				if (!useont) {
 					useont=true;
 					ont=new GregorianCalendar();
-					//System.err.println("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
+					//Log.finest("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
 					//	" no ontime specified, assuming now.");
 				}
 
 				// error checking: valid off time?
 				if (useont && useofft && offt.compareTo(ont)<=0) {
 					useofft=false;
-					//System.err.println("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
+					//Log.finest("NOTE: DmsLite.OpQueryMsg.PhaseQueryCurrentMessage():"+
 					//	" offtime <= ontime, so off time ignored.");
 				}
 
@@ -387,13 +388,13 @@ public class OpQueryMsg extends OpDms {
 
 			// valid flag is false
 			} else {
-				System.err.println(
+				Log.finest(
 				    "OpQueryMsg: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
 				errorStatus = errmsg;
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {
-					System.err.println("OpQueryMsg: will retry failed operation.");
+					Log.finest("OpQueryMsg: will retry failed operation.");
 					return this;
 				}
 			}

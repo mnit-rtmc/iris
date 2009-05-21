@@ -228,7 +228,7 @@ public class SString {
 			double mult=Math.pow(10,numdecplaces);
 			ret=new Double(Math.round(d*mult)/mult).toString();
 		}
-		//System.err.println(ret);
+		//Log.finest(ret);
 		return ret;
 	}
 

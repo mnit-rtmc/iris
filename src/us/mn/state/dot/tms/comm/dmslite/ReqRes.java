@@ -227,10 +227,9 @@ public class ReqRes {
         return;
     }
 
-    /** test this class */
+    /** test this class FIXME: move these test cases to junit */
     public static boolean test() {
         boolean ok = true;
-
         {
             System.err.println("Test case 1");
 

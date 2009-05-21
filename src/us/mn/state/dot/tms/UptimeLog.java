@@ -24,6 +24,7 @@ import java.lang.Runtime;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -58,15 +59,13 @@ public class UptimeLog {
 			return;
 		String fname = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();
 		if(fname == null || fname.length() <= 0 ) {
-			System.err.println("UptimeLog.writeServerLog(): " +
+			Log.config("UptimeLog.writeServerLog(): " +
 				"warning: bogus file name: "+fname);
 			return;
 		}
 		UptimeLog log = new UptimeLog(fname, namespace);
-		if(!log.write()) {
-			System.err.println("Warning: failed to append to " +
-				fname);
-		}
+		if(log.write())
+			Log.finest("Wrote uptime log: " + fname);
 	}
 
 	/** Create a new uptime log.
@@ -80,7 +79,7 @@ public class UptimeLog {
 	 *  @return true on success else false on error. */
 	public boolean write() {
 		if(m_fname == null || m_fname.length() <= 0) {
-			System.err.println("UptimeLog.write(): warning: " + 
+			Log.config("UptimeLog.write(): warning: " + 
 				" bogus name: " + m_fname);
 			return false;
 		}
@@ -93,11 +92,11 @@ public class UptimeLog {
 			ok = appendLog(os);
 		}
 		catch(IOException ex) {
-			System.err.println("UptimeLog.write(): ex: " + ex);
+			Log.warning("UptimeLog.write(): ex: " + ex);
 			return false;
 		}
 		catch(Exception ex) {
-			System.err.println("UptimeLog.write(): ex: " + ex);
+			Log.warning("UptimeLog.write(): ex: " + ex);
 			ex.printStackTrace();
 			return false;
 		}
@@ -137,14 +136,13 @@ public class UptimeLog {
 			os.write(sb.toString().getBytes());
 		}
 		catch(IOException ex) {
-			System.err.println("Warning: UptimeLog.appendLog(): " +
-				ex);
+			Log.warning("Warning: UptimeLog.appendLog(): ex: " 
+				+ ex);
 			return false;
 		}
 		catch(Exception ex) {
-			System.err.println("Warning: UptimeLog.appendLog(): " +
-				ex);
-			ex.printStackTrace();
+			Log.warning("Warning: UptimeLog.appendLog(): ex: " 
+				+ ex);
 			return false;
 		}
 		return true;
@@ -158,7 +156,7 @@ public class UptimeLog {
 			return true;
 		}
 		catch(Exception e) {
-			System.err.println("Warning: UptimeLog.close(): " + e);
+			Log.warning("Warning: UptimeLog.close(): " + e);
 		}
 		return false;
 	}

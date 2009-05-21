@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Operation to reset the DMS.
@@ -60,7 +61,7 @@ public class OpReset extends OpDms
 	{
 		/** Query current message */
 		protected Phase poll(AddressedMessage argmess) throws IOException {
-			System.err.println(
+			Log.finest(
 			    "OpReset.PhaseResetDms.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";
 
@@ -107,7 +108,7 @@ public class OpReset extends OpDms
 					errmsg = FAILURE_UNKNOWN;
 
 			} catch (IllegalArgumentException ex) {
-				System.err.println(
+				Log.severe(
 				    "OpReset.PhaseResetDms: Malformed XML received:"+ ex+", id="+id);
 				valid=false;
 				errmsg=ex.getMessage();
@@ -133,13 +134,13 @@ public class OpReset extends OpDms
 
 			// valid flag is false
 			} else {
-				System.err.println(
+				Log.finest(
 				    "OpReset: isvalid is false, errmsg="+errmsg);
 				errorStatus = errmsg;
 
 				// try again
 				if (flagFailureShouldRetry(errmsg)) {
-					System.err.println("OpReset: will retry failed operation.");
+					Log.finest("OpReset: will retry failed operation.");
 					return this;
 				}
 			}

@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Caltrans D10 CAWS Poller. This class provides a Caltrans D10
@@ -42,14 +43,14 @@ public class CawsPoller extends MessagePoller {
 	public CawsPoller(String n, Messenger m) {
 		super(n, m);
 
-		// System.err.println("CawsPoller.CawsPoller() called.");
+		// Log.finest("CawsPoller.CawsPoller() called.");
 		assert m instanceof HttpFileMessenger;
 	}
 
 	/** Create a new message for the specified controller, called by MessagePoller.doPoll(). */
 	public AddressedMessage createMessage(ControllerImpl c) {
 
-		// System.err.println("CawsPoller.createMessage() called.");
+		// Log.finest("CawsPoller.createMessage() called.");
 		return new Message(messenger);
 	}
 
@@ -64,7 +65,7 @@ public class CawsPoller extends MessagePoller {
 	 * dialog in the status tab.
 	 */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		//System.err.println("CawsPoller.download() called, reset="
+		//Log.finest("CawsPoller.download() called, reset="
 		//		   + reset);
 	}
 
@@ -85,7 +86,7 @@ public class CawsPoller extends MessagePoller {
 	 * @see us.mn.state.dot.tms.ControllerImpl#testCommunications
 	 */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-		// System.err.println("CawsPoller.startTest() called.");
+		// Log.finest("CawsPoller.startTest() called.");
 		return null;
 	}
 

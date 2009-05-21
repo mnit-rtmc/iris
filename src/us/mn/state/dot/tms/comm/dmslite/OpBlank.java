@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Operation to blank the DMS.
@@ -64,7 +65,7 @@ public class OpBlank extends OpDms
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException {
 
-			System.err.println(
+			Log.finest(
 			    "dmslite.OpBlank.PhaseGetConfig.poll(msg) called. m_mess.duration="
 			    + m_mess.getDuration());
 			assert argmess instanceof Message :
@@ -74,10 +75,8 @@ public class OpBlank extends OpDms
 
 			// sanity check
 			if(m_mess.getDuration() > 0) {
-				System.err.println(
-				    "Bogus duration received in OpBlank.PhaseSetBlank().");
-
-				return (null);
+				Log.severe("Bogus duration received in OpBlank.PhaseSetBlank().");
+				return null;
 			}
 
 			// set message attributes as a function of the operation
@@ -133,13 +132,12 @@ public class OpBlank extends OpDms
 					errmsg = FAILURE_UNKNOWN;
 
 				// valid resp received?
-				System.err.println(
-				    "dmslite.OpBlank.PhaseSetBlank.poll(): success="
-				    + valid);
+				Log.finest("dmslite.OpBlank.PhaseSetBlank.poll(): success="
+					+ valid);
 			} catch (IllegalArgumentException ex) {
-				System.err.println(
-				    "Malformed XML received in dmslite.OpBlank.PhaseSetBlank.poll(msg):"
-				    + ex + ",id=" + id);
+				Log.severe(
+					"Malformed XML received in dmslite.OpBlank.PhaseSetBlank.poll(msg):"
+					+ ex + ",id=" + id);
 				valid = false;
 				errmsg = ex.getMessage();
 				handleException(new IOException(errmsg));
@@ -152,15 +150,14 @@ public class OpBlank extends OpDms
 			if(valid) {
 				m_dms.setMessageCurrent(m_mess, m_user);
 			} else {
-				System.err.println(
-				    "OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="
-				    + errmsg);
+				Log.finest(
+					"OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="
+					+ errmsg);
 				errorStatus = errmsg;
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {
-					System.err.println(
-					    "OpBlank: will retry failed operation");
+					Log.finest("OpBlank: will retry failed operation");
 					return this;
 
 				// give up

@@ -56,9 +56,9 @@ final public class STime {
 		TimeZone tz = TimeZone.getDefault();
 		boolean ok = tz.getDisplayName().equals(expectedtz);
 
-		// System.err.println("Default Locale:" + Locale.getDefault());
+		// Log.finest("Default Locale:" + Locale.getDefault());
 		if(!ok) {
-			System.err.println("The default time zone is:"
+			Log.warning("The default time zone is:"
 				 + tz.getDisplayName() + ", expected: "
 				 + expectedtz);
 		}
@@ -213,7 +213,7 @@ final public class STime {
 			ok = ok && date.charAt(13) == ':';
 			ok = ok && date.charAt(16) == ':';
 			if(!ok) {
-				System.err.println("Bogus date string: " + date);
+				Log.finest("Bogus date string: " + date);
 				return null;
 			}
 
@@ -230,7 +230,7 @@ final public class STime {
 				c.setTimeZone(TimeZone.getTimeZone("UTC"));
 			retdate = c.getTime();
 		} catch(Exception ex) {
-			System.err.println("Exception in stringToDate(): " + ex);
+			Log.finest("Exception in stringToDate(): " + ex);
 			ex.printStackTrace();
 		}
 		return retdate;
@@ -401,7 +401,7 @@ final public class STime {
 			boolean ok = true;
 			ok = ok && xml.length() == 12;
 			if(!ok) {
-				System.err.println("Bogus date string: " + xml);
+				Log.finest("Bogus date string: " + xml);
 				return null;
 			}
 
@@ -420,7 +420,7 @@ final public class STime {
 
 			retdate = c.getTime();
 		} catch(Exception ex) {
-			System.err.println("Exception in ShortStringToDate(): " + ex);
+			Log.finest("Exception in ShortStringToDate(): " + ex);
 			ex.printStackTrace();
 		}
 		return retdate;

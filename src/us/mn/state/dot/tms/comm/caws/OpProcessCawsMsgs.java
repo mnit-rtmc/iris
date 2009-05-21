@@ -19,12 +19,12 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
-
-import java.io.IOException;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * This operation reads the DMS messages from the CAWS generated
@@ -63,7 +63,7 @@ public class OpProcessCawsMsgs extends ControllerOperation
 		 */
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException {
-			System.err.println(
+			Log.finest(
 			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll() called.");
 			assert argmess instanceof Message : "wrong message type";
 
@@ -77,13 +77,13 @@ public class OpProcessCawsMsgs extends ControllerOperation
 
 			// nothing?
 			if((bmsgs == null) || (bmsgs.length <= 0)) {
-				System.err.println(
+				Log.finest(
 				    "OpProcessCawsMsgs.PhaseReadMsgFile.poll(), missing or zero length caws file.");
 				return null;
 			}
 
 			// create and activate messages
-			System.err.println(
+			Log.finest(
 			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll(), received "
 			    + bmsgs.length + " bytes of cms messages.");
 			new D10CmsMsgs(bmsgs).activate();

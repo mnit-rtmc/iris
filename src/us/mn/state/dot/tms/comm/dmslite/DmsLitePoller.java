@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.SocketMessenger;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * DmsLitePoller. This class provides a DMS Poller developed
@@ -60,7 +61,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	public AddressedMessage createMessage(ControllerImpl c)
 		throws EOFException
 	{
-		//System.err.println("DmsLitePoller.createMessage() called.");
+		//Log.finest("DmsLitePoller.createMessage() called.");
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream(c));
 	}
@@ -155,7 +156,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			break;
 		default:
 			// Ignore other requests
-			System.err.println("Warning: DmsLitePoller: "+
+			Log.warning("DmsLitePoller: "+
 				"unknown request in sendRequest(). "+
 				"r="+r+", desc="+r.description);
 			break;

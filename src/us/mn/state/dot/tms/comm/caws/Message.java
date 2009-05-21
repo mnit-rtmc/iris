@@ -19,6 +19,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.Messenger;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * CAWS Message. Normally, a Message represents the bytes sent and
@@ -60,7 +61,7 @@ public class Message implements AddressedMessage
 	 * @throws IOException if received response is malformed.
 	 */
 	public void getRequest() throws IOException {
-		System.err.println("caws.Message.getRequest() called.");
+		Log.finest("caws.Message.getRequest() called.");
 
 		// read http file
 		m_msgs = m_mess.read();

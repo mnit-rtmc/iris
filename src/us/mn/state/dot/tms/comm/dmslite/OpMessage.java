@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -129,7 +130,7 @@ public class OpMessage extends OpDms {
 			return new PhaseSendOnePageMessage();
 		else if(np == 2)
 			return new PhaseSendTwoPageMessage();
-		System.err.println("WARNING: bogus number of pages (" + np +
+		Log.severe("Bogus number of pages (" + np +
 			") in dmslite.OpMessage.OpMessage(). Ignored.");
 		return null;
 	}
@@ -185,7 +186,7 @@ public class OpMessage extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException 
 		{
-			System.err.println(
+			Log.finest(
 			    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg) called.");
 			assert argmess instanceof Message :
 			       "wrong message type";
@@ -273,7 +274,7 @@ public class OpMessage extends OpDms {
 
 					// valid flag
 					valid = new Boolean(rr1.getResVal("IsValid"));
-					System.err.println(
+					Log.finest(
 					    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg): parsed msg values: IsValid:"
 					    + valid + ".");
 
@@ -283,7 +284,7 @@ public class OpMessage extends OpDms {
 						errmsg = FAILURE_UNKNOWN;
 
 				} catch (IllegalArgumentException ex) {
-					System.err.println(
+					Log.severe(
 					    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg): Malformed XML received:"
 					    + ex+", id="+id);
 					valid=false;
@@ -300,14 +301,14 @@ public class OpMessage extends OpDms {
 					m_dms.setMessageCurrent(m_signMessage,
 						m_user);
 				} else {
-					System.err.println(
+					Log.finest(
 					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
 					errorStatus = errmsg;
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
-						System.err.println("OpMessage: will retry failed operation.");
+						Log.finest("OpMessage: will retry failed operation.");
 						return this;
 
 					// give up
@@ -343,7 +344,7 @@ public class OpMessage extends OpDms {
 		 */
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException {
-			System.err.println(
+			Log.finest(
 			    "dmslite.OpMessage.PhaseSendTwoPageMessage.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";
 
@@ -449,11 +450,11 @@ public class OpMessage extends OpDms {
 					if(!valid && errmsg.length() <= 0)
 						errmsg = FAILURE_UNKNOWN;
 
-					System.err.println(
+					Log.finest(
 					    "dmslite.OpMessage.PhaseSendTwoPageMessage.poll(msg): parsed msg values: IsValid:"
 					    + valid + ".");
 				} catch (IllegalArgumentException ex) {
-					System.err.println("OpMessage.PhaseSendTwoPageMessage: Malformed XML received:"
+					Log.severe("OpMessage.PhaseSendTwoPageMessage: Malformed XML received:"
 					    + ex+", id="+id);
 					valid=false;
 					errmsg=ex.getMessage();
@@ -469,14 +470,14 @@ public class OpMessage extends OpDms {
 					m_dms.setMessageCurrent(
 						m_signMessage, m_user);
 				} else {
-					System.err.println(
+					Log.finest(
 					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
 					    errmsg+",id="+id);
 					errorStatus = errmsg;
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
-						System.err.println("OpMessage: will retry failed operation.");
+						Log.finest("OpMessage: will retry failed operation.");
 						return this;
 
 					// give up

@@ -30,6 +30,7 @@ import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Convenience class for writing Xml.
@@ -48,6 +49,7 @@ final public class Xml {
     public static boolean test() {
         boolean ok = true;
 
+	//FIXME: move test cases to junit
         System.err.println("Test case 1");
         {
             try {
@@ -327,13 +329,13 @@ final public class Xml {
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw ex;
         }
 
@@ -401,13 +403,13 @@ final public class Xml {
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw ex;
         }
 
@@ -463,13 +465,13 @@ final public class Xml {
 
             ret = topelem2.getNodeName();
         } catch (ParserConfigurationException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            System.err.println("Exception:" + ex);
+            Log.finest("Exception:" + ex);
             throw new IOException(ex.toString());
         }
 

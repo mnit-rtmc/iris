@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.DeviceOperation;
 import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -138,14 +139,14 @@ abstract public class OpDms extends DeviceOperation {
 		if(at == SignAccessType.DIALUPMODEM) {
 			int secs = SystemAttrEnum.DMSLITE_MODEM_OP_TIMEOUT_SECS.
 				getInt();
-			System.err.println("connection type is modem" +
+			Log.finest("connection type is modem" +
 				", dms=" + m_dms.toString() +
 				", timeout secs=" + secs);
 			return secs;
 		} else if(at == SignAccessType.WIZARD) {
 			int secs = SystemAttrEnum.DMSLITE_OP_TIMEOUT_SECS.
 				getInt();
-			System.err.println("connection type is wizard" +
+			Log.finest("connection type is wizard" +
 				", dms=" + m_dms.toString() +
 				", timeout secs=" + secs);
 			return secs;
@@ -253,7 +254,7 @@ abstract public class OpDms extends DeviceOperation {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException {
 
-			// System.err.println("dmslite.OpQueryConfig.PhaseGetConfig.poll(msg) called.");
+			// Log.finest("dmslite.OpQueryConfig.PhaseGetConfig.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";
 
 			Message mess = (Message) argmess;
@@ -329,7 +330,7 @@ abstract public class OpDms extends DeviceOperation {
 					if (stype.toLowerCase().contains("full"))
 						type = DMSType.VMS_FULL;
 					else
-						System.err.println("SEVERE: Unknown matrix type read ("+stype+")");
+						Log.severe("SEVERE: Unknown matrix type read ("+stype+")");
 
 					horizBorder = SString.stringToInt(
 						rr1.getResVal("horizBorder"));
@@ -356,12 +357,11 @@ abstract public class OpDms extends DeviceOperation {
 						rr1.getResVal(
 							"signWidthPixels"));
 
-					// System.err.println("PhaseGetConfig.poll(msg) parsed msg values: valid:"+
+					// Log.finest("PhaseGetConfig.poll(msg) parsed msg values: valid:"+
 					// valid+", model:"+model+", make:"+make+"...etc.");
 				}
 			} catch (IllegalArgumentException ex) {
-				System.err.println(
-				    "PhaseGetConfig: Malformed XML received:"+ex+", id="+id);
+				Log.severe("PhaseGetConfig: Malformed XML received:"+ex+", id="+id);
 				valid = false;
 				errmsg = ex.getMessage();
 				handleException(new IOException(errmsg));
@@ -397,14 +397,14 @@ abstract public class OpDms extends DeviceOperation {
 
 			// failure
 			} else {
-				System.err.println(
-				    "PhaseGetConfig: response from cmsserver received, ignored because Xml valid field is false, errmsg="
-				    + errmsg);
+				Log.severe(
+					"PhaseGetConfig: response from cmsserver received, ignored because Xml valid field is false, errmsg="
+					+ errmsg);
 				errorStatus = errmsg;
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {
-					System.err.println("PhaseGetConfig: will retry failed operation");
+					Log.finest("PhaseGetConfig: will retry failed operation");
 					return this;
 				}
 			}

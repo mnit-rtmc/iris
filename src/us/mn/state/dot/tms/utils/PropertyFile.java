@@ -41,7 +41,7 @@ public class PropertyFile
 			props.load(url.openStream());
 			return props;
 		} catch(Exception ex) {
-			System.err.println("PropertyFile.readFile(): failed to read properties file: ex="+ex);
+			Log.config("PropertyFile.readFile(): failed to read properties file: ex="+ex);
 			return null;
 		}
 	}
@@ -70,7 +70,7 @@ public class PropertyFile
 		def=(def==null ? "" : def);
 
 		if (pf==null) {
-			System.err.println("Error: the property file is null");
+			Log.config("Error: the property file is null");
 			return "";
 		}
 
@@ -80,14 +80,13 @@ public class PropertyFile
 		if (p==null) {
 			p=def;
 			if (def.length()==0)
-				System.err.println("Warning: a property ("+id+
+				Log.config("Warning: a property ("+id+
 					") was not found in the property file.");
 			else
-				System.err.println("Warning: a property ("+id+
+				Log.config("Warning: a property ("+id+
 					") was not found in the property file, "+
 					"assigned the default value("+def+")");
 		}
 		return p;
 	}
 }
-

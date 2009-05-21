@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -103,7 +104,7 @@ public class D10CmsMsg {
 		m_ontime = SString.stringToDouble(f[11]);
 
 		if(m_type != CawsMsgType.BLANK) {
-			System.err.println("D10CmsMsg.D10CmsMsg():" + m_date
+			Log.finest("D10CmsMsg.D10CmsMsg():" + m_date
 				+ "," + m_cmsid + "," + m_multistring + ","
 				+ m_ontime);
 		}
@@ -191,7 +192,7 @@ public class D10CmsMsg {
 			String msg = "D10CmsMsg.parseDescription: WARNING: " +
 				"unknown message description (" + d + ").";
 			assert false: msg;
-			System.err.println(msg);
+			Log.finest(msg);
 			return CawsMsgType.BLANK;
 		}
 	}
@@ -209,7 +210,7 @@ public class D10CmsMsg {
 			return 2;
 		else {
 			// FIXME: should throw InvalidArgumentException
-			System.err.println("WARNING: unknown font received " +
+			Log.warning("WARNING: unknown font received " +
 				"in D10CmsMsg.parseFont(): " + f);
 			// FIXME: should return default font number for DMS
 			return 1;
@@ -222,7 +223,7 @@ public class D10CmsMsg {
 	 * @param dms Activate the message on this DMS.
 	 */
 	public void activate(DMSImpl dms) {
-		System.err.println("-----D10CmsMsg.activate(" + dms +
+		Log.finest("-----D10CmsMsg.activate(" + dms +
 			") called, msg=" + this);
 		if(shouldSendMessage(dms))
 			sendMessage(dms);
@@ -239,12 +240,12 @@ public class D10CmsMsg {
 
 		// is caws activated for the sign?
 		if(!(dms.getAwsAllowed() && dms.getAwsControlled())) {
-			System.err.println("D10CmsMsg.shouldSendMessage(): DMS "
+			Log.finest("D10CmsMsg.shouldSendMessage(): DMS "
 				+ getIrisCmsId() +
 				" is NOT activated for CAWS control.");
 			return false;
 		}
-		System.err.println("D10CmsMsg.shouldSendMessage(): DMS " +
+		Log.finest("D10CmsMsg.shouldSendMessage(): DMS " +
 			getIrisCmsId() + " is activated for CAWS control.");
 
 		// be safe and send the caws message by default
@@ -255,7 +256,7 @@ public class D10CmsMsg {
 		if(cur != null)
 			send = !cur.getMulti().equals(m_multistring);
 
-		System.err.println("D10CmsMsg.shouldSendMessage(): should send="
+		Log.finest("D10CmsMsg.shouldSendMessage(): should send="
 			+ send);
 		return send;
 	}
@@ -269,13 +270,13 @@ public class D10CmsMsg {
 		case BLANK:
 		case ONEPAGEMSG:
 		case TWOPAGEMSG:
-			System.err.println("D10CmsMsg.sendMessage(): will " +
+			Log.finest("D10CmsMsg.sendMessage(): will " +
 				"activate DMS " + getIrisCmsId() + ":" + this);
 			try {
 				dms.sendMessage(toSignMessage(dms));
 			}
 			catch(Exception e) {
-				System.err.println("D10CmsMsg.sendMessage(): " +
+				Log.warning("D10CmsMsg.sendMessage(): " +
 					"exception:" + e);
 			}
 			break;

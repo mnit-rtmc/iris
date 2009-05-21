@@ -67,7 +67,7 @@ public class SFile
 		try {
 			url = new URL(surl);
 		} catch(MalformedURLException ex) {
-			System.err.println("SFile.readUrl(), malformed URL: "+ex);
+			Log.warning("SFile.readUrl(), malformed URL: "+ex);
 			return null;
 		}
 		InputStream in = null;
@@ -77,9 +77,9 @@ public class SFile
 			URLConnection c = url.openConnection();
 			int pl = c.getContentLength();
 
-			// System.err.println("SFile.readUrl(), content len="+pl);
+			// Log.finest("SFile.readUrl(), content len="+pl);
 			long fdate = c.getDate();
-			// System.err.println("SFile.readUrl(), date="+d);
+			// Log.finest("SFile.readUrl(), date="+d);
 
 			// read until eof
 			in = c.getInputStream();
@@ -98,14 +98,14 @@ public class SFile
 
 			// for(int i = 0; i < len; ++i ) 
 			//	System.err.print(ret[i]+" "+(char)ret[i]+","); 
-			//	System.err.println(" ");
-			//System.err.println("SFile.readUrl(), read "
+			//	Log.finest(" ");
+			//Log.finest("SFile.readUrl(), read "
 			//	+ al.size() + " bytes, file date=" + fdate + ".");
 		} catch(UnknownHostException e) {
-			//System.err.println(
+			//Log.finest(
 			//	"SFile.readUrl(): ignoring bogus url: "+e);
 		} catch(IOException e) {
-			System.err.println(
+			Log.warning(
 				"SFile.readUrl(), caught exception: " + e);
 		} finally {
 			try {
@@ -120,7 +120,7 @@ public class SFile
 	public static boolean test() {
 		boolean ok = true;
 		byte[] ba = readUrl("http://iris.ahmct.ucdavis.edu/index.html");
-		System.err.println(ba.length);
+		Log.finest("length="+ba.length);
 		return ok;
 	}
 }

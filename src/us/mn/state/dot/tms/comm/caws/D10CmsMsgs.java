@@ -15,13 +15,13 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
-import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.TMSImpl;
-import us.mn.state.dot.tms.utils.SString;
-
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.TMSImpl;
+import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * CAWS D10CmsMsgs. This is a collection of CMS messages.
@@ -35,7 +35,7 @@ public class D10CmsMsgs implements Serializable
 
 	/** constructor */
 	public D10CmsMsgs(byte[] bmsgs) {
-		System.err.println("D10CmsMsgs.D10CmsMsgs() called.");
+		Log.finest("D10CmsMsgs.D10CmsMsgs() called.");
 		this.parse(bmsgs);
 	}
 

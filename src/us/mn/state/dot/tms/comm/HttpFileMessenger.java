@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * A HttpFileMessenger is a class which reads a file from a URL using http.
@@ -37,8 +38,6 @@ public class HttpFileMessenger extends Messenger {
 	 *  @args url The URL of the file to read.
 	 */
 	public HttpFileMessenger(URL url) {
-		System.err.println("HttpFileMessenger.HttpFileMessenger(" + url
-				   + ") called.");
 		m_url = url;
 		input = null;
 		output = null;
@@ -58,7 +57,6 @@ public class HttpFileMessenger extends Messenger {
 	 *  @returns byte[] containing contents of read file.
 	 */
 	public byte[] read() {
-		//System.err.println("HttpFileMessenger.read() called.");
 		InputStream in = null;
 		byte[] ret = new byte[0];
 		try {
@@ -67,9 +65,9 @@ public class HttpFileMessenger extends Messenger {
 			URLConnection c = m_url.openConnection();
 			int pl = c.getContentLength();
 
-			// System.err.println("HttpFileMessenger.read(), content len="+pl);
+			// Log.finest("HttpFileMessenger.read(), len="+pl);
 			long fdate = c.getDate();
-			// System.err.println("HttpFileMessenger.read(), date="+d);
+			// Log.finest("HttpFileMessenger.read(), date="+d);
 
 			// read until eof
 			in = c.getInputStream();
@@ -86,15 +84,14 @@ public class HttpFileMessenger extends Messenger {
 			for (int i=0; i<ret.length; ++i)
 				ret[i]=(byte)(al.get(i));
 
-			// for( int i=0; i<len; ++i ) System.err.print(ret[i]+" "+(char)ret[i]+","); System.err.println(" ");
-			System.err.println("HttpFileMessenger.read(), read "
-					   + al.size() + " bytes, file date=" + fdate + ".");
+			Log.finest("HttpFileMessenger.read(), read " +
+				al.size() + " bytes, file date=" + fdate);
 		} catch (UnknownHostException e) {
-			//System.err.println(
-			//    "HttpFileMessenger.read(): ignoring bogus url: "+e);
+			Log.fine("HttpFileMessenger.read(): "+
+				"ignoring bogus url: "+e);
 		} catch (IOException e) {
-			System.err.println(
-			    "HttpFileMessenger.read(), caught exception: " + e);
+			Log.warning(
+			    "HttpFileMessenger.read(), caught exception:" + e);
 		} finally {
 			try {
 				if (in!= null)
