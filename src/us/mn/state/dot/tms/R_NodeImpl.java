@@ -567,7 +567,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		if(loc != null) {
 			Road x = loc.getCrossStreet();
 			if(x != null) {
-				String xs = XmlWriter.replaceEntities(
+				String xs = XmlWriter.validateElementValue(
 					x.getName());
 				out.print("label='" + xs + "' ");
 			}

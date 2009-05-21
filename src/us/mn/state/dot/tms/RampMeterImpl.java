@@ -555,7 +555,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		Road x = geo_loc.getCrossStreet();
 		if(x != null)
 			b.append(x.getName());
-		return XmlWriter.replaceEntities(b.toString().trim());
+		return XmlWriter.validateElementValue(b.toString().trim());
 	}
 
 	/** Print the detectors associated with a ramp meter */

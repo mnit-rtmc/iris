@@ -19,14 +19,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 import java.util.zip.GZIPOutputStream;
-
 import javax.xml.XMLConstants;
-
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.tms.comm.dmslite.Xml;
 
 /**
  * A simple class for writing out XML documents
@@ -41,22 +36,29 @@ abstract public class XmlWriter {
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =
 		"<?xml version='1.0' encoding='UTF-8'?>";
-	
-	/** Regex pattern to match an ampersand */
-	static protected final Pattern AMPERSAND = Pattern.compile("&");
 
-	/** Replace special characters with proper entities */
-	static public String replaceEntities(String text) {
-		Matcher m = AMPERSAND.matcher(text);
-		return m.replaceAll("&amp;");
+	/** Validate an xml element name */
+	static public String validateElementName(String e) {
+		e = e.replace("&", "");
+		e = e.replace("<", "");
+		e = e.replace(">", "");
+		return e;
+	}
+
+	/** Validate an xml element value */
+	static public String validateElementValue(String v) {
+		v = v.replace("&", "&amp;");
+		v = v.replace("<", "&lt;");
+		v = v.replace(">", "&gt;");
+		return v;
 	}
 
 	/** Create an xml attribute */
 	static public String createAttribute(String name, Object value) {
 		StringBuffer sb = new StringBuffer(" ");
-		sb.append(Xml.validateElementName(name));
+		sb.append(validateElementName(name));
 		sb.append("='");
-		sb.append(Xml.validateElementValue(value.toString()));
+		sb.append(validateElementValue(value.toString()));
 		sb.append("'");
 		return sb.toString();
 	}

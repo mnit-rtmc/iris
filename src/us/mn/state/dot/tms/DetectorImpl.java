@@ -751,7 +751,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		LaneType lt = lane_type;
 		short lane = getLaneNumber();
 		float field = getFieldLength();
-		String l = XmlWriter.replaceEntities(
+		String l = XmlWriter.validateElementValue(
 			DetectorHelper.getLabel(this));
 		// NOTE: the 'D' is needed for XML validity
 		out.print("<detector index='D" + name + "' ");
