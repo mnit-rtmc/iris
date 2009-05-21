@@ -35,8 +35,8 @@ public class Message implements AddressedMessage
 	/** dms messages received from caws */
 	private byte[] m_msgs = new byte[0];
 
-	// fields
-	private HttpFileMessenger m_mess;    // associated file messenger
+	// associated file messenger
+	private HttpFileMessenger m_mess;
 
 	/** Create a new message */
 	public Message(Messenger mess) {
@@ -44,7 +44,6 @@ public class Message implements AddressedMessage
 			throw new IllegalArgumentException(
 			    "wrong type of messenger arg.");
 		}
-
 		m_mess = (HttpFileMessenger) mess;
 	}
 

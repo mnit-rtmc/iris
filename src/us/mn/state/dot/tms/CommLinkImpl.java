@@ -322,7 +322,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create a CAWS poller */
 	protected MessagePoller createCawsPoller() throws IOException {
-		return new CawsPoller(name, createHttpFileMessenger());
+		return new CawsPoller(name, createHttpFileMessenger(), namespace);
 	}
 
 	/** Create a Pelco video switch poller */

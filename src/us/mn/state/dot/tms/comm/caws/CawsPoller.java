@@ -15,7 +15,11 @@
 
 package us.mn.state.dot.tms.comm.caws;
 
+import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -25,6 +29,7 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.utils.I18NMessages;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.STime;
 
 /**
  * Caltrans D10 CAWS Poller. This class provides a Caltrans D10
@@ -36,21 +41,35 @@ import us.mn.state.dot.tms.utils.Log;
  */
 public class CawsPoller extends MessagePoller {
 
+	/** 30 sec AWS job will execute at :08 and :38 */
+	private static final int JOB_EXEC_TIME_SECS = 8;
+
+	/** Create scheduler that runs AWS activation job */
+	static protected final Scheduler m_scheduler =
+		new Scheduler("Scheduler: AWS Activation");
+
 	/** the only valid drop address */
 	static public final int VALID_DROP_ADDRESS = 1;
 
-	/** Create a new poller */
-	public CawsPoller(String n, Messenger m) {
-		super(n, m);
+	/** server namespace */
+	final ServerNamespace m_namespace;
 
-		// Log.finest("CawsPoller.CawsPoller() called.");
+	/** associated controller */
+	private ControllerImpl m_awsController = null;
+
+	/** Create a new poller */
+	public CawsPoller(String n, Messenger m, ServerNamespace namespace) {
+		super(n, m);
 		assert m instanceof HttpFileMessenger;
+		m_namespace = namespace;
+
+		// add 30 second timer to aws scheduler
+		m_scheduler.addJob(new AwsTimerJob());
 	}
 
-	/** Create a new message for the specified controller, called by MessagePoller.doPoll(). */
+	/** Create a new message for the specified controller, 
+	 *  called by MessagePoller.doPoll(). */
 	public AddressedMessage createMessage(ControllerImpl c) {
-
-		// Log.finest("CawsPoller.createMessage() called.");
 		return new Message(messenger);
 	}
 
@@ -59,20 +78,15 @@ public class CawsPoller extends MessagePoller {
 		return (drop == VALID_DROP_ADDRESS);
 	}
 
-	/**
-	 * Perform a controller download. This method is also called
-	 * when the user presses the 'download' button on the controller
-	 * dialog in the status tab.
-	 */
-	public void download(ControllerImpl c, boolean reset, int p) {
-		//Log.finest("CawsPoller.download() called, reset="
-		//		   + reset);
-	}
+	/** Perform a controller download, which happens every 
+	 *  morning at 4am. */
+	public void download(ControllerImpl c, boolean reset, int p) {}
 
 	/** Perform a 30-second poll */
 	public void poll30Second(ControllerImpl c, Completer comp) {
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-			new OpProcessCawsMsgs(c).start();
+		// FIXME: should get the controller from sonar
+		if(c != m_awsController)
+			m_awsController = c;
 	}
 
 	/** Perform a 5-minute poll */
@@ -82,7 +96,6 @@ public class CawsPoller extends MessagePoller {
 	 * Start a test for the given controller.  This method is activated
 	 * when the user clicks the checkbox 'test communication' on the
 	 * the controller dialog in the status tab.
-	 *
 	 * @see us.mn.state.dot.tms.ControllerImpl#testCommunications
 	 */
 	public DiagnosticOperation startTest(ControllerImpl c) {
@@ -93,5 +106,59 @@ public class CawsPoller extends MessagePoller {
 	/** return name of AWS system */
 	public static String awsName() {
 		return I18NMessages.get("Aws.Name");
+	}
+
+	/** get the one AWS controller */
+	protected ControllerImpl getController() {
+		//if(m_namespace == null)
+		//	return null;
+		return m_awsController;
+	}
+
+	/** AWS timer job */
+	protected class AwsTimerJob extends Job {
+
+		/** Job completer */
+		protected final Completer m_comp;
+
+		/** Current time stamp */
+		protected Calendar stamp;
+
+		/** Job to be performed on completion */
+		protected final Job job = new Job() {
+			public void perform() {
+				// nothing
+			}
+		};
+
+		/** Create a new 30-second timer job */
+		protected AwsTimerJob() {
+			super(Calendar.SECOND, 30, Calendar.SECOND, 
+				JOB_EXEC_TIME_SECS);
+			m_comp = new Completer("30-Second", m_scheduler, job);
+		}
+
+		/** Perform the 30-second timer job */
+		public void perform() throws Exception {
+			if(!m_comp.checkComplete())
+				return;
+			Calendar s = Calendar.getInstance();
+			s.add(Calendar.SECOND, -30);
+			stamp = s;
+			m_comp.reset(stamp);
+			try {
+				doWork();
+			} finally {
+				m_comp.makeReady();
+			}
+		}
+
+		/** do the job work */
+		private void doWork() {
+			if(getController() == null) 
+				return;
+			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
+				new OpProcessCawsMsgs(getController()).start();
+		}
 	}
 }

@@ -24,13 +24,12 @@ import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * CAWS D10CmsMsgs. This is a collection of CMS messages.
- *
+ * Container for AWS messages.
  * @author Michael Darter
  */
 public class D10CmsMsgs implements Serializable
 {
-	// fields
+	/** messages */
 	LinkedList<D10CmsMsg> m_msgs = null;
 
 	/** constructor */
@@ -39,9 +38,8 @@ public class D10CmsMsgs implements Serializable
 		this.parse(bmsgs);
 	}
 
-	/**
-	 * parse a byte array of messages and add each cms message to the container.
-	 */
+	/** Parse a byte array of messages and add each dms 
+	 *  message to the container. */
 	private void parse(byte[] argmsgs) {
 		m_msgs = new LinkedList<D10CmsMsg>();
 
@@ -60,11 +58,9 @@ public class D10CmsMsgs implements Serializable
 
 	/** activate the messages */
 	public void activate() {
-		// sanity check
 		if(m_msgs == null)
 			return;
-
-		// activate each msg
+		Log.finest("=====Starting activating AWS messages");
 		for(D10CmsMsg m: m_msgs) {
 			// get the iris cms id, e.g. "V30"
 			String irisCmsId = m.getIrisCmsId();
@@ -72,5 +68,6 @@ public class D10CmsMsgs implements Serializable
 			if(dms != null)
 				m.activate(dms);
 		}
+		Log.finest("=====End activating AWS messages");
 	}
 }

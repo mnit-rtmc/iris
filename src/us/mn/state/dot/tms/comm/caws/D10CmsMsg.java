@@ -33,21 +33,21 @@ import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
- * CAWS D10CmsMsg. This is a single CMS message.
+ * AWS message.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
 public class D10CmsMsg {
 
-	// consts
+	/** constants */
 	private static final String DESC_BLANK = "Blank";
 	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
 	private static final String DESC_TWOPAGENORM = "2 Page (Normal)";
 	private static final String SINGLESTROKE = "Single Stroke";
 	private static final String DOUBLESTROKE = "Double Stroke";
 
-	// fields
+	/** AWS message fields */
 	private int m_dmsid;			// cms ID
 	private Date m_date;			// message date and time
 	private String m_desc;			// has predefined valid values
@@ -56,13 +56,12 @@ public class D10CmsMsg {
 	private boolean m_valid = false;	// is message valid?
 	private double m_ontime;
 
-	// types
-	public enum CawsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, TRAVELTIME }
+	/** AWS message type */
+	public enum CawsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, 
+		TRAVELTIME, UNKNOWN}
 
-	/**
- 	 * Parse a string that contains a single DMS message.
- 	 * @param argline a single DMS message, fields delimited with ';'.
- 	 */
+	/** Parse a string that contains a single DMS message.
+ 	 * @param argline a single DMS message, fields delimited with ';'. */
 	public void parse(String argline) {
 		if(argline == null)
 			argline = "";
@@ -70,23 +69,24 @@ public class D10CmsMsg {
 		boolean ok = true;
 
 		try {
-			// add a space between successive delimiters. This is done so the
-			// tokenizer doesn't skip over delimeters with nothing between them.
+			// add a space between successive delimiters. This is 
+			// done so the tokenizer doesn't skip over delimeters 
+			// with nothing between them.
 			String line = argline.replace(";;", "; ;");
 			line = line.replace(";;", "; ;");
 
 			// verify syntax
 			StringTokenizer tok = new StringTokenizer(line, ";");
 
-			// validity check, note that 12 or 13 tokens are expected
+			// validity check, 12 or 13 tokens are expected
 			int numtoks = tok.countTokens();
-			final int EXPNUMTOKENS1 = 12;
-			final int EXPNUMTOKENS2 = 13;
-			if(numtoks != EXPNUMTOKENS1 && numtoks != EXPNUMTOKENS2) {
+			final int EXPTOKS1 = 12;
+			final int EXPTOKS2 = 13;
+			if(numtoks != EXPTOKS1 && numtoks != EXPTOKS2) {
 				throw new IllegalArgumentException(
-					"Bogus CMS message format, numtoks was " + 
-					numtoks + ", expected " + EXPNUMTOKENS1 + 
-					" or " + EXPNUMTOKENS2 + " (" + argline + 
+					"Bogus DMS msg format, numtoks=" + 
+					numtoks + ", expected " + EXPTOKS1 + 
+					" or " + EXPTOKS2 + " (" + argline + 
 					").");
 			}
 
@@ -97,30 +97,26 @@ public class D10CmsMsg {
 			m_dmsid = SString.stringToInt(tok.nextToken());
 
 			// #3, message description
-			String f02 = tok.nextToken();
-			if(!f02.equals(DESC_BLANK) &&!f02.equals(
-				DESC_ONEPAGENORM) &&!f02.equals(
-				DESC_TWOPAGENORM)) {    // FIXME: verify possibilities
-				String msg = "D10CmsMsg.parse(): unknown " +
-					"message description received in " +
-					"D10CmsMsg.parse(): " + f02;
-				throw new IllegalArgumentException(msg);
-			}
-			m_desc = f02;
+			m_desc = tok.nextToken();
+			m_type = parseDescription(m_desc);
 
 			// #4, pg 1 font
 			String f03 = tok.nextToken();
-			if(!f03.equals(SINGLESTROKE) &&!f03.equals(DOUBLESTROKE)) {
-				String msg = "D10CmsMsg.parse(): unknown pg " +
-					"1 font received: " + f03;
+			if(!f03.equals(SINGLESTROKE) && 
+				!f03.equals(DOUBLESTROKE)) 
+			{
+				String msg = "D10CmsMsg.parse(): unknown pg" +
+					" 1 font received: " + f03;
 				throw new IllegalArgumentException(msg);
 			}
 
 			// #5, pg 2 font
 			String f04 = tok.nextToken();
-			if(!f04.equals(SINGLESTROKE) &&!f04.equals(DOUBLESTROKE)) {
-				String msg = "D10CmsMsg.parse(): unknown pg " +
-					"2 font received: " + f04;
+			if(!f04.equals(SINGLESTROKE) && 
+				!f04.equals(DOUBLESTROKE)) 
+			{
+				String msg = "D10CmsMsg.parse(): unknown pg" +
+					" 2 font received: " + f04;
 				throw new IllegalArgumentException(msg);
 			}
 
@@ -166,6 +162,9 @@ public class D10CmsMsg {
 			// #13, ignore this field, follows last semicolon if
 			//      there are 13 tokens.
 
+			Log.finest("D10CmsMsg: Read CAWS message " + 
+				"from file: " + toString());
+
 		} catch(Exception ex) {
 			Log.severe("D10CmsMsg.parse(): unexpected " +
 				"exception: " + ex + ", argline=" + argline +
@@ -178,8 +177,8 @@ public class D10CmsMsg {
 
 	/**
 	 * Convert a local time date string from the d10 cms file to a Date.
-	 * @param date String date/time in the format "20080403085910" which is
-	 *             local time.
+	 * @param date String date/time in the format "20080403085910" which 
+	 *        is local time.
 	 * @return A Date cooresponding to the argument.
 	 * @throws IllegalArgumentException if the argument is bogus.
 	 */
@@ -231,7 +230,8 @@ public class D10CmsMsg {
 		int s = SString.stringToInt(argdate.substring(12, 14));
 		if((s < 0) || (s > 59)) {
 			throw new IllegalArgumentException(
-			    "Bogus second received:" + argdate + "," + s);
+				"Bogus second received:" + 
+				argdate + "," + s);
 		}
 
 		// create Date
@@ -255,29 +255,24 @@ public class D10CmsMsg {
 	 * @return CawsMsgType enum value.
 	 */
 	static protected CawsMsgType parseDescription(String d) {
-		if(d.equals(DESC_BLANK))
+		if(d.equalsIgnoreCase(DESC_BLANK))
 			return CawsMsgType.BLANK;
-		else if(d.equals(DESC_ONEPAGENORM))
+		else if(d.equalsIgnoreCase(DESC_ONEPAGENORM))
 			return CawsMsgType.ONEPAGEMSG;
-		else if(d.equals(DESC_TWOPAGENORM))
+		else if(d.equalsIgnoreCase(DESC_TWOPAGENORM))
 			return CawsMsgType.TWOPAGEMSG;
-		else if(false)	//FIXME: add in the future
-			return CawsMsgType.TRAVELTIME;
+		else if(false)
+			return CawsMsgType.TRAVELTIME; // future
 		else {
-			// FIXME: should throw InvalidArgumentException
-			String msg = "D10CmsMsg.parseDescription: WARNING: " +
-				"unknown message description (" + d + ").";
-			assert false: msg;
-			Log.severe(msg);
-			return CawsMsgType.BLANK;	//FIXME: return a new UNKNOWN?
+			Log.severe("D10CmsMsg.parseDescription: " +
+				"unknown message description (" + d + ").");
+			return CawsMsgType.UNKNOWN;
 		}
 	}
 
-	/**
-	 * Parse a font.
+	/** Parse a font name 
 	 * @param f Font name.
-	 * @return Font number.
-	 */
+	 * @return Font number. */
 	static protected int parseFont(String f) {
 		// FIXME: should lookup font number from name
 		if(f.equals(SINGLESTROKE))
@@ -337,11 +332,11 @@ public class D10CmsMsg {
 		return send;
 	}
 
-	/**
-	 * Send a message to the specified DMS.
-	 * @params dms The associated DMS.
-	 */
+	/** Send a message to the specified DMS.
+	 * @params dms The associated DMS. */
 	protected void sendMessage(DMSImpl dms) {
+		if(m_type == null)
+			return;
 		switch(m_type) {
 		case BLANK:
 		case ONEPAGEMSG:
@@ -358,19 +353,22 @@ public class D10CmsMsg {
 			break;
 		case TRAVELTIME:
 			//FIXME: add in future
+			Log.severe("D10CmsMsg: AWS TT not available.");
+			break;
+		case UNKNOWN:
+			Log.severe("D10CmsMsg.sendMessage(): unknown AWS " +
+				"message type not sent."); 
 			break;
 		default:
-			Log.severe("D10CmsMsg: unknown AWS message type:" 
-				+ m_type);
+			assert false;
+			Log.severe("D10CmsMsg: unknown CawsMsgType.");
 		}
 	}
 
-	/**
-	 * toSignMessage builds a SignMessage version of this message.
+	/** Build a SignMessage version of this message.
 	 * @param dms The associated DMS.
 	 * @return A SignMessage that contains the text of the message and
-	 *         rendered bitmap(s).
-	 */
+	 *         rendered bitmap(s). */
 	public SignMessage toSignMessage(DMSImpl dms) throws SonarException,
 		TMSException
 	{
@@ -380,10 +378,11 @@ public class D10CmsMsg {
 
 	/** toString */
 	public String toString() {
-		String s = "";
-		s += "Message: " + m_multistring + ", ";
-		s += "On time: " + m_ontime;
-		return s;
+		StringBuilder sb = new StringBuilder();
+		sb.append("DMS ").append(m_dmsid).append(", ");
+		sb.append("Message: ").append(m_multistring).append(", ");
+		sb.append("On time: ").append(m_ontime);
+		return sb.toString();
 	}
 
 	/** get the CMS id, e.g. "39" */
