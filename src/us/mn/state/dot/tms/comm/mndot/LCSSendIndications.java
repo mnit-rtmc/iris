@@ -59,10 +59,7 @@ public class LCSSendIndications extends LCSOperation {
 			data[Address.OFF_METER_2] = MeterRate.FORCED_FLASH;
 			mess.add(new MemoryRequest(address, data));
 			mess.setRequest();
-			if(isDark())
-				return null;
-			else
-				return new SetOutputs();
+			return new SetOutputs();
 		}
 	}
 
@@ -75,7 +72,10 @@ public class LCSSendIndications extends LCSOperation {
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS, buffer));
 			mess.setRequest();
-			return new TurnOnDevices();
+			if(isDark())
+				return null;
+			else
+				return new TurnOnDevices();
 		}
 	}
 
