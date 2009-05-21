@@ -15,27 +15,26 @@
 package us.mn.state.dot.tms.comm.pelco;
 
 /**
- * Pelco Request
+ * A request to select a new monitor
  *
  * @author Douglas Lau
  * @author Timothy Johnson
  */
-abstract public class Request {
+public class SelectMonitorRequest extends Request {
 
-	/** Value to indicate no selected camera */
-	static protected final int CAMERA_NONE = -1;
+	/** Command to select a new monitor */
+	static protected final String CODE = "Ma";
 
-	/** Minimum value allowed for a request */
-	static protected final int MIN_VALUE = -256;
+	/** Monitor to select */
+	protected final int monitor;
 
-	/** Maximum value allowed for a request */
-	static protected final int MAX_VALUE = 256;
-
-	/** Clamp a value to within the allowed range */
-	static protected int clampValue(int v) {
-		return Math.max(Math.min(v, MAX_VALUE), MIN_VALUE);
+	/** Create a new select monitor request */
+	public SelectMonitorRequest(int m) {
+		monitor = m;
 	}
 
-	/** Get the request string */
-	abstract public String toString();
+	/** Get the code to send to the switcher */
+	public String toString() {
+		return monitor + CODE;
+	}
 }

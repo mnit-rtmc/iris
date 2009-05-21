@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,37 +14,66 @@
  */
 package us.mn.state.dot.tms.comm.pelco;
 
+import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.LinkedList;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.comm.ParsingException;
 import us.mn.state.dot.tms.comm.ProtocolException;
 
 /**
  * Pelco message
  *
  * @author Douglas Lau
+ * @author Timothy Johnson
  */
 public class Message implements AddressedMessage {
+
+	/** Start Of Header byte */
+	static protected final byte SOH = (byte)1;
+
+	/** Acknowledge response */
+	static protected final String ACK = "AK";
+
+	/** Negative Acknowledge response */
+	static protected final String NO_ACK = "NA";
+
+	/** End of Response byte */
+	static protected final int EOR = 'a';
+
+	/** Maximum size (in bytes) of a response from switcher */
+	static protected final int MAX_RESPONSE = 80;
 
 	/** Serial output stream */
 	protected final OutputStream os;
 
-	/** Camera receiver drop address */
-	protected final int drop;
+	/** Serial input stream */
+	protected final InputStream is;
+
+	/** Chained request buffer */
+	protected final LinkedList<Request> requests =
+		new LinkedList<Request>();
 
 	/** Create a new Pelco message */
-	public Message(OutputStream o, int d) {
+	public Message(OutputStream o, InputStream i) {
 		os = o;
-		drop = d;
+		is = i;
 	}
 
-	/** Request for the message */
-	protected Request request = null;
+	/** Get a string of the message */
+	public String toString() {
+		StringBuilder b = new StringBuilder();
+		for(Request req: requests)
+			b.append(req.toString());
+		return b.toString();
+	}
 
 	/** Add a request object to this message */
 	public void add(Object r) {
 		if(r instanceof Request)
-			request = (Request)r;
+			requests.add((Request)r);
 	}
 
 	/** Perform a "get" request */
@@ -54,14 +83,32 @@ public class Message implements AddressedMessage {
 
 	/** Perform a "set" request */
 	public void setRequest() throws IOException {
-		if(request != null) {
-			os.write(request.format(drop));
-			os.flush();
-		}
+		String req = toString();
+		is.skip(is.available());
+		os.write(SOH);
+		os.write(req.getBytes());
+		os.flush();
+		getResponse();
 	}
 
 	/** Perform a "set" request */
 	public void setRequest(String community) throws IOException {
-		setRequest();
+		throw new ProtocolException("Community not handled by Pelco");
+	}
+
+	/** Get a response from the switcher */
+	protected String getResponse() throws IOException {
+		StringBuffer resp = new StringBuffer();
+		while(true) {
+			int value = is.read();
+			if(value < 0)
+				throw new EOFException("END OF STREAM");
+			resp.append((char)value);
+			if(value == EOR)
+				break;
+			else if(resp.length() > MAX_RESPONSE)
+				break;
+		}
+		return resp.toString();
 	}
 }

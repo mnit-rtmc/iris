@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2008  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,32 +12,32 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.pelco;
+package us.mn.state.dot.tms.comm.viconptz;
 
 import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.TrafficDeviceImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
-import us.mn.state.dot.tms.comm.VideoMonitorPoller;
 
 /**
- * PecloPoller is a java implementation of the Pelco Video Switch serial
+ * ViconPoller is a java implementation of the Vicon camera control 
  * communication protocol
  *
- * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
+public class ViconPTZPoller extends MessagePoller implements CameraPoller {
 
-	/** Dummy drop value for creating addressed messages */
-	static protected final int PELCO_DROP = 1;
+	/** Highest allowed address for Vicon protocol */
+	static public final int ADDRESS_MAX = 254;
 
-	/** Create a new Pelco line */
-	public PelcoPoller(String n, Messenger m) {
+	/** Create a new Vicon poller */
+	public ViconPTZPoller(String n, Messenger m) {
 		super(n, m);
 	}
 
@@ -45,18 +45,18 @@ public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
 	public AddressedMessage createMessage(ControllerImpl c)
 		throws EOFException
 	{
-		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream(c));
+		return new Message(messenger.getOutputStream(c), c.getDrop());
 	}
 
 	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
-		return drop == PELCO_DROP;
+		return drop >= 1 && drop <= ADDRESS_MAX;
 	}
 
 	/** Perform a controller download */
 	public void download(ControllerImpl c, boolean reset, int p) {
-		// Nothing to do here
+		if(c.getActive())
+			c.resetErrorCounter();
 	}
 
 	/** Perform a 30-second poll */
@@ -69,15 +69,23 @@ public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
 		// Nothing to do here
 	}
 
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		return null; // no diagmnostic testing can be done
+	/** Send a PTZ camera move command */
+	public void sendPTZ(CameraImpl c, float p, float t, float z) {
+		new MoveCamera(c, p, t, z).start();
+	}
+	
+	/** Send a PTZ set camera preset command */
+	public void sendSetPreset(CameraImpl c, int preset) {
+		new SetCameraPreset(c, preset).start();
 	}
 
-	/** Set the camera to display on the specified monitor */
-	public void setMonitorCamera(ControllerImpl c, VideoMonitor m,
-		String cam)
-	{
-		new SelectMonitorCamera(c, m, cam).start();
+	/** Send a PTZ goto camera preset command */
+	public void sendGoToPreset(CameraImpl c, int preset) {
+		new GoToCameraPreset(c, preset).start();
+	}
+
+	/** Start a test for the given controller */
+	public DiagnosticOperation startTest(ControllerImpl c) {
+		return null; // no diagnostic testing can be done
 	}
 }

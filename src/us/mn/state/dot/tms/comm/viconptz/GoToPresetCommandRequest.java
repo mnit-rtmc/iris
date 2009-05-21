@@ -9,10 +9,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.pelco;
+package us.mn.state.dot.tms.comm.viconptz;
 
 /**
- * This class creates a Pelco D request to instruct the camera to go to
+ * This class creates a Vicon request to instruct the camera to go to
  * a preset state.
  *
  * @author Stephen Donecker

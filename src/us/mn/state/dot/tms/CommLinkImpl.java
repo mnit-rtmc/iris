@@ -37,8 +37,10 @@ import us.mn.state.dot.tms.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.comm.pelco.PelcoPoller;
+import us.mn.state.dot.tms.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.comm.smartsensor.SmartSensorPoller;
 import us.mn.state.dot.tms.comm.vicon.ViconPoller;
+import us.mn.state.dot.tms.comm.viconptz.ViconPTZPoller;
 
 /**
  * The CommLinkImpl class represents a single communication link which is
@@ -298,9 +300,14 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new ViconPoller(name, createSocketMessenger());
 	}
 
-	/** Create a Pelco poller */
-	protected MessagePoller createPelcoPoller() throws IOException {
-		return new PelcoPoller(name, createSocketMessenger());
+	/** Create a Vicon PTZ poller */
+	protected MessagePoller createViconPTZPoller() throws IOException {
+		return new ViconPTZPoller(name, createDatagramMessenger());
+	}
+
+	/** Create a PelcoD poller */
+	protected MessagePoller createPelcoDPoller() throws IOException {
+		return new PelcoDPoller(name, createSocketMessenger());
 	}
 
 	/** Create a Manchester poller */
@@ -316,6 +323,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Create a CAWS poller */
 	protected MessagePoller createCawsPoller() throws IOException {
 		return new CawsPoller(name, createHttpFileMessenger());
+	}
+
+	/** Create a Pelco video switch poller */
+	protected MessagePoller createPelcoPoller() throws IOException {
+		return new PelcoPoller(name, createSocketMessenger());
 	}
 
 	/** Try to open the communication link */
@@ -336,14 +348,18 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				return createCanogaPoller();
 			case PROTO_VICON:
 				return createViconPoller();
-			case PROTO_PELCO:
-				return createPelcoPoller();
+			case PROTO_PELCO_D:
+				return createPelcoDPoller();
 			case PROTO_MANCHESTER:
 				return createManchesterPoller();
 			case PROTO_DMSLITE:
 				return createDmsLitePoller();
 			case PROTO_CAWS:
 				return createCawsPoller();
+			case PROTO_PELCO:
+				return createPelcoPoller();
+			case PROTO_VICON_PTZ:
+				return createViconPTZPoller();
 			default:
 				throw new ProtocolException("INVALID PROTOCOL");
 		}

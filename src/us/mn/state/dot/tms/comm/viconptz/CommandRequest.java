@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.pelco;
+package us.mn.state.dot.tms.comm.viconptz;
 
 /**
  * A request to command a camera
@@ -22,16 +22,16 @@ package us.mn.state.dot.tms.comm.pelco;
 public class CommandRequest extends Request {
 
 	/** Bit flag to command a pan right */
-	static protected final byte PAN_RIGHT = 1 << 1;
+	static protected final byte PAN_RIGHT = 1 << 5;
 
 	/** Bit flag to command a pan left */
-	static protected final byte PAN_LEFT = 1 << 2;
+	static protected final byte PAN_LEFT = 1 << 6;
 
 	/** Bit flag to command a tilt up */
-	static protected final byte TILT_UP = 1 << 3;
+	static protected final byte TILT_UP = 1 << 4;
 
 	/** Bit flag to command a tilt down */
-	static protected final byte TILT_DOWN = 1 << 4;
+	static protected final byte TILT_DOWN = 1 << 3;
 
 	/** Bit flag to command a zoom in */
 	static protected final byte ZOOM_IN = 1 << 5;
@@ -84,31 +84,20 @@ public class CommandRequest extends Request {
 		else
 			return 0;
 	}
-
-	/** Get the bit flags to control pan/tilt/zoom functions */
-	protected byte getPTZFlags() {
-		return (byte)(getPanFlags() | getTiltFlags() | getZoomFlags());
-	}
-
-	/** Calculate the checksum of a message */
-	protected byte calculateChecksum(byte[] message) {
-		int i;
-		byte checksum = 0;
-		for(i = 1; i < 6; i++)
-			checksum += message[i];
-		return checksum;
-	}
-
+	
 	/** Format the request for the specified receiver address */
 	public byte[] format(int drop) {
-		byte[] message = new byte[7];
-		message[0] = (byte)0xFF;
-		message[1] = (byte)drop;
-		message[2] = 0;
-		message[3] = getPTZFlags();
-		message[4] = (byte)Math.abs(pan);
-		message[5] = (byte)Math.abs(tilt);
-		message[6] = calculateChecksum(message);
+		byte[] message = new byte[10];
+		message[0] = (byte)(0x80 | (drop >> 4));
+		message[1] = (byte)((0x0f & drop) | 0x50);
+		message[2] = (byte)(getPanFlags() | getTiltFlags() );
+		message[3] = getZoomFlags();
+		message[4] = (byte)0x00; //not implemented
+		message[5] = (byte)0x00; //not implemented
+		message[6] = (byte)((Math.abs(pan) >> 7) & 0x0f);
+		message[7] = (byte)((byte)Math.abs(pan) & 0x7f);
+		message[8] = (byte)((Math.abs(tilt) >> 7) & 0x0f);
+		message[9] = (byte)((byte)Math.abs(tilt) & 0x7f);
 		return message;
 	}
 }

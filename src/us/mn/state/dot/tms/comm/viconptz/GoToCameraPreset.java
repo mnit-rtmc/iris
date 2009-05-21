@@ -9,41 +9,42 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.pelco;
+package us.mn.state.dot.tms.comm.viconptz;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.comm.Device2Operation;
 
 /**
- * Pelco operation to set a camera preset.
+ * Vicon operation to goto a camera preset.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
+ * @created July 2, 2008
  */
-public class SetCameraPreset extends DeviceOperation {
+public class GoToCameraPreset extends Device2Operation {
 
-	/** The camera preset to set */
+	/** The camera preset to goto */
 	private final int m_preset;
 
-	/** Create a new operation to set a camera preset */
-	public SetCameraPreset(CameraImpl c, int preset) {
+	/** Create a new operation to goto a camera preset */
+	public GoToCameraPreset(CameraImpl c, int preset) {
 		super(COMMAND, c);
 		m_preset = preset;
 	}
 
 	/** Begin the operation */
 	public Phase phaseOne() {
-		return new SetPreset();
+		return new GoToPreset();
 	}
 
 	/** Phase to set the camera preset */
-	protected class SetPreset extends Phase {
+	protected class GoToPreset extends Phase {
 
 		/** Command controller to set the camera preset */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new SetPresetCommandRequest(m_preset));
+			mess.add(new GoToPresetCommandRequest(m_preset));
 			mess.setRequest();
 			return null;
 		}
