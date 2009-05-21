@@ -14,9 +14,11 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.PrintWriter;
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.sql.ResultSet;
+
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
@@ -248,4 +250,14 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		}
 	}
 
+	/** Render the camera object as xml */
+	public void printXmlElement(PrintWriter out){
+		out.print("<camera ");
+		out.print(XmlWriter.createAttribute("id", getName()));
+		out.print(XmlWriter.createAttribute("encoder", getEncoder()));
+		out.print(XmlWriter.createAttribute("encoder_channel", getEncoderChannel()));
+		if(getGeoLoc() != null)
+			out.print(XmlWriter.createAttribute("geoloc", getGeoLoc().getName()));
+		out.println("/>");
+	}
 }

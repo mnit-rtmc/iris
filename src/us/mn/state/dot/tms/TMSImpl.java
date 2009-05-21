@@ -141,6 +141,9 @@ public final class TMSImpl implements KmlDocument {
 		corridors = new CorridorManager(namespace);
 		new R_NodeXmlWriter(corridors).write();
 		new RampMeterXmlWriter(namespace).write();
+		new CameraXmlWriter(namespace).write();
+		new GeoLocXmlWriter(namespace).write();
+		new DMSXmlWriter(namespace).write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 
@@ -158,7 +161,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Print the header of the detector sample XML file */
 	protected void printSampleXmlHead(PrintWriter out) {
-		out.println("<?xml version='1.0'?>");
+		out.println(XmlWriter.XML_DECLARATION);
 		out.println("<!DOCTYPE traffic_sample SYSTEM 'tms.dtd'>");
 		out.println("<traffic_sample time_stamp='" + new Date() +
 			"' period='30'>");

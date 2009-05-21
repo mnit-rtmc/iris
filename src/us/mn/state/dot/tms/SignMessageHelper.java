@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -116,5 +117,20 @@ public class SignMessageHelper extends BaseHelper {
 		catch(IOException e) {
 			return false;
 		}
+	}
+
+	/** Render the SignMessage object as xml */
+	static public void printXmlElement(SignMessage sm, PrintWriter out) {
+		//Don't write the SignMessage element if the sign is blank
+		if(sm.getPriority() == DMSMessagePriority.BLANK.ordinal()) return;
+		out.print("<" + SignMessage.SONAR_TYPE + " ");
+		String[] ml = createLines(sm);
+		if(getFontName(sm, 1).length > 0)
+			out.print("font='" + SString.toString(getFontName(sm, 1)) + "' ");
+		if(ml != null && ml.length > 0){
+			for(int i = 0; i < ml.length; ++i)
+				out.print("line_" + i+1 + "='" + ml[i] + "' ");
+		}
+		out.println("/>");
 	}
 }

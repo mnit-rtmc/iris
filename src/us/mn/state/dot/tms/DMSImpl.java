@@ -15,12 +15,13 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
+
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
@@ -33,16 +34,14 @@ import us.mn.state.dot.tms.kml.Kml;
 import us.mn.state.dot.tms.kml.KmlColor;
 import us.mn.state.dot.tms.kml.KmlColorImpl;
 import us.mn.state.dot.tms.kml.KmlGeometry;
-import us.mn.state.dot.tms.kml.KmlIcon;
 import us.mn.state.dot.tms.kml.KmlIconImpl;
 import us.mn.state.dot.tms.kml.KmlIconStyle;
 import us.mn.state.dot.tms.kml.KmlIconStyleImpl;
 import us.mn.state.dot.tms.kml.KmlPlacemark;
-import us.mn.state.dot.tms.kml.KmlPoint;
+import us.mn.state.dot.tms.kml.KmlRenderer;
 import us.mn.state.dot.tms.kml.KmlStyle;
 import us.mn.state.dot.tms.kml.KmlStyleImpl;
 import us.mn.state.dot.tms.kml.KmlStyleSelector;
-import us.mn.state.dot.tms.kml.KmlRenderer;
 import us.mn.state.dot.tms.utils.I18NMessages;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -1503,5 +1502,24 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(DMSHelper.checkStyle(DMSHelper.STYLE_FAILED, this))
 			return KmlColorImpl.Gray;
 		return KmlColorImpl.Black;
+	}
+
+	/** Render the DMS object as xml */
+	public void printXmlElement(PrintWriter out) {
+		// DMS name, e.g. CMS or DMS
+		final String DMSABBR = I18NMessages.get("dms.abbreviation");
+		out.print("<" + DMSABBR);
+		out.print(XmlWriter.createAttribute("id", getName()));
+		out.print(XmlWriter.createAttribute("status", DMSHelper.getAllStyles(this)));
+		if(getOwnerCurrent() != null)
+			out.print(XmlWriter.createAttribute("owner", getOwnerCurrent().getFullName()));
+		out.print(XmlWriter.createAttribute("notes", getNotes()));
+		if(getUserNote() != null)
+			out.print(XmlWriter.createAttribute("last_operation", getUserNote()));
+		if(getGeoLoc() != null)
+			out.print(XmlWriter.createAttribute("geoloc", getGeoLoc().getName()));
+		out.println(">");
+		SignMessageHelper.printXmlElement(getMessageCurrent(), out);
+		out.println("</" + DMSABBR + ">");
 	}
 }

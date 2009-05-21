@@ -22,7 +22,11 @@ import java.io.PrintWriter;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.util.zip.GZIPOutputStream;
+
+import javax.xml.XMLConstants;
+
 import us.mn.state.dot.sonar.NamespaceError;
+import us.mn.state.dot.tms.comm.dmslite.Xml;
 
 /**
  * A simple class for writing out XML documents
@@ -34,6 +38,10 @@ abstract public class XmlWriter {
 	/** Filesystem directory to write XML files */
 	static protected final String XML_DIR = "/var/lib/iris/xml";
 
+	/** XML version and encoding declaration */
+	static protected final String XML_DECLARATION =
+		"<?xml version='1.0' encoding='UTF-8'?>";
+	
 	/** Regex pattern to match an ampersand */
 	static protected final Pattern AMPERSAND = Pattern.compile("&");
 
@@ -41,6 +49,16 @@ abstract public class XmlWriter {
 	static public String replaceEntities(String text) {
 		Matcher m = AMPERSAND.matcher(text);
 		return m.replaceAll("&amp;");
+	}
+
+	/** Create an xml attribute */
+	static public String createAttribute(String name, Object value) {
+		StringBuffer sb = new StringBuffer(" ");
+		sb.append(Xml.validateElementName(name));
+		sb.append("='");
+		sb.append(Xml.validateElementValue(value.toString()));
+		sb.append("'");
+		return sb.toString();
 	}
 
 	/** File to write final XML data */
