@@ -1,4 +1,7 @@
 /*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2009  Minnesota Department of Transportation
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -14,16 +17,15 @@ package us.mn.state.dot.tms.comm.viconptz;
 import java.io.IOException;
 import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.Device2Operation;
+import us.mn.state.dot.tms.comm.DeviceOperation;
 
 /**
  * Vicon operation to set a camera preset.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
- * @created July 2, 2008
  */
-public class SetCameraPreset extends Device2Operation {
+public class SetCameraPreset extends DeviceOperation {
 
 	/** The camera preset to set */
 	private final int m_preset;
