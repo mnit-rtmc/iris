@@ -182,7 +182,9 @@ public class DMSDefaultDownload extends DMSOperation {
 		/** Set ADDCO-specific object defaults */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
-			if(dms.getMake().startsWith("ADDCO") &&
+			String make = dms.getMake();
+			if(make != null &&
+			   make.startsWith("ADDCO") &&
 			   dms.getDmsType() == DMSType.VMS_CHAR.ordinal())
 			{
 				mess.add(new DmsHorizontalBorder(50));
