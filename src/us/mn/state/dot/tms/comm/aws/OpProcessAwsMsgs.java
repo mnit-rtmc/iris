@@ -16,8 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-package us.mn.state.dot.tms.comm.caws;
+package us.mn.state.dot.tms.comm.aws;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.ControllerImpl;
@@ -28,19 +27,19 @@ import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
- * This operation reads the DMS messages from the CAWS generated
+ * This operation reads the DMS messages from the AWS generated
  * message file and sets new DMS messages.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class OpProcessCawsMsgs extends ControllerOperation
+public class OpProcessAwsMsgs extends ControllerOperation
 {
 	/** This operation; needed for inner Phase classes */
-	protected final OpProcessCawsMsgs operation;
+	protected final OpProcessAwsMsgs operation;
 
 	/** Create a new device operation */
-	protected OpProcessCawsMsgs(ControllerImpl c) {
+	protected OpProcessAwsMsgs(ControllerImpl c) {
 		super(DATA_30_SEC, c);
 		operation = this;
 	}
@@ -55,7 +54,7 @@ public class OpProcessCawsMsgs extends ControllerOperation
 		super.cleanup();
 	}
 
-	/** Phase to read the caws dms message file */
+	/** Phase to read the aws dms message file */
 	protected class PhaseReadMsgFile extends Phase
 	{
 		/**
@@ -66,7 +65,7 @@ public class OpProcessCawsMsgs extends ControllerOperation
 			throws IOException 
 		{
 			Log.finest(
-				"OpProcessCawsMsgs.PhaseReadMsgFile.poll() " +
+				"OpProcessAwsMsgs.PhaseReadMsgFile.poll() " +
 				"called: " + 
 				STime.getCurDateTimeMSString(true));
 			assert argmess instanceof Message : "wrong message type";
@@ -82,15 +81,16 @@ public class OpProcessCawsMsgs extends ControllerOperation
 			// nothing?
 			if((bmsgs == null) || (bmsgs.length <= 0)) {
 				Log.finest(
-				    "OpProcessCawsMsgs.PhaseReadMsgFile.poll(), missing or zero length caws file.");
+					"OpProcessAwsMsgs.poll(): " +
+					" missing or zero length AWS file.");
 				return null;
 			}
 
 			// create and activate messages
 			Log.finest(
-			    "OpProcessCawsMsgs.PhaseReadMsgFile.poll(), received "
-			    + bmsgs.length + " bytes of cms messages.");
-			new D10CmsMsgs(bmsgs).activate();
+			    "OpProcessAwsMsgs.PhaseReadMsgFile.poll(), received "
+			    + bmsgs.length + " bytes of DMS messages.");
+			new AwsMsgs(bmsgs).activate();
 			return null;
 		}
 	}

@@ -12,14 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
-package us.mn.state.dot.tms.comm.caws;
+package us.mn.state.dot.tms.comm.aws;
 
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.TMSImpl;
+import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -27,21 +26,21 @@ import us.mn.state.dot.tms.utils.SString;
  * Container for AWS messages.
  * @author Michael Darter
  */
-public class D10CmsMsgs implements Serializable
+public class AwsMsgs implements Serializable
 {
 	/** messages */
-	LinkedList<D10CmsMsg> m_msgs = null;
+	LinkedList<AwsMsg> m_msgs = null;
 
 	/** constructor */
-	public D10CmsMsgs(byte[] bmsgs) {
-		Log.finest("D10CmsMsgs.D10CmsMsgs() called.");
+	public AwsMsgs(byte[] bmsgs) {
+		Log.finest("AwsMsgs.AwsMsgs() called.");
 		this.parse(bmsgs);
 	}
 
 	/** Parse a byte array of messages and add each dms 
 	 *  message to the container. */
 	private void parse(byte[] argmsgs) {
-		m_msgs = new LinkedList<D10CmsMsg>();
+		m_msgs = new LinkedList<AwsMsg>();
 
 		// cycle through each line, which is terminated by '\n'
 		String msgs = SString.byteArrayToString(argmsgs);
@@ -49,10 +48,10 @@ public class D10CmsMsgs implements Serializable
 
 		while(lineTok.hasMoreTokens()) {
 			String line = lineTok.nextToken();
-			D10CmsMsg cmsmsg = new D10CmsMsg();
-			cmsmsg.parse(line);
-			if(cmsmsg.getValid())
-				m_msgs.add(cmsmsg);
+			AwsMsg amsmsg = new AwsMsg();
+			amsmsg.parse(line);
+			if(amsmsg.getValid())
+				m_msgs.add(amsmsg);
 		}
 	}
 
@@ -61,10 +60,10 @@ public class D10CmsMsgs implements Serializable
 		if(m_msgs == null)
 			return;
 		Log.finest("=====Starting activating AWS messages");
-		for(D10CmsMsg m: m_msgs) {
-			// get the iris cms id, e.g. "V30"
-			String irisCmsId = m.getIrisCmsId();
-			DMSImpl dms = TMSImpl.lookupDms(irisCmsId);
+		for(AwsMsg m: m_msgs) {
+			// get the iris DMS id, e.g. "V30"
+			String id = m.getIrisDmsId();
+			DMSImpl dms = null; // FIXME: was: TMSObjectImpl.lookupDms(id);
 			if(dms != null)
 				m.activate(dms);
 		}

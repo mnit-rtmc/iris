@@ -56,8 +56,8 @@ public interface CommLink extends SonarObject {
 	/** DMS Lite protocol */
 	int PROTO_DMSLITE = 9;
 
-	/** CAWS protocol */
-	int PROTO_CAWS = 10;
+	/** AWS protocol */
+	int PROTO_AWS = 10;
 
 	/** NTCIP Class A protocol */
 	int PROTO_NTCIP_A = 11;
@@ -80,7 +80,7 @@ public interface CommLink extends SonarObject {
 		"NTCIP Class C",
 		"Manchester",
 		"DMS Lite",
-		"CAWS",
+		"AWS",
 		"NTCIP Class A",
 		"Pelco video switch",
 		"Vicon PTZ"

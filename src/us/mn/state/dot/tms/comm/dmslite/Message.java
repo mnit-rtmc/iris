@@ -22,7 +22,6 @@ import java.util.LinkedList;
 import javax.mail.MessagingException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
-import us.mn.state.dot.tms.comm.caws.CawsPoller;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;

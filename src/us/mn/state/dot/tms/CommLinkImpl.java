@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.comm.Operation;
 import us.mn.state.dot.tms.comm.ProtocolException;
 import us.mn.state.dot.tms.comm.SocketMessenger;
 import us.mn.state.dot.tms.comm.canoga.CanogaPoller;
-import us.mn.state.dot.tms.comm.caws.CawsPoller;
+import us.mn.state.dot.tms.comm.aws.AwsPoller;
 import us.mn.state.dot.tms.comm.dmslite.DmsLitePoller;
 import us.mn.state.dot.tms.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.comm.mndot.MndotPoller;
@@ -320,9 +320,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new DmsLitePoller(name, createSocketMessenger());
 	}
 
-	/** Create a CAWS poller */
-	protected MessagePoller createCawsPoller() throws IOException {
-		return new CawsPoller(name, createHttpFileMessenger(), namespace);
+	/** Create a AWS poller */
+	protected MessagePoller createAwsPoller() throws IOException {
+		return new AwsPoller(name, createHttpFileMessenger(), 
+			namespace);
 	}
 
 	/** Create a Pelco video switch poller */
@@ -354,8 +355,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 				return createManchesterPoller();
 			case PROTO_DMSLITE:
 				return createDmsLitePoller();
-			case PROTO_CAWS:
-				return createCawsPoller();
+			case PROTO_AWS:
+				return createAwsPoller();
 			case PROTO_PELCO:
 				return createPelcoPoller();
 			case PROTO_VICON_PTZ:

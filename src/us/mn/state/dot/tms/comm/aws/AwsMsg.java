@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.comm.caws;
+package us.mn.state.dot.tms.comm.aws;
 
 import java.io.FileWriter;
 import java.util.Calendar;
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class D10CmsMsg {
+public class AwsMsg {
 
 	/** constants */
 	private static final String DESC_BLANK = "Blank";
@@ -48,16 +48,16 @@ public class D10CmsMsg {
 	private static final String DOUBLESTROKE = "Double Stroke";
 
 	/** AWS message fields */
-	private int m_dmsid;			// cms ID
+	private int m_dmsid;			// DMS ID
 	private Date m_date;			// message date and time
 	private String m_desc;			// has predefined valid values
-	private CawsMsgType m_type;		// message type
+	private AwsMsgType m_type;		// message type
 	private String m_multistring;		// message as multistring
 	private boolean m_valid = false;	// is message valid?
 	private double m_ontime;
 
 	/** AWS message type */
-	public enum CawsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, 
+	public enum AwsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, 
 		TRAVELTIME, UNKNOWN}
 
 	/** Parse a string that contains a single DMS message.
@@ -105,7 +105,7 @@ public class D10CmsMsg {
 			if(!f03.equals(SINGLESTROKE) && 
 				!f03.equals(DOUBLESTROKE)) 
 			{
-				String msg = "D10CmsMsg.parse(): unknown pg" +
+				String msg = "AwsMsg.parse(): unknown pg" +
 					" 1 font received: " + f03;
 				throw new IllegalArgumentException(msg);
 			}
@@ -115,7 +115,7 @@ public class D10CmsMsg {
 			if(!f04.equals(SINGLESTROKE) && 
 				!f04.equals(DOUBLESTROKE)) 
 			{
-				String msg = "D10CmsMsg.parse(): unknown pg" +
+				String msg = "AwsMsg.parse(): unknown pg" +
 					" 2 font received: " + f04;
 				throw new IllegalArgumentException(msg);
 			}
@@ -162,11 +162,11 @@ public class D10CmsMsg {
 			// #13, ignore this field, follows last semicolon if
 			//      there are 13 tokens.
 
-			Log.finest("D10CmsMsg: Read CAWS message " + 
+			Log.finest("AwsMsg: Read AWS message " + 
 				"from file: " + toString());
 
 		} catch(Exception ex) {
-			Log.severe("D10CmsMsg.parse(): unexpected " +
+			Log.severe("AwsMsg.parse(): unexpected " +
 				"exception: " + ex + ", argline=" + argline +
 				", stack trace=" + SString.getStackTrace(ex));
 			ok = false;
@@ -176,7 +176,7 @@ public class D10CmsMsg {
 	}
 
 	/**
-	 * Convert a local time date string from the d10 cms file to a Date.
+	 * Convert a local time date string from the d10 DMS file to a Date.
 	 * @param date String date/time in the format "20080403085910" which 
 	 *        is local time.
 	 * @return A Date cooresponding to the argument.
@@ -252,21 +252,21 @@ public class D10CmsMsg {
 	/**
 	 * Parse a message description to a message type.
 	 * @param d Message description.
-	 * @return CawsMsgType enum value.
+	 * @return AwsMsgType enum value.
 	 */
-	static protected CawsMsgType parseDescription(String d) {
+	static protected AwsMsgType parseDescription(String d) {
 		if(d.equalsIgnoreCase(DESC_BLANK))
-			return CawsMsgType.BLANK;
+			return AwsMsgType.BLANK;
 		else if(d.equalsIgnoreCase(DESC_ONEPAGENORM))
-			return CawsMsgType.ONEPAGEMSG;
+			return AwsMsgType.ONEPAGEMSG;
 		else if(d.equalsIgnoreCase(DESC_TWOPAGENORM))
-			return CawsMsgType.TWOPAGEMSG;
+			return AwsMsgType.TWOPAGEMSG;
 		else if(false)
-			return CawsMsgType.TRAVELTIME; // future
+			return AwsMsgType.TRAVELTIME; // future
 		else {
-			Log.severe("D10CmsMsg.parseDescription: " +
+			Log.severe("AwsMsg.parseDescription: " +
 				"unknown message description (" + d + ").");
-			return CawsMsgType.UNKNOWN;
+			return AwsMsgType.UNKNOWN;
 		}
 	}
 
@@ -282,26 +282,26 @@ public class D10CmsMsg {
 		else {
 			// FIXME: should throw InvalidArgumentException
 			Log.warning("WARNING: unknown font received " +
-				"in D10CmsMsg.parseFont(): " + f);
+				"in AwsMsg.parseFont(): " + f);
 			// FIXME: should return default font number for DMS
 			return 1;
 		}
 	}
 
 	/**
-	 * Activate the message. CAWS messages are activated only if the DMS is
-	 * currently blank or contains a message owned by CAWS.
+	 * Activate the AWS message only if the DMS is
+	 * currently blank or contains a message owned by AWS.
 	 * @param dms Activate the message on this DMS.
 	 */
 	public void activate(DMSImpl dms) {
-		Log.finest("-----D10CmsMsg.activate(" + dms +
+		Log.finest("-----AwsMsg.activate(" + dms +
 			") called, msg=" + this);
 		if(shouldSendMessage(dms))
 			sendMessage(dms);
 	}
 
 	/**
-	 * Decide if a caws message should be sent to a DMS.
+	 * Decide if aws message should be sent to a DMS.
 	 * @params dms The associated DMS.
 	 * @return true to send the message.
 	 */
@@ -309,17 +309,17 @@ public class D10CmsMsg {
 		if(dms == null)
 			return false;
 
-		// is caws activated for the sign?
+		// is aws activated for the sign?
 		if(!(dms.getAwsAllowed() && dms.getAwsControlled())) {
-			Log.finest("D10CmsMsg.shouldSendMessage(): DMS "
-				+ getIrisCmsId() +
-				" is NOT activated for CAWS control.");
+			Log.finest("AwsMsg.shouldSendMessage(): DMS "
+				+ getIrisDmsId() +
+				" is NOT activated for AWS control.");
 			return false;
 		}
-		Log.finest("D10CmsMsg.shouldSendMessage(): DMS " +
-			getIrisCmsId() + " is activated for CAWS control.");
+		Log.finest("AwsMsg.shouldSendMessage(): DMS " +
+			getIrisDmsId() + " is activated for AWS control.");
 
-		// be safe and send the caws message by default
+		// be safe and send the aws message by default
 		boolean send = true;
 
 		// message already deployed?
@@ -327,7 +327,7 @@ public class D10CmsMsg {
 		if(cur != null)
 			send = !cur.getMulti().equals(m_multistring);
 
-		Log.finest("D10CmsMsg.shouldSendMessage(): should send="
+		Log.finest("AwsMsg.shouldSendMessage(): should send="
 			+ send);
 		return send;
 	}
@@ -341,27 +341,27 @@ public class D10CmsMsg {
 		case BLANK:
 		case ONEPAGEMSG:
 		case TWOPAGEMSG:
-			Log.finest("D10CmsMsg.sendMessage(): will " +
-				"activate DMS " + getIrisCmsId() + ":" + this);
+			Log.finest("AwsMsg.sendMessage(): will activate" +
+				"DMS " + getIrisDmsId() + ":" + this);
 			try {
 				dms.sendMessage(toSignMessage(dms));
 			}
 			catch(Exception e) {
-				Log.warning("D10CmsMsg.sendMessage(): " +
+				Log.warning("AwsMsg.sendMessage(): " +
 					"exception:" + e);
 			}
 			break;
 		case TRAVELTIME:
 			//FIXME: add in future
-			Log.severe("D10CmsMsg: AWS TT not available.");
+			Log.severe("AwsMsg: AWS TT not available.");
 			break;
 		case UNKNOWN:
-			Log.severe("D10CmsMsg.sendMessage(): unknown AWS " +
+			Log.severe("AwsMsg.sendMessage(): unknown AWS " +
 				"message type not sent."); 
 			break;
 		default:
 			assert false;
-			Log.severe("D10CmsMsg: unknown CawsMsgType.");
+			Log.severe("AwsMsg: unknown AwsMsgType.");
 		}
 	}
 
@@ -385,14 +385,14 @@ public class D10CmsMsg {
 		return sb.toString();
 	}
 
-	/** get the CMS id, e.g. "39" */
-	public int getCmsId() {
+	/** get the DMS id, e.g. "39" */
+	public int getDmsId() {
 		return m_dmsid;
 	}
 
-	/** get the CMS id in IRIS form, e.g. "V39" */
-	public String getIrisCmsId() {
-		return "V" + getCmsId();
+	/** get the DMS id in IRIS form, e.g. "V39" */
+	public String getIrisDmsId() {
+		return "V" + getDmsId();
 	}
 
 	/** append a line to the AWS report file */

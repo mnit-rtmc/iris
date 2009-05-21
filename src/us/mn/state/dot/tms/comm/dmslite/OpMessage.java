@@ -313,9 +313,9 @@ public class OpMessage extends OpDms {
 
 					// give up
 					} else {
-						// if caws failure, handle it
+						// if AWS failure, handle it
 						if(mess.checkAwsFailure())
-							mess.handleAwsFailure("was sending a message.");						
+							mess.handleAwsFailure("was sending a message.");
 					}
 				}
 			}
@@ -482,7 +482,7 @@ public class OpMessage extends OpDms {
 
 					// give up
 					} else {
-						// if caws failure, handle it
+						// if AWS failure, handle it
 						if(mess.checkAwsFailure())
 							mess.handleAwsFailure("was sending a message.");						
 					}

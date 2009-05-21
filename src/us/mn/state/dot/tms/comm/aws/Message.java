@@ -12,8 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
-package us.mn.state.dot.tms.comm.caws;
+package us.mn.state.dot.tms.comm.aws;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.comm.AddressedMessage;
@@ -22,8 +21,8 @@ import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.utils.Log;
 
 /**
- * CAWS Message. Normally, a Message represents the bytes sent and
- * received from a device. However, the CAWS poller uses the
+ * AWS Message. Normally, a Message represents the bytes sent and
+ * received from a device. However, the AWS poller uses the
  * the HttpFileMessenger messenger, which reads a file via HTTP,
  * so there is no real message "sent".
  *
@@ -32,7 +31,7 @@ import us.mn.state.dot.tms.utils.Log;
  */
 public class Message implements AddressedMessage
 {
-	/** dms messages received from caws */
+	/** dms messages received from AWS */
 	private byte[] m_msgs = new byte[0];
 
 	// associated file messenger
@@ -53,34 +52,23 @@ public class Message implements AddressedMessage
 	 */
 	public void add(Object mo) {}
 
-	/**
-	 * Send a get request message.
-	 * Defined in AddressedMessage interface.
-	 *
-	 * @throws IOException if received response is malformed.
-	 */
+	/** Send a get request message.
+	 *  Defined in AddressedMessage interface.
+	 *  @throws IOException if received response is malformed. */
 	public void getRequest() throws IOException {
-		Log.finest("caws.Message.getRequest() called.");
-
-		// read http file
+		Log.finest("aws.Message.getRequest() called.");
 		m_msgs = m_mess.read();
 	}
 
-	/**
-	 * Send a set request message.
-	 * Defined in AddressedMessage interface.
-	 */
+	/** Send a set request message. Defined in the 
+	 * AddressedMessage interface. */
 	public void setRequest(String community) throws IOException {}
 
-	/**
-	 * Send an set request message.
-	 * Defined in AddressedMessage interface.
-	 */
+	/** Send an set request message. Defined in the
+	 *  AddressedMessage interface. */
 	public void setRequest() throws IOException {}
 
-	/**
-	 * get the DMS messages received.
-	 */
+	/** Get the DMS messages received. */
 	public byte[] getDmsMsgs() {
 		return (m_msgs);
 	}
