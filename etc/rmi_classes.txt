@@ -52,6 +52,7 @@ us/mn/state/dot/tms/SignMessage.class
 us/mn/state/dot/tms/SignMessageHelper*.class
 us/mn/state/dot/tms/SignRequest.class
 us/mn/state/dot/tms/SignText.class
+us/mn/state/dot/tms/SignTextHelper.class
 us/mn/state/dot/tms/Station.class
 us/mn/state/dot/tms/SystemAttrEnum.class
 us/mn/state/dot/tms/SystemAttribute.class

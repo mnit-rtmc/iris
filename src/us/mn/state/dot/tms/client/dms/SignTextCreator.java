@@ -21,7 +21,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.utils.SDMS;
+import us.mn.state.dot.tms.SignTextHelper;
 
 /**
  * This is a utility class to create sign text messages.
@@ -64,7 +64,7 @@ public class SignTextCreator {
 	public void create(SignGroup sg, short line, String mess,
 		short priority)
 	{
-		mess = SDMS.getValidText(mess);
+		mess = SignTextHelper.getValidText(mess);
 		String name = createUniqueSignTextName(sg);
 		if(canAddSignText(name)) {
 			HashMap<String, Object> attrs =

@@ -19,9 +19,9 @@ import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.utils.SString;
-import us.mn.state.dot.tms.utils.SDMS;
 
 /**
  * Model for a sign text line combo box
@@ -85,7 +85,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 		SignText st = m_selected;
 		// this is a hack, see the note in ignoreLineHack()
 		if(st != null && st instanceof ClientSignText)
-			if(SDMS.ignoreLineHack(st.getMessage()))
+			if(SignTextHelper.ignoreLineHack(st.getMessage()))
 				return BLANK_SIGN_TEXT;
 		return st;
 	}

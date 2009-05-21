@@ -30,7 +30,7 @@ import javax.swing.border.Border;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.utils.SDMS;
+import us.mn.state.dot.tms.SignTextHelper;
 
 /**
  * The editor for SignText combo boxes.
@@ -78,12 +78,13 @@ public class MsgComboBoxEditor implements ComboBoxEditor {
 			txt = ((SignText)o).getMessage();
 		else
 			txt = o.toString();
-		return SDMS.getValidText(txt);
+		return SignTextHelper.getValidText(txt);
 	}
 
 	/** return the edited item */
 	public Object getItem() {
-		String newValue = SDMS.getValidText(m_editor.getText());
+		String newValue = SignTextHelper.
+			getValidText(m_editor.getText());
 		m_editor.setText(newValue);
 		if(m_oldValue instanceof SignText) {
 			if(getItemText(newValue).equals(

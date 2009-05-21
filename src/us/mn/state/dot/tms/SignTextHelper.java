@@ -12,35 +12,37 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.utils;
+package us.mn.state.dot.tms;
 
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * DMS convenience methods.
+ * SignText convenience methods.
  *
  * @author Michael Darter
  */
-public class SDMS {
+public class SignTextHelper {
 
 	/** instance can't be created */
-	private SDMS(){}
+	private SignTextHelper(){}
 
 	/**
 	 *  test methods.
+	 *  FIXME: move to junit test
 	 */
 	public static boolean test() {
 		boolean ok = true;
 
 		// getValidText
-		ok = ok & SDMS.getValidText("abcDEF").equals("DEF");
+		ok = ok & SignTextHelper.getValidText("abcDEF").equals("DEF");
 
 		return (ok);
 	}
 
 	/** return validated sign text, with invalid chars removed */
 	public static String getValidText(String t) {
-		final String DMS_VALID_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890 !#$%&()*+,-./:;<=>?@]*'";
+		final String DMS_VALID_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZ0" +
+			"1234567890 !#$%&()*+,-./:;<=>?@]*'";
 		return SString.union(t.toUpperCase(),DMS_VALID_CHARS);
 	}
 
@@ -62,6 +64,4 @@ public class SDMS {
 	public static String flagIgnoredSignLineHack(String line) {
 		return "_"+line+"_";
 	}
-
 }
-
