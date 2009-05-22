@@ -71,7 +71,7 @@
 		  value="video-client-${videoclient.version}.jar"/>
 	<property name="rmi.jar" value="${name}-rmi-${version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
-	<property name="utils.jar" value="${name}-utils-${version}.jar"/>
+	<property name="common.jar" value="${name}-common-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
 
 	<!-- Compiler configuration -->
@@ -302,6 +302,7 @@
 				<include name="us/mn/state/dot/tms/comm/**/*"/>
 				<include name="us/mn/state/dot/tms/event/**/*"/>
 				<include name="us/mn/state/dot/tms/kml/**/*"/>
+				<include name="us/mn/state/dot/tms/server/**/*"/>
 			</fileset>
 		</jar>
 	</target>
@@ -315,13 +316,13 @@
 
 	<!-- Create the iris server distribution -->
 	<target name="server"
-		depends="check-server,server-jar,rmi-jar,utils-jar"
+		depends="check-server,server-jar,rmi-jar,common-jar"
 		description="Create the iris server distribution">
 		<copy todir="${dist.server}">
 			<fileset dir="${build.lib}">
 				<include name="${server.jar}"/>
 				<include name="${rmi.jar}"/>
-				<include name="${utils.jar}"/>
+				<include name="${common.jar}"/>
 			</fileset>
 		</copy>
 		<copy todir="${dist.server}">
@@ -334,11 +335,11 @@
 		</copy>
 	</target>
 
-	<!-- Create the utils jar -->
-	<target name="utils-jar"
+	<!-- Create the common jar -->
+	<target name="common-jar"
 		depends="compile"
-		description="Create the iris-utils jar">
-		<jar jarfile="${build.lib}/${utils.jar}">
+		description="Create the iris-common jar">
+		<jar jarfile="${build.lib}/${common.jar}">
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/utils/*.class"/>
 			<fileset dir="${build.dir}"
@@ -362,7 +363,7 @@
 
 	<!-- Create the iris client distribution -->
 	<target name="client"
-	        depends="client-jar,rmi-jar,utils-jar"
+	        depends="client-jar,rmi-jar,common-jar"
 	        description="Create the iris client distribution">
 		<mkdir dir="${dist.client}"/>
 		<copy todir="${dist.client}">
@@ -406,7 +407,7 @@
 			</fileset>
 			<fileset dir="${build.lib}">
 				<include name="${rmi.jar}"/>
-				<include name="${utils.jar}"/>
+				<include name="${common.jar}"/>
 				<include name="${client.jar}"/>
 			</fileset>
 		</copy>

@@ -103,7 +103,7 @@ fi
 %defattr(0644,tms,tms)
 %{_serverdir}/iris-rmi-%{version}.jar
 %{_serverdir}/iris-server-%{version}.jar
-%{_serverdir}/iris-utils-%{version}.jar
+%{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
 %{_serverdir}/postgresql.jar
 %{_serverdir}/scheduler-@@SCHEDULER.VERSION@@.jar
@@ -133,7 +133,7 @@ fi
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
 %{_clientdir}/lib/iris-rmi-%{version}.jar
-%{_clientdir}/lib/iris-utils-%{version}.jar
+%{_clientdir}/lib/iris-common-%{version}.jar
 %{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar
 %{_clientdir}/lib/shapes-@@SHAPES.VERSION@@.jar

@@ -1,3 +1,3 @@
 Manifest-Version: 1.0
-Class-Path: iris-rmi-@@VERSION@@.jar sonar-server-@@SONAR.VERSION@@.jar scheduler-@@SCHEDULER.VERSION@@.jar iris-utils-@@VERSION@@.jar postgresql.jar mail.jar
+Class-Path: iris-rmi-@@VERSION@@.jar sonar-server-@@SONAR.VERSION@@.jar scheduler-@@SCHEDULER.VERSION@@.jar iris-common-@@VERSION@@.jar postgresql.jar mail.jar
 Main-Class: us.mn.state.dot.tms.MainServer
