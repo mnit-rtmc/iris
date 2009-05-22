@@ -19,7 +19,7 @@ import java.net.URL;
 import javax.swing.Action;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.WebBrowser;
+import us.mn.state.dot.tms.client.widget.WebBrowser;
 
 /**
  * An action to launch a web browser for TESLA error logging.

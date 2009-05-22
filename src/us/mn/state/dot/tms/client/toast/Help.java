@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.toast;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import javax.swing.KeyStroke;
-import us.mn.state.dot.tms.utils.WebBrowser;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.widget.WebBrowser;
 
 /**
  * Help system functionality. A context sensitive web page is started

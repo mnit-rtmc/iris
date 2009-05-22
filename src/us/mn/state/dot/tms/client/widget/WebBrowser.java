@@ -19,7 +19,7 @@
  *   Supports: Mac OS X, GNU/Linux, Unix, Windows XP
  *   Originally released into the public domain
  */
-package us.mn.state.dot.tms.utils;
+package us.mn.state.dot.tms.client.widget;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
