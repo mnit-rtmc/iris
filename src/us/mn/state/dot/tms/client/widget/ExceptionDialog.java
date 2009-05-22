@@ -40,7 +40,6 @@ import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.Screen;
 import us.mn.state.dot.tms.utils.SEmail;
 
 /**

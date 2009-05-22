@@ -27,7 +27,7 @@ import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.JComponent;
 import us.mn.state.dot.sched.AbstractJob;
-import us.mn.state.dot.tms.utils.Screen;
+import us.mn.state.dot.tms.client.widget.Screen;
 
 /**
  * SmartDesktop

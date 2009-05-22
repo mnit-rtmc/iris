@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.utils.Screen;
-import us.mn.state.dot.tms.utils.ScreenLayout;
+import us.mn.state.dot.tms.client.widget.Screen;
+import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.utils.I18N;
 
 
