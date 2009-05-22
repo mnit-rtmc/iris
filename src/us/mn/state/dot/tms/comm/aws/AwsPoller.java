@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 //import us.mn.state.dot.tms.comm.SignPoller; FIXME
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
 
@@ -108,7 +108,7 @@ public class AwsPoller extends MessagePoller // FIXME implements SignPoller
 
 	/** return name of AWS system */
 	public static String awsName() {
-		return I18NMessages.get("Aws.Name");
+		return I18N.get("Aws.Name");
 	}
 
 	/** get the one AWS controller */

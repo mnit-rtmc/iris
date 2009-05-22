@@ -30,7 +30,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.I18NMessages;
 
 /**
  * A KML file, used to write kml and kmz files. An existing file is 

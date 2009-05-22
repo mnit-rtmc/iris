@@ -19,8 +19,7 @@ import java.net.MalformedURLException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPanel;
-
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * An abstract form is a panel which contains a titled form. Most of the work
@@ -82,7 +81,7 @@ abstract public class AbstractForm extends JPanel implements TmsForm {
 
 	/** get the form's help URL */
 	public String getHelpPageUrl() {
-		return I18NMessages.get(helpPageName);
+		return I18N.get(helpPageName);
 	}
 
 	/** set the form's help page name, which is an I18N name */

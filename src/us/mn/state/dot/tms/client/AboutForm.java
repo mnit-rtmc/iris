@@ -20,7 +20,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Provides an about form for the IRIS client.
@@ -36,12 +36,10 @@ public class AboutForm extends AbstractForm {
 		"IRIS -- Intelligent Roadway Information System v. @@VERSION@@";
 
 	/** 2nd title line (optional) */
-	static protected final String m_title2 =
-		I18NMessages.get("AboutForm.Title2");
+	static protected final String m_title2 = I18N.get("AboutForm.Title2");
 
 	/** 3rd title line (optional) */
-	static protected final String m_title3 =
-		I18NMessages.get("AboutForm.Title3");
+	static protected final String m_title3 = I18N.get("AboutForm.Title3");
 
 	/** Create a new About form */
 	public AboutForm() {

@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.client.toast.DetectorForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 
 /**
@@ -133,7 +133,7 @@ public class ViewMenu extends JMenu {
 		add(item);
 
 		// get DMS menu item name
-		String dmsmenuitem = I18NMessages.get("dms.abbreviation");
+		String dmsmenuitem = I18N.get("dms.abbreviation");
 		item = new JMenuItem(dmsmenuitem, Icons.getIcon("drum-inactive"));
 		// use 1st char as mnemonic
 		if (dmsmenuitem.length()>0)

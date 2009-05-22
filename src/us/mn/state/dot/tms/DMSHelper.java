@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -41,7 +41,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Name of automated warning system deployed style */
 	static public final String STYLE_AWS_DEPLOYED =
-		I18NMessages.get("dms.aws.deployed");
+		I18N.get("dms.aws.deployed");
 
 	/** Name of maintenance style */
 	static public final String STYLE_MAINTENANCE = "Maintenance";
@@ -54,7 +54,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Name of automated warning system controlled style */
 	static public final String STYLE_AWS_CONTROLLED =
-		I18NMessages.get("dms.aws.controlled");
+		I18N.get("dms.aws.controlled");
 
 	/** Name of "no controller" style */
 	static public final String STYLE_NO_CONTROLLER = "No controller";

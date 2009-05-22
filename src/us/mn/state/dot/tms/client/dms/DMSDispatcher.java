@@ -46,7 +46,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -93,8 +93,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		new JComboBox(Expiration.values());
 
 	/** Button used to send a message to the DMS */
-	protected final JButton sendBtn =
-		new JButton(I18NMessages.get("dms.send"));
+	protected final JButton sendBtn = new JButton(I18N.get("dms.send"));
 
 	/** Button used to clear the DMS */
 	protected final JButton clearBtn = new JButton();
@@ -110,7 +109,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** AMBER Alert checkbox */
 	protected final JCheckBox alertCbx =
-		new JCheckBox(I18NMessages.get("dms.alert"));
+		new JCheckBox(I18N.get("dms.alert"));
 
 	/** Currently logged in user */
 	protected final User user;
@@ -251,7 +250,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				sendMessage();
 			}
 		};
-		sendBtn.setToolTipText(I18NMessages.get("dms.send.tooltip"));
+		sendBtn.setToolTipText(I18N.get("dms.send.tooltip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);

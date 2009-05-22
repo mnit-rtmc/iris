@@ -25,7 +25,7 @@ import java.util.TimeZone;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.event.BaseEvent;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
 
 /**
@@ -71,7 +71,7 @@ public class MainServer {
 			sanityChecks();
 			Properties props = PropertyLoader.load(PROP_FILE);
 			TMSImpl tms = new TMSImpl(props);
-			I18NMessages.initialize(props);
+			I18N.initialize(props);
 			ServerNamespace ns = new ServerNamespace();
 			// FIXME: static namespace hacks
 			TMSImpl.namespace = ns;

@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A SingleSignTab is a GUI component for displaying the status of a single
@@ -105,7 +105,7 @@ public class SingleSignTab extends FormPanel {
 	protected final JTextField operationTxt = createTextField();
 
 	/** Button used to get the DMS status (optional) */
-	protected final JButton queryStatusBtn = new JButton(I18NMessages.get(
+	protected final JButton queryStatusBtn = new JButton(I18N.get(
 		"dms.query_status"));
 
 	/** Displays the controller status (optional) */
@@ -152,8 +152,7 @@ public class SingleSignTab extends FormPanel {
 		} else
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
-		addRow(I18NMessages.get("DMSDispatcher.OperationTitle"), 
-			operationTxt);
+		addRow(I18N.get("DMSDispatcher.OperationTitle"), operationTxt);
 		if(SystemAttrEnum.DMS_STATUS_ENABLE.getBoolean())
 			addRow("Status", statusTxt, queryStatusBtn);
 		add("Deployed", deployTxt);
@@ -164,10 +163,8 @@ public class SingleSignTab extends FormPanel {
 				addRow("Expires", expiresTxt);
 		} else
 			finishRow();
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			addRow(I18NMessages.get("dms.aws.controlled"),
-				awsControlledCbx);
-		}
+		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
+			addRow(I18N.get("dms.aws.controlled"),awsControlledCbx);
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
@@ -185,7 +182,7 @@ public class SingleSignTab extends FormPanel {
 				}
 			}
 		};
-		queryStatusBtn.setToolTipText(I18NMessages.get(
+		queryStatusBtn.setToolTipText(I18N.get(
 			"dms.query_status.tooltip"));
 		new ActionJob(awsControlledCbx) {
 			public void perform() {

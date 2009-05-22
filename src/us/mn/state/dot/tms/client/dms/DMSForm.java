@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.ZTable;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A form for displaying a table of dynamic message signs.
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
 public class DMSForm extends AbstractForm {
 
 	/** Frame title */
-	static protected final String TITLE = I18NMessages.get("dms.title");
+	static protected final String TITLE = I18N.get("dms.title");
 
 	/** Table model for DMSs */
 	protected DMSModel d_model;

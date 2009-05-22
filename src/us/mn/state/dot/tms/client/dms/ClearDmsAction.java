@@ -22,7 +22,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 
 /**
@@ -48,9 +48,9 @@ public class ClearDmsAction extends AbstractAction {
 		selectionModel = s;
 		dispatcher = d;
 		owner = o;
-		putValue(Action.NAME, I18NMessages.get("dms.clear"));
+		putValue(Action.NAME, I18N.get("dms.clear"));
 		putValue(Action.SHORT_DESCRIPTION,
-			I18NMessages.get("dms.clear.tooltip"));
+			I18N.get("dms.clear.tooltip"));
 	}
 
 	/** Schedule the action to be performed */

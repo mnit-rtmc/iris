@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.toast.ZTable;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is a form for viewing and editing the properties of a dynamic message
@@ -99,8 +99,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Frame title */
-	static protected String TITLE = 
-		I18NMessages.get("dms.abbreviation") + ": ";
+	static protected String TITLE = I18N.get("dms.abbreviation") + ": ";
 
 	/** Generic sign make */
 	static protected final String MAKE_GENERIC = "Generic";
@@ -424,9 +423,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Housing temp", housingTemp);
 		panel.add("Operation", operation);
 		if(SystemAttrEnum.DMS_STATUS_ENABLE.getBoolean()) {
-			JButton btn = new JButton(I18NMessages.get(
-				"dms.query_status"));
-			btn.setToolTipText(I18NMessages.get(
+			JButton btn = new JButton(I18N.get("dms.query_status"));
+			btn.setToolTipText(I18N.get(
 				"dms.query_status.tooltip"));
 			panel.add(btn);
 			new ActionJob(this, btn) {
@@ -439,10 +437,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.finishRow();
 		panel.addRow("User Note", userNote);
 		if(SystemAttrEnum.DMS_RESET_ENABLE.getBoolean()) {
-			JButton btn = new JButton(I18NMessages.get(
-				"dms.reset"));
-			btn.setToolTipText(I18NMessages.get(
-				"dms.reset.tooltip"));
+			JButton btn = new JButton(I18N.get("dms.reset"));
+			btn.setToolTipText(I18N.get("dms.reset.tooltip"));
 			panel.addRow(btn);
 			new ActionJob(this, btn) {
 				public void perform() {

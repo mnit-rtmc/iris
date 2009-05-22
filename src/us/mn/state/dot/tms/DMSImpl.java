@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.kml.KmlRenderer;
 import us.mn.state.dot.tms.kml.KmlStyle;
 import us.mn.state.dot.tms.kml.KmlStyleImpl;
 import us.mn.state.dot.tms.kml.KmlStyleSelector;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -1432,7 +1432,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** get placemark description (KmlPlacemark interface) */
 	public String getPlacemarkDesc() {
 		// DMS name, e.g. CMS or DMS
-		final String DMSABBR = I18NMessages.get("dms.abbreviation");
+		final String DMSABBR = I18N.get("dms.abbreviation");
 
 		StringBuilder desc = new StringBuilder();
 
@@ -1507,7 +1507,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Render the DMS object as xml */
 	public void printXmlElement(PrintWriter out) {
 		// DMS name, e.g. CMS or DMS
-		final String DMSABBR = I18NMessages.get("dms.abbreviation");
+		final String DMSABBR = I18N.get("dms.abbreviation");
 		out.print("<" + DMSABBR);
 		out.print(XmlWriter.createAttribute("id", getName()));
 		out.print(XmlWriter.createAttribute("status", DMSHelper.getAllStyles(this)));

@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The system attribute allows administrators to change system-wide policy
@@ -46,11 +46,11 @@ public class SystemAttributeForm extends AbstractForm {
 
 	/** Caution text for ramp meters */
 	static protected final String CAUTION_RMETERS = 
-		I18NMessages.get("SystemAttributeForm.RampMeterCaution");
+		I18N.get("SystemAttributeForm.RampMeterCaution");
 
 	/** Caution text for DMS */
 	static protected final String CAUTION_DMS = 
-		I18NMessages.get("SystemAttributeForm.DmsCaution");
+		I18N.get("SystemAttributeForm.DmsCaution");
 
 	/** Create a SONAR name to check for allowed updates */
 	static protected String createNamespaceString(String name) {

@@ -26,7 +26,7 @@ import java.util.ResourceBundle;
  * @author P.W. Wong, AHMCT
  * @author Michael Darter
  */
-public class I18NMessages {
+public class I18N {
 
 	/** Base name for resource bundles */
 	static private final String BASENAME = "MessagesBundle.MessagesBundle";
@@ -41,7 +41,7 @@ public class I18NMessages {
 	static private ResourceBundle m_bundle = null;
 
 	/** Class can't be instantiated */
-	private I18NMessages() {
+	private I18N() {
 		assert false;
 	}
 

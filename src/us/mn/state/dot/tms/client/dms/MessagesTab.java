@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.toast.ZTable;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * MessagesTab is a GUI tab for displaying and editing sign messages on a
@@ -82,11 +82,11 @@ public class MessagesTab extends JPanel {
 
 	/** AWS allowed component */
 	protected final JCheckBox awsAllowed = new JCheckBox(
-		I18NMessages.get("dms.aws.allowed"));
+		I18N.get("dms.aws.allowed"));
 
 	/** AWS controlled component */
 	protected final JCheckBox awsControlled = new JCheckBox(
-		I18NMessages.get("dms.aws.controlled"));
+		I18N.get("dms.aws.controlled"));
 
 	/** Sonar state */
 	protected final SonarState state;

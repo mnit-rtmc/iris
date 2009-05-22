@@ -22,7 +22,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.ZTable;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is a tab for viewing and editing system attributes.
@@ -48,7 +48,7 @@ public class SystemAttributeTab extends FormPanel {
 				SystemAttributeTableModel.COL_NAME);
 			if(value instanceof String) {
 				String aname = (String)value;
-				return I18NMessages.get(aname);
+				return I18N.get(aname);
 			} else
 				return null;
 		}

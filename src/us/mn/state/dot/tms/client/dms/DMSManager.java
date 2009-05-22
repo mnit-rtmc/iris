@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.StyleSummary;
 import us.mn.state.dot.tms.client.sonar.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A DMS manager is a container for SONAR DMS objects.
@@ -78,7 +78,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Get the proxy type name */
 	public String getProxyType() {
-		return I18NMessages.get("dms.abbreviation");
+		return I18N.get("dms.abbreviation");
 	}
 
 	/** Create a styled theme for DMSs */

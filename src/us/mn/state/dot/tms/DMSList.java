@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.kml.KmlRenderer;
 import us.mn.state.dot.tms.kml.KmlStyle;
 import us.mn.state.dot.tms.kml.KmlStyleImpl;
 import us.mn.state.dot.tms.kml.KmlStyleSelector;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A DMS List used for KML rendering of all DMS. This class
@@ -57,7 +57,7 @@ public class DMSList implements KmlFolder {
 
 	/** get kml document name (KmlFolder interface) */
 	public String getFolderName() {
-		return I18NMessages.get("dms.abbreviation");
+		return I18N.get("dms.abbreviation");
 	}
 
 	/** render to kml (KmlFolder interface) */

@@ -18,7 +18,7 @@ import java.awt.event.KeyEvent;
 import java.io.IOException;
 import javax.swing.KeyStroke;
 import us.mn.state.dot.tms.utils.WebBrowser;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Help system functionality. A context sensitive web page is started
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.utils.I18NMessages;
  *
  * @author Michael Darter
  * @author Douglas Lau
- * @see I18NMessages
+ * @see I18N
  */
 public class Help {
 
@@ -43,7 +43,7 @@ public class Help {
 	 * @param url HTTP URL of help page to load. */
 	static public void invokeHelp(String url) throws IOException {
 		WebBrowser.open(url == null ? 
-			I18NMessages.get(DEFAULT_HELP_PAGE_NAME) : url);
+			I18N.get(DEFAULT_HELP_PAGE_NAME) : url);
 	}
 
 	/** constructor */

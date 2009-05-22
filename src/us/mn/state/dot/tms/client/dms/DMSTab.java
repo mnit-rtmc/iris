@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.sonar.StyleSummary;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The DMSTab class provides the GUI for working with DMS objects.
@@ -49,8 +49,7 @@ public class DMSTab extends MapTab {
 	public DMSTab(DMSManager manager, List<LayerState> lstates,
 		ViewLayer vlayer, TmsConnection tc)
 	{
-		super(I18NMessages.get("dms.abbreviation"),
-			I18NMessages.get("dms.title"));
+		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
 		dispatcher = new DMSDispatcher(manager, tc);
 		summary = manager.createStyleSummary();
 		map.addLayers(lstates);

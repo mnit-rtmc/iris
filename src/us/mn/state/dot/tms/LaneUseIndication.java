@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A lane-use indication is one of a set of possible states for a lane-use
@@ -26,43 +26,43 @@ import us.mn.state.dot.tms.utils.I18NMessages;
 public enum LaneUseIndication {
 
 	/** Dark (no indication) */
-	DARK(I18NMessages.get("lane.use.dark")),
+	DARK(I18N.get("lane.use.dark")),
 
 	/** Lane open (green arrow) */
-	LANE_OPEN(I18NMessages.get("lane.use.lane.open")),
+	LANE_OPEN(I18N.get("lane.use.lane.open")),
 
 	/** Use caution (flashing yellow arrow, not in MUTCD) */
-	USE_CAUTION(I18NMessages.get("lane.use.use.caution")),
+	USE_CAUTION(I18N.get("lane.use.use.caution")),
 
 	/** Lane closed ahead (Yellow X) */
-	LANE_CLOSED_AHEAD(I18NMessages.get("lane.use.lane.closed.ahead")),
+	LANE_CLOSED_AHEAD(I18N.get("lane.use.lane.closed.ahead")),
 
 	/** Lane closed (red X) */
-	LANE_CLOSED(I18NMessages.get("lane.use.lane.closed")),
+	LANE_CLOSED(I18N.get("lane.use.lane.closed")),
 
 	/** HOV / HOT vehicles only (white diamond) */
-	HOV(I18NMessages.get("lane.use.hov.hot")),
+	HOV(I18N.get("lane.use.hov.hot")),
 
 	/** Merge right (not in MUTCD) */
-	MERGE_RIGHT(I18NMessages.get("lane.use.merge.right")),
+	MERGE_RIGHT(I18N.get("lane.use.merge.right")),
 
 	/** Merge left (not in MUTCD) */
-	MERGE_LEFT(I18NMessages.get("lane.use.merge.left")),
+	MERGE_LEFT(I18N.get("lane.use.merge.left")),
 
 	/** Merge left or right (not in MUTCD) */
-	MERGE_BOTH(I18NMessages.get("lane.use.merge.both")),
+	MERGE_BOTH(I18N.get("lane.use.merge.both")),
 
 	/** Must exit right (not in MUTCD) */
-	MUST_EXIT_RIGHT(I18NMessages.get("lane.use.must.exit.right")),
+	MUST_EXIT_RIGHT(I18N.get("lane.use.must.exit.right")),
 
 	/** Must exit left (not in MUTCD) */
-	MUST_EXIT_LEFT(I18NMessages.get("lane.use.must.exit.left")),
+	MUST_EXIT_LEFT(I18N.get("lane.use.must.exit.left")),
 
 	/** Advisory variable speed limit (amber on black) */
-	AVSL(I18NMessages.get("lane.use.avsl")),
+	AVSL(I18N.get("lane.use.avsl")),
 
 	/** Variable speed limit (black on white) */
-	VSL(I18NMessages.get("lane.use.vsl"));
+	VSL(I18N.get("lane.use.vsl"));
 
 	/** Create a new lane use indication */
 	private LaneUseIndication(String d) {

@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.utils.I18NMessages;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * ControllerForm is a Swing dialog for editing Controller records
@@ -102,11 +102,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Download button */
 	protected final JButton download =
-		new JButton(I18NMessages.get("ControllerForm.DownloadButton"));
+		new JButton(I18N.get("ControllerForm.DownloadButton"));
 
 	/** Reset button */
 	protected final JButton reset =
-		new JButton(I18NMessages.get("ControllerForm.ResetButton"));
+		new JButton(I18N.get("ControllerForm.ResetButton"));
 
 	/** Comm Link list model */
 	protected final ProxyListModel<CommLink> link_model;
