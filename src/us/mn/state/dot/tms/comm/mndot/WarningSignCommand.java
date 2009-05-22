@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.WarningSignImpl;
 
 /**
  * Operation to command a 170 controller warning sign

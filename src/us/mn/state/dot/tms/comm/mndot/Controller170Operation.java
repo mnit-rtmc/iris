@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.tms.comm.mndot;
 
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.ControllerIO;
-import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
  * 170 Controller operation

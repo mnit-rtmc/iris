@@ -16,13 +16,13 @@ package us.mn.state.dot.tms.comm.viconptz;
 
 import java.io.EOFException;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.CameraImpl;
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.CameraPoller;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
+import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * ViconPoller is a java implementation of the Vicon camera control 

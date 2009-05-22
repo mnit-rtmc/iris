@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Operation to set the time remaining for the current DMS message

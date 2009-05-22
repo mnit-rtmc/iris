@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.comm;
 
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DeviceImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DeviceImpl;
 
 /**
  * An operation on a traffic device, such as a ramp meter or DMS.

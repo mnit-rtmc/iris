@@ -18,9 +18,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
  * Operation to query the status of a ramp meter

@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.comm;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * DMSPoller is an interface for MessagePoller classes which can poll DMS

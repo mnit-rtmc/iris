@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2007  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Operation to set the manual brightness level on a DMS

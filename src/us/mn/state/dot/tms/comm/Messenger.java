@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A Messenger is a class which can poll a field controller and get the

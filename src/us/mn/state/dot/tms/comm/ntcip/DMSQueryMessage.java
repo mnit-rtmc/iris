@@ -16,12 +16,12 @@ package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Operation to query the current message on a DMS

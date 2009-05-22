@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
@@ -27,6 +26,7 @@ import us.mn.state.dot.tms.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 //import us.mn.state.dot.tms.comm.SignPoller; FIXME
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;

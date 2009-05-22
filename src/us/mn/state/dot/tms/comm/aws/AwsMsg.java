@@ -21,7 +21,7 @@ import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;

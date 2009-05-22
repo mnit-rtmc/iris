@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.comm.pelcod;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.CameraImpl;
 
 /**
  * Pelco operation to move a camera.

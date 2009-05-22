@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
-
 import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.utils.Transform;
 
@@ -370,26 +369,4 @@ public class GeoLocHelper extends BaseHelper {
 		return Transform.toLatLonPoint(easting_d, 
 			northing_d, UTM_ZONE, NORTHERN_HEMISPHERE);
 	}
-
-	/** Render the GeoLoc object as xml */
-	static public void printXmlElement(GeoLoc p, PrintWriter out){
-		out.print("<" + p.SONAR_TYPE);
-		out.print(XmlWriter.createAttribute("id", p.getName()));
-		if(GeoLocHelper.hasGPS(p)){
-			out.print(XmlWriter.createAttribute("northing",
-					GeoLocHelper.getTrueNorthing(p)));
-			out.print(XmlWriter.createAttribute("easting",
-					GeoLocHelper.getTrueEasting(p)));
-		}
-		if(p.getFreeway() != null)
-			out.print(XmlWriter.createAttribute("freeway", p.getFreeway().getName()));
-		if(p.getCrossStreet() != null){
-			out.print(XmlWriter.createAttribute("cross_mod",
-					TMSObject.MODIFIER[p.getCrossMod()]));
-			out.print(XmlWriter.createAttribute("cross_street",
-					p.getCrossStreet().getName()));
-		}
-		out.println("/>");
-	}
-
 }

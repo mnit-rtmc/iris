@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2008  Minnesota Department of Transportation
+ * Copyright (C) 2004-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@ import java.io.IOException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.Constants;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
 import us.mn.state.dot.tms.comm.DownloadRequestException;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DebugLog;
 
 /**
  * Operation to get binned samples from a SmartSensor device

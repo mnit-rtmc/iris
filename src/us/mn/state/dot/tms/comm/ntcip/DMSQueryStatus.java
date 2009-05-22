@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * This operation queries the status of a DMS. This includes temperature and

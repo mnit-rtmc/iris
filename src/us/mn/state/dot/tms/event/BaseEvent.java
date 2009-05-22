@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.event;
 
 import java.util.Date;
-import us.mn.state.dot.tms.SQLConnection;
-import us.mn.state.dot.tms.Storable;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.SQLConnection;
+import us.mn.state.dot.tms.server.Storable;
 
 /**
  * This is the base class for logging events to a database.

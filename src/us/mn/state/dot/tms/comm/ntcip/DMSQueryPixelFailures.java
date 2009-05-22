@@ -18,9 +18,9 @@ import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * This operation queries the pixel failure table.

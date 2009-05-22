@@ -22,15 +22,15 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.BaseObjectImpl;
 import us.mn.state.dot.tms.Base64;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.FontImpl;
-import us.mn.state.dot.tms.GlyphImpl;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.BaseObjectImpl;
+import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.FontImpl;
+import us.mn.state.dot.tms.server.GlyphImpl;
 
 /**
  * Operation to send a set of fonts to a DMS controller.

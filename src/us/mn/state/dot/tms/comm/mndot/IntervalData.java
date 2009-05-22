@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import us.mn.state.dot.tms.Constants;
-import us.mn.state.dot.tms.ControllerImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * Inverval data operations are for collecting 30-second or 5-minute binned

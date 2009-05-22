@@ -20,17 +20,17 @@ import java.util.Calendar;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DetectorImpl;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TMSImpl;
-import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DownloadRequestException;
 import us.mn.state.dot.tms.comm.MeterPoller;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DetectorImpl;
+import us.mn.state.dot.tms.server.RampMeterImpl;
+import us.mn.state.dot.tms.server.TMSImpl;
+import us.mn.state.dot.tms.server.WarningSignImpl;
 
 /**
  * Download configuration data to a 170 controller

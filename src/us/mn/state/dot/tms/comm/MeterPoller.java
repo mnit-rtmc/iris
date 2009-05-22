@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.comm;
 
-import us.mn.state.dot.tms.RampMeterImpl;
+import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
  * MeterPoller is an interface for MessagePoller classes which can poll ramp

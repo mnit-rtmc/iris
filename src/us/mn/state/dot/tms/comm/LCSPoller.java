@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.comm;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.SignRequest;
+import us.mn.state.dot.tms.server.LCSArrayImpl;
 
 /**
  * LCSPoller is an interface for MessagePoller classes which can poll LCS

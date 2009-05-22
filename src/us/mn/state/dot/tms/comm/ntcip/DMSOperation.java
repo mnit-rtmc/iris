@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.DebugLog;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.ChecksumException;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Operation to be performed on a dynamic message sign

@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.comm;
 
 import us.mn.state.dot.tms.SignRequest;
-import us.mn.state.dot.tms.WarningSignImpl;
+import us.mn.state.dot.tms.server.WarningSignImpl;
 
 /**
  * WarningSignPoller is an interface for MessagePoller classes which can poll

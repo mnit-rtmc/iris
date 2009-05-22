@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.comm.ntcip;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import us.mn.state.dot.tms.BrightnessSample;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.BrightnessSample;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Operation to incorporate brightness feedback for a DMS.

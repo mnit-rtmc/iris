@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.DebugLog;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DebugLog;
 
 /**
  * MessagePoller is an abstract class which represents a communication channel 

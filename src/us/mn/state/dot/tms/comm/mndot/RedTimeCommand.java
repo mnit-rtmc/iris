@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.comm.mndot;
 
 import java.io.IOException;
 import java.io.ByteArrayOutputStream;
-import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
  * Operation to set the red time for a ramp meter

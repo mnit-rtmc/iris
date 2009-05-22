@@ -18,9 +18,9 @@ import java.io.IOException;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.LCSArrayImpl;
 
 /**
  * Operation to query the status of a Lane Control Signal array.

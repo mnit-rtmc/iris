@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.comm.dmslite;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMSImpl;
+import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.utils.SString;
 
 /**

@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.comm.ntcip;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import us.mn.state.dot.tms.DMSImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 
 /**
  * Operatoin to reset a dynamic message sign

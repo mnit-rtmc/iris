@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.comm;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.ErrorCounter;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.ErrorCounter;
 
 /**
  * General operation to test communication to a controller

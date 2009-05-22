@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.comm.canoga;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * Controller operation to initialize a Canoga card

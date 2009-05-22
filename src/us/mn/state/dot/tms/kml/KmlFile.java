@@ -24,12 +24,12 @@ import java.util.Iterator;
 import java.util.zip.ZipOutputStream;
 import java.util.zip.ZipEntry;
 
-import us.mn.state.dot.tms.DMSImpl;
-import us.mn.state.dot.tms.DMSList;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.DMSList;
 
 /**
  * A KML file, used to write kml and kmz files. An existing file is 

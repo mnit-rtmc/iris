@@ -19,9 +19,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
-import us.mn.state.dot.tms.DebugLog;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.ParsingException;
+import us.mn.state.dot.tms.server.DebugLog;
 
 /**
  * Simple Network Management Protocol (SNMP)

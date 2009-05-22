@@ -19,14 +19,10 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.Interval;
-import us.mn.state.dot.tms.LCSArrayImpl;
-import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.WarningSignImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.LCSPoller;
@@ -34,6 +30,10 @@ import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
 import us.mn.state.dot.tms.comm.MeterPoller;
 import us.mn.state.dot.tms.comm.WarningSignPoller;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.RampMeterImpl;
+import us.mn.state.dot.tms.server.WarningSignImpl;
 
 /**
  * MndotPoller is a poller for the Mn/DOT 170 communication protocol,

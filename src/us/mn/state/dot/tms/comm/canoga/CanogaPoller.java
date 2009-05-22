@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@ import java.io.EOFException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.ControllerImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.comm.MessagePoller;
 import us.mn.state.dot.tms.comm.Messenger;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * CanogaPoller is a java implementation of the 3M Canoga (tm) serial

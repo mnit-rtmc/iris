@@ -14,8 +14,8 @@
  */
 package us.mn.state.dot.tms.comm.mndot;
 
-import us.mn.state.dot.tms.LCSArrayImpl;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.LCSArrayImpl;
 
 /**
  * An LCS array operation.

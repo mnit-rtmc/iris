@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sched.Completer;
-import us.mn.state.dot.tms.ControllerImpl;
-import us.mn.state.dot.tms.RampMeterImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
  * Operation to query 5-minute sample data + meter green counts

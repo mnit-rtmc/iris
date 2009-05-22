@@ -15,15 +15,14 @@
 package us.mn.state.dot.tms.comm.viconptz;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.CameraImpl;
 import us.mn.state.dot.tms.comm.AddressedMessage;
 import us.mn.state.dot.tms.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.CameraImpl;
 
 /**
  * Vicon operation to set a camera preset.
  *
  * @author Stephen Donecker
- * @company University of California, Davis
  */
 public class SetCameraPreset extends DeviceOperation {
 
