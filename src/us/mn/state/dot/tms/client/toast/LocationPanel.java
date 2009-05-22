@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,11 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -74,16 +74,16 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	protected final JComboBox freeway = new JComboBox();
 
 	/** Freeway direction combo box */
-	protected final JComboBox freeDir = new JComboBox(TMSObject.DIR_LONG);
+	protected final JComboBox freeDir = new JComboBox(Direction.DIR_LONG);
 
 	/** Cross street modifier combobox */
-	protected final JComboBox crossMod = new JComboBox(TMSObject.MODIFIER);
+	protected final JComboBox crossMod = new JComboBox(Direction.MODIFIER);
 
 	/** Cross street combobox */
 	protected final JComboBox cross = new JComboBox();
 
 	/** Cross street direction combobox */
-	protected final JComboBox crossDir = new JComboBox(TMSObject.DIRECTION);
+	protected final JComboBox crossDir = new JComboBox(Direction.DIRECTION);
 
 	/** UTM Easting */
 	protected final JSpinner easting = new JSpinner(

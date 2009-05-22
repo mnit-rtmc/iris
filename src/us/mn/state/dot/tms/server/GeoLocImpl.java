@@ -20,10 +20,10 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TMSObject;
 
 /**
  * GeoLoc contains attributes necessary to describe a map location.
@@ -163,7 +163,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetFreeDir(short d) throws TMSException {
 		if(d == free_dir)
 			return;
-		if(d < 0 || d > TMSObject.DIR_FREEWAY.length)
+		if(d < 0 || d > Direction.DIR_FREEWAY.length)
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "free_dir", d);
 		setFreeDir(d);
@@ -210,7 +210,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetCrossDir(short d) throws TMSException {
 		if(d == cross_dir)
 			return;
-		if(d < 0 || d > TMSObject.DIRECTION.length)
+		if(d < 0 || d > Direction.DIRECTION.length)
 			throw new ChangeVetoException("Invalid direction");
 		store.update(this, "cross_dir", d);
 		setCrossDir(d);
@@ -233,7 +233,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public void doSetCrossMod(short m) throws TMSException {
 		if(m == cross_mod)
 			return;
-		if(m < 0 || m > TMSObject.MODIFIER.length)
+		if(m < 0 || m > Direction.MODIFIER.length)
 			throw new ChangeVetoException("Invalid modifier");
 		store.update(this, "cross_mod", m);
 		setCrossMod(m);

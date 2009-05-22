@@ -47,7 +47,7 @@ public class GeoLocHelper extends BaseHelper {
 			if(f != null) {
 				short fd = l.getFreeDir();
 				String free = f.getName() + " " +
-					TMSObject.DIRECTION[fd];
+					Direction.DIRECTION[fd];
 				b.append(free.trim());
 			}
 		}
@@ -70,9 +70,9 @@ public class GeoLocHelper extends BaseHelper {
 			if(x != null) {
 				short xd = l.getCrossDir();
 				short xm = l.getCrossMod();
-				String cross = TMSObject.MODIFIER[xm] +
+				String cross = Direction.MODIFIER[xm] +
 					" " + x.getName() + " " +
-					TMSObject.DIRECTION[xd];
+					Direction.DIRECTION[xd];
 				return cross.trim();
 			}
 		}
@@ -92,7 +92,7 @@ public class GeoLocHelper extends BaseHelper {
 					b.append(" to ");
 				short fd = l.getFreeDir();
 				String free = f.getName() + " " +
-					TMSObject.DIRECTION[fd];
+					Direction.DIRECTION[fd];
 				b.append(free.trim());
 			}
 		}
@@ -180,8 +180,8 @@ public class GeoLocHelper extends BaseHelper {
 		else
 			return "null";
 		short fd = filterDirection(d, f);
-		if(fd > 0 && fd < TMSObject.DIRECTION.length)
-			b.append(TMSObject.DIRECTION[fd]);
+		if(fd > 0 && fd < Direction.DIRECTION.length)
+			b.append(Direction.DIRECTION[fd]);
 		return b.toString();
 	}
 
@@ -192,9 +192,9 @@ public class GeoLocHelper extends BaseHelper {
 		StringBuilder b = new StringBuilder();
 		b.append(r.getName());
 		short fd = filterDirection(d, r);
-		if(fd > 0 && fd < TMSObject.DIRECTION.length) {
+		if(fd > 0 && fd < Direction.DIRECTION.length) {
 			b.append(' ');
-			b.append(TMSObject.DIRECTION[fd]);
+			b.append(Direction.DIRECTION[fd]);
 		}
 		return b.toString();
 	}

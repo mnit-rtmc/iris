@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms;
 
 /**
- * TMSObject
+ * Direction constants.
  *
  * @author Douglas Lau
  */
-public interface TMSObject {
+public interface Direction {
 
 	/** Cross street direction strings to use for detector names */
 	public String[] DIRECTION = {

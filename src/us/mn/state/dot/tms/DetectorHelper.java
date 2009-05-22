@@ -52,10 +52,10 @@ public class DetectorHelper extends BaseHelper {
 		b.append(freeway.getAbbrev());
 		b.append("/");
 		if(cd > 0)
-			b.append(TMSObject.DIRECTION[cd]);
-		b.append(TMSObject.MOD_SHORT[cm]);
+			b.append(Direction.DIRECTION[cd]);
+		b.append(Direction.MOD_SHORT[cm]);
 		b.append(cross.getAbbrev());
-		b.append(TMSObject.DIR_FREEWAY[fd]);
+		b.append(Direction.DIR_FREEWAY[fd]);
 		return b.toString();
 	}
 

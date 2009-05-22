@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.server;
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.TMSObject;
 
 /**
  * This class writes out the current GeoLoc configuration to an XML file.
@@ -71,7 +71,7 @@ public class GeoLocXmlWriter extends XmlWriter {
 		}
 		if(p.getCrossStreet() != null) {
 			out.print(createAttribute("cross_mod",
-				TMSObject.MODIFIER[p.getCrossMod()]));
+				Direction.MODIFIER[p.getCrossMod()]));
 			out.print(createAttribute("cross_street",
 				p.getCrossStreet().getName()));
 		}

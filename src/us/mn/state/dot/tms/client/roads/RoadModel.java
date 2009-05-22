@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.TMSObject;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -60,7 +60,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 	/** List of all possible direction values */
 	static LinkedList<String> DIRECTION = new LinkedList<String>();
 	static {
-		for(String d: TMSObject.DIR_LONG)
+		for(String d: Direction.DIR_LONG)
 			DIRECTION.add(d);
 	}
 

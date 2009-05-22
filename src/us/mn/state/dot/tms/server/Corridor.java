@@ -22,10 +22,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.TMSObject;
 
 /**
  * A corridor is a collection of all R_Node objects for one freeway corridor.
@@ -83,7 +83,7 @@ public class Corridor extends CorridorBase {
 	/** Print out the corridor to an XML file */
 	public void printXml(PrintWriter out) {
 		out.println("<corridor route='" + freeway + "' dir='" +
-			TMSObject.DIRECTION[free_dir] + "'>");
+			Direction.DIRECTION[free_dir] + "'>");
 		for(R_Node n: r_nodes)
 			((R_NodeImpl)n).printXml(out);
 		out.println("</corridor>");

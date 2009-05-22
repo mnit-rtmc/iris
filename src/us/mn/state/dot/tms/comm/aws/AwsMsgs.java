@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.comm.aws;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
-import us.mn.state.dot.tms.TMSObject;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
