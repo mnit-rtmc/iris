@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client;
 
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ExceptionHandler;
-import us.mn.state.dot.tms.utils.ExceptionDialog;
+import us.mn.state.dot.tms.client.widget.ExceptionDialog;
 
 /**
  * A simple exception handler.

@@ -21,7 +21,7 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.tms.utils.ExceptionDialog;
+import us.mn.state.dot.tms.client.widget.ExceptionDialog;
 import us.mn.state.dot.util.HTTPProxySelector;
 
 /**
