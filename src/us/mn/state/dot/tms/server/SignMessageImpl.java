@@ -108,12 +108,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		multi = m;
 		bitmaps = b;
 		priority = p;
-		// FIXME: the ancient postgresql driver has a bug which makes
-		// a NULL column return 0 for numeric datatypes. This workaround
-		// can be removed after upgrading to newer JDBC driver. These
-		// fields cannot be 0 anyway, so this trick works in this case.
-		if(d == 0)
-			d = null;
 		duration = d;		
 	}
 

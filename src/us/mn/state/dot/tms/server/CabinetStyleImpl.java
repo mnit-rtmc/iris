@@ -70,15 +70,12 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 	/** Create a new cabinet style */
 	protected CabinetStyleImpl(String n, Integer d) {
 		this(n);
-		dip = checkDip(d);
+		dip = d;
 	}
 
 	/** Check for special null dip setting */
 	protected Integer checkDip(Integer d) {
-		// FIXME: the ancient postgresql driver has a bug which makes
-		// a NULL column return 0 for numeric datatypes. This workaround
-		// can be removed after upgrading to newer JDBC driver.
-		if(d == 0 && !name.equals("336"))
+		if(d != null && d == 0 && !name.equals("336"))
 			return null;
 		else
 			return d;

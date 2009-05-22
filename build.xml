@@ -295,16 +295,9 @@
 		</jar>
 	</target>
 
-	<!-- Check for server dependencies -->
-	<target name="check-server">
-		<antcall target="check-dep">
-			<param name="file.dep" value="postgresql.jar"/>
-		</antcall>
-	</target>
-
 	<!-- Create the iris server distribution -->
 	<target name="server"
-		depends="check-server,server-jar,common-jar"
+		depends="server-jar,common-jar"
 		description="Create the iris server distribution">
 		<copy todir="${dist.server}">
 			<fileset dir="${build.lib}">
@@ -315,7 +308,6 @@
 		<copy todir="${dist.server}">
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
-				<include name="postgresql.jar"/>
 				<include name="${scheduler.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>

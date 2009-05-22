@@ -94,18 +94,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		short xm, Integer e, Integer eo, Integer nr, Integer no)
 	{
 		this(n);
-		// FIXME: the ancient postgresql driver has a bug which makes
-		// a NULL column return 0 for numeric datatypes. This workaround
-		// can be removed after upgrading to newer JDBC driver. These
-		// fields cannot be 0 anyway, so this trick works in this case.
-		if(e == 0)
-			e = null;
-		if(eo == 0)
-			eo = null;
-		if(nr == 0)
-			nr = null;
-		if(no == 0)
-			no = null;
 		freeway = f;
 		free_dir = fd;
 		cross_street = x;
