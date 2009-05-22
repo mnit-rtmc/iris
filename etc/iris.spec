@@ -101,7 +101,6 @@ fi
 # /usr/share/java/iris-server-x.x.x
 %dir %attr(0755,tms,tms) %{_serverdir}
 %defattr(0644,tms,tms)
-%{_serverdir}/iris-rmi-%{version}.jar
 %{_serverdir}/iris-server-%{version}.jar
 %{_serverdir}/iris-common-%{version}.jar
 %{_serverdir}/mail.jar
@@ -132,7 +131,6 @@ fi
 %{_clientdir}/images/iris_icon.png
 %{_clientdir}/lib/mail.jar
 %{_clientdir}/lib/iris-client-%{version}.jar
-%{_clientdir}/lib/iris-rmi-%{version}.jar
 %{_clientdir}/lib/iris-common-%{version}.jar
 %{_clientdir}/lib/MapBean-@@MAPBEAN.VERSION@@.jar
 %{_clientdir}/lib/scheduler-@@SCHEDULER.VERSION@@.jar

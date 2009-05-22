@@ -69,7 +69,6 @@
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
 	<property name="videoclient.jar"
 		  value="video-client-${videoclient.version}.jar"/>
-	<property name="rmi.jar" value="${name}-rmi-${version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
@@ -281,24 +280,13 @@
 		</javac>
 	</target>
 
-	<!-- Create the RMI jar -->
-	<target name="rmi-jar"
-		depends="compile"
-		description="Create the RMI jar">
-		<jar jarfile="${build.lib}/${rmi.jar}"
-		     basedir="${build.classes}"
-		     includesfile="${etc.dir}/rmi_classes.txt"/>
-	</target>
-
 	<!-- Create the server jar -->
 	<target name="server-jar"
 		depends="compile"
 		description="Create the iris-server jar">
 		<jar jarfile="${build.lib}/${server.jar}"
 		     manifest="${build.etc}/${manifest.server}">
-			<fileset dir="${build.classes}"
-				 excludesfile="${etc.dir}/rmi_classes.txt">
-				<include name="us/mn/state/dot/tms/*.class"/>
+			<fileset dir="${build.classes}">
 				<include name="us/mn/state/dot/tms/comm/**/*"/>
 				<include name="us/mn/state/dot/tms/event/**/*"/>
 				<include name="us/mn/state/dot/tms/kml/**/*"/>
@@ -316,12 +304,11 @@
 
 	<!-- Create the iris server distribution -->
 	<target name="server"
-		depends="check-server,server-jar,rmi-jar,common-jar"
+		depends="check-server,server-jar,common-jar"
 		description="Create the iris server distribution">
 		<copy todir="${dist.server}">
 			<fileset dir="${build.lib}">
 				<include name="${server.jar}"/>
-				<include name="${rmi.jar}"/>
 				<include name="${common.jar}"/>
 			</fileset>
 		</copy>
@@ -340,6 +327,8 @@
 		depends="compile"
 		description="Create the iris-common jar">
 		<jar jarfile="${build.lib}/${common.jar}">
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/utils/*.class"/>
 			<fileset dir="${build.dir}"
@@ -363,7 +352,7 @@
 
 	<!-- Create the iris client distribution -->
 	<target name="client"
-	        depends="client-jar,rmi-jar,common-jar"
+	        depends="client-jar,common-jar"
 	        description="Create the iris client distribution">
 		<mkdir dir="${dist.client}"/>
 		<copy todir="${dist.client}">
@@ -406,7 +395,6 @@
 				<include name="${videoclient.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
-				<include name="${rmi.jar}"/>
 				<include name="${common.jar}"/>
 				<include name="${client.jar}"/>
 			</fileset>
