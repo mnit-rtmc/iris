@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
@@ -295,6 +296,14 @@ public class SonarState extends Client {
 		return sign_messages;
 	}
 
+	/** Cache of quick messages */
+	protected final TypeCache<QuickMessage> quick_messages;
+
+	/** Get the quick message cache */
+	public TypeCache<QuickMessage> getQuickMessages() {
+		return quick_messages;
+	}
+
 	/** Cache of dynamic message signs */
 	protected final TypeCache<DMS> dmss;
 
@@ -413,6 +422,8 @@ public class SonarState extends Client {
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
 		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
 			this);
+		quick_messages = new TypeCache<QuickMessage>(
+			QuickMessage.class, this);
 		dmss = new TypeCache<DMS>(DMS.class, this);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
@@ -455,6 +466,7 @@ public class SonarState extends Client {
 		populate(warn_signs);
 		populate(ramp_meters);
 		populate(sign_messages);
+		populate(quick_messages);
 		populate(dmss);
 		populate(sign_groups);
 		populate(dms_sign_groups);
