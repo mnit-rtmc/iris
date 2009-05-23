@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.dms.quicklib.QuickMessageEditorTab;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
@@ -124,6 +125,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Messages tab */
 	protected final MessagesTab messagesTab;
+
+	/** Quick Library tab */
+	protected final QuickMessageEditorTab qlibTab;
 
 	/** Travel time template string field */
 	protected final JTextArea travel = new JTextArea(6, 24);
@@ -271,6 +275,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		state = tc.getSonarState();
 		user = state.lookupUser(tc.getUser().getName());
 		messagesTab = new MessagesTab(tc, sign);
+		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+			qlibTab = new QuickMessageEditorTab(
+				state.getQuickMessages(), this, user);
+			else
+				qlibTab = null;
 		plan_model = new TimingPlanModel(state.getTimingPlans(), sign);
 	}
 
@@ -294,6 +303,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			tab.add("Brightness", createBrightnessPanel());
 		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
 			tab.add("Manufacturer", createManufacturerPanel());
+		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+			tab.add(qlibTab.getTabText(), qlibTab);
 		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
