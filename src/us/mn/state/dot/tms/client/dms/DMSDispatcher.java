@@ -39,10 +39,12 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.dms.quicklib.QLibCBox;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -92,6 +94,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final JComboBox durationCmb =
 		new JComboBox(Expiration.values());
 
+	/** Combobox used to select a quick library message (optional). */
+	protected final QLibCBox qlibCmb;
+
 	/** Button used to send a message to the DMS */
 	protected final JButton sendBtn = new JButton(I18N.get("dms.send"));
 
@@ -139,6 +144,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearDmsAction(selectionModel, this, user);
+		qlibCmb = new QLibCBox(this, st.getQuickMessages());
 		clearBtn.setAction(clearAction);
 		manager.setClearAction(clearAction);
 		composer = new SignMessageComposer(this, st.getDmsSignGroups(),
@@ -166,6 +172,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		card_panel.add(new JLabel(), "Blank");
 		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
+		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+			panel.addRow(buildQuickLibPanel());
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
 		deployBox.add(composer);
@@ -222,6 +230,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		clearCurrentPager();
 		clearPreviewPager();
 		composer.dispose();
+		qlibCmb.dispose();
 		removeAll();
 	}
 
@@ -241,6 +250,21 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			pager.dispose();
 			previewPnlPager = null;
 		}
+	}
+
+	/** Build the quick lib panel */
+	protected Box buildQuickLibPanel() {
+		Box box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
+		JLabel label = new JLabel();
+		label.setLabelFor(qlibCmb);
+		label.setDisplayedMnemonic('Q');
+		label.setText("<html><p align=\"right\"><u>Q</u>uick" +
+			"<br>Message</p></html>");
+		box.add(label);
+		box.add(box.createHorizontalStrut(4));
+		box.add(qlibCmb);
+		return box;
 	}
 
 	/** Build the button panel */
@@ -323,6 +347,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		if(tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
 		cards.show(card_panel, "Alert");
+		qlibCmb.setSelectedItem("");
 	}
 
 	/** Disable the dispatcher widgets */
@@ -337,6 +362,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		durationCmb.setSelectedItem(null);
 		sendBtn.setEnabled(false);
 		clearBtn.setEnabled(false);
+		qlibCmb.setEnabled(false);
+		qlibCmb.setSelectedItem("");
 		builder = null;
 	}
 
@@ -347,7 +374,92 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		durationCmb.setSelectedIndex(0);
 		sendBtn.setEnabled(true);
 		clearBtn.setEnabled(true);
+		qlibCmb.setEnabled(true);
+		updateTextQLibCBox(true);
 		selectPreview(false);
+	}
+
+	/** True to indicate updateWidgetsUsingQuickLib() is updating 
+	 *  the widgets, which is used by SignMessageComposer. */
+	protected boolean m_updating_widgets = false;
+
+	/** Update widgets based on current quick library message. This
+	 *  method is called by QLibCBox when its state changes. */
+	public void updateWidgetsUsingQuickLib() {
+		if(!SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+			return;
+
+		// get qlib multi
+		String qlib_multi = "";
+		{
+			QuickMessage qlib_qm = qlibCmb.getSelectedProxy();
+			if(qlib_qm == null)
+				return;
+			qlib_multi = new MultiString(qlib_qm.getMulti()).
+				normalize();
+			if(qlib_multi.isEmpty())
+				return;
+		}
+
+		boolean set = true;
+
+		// compare MULTI strings
+		SignMessage widg_sm = createMessage();
+		if(widg_sm != null) {
+			String widg_multi = new MultiString(
+				widg_sm.getMulti()).normalize();
+			set = !widg_multi.equals(qlib_multi);
+		}
+
+		// set sign message if MULTIs are different or no widget multi
+		if(set) {
+			SignMessage sm = createMessage(qlib_multi);
+			m_updating_widgets = true; // see SignMessageComposer
+			setMessage(sm);
+			m_updating_widgets = false;
+		}
+	}
+
+	/** Set the composer's current sign message. Called by quick 
+	 *  library cbox when the user changes the quick message. */
+	public void setMessage(SignMessage m) {
+		composer.setMessage(m, getLineCount());
+	}
+
+	/** Update the quick library cbox using the current sign message 
+	 *  on either the DMS or from the widgets.
+	 *  @param useDms True to use the DMS as the message source else false
+	 *		  to use the sign message widgets as the source. */
+	public void updateTextQLibCBox(final boolean useDms) {
+		if(!SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+			return;
+
+		// get sign message from dms
+		final SignMessage sm_dms = (watching == null ? null : 
+			watching.getMessageCurrent());
+
+		// this is invoked later because the model probably hasn't 
+		// been updated with the free-form text in the editor's 
+		// edit field.
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				handleUpdateTextQLibCBox(useDms, sm_dms);
+			}
+		});
+	}
+
+	/** handle update to quick lib combobox */
+	protected void handleUpdateTextQLibCBox(boolean useDms, 
+		SignMessage sm_dms) 
+	{
+		if(useDms) {
+			if(qlibCmb != null)
+				qlibCmb.setSelectedItem(sm_dms);
+		} else {
+			final SignMessage sm = createMessage();
+			if(sm != null && qlibCmb != null)
+				qlibCmb.setSelectedItem(sm);
+		}
 	}
 
 	/** Create the pixel map builder */
@@ -437,14 +549,19 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Create a new message from the widgets */
 	protected SignMessage createMessage() {
-		String multi = composer.getMessage();
-		if(multi != null) {
-			String bitmaps = createBitmaps(multi);
-			if(bitmaps != null) {
-				return creator.create(multi, bitmaps,
-				       getPriority(), getDuration());
-			}
-		}
+		if(composer == null)
+			return null;
+		return createMessage(composer.getMessage());
+	}
+
+	/** Create a new message using the specified MULTI */
+	protected SignMessage createMessage(String multi) {
+		if(creator == null || multi == null)
+			return null;
+		String bitmaps = createBitmaps(multi);
+		if(bitmaps != null)
+			return creator.create(multi, bitmaps,
+			       getPriority(), getDuration());
 		return null;
 	}
 
@@ -525,6 +642,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			}
 			composer.setMessage();
 		}
+	}
+
+	/** Get the number of lines on the current sign */
+	public int getLineCount() {
+		if(watching == null)
+			return 0;
+		return getLineCount(watching);
 	}
 
 	/** Get the number of lines on a sign */
