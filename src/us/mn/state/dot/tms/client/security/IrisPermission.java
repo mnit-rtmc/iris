@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,5 +60,4 @@ public class IrisPermission implements Permission {
 	static public final IrisPermission ACTIVATE =
 		new IrisPermission("ACTIVATE");
 	static public final IrisPermission VIEW = new IrisPermission("VIEW");
-	static public final IrisPermission TIGER = new IrisPermission("TIGER");
 }

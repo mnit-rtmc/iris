@@ -76,11 +76,6 @@ public class TmsConnection {
 		return getUser().hasPermission(IrisPermission.ACTIVATE);
 	}
 
-	/** Is the current user allowed tiger privileges */
-	public boolean isTiger() {
-		return getUser().hasPermission(IrisPermission.TIGER);
-	}
-
 	/** Is the connection open? */
 	public boolean isOpen() {
 		return connectionOpen;
