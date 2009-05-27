@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A form for displaying and editing DMS fonts

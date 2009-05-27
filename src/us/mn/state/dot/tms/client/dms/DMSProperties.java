@@ -49,7 +49,7 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

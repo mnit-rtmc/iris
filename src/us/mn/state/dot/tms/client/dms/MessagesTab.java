@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TmsForm;
-import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

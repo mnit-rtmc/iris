@@ -21,7 +21,7 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

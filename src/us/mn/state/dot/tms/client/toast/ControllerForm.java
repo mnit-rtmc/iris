@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
+import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
-import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * LCSArrayProperties is a dialog for editing the properties of an LCS array.

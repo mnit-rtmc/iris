@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A form for displaying and editing warning signs

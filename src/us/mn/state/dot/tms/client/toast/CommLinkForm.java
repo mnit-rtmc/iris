@@ -34,8 +34,8 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A form for displaying and editing comm links
