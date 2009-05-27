@@ -108,10 +108,20 @@ public class SignMessageComposer extends JPanel {
 	/** Listener for combo box events */
 	protected final ActionListener comboListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			if(adjusting == 0)
-				selectPreview(true);
+			handleActionPerformed(e);
 		}
 	};
+
+	/** handle action event */
+	protected void handleActionPerformed(ActionEvent e) {
+		if(adjusting != 0)
+			return;
+		selectPreview(true);
+		// the user might have changed cbox contents, so
+		// reevaluate the currently selected quick message.
+		if(!dispatcher.m_updating_widgets)
+			dispatcher.updateTextQLibCBox(false);
+	}
 
 	/** Create a new sign message composer */
 	public SignMessageComposer(DMSDispatcher ds, TypeCache<DmsSignGroup> d, 
@@ -329,8 +339,14 @@ public class SignMessageComposer extends JPanel {
 					first_key_event = null;
 				}
 			}
+			// the cbox editor lost focus, which only happens
+			// if the cbox is editable.
 			public void focusLost(FocusEvent e) {
 				cbox.setEditable(false);
+				// the user might have changed cbox contents, 
+				// so reevaluate the currently selected quick 
+				// message.
+				dispatcher.updateTextQLibCBox(false);
 			}
 		});
 	}
@@ -409,10 +425,11 @@ public class SignMessageComposer extends JPanel {
 	protected void setMessage(SignMessage m, int n_lines) {
 		String[] lines = SignMessageHelper.createLines(m, n_lines);
 		for(int i = 0; i < cmbLine.length; i++) {
-			if(i < lines.length)
+			if(i < lines.length) {
 				setLineSelection(i, lines[i]);
-			else if(cmbLine[i].getItemCount() > 0)
-					cmbLine[i].setSelectedIndex(0);
+			} else if(cmbLine[i].getItemCount() > 0) {
+				cmbLine[i].setSelectedIndex(0);
+			}
 		}
 	}
 

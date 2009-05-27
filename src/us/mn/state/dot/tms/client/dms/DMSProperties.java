@@ -314,6 +314,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void dispose() {
 		location.dispose();
 		messagesTab.dispose();
+		if(qlibTab != null)
+			qlibTab.dispose();
 		super.dispose();
 	}
 
