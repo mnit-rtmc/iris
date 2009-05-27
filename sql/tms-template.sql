@@ -700,6 +700,11 @@ CREATE TABLE iris.sign_message (
 	duration INTEGER
 );
 
+CREATE TABLE iris.quick_message (
+	name VARCHAR(20) PRIMARY KEY,
+	multi VARCHAR(256) NOT NULL
+);
+
 CREATE FUNCTION hour_min(integer) RETURNS text
     AS '
 DECLARE
@@ -1079,7 +1084,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.87.0
+database_version	3.88.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
