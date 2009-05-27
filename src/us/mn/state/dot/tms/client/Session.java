@@ -28,7 +28,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
-import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.Camera;
@@ -43,7 +42,6 @@ import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
-import us.mn.state.dot.tms.client.rwis.RwisTab;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
@@ -58,7 +56,6 @@ import us.mn.state.dot.tms.client.warning.WarningSignManager;
 // agency specific imports
 import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
 import us.mn.state.dot.tms.client.incidents.D10IncidentLayer;
-import us.mn.state.dot.tms.client.rwis.D10RwisLayer;
 
 /**
  * A session is one IRIS login session.
@@ -87,9 +84,6 @@ public class Session {
 
 	/** Incident layer */
 	protected final TmsIncidentLayer incLayer;
-
-	/** RWIS layer */
-	protected final RwisLayer rwisLayer;
 
 	/** Location manager */
 	protected final GeoLocManager loc_manager;
@@ -177,8 +171,6 @@ public class Session {
 		lstates.add(cam_manager.getLayer().createState());
 		if(incLayer != null)
 			lstates.add(incLayer.createState());
-		if(rwisLayer != null)
-			lstates.add(rwisLayer.createState());
 		lstates.add(warn_manager.getLayer().createState());
 		tabs.add(new DMSTab(dms_manager, lstates, vlayer,
 			tmsConnection));
@@ -203,11 +195,6 @@ public class Session {
 	protected void addIncidentTab() {
 		if(incLayer != null)
 			tabs.add(new IncidentTab(incLayer));
-	}
-
-	/** Add the rwis tab */
-	protected void addRwisTab() {
-		tabs.add(new RwisTab(rwisLayer));
 	}
 
 	/** Add the LCS tab */
@@ -241,16 +228,11 @@ public class Session {
 		if(i_loc != null) {
 			URL u = new URL(i_loc);
 			if(SystemAttrEnum.INCIDENT_CALTRANS_ENABLE.getBoolean())
-			{
 				incLayer = new D10IncidentLayer(u, logger);
-				rwisLayer = new D10RwisLayer(u, logger);
-			} else {
+			else
 				incLayer = new TmsIncidentLayer(u, logger);
-				rwisLayer = null;
-			}
 		} else {
 			incLayer = null;
-			rwisLayer = null;
 		}
 
 		loc_manager = new GeoLocManager(st.getGeoLocs());
@@ -304,7 +286,5 @@ public class Session {
 			gpoly.dispose();
 		if(incLayer != null)
 			incLayer.dispose();
-		if(rwisLayer != null)
-			rwisLayer.dispose();
 	}
 }
