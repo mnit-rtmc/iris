@@ -29,6 +29,8 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
@@ -190,9 +192,15 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		// Add a third column to the grid bag so the drop spinner
 		// does not extend across the whole form
 		panel.addRow(new javax.swing.JLabel());
-		active.setEnabled(connection.isAdmin() ||
-			connection.isActivate());
+		active.setEnabled(canActivate());
 		return panel;
+	}
+
+	/** Check if the user can activate a controller */
+	protected boolean canActivate() {
+		User user = connection.getUser();
+		Name name = new Name(Controller.SONAR_TYPE, "oname", "active");
+		return user.canUpdate(name.toString());
 	}
 
 	/** Create the cabinet panel */

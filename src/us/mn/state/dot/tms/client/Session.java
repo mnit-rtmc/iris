@@ -23,13 +23,18 @@ import java.util.logging.Logger;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.Theme;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.RwisLayer;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.ViewLayer;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -47,8 +52,6 @@ import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.sonar.GeoLocManager;
-import us.mn.state.dot.tms.client.security.IrisPermission;
-import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
@@ -213,7 +216,7 @@ public class Session {
 	}
 
 	/** Add the camera tab */
-	protected void addCameraTab(final SonarState st, IrisUser user) {
+	protected void addCameraTab(SonarState st, User user) {
 		tabs.add(new CameraTab(cam_manager, props, logger, st, user));
 	}
 
@@ -274,20 +277,23 @@ public class Session {
 			st.getRampMeters(), loc_manager);
 		meter_manager_singleton = meter_manager;
 		vlayer = new ViewLayer();
-		IrisUser user = tmsConnection.getUser();
-		if(user.hasPermission(IrisPermission.DMS_TAB))
+		User user = tmsConnection.getUser();
+		if(canUpdate(user, DMS.SONAR_TYPE, "messageNext"))
 			addDMSTab();
-		if(user.hasPermission(IrisPermission.METER_TAB))
+		if(canUpdate(user, RampMeter.SONAR_TYPE, "rateNext"))
 			addMeterTab();
-		if(user.hasPermission(IrisPermission.MAIN_TAB))
-			addIncidentTab();
-		if(user.hasPermission(IrisPermission.RWIS_TAB))
-			addRwisTab();
-		if(user.hasPermission(IrisPermission.LCS_TAB))
+		addIncidentTab();
+		if(canUpdate(user, LCSArray.SONAR_TYPE, "indicationsNext"))
 			addLcsTab();
-		addCameraTab(st, user);
-		if(user.hasPermission(IrisPermission.ADMINISTRATOR))
+		if(user.canRead(Camera.SONAR_TYPE))
+			addCameraTab(st, user);
+		if(user.canAdd(new Name(R_Node.SONAR_TYPE, "oname").toString()))
 			addRoadwayTab();
+	}
+
+	/** Check if a user can update an attribute */
+	protected boolean canUpdate(User user, String tname, String aname) {
+		return user.canUpdate(new Name(tname,"oname",aname).toString());
 	}
 
 	/** Dispose of the session */

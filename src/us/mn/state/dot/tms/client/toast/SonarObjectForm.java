@@ -48,7 +48,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		proxy = p;
 		connection = tc;
 		state = tc.getSonarState();
-		admin = connection.isAdmin();
+		admin = true;
 	}
 
 	/** Get the TMS connection */

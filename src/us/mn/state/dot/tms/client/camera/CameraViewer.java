@@ -32,13 +32,13 @@ import javax.swing.JTextField;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
 import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
@@ -137,7 +137,7 @@ public class CameraViewer extends JPanel
 	protected final CameraManager manager;
 
 	/** Logged in user */
-	protected final IrisUser user;
+	protected final User user;
 
 	/** Currently selected camera */
 	protected Camera selected = null;
@@ -147,7 +147,7 @@ public class CameraViewer extends JPanel
 	
 	/** Create a new camera viewer */
 	public CameraViewer(CameraManager m, Properties p, Logger l,
-		SonarState st, IrisUser u)
+		SonarState st, User u)
 	{
 		super(new GridBagLayout());
 		manager = m;
@@ -442,8 +442,7 @@ public class CameraViewer extends JPanel
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo() {
 		JComboBox box = new JComboBox();
-		FilteredMonitorModel m = new FilteredMonitorModel(
-			state.lookupUser(user.getName()), state);
+		FilteredMonitorModel m = new FilteredMonitorModel(user, state);
 		box.setModel(new WrapperComboBoxModel(m));
 		if(m.getSize() > 1)
 			box.setSelectedIndex(1);

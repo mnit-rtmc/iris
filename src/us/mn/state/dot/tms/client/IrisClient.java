@@ -31,9 +31,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
-import us.mn.state.dot.tms.client.security.IrisPermission;
-import us.mn.state.dot.tms.client.security.IrisUser;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -171,21 +170,19 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Set the logged in user */
-	protected void setUser(IrisUser user) throws IOException,
+	protected void setUser(User user) throws IOException,
 		TdxmlException, NotBoundException
 	{
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +
 			user.getFullName() + ")");
-		tmsConnection.open(user.getFullName());
+		tmsConnection.open();
 		session = new Session(tmsConnection,
 			userManager.getSonarState(), props, logger);
 		arrangeTabs();
-		if(user.hasPermission(IrisPermission.VIEW)) {
-			viewMenu = new ViewMenu(tmsConnection,
-				userManager.getSonarState());
-			getJMenuBar().add(viewMenu, 1);
-		}
+		viewMenu = new ViewMenu(tmsConnection,
+			userManager.getSonarState());
+		getJMenuBar().add(viewMenu, 1);
 
 		// post-login additions to help menu
 		if(m_helpmenu != null)

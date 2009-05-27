@@ -16,8 +16,7 @@ package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
 import java.util.Properties;
-import us.mn.state.dot.tms.client.security.IrisPermission;
-import us.mn.state.dot.tms.client.security.IrisUser;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
@@ -57,23 +56,8 @@ public class TmsConnection {
 	}
 
 	/** Get the user information for the user who owns the connection */
-	public IrisUser getUser() {
+	public User getUser() {
 		return userManager.getUser();
-	}
-
-	/** Is the current user allowed admin privileges */
-	public boolean isAdmin() {
-		return getUser().hasPermission(IrisPermission.ADMINISTRATOR);
-	}
-
-	/** Is the current user allowed to send alerts? */
-	public boolean isAlert() {
-		return getUser().hasPermission(IrisPermission.ALERT);
-	}
-
-	/** Is the current user allowed activate privileges */
-	public boolean isActivate() {
-		return getUser().hasPermission(IrisPermission.ACTIVATE);
 	}
 
 	/** Is the connection open? */
@@ -82,7 +66,7 @@ public class TmsConnection {
 	}
 
 	/** Open the connection */
-	public void open(String userName) throws IOException {
+	public void open() throws IOException {
 		connectionOpen = true;
 	}
 

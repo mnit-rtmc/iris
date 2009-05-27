@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,9 @@ import java.awt.BorderLayout;
 import java.util.Properties;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.IrisTab;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.security.IrisUser;
 
 /**
  * Provides a GUI for the camera tab on the operator interface for IRIS.
@@ -37,7 +37,7 @@ public class CameraTab extends IrisTab {
 
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(CameraManager manager, Properties p, Logger l,
-		SonarState st, IrisUser user)
+		SonarState st, User user)
 	{
 		super("Camera", "Camera summary");
 		tabPanel = createSideBar(manager, p, st, user);
@@ -46,7 +46,7 @@ public class CameraTab extends IrisTab {
 
 	/** Create the side bar component */
 	protected JPanel createSideBar(CameraManager manager, Properties props,
-		SonarState st, IrisUser user)
+		SonarState st, User user)
 	{
 		JPanel p = new JPanel(new BorderLayout());
 		p.add(new CameraViewer(manager, props, logger, st, user),

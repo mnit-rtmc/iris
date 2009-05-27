@@ -78,8 +78,8 @@ public class UserManager {
 		return state;
 	}
 
-	/** Information of the currently logged in user */
-	protected IrisUser user = null;
+	/** Currently logged in user */
+	protected User user = null;
 
 	/** Create a new user manager */
 	public UserManager(SmartDesktop d, Properties p) {
@@ -93,7 +93,7 @@ public class UserManager {
 	}
 
 	/** Get the user that is currently logged in */
-	public IrisUser getUser() {
+	public User getUser() {
 		return user;
 	}
 
@@ -231,17 +231,11 @@ public class UserManager {
 	}
 
 	/** Create a new user */
-	protected IrisUser createUser(String userName, char[] pwd)
+	protected User createUser(String userName, char[] pwd)
 		throws SonarException, NoSuchFieldException,
 		IllegalAccessException
 	{
 		state.login(userName, new String(pwd));
-		User user = state.lookupUser(userName);
-		IrisUser iris_user = new IrisUser(userName, user.getFullName());
-		for(Role r: user.getRoles())
-			iris_user.addRolePermission(r.getName());
-		if(iris_user.hasNoPermissions())
-			throw new SonarException("User has no permissions");
-		return iris_user;
+		return state.lookupUser(userName);
 	}
 }
