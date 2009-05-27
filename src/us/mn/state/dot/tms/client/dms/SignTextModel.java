@@ -147,22 +147,29 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	}
 
 	/** 
-	  * Create a new sign text and add to the persistent sign text library.
-	  * @param sg SignGroup the new message will be associated with.
-	  * @param line Combobox line number.
-	  * @param message Line text.
-	  * @param priority line priority
-	  */
-	protected void createSignText(SignGroup sg, short line, String messarg,
+	 * Create a new sign text and add to the local sign text library.
+	 * @param line Combobox line number.
+	 * @param message Line text.
+	 * @param priority line priority
+	 */
+	protected void createSignText(short line, String messarg,
 		short priority)
 	{
-		if(messarg.length() > 0)
-			creator.create(sg, line, messarg, priority);
+		SignGroup sg = getLocalSignGroup();
+		if(sg != null) {
+			if(messarg.length() > 0)
+				creator.create(sg, line, messarg, priority);
+		}
 	}
 
-	/** Check if the user can add the named sign text */
-	public boolean canAddSignText(String name) {
-		return creator.canAddSignText(name);
+	/** Check if the user can add a sign text to the local sign group */
+	public boolean canAddLocalSignText() {
+		SignGroup sg = getLocalSignGroup();
+		if(sg != null) {
+			String oname = sg.getName() + "_XX";
+			return creator.canAddSignText(oname);
+		} else
+			return false;
 	}
 
 	/** 

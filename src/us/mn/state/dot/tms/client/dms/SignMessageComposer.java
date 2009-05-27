@@ -234,7 +234,7 @@ public class SignMessageComposer extends JPanel {
 		n_lines = nl;
 		n_pages = np;
 		boolean can_add = st_model != null &&
-			st_model.canAddSignText("arbitrary_name");
+			st_model.canAddLocalSignText();
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i] = createLineCombo(can_add);

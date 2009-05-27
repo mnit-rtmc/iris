@@ -182,10 +182,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 
 	/** Add a message to the local sign group library */
 	protected void addMsgToLib(String message) {
-		SignGroup lsg = m_signTextModel.getLocalSignGroup();
-		if(lsg != null) {
-			m_signTextModel.createSignText(lsg, m_cbline, message,
-				ON_THE_FLY_PRIORITY);
-		}
+		m_signTextModel.createSignText(m_cbline, message,
+			ON_THE_FLY_PRIORITY);
 	}
 }
