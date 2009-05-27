@@ -51,6 +51,7 @@ import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.toast.ZTable;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -435,12 +436,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
 		panel.add("Operation", operation);
-		if(SystemAttrEnum.DMS_STATUS_ENABLE.getBoolean()) {
-			JButton btn = new JButton(I18N.get("dms.query_status"));
-			btn.setToolTipText(I18N.get(
-				"dms.query_status.tooltip"));
-			panel.add(btn);
-			new ActionJob(this, btn) {
+		IButton queryBtn = new IButton("dms.query_status", 
+			SystemAttrEnum.DMS_STATUS_ENABLE);
+		if(queryBtn.getIEnabled()) {
+			panel.add(queryBtn);
+			new ActionJob(this, queryBtn) {
 				public void perform() throws Exception {
 					proxy.setSignRequest(SignRequest.
 						QUERY_MESSAGE.ordinal());
@@ -449,11 +449,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		}
 		panel.finishRow();
 		panel.addRow("User Note", userNote);
-		if(SystemAttrEnum.DMS_RESET_ENABLE.getBoolean()) {
-			JButton btn = new JButton(I18N.get("dms.reset"));
-			btn.setToolTipText(I18N.get("dms.reset.tooltip"));
-			panel.addRow(btn);
-			new ActionJob(this, btn) {
+		IButton resetBtn = new IButton("dms.reset", 
+			SystemAttrEnum.DMS_RESET_ENABLE);
+		if(resetBtn.getIEnabled()) {
+			panel.addRow(resetBtn);
+			new ActionJob(this, resetBtn) {
 				public void perform() {
 					proxy.setSignRequest(SignRequest.
 						RESET_DMS.ordinal());

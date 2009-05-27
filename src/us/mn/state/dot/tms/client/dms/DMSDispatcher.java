@@ -32,6 +32,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
@@ -98,10 +99,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final QLibCBox qlibCmb;
 
 	/** Button used to send a message to the DMS */
-	protected final JButton sendBtn = new JButton(I18N.get("dms.send"));
+	protected final IButton sendBtn = new IButton("dms.send");
 
 	/** Button used to clear the DMS */
-	protected final JButton clearBtn = new JButton();
+	protected final JButton clearBtn = new IButton("dms.clear");
 
 	/** Action to clear selected DMS */
 	protected final ClearDmsAction clearAction;
@@ -274,7 +275,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				sendMessage();
 			}
 		};
-		sendBtn.setToolTipText(I18N.get("dms.send.tooltip"));
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
