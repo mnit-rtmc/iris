@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id="stamp">22 May 2009</div>
+<div id="stamp">27 May 2009</div>
 <h1>Mn/DOT IRIS Installation and Configuration</h1>
 All commands must be run as the root user.
 <ol>
@@ -77,6 +77,12 @@ createuser -S -D -R -W tms
 su tms
 psql tms -f /var/lib/iris/sql/tms-template.sql
 exit
+</pre>
+	</li>
+	<li>
+		Add the PostgreSQL JDBC driver to the java classpath.
+<pre>
+ln -snf /usr/share/java/postgresql-jdbc.jar /usr/lib/jvm/jre/lib/ext/
 </pre>
 	</li>
 	<li>
