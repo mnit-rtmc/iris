@@ -164,16 +164,14 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		synchronized(proxies) {
-			if(row == proxies.size())
-				return creator.canAddSignText("arbitrary_name");
-		}
 		SignText st = getProxy(row);
 		if(st != null) {
 			return creator.canUpdateSignText(st.getName() + "/" +
 				getAttributeName(column));
-		} else
-			return false;
+		} else {
+			String oname = group.getName() + "_XX";
+			return creator.canAddSignText(oname);
+		}
 	}
 
 	/** Set the value at the specified cell */
