@@ -14,16 +14,14 @@
  */
 package us.mn.state.dot.tms.client.dms.quicklib;
 
-import java.util.Iterator;
 import java.util.TreeSet;
-import java.util.Set;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.client.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Model for a quick library combobox.

@@ -24,7 +24,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.NumericAlphaComparator;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * List model for IRIS proxies. This class contains a TypeCache for a single
@@ -44,21 +44,7 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Create an empty set of proxies */
 	protected TreeSet<T> createProxySet() {
-		return new TreeSet<T>(
-			new Comparator<T>() {
-				public int compare(T t0, T t1) {
-					return NumericAlphaComparator.
-						compareStrings(t0.getName(), 
-						t1.getName());
-				}
-				public boolean equals(Object o) {
-					return o == this;
-				}
-				public int hashCode() {
-					return super.hashCode();
-				}
-			}
-		);
+		return new TreeSet<T>(new NumericAlphaComparator<T>());
 	}
 
 	/** Set of all proxies */

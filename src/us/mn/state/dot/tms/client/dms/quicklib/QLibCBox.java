@@ -14,24 +14,19 @@
  */
 package us.mn.state.dot.tms.client.dms.quicklib;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import javax.swing.ComboBoxEditor;
 import javax.swing.JComboBox;
-import javax.swing.JTextField;
-import javax.swing.plaf.basic.BasicComboBoxEditor;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.client.NumericAlphaComparator;
-import us.mn.state.dot.tms.client.dms.DMSDispatcher;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.client.dms.DMSDispatcher;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Quick library combobox. This combobox stores quick messages.

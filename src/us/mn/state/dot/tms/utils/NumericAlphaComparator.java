@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client;
+package us.mn.state.dot.tms.utils;
 
 import java.util.Comparator;
 import us.mn.state.dot.tms.utils.SString;
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  * @see NumericAlphaComparatorTest
  */
-public class NumericAlphaComparator<T> implements Comparator<T>{
+public class NumericAlphaComparator<T> implements Comparator<T> {
 
 	/** Compare two objects */
 	public int compare(T a, T b) {
