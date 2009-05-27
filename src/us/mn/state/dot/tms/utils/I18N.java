@@ -79,10 +79,11 @@ public class I18N {
  		}
 	}
 
-	/** Get the specified message.
+	/** Get the specified message, with no error messages returned
+	 *  if there is an error.
 	 *  @param id Name of I18N string in the bundle.
 	 *  @return The I18N string cooresponding to id, else null on error */
-	static private String _get(String id) {
+	static public String getSilent(String id) {
 		if(id == null || id.isEmpty())
 			return null;
 		if(m_bundle == null)
@@ -123,14 +124,26 @@ public class I18N {
 	 *  @see java.awt.event.KeyEvent */
 	static public int getKeyEvent(String id) {
 		final int FAILURE_CODE = 0;
-		String s = _get(id);
-		if(s == null)
+		char c = getKeyEventChar(id);
+		if(c == '\0')
 			return FAILURE_CODE;
+		return charToKeyCode(c, FAILURE_CODE);
+	}
+
+	/** Return the implied key mnemonic in the specified I18N
+	 *  string as a character. For example, if the I18N string
+	 *  is "<html><u>B</u>lank</html>" then 'B' is returned.
+	 *  @param id Name of I18N string in the bundle.
+	 *  @return The 1st underlined char else '\0' on failure. */
+	static public char getKeyEventChar(String id) {
+		final char FAILURE_CHAR = '\0';
+		String s = getSilent(id);
+		if(s == null)
+			return FAILURE_CHAR;
 		String utext = SXml.extractUnderline(s);
 		if(utext == null || utext.isEmpty())
-			return FAILURE_CODE;
-		char c = utext.charAt(0);
-		return charToKeyCode(c, FAILURE_CODE);
+			return FAILURE_CHAR;
+		return Character.toUpperCase(utext.charAt(0));
 	}
 
 	/** Return KeyEvent representation of specified character */
