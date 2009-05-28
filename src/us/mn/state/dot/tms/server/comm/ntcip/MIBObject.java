@@ -25,10 +25,10 @@ abstract public class MIBObject {
 	abstract public int[] getOID();
 
 	/** Get the object name */
-	abstract protected String getName();
+	abstract public String getName();
 
 	/** Get the object value */
-	abstract protected String getValue();
+	abstract public String getValue();
 
 	/** Create an object description */
 	public String toString() {
