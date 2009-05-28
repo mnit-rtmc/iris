@@ -32,8 +32,8 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.comm.LCSPoller;
-import us.mn.state.dot.tms.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.LCSPoller;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes

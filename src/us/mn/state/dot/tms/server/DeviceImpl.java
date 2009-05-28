@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.comm.DeviceOperation;
-import us.mn.state.dot.tms.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
 
 /**
  * DeviceImpl is the base class for all field devices, including detectors,

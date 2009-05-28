@@ -24,8 +24,8 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.comm.WarningSignPoller;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.WarningSignPoller;
 
 /**
  * WarningSignImpl is a traffic device can display one fixed message. It can

@@ -39,8 +39,8 @@ import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.comm.MessagePoller;
-import us.mn.state.dot.tms.comm.MeterPoller;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.MeterPoller;
 
 /**
  * A ramp meter is a traffic signal which meters the flow of traffic on a

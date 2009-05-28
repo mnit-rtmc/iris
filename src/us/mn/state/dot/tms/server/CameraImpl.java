@@ -25,8 +25,8 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.comm.CameraPoller;
-import us.mn.state.dot.tms.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CameraPoller;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
 
 /**
  * CameraImpl represents a single CCTV camera.
