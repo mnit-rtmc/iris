@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 /**
-  * Ntcip VmsCfg node
-  *
-  * @author Douglas Lau
-  */
+ * Ntcip VmsCfg node
+ *
+ * @author Douglas Lau
+ */
 abstract class VmsCfg extends Dms {
 
 	/** Create a new VmsCfg object */

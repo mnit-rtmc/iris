@@ -14,46 +14,32 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip VmsHorizontalPitch object
  *
  * @author Douglas Lau
  */
-public class VmsHorizontalPitch extends VmsCfg implements ASN1Integer {
+public class VmsHorizontalPitch extends ASN1Int {
 
-	/** Create a new VmsHorizontalPitch object */
-	public VmsHorizontalPitch(int p) {
-		super(5);
-		pitch = p;
-	}
+	/** Object ID */
+	static protected final int[] oid = {
+		1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 5, 0
+	};
 
 	/** Create a new VmsHorizontalPitch object */
 	public VmsHorizontalPitch() {
 		this(0);
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "vmsHorizontalPitch";
+	/** Create a new VmsHorizontalPitch object */
+	public VmsHorizontalPitch(int p) {
+		value = p;
 	}
 
-	/** Horizontal pitch */
-	protected int pitch;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		pitch = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return pitch;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(pitch);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return oid;
 	}
 }

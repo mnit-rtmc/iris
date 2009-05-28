@@ -30,7 +30,28 @@ public class OIDTest extends TestCase {
 
 	/** test cases */
 	public void test() {
-		int[] oid = new VmsVerticalPitch().getOID();
+		int[] oid;
+		oid = new VmsCharacterHeightPixels().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 1, 0
+		}));
+		oid = new VmsCharacterWidthPixels().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 2, 0
+		}));
+		oid = new VmsSignHeightPixels().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 3, 0
+		}));
+		oid = new VmsSignWidthPixels().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 4, 0
+		}));
+		oid = new VmsHorizontalPitch().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 5, 0
+		}));
+		oid = new VmsVerticalPitch().getOID();
 		assertTrue(java.util.Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 6, 0
 		}));

@@ -14,40 +14,22 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip VmsSignHeightPixels object
  *
  * @author Douglas Lau
  */
-public class VmsSignHeightPixels extends VmsCfg implements ASN1Integer {
+public class VmsSignHeightPixels extends ASN1Int {
 
-	/** Create a new VmsSignHeightPixels object */
-	public VmsSignHeightPixels() {
-		super(3);
-	}
+	/** Object ID */
+	static protected final int[] oid = {
+		1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 3, 0
+	};
 
-	/** Get the object name */
-	protected String getName() {
-		return "vmsSignHeightPixels";
-	}
-
-	/** Sign height (in pixels) */
-	protected int height;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		height = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return height;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(height);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return oid;
 	}
 }
