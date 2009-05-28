@@ -132,7 +132,7 @@ public class SignMessageHelper extends BaseHelper {
 				int lineNo = i+1;
 				out.print("line_" + lineNo + "='" + ml[i] + "' ");
 			}
+			out.println("/>");
 		}
-		out.println("/>");
 	}
 }
