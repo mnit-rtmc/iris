@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
  * This operation queries the status of a DMS. This includes temperature and

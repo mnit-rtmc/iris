@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
  * Operation to set the time remaining for the current DMS message

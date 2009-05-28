@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.FontImpl;
 import us.mn.state.dot.tms.server.GlyphImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
  * Operation to send a set of fonts to a DMS controller.

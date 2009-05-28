@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  *
  * @author Douglas Lau
  */
-abstract class MIBObject {
+abstract public class MIBObject {
 
 	/** Get the object identifier */
 	abstract public int[] getOID();

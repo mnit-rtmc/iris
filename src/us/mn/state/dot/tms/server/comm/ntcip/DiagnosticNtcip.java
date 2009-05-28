@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
  * Operation to test communication to Ntcip devices
