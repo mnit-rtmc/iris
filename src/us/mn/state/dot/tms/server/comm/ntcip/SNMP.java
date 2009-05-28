@@ -72,12 +72,16 @@ public class SNMP extends BER {
 	/** Get a tag that matches */
 	protected ASN1.Tag getTag(byte clazz, boolean constructed, int number) {
 		Tag tag = new Tag(clazz, constructed, number);
-		if(tag.equals(Tag.GET_REQUEST)) return Tag.GET_REQUEST;
+		if(tag.equals(Tag.GET_REQUEST))
+			return Tag.GET_REQUEST;
 		if(tag.equals(Tag.GET_NEXT_REQUEST))
 			return Tag.GET_NEXT_REQUEST;
-		if(tag.equals(Tag.GET_RESPONSE)) return Tag.GET_RESPONSE;
-		if(tag.equals(Tag.SET_REQUEST)) return Tag.SET_REQUEST;
-		if(tag.equals(Tag.TRAP)) return Tag.TRAP;
+		if(tag.equals(Tag.GET_RESPONSE))
+			return Tag.GET_RESPONSE;
+		if(tag.equals(Tag.SET_REQUEST))
+			return Tag.SET_REQUEST;
+		if(tag.equals(Tag.TRAP))
+			return Tag.TRAP;
 		return super.getTag(clazz, constructed, number);
 	}
 
@@ -108,13 +112,13 @@ public class SNMP extends BER {
 	protected void decodeSNMPMessage(InputStream is, String community)
 		throws IOException
 	{
-		if(decodeSequence(is) > is.available()) throw new
-			ParsingException("INVALID SNMP LENGTH");
-		if(decodeInteger(is) != 0) throw new
-			ParsingException("SNMP VERSION MISMATCH");
+		if(decodeSequence(is) > is.available())
+			throw new ParsingException("INVALID SNMP LENGTH");
+		if(decodeInteger(is) != 0)
+			throw new ParsingException("SNMP VERSION MISMATCH");
 		String c = new String(decodeOctetString(is));
-		if(!c.equals(community)) throw new
-			ParsingException("SNMP COMMUNITY MISMATCH");
+		if(!c.equals(community))
+			throw new ParsingException("SNMP COMMUNITY MISMATCH");
 	}
 
 	/** SNMP message class */
@@ -208,7 +212,8 @@ public class SNMP extends BER {
 			} else if(mo instanceof ASN1OctetString) {
 				ASN1OctetString value = (ASN1OctetString)mo;
 				encodeOctetString(value.getOctetString());
-			} else throw new IOException("UNKNOWN OBJECT TYPE");
+			} else
+				throw new IOException("UNKNOWN OBJECT TYPE");
 		}
 
 		/** Encode a null variable binding */
@@ -216,8 +221,10 @@ public class SNMP extends BER {
 			throws IOException
 		{
 			encodeObjectIdentifier(mo.getOID());
-			if(set) encodeValue(mo);
-			else encodeNull();
+			if(set)
+				encodeValue(mo);
+			else
+				encodeNull();
 			encodeSequence(getEncodedData());
 		}
 
@@ -257,7 +264,8 @@ public class SNMP extends BER {
 			} else if(mo instanceof ASN1OctetString) {
 				ASN1OctetString value = (ASN1OctetString)mo;
 				value.setOctetString(decodeOctetString(is));
-			} else throw new IOException("UNKNOWN OBJECT TYPE");
+			} else
+				throw new IOException("UNKNOWN OBJECT TYPE");
 		}
 
 		/** Decode a variable binding */
@@ -282,21 +290,26 @@ public class SNMP extends BER {
 		protected void decodeResponsePDU(InputStream is)
 			throws IOException
 		{
-			if(decodeIdentifier(is) != Tag.GET_RESPONSE) throw new
-				ParsingException("EXPECTED GET_RESPONSE TAG");
-			if(decodeLength(is) > is.available()) throw new
-				ParsingException("INVALID PDU LENGTH");
+			if(decodeIdentifier(is) != Tag.GET_RESPONSE)
+				throw new ParsingException("!GET_RESPONSE TAG");
+			if(decodeLength(is) > is.available())
+				throw new ParsingException("INVALID PDU LEN");
 			int request = decodeInteger(is);
 			if(request != request_id)
 				throw new RequestIDException(request);
 			int error = decodeInteger(is);
 			int index = decodeInteger(is);
 			switch(error) {
-				case TOO_BIG: throw new TooBig();
-				case NO_SUCH_NAME: throw new NoSuchName(index);
-				case BAD_VALUE: throw new BadValue(index);
-				case READ_ONLY: throw new ReadOnly(index);
-				case GEN_ERROR: throw new GenError(index);
+			case TOO_BIG:
+				throw new TooBig();
+			case NO_SUCH_NAME:
+				throw new NoSuchName(index);
+			case BAD_VALUE:
+				throw new BadValue(index);
+			case READ_ONLY:
+				throw new ReadOnly(index);
+			case GEN_ERROR:
+				throw new GenError(index);
 			}
 		}
 
@@ -317,7 +330,9 @@ public class SNMP extends BER {
 			protected TooBig() {}
 
 			/** Get the error message string */
-			public String getMessage() { return "tooBig"; }
+			public String getMessage() {
+				return "tooBig";
+			}
 		}
 
 		/** NoSuchName exception */
