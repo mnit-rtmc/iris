@@ -288,7 +288,6 @@
 		     manifest="${build.etc}/${manifest.server}">
 			<fileset dir="${build.classes}">
 				<include name="us/mn/state/dot/tms/comm/**/*"/>
-				<include name="us/mn/state/dot/tms/event/**/*"/>
 				<include name="us/mn/state/dot/tms/kml/**/*"/>
 				<include name="us/mn/state/dot/tms/server/**/*"/>
 			</fileset>
