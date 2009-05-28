@@ -27,7 +27,7 @@ import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.event.BaseEvent;
+import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
 

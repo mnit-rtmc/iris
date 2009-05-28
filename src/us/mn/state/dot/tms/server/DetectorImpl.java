@@ -26,8 +26,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.event.DetFailEvent;
-import us.mn.state.dot.tms.event.EventType;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
@@ -41,6 +39,8 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.event.DetFailEvent;
+import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * Detector for traffic data sampling

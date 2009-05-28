@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,38 +12,34 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.event;
+package us.mn.state.dot.tms.server.event;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This is a class for logging sign status change events to a database.
+ * This is a class for logging communication events to a database.
  *
  * @author Douglas Lau
  */
-public class SignStatusEvent extends BaseEvent {
+public class CommEvent extends BaseEvent {
+
+	/** Controller affected by this event */
+	protected final String controller;
 
 	/** Device ID (if device specific) */
 	protected final String device_id;
 
-	/** Message text */
-	protected final String message;
-
-	/** User who deployed message */
-	protected final String iris_user;
-
-	/** Create a new sign status event */
-	public SignStatusEvent(EventType e, String d, String m, String u) {
+	/** Create a new comm event */
+	public CommEvent(EventType e, String c, String dev) {
 		super(e);
-		device_id = d;
-		message = m;
-		iris_user = u;
+		controller = c;
+		device_id = dev;
 	}
 
 	/** Get the database table name */
 	public String getTable() {
-		return "event.sign_event";
+		return "event.comm_event";
 	}
 
 	/** Get a mapping of the columns */
@@ -51,9 +47,8 @@ public class SignStatusEvent extends BaseEvent {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_desc_id", event_type.id);
 		map.put("event_date", event_date);
+		map.put("controller", controller);
 		map.put("device_id", device_id);
-		map.put("message", message);
-		map.put("iris_user", iris_user);
 		return map;
 	}
 }
