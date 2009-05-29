@@ -14,47 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip LampFailureStuckOff object
  *
  * @author Douglas Lau
  */
-public class LampFailureStuckOff extends StatError implements ASN1OctetString {
+public class LampFailureStuckOff extends ASN1OctetStr {
 
-	/** Create a new LampFailureStuckOff object */
-	public LampFailureStuckOff() {
-		super(2);
-		oid[node++] = 6;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "lampFailureStuckOff";
-	}
-
-	/** Lamp failure (stuck off) bitmap */
-	protected byte[] failures = new byte[0];
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		failures = value;
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return failures;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {6, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder buf = new StringBuilder();
 		int f = 1;
-		for(int i = 0; i < failures.length; i++) {
+		for(int i = 0; i < value.length; i++) {
 			for(int b = 0; b < 8; b++, f++) {
-				if((failures[i] & 1 << b) != 0) {
+				if((value[i] & 1 << b) != 0) {
 					if(buf.length() > 0)
 						buf.append(", ");
 					buf.append("#");

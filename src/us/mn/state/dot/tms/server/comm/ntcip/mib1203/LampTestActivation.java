@@ -14,63 +14,46 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip LampTestActivation object
  *
  * @author Douglas Lau
  */
-public class LampTestActivation extends StatError implements ASN1Integer {
+public class LampTestActivation extends ASN1Int {
 
-	/** Undefined code */
-	static public final int UNDEFINED = 0;
+	/** Enumeration of test activation */
+	static public enum Enum {
+		undefined, other, noTest, test;
 
-	/** Other (useless) code */
-	static public final int OTHER = 1;
-
-	/** No lamp test active */
-	static public final int NO_TEST = 2;
-
-	/** Activate lamp test / test in progress */
-	static public final int TEST = 3;
-
-	/** Lamp test activation descriptions */
-	static protected final String ACTIVATION[] = {
-		"???", "Other", "No test", "Test"
-	};
+		/** Get test activation status from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
+	}
 
 	/** Create a new LampTestActivation object */
 	public LampTestActivation() {
-		super(2);
-		oid[node++] = 7;
-		oid[node++] = 0;
-		activation = TEST;
+		value = Enum.test.ordinal();
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "lampTestActivation";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {7, 0});
 	}
-
-	/** Lamp test activation */
-	protected int activation;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= ACTIVATION.length)
-			activation = UNDEFINED;
-		else
-			activation = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return activation;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return ACTIVATION[activation];
+		return Enum.fromOrdinal(value).toString();
 	}
 }

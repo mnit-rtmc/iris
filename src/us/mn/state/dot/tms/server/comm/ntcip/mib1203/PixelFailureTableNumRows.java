@@ -14,42 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip PixelFailureTableNumRows object
  *
  * @author Douglas Lau
  */
-public class PixelFailureTableNumRows extends StatError implements ASN1Integer {
+public class PixelFailureTableNumRows extends ASN1Int {
 
-	/** Create a new PixelFailureTableNumRows object */
-	public PixelFailureTableNumRows() {
-		super(2);
-		oid[node++] = 2;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "pixelFailureTableNumRows";
-	}
-
-	/** Number of rows in the pixel failure table */
-	protected int rows;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		rows = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return rows;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(rows);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {2, 0});
 	}
 }

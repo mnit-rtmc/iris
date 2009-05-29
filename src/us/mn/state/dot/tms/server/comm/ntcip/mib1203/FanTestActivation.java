@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip FanTestActivation object. This object has been deprecated by
@@ -22,56 +22,39 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  *
  * @author Douglas Lau
  */
-public class FanTestActivation extends StatError implements ASN1Integer {
+public class FanTestActivation extends ASN1Int {
 
-	/** Undefined code */
-	static public final int UNDEFINED = 0;
+	/** Enumeration of test activation */
+	static public enum Enum {
+		undefined, other, noTest, test;
 
-	/** Other (useless) code */
-	static public final int OTHER = 1;
-
-	/** No fan test active */
-	static public final int NO_TEST = 2;
-
-	/** Activate fan test / test in progress */
-	static public final int TEST = 3;
-
-	/** Fan test activation descriptions */
-	static protected final String ACTIVATION[] = {
-		"???", "Other", "No test", "Test"
-	};
+		/** Get test activation status from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
+	}
 
 	/** Create a new FanTestActivation object */
 	public FanTestActivation() {
-		super(2);
-		oid[node++] = 9;
-		oid[node++] = 0;
-		activation = TEST;
+		value = Enum.test.ordinal();
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "fanTestActivation";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {9, 0});
 	}
-
-	/** Fan test activation */
-	protected int activation;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= ACTIVATION.length)
-			activation = UNDEFINED;
-		else
-			activation = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return activation;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return ACTIVATION[activation];
+		return Enum.fromOrdinal(value).toString();
 	}
 }

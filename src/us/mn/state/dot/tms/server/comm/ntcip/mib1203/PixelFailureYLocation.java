@@ -14,47 +14,25 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * PixelFailureYLocation
  *
  * @author Douglas Lau
  */
-public class PixelFailureYLocation extends PixelFailureTable
-	implements ASN1Integer
-{
+public class PixelFailureYLocation extends ASN1Int {
+
+	/** Row in table */
+	protected final int row;
+
 	/** Create a new pixel failure Y location object */
 	public PixelFailureYLocation(int r) {
-		super(r);
-		y = 1;
+		row = r;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "pixelFailureYLocation";
-	}
-
-	/** Get the pixel failure table item */
-	protected int getTableItem() {
-		return 4;
-	}
-
-	/** Actual pixel failure Y location */
-	protected int y;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		y = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return y;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(y);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {3, 1, 4, 2, row});
 	}
 }

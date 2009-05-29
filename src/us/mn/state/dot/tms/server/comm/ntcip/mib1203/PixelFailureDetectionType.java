@@ -14,66 +14,49 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * PixelFailureDetectionType
  *
  * @author Douglas Lau
  */
-public class PixelFailureDetectionType extends PixelFailureTable
-	implements ASN1Integer
-{
-	/** Other detection type */
-	static public final int OTHER = 1;
+public class PixelFailureDetectionType extends ASN1Int {
 
-	/** Pixel test detection type */
-	static public final int PIXEL_TEST = 2;
+	/** Enumeration of failure detection types */
+	static public enum Enum {
+		undefined, other, pixelTest, messageDisplay;
 
-	/** Message display detection type */
-	static public final int MESSAGE_DISPLAY = 3;
+		/** Get failure detection type from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
+	}
 
-	/** Pixel failure detection type descriptions */
-	static protected final String DETECTION_TYPE[] = {
-		"???", "Other", "Pixel test", "Message display"
-	};
+	/** Row in table */
+	protected final int row;
 
 	/** Create a new pixel failure detection type object */
 	public PixelFailureDetectionType(int r) {
-		this(r, 1);
+		row = r;
 	}
 
-	/** Create a new pixel failure detection type object */
-	public PixelFailureDetectionType(int r, int d) {
-		super(r);
-		dtype = d;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {3, 1, 1, 2, row});
 	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "pixelFailureDetectionType";
-	}
-
-	/** Get the pixel failure table item */
-	protected int getTableItem() {
-		return 1;
-	}
-
-	/** Actual pixel failure detection type */
-	protected int dtype;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		dtype = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return dtype;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return DETECTION_TYPE[dtype];
+		return Enum.fromOrdinal(value).toString();
 	}
 }

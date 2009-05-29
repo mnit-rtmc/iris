@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip ControllerErrorStatus object
  *
  * @author Douglas Lau
  */
-public class ControllerErrorStatus extends StatError implements ASN1Integer {
+public class ControllerErrorStatus extends ASN1Int {
 
 	/** Other error */
 	static public final int OTHER = 1 << 0;
@@ -43,36 +43,16 @@ public class ControllerErrorStatus extends StatError implements ASN1Integer {
 		"OTHER", "PROM", "PROGRAM/PROCESSOR", "RAM", "DISPLAY"
 	};
 
-	/** Create a new ControllerErrorStatus object */
-	public ControllerErrorStatus() {
-		super(2);
-		oid[node++] = 10;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "controllerErrorStatus";
-	}
-
-	/** Short error status bitfield */
-	protected int status;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		status = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return status;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {10, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder buf = new StringBuilder();
 		for(int i = 0; i < ERROR.length; i++) {
-			if((status & 1 << i) != 0) {
+			if((value & 1 << i) != 0) {
 				if(buf.length() > 0)
 					buf.append(", ");
 				buf.append(ERROR[i] + " ERROR");

@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip FanFailures object.  This object has been deprecated by
@@ -22,45 +22,30 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  *
  * @author Douglas Lau
  */
-public class FanFailures extends StatError implements ASN1OctetString {
+public class FanFailures extends ASN1OctetStr {
 
-	/** Create a new FanFailures object */
-	public FanFailures() {
-		super(2);
-		oid[node++] = 8;
-		oid[node++] = 0;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {8, 0});
 	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "fanFailures";
-	}
-
-	/** Fan failures bitmap */
-	protected byte[] failures = new byte[0];
 
 	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		failures = value;
+	public void setOctetString(byte[] v) {
 		// Note: Skyline signs return 16-bit, network byte order
-		if(value.length == 2 && value[0] == 0) {
-			failures = new byte[1];
-			failures[0] = value[1];
-		}
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return failures;
+		if(v.length == 2 && v[0] == 0) {
+			value = new byte[1];
+			value[0] = v[1];
+		} else
+			value = v;
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuffer buf = new StringBuffer();
 		int f = 1;
-		for(int i = 0; i < failures.length; i++) {
+		for(int i = 0; i < value.length; i++) {
 			for(int b = 0; b < 8; b++, f++) {
-				if((failures[i] & 1 << b) != 0) {
+				if((value[i] & 1 << b) != 0) {
 					if(buf.length() > 0)
 						buf.append(", ");
 					buf.append("#");

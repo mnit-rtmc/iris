@@ -14,45 +14,25 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsStatDoorOpen object
  *
  * @author Douglas Lau
  */
-public class DmsStatDoorOpen extends DmsStatus implements ASN1Integer {
+public class DmsStatDoorOpen extends ASN1Int {
 
-	/** Create a new DmsStatDoorOpen object */
-	public DmsStatDoorOpen() {
-		super(2);
-		oid[node++] = 6;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsStatDoorOpen";
-	}
-
-	/** Door open status bitmap */
-	protected int open;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		open = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return open;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsStatus.createOID(new int[] {6, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		for(int i = 0; i < 8; i++) {
-			if(((open >> i) & 1) == 1) {
+			if(((value >> i) & 1) == 1) {
 				if(b.length() > 0)
 					b.append(", ");
 				b.append("#");

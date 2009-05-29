@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip ShortErrorStatus object
  *
  * @author Douglas Lau
  */
-public class ShortErrorStatus extends StatError implements ASN1Integer {
+public class ShortErrorStatus extends ASN1Int {
 
 	/** Other error */
 	static public final int OTHER = 1 << 0;
@@ -82,36 +82,16 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 		PHOTOCELL | CONTROLLER | TEMPERATURE | CRITICAL_TEMPERATURE |
 		DOOR_OPEN | HUMIDITY;
 
-	/** Create a new ShortErrorStatus object */
-	public ShortErrorStatus() {
-		super(2);
-		oid[node++] = 1;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "shortErrorStatus";
-	}
-
-	/** Short error status bitfield */
-	protected int status;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		status = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return status;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {1, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder buf = new StringBuilder();
 		for(int i = 0; i < ERROR.length; i++) {
-			if((status & 1 << i) != 0) {
+			if((value & 1 << i) != 0) {
 				if(buf.length() > 0)
 					buf.append(", ");
 				buf.append(ERROR[i]);
@@ -126,7 +106,7 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 
 	/** Check if an error bit is set */
 	public boolean checkError(int mask) {
-		return (status & mask) > 0;
+		return (value & mask) > 0;
 	}
 
 	/** Check if we should report the error for maintenance */
@@ -136,6 +116,6 @@ public class ShortErrorStatus extends StatError implements ASN1Integer {
 		// so we shouldn't consider them real errors.
 		// CLIMATE CONTROL errors are not reported because of too many
 		// false positives from existing signs (Mn/DOT).
-		return (status & REPORTABLE_MASK) != 0;
+		return (value & REPORTABLE_MASK) != 0;
 	}
 }

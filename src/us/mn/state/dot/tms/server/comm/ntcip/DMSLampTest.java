@@ -54,7 +54,8 @@ public class DMSLampTest extends DMSOperation {
 					e.getMessage());
 				return null;
 			}
-			if(test.getInteger() == LampTestActivation.NO_TEST)
+			if(test.getInteger() ==
+			   LampTestActivation.Enum.noTest.ordinal())
 				return new ActivateLampTest();
 			else {
 				DMS_LOG.log(dms.getName() + ": " + test);
@@ -89,7 +90,8 @@ public class DMSLampTest extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(test);
 			mess.getRequest();
-			if(test.getInteger() == LampTestActivation.NO_TEST)
+			if(test.getInteger() ==
+			   LampTestActivation.Enum.noTest.ordinal())
 				return new QueryLampStatus();
 			if(System.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": lamp test " +

@@ -76,7 +76,8 @@ public class DMSQueryPixelFailures extends DMSOperation {
 			PixelTestActivation test = new PixelTestActivation();
 			mess.add(test);
 			mess.getRequest();
-			if(test.getInteger() == PixelTestActivation.NO_TEST)
+			if(test.getInteger() ==
+			   PixelTestActivation.Enum.noTest.ordinal())
 				return new ActivatePixelTest();
 			else {
 				DMS_LOG.log(dms.getName() + ": " + test);
@@ -111,7 +112,8 @@ public class DMSQueryPixelFailures extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(test);
 			mess.getRequest();
-			if(test.getInteger() == PixelTestActivation.NO_TEST)
+			if(test.getInteger() ==
+			   PixelTestActivation.Enum.noTest.ordinal())
 				return new QueryRows();
 			if(System.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": pixel test " +

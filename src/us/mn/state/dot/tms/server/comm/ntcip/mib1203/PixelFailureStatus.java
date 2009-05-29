@@ -14,16 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * PixelFailureStatus
  *
  * @author Douglas Lau
  */
-public class PixelFailureStatus extends PixelFailureTable
-	implements ASN1Integer
-{
+public class PixelFailureStatus extends ASN1Int {
+
 	/** Stuck on (for 1203v1 stuck off assumed when unset) */
 	static public final int STUCK_ON = 1 << 0;
 
@@ -42,43 +41,22 @@ public class PixelFailureStatus extends PixelFailureTable
 	/** Partial failure (added in 1203v2) */
 	static public final int PARTIAL_FAILURE = 1 << 5;
 
+	/** Row in table */
+	protected final int row;
+
 	/** Create a new pixel failure status object */
 	public PixelFailureStatus(int r) {
-		this(r, 1);
+		row = r;
 	}
 
-	/** Create a new pixel failure status object */
-	public PixelFailureStatus(int r, int s) {
-		super(r);
-		status = s;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "pixelFailureStatus";
-	}
-
-	/** Get the pixel failure table item */
-	protected int getTableItem() {
-		return 5;
-	}
-
-	/** Actual pixel failure status */
-	protected int status;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		status = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return status;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statError.createOID(new int[] {3, 1, 5, 2, row});
 	}
 
 	/** Test if the pixel is stuck on */
 	public boolean isStuckOn() {
-		return (status & STUCK_ON) != 0;
+		return (value & STUCK_ON) != 0;
 	}
 
 	/** Test if the pixel is stuck off */
@@ -88,12 +66,12 @@ public class PixelFailureStatus extends PixelFailureTable
 
 	/** Test if the pixel is stuck off (1203v1) */
 	protected boolean isStuckOffV1() {
-		return (status & (STUCK_ON | PARTIAL_FAILURE)) == 0;
+		return (value & (STUCK_ON | PARTIAL_FAILURE)) == 0;
 	}
 
 	/** Test if the pixel is stuck off (1203v2) */
 	protected boolean isStuckOffV2() {
-		return (status & STUCK_OFF) != 0;
+		return (value & STUCK_OFF) != 0;
 	}
 
 	/** Get the object value */
@@ -103,13 +81,13 @@ public class PixelFailureStatus extends PixelFailureTable
 			b.append("Stuck ON, ");
 		if(isStuckOff())
 			b.append("Stuck OFF, ");
-		if((status & PARTIAL_FAILURE) != 0)
+		if((value & PARTIAL_FAILURE) != 0)
 			b.append("partial failure, ");
-		if((status & COLOR_ERROR) != 0)
+		if((value & COLOR_ERROR) != 0)
 			b.append("color error, ");
-		if((status & ELECTRICAL_ERROR) != 0)
+		if((value & ELECTRICAL_ERROR) != 0)
 			b.append("electrical error, ");
-		if((status & MECHANICAL_ERROR) != 0)
+		if((value & MECHANICAL_ERROR) != 0)
 			b.append("mechanical error, ");
 		// remove trailing comma and space
 		if(b.length() > 1)

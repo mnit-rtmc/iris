@@ -217,10 +217,71 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 8, 0
 		}));
 		oid = new DmsIllumLightOutputStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 9, 0
+		}));
+
+		oid = new DmsStatDoorOpen().getOID();
 for(int i: oid) System.err.print(" " + i);
 System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 9, 0
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 6, 0
+		}));
+		oid = new ShortErrorStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 1, 0
+		}));
+		oid = new PixelFailureTableNumRows().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 2, 0
+		}));
+		oid = new PixelFailureDetectionType(5).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 1, 2, 5
+		}));
+		oid = new PixelFailureIndex(5).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 2, 2, 5
+		}));
+		oid = new PixelFailureXLocation(5).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 3, 2, 5
+		}));
+		oid = new PixelFailureYLocation(5).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 4, 2, 5
+		}));
+		oid = new PixelFailureStatus(5).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 5, 2, 5
+		}));
+		oid = new PixelTestActivation().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 4, 0
+		}));
+		oid = new LampFailureStuckOn().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 5, 0
+		}));
+		oid = new LampFailureStuckOff().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 6, 0
+		}));
+		oid = new LampTestActivation().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 7, 0
+		}));
+		oid = new FanFailures().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 8, 0
+		}));
+		oid = new FanTestActivation().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 9, 0
+		}));
+		oid = new ControllerErrorStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 10, 0
 		}));
 
 		oid = new TempMinCtrlCabinet().getOID();
