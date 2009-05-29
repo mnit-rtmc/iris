@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * PixelFailureXLocation
  *
  * @author Douglas Lau
  */
-public class PixelFailureXLocation extends ASN1Int {
+public class PixelFailureXLocation extends ASN1Integer {
 
 	/** Row in table */
 	protected final int row;

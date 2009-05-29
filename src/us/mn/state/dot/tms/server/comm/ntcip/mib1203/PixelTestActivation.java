@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip PixelTestActivation object
  *
  * @author Douglas Lau
  */
-public class PixelTestActivation extends ASN1Int {
+public class PixelTestActivation extends ASN1Integer {
 
 	/** Enumeration of test activation */
 	static public enum Enum {

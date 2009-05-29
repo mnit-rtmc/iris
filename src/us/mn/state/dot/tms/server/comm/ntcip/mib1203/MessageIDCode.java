@@ -19,14 +19,14 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * Ntcip MessageIDCode object
  *
  * @author Douglas Lau
  */
-abstract public class MessageIDCode extends ASN1OctetStr {
+abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Memory type */
 	protected int memory;

@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * DynBrightDayNight object
  *
  * @author Douglas Lau
  */
-public class DynBrightDayNight extends ASN1Int {
+public class DynBrightDayNight extends ASN1Integer {
 
 	/** Create a new DynBrightDayNight object */
 	public DynBrightDayNight() {

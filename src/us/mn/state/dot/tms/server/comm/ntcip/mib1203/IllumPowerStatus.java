@@ -19,14 +19,14 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * Skyline IllumPowerStatus object
  *
  * @author Douglas Lau
  */
-public class IllumPowerStatus extends ASN1OctetStr {
+public class IllumPowerStatus extends ASN1OctetString {
 
 	/** Enumeration of power status */
 	static public enum Enum {

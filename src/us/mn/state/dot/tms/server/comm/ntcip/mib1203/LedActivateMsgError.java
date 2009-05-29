@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ledstar LedActivateMsgError object
  *
  * @author Douglas Lau
  */
-public class LedActivateMsgError extends ASN1Int {
+public class LedActivateMsgError extends ASN1Integer {
 
 	/** Activate message error descriptions */
 	static protected final String[] ERROR = {

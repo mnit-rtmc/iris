@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,27 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 /**
- * ASN1 Octet String. Interface for MIB octet string objects.
+ * ASN1 Octet String.
  *
  * @author Douglas Lau
  */
-public interface ASN1OctetString {
+abstract public class ASN1OctetString extends ASN1Type {
+
+	/** Actual octet string value */
+	protected byte[] value = new byte[0];
 
 	/** Set the octet string value */
-	void setOctetString(byte[] value);
+	public void setOctetString(byte[] v) {
+		value = v;
+	}
 
 	/** Get the octet string value */
-	byte[] getOctetString();
+	public byte[] getOctetString() {
+		return value;
+	}
+
+	/** Get the object value */
+	protected String getValue() {
+		return new String(value);
+	}
 }

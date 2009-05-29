@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip FanTestActivation object. This object has been deprecated by
@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
  *
  * @author Douglas Lau
  */
-public class FanTestActivation extends ASN1Int {
+public class FanTestActivation extends ASN1Integer {
 
 	/** Enumeration of test activation */
 	static public enum Enum {

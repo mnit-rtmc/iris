@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * DynBrightMaxNightManLvl object
  *
  * @author Douglas Lau
  */
-public class DynBrightMaxNightManLvl extends ASN1Int {
+public class DynBrightMaxNightManLvl extends ASN1Integer {
 
 	/** Create a new DynBrightMaxNightManLvl object */
 	public DynBrightMaxNightManLvl() {

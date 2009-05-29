@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip VmsHorizontalPitch object
  *
  * @author Douglas Lau
  */
-public class VmsHorizontalPitch extends ASN1Int {
+public class VmsHorizontalPitch extends ASN1Integer {
 
 	/** Create a new VmsHorizontalPitch object */
 	public VmsHorizontalPitch() {

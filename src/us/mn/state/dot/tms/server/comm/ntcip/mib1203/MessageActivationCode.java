@@ -19,14 +19,14 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * MessageActivationCode type
  *
  * @author Douglas Lau
  */
-abstract public class MessageActivationCode extends ASN1OctetStr {
+abstract public class MessageActivationCode extends ASN1OctetString {
 
 	/** Message duration */
 	protected int duration;

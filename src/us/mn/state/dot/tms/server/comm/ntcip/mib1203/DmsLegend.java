@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsLegend object
  *
  * @author Douglas Lau
  */
-public class DmsLegend extends ASN1Int {
+public class DmsLegend extends ASN1Integer {
 
 	/** Enumeration of legends */
 	static public enum Enum {

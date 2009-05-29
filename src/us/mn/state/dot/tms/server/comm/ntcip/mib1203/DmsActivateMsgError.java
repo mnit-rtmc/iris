@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsActivateMsgError object
  *
  * @author Douglas Lau
  */
-public class DmsActivateMsgError extends ASN1Int {
+public class DmsActivateMsgError extends ASN1Integer {
 
 	/** Enumeration of message activation errors */
 	static public enum Enum {

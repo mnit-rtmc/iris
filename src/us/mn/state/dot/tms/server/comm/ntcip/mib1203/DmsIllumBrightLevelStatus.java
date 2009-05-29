@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsIllumBrightLevelStatus object
  *
  * @author Douglas Lau
  */
-public class DmsIllumBrightLevelStatus extends ASN1Int {
+public class DmsIllumBrightLevelStatus extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {

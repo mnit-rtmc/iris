@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * Ntcip DmsIllumBrightnessValuesError object
  *
  * @author Douglas Lau
  */
-public class DmsIllumBrightnessValuesError extends ASN1OctetStr {
+public class DmsIllumBrightnessValuesError extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {

@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsMessageMemoryType object
  *
  * @author Douglas Lau
  */
-public class DmsMessageMemoryType extends ASN1Int {
+public class DmsMessageMemoryType extends ASN1Integer {
 
 	/** Enumeration of memory types */
 	static public enum Enum {

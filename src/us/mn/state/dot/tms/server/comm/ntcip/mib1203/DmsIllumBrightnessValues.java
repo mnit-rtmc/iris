@@ -19,14 +19,14 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * Ntcip DmsIllumBrightnessValues object
  *
  * @author Douglas Lau
  */
-public class DmsIllumBrightnessValues extends ASN1OctetStr {
+public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {

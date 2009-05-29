@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * Ntcip FontName object
  *
  * @author Douglas Lau
  */
-public class FontName extends ASN1OctetStr {
+public class FontName extends ASN1OctetString {
 
 	/** Font index */
 	protected final int font;

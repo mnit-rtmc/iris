@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsMessageTimeRemaining object
  *
  * @author Douglas Lau
  */
-public class DmsMessageTimeRemaining extends ASN1Int {
+public class DmsMessageTimeRemaining extends ASN1Integer {
 
 	/** Create a new DmsMessageTimeRemaining object */
 	public DmsMessageTimeRemaining() {

@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
  * Ntcip ModuleVersion object
  *
  * @author Douglas Lau
  */
-public class ModuleVersion extends ASN1OctetStr {
+public class ModuleVersion extends ASN1OctetString {
 
 	/** Row in table */
 	protected final int row;

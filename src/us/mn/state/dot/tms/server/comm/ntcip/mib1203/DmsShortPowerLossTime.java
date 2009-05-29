@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsShortPowerLossTime object
  *
  * @author Douglas Lau
  */
-public class DmsShortPowerLossTime extends ASN1Int {
+public class DmsShortPowerLossTime extends ASN1Integer {
 
 	/** Create a new DmsShortPowerLossTime object */
 	public DmsShortPowerLossTime() {

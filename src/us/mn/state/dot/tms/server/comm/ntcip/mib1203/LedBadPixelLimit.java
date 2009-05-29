@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * LedBadPixelLimit object is the number of failed pixels needed before the
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
  *
  * @author Douglas Lau
  */
-public class LedBadPixelLimit extends ASN1Int {
+public class LedBadPixelLimit extends ASN1Integer {
 
 	/** Create a new LedBadPixelLimit object */
 	public LedBadPixelLimit() {

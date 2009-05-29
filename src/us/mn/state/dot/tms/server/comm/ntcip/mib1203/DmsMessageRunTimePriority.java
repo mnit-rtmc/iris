@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsMessageRunTimePriority object
  *
  * @author Douglas Lau
  */
-public class DmsMessageRunTimePriority extends ASN1Int {
+public class DmsMessageRunTimePriority extends ASN1Integer {
 
 	/** Memory type */
 	protected final int memory;

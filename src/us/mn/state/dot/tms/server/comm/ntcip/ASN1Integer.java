@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,27 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 /**
- * ASN1 Integer. Interface for MIB integer objects.
+ * ASN1 Integer.  Base class for MIB integer objects.
  *
  * @author Douglas Lau
  */
-public interface ASN1Integer {
+abstract public class ASN1Integer extends ASN1Type {
+
+	/** Actual integer value */
+	protected int value;
 
 	/** Set the integer value */
-	void setInteger(int value);
+	public void setInteger(int v) {
+		value = v;
+	}
 
 	/** Get the integer value */
-	int getInteger();
+	public int getInteger() {
+		return value;
+	}
+
+	/** Get the object value */
+	protected String getValue() {
+		return String.valueOf(value);
+	}
 }

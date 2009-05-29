@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsMultiSyntaxError object
  *
  * @author Douglas Lau
  */
-public class DmsMultiSyntaxError extends ASN1Int {
+public class DmsMultiSyntaxError extends ASN1Integer {
 
 	/** Enumeration of MULTI syntax errors */
 	static public enum Enum {

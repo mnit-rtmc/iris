@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsBeaconType object
  *
  * @author Douglas Lau
  */
-public class DmsBeaconType extends ASN1Int {
+public class DmsBeaconType extends ASN1Integer {
 
 	/** Enumeration of beacon types */
 	static public enum Enum {

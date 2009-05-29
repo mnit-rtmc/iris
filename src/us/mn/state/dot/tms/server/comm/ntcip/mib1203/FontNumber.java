@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * FontNumber
  *
  * @author Douglas Lau
  */
-public class FontNumber extends ASN1Int {
+public class FontNumber extends ASN1Integer {
 
 	/** Font index */
 	protected final int font;

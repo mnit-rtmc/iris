@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsSignAccess object
  *
  * @author Douglas Lau
  */
-public class DmsSignAccess extends ASN1Int {
+public class DmsSignAccess extends ASN1Integer {
 
 	/** Other access (?) */
 	static public final int OTHER = 1 << 0;

@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DefaultPageOnTime object
  *
  * @author Douglas Lau
  */
-public class DefaultPageOnTime extends ASN1Int {
+public class DefaultPageOnTime extends ASN1Integer {
 
 	/** Create a new DefaultPageOnTime object */
 	public DefaultPageOnTime(int t) {

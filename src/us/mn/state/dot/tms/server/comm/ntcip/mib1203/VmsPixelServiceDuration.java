@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip VmsPixelServiceDuration object
  *
  * @author Douglas Lau
  */
-public class VmsPixelServiceDuration extends ASN1Int {
+public class VmsPixelServiceDuration extends ASN1Integer {
 
 	/** Create a new VmsPixelServiceDuration object */
 	public VmsPixelServiceDuration() {

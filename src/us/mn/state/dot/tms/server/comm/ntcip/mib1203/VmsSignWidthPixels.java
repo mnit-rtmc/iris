@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip VmsSignWidthPixels object
  *
  * @author Douglas Lau
  */
-public class VmsSignWidthPixels extends ASN1Int {
+public class VmsSignWidthPixels extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {

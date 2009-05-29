@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DefaultFont object.  Note: this references the font number, not the
@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
  *
  * @author Douglas Lau
  */
-public class DefaultFont extends ASN1Int {
+public class DefaultFont extends ASN1Integer {
 
 	/** Create a new DefaultFont object */
 	public DefaultFont(int f) {

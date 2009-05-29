@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip FontLineSpacing object
  *
  * @author Douglas Lau
  */
-public class FontLineSpacing extends ASN1Int {
+public class FontLineSpacing extends ASN1Integer {
 
 	/** Font index */
 	protected final int font;

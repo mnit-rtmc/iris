@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsIllumControl object
  *
  * @author Douglas Lau
  */
-public class DmsIllumControl extends ASN1Int {
+public class DmsIllumControl extends ASN1Integer {
 
 	/** Enumeration of illumination control types */
 	static public enum Enum {

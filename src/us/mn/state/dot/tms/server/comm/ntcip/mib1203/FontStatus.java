@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip FontStatus object.  This object was added in 1203 v2.
  *
  * @author Douglas Lau
  */
-public class FontStatus extends ASN1Int {
+public class FontStatus extends ASN1Integer {
 
 	/** Enumeration of font status values */
 	static public enum Enum {

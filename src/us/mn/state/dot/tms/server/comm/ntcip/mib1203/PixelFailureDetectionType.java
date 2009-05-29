@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * PixelFailureDetectionType
  *
  * @author Douglas Lau
  */
-public class PixelFailureDetectionType extends ASN1Int {
+public class PixelFailureDetectionType extends ASN1Integer {
 
 	/** Enumeration of failure detection types */
 	static public enum Enum {

@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * Ntcip DmsMessagePixelService object
  *
  * @author Douglas Lau
  */
-public class DmsMessagePixelService extends ASN1Int {
+public class DmsMessagePixelService extends ASN1Integer {
 
 	/** Memory type */
 	protected final int memory;

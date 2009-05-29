@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
  * PixelFailureStatus
  *
  * @author Douglas Lau
  */
-public class PixelFailureStatus extends ASN1Int {
+public class PixelFailureStatus extends ASN1Integer {
 
 	/** Stuck on (for 1203v1 stuck off assumed when unset) */
 	static public final int STUCK_ON = 1 << 0;
