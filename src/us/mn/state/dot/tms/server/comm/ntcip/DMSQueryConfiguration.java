@@ -77,7 +77,9 @@ public class DMSQueryConfiguration extends DMSOperation {
 			ModuleType m_type = new ModuleType(mod);
 			mess.add(m_type);
 			mess.getRequest();
-			if(m_type.getInteger() == ModuleType.SOFTWARE) {
+			if(m_type.getInteger() ==
+			   ModuleType.Enum.software.ordinal())
+			{
 				dms.setMake(make.getValue());
 				dms.setModel(model.getValue());
 				dms.setVersion(version.getValue());

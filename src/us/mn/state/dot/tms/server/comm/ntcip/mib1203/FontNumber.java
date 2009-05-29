@@ -14,51 +14,32 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * FontNumber
  *
  * @author Douglas Lau
  */
-public class FontNumber extends FontTable implements ASN1Integer {
+public class FontNumber extends ASN1Int {
+
+	/** Font index */
+	protected final int font;
 
 	/** Create a new font number object */
 	public FontNumber(int f) {
-		this(f, 1);
+		font = f;
 	}
 
 	/** Create a new font number object */
 	public FontNumber(int f, int n) {
-		super(f);
-		number = n;
+		font = f;
+		value = n;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "fontNumber";
-	}
-
-	/** Get the font table item (for fontNumber objects) */
-	protected int getTableItem() {
-		return 2;
-	}
-
-	/** Actual font number */
-	protected int number;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		number = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return number;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(number);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 2, font});
 	}
 }

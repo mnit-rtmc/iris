@@ -14,45 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip FontVersionID object
  *
  * @author Douglas Lau
  */
-public class FontVersionID extends FontTable implements ASN1Integer {
+public class FontVersionID extends ASN1Int {
+
+	/** Font index */
+	protected final int font;
 
 	/** Create a new FontVersionID object */
 	public FontVersionID(int f) {
-		super(f);
+		font = f;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "fontVersionID";
-	}
-
-	/** Get the font table item (for fontVersionID objects) */
-	protected int getTableItem() {
-		return 7;
-	}
-
-	/** Actual font version ID */
-	protected int version;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		version = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return version;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(version);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 7, font});
 	}
 }

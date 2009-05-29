@@ -14,52 +14,32 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip FontLineSpacing object
  *
  * @author Douglas Lau
  */
-public class FontLineSpacing extends FontTable implements ASN1Integer {
+public class FontLineSpacing extends ASN1Int {
+
+	/** Font index */
+	protected final int font;
 
 	/** Create a new font line spacing object */
 	public FontLineSpacing(int f) {
-		this(f, 0);
+		font = f;
 	}
 
 	/** Create a new font line spacing object */
 	public FontLineSpacing(int f, int s) {
-		super(f);
-		spacing = s;
+		font = f;
+		value = s;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "fontLineSpacing";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 6, font});
 	}
-
-	/** Get the font table item (for fontLineSpacing objects) */
-	protected int getTableItem() {
-		return 6;
-	}
-
-	/** Actual font line spacing */
-	protected int spacing;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		spacing = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return spacing;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(spacing);
-	}
-
 }

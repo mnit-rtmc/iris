@@ -14,42 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip NumFonts object
  *
  * @author Douglas Lau
  */
-public class NumFonts extends FontDefinition implements ASN1Integer {
+public class NumFonts extends ASN1Int {
 
-	/** Create a new num fonts object */
-	public NumFonts() {
-		super(2);
-		oid[node++] = 1;
-		oid[node] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "numFonts";
-	}
-
-	/** Number of fonts */
-	protected int num;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		num = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return num;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(num);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {1, 0});
 	}
 }

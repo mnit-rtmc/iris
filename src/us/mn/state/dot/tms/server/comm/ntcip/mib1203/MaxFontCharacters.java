@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,17 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
+
 /**
- * Ntcip Private node
+ * Ntcip MaxFontCharacters object
  *
  * @author Douglas Lau
  */
-abstract class Private extends Nema {
+public class MaxFontCharacters extends ASN1Int {
 
-	/** Create a new Priate object
-	 * @param n additional nodes in object identifier */
-	protected Private(int n) {
-		super(n + 1);
-		oid[node++] = 3;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {3, 0});
 	}
 }

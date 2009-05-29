@@ -212,18 +212,20 @@ public class DMSFontDownload extends DMSOperation {
 				return new InvalidateFontV1();
 			}
 			DMS_LOG.log(dms.getName() + ": " + status);
-			if(status.getInteger() == FontStatus.MODIFYING)
+			switch(status.getEnum()) {
+			case modifying:
 				return new CreateFont();
-			if(status.getInteger() == FontStatus.PERMANENT)
+			case permanent:
 				return nextFontPhase();
-			if(status.getInteger() == FontStatus.UNMANAGED)
+			case unmanaged:
 				return new InvalidateFontV2();
-			if(status.getInteger() == FontStatus.IN_USE) {
+			case inUse:
 				DMS_LOG.log(dms.getName() +
 					": font download aborted");
 				return null;
+			default:
+				return new SetStatusModifying();
 			}
-			return new SetStatusModifying();
 		}
 	}
 
@@ -246,7 +248,7 @@ public class DMSFontDownload extends DMSOperation {
 		/** Invalidate the font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(index);
-			status.setInteger(FontStatus.NOT_USED_REQ);
+			status.setInteger(FontStatus.Enum.notUsedReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -260,7 +262,7 @@ public class DMSFontDownload extends DMSOperation {
 		/** Set the font status to modifying */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(index);
-			status.setInteger(FontStatus.MODIFY_REQ);
+			status.setInteger(FontStatus.Enum.modifyReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -277,7 +279,7 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
-			if(status.getInteger() != FontStatus.MODIFYING) {
+			if(status.getEnum() != FontStatus.Enum.modifying) {
 				DMS_LOG.log(dms.getName() +
 					": font download aborted");
 				return null;
@@ -376,7 +378,8 @@ public class DMSFontDownload extends DMSOperation {
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(index);
-			status.setInteger(FontStatus.READY_FOR_USE_REQ);
+			status.setInteger(
+				FontStatus.Enum.readyForUseReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -397,13 +400,13 @@ public class DMSFontDownload extends DMSOperation {
 			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
-			if(status.getInteger() == FontStatus.READY_FOR_USE) {
+			if(status.getEnum() == FontStatus.Enum.readyForUse) {
 				if(first)
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
 			}
-			if(status.getInteger() != FontStatus.CALCULATING_ID) {
+			if(status.getEnum() != FontStatus.Enum.calculatingID) {
 				DMS_LOG.log(dms.getName() + ": font status " +
 					"unexpected -- aborted");
 				return null;

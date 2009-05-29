@@ -14,69 +14,57 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip FontStatus object.  This object was added in 1203 v2.
  *
  * @author Douglas Lau
  */
-public class FontStatus extends FontTable implements ASN1Integer {
+public class FontStatus extends ASN1Int {
 
-	/** Font status codes */
-	static public final int UNDEFINED = 0;
-	static public final int NOT_USED = 1;
-	static public final int MODIFYING = 2;
-	static public final int CALCULATING_ID = 3;
-	static public final int READY_FOR_USE = 4;
-	static public final int IN_USE = 5;
-	static public final int PERMANENT = 6;
-	static public final int MODIFY_REQ = 7;
-	static public final int READY_FOR_USE_REQ = 8;
-	static public final int NOT_USED_REQ = 9;
-	static public final int UNMANAGED_REQ = 10;
-	static public final int UNMANAGED = 11;
+	/** Enumeration of font status values */
+	static public enum Enum {
+		undefined, notUsed, modifying, calculatingID, readyForUse,
+		inUse, permanent, modifyReq, readyForUseReq, notUsedReq,
+		unmanagedReq, unmanaged;
 
-	/** Status descriptions */
-	static protected final String[] STATUS = {
-		"???", "notUsed", "modifying", "calculatingID", "readyForUse",
-		"inUse", "permanent", "modifyReq", "readyForUseReq",
-		"notUsedReq", "unmanagedReq", "unmanaged"
-	};
+		/** Get font status from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
+	}
+
+	/** Font index */
+	protected final int font;
 
 	/** Create a new FontStatus object */
 	public FontStatus(int f) {
-		super(f);
+		font = f;
 	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "fontStatus";
-	}
-
-	/** Get the font table item (for fontStatus objects) */
-	protected int getTableItem() {
-		return 8;
-	}
-
-	/** Actual font status */
-	protected int status;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= STATUS.length)
-			status = UNDEFINED;
-		else
-			status = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return status;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return STATUS[status];
+		return Enum.fromOrdinal(value).toString();
+	}
+
+	/** Get the enum value */
+	public Enum getEnum() {
+		return Enum.fromOrdinal(value);
+	}
+
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 8, font});
 	}
 }

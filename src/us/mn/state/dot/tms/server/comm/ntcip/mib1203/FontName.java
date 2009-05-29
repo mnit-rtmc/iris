@@ -14,51 +14,32 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip FontName object
  *
  * @author Douglas Lau
  */
-public class FontName extends FontTable implements ASN1OctetString {
+public class FontName extends ASN1OctetStr {
+
+	/** Font index */
+	protected final int font;
 
 	/** Create a new font name object */
 	public FontName(int f) {
-		this(f, "");
+		font = f;
 	}
 
 	/** Create a new font name object */
 	public FontName(int f, String n) {
-		super(f);
-		f_name = n;
+		font = f;
+		value = n.getBytes();
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "fontName";
-	}
-
-	/** Get the font table item (for fontName objects) */
-	protected int getTableItem() {
-		return 3;
-	}
-
-	/** Actual font name */
-	protected String f_name;
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		f_name = new String(value);
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return f_name.getBytes();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return f_name;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 3, font});
 	}
 }

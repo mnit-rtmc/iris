@@ -14,51 +14,47 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip CharacterBitmap object
  *
  * @author Douglas Lau
  */
-public class CharacterBitmap extends CharacterTable implements ASN1OctetString {
+public class CharacterBitmap extends ASN1OctetStr {
+
+	/** Font index */
+	protected final int font;
+
+	/** Character index */
+	protected final int index;
+
+	/** Create a new CharacterBitmap object */
+	public CharacterBitmap(int f, int i) {
+		font = f;
+		index = i;
+	}
 
 	/** Create a new CharacterBitmap object */
 	public CharacterBitmap(int f, int i, byte[] b) {
-		super(f, i);
-		bitmap = b;
+		font = f;
+		index = i;
+		value = b;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "characterBitmap";
-	}
-
-	/** Get the character table item (for characterBitmap objects) */
-	protected int getTableItem() {
-		return 3;
-	}
-
-	/** Actual character bitmap */
-	protected byte[] bitmap;
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		bitmap = value;
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return bitmap;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			4, 1, 3, font, index});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < bitmap.length; i++) {
+		for(int i = 0; i < value.length; i++) {
 			if(i > 0)
 				b.append(",");
-			b.append(bitmap[i] & 0xFF);
+			b.append(value[i] & 0xFF);
 		}
 		return b.toString();
 	}

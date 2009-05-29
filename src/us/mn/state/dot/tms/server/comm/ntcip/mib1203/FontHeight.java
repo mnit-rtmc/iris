@@ -14,51 +14,32 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip FontHeight object
  *
  * @author Douglas Lau
  */
-public class FontHeight extends FontTable implements ASN1Integer {
+public class FontHeight extends ASN1Int {
+
+	/** Font index */
+	protected final int font;
 
 	/** Create a new font height object */
 	public FontHeight(int f) {
-		this(f, 7);
+		font = f;
 	}
 
 	/** Create a new font height object */
 	public FontHeight(int f, int h) {
-		super(f);
-		height = h;
+		font = f;
+		value = h;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "fontHeight";
-	}
-
-	/** Get the font table item (for fontHeight objects) */
-	protected int getTableItem() {
-		return 4;
-	}
-
-	/** Actual font height */
-	protected int height;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		height = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return height;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(height);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 4, font});
 	}
 }

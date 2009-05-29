@@ -33,8 +33,6 @@ public class OIDTest extends TestCase {
 	public void test() {
 		int[] oid;
 		oid = new GlobalMaxModules().getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 2, 0
 		}));
@@ -114,6 +112,75 @@ System.err.println();
 		oid = new VmsVerticalPitch().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 6, 0
+		}));
+
+		oid = new NumFonts().getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 1, 0
+		}));
+		oid = new FontIndex(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 1, 5
+		}));
+		oid = new FontNumber(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 2, 5
+		}));
+		oid = new FontName(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 3, 5
+		}));
+		oid = new FontHeight(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 4, 5
+		}));
+		oid = new FontCharSpacing(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 5, 5
+		}));
+		oid = new FontLineSpacing(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 6, 5
+		}));
+		oid = new FontVersionID(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 7, 5
+		}));
+		oid = new FontStatus(5).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 8, 5
+		}));
+		oid = new MaxFontCharacters().getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 3, 0
+		}));
+		oid = new CharacterWidth(5, 32, 7).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 2, 5, 32
+		}));
+		oid = new CharacterBitmap(5, 32).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 3, 5, 32
 		}));
 
 		oid = new DefaultFont(0).getOID();
