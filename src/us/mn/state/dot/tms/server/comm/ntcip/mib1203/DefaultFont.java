@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DefaultFont object.  Note: this references the font number, not the
@@ -22,34 +22,15 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  *
  * @author Douglas Lau
  */
-public class DefaultFont extends MultiCfg implements ASN1Integer {
+public class DefaultFont extends ASN1Int {
 
 	/** Create a new DefaultFont object */
 	public DefaultFont(int f) {
-		super(5);
-		font = f;
+		value = f;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "defaultFont";
-	}
-
-	/** Actual default font */
-	protected int font;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		font = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return font;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(font);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.multiCfg.createOID(new int[] {5, 0});
 	}
 }

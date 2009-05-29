@@ -14,63 +14,33 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DefaultJustificationPage object
  *
  * @author Douglas Lau
  */
-public class DefaultJustificationPage extends MultiCfg implements ASN1Integer {
-
-	/** Undefined page justification */
-	static public final int UNDEFINED = 0;
-
-	/** Whatever 'other' justification means */
-	static public final int OTHER = 1;
-
-	/** Top-justify text on a page */
-	static public final int TOP = 2;
-
-	/** Middle-justify text on a page */
-	static public final int MIDDLE = 3;
-
-	/** Bottom-justify text on a page */
-	static public final int BOTTOM = 4;
-
-	/** Justification descriptions */
-	static protected final String[] JUSTIFICATION = {
-		"???", "other", "top", "middle", "bottom"
-	};
+public class DefaultJustificationPage extends ASN1Int {
 
 	/** Create a new DefaultJustificationPage object */
-	public DefaultJustificationPage(int j) {
-		super(7);
-		setInteger(j);
+	public DefaultJustificationPage() {
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "defaultJustificationPage";
+	/** Create a new DefaultJustificationPage object */
+	public DefaultJustificationPage(MultiString.JustificationPage j) {
+		value = j.ordinal();
 	}
 
-	/** Actual default page justification */
-	protected int justification;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		justification = value;
-		if(justification < 0 || justification >= JUSTIFICATION.length)
-			justification = UNDEFINED;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return justification;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.multiCfg.createOID(new int[] {7, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return JUSTIFICATION[justification];
+		return MultiString.JustificationPage.fromOrdinal(
+		       value).toString();
 	}
 }

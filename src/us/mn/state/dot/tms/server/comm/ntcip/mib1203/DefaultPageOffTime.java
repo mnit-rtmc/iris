@@ -14,41 +14,22 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DefaultPageOffTime object
  *
  * @author Douglas Lau
  */
-public class DefaultPageOffTime extends MultiCfg implements ASN1Integer {
+public class DefaultPageOffTime extends ASN1Int {
 
 	/** Create a new DefaultPageOffTime object */
 	public DefaultPageOffTime(int t) {
-		super(9);
-		time = t;
+		value = t;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "defaultPageOffTime";
-	}
-
-	/** Actual default page off time */
-	protected int time;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		time = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return time;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(time);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.multiCfg.createOID(new int[] {9, 0});
 	}
 }

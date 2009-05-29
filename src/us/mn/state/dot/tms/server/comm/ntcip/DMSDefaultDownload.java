@@ -127,7 +127,7 @@ public class DMSDefaultDownload extends DMSOperation {
 			mess.add(new DefaultJustificationLine(
 				MultiString.JustificationLine.CENTER));
 			mess.add(new DefaultJustificationPage(
-				DefaultJustificationPage.TOP));
+				MultiString.JustificationPage.TOP));
 			mess.add(new DefaultPageOnTime(Math.round(10 *
 				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat())));
 			mess.add(new DefaultPageOffTime(Math.round(10 *

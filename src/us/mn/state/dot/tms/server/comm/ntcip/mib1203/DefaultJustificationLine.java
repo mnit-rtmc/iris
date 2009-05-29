@@ -15,41 +15,32 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DefaultJustificationLine object
  *
  * @author Douglas Lau
  */
-public class DefaultJustificationLine extends MultiCfg implements ASN1Integer {
+public class DefaultJustificationLine extends ASN1Int {
+
+	/** Create a new DefaultJustificationLine object */
+	public DefaultJustificationLine() {
+	}
 
 	/** Create a new DefaultJustificationLine object */
 	public DefaultJustificationLine(MultiString.JustificationLine j) {
-		super(6);
-		justification = j;
+		value = j.ordinal();
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "defaultJustificationLine";
-	}
-
-	/** Actual default line justification */
-	protected MultiString.JustificationLine justification;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		justification =MultiString.JustificationLine.fromOrdinal(value);
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return justification.ordinal();
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.multiCfg.createOID(new int[] {6, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return justification.toString();
+		return MultiString.JustificationLine.fromOrdinal(
+		       value).toString();
 	}
 }
