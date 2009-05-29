@@ -14,45 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip ModuleModel object
  *
  * @author Douglas Lau
  */
-public class ModuleModel extends GlobalModuleTable implements ASN1OctetString {
+public class ModuleModel extends ASN1OctetStr {
 
-	/** Create a new ModuleModel object */
-	public ModuleModel(int i) {
-		super(i);
+	/** Row in table */
+	protected final int row;
+
+	/** Create a new module model object */
+	public ModuleModel(int r) {
+		row = r;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "moduleModel";
-	}
-
-	/** Get the module table item (for moduleModel objects) */
-	protected int getTableItem() {
-		return 4;
-	}
-
-	/** Actual module model */
-	protected String model;
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		model = new String(value);
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return model.getBytes();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return model;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.globalConfiguration.createOID(new int[] {
+			3, 1, 4, row});
 	}
 }

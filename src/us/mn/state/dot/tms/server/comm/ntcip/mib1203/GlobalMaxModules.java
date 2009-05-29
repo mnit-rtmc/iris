@@ -14,43 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip GlobalMaxModules object
  *
  * @author Douglas Lau
  */
-public class GlobalMaxModules extends GlobalConfiguration
-	implements ASN1Integer
-{
-	/** Create a new GlobalMaxModules object */
-	public GlobalMaxModules() {
-		super(2);
-		oid[node++] = 2;
-		oid[node++] = 0;
-	}
+public class GlobalMaxModules extends ASN1Int {
 
-	/** Get the object name */
-	protected String getName() {
-		return "globalMaxModules";
-	}
-
-	/** Actual max modules */
-	protected int modules;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		modules = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return modules;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(modules);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.globalConfiguration.createOID(new int[] {2, 0});
 	}
 }

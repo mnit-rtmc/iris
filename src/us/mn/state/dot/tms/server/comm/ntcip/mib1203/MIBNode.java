@@ -67,6 +67,8 @@ class MIBNode {
 	static public final MIBNode _private = new MIBNode(nema, 3);
 	static public final MIBNode transportation = new MIBNode(nema, 4);
 	static public final MIBNode devices = new MIBNode(transportation, 2);
+	static public final MIBNode global = new MIBNode(devices, 6);
+	static public final MIBNode globalConfiguration = new MIBNode(global,1);
 	static public final MIBNode dms = new MIBNode(devices, 3);
 	static public final MIBNode dmsSignCfg = new MIBNode(dms, 1);
 	static public final MIBNode vmsCfg = new MIBNode(dms, 2);

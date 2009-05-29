@@ -14,66 +14,50 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip ModuleType object
  *
  * @author Douglas Lau
  */
-public class ModuleType extends GlobalModuleTable implements ASN1Integer {
+public class ModuleType extends ASN1Int {
 
-	/** Undefined module type */
-	static public final int UNDEFINED = 0;
+	/** Enumeration of module types */
+	static public enum Enum {
+		undefined, other, hardware, software;
 
-	/** Other module type (manufacturer specific)
-	 * Note: Ledstar version 1.9 has ModuleType.OTHER for its software */
-	static public final int OTHER = 1;
-
-	/** Hardware module type */
-	static public final int HARDWARE = 2;
-
-	/** Software module type */
-	static public final int SOFTWARE = 3;
-
-	/** String descriptions of module types */
-	static public final String[] DESCRIPTION = {
-		"???", "other", "hardware", "software"
-	};
-
-	/** Create a new ModuleType object */
-	public ModuleType(int i) {
-		super(i);
+		/** Get module type from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "moduleType";
+	/** Row in table */
+	protected final int row;
+
+	/** Create a new module type object */
+	public ModuleType(int r) {
+		row = r;
 	}
 
-	/** Get the module table item (for moduleType objects) */
-	protected int getTableItem() {
-		return 6;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.globalConfiguration.createOID(new int[] {
+			3, 1, 6, row});
 	}
-
-	/** Actual module type */
-	protected int m_type;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= DESCRIPTION.length)
-			m_type = UNDEFINED;
-		else
-			m_type = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return m_type;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return DESCRIPTION[m_type];
+		return Enum.fromOrdinal(value).toString();
 	}
 }
