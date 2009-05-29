@@ -14,40 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsSignWidth object
  *
  * @author Douglas Lau
  */
-public class DmsSignWidth extends DmsSignCfg implements ASN1Integer {
+public class DmsSignWidth extends ASN1Int {
 
-	/** Create a new DmsSignWidth object */
-	public DmsSignWidth() {
-		super(4);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsSignWidth";
-	}
-
-	/** Sign width */
-	protected int width;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		width = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return width;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(width);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsSignCfg.createOID(new int[] {4, 0});
 	}
 }

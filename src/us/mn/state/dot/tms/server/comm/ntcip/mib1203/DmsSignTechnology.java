@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsSignTechnology object
  *
  * @author Douglas Lau
  */
-public class DmsSignTechnology extends DmsSignCfg implements ASN1Integer {
+public class DmsSignTechnology extends ASN1Int {
 
 	/** Other technology */
 	static public final int OTHER = 1 << 0;
@@ -44,64 +44,35 @@ public class DmsSignTechnology extends DmsSignCfg implements ASN1Integer {
 	/** Drum technology */
 	static public final int DRUM = 1 << 6;
 
-	/** Create a new DmsSignTechnology object */
-	public DmsSignTechnology() {
-		super(9);
+	/** Append a string to a StringBuilder */
+	static protected void appendString(StringBuilder b, String s) {
+		if(b.length() > 0)
+			b.append(", ");
+		b.append(s);
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsSignTechnology";
-	}
-
-	/** Sign technology bitfield */
-	protected int technology;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		technology = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return technology;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsSignCfg.createOID(new int[] {9, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		if((technology & DRUM) > 0)
-			b.append("Drum");
-		if((technology & LAMP) > 0) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("Lamp");
-		}
-		if((technology & SHUTTERED) > 0) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("Shuttered");
-		}
-		if((technology & FIBER_OPTIC) > 0) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("Fiber Optics");
-		}
-		if((technology & FLIP_DISK) > 0) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("Flip Disk");
-		}
-		if((technology & LED) > 0) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("LED");
-		}
-		if((technology & OTHER) > 0) {
-			if(b.length() > 0)
-				b.append(", ");
-			b.append("Other");
-		}
+		if((value & DRUM) > 0)
+			appendString(b, "Drum");
+		if((value & LAMP) > 0)
+			appendString(b, "Lamp");
+		if((value & SHUTTERED) > 0)
+			appendString(b, "Shuttered");
+		if((value & FIBER_OPTIC) > 0)
+			appendString(b, "Fiber Optics");
+		if((value & FLIP_DISK) > 0)
+			appendString(b, "Flip Disk");
+		if((value & LED) > 0)
+			appendString(b, "LED");
+		if((value & OTHER) > 0)
+			appendString(b, "Other");
 		if(b.length() == 0)
 			b.append("None");
 		return b.toString();

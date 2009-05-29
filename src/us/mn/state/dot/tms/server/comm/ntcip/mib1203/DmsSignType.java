@@ -15,42 +15,24 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsSignType object
  *
  * @author Douglas Lau
  */
-public class DmsSignType extends DmsSignCfg implements ASN1Integer {
+public class DmsSignType extends ASN1Int {
 
-	/** Create a new DmsSignType object */
-	public DmsSignType() {
-		super(2);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsSignType";
-	}
-
-	/** Sign type */
-	protected int type;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		type = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return type;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsSignCfg.createOID(new int[] {2, 0});
 	}
 
 	/** Get the object value as a String */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		if((type & 0x80) != 0)
+		if((value & 0x80) != 0)
 			b.append("Portable ");
 		b.append(getValueEnum().description);
 		return b.toString();
@@ -58,6 +40,6 @@ public class DmsSignType extends DmsSignCfg implements ASN1Integer {
 
 	/** Get the object value as a DMSType */
 	public DMSType getValueEnum() {
-		return DMSType.fromOrdinal(type & 0x7f);
+		return DMSType.fromOrdinal(value & 0x7f);
 	}
 }

@@ -14,48 +14,41 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsLegend object
  *
  * @author Douglas Lau
  */
-public class DmsLegend extends DmsSignCfg implements ASN1Integer {
+public class DmsLegend extends ASN1Int {
 
-	/** Sign legends */
-	static protected final String[] LEGEND = {
-		"?", "other", "noLegend", "legendExists"
-	};
+	/** Enumeration of legends */
+	static public enum Enum {
+		undefined, other, noLegend, legendExists;
 
-	/** Create a new DMS legend object */
-	public DmsLegend() {
-		super(7);
+		/** Get legend from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsLegend";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsSignCfg.createOID(new int[] {7, 0});
 	}
-
-	/** Sign legend */
-	protected int legend;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= LEGEND.length)
-			legend = 0;
-		else
-			legend = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return legend;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return LEGEND[legend];
+		return Enum.fromOrdinal(value).toString();
 	}
 }

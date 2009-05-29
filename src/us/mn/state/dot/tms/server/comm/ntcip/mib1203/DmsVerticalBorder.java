@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsVerticalBorder object
  *
  * @author Douglas Lau
  */
-public class DmsVerticalBorder extends DmsSignCfg implements ASN1Integer {
+public class DmsVerticalBorder extends ASN1Int {
 
 	/** Create a new DmsVerticalBorder object */
 	public DmsVerticalBorder() {
@@ -30,30 +30,11 @@ public class DmsVerticalBorder extends DmsSignCfg implements ASN1Integer {
 
 	/** Create a new DmsVerticalBorder object */
 	public DmsVerticalBorder(int b) {
-		super(6);
-		border = b;
+		value = b;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsVerticalBorder";
-	}
-
-	/** Vertical border */
-	protected int border;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		border = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return border;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(border);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsSignCfg.createOID(new int[] {6, 0});
 	}
 }

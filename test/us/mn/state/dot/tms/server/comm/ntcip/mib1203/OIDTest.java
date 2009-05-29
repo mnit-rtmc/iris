@@ -32,6 +32,45 @@ public class OIDTest extends TestCase {
 	/** test cases */
 	public void test() {
 		int[] oid;
+		oid = new DmsSignAccess().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 1, 0
+		}));
+		oid = new DmsSignType().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 2, 0
+		}));
+		oid = new DmsSignHeight().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 3, 0
+		}));
+		oid = new DmsSignWidth().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 4, 0
+		}));
+		oid = new DmsHorizontalBorder().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 5, 0
+		}));
+		oid = new DmsVerticalBorder().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 6, 0
+		}));
+		oid = new DmsLegend().getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 7, 0
+		}));
+		oid = new DmsBeaconType().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 8, 0
+		}));
+		oid = new DmsSignTechnology().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 9, 0
+		}));
+
 		oid = new VmsCharacterHeightPixels().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 1, 0
@@ -70,14 +109,10 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 7, 0
 		}));
 		oid = new DefaultPageOnTime(0).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 8, 0
 		}));
 		oid = new DefaultPageOffTime(0).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 9, 0
 		}));
