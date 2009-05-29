@@ -22,7 +22,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 abstract public class ASN1OctetStr extends ASN1Type implements ASN1OctetString {
 
 	/** Actual octet string value */
-	protected byte[] value;
+	protected byte[] value = new byte[0];
 
 	/** Set the octet string value */
 	public void setOctetString(byte[] v) {

@@ -19,68 +19,44 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Skyline IllumPowerStatus object
  *
  * @author Douglas Lau
  */
-public class IllumPowerStatus extends SkylineDmsStatus
-	implements ASN1OctetString
-{
-	/** Power status codes */
-	static public final int UNAVAILABLE = 0;
-	static public final int LOW = 1;
-	static public final int MARGINALLY_LOW = 2;
-	static public final int OK = 3;
-	static public final int MARGINALLY_HIGH = 4;
-	static public final int HIGH = 5;
+public class IllumPowerStatus extends ASN1OctetStr {
 
-	/** Status descriptions */
-	static protected final String[] STATUS = {
-		"???", "low", "marginally low", "OK", "marginally high", "high"
-	};
+	/** Enumeration of power status */
+	static public enum Enum {
+		unavailable, low, marginallyLow, ok, marginallyHigh, high;
 
-	/** Create a new IllumPowerStatus object */
-	public IllumPowerStatus() {
-		super(2);
-		oid[node++] = 2;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "illumPowerStatus";
-	}
-
-	/** Power status */
-	protected byte[] power = new byte[0];
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		power = value;
-		for(int i = 0; i < power.length; i++) {
-			if(power[i] < 0 || power[i] >= STATUS.length)
-				power[i] = UNAVAILABLE;
+		/** Get power status from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return unavailable;
 		}
 	}
 
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return power;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.skylineDmsStatus.createOID(new int[] {2, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < power.length; i++) {
+		for(int i = 0; i < value.length; i++) {
 			if(b.length() > 0)
 				b.append(", ");
 			b.append("#");
 			b.append(i + 1);
 			b.append(": ");
-			b.append(STATUS[power[i]]);
+			b.append(Enum.fromOrdinal(value[i]));
 		}
 		if(b.length() == 0)
 			b.append("None");
@@ -89,24 +65,24 @@ public class IllumPowerStatus extends SkylineDmsStatus
 
 	/** Simple interface to test a power supply for something */
 	static public interface PowerTester {
-		boolean check(int p);
+		boolean check(Enum p);
 	}
 
 	/** Get power status bitmaps */
 	public String[] getBitmaps() throws IOException {
 		String[] rows = new String[3];
 		rows[DMS.FAIL_BITMAP] = createBase64(new PowerTester() {
-			public boolean check(int p) {
-				return p == LOW || p == HIGH;
+			public boolean check(Enum p) {
+				return p == Enum.low || p == Enum.high;
 			}
 		});
 		rows[DMS.VOLTAGE_BITMAP] = createBase64(new PowerTester() {
-			public boolean check(int p) {
-				return p != OK && p != UNAVAILABLE;
+			public boolean check(Enum p) {
+				return p != Enum.ok && p != Enum.unavailable;
 			}
 		});
 		rows[DMS.CURRENT_BITMAP] = createBase64(new PowerTester() {
-			public boolean check(int p) {
+			public boolean check(Enum p) {
 				return false;
 			}
 		});
@@ -123,13 +99,14 @@ public class IllumPowerStatus extends SkylineDmsStatus
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
-			for(int i = 0; i < power.length; ) {
+			for(int i = 0; i < value.length; ) {
 				int v = 0;
 				for(int b = 0; b < 8; b++) {
-					if(tester.check(power[i]))
+					Enum p = Enum.fromOrdinal(value[i]);
+					if(tester.check(p))
 						v |= 1 << b;
 					i++;
-					if(i >= power.length)
+					if(i >= value.length)
 						break;
 				}
 				dos.writeByte(v);

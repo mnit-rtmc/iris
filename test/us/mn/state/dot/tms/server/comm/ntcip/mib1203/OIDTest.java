@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import java.util.Arrays;
 import junit.framework.TestCase;
 
 /** 
@@ -32,124 +33,138 @@ public class OIDTest extends TestCase {
 	public void test() {
 		int[] oid;
 		oid = new VmsCharacterHeightPixels().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 1, 0
 		}));
 		oid = new VmsCharacterWidthPixels().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 2, 0
 		}));
 		oid = new VmsSignHeightPixels().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 3, 0
 		}));
 		oid = new VmsSignWidthPixels().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 4, 0
 		}));
 		oid = new VmsHorizontalPitch().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 5, 0
 		}));
 		oid = new VmsVerticalPitch().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 6, 0
 		}));
 
 		oid = new DmsSWReset().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 2, 0
 		}));
 		oid = new DmsActivateMessage().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 3, 0
 		}));
 		oid = new DmsMessageTimeRemaining().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 4, 0
 		}));
 		oid = new DmsMsgTableSource().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 5, 0
 		}));
 		oid = new DmsMsgSourceMode().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 7, 0
 		}));
 		oid = new DmsShortPowerRecoveryMessage(0, 0, 0).getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 8, 0
 		}));
 		oid = new DmsLongPowerRecoveryMessage(0, 0, 0).getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 9, 0
 		}));
 		oid = new DmsShortPowerLossTime().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 10, 0
 		}));
 		oid = new DmsCommunicationsLossMessage(0, 0, 0).getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 12, 0
 		}));
 		oid = new DmsTimeCommLoss().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 13, 0
 		}));
 		oid = new DmsPowerLossMessage(0, 0, 0).getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 14, 0
 		}));
 		oid = new DmsEndDurationMessage(0, 0, 0).getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 15, 0
 		}));
 		oid = new DmsActivateMsgError().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 17, 0
 		}));
 		oid = new DmsMultiSyntaxError().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 18, 0
 		}));
 		oid = new VmsPixelServiceDuration().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 21, 0
 		}));
 		oid = new VmsPixelServiceFrequency().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 22, 0
 		}));
 		oid = new VmsPixelServiceTime().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 23, 0
 		}));
 
-/*for(int i: oid) System.err.print(" " + i);
-System.err.println(); */
 		oid = new TempMinCtrlCabinet().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 1, 0
 		}));
 		oid = new TempMaxCtrlCabinet().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 2, 0
 		}));
 		oid = new TempMinAmbient().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 3, 0
 		}));
 		oid = new TempMaxAmbient().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 4, 0
 		}));
 		oid = new TempMinSignHousing().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 5, 0
 		}));
 		oid = new TempMaxSignHousing().getOID();
-		assertTrue(java.util.Arrays.equals(oid, new int[] {
+		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 6, 0
 		}));
+
+		oid = new IllumPowerStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 2, 0
+		}));
+		oid = new SignFaceHeatStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 4, 0
+		}));
+		oid = new SensorFailures().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 17, 0
+		}));
+
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
 	}
 }

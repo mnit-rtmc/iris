@@ -14,54 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip SignFaceHeatStatus object
  *
  * @author Douglas Lau
  */
-public class SignFaceHeatStatus extends SkylineDmsStatus implements ASN1Integer
-{
-	/** Heat off state */
-	static public final int OFF = 0;
+public class SignFaceHeatStatus extends ASN1Int {
 
-	/** Heat on state */
-	static public final int ON = 1;
-
-	/** Status strings */
-	static protected final String[] STATUS = { "OFF", "ON" };
-
-	/** Create a new SignFaceHeatStatus object */
-	public SignFaceHeatStatus() {
-		super(2);
-		oid[node++] = 4;
-		oid[node++] = 0;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "signFaceHeatStatus";
-	}
-
-	/** Sign face heat status */
-	protected int status;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= STATUS.length)
-			status = OFF;
-		else
-			status = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return status;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.skylineDmsStatus.createOID(new int[] {4, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return STATUS[status];
+		switch(value) {
+		case 1:
+			return "ON";
+		default:
+			return "OFF";
+		}
 	}
 }

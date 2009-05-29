@@ -14,47 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip SensorFailures object
  *
  * @author Douglas Lau
  */
-public class SensorFailures extends SkylineDmsStatus implements ASN1OctetString
-{
-	/** Create a new SensorFailures object */
-	public SensorFailures() {
-		super(2);
-		oid[node++] = 17;
-		oid[node++] = 0;
-	}
+public class SensorFailures extends ASN1OctetStr {
 
-	/** Get the object name */
-	protected String getName() {
-		return "sensorFailures";
-	}
-
-	/** Sensor failures bitmap */
-	protected byte[] failures = new byte[0];
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		failures = value;
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return failures;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.skylineDmsStatus.createOID(new int[] {17, 0});
 	}
 
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder buf = new StringBuilder();
 		int f = 1;
-		for(int i = 0; i < failures.length; i++) {
+		for(int i = 0; i < value.length; i++) {
 			for(int b = 0; b < 8; b++, f++) {
-				if((failures[i] & 1 << b) != 0) {
+				if((value[i] & 1 << b) != 0) {
 					if(buf.length() > 0)
 						buf.append(", ");
 					buf.append("#");
