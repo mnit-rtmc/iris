@@ -14,40 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip TempMinSignHousing object
  *
  * @author Douglas Lau
  */
-public class TempMinSignHousing extends StatTemp implements ASN1Integer {
+public class TempMinSignHousing extends ASN1Int {
 
-	/** Create a new TempMinSignHousing object */
-	public TempMinSignHousing() {
-		super(5);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "tempMinSignHousing";
-	}
-
-	/** Actual temperature */
-	protected int temp;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		temp = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return temp;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(temp);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.statTemp.createOID(new int[] {5, 0});
 	}
 }

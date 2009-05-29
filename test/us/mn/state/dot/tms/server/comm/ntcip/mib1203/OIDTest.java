@@ -124,5 +124,32 @@ public class OIDTest extends TestCase {
 		assertTrue(java.util.Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 23, 0
 		}));
+
+/*for(int i: oid) System.err.print(" " + i);
+System.err.println(); */
+		oid = new TempMinCtrlCabinet().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 1, 0
+		}));
+		oid = new TempMaxCtrlCabinet().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 2, 0
+		}));
+		oid = new TempMinAmbient().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 3, 0
+		}));
+		oid = new TempMaxAmbient().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 4, 0
+		}));
+		oid = new TempMinSignHousing().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 5, 0
+		}));
+		oid = new TempMaxSignHousing().getOID();
+		assertTrue(java.util.Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 6, 0
+		}));
 	}
 }
