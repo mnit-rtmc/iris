@@ -76,5 +76,7 @@ class MIBNode {
 	static public final MIBNode skyline = new MIBNode(_private, 18);
 	static public final MIBNode skylineDevices = new MIBNode(skyline, 2);
 	static public final MIBNode skylineDms = new MIBNode(skylineDevices, 3);
+	static public final MIBNode skylineDmsSignCfg =
+		new MIBNode(skylineDms, 1);
 	static public final MIBNode skylineDmsStatus =new MIBNode(skylineDms,9);
 }

@@ -14,46 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * DynBrightDayRate object
  *
  * @author Douglas Lau
  */
-public class DynBrightDayRate extends SkylineDmsSignCfg implements ASN1Integer {
+public class DynBrightDayRate extends ASN1Int {
 
 	/** Create a new DynBrightDayRate object */
 	public DynBrightDayRate() {
-		this(0);
 	}
 
 	/** Create a new DynBrightDayRate object */
 	public DynBrightDayRate(int r) {
-		super(2);
-		rate = r;
+		value = r;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dynBrightDayRate";
-	}
-
-	/** Daytime brightness ramping rate (tenths of a second) */
-	protected int rate;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		rate = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return rate;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(rate);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.skylineDmsSignCfg.createOID(new int[] {2, 0});
 	}
 }

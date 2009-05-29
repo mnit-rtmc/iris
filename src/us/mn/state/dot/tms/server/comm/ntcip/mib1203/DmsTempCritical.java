@@ -14,46 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * DmsTempCritical object
  *
  * @author Douglas Lau
  */
-public class DmsTempCritical extends SkylineDmsSignCfg implements ASN1Integer {
+public class DmsTempCritical extends ASN1Int {
 
 	/** Create a new DmsTempCritical object */
 	public DmsTempCritical() {
-		this(0);
 	}
 
 	/** Create a new DmsTempCritical object */
 	public DmsTempCritical(int t) {
-		super(11);
-		temp = t;
+		value = t;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsTempCritical";
-	}
-
-	/** Critical temperature */
-	protected int temp;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		temp = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return temp;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(temp);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.skylineDmsSignCfg.createOID(new int[] {11, 0});
 	}
 }

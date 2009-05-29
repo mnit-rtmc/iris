@@ -14,46 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * DynBrightDayNight object
  *
  * @author Douglas Lau
  */
-public class DynBrightDayNight extends SkylineDmsSignCfg implements ASN1Integer
-{
+public class DynBrightDayNight extends ASN1Int {
+
 	/** Create a new DynBrightDayNight object */
 	public DynBrightDayNight() {
-		this(0);
 	}
 
 	/** Create a new DynBrightDayNight object */
 	public DynBrightDayNight(int l) {
-		super(1);
-		level = l;
+		value = l;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dynBrightDayNight";
-	}
-
-	/** Photocell level for day/night threshold */
-	protected int level;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		level = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return level;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(level);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.skylineDmsSignCfg.createOID(new int[] {1, 0});
 	}
 }

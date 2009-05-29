@@ -164,7 +164,27 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 17, 0
 		}));
 
+		oid = new DynBrightDayNight().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 1, 0
+		}));
+		oid = new DynBrightDayRate().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 2, 0
+		}));
+		oid = new DynBrightNightRate().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 3, 0
+		}));
+		oid = new DynBrightMaxNightManLvl().getOID();
 for(int i: oid) System.err.print(" " + i);
 System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 8, 0
+		}));
+		oid = new DmsTempCritical().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 11, 0
+		}));
 	}
 }
