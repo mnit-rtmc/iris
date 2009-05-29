@@ -26,14 +26,13 @@ public class DmsPowerLossMessage extends MessageIDCode {
 	 * @param n message number
 	 * @param c message CRC */
 	public DmsPowerLossMessage(int m, int n, int c) {
-		super(14);
 		memory = m;
 		number = n;
 		crc = c;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsPowerLossMessage";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {14, 0});
 	}
 }

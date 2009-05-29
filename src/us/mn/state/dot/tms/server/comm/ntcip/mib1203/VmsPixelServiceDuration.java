@@ -14,42 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip VmsPixelServiceDuration object
  *
  * @author Douglas Lau
  */
-public class VmsPixelServiceDuration extends SignControl
-	implements ASN1Integer
-{
+public class VmsPixelServiceDuration extends ASN1Int {
+
+	/** Create a new VmsPixelServiceDuration object */
+	public VmsPixelServiceDuration() {
+		this(0);
+	}
+
 	/** Create a new VmsPixelServiceDuration object */
 	public VmsPixelServiceDuration(int d) {
-		super(21);
-		duration = d;
+		value = d;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "vmsPixelServiceDuration";
-	}
-
-	/** Pixel service duration (in seconds) */
-	protected int duration;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		duration = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return duration;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(duration);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {21, 0});
 	}
 }

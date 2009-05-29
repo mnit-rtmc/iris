@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Int extends MIBObject implements ASN1Integer {
+abstract public class ASN1Int extends ASN1Type implements ASN1Integer {
 
 	/** Actual integer value */
 	protected int value;
@@ -32,22 +32,6 @@ abstract public class ASN1Int extends MIBObject implements ASN1Integer {
 	/** Get the integer value */
 	public int getInteger() {
 		return value;
-	}
-
-	/** Get the object name */
-	public final String getName() {
-		String n = getClassName();
-		return n.substring(0, 1).toLowerCase() + n.substring(1);
-	}
-
-	/** Get the class name (without packages) */
-	protected String getClassName() {
-		String name = getClass().getName();
-		int i = name.lastIndexOf('.');
-		if(i >= 0)
-			return name.substring(i + 1);
-		else
-			return name;
 	}
 
 	/** Get the object value */

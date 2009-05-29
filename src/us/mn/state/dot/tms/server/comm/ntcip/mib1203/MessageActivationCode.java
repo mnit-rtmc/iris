@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,27 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
- * Ntcip MessageIDCode object
+ * MessageActivationCode type
  *
  * @author Douglas Lau
  */
-abstract public class MessageIDCode extends ASN1OctetStr {
+abstract public class MessageActivationCode extends ASN1OctetStr {
+
+	/** Message duration */
+	protected int duration;
+
+	/** Get the message duration */
+	public int getDuration() {
+		return duration;
+	}
+
+	/** Activation priority */
+	protected int priority;
+
+	/** Get the activation priority */
+	public int getPriority() {
+		return priority;
+	}
 
 	/** Memory type */
 	protected int memory;
@@ -52,14 +68,25 @@ abstract public class MessageIDCode extends ASN1OctetStr {
 		return crc;
 	}
 
+	/** Source address */
+	protected int address;
+
+	/** Get the source address */
+	public int getAddress() {
+		return address;
+	}
+
 	/** Set the octet string value */
 	public void setOctetString(byte[] value) {
 		ByteArrayInputStream bis = new ByteArrayInputStream(value);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
+			duration = dis.readUnsignedShort();
+			priority = dis.readUnsignedByte();
 			memory = dis.readUnsignedByte();
 			number = dis.readUnsignedShort();
 			crc = dis.readUnsignedShort();
+			address = dis.readInt();
 		}
 		catch(IOException e) {
 			e.printStackTrace();
@@ -71,9 +98,12 @@ abstract public class MessageIDCode extends ASN1OctetStr {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
+			dos.writeShort(duration);
+			dos.writeByte(priority);
 			dos.writeByte(memory);
 			dos.writeShort(number);
 			dos.writeShort(crc);
+			dos.writeInt(address);
 			return bos.toByteArray();
 		}
 		catch(IOException e) {
@@ -85,11 +115,17 @@ abstract public class MessageIDCode extends ASN1OctetStr {
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
+		b.append(duration);
+		b.append(",");
+		b.append(priority);
+		b.append(",");
 		b.append(DmsMessageMemoryType.getDescription(memory));
 		b.append(",");
 		b.append(number);
 		b.append(",");
 		b.append(crc);
+		b.append(",");
+		b.append(address);
 		return b.toString();
 	}
 }

@@ -14,67 +14,44 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMsgSourceMode object
  *
  * @author Douglas Lau
  */
-public class DmsMsgSourceMode extends SignControl implements ASN1Integer {
+public class DmsMsgSourceMode extends ASN1Int {
 
-	/** Message source codes */
-	static public final int UNDEFINED = 0;
-	static public final int OTHER = 1;
-	static public final int LOCAL = 2;
-	static public final int EXTERNAL = 3;
-	static public final int OTHER_COM1 = 4;
-	static public final int OTHER_COM2 = 5;
-	static public final int OTHER_COM3 = 6;
-	static public final int OTHER_COM4 = 7;
-	static public final int CENTRAL = 8;
-	static public final int TIMEBASED_SCHEDULER = 9;
-	static public final int POWER_RECOVER8Y = 10;
-	static public final int RESET = 11;
-	static public final int COMM_LOSS = 12;
-	static public final int POWER_LOSS = 13;
-	static public final int END_DURATION = 14;
+	/** Enumeration of MULTI syntax errors */
+	static public enum Enum {
+		undefined, other, local, external,
+		otherCom1, otherCom2, otherCom3, otherCom4,
+		central, timebasedScheduler, powerRecovery, reset, commLoss,
+		powerLoss, endDuration;
 
-	/** Source descriptions */
-	static protected final String[] SOURCE = {
-		"???", "other", "local", "external", "otherCom1", "otherCom2",
-		"otherCom3", "otherCom4", "central", "timebasedScheduler",
-		"powerRecovery", "reset", "commLoss", "powerLoss", "endDuration"
-	};
-
-	/** Create a new DmsMsgSourceMode object */
-	public DmsMsgSourceMode() {
-		super(7);
+		/** Get MULTI syntax error from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMsgSourceMode";
-	}
-
-	/** Actual message source */
-	protected int source;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= SOURCE.length)
-			source = UNDEFINED;
-		else
-			source = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return source;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return SOURCE[source];
+		return Enum.fromOrdinal(value).toString();
+	}
+
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {7, 0});
 	}
 }

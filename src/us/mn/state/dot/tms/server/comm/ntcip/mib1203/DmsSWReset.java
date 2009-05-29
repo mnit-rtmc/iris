@@ -14,41 +14,22 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsSWReset object
  *
  * @author Douglas Lau
  */
-public class DmsSWReset extends SignControl implements ASN1Integer {
+public class DmsSWReset extends ASN1Int {
 
 	/** Create a new DmsSWReset object */
 	public DmsSWReset() {
-		super(2);
-		reset = 1;
+		value = 1;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsSWReset";
-	}
-
-	/** Reset condition */
-	protected int reset;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		reset = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return reset;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(reset);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {2, 0});
 	}
 }

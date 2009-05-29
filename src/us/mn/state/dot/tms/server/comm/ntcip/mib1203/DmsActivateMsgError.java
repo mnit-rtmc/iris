@@ -14,61 +14,48 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsActivateMsgError object
  *
  * @author Douglas Lau
  */
-public class DmsActivateMsgError extends SignControl implements ASN1Integer {
+public class DmsActivateMsgError extends ASN1Int {
 
-	/** Activate message error codes */
-	static public final int UNDEFINED = 0;
-	static public final int OTHER = 1;
-	static public final int NONE = 2;
-	static public final int PRIORITY = 3;
-	static public final int UNDER_VALIDATION = 4;
-	static public final int MEMORY_TYPE = 5;
-	static public final int MESSAGE_NUMBER = 6;
-	static public final int MESSAGE_CRC = 7;
-	static public final int SYNTAX_MULTI = 8;
-	static public final int LOCAL_MODE = 9;
+	/** Enumeration of message activation errors */
+	static public enum Enum {
+		undefined, other, none, priority, messageStatus,
+		messageMemoryType, messageNumber, messageCRC, syntaxMULTI,
+		localMode, centralMode, centralOverrideMode;
 
-	/** Activate message error descriptions */
-	static protected final String[] DESCRIPTION = {
-		"???", "other", "none", "priority", "underValidation",
-		"memoryType", "messageNumber", "messageCRC", "syntaxMULTI",
-		"localMode"
-	};
-
-	/** Create a new DmsActivateMsgError object */
-	public DmsActivateMsgError() {
-		super(17);
+		/** Get activation error from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsActivateMsgError";
-	}
-
-	/** Message activation error */
-	protected int error;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		error = value;
-		if(error < 0 || error >= DESCRIPTION.length)
-			error = UNDEFINED;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return error;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return DESCRIPTION[error];
+		return Enum.fromOrdinal(value).toString();
+	}
+
+	/** Get the enum value */
+	public Enum getEnum() {
+		return Enum.fromOrdinal(value);
+	}
+
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {17, 0});
 	}
 }

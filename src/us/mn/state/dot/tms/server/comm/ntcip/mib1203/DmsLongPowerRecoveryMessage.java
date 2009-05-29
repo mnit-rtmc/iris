@@ -26,14 +26,13 @@ public class DmsLongPowerRecoveryMessage extends MessageIDCode {
 	 * @param n message number
 	 * @param c message CRC */
 	public DmsLongPowerRecoveryMessage(int m, int n, int c) {
-		super(9);
 		memory = m;
 		number = n;
 		crc = c;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsLongPowerRecoveryMessage";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {9, 0});
 	}
 }

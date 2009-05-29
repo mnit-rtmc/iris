@@ -14,41 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsTimeCommLoss object
  *
  * @author Douglas Lau
  */
-public class DmsTimeCommLoss extends SignControl implements ASN1Integer {
+public class DmsTimeCommLoss extends ASN1Int {
+
+	/** Create a new DmsTimeCommLoss object */
+	public DmsTimeCommLoss() {
+		this(0);
+	}
 
 	/** Create a new DmsTimeCommLoss object */
 	public DmsTimeCommLoss(int t) {
-		super(13);
-		time = t;
+		value = t;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsTimeCommLoss";
-	}
-
-	/** Comm loss time (in minutes) */
-	protected int time;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		time = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return time;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(time);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {13, 0});
 	}
 }

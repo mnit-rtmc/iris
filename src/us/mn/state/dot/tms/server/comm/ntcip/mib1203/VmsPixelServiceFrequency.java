@@ -14,42 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip VmsPixelServiceFrequency object
  *
  * @author Douglas Lau
  */
-public class VmsPixelServiceFrequency extends SignControl
-	implements ASN1Integer
-{
+public class VmsPixelServiceFrequency extends ASN1Int {
+
+	/** Create a new VmsPixelServiceFrequency object */
+	public VmsPixelServiceFrequency() {
+		this(0);
+	}
+
 	/** Create a new VmsPixelServiceFrequency object */
 	public VmsPixelServiceFrequency(int f) {
-		super(22);
-		frequency = f;
+		value = f;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "vmsPixelServiceFrequency";
-	}
-
-	/** Pixel service frequency (in minutes) */
-	protected int frequency;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		frequency = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return frequency;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(frequency);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {22, 0});
 	}
 }

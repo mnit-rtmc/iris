@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,27 +12,30 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip;
 
 /**
- * Ntcip DmsCommunicationsLossMessage object
+ * ASN1 Octet String.
  *
  * @author Douglas Lau
  */
-public class DmsCommunicationsLossMessage extends MessageIDCode {
+abstract public class ASN1OctetStr extends ASN1Type implements ASN1OctetString {
 
-	/** Create a new DMS communications loss message object
-	 * @param m memory type
-	 * @param n message number
-	 * @param c message CRC */
-	public DmsCommunicationsLossMessage(int m, int n, int c) {
-		memory = m;
-		number = n;
-		crc = c;
+	/** Actual octet string value */
+	protected byte[] value;
+
+	/** Set the octet string value */
+	public void setOctetString(byte[] v) {
+		value = v;
 	}
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIBNode.signControl.createOID(new int[] {12, 0});
+	/** Get the octet string value */
+	public byte[] getOctetString() {
+		return value;
+	}
+
+	/** Get the object value */
+	protected String getValue() {
+		return new String(value);
 	}
 }

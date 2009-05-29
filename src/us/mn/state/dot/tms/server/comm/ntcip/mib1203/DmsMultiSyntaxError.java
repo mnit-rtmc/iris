@@ -14,66 +14,45 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMultiSyntaxError object
  *
  * @author Douglas Lau
  */
-public class DmsMultiSyntaxError extends SignControl implements ASN1Integer {
+public class DmsMultiSyntaxError extends ASN1Int {
 
-	/** MULTI syntax error codes */
-	static public final int UNDEFINED = 0;
-	static public final int OTHER = 1;
-	static public final int NONE = 2;
-	static public final int UNSUPPORTED_TAG = 3;
-	static public final int UNSUPPORTED_TAG_VALUE = 4;
-	static public final int TEXT_TOO_BIG = 5;
-	static public final int FONT_NOT_DEFINED = 6;
-	static public final int CHARACTER_NOT_DEFINED = 7;
-	static public final int FIELD_DEVICE_NOT_EXIST = 8;
-	static public final int FIELD_DEVICE_ERROR = 9;
-	static public final int FLASH_REGION_ERROR = 10;
-	static public final int TAG_CONFLICT = 11;
-	static public final int TOO_MANY_PAGES = 12;
+	/** Enumeration of MULTI syntax errors */
+	static public enum Enum {
+		undefined, other, none, unsupportedTag, unsupportedTagValue,
+		textTooBig, fontNotDefined, characterNotDefined,
+		fieldDeviceNotExist, fieldDeviceError, flashRegionError,
+		tagConflict, tooManyPages, fontVersionID, graphicID,
+		graphicNotDefined;
 
-	/** MULTI syntax error descriptions */
-	static protected final String[] DESCRIPTION = {
-		"???", "other", "none", "unsupportedTag", "unsupportedTagValue",
-		"textTooBig", "fontNotDefined", "characterNotDefined",
-		"fieldDeviceNotExist", "fieldDeviceError", "flashRegionError",
-		"tagConflict", "tooManyPages"
-	};
-
-	/** Create a new DmsMultiSyntaxError object */
-	public DmsMultiSyntaxError() {
-		super(18);
+		/** Get MULTI syntax error from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMultiSyntaxError";
-	}
-
-	/** MULTI syntax error */
-	protected int error;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= DESCRIPTION.length)
-			error = UNDEFINED;
-		else
-			error = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return error;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return DESCRIPTION[error];
+		return Enum.fromOrdinal(value).toString();
+	}
+
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {18, 0});
 	}
 }

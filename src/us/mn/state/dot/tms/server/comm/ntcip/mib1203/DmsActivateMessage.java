@@ -14,19 +14,16 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
-
 /**
  * Ntcip DmsActivateMessage object
  *
  * @author Douglas Lau
  */
-public class DmsActivateMessage extends SignControl implements ASN1OctetString {
+public class DmsActivateMessage extends MessageActivationCode {
+
+	/** Create a new DmsActivateMessage object */
+	public DmsActivateMessage() {
+	}
 
 	/** Create a new DmsActivateMessage object
 	 * @param d duration (in minutes)
@@ -36,7 +33,6 @@ public class DmsActivateMessage extends SignControl implements ASN1OctetString {
 	 * @param c CRC (dmsMsgMessageCRC)
 	 * @param a source address */
 	public DmsActivateMessage(int d, int p, int m, int n, int c, int a) {
-		super(3);
 		duration = d;
 		priority = p;
 		memory = m;
@@ -45,109 +41,8 @@ public class DmsActivateMessage extends SignControl implements ASN1OctetString {
 		address = a;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsActivateMessage";
-	}
-
-	/** Message duration */
-	protected int duration;
-
-	/** Get the message duration */
-	public int getDuration() {
-		return duration;
-	}
-
-	/** Activation priority */
-	protected int priority;
-
-	/** Get the activation priority */
-	public int getPriority() {
-		return priority;
-	}
-
-	/** Memory type */
-	protected int memory;
-
-	/** Get the memory type */
-	public int getMemory() {
-		return memory;
-	}
-
-	/** Message number */
-	protected int number;
-
-	/** Get the message number */
-	public int getNumber() {
-		return number;
-	}
-
-	/** Cyclic redundancy check */
-	protected int crc;
-
-	/** Get the CRC */
-	public int getCrc() {
-		return crc;
-	}
-
-	/** Source address */
-	protected int address;
-
-	/** Get the source address */
-	public int getAddress() {
-		return address;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		StringBuilder b = new StringBuilder();
-		b.append(duration);
-		b.append(",");
-		b.append(priority);
-		b.append(",");
-		b.append(DmsMessageMemoryType.getDescription(memory));
-		b.append(",");
-		b.append(number);
-		b.append(",");
-		b.append(crc);
-		b.append(",");
-		b.append(address);
-		return b.toString();
-	}
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		ByteArrayInputStream bis = new ByteArrayInputStream(value);
-		DataInputStream dis = new DataInputStream(bis);
-		try {
-			duration = dis.readUnsignedShort();
-			priority = dis.readUnsignedByte();
-			memory = dis.readUnsignedByte();
-			number = dis.readUnsignedShort();
-			crc = dis.readUnsignedShort();
-			address = dis.readInt();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			dos.writeShort(duration);
-			dos.writeByte(priority);
-			dos.writeByte(memory);
-			dos.writeShort(number);
-			dos.writeShort(crc);
-			dos.writeInt(address);
-			return bos.toByteArray();
-		}
-		catch(IOException e) {
-			e.printStackTrace();
-			return new byte[0];
-		}
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {3, 0});
 	}
 }

@@ -14,16 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMessageTimeRemaining object
  *
  * @author Douglas Lau
  */
-public class DmsMessageTimeRemaining extends SignControl
-	implements ASN1Integer
-{
+public class DmsMessageTimeRemaining extends ASN1Int {
+
 	/** Create a new DmsMessageTimeRemaining object */
 	public DmsMessageTimeRemaining() {
 		this(0);
@@ -31,30 +30,11 @@ public class DmsMessageTimeRemaining extends SignControl
 
 	/** Create a new DmsMessageTimeRemaining object */
 	public DmsMessageTimeRemaining(int t) {
-		super(4);
-		time = t;
+		value = t;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMessageTimeRemaining";
-	}
-
-	/** Message time remaining */
-	protected int time;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		time = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return time;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(time);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {4, 0});
 	}
 }

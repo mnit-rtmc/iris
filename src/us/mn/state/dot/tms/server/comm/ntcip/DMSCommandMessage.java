@@ -201,11 +201,11 @@ public class DMSCommandMessage extends DMSOperation {
 			DmsMultiSyntaxError multi = new DmsMultiSyntaxError();
 			mess.add(multi);
 			mess.getRequest();
-			switch(error.getInteger()) {
-				case DmsActivateMsgError.SYNTAX_MULTI:
+			switch(error.getEnum()) {
+				case syntaxMULTI:
 					errorStatus = multi.toString();
 					break;
-				case DmsActivateMsgError.OTHER:
+				case other:
 					// FIXME: ADDCO does this too ...
 					return new LedstarActivateError();
 				default:

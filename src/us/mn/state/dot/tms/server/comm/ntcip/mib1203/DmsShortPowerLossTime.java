@@ -14,41 +14,27 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsShortPowerLossTime object
  *
  * @author Douglas Lau
  */
-public class DmsShortPowerLossTime extends SignControl implements ASN1Integer {
+public class DmsShortPowerLossTime extends ASN1Int {
+
+	/** Create a new DmsShortPowerLossTime object */
+	public DmsShortPowerLossTime() {
+		this(0);
+	}
 
 	/** Create a new DmsShortPowerLossTime object */
 	public DmsShortPowerLossTime(int t) {
-		super(10);
-		time = t;
+		value = t;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsShortPowerLossTime";
-	}
-
-	/** Short power loss time */
-	protected int time;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		time = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return time;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(time);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.signControl.createOID(new int[] {10, 0});
 	}
 }
