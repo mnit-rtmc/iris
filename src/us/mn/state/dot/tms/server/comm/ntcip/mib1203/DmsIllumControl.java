@@ -14,71 +14,60 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsIllumControl object
  *
  * @author Douglas Lau
  */
-public class DmsIllumControl extends Illum implements ASN1Integer {
+public class DmsIllumControl extends ASN1Int {
 
-	/** Brightness level control methods */
-	static public final int UNDEFINED = 0;
-	static public final int OTHER = 1;
-	static public final int PHOTOCELL = 2;
-	static public final int TIMER = 3;
-	static public final int MANUAL = 4;
+	/** Enumeration of illumination control types */
+	static public enum Enum {
+		undefined, other, photocell, timer, manual, manualDirect,
+		manualIndexed;
 
-	/** Control method descriptions */
-	static protected final String[] CONTROL = {
-		"???", "other", "photocell", "timer", "manual"
-	};
-
-	/** Create a new DmsIllumControl object */
-	public DmsIllumControl(int c) {
-		super(1);
-		setInteger(c);
+		/** Get illumination control from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
 
 	/** Create a new DmsIllumControl object */
 	public DmsIllumControl() {
-		this(UNDEFINED);
+		this(Enum.undefined);
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsIllumControl";
+	/** Create a new DmsIllumControl object */
+	public DmsIllumControl(Enum c) {
+		value = c.ordinal();
 	}
 
-	/** Brightness level control method */
-	protected int control;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= CONTROL.length)
-			control = UNDEFINED;
-		else
-			control = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return control;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.illum.createOID(new int[] {1, 0});
 	}
 
 	/** Test if the brightness level control is "manual" */
 	public boolean isManual() {
-		return control == MANUAL;
+		Enum c = Enum.fromOrdinal(value);
+		switch(c) {
+		case manual:
+		case manualDirect:
+		case manualIndexed:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Test if the brightness level control is "photocell" */
 	public boolean isPhotocell() {
-		return control == PHOTOCELL;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return CONTROL[control];
+		return Enum.fromOrdinal(value) == Enum.photocell;
 	}
 }

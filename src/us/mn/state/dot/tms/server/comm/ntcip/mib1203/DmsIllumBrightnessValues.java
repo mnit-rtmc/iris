@@ -19,36 +19,18 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip DmsIllumBrightnessValues object
  *
  * @author Douglas Lau
  */
-public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
+public class DmsIllumBrightnessValues extends ASN1OctetStr {
 
-	/** Create a new DmsIllumBrightnessValues object */
-	public DmsIllumBrightnessValues() {
-		super(7);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsIllumBrightnessValues";
-	}
-
-	/** Brightness values */
-	protected byte[] brightness;
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		brightness = value;
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return brightness;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.illum.createOID(new int[] {7, 0});
 	}
 
 	/** Set the brightness table */
@@ -62,7 +44,7 @@ public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
 				dos.writeShort(level[1]); // photocellLevelDown
 				dos.writeShort(level[2]); // photocellLevelUp
 			}
-			brightness = bos.toByteArray();
+			value = bos.toByteArray();
 		}
 		finally {
 			dos.close();
@@ -72,7 +54,7 @@ public class DmsIllumBrightnessValues extends Illum implements ASN1OctetString {
 
 	/** Get the brightness table */
 	public int[][] getTable() throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(brightness);
+		ByteArrayInputStream bis = new ByteArrayInputStream(value);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
 			int[][] table = new int[dis.readByte()][3];

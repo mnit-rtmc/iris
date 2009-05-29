@@ -66,7 +66,7 @@ public class DMSDefaultDownload extends DMSOperation {
 			DmsIllumBrightnessValues brightness =
 				new DmsIllumBrightnessValues();
 			DmsIllumControl control = new DmsIllumControl(
-				DmsIllumControl.PHOTOCELL);
+				DmsIllumControl.Enum.photocell);
 			mess.add(brightness);
 			mess.add(control);
 			mess.getRequest();

@@ -14,45 +14,22 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsIllumLightOutputStatus object
  *
  * @author Douglas Lau
  */
-public class DmsIllumLightOutputStatus extends Illum implements ASN1Integer {
+public class DmsIllumLightOutputStatus extends ASN1Int {
 
-	/** Create a new DmsIllumLightOutputStatus object */
-	public DmsIllumLightOutputStatus() {
-		super(9);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsIllumLightOutputStatus";
-	}
-
-	/** Light output status */
-	protected int light;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		light = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return light;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(light);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.illum.createOID(new int[] {9, 0});
 	}
 
 	/** Get the light output as percent */
 	public int getPercent() {
-		return Math.round(light / 655.35f);
+		return Math.round(value / 655.35f);
 	}
 }

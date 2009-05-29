@@ -57,8 +57,6 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 6, 0
 		}));
 		oid = new DmsLegend().getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 7, 0
 		}));
@@ -184,6 +182,45 @@ System.err.println();
 		oid = new VmsPixelServiceTime().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 23, 0
+		}));
+
+		oid = new DmsIllumControl().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 1, 0
+		}));
+		oid = new DmsIllumMaxPhotocellLevel().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 2, 0
+		}));
+		oid = new DmsIllumPhotocellLevelStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 3, 0
+		}));
+		oid = new DmsIllumNumBrightLevels().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 4, 0
+		}));
+		oid = new DmsIllumBrightLevelStatus().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 5, 0
+		}));
+		oid = new DmsIllumManLevel(0).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 6, 0
+		}));
+		oid = new DmsIllumBrightnessValues().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 7, 0
+		}));
+		oid = new DmsIllumBrightnessValuesError().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 8, 0
+		}));
+		oid = new DmsIllumLightOutputStatus().getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 9, 0
 		}));
 
 		oid = new TempMinCtrlCabinet().getOID();

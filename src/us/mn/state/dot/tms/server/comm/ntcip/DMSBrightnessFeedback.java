@@ -102,8 +102,8 @@ public class DMSBrightnessFeedback extends DMSOperation {
 
 		/** Set the photocell control mode */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			int mode = DmsIllumControl.PHOTOCELL;
-			mess.add(new DmsIllumControl(mode));
+			mess.add(new DmsIllumControl(
+				DmsIllumControl.Enum.photocell));
 			mess.setRequest();
 			return new SetBrightnessTable();
 		}

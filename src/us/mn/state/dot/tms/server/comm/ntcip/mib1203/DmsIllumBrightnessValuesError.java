@@ -14,19 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
+
 /**
- * Ntcip Illum node
+ * Ntcip DmsIllumBrightnessValuesError object
  *
  * @author Douglas Lau
  */
-abstract class Illum extends Dms {
+public class DmsIllumBrightnessValuesError extends ASN1OctetStr {
 
-	/** Create a new Illum object
-	 * @param n additional nodes in object identifier */
-	protected Illum(int i) {
-		super(3);
-		oid[node++] = 7;
-		oid[node++] = i;
-		oid[node++] = 0;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.illum.createOID(new int[] {8, 0});
 	}
 }

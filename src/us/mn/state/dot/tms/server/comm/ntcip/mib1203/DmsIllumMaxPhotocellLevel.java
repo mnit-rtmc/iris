@@ -14,40 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsIllumMaxPhotocellLevel object
  *
  * @author Douglas Lau
  */
-public class DmsIllumMaxPhotocellLevel extends Illum implements ASN1Integer {
+public class DmsIllumMaxPhotocellLevel extends ASN1Int {
 
-	/** Create a new DmsIllumMaxPhotocellLevel object */
-	public DmsIllumMaxPhotocellLevel() {
-		super(2);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsIllumMaxPhotocellLevel";
-	}
-
-	/** Maximum photocell level */
-	protected int level;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		level = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return level;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(level);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.illum.createOID(new int[] {2, 0});
 	}
 }

@@ -14,40 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsIllumBrightLevelStatus object
  *
  * @author Douglas Lau
  */
-public class DmsIllumBrightLevelStatus extends Illum implements ASN1Integer {
+public class DmsIllumBrightLevelStatus extends ASN1Int {
 
-	/** Create a new DmsIllumBrightLevelStatus object */
-	public DmsIllumBrightLevelStatus() {
-		super(5);
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsIllumBrightLevelStatus";
-	}
-
-	/** Current brightness level */
-	protected int level;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		level = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return level;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(level);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.illum.createOID(new int[] {5, 0});
 	}
 }

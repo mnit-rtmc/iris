@@ -45,9 +45,10 @@ public class DMSBrightnessControl extends DMSOperation {
 
 		/** Set the brightness control mode */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			int mode = DmsIllumControl.PHOTOCELL;
+			DmsIllumControl.Enum mode =
+				DmsIllumControl.Enum.photocell;
 			if(manual)
-				mode = DmsIllumControl.MANUAL;
+				mode = DmsIllumControl.Enum.manual;
 			mess.add(new DmsIllumControl(mode));
 			mess.setRequest();
 			return null;
