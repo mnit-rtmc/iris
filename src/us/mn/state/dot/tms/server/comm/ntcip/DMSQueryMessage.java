@@ -103,10 +103,10 @@ public class DMSQueryMessage extends DMSOperation {
 		/** Query the current message */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.CURRENT_BUFFER, 1);
+				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			mess.add(multi);
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.CURRENT_BUFFER, 1);
+				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			mess.add(status);
 			DmsMessageTimeRemaining time =
 				new DmsMessageTimeRemaining();

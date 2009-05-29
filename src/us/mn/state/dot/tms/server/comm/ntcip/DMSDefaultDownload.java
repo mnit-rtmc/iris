@@ -83,9 +83,9 @@ public class DMSDefaultDownload extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsTimeCommLoss(10));
 			mess.add(new DmsCommunicationsLossMessage(
-				DmsMessageMemoryType.BLANK, 1, 0));
+				DmsMessageMemoryType.Enum.blank, 1, 0));
 			mess.add(new DmsEndDurationMessage(
-				DmsMessageMemoryType.BLANK, 1, 0));
+				DmsMessageMemoryType.Enum.blank, 1, 0));
 			mess.setRequest();
 			return new PowerLoss();
 		}
@@ -98,9 +98,9 @@ public class DMSDefaultDownload extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsShortPowerLossTime(0));
 			mess.add(new DmsLongPowerRecoveryMessage(
-				DmsMessageMemoryType.BLANK, 1, 0));
+				DmsMessageMemoryType.Enum.blank, 1, 0));
 //			mess.add(new DmsPowerLossMessage(
-//				DmsMessageMemoryType.BLANK, 1, 0));
+//				DmsMessageMemoryType.Enum.blank, 1, 0));
 			mess.setRequest();
 			return new PixelService();
 		}

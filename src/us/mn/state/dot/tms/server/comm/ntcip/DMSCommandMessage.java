@@ -69,8 +69,8 @@ public class DMSCommandMessage extends DMSOperation {
 		/** Set the status to modify request */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsMessageStatus(
-				DmsMessageMemoryType.CHANGEABLE, 1,
-				DmsMessageStatus.MODIFY_REQ));
+				DmsMessageMemoryType.Enum.changeable, 1,
+				DmsMessageStatus.Enum.modifyReq));
 			try {
 				mess.setRequest();
 			}
@@ -91,7 +91,7 @@ public class DMSCommandMessage extends DMSOperation {
 		/** Get the initial message status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.CHANGEABLE, 1);
+				DmsMessageMemoryType.Enum.changeable, 1);
 			mess.add(status);
 			mess.getRequest();
 			if(status.isModifying())
@@ -107,7 +107,7 @@ public class DMSCommandMessage extends DMSOperation {
 		/** Set the message MULTI string */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsMessageMultiString(
-				DmsMessageMemoryType.CHANGEABLE, 1,
+				DmsMessageMemoryType.Enum.changeable, 1,
 				message.getMulti().toString()));
 			mess.setRequest();
 			return new ValidateRequest();
@@ -120,8 +120,8 @@ public class DMSCommandMessage extends DMSOperation {
 		/** Set the status to modify request */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsMessageStatus(
-				DmsMessageMemoryType.CHANGEABLE, 1,
-				DmsMessageStatus.VALIDATE_REQ));
+				DmsMessageMemoryType.Enum.changeable, 1,
+				DmsMessageStatus.Enum.validateReq));
 			try {
 				mess.setRequest();
 			}
@@ -157,10 +157,10 @@ public class DMSCommandMessage extends DMSOperation {
 		/** Get the final message status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.CHANGEABLE, 1);
+				DmsMessageMemoryType.Enum.changeable, 1);
 			mess.add(status);
 			DmsMessageCRC crc = new DmsMessageCRC(
-				DmsMessageMemoryType.CHANGEABLE, 1);
+				DmsMessageMemoryType.Enum.changeable, 1);
 			mess.add(crc);
 			mess.getRequest();
 			if(!status.isValid())
@@ -177,7 +177,7 @@ public class DMSCommandMessage extends DMSOperation {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(new DmsActivateMessage(getDuration(),
 				MAX_MESSAGE_PRIORITY,
-				DmsMessageMemoryType.CHANGEABLE, 1,
+				DmsMessageMemoryType.Enum.changeable, 1,
 				messageCRC, 0));
 			try {
 				mess.setRequest();

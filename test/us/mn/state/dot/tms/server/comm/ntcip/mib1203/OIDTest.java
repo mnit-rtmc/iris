@@ -115,62 +115,42 @@ public class OIDTest extends TestCase {
 		}));
 
 		oid = new NumFonts().getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 1, 0
 		}));
 		oid = new FontIndex(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 1, 5
 		}));
 		oid = new FontNumber(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 2, 5
 		}));
 		oid = new FontName(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 3, 5
 		}));
 		oid = new FontHeight(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 4, 5
 		}));
 		oid = new FontCharSpacing(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 5, 5
 		}));
 		oid = new FontLineSpacing(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 6, 5
 		}));
 		oid = new FontVersionID(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 7, 5
 		}));
 		oid = new FontStatus(5).getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 8, 5
 		}));
 		oid = new MaxFontCharacters().getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 3, 0
 		}));
@@ -204,6 +184,41 @@ System.err.println();
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 9, 0
 		}));
 
+		oid = new DmsMessageMemoryType(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 1, 5, 1
+		}));
+		oid = new DmsMessageMultiString(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 3, 5, 1
+		}));
+		oid = new DmsMessageCRC(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 5, 5, 1
+		}));
+		oid = new DmsMessageBeacon(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 6, 5, 1
+		}));
+		oid = new DmsMessagePixelService(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 7, 5, 1
+		}));
+		oid = new DmsMessageRunTimePriority(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 8, 5, 1
+		}));
+		oid = new DmsMessageStatus(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 9, 5, 1
+		}));
+		oid = new DmsValidateMessageError().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 9, 0
+		}));
+
 		oid = new DmsSWReset().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 2, 0
@@ -228,7 +243,7 @@ System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 8, 0
 		}));
-		oid = new DmsLongPowerRecoveryMessage(0, 0, 0).getOID();
+		oid = new DmsLongPowerRecoveryMessage(DmsMessageMemoryType.Enum.blank, 0, 0).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 9, 0
 		}));
@@ -236,7 +251,7 @@ System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 10, 0
 		}));
-		oid = new DmsCommunicationsLossMessage(0, 0, 0).getOID();
+		oid = new DmsCommunicationsLossMessage(DmsMessageMemoryType.Enum.blank, 0, 0).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 12, 0
 		}));
@@ -248,7 +263,7 @@ System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 14, 0
 		}));
-		oid = new DmsEndDurationMessage(0, 0, 0).getOID();
+		oid = new DmsEndDurationMessage(DmsMessageMemoryType.Enum.blank, 0, 0).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 15, 0
 		}));

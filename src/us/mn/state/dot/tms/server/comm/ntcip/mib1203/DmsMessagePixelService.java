@@ -14,47 +14,30 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMessagePixelService object
  *
  * @author Douglas Lau
  */
-public class DmsMessagePixelService extends DmsMessageTable
-	implements ASN1Integer
-{
+public class DmsMessagePixelService extends ASN1Int {
+
+	/** Memory type */
+	protected final int memory;
+
+	/** Message number */
+	protected final int number;
+
 	/** Create a new DmsMessagePixelService object */
-	public DmsMessagePixelService(int m, int n, int s) {
-		super(m, n);
-		service = s;
+	public DmsMessagePixelService(DmsMessageMemoryType.Enum m, int n) {
+		memory = m.ordinal();
+		number = n;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMessagePixelService";
-	}
-
-	/** Get the message table item (for dmsMessagePixelService objects) */
-	protected int getTableItem() {
-		return 7;
-	}
-
-	/** Actual message pixel service */
-	protected int service;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		service = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return service;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(service);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsMessage.createOID(new int[] {
+			8, 1, 7, memory, number});
 	}
 }

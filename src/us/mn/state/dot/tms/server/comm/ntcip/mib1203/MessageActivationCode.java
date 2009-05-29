@@ -119,7 +119,7 @@ abstract public class MessageActivationCode extends ASN1OctetStr {
 		b.append(",");
 		b.append(priority);
 		b.append(",");
-		b.append(DmsMessageMemoryType.getDescription(memory));
+		b.append(DmsMessageMemoryType.Enum.fromOrdinal(memory));
 		b.append(",");
 		b.append(number);
 		b.append(",");

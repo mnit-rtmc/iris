@@ -14,47 +14,30 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMessageRunTimePriority object
  *
  * @author Douglas Lau
  */
-public class DmsMessageRunTimePriority extends DmsMessageTable
-	implements ASN1Integer
-{
+public class DmsMessageRunTimePriority extends ASN1Int {
+
+	/** Memory type */
+	protected final int memory;
+
+	/** Message number */
+	protected final int number;
+
 	/** Create a new DmsMessageRunTimePriority object */
-	public DmsMessageRunTimePriority(int m, int n, int p) {
-		super(m, n);
-		priority = p;
+	public DmsMessageRunTimePriority(DmsMessageMemoryType.Enum m, int n) {
+		memory = m.ordinal();
+		number = n;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMessageRunTimePriority";
-	}
-
-	/** Get the message table item (for dmsMessageRunTimePriority) */
-	protected int getTableItem() {
-		return 8;
-	}
-
-	/** Message run time priority */
-	protected int priority;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		priority = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return priority;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(priority);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsMessage.createOID(new int[] {
+			8, 1, 8, memory, number});
 	}
 }

@@ -14,69 +14,51 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsValidateMessageError object
  *
  * @author Douglas Lau
  */
-public class DmsValidateMessageError extends DmsMessage implements ASN1Integer {
+public class DmsValidateMessageError extends ASN1Int {
 
-	/** Validate message error codes */
-	static public final int UNDEFINED = 0;
-	static public final int OTHER = 1;
-	static public final int NONE = 2;
-	static public final int BEACONS = 3;
-	static public final int PIXEL_SERVICE = 4;
-	static public final int SYNTAX_MULTI = 5;
+	/** Enumeration of message validation errors */
+	static public enum Enum {
+		undefined, other, none, beacons, pixelService, syntaxMULTI;
 
-	/** Validate message error descriptions */
-	static protected final String[] DESCRIPTION = {
-		"???", "other", "none", "beacons",
-		"pixelService", "syntaxMULTI"
-	};
-
-	/** Create a new DmsValidateMessageError object */
-	public DmsValidateMessageError() {
-		super(2);
-		oid[node++] = 9;
-		oid[node++] = 0;
+		/** Get message validation error from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsValidateMessageError";
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsMessage.createOID(new int[] {9, 0});
 	}
-
-	/** Message activation error */
-	protected int error;
 
 	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= DESCRIPTION.length)
-			error = UNDEFINED;
-		else
-			error = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return error;
-	}
-
-	/** Test for a MULTI syntax error */
-	public boolean isSyntaxMulti() {
-		return error == SYNTAX_MULTI;
+	public void setInteger(int v) {
+		value = Enum.fromOrdinal(v).ordinal();
 	}
 
 	/** Get the object value */
 	public String getValue() {
-		return DESCRIPTION[error];
+		return Enum.fromOrdinal(value).toString();
+	}
+
+	/** Test for a MULTI syntax error */
+	public boolean isSyntaxMulti() {
+		return Enum.fromOrdinal(value) == Enum.syntaxMULTI;
 	}
 
 	/** Test if there is an error */
 	public boolean isError() {
-		return error != NONE;
+		return Enum.fromOrdinal(value) != Enum.none;
 	}
 }

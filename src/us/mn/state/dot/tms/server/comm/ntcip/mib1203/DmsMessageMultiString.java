@@ -14,53 +14,39 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetStr;
 
 /**
  * Ntcip DmsMessageMultiString object
  *
  * @author Douglas Lau
  */
-public class DmsMessageMultiString extends DmsMessageTable
-	implements ASN1OctetString
-{
+public class DmsMessageMultiString extends ASN1OctetStr {
+
+	/** Memory type */
+	protected final int memory;
+
+	/** Message number */
+	protected final int number;
+
 	/** Create a new MULTI string object */
-	public DmsMessageMultiString(int m, int n) {
-		super(m, n);
-		string = "";
+	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int n) {
+		memory = m.ordinal();
+		number = n;
 	}
 
 	/** Create a new DmsMessageMultiString object */
-	public DmsMessageMultiString(int m, int n, String s) {
-		super(m, n);
-		string = s;
+	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int n,
+		String s)
+	{
+		memory = m.ordinal();
+		number = n;
+		value = s.getBytes();
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMessageMultiString";
-	}
-
-	/** Get the message table item (for dmsMessageMultiString objects) */
-	protected int getTableItem() {
-		return 3;
-	}
-
-	/** Actual MULTI string */
-	protected String string;
-
-	/** Set the octet string value */
-	public void setOctetString(byte[] value) {
-		string = new String(value);
-	}
-
-	/** Get the octet string value */
-	public byte[] getOctetString() {
-		return string.getBytes();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return string;
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsMessage.createOID(new int[] {
+			8, 1, 3, memory, number});
 	}
 }

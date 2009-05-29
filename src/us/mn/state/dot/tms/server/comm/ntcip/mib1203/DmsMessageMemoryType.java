@@ -14,100 +14,52 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMessageMemoryType object
  *
  * @author Douglas Lau
  */
-public class DmsMessageMemoryType extends DmsMessageTable 
-	implements ASN1Integer
-{
-	/** Undefined memory type.
-	 * Note: this is used by Ledstar for blank messages. */
-	static public final int UNDEFINED = 0;
+public class DmsMessageMemoryType extends ASN1Int {
 
-	/** Other memory type (manufacturer specific)
-	 * @deprecated (by NTCIP standard) */
-	static public final int OTHER = 1;
+	/** Enumeration of memory types */
+	static public enum Enum {
+		undefined, other, permanent, changeable, _volatile,
+		currentBuffer, schedule, blank;
 
-	/** Permanent memory (non-volatile and non-changeable) */
-	static public final int PERMANENT = 2;
-
-	/** Non-volatile and changeable memory */
-	static public final int CHANGEABLE = 3;
-
-	/** Volatile and changeable memory */
-	static public final int VOLATILE = 4;
-
-	/** Currently displayed message */
-	static public final int CURRENT_BUFFER = 5;
-
-	/** Scheduled message */
-	static public final int SCHEDULE = 6;
-
-	/** Blank message (added in amendment 1) */
-	static public final int BLANK = 7;
-
-	/** String descriptions of memory types */
-	static public final String[] DESCRIPTION = {
-		"???", "other", "permanent", "changeable", "volatile",
-		"current buffer", "schedule", "blank"
-	};
-
-	/** Get a string description of a memory type */
-	static public String getDescription(int m) {
-		if(m < 0 || m >= DESCRIPTION.length)
-			m = UNDEFINED;
-		return DESCRIPTION[m];
+		/** Get memory type from an ordinal value */
+		static protected Enum fromOrdinal(int o) {
+			for(Enum e: Enum.values()) {
+				if(e.ordinal() == o)
+					return e;
+			}
+			return undefined;
+		}
 	}
 
 	/** Test if a message memory type is "blank" */
 	static public boolean isBlank(int m) {
-	 	// Ledstar blank messages are UNDEFINED in dmsMsgTableSource
-		return m == BLANK || m == UNDEFINED;
+		Enum mt = Enum.fromOrdinal(m);
+	 	// Ledstar blank messages are undefined in dmsMsgTableSource
+		return mt == Enum.blank || mt == Enum.undefined;
 	}
+
+	/** Memory type */
+	protected final int memory;
+
+	/** Message number */
+	protected final int number;
 
 	/** Create a new memory type object */
-	public DmsMessageMemoryType(int m, int n) {
-		super(m, n);
+	public DmsMessageMemoryType(Enum m, int n) {
+		memory = m.ordinal();
+		number = n;
 	}
 
-	/** Create a new memory type object */
-	public DmsMessageMemoryType(int m, int n, int i) {
-		super(m, n);
-		memory = i;
-	}
-
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMessageMemoryType";
-	}
-
-	/** Get the message table item (for dmsMessageMemoryType objects) */
-	protected int getTableItem() {
-		return 1;
-	}
-
-	/** Actual memory type */
-	protected int memory;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		if(value < 0 || value >= DESCRIPTION.length)
-			memory = UNDEFINED;
-		else
-			memory = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return memory;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return DESCRIPTION[memory];
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsMessage.createOID(new int[] {
+			8, 1, 1, memory, number});
 	}
 }

@@ -25,8 +25,10 @@ public class DmsCommunicationsLossMessage extends MessageIDCode {
 	 * @param m memory type
 	 * @param n message number
 	 * @param c message CRC */
-	public DmsCommunicationsLossMessage(int m, int n, int c) {
-		memory = m;
+	public DmsCommunicationsLossMessage(DmsMessageMemoryType.Enum m, int n,
+		int c)
+	{
+		memory = m.ordinal();
 		number = n;
 		crc = c;
 	}

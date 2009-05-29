@@ -32,10 +32,12 @@ public class DmsActivateMessage extends MessageActivationCode {
 	 * @param n message number
 	 * @param c CRC (dmsMsgMessageCRC)
 	 * @param a source address */
-	public DmsActivateMessage(int d, int p, int m, int n, int c, int a) {
+	public DmsActivateMessage(int d, int p, DmsMessageMemoryType.Enum m,
+		 int n, int c, int a)
+	{
 		duration = d;
 		priority = p;
-		memory = m;
+		memory = m.ordinal();
 		number = n;
 		crc = c;
 		address = a;

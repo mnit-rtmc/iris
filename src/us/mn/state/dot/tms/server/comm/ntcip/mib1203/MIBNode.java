@@ -74,6 +74,7 @@ class MIBNode {
 	static public final MIBNode vmsCfg = new MIBNode(dms, 2);
 	static public final MIBNode fontDefinition = new MIBNode(dms, 3);
 	static public final MIBNode multiCfg = new MIBNode(dms, 4);
+	static public final MIBNode dmsMessage = new MIBNode(dms, 5);
 	static public final MIBNode signControl = new MIBNode(dms, 6);
 	static public final MIBNode illum = new MIBNode(dms, 7);
 	static public final MIBNode dmsStatus = new MIBNode(dms, 9);

@@ -25,8 +25,10 @@ public class DmsLongPowerRecoveryMessage extends MessageIDCode {
 	 * @param m memory type
 	 * @param n message number
 	 * @param c message CRC */
-	public DmsLongPowerRecoveryMessage(int m, int n, int c) {
-		memory = m;
+	public DmsLongPowerRecoveryMessage(DmsMessageMemoryType.Enum m, int n,
+		int c)
+	{
+		memory = m.ordinal();
 		number = n;
 		crc = c;
 	}

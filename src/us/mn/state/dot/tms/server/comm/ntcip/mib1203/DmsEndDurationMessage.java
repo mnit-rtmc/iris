@@ -25,8 +25,8 @@ public class DmsEndDurationMessage extends MessageIDCode {
 	 * @param m memory type
 	 * @param n message number
 	 * @param c message CRC */
-	public DmsEndDurationMessage(int m, int n, int c) {
-		memory = m;
+	public DmsEndDurationMessage(DmsMessageMemoryType.Enum m, int n,int c) {
+		memory = m.ordinal();
 		number = n;
 		crc = c;
 	}

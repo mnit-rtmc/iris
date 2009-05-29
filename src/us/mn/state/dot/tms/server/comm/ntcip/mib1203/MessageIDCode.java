@@ -85,7 +85,7 @@ abstract public class MessageIDCode extends ASN1OctetStr {
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		b.append(DmsMessageMemoryType.getDescription(memory));
+		b.append(DmsMessageMemoryType.Enum.fromOrdinal(memory));
 		b.append(",");
 		b.append(number);
 		b.append(",");

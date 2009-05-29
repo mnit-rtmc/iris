@@ -14,45 +14,30 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * Ntcip DmsMessageCRC object
  *
  * @author Douglas Lau
  */
-public class DmsMessageCRC extends DmsMessageTable implements ASN1Integer {
+public class DmsMessageCRC extends ASN1Int {
+
+	/** Memory type */
+	protected final int memory;
+
+	/** Message number */
+	protected final int number;
 
 	/** Create a new DmsMessageCRC object */
-	public DmsMessageCRC(int m, int n) {
-		super(m, n);
+	public DmsMessageCRC(DmsMessageMemoryType.Enum m, int n) {
+		memory = m.ordinal();
+		number = n;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "dmsMessageCRC";
-	}
-
-	/** Get the message table item (for dmsMessageCRC objects) */
-	protected int getTableItem() {
-		return 5;
-	}
-
-	/** Actual message CRC */
-	protected int crc;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		crc = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return crc;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(crc);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.dmsMessage.createOID(new int[] {
+			8, 1, 5, memory, number});
 	}
 }

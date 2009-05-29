@@ -47,6 +47,12 @@ public class FontStatus extends ASN1Int {
 		font = f;
 	}
 
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.fontDefinition.createOID(new int[] {
+			2, 1, 8, font});
+	}
+
 	/** Set the integer value */
 	public void setInteger(int v) {
 		value = Enum.fromOrdinal(v).ordinal();
@@ -60,11 +66,5 @@ public class FontStatus extends ASN1Int {
 	/** Get the enum value */
 	public Enum getEnum() {
 		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIBNode.fontDefinition.createOID(new int[] {
-			2, 1, 8, font});
 	}
 }
