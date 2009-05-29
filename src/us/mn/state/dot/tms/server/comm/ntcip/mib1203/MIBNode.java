@@ -64,6 +64,7 @@ class MIBNode {
 
 	static public final MIBNode nema = new MIBNode(null,
 		new int[] { 1, 3, 6, 1, 4, 1, 1206 } );
+	static public final MIBNode _private = new MIBNode(nema, 3);
 	static public final MIBNode transportation = new MIBNode(nema, 4);
 	static public final MIBNode devices = new MIBNode(transportation, 2);
 	static public final MIBNode dms = new MIBNode(devices, 3);
@@ -72,7 +73,13 @@ class MIBNode {
 	static public final MIBNode dmsStatus = new MIBNode(dms, 9);
 	static public final MIBNode statTemp = new MIBNode(dmsStatus, 9);
 
-	static public final MIBNode _private = new MIBNode(nema, 3);
+	static public final MIBNode ledstar = new MIBNode(_private, 16);
+	static public final MIBNode ledstarDMS = new MIBNode(ledstar, 1);
+	static public final MIBNode ledstarSignControl =
+		new MIBNode(ledstarDMS, 1);
+	static public final MIBNode ledstarDiagnostics =
+		new MIBNode(ledstarDMS, 2);
+
 	static public final MIBNode skyline = new MIBNode(_private, 18);
 	static public final MIBNode skylineDevices = new MIBNode(skyline, 2);
 	static public final MIBNode skylineDms = new MIBNode(skylineDevices, 3);

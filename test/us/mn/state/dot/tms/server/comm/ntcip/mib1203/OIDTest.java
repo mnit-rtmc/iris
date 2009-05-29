@@ -164,6 +164,37 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 17, 0
 		}));
 
+		oid = new LedHighTempCutoff().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 1, 0
+		}));
+		oid = new LedSignErrorOverride().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 2, 0
+		}));
+		oid = new LedBadPixelLimit().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 3, 0
+		}));
+		oid = new LedLdcPotBase().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 6, 0
+		}));
+		oid = new LedPixelLow().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 7, 0
+		}));
+		oid = new LedPixelHigh().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 8, 0
+		}));
+		oid = new LedActivateMsgError().getOID();
+for(int i: oid) System.err.print(" " + i);
+System.err.println();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 2, 12, 0
+		}));
+
 		oid = new DynBrightDayNight().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 1, 0
@@ -177,8 +208,6 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 3, 0
 		}));
 		oid = new DynBrightMaxNightManLvl().getOID();
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 8, 0
 		}));

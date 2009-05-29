@@ -14,53 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * LedSignErrorOverride object
  *
  * @author Douglas Lau
  */
-public class LedSignErrorOverride extends LedstarSignControl
-	implements ASN1Integer
-{
-	/** Override off state */
-	static public final int OFF = 0;
-
-	/** Override on state */
-	static public final int ON = 1;
+public class LedSignErrorOverride extends ASN1Int {
 
 	/** Create a new LedSignErrorOverride object */
 	public LedSignErrorOverride() {
-		this(OFF);
 	}
 
 	/** Create a new LedSignErrorOverride object */
 	public LedSignErrorOverride(int o) {
-		super(2);
-		override = o;
+		value = o;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "LedSignErrorOverride";
-	}
-
-	/** Sign error override */
-	protected int override;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		override = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return override;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(override);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.ledstarSignControl.createOID(new int[] {2, 0});
 	}
 }

@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * LedBadPixelLimit object is the number of failed pixels needed before the
@@ -23,9 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  *
  * @author Douglas Lau
  */
-public class LedBadPixelLimit extends LedstarSignControl
-	implements ASN1Integer
-{
+public class LedBadPixelLimit extends ASN1Int {
+
 	/** Create a new LedBadPixelLimit object */
 	public LedBadPixelLimit() {
 		this(500);
@@ -33,30 +32,11 @@ public class LedBadPixelLimit extends LedstarSignControl
 
 	/** Create a new LedBadPixelLimit object */
 	public LedBadPixelLimit(int l) {
-		super(3);
-		limit = l;
+		value = l;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "LedBadPixelLimit";
-	}
-
-	/** Bad pixel limit */
-	protected int limit;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		limit = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return limit;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(limit);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.ledstarSignControl.createOID(new int[] {3, 0});
 	}
 }

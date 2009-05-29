@@ -14,16 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * LedHighTempCutoff object
  *
  * @author Douglas Lau
  */
-public class LedHighTempCutoff extends LedstarSignControl
-	implements ASN1Integer
-{
+public class LedHighTempCutoff extends ASN1Int {
+
 	/** Create a new LedHighTempCutoff object */
 	public LedHighTempCutoff() {
 		this(0);
@@ -31,30 +30,11 @@ public class LedHighTempCutoff extends LedstarSignControl
 
 	/** Create a new LedHighTempCutoff object */
 	public LedHighTempCutoff(int t) {
-		super(1);
-		temp = t;
+		value = t;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "LedHighTempCutoff";
-	}
-
-	/** High temperature cutoff */
-	protected int temp;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		temp = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return temp;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(temp);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.ledstarSignControl.createOID(new int[] {1, 0});
 	}
 }

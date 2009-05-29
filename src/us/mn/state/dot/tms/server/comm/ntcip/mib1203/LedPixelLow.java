@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1Int;
 
 /**
  * LedPixelLow object
  *
  * @author Douglas Lau
  */
-public class LedPixelLow extends LedstarSignControl implements ASN1Integer {
+public class LedPixelLow extends ASN1Int {
 
 	/** Create a new LedPixelLow object */
 	public LedPixelLow() {
@@ -30,30 +30,11 @@ public class LedPixelLow extends LedstarSignControl implements ASN1Integer {
 
 	/** Create a new LedPixelLow object */
 	public LedPixelLow(int l) {
-		super(7);
-		limit = l;
+		value = l;
 	}
 
-	/** Get the object name */
-	protected String getName() {
-		return "LedPixelLow";
-	}
-
-	/** Pixel low current limit (milliamperes) */
-	protected int limit;
-
-	/** Set the integer value */
-	public void setInteger(int value) {
-		limit = value;
-	}
-
-	/** Get the integer value */
-	public int getInteger() {
-		return limit;
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return String.valueOf(limit);
+	/** Get the object identifier */
+	public int[] getOID() {
+		return MIBNode.ledstarSignControl.createOID(new int[] {7, 0});
 	}
 }
