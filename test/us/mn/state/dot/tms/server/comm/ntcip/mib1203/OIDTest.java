@@ -32,26 +32,6 @@ public class OIDTest extends TestCase {
 	/** test cases */
 	public void test() {
 		int[] oid;
-		oid = new GlobalMaxModules().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 2, 0
-		}));
-		oid = new ModuleMake(7).getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 3, 7
-		}));
-		oid = new ModuleModel(7).getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 4, 7
-		}));
-		oid = new ModuleVersion(7).getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 5, 7
-		}));
-		oid = new ModuleType(7).getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 6, 7
-		}));
 		oid = new DmsSignAccess().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 1, 0

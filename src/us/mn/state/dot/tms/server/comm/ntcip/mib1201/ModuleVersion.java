@@ -12,19 +12,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
- * Ntcip GlobalMaxModules object
+ * Ntcip ModuleVersion object
  *
  * @author Douglas Lau
  */
-public class GlobalMaxModules extends ASN1Integer {
+public class ModuleVersion extends ASN1OctetString {
 
-	/** Create a new GlobalMaxModules object */
-	public GlobalMaxModules() {
-		super(MIB1203.globalConfiguration.create(new int[] {2, 0}));
+	/** Create a new module version object */
+	public ModuleVersion(int row) {
+		super(MIB1201.moduleTableEntry.create(new int[] { 5, row }));
 	}
 }

@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
@@ -39,7 +39,7 @@ public class ModuleType extends ASN1Integer {
 
 	/** Create a new module type object */
 	public ModuleType(int row) {
-		super(MIB1203.moduleTableEntry.create(new int[] { 6, row }));
+		super(MIB1201.moduleTableEntry.create(new int[] { 6, row }));
 	}
 
 	/** Set the integer value */
