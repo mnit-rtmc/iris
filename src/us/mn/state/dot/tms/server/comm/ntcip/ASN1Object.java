@@ -50,11 +50,16 @@ abstract public class ASN1Object {
 			return name;
 	}
 
+	/** Get the index of the MIB node */
+	protected String getIndex() {
+		return node.getIndex();
+	}
+
 	/** Get the object value */
 	abstract protected String getValue();
 
 	/** Create an object description */
 	public String toString() {
-		return getName() + ": " + getValue();
+		return getName() + getIndex() + ": " + getValue();
 	}
 }

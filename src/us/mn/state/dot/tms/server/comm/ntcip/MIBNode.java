@@ -33,11 +33,6 @@ public class MIBNode {
 		nid = n;
 	}
 
-	/** Create a node in a MIB */
-	protected MIBNode(MIBNode p, int n) {
-		this(p, new int[] { n });
-	}
-
 	/** Create a new child node */
 	public MIBNode create(int[] n) {
 		return new MIBNode(this, n);
@@ -67,5 +62,15 @@ public class MIBNode {
 			return new int[length + nid.length];
 		else
 			return parent.fillOID(length + nid.length);
+	}
+
+	/** Get the MIB index */
+	public String getIndex() {
+		StringBuilder b = new StringBuilder();
+		for(int i = 1; i < nid.length; i++) {
+			b.append('.');
+			b.append(nid[i]);
+		}
+		return b.toString();
 	}
 }
