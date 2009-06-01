@@ -49,4 +49,12 @@ class MIB1203 extends MIBNode {
 	static public final MIBNode pixelFailureEntry =
 		pixelFailureTable.create(1);
 	static public final MIBNode statTemp = dmsStatus.create(9);
+	static public final MIBNode graphicDefinition = dms.create(10);
+	static public final MIBNode dmsGraphicTable =
+		graphicDefinition.create(6);
+	static public final MIBNode dmsGraphicEntry = dmsGraphicTable.create(1);
+	static public final MIBNode dmsGraphicBitmapTable =
+		graphicDefinition.create(7);
+	static public final MIBNode dmsGraphicBitmapEntry =
+		dmsGraphicBitmapTable.create(1);
 }
