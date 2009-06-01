@@ -134,8 +134,8 @@ public class SNMP extends BER {
 		public final int request_id;
 
 		/** List of objects set or get with this message */
-		protected final LinkedList<MIBObject> mos =
-			new LinkedList<MIBObject>();
+		protected final LinkedList<ASN1Object> mos =
+			new LinkedList<ASN1Object>();
 
 		/** Create a new SNMP message */
 		public Message(OutputStream o, InputStream i) {
@@ -148,8 +148,8 @@ public class SNMP extends BER {
 
 		/** Add an object to this message */
 		public void add(Object mo) {
-			if(mo instanceof MIBObject)
-				mos.add((MIBObject)mo);
+			if(mo instanceof ASN1Object)
+				mos.add((ASN1Object)mo);
 		}
 
 		/** Send an SNMP get request message */
@@ -205,7 +205,7 @@ public class SNMP extends BER {
 		}
 
 		/** Encode the value of an MIB object */
-		protected void encodeValue(MIBObject mo) throws IOException {
+		protected void encodeValue(ASN1Object mo) throws IOException {
 			if(mo instanceof ASN1Integer) {
 				ASN1Integer value = (ASN1Integer)mo;
 				encodeInteger(value.getInteger());
@@ -217,7 +217,7 @@ public class SNMP extends BER {
 		}
 
 		/** Encode a null variable binding */
-		protected void encodeVarBind(MIBObject mo, boolean set)
+		protected void encodeVarBind(ASN1Object mo, boolean set)
 			throws IOException
 		{
 			encodeObjectIdentifier(mo.getOID());
@@ -233,7 +233,7 @@ public class SNMP extends BER {
 			throws IOException
 		{
 			ByteArrayOutputStream vb = new ByteArrayOutputStream();
-			for(MIBObject mo: mos) {
+			for(ASN1Object mo: mos) {
 				encodeVarBind(mo, set);
 				vb.write(getEncodedData());
 			}
@@ -255,7 +255,7 @@ public class SNMP extends BER {
 		}
 
 		/** Decode the value of an MIB object */
-		protected void decodeValue(InputStream is, MIBObject mo)
+		protected void decodeValue(InputStream is, ASN1Object mo)
 			throws IOException
 		{
 			if(mo instanceof ASN1Integer) {
@@ -269,7 +269,7 @@ public class SNMP extends BER {
 		}
 
 		/** Decode a variable binding */
-		protected void decodeVarBind(InputStream is, MIBObject mo)
+		protected void decodeVarBind(InputStream is, ASN1Object mo)
 			throws IOException
 		{
 			decodeSequence(is);
@@ -282,7 +282,7 @@ public class SNMP extends BER {
 			throws IOException
 		{
 			decodeSequence(is);
-			for(MIBObject mo: mos)
+			for(ASN1Object mo: mos)
 				decodeVarBind(is, mo);
 		}
 
@@ -356,7 +356,7 @@ public class SNMP extends BER {
 		public class BadValue extends IOException {
 
 			/** MIB Object */
-			protected final MIBObject obj;
+			protected final ASN1Object obj;
 
 			/** Create a new BadValue exception */
 			protected BadValue(int i) {
@@ -390,7 +390,7 @@ public class SNMP extends BER {
 		public class GenError extends IOException {
 
 			/** MIB Object */
-			protected final MIBObject obj;
+			protected final ASN1Object obj;
 
 			/** Create a new GenError exception */
 			protected GenError(int i) {

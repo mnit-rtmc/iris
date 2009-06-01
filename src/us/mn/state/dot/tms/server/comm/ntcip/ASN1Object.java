@@ -19,7 +19,10 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Object extends MIBObject {
+abstract public class ASN1Object {
+
+	/** Get the object identifier */
+	abstract public int[] getOID();
 
 	/** Get the object name */
 	public final String getName() {
@@ -35,5 +38,13 @@ abstract public class ASN1Object extends MIBObject {
 			return name.substring(i + 1);
 		else
 			return name;
+	}
+
+	/** Get the object value */
+	abstract protected String getValue();
+
+	/** Create an object description */
+	public String toString() {
+		return getName() + ": " + getValue();
 	}
 }
