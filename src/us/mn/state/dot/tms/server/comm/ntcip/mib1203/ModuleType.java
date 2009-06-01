@@ -47,8 +47,7 @@ public class ModuleType extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.globalConfiguration.createOID(new int[] {
-			3, 1, 6, row});
+		return MIBNode.moduleTableEntry.createOID(new int[] { 6, row });
 	}
 
 	/** Set the integer value */
