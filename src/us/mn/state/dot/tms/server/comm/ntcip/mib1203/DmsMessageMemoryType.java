@@ -59,7 +59,7 @@ public class DmsMessageMemoryType extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsMessage.createOID(new int[] {
-			8, 1, 1, memory, number});
+		return MIBNode.dmsMessageEntry.createOID(new int[] {
+			1, memory, number});
 	}
 }

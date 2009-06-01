@@ -37,7 +37,7 @@ public class DmsMessageCRC extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsMessage.createOID(new int[] {
-			8, 1, 5, memory, number});
+		return MIBNode.dmsMessageEntry.createOID(new int[] {
+			5, memory, number});
 	}
 }

@@ -37,7 +37,7 @@ public class DmsMessageRunTimePriority extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsMessage.createOID(new int[] {
-			8, 1, 8, memory, number});
+		return MIBNode.dmsMessageEntry.createOID(new int[] {
+			8, memory, number});
 	}
 }

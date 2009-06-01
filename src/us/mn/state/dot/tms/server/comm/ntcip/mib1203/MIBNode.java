@@ -81,6 +81,9 @@ class MIBNode {
 		new MIBNode(characterTable, 1);
 	static public final MIBNode multiCfg = new MIBNode(dms, 4);
 	static public final MIBNode dmsMessage = new MIBNode(dms, 5);
+	static public final MIBNode dmsMessageTable = new MIBNode(dmsMessage,8);
+	static public final MIBNode dmsMessageEntry =
+		new MIBNode(dmsMessageTable, 1);
 	static public final MIBNode signControl = new MIBNode(dms, 6);
 	static public final MIBNode illum = new MIBNode(dms, 7);
 	static public final MIBNode dmsStatus = new MIBNode(dms, 9);
