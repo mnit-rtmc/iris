@@ -222,7 +222,7 @@ public class SignMessageComposer extends JPanel {
 	protected void initializeFonts(int np, PixelMapBuilder builder) {
 		disposeFonts();
 		fontCmb = new JComboBox[np];
-		if(builder != null && builder != null)
+		if(builder != null)
 			fontModel = new FontComboBoxModel[np];
 		String tip = I18N.get("DMSDispatcher.FontComboBox.ToolTip");
 		for(int i = 0; i < np; i++) {
