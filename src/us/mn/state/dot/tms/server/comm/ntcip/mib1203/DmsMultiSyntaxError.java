@@ -43,7 +43,7 @@ public class DmsMultiSyntaxError extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.signControl.createOID(new int[] {18, 0});
+		return MIB1203.signControl.createOID(new int[] {18, 0});
 	}
 
 	/** Set the integer value */

@@ -45,7 +45,7 @@ public class ControllerErrorStatus extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {10, 0});
+		return MIB1203.statError.createOID(new int[] {10, 0});
 	}
 
 	/** Get the object value */

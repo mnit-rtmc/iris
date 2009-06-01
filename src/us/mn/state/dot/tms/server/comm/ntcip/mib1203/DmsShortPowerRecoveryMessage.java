@@ -33,6 +33,6 @@ public class DmsShortPowerRecoveryMessage extends MessageIDCode {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.signControl.createOID(new int[] {8, 0});
+		return MIB1203.signControl.createOID(new int[] {8, 0});
 	}
 }

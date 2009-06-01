@@ -44,7 +44,7 @@ public class LampTestActivation extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {7, 0});
+		return MIB1203.statError.createOID(new int[] {7, 0});
 	}
 
 	/** Set the integer value */

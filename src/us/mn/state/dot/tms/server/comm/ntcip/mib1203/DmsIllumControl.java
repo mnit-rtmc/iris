@@ -50,7 +50,7 @@ public class DmsIllumControl extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.illum.createOID(new int[] {1, 0});
+		return MIB1203.illum.createOID(new int[] {1, 0});
 	}
 
 	/** Test if the brightness level control is "manual" */

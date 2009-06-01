@@ -37,7 +37,7 @@ public class DmsMessagePixelService extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsMessageEntry.createOID(new int[] {
+		return MIB1203.dmsMessageEntry.createOID(new int[] {
 			7, memory, number});
 	}
 }

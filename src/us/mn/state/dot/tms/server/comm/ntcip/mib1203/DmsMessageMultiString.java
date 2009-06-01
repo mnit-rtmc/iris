@@ -46,7 +46,7 @@ public class DmsMessageMultiString extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsMessageEntry.createOID(new int[] {
+		return MIB1203.dmsMessageEntry.createOID(new int[] {
 			3, memory, number});
 	}
 }

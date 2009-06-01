@@ -35,7 +35,7 @@ public class DefaultJustificationPage extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.multiCfg.createOID(new int[] {7, 0});
+		return MIB1203.multiCfg.createOID(new int[] {7, 0});
 	}
 
 	/** Get the object value */

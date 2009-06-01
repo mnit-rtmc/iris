@@ -26,7 +26,7 @@ public class DmsSignType extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsSignCfg.createOID(new int[] {2, 0});
+		return MIB1203.dmsSignCfg.createOID(new int[] {2, 0});
 	}
 
 	/** Get the object value as a String */

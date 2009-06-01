@@ -25,7 +25,7 @@ public class LampFailureStuckOn extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {5, 0});
+		return MIB1203.statError.createOID(new int[] {5, 0});
 	}
 
 	/** Get the object value */

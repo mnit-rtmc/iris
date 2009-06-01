@@ -26,7 +26,7 @@ public class FanFailures extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {8, 0});
+		return MIB1203.statError.createOID(new int[] {8, 0});
 	}
 
 	/** Set the octet string value */

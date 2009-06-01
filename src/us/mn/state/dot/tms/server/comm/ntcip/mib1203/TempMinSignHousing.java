@@ -25,6 +25,6 @@ public class TempMinSignHousing extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statTemp.createOID(new int[] {5, 0});
+		return MIB1203.statTemp.createOID(new int[] {5, 0});
 	}
 }

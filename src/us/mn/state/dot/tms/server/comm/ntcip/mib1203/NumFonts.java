@@ -25,6 +25,6 @@ public class NumFonts extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.fontDefinition.createOID(new int[] {1, 0});
+		return MIB1203.fontDefinition.createOID(new int[] {1, 0});
 	}
 }

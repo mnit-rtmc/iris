@@ -25,6 +25,6 @@ public class PixelFailureTableNumRows extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {2, 0});
+		return MIB1203.statError.createOID(new int[] {2, 0});
 	}
 }

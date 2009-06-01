@@ -30,7 +30,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.illum.createOID(new int[] {7, 0});
+		return MIB1203.illum.createOID(new int[] {7, 0});
 	}
 
 	/** Set the brightness table */

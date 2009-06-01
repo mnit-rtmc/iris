@@ -37,6 +37,6 @@ public class LedBadPixelLimit extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.ledstarSignControl.createOID(new int[] {3, 0});
+		return MIB1203.ledstarSignControl.createOID(new int[] {3, 0});
 	}
 }

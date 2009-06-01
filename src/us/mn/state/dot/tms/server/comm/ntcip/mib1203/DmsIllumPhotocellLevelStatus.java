@@ -25,6 +25,6 @@ public class DmsIllumPhotocellLevelStatus extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.illum.createOID(new int[] {3, 0});
+		return MIB1203.illum.createOID(new int[] {3, 0});
 	}
 }

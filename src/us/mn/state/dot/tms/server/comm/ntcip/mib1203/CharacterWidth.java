@@ -38,7 +38,7 @@ public class CharacterWidth extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.characterEntry.createOID(new int[] {
+		return MIB1203.characterEntry.createOID(new int[] {
 			2, font, index});
 	}
 }

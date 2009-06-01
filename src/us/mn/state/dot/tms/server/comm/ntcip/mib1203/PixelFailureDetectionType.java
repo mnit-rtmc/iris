@@ -47,7 +47,7 @@ public class PixelFailureDetectionType extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.pixelFailureEntry.createOID(new int[] {1,2,row});
+		return MIB1203.pixelFailureEntry.createOID(new int[] {1,2,row});
 	}
 
 	/** Set the integer value */

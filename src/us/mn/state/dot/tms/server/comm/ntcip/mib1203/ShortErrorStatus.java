@@ -84,7 +84,7 @@ public class ShortErrorStatus extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {1, 0});
+		return MIB1203.statError.createOID(new int[] {1, 0});
 	}
 
 	/** Get the object value */

@@ -35,6 +35,6 @@ public class VmsHorizontalPitch extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.vmsCfg.createOID(new int[] {5, 0});
+		return MIB1203.vmsCfg.createOID(new int[] {5, 0});
 	}
 }

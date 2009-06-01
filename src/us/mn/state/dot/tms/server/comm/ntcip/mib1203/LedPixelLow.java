@@ -35,6 +35,6 @@ public class LedPixelLow extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.ledstarSignControl.createOID(new int[] {7, 0});
+		return MIB1203.ledstarSignControl.createOID(new int[] {7, 0});
 	}
 }

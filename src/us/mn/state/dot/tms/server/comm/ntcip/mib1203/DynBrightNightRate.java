@@ -34,6 +34,6 @@ public class DynBrightNightRate extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.skylineDmsSignCfg.createOID(new int[] {3, 0});
+		return MIB1203.skylineDmsSignCfg.createOID(new int[] {3, 0});
 	}
 }

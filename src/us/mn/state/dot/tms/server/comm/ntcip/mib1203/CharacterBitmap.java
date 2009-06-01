@@ -44,7 +44,7 @@ public class CharacterBitmap extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.characterEntry.createOID(new int[] {
+		return MIB1203.characterEntry.createOID(new int[] {
 			3, font, index});
 	}
 

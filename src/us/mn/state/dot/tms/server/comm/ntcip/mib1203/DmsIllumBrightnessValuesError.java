@@ -25,6 +25,6 @@ public class DmsIllumBrightnessValuesError extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.illum.createOID(new int[] {8, 0});
+		return MIB1203.illum.createOID(new int[] {8, 0});
 	}
 }

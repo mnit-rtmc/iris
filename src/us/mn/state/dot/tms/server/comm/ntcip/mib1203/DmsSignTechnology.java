@@ -53,7 +53,7 @@ public class DmsSignTechnology extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsSignCfg.createOID(new int[] {9, 0});
+		return MIB1203.dmsSignCfg.createOID(new int[] {9, 0});
 	}
 
 	/** Get the object value */

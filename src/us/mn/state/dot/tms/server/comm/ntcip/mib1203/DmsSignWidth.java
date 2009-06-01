@@ -25,6 +25,6 @@ public class DmsSignWidth extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.dmsSignCfg.createOID(new int[] {4, 0});
+		return MIB1203.dmsSignCfg.createOID(new int[] {4, 0});
 	}
 }

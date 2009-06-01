@@ -25,7 +25,7 @@ public class SensorFailures extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.skylineDmsStatus.createOID(new int[] {17, 0});
+		return MIB1203.skylineDmsStatus.createOID(new int[] {17, 0});
 	}
 
 	/** Get the object value */

@@ -39,6 +39,6 @@ public class FontCharSpacing extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.fontEntry.createOID(new int[] { 5, font });
+		return MIB1203.fontEntry.createOID(new int[] { 5, font });
 	}
 }

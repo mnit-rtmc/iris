@@ -33,6 +33,6 @@ public class ModuleVersion extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.moduleTableEntry.createOID(new int[] { 5, row });
+		return MIB1203.moduleTableEntry.createOID(new int[] { 5, row });
 	}
 }

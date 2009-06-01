@@ -25,6 +25,6 @@ public class GlobalMaxModules extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.globalConfiguration.createOID(new int[] {2, 0});
+		return MIB1203.globalConfiguration.createOID(new int[] {2, 0});
 	}
 }
