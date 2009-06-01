@@ -39,6 +39,6 @@ public class FontHeight extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.fontTable.createOID(new int[] { 4, font });
+		return MIBNode.fontEntry.createOID(new int[] { 4, font });
 	}
 }

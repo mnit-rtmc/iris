@@ -73,8 +73,12 @@ class MIBNode {
 	static public final MIBNode dmsSignCfg = new MIBNode(dms, 1);
 	static public final MIBNode vmsCfg = new MIBNode(dms, 2);
 	static public final MIBNode fontDefinition = new MIBNode(dms, 3);
-	static public final MIBNode fontTable =
-		new MIBNode(fontDefinition, new int[] { 2, 1 } );
+	static public final MIBNode fontTable = new MIBNode(fontDefinition, 2);
+	static public final MIBNode fontEntry = new MIBNode(fontTable, 1);
+	static public final MIBNode characterTable =
+		new MIBNode(fontDefinition, 4);
+	static public final MIBNode characterEntry =
+		new MIBNode(characterTable, 1);
 	static public final MIBNode multiCfg = new MIBNode(dms, 4);
 	static public final MIBNode dmsMessage = new MIBNode(dms, 5);
 	static public final MIBNode signControl = new MIBNode(dms, 6);

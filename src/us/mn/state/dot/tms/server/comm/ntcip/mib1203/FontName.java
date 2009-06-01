@@ -39,6 +39,6 @@ public class FontName extends ASN1OctetString {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.fontTable.createOID(new int[] { 3, font });
+		return MIBNode.fontEntry.createOID(new int[] { 3, font });
 	}
 }
