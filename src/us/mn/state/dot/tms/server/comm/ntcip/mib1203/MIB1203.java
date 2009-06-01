@@ -49,9 +49,4 @@ class MIB1203 extends MIBNode {
 	static public final MIBNode pixelFailureEntry =
 		pixelFailureTable.create(1);
 	static public final MIBNode statTemp = dmsStatus.create(9);
-
-	static public final MIBNode ledstar = MIB1201._private.create(16);
-	static public final MIBNode ledstarDMS = ledstar.create(1);
-	static public final MIBNode ledstarSignControl = ledstarDMS.create(1);
-	static public final MIBNode ledstarDiagnostics = ledstarDMS.create(2);
 }
