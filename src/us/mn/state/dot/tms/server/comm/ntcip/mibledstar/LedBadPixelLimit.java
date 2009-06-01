@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2002-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,25 +12,27 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * LedHighTempCutoff object
+ * LedBadPixelLimit object is the number of failed pixels needed before the
+ * sign will refuse to activate a message (with dmsActivateMsgError.OTHER).
+ * Setting this to zero disables the shortErrorStatus.PIXEL error reporting.
  *
  * @author Douglas Lau
  */
-public class LedHighTempCutoff extends ASN1Integer {
+public class LedBadPixelLimit extends ASN1Integer {
 
-	/** Create a new LedHighTempCutoff object */
-	public LedHighTempCutoff() {
-		this(0);
+	/** Create a new LedBadPixelLimit object */
+	public LedBadPixelLimit() {
+		this(500);
 	}
 
-	/** Create a new LedHighTempCutoff object */
-	public LedHighTempCutoff(int t) {
-		super(MIB1203.ledstarSignControl.create(new int[] {1, 0}));
-		value = t;
+	/** Create a new LedBadPixelLimit object */
+	public LedBadPixelLimit(int l) {
+		super(MIB.ledstarSignControl.create(new int[] {3, 0}));
+		value = l;
 	}
 }

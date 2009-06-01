@@ -12,25 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * LedPixelHigh object
+ * LedLdcPotBase object
  *
  * @author Douglas Lau
  */
-public class LedPixelHigh extends ASN1Integer {
+public class LedLdcPotBase extends ASN1Integer {
 
-	/** Create a new LedPixelHigh object */
-	public LedPixelHigh() {
+	/** Create a new LedLdcPotBase object */
+	public LedLdcPotBase() {
 		this(0);
 	}
 
-	/** Create a new LedPixelHigh object */
-	public LedPixelHigh(int l) {
-		super(MIB1203.ledstarSignControl.create(new int[] {8, 0}));
-		value = l;
+	/** Create a new LedLdcPotBase object */
+	public LedLdcPotBase(int b) {
+		super(MIB.ledstarSignControl.create(new int[] {6, 0}));
+		value = b;
 	}
 }

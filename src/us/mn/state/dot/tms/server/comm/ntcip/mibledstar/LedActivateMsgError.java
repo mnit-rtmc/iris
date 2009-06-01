@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
@@ -33,7 +33,7 @@ public class LedActivateMsgError extends ASN1Integer {
 
 	/** Create a new LedActivateMsgError */
 	public LedActivateMsgError() {
-		super(MIB1203.ledstarDiagnostics.create(new int[] {12, 0}));
+		super(MIB.ledstarDiagnostics.create(new int[] {12, 0}));
 	}
 
 	/** Get the object value */

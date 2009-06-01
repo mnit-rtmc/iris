@@ -12,27 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * LedBadPixelLimit object is the number of failed pixels needed before the
- * sign will refuse to activate a message (with dmsActivateMsgError.OTHER).
- * Setting this to zero disables the shortErrorStatus.PIXEL error reporting.
+ * LedPixelLow object
  *
  * @author Douglas Lau
  */
-public class LedBadPixelLimit extends ASN1Integer {
+public class LedPixelLow extends ASN1Integer {
 
-	/** Create a new LedBadPixelLimit object */
-	public LedBadPixelLimit() {
-		this(500);
+	/** Create a new LedPixelLow object */
+	public LedPixelLow() {
+		this(0);
 	}
 
-	/** Create a new LedBadPixelLimit object */
-	public LedBadPixelLimit(int l) {
-		super(MIB1203.ledstarSignControl.create(new int[] {3, 0}));
+	/** Create a new LedPixelLow object */
+	public LedPixelLow(int l) {
+		super(MIB.ledstarSignControl.create(new int[] {7, 0}));
 		value = l;
 	}
 }

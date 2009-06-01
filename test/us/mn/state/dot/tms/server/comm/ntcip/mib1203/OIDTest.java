@@ -390,34 +390,5 @@ System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 6, 0
 		}));
-
-		oid = new LedHighTempCutoff().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 1, 0
-		}));
-		oid = new LedSignErrorOverride().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 2, 0
-		}));
-		oid = new LedBadPixelLimit().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 3, 0
-		}));
-		oid = new LedLdcPotBase().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 6, 0
-		}));
-		oid = new LedPixelLow().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 7, 0
-		}));
-		oid = new LedPixelHigh().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 8, 0
-		}));
-		oid = new LedActivateMsgError().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 2, 12, 0
-		}));
 	}
 }
