@@ -12,29 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * Ntcip SignFaceHeatStatus object
+ * DynBrightMaxNightManLvl object
  *
  * @author Douglas Lau
  */
-public class SignFaceHeatStatus extends ASN1Integer {
+public class DynBrightMaxNightManLvl extends ASN1Integer {
 
-	/** Create a new SignFaceHeatStatus object */
-	public SignFaceHeatStatus() {
-		super(MIB1203.skylineDmsStatus.create(new int[] {4, 0}));
+	/** Create a new DynBrightMaxNightManLvl object */
+	public DynBrightMaxNightManLvl() {
+		super(MIB.skylineDmsSignCfg.create(new int[] {8, 0}));
 	}
 
-	/** Get the object value */
-	public String getValue() {
-		switch(value) {
-		case 1:
-			return "ON";
-		default:
-			return "OFF";
-		}
+	/** Create a new DynBrightMaxNightManLvl object */
+	public DynBrightMaxNightManLvl(int l) {
+		this();
+		value = l;
 	}
 }

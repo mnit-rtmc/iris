@@ -54,10 +54,4 @@ class MIB1203 extends MIBNode {
 	static public final MIBNode ledstarDMS = ledstar.create(1);
 	static public final MIBNode ledstarSignControl = ledstarDMS.create(1);
 	static public final MIBNode ledstarDiagnostics = ledstarDMS.create(2);
-
-	static public final MIBNode skyline = MIB1201._private.create(18);
-	static public final MIBNode skylineDevices = skyline.create(2);
-	static public final MIBNode skylineDms = skylineDevices.create(3);
-	static public final MIBNode skylineDmsSignCfg = skylineDms.create(1);
-	static public final MIBNode skylineDmsStatus = skylineDms.create(9);
 }

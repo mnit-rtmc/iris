@@ -391,19 +391,6 @@ System.err.println();
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 6, 0
 		}));
 
-		oid = new IllumPowerStatus().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 2, 0
-		}));
-		oid = new SignFaceHeatStatus().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 4, 0
-		}));
-		oid = new SensorFailures().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 17, 0
-		}));
-
 		oid = new LedHighTempCutoff().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 1, 1, 0
@@ -431,27 +418,6 @@ System.err.println();
 		oid = new LedActivateMsgError().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 16, 1, 2, 12, 0
-		}));
-
-		oid = new DynBrightDayNight().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 1, 0
-		}));
-		oid = new DynBrightDayRate().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 2, 0
-		}));
-		oid = new DynBrightNightRate().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 3, 0
-		}));
-		oid = new DynBrightMaxNightManLvl().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 8, 0
-		}));
-		oid = new DmsTempCritical().getOID();
-		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 11, 0
 		}));
 	}
 }

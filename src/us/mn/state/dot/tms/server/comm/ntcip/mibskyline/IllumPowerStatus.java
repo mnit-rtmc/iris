@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -44,7 +44,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 
 	/** Create a new IllumPowerStatus object */
 	public IllumPowerStatus() {
-		super(MIB1203.skylineDmsStatus.create(new int[] {2, 0}));
+		super(MIB.skylineDmsStatus.create(new int[] {2, 0}));
 	}
 
 	/** Get the object value */

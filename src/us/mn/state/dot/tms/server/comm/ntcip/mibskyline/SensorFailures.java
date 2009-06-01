@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
@@ -25,7 +25,7 @@ public class SensorFailures extends ASN1OctetString {
 
 	/** Create a new SensorFailures object */
 	public SensorFailures() {
-		super(MIB1203.skylineDmsStatus.create(new int[] {17, 0}));
+		super(MIB.skylineDmsStatus.create(new int[] {17, 0}));
 	}
 
 	/** Get the object value */

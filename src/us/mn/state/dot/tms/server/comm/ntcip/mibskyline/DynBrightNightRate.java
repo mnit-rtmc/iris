@@ -12,24 +12,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
+package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * DynBrightDayRate object
+ * DynBrightNightRate object
  *
  * @author Douglas Lau
  */
-public class DynBrightDayRate extends ASN1Integer {
+public class DynBrightNightRate extends ASN1Integer {
 
-	/** Create a new DynBrightDayRate object */
-	public DynBrightDayRate() {
-		super(MIB1203.skylineDmsSignCfg.create(new int[] {2, 0}));
+	/** Create a new DynBrightNightRate object */
+	public DynBrightNightRate() {
+		super(MIB.skylineDmsSignCfg.create(new int[] {3, 0}));
 	}
 
-	/** Create a new DynBrightDayRate object */
-	public DynBrightDayRate(int r) {
+	/** Create a new DynBrightNightRate object */
+	public DynBrightNightRate(int r) {
 		this();
 		value = r;
 	}
