@@ -33,6 +33,6 @@ public class PixelFailureIndex extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {3, 1, 2, 2, row});
+		return MIBNode.pixelFailureEntry.createOID(new int[] {2,2,row});
 	}
 }

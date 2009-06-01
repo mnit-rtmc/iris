@@ -51,7 +51,7 @@ public class PixelFailureStatus extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.statError.createOID(new int[] {3, 1, 5, 2, row});
+		return MIBNode.pixelFailureEntry.createOID(new int[] {5,2,row});
 	}
 
 	/** Test if the pixel is stuck on */

@@ -86,6 +86,8 @@ class MIBNode {
 	static public final MIBNode dmsStatus = new MIBNode(dms, 9);
 	static public final MIBNode statError = new MIBNode(dmsStatus, 7);
 	static public final MIBNode pixelFailureTable =new MIBNode(statError,3);
+	static public final MIBNode pixelFailureEntry =
+		new MIBNode(pixelFailureTable, 1);
 	static public final MIBNode statTemp = new MIBNode(dmsStatus, 9);
 
 	static public final MIBNode ledstar = new MIBNode(_private, 16);
