@@ -30,11 +30,7 @@ public class LedHighTempCutoff extends ASN1Integer {
 
 	/** Create a new LedHighTempCutoff object */
 	public LedHighTempCutoff(int t) {
+		super(MIB1203.ledstarSignControl.create(new int[] {1, 0}));
 		value = t;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.ledstarSignControl.createOID(new int[] {1, 0});
 	}
 }

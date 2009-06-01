@@ -23,22 +23,14 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class FontNumber extends ASN1Integer {
 
-	/** Font index */
-	protected final int font;
-
 	/** Create a new font number object */
-	public FontNumber(int f) {
-		font = f;
+	public FontNumber(int font) {
+		super(MIB1203.fontEntry.create(new int[] { 2, font }));
 	}
 
 	/** Create a new font number object */
-	public FontNumber(int f, int n) {
-		font = f;
+	public FontNumber(int font, int n) {
+		this(font);
 		value = n;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.fontEntry.createOID(new int[] { 2, font });
 	}
 }

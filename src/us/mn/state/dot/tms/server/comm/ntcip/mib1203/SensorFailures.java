@@ -23,9 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class SensorFailures extends ASN1OctetString {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.skylineDmsStatus.createOID(new int[] {17, 0});
+	/** Create a new SensorFailures object */
+	public SensorFailures() {
+		super(MIB1203.skylineDmsStatus.create(new int[] {17, 0}));
 	}
 
 	/** Get the object value */

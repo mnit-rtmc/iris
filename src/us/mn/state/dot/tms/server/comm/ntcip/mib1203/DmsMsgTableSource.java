@@ -21,8 +21,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  */
 public class DmsMsgTableSource extends MessageIDCode {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {5, 0});
+	/** Create a new DmsMsgTableSource object */
+	public DmsMsgTableSource() {
+		super(MIB1203.signControl.create(new int[] {5, 0}));
 	}
 }

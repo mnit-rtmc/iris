@@ -30,11 +30,7 @@ public class LedLdcPotBase extends ASN1Integer {
 
 	/** Create a new LedLdcPotBase object */
 	public LedLdcPotBase(int b) {
+		super(MIB1203.ledstarSignControl.create(new int[] {6, 0}));
 		value = b;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.ledstarSignControl.createOID(new int[] {6, 0});
 	}
 }

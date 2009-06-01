@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class GlobalMaxModules extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.globalConfiguration.createOID(new int[] {2, 0});
+	/** Create a new GlobalMaxModules object */
+	public GlobalMaxModules() {
+		super(MIB1203.globalConfiguration.create(new int[] {2, 0}));
 	}
 }

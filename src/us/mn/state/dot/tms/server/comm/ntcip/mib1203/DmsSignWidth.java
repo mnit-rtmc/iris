@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsSignWidth extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsSignCfg.createOID(new int[] {4, 0});
+	/** Create a new DmsSignWidth object */
+	public DmsSignWidth() {
+		super(MIB1203.dmsSignCfg.create(new int[] {4, 0}));
 	}
 }

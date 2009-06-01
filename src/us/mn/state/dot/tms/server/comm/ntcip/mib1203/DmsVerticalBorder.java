@@ -25,16 +25,12 @@ public class DmsVerticalBorder extends ASN1Integer {
 
 	/** Create a new DmsVerticalBorder object */
 	public DmsVerticalBorder() {
-		this(0);
+		super(MIB1203.dmsSignCfg.create(new int[] {6, 0}));
 	}
 
 	/** Create a new DmsVerticalBorder object */
 	public DmsVerticalBorder(int b) {
+		this();
 		value = b;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsSignCfg.createOID(new int[] {6, 0});
 	}
 }

@@ -37,9 +37,9 @@ public class DmsValidateMessageError extends ASN1Integer {
 		}
 	}
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsMessage.createOID(new int[] {9, 0});
+	/** Create a new DmsValidateMessageError object */
+	public DmsValidateMessageError() {
+		super(MIB1203.dmsMessage.create(new int[] {9, 0}));
 	}
 
 	/** Set the integer value */

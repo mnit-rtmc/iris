@@ -23,21 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsMessageBeacon extends ASN1Integer {
 
-	/** Memory type */
-	protected final int memory;
-
-	/** Message number */
-	protected final int number;
-
 	/** Create a new DmsMessageBeacon object */
-	public DmsMessageBeacon(DmsMessageMemoryType.Enum m, int n) {
-		memory = m.ordinal();
-		number = n;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsMessageEntry.createOID(new int[] {
-			6, memory, number});
+	public DmsMessageBeacon(DmsMessageMemoryType.Enum m, int number) {
+		super(MIB1203.dmsMessageEntry.create(new int[] {
+			6, m.ordinal(), number}));
 	}
 }

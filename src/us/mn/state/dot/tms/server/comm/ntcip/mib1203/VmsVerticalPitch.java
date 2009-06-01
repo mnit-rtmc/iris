@@ -30,11 +30,7 @@ public class VmsVerticalPitch extends ASN1Integer {
 
 	/** Create a new VmsVerticalPitch object */
 	public VmsVerticalPitch(int p) {
+		super(MIB1203.vmsCfg.create(new int[] {6, 0}));
 		value = p;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.vmsCfg.createOID(new int[] {6, 0});
 	}
 }

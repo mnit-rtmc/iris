@@ -26,13 +26,9 @@ public class DmsEndDurationMessage extends MessageIDCode {
 	 * @param n message number
 	 * @param c message CRC */
 	public DmsEndDurationMessage(DmsMessageMemoryType.Enum m, int n,int c) {
+		super(MIB1203.signControl.create(new int[] {15, 0}));
 		memory = m.ordinal();
 		number = n;
 		crc = c;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {15, 0});
 	}
 }

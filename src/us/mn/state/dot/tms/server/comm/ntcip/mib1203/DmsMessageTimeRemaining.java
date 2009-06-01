@@ -25,16 +25,12 @@ public class DmsMessageTimeRemaining extends ASN1Integer {
 
 	/** Create a new DmsMessageTimeRemaining object */
 	public DmsMessageTimeRemaining() {
-		this(0);
+		super(MIB1203.signControl.create(new int[] {4, 0}));
 	}
 
 	/** Create a new DmsMessageTimeRemaining object */
 	public DmsMessageTimeRemaining(int t) {
+		this();
 		value = t;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {4, 0});
 	}
 }

@@ -42,9 +42,9 @@ public class IllumPowerStatus extends ASN1OctetString {
 		}
 	}
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.skylineDmsStatus.createOID(new int[] {2, 0});
+	/** Create a new IllumPowerStatus object */
+	public IllumPowerStatus() {
+		super(MIB1203.skylineDmsStatus.create(new int[] {2, 0}));
 	}
 
 	/** Get the object value */

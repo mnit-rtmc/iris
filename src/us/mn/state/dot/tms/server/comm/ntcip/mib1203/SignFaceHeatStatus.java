@@ -23,9 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class SignFaceHeatStatus extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.skylineDmsStatus.createOID(new int[] {4, 0});
+	/** Create a new SignFaceHeatStatus object */
+	public SignFaceHeatStatus() {
+		super(MIB1203.skylineDmsStatus.create(new int[] {4, 0}));
 	}
 
 	/** Get the object value */

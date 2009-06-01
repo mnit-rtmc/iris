@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsIllumPhotocellLevelStatus extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.illum.createOID(new int[] {3, 0});
+	/** Create a new DmsIllumPhotocellLevelStatus object */
+	public DmsIllumPhotocellLevelStatus() {
+		super(MIB1203.illum.create(new int[] {3, 0}));
 	}
 }

@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.MIBNode;
 
 /**
  * Ntcip MessageIDCode object
@@ -27,6 +28,11 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  * @author Douglas Lau
  */
 abstract public class MessageIDCode extends ASN1OctetString {
+
+	/** Create a new MessageIDCode */
+	protected MessageIDCode(MIBNode n) {
+		super(n);
+	}
 
 	/** Memory type */
 	protected int memory;

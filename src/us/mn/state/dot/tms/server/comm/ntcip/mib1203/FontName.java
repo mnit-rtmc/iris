@@ -23,22 +23,14 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class FontName extends ASN1OctetString {
 
-	/** Font index */
-	protected final int font;
-
 	/** Create a new font name object */
-	public FontName(int f) {
-		font = f;
+	public FontName(int font) {
+		super(MIB1203.fontEntry.create(new int[] { 3, font }));
 	}
 
 	/** Create a new font name object */
-	public FontName(int f, String n) {
-		font = f;
+	public FontName(int font, String n) {
+		this(font);
 		value = n.getBytes();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.fontEntry.createOID(new int[] { 3, font });
 	}
 }

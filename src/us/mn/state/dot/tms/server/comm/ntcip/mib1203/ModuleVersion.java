@@ -23,16 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class ModuleVersion extends ASN1OctetString {
 
-	/** Row in table */
-	protected final int row;
-
 	/** Create a new module version object */
-	public ModuleVersion(int r) {
-		row = r;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.moduleTableEntry.createOID(new int[] { 5, row });
+	public ModuleVersion(int row) {
+		super(MIB1203.moduleTableEntry.create(new int[] { 5, row }));
 	}
 }

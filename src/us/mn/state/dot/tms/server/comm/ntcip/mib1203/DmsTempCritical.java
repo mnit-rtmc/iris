@@ -25,15 +25,12 @@ public class DmsTempCritical extends ASN1Integer {
 
 	/** Create a new DmsTempCritical object */
 	public DmsTempCritical() {
+		super(MIB1203.skylineDmsSignCfg.create(new int[] {11, 0}));
 	}
 
 	/** Create a new DmsTempCritical object */
 	public DmsTempCritical(int t) {
+		this();
 		value = t;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.skylineDmsSignCfg.createOID(new int[] {11, 0});
 	}
 }

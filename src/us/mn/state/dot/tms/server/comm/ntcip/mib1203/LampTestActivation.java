@@ -39,12 +39,8 @@ public class LampTestActivation extends ASN1Integer {
 
 	/** Create a new LampTestActivation object */
 	public LampTestActivation() {
+		super(MIB1203.statError.create(new int[] {7, 0}));
 		value = Enum.test.ordinal();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {7, 0});
 	}
 
 	/** Set the integer value */

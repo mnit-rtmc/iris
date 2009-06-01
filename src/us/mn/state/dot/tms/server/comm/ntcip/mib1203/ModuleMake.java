@@ -23,16 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class ModuleMake extends ASN1OctetString {
 
-	/** Row in table */
-	protected final int row;
-
 	/** Create a new module make object */
-	public ModuleMake(int r) {
-		row = r;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.moduleTableEntry.createOID(new int[] { 3, row });
+	public ModuleMake(int row) {
+		super(MIB1203.moduleTableEntry.create(new int[] { 3, row }));
 	}
 }

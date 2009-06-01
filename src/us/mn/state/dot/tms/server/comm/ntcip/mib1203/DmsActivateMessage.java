@@ -23,6 +23,7 @@ public class DmsActivateMessage extends MessageActivationCode {
 
 	/** Create a new DmsActivateMessage object */
 	public DmsActivateMessage() {
+		super(MIB1203.signControl.create(new int[] {3, 0}));
 	}
 
 	/** Create a new DmsActivateMessage object
@@ -35,16 +36,12 @@ public class DmsActivateMessage extends MessageActivationCode {
 	public DmsActivateMessage(int d, int p, DmsMessageMemoryType.Enum m,
 		 int n, int c, int a)
 	{
+		this();
 		duration = d;
 		priority = p;
 		memory = m.ordinal();
 		number = n;
 		crc = c;
 		address = a;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {3, 0});
 	}
 }

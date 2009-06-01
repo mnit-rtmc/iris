@@ -25,11 +25,7 @@ public class DefaultPageOnTime extends ASN1Integer {
 
 	/** Create a new DefaultPageOnTime object */
 	public DefaultPageOnTime(int t) {
+		super(MIB1203.multiCfg.create(new int[] {8, 0}));
 		value = t;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.multiCfg.createOID(new int[] {8, 0});
 	}
 }

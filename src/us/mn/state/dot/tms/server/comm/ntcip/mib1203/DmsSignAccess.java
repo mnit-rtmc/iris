@@ -42,9 +42,9 @@ public class DmsSignAccess extends ASN1Integer {
 		b.append(s);
 	}
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsSignCfg.createOID(new int[] {1, 0});
+	/** Create a new DmsSignAccess object */
+	public DmsSignAccess() {
+		super(MIB1203.dmsSignCfg.create(new int[] {1, 0}));
 	}
 
 	/** Get the object value */

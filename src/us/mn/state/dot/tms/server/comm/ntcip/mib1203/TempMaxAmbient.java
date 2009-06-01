@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class TempMaxAmbient extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statTemp.createOID(new int[] {4, 0});
+	/** Create a new TempMaxAmbient object */
+	public TempMaxAmbient() {
+		super(MIB1203.statTemp.create(new int[] {4, 0}));
 	}
 }

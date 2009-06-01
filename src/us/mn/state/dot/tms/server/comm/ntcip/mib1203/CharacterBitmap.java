@@ -23,29 +23,16 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class CharacterBitmap extends ASN1OctetString {
 
-	/** Font index */
-	protected final int font;
-
-	/** Character index */
-	protected final int index;
-
 	/** Create a new CharacterBitmap object */
-	public CharacterBitmap(int f, int i) {
-		font = f;
-		index = i;
+	public CharacterBitmap(int font, int index) {
+		super(MIB1203.characterEntry.create(new int[] {
+			3, font, index}));
 	}
 
 	/** Create a new CharacterBitmap object */
-	public CharacterBitmap(int f, int i, byte[] b) {
-		font = f;
-		index = i;
+	public CharacterBitmap(int font, int index, byte[] b) {
+		this(font, index);
 		value = b;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.characterEntry.createOID(new int[] {
-			3, font, index});
 	}
 
 	/** Get the object value */

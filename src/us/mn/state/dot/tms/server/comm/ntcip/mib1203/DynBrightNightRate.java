@@ -25,15 +25,12 @@ public class DynBrightNightRate extends ASN1Integer {
 
 	/** Create a new DynBrightNightRate object */
 	public DynBrightNightRate() {
+		super(MIB1203.skylineDmsSignCfg.create(new int[] {3, 0}));
 	}
 
 	/** Create a new DynBrightNightRate object */
 	public DynBrightNightRate(int r) {
+		this();
 		value = r;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.skylineDmsSignCfg.createOID(new int[] {3, 0});
 	}
 }

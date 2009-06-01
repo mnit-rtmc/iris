@@ -25,16 +25,12 @@ public class DmsTimeCommLoss extends ASN1Integer {
 
 	/** Create a new DmsTimeCommLoss object */
 	public DmsTimeCommLoss() {
-		this(0);
+		super(MIB1203.signControl.create(new int[] {13, 0}));
 	}
 
 	/** Create a new DmsTimeCommLoss object */
 	public DmsTimeCommLoss(int t) {
+		this();
 		value = t;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {13, 0});
 	}
 }

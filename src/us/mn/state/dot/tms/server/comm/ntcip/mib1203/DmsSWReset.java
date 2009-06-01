@@ -25,11 +25,7 @@ public class DmsSWReset extends ASN1Integer {
 
 	/** Create a new DmsSWReset object */
 	public DmsSWReset() {
+		super(MIB1203.signControl.create(new int[] {2, 0}));
 		value = 1;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {2, 0});
 	}
 }

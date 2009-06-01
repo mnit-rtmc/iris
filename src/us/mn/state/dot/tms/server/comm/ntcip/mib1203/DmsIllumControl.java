@@ -40,17 +40,13 @@ public class DmsIllumControl extends ASN1Integer {
 
 	/** Create a new DmsIllumControl object */
 	public DmsIllumControl() {
-		this(Enum.undefined);
+		super(MIB1203.illum.create(new int[] {1, 0}));
 	}
 
 	/** Create a new DmsIllumControl object */
 	public DmsIllumControl(Enum c) {
+		this();
 		value = c.ordinal();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.illum.createOID(new int[] {1, 0});
 	}
 
 	/** Test if the brightness level control is "manual" */

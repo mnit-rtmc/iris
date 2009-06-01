@@ -41,17 +41,10 @@ public class PixelFailureStatus extends ASN1Integer {
 	/** Partial failure (added in 1203v2) */
 	static public final int PARTIAL_FAILURE = 1 << 5;
 
-	/** Row in table */
-	protected final int row;
-
 	/** Create a new pixel failure status object */
-	public PixelFailureStatus(int r) {
-		row = r;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.pixelFailureEntry.createOID(new int[] {5,2,row});
+	public PixelFailureStatus(int row) {
+		super(MIB1203.pixelFailureEntry.create(new int[] {5,
+		      PixelFailureDetectionType.Enum.pixelTest.ordinal(),row}));
 	}
 
 	/** Test if the pixel is stuck on */

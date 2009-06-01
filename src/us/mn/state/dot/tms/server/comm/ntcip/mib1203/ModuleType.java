@@ -37,17 +37,9 @@ public class ModuleType extends ASN1Integer {
 		}
 	}
 
-	/** Row in table */
-	protected final int row;
-
 	/** Create a new module type object */
-	public ModuleType(int r) {
-		row = r;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.moduleTableEntry.createOID(new int[] { 6, row });
+	public ModuleType(int row) {
+		super(MIB1203.moduleTableEntry.create(new int[] { 6, row }));
 	}
 
 	/** Set the integer value */

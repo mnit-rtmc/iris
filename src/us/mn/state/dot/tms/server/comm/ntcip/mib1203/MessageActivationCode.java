@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.MIBNode;
 
 /**
  * MessageActivationCode type
@@ -27,6 +28,11 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  * @author Douglas Lau
  */
 abstract public class MessageActivationCode extends ASN1OctetString {
+
+	/** Create a new MessageActivationCode */
+	protected MessageActivationCode(MIBNode n) {
+		super(n);
+	}
 
 	/** Message duration */
 	protected int duration;

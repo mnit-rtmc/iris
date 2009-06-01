@@ -23,9 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsStatDoorOpen extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsStatus.createOID(new int[] {6, 0});
+	/** Create a new DmsStatDoorOpen object */
+	public DmsStatDoorOpen() {
+		super(MIB1203.dmsStatus.create(new int[] {6, 0}));
 	}
 
 	/** Get the object value */

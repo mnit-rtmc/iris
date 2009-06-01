@@ -21,6 +21,11 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  */
 abstract public class ASN1Integer extends ASN1Object {
 
+	/** Create a new ASN1 integer */
+	protected ASN1Integer(MIBNode n) {
+		super(n);
+	}
+
 	/** Actual integer value */
 	protected int value;
 

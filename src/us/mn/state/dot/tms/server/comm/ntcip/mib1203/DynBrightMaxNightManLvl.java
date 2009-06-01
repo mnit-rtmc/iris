@@ -25,15 +25,12 @@ public class DynBrightMaxNightManLvl extends ASN1Integer {
 
 	/** Create a new DynBrightMaxNightManLvl object */
 	public DynBrightMaxNightManLvl() {
+		super(MIB1203.skylineDmsSignCfg.create(new int[] {8, 0}));
 	}
 
 	/** Create a new DynBrightMaxNightManLvl object */
 	public DynBrightMaxNightManLvl(int l) {
+		this();
 		value = l;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.skylineDmsSignCfg.createOID(new int[] {8, 0});
 	}
 }

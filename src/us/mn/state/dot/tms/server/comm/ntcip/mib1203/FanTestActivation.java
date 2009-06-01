@@ -40,12 +40,8 @@ public class FanTestActivation extends ASN1Integer {
 
 	/** Create a new FanTestActivation object */
 	public FanTestActivation() {
+		super(MIB1203.statError.create(new int[] {9, 0}));
 		value = Enum.test.ordinal();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {9, 0});
 	}
 
 	/** Set the integer value */

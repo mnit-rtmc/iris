@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class PixelFailureTableNumRows extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {2, 0});
+	/** Create a new PixelFailureTableNumRows object */
+	public PixelFailureTableNumRows() {
+		super(MIB1203.statError.create(new int[] {2, 0}));
 	}
 }

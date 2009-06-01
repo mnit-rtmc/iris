@@ -38,12 +38,19 @@ public class MIBNode {
 		this(p, new int[] { n });
 	}
 
+	/** Create a new child node */
+	public MIBNode create(int[] n) {
+		return new MIBNode(this, n);
+	}
+
+	/** Create a new child node */
+	public MIBNode create(int n) {
+		return create(new int[] { n });
+	}
+
 	/** Create an Object Identifier */
-	public int[] createOID(int[] tail) {
-		int[] oid = fillOID(tail.length);
-		int s = oid.length - tail.length;
-		System.arraycopy(tail, 0, oid, s, tail.length);
-		return oid;
+	public int[] createOID() {
+		return fillOID(0);
 	}
 
 	/** Fill an Object Identifier */

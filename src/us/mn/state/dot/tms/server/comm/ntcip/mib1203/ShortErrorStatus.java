@@ -82,9 +82,9 @@ public class ShortErrorStatus extends ASN1Integer {
 		PHOTOCELL | CONTROLLER | TEMPERATURE | CRITICAL_TEMPERATURE |
 		DOOR_OPEN | HUMIDITY;
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {1, 0});
+	/** Create a new ShortErrorStatus object */
+	public ShortErrorStatus() {
+		super(MIB1203.statError.create(new int[] {1, 0}));
 	}
 
 	/** Get the object value */

@@ -23,22 +23,10 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class CharacterWidth extends ASN1Integer {
 
-	/** Font index */
-	protected final int font;
-
-	/** Character index */
-	protected final int index;
-
 	/** Create a new CharacterWidth object */
-	public CharacterWidth(int f, int i, int w) {
-		font = f;
-		index = i;
+	public CharacterWidth(int font, int index, int w) {
+		super(MIB1203.characterEntry.create(new int[] {
+			2, font, index}));
 		value = w;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.characterEntry.createOID(new int[] {
-			2, font, index});
 	}
 }

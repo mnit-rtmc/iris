@@ -31,9 +31,9 @@ public class LedActivateMsgError extends ASN1Integer {
 	/** Bit masks */
 	static protected final int[] BIT = { 1, 2, 4 };
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.ledstarDiagnostics.createOID(new int[] {12, 0});
+	/** Create a new LedActivateMsgError */
+	public LedActivateMsgError() {
+		super(MIB1203.ledstarDiagnostics.create(new int[] {12, 0}));
 	}
 
 	/** Get the object value */

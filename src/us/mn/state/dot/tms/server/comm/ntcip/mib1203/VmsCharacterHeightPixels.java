@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class VmsCharacterHeightPixels extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.vmsCfg.createOID(new int[] {1, 0});
+	/** Create a new VmsCharacterHeightPixels object */
+	public VmsCharacterHeightPixels() {
+		super(MIB1203.vmsCfg.create(new int[] {1, 0}));
 	}
 }

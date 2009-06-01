@@ -37,9 +37,9 @@ public class DmsLegend extends ASN1Integer {
 		}
 	}
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsSignCfg.createOID(new int[] {7, 0});
+	/** Create a new DmsLegend object */
+	public DmsLegend() {
+		super(MIB1203.dmsSignCfg.create(new int[] {7, 0}));
 	}
 
 	/** Set the integer value */

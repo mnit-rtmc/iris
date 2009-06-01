@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsIllumBrightLevelStatus extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.illum.createOID(new int[] {5, 0});
+	/** Create a new DmsIllumBrightLevelStatus object */
+	public DmsIllumBrightLevelStatus() {
+		super(MIB1203.illum.create(new int[] {5, 0}));
 	}
 }

@@ -39,12 +39,8 @@ public class PixelTestActivation extends ASN1Integer {
 
 	/** Create a new PixelTestActivation object */
 	public PixelTestActivation() {
+		super(MIB1203.statError.create(new int[] {4, 0}));
 		value = Enum.test.ordinal();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {4, 0});
 	}
 
 	/** Set the integer value */

@@ -28,9 +28,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class DmsIllumBrightnessValues extends ASN1OctetString {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.illum.createOID(new int[] {7, 0});
+	/** Create a new DmsIllumBrightnessValues object */
+	public DmsIllumBrightnessValues() {
+		super(MIB1203.illum.create(new int[] {7, 0}));
 	}
 
 	/** Set the brightness table */

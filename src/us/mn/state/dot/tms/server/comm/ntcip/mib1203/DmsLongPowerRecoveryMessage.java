@@ -28,13 +28,9 @@ public class DmsLongPowerRecoveryMessage extends MessageIDCode {
 	public DmsLongPowerRecoveryMessage(DmsMessageMemoryType.Enum m, int n,
 		int c)
 	{
+		super(MIB1203.signControl.create(new int[] {9, 0}));
 		memory = m.ordinal();
 		number = n;
 		crc = c;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {9, 0});
 	}
 }

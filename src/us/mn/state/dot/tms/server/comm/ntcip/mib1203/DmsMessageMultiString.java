@@ -23,30 +23,17 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class DmsMessageMultiString extends ASN1OctetString {
 
-	/** Memory type */
-	protected final int memory;
-
-	/** Message number */
-	protected final int number;
-
 	/** Create a new MULTI string object */
-	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int n) {
-		memory = m.ordinal();
-		number = n;
+	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int number) {
+		super(MIB1203.dmsMessageEntry.create(new int[] {
+			3, m.ordinal(), number}));
 	}
 
 	/** Create a new DmsMessageMultiString object */
-	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int n,
+	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int number,
 		String s)
 	{
-		memory = m.ordinal();
-		number = n;
+		this(m, number);
 		value = s.getBytes();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsMessageEntry.createOID(new int[] {
-			3, memory, number});
 	}
 }

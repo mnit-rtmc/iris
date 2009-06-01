@@ -23,22 +23,14 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class FontLineSpacing extends ASN1Integer {
 
-	/** Font index */
-	protected final int font;
-
 	/** Create a new font line spacing object */
-	public FontLineSpacing(int f) {
-		font = f;
+	public FontLineSpacing(int font) {
+		super(MIB1203.fontEntry.create(new int[] { 6, font }));
 	}
 
 	/** Create a new font line spacing object */
-	public FontLineSpacing(int f, int s) {
-		font = f;
+	public FontLineSpacing(int font, int s) {
+		this(font);
 		value = s;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.fontEntry.createOID(new int[] { 6, font });
 	}
 }

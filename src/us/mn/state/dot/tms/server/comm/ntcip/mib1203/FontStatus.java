@@ -39,17 +39,9 @@ public class FontStatus extends ASN1Integer {
 		}
 	}
 
-	/** Font index */
-	protected final int font;
-
 	/** Create a new FontStatus object */
-	public FontStatus(int f) {
-		font = f;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.fontEntry.createOID(new int[] { 8, font });
+	public FontStatus(int font) {
+		super(MIB1203.fontEntry.create(new int[] { 8, font }));
 	}
 
 	/** Set the integer value */

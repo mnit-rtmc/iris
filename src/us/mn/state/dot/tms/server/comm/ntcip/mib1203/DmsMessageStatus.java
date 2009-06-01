@@ -38,29 +38,18 @@ public class DmsMessageStatus extends ASN1Integer {
 		}
 	}
 
-	/** Memory type */
-	protected final int memory;
-
-	/** Message number */
-	protected final int number;
+	/** Create a new DmsMessageStatus object */
+	public DmsMessageStatus(DmsMessageMemoryType.Enum m, int number) {
+		super(MIB1203.dmsMessageEntry.create(new int[] {
+			9, m.ordinal(), number}));
+	}
 
 	/** Create a new DmsMessageStatus object */
-	public DmsMessageStatus(DmsMessageMemoryType.Enum m, int n, Enum s) {
-		memory = m.ordinal();
-		number = n;
+	public DmsMessageStatus(DmsMessageMemoryType.Enum m, int number,
+		Enum s)
+	{
+		this(m, number);
 		value = s.ordinal();
-	}
-
-	/** Create a new DmsMessageStatus object */
-	public DmsMessageStatus(DmsMessageMemoryType.Enum m, int n) {
-		memory = m.ordinal();
-		number = n;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsMessageEntry.createOID(new int[] {
-			9, memory, number});
 	}
 
 	/** Set the integer value */

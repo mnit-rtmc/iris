@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class TempMinCtrlCabinet extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statTemp.createOID(new int[] {1, 0});
+	/** Create a new TempMinCtrlCabinet object */
+	public TempMinCtrlCabinet() {
+		super(MIB1203.statTemp.create(new int[] {1, 0}));
 	}
 }

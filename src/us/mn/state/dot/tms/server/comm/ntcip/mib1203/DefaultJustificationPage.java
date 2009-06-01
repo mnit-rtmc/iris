@@ -26,16 +26,13 @@ public class DefaultJustificationPage extends ASN1Integer {
 
 	/** Create a new DefaultJustificationPage object */
 	public DefaultJustificationPage() {
+		super(MIB1203.multiCfg.create(new int[] {7, 0}));
 	}
 
 	/** Create a new DefaultJustificationPage object */
 	public DefaultJustificationPage(MultiString.JustificationPage j) {
+		this();
 		value = j.ordinal();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.multiCfg.createOID(new int[] {7, 0});
 	}
 
 	/** Get the object value */

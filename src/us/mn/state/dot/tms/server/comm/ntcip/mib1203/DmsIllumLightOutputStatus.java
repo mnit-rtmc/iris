@@ -23,9 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsIllumLightOutputStatus extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.illum.createOID(new int[] {9, 0});
+	/** Create a new DmsIllumLightOutputStatus object */
+	public DmsIllumLightOutputStatus() {
+		super(MIB1203.illum.create(new int[] {9, 0}));
 	}
 
 	/** Get the light output as percent */

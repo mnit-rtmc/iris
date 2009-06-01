@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class NumFonts extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.fontDefinition.createOID(new int[] {1, 0});
+	/** Create a new NumFonts object */
+	public NumFonts() {
+		super(MIB1203.fontDefinition.create(new int[] {1, 0}));
 	}
 }

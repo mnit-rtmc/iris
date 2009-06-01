@@ -23,21 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsMessageCRC extends ASN1Integer {
 
-	/** Memory type */
-	protected final int memory;
-
-	/** Message number */
-	protected final int number;
-
 	/** Create a new DmsMessageCRC object */
-	public DmsMessageCRC(DmsMessageMemoryType.Enum m, int n) {
-		memory = m.ordinal();
-		number = n;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsMessageEntry.createOID(new int[] {
-			5, memory, number});
+	public DmsMessageCRC(DmsMessageMemoryType.Enum m, int number) {
+		super(MIB1203.dmsMessageEntry.create(new int[] {
+			5, m.ordinal(), number}));
 	}
 }

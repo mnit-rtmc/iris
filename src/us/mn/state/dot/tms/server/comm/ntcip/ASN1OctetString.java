@@ -21,6 +21,11 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  */
 abstract public class ASN1OctetString extends ASN1Object {
 
+	/** Create a new ASN1 octet string */
+	protected ASN1OctetString(MIBNode n) {
+		super(n);
+	}
+
 	/** Actual octet string value */
 	protected byte[] value = new byte[0];
 

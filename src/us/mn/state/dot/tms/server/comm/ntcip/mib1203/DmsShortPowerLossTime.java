@@ -25,16 +25,12 @@ public class DmsShortPowerLossTime extends ASN1Integer {
 
 	/** Create a new DmsShortPowerLossTime object */
 	public DmsShortPowerLossTime() {
-		this(0);
+		super(MIB1203.signControl.create(new int[] {10, 0}));
 	}
 
 	/** Create a new DmsShortPowerLossTime object */
 	public DmsShortPowerLossTime(int t) {
+		this();
 		value = t;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {10, 0});
 	}
 }

@@ -24,9 +24,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class FanFailures extends ASN1OctetString {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {8, 0});
+	/** Create a new FanFailures object */
+	public FanFailures() {
+		super(MIB1203.statError.create(new int[] {8, 0}));
 	}
 
 	/** Set the octet string value */

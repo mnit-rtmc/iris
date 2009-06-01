@@ -45,21 +45,9 @@ public class DmsMessageMemoryType extends ASN1Integer {
 		return mt == Enum.blank || mt == Enum.undefined;
 	}
 
-	/** Memory type */
-	protected final int memory;
-
-	/** Message number */
-	protected final int number;
-
 	/** Create a new memory type object */
-	public DmsMessageMemoryType(Enum m, int n) {
-		memory = m.ordinal();
-		number = n;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsMessageEntry.createOID(new int[] {
-			1, memory, number});
+	public DmsMessageMemoryType(Enum m, int number) {
+		super(MIB1203.dmsMessageEntry.create(new int[] {
+			1, m.ordinal(), number}));
 	}
 }

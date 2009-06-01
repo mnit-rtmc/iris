@@ -24,9 +24,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  */
 public class DmsSignType extends ASN1Integer {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsSignCfg.createOID(new int[] {2, 0});
+	/** Create a new DmsSignType object */
+	public DmsSignType() {
+		super(MIB1203.dmsSignCfg.create(new int[] {2, 0}));
 	}
 
 	/** Get the object value as a String */

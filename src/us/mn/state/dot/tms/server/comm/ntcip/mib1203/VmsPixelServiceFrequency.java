@@ -30,11 +30,7 @@ public class VmsPixelServiceFrequency extends ASN1Integer {
 
 	/** Create a new VmsPixelServiceFrequency object */
 	public VmsPixelServiceFrequency(int f) {
+		super(MIB1203.signControl.create(new int[] {22, 0}));
 		value = f;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {22, 0});
 	}
 }

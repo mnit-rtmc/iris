@@ -37,17 +37,10 @@ public class PixelFailureDetectionType extends ASN1Integer {
 		}
 	}
 
-	/** Row in table */
-	protected final int row;
-
 	/** Create a new pixel failure detection type object */
-	public PixelFailureDetectionType(int r) {
-		row = r;
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.pixelFailureEntry.createOID(new int[] {1,2,row});
+	public PixelFailureDetectionType(int row) {
+		super(MIB1203.pixelFailureEntry.create(new int[] {1,
+			Enum.pixelTest.ordinal(), row}));
 	}
 
 	/** Set the integer value */

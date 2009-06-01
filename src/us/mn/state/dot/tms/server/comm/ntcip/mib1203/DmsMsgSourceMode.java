@@ -40,6 +40,11 @@ public class DmsMsgSourceMode extends ASN1Integer {
 		}
 	}
 
+	/** Create a new DmsMsgSourceMode object */
+	public DmsMsgSourceMode() {
+		super(MIB1203.signControl.create(new int[] {7, 0}));
+	}
+
 	/** Set the integer value */
 	public void setInteger(int v) {
 		value = Enum.fromOrdinal(v).ordinal();
@@ -48,10 +53,5 @@ public class DmsMsgSourceMode extends ASN1Integer {
 	/** Get the object value */
 	public String getValue() {
 		return Enum.fromOrdinal(value).toString();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {7, 0});
 	}
 }

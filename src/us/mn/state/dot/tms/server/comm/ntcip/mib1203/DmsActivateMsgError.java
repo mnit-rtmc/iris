@@ -39,6 +39,11 @@ public class DmsActivateMsgError extends ASN1Integer {
 		}
 	}
 
+	/** Create a new DmsActivateMsgError object */
+	public DmsActivateMsgError() {
+		super(MIB1203.signControl.create(new int[] {17, 0}));
+	}
+
 	/** Set the integer value */
 	public void setInteger(int v) {
 		value = Enum.fromOrdinal(v).ordinal();
@@ -52,10 +57,5 @@ public class DmsActivateMsgError extends ASN1Integer {
 	/** Get the enum value */
 	public Enum getEnum() {
 		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.signControl.createOID(new int[] {17, 0});
 	}
 }

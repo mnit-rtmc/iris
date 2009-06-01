@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class DmsIllumBrightnessValuesError extends ASN1OctetString {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.illum.createOID(new int[] {8, 0});
+	/** Create a new DmsIllumBrightnessValuesError object */
+	public DmsIllumBrightnessValuesError() {
+		super(MIB1203.illum.create(new int[] {8, 0}));
 	}
 }

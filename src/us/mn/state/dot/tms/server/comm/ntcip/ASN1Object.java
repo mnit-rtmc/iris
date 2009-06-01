@@ -21,8 +21,18 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  */
 abstract public class ASN1Object {
 
+	/** MIB node */
+	protected final MIBNode node;
+
+	/** Create a new ASN1 object */
+	protected ASN1Object(MIBNode n) {
+		node = n;
+	}
+
 	/** Get the object identifier */
-	abstract public int[] getOID();
+	public int[] getOID() {
+		return node.createOID();
+	}
 
 	/** Get the object name */
 	public final String getName() {

@@ -23,9 +23,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
  */
 public class LampFailureStuckOff extends ASN1OctetString {
 
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.statError.createOID(new int[] {6, 0});
+	/** Create a new LampFailureStuckOff object */
+	public LampFailureStuckOff() {
+		super(MIB1203.statError.create(new int[] {6, 0}));
 	}
 
 	/** Get the object value */

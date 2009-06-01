@@ -41,6 +41,11 @@ public class DmsBeaconType extends ASN1Integer {
 		}
 	}
 
+	/** Create a new DmsBeaconType object */
+	public DmsBeaconType() {
+		super(MIB1203.dmsSignCfg.create(new int[] {8, 0}));
+	}
+
 	/** Set the integer value */
 	public void setInteger(int v) {
 		value = Enum.fromOrdinal(v).ordinal();
@@ -49,10 +54,5 @@ public class DmsBeaconType extends ASN1Integer {
 	/** Get the object value */
 	public String getValue() {
 		return Enum.fromOrdinal(value).toString();
-	}
-
-	/** Get the object identifier */
-	public int[] getOID() {
-		return MIB1203.dmsSignCfg.createOID(new int[] {8, 0});
 	}
 }
