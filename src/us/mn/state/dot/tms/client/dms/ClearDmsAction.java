@@ -49,8 +49,8 @@ public class ClearDmsAction extends AbstractAction {
 		dispatcher = d;
 		owner = o;
 		putValue(Action.NAME, I18N.get("dms.clear"));
-		putValue(Action.SHORT_DESCRIPTION,
-			I18N.get("dms.clear.tooltip"));
+		putValue(Action.SHORT_DESCRIPTION, 
+			I18N.get("dms.clear.tooltip")); 
 	}
 
 	/** Schedule the action to be performed */

@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -105,8 +106,8 @@ public class SingleSignTab extends FormPanel {
 	protected final JTextField operationTxt = createTextField();
 
 	/** Button used to get the DMS status (optional) */
-	protected final JButton queryStatusBtn = new JButton(I18N.get(
-		"dms.query_status"));
+	protected final IButton queryBtn = new IButton("dms.query_status",
+		SystemAttrEnum.DMS_STATUS_ENABLE);
 
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
@@ -153,8 +154,8 @@ public class SingleSignTab extends FormPanel {
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
 		addRow(I18N.get("DMSDispatcher.OperationTitle"), operationTxt);
-		if(SystemAttrEnum.DMS_STATUS_ENABLE.getBoolean())
-			addRow("Status", statusTxt, queryStatusBtn);
+		if(queryBtn.getIEnabled())
+			addRow("Status", statusTxt, queryBtn);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
@@ -174,7 +175,7 @@ public class SingleSignTab extends FormPanel {
 					togglePreview();
 			}
 		});
-		new ActionJob(this, queryStatusBtn) {
+		new ActionJob(this, queryBtn) {
 			public void perform() {
 				if(proxy != null) {
 					proxy.setSignRequest(SignRequest.
@@ -182,8 +183,6 @@ public class SingleSignTab extends FormPanel {
 				}
 			}
 		};
-		queryStatusBtn.setToolTipText(I18N.get(
-			"dms.query_status.tooltip"));
 		new ActionJob(awsControlledCbx) {
 			public void perform() {
 				if(proxy != null) {
@@ -234,7 +233,7 @@ public class SingleSignTab extends FormPanel {
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
 		operationTxt.setText("");
-		queryStatusBtn.setEnabled(false);
+		queryBtn.setEnabled(false);
 		statusTxt.setText("");
 		deployTxt.setText("");
 		expiresTxt.setText(EMPTY_TXT);
@@ -269,7 +268,7 @@ public class SingleSignTab extends FormPanel {
 				operationTxt.setBackground(Color.GRAY);
 			}
 			operationTxt.setText(dms.getOperation());
-			queryStatusBtn.setEnabled(true);
+			queryBtn.setEnabled(true);
 			statusTxt.setText(status);
 		}
 		if(a == null || a.equals("messageCurrent")) {

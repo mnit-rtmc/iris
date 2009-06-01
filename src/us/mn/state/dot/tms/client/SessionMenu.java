@@ -53,7 +53,7 @@ public class SessionMenu extends JMenu {
 				log_out.setEnabled(false);
 			}
 		});
-		setMnemonic('S');
+		setMnemonic('e');
 		log_in.setMnemonic('L');
 		new ActionJob(log_in) {
 			public void perform() throws Exception {

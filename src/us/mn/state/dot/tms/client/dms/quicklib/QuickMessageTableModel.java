@@ -156,8 +156,9 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAddProxy(String objname) {
-		return objname != null && 
-			m_user.canAdd(prependSonarType(objname));
+		if(objname == null || objname.isEmpty())
+			return false;
+		return m_user.canAdd(prependSonarType(objname));
 	}
 
 	/** Check if the user can update the named attribute,
