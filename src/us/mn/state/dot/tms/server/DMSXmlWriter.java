@@ -20,7 +20,7 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.DMS;
 
 /**
- * This class writes out the current DMS configuration to an XML file.
+ * This class writes out the current DMS configuration and state to an XML file.
  *
  * @author Tim Johnson
  */

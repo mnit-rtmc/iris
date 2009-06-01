@@ -156,8 +156,14 @@ public final class TMSImpl implements KmlDocument {
 		new RampMeterXmlWriter(namespace).write();
 		new CameraXmlWriter(namespace).write();
 		new GeoLocXmlWriter(namespace).write();
-		new DMSXmlWriter(namespace).write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
+	}
+
+	/** Write the current state to XML files */
+	protected void writeXmlState() throws IOException,
+		NamespaceError
+	{
+		new DMSXmlWriter(namespace).write();
 	}
 
 	/** Write the sample data out as XML */
@@ -407,9 +413,10 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Perform 1 minute jobs */
-	protected void do1MinuteJobs() {
+	protected void do1MinuteJobs() throws Exception {
 		KmlFile.writeServerFile(this);
 		UptimeLog.writeServerLog(namespace);
+		writeXmlState();
 	}
 
 	/** Poll all controllers 5 minute interval */
