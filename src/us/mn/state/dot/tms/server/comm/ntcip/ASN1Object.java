@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 /**
- * ASN1 type.  Base class for MIB objects.
+ * ASN1 object.  Base class for ASN1 objects.
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Type extends MIBObject {
+abstract public class ASN1Object extends MIBObject {
 
 	/** Get the object name */
 	public final String getName() {

@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Integer extends ASN1Type {
+abstract public class ASN1Integer extends ASN1Object {
 
 	/** Actual integer value */
 	protected int value;

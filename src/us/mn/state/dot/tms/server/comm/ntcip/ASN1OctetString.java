@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
  *
  * @author Douglas Lau
  */
-abstract public class ASN1OctetString extends ASN1Type {
+abstract public class ASN1OctetString extends ASN1Object {
 
 	/** Actual octet string value */
 	protected byte[] value = new byte[0];
