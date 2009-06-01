@@ -33,7 +33,6 @@ public class FontIndex extends ASN1Integer {
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return MIBNode.fontDefinition.createOID(new int[] {
-			2, 1, 1, font});
+		return MIBNode.fontTable.createOID(new int[] { 1, font });
 	}
 }
