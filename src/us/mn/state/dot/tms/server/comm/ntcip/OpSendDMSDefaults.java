@@ -26,14 +26,14 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
 
 /**
- * Operation to download default values to a DMS
+ * Operation to send default parameters to a DMS.
  *
  * @author Douglas Lau
  */
-public class DMSDefaultDownload extends OpDMS {
+public class OpSendDMSDefaults extends OpDMS {
 
 	/** Create a new DMS default download object */
-	public DMSDefaultDownload(DMSImpl d) {
+	public OpSendDMSDefaults(DMSImpl d) {
 		super(DOWNLOAD, d);
 	}
 
