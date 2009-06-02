@@ -150,7 +150,7 @@ public class OpBlank extends OpDms
 				m_dms.setMessageCurrent(m_mess, m_user);
 			} else {
 				Log.finest(
-					"OpBlank: response from cmsserver received, ignored because Xml valid field is false, errmsg="
+					"OpBlank: response from SensorServer received, ignored because Xml valid field is false, errmsg="
 					+ errmsg);
 				errorStatus = errmsg;
 

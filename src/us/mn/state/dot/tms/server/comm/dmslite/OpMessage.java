@@ -200,14 +200,13 @@ public class OpMessage extends OpDms {
 			 *        <SetSnglPgReqMsg>
 			 *           <Id>...</Id>
 			 *           <Address>...</Address>
-			 *           <MsgText>...</MsgText>             multistring cms message text
-			 *	     <FontName>...</FontName>		font name
-			 *           <UseOnTime>...</UseOnTime>         true to use on time, else now
-			 *           <OnTime>...</OnTime>             	message on time
-			 *           <UseOffTime>...</UseOffTime>       true to use off time, else indefinite
-		 	 *           <OffTime>...</OffTime>           	message off time
-			 *           <Owner>...</Owner>                 the message author
-			 *           <Msg>...</Msg>                     this is the bitmap
+			 *           <MsgText>...</MsgText>
+			 *           <UseOnTime>...</UseOnTime>
+			 *           <OnTime>...</OnTime>
+			 *           <UseOffTime>...</UseOffTime>
+		 	 *           <OffTime>...</OffTime>
+			 *           <Owner>...</Owner>
+			 *           <Msg>...</Msg>
 			 *        </SetSnglPgReqMsg>
 			 *     </DmsLite>
 			 */
@@ -230,11 +229,6 @@ public class OpMessage extends OpDms {
 			// MsgText
 			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
 
-			// FontName
-			// FIXME: mtod from r8p9 merge
-			String fn = "fontname"; //m_signMessage.getFontName();
-			mess.add(new ReqRes("FontName", (fn == null ? "" : fn)));
-
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
 
@@ -255,7 +249,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
-			mess.add(new ReqRes("Msg", getBitmapPage(0)));
+			mess.add(new ReqRes("Bitmap", getBitmapPage(0)));
 
 			// send msg to field controller
             		mess.getRequest();	// throws IOException
@@ -301,7 +295,7 @@ public class OpMessage extends OpDms {
 						m_user);
 				} else {
 					Log.finest(
-					    "OpMessage: cmsserver response received, IsValid is false, errmsg="+
+					    "OpMessage: SensorServer response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
 					errorStatus = errmsg;
 
@@ -360,14 +354,13 @@ public class OpMessage extends OpDms {
 			 *       <SetMultiplePageReqMsg>
 			 *          <Id>...</Id>
 			 *          <Address>...</Address>
-			 *          <MsgText>...</MsgText>               multistring cms message text
-			 *	    <FontName>...</FontName>		 font name
-			 *          <UseOnTime>...</UseOnTime>         	 true to use on time, else now
-			 *          <OnTime>...</OnTime>             	 message on time
-			 *          <UseOffTime>...</UseOffTime>       	 true to use off time, else indefinite
-			 *          <OffTime>...</OffTime>           	 message off time
-			 *          <DisplayTimeMS>...<DisplayTimeMS>    message display time
-			 *          <Owner>...</Owner>                   the message author
+			 *          <MsgText>...</MsgText>
+			 *          <UseOnTime>...</UseOnTime>
+			 *          <OnTime>...</OnTime>
+			 *          <UseOffTime>...</UseOffTime>
+			 *          <OffTime>...</OffTime>
+			 *          <DisplayTimeMS>...<DisplayTimeMS>
+			 *          <Owner>...</Owner>
 			 *          <Msg>...</Msg>
 			 *       </SetMultiplePageReqMsg>
 			 *    </DmsLite>
@@ -396,11 +389,6 @@ public class OpMessage extends OpDms {
 			// MsgText
 			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
 
-			// FontName
-			// FIXME: mtod from r8p9 merge
-			String fn = "fontname"; //m_signMessage.getFontName();
-			mess.add(new ReqRes("FontName", (fn == null ? "" : fn)));
-
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
 
@@ -425,7 +413,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
-			mess.add(new ReqRes("Msg", getBitmapPage(0) + getBitmapPage(1)));
+			mess.add(new ReqRes("Bitmap", getBitmapPage(0) + getBitmapPage(1)));
 
 			// send msg
             		mess.getRequest();	// throws IOException
@@ -470,7 +458,7 @@ public class OpMessage extends OpDms {
 						m_signMessage, m_user);
 				} else {
 					Log.finest(
-					    "OpMessage: response from cmsserver received, ignored because Xml valid field is false, errmsg="+
+					    "OpMessage: response from SensorServer received, ignored because Xml valid field is false, errmsg="+
 					    errmsg+",id="+id);
 					errorStatus = errmsg;
 

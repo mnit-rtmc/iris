@@ -151,7 +151,7 @@ public class Message implements AddressedMessage
 		// send message
 		long starttime=STime.getCurTimeUTCinMillis();
 		Log.finest("getRequest(): Writing " + array.length + 
-			" bytes to cmsserver.");
+			" bytes to SensorServer.");
 		m_is.resetBuffer();
 		m_os.write(array);
 		m_os.flush();
@@ -170,7 +170,7 @@ public class Message implements AddressedMessage
 			handleAwsFailure(msg);
 			throw new IOException(msg);
 		} catch(IOException ex) {
-			String msg = "Unable to connect to cmsserver.";
+			String msg = "Unable to connect to SensorServer.";
 			handleAwsFailure(msg);
 			Log.warning(msg);
 			throw new IOException(msg);
@@ -235,7 +235,7 @@ public class Message implements AddressedMessage
 	}
 
 	/** 
-	  * Determine if failure sending an AWS message to the cmsserver
+	  * Determine if failure sending an AWS message to the SensorServer
 	  * occurred. 
 	  * @return true on failure else false.
 	  */

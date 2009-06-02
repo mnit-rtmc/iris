@@ -397,7 +397,7 @@ abstract public class OpDms extends OpDevice {
 			// failure
 			} else {
 				Log.severe(
-					"PhaseGetConfig: response from cmsserver received, ignored because Xml valid field is false, errmsg="
+					"PhaseGetConfig: response from SensorServer received, ignored because Xml valid field is false, errmsg="
 					+ errmsg);
 				errorStatus = errmsg;
 

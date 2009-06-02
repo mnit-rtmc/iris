@@ -77,7 +77,7 @@ public class OpQueryMsg extends OpDms {
 	/**
 	 * Create message text given a bitmap.
 	 * It is important to create message text for the message because
-	 * the cmsserver returns a message containing a bitmap but with
+	 * the SensorServer returns a message containing a bitmap but with
 	 * no message text. IRIS requires both a bitmap and message text,
 	 * so this method constructs message text so IRIS will think it's a
 	 * message, rather than a blank sign.
@@ -242,7 +242,7 @@ public class OpQueryMsg extends OpDms {
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", "MsgText",
-				"FontName", "Owner", "UseOnTime", "OnTime", "UseOffTime",
+				"Owner", "UseOnTime", "OnTime", "UseOffTime",
 				"OffTime", "UseBitmap", "Bitmap"});
 
 			// send msg
@@ -256,7 +256,6 @@ public class OpQueryMsg extends OpDms {
 			String errmsg = "";
 			boolean msgtextavailable = false;
 			String msgtext = "";
-			String fontname = "";
 			String owner = "";
 			boolean useont = false;
 			Calendar ont = new GregorianCalendar();
@@ -286,9 +285,6 @@ public class OpQueryMsg extends OpDms {
 					// msg text
 					msgtext = rr1.getResVal("MsgText");
 
-					// font name
-					fontname = rr1.getResVal("FontName");
-
 					// owner
 					owner = rr1.getResVal("Owner");
 
@@ -312,7 +308,7 @@ public class OpQueryMsg extends OpDms {
 					    "OpQueryMsg.PhaseQueryCurrentMessage.poll(msg) parsed msg values: IsValid:"
 					    + valid + ", MsgTextAvailable:"
 					    + msgtextavailable + ", MsgText:"
-					    + msgtext + "FontName:" + fontname + ", OnTime:" 
+					    + msgtext + ", OnTime:" 
 					    + ont.getTime() + ", OffTime:" + offt.getTime() 
 					    + ", bitmap:" + bitmap);
 				}
@@ -355,10 +351,7 @@ public class OpQueryMsg extends OpDms {
 						SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
 						DMSMessagePriority.OPERATOR, duramins);
-//FIXME: mtod from r8p9 merge: something should be done with fontname here to update current message, 8p9 code:
-//+ m_dms.setMessageFromController(msgtext, duramins, owner, MsgActPriorityD10.PRI_D10_OPER_MSG, fontname);
-						m_dms.setMessageCurrent(sm, 
-							null);
+						m_dms.setMessageCurrent(sm, m_user);
 					}
 					catch(SonarException e) {
 						e.printStackTrace();
@@ -369,15 +362,14 @@ public class OpQueryMsg extends OpDms {
 					SignMessageImpl sm = null;
 					if(usebitmap) {
 						sm = createSignMessageWithBitmap(bitmap, duramins);
-						m_dms.setMessageCurrent(sm,
-							null);
+						m_dms.setMessageCurrent(sm, m_user);
 					}
 					if(sm == null) {
 						try {
 							m_dms.setMessageCurrent(
 								m_dms.createMessage("",
 								DMSMessagePriority.BLANK, null
-							), null);
+							), m_user);
 						}
 						catch(SonarException e) {
 							e.printStackTrace();
@@ -388,7 +380,7 @@ public class OpQueryMsg extends OpDms {
 			// valid flag is false
 			} else {
 				Log.finest(
-				    "OpQueryMsg: response from cmsserver received, ignored because Xml valid field is false, errmsg="+errmsg);
+				    "OpQueryMsg: response from SensorServer received, ignored because Xml valid field is false, errmsg="+errmsg);
 				errorStatus = errmsg;
 
 				// try again
