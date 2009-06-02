@@ -99,7 +99,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 	public void sendRequest(DMSImpl dms, SignRequest r) {
 		switch(r) {
 		case QUERY_CONFIGURATION:
-			new DMSQueryConfiguration(dms).start();
+			new OpQueryDMSConfiguration(dms).start();
 			break;
 		case QUERY_MESSAGE:
 			new DMSQueryMessage(dms).start();
