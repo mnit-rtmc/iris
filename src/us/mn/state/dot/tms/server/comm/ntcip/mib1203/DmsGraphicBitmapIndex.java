@@ -24,7 +24,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 public class DmsGraphicBitmapIndex extends ASN1Integer {
 
 	/** Create a new DmsGraphicBitmapIndex object */
-	public DmsGraphicBitmapIndex(int row) {
-		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {1, row}));
+	public DmsGraphicBitmapIndex(int row, int block) {
+		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {1, row,
+			block}));
 	}
 }

@@ -28,9 +28,9 @@ public class DmsGraphicType extends ASN1Integer {
 		super(MIB1203.dmsGraphicEntry.create(new int[] {6, row}));
 	}
 
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = DmsColorScheme.Enum.fromOrdinal(v).ordinal();
+	/** Set the enum value */
+	public void setEnum(DmsColorScheme.Enum v) {
+		value = v.ordinal();
 	}
 
 	/** Get the object value */

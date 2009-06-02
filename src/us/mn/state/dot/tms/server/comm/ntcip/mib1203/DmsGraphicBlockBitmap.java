@@ -24,7 +24,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 public class DmsGraphicBlockBitmap extends ASN1OctetString {
 
 	/** Create a new DmsGraphicBlockBitmap object */
-	public DmsGraphicBlockBitmap(int row) {
-		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {3, row}));
+	public DmsGraphicBlockBitmap(int row, int block) {
+		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {3, row,
+			block}));
 	}
 }
