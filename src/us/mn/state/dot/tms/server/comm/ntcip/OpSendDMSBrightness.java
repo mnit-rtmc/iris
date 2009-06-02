@@ -24,13 +24,13 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSManualBrightness extends OpDMS {
+public class OpSendDMSBrightness extends OpDMS {
 
 	/** Manual brightness level */
 	protected final int level;
 
 	/** Create a new DMS manual brightness operation */
-	public DMSManualBrightness(DMSImpl d, int l) {
+	public OpSendDMSBrightness(DMSImpl d, int l) {
 		super(COMMAND, d);
 		level = l;
 	}
