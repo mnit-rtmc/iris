@@ -102,7 +102,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 			new OpQueryDMSConfiguration(dms).start();
 			break;
 		case QUERY_MESSAGE:
-			new DMSQueryMessage(dms).start();
+			new OpQueryDMSMessage(dms).start();
 			break;
 		case QUERY_STATUS:
 			new OpQueryDMSStatus(dms).start();

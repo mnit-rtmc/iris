@@ -25,14 +25,14 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
- * Operation to query the current message on a DMS
+ * Operation to query the current message on a DMS.
  *
  * @author Douglas Lau
  */
-public class DMSQueryMessage extends OpDMS {
+public class OpQueryDMSMessage extends OpDMS {
 
 	/** Create a new DMS query status object */
-	public DMSQueryMessage(DMSImpl d) {
+	public OpQueryDMSMessage(DMSImpl d) {
 		super(DEVICE_DATA, d);
 	}
 
