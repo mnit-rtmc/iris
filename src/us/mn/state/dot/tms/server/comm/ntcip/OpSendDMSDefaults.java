@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
  */
 public class OpSendDMSDefaults extends OpDMS {
 
-	/** Create a new DMS default download object */
+	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
 		super(DOWNLOAD, d);
 	}

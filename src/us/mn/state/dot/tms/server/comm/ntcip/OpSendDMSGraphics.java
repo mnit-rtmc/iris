@@ -88,7 +88,13 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(max_size);
 			mess.add(num_graphics);
 			mess.add(block_size);
-			mess.getRequest();
+			try {
+				mess.getRequest();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Must be 1203v1 only (no graphics) ...
+				return null;
+			}
 			DMS_LOG.log(dms.getName() + ": " + max_graphics);
 			DMS_LOG.log(dms.getName() + ": " + max_size);
 			DMS_LOG.log(dms.getName() + ": " + num_graphics);
