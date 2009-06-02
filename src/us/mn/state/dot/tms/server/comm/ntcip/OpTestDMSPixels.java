@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class OpQueryDMSPixelStatus extends OpDMS {
+public class OpTestDMSPixels extends OpDMS {
 
 	/** Number of pixel errors before reported for maintenance */
 	static protected final int REPORT_PIXEL_ERROR_COUNT = 35;
@@ -47,7 +47,7 @@ public class OpQueryDMSPixelStatus extends OpDMS {
 		new PixelFailureTableNumRows();
 
 	/** Create a new DMS query pixel failures operation */
-	public OpQueryDMSPixelStatus(DMSImpl d, boolean p) {
+	public OpTestDMSPixels(DMSImpl d, boolean p) {
 		super(DEVICE_DATA, d);
 		perform_test = p;
 		Integer w = d.getWidthPixels();
