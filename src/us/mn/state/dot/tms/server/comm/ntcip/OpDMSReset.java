@@ -21,17 +21,17 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
- * Operatoin to reset a dynamic message sign
+ * Operatoin to reset a dynamic message sign.
  *
  * @author Douglas Lau
  */
-public class DMSReset extends OpDMS {
+public class OpDMSReset extends OpDMS {
 
 	/** Timeout (ms) to wait for a controller reset */
 	static protected final long RESET_TIMEOUT = 45 * 1000;
 
 	/** Create a new DMS reset object */
-	public DMSReset(DMSImpl d) {
+	public OpDMSReset(DMSImpl d) {
 		super(COMMAND, d);
 	}
 
