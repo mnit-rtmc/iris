@@ -39,43 +39,7 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new QueryBrightness();
-	}
-
-	/** Phase to query static brightness values */
-	protected class QueryBrightness extends Phase {
-
-		/** Query static brightness values */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsIllumMaxPhotocellLevel level =
-				new DmsIllumMaxPhotocellLevel();
-			DmsIllumNumBrightLevels levels =
-				new DmsIllumNumBrightLevels();
-			mess.add(level);
-			mess.add(levels);
-			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + level);
-			DMS_LOG.log(dms.getName() + ": " + levels);
-			return new BrightnessTable();
-		}
-	}
-
-	/** Phase to get the brightness table */
-	protected class BrightnessTable extends Phase {
-
-		/** Get the brightness table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsIllumBrightnessValues brightness =
-				new DmsIllumBrightnessValues();
-			DmsIllumControl control = new DmsIllumControl(
-				DmsIllumControl.Enum.photocell);
-			mess.add(brightness);
-			mess.add(control);
-			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + brightness);
-			DMS_LOG.log(dms.getName() + ": " + control);
-			return new CommLoss();
-		}
+		return new CommLoss();
 	}
 
 	/** Phase to set the comm loss action */

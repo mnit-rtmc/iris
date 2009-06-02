@@ -43,9 +43,8 @@ public class DmsIllumControl extends ASN1Integer {
 		super(MIB1203.illum.create(new int[] {1, 0}));
 	}
 
-	/** Create a new DmsIllumControl object */
-	public DmsIllumControl(Enum c) {
-		this();
+	/** Set the control value */
+	public void setEnum(Enum c) {
 		value = c.ordinal();
 	}
 

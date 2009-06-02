@@ -34,6 +34,10 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	 * BRIGHTNESS_TOO_BRIGHT) */
 	protected final SignRequest request;
 
+	/** Maximum photocell level */
+	protected final DmsIllumMaxPhotocellLevel max_level =
+		new DmsIllumMaxPhotocellLevel();
+
 	/** Photocell level status */
 	protected final DmsIllumPhotocellLevelStatus p_level =
 		new DmsIllumPhotocellLevelStatus();
@@ -66,9 +70,13 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 		/** Query the DMS brightness status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(max_level);
 			mess.add(p_level);
 			mess.add(light);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + max_level);
+			DMS_LOG.log(dms.getName() + ": " + p_level);
+			DMS_LOG.log(dms.getName() + ": " + light);
 			dms.feedbackBrightness(new BrightnessSample(request,
 				p_level.getInteger(), light.getInteger()));
 			if(request == SignRequest.BRIGHTNESS_TOO_DIM ||
@@ -89,7 +97,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + b_levels);
 			DMS_LOG.log(dms.getName() + ": " + brightness);
+			DMS_LOG.log(dms.getName() + ": " + control);
 			if(!control.isPhotocell())
 				return new SetPhotocellControl();
 			else
@@ -102,9 +112,11 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 		/** Set the photocell control mode */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsIllumControl(
-				DmsIllumControl.Enum.photocell));
+			DmsIllumControl control = new DmsIllumControl();
+			control.setEnum(DmsIllumControl.Enum.photocell);
+			mess.add(control);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ": " + control);
 			return new SetBrightnessTable();
 		}
 	}
@@ -115,9 +127,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		/** Set the brightness table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			brightness.setTable(calculateTable());
-			DMS_LOG.log(dms.getName() + ": " + brightness);
 			mess.add(brightness);
 //			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ": " + brightness);
 			return null;
 		}
 	}
