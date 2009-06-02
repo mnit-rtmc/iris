@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
  *
  * @author Douglas Lau
  */
-public class DMSCommandMessage extends OpDMS {
+public class OpSendDMSMessage extends OpDMS {
 
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;
@@ -45,7 +45,7 @@ public class DMSCommandMessage extends OpDMS {
 	protected int messageCRC;
 
 	/** Create a new DMS command message object */
-	public DMSCommandMessage(DMSImpl d, SignMessage m, User o) {
+	public OpSendDMSMessage(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
 		message = m;
 		owner = o;

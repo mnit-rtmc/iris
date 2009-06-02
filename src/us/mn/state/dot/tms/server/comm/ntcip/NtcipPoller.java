@@ -137,7 +137,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		if(shouldSetTimeRemaining(dms, m))
 			new OpDMSUpdateDuration(dms, m, o).start();
 		else
-			new DMSCommandMessage(dms, m, o).start();
+			new OpSendDMSMessage(dms, m, o).start();
 	}
 
 	/** Check if we should just set the message time remaining */
