@@ -119,7 +119,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		case BRIGHTNESS_GOOD:
 		case BRIGHTNESS_TOO_DIM:
 		case BRIGHTNESS_TOO_BRIGHT:
-			new DMSBrightnessFeedback(dms, r).start();
+			new OpUpdateDMSBrightness(dms, r).start();
 			break;
 		case SEND_LEDSTAR_SETTINGS:
 			new DMSSetLedstarPixel(dms).start();
