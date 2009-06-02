@@ -25,10 +25,10 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DiagnosticNtcip extends DiagnosticOperation {
+public class OpTestDMSCommunication extends DiagnosticOperation {
 
 	/** Create a new diagnostic ntcip object */
-	public DiagnosticNtcip(ControllerImpl c) {
+	public OpTestDMSCommunication(ControllerImpl c) {
 		super(c);
 	}
 

@@ -90,7 +90,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
-		DiagnosticOperation test = new DiagnosticNtcip(c);
+		DiagnosticOperation test = new OpTestDMSCommunication(c);
 		test.start();
 		return test;
 	}
