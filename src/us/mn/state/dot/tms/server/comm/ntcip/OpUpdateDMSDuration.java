@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class OpDMSUpdateDuration extends OpDMS {
+public class OpUpdateDMSDuration extends OpDMS {
 
 	/** Sign message to update */
 	protected final SignMessage message;
@@ -36,7 +36,7 @@ public class OpDMSUpdateDuration extends OpDMS {
 	protected final User owner;
 
 	/** Create a new DMS update duration operation */
-	public OpDMSUpdateDuration(DMSImpl d, SignMessage m, User o) {
+	public OpUpdateDMSDuration(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
 		message = m;
 		owner = o;
