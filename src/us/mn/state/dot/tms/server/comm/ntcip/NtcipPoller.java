@@ -114,7 +114,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 			new OpQueryDMSPixelStatus(dms, true).start();
 			break;
 		case TEST_LAMPS:
-			new DMSLampTest(dms).start();
+			new OpTestDMSLamps(dms).start();
 			break;
 		case BRIGHTNESS_GOOD:
 		case BRIGHTNESS_TOO_DIM:
