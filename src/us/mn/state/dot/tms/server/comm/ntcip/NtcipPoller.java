@@ -122,7 +122,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 			new OpUpdateDMSBrightness(dms, r).start();
 			break;
 		case SEND_LEDSTAR_SETTINGS:
-			new DMSSetLedstarPixel(dms).start();
+			new OpSendDMSLedstar(dms).start();
 			break;
 		default:
 			// Ignore other requests

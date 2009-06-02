@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
  *
  * @author Douglas Lau
  */
-public class DMSSetLedstarPixel extends OpDMS {
+public class OpSendDMSLedstar extends OpDMS {
 
 	/** LDC pot base value */
 	protected final LedLdcPotBase potBase;
@@ -39,7 +39,7 @@ public class DMSSetLedstarPixel extends OpDMS {
 	protected final LedBadPixelLimit badLimit;
 
 	/** Create a new DMS set pixel threshold operation */
-	public DMSSetLedstarPixel(DMSImpl d) {
+	public OpSendDMSLedstar(DMSImpl d) {
 		super(COMMAND, d);
 		potBase = new LedLdcPotBase(d.getLdcPotBase());
 		currentLow = new LedPixelLow(d.getPixelCurrentLow());
