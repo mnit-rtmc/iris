@@ -25,6 +25,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tdxml.geo.Transform;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
@@ -43,12 +44,17 @@ public class CoordinatePanel extends JPanel implements MouseMotionListener
 	/** The label used for cursor coordinates */
 	protected final JLabel m_coordinates = new JLabel();
 
+	/** Determine displayed coordinate type */
+	static protected final String COORDINATE_TYPE = 
+		SystemAttrEnum.MAP_TOOLBAR_COORDS.getString();
+
 	/** Determine displayed coordinate type, may be UTM or WGS84 */
-	static protected final String COORDINATE_TYPE = "WGS84";
-	static protected final int UTM_ZONE = 10;
+	static protected final int UTM_ZONE = 
+		SystemAttrEnum.MAP_UTM_ZONE.getInt();
 
 	/** The system attribute for northern hemisphere */
-	static protected final boolean NORTHERN_HEMISPHERE = true;
+	static protected final boolean NORTHERN_HEMISPHERE = 
+		SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean();
 
 	/** The lat long decimal format */
 	static protected final String LAT_LONG_DECIMAL_FORMAT = "0.000000";
