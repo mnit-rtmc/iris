@@ -135,7 +135,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		throws InvalidMessageException
 	{
 		if(shouldSetTimeRemaining(dms, m))
-			new DMSSetTimeRemaining(dms, m, o).start();
+			new OpDMSUpdateDuration(dms, m, o).start();
 		else
 			new DMSCommandMessage(dms, m, o).start();
 	}

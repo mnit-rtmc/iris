@@ -23,11 +23,11 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
- * Operation to set the time remaining for the current DMS message
+ * Operation to update the duration of the current DMS message.
  *
  * @author Douglas Lau
  */
-public class DMSSetTimeRemaining extends OpDMS {
+public class OpDMSUpdateDuration extends OpDMS {
 
 	/** Sign message to update */
 	protected final SignMessage message;
@@ -35,8 +35,8 @@ public class DMSSetTimeRemaining extends OpDMS {
 	/** User who deployed the message */
 	protected final User owner;
 
-	/** Create a new DMS set time remaining operation */
-	public DMSSetTimeRemaining(DMSImpl d, SignMessage m, User o) {
+	/** Create a new DMS update duration operation */
+	public OpDMSUpdateDuration(DMSImpl d, SignMessage m, User o) {
 		super(COMMAND, d);
 		message = m;
 		owner = o;
