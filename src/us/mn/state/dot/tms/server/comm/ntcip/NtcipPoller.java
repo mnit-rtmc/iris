@@ -67,7 +67,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 				r.setPriority(p);
 				r.start();
 			}
-			DMSFontDownload d = new DMSFontDownload(dms);
+			OpSendDMSFonts d = new OpSendDMSFonts(dms);
 			d.setPriority(p);
 			d.start();
 			DMSDefaultDownload o = new DMSDefaultDownload(dms);

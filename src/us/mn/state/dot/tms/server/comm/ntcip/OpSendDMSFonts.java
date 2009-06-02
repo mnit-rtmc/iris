@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSFontDownload extends OpDMS {
+public class OpSendDMSFonts extends OpDMS {
 
 	/** Number of fonts supported */
 	protected final NumFonts num_fonts = new NumFonts();
@@ -65,8 +65,8 @@ public class DMSFontDownload extends OpDMS {
 	/** Flag for version 2 controller (with support for fontStatus) */
 	protected boolean font_status_support = true;
 
-	/** Create a new DMS font download operation */
-	public DMSFontDownload(DMSImpl d) {
+	/** Create a new operation to send fonts to a DMS */
+	public OpSendDMSFonts(DMSImpl d) {
 		super(DOWNLOAD, d);
 		final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
 		Integer w = dms.getWidthPixels();
@@ -221,7 +221,7 @@ public class DMSFontDownload extends OpDMS {
 				return new InvalidateFontV2();
 			case inUse:
 				DMS_LOG.log(dms.getName() +
-					": font download aborted");
+					": font send aborted");
 				return null;
 			default:
 				return new SetStatusModifying();
@@ -281,7 +281,7 @@ public class DMSFontDownload extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() != FontStatus.Enum.modifying) {
 				DMS_LOG.log(dms.getName() +
-					": font download aborted");
+					": font send aborted");
 				return null;
 			}
 			return new CreateFont();
