@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
- * This operation queries the pixel status for a DMS.
+ * This operation tests the pixel status of a DMS.
  *
  * @author Douglas Lau
  */
@@ -46,7 +46,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected final PixelFailureTableNumRows rows =
 		new PixelFailureTableNumRows();
 
-	/** Create a new DMS query pixel failures operation */
+	/** Create a new test DMS pixel operation */
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
 		super(DEVICE_DATA, d);
 		perform_test = p;
