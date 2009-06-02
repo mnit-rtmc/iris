@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
  *
  * @author Douglas Lau
  */
-public class DMSCommandMessage extends DMSOperation {
+public class DMSCommandMessage extends OpDMS {
 
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;

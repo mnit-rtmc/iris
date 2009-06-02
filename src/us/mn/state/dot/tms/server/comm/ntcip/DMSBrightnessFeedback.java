@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSBrightnessFeedback extends DMSOperation {
+public class DMSBrightnessFeedback extends OpDMS {
 
 	/** Sign request (BRIGHTNESS_GOOD, BRIGHTNESS_TOO_DIM or
 	 * BRIGHTNESS_TOO_BRIGHT) */

@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSQueryPixelFailures extends DMSOperation {
+public class DMSQueryPixelFailures extends OpDMS {
 
 	/** Number of pixel errors before reported for maintenance */
 	static protected final int REPORT_PIXEL_ERROR_COUNT = 35;

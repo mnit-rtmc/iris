@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSBrightnessControl extends DMSOperation {
+public class DMSBrightnessControl extends OpDMS {
 
 	/** Manual control flag */
 	protected final boolean manual;

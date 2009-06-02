@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSQueryConfiguration extends DMSOperation {
+public class DMSQueryConfiguration extends OpDMS {
 
 	/** DMS to query configuration */
 	protected final DMSImpl dms;

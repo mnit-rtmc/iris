@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
  *
  * @author Douglas Lau
  */
-public class DMSDefaultDownload extends DMSOperation {
+public class DMSDefaultDownload extends OpDMS {
 
 	/** Create a new DMS default download object */
 	public DMSDefaultDownload(DMSImpl d) {

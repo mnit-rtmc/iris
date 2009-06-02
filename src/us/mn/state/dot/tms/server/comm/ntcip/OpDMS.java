@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.DeviceOperation;
  *
  * @author Douglas Lau
  */
-abstract public class DMSOperation extends DeviceOperation {
+abstract public class OpDMS extends DeviceOperation {
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");
@@ -55,7 +55,7 @@ abstract public class DMSOperation extends DeviceOperation {
 	protected final DMSImpl dms;
 
 	/** Create a new DMS operation */
-	public DMSOperation(int p, DMSImpl d) {
+	public OpDMS(int p, DMSImpl d) {
 		super(p, d);
 		dms = d;
 	}

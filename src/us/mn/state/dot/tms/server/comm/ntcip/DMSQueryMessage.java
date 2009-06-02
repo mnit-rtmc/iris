@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSQueryMessage extends DMSOperation {
+public class DMSQueryMessage extends OpDMS {
 
 	/** Create a new DMS query status object */
 	public DMSQueryMessage(DMSImpl d) {

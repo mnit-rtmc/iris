@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
  *
  * @author Douglas Lau
  */
-public class DMSSetLedstarPixel extends DMSOperation {
+public class DMSSetLedstarPixel extends OpDMS {
 
 	/** LDC pot base value */
 	protected final LedLdcPotBase potBase;

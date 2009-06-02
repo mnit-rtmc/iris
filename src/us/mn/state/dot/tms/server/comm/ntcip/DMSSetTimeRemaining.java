@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSSetTimeRemaining extends DMSOperation {
+public class DMSSetTimeRemaining extends OpDMS {
 
 	/** Sign message to update */
 	protected final SignMessage message;

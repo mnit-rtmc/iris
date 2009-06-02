@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSFontDownload extends DMSOperation {
+public class DMSFontDownload extends OpDMS {
 
 	/** Number of fonts supported */
 	protected final NumFonts num_fonts = new NumFonts();

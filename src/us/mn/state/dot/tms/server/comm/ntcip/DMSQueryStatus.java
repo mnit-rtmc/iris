@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
  *
  * @author Douglas Lau
  */
-public class DMSQueryStatus extends DMSOperation {
+public class DMSQueryStatus extends OpDMS {
 
 	/** Short Error status */
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();

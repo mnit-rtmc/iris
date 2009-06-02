@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class DMSLampTest extends DMSOperation {
+public class DMSLampTest extends OpDMS {
 
 	/** Create a new DMS lamp test object */
 	public DMSLampTest(DMSImpl d) {
