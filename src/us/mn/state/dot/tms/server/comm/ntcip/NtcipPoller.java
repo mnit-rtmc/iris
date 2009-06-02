@@ -85,7 +85,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 	public void poll5Minute(ControllerImpl c, Completer comp) {
 		DMSImpl dms = c.getActiveSign();
 		if(dms != null)
-			new DMSQueryStatus(dms).start();
+			new OpQueryDMSStatus(dms).start();
 	}
 
 	/** Start a test for the given controller */
@@ -105,7 +105,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 			new DMSQueryMessage(dms).start();
 			break;
 		case QUERY_STATUS:
-			new DMSQueryStatus(dms).start();
+			new OpQueryDMSStatus(dms).start();
 			break;
 		case QUERY_PIXEL_FAILURES:
 			new DMSQueryPixelFailures(dms, false).start();
