@@ -63,7 +63,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		DMSImpl dms = c.getActiveSign();
 		if(dms != null) {
 			if(reset) {
-				OpDMSReset r = new OpDMSReset(dms);
+				OpResetDMS r = new OpResetDMS(dms);
 				r.setPriority(p);
 				r.start();
 			}

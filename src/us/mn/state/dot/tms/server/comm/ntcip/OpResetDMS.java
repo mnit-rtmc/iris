@@ -25,13 +25,13 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  *
  * @author Douglas Lau
  */
-public class OpDMSReset extends OpDMS {
+public class OpResetDMS extends OpDMS {
 
 	/** Timeout (ms) to wait for a controller reset */
 	static protected final long RESET_TIMEOUT = 45 * 1000;
 
 	/** Create a new DMS reset object */
-	public OpDMSReset(DMSImpl d) {
+	public OpResetDMS(DMSImpl d) {
 		super(COMMAND, d);
 	}
 
