@@ -24,11 +24,11 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
- * This operation queries the pixel failure table.
+ * This operation queries the pixel status for a DMS.
  *
  * @author Douglas Lau
  */
-public class DMSQueryPixelFailures extends OpDMS {
+public class OpQueryDMSPixelStatus extends OpDMS {
 
 	/** Number of pixel errors before reported for maintenance */
 	static protected final int REPORT_PIXEL_ERROR_COUNT = 35;
@@ -47,7 +47,7 @@ public class DMSQueryPixelFailures extends OpDMS {
 		new PixelFailureTableNumRows();
 
 	/** Create a new DMS query pixel failures operation */
-	public DMSQueryPixelFailures(DMSImpl d, boolean p) {
+	public OpQueryDMSPixelStatus(DMSImpl d, boolean p) {
 		super(DEVICE_DATA, d);
 		perform_test = p;
 		Integer w = d.getWidthPixels();
