@@ -39,13 +39,17 @@ public class OpSendDMSGraphics extends OpDMS {
 	/** Maximum size of a graphic */
 	protected final DmsGraphicMaxSize max_size = new DmsGraphicMaxSize();
 
+	/** Size of graphic blocks (in bytes) */
+	protected final DmsGraphicBlockSize block_size =
+		new DmsGraphicBlockSize();
+
 	/** Number of graphics defined in graphic table */
 	protected final DmsGraphicNumEntries num_graphics =
 		new DmsGraphicNumEntries();
 
-	/** Size of graphic blocks (in bytes) */
-	protected final DmsGraphicBlockSize block_size =
-		new DmsGraphicBlockSize();
+	/** Available memory for storing graphics */
+	protected final AvailableGraphicMemory available_memory =
+		new AvailableGraphicMemory();
 
 	/** Mapping of graphic numbers to indices (row in table) */
 	protected final TreeMap<Integer, Integer> num_2_row =
@@ -86,8 +90,9 @@ public class OpSendDMSGraphics extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(max_graphics);
 			mess.add(max_size);
-			mess.add(num_graphics);
 			mess.add(block_size);
+			mess.add(num_graphics);
+			mess.add(available_memory);
 			try {
 				mess.getRequest();
 			}
@@ -97,8 +102,9 @@ public class OpSendDMSGraphics extends OpDMS {
 			}
 			DMS_LOG.log(dms.getName() + ": " + max_graphics);
 			DMS_LOG.log(dms.getName() + ": " + max_size);
-			DMS_LOG.log(dms.getName() + ": " + num_graphics);
 			DMS_LOG.log(dms.getName() + ": " + block_size);
+			DMS_LOG.log(dms.getName() + ": " + num_graphics);
+			DMS_LOG.log(dms.getName() + ": " + available_memory);
 			for(row = 1; row <= max_graphics.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
