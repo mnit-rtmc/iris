@@ -51,18 +51,19 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsIllumPhotocellLevelStatus p_level =
 				new DmsIllumPhotocellLevelStatus();
-			mess.add(p_level);
 			DmsIllumBrightLevelStatus b_level =
 				new DmsIllumBrightLevelStatus();
-			mess.add(b_level);
 			DmsIllumLightOutputStatus light =
 				new DmsIllumLightOutputStatus();
-			mess.add(light);
 			DmsIllumControl control = new DmsIllumControl();
+			mess.add(p_level);
+			mess.add(b_level);
+			mess.add(light);
 			mess.add(control);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + p_level);
 			DMS_LOG.log(dms.getName() + ": " + b_level);
+			DMS_LOG.log(dms.getName() + ": " + light);
 			DMS_LOG.log(dms.getName() + ": " + control);
 			dms.setLightOutput(light.getPercent());
 			return new ControllerTemperature();
@@ -75,10 +76,12 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS controller temperature */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			TempMinCtrlCabinet min_cab = new TempMinCtrlCabinet();
-			mess.add(min_cab);
 			TempMaxCtrlCabinet max_cab = new TempMaxCtrlCabinet();
+			mess.add(min_cab);
 			mess.add(max_cab);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + min_cab);
+			DMS_LOG.log(dms.getName() + ": " + max_cab);
 			dms.setMinCabinetTemp(min_cab.getInteger());
 			dms.setMaxCabinetTemp(max_cab.getInteger());
 			return new AmbientTemperature();
@@ -91,11 +94,13 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS ambient temperature */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			TempMinAmbient min_amb = new TempMinAmbient();
-			mess.add(min_amb);
 			TempMaxAmbient max_amb = new TempMaxAmbient();
+			mess.add(min_amb);
 			mess.add(max_amb);
 			try {
 				mess.getRequest();
+				DMS_LOG.log(dms.getName() + ": " + min_amb);
+				DMS_LOG.log(dms.getName() + ": " + max_amb);
 				dms.setMinAmbientTemp(min_amb.getInteger());
 				dms.setMaxAmbientTemp(max_amb.getInteger());
 			}
@@ -112,10 +117,12 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query the DMS housing temperature */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			TempMinSignHousing min_hou = new TempMinSignHousing();
-			mess.add(min_hou);
 			TempMaxSignHousing max_hou = new TempMaxSignHousing();
+			mess.add(min_hou);
 			mess.add(max_hou);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + min_hou);
+			DMS_LOG.log(dms.getName() + ": " + max_hou);
 			dms.setMinHousingTemp(min_hou.getInteger());
 			dms.setMaxHousingTemp(max_hou.getInteger());
 			return new Failures();
@@ -129,6 +136,7 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(shortError);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + shortError);
 			if(shortError.shouldReport())
 				errorStatus = shortError.getValue();
 			return new MoreFailures();
@@ -142,14 +150,14 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			LampFailureStuckOff l_off = new LampFailureStuckOff();
 			LampFailureStuckOn l_on = new LampFailureStuckOn();
+			DmsActivateMsgError msg_err = new DmsActivateMsgError();
+			ControllerErrorStatus con = new ControllerErrorStatus();
 			if(shortError.checkError(ShortErrorStatus.LAMP)) {
 				mess.add(l_off);
 				mess.add(l_on);
 			}
-			DmsActivateMsgError msg_err = new DmsActivateMsgError();
 			if(shortError.checkError(ShortErrorStatus.MESSAGE))
 				mess.add(msg_err);
-			ControllerErrorStatus con = new ControllerErrorStatus();
 			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
 			if(shortError.checkError(ShortErrorStatus.LAMP |
@@ -159,6 +167,8 @@ public class OpQueryDMSStatus extends OpDMS {
 				mess.getRequest();
 			}
 			if(shortError.checkError(ShortErrorStatus.LAMP)) {
+				DMS_LOG.log(dms.getName() + ": " + l_off);
+				DMS_LOG.log(dms.getName() + ": " + l_on);
 		 		String[] lamp = new String[2];
 				lamp[DMS.STUCK_OFF_BITMAP] =
 					Base64.encode(l_off.getOctetString());
@@ -194,10 +204,13 @@ public class OpQueryDMSStatus extends OpDMS {
 			catch(SNMP.Message.NoSuchName e) {
 				return new SkylineStatus();
 			}
+			DMS_LOG.log(dms.getName() + ": " + potBase);
+			DMS_LOG.log(dms.getName() + ": " + low);
+			DMS_LOG.log(dms.getName() + ": " + high);
+			DMS_LOG.log(dms.getName() + ": " + bad);
 			dms.setLdcPotBase(potBase.getInteger());
 			dms.setPixelCurrentLow(low.getInteger());
 			dms.setPixelCurrentHigh(high.getInteger());
-			DMS_LOG.log(dms.getName() + ": " + bad);
 			return null;
 		}
 	}
@@ -208,16 +221,18 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query Skyline-specific status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			SignFaceHeatStatus heat = new SignFaceHeatStatus();
-			mess.add(heat);
 			IllumPowerStatus power = new IllumPowerStatus();
-			mess.add(power);
 			SensorFailures sensor = new SensorFailures();
+			mess.add(heat);
+			mess.add(power);
 			mess.add(sensor);
 			try {
 				mess.getRequest();
+				DMS_LOG.log(dms.getName() + ": " + heat);
+				DMS_LOG.log(dms.getName() + ": " + power);
+				DMS_LOG.log(dms.getName() + ": " + sensor);
 				dms.setHeatTapeStatus(heat.getValue());
 				dms.setPowerStatus(power.getBitmaps());
-				DMS_LOG.log(dms.getName() + ": " + sensor);
 			}
 			catch(SNMP.Message.NoSuchName e) {
 				// Ignore; only Skyline has these objects
