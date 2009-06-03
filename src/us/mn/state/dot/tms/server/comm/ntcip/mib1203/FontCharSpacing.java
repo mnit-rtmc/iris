@@ -27,10 +27,4 @@ public class FontCharSpacing extends ASN1Integer {
 	public FontCharSpacing(int font) {
 		super(MIB1203.fontEntry.create(new int[] { 5, font }));
 	}
-
-	/** Create a new font character spacing object */
-	public FontCharSpacing(int font, int s) {
-		this(font);
-		value = s;
-	}
 }

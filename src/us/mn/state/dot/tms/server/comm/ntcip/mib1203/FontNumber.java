@@ -27,10 +27,4 @@ public class FontNumber extends ASN1Integer {
 	public FontNumber(int font) {
 		super(MIB1203.fontEntry.create(new int[] { 2, font }));
 	}
-
-	/** Create a new font number object */
-	public FontNumber(int font, int n) {
-		this(font);
-		value = n;
-	}
 }

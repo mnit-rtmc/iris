@@ -27,10 +27,4 @@ public class FontName extends ASN1OctetString {
 	public FontName(int font) {
 		super(MIB1203.fontEntry.create(new int[] { 3, font }));
 	}
-
-	/** Create a new font name object */
-	public FontName(int font, String n) {
-		this(font);
-		value = n.getBytes();
-	}
 }

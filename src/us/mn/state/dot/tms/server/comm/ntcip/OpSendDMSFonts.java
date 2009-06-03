@@ -238,7 +238,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Invalidate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontHeight height = new FontHeight(row, 0);
+			FontHeight height = new FontHeight(row);
 			mess.add(height);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ": " + height);
@@ -297,15 +297,27 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Create a new font in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontNumber(row, font.getNumber()));
-			mess.add(new FontName(row, font.getName()));
-			mess.add(new FontHeight(row, font.getHeight()));
-			mess.add(new FontCharSpacing(row,
-				font.getCharSpacing()));
-			mess.add(new FontLineSpacing(row,
-				font.getLineSpacing()));
+			FontNumber number = new FontNumber(row);
+			FontName name = new FontName(row);
+			FontHeight height = new FontHeight(row);
+			FontCharSpacing char_spacing = new FontCharSpacing(row);
+			FontLineSpacing line_spacing = new FontLineSpacing(row);
+			number.setInteger(font.getNumber());
+			name.setString(font.getName());
+			height.setInteger(font.getHeight());
+			char_spacing.setInteger(font.getCharSpacing());
+			line_spacing.setInteger(font.getLineSpacing());
+			mess.add(number);
+			mess.add(name);
+			mess.add(height);
+			mess.add(char_spacing);
+			mess.add(line_spacing);
 			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": create font #" + row);
+			DMS_LOG.log(dms.getName() + ":= " + number);
+			DMS_LOG.log(dms.getName() + ":= " + name);
+			DMS_LOG.log(dms.getName() + ":= " + height);
+			DMS_LOG.log(dms.getName() + ":= " + char_spacing);
+			DMS_LOG.log(dms.getName() + ":= " + line_spacing);
 			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
 			if(glyphs.isEmpty()) {
 				if(version2)
@@ -367,8 +379,11 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontHeight(row, font.getHeight()));
+			FontHeight height = new FontHeight(row);
+			height.setInteger(font.getHeight());
+			mess.add(height);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ":= " + height);
 			if(first)
 				return new SetDefaultFont();
 			else

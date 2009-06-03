@@ -27,10 +27,4 @@ public class FontHeight extends ASN1Integer {
 	public FontHeight(int font) {
 		super(MIB1203.fontEntry.create(new int[] { 4, font }));
 	}
-
-	/** Create a new font height object */
-	public FontHeight(int font, int h) {
-		this(font);
-		value = h;
-	}
 }
