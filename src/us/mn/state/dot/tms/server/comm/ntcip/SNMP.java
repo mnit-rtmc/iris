@@ -112,7 +112,6 @@ public class SNMP extends BER {
 		encodeSequence(getEncodedData());
 	}
 
-
 	/** Decode an SNMP message */
 	protected void decodeSNMPMessage(InputStream is, String community)
 		throws IOException
