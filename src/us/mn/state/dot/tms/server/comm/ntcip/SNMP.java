@@ -67,6 +67,9 @@ public class SNMP extends BER {
 
 		/** Trap tag */
 		static public final Tag TRAP = new Tag(CONTEXT, true, 4);
+
+		/** Counter tag (RFC1155-SMI) */
+		static public final Tag COUNTER = new Tag(APPLICATION, false,1);
 	}
 
 	/** Get a tag that matches */
@@ -82,6 +85,8 @@ public class SNMP extends BER {
 			return Tag.SET_REQUEST;
 		if(tag.equals(Tag.TRAP))
 			return Tag.TRAP;
+		if(tag.equals(Tag.COUNTER))
+			return Tag.COUNTER;
 		return super.getTag(clazz, constructed, number);
 	}
 
@@ -258,7 +263,10 @@ public class SNMP extends BER {
 		protected void decodeValue(InputStream is, ASN1Object mo)
 			throws IOException
 		{
-			if(mo instanceof ASN1Integer) {
+			if(mo instanceof Counter) {
+				Counter value = (Counter)mo;
+				value.setInteger(decodeCounter(is));
+			} else if(mo instanceof ASN1Integer) {
 				ASN1Integer value = (ASN1Integer)mo;
 				value.setInteger(decodeInteger(is));
 			} else if(mo instanceof ASN1OctetString) {
@@ -266,6 +274,24 @@ public class SNMP extends BER {
 				value.setOctetString(decodeOctetString(is));
 			} else
 				throw new IOException("UNKNOWN OBJECT TYPE");
+		}
+
+		/** Decode a counter (from RFC1155-SMI) */
+		protected int decodeCounter(InputStream is) throws IOException {
+			if(decodeIdentifier(is) != Tag.COUNTER)
+				throw new ParsingException("EXPECTED COUNTER");
+			int length = decodeLength(is);
+			if(length != 4)
+				throw new ParsingException("INVALID LENGTH");
+			int value = 0;
+			for(int i = 0; i < 4; i++) {
+				value <<= 8;
+				int v = is.read();
+				if(v < 0)
+					throw END_OF_STREAM;
+				value |= v;
+			}
+			return value;
 		}
 
 		/** Decode a variable binding */

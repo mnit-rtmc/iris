@@ -12,20 +12,17 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
-
-import us.mn.state.dot.tms.server.comm.ntcip.Counter;
+package us.mn.state.dot.tms.server.comm.ntcip;
 
 /**
- * AvailableGraphicMemory is the number of bytes available to store graphics
- * on the sign.
+ * Counter from RFC1155-SMI.
  *
  * @author Douglas Lau
  */
-public class AvailableGraphicMemory extends Counter {
+abstract public class Counter extends ASN1Integer {
 
-	/** Create a new AvailableGraphicMemory object */
-	public AvailableGraphicMemory() {
-		super(MIB1203.graphicDefinition.create(new int[] {4, 0}));
+	/** Create a new counter */
+	protected Counter(MIBNode n) {
+		super(n);
 	}
 }
