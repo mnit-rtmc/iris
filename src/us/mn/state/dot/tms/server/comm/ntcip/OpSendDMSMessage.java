@@ -69,10 +69,12 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the status to modify request */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1,
-				DmsMessageStatus.Enum.modifyReq));
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, 1);
+			status.setEnum(DmsMessageStatus.Enum.modifyReq);
+			mess.add(status);
 			try {
+				DMS_LOG.log(dms.getName() + ":= " + status);
 				mess.setRequest();
 			}
 			catch(SNMP.Message.GenError e) {
@@ -95,6 +97,7 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.Enum.changeable, 1);
 			mess.add(status);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.isModifying())
 				return new SetMultiString();
 			else
@@ -107,9 +110,11 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the message MULTI string */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsMessageMultiString(
-				DmsMessageMemoryType.Enum.changeable, 1,
-				message.getMulti().toString()));
+			DmsMessageMultiString multi = new DmsMessageMultiString(
+				DmsMessageMemoryType.Enum.changeable, 1);
+			multi.setString(message.getMulti().toString());
+			mess.add(multi);
+			DMS_LOG.log(dms.getName() + ":= " + multi);
 			mess.setRequest();
 			return new ValidateRequest();
 		}
@@ -120,10 +125,12 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the status to modify request */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1,
-				DmsMessageStatus.Enum.validateReq));
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, 1);
+			status.setEnum(DmsMessageStatus.Enum.validateReq);
+			mess.add(status);
 			try {
+				DMS_LOG.log(dms.getName() + ":= " + status);
 				mess.setRequest();
 			}
 			catch(SNMP.Message.GenError e) {
@@ -140,12 +147,14 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsValidateMessageError error = new
 				DmsValidateMessageError();
+			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
 			mess.add(error);
-			DmsMultiSyntaxError multi = new DmsMultiSyntaxError();
-			mess.add(multi);
+			mess.add(m_err);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + error);
+			DMS_LOG.log(dms.getName() + ": " + m_err);
 			if(error.isSyntaxMulti())
-				errorStatus = multi.toString();
+				errorStatus = m_err.toString();
 			else if(error.isError())
 				errorStatus = error.toString();
 			return null;
@@ -159,11 +168,13 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.changeable, 1);
-			mess.add(status);
 			DmsMessageCRC crc = new DmsMessageCRC(
 				DmsMessageMemoryType.Enum.changeable, 1);
+			mess.add(status);
 			mess.add(crc);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ": " + crc);
 			if(!status.isValid())
 				return new ValidateMessageError();
 			messageCRC = crc.getInteger();
@@ -176,11 +187,16 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Activate the message */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsActivateMessage(getDuration(),
-				MAX_MESSAGE_PRIORITY,
-				DmsMessageMemoryType.Enum.changeable, 1,
-				messageCRC, 0));
+			DmsActivateMessage act = new DmsActivateMessage();
+			act.setDuration(getDuration());
+			act.setPriority(MAX_MESSAGE_PRIORITY);
+			act.setMemoryType(DmsMessageMemoryType.Enum.changeable);
+			act.setNumber(1);
+			act.setCrc(messageCRC);
+			act.setAddress(0);
+			mess.add(act);
 			try {
+				DMS_LOG.log(dms.getName() + ":= " + act);
 				mess.setRequest();
 			}
 			catch(SNMP.Message.GenError e) {
@@ -198,20 +214,22 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Get the activate message error */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsActivateMsgError error = new DmsActivateMsgError();
+			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
 			mess.add(error);
-			DmsMultiSyntaxError multi = new DmsMultiSyntaxError();
-			mess.add(multi);
+			mess.add(m_err);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + error);
+			DMS_LOG.log(dms.getName() + ": " + m_err);
 			switch(error.getEnum()) {
-				case syntaxMULTI:
-					errorStatus = multi.toString();
-					break;
-				case other:
-					// FIXME: ADDCO does this too ...
-					return new LedstarActivateError();
-				default:
-					errorStatus = error.toString();
-					break;
+			case syntaxMULTI:
+				errorStatus = m_err.toString();
+				break;
+			case other:
+				// FIXME: ADDCO does this too ...
+				return new LedstarActivateError();
+			default:
+				errorStatus = error.toString();
+				break;
 			}
 			return null;
 		}
@@ -225,6 +243,7 @@ public class OpSendDMSMessage extends OpDMS {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + error);
 			errorStatus = error.toString();
 			return null;
 		}
@@ -235,7 +254,11 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the message time remaining */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new DmsMessageTimeRemaining(getDuration()));
+			DmsMessageTimeRemaining time =
+				new DmsMessageTimeRemaining();
+			time.setInteger(getDuration());
+			mess.add(time);
+			DMS_LOG.log(dms.getName() + ":= " + time);
 			mess.setRequest();
 			return null;
 		}

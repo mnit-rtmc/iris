@@ -25,23 +25,4 @@ public class DmsActivateMessage extends MessageActivationCode {
 	public DmsActivateMessage() {
 		super(MIB1203.signControl.create(new int[] {3, 0}));
 	}
-
-	/** Create a new DmsActivateMessage object
-	 * @param d duration (in minutes)
-	 * @param p activation priority
-	 * @param m memory type
-	 * @param n message number
-	 * @param c CRC (dmsMsgMessageCRC)
-	 * @param a source address */
-	public DmsActivateMessage(int d, int p, DmsMessageMemoryType.Enum m,
-		 int n, int c, int a)
-	{
-		this();
-		duration = d;
-		priority = p;
-		memory = m.ordinal();
-		number = n;
-		crc = c;
-		address = a;
-	}
 }

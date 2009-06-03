@@ -37,6 +37,11 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	/** Message duration */
 	protected int duration;
 
+	/** Set the message duration */
+	public void setDuration(int d) {
+		duration = d;
+	}
+
 	/** Get the message duration */
 	public int getDuration() {
 		return duration;
@@ -44,6 +49,11 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 
 	/** Activation priority */
 	protected int priority;
+
+	/** Set the activation priority */
+	public void setPriority(int p) {
+		priority = p;
+	}
 
 	/** Get the activation priority */
 	public int getPriority() {
@@ -53,13 +63,23 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	/** Memory type */
 	protected int memory;
 
+	/** Set the memory type */
+	public void setMemoryType(DmsMessageMemoryType.Enum m) {
+		memory = m.ordinal();
+	}
+
 	/** Get the memory type */
-	public int getMemory() {
-		return memory;
+	public DmsMessageMemoryType.Enum getMemoryType() {
+		return DmsMessageMemoryType.Enum.fromOrdinal(memory);
 	}
 
 	/** Message number */
 	protected int number;
+
+	/** Set the message number */
+	public void setNumber(int n) {
+		number = n;
+	}
 
 	/** Get the message number */
 	public int getNumber() {
@@ -69,6 +89,11 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	/** Cyclic redundancy check */
 	protected int crc;
 
+	/** Set the CRC */
+	public void setCrc(int c) {
+		crc = c;
+	}
+
 	/** Get the CRC */
 	public int getCrc() {
 		return crc;
@@ -76,6 +101,11 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 
 	/** Source address */
 	protected int address;
+
+	/** Set the source address */
+	public void setAddress(int a) {
+		address = a;
+	}
 
 	/** Get the source address */
 	public int getAddress() {

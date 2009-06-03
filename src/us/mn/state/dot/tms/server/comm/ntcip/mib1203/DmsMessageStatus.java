@@ -44,17 +44,9 @@ public class DmsMessageStatus extends ASN1Integer {
 			9, m.ordinal(), number}));
 	}
 
-	/** Create a new DmsMessageStatus object */
-	public DmsMessageStatus(DmsMessageMemoryType.Enum m, int number,
-		Enum s)
-	{
-		this(m, number);
-		value = s.ordinal();
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
+	/** Set the enum value */
+	public void setEnum(Enum v) {
+		value = v.ordinal();
 	}
 
 	/** Get the object value */

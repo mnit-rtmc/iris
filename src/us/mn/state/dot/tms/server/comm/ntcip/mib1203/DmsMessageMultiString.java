@@ -28,12 +28,4 @@ public class DmsMessageMultiString extends ASN1OctetString {
 		super(MIB1203.dmsMessageEntry.create(new int[] {
 			3, m.ordinal(), number}));
 	}
-
-	/** Create a new DmsMessageMultiString object */
-	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int number,
-		String s)
-	{
-		this(m, number);
-		value = s.getBytes();
-	}
 }
