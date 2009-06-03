@@ -118,15 +118,18 @@ public class OpSendDMSGraphics extends OpDMS {
 		/** Query the graphic number for one graphic */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsGraphicNumber number = new DmsGraphicNumber(row);
+			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			mess.add(number);
+			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + number);
+			DMS_LOG.log(dms.getName() + ": " + status);
 			Integer g_num = number.getInteger();
 			if(num_2_row.containsKey(g_num)) {
 				num_2_row.put(g_num, row);
 				open_rows.remove(row);
 			}
-			if(row < num_graphics.getInteger()) {
+			if(row < max_graphics.getInteger()) {
 				row++;
 				return this;
 			} else
