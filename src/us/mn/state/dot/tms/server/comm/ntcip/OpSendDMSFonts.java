@@ -272,7 +272,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Invalidate the font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
-			status.setInteger(FontStatus.Enum.notUsedReq.ordinal());
+			status.setEnum(FontStatus.Enum.notUsedReq);
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);
@@ -286,7 +286,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Set the font status to modifying */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
-			status.setInteger(FontStatus.Enum.modifyReq.ordinal());
+			status.setEnum(FontStatus.Enum.modifyReq);
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);
@@ -423,8 +423,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
-			status.setInteger(
-				FontStatus.Enum.readyForUseReq.ordinal());
+			status.setEnum(FontStatus.Enum.readyForUseReq);
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);

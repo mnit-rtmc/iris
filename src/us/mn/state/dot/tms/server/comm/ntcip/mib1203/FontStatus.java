@@ -44,18 +44,18 @@ public class FontStatus extends ASN1Integer {
 		super(MIB1203.fontEntry.create(new int[] { 8, font }));
 	}
 
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
+	/** Set the enum value */
+	public void setEnum(Enum v) {
+		value = v.ordinal();
 	}
 
 	/** Get the enum value */
 	public Enum getEnum() {
 		return Enum.fromOrdinal(value);
+	}
+
+	/** Get the object value */
+	public String getValue() {
+		return Enum.fromOrdinal(value).toString();
 	}
 }
