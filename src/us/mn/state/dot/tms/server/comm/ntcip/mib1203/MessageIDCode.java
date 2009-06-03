@@ -23,7 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.ntcip.MIBNode;
 
 /**
- * Ntcip MessageIDCode object
+ * A MessageIDCode is a code which identifies a message.  It is encoded using
+ * OER (NTCIP 1102).
  *
  * @author Douglas Lau
  */

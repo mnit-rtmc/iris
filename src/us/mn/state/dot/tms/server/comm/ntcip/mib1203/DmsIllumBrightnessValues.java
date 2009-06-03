@@ -22,7 +22,8 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 
 /**
- * Ntcip DmsIllumBrightnessValues object
+ * DmsIllumBrightnessValues is a sign brightness table.  It is encoded using
+ * OER (NTCIP 1102).
  *
  * @author Douglas Lau
  */

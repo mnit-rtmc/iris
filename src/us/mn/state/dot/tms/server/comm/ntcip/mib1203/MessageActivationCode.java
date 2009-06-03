@@ -23,7 +23,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.ntcip.MIBNode;
 
 /**
- * MessageActivationCode type
+ * A MessageActivationCode is a code used to activate a message.  It is encoded
+ * using OER (NTCIP 1102).
  *
  * @author Douglas Lau
  */

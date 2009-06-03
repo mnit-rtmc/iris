@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * Ntcip DmsMessageCRC object
+ * DmsMessageCRC is a CRC based on the dmsMessageMultiString, dmsMessageBeacon,
+ * and dmsMessagePixelService objects.  These values are encoded using OER
+ * (NTCIP 1102) and the CRC is performed on the result.
  *
  * @author Douglas Lau
  */
