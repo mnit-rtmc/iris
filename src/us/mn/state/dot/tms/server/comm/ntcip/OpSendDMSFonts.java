@@ -222,7 +222,7 @@ public class OpSendDMSFonts extends OpDMS {
 				if(version2)
 					return new QueryInitialStatus();
 				else
-					return new InvalidateFontV1();
+					return new InvalidateFont();
 			}
 		}
 	}
@@ -237,51 +237,53 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			switch(status.getEnum()) {
+			case notUsed:
+				return new RequestStatusModify();
 			case modifying:
-				return new CreateFont();
-			case permanent:
-				return nextFontPhase();
+			case calculatingID:
+			case readyForUse:
 			case unmanaged:
-				return new InvalidateFontV2();
-			case inUse:
-				DMS_LOG.log(dms.getName() +
-					": font send aborted");
-				return nextFontPhase();
+				return new RequestStatusNotUsed();
 			default:
-				return new SetStatusModifying();
+				DMS_LOG.log(dms.getName() + ": font aborted");
+				return nextFontPhase();
 			}
 		}
 	}
 
-	/** Invalidate the font (v1) */
-	protected class InvalidateFontV1 extends Phase {
+	/** Phase to request the font status be "notUsed" */
+	protected class RequestStatusNotUsed extends Phase {
 
-		/** Invalidate a font entry in the font table */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontHeight height = new FontHeight(row);
-			mess.add(height);
-			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ":= " + height);
-			return new CreateFont();
-		}
-	}
-
-	/** Invalidate the font (v2) */
-	protected class InvalidateFontV2 extends Phase {
-
-		/** Invalidate the font entry in the font table */
+		/** Request the font status be "notUsed" */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			status.setEnum(FontStatus.Enum.notUsedReq);
 			mess.add(status);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);
-			return new SetStatusModifying();
+			return new VerifyStatusNotUsed();
 		}
 	}
 
-	/** Phase to set the font status to modifying */
-	protected class SetStatusModifying extends Phase {
+	/** Phase to verify the font status is "notUsed" */
+	protected class VerifyStatusNotUsed extends Phase {
+
+		/** Verify the font status is "notUsed" */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontStatus status = new FontStatus(row);
+			mess.add(status);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			if(status.getEnum() != FontStatus.Enum.notUsed) {
+				DMS_LOG.log(dms.getName() + ": font aborted");
+				return nextFontPhase();
+			}
+			return new RequestStatusModify();
+		}
+	}
+
+	/** Phase to request the font status to "modifying" */
+	protected class RequestStatusModify extends Phase {
 
 		/** Set the font status to modifying */
 		protected Phase poll(AddressedMessage mess) throws IOException {
@@ -304,10 +306,22 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			if(status.getEnum() != FontStatus.Enum.modifying) {
-				DMS_LOG.log(dms.getName() +
-					": font send aborted");
+				DMS_LOG.log(dms.getName() + ": font aborted");
 				return nextFontPhase();
 			}
+			return new InvalidateFont();
+		}
+	}
+
+	/** Invalidate the font */
+	protected class InvalidateFont extends Phase {
+
+		/** Invalidate a font entry in the font table */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontHeight height = new FontHeight(row);
+			mess.add(height);
+			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ":= " + height);
 			return new CreateFont();
 		}
 	}
@@ -436,7 +450,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Time to stop checking if the font is ready for use */
 		protected final long expire = System.currentTimeMillis() + 
-			10 * 1000;
+			15 * 1000;
 
 		/** Verify the font status is ready for use */
 		protected Phase poll(AddressedMessage mess) throws IOException {
@@ -444,23 +458,24 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
-			if(status.getEnum() == FontStatus.Enum.readyForUse) {
+			switch(status.getEnum()) {
+			case readyForUse:
 				if(first)
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
-			}
-			if(status.getEnum() != FontStatus.Enum.calculatingID) {
+			case calculatingID:
+				if(System.currentTimeMillis() > expire) {
+					DMS_LOG.log(dms.getName() + ": font " +
+					"status timeout expired -- aborted");
+					return nextFontPhase();
+				} else
+					return this;
+			default:
 				DMS_LOG.log(dms.getName() + ": font status " +
 					"unexpected -- aborted");
 				return nextFontPhase();
 			}
-			if(System.currentTimeMillis() > expire) {
-				DMS_LOG.log(dms.getName() + ": font status " +
-					"timeout expired -- aborted");
-				return nextFontPhase();
-			} else
-				return this;
 		}
 	}
 
