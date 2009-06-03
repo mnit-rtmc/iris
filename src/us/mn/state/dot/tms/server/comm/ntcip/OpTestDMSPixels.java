@@ -76,13 +76,11 @@ public class OpTestDMSPixels extends OpDMS {
 			PixelTestActivation test = new PixelTestActivation();
 			mess.add(test);
 			mess.getRequest();
-			if(test.getInteger() ==
-			   PixelTestActivation.Enum.noTest.ordinal())
+			DMS_LOG.log(dms.getName() + ": " + test);
+			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new ActivatePixelTest();
-			else {
-				DMS_LOG.log(dms.getName() + ": " + test);
-				return new QueryRows();
-			}
+			else
+				return new CheckTestCompletion();
 		}
 	}
 
@@ -91,7 +89,10 @@ public class OpTestDMSPixels extends OpDMS {
 
 		/** Activate the pixel test */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new PixelTestActivation());
+			PixelTestActivation test = new PixelTestActivation();
+			test.setEnum(PixelTestActivation.Enum.test);
+			mess.add(test);
+			DMS_LOG.log(dms.getName() + ":= " + test);
 			mess.setRequest();
 			return new CheckTestCompletion();
 		}
@@ -112,8 +113,8 @@ public class OpTestDMSPixels extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(test);
 			mess.getRequest();
-			if(test.getInteger() ==
-			   PixelTestActivation.Enum.noTest.ordinal())
+			DMS_LOG.log(dms.getName() + ": " + test);
+			if(test.getEnum() == PixelTestActivation.Enum.noTest)
 				return new QueryRows();
 			if(System.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": pixel test " +

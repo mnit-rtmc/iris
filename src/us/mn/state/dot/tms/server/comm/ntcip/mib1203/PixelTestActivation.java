@@ -40,12 +40,16 @@ public class PixelTestActivation extends ASN1Integer {
 	/** Create a new PixelTestActivation object */
 	public PixelTestActivation() {
 		super(MIB1203.statError.create(new int[] {4, 0}));
-		value = Enum.test.ordinal();
 	}
 
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
+	/** Set the enum value */
+	public void setEnum(Enum v) {
+		value = v.ordinal();
+	}
+
+	/** Get the enum value */
+	public Enum getEnum() {
+		return Enum.fromOrdinal(value);
 	}
 
 	/** Get the object value */
