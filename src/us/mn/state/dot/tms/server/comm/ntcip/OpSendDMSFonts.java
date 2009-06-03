@@ -47,8 +47,8 @@ public class OpSendDMSFonts extends OpDMS {
 	protected final MaxFontCharacters max_characters =
 		new MaxFontCharacters();
 
-	/** Mapping of font numbers to font index (row in font table) */
-	protected final TreeMap<Integer, Integer> font_numbers =
+	/** Mapping of font numbers to row in font table */
+	protected final TreeMap<Integer, Integer> num_2_row =
 		new TreeMap<Integer, Integer>();
 
 	/** Set of open rows in the font table */
@@ -60,8 +60,8 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Current font */
 	protected FontImpl font;
 
-	/** Font index for font table */
-	protected int index = 0;
+	/** Current row in font table */
+	protected int row;
 
 	/** Flag for determining the default font */
 	protected boolean first = true;
@@ -88,7 +88,7 @@ public class OpSendDMSFonts extends OpDMS {
 			});
 		}
 		for(FontImpl f: fonts)
-			font_numbers.put(f.getNumber(), null);
+			num_2_row.put(f.getNumber(), null);
 		font_iterator = fonts.iterator();
 	}
 
@@ -107,17 +107,15 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + num_fonts);
 			DMS_LOG.log(dms.getName() + ": " + max_characters);
-			for(int row = 1; row <= num_fonts.getInteger(); row++)
+			for(row = 1; row <= num_fonts.getInteger(); row++)
 				open_rows.add(row);
+			row = 1;
 			return new QueryFontNumbers();
 		}
 	}
 
 	/** Phase to query all font numbers */
 	protected class QueryFontNumbers extends Phase {
-
-		/** Current row in the font table */
-		protected int row = 1;
 
 		/** Query the font number for one font */
 		protected Phase poll(AddressedMessage mess) throws IOException {
@@ -127,31 +125,31 @@ public class OpSendDMSFonts extends OpDMS {
 				mess.getRequest();
 			}
 			catch(SNMP.Message.NoSuchName e) {
-				return populateFontNumbers();
+				return populateNum2Row();
 			}
 			DMS_LOG.log(dms.getName() + ": " + number);
 			Integer f_num = number.getInteger();
-			if(font_numbers.containsKey(f_num)) {
-				font_numbers.put(f_num, row);
+			if(num_2_row.containsKey(f_num)) {
+				num_2_row.put(f_num, row);
 				open_rows.remove(row);
 			}
 			if(row < num_fonts.getInteger()) {
 				row++;
 				return this;
 			} else
-				return populateFontNumbers();
+				return populateNum2Row();
 		}
 	}
 
-	/** Populate the font_numbers hash */
-	protected Phase populateFontNumbers() {
-		for(Integer f_num: font_numbers.keySet()) {
-			if(font_numbers.get(f_num) == null) {
-				Integer row = open_rows.pollLast();
-				if(row != null)
-					font_numbers.put(f_num, row);
+	/** Populate the num_2_row mapping */
+	protected Phase populateNum2Row() {
+		for(Integer f_num: num_2_row.keySet()) {
+			if(num_2_row.get(f_num) == null) {
+				Integer r = open_rows.pollLast();
+				if(r != null)
+					num_2_row.put(f_num, r);
 				else
-					font_numbers.remove(f_num);
+					num_2_row.remove(f_num);
 			}
 		}
 		return nextFontPhase();
@@ -162,8 +160,8 @@ public class OpSendDMSFonts extends OpDMS {
 		while(font_iterator.hasNext()) {
 			font = font_iterator.next();
 			Integer f_num = font.getNumber();
-			if(font_numbers.containsKey(f_num)) {
-				index = font_numbers.get(f_num);
+			if(num_2_row.containsKey(f_num)) {
+				row = num_2_row.get(f_num);
 				return new VerifyFont();
 			}
 			DMS_LOG.log(dms.getName() + ": Skipping font " + f_num);
@@ -176,10 +174,10 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify a font */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			DMS_LOG.log(dms.getName() + " Font #" + index +
+			DMS_LOG.log(dms.getName() + " Font #" + row +
 				", name: " + font.getName() + ", number: " +
 				 font.getNumber());
-			FontVersionID version = new FontVersionID(index);
+			FontVersionID version = new FontVersionID(row);
 			mess.add(version);
 			try {
 				mess.getRequest();
@@ -208,7 +206,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Query the initial font status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontStatus status = new FontStatus(index);
+			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			try {
 				mess.getRequest();
@@ -240,7 +238,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Invalidate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontHeight height = new FontHeight(index, 0);
+			FontHeight height = new FontHeight(row, 0);
 			mess.add(height);
 			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ": " + height);
@@ -253,7 +251,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Invalidate the font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontStatus status = new FontStatus(index);
+			FontStatus status = new FontStatus(row);
 			status.setInteger(FontStatus.Enum.notUsedReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
@@ -267,7 +265,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Set the font status to modifying */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontStatus status = new FontStatus(index);
+			FontStatus status = new FontStatus(row);
 			status.setInteger(FontStatus.Enum.modifyReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
@@ -281,7 +279,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is modifying */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontStatus status = new FontStatus(index);
+			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -299,15 +297,15 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Create a new font in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontNumber(index, font.getNumber()));
-			mess.add(new FontName(index, font.getName()));
-			mess.add(new FontHeight(index, font.getHeight()));
-			mess.add(new FontCharSpacing(index,
+			mess.add(new FontNumber(row, font.getNumber()));
+			mess.add(new FontName(row, font.getName()));
+			mess.add(new FontHeight(row, font.getHeight()));
+			mess.add(new FontCharSpacing(row,
 				font.getCharSpacing()));
-			mess.add(new FontLineSpacing(index,
+			mess.add(new FontLineSpacing(row,
 				font.getLineSpacing()));
 			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": create font #" + index);
+			DMS_LOG.log(dms.getName() + ": create font #" + row);
 			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
 			if(glyphs.isEmpty()) {
 				if(version2)
@@ -343,9 +341,9 @@ public class OpSendDMSFonts extends OpDMS {
 			int code_point = glyph.getCodePoint();
 			Graphic graphic = glyph.getGraphic();
 			byte[] pixels = Base64.decode(graphic.getPixels());
-			mess.add(new CharacterWidth(index, code_point,
+			mess.add(new CharacterWidth(row, code_point,
 				graphic.getWidth()));
-			mess.add(new CharacterBitmap(index, code_point,
+			mess.add(new CharacterBitmap(row, code_point,
 				pixels));
 			mess.setRequest();
 			count++;
@@ -369,7 +367,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new FontHeight(index, font.getHeight()));
+			mess.add(new FontHeight(row, font.getHeight()));
 			mess.setRequest();
 			if(first)
 				return new SetDefaultFont();
@@ -383,7 +381,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontStatus status = new FontStatus(index);
+			FontStatus status = new FontStatus(row);
 			status.setInteger(
 				FontStatus.Enum.readyForUseReq.ordinal());
 			mess.add(status);
@@ -402,7 +400,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is ready for use */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			FontStatus status = new FontStatus(index);
+			FontStatus status = new FontStatus(row);
 			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
