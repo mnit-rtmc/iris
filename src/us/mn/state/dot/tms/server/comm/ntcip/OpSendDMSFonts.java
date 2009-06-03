@@ -111,6 +111,8 @@ public class OpSendDMSFonts extends OpDMS {
 				version2 = true;
 			}
 			catch(SNMP.Message.NoSuchName e) {
+				// Note: if this object doesn't exist, then the
+				//       sign must not support v2.
 				version2 = false;
 			}
 			return new QueryNumFonts();
@@ -140,14 +142,21 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Query the font number for one font */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontNumber number = new FontNumber(row);
+			FontStatus status = new FontStatus(row);
 			mess.add(number);
+			if(version2)
+				mess.add(status);
 			try {
 				mess.getRequest();
 			}
 			catch(SNMP.Message.NoSuchName e) {
+				// Note: some vendors respond with NoSuchName
+				//       if the font is not valid
 				return populateNum2Row();
 			}
 			DMS_LOG.log(dms.getName() + ": " + number);
+			if(version2)
+				DMS_LOG.log(dms.getName() + ": " + status);
 			Integer f_num = number.getInteger();
 			if(num_2_row.containsKey(f_num)) {
 				num_2_row.put(f_num, row);
