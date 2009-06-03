@@ -43,6 +43,10 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Number of fonts supported */
 	protected final NumFonts num_fonts = new NumFonts();
 
+	/** Maximum number of characters in a font */
+	protected final MaxFontCharacters max_characters =
+		new MaxFontCharacters();
+
 	/** Mapping of font numbers to font index (row in font table) */
 	protected final TreeMap<Integer, Integer> font_numbers =
 		new TreeMap<Integer, Integer>();
@@ -63,7 +67,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected boolean first = true;
 
 	/** Flag for version 2 controller (with support for fontStatus) */
-	protected boolean font_status_support = true;
+	protected boolean version2 = true;
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
@@ -99,8 +103,10 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Query the number of supported fonts */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(num_fonts);
+			mess.add(max_characters);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + num_fonts);
+			DMS_LOG.log(dms.getName() + ": " + max_characters);
 			for(int row = 1; row <= num_fonts.getInteger(); row++)
 				open_rows.add(row);
 			return new QueryFontNumbers();
@@ -189,7 +195,7 @@ public class OpSendDMSFonts extends OpDMS {
 				DMS_LOG.log(dms.getName() + ": Font is valid");
 				return nextFontPhase();
 			} else {
-				if(font_status_support)
+				if(version2)
 					return new QueryInitialStatus();
 				else
 					return new InvalidateFontV1();
@@ -208,7 +214,7 @@ public class OpSendDMSFonts extends OpDMS {
 				mess.getRequest();
 			}
 			catch(SNMP.Message.NoSuchName e) {
-				font_status_support = false;
+				version2 = false;
 				return new InvalidateFontV1();
 			}
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -304,7 +310,7 @@ public class OpSendDMSFonts extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": create font #" + index);
 			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
 			if(glyphs.isEmpty()) {
-				if(font_status_support)
+				if(version2)
 					return new ValidateFontV2();
 				else
 					return new ValidateFontV1();
@@ -349,7 +355,7 @@ public class OpSendDMSFonts extends OpDMS {
 				glyph = chars.next();
 				return this;
 			} else {
-				if(font_status_support)
+				if(version2)
 					return new ValidateFontV2();
 				else
 					return new ValidateFontV1();
