@@ -46,7 +46,6 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process the message table source from the sign controller */
 	protected Phase processMessageSource() {
-		DMS_LOG.log(dms.getName() + ": " + source);
 		SignMessage m = dms.getMessageCurrent();
 		if(DmsMessageMemoryType.isBlank(source.getMemory())) {
 			/* The sign is blank. If IRIS says there should
@@ -93,6 +92,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			mess.add(source);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + source);
 			return processMessageSource();
 		}
 	}
@@ -104,12 +104,12 @@ public class OpQueryDMSMessage extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
-			mess.add(multi);
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
-			mess.add(status);
 			DmsMessageTimeRemaining time =
 				new DmsMessageTimeRemaining();
+			mess.add(multi);
+			mess.add(status);
 			mess.add(time);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + multi);
