@@ -241,7 +241,7 @@ public class OpSendDMSFonts extends OpDMS {
 			FontHeight height = new FontHeight(row);
 			mess.add(height);
 			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": " + height);
+			DMS_LOG.log(dms.getName() + ":= " + height);
 			return new CreateFont();
 		}
 	}
@@ -255,7 +255,7 @@ public class OpSendDMSFonts extends OpDMS {
 			status.setInteger(FontStatus.Enum.notUsedReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ":= " + status);
 			return new SetStatusModifying();
 		}
 	}
@@ -269,7 +269,7 @@ public class OpSendDMSFonts extends OpDMS {
 			status.setInteger(FontStatus.Enum.modifyReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ":= " + status);
 			return new VerifyStatusModifying();
 		}
 	}
@@ -353,11 +353,17 @@ public class OpSendDMSFonts extends OpDMS {
 			int code_point = glyph.getCodePoint();
 			Graphic graphic = glyph.getGraphic();
 			byte[] pixels = Base64.decode(graphic.getPixels());
-			mess.add(new CharacterWidth(row, code_point,
-				graphic.getWidth()));
-			mess.add(new CharacterBitmap(row, code_point,
-				pixels));
+			CharacterWidth char_width = new CharacterWidth(row,
+				code_point);
+			CharacterBitmap char_bitmap = new CharacterBitmap(row,
+				code_point);
+			char_width.setInteger(graphic.getWidth());
+			char_bitmap.setOctetString(pixels);
+			mess.add(char_width);
+			mess.add(char_bitmap);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ":= " + char_width);
+			DMS_LOG.log(dms.getName() + ":= " + char_bitmap);
 			count++;
 			if(count % 20 == 0 && !controller.isFailed())
 				controller.resetErrorCounter(id);
@@ -401,7 +407,7 @@ public class OpSendDMSFonts extends OpDMS {
 				FontStatus.Enum.readyForUseReq.ordinal());
 			mess.add(status);
 			mess.setRequest();
-			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ":= " + status);
 			return new VerifyStatusReadyForUse();
 		}
 	}
@@ -444,10 +450,11 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Set the default font numbmer */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			DefaultFont dfont = new DefaultFont(font.getNumber());
-			DMS_LOG.log(dms.getName() + ": " + dfont);
+			DefaultFont dfont = new DefaultFont();
+			dfont.setInteger(font.getNumber());
 			mess.add(dfont);
 			mess.setRequest();
+			DMS_LOG.log(dms.getName() + ":= " + dfont);
 			first = false;
 			return nextFontPhase();
 		}

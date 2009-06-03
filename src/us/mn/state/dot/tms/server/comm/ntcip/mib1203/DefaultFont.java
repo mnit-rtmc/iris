@@ -25,8 +25,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 public class DefaultFont extends ASN1Integer {
 
 	/** Create a new DefaultFont object */
-	public DefaultFont(int f) {
+	public DefaultFont() {
 		super(MIB1203.multiCfg.create(new int[] {5, 0}));
-		value = f;
 	}
 }

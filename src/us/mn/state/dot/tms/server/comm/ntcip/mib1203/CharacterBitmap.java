@@ -29,12 +29,6 @@ public class CharacterBitmap extends ASN1OctetString {
 			3, font, index}));
 	}
 
-	/** Create a new CharacterBitmap object */
-	public CharacterBitmap(int font, int index, byte[] b) {
-		this(font, index);
-		value = b;
-	}
-
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();

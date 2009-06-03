@@ -134,7 +134,7 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 3, 0
 		}));
-		oid = new CharacterWidth(5, 32, 7).getOID();
+		oid = new CharacterWidth(5, 32).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 2, 5, 32
 		}));
@@ -143,7 +143,7 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 3, 5, 32
 		}));
 
-		oid = new DefaultFont(0).getOID();
+		oid = new DefaultFont().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 5, 0
 		}));
@@ -453,17 +453,17 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 10, 15
 		}));
-		oid = new DmsGraphicBitmapIndex(15).getOID();
+		oid = new DmsGraphicBitmapIndex(6, 15).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 1, 15
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 1, 6, 15
 		}));
-		oid = new DmsGraphicBlockNumber(15).getOID();
+		oid = new DmsGraphicBlockNumber(6, 15).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 2, 15
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 2, 6, 15
 		}));
-		oid = new DmsGraphicBlockBitmap(15).getOID();
+		oid = new DmsGraphicBlockBitmap(6, 15).getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
-			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 3, 15
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 3, 6, 15
 		}));
 
 for(int i: oid) System.err.print(" " + i);
