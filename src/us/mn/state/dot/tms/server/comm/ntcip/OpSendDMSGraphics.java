@@ -223,8 +223,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.notUsedReq);
 			mess.add(status);
-			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);
+			mess.setRequest();
 			return new RequestModify();
 		}
 	}
@@ -237,8 +237,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.modifyReq);
 			mess.add(status);
-			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);
+			mess.setRequest();
 			return new VerifyStatusModifying();
 		}
 	}
@@ -289,7 +289,6 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(type);
 			mess.add(trans_enabled);
 			mess.add(trans_color);
-			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + number);
 			DMS_LOG.log(dms.getName() + ":= " + name);
 			DMS_LOG.log(dms.getName() + ":= " + height);
@@ -297,6 +296,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + type);
 			DMS_LOG.log(dms.getName() + ":= " + trans_enabled);
 			DMS_LOG.log(dms.getName() + ":= " + trans_color);
+			mess.setRequest();
 			return new SendGraphicBlock();
 		}
 	}
@@ -322,8 +322,8 @@ public class OpSendDMSGraphics extends OpDMS {
 				new DmsGraphicBlockBitmap(row, block);
 			block_bitmap.setOctetString(createBlock());
 			mess.add(block_bitmap);
-			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + block_bitmap);
+			mess.setRequest();
 			if(block * block_size.getInteger() < bitmap.length) {
 				block++;
 				if(block % 20 == 0 && !controller.isFailed())
@@ -351,8 +351,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			DmsGraphicStatus status = new DmsGraphicStatus(row);
 			status.setEnum(DmsGraphicStatus.Enum.readyForUseReq);
 			mess.add(status);
-			mess.setRequest();
 			DMS_LOG.log(dms.getName() + ":= " + status);
+			mess.setRequest();
 			return new VerifyStatusReadyForUse();
 		}
 	}
