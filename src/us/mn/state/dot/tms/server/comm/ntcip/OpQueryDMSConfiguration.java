@@ -49,6 +49,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			GlobalMaxModules modules = new GlobalMaxModules();
 			mess.add(modules);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + modules);
 			return new QueryModules(modules.getInteger());
 		}
 	}
@@ -70,25 +71,23 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the module make, model and version */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			ModuleMake make = new ModuleMake(mod);
-			mess.add(make);
 			ModuleModel model = new ModuleModel(mod);
-			mess.add(model);
 			ModuleVersion version = new ModuleVersion(mod);
-			mess.add(version);
 			ModuleType m_type = new ModuleType(mod);
+			mess.add(make);
+			mess.add(model);
+			mess.add(version);
 			mess.add(m_type);
 			mess.getRequest();
-			if(m_type.getInteger() ==
-			   ModuleType.Enum.software.ordinal())
-			{
-				dms.setMake(make.getValue());
-				dms.setModel(model.getValue());
-				dms.setVersion(version.getValue());
-			}
 			DMS_LOG.log(dms.getName() + ": " + make);
 			DMS_LOG.log(dms.getName() + ": " + model);
 			DMS_LOG.log(dms.getName() + ": " + version);
 			DMS_LOG.log(dms.getName() + ": " + m_type);
+			if(m_type.getEnum() == ModuleType.Enum.software) {
+				dms.setMake(make.getValue());
+				dms.setModel(model.getValue());
+				dms.setVersion(version.getValue());
+			}
 			mod += 1;
 			if(mod < count)
 				return this;
@@ -103,25 +102,34 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the DMS information */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsSignAccess access = new DmsSignAccess();
-			mess.add(access);
 			DmsSignType type = new DmsSignType();
-			mess.add(type);
 			DmsSignHeight height = new DmsSignHeight();
-			mess.add(height);
 			DmsSignWidth width = new DmsSignWidth();
-			mess.add(width);
 			DmsHorizontalBorder h_border =
 				new DmsHorizontalBorder();
-			mess.add(h_border);
 			DmsVerticalBorder v_border = new DmsVerticalBorder();
-			mess.add(v_border);
 			DmsLegend legend = new DmsLegend();
-			mess.add(legend);
 			DmsBeaconType beacon = new DmsBeaconType();
-			mess.add(beacon);
 			DmsSignTechnology tech = new DmsSignTechnology();
+			mess.add(access);
+			mess.add(type);
+			mess.add(height);
+			mess.add(width);
+			mess.add(h_border);
+			mess.add(v_border);
+			mess.add(legend);
+			mess.add(beacon);
 			mess.add(tech);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + access);
+			DMS_LOG.log(dms.getName() + ": " + type);
+			DMS_LOG.log(dms.getName() + ": " + height);
+			DMS_LOG.log(dms.getName() + ": " + width);
+			DMS_LOG.log(dms.getName() + ": " + h_border);
+			DMS_LOG.log(dms.getName() + ": " + v_border);
+			DMS_LOG.log(dms.getName() + ": " + legend);
+			DMS_LOG.log(dms.getName() + ": " + beacon);
+			DMS_LOG.log(dms.getName() + ": " + tech);
 			dms.setSignAccess(access.getValue());
 			dms.setDmsType(type.getValueEnum());
 			dms.setFaceHeight(height.getInteger());
@@ -142,20 +150,26 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			VmsSignHeightPixels s_height =
 				new VmsSignHeightPixels();
-			mess.add(s_height);
 			VmsSignWidthPixels s_width = new VmsSignWidthPixels();
-			mess.add(s_width);
 			VmsHorizontalPitch h_pitch = new VmsHorizontalPitch();
-			mess.add(h_pitch);
 			VmsVerticalPitch v_pitch = new VmsVerticalPitch();
-			mess.add(v_pitch);
 			VmsCharacterHeightPixels c_height =
 				new VmsCharacterHeightPixels();
-			mess.add(c_height);
 			VmsCharacterWidthPixels c_width =
 				new VmsCharacterWidthPixels();
+			mess.add(s_height);
+			mess.add(s_width);
+			mess.add(h_pitch);
+			mess.add(v_pitch);
+			mess.add(c_height);
 			mess.add(c_width);
 			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + s_height);
+			DMS_LOG.log(dms.getName() + ": " + s_width);
+			DMS_LOG.log(dms.getName() + ": " + h_pitch);
+			DMS_LOG.log(dms.getName() + ": " + v_pitch);
+			DMS_LOG.log(dms.getName() + ": " + c_height);
+			DMS_LOG.log(dms.getName() + ": " + c_width);
 			dms.setHeightPixels(s_height.getInteger());
 			dms.setWidthPixels(s_width.getInteger());
 			dms.setHorizontalPitch(h_pitch.getInteger());

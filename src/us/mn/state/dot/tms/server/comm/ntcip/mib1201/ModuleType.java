@@ -42,9 +42,9 @@ public class ModuleType extends ASN1Integer {
 		super(MIB1201.moduleTableEntry.create(new int[] { 6, row }));
 	}
 
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
+	/** Get the enum value */
+	public Enum getEnum() {
+		return Enum.fromOrdinal(value);
 	}
 
 	/** Get the object value */
