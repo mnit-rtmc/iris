@@ -67,7 +67,7 @@ public class OpSendDMSFonts extends OpDMS {
 	protected boolean first = true;
 
 	/** Flag for version 2 controller (with support for fontStatus) */
-	protected boolean version2 = true;
+	protected boolean version2;
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
@@ -94,7 +94,27 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new QueryNumFonts();
+		return new Query1203Version();
+	}
+
+	/** Phase to determine the version of NTCIP 1203 (1 or 2) */
+	protected class Query1203Version extends Phase {
+
+		/** Query the maximum character size (v2 only) */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FontMaxCharacterSize max_char =
+				new FontMaxCharacterSize();
+			mess.add(max_char);
+			try {
+				mess.getRequest();
+				DMS_LOG.log(dms.getName() + ": " + max_char);
+				version2 = true;
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				version2 = false;
+			}
+			return new QueryNumFonts();
+		}
 	}
 
 	/** Phase to query the number of supported fonts */
@@ -205,13 +225,7 @@ public class OpSendDMSFonts extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			FontStatus status = new FontStatus(row);
 			mess.add(status);
-			try {
-				mess.getRequest();
-			}
-			catch(SNMP.Message.NoSuchName e) {
-				version2 = false;
-				return new InvalidateFontV1();
-			}
+			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
 			switch(status.getEnum()) {
 			case modifying:

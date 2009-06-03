@@ -142,6 +142,10 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 3, 5, 32
 		}));
+		oid = new FontMaxCharacterSize().getOID();
+		assertTrue(Arrays.equals(oid, new int[] {
+			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 5, 0
+		}));
 
 		oid = new DefaultFont().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
