@@ -174,9 +174,6 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify a font */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			DMS_LOG.log(dms.getName() + " Font #" + row +
-				", name: " + font.getName() + ", number: " +
-				 font.getNumber());
 			FontVersionID version = new FontVersionID(row);
 			mess.add(version);
 			try {
@@ -226,7 +223,7 @@ public class OpSendDMSFonts extends OpDMS {
 			case inUse:
 				DMS_LOG.log(dms.getName() +
 					": font send aborted");
-				return null;
+				return nextFontPhase();
 			default:
 				return new SetStatusModifying();
 			}
@@ -286,7 +283,7 @@ public class OpSendDMSFonts extends OpDMS {
 			if(status.getEnum() != FontStatus.Enum.modifying) {
 				DMS_LOG.log(dms.getName() +
 					": font send aborted");
-				return null;
+				return nextFontPhase();
 			}
 			return new CreateFont();
 		}
@@ -434,12 +431,12 @@ public class OpSendDMSFonts extends OpDMS {
 			if(status.getEnum() != FontStatus.Enum.calculatingID) {
 				DMS_LOG.log(dms.getName() + ": font status " +
 					"unexpected -- aborted");
-				return null;
+				return nextFontPhase();
 			}
 			if(System.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": font status " +
 					"timeout expired -- aborted");
-				return null;
+				return nextFontPhase();
 			} else
 				return this;
 		}
