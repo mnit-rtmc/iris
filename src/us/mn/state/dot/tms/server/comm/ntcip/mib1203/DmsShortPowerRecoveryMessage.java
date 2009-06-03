@@ -21,14 +21,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  */
 public class DmsShortPowerRecoveryMessage extends MessageIDCode {
 
-	/** Create a new DMS short power recovery object
-	 * @param m memory type
-	 * @param n message number
-	 * @param c message CRC */
-	public DmsShortPowerRecoveryMessage(int m, int n, int c) {
+	/** Create a new DMS short power recovery object */
+	public DmsShortPowerRecoveryMessage() {
 		super(MIB1203.signControl.create(new int[] {8, 0}));
-		memory = m;
-		number = n;
-		crc = c;
 	}
 }

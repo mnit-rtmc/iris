@@ -27,12 +27,6 @@ public class LedBadPixelLimit extends ASN1Integer {
 
 	/** Create a new LedBadPixelLimit object */
 	public LedBadPixelLimit() {
-		this(500);
-	}
-
-	/** Create a new LedBadPixelLimit object */
-	public LedBadPixelLimit(int l) {
 		super(MIB.ledstarSignControl.create(new int[] {3, 0}));
-		value = l;
 	}
 }

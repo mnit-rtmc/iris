@@ -47,7 +47,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Process the message table source from the sign controller */
 	protected Phase processMessageSource() {
 		SignMessage m = dms.getMessageCurrent();
-		if(DmsMessageMemoryType.isBlank(source.getMemory())) {
+		if(source.getMemoryType().isBlank()) {
 			/* The sign is blank. If IRIS says there should
 			 * be a message on the sign, that's wrong and
 			 * needs to be updated */

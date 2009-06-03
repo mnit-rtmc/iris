@@ -27,24 +27,20 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 public class OpSendDMSLedstar extends OpDMS {
 
 	/** LDC pot base value */
-	protected final LedLdcPotBase potBase;
+	protected final LedLdcPotBase potBase = new LedLdcPotBase();
 
 	/** Pixel low current threshold */
-	protected final LedPixelLow currentLow;
+	protected final LedPixelLow currentLow = new LedPixelLow();
 
 	/** Pixel high current threshols */
-	protected final LedPixelHigh currentHigh;
-
-	/** Bad pixel limit */
-	protected final LedBadPixelLimit badLimit;
+	protected final LedPixelHigh currentHigh = new LedPixelHigh();
 
 	/** Create a new DMS set pixel threshold operation */
 	public OpSendDMSLedstar(DMSImpl d) {
 		super(COMMAND, d);
-		potBase = new LedLdcPotBase(d.getLdcPotBase());
-		currentLow = new LedPixelLow(d.getPixelCurrentLow());
-		currentHigh = new LedPixelHigh(d.getPixelCurrentHigh());
-		badLimit = new LedBadPixelLimit();
+		potBase.setInteger(d.getLdcPotBase());
+		currentLow.setInteger(d.getPixelCurrentLow());
+		currentHigh.setInteger(d.getPixelCurrentHigh());
 	}
 
 	/** Create the first real phase of the operation */
@@ -60,7 +56,9 @@ public class OpSendDMSLedstar extends OpDMS {
 			mess.add(potBase);
 			mess.add(currentLow);
 			mess.add(currentHigh);
-			mess.add(badLimit);
+			DMS_LOG.log(dms.getName() + ":= " + potBase);
+			DMS_LOG.log(dms.getName() + ":= " + currentLow);
+			DMS_LOG.log(dms.getName() + ":= " + currentHigh);
 			mess.setRequest();
 			return null;
 		}

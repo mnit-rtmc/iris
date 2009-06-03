@@ -36,13 +36,13 @@ public class DmsMessageMemoryType extends ASN1Integer {
 			}
 			return undefined;
 		}
-	}
 
-	/** Test if a message memory type is "blank" */
-	static public boolean isBlank(int m) {
-		Enum mt = Enum.fromOrdinal(m);
-	 	// Ledstar blank messages are undefined in dmsMsgTableSource
-		return mt == Enum.blank || mt == Enum.undefined;
+		/** Test if a message memory type is "blank" */
+		public boolean isBlank() {
+		 	// For some vendors (1203v1), blank messages are
+		 	// undefined in dmsMsgTableSource
+			return this == blank || this == undefined;
+		}
 	}
 
 	/** Create a new memory type object */

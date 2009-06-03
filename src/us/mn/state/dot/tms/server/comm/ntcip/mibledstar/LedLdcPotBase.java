@@ -25,12 +25,6 @@ public class LedLdcPotBase extends ASN1Integer {
 
 	/** Create a new LedLdcPotBase object */
 	public LedLdcPotBase() {
-		this(0);
-	}
-
-	/** Create a new LedLdcPotBase object */
-	public LedLdcPotBase(int b) {
 		super(MIB.ledstarSignControl.create(new int[] {6, 0}));
-		value = b;
 	}
 }

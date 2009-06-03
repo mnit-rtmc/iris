@@ -37,13 +37,23 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	/** Memory type */
 	protected int memory;
 
+	/** Set the memory type */
+	public void setMemoryType(DmsMessageMemoryType.Enum m) {
+		memory = m.ordinal();
+	}
+
 	/** Get the memory type */
-	public int getMemory() {
-		return memory;
+	public DmsMessageMemoryType.Enum getMemoryType() {
+		return DmsMessageMemoryType.Enum.fromOrdinal(memory);
 	}
 
 	/** Message number */
 	protected int number;
+
+	/** Set the message number */
+	public void setNumber(int n) {
+		number = n;
+	}
 
 	/** Get the message number */
 	public int getNumber() {
@@ -52,6 +62,11 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Cyclic redundancy check */
 	protected int crc;
+
+	/** Set the CRC */
+	public void setCrc(int c) {
+		crc = c;
+	}
 
 	/** Get the CRC */
 	public int getCrc() {

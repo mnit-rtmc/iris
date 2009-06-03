@@ -24,8 +24,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 public class DefaultPageOnTime extends ASN1Integer {
 
 	/** Create a new DefaultPageOnTime object */
-	public DefaultPageOnTime(int t) {
+	public DefaultPageOnTime() {
 		super(MIB1203.multiCfg.create(new int[] {8, 0}));
-		value = t;
 	}
 }

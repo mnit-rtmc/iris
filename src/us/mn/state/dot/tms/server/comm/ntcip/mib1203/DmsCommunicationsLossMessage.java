@@ -21,16 +21,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  */
 public class DmsCommunicationsLossMessage extends MessageIDCode {
 
-	/** Create a new DMS communications loss message object
-	 * @param m memory type
-	 * @param n message number
-	 * @param c message CRC */
-	public DmsCommunicationsLossMessage(DmsMessageMemoryType.Enum m, int n,
-		int c)
-	{
+	/** Create a new DMS communications loss message object */
+	public DmsCommunicationsLossMessage() {
 		super(MIB1203.signControl.create(new int[] {12, 0}));
-		memory = m.ordinal();
-		number = n;
-		crc = c;
 	}
 }

@@ -21,14 +21,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  */
 public class DmsEndDurationMessage extends MessageIDCode {
 
-	/** Create a new DMS end duration message
-	 * @param m memory type
-	 * @param n message number
-	 * @param c message CRC */
-	public DmsEndDurationMessage(DmsMessageMemoryType.Enum m, int n,int c) {
+	/** Create a new DMS end duration message */
+	public DmsEndDurationMessage() {
 		super(MIB1203.signControl.create(new int[] {15, 0}));
-		memory = m.ordinal();
-		number = n;
-		crc = c;
 	}
 }

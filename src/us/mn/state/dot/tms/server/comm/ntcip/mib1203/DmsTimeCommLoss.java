@@ -27,10 +27,4 @@ public class DmsTimeCommLoss extends ASN1Integer {
 	public DmsTimeCommLoss() {
 		super(MIB1203.signControl.create(new int[] {13, 0}));
 	}
-
-	/** Create a new DmsTimeCommLoss object */
-	public DmsTimeCommLoss(int t) {
-		this();
-		value = t;
-	}
 }

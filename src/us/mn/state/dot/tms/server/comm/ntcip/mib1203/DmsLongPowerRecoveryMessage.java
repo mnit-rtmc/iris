@@ -21,16 +21,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  */
 public class DmsLongPowerRecoveryMessage extends MessageIDCode {
 
-	/** Create a new DMS long power recovery object
-	 * @param m memory type
-	 * @param n message number
-	 * @param c message CRC */
-	public DmsLongPowerRecoveryMessage(DmsMessageMemoryType.Enum m, int n,
-		int c)
-	{
+	/** Create a new DMS long power recovery object */
+	public DmsLongPowerRecoveryMessage() {
 		super(MIB1203.signControl.create(new int[] {9, 0}));
-		memory = m.ordinal();
-		number = n;
-		crc = c;
 	}
 }

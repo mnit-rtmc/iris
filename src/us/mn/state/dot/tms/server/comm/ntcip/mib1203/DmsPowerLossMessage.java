@@ -21,14 +21,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  */
 public class DmsPowerLossMessage extends MessageIDCode {
 
-	/** Create a new DMS power loss message
-	 * @param m memory type
-	 * @param n message number
-	 * @param c message CRC */
-	public DmsPowerLossMessage(int m, int n, int c) {
+	/** Create a new DMS power loss message */
+	public DmsPowerLossMessage() {
 		super(MIB1203.signControl.create(new int[] {14, 0}));
-		memory = m;
-		number = n;
-		crc = c;
 	}
 }

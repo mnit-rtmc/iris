@@ -29,9 +29,8 @@ public class DefaultJustificationLine extends ASN1Integer {
 		super(MIB1203.multiCfg.create(new int[] {6, 0}));
 	}
 
-	/** Create a new DefaultJustificationLine object */
-	public DefaultJustificationLine(MultiString.JustificationLine j) {
-		this();
+	/** Set the enum value */
+	public void setEnum(MultiString.JustificationLine j) {
 		value = j.ordinal();
 	}
 

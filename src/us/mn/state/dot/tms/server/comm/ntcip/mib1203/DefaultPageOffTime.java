@@ -24,8 +24,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 public class DefaultPageOffTime extends ASN1Integer {
 
 	/** Create a new DefaultPageOffTime object */
-	public DefaultPageOffTime(int t) {
+	public DefaultPageOffTime() {
 		super(MIB1203.multiCfg.create(new int[] {9, 0}));
-		value = t;
 	}
 }

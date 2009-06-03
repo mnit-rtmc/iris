@@ -29,9 +29,8 @@ public class DefaultJustificationPage extends ASN1Integer {
 		super(MIB1203.multiCfg.create(new int[] {7, 0}));
 	}
 
-	/** Create a new DefaultJustificationPage object */
-	public DefaultJustificationPage(MultiString.JustificationPage j) {
-		this();
+	/** Set the enum value */
+	public void setEnum(MultiString.JustificationPage j) {
 		value = j.ordinal();
 	}
 

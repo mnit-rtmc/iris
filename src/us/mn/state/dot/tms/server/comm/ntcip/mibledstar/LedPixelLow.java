@@ -25,12 +25,6 @@ public class LedPixelLow extends ASN1Integer {
 
 	/** Create a new LedPixelLow object */
 	public LedPixelLow() {
-		this(0);
-	}
-
-	/** Create a new LedPixelLow object */
-	public LedPixelLow(int l) {
 		super(MIB.ledstarSignControl.create(new int[] {7, 0}));
-		value = l;
 	}
 }

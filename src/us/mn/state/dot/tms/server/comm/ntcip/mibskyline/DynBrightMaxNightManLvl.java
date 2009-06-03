@@ -27,10 +27,4 @@ public class DynBrightMaxNightManLvl extends ASN1Integer {
 	public DynBrightMaxNightManLvl() {
 		super(MIB.skylineDmsSignCfg.create(new int[] {8, 0}));
 	}
-
-	/** Create a new DynBrightMaxNightManLvl object */
-	public DynBrightMaxNightManLvl(int l) {
-		this();
-		value = l;
-	}
 }

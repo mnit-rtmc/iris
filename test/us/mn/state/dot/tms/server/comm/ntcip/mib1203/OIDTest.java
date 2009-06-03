@@ -159,11 +159,11 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 7, 0
 		}));
-		oid = new DefaultPageOnTime(0).getOID();
+		oid = new DefaultPageOnTime().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 8, 0
 		}));
-		oid = new DefaultPageOffTime(0).getOID();
+		oid = new DefaultPageOffTime().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 9, 0
 		}));
@@ -225,11 +225,11 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 7, 0
 		}));
-		oid = new DmsShortPowerRecoveryMessage(0, 0, 0).getOID();
+		oid = new DmsShortPowerRecoveryMessage().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 8, 0
 		}));
-		oid = new DmsLongPowerRecoveryMessage(DmsMessageMemoryType.Enum.blank, 0, 0).getOID();
+		oid = new DmsLongPowerRecoveryMessage().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 9, 0
 		}));
@@ -237,7 +237,7 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 10, 0
 		}));
-		oid = new DmsCommunicationsLossMessage(DmsMessageMemoryType.Enum.blank, 0, 0).getOID();
+		oid = new DmsCommunicationsLossMessage().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 12, 0
 		}));
@@ -245,11 +245,11 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 13, 0
 		}));
-		oid = new DmsPowerLossMessage(0, 0, 0).getOID();
+		oid = new DmsPowerLossMessage().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 14, 0
 		}));
-		oid = new DmsEndDurationMessage(DmsMessageMemoryType.Enum.blank, 0, 0).getOID();
+		oid = new DmsEndDurationMessage().getOID();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 15, 0
 		}));

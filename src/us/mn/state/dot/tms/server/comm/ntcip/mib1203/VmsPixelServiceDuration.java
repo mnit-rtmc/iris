@@ -25,12 +25,6 @@ public class VmsPixelServiceDuration extends ASN1Integer {
 
 	/** Create a new VmsPixelServiceDuration object */
 	public VmsPixelServiceDuration() {
-		this(0);
-	}
-
-	/** Create a new VmsPixelServiceDuration object */
-	public VmsPixelServiceDuration(int d) {
 		super(MIB1203.signControl.create(new int[] {21, 0}));
-		value = d;
 	}
 }
