@@ -35,7 +35,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		System.err.println("Loading DMS glyphs...");
 		namespace.registerType(SONAR_TYPE, GlyphImpl.class);
 		store.query("SELECT name, font, code_point, graphic " +
-			"FROM glyph;", new ResultFactory()
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GlyphImpl(
@@ -67,7 +67,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

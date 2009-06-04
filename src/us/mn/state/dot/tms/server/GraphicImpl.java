@@ -35,7 +35,8 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		System.err.println("Loading DMS graphics...");
 		namespace.registerType(SONAR_TYPE, GraphicImpl.class);
 		store.query("SELECT name, g_number, bpp, height, width, " +
-			"pixels FROM graphic;", new ResultFactory()
+			"pixels FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GraphicImpl(
@@ -64,7 +65,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

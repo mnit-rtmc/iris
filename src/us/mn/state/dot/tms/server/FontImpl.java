@@ -58,8 +58,8 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		System.err.println("Loading DMS fonts...");
 		namespace.registerType(SONAR_TYPE, FontImpl.class);
 		store.query("SELECT name, f_number, height, width, " +
-			"line_spacing, char_spacing, version_id FROM font;",
-			new ResultFactory()
+			"line_spacing, char_spacing, version_id FROM " +
+			"iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new FontImpl(
@@ -90,7 +90,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

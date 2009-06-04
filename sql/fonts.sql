@@ -1,3 +1,9 @@
+\set ON_ERROR_STOP
+
+SET SESSION AUTHORIZATION 'tms';
+
+SET search_path = iris, public;
+
 INSERT INTO font (name, f_number, height, width, line_spacing, char_spacing,
 	version_id) VALUES ('NORMAL', 1, 7, 0, 0, 2, 15555);
 INSERT INTO font (name, f_number, height, width, line_spacing, char_spacing,
