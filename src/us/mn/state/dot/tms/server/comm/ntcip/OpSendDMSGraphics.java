@@ -122,7 +122,8 @@ public class OpSendDMSGraphics extends OpDMS {
 		GraphicHelper.find(new Checker<Graphic>() {
 			public boolean check(Graphic graphic) {
 				if(graphic.getNumber() != null &&
-				   graphic.getBpp() == bpp)
+				   (graphic.getBpp() == 1 ||
+				    graphic.getBpp() == bpp))
 					graphics.add(graphic);
 				return false;
 			}
