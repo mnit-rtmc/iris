@@ -215,7 +215,7 @@ public class OpSendDMSFonts extends OpDMS {
 			}
 			int v = version.getInteger();
 			DMS_LOG.log(dms.getName() + ": " + version);
-			if(v == font.getVersionID()) {
+			if(isVersionIDCorrect(v)) {
 				DMS_LOG.log(dms.getName() + ": Font is valid");
 				return nextFontPhase();
 			} else {
@@ -225,6 +225,17 @@ public class OpSendDMSFonts extends OpDMS {
 					return new InvalidateFont();
 			}
 		}
+	}
+
+	/** Compare the font version ID */
+	protected boolean isVersionIDCorrect(int v) throws IOException {
+		FontVersionByteStream fv = new FontVersionByteStream(font);
+		int crc = fv.getCrc() ^ CRC16.INITIAL_CRC;
+		int vid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
+		if(v == vid)
+			return true;
+		else
+			return v == font.getVersionID();
 	}
 
 	/** Phase to query the initial font status */
