@@ -44,7 +44,6 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -100,10 +99,7 @@ public class SignMessageComposer extends JPanel {
 	protected int n_lines;
 
 	/** Font combo box widgets */
-	protected JComboBox[] fontCmb = new JComboBox[0];
-
-	/** Font combo box models */
-	protected FontComboBoxModel[] fontModel = new FontComboBoxModel[0];
+	protected FontComboBox[] fontCmb = new FontComboBox[0];
 
 	/** Preview mode */
 	protected boolean preview = false;
@@ -184,9 +180,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Dispose of the existing font widgets */
 	protected void disposeFonts() {
-		for(int i = 0; i < fontModel.length; i++)
-			fontModel[i].dispose();
-		fontModel = new FontComboBoxModel[0];
+		for(int i = 0; i < fontCmb.length; i++)
+			fontCmb[i].dispose();
 	}
 
 	/** Set the preview mode */
@@ -239,19 +234,9 @@ public class SignMessageComposer extends JPanel {
 	/** Initialize the font combo boxes */
 	protected void initializeFonts(int np, PixelMapBuilder builder) {
 		disposeFonts();
-		fontCmb = new JComboBox[np];
-		if(builder != null)
-			fontModel = new FontComboBoxModel[np];
-		String tip = I18N.get("DMSDispatcher.FontComboBox.ToolTip");
-		for(int i = 0; i < np; i++) {
-			fontCmb[i] = new JComboBox();
-			fontCmb[i].setToolTipText(tip);
-			if(builder != null) {
-				fontModel[i] = new FontComboBoxModel(fonts,
-					builder);
-				fontCmb[i].setModel(fontModel[i]);
-			}
-		}
+		fontCmb = new FontComboBox[np];
+		for(int i = 0; i < np; i++)
+			fontCmb[i] = new FontComboBox(fonts, builder);
 	}
 
 	/** Initialize the page tabs and message combo boxes */
@@ -309,15 +294,6 @@ public class SignMessageComposer extends JPanel {
 		box.add(Box.createHorizontalStrut(4));
 		box.add(fontCmb[p]);
 		return box;
-	}
-
-	/** Get the selected font number */
-	protected Integer getFontNumber(int p) {
-		Font font = (Font)fontCmb[p].getSelectedItem();
-		if(font != null)
-			return font.getNumber();
-		else
-			return null;
 	}
 
 	/** Set a page on one tab */
@@ -409,7 +385,7 @@ public class SignMessageComposer extends JPanel {
 	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		int p = 0;
-		Integer f = getFontNumber(0);
+		Integer f = fontCmb[0].getFontNumber();
 		if(f != null)
 			multi.setFont(f);
 		for(int i = 0; i < m; i++) {
@@ -417,7 +393,7 @@ public class SignMessageComposer extends JPanel {
 				if(i % n_lines == 0) {
 					multi.addPage();
 					p++;
-					f = getFontNumber(p);
+					f = fontCmb[p].getFontNumber();
 					if(f != null)
 						multi.setFont(f);
 				} else
