@@ -31,7 +31,7 @@ public class GraphicInfoList extends CRC16 {
 	/** Create a new GraphicInfoList */
 	public GraphicInfoList(Graphic graphic) throws IOException {
 		DataOutputStream dos = new DataOutputStream(this);
-// FIXME:	dos.writeByte(graphic.getNumber());
+		dos.writeByte(graphic.getNumber());
 		dos.writeShort(graphic.getHeight());
 		dos.writeShort(graphic.getWidth());
 		dos.writeByte(DmsColorScheme.Enum.fromBpp(graphic.getBpp(),

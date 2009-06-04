@@ -72,9 +72,9 @@ public class OpSendDMSGraphics extends OpDMS {
 		super(DOWNLOAD, d);
 		final LinkedList<Graphic> graphics = new LinkedList<Graphic>();
 		// FIXME: lookup all graphics to be sent to the DMS
-		// FIXME: add getNumber method to Graphic interface
-//		for(Graphic g: graphics)
-//			num_2_row.put(g.getNumber(), null);
+		//        these are all graphics with a non-null number
+		for(Graphic g: graphics)
+			num_2_row.put(g.getNumber(), null);
 		graphic_iterator = graphics.iterator();
 	}
 
@@ -155,9 +155,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected Phase nextGraphicPhase() {
 		while(graphic_iterator.hasNext()) {
 			graphic = graphic_iterator.next();
-			// FIXME: add getNumber to Graphic interface
-//			Integer g_num = graphic.getNumber();
-			Integer g_num = 1;
+			Integer g_num = graphic.getNumber();
 			if(num_2_row.containsKey(g_num)) {
 				row = num_2_row.get(g_num);
 				return new VerifyGraphic();
@@ -277,7 +275,7 @@ public class OpSendDMSGraphics extends OpDMS {
 				new DmsGraphicTransparentEnabled(row);
 			DmsGraphicTransparentColor trans_color =
 				new DmsGraphicTransparentColor(row);
-// FIXME:		number.setInteger(graphic.getNumber());
+			number.setInteger(graphic.getNumber());
 			name.setString(graphic.getName());
 			height.setInteger(graphic.getHeight());
 			width.setInteger(graphic.getWidth());
