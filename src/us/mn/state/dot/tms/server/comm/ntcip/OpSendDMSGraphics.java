@@ -19,8 +19,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
@@ -31,6 +33,10 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  * @author Douglas Lau
  */
 public class OpSendDMSGraphics extends OpDMS {
+
+	/** Color scheme supported */
+	protected final DmsColorScheme color_scheme =
+		new DmsColorScheme();
 
 	/** Number of graphics supported */
 	protected final DmsGraphicMaxEntries max_graphics =
@@ -59,7 +65,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected final TreeSet<Integer> open_rows = new TreeSet<Integer>();
 
 	/** Iterator of graphics to be sent to the sign */
-	protected final Iterator<Graphic> graphic_iterator;
+	protected Iterator<Graphic> graphic_iterator;
 
 	/** Current graphic */
 	protected Graphic graphic;
@@ -70,12 +76,6 @@ public class OpSendDMSGraphics extends OpDMS {
 	/** Create a new operation to send graphics to a DMS */
 	public OpSendDMSGraphics(DMSImpl d) {
 		super(DOWNLOAD, d);
-		final LinkedList<Graphic> graphics = new LinkedList<Graphic>();
-		// FIXME: lookup all graphics to be sent to the DMS
-		//        these are all graphics with a non-null number
-		for(Graphic g: graphics)
-			num_2_row.put(g.getNumber(), null);
-		graphic_iterator = graphics.iterator();
 	}
 
 	/** Create the first real phase of the operation */
@@ -88,6 +88,7 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Query the graphics configuration */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(color_scheme);
 			mess.add(max_graphics);
 			mess.add(num_graphics);
 			mess.add(max_size);
@@ -100,6 +101,7 @@ public class OpSendDMSGraphics extends OpDMS {
 				// Must be 1203v1 only (no graphics) ...
 				return null;
 			}
+			DMS_LOG.log(dms.getName() + ": " + color_scheme);
 			DMS_LOG.log(dms.getName() + ": " + max_graphics);
 			DMS_LOG.log(dms.getName() + ": " + num_graphics);
 			DMS_LOG.log(dms.getName() + ": " + max_size);
@@ -108,7 +110,41 @@ public class OpSendDMSGraphics extends OpDMS {
 			for(row = 1; row <= max_graphics.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
+			lookupGraphics();
 			return new QueryGraphicNumbers();
+		}
+	}
+
+	/** Lookup all graphics which have the proper color scheme */
+	protected void lookupGraphics() {
+		final int bpp = getBpp();
+		final LinkedList<Graphic> graphics = new LinkedList<Graphic>();
+		GraphicHelper.find(new Checker<Graphic>() {
+			public boolean check(Graphic graphic) {
+				if(graphic.getNumber() != null &&
+				   graphic.getBpp() == bpp)
+					graphics.add(graphic);
+				return false;
+			}
+		});
+		for(Graphic g: graphics)
+			num_2_row.put(g.getNumber(), null);
+		graphic_iterator = graphics.iterator();
+	}
+
+	/** Get the bpp of the sign's color scheme */
+	protected int getBpp() {
+		switch(color_scheme.getEnum()) {
+			case monochrome1bit:
+				return 1;
+			case monochrome8bit:
+				return 8;
+			case colorClassic:
+				return 8;
+			case color24bit:
+				return 24;
+			default:
+				return 0;
 		}
 	}
 
