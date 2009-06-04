@@ -67,7 +67,7 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Create columns */
 	Column[] m_columns = new Column[] {
-		new Column(I18N.get("dms.abbreviation"), String.class, 60,
+		new Column(I18N.get("dms.abbreviation"), String.class, 40,
 			new ColAction() {
 				public Object getValueAt(DMS d) {
 					return d.getName();
@@ -78,15 +78,10 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 					return GeoLocHelper.getDescription(
 						d.getGeoLoc());
 				}}),
-		new Column("Model", String.class, 80,
+		new Column("Dir.", String.class, 30,
 			new ColAction() {
 				public Object getValueAt(DMS d) {
-					return d.getModel();
-				}}),
-		new Column("Com Type", String.class, 140,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return d.getSignAccess();
+					return DMSHelper.getFreeDir(d);
 				}}),
 		new Column(m_awsAbbr +" Allowed", Boolean.class, 80,
 			new ColAction() {
@@ -110,6 +105,16 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 			new ColAction() {
 				public Object getValueAt(DMS d) {
 					return DMSHelper.getAllStyles(d);
+				}}),
+		new Column("Model", String.class, 40,
+			new ColAction() {
+				public Object getValueAt(DMS d) {
+					return d.getModel();
+				}}),
+		new Column("Com Type", String.class, 140,
+			new ColAction() {
+				public Object getValueAt(DMS d) {
+					return d.getSignAccess();
 				}}),
 	};
 

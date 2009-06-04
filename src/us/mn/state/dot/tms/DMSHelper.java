@@ -226,4 +226,16 @@ public class DMSHelper extends BaseHelper {
 		}
 		return EMPTY_TXT;
 	}
+
+	/** Get the DMS freeway direction from the geo location as a String */
+	static public String getFreeDir(DMS proxy) {
+		if(proxy == null)
+			return "";
+		GeoLoc g = proxy.getGeoLoc();
+		if(g == null)
+			return "";
+		short fd = g.getFreeDir();
+		String free = Direction.DIRECTION[fd];
+		return free;
+	}
 }
