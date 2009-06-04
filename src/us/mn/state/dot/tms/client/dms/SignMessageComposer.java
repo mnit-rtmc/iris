@@ -31,8 +31,10 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
@@ -135,9 +137,23 @@ public class SignMessageComposer extends JPanel {
 		sign_text = st.getDmsCache().getSignText();
 		fonts = st.getDmsCache().getFonts();
 		user = u;
+		addBlankBtn();
 		add(tab);
 		initializeFonts(1, null);
 		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
+	}
+
+	/** Add blank button */
+	protected void addBlankBtn() {
+		IButton b = new IButton("dms.blank");
+		new ActionJob(b) {
+			public void perform() {
+				clearSelections();
+				dispatcher.qlibCmb.setSelectedIndex(-1);
+			}
+		};
+		b.setMaximumSize(b.getMinimumSize());
+		add(b);
 	}
 
 	/** Dispose of the message selector */
