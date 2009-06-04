@@ -186,9 +186,11 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Compare the graphic ID */
-	protected boolean isIDCorrect(int v) {
-		// FIXME: calculate the graphic ID
-		return false;
+	protected boolean isIDCorrect(int g) throws IOException {
+		GraphicInfoList gil = new GraphicInfoList(graphic);
+		int crc = gil.getCrc() ^ CRC16.INITIAL_CRC;
+		int gid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
+		return g == gid;
 	}
 
 	/** Phase to query the initial graphic status */
@@ -279,7 +281,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			name.setString(graphic.getName());
 			height.setInteger(graphic.getHeight());
 			width.setInteger(graphic.getWidth());
-			type.setEnum(DmsColorScheme.Enum.color24bit);
+			type.setEnum(DmsColorScheme.Enum.fromBpp(
+				graphic.getBpp(), false));
 			trans_enabled.setInteger(1);
 			trans_color.setOctetString(new byte[] { 1, 0, 1 });
 			mess.add(number);

@@ -36,6 +36,26 @@ public class DmsColorScheme extends ASN1Integer {
 			}
 			return undefined;
 		}
+
+		/** Lookup an enum from bpp and monochrome values */
+		static public Enum fromBpp(int bpp, boolean monochrome) {
+			if(monochrome) {
+				switch(bpp) {
+				case 1:
+					return monochrome1bit;
+				case 8:
+					return monochrome8bit;
+				}
+			} else {
+				switch(bpp) {
+				case 8:
+					return colorClassic;
+				case 24:
+					return color24bit;
+				}
+			}
+			return undefined;
+		}
 	}
 
 	/** Create a new DmsColorScheme object */
