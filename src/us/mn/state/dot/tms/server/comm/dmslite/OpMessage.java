@@ -245,7 +245,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// Owner
-			String owner = m_user != null ? m_user.getFullName() : "";
+			String owner = (m_user != null ? m_user.getName() : "");
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap
@@ -409,7 +409,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(dt).toString()));
 
 			// Owner
-			String owner = m_user != null ? m_user.getFullName() : "";
+			String owner = (m_user != null ? m_user.getName() : "");
 			mess.add(new ReqRes("Owner", owner));
 
 			// bitmap

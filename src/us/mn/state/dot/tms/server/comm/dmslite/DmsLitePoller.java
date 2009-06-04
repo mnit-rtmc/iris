@@ -99,8 +99,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	/** Send a device request message to the sign, no user specified */
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		// user assumed to be IRIS
-		User u = null; //UserImpl.create("IRIS");
-		//u.setFullName("IRIS");
+		User u = null;
 		sendRequest(dms, r, u);
 	}
 
