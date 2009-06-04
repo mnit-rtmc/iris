@@ -79,6 +79,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	{
 		if(dms == null || m == null || m.getBitmaps() == null)
 			return;
+
 		// Are the DMS width and height valid?  If not, it's probably
 		// because a OpQueryConfig message has not been received yet,
 		// so the DMS physical properties are not yet valid.
@@ -119,7 +120,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			new OpReset(dms, u).start();
 			break;
 		case RESET_MODEM:
-			//new OpResetModem(dms, u).start();
 			break;
 		default:
 			// Ignore other requests

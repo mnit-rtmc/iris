@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -231,6 +232,9 @@ public class OpQueryMsg extends OpDms {
 
 			Message mess = (Message) argmess;
 
+			// user who created the message retrieved from the DMS
+			User irisUser = null;
+
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
 
@@ -326,6 +330,10 @@ public class OpQueryMsg extends OpDms {
 			// process response
 			if(valid) {
 
+				// get user name via owner
+				if(owner != null)
+					irisUser = IrisUserHelper.lookup(owner);
+
 				// error checking: have on time? if not, create new ontime
 				if (!useont) {
 					useont=true;
@@ -349,9 +357,9 @@ public class OpQueryMsg extends OpDms {
 				if(msgtextavailable) {
 					try {
 						SignMessageImpl sm = (SignMessageImpl)
-						m_dms.createMessage(msgtext,
-						DMSMessagePriority.OPERATOR, duramins);
-						m_dms.setMessageCurrent(sm, m_user);
+							m_dms.createMessage(msgtext,
+							DMSMessagePriority.OPERATOR, duramins);
+						m_dms.setMessageCurrent(sm, irisUser);
 					}
 					catch(SonarException e) {
 						e.printStackTrace();
@@ -362,14 +370,13 @@ public class OpQueryMsg extends OpDms {
 					SignMessageImpl sm = null;
 					if(usebitmap) {
 						sm = createSignMessageWithBitmap(bitmap, duramins);
-						m_dms.setMessageCurrent(sm, m_user);
+						m_dms.setMessageCurrent(sm, irisUser);
 					}
 					if(sm == null) {
 						try {
-							m_dms.setMessageCurrent(
-								m_dms.createMessage("",
-								DMSMessagePriority.BLANK, null
-							), m_user);
+							sm = (SignMessageImpl)m_dms.createMessage("",
+								DMSMessagePriority.BLANK, null);
+							m_dms.setMessageCurrent(sm, irisUser);
 						}
 						catch(SonarException e) {
 							e.printStackTrace();
