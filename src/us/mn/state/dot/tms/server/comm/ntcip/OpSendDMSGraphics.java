@@ -374,9 +374,10 @@ public class OpSendDMSGraphics extends OpDMS {
 		/** Create a graphic block */
 		protected byte[] createBlock() {
 			int bsize = block_size.getInteger();
-			byte[] bdata = new byte[bsize];
 			int pos = (block - 1) * bsize;
-			System.arraycopy(bitmap, pos, bdata, 0, bsize);
+			int blen = Math.min(bsize, bitmap.length - pos);
+			byte[] bdata = new byte[blen];
+			System.arraycopy(bitmap, pos, bdata, 0, blen);
 			return bdata;
 		}
 	}
