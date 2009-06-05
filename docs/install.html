@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id="stamp">27 May 2009</div>
+<div id="stamp">5 June 2009</div>
 <h1>Mn/DOT IRIS Installation and Configuration</h1>
 All commands must be run as the root user.
 <ol>
@@ -69,12 +69,14 @@ rpm -i iris-xx.yy.zz.rpm
 <pre>
 su postgres
 createuser -S -D -R -W tms
+exit
 </pre>
 	</li>
 	<li>
-		Populate the tms database with template file.
+		Create the tms database and populate it with template file.
 <pre>
 su tms
+createdb tms
 psql tms -f /var/lib/iris/sql/tms-template.sql
 exit
 </pre>
