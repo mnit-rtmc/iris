@@ -37,7 +37,7 @@ public class GraphicInfoList extends CRC16 {
 		dos.writeByte(DmsColorScheme.Enum.fromBpp(
 			graphic.getBpp()).ordinal());
 		dos.writeByte(0);	// transparency not enabled
-		dos.writeByte(0);	// red component of transparent color
+		dos.writeByte(1);	// red component of transparent color
 		dos.writeByte(0);	// green component of transparent color
 		dos.writeByte(0);	// blue component of transparent color
 		dos.write(Base64.decode(graphic.getPixels()));
