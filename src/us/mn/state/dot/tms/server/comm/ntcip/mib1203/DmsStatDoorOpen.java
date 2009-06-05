@@ -32,15 +32,19 @@ public class DmsStatDoorOpen extends ASN1Integer {
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		for(int i = 0; i < 8; i++) {
-			if(((value >> i) & 1) == 1) {
-				if(b.length() > 0)
-					b.append(", ");
+			int bit = 1 << i;
+			if((value & bit) != 0) {
 				b.append("#");
 				b.append(i + 1);
+				b.append(", ");
 			}
 		}
 		if(b.length() == 0)
 			b.append("None");
+		else {
+			// remove trailing comma and space
+			b.setLength(b.length() - 2);
+		}
 		return b.toString();
 	}
 }

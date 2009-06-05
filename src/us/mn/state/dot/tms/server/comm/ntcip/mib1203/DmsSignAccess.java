@@ -35,13 +35,6 @@ public class DmsSignAccess extends ASN1Integer {
 	/** Front access */
 	static public final int FRONT = 1 << 3;
 
-	/** Append a string to a StringBuilder */
-	static protected void appendString(StringBuilder b, String s) {
-		if(b.length() > 0)
-			b.append(", ");
-		b.append(s);
-	}
-
 	/** Create a new DmsSignAccess object */
 	public DmsSignAccess() {
 		super(MIB1203.dmsSignCfg.create(new int[] {1, 0}));
@@ -51,15 +44,19 @@ public class DmsSignAccess extends ASN1Integer {
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		if((value & FRONT) > 0)
-			appendString(b, "Front");
+			b.append("Front, ");
 		if((value & BACK) > 0)
-			appendString(b, "Back");
+			b.append("Back, ");
 		if((value & WALK_IN) > 0)
-			appendString(b, "Walk-in");
+			b.append("Walk-in, ");
 		if((value & OTHER) > 0)
-			appendString(b, "Other");
+			b.append("Other, ");
 		if(b.length() == 0)
 			b.append("None");
+		else {
+			// remove trailing comma and space
+			b.setLength(b.length() - 2);
+		}
 		return b.toString();
 	}
 }

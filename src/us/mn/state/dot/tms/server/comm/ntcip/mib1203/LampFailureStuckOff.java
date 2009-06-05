@@ -30,22 +30,23 @@ public class LampFailureStuckOff extends ASN1OctetString {
 
 	/** Get the object value */
 	public String getValue() {
-		StringBuilder buf = new StringBuilder();
+		StringBuilder b = new StringBuilder();
 		int f = 1;
-		for(int i = 0; i < value.length; i++) {
-			for(int b = 0; b < 8; b++, f++) {
-				if((value[i] & 1 << b) != 0) {
-					if(buf.length() > 0)
-						buf.append(", ");
-					buf.append("#");
-					buf.append(f);
-					buf.append(" STUCK OFF");
+		for(byte v: value) {
+			for(int bit = 0x01; bit < 0x0100; bit <<= 1, f++) {
+				if((v & bit) != 0) {
+					b.append("#");
+					b.append(f);
+					b.append(" STUCK OFF, ");
 				}
 			}
 		}
-		if(buf.length() == 0)
+		if(b.length() == 0)
 			return "OK";
-		else
-			return buf.toString();
+		else {
+			// remove trailing comma and space
+			b.setLength(b.length() - 2);
+			return b.toString();
+		}
 	}
 }

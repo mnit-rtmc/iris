@@ -44,13 +44,6 @@ public class DmsSignTechnology extends ASN1Integer {
 	/** Drum technology */
 	static public final int DRUM = 1 << 6;
 
-	/** Append a string to a StringBuilder */
-	static protected void appendString(StringBuilder b, String s) {
-		if(b.length() > 0)
-			b.append(", ");
-		b.append(s);
-	}
-
 	/** Create a new DmsSignTechnology object */
 	public DmsSignTechnology() {
 		super(MIB1203.dmsSignCfg.create(new int[] {9, 0}));
@@ -60,21 +53,25 @@ public class DmsSignTechnology extends ASN1Integer {
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		if((value & DRUM) > 0)
-			appendString(b, "Drum");
+			b.append("Drum, ");
 		if((value & LAMP) > 0)
-			appendString(b, "Lamp");
+			b.append("Lamp, ");
 		if((value & SHUTTERED) > 0)
-			appendString(b, "Shuttered");
+			b.append("Shuttered, ");
 		if((value & FIBER_OPTIC) > 0)
-			appendString(b, "Fiber Optics");
+			b.append("Fiber Optics, ");
 		if((value & FLIP_DISK) > 0)
-			appendString(b, "Flip Disk");
+			b.append("Flip Disk, ");
 		if((value & LED) > 0)
-			appendString(b, "LED");
+			b.append("LED, ");
 		if((value & OTHER) > 0)
-			appendString(b, "Other");
+			b.append("Other, ");
 		if(b.length() == 0)
 			b.append("None");
+		else {
+			// remove trailing comma and space
+			b.setLength(b.length() - 2);
+		}
 		return b.toString();
 	}
 }
