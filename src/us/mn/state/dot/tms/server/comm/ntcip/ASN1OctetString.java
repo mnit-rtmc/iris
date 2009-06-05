@@ -39,13 +39,16 @@ abstract public class ASN1OctetString extends ASN1Object {
 		return value;
 	}
 
-	/** Set the octet string to a string */
-	public void setString(String v) {
-		setOctetString(v.getBytes());
-	}
-
 	/** Get the object value */
 	protected String getValue() {
-		return new String(value);
+		StringBuilder b = new StringBuilder();
+		for(byte v: value) {
+			b.append(v & 0xFF);
+			b.append(",");
+		}
+		// remove trailing comma
+		if(b.length() > 1)
+			b.setLength(b.length() - 1);
+		return b.toString();
 	}
 }

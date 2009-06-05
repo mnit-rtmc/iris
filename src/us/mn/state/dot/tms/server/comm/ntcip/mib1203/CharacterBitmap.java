@@ -28,15 +28,4 @@ public class CharacterBitmap extends ASN1OctetString {
 		super(MIB1203.characterEntry.create(new int[] {
 			3, font, index}));
 	}
-
-	/** Get the object value */
-	public String getValue() {
-		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < value.length; i++) {
-			if(i > 0)
-				b.append(",");
-			b.append(value[i] & 0xFF);
-		}
-		return b.toString();
-	}
 }

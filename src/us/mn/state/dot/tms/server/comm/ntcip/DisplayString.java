@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,21 +12,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
-
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+package us.mn.state.dot.tms.server.comm.ntcip;
 
 /**
- * Ntcip DmsMessageMultiString object
+ * Display String
  *
  * @author Douglas Lau
  */
-public class DmsMessageMultiString extends ASN1OctetString {
+abstract public class DisplayString extends ASN1OctetString {
 
-	/** Create a new MULTI string object */
-	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int number) {
-		super(MIB1203.dmsMessageEntry.create(new int[] {
-			3, m.ordinal(), number}));
+	/** Create a new display string */
+	protected DisplayString(MIBNode n) {
+		super(n);
 	}
 
 	/** Set the octet string to a string */
@@ -35,7 +32,7 @@ public class DmsMessageMultiString extends ASN1OctetString {
 	}
 
 	/** Get the object value */
-	public String getValue() {
+	protected String getValue() {
 		return new String(value);
 	}
 }

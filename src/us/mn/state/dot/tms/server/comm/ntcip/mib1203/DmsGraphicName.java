@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.ntcip.DisplayString;
 
 /**
  * DmsGraphicName is the name of a graphic.
  *
  * @author Douglas Lau
  */
-public class DmsGraphicName extends ASN1OctetString {
+public class DmsGraphicName extends DisplayString {
 
 	/** Create a new DmsGraphicName object */
 	public DmsGraphicName(int row) {
