@@ -36,6 +36,7 @@ public class DmsGraphicBlockBitmap extends ASN1OctetString {
 			b.append(v & 0xFF);
 			b.append(",");
 		}
+		// remove trailing comma
 		if(b.length() > 1)
 			b.setLength(b.length() - 1);
 		return b.toString();
