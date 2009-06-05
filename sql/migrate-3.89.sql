@@ -30,6 +30,13 @@ CREATE TABLE iris.glyph (
 	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name)
 );
 
+CREATE TABLE iris.lane_use_graphic (
+	name VARCHAR(10) PRIMARY KEY,
+	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
+	g_number INTEGER NOT NULL UNIQUE,
+	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name)
+);
+
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 	(SELECT name, bpp, height, width, pixels FROM graphic);
 INSERT INTO iris.font (name, f_number, height, width, line_spacing,
