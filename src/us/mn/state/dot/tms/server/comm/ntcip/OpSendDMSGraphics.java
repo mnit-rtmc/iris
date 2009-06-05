@@ -317,7 +317,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			height.setInteger(graphic.getHeight());
 			width.setInteger(graphic.getWidth());
 			type.setEnum(DmsColorScheme.Enum.fromBpp(
-				graphic.getBpp(), false));
+				graphic.getBpp()));
 			trans_enabled.setInteger(1);
 			trans_color.setOctetString(new byte[] { 1, 0, 1 });
 			mess.add(number);
