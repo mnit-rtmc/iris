@@ -67,7 +67,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 					row.getString(2),	// multi
 					row.getString(3),	// bitmaps
 					row.getInt(4),		// priority
-					row.getInt(5)		// duration
+					(Integer)row.getObject(5) // duration
 				));
 			}
 		});
@@ -80,8 +80,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("multi", multi);
 		map.put("bitmaps", bitmaps);
 		map.put("priority", priority);
-		if(duration != null)
-			map.put("duration", duration);
+		map.put("duration", duration);
 		return map;
 	}
 
