@@ -28,4 +28,16 @@ public class DmsGraphicBlockBitmap extends ASN1OctetString {
 		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {3, row,
 			block}));
 	}
+
+	/** Get the object value */
+	public String getValue() {
+		StringBuilder b = new StringBuilder();
+		for(byte v: value) {
+			b.append(v & 0xFF);
+			b.append(",");
+		}
+		if(b.length() > 1)
+			b.setLength(b.length() - 1);
+		return b.toString();
+	}
 }
