@@ -223,15 +223,14 @@ public class OpSendDMSMessage extends OpDMS {
 			switch(error.getEnum()) {
 			case syntaxMULTI:
 				errorStatus = m_err.toString();
-				break;
+				return null;
 			case other:
-				// FIXME: ADDCO does this too ...
+				errorStatus = error.toString();
 				return new LedstarActivateError();
 			default:
 				errorStatus = error.toString();
-				break;
+				return null;
 			}
-			return null;
 		}
 	}
 
@@ -242,7 +241,13 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			LedActivateMsgError error = new LedActivateMsgError();
 			mess.add(error);
-			mess.getRequest();
+			try {
+				mess.getRequest();
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// must not be a Ledstar sign ...
+				return null;
+			}
 			DMS_LOG.log(dms.getName() + ": " + error);
 			errorStatus = error.toString();
 			return null;
