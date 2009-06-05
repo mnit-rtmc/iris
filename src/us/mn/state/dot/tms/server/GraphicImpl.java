@@ -41,7 +41,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GraphicImpl(
 					row.getString(1),	// name
-					row.getInt(2),		// g_number
+					(Integer)row.getObject(2), // g_number
 					row.getInt(3),		// bpp
 					row.getInt(4),		// height
 					row.getInt(5),		// width
