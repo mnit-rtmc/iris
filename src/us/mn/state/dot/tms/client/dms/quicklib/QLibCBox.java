@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.dms.DMSDispatcher;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -240,5 +241,10 @@ public class QLibCBox extends JComboBox implements ActionListener
 		getEditor().getEditorComponent().
 			removeFocusListener(m_flistener);
 		removeActionListener(this);
+	}
+
+	/** is this control IRIS enabled? */
+	public static boolean getIEnabled() {
+		return SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean();
 	}
 }

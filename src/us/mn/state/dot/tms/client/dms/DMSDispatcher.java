@@ -172,7 +172,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		card_panel.add(new JLabel(), "Blank");
 		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
-		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+		if(QLibCBox.getIEnabled())
 			panel.addRow(buildQuickLibPanel());
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
@@ -385,7 +385,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Update widgets based on current quick library message. This
 	 *  method is called by QLibCBox when its state changes. */
 	public void updateWidgetsUsingQuickLib() {
-		if(!SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+		if(!QLibCBox.getIEnabled())
 			return;
 
 		// get qlib multi
@@ -430,7 +430,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	 *  @param useDms True to use the DMS as the message source else false
 	 *		  to use the sign message widgets as the source. */
 	public void updateTextQLibCBox(final boolean useDms) {
-		if(!SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+		if(!QLibCBox.getIEnabled())
 			return;
 
 		// get sign message from dms
