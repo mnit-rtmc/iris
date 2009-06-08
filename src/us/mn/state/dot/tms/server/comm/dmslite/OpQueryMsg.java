@@ -207,7 +207,8 @@ public class OpQueryMsg extends OpDms {
 				duration);
 		}
 		catch(SonarException e) {
-			e.printStackTrace();
+			Log.warning("OpQueryMsg: sonar exception: e=" + e +
+				", stack=" + SString.getStackTrace(e));
 			return null;
 		}
 	}
@@ -381,7 +382,7 @@ public class OpQueryMsg extends OpDms {
 							DMSMessagePriority.OPERATOR, duramins);
 						m_dms.setMessageCurrent(sm, irisUser);
 					} catch(SonarException e) {
-						Log.warning("Sonar exception in OpQueryMsg:" + e + 
+						Log.warning("OpQueryMsg: sonar exception: e=" + e +
 							", stack=" + SString.getStackTrace(e));
 					}
 
@@ -404,7 +405,7 @@ public class OpQueryMsg extends OpDms {
 							m_dms.setMessageCurrent(sm, irisUser);
 						}
 						catch(SonarException e) {
-							Log.warning("Sonar exception in OpQueryMsg:" + e + 
+							Log.warning("OpQueryMsg: sonar exception: e=" + e +
 								", stack=" + SString.getStackTrace(e));
 						}
 					}

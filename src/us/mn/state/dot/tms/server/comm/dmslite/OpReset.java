@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Operation to reset the DMS.
@@ -128,7 +129,8 @@ public class OpReset extends OpDms
 	                		m_dms.setMessageCurrent(m, null);
 				}
 				catch(SonarException e) {
-					e.printStackTrace();
+					Log.warning("OpReset: sonar exception: e=" + e +
+						", stack=" + SString.getStackTrace(e));
 				}
 
 			// valid flag is false
