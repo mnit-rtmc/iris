@@ -19,7 +19,6 @@ import java.io.PrintStream;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -74,12 +73,5 @@ public class SmartSensorPoller extends MessagePoller implements SamplePoller {
 			if(c.hasActiveDetector())
 				new GetBinnedSamples(c, comp).start();
 		}
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		DiagnosticOperation test = new SensorDiagnostic(c);
-		test.start();
-		return test;
 	}
 }

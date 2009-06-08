@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -172,13 +171,6 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	public void queryAlarms(ControllerImpl c) {
 		if(c.hasAlarm())
 			new QueryAlarms(c).start();
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		DiagnosticOperation test = new Diagnostic170(c);
-		test.start();
-		return test;
 	}
 
 	/** Send a device request to a ramp meter */

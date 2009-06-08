@@ -23,7 +23,6 @@ import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.ControllerOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -644,29 +643,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			SamplePoller sp = (SamplePoller)p;
 			sp.resetController(this);
 		}
-	}
-
-	/** Diagnostic operation for this controller */
-	protected transient DiagnosticOperation test;
-
-	/** Test the communications to this controller */
-	public synchronized void setTest(boolean on_off) {
-		MessagePoller p = getPoller();
-		if(on_off) {
-			if(test == null) {
-				if(p != null)
-					test = p.startTest(this);
-			} else
-				test.keepTesting();
-		} else if(test != null) {
-			test.stopTesting();
-			test = null;
-		}
-	}
-
-	/** Get the testing status flag */
-	public boolean getTest() {
-		return test != null;
 	}
 
 	/** Destroy an object */

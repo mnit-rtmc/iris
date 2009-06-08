@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -57,13 +56,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public boolean isAddressValid(int drop) {
 		// FIXME: this doesn't belong here
 		return drop > 0 && drop <= HDLC.NTCIP_MAX_ADDRESS;
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		DiagnosticOperation test = new OpTestDMSCommunication(c);
-		test.start();
-		return test;
 	}
 
 	/** Send a device request message to the sign */

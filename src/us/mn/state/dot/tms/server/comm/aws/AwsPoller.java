@@ -21,7 +21,6 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -81,17 +80,6 @@ public class AwsPoller extends MessagePoller // FIXME implements SignPoller
 
 	/** Perform a sign status poll. Defined in SignPoller interface. */
 	// FIXME public void pollSigns(ControllerImpl c, Completer comp) {}
-
-	/**
-	 * Start a test for the given controller.  This method is activated
-	 * when the user clicks the checkbox 'test communication' on the
-	 * the controller dialog in the status tab.
-	 * @see us.mn.state.dot.tms.ControllerImpl#testCommunications
-	 */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		// Log.finest("AwsPoller.startTest() called.");
-		return null;
-	}
 
 	/** return name of AWS system */
 	public static String awsName() {

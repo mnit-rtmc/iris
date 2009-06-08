@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -105,10 +104,5 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 				ced.cleanup();
 		}
 		// FIXME: put logged data in bin
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		return null;
 	}
 }

@@ -19,7 +19,6 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
@@ -64,10 +63,5 @@ public class PelcoDPoller extends MessagePoller implements CameraPoller {
 	/** Send a PTZ goto camera preset command */
 	public void sendGoToPreset(CameraImpl c, int preset) {
 		new GoToCameraPreset(c, preset).start();
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		return null; // no diagnostic testing can be done
 	}
 }

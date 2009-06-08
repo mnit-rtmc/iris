@@ -233,7 +233,4 @@ abstract public class MessagePoller extends Thread {
 	protected void download(ControllerImpl c, int p) {
 		// Subclasses should override this if necessary
 	}
-
-	/** Start a test for the given controller */
-	abstract public DiagnosticOperation startTest(ControllerImpl c);
 }

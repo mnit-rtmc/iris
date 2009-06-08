@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SocketMessenger;
@@ -68,11 +67,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		return null;
 	}
 
 	/**

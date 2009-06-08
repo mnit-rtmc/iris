@@ -18,7 +18,6 @@ import java.io.EOFException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
@@ -51,11 +50,6 @@ public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
 	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
 		return drop == PELCO_DROP;
-	}
-
-	/** Start a test for the given controller */
-	public DiagnosticOperation startTest(ControllerImpl c) {
-		return null; // no diagmnostic testing can be done
 	}
 
 	/** Set the camera to display on the specified monitor */
