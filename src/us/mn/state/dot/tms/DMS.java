@@ -164,9 +164,6 @@ public interface DMS extends Device {
 	 *         power status is not known, null is returned. */
 	String[] getPowerStatus();
 
-	/** Request a sign operation (query message, test pixels, etc.) */
-	void setSignRequest(int r);
-
 	/** Get user note */
 	String getUserNote();
 

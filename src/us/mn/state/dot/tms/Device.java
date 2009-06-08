@@ -28,6 +28,7 @@ public interface Device extends ControllerIO {
 		Camera.SONAR_TYPE,
 		Detector.SONAR_TYPE,
 		DMS.SONAR_TYPE,
+		LCSArray.SONAR_TYPE,
 		RampMeter.SONAR_TYPE,
 		WarningSign.SONAR_TYPE
 	};
@@ -37,6 +38,9 @@ public interface Device extends ControllerIO {
 
 	/** Get the administrator notes */
 	String getNotes();
+
+	/** Request a device operation (query message, test pixels, etc.) */
+	void setDeviceRequest(int r);
 
 	/** Get the operation description */
 	String getOperation();

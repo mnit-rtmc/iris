@@ -324,6 +324,11 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		return null;
 	}
 
+	/** Request a device operation */
+	public void setDeviceRequest(int r) {
+		// FIXME
+	}
+
 	/** Get an array of the DMS */
 	protected DMSImpl[] getDMSArray() {
 		LCS[] lcss = getLanes();

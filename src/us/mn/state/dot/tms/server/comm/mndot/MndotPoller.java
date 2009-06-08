@@ -19,9 +19,9 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.RampMeterType;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -190,9 +190,9 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 			new MeterRateCommand(meter, n, rate).start();
 	}
 
-	/** Send a sign request to a warning sign */
-	public void sendRequest(WarningSignImpl sign, SignRequest r) {
-		if(r == SignRequest.QUERY_STATUS)
+	/** Send a device request to a warning sign */
+	public void sendRequest(WarningSignImpl sign, DeviceRequest r) {
+		if(r == DeviceRequest.QUERY_STATUS)
 			new WarningStatus(sign).start();
 	}
 
@@ -201,9 +201,9 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		new WarningSignCommand(sign, d).start();
 	}
 
-	/** Send a sign request to an LCS array */
-	public void sendRequest(LCSArrayImpl lcs_array, SignRequest r) {
-		if(r == SignRequest.QUERY_STATUS)
+	/** Send a device request to an LCS array */
+	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
+		if(r == DeviceRequest.QUERY_STATUS)
 			new LCSQueryStatus(lcs_array).start();
 	}
 

@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
-import us.mn.state.dot.tms.SignRequest;
+import us.mn.state.dot.tms.DeviceRequest;
 
 /**
  * A brightness feedback sample point
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.SignRequest;
 public class BrightnessSample {
 
 	/** Feedback request */
-	public final SignRequest feedback;
+	public final DeviceRequest feedback;
 
 	/** Photocell value (0-65535) */
 	public final int photocell;
@@ -33,7 +33,7 @@ public class BrightnessSample {
 	public final int output;
 
 	/** Create a new brightness feedback sample point */
-	public BrightnessSample(SignRequest f, int p, int o) {
+	public BrightnessSample(DeviceRequest f, int p, int o) {
 		feedback = f;
 		photocell = p;
 		output = o;

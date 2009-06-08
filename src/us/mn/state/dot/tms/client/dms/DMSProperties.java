@@ -37,9 +37,9 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.dms.quicklib.QuickMessageEditorTab;
 import us.mn.state.dot.tms.client.SonarState;
@@ -219,11 +219,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Brightness feedback combo box */
 	protected final JComboBox feedback = new JComboBox(
-		new SignRequest[] {
-			SignRequest.NO_REQUEST,
-			SignRequest.BRIGHTNESS_GOOD,
-			SignRequest.BRIGHTNESS_TOO_DIM,
-			SignRequest.BRIGHTNESS_TOO_BRIGHT
+		new DeviceRequest[] {
+			DeviceRequest.NO_REQUEST,
+			DeviceRequest.BRIGHTNESS_GOOD,
+			DeviceRequest.BRIGHTNESS_TOO_DIM,
+			DeviceRequest.BRIGHTNESS_TOO_BRIGHT
 		}
 	);
 
@@ -442,7 +442,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			panel.add(queryBtn);
 			new ActionJob(this, queryBtn) {
 				public void perform() throws Exception {
-					proxy.setSignRequest(SignRequest.
+					proxy.setDeviceRequest(DeviceRequest.
 						QUERY_MESSAGE.ordinal());
 				}
 			};
@@ -455,8 +455,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			panel.addRow(resetBtn);
 			new ActionJob(this, resetBtn) {
 				public void perform() {
-					proxy.setSignRequest(SignRequest.
-						RESET_DMS.ordinal());
+					proxy.setDeviceRequest(DeviceRequest.
+						RESET_DEVICE.ordinal());
 				}
 			};
 		}
@@ -468,15 +468,15 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		JButton queryBtn = new JButton("Query Pixel Failures");
 		new ActionJob(this, queryBtn) {
 			public void perform() {
-				proxy.setSignRequest(SignRequest.
+				proxy.setDeviceRequest(DeviceRequest.
 					QUERY_PIXEL_FAILURES.ordinal());
 			}
 		};
 		JButton testBtn = new JButton("Test Pixels");
 		new ActionJob(this, testBtn) {
 			public void perform() {
-				proxy.setSignRequest(
-					SignRequest.TEST_PIXELS.ordinal());
+				proxy.setDeviceRequest(
+					DeviceRequest.TEST_PIXELS.ordinal());
 			}
 		};
 		JPanel buttonPnl = new JPanel();
@@ -506,17 +506,17 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected JPanel createBrightnessPanel() {
 		new ActionJob(this, feedback) {
 			public void perform() {
-				SignRequest sr =
-					(SignRequest)feedback.getSelectedItem();
-				proxy.setSignRequest(sr.ordinal());
+				DeviceRequest sr = (DeviceRequest)
+					feedback.getSelectedItem();
+				proxy.setDeviceRequest(sr.ordinal());
 				feedback.setEnabled(false);
 			}
 		};
 		JButton testBtn = new JButton("Test Lamps");
 		new ActionJob(this, testBtn) {
 			public void perform() {
-				proxy.setSignRequest(
-					SignRequest.TEST_LAMPS.ordinal());
+				proxy.setDeviceRequest(
+					DeviceRequest.TEST_LAMPS.ordinal());
 			}
 		};
 		lightOutput.setForeground(OK);

@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WarningSign;
@@ -198,5 +199,13 @@ public class WarningSignImpl extends DeviceImpl implements WarningSign {
 				return (WarningSignPoller)p;
 		}
 		return null;
+	}
+
+	/** Request a device operation */
+	public void setDeviceRequest(int r) {
+		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
+		WarningSignPoller p = getWarningSignPoller();
+		if(p != null)
+			p.sendRequest(this, dr);
 	}
 }

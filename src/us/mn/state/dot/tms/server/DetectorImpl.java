@@ -439,6 +439,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 			f.calculate();
 	}
 
+	/** Request a device operation */
+	public void setDeviceRequest(int r) {
+		// no detector device requests
+	}
+
 	/** Accumulator for number of samples locked on (scans) */
 	protected transient int locked_on = 0;
 

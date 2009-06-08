@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -41,7 +42,6 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
@@ -202,7 +202,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			DMSPoller p = getDMSPoller();
 			if(p != null) {
 				p.sendRequest(this,
-					SignRequest.QUERY_CONFIGURATION);
+					DeviceRequest.QUERY_CONFIGURATION);
 			}
 		}
 	}
@@ -795,12 +795,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return powerStatus;
 	}
 
-	/** Request a sign operation (query message, test pixels, etc.) */
-	public void setSignRequest(int r) {
-		SignRequest sr = SignRequest.fromOrdinal(r);
+	/** Request a device operation (query message, test pixels, etc.) */
+	public void setDeviceRequest(int r) {
+		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
 		DMSPoller p = getDMSPoller();
 		if(p != null)
-			p.sendRequest(this, sr);
+			p.sendRequest(this, dr);
 	}
 
 	/** User note */

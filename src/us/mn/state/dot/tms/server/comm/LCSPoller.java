@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.SignRequest;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 
 /**
@@ -26,8 +26,8 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
  */
 public interface LCSPoller {
 
-	/** Send a sign request */
-	void sendRequest(LCSArrayImpl lcs_array, SignRequest r);
+	/** Send a device request */
+	void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r);
 
 	/** Send new indications to an LCS array.
 	 * @param lcs_array LCS array.

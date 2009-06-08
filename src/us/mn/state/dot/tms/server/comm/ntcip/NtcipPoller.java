@@ -17,12 +17,13 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
@@ -95,8 +96,8 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 		return test;
 	}
 
-	/** Send a sign request message to the sign */
-	public void sendRequest(DMSImpl dms, SignRequest r) {
+	/** Send a device request message to the sign */
+	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch(r) {
 		case QUERY_CONFIGURATION:
 			new OpQueryDMSConfiguration(dms).start();

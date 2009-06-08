@@ -368,6 +368,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return null;
 	}
 
+	/** Request a device operation */
+	public void setDeviceRequest(int r) {
+		// no ramp meter device requests
+	}
+
 	/** Ramp meter queue status */
 	protected RampMeterQueue queue = RampMeterQueue.UNKNOWN;
 

@@ -30,11 +30,11 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TMSException;
@@ -389,7 +389,7 @@ public final class TMSImpl implements KmlDocument {
 		});
 		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
 			public boolean check(DMSImpl s) {
-				s.setSignRequest(SignRequest.
+				s.setDeviceRequest(DeviceRequest.
 					QUERY_PIXEL_FAILURES.ordinal());
 				return false;
 			}
@@ -491,7 +491,7 @@ public final class TMSImpl implements KmlDocument {
 	static protected void pollDMS(DMSImpl d) {
 		DMSPoller p = d.getDMSPoller();
 		if(p != null)
-			p.sendRequest(d, SignRequest.QUERY_MESSAGE);
+			p.sendRequest(d, DeviceRequest.QUERY_MESSAGE);
 	}
 
 	/** Poll all LCS status */
@@ -510,7 +510,7 @@ public final class TMSImpl implements KmlDocument {
 	static protected void pollLCSArray(LCSArrayImpl lcs_array) {
 		LCSPoller p = lcs_array.getLCSPoller();
 		if(p != null)
-			p.sendRequest(lcs_array, SignRequest.QUERY_STATUS);
+			p.sendRequest(lcs_array, DeviceRequest.QUERY_STATUS);
 	}
 
 	/** Poll all warning signs */
@@ -529,7 +529,7 @@ public final class TMSImpl implements KmlDocument {
 	static protected void pollWarningSign(WarningSignImpl warn_sign) {
 		WarningSignPoller p = warn_sign.getWarningSignPoller();
 		if(p != null)
-			p.sendRequest(warn_sign, SignRequest.QUERY_STATUS);
+			p.sendRequest(warn_sign, DeviceRequest.QUERY_STATUS);
 	}
 
 	/** Select a camera on a video monitor */

@@ -27,11 +27,11 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.IButton;
@@ -178,7 +178,7 @@ public class SingleSignTab extends FormPanel {
 		new ActionJob(this, queryBtn) {
 			public void perform() {
 				if(proxy != null) {
-					proxy.setSignRequest(SignRequest.
+					proxy.setDeviceRequest(DeviceRequest.
 						QUERY_STATUS.ordinal());
 				}
 			}

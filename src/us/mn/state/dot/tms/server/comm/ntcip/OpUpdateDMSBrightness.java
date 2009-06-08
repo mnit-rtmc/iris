@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import us.mn.state.dot.tms.SignRequest;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BrightnessSample;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -30,9 +30,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  */
 public class OpUpdateDMSBrightness extends OpDMS {
 
-	/** Sign request (BRIGHTNESS_GOOD, BRIGHTNESS_TOO_DIM or
+	/** Device request (BRIGHTNESS_GOOD, BRIGHTNESS_TOO_DIM or
 	 * BRIGHTNESS_TOO_BRIGHT) */
-	protected final SignRequest request;
+	protected final DeviceRequest request;
 
 	/** Maximum photocell level */
 	protected final DmsIllumMaxPhotocellLevel max_level =
@@ -55,7 +55,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		new DmsIllumBrightnessValues();
 
 	/** Create a new DMS brightness feedback operation */
-	public OpUpdateDMSBrightness(DMSImpl d, SignRequest r) {
+	public OpUpdateDMSBrightness(DMSImpl d, DeviceRequest r) {
 		super(COMMAND, d);
 		request = r;
 	}
@@ -79,8 +79,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + light);
 			dms.feedbackBrightness(new BrightnessSample(request,
 				p_level.getInteger(), light.getInteger()));
-			if(request == SignRequest.BRIGHTNESS_TOO_DIM ||
-			   request == SignRequest.BRIGHTNESS_TOO_BRIGHT)
+			if(request == DeviceRequest.BRIGHTNESS_TOO_DIM ||
+			   request == DeviceRequest.BRIGHTNESS_TOO_BRIGHT)
 				return new QueryBrightnessTable();
 			else
 				return null;
@@ -146,9 +146,9 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		dms.queryBrightnessFeedback(new BrightnessSample.Handler() {
 			public void handle(BrightnessSample s) {
 				down.put(s.photocell, s.output, s.feedback ==
-					SignRequest.BRIGHTNESS_TOO_DIM);
+					DeviceRequest.BRIGHTNESS_TOO_DIM);
 				up.put(s.photocell, s.output, s.feedback ==
-					SignRequest.BRIGHTNESS_TOO_BRIGHT);
+					DeviceRequest.BRIGHTNESS_TOO_BRIGHT);
 			}
 		});
 		int[][] tbl = new int[table.length][3];

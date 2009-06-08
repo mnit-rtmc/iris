@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import us.mn.state.dot.tms.SignRequest;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 
 /**
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.WarningSignImpl;
 public interface WarningSignPoller {
 
 	/** Send a sign request */
-	void sendRequest(WarningSignImpl sign, SignRequest r);
+	void sendRequest(WarningSignImpl sign, DeviceRequest r);
 
 	/** Set the deployed status of a warning sign */
 	void setDeployed(WarningSignImpl sign, boolean d);

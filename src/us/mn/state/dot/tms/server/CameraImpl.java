@@ -219,6 +219,11 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return publish;
 	}
 
+	/** Request a device operation */
+	public void setDeviceRequest(int r) {
+		// no camera device requests
+	}
+
 	/** Command the camera pan, tilt or zoom */
 	public void setPtz(Float[] ptz) {
 		// FIXME: SONAR should not send notification to clients for

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,25 +17,28 @@ package us.mn.state.dot.tms;
 import java.util.LinkedList;
 
 /**
- * Sign request enumeration.
+ * Device request enumeration.
  *
  * @author Douglas Lau
  */
-public enum SignRequest {
+public enum DeviceRequest {
 
 	/** No request */
 	NO_REQUEST(""),
 
-	/** Query sign configuration */
+	/** Query device configuration */
 	QUERY_CONFIGURATION("Query configuration"),
 
-	/** Query current sign message */
+	/** Send device settings */
+	SEND_SETTINGS("Send settings"),
+
+	/** Query current message */
 	QUERY_MESSAGE("Query message"),
 
-	/** Query sign status */
+	/** Query device status */
 	QUERY_STATUS("Query status"),
 
-	/** Query pixel failures */
+	/** Query sign pixel failures */
 	QUERY_PIXEL_FAILURES("Query pixel failures"),
 
 	/** Activate pixel test */
@@ -47,49 +50,49 @@ public enum SignRequest {
 	/** Activate lamp test */
 	TEST_LAMPS("Lamp test"),
 
-	/** Brightness feedback "good" */
+	/** Sign brightness feedback "good" */
 	BRIGHTNESS_GOOD("Brightness good"),
 
-	/** Brightness feedback "too dim" */
+	/** Sign brightness feedback "too dim" */
 	BRIGHTNESS_TOO_DIM("Brightness too dim"),
 
-	/** Brightness feedback "too bright" */
+	/** Sign brightness feedback "too bright" */
 	BRIGHTNESS_TOO_BRIGHT("Brightness too bright"),
 
-	/** Reset DMS */
-	RESET_DMS("Reset DMS"),
+	/** Reset device */
+	RESET_DEVICE("Reset Device"),
 
 	/** Reset modem */
 	RESET_MODEM("Reset modem"),
 
-	/** Send LEDSTAR settings */
+	/** Send LEDSTAR sign settings */
 	SEND_LEDSTAR_SETTINGS("Send LEDSTAR settings"),
 
-	/** Query LEDSTAR settings */
+	/** Query LEDSTAR sign settings */
 	QUERY_LEDSTAR_SETTINGS("Query LEDSTAR settings");
 
-	/** Create a new sign request value */
-	private SignRequest(String d) {
+	/** Create a new deivce request value */
+	private DeviceRequest(String d) {
 		description = d;
 	}
 
 	/** Description */
 	public final String description;
 
-	/** Get sign request from an ordinal value */
-	static public SignRequest fromOrdinal(int o) {
-		for(SignRequest sr: SignRequest.values()) {
-			if(sr.ordinal() == o)
-				return sr;
+	/** Get device request from an ordinal value */
+	static public DeviceRequest fromOrdinal(int o) {
+		for(DeviceRequest dr: DeviceRequest.values()) {
+			if(dr.ordinal() == o)
+				return dr;
 		}
 		return NO_REQUEST;
 	}
 
-	/** Get an array of sign request descriptions */
+	/** Get an array of device request descriptions */
 	static public String[] getDescriptions() {
 		LinkedList<String> d = new LinkedList<String>();
-		for(SignRequest sr: SignRequest.values())
-			d.add(sr.description);
+		for(DeviceRequest dr: DeviceRequest.values())
+			d.add(dr.description);
 		return d.toArray(new String[0]);
 	}
 }

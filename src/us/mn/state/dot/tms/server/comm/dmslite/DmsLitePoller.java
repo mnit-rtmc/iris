@@ -18,9 +18,9 @@ import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -82,10 +82,10 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 
 		// reset button pressed
 		if(reset)
-			sendRequest(dms, SignRequest.RESET_DMS);
+			sendRequest(dms, DeviceRequest.RESET_DEVICE);
 		// download button pressed
 		else
-			sendRequest(dms, SignRequest.QUERY_MESSAGE);
+			sendRequest(dms, DeviceRequest.QUERY_MESSAGE);
 	}
 
 	/** Perform a 30-second poll */
@@ -128,16 +128,16 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	}
 
 
-	/** Send a sign request message to the sign, no user specified */
-	public void sendRequest(DMSImpl dms, SignRequest r) {
+	/** Send a device request message to the sign, no user specified */
+	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		// user assumed to be IRIS
 		User u = null; //UserImpl.create("IRIS");
 		//u.setFullName("IRIS");
 		sendRequest(dms, r, u);
 	}
 
-	/** Send a sign request message to the sign from a specific user */
-	public void sendRequest(DMSImpl dms, SignRequest r, User u) {
+	/** Send a device request message to the sign from a specific user */
+	public void sendRequest(DMSImpl dms, DeviceRequest r, User u) {
 		if(dms == null)
 			return;
 		switch(r) {
@@ -148,7 +148,7 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		case QUERY_STATUS:
 			new OpQueryMsg(dms, u).start();
 			break;
-		case RESET_DMS:
+		case RESET_DEVICE:
 			new OpReset(dms, u).start();
 			break;
 		case RESET_MODEM:
