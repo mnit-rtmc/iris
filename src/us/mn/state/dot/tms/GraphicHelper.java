@@ -33,4 +33,9 @@ public class GraphicHelper extends BaseHelper {
 		return (Graphic)namespace.findObject(Graphic.SONAR_TYPE, 
 			checker);
 	}
+
+	/** Lookup the graphic with the specified name */
+	static public Graphic lookup(String name) {
+		return (Graphic)namespace.lookupObject(Graphic.SONAR_TYPE,name);
+	}
 }

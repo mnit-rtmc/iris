@@ -29,9 +29,9 @@ import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
 public class GraphicInfoList extends CRC16 {
 
 	/** Create a new GraphicInfoList */
-	public GraphicInfoList(Graphic graphic) throws IOException {
+	public GraphicInfoList(Graphic graphic, int g_num) throws IOException {
 		DataOutputStream dos = new DataOutputStream(this);
-		dos.writeByte(graphic.getNumber());
+		dos.writeByte(g_num);
 		dos.writeShort(graphic.getHeight());
 		dos.writeShort(graphic.getWidth());
 		dos.writeByte(DmsColorScheme.Enum.fromBpp(

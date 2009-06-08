@@ -6,7 +6,6 @@ UPDATE system_attribute SET value = '3.89.0' WHERE name = 'database_version';
 
 CREATE TABLE iris.graphic (
 	name VARCHAR(20) PRIMARY KEY,
-	g_number INTEGER UNIQUE,
 	bpp INTEGER NOT NULL,
 	height INTEGER NOT NULL,
 	width INTEGER NOT NULL,

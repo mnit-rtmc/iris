@@ -34,18 +34,16 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading DMS graphics...");
 		namespace.registerType(SONAR_TYPE, GraphicImpl.class);
-		store.query("SELECT name, g_number, bpp, height, width, " +
-			"pixels FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, bpp, height, width, pixels " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GraphicImpl(
 					row.getString(1),	// name
-					(Integer)row.getObject(2), // g_number
-					row.getInt(3),		// bpp
-					row.getInt(4),		// height
-					row.getInt(5),		// width
-					row.getString(6)	// pixels
+					row.getInt(2),		// bpp
+					row.getInt(3),		// height
+					row.getInt(4),		// width
+					row.getString(5)	// pixels
 				));
 			}
 		});
@@ -55,7 +53,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("g_number", g_number);
 		map.put("bpp", bpp);
 		map.put("height", height);
 		map.put("width", width);
@@ -76,7 +73,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	/** Create a new graphic */
 	public GraphicImpl(String n) {
 		super(n);
-		g_number = null;
 		bpp = 1;
 		height = 0;
 		width = 0;
@@ -84,38 +80,12 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Create a graphic from database lookup */
-	protected GraphicImpl(String n, Integer num, int b, int h, int w,
-		String p)
-	{
+	protected GraphicImpl(String n, int b, int h, int w, String p) {
 		this(n);
-		g_number = num;
 		bpp = b;
 		height = h;
 		width = w;
 		pixels = p;
-	}
-
-	/** Graphic number */
-	protected Integer g_number;
-
-	/** Set the graphic number */
-	public void setNumber(Integer n) {
-		g_number = n;
-	}
-
-	/** Set the graphic number */
-	public void doSetNumber(Integer n) throws TMSException {
-		if(n == g_number)
-			return;
-		if(n != null && (n < 1 || n > 255))
-			throw new ChangeVetoException("Invalid number");
-		store.update(this, "g_number", n);
-		setNumber(n);
-	}
-
-	/** Get the graphic number */
-	public Integer getNumber() {
-		return g_number;
 	}
 
 	/** Bits per pixel */
