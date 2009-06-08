@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
+import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
@@ -35,7 +36,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class NtcipPoller extends MessagePoller implements DMSPoller {
+public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
 	/** SNMP message protocol */
 	protected final SNMP snmp = new SNMP();
@@ -150,5 +151,29 @@ public class NtcipPoller extends MessagePoller implements DMSPoller {
 	/** Check if the message is already deployed on the sign */
 	protected boolean isMessageDeployed(DMSImpl dms, SignMessage m) {
 		return m.getMulti().equals(dms.getMessageCurrent().getMulti());
+	}
+
+	/** Send a device request message to an LCS array */
+	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
+		switch(r) {
+		case SEND_SETTINGS:
+/*			OpSendDMSGraphics g = new OpSendDMSGraphics(dms);
+			g.setPriority(p);
+			g.start(); */
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
+	/** Send new indications to an LCS array.
+	 * @param lcs_array LCS array.
+	 * @param ind New lane use indications.
+	 * @param o User who deployed the indications. */
+	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
+		User o)
+	{
+		// FIXME: create operation 
 	}
 }
