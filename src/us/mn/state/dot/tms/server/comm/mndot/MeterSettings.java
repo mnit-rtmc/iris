@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DeviceOperation;
-import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 
 /**
@@ -93,7 +92,7 @@ public class MeterSettings extends DeviceOperation {
 	/** Stop times for timing table */
 	protected final int[] table_stop = {AM_MID_TIME, PM_MID_TIME};
 
-	/** Create a new download operation */
+	/** Create a new meter settings operation */
 	public MeterSettings(RampMeterImpl m) {
 		super(DOWNLOAD, m);
 		meter = m;
@@ -127,28 +126,9 @@ public class MeterSettings extends DeviceOperation {
 		}
 	}
 
-	/** Handle an exception */
-	public void handleException(IOException e) {
-		if(e instanceof DownloadRequestException)
-			return;
-		else
-			super.handleException(e);
-	}
-
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new SynchronizeClock();
-	}
-
-	/** Phase to synchronize the clock */
-	protected class SynchronizeClock extends Phase {
-
-		/** Synchronize the clock */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new SynchronizeRequest());
-			mess.setRequest();
-			return new ResetWatchdogMonitor();
-		}
+		return new ResetWatchdogMonitor();
 	}
 
 	/** Phase to reset the watchdog monitor */
@@ -201,7 +181,7 @@ public class MeterSettings extends DeviceOperation {
 		}
 	}
 
-	/** Send both AM and PM timing tables to the specified ramp meter */
+	/** Create a timing table request for the meter */
 	protected Request createTimingTableRequest(int address)
 		throws IOException
 	{

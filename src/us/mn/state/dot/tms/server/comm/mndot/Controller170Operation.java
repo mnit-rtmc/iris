@@ -45,7 +45,7 @@ abstract public class Controller170Operation extends ControllerOperation {
 	static protected final int ALARM_PIN = 70;
 
 	/** Lookup the first ramp meter on a 170 controller */
-	static protected RampMeterImpl lookupMeter1(ControllerImpl c) {
+	static public RampMeterImpl lookupMeter1(ControllerImpl c) {
 		ControllerIO[] io_pins = c.getIO();
 		ControllerIO io = io_pins[DEVICE_1_PIN];
 		if(io instanceof RampMeterImpl)
@@ -55,7 +55,7 @@ abstract public class Controller170Operation extends ControllerOperation {
 	}
 
 	/** Lookup the second ramp meter on a 170 controller */
-	static protected RampMeterImpl lookupMeter2(ControllerImpl c) {
+	static public RampMeterImpl lookupMeter2(ControllerImpl c) {
 		ControllerIO[] io_pins = c.getIO();
 		ControllerIO io = io_pins[METER_2_PIN];
 		if(io instanceof RampMeterImpl)

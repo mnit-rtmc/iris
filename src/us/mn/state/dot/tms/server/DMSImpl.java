@@ -797,10 +797,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Request a device operation (query message, test pixels, etc.) */
 	public void setDeviceRequest(int r) {
-		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
 		DMSPoller p = getDMSPoller();
 		if(p != null)
-			p.sendRequest(this, dr);
+			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
 	/** User note */

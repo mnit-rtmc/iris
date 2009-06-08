@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
@@ -60,36 +59,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		return drop > 0 && drop <= HDLC.NTCIP_MAX_ADDRESS;
 	}
 
-	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset, int p) {
-		DMSImpl dms = c.getActiveSign();
-		if(dms != null) {
-			if(reset) {
-				OpResetDMS r = new OpResetDMS(dms);
-				r.setPriority(p);
-				r.start();
-			}
-			OpSendDMSFonts d = new OpSendDMSFonts(dms);
-			d.setPriority(p);
-			d.start();
-			OpSendDMSDefaults o = new OpSendDMSDefaults(dms);
-			o.setPriority(p);
-			o.start();
-		}
-	}
-
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
-		// Nothing to do here
-	}
-
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
-		DMSImpl dms = c.getActiveSign();
-		if(dms != null)
-			new OpQueryDMSStatus(dms).start();
-	}
-
 	/** Start a test for the given controller */
 	public DiagnosticOperation startTest(ControllerImpl c) {
 		DiagnosticOperation test = new OpTestDMSCommunication(c);
@@ -100,6 +69,13 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	/** Send a device request message to the sign */
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch(r) {
+		case RESET_DEVICE:
+			new OpResetDMS(dms).start();
+			break;
+		case SEND_SETTINGS:
+			new OpSendDMSFonts(dms).start();
+			new OpSendDMSDefaults(dms).start();
+			break;
 		case QUERY_CONFIGURATION:
 			new OpQueryDMSConfiguration(dms).start();
 			break;

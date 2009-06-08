@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.EOFException;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -50,22 +49,6 @@ public class ViconPTZPoller extends MessagePoller implements CameraPoller {
 	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
 		return drop >= 1 && drop <= ADDRESS_MAX;
-	}
-
-	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset, int p) {
-		if(c.getActive())
-			c.resetErrorCounter();
-	}
-
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
-		// Nothing to do here
-	}
-
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
-		// Nothing to do here
 	}
 
 	/** Send a PTZ camera move command */

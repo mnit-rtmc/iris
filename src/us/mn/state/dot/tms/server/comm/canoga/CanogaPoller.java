@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
  * CanogaPoller is a java implementation of the 3M Canoga (tm) serial
@@ -30,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class CanogaPoller extends MessagePoller {
+public class CanogaPoller extends MessagePoller implements SamplePoller {
 
 	/** Maximum address allowed for backplane addressing */
 	static protected final int ADDRESS_MAX_BACKPLANE = 15;
@@ -61,9 +62,9 @@ public class CanogaPoller extends MessagePoller {
 	}
 
 	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset, int p) {
+	public void download(ControllerImpl c, int p) {
 		if(c.getActive()) {
-			InitializeCanoga o = new InitializeCanoga(c, reset);
+			InitializeCanoga o = new InitializeCanoga(c);
 			o.setPriority(p);
 			o.start();
 		}
@@ -86,8 +87,14 @@ public class CanogaPoller extends MessagePoller {
 		return null;
 	}
 
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
+	/** Perform a controller reset */
+	public void resetController(ControllerImpl c) {
+		if(c.getActive())
+			new InitializeCanoga(c).start();
+	}
+
+	/** Query sample data */
+	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
 		if(c.hasActiveDetector()) {
 			CollectEventData ced = getEventCollector(c);
 			if(ced == null) {
@@ -98,11 +105,6 @@ public class CanogaPoller extends MessagePoller {
 				ced.cleanup();
 		}
 		// FIXME: put logged data in bin
-	}
-
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
-		// Nothing to do here
 	}
 
 	/** Start a test for the given controller */

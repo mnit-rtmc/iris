@@ -15,45 +15,24 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
-import java.util.Calendar;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
-import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 
 /**
- * Download configuration data to a 170 controller
+ * Send sample settings to a 170 controller
  *
  * @author Douglas Lau
  */
-public class Download extends Controller170Operation {
+public class SendSampleSettings extends Controller170Operation {
 
-	/** HOV preempt time (tenths of a second) (obsolete) */
-	static protected final int HOV_PREEMPT = 80;
-
-	/** AM midpoint time (BCD; minute of day) */
-	static protected final int AM_MID_TIME = 730;
-
-	/** PM midpoint time (BCD; minute of day) */
-	static protected final int PM_MID_TIME = 1630;
-
-	/** Flag to perform a level-1 restart */
-	protected final boolean restart;
-
-	/** Create a new download operation */
-	public Download(ControllerImpl c) {
-		this(c, false);
-	}
-
-	/** Create a new download operation */
-	public Download(ControllerImpl c, boolean r) {
+	/** Create a new send sample settings operation */
+	public SendSampleSettings(ControllerImpl c) {
 		super(DOWNLOAD, c);
-		restart = r;
 	}
 
 	/** Handle an exception */
@@ -64,23 +43,9 @@ public class Download extends Controller170Operation {
 			super.handleException(e);
 	}
 
-	/** Begin the download operation */
+	/** Begin the send sample settings operation */
 	public void begin() {
-		if(restart)
-			phase = new Level1Restart();
-		else
-			phase = new SynchronizeClock();
-	}
-
-	/** Phase to restart the controller */
-	protected class Level1Restart extends Phase {
-
-		/** Restart the controller */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new Level1Request());
-			mess.setRequest();
-			return new SynchronizeClock();
-		}
+		phase = new SynchronizeClock();
 	}
 
 	/** Phase to synchronize the clock */
@@ -188,7 +153,7 @@ public class Download extends Controller170Operation {
 			byte[] data = getQueueBitmap();
 			mess.add(new MemoryRequest(Address.QUEUE_BITMAP, data));
 			mess.setRequest();
-			return new SetTimingTable1();
+			return null;
 		}
 	}
 
@@ -196,52 +161,16 @@ public class Download extends Controller170Operation {
 	public byte[] getQueueBitmap() {
 		byte[] bitmap = new byte[DETECTOR_INPUTS / 8];
 		for(int inp = 0; inp < DETECTOR_INPUTS; inp++) {
-			DetectorImpl det = controller.getDetectorAtPin(
-				FIRST_DETECTOR_PIN + inp);
-			if(det != null &&
-				det.getLaneType() == LaneType.QUEUE.ordinal())
-			{
+			if(isQueueDetector(inp))
 				bitmap[inp / 8] |= 1 << (inp % 8);
-			}
 		}
 		return bitmap;
 	}
 
-	/** Phase to set the timing table for the first ramp meter */
-	protected class SetTimingTable1 extends Phase {
-
-		/** Set the timing table for the first ramp meter */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			WarningSignImpl warn =
-				controller.getActiveWarningSign();
-			if(warn != null) {
-				sendWarningSignTiming(mess,
-					Address.METER_1_TIMING_TABLE);
-			}
-			return null;
-		}
-	}
-
-	/** Send timing table for a warning sign */
-	protected void sendWarningSignTiming(AddressedMessage mess, int address)
-		throws IOException
-	{
-		int[] times = {AM_MID_TIME, PM_MID_TIME};
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCD.OutputStream bcd = new BCD.OutputStream(os);
-		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
-			bcd.write16Bit(1);		// Startup GREEN
-			bcd.write16Bit(1);		// Startup YELLOW
-			bcd.write16Bit(3);		// Metering GREEN
-			bcd.write16Bit(1);		// Metering YELLOW
-			bcd.write16Bit(HOV_PREEMPT);
-			for(int i = 0; i < 6; i++)
-				bcd.write16Bit(1);	// Metering RED
-			bcd.write8Bit(MeterRate.FLASH);	// TOD rate
-			bcd.write16Bit(times[t]);	// TOD start time
-			bcd.write16Bit(times[t]);	// TOD stop time
-		}
-		mess.add(new MemoryRequest(address, os.toByteArray()));
-		mess.setRequest();
+	/** Test if a detector input has a queue detector associated */
+	protected boolean isQueueDetector(int inp) {
+		DetectorImpl d = controller.getDetectorAtPin(
+			FIRST_DETECTOR_PIN + inp);
+		return d != null && d.getLaneType() == LaneType.QUEUE.ordinal();
 	}
 }

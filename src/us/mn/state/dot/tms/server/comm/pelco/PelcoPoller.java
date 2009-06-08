@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.pelco;
 
 import java.io.EOFException;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -52,21 +51,6 @@ public class PelcoPoller extends MessagePoller implements VideoMonitorPoller {
 	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
 		return drop == PELCO_DROP;
-	}
-
-	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset, int p) {
-		// Nothing to do here
-	}
-
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
-		// Nothing to do here
-	}
-
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
-		// Nothing to do here
 	}
 
 	/** Start a test for the given controller */

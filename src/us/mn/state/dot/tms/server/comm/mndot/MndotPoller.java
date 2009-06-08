@@ -28,11 +28,13 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WarningSignPoller;
 
 /**
@@ -41,8 +43,8 @@ import us.mn.state.dot.tms.server.comm.WarningSignPoller;
  *
  * @author Douglas Lau
  */
-public class MndotPoller extends MessagePoller implements MeterPoller,
-	WarningSignPoller, LCSPoller
+public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
+	MeterPoller, SamplePoller, WarningSignPoller
 {
 	/** Test if it is afternoon */
 	static protected boolean isAfternoon() {
@@ -115,29 +117,59 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		return true;
 	}
 
-	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset, int p) {
-		if(c.getActive()) {
-			Download d = new Download(c, reset);
-			d.setPriority(p);
-			d.start();
+	/** Respond to a download request from a controller */
+	protected void download(ControllerImpl c, int p) {
+		SendSampleSettings ss = new SendSampleSettings(c);
+		ss.setPriority(p);
+		ss.start();
+		WarningSignImpl warn = c.getActiveWarningSign();
+		if(warn != null) {
+			SendWarningSettings s = new SendWarningSettings(warn);
+			s.setPriority(p);
+			s.start();
+		}
+		RampMeterImpl meter1 = Controller170Operation.lookupMeter1(c);
+		if(meter1 != null) {
+			MeterSettings s = new MeterSettings(meter1);
+			s.setPriority(p);
+			s.start();
+		}
+		RampMeterImpl meter2 = Controller170Operation.lookupMeter2(c);
+		if(meter2 != null) {
+			MeterSettings s = new MeterSettings(meter2);
+			s.setPriority(p);
+			s.start();
 		}
 	}
 
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
+	/** Perform a controller reset */
+	public void resetController(ControllerImpl c) {
 		if(c.getActive()) {
-			if(c.hasActiveDetector())
-				new Data30Second(c, comp).start();
-			if(c.hasActiveMeter())
-				new QueryMeterStatus(c, comp).start();
+			SendLevel1Restart s = new SendLevel1Restart(c);
+			s.start();
 		}
 	}
 
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
-		if(c.hasActiveDetector() || c.hasActiveMeter())
-			new Data5Minute(c, comp).start();
+	/** Query sample data */
+	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
+		switch(intvl) {
+		case 30:
+			if(c.getActive()) {
+				if(c.hasActiveDetector())
+					new Data30Second(c, comp).start();
+				if(c.hasActiveMeter())
+					new QueryMeterStatus(c, comp).start();
+			}
+			break;
+		case 300:
+			if(c.hasActiveDetector() || c.hasActiveMeter())
+				new Data5Minute(c, comp).start();
+			break;
+		}
+	}
+
+	/** Query the status of alarms */
+	public void queryAlarms(ControllerImpl c) {
 		if(c.hasAlarm())
 			new QueryAlarms(c).start();
 	}
@@ -198,8 +230,17 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 
 	/** Send a device request to a warning sign */
 	public void sendRequest(WarningSignImpl sign, DeviceRequest r) {
-		if(r == DeviceRequest.QUERY_STATUS)
+		switch(r) {
+		case SEND_SETTINGS:
+			new SendWarningSettings(sign).start();
+			break;
+		case QUERY_STATUS:
 			new WarningStatus(sign).start();
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
 	}
 
 	/** Set the deployed status of the sign */

@@ -18,7 +18,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
 
@@ -173,7 +172,7 @@ abstract public class MessagePoller extends Thread {
 			}
 		}
 		catch(DownloadRequestException e) {
-			download(o);
+			download(o.getController(), o.getPriority());
 		}
 		catch(ParsingException e) {
 			o.handleException(e);
@@ -231,23 +230,9 @@ abstract public class MessagePoller extends Thread {
 		throws EOFException;
 
 	/** Respond to a download request from a controller */
-	protected void download(ControllerOperation o) {
-		download(o.getController(), false, o.getPriority());
+	protected void download(ControllerImpl c, int p) {
+		// Subclasses should override this if necessary
 	}
-
-	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset) {
-		download(c, reset, Operation.DOWNLOAD);
-	}
-
-	/** Perform a controller download */
-	abstract public void download(ControllerImpl c, boolean reset, int p);
-
-	/** Perform a 30-second poll */
-	abstract public void poll30Second(ControllerImpl c, Completer comp);
-
-	/** Perform a 5-minute poll */
-	abstract public void poll5Minute(ControllerImpl c, Completer comp);
 
 	/** Start a test for the given controller */
 	abstract public DiagnosticOperation startTest(ControllerImpl c);

@@ -32,19 +32,23 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimingPlan;
+import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.server.comm.DMSPoller;
-import us.mn.state.dot.tms.server.comm.LCSPoller;
+import us.mn.state.dot.tms.WarningSignHelper;
+import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
-import us.mn.state.dot.tms.server.comm.WarningSignPoller;
 import us.mn.state.dot.tms.kml.KmlDocument;
 import us.mn.state.dot.tms.kml.KmlFolder;
 import us.mn.state.dot.tms.kml.KmlFeature;
@@ -291,7 +295,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Validate all timing plans */
 	protected void validateTimingPlans() {
-		lookupTimingPlans(new Checker<TimingPlan>() {
+		TimingPlanHelper.find(new Checker<TimingPlan>() {
 			public boolean check(TimingPlan p) {
 				TimingPlanImpl plan = (TimingPlanImpl)p;
 				plan.validate();
@@ -299,11 +303,10 @@ public final class TMSImpl implements KmlDocument {
 			}
 		});
 		StratifiedPlanState.processAllStates();
-		namespace.findObject(RampMeter.SONAR_TYPE,
-			new Checker<RampMeterImpl>()
-		{
-			public boolean check(RampMeterImpl m) {
-				m.updateRatePlanned();
+		RampMeterHelper.find(new Checker<RampMeter>() {
+			public boolean check(RampMeter m) {
+				RampMeterImpl meter = (RampMeterImpl)m;
+				meter.updateRatePlanned();
 				return false;
 			}
 		});
@@ -387,16 +390,30 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
-		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
-			public boolean check(DMSImpl s) {
-				s.setDeviceRequest(DeviceRequest.
+		final int req = DeviceRequest.SEND_SETTINGS.ordinal();
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				dms.setDeviceRequest(req);
+				dms.setDeviceRequest(DeviceRequest.
 					QUERY_PIXEL_FAILURES.ordinal());
+				return false;
+			}
+		});
+		RampMeterHelper.find(new Checker<RampMeter>() {
+			public boolean check(RampMeter meter) {
+				meter.setDeviceRequest(req);
+				return false;
+			}
+		});
+		WarningSignHelper.find(new Checker<WarningSign>() {
+			public boolean check(WarningSign sign) {
+				sign.setDeviceRequest(req);
 				return false;
 			}
 		});
 	}
 
-	/** Poll all controllers 30 second interval */
+	/** Poll all sampling controllers 30 second interval */
 	static protected void poll30Second(final Completer comp)
 		throws NamespaceError
 	{
@@ -405,8 +422,10 @@ public final class TMSImpl implements KmlDocument {
 		{
 			public boolean check(ControllerImpl c) {
 				MessagePoller p = c.getPoller();
-				if(p != null)
-					p.poll30Second(c, comp);
+				if(p instanceof SamplePoller) {
+					SamplePoller sp = (SamplePoller)p;
+					sp.querySamples(c, 30, comp);
+				}
 				return false;
 			}
 		});
@@ -428,8 +447,22 @@ public final class TMSImpl implements KmlDocument {
 		{
 			public boolean check(ControllerImpl c) {
 				MessagePoller p = c.getPoller();
-				if(p != null)
-					p.poll5Minute(c, comp);
+				if(p instanceof SamplePoller) {
+					SamplePoller sp = (SamplePoller)p;
+					sp.querySamples(c, 300, comp);
+				}
+				if(p instanceof AlarmPoller) {
+					AlarmPoller ap = (AlarmPoller)p;
+					ap.queryAlarms(c);
+				}
+				return false;
+			}
+		});
+		final int req = DeviceRequest.QUERY_STATUS.ordinal();
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(!isConnectedViaModem(dms))
+					dms.setDeviceRequest(req);
 				return false;
 			}
 		});
@@ -478,58 +511,45 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Poll all DMS message status */
 	static protected void pollDMSs() throws NamespaceError {
-		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
-			public boolean check(DMSImpl d) {
-				if(!d.isConnectedViaModem())
-					pollDMS(d);
+		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(!isConnectedViaModem(dms))
+					dms.setDeviceRequest(req);
 				return false;
 			}
 		});
 	}
 
-	/** Poll one DMS message status */
-	static protected void pollDMS(DMSImpl d) {
-		DMSPoller p = d.getDMSPoller();
-		if(p != null)
-			p.sendRequest(d, DeviceRequest.QUERY_MESSAGE);
+	/** Test if a DMS is connected via modem */
+	static protected boolean isConnectedViaModem(DMS s) {
+		if(s instanceof DMSImpl) {
+			DMSImpl dms = (DMSImpl)s;
+			return dms.isConnectedViaModem();
+		} else
+			return true;
 	}
 
 	/** Poll all LCS status */
 	static protected void pollLCSs() throws NamespaceError {
-		namespace.findObject(LCSArray.SONAR_TYPE,
-			new Checker<LCSArrayImpl>()
-		{
-			public boolean check(LCSArrayImpl lcs_array) {
-				pollLCSArray(lcs_array);
+		final int req = DeviceRequest.QUERY_STATUS.ordinal();
+		LCSArrayHelper.find(new Checker<LCSArray>() {
+			public boolean check(LCSArray lcs_array) {
+				lcs_array.setDeviceRequest(req);
 				return false;
 			}
 		});
-	}
-
-	/** Poll one LCS array status */
-	static protected void pollLCSArray(LCSArrayImpl lcs_array) {
-		LCSPoller p = lcs_array.getLCSPoller();
-		if(p != null)
-			p.sendRequest(lcs_array, DeviceRequest.QUERY_STATUS);
 	}
 
 	/** Poll all warning signs */
 	static protected void pollWarningSigns() throws NamespaceError {
-		namespace.findObject(WarningSign.SONAR_TYPE,
-			new Checker<WarningSignImpl>()
-		{
-			public boolean check(WarningSignImpl warn_sign) {
-				pollWarningSign(warn_sign);
+		final int req = DeviceRequest.QUERY_STATUS.ordinal();
+		WarningSignHelper.find(new Checker<WarningSign>() {
+			public boolean check(WarningSign sign) {
+				sign.setDeviceRequest(req);
 				return false;
 			}
 		});
-	}
-
-	/** Poll one warning sign status */
-	static protected void pollWarningSign(WarningSignImpl warn_sign) {
-		WarningSignPoller p = warn_sign.getWarningSignPoller();
-		if(p != null)
-			p.sendRequest(warn_sign, DeviceRequest.QUERY_STATUS);
 	}
 
 	/** Select a camera on a video monitor */
@@ -568,16 +588,6 @@ public final class TMSImpl implements KmlDocument {
 		});
 		for(VideoMonitorImpl m: restricted)
 			m.selectCamera("");
-	}
-
-	/** Lookup timing plans plans */
-	static public void lookupTimingPlans(Checker<TimingPlan> checker) {
-		namespace.findObject(TimingPlan.SONAR_TYPE, checker);
-	}
-
-	/** Lookup a DMS in the SONAR namespace */
-	static public DMSImpl lookupDms(String name) {
-		return (DMSImpl)namespace.lookupObject(DMS.SONAR_TYPE, name);
 	}
 
 	/** get kml document name (KmlDocument interface) */

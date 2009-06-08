@@ -54,6 +54,7 @@ public class AwsPoller extends MessagePoller // FIXME implements SignPoller
 	final ServerNamespace m_namespace;
 
 	/** associated controller */
+	// FIXME: should get the controller from sonar
 	private ControllerImpl m_awsController = null;
 
 	/** Create a new poller */
@@ -78,22 +79,8 @@ public class AwsPoller extends MessagePoller // FIXME implements SignPoller
 		return (drop == VALID_DROP_ADDRESS);
 	}
 
-	/** Perform a controller download, which happens every 
-	 *  morning at 4am. */
-	public void download(ControllerImpl c, boolean reset, int p) {}
-
 	/** Perform a sign status poll. Defined in SignPoller interface. */
 	// FIXME public void pollSigns(ControllerImpl c, Completer comp) {}
-
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
-		// FIXME: should get the controller from sonar
-		if(c != m_awsController)
-			m_awsController = c;
-	}
-
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {}
 
 	/**
 	 * Start a test for the given controller.  This method is activated

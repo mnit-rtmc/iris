@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.ControllerOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.Cabinet;
@@ -636,11 +637,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return null;
 	}
 
-	/** Perform a controller download */
+	/** Perform a controller download (reset) */
 	public void setDownload(boolean reset) {
 		MessagePoller p = getPoller();
-		if(p != null)
-			p.download(this, reset);
+		if(p instanceof SamplePoller) {
+			SamplePoller sp = (SamplePoller)p;
+			sp.resetController(this);
+		}
 	}
 
 	/** Diagnostic operation for this controller */

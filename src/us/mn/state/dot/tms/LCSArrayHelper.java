@@ -30,6 +30,12 @@ public class LCSArrayHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Find LCS arrays using a Checker */
+	static public LCSArray find(Checker<LCSArray> checker) {
+		return (LCSArray)namespace.findObject(LCSArray.SONAR_TYPE,
+			checker);
+	}
+
 	/** Lookup the LCS objects for an array */
 	static public LCS[] lookupLCSs(LCSArray lcs_array) {
 		final TreeMap<Integer, LCS> lanes = new TreeMap<Integer, LCS>();

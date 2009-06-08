@@ -26,9 +26,6 @@ import us.mn.state.dot.tms.server.comm.ControllerOperation;
  */
 public class InitializeCanoga extends ControllerOperation {
 
-	/** Flag to perform a controller restart */
-	protected final boolean restart;
-
 	/** Canoga card serial number */
 	protected final SerialNumberRequest serial_number =
 		new SerialNumberRequest();
@@ -37,9 +34,8 @@ public class InitializeCanoga extends ControllerOperation {
 	protected final VersionRequest version = new VersionRequest();
 
 	/** Create a new initialize Canoga object */
-	public InitializeCanoga(ControllerImpl c, boolean r) {
+	public InitializeCanoga(ControllerImpl c) {
 		super(DOWNLOAD, c, c.toString());
-		restart = r;
 	}
 
 	/** Begin the sensor initialization operation */

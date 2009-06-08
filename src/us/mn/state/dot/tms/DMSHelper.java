@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -206,6 +207,11 @@ public class DMSHelper extends BaseHelper {
 	/** Lookup the DMS with the specified name */
 	static public DMS lookup(String name) {
 		return (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
+	}
+
+	/** Find DMS using a Checker */
+	static public DMS find(final Checker<DMS> checker) {
+		return (DMS)namespace.findObject(DMS.SONAR_TYPE, checker);
 	}
 
 	/** Empty text field */

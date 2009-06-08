@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.UserImpl;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
@@ -69,31 +68,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	/** Check if a drop address is valid */
 	public boolean isAddressValid(int drop) {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
-	}
-
-	/** 
-	 * Perform a controller download. Called when the IRIS server is shutting down, 
-	 * when the 'reset' button is pressed on the controller status tab. 
-	 */
-	public void download(ControllerImpl c, boolean reset, int p) {
-		DMSImpl dms = c.getActiveSign();
-		if(dms == null)
-			return;
-
-		// reset button pressed
-		if(reset)
-			sendRequest(dms, DeviceRequest.RESET_DEVICE);
-		// download button pressed
-		else
-			sendRequest(dms, DeviceRequest.QUERY_MESSAGE);
-	}
-
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
-	}
-
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
 	}
 
 	/** Start a test for the given controller */

@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DiagnosticOperation;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
  * SmartSensorPoller is a java implementation of the Wavetronix SmartSensor
@@ -29,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class SmartSensorPoller extends MessagePoller {
+public class SmartSensorPoller extends MessagePoller implements SamplePoller {
 
 	/** Create a new SmartSensor poller */
 	public SmartSensorPoller(String n, Messenger m) {
@@ -51,23 +52,28 @@ public class SmartSensorPoller extends MessagePoller {
 	}
 
 	/** Perform a controller download */
-	public void download(ControllerImpl c, boolean reset, int p) {
+	protected void download(ControllerImpl c, int p) {
 		if(c.getActive()) {
-			InitializeSensor o = new InitializeSensor(c, reset);
+			InitializeSensor o = new InitializeSensor(c, true);
 			o.setPriority(p);
 			o.start();
 		}
 	}
 
-	/** Perform a 30-second poll */
-	public void poll30Second(ControllerImpl c, Completer comp) {
-		if(c.hasActiveDetector())
-			new GetBinnedSamples(c, comp).start();
+	/** Perform a controller reset */
+	public void resetController(ControllerImpl c) {
+		if(c.getActive()) {
+			InitializeSensor o = new InitializeSensor(c, true);
+			o.start();
+		}
 	}
 
-	/** Perform a 5-minute poll */
-	public void poll5Minute(ControllerImpl c, Completer comp) {
-		// Nothing to do here
+	/** Query sample data */
+	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
+		if(intvl == 30) {
+			if(c.hasActiveDetector())
+				new GetBinnedSamples(c, comp).start();
+		}
 	}
 
 	/** Start a test for the given controller */
