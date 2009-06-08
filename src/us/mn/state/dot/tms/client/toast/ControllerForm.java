@@ -103,13 +103,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Clear error status button */
 	protected final JButton clearErrorBtn = new JButton("Clear Error");
 
-	/** Download button */
-	protected final JButton download =
-		new JButton(I18N.get("ControllerForm.DownloadButton"));
-
 	/** Reset button */
 	protected final JButton reset =
-		new JButton(I18N.get("ControllerForm.ResetButton"));
+		new JButton(I18N.get("controller.reset"));
 
 	/** Comm Link list model */
 	protected final ProxyListModel<CommLink> link_model;
@@ -261,11 +257,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the status panel */
 	protected JPanel createStatusPanel() {
-		new ActionJob(this, download) {
-			public void perform() {
-				proxy.setDownload(false);
-			}
-		};
 		new ActionJob(this, reset) {
 			public void perform() {
 				proxy.setDownload(true);
@@ -278,7 +269,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		};
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(clearErrorBtn);
-		buttonPnl.add(download);
 		buttonPnl.add(reset);
 		FormPanel panel = new FormPanel(admin);
 		panel.addRow("Status:", status);
