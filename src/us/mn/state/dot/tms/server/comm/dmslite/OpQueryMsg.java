@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -210,6 +212,16 @@ public class OpQueryMsg extends OpDms {
 		}
 	}
 
+	/** Return a multi with an updated page on-time with 
+	 *  the value read from controller. */
+	private String updatePageOnTime(String multi, DmsPgTime pt) {
+		String ret = new MultiString(multi).
+			replacePageOnTime(pt.toTenths());
+		Log.finest("OpQueryMsg.updatePageOnTime(): " +
+			"updated multi w/ page display time: " + ret);
+		return ret;
+	}
+
 	/**
 	 * Phase to get current message
 	 * Note, the type of exception throw here determines
@@ -247,7 +259,7 @@ public class OpQueryMsg extends OpDms {
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", "MsgText",
 				"Owner", "UseOnTime", "OnTime", "UseOffTime",
-				"OffTime", "UseBitmap", "Bitmap"});
+				"OffTime", "DisplayTimeMS", "UseBitmap", "Bitmap"});
 
 			// send msg
 			mess.add(rr0);
@@ -265,10 +277,11 @@ public class OpQueryMsg extends OpDms {
 			Calendar ont = new GregorianCalendar();
 			boolean useofft = false;
 			Calendar offt = new GregorianCalendar();
+			DmsPgTime pgOnTime = new DmsPgTime(0);
 			boolean usebitmap = false;
 			String bitmap = "";
 
-			// parse
+			// parse respose
 			try {
 				// id
 				id = new Long(rr0.getResVal("Id"));
@@ -303,6 +316,10 @@ public class OpQueryMsg extends OpDms {
 					if(useofft) {
 						offt.setTime(STime.XMLtoDate(rr1.getResVal("OffTime")));
 					}
+
+					// display time
+					int ms = SString.stringToInt(rr1.getResVal("DisplayTimeMS"));
+					pgOnTime = new DmsPgTime(DmsPgTime.MsToTenths(ms)); 
 
 					// bitmap
 					usebitmap = new Boolean(rr1.getResVal("UseBitmap"));
@@ -352,21 +369,29 @@ public class OpQueryMsg extends OpDms {
 				// calc message duration
 				Integer duramins = calcMsgDuration(useont,
 					useofft, ont, offt);
-
+ 
 				// have text
 				if(msgtextavailable) {
+
+					// update page on-time in multi with value read from controller
+					msgtext = updatePageOnTime(msgtext, pgOnTime);
 					try {
 						SignMessageImpl sm = (SignMessageImpl)
 							m_dms.createMessage(msgtext,
 							DMSMessagePriority.OPERATOR, duramins);
 						m_dms.setMessageCurrent(sm, irisUser);
-					}
-					catch(SonarException e) {
-						e.printStackTrace();
+					} catch(SonarException e) {
+						Log.warning("Sonar exception in OpQueryMsg:" + e + 
+							", stack=" + SString.getStackTrace(e));
 					}
 
 				// don't have text
 				} else {
+//FIXME: test this. other system message still works?
+
+					// update page on-time in multi with value read from controller
+					msgtext = updatePageOnTime("_OTHER", pgOnTime); //FIXME: do something w/ msgtext
+
 					SignMessageImpl sm = null;
 					if(usebitmap) {
 						sm = createSignMessageWithBitmap(bitmap, duramins);
@@ -379,7 +404,8 @@ public class OpQueryMsg extends OpDms {
 							m_dms.setMessageCurrent(sm, irisUser);
 						}
 						catch(SonarException e) {
-							e.printStackTrace();
+							Log.warning("Sonar exception in OpQueryMsg:" + e + 
+								", stack=" + SString.getStackTrace(e));
 						}
 					}
 				}

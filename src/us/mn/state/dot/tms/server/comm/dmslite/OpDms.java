@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -222,6 +224,17 @@ abstract public class OpDms extends OpDevice {
 	public boolean dmsConfigured() {
 		// FIXME: there must be a better way to check for this condition
 		return m_dms.getWidthPixels() != null;
+	}
+
+	/** Return the page on-time. If a value is not found in the MULTI
+	 *  string, the system default value is returned. */
+	protected DmsPgTime determinePageOnTime(String multi) {
+		// extract from 1st page of MULTI
+		int[] pont = new MultiString(multi).getPageOnTime(
+			DmsPgTime.getDefaultOn().toTenths());
+		if(pont != null && pont.length > 0)
+			return new DmsPgTime(pont[0]);
+		return DmsPgTime.getDefaultOn();
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

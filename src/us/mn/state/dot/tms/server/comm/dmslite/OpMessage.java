@@ -20,6 +20,8 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DmsPgTime;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -387,7 +389,7 @@ public class OpMessage extends OpDms {
 			}
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
+			mess.add(new ReqRes("MsgText",m_signMessage.getMulti()));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
@@ -404,9 +406,9 @@ public class OpMessage extends OpDms {
 			String offtime= (useofftime ? STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
 			mess.add(new ReqRes("OffTime",offtime));
 
-			// DisplayTimeMS
-			int dt = (int)(SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat() * 1000);
-			mess.add(new ReqRes("DisplayTimeMS", new Integer(dt).toString()));
+			// DisplayTimeMS: extract from 1st page of MULTI
+			DmsPgTime pt = determinePageOnTime(m_signMessage.getMulti());
+			mess.add(new ReqRes("DisplayTimeMS", new Integer(pt.toMs()).toString()));
 
 			// Owner
 			String owner = (m_user != null ? m_user.getName() : "");
