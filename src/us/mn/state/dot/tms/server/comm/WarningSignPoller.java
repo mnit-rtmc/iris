@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.WarningSignImpl;
  */
 public interface WarningSignPoller {
 
-	/** Send a sign request */
+	/** Send a device request */
 	void sendRequest(WarningSignImpl sign, DeviceRequest r);
 
 	/** Set the deployed status of a warning sign */

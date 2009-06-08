@@ -40,7 +40,7 @@ public interface Address {
 	int SPECIAL_FUNCTION_OUTPUTS = 0x012F;
 
 	/** Bits to reset watchdog monitor */
-	int WATCHDOG_RESET = 14;
+	int WATCHDOG_BITS = 0x0E;
 
 	/** Bits to reset detectors */
 	int DETECTOR_RESET = 2;

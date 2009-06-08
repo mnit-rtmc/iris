@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 
 /**
@@ -29,6 +30,9 @@ public interface MeterPoller {
 
 	/** Threshold to fail communication (ms) */
 	long COMM_FAIL_THRESHOLD_MS = COMM_FAIL_THRESHOLD * 60 * 1000;
+
+	/** Send a device request */
+	void sendRequest(RampMeterImpl sign, DeviceRequest r);
 
 	/** Send a new release rate (vehicles per hour) */
 	void sendReleaseRate(RampMeterImpl meter, Integer rate);

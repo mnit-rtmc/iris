@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,27 +12,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.mndot;
+package us.mn.state.dot.tms;
+
+import us.mn.state.dot.sonar.Checker;
 
 /**
- * TimingTable
+ * Timing plan helper methods.
  *
  * @author Douglas Lau
  */
-public interface TimingTable {
+public class TimingPlanHelper extends BaseHelper {
 
-	/** Startup green time (tenths of a second) */
-	int STARTUP_GREEN = 80;
+	/** Disallow instantiation */
+	protected TimingPlanHelper() {
+		assert false;
+	}
 
-	/** Startup yellow time (tenths of a second) */
-	int STARTUP_YELLOW = 50;
-
-	/** HOV preempt time (tenths of a second) (obsolete) */
-	int HOV_PREEMPT = 80;
-
-	/** AM midpoint time (BCD; minute of day) */
-	int AM_MID_TIME = 730;
-
-	/** PM midpoint time (BCD; minute of day) */
-	int PM_MID_TIME = 1630;
+	/** Find timing plans using a Checker */
+	static public TimingPlan find(final Checker<TimingPlan> checker) {
+		return (TimingPlan)namespace.findObject(TimingPlan.SONAR_TYPE, 
+			checker);
+	}
 }

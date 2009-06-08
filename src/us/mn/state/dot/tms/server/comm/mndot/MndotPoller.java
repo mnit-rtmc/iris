@@ -149,6 +149,12 @@ public class MndotPoller extends MessagePoller implements MeterPoller,
 		return test;
 	}
 
+	/** Send a device request to a ramp meter */
+	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
+		if(r == DeviceRequest.SEND_SETTINGS)
+			new MeterSettings(meter).start();
+	}
+
 	/** Send a new release rate to a ramp meter */
 	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
 		int n = getMeterNumber(meter);
