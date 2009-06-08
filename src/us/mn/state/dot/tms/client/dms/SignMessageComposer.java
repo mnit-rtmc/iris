@@ -30,6 +30,7 @@ import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
@@ -45,6 +46,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * Gui for composing messages for DMS.
@@ -101,6 +103,12 @@ public class SignMessageComposer extends JPanel {
 	/** Font combo box widgets */
 	protected FontComboBox[] fontCmb = new FontComboBox[0];
 
+	/** page on-time spinner */
+	protected PgTimeSpinner timeSpin = new PgTimeSpinner();
+
+	/** blank button */
+	protected IButton blankBtn = new IButton("dms.blank");
+
 	/** Preview mode */
 	protected boolean preview = false;
 
@@ -133,30 +141,40 @@ public class SignMessageComposer extends JPanel {
 		sign_text = st.getDmsCache().getSignText();
 		fonts = st.getDmsCache().getFonts();
 		user = u;
-		addBlankBtn();
-		add(tab);
-		initializeFonts(1, null);
+		add(createAllWidgets());
+		initializeEtcWidgets(1, null);
 		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
 	}
 
+	/** Create all widgets */
+	protected JPanel createAllWidgets() {
+		JPanel panel = new JPanel(new BorderLayout());
+		if(PgTimeSpinner.getIEnabled())
+			panel.add(createOnTimeBox(), BorderLayout.PAGE_START);
+		panel.add(addBlankBtn(), BorderLayout.LINE_START);
+		panel.add(tab, BorderLayout.CENTER);
+		return panel;
+	}
+
 	/** Add blank button */
-	protected void addBlankBtn() {
-		IButton b = new IButton("dms.blank");
-		new ActionJob(b) {
+	protected JPanel addBlankBtn() {
+		JPanel panel = new JPanel();
+		new ActionJob(blankBtn) {
 			public void perform() {
 				clearSelections();
 				dispatcher.qlibCmb.setSelectedIndex(-1);
 			}
 		};
-		b.setMaximumSize(b.getMinimumSize());
-		add(b);
+		blankBtn.setMaximumSize(blankBtn.getMinimumSize());
+		panel.add(blankBtn);
+		return panel;
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
 		disposeLines();
-		disposeFonts();
+		disposeEtcWidgets();
 		SignTextModel stm = st_model;
 		if(stm != null) {
 			stm.dispose();
@@ -178,8 +196,9 @@ public class SignMessageComposer extends JPanel {
 		}
 	}
 
-	/** Dispose of the existing font widgets */
-	protected void disposeFonts() {
+	/** Dispose of the existing combobox widgets */
+	protected void disposeEtcWidgets() {
+		timeSpin.dispose();
 		for(int i = 0; i < fontCmb.length; i++)
 			fontCmb[i].dispose();
 	}
@@ -202,7 +221,7 @@ public class SignMessageComposer extends JPanel {
 		int ml = stm.getMaxLine();
 		int np = Math.max(calculateSignPages(ml, nl),
 			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
-		initializeFonts(np, builder);
+		initializeEtcWidgets(np, builder);
 		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
 			cmbLine[i].setModel(stm.getLineModel(
@@ -231,9 +250,9 @@ public class SignMessageComposer extends JPanel {
 			return 1;
 	}
 
-	/** Initialize the font combo boxes */
-	protected void initializeFonts(int np, PixelMapBuilder builder) {
-		disposeFonts();
+	/** Initialize the other widgets for all pages */
+	protected void initializeEtcWidgets(int np, PixelMapBuilder builder) {
+		disposeEtcWidgets();
 		fontCmb = new FontComboBox[np];
 		for(int i = 0; i < np; i++)
 			fontCmb[i] = new FontComboBox(fonts, builder);
@@ -241,8 +260,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Initialize the page tabs and message combo boxes */
 	protected void initializeWidgets(int nl, int np) {
-		if(nl == n_lines && np == n_pages)
-			return;
+		//if(nl == n_lines && np == n_pages)
+		//	return;
 		disposeLines();
 		n_lines = nl;
 		n_pages = np;
@@ -282,17 +301,35 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < n_lines; i++)
 			panel.add(cmbLine[i + p * n_lines]);
 		page.add(panel, BorderLayout.CENTER);
-		if(SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean())
-			page.add(createFontBox(p), BorderLayout.SOUTH);
+		if(SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean()) //FIXME: use FontComboBox.getIEnabled()
+			page.add(createFontBox(p), BorderLayout.PAGE_END);
 		return page;
 	}
 
 	/** Create a font box */
 	protected Box createFontBox(int p) {
 		Box box = Box.createHorizontalBox();
+		JLabel label = new JLabel();
+		label.setLabelFor(fontCmb[p]);
+		//label.setDisplayedMnemonic('F');
+		//box.add(new JLabel("<html><u>F</u>ont</html>"));
 		box.add(new JLabel("Font"));
 		box.add(Box.createHorizontalStrut(4));
 		box.add(fontCmb[p]);
+		return box;
+	}
+
+	/** Create page on-time box */
+	protected Box createOnTimeBox() {
+		timeSpin = new PgTimeSpinner();
+		Box box = Box.createHorizontalBox();
+		JLabel label = new JLabel();
+		label.setLabelFor(timeSpin);
+		label.setDisplayedMnemonic('P');
+		label.setText(I18N.get("PgOnTimeSpinner")); //FIXME: move to a new ISpinner class.
+		box.add(label);
+		box.add(timeSpin);
+		box.add(Box.createHorizontalStrut(4));
 		return box;
 	}
 
@@ -348,6 +385,8 @@ public class SignMessageComposer extends JPanel {
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
+		blankBtn.setEnabled(b);
+		timeSpin.setEnabled(b);
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i].setEnabled(b);
 		for(int i = 0; i < fontCmb.length; i++)
@@ -386,8 +425,13 @@ public class SignMessageComposer extends JPanel {
 		MultiString multi = new MultiString();
 		int p = 0;
 		Integer f = fontCmb[0].getFontNumber();
-		if(f != null)
+		if(f != null) //FIXME: use getIEnabled()
 			multi.setFont(f);
+		if(PgTimeSpinner.getIEnabled())
+			multi.setPageOnTime(timeSpin.getValuePgTime().toTenths());
+		else
+			; //FIXME: if on-time spinner not enabled, set [ptXoY] using system attribute value?
+		//FIXME: get phase time from cbox
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0) {
@@ -424,6 +468,8 @@ public class SignMessageComposer extends JPanel {
 			else if(cmbLine[i].getItemCount() > 0)
 				cmbLine[i].setSelectedIndex(0);
 		}
+		if(m != null)
+			timeSpin.setValue(m.getMulti());
 	}
 
 	/** Set the selected message for a message line combo box */

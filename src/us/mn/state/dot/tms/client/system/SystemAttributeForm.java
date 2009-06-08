@@ -98,9 +98,11 @@ public class SystemAttributeForm extends AbstractForm {
 	protected final JSpinner lmp_tst_timeout = createTimeSpinner();
 
 	/** Page on time spinner */
+	//FIXME: may be able to resuse PgTimeSpinner here.
 	protected final JSpinner page_on = createSpinner();
 
 	/** Page off time spinner */
+	//FIXME: may be able to resuse PgTimeSpinner here.
 	protected final JSpinner page_off = createSpinner();
 
 	/** Ring 1 radius spinner */
