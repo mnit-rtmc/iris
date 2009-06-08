@@ -163,10 +163,15 @@ public class OpTestDMSPixels extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
-			if(status.isStuckOn())
-				stuck_on.setPixel(x, y, 1);
-			else
-				stuck_off.setPixel(x, y, 1);
+			try {
+				if(status.isStuckOn())
+					stuck_on.setPixel(x, y, 1);
+				else
+					stuck_off.setPixel(x, y, 1);
+			}
+			catch(IndexOutOfBoundsException e) {
+				// Ignore; configuration has not been read yet
+			}
 			row++;
 			if(row <= rows.getInteger())
 				return this;
