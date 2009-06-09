@@ -118,7 +118,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Respond to a download request from a controller */
 	protected void download(ControllerImpl c, int p) {
-		SendSampleSettings ss = new SendSampleSettings(c);
+		OpSendSampleSettings ss = new OpSendSampleSettings(c);
 		ss.setPriority(p);
 		ss.start();
 		WarningSignImpl warn = c.getActiveWarningSign();

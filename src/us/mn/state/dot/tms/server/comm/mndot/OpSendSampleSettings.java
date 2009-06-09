@@ -28,10 +28,10 @@ import us.mn.state.dot.tms.server.comm.DownloadRequestException;
  *
  * @author Douglas Lau
  */
-public class SendSampleSettings extends Op170 {
+public class OpSendSampleSettings extends Op170 {
 
 	/** Create a new send sample settings operation */
-	public SendSampleSettings(ControllerImpl c) {
+	public OpSendSampleSettings(ControllerImpl c) {
 		super(DOWNLOAD, c);
 	}
 
