@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class LCSSendIndications extends OpLCS {
+public class OpSendLCSIndications extends OpLCS {
 
 	/** Indications to send */
 	protected final Integer[] indications;
@@ -36,7 +36,7 @@ public class LCSSendIndications extends OpLCS {
 	protected final User user;
 
 	/** Create a new operation to send LCS indications */
-	public LCSSendIndications(LCSArrayImpl l, Integer[] ind, User u) {
+	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
 		super(COMMAND, l);
 		indications = ind;
 		user = u;

@@ -254,6 +254,6 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		new LCSSendIndications(lcs_array, ind, o).start();
+		new OpSendLCSIndications(lcs_array, ind, o).start();
 	}
 }
