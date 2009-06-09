@@ -171,7 +171,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	/** Query the status of alarms */
 	public void queryAlarms(ControllerImpl c) {
 		if(c.hasAlarm())
-			new QueryAlarms(c).start();
+			new OpQueryAlarms(c).start();
 	}
 
 	/** Send a device request to a ramp meter */
