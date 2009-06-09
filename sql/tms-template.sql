@@ -669,7 +669,7 @@ CREATE RULE lcs_indication_delete AS ON DELETE TO iris.lcs_indication DO INSTEAD
 
 CREATE TABLE iris.lane_use_graphic (
 	name VARCHAR(10) PRIMARY KEY,
-	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
+	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
 	g_number INTEGER NOT NULL UNIQUE,
 	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name)
 );
