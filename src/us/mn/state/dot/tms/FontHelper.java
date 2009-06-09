@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
@@ -27,8 +28,20 @@ import us.mn.state.dot.sonar.Checker;
 public class FontHelper extends BaseHelper {
 
 	/** Disallow instantiation */
-	protected FontHelper() {
+	private FontHelper() {
 		assert false;
+	}
+
+	/** Return the default font number, which is the font with 
+	 *  the lowest font number. Even if no fonts are defined,
+	 *  the smallest font number returned will be 1. */
+	static public Integer getDefault() {
+		int lowest = 1;
+		int[] fn = getFontNumbers();
+		for(int i = 0; i<fn.length; ++i)
+			if(fn[i] < lowest)
+				lowest = fn[i];
+		return lowest;
 	}
 
 	/** Find the font using a font number */
@@ -60,5 +73,20 @@ public class FontHelper extends BaseHelper {
 			}
 		});
 		return glyphs.values();
+	}
+
+	/** Get an array of all fonts by font number. */
+	static public int[] getFontNumbers() {
+		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
+		namespace.findObject(Font.SONAR_TYPE, new Checker<Font>() {
+			public boolean check(Font f) {
+				al.add(new Integer(f.getNumber()));
+				return false;
+			}
+		});
+		int[] ret = new int[al.size()];
+		for(int i = 0; i<ret.length; ++i)
+			ret[i] = al.get(i);
+		return ret;
 	}
 }
