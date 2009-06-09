@@ -244,7 +244,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	/** Send a device request to an LCS array */
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		if(r == DeviceRequest.QUERY_STATUS)
-			new LCSQueryStatus(lcs_array).start();
+			new OpQueryLCSStatus(lcs_array).start();
 	}
 
 	/** Send new indications to an LCS array.
