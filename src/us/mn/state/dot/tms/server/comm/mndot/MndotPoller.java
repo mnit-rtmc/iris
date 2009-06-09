@@ -123,7 +123,8 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		ss.start();
 		WarningSignImpl warn = c.getActiveWarningSign();
 		if(warn != null) {
-			SendWarningSettings s = new SendWarningSettings(warn);
+			OpSendWarningSettings s =
+				new OpSendWarningSettings(warn);
 			s.setPriority(p);
 			s.start();
 		}
@@ -224,7 +225,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	public void sendRequest(WarningSignImpl sign, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			new SendWarningSettings(sign).start();
+			new OpSendWarningSettings(sign).start();
 			break;
 		case QUERY_STATUS:
 			new WarningStatus(sign).start();

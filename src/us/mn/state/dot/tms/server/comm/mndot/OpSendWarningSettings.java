@@ -22,11 +22,11 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
- * SendWarningSettings configuration data to a 170 controller
+ * OpSendWarningSettings configuration data to a 170 controller
  *
  * @author Douglas Lau
  */
-public class SendWarningSettings extends OpDevice {
+public class OpSendWarningSettings extends OpDevice {
 
 	/** HOV preempt time (tenths of a second) (obsolete) */
 	static protected final int HOV_PREEMPT = 80;
@@ -41,7 +41,7 @@ public class SendWarningSettings extends OpDevice {
 	protected final WarningSignImpl warning_sign;
 
 	/** Create a new send warning settings operation */
-	public SendWarningSettings(WarningSignImpl w) {
+	public OpSendWarningSettings(WarningSignImpl w) {
 		super(DOWNLOAD, w);
 		warning_sign = w;
 	}
