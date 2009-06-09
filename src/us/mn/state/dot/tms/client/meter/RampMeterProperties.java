@@ -29,6 +29,7 @@ import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
@@ -238,6 +239,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		panel.addRow("Lock", m_lock);
 		panel.addRow("Operation", operation);
 		panel.addRow("Status", l_status);
+		JButton settingsBtn = new JButton("Send Settings");
+		new ActionJob(this, settingsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					SEND_SETTINGS.ordinal());
+			}
+		};
+		panel.addRow(settingsBtn);
 		return panel;
 	}
 
