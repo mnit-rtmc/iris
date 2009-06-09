@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class QueryMeterStatus extends Op170 {
+public class OpQueryMeterStatus extends Op170 {
 
 	/** Police panel bit from verify data from 170 */
 	static protected final int POLICE_PANEL_BIT = 1 << 4;
@@ -57,7 +57,7 @@ public class QueryMeterStatus extends Op170 {
 	protected final LinkedList<Phase> phases = new LinkedList<Phase>();
 
 	/** Create a new query meter status operatoin */
-	public QueryMeterStatus(ControllerImpl c, Completer comp) {
+	public OpQueryMeterStatus(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
 	}
