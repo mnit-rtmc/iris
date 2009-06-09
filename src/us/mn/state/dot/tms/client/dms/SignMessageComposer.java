@@ -105,7 +105,7 @@ public class SignMessageComposer extends JPanel {
 	protected FontComboBox[] fontCmb = new FontComboBox[0];
 
 	/** page on-time spinner */
-	protected PgTimeSpinner timeSpin = new PgTimeSpinner();
+	protected PgTimeSpinner timeSpin = new PgTimeSpinner(null);
 
 	/** blank button */
 	protected IButton blankBtn = new IButton("dms.blank");
@@ -323,7 +323,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create page on-time box */
 	protected Box createOnTimeBox() {
-		timeSpin = new PgTimeSpinner();
+		timeSpin = new PgTimeSpinner(this);
 		Box box = Box.createHorizontalBox();
 		JLabel label = new JLabel();
 		label.setLabelFor(timeSpin);

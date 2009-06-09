@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.tms.DmsPgTime;
@@ -27,12 +29,17 @@ import us.mn.state.dot.tms.utils.Log;
  * @see DmsPgTime, SignMessageComposer, SystemAttributeForm
  * @author Michael Darter
  */
-public class PgTimeSpinner extends JSpinner
+public class PgTimeSpinner extends JSpinner implements ChangeListener
 {
 	public static final float INC_ONTIME_SECS = .1f;
 
-	/** constructor */
-	public PgTimeSpinner() {
+	/** This component's container */
+	private final SignMessageComposer m_composer;
+
+	/** Constructor 
+	 *  @param c This widget's container, may be null. */
+	public PgTimeSpinner(SignMessageComposer c) {
+		m_composer = c;
 		setModel(new SpinnerNumberModel(
 			DmsPgTime.getDefaultOn().toSecs(), 
 			DmsPgTime.MIN_ONTIME.toSecs(), 
@@ -40,6 +47,7 @@ public class PgTimeSpinner extends JSpinner
 			INC_ONTIME_SECS));
 		setToolTipText(I18N.get("PgOnTimeSpinner.ToolTip"));
 		setMaximumSize(getMinimumSize());
+		addChangeListener(this);
 	}
 
 	/** is this control IRIS enabled? */
@@ -66,6 +74,18 @@ public class PgTimeSpinner extends JSpinner
 		super.setValue(t.toSecs());
 	}
 
+	/** When this ignore field is > 0, stateChanged events should 
+	 *  be ignored. */
+	private int m_ignore = 0;
+
+	/** Set the selected item and ignore any actionPerformed 
+	 *  events that are generated. */
+	public void setValueNoAction(String s) {
+		++m_ignore;
+		setValue(s);
+		--m_ignore;
+	}
+
 	/** Get the current value */
 	public DmsPgTime getValuePgTime() {
 		Object v = super.getValue();
@@ -80,9 +100,18 @@ public class PgTimeSpinner extends JSpinner
 	 *  @param smulti A MULTI string, containing possible page times. */
 	public void setValue(String smulti) {
 		MultiString m = new MultiString(smulti);
-		int[] ponts = m.getPageOnTime(DmsPgTime.getDefaultOn().toTenths());
+		int[] ponts = m.getPageOnTime(
+			DmsPgTime.getDefaultOn().toTenths());
 		setValue(ponts.length > 0 ? new DmsPgTime(ponts[0]) : 
 			DmsPgTime.getDefaultOn());
+	}
+
+	/** Catch state change events. Defined in interface ChangeListener. */
+	public void stateChanged(ChangeEvent e) {
+		// only update preview if user changed spinner
+		if(m_ignore == 0)
+			if( m_composer != null)
+				m_composer.selectPreview(true);
 	}
 
 	/** dispose */
