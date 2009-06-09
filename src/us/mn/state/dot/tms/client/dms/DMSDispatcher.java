@@ -558,10 +558,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		if(creator == null || multi == null)
 			return null;
 		String bitmaps = createBitmaps(multi);
+		SignMessage ret = null;
 		if(bitmaps != null)
-			return creator.create(multi, bitmaps,
+			ret = creator.create(multi, bitmaps,
 			       getPriority(), getDuration());
-		return null;
+		return ret;
 	}
 
 	/** Create a new blank message */

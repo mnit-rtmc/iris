@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
@@ -203,7 +204,8 @@ public class SignMessageComposer extends JPanel {
 			fontCmb[i].dispose();
 	}
 
-	/** Set the preview mode */
+	/** Set the preview mode.
+	 *  @param p True to select preview else false. */
 	public void selectPreview(boolean p) {
 		preview = p;
 		if(adjusting == 0) {
@@ -255,7 +257,7 @@ public class SignMessageComposer extends JPanel {
 		disposeEtcWidgets();
 		fontCmb = new FontComboBox[np];
 		for(int i = 0; i < np; i++)
-			fontCmb[i] = new FontComboBox(fonts, builder);
+			fontCmb[i] = new FontComboBox(fonts, builder, this);
 	}
 
 	/** Initialize the page tabs and message combo boxes */
@@ -301,7 +303,7 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < n_lines; i++)
 			panel.add(cmbLine[i + p * n_lines]);
 		page.add(panel, BorderLayout.CENTER);
-		if(SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean()) //FIXME: use FontComboBox.getIEnabled()
+		if(FontComboBox.getIEnabled())
 			page.add(createFontBox(p), BorderLayout.PAGE_END);
 		return page;
 	}
@@ -393,7 +395,7 @@ public class SignMessageComposer extends JPanel {
 			fontCmb[i].setEnabled(b);
 	}
 
-	/** Get the text of the message to send to the sign */
+	/** Return a MULTI string using the contents of the widgets. */
 	public String getMessage() {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
@@ -424,14 +426,13 @@ public class SignMessageComposer extends JPanel {
 	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		int p = 0;
-		Integer f = fontCmb[0].getFontNumber();
-		if(f != null) //FIXME: use getIEnabled()
-			multi.setFont(f);
+		Integer f = FontHelper.getDefault();
+		if(FontComboBox.getIEnabled())
+			f = fontCmb[0].getFontNumber();
+		multi.setFont(f);
 		if(PgTimeSpinner.getIEnabled())
-			multi.setPageOnTime(timeSpin.getValuePgTime().toTenths());
-		else
-			; //FIXME: if on-time spinner not enabled, set [ptXoY] using system attribute value?
-		//FIXME: get phase time from cbox
+			multi.setPageOnTime(timeSpin.
+				getValuePgTime().toTenths());
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0) {
@@ -468,8 +469,23 @@ public class SignMessageComposer extends JPanel {
 			else if(cmbLine[i].getItemCount() > 0)
 				cmbLine[i].setSelectedIndex(0);
 		}
-		if(m != null)
-			timeSpin.setValue(m.getMulti());
+		if(m != null) {
+			timeSpin.setValueNoAction(m.getMulti());
+			setFontComboBoxes(new MultiString(m.getMulti()));
+		}
+	}
+
+	/** set all font comboboxes using the specified MultiString */
+	protected void setFontComboBoxes(MultiString ms) {
+		// get the font numbers for each page in the multi
+		int[] fnum = ms.getFont(1);
+		// set font for each page tab
+		for(int i = 0; i < fontCmb.length; ++i) {	
+			int newfn = 1; // assumed default font number
+			if(fnum != null && i < fnum.length)
+				newfn = fnum[i];
+			fontCmb[i].setSelectedItemNoAction(newfn);
+		}
 	}
 
 	/** Set the selected message for a message line combo box */
