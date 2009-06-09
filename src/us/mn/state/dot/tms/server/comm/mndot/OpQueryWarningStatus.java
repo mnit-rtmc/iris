@@ -24,13 +24,13 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-public class WarningStatus extends OpDevice {
+public class OpQueryWarningStatus extends OpDevice {
 
 	/** Warning sign */
 	protected final WarningSignImpl warn;
 
 	/** Create a new warning status poll */
-	public WarningStatus(WarningSignImpl w) {
+	public OpQueryWarningStatus(WarningSignImpl w) {
 		super(DATA_30_SEC, w);
 		warn = w;
 	}
@@ -46,8 +46,7 @@ public class WarningStatus extends OpDevice {
 		/** Query the warning sign status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			byte[] b = new byte[1];
-			mess.add(new MemoryRequest(Address.RAMP_METER_DATA,
-				b));
+			mess.add(new MemoryRequest(Address.RAMP_METER_DATA, b));
 			mess.getRequest();
 			warn.setDeployedStatus(b[Address.OFF_STATUS] !=
 				MeterStatus.FLASH);

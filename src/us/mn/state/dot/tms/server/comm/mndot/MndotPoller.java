@@ -228,7 +228,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			new OpSendWarningSettings(sign).start();
 			break;
 		case QUERY_STATUS:
-			new WarningStatus(sign).start();
+			new OpQueryWarningStatus(sign).start();
 			break;
 		default:
 			// Ignore other requests
