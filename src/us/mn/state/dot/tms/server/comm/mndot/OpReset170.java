@@ -23,10 +23,10 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class SendLevel1Restart extends Op170 {
+public class OpReset170 extends Op170 {
 
 	/** Create a new send level-1 restart operation */
-	public SendLevel1Restart(ControllerImpl c) {
+	public OpReset170(ControllerImpl c) {
 		super(DOWNLOAD, c);
 	}
 
