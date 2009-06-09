@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class QueryAlarms extends Controller170Operation {
+public class QueryAlarms extends Op170 {
 
 	/** Parse alarm special function input data */
 	static protected boolean[] parseAlarms(byte[] data) {

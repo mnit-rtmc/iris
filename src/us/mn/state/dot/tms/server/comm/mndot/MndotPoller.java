@@ -128,13 +128,13 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			s.setPriority(p);
 			s.start();
 		}
-		RampMeterImpl meter1 = Controller170Operation.lookupMeter1(c);
+		RampMeterImpl meter1 = Op170.lookupMeter1(c);
 		if(meter1 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter1);
 			s.setPriority(p);
 			s.start();
 		}
-		RampMeterImpl meter2 = Controller170Operation.lookupMeter2(c);
+		RampMeterImpl meter2 = Op170.lookupMeter2(c);
 		if(meter2 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter2);
 			s.setPriority(p);

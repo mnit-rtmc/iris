@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class SendLevel1Restart extends Controller170Operation {
+public class SendLevel1Restart extends Op170 {
 
 	/** Create a new send level-1 restart operation */
 	public SendLevel1Restart(ControllerImpl c) {

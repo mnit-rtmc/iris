@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  *
  * @author Douglas Lau
  */
-abstract public class IntervalData extends Controller170Operation {
+abstract public class IntervalData extends Op170 {
 
 	/** Volume data for all detectors on a controller */
 	protected final int[] volume = new int[DETECTOR_INPUTS];

@@ -138,7 +138,7 @@ public class LCSSendIndications extends OpLCS {
 	/** Set the specified pin in a special function output buffer */
 	protected void setPin(byte[] buffer, int pin) {
 		int i = pin -
-			Controller170Operation.SPECIAL_FUNCTION_OUTPUT_PIN;
+			Op170.SPECIAL_FUNCTION_OUTPUT_PIN;
 		if(i >= 0 && i < 8)
 			buffer[0] |= 1 << i;
 		i -= 8;

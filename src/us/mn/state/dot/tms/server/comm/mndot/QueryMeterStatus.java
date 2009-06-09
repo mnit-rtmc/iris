@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class QueryMeterStatus extends Controller170Operation {
+public class QueryMeterStatus extends Op170 {
 
 	/** Police panel bit from verify data from 170 */
 	static protected final int POLICE_PANEL_BIT = 1 << 4;

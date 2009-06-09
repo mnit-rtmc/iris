@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.OpController;
  *
  * @author Douglas Lau
  */
-abstract public class Controller170Operation extends OpController {
+abstract public class Op170 extends OpController {
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;
@@ -71,7 +71,7 @@ abstract public class Controller170Operation extends OpController {
 	protected final RampMeterImpl meter2;
 
 	/** Create a new query meter status operatoin */
-	public Controller170Operation(int p, ControllerImpl c) {
+	public Op170(int p, ControllerImpl c) {
 		super(p, c);
 		meter1 = lookupMeter1(controller);
 		meter2 = lookupMeter2(controller);
