@@ -238,7 +238,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Set the deployed status of the sign */
 	public void setDeployed(WarningSignImpl sign, boolean d) {
-		new WarningSignCommand(sign, d).start();
+		new OpSendWarningCommand(sign, d).start();
 	}
 
 	/** Send a device request to an LCS array */

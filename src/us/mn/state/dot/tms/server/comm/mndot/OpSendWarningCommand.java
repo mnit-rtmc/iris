@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-public class WarningSignCommand extends OpDevice {
+public class OpSendWarningCommand extends OpDevice {
 
 	/** Get the appropriate rate for the deployed state */
 	static protected byte getDeployedRate(boolean d) {
@@ -41,7 +41,7 @@ public class WarningSignCommand extends OpDevice {
 	protected final byte rate;
 
 	/** Create a new warning sign command operation */
-	public WarningSignCommand(WarningSignImpl s, boolean d) {
+	public OpSendWarningCommand(WarningSignImpl s, boolean d) {
 		super(COMMAND, s);
 		address = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
 		rate = getDeployedRate(d);
