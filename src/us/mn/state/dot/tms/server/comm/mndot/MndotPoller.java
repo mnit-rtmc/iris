@@ -129,13 +129,13 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		}
 		RampMeterImpl meter1 = Controller170Operation.lookupMeter1(c);
 		if(meter1 != null) {
-			MeterSettings s = new MeterSettings(meter1);
+			OpSendMeterSettings s = new OpSendMeterSettings(meter1);
 			s.setPriority(p);
 			s.start();
 		}
 		RampMeterImpl meter2 = Controller170Operation.lookupMeter2(c);
 		if(meter2 != null) {
-			MeterSettings s = new MeterSettings(meter2);
+			OpSendMeterSettings s = new OpSendMeterSettings(meter2);
 			s.setPriority(p);
 			s.start();
 		}
@@ -176,7 +176,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	/** Send a device request to a ramp meter */
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
 		if(r == DeviceRequest.SEND_SETTINGS)
-			new MeterSettings(meter).start();
+			new OpSendMeterSettings(meter).start();
 	}
 
 	/** Send a new release rate to a ramp meter */

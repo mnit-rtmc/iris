@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.MeterPoller;
  *
  * @author Douglas Lau
  */
-public class MeterSettings extends OpDevice {
+public class OpSendMeterSettings extends OpDevice {
 
 	/** Startup green time (tenths of a second) */
 	static protected final int STARTUP_GREEN = 80;
@@ -93,7 +93,7 @@ public class MeterSettings extends OpDevice {
 	protected final int[] table_stop = {AM_MID_TIME, PM_MID_TIME};
 
 	/** Create a new meter settings operation */
-	public MeterSettings(RampMeterImpl m) {
+	public OpSendMeterSettings(RampMeterImpl m) {
 		super(DOWNLOAD, m);
 		meter = m;
 		updateTimingTable();
