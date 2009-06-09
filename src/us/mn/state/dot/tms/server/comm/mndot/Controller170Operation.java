@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
  * 170 Controller operation
  *
  * @author Douglas Lau
  */
-abstract public class Controller170Operation extends ControllerOperation {
+abstract public class Controller170Operation extends OpController {
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;

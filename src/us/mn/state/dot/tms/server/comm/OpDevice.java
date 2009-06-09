@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.DeviceImpl;
  *
  * @author Douglas Lau
  */
-abstract public class OpDevice extends ControllerOperation {
+abstract public class OpDevice extends OpController {
 
 	/** This operation; needed for inner Phase classes */
 	protected final OpDevice operation;

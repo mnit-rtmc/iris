@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
  * PelcoOperation is the base class for the Pelco comm protocol.
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ControllerOperation;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-abstract public class PelcoOperation extends ControllerOperation {
+abstract public class PelcoOperation extends OpController {
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;

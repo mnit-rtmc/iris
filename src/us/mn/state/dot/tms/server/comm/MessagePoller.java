@@ -148,13 +148,13 @@ abstract public class MessagePoller extends Thread {
 			Operation o = queue.next();
 			if(o instanceof KillThread)
 				break;
-			if(o instanceof ControllerOperation)
-				doPoll((ControllerOperation)o);
+			if(o instanceof OpController)
+				doPoll((OpController)o);
 		}
 	}
 
 	/** Perform one poll for an operation */
-	protected void doPoll(final ControllerOperation o) throws IOException {
+	protected void doPoll(final OpController o) throws IOException {
 		final String oname = o.toString();
 		long start = System.currentTimeMillis();
 		try {

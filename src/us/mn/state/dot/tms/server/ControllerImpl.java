@@ -23,7 +23,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
@@ -457,7 +457,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Add an operation to be performed */
-	public void addOperation(ControllerOperation o) {
+	public void addOperation(OpController o) {
 		CommLinkImpl link = (CommLinkImpl)comm_link;
 		if(link != null)
 			link.addOperation(o);

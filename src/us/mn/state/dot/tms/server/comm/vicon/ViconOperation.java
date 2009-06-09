@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.vicon;
 
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
  * ViconOperation is the base class for the Vicon comm protocol.
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ControllerOperation;
  * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
  * @author Douglas Lau
  */
-abstract public class ViconOperation extends ControllerOperation {
+abstract public class ViconOperation extends OpController {
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;

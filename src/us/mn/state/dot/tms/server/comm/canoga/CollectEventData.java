@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class CollectEventData extends ControllerOperation {
+public class CollectEventData extends OpController {
 
 	/** Minimum time before volume LSB can wrap */
 	static protected final int VOL_COUNT_WRAP = 4 * 60 * 1000;

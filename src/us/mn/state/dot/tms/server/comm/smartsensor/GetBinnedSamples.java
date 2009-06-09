@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 
 /**
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.DownloadRequestException;
  *
  * @author Douglas Lau
  */
-public class GetBinnedSamples extends ControllerOperation {
+public class GetBinnedSamples extends OpController {
 
 	/** Sample debug log */
 	static public final DebugLog SAMPLE_LOG = new DebugLog("samples");

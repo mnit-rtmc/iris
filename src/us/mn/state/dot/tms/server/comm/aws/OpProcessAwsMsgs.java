@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.aws;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.Log;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class OpProcessAwsMsgs extends ControllerOperation
+public class OpProcessAwsMsgs extends OpController
 {
 	/** This operation; needed for inner Phase classes */
 	protected final OpProcessAwsMsgs operation;

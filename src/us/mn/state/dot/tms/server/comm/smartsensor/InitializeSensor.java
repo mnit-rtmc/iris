@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.server.comm.smartsensor;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
  * Controller operation to initialize a SmartSensor
  *
  * @author Douglas Lau
  */
-public class InitializeSensor extends ControllerOperation {
+public class InitializeSensor extends OpController {
 
 	/** Time interval for data binning */
 	static protected final int BINNING_INTERVAL = 30;

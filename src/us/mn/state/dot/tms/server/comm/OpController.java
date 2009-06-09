@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.utils.SString;
  *
  * @author Douglas Lau
  */
-abstract public class ControllerOperation extends Operation {
+abstract public class OpController extends Operation {
 
 	/** Get a message describing an IO exception */
 	static protected String exceptionMessage(IOException e) {
@@ -58,7 +58,7 @@ abstract public class ControllerOperation extends Operation {
 	protected String errorStatus = null;
 
 	/** Create a new controller operation */
-	protected ControllerOperation(int p, ControllerImpl c, String i) {
+	protected OpController(int p, ControllerImpl c, String i) {
 		super(p);
 		controller = c;
 		drop = controller.getDrop();
@@ -66,7 +66,7 @@ abstract public class ControllerOperation extends Operation {
 	}
 
 	/** Create a new controller operation */
-	protected ControllerOperation(int p, ControllerImpl c) {
+	protected OpController(int p, ControllerImpl c) {
 		this(p, c, c.toString());
 	}
 

@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.server.comm.canoga;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.ControllerOperation;
+import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
  * Controller operation to initialize a Canoga card
  *
  * @author Douglas Lau
  */
-public class InitializeCanoga extends ControllerOperation {
+public class InitializeCanoga extends OpController {
 
 	/** Canoga card serial number */
 	protected final SerialNumberRequest serial_number =
