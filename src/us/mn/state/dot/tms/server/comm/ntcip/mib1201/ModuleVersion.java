@@ -27,4 +27,9 @@ public class ModuleVersion extends ASN1OctetString {
 	public ModuleVersion(int row) {
 		super(MIB1201.moduleTableEntry.create(new int[] { 5, row }));
 	}
+
+	/** Get the object value */
+	public String getValue() {
+		return new String(value);
+	}
 }

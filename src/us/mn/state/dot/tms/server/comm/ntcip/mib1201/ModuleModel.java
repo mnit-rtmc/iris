@@ -27,4 +27,9 @@ public class ModuleModel extends ASN1OctetString {
 	public ModuleModel(int row) {
 		super(MIB1201.moduleTableEntry.create(new int[] { 4, row }));
 	}
+
+	/** Get the object value */
+	public String getValue() {
+		return new String(value);
+	}
 }
