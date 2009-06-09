@@ -641,7 +641,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		MessagePoller p = getPoller();
 		if(p instanceof SamplePoller) {
 			SamplePoller sp = (SamplePoller)p;
-			sp.resetController(this);
+			if(reset)
+				sp.resetController(this);
+			else
+				sp.sendSettings(this);
 		}
 	}
 

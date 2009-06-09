@@ -92,6 +92,12 @@ public class CanogaPoller extends MessagePoller implements SamplePoller {
 			new InitializeCanoga(c).start();
 	}
 
+	/** Send sample settings to a controller */
+	public void sendSettings(ControllerImpl c) {
+		if(c.getActive())
+			new InitializeCanoga(c).start();
+	}
+
 	/** Query sample data */
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
 		if(c.hasActiveDetector()) {

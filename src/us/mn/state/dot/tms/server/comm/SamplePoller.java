@@ -28,6 +28,9 @@ public interface SamplePoller {
 	/** Reset controller */
 	void resetController(ControllerImpl c);
 
+	/** Send sample settings to a controller */
+	void sendSettings(ControllerImpl c);
+
 	/** Query sample data */
 	void querySamples(ControllerImpl c, int interval, Completer comp);
 }

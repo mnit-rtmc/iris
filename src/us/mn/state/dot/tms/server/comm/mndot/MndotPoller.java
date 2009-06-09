@@ -144,10 +144,14 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Perform a controller reset */
 	public void resetController(ControllerImpl c) {
-		if(c.getActive()) {
-			OpReset170 s = new OpReset170(c);
-			s.start();
-		}
+		if(c.getActive())
+			new OpReset170(c).start();
+	}
+
+	/** Send sample settings to a controller */
+	public void sendSettings(ControllerImpl c) {
+		if(c.getActive())
+			new OpSendSampleSettings(c).start();
 	}
 
 	/** Query sample data */
