@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 
 /**
@@ -176,10 +176,10 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Operation which owns the device */
-	protected transient DeviceOperation owner;
+	protected transient OpDevice owner;
 
 	/** Acquire ownership of the device */
-	public DeviceOperation acquire(DeviceOperation o) {
+	public OpDevice acquire(OpDevice o) {
 		try {
 			// Name used for unique device acquire/release lock
 			synchronized(name) {
@@ -194,11 +194,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Release ownership of the device */
-	public DeviceOperation release(DeviceOperation o) {
+	public OpDevice release(OpDevice o) {
 		try {
 			// Name used for unique device acquire/release lock
 			synchronized(name) {
-				DeviceOperation _owner = owner;
+				OpDevice _owner = owner;
 				if(owner == o)
 					owner = null;
 				return _owner;
@@ -211,7 +211,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 
 	/** Get a description of the current device operation */
 	public String getOperation() {
-		DeviceOperation o = owner;
+		OpDevice o = owner;
 		if(o == null)
 			return "None";
 		else

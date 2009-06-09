@@ -22,16 +22,16 @@ import us.mn.state.dot.tms.server.DeviceImpl;
  *
  * @author Douglas Lau
  */
-abstract public class DeviceOperation extends ControllerOperation {
+abstract public class OpDevice extends ControllerOperation {
 
 	/** This operation; needed for inner Phase classes */
-	protected final DeviceOperation operation;
+	protected final OpDevice operation;
 
 	/** Device on which to perform operation */
 	protected final DeviceImpl device;
 
 	/** Create a new device operation */
-	protected DeviceOperation(int p, DeviceImpl d) {
+	protected OpDevice(int p, DeviceImpl d) {
 		super(p, (ControllerImpl)d.getController(), d.getName());
 		operation = this;
 		device = d;
@@ -44,7 +44,7 @@ abstract public class DeviceOperation extends ControllerOperation {
 		protected Phase poll(AddressedMessage mess)
 			throws DeviceContentionException
 		{
-			DeviceOperation owner = device.acquire(operation);
+			OpDevice owner = device.acquire(operation);
 			if(owner != operation)
 				throw new DeviceContentionException(owner);
 			return phaseOne();

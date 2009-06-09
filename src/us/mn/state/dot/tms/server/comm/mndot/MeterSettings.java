@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 
 /**
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.MeterPoller;
  *
  * @author Douglas Lau
  */
-public class MeterSettings extends DeviceOperation {
+public class MeterSettings extends OpDevice {
 
 	/** Startup green time (tenths of a second) */
 	static protected final int STARTUP_GREEN = 80;

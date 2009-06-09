@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
  * Query the status of a warning sign
  *
  * @author Douglas Lau
  */
-public class WarningStatus extends DeviceOperation {
+public class WarningStatus extends OpDevice {
 
 	/** Warning sign */
 	protected final WarningSignImpl warn;

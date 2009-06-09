@@ -18,14 +18,14 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
  * Operation to be performed on a dynamic message sign
  *
  * @author Douglas Lau
  */
-abstract public class OpDMS extends DeviceOperation {
+abstract public class OpDMS extends OpDevice {
 
 	/** DMS debug log */
 	static protected final DebugLog DMS_LOG = new DebugLog("dms");

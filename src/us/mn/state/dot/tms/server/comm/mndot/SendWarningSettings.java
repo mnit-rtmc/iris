@@ -19,14 +19,14 @@ import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
  * SendWarningSettings configuration data to a 170 controller
  *
  * @author Douglas Lau
  */
-public class SendWarningSettings extends DeviceOperation {
+public class SendWarningSettings extends OpDevice {
 
 	/** HOV preempt time (tenths of a second) (obsolete) */
 	static protected final int HOV_PREEMPT = 80;

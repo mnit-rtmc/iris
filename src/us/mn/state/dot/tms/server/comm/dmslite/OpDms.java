@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-abstract public class OpDms extends DeviceOperation {
+abstract public class OpDms extends OpDevice {
 
 	/** failure message for unknown reasons */
 	final static String FAILURE_UNKNOWN = "Failure, unknown reason";

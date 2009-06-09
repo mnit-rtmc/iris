@@ -18,14 +18,14 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DeviceOperation;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
  * Operation to set the red time for a ramp meter
  *
  * @author Douglas Lau
  */
-public class RedTimeCommand extends DeviceOperation {
+public class RedTimeCommand extends OpDevice {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
