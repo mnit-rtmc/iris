@@ -174,11 +174,19 @@ public class OpSendMeterSettings extends OpDevice {
 
 		/** Set the timing table for the ramp meter */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			int a = Address.METER_1_TIMING_TABLE;
+			int a = getTableAddress();
 			mess.add(createTimingTableRequest(a));
 			mess.setRequest();
 			return new ClearVerifies();
 		}
+	}
+
+	/** Get the memory address of the meter timing table */
+	protected int getTableAddress() {
+		if(meter.getPin() == Op170.METER_2_PIN)
+			return Address.METER_2_TIMING_TABLE;
+		else
+			return Address.METER_1_TIMING_TABLE;
 	}
 
 	/** Create a timing table request for the meter */
@@ -207,11 +215,18 @@ public class OpSendMeterSettings extends OpDevice {
 
 		/** Clear the meter verifies for the ramp meter */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			int address = Address.RAMP_METER_DATA +
-				Address.OFF_POLICE_PANEL;
+			int address = getVerifyAddress();
 			mess.add(new MemoryRequest(address, new byte[1]));
 			mess.setRequest();
 			return null;
 		}
+	}
+
+	/** Get the memory address of the meter timing table */
+	protected int getVerifyAddress() {
+		int a = Address.RAMP_METER_DATA + Address.OFF_POLICE_PANEL;
+		if(meter.getPin() == Op170.METER_2_PIN)
+			a += Address.OFF_METER_2;
+		return a;
 	}
 }
