@@ -33,6 +33,7 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -288,6 +289,14 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Lock", lcs_lock);
 		panel.addRow("Operation", operation);
+		JButton settingsBtn = new JButton("Send Settings");
+		new ActionJob(this, settingsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					SEND_SETTINGS.ordinal());
+			}
+		};
+		panel.addRow(settingsBtn);
 		return panel;
 	}
 
