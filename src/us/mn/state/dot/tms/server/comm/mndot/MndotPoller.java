@@ -156,6 +156,8 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		case 30:
 			if(c.hasActiveDetector())
 				new OpQuerySamples30Sec(c, comp).start();
+			// This should happen on a meter QUERY_STATUS, but
+			// green detectors need to be queried also...
 			if(c.hasActiveMeter())
 				new OpQueryMeterStatus(c, comp).start();
 			break;
@@ -177,9 +179,6 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		switch(r) {
 		case SEND_SETTINGS:
 			new OpSendMeterSettings(meter).start();
-			break;
-		case QUERY_STATUS:
-			// FIXME
 			break;
 		default:
 			// Ignore other requests
