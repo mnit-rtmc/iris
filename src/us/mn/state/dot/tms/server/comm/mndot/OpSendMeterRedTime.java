@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-public class RedTimeCommand extends OpDevice {
+public class OpSendMeterRedTime extends OpDevice {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
@@ -37,7 +37,7 @@ public class RedTimeCommand extends OpDevice {
 	protected final int red_time;
 
 	/** Create a set red time packet */
-	public RedTimeCommand(RampMeterImpl r, int m, int red) {
+	public OpSendMeterRedTime(RampMeterImpl r, int m, int red) {
 		super(COMMAND, r);
 		meter = r;
 		int a = Address.METER_1_TIMING_TABLE;

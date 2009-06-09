@@ -188,7 +188,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			else {
 				float red = calculateRedTime(meter, rate);
 				int r = Math.round(red * 10);
-				new RedTimeCommand(meter, n, r).start();
+				new OpSendMeterRedTime(meter, n, r).start();
 				if(!meter.isMetering())
 					startMetering(meter);
 			}
