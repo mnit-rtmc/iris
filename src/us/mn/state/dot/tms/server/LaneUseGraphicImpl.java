@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.LaneUseGraphic;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -36,8 +37,9 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading lane-use graphics...");
 		namespace.registerType(SONAR_TYPE, LaneUseGraphicImpl.class);
-		store.query("SELECT name, indication, g_number, graphic "+
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, indication, g_number, graphic, " +
+			"page, on_time FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LaneUseGraphicImpl(
@@ -45,7 +47,9 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 					row.getString(1),	// name
 					row.getInt(2),		// indication
 					row.getInt(3),		// g_number
-					row.getString(4)	// graphic
+					row.getString(4),	// graphic
+					row.getInt(5),		// page
+					row.getInt(6)		// on_time
 				));
 			}
 		});
@@ -58,6 +62,8 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 		map.put("indication", indication);
 		map.put("g_number", g_number);
 		map.put("graphic", graphic);
+		map.put("page", page);
+		map.put("on_time", on_time);
 		return map;
 	}
 
@@ -78,21 +84,42 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 
 	/** Create a new lane-use graphic */
 	public LaneUseGraphicImpl(Namespace ns, String n, int i, int gn,
-		String g)
+		String g, int p, int t)
 	{
-		this(n, i, gn, (Graphic)ns.lookupObject(Graphic.SONAR_TYPE, g));
+		this(n, i, gn, (Graphic)ns.lookupObject(Graphic.SONAR_TYPE, g),
+		     p, t);
 	}
 
 	/** Create a new lane-use graphic */
-	public LaneUseGraphicImpl(String n, int i, int gn, Graphic g) {
+	public LaneUseGraphicImpl(String n, int i, int gn, Graphic g, int p,
+		int t)
+	{
 		this(n);
 		indication = i;
 		g_number = gn;
 		graphic = g;
+		page = p;
+		on_time = t;
 	}
 
 	/** Ordinal of LaneUseIndication */
 	protected int indication;
+
+	/** Set the indication (ordinal of LaneUseIndication) */
+	public void setIndication(int i) {
+		indication = i;
+	}
+
+	/** Set the indication (ordinal of LaneUseIndication) */
+	public void doSetIndication(int i) throws TMSException {
+		if(i == indication)
+			return;
+		LaneUseIndication ind = LaneUseIndication.fromOrdinal(i);
+		if(ind == null)
+			throw new ChangeVetoException("Invalid indication:" +i);
+		store.update(this, "indication", i);
+		setIndication(i);
+	}
 
 	/** Get the indication (ordinal of LaneUseIndication) */
 	public int getIndication() {
@@ -102,6 +129,22 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 	/** Graphic number */
 	protected int g_number;
 
+	/** Set the graphic number */
+	public void setGNumber(int n) {
+		g_number = n;
+	}
+
+	/** Set the graphic number */
+	public void doSetGNumber(int n) throws TMSException {
+		if(n == g_number)
+			return;
+		// Restriction imposed by NTCIP 1203
+		if(n < 1 || n > 255)
+			throw new ChangeVetoException("Invalid number:" + n);
+		store.update(this, "g_number", n);
+		setGNumber(n);
+	}
+
 	/** Get the graphic number */
 	public int getGNumber() {
 		return g_number;
@@ -110,8 +153,67 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 	/** Graphic associated with the lane-use indication */
 	protected Graphic graphic;
 
+	/** Set the graphic */
+	public void setGraphic(Graphic g) {
+		graphic = g;
+	}
+
+	/** Set the graphic */
+	public void doSetGraphic(Graphic g) throws TMSException {
+		if(g == graphic)
+			return;
+		store.update(this, "graphic", g.getName());
+		setGraphic(g);
+	}
+
 	/** Get the graphic */
 	public Graphic getGraphic() {
 		return graphic;
+	}
+
+	/** Page number */
+	protected int page;
+
+	/** Set the page number */
+	public void setPage(int p) {
+		page = p;
+	}
+
+	/** Set the page number */
+	public void doSetPage(int p) throws TMSException {
+		if(p == page)
+			return;
+		if(p < 1 || p > 6)
+			throw new ChangeVetoException("Invalid page:" + p);
+		store.update(this, "page", p);
+		setPage(p);
+	}
+
+	/** Get the page number */
+	public int getPage() {
+		return page;
+	}
+
+	/** Page on time (tenths of a second) */
+	protected int on_time;
+
+	/** Set the page on time (tenths of a second) */
+	public void setOnTime(int t) {
+		on_time = t;
+	}
+
+	/** Set the page on time (tenths of a second) */
+	public void doSetOnTime(int t) throws TMSException {
+		if(t == on_time)
+			return;
+		if(t < 1 || t > 60)
+			throw new ChangeVetoException("Invalid on time:" + t);
+		store.update(this, "on_time", t);
+		setOnTime(t);
+	}
+
+	/** Get the page on time (tenths of a second) */
+	public int getOnTime() {
+		return on_time;
 	}
 }

@@ -27,12 +27,33 @@ public interface LaneUseGraphic extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "lane_use_graphic";
 
+	/** Set the indication (ordinal of LaneUseIndication) */
+	void setIndication(int i);
+
 	/** Get the indication (ordinal of LaneUseIndication) */
 	int getIndication();
+
+	/** Set the graphic number */
+	void setGNumber(int n);
 
 	/** Get the graphic number */
 	int getGNumber();
 
+	/** Set the graphic */
+	void setGraphic(Graphic g);
+
 	/** Get the graphic */
 	Graphic getGraphic();
+
+	/** Set the page number */
+	void setPage(int p);
+
+	/** Get the page number */
+	int getPage();
+
+	/** Set the page on time (tenths of a second) */
+	void setOnTime(int t);
+
+	/** Get the page on time (tenths of a second) */
+	int getOnTime();
 }
