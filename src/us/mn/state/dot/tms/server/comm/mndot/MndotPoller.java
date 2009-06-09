@@ -154,12 +154,10 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
 		switch(intvl) {
 		case 30:
-			if(c.getActive()) {
-				if(c.hasActiveDetector())
-					new OpQuerySamples30Sec(c,comp).start();
-				if(c.hasActiveMeter())
-					new OpQueryMeterStatus(c, comp).start();
-			}
+			if(c.hasActiveDetector())
+				new OpQuerySamples30Sec(c, comp).start();
+			if(c.hasActiveMeter())
+				new OpQueryMeterStatus(c, comp).start();
 			break;
 		case 300:
 			if(c.hasActiveDetector() || c.hasActiveMeter())
@@ -176,8 +174,17 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 
 	/** Send a device request to a ramp meter */
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
-		if(r == DeviceRequest.SEND_SETTINGS)
+		switch(r) {
+		case SEND_SETTINGS:
 			new OpSendMeterSettings(meter).start();
+			break;
+		case QUERY_STATUS:
+			// FIXME
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
 	}
 
 	/** Send a new release rate to a ramp meter */
