@@ -156,7 +156,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		case 30:
 			if(c.getActive()) {
 				if(c.hasActiveDetector())
-					new Data30Second(c, comp).start();
+					new OpQuerySamples30Sec(c, comp).start();
 				if(c.hasActiveMeter())
 					new QueryMeterStatus(c, comp).start();
 			}

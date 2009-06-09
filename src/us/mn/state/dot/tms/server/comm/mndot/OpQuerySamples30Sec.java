@@ -25,13 +25,13 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class Data30Second extends OpQuerySamples {
+public class OpQuerySamples30Sec extends OpQuerySamples {
 
 	/** 30-Second completer */
 	protected final Completer completer;
 
 	/** Create a new 30-second data operation */
-	public Data30Second(ControllerImpl c, Completer comp) {
+	public OpQuerySamples30Sec(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
 	}
