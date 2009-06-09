@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -326,7 +327,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Request a device operation */
 	public void setDeviceRequest(int r) {
-		// FIXME
+		LCSPoller p = getLCSPoller();
+		if(p != null)
+			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
 	/** Get an array of the DMS */

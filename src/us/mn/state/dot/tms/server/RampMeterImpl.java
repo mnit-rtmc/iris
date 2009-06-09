@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -370,7 +371,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Request a device operation */
 	public void setDeviceRequest(int r) {
-		// no ramp meter device requests
+		MeterPoller p = getMeterPoller();
+		if(p != null)
+			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
 	/** Ramp meter queue status */
