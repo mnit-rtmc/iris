@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class Data5Minute extends OpQuerySamples {
+public class OpQuerySamples5Min extends OpQuerySamples {
 
 	/** Maximum number of records to read with "BAD TIMESTAMP" errors */
 	static protected final int MAX_BAD_RECORDS = 5;
@@ -48,7 +48,7 @@ public class Data5Minute extends OpQuerySamples {
 	protected int n_bad = 0;
 
 	/** Create a new 5-minute data operation */
-	public Data5Minute(ControllerImpl c, Completer comp) {
+	public OpQuerySamples5Min(ControllerImpl c, Completer comp) {
 		super(DATA_5_MIN, c);
 		completer = comp;
 		long s = System.currentTimeMillis();
