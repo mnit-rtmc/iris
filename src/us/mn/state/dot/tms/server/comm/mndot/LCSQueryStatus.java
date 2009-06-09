@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class LCSQueryStatus extends LCSOperation {
+public class LCSQueryStatus extends OpLCS {
 
 	/** Device on/off status ("metering" status) */
 	protected final byte[] status = new byte[1];

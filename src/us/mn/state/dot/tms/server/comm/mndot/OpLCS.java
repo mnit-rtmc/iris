@@ -22,13 +22,13 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-abstract public class LCSOperation extends OpDevice {
+abstract public class OpLCS extends OpDevice {
 
 	/** LCS array to query */
 	protected final LCSArrayImpl lcs_array;
 
 	/** Create a new LCS operation */
-	protected LCSOperation(int p, LCSArrayImpl l) {
+	protected OpLCS(int p, LCSArrayImpl l) {
 		super(p, l);
 		lcs_array = l;
 	}

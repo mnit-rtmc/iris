@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class LCSSendIndications extends LCSOperation {
+public class LCSSendIndications extends OpLCS {
 
 	/** Indications to send */
 	protected final Integer[] indications;
