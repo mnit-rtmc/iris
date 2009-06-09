@@ -21,12 +21,12 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * Inverval data operations are for collecting 30-second or 5-minute binned
+ * Query sample operations are for collecting 30-second or 5-minute binned
  * sample data.
  *
  * @author Douglas Lau
  */
-abstract public class IntervalData extends Op170 {
+abstract public class OpQuerySamples extends Op170 {
 
 	/** Volume data for all detectors on a controller */
 	protected final int[] volume = new int[DETECTOR_INPUTS];
@@ -34,8 +34,8 @@ abstract public class IntervalData extends Op170 {
 	/** Scan data for all detectors on a controller */
 	protected final int[] scans = new int[DETECTOR_INPUTS];
 
-	/** Create a new IntervalData poll */
-	protected IntervalData(int p, ControllerImpl c) {
+	/** Create a new OpQuerySamples poll */
+	protected OpQuerySamples(int p, ControllerImpl c) {
 		super(p, c);
 		for(int i = 0; i < DETECTOR_INPUTS; i++) {
 			volume[i] = Constants.MISSING_DATA;
@@ -43,7 +43,7 @@ abstract public class IntervalData extends Op170 {
 		}
 	}
 
-	/** Process interval data from the controller */
+	/** Process sample data from the controller */
 	protected void processData(byte[] record) throws IOException {
 		ByteArrayInputStream is = new ByteArrayInputStream(record);
 		DataInputStream dis = new DataInputStream(is);

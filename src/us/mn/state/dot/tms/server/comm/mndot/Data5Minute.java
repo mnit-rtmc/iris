@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class Data5Minute extends IntervalData {
+public class Data5Minute extends OpQuerySamples {
 
 	/** Maximum number of records to read with "BAD TIMESTAMP" errors */
 	static protected final int MAX_BAD_RECORDS = 5;

@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  *
  * @author Douglas Lau
  */
-public class Data30Second extends IntervalData {
+public class Data30Second extends OpQuerySamples {
 
 	/** 30-Second completer */
 	protected final Completer completer;
