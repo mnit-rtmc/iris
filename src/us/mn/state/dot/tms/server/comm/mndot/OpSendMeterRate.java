@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-public class MeterRateCommand extends OpDevice {
+public class OpSendMeterRate extends OpDevice {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
@@ -36,7 +36,7 @@ public class MeterRateCommand extends OpDevice {
 	protected final byte rate;
 
 	/** Create a new meter rate command operation */
-	public MeterRateCommand(RampMeterImpl m, int i, int r) {
+	public OpSendMeterRate(RampMeterImpl m, int i, int r) {
 		super(COMMAND, m);
 		meter = m;
 		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;

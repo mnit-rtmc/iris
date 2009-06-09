@@ -217,7 +217,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
 		int n = getMeterNumber(meter);
 		if(n > 0)
-			new MeterRateCommand(meter, n, rate).start();
+			new OpSendMeterRate(meter, n, rate).start();
 	}
 
 	/** Send a device request to a warning sign */
