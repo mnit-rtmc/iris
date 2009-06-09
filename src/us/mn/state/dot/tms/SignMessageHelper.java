@@ -121,17 +121,18 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Render the SignMessage object as xml */
 	static public void printXmlElement(SignMessage sm, PrintWriter out) {
-		//Don't write the SignMessage element if the sign is blank
-		if(sm.getPriority() == DMSMessagePriority.BLANK.ordinal()) return;
+		if(isBlank(sm))
+			return;
 		String[] ml = createLines(sm);
-		if(ml != null && ml.length > 0){
+		if(ml != null && ml.length > 0) {
 			out.print("<" + SignMessage.SONAR_TYPE + " ");
-			if(getFontName(sm, 1).length > 0)
-				out.print("font='" + SString.toString(getFontName(sm, 1)) + "' ");
-			for(int i = 0; i < ml.length; ++i){
-				int lineNo = i+1;
-				out.print("line_" + lineNo + "='" + ml[i] + "' ");
+			String[] fonts = getFontName(sm, 1);
+			if(fonts.length > 0) {
+				String f = SString.toString(fonts);
+				out.print("font='" + f + "' ");
 			}
+			for(int i = 0; i < ml.length; i++)
+				out.print("line_" + (i+1) + "='" + ml[i] +"' ");
 			out.println("/>");
 		}
 	}
