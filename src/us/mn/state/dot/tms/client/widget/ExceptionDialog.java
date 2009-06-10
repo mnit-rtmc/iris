@@ -21,8 +21,6 @@ import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.BindException;
-import java.rmi.ConnectException;
-import java.rmi.ConnectIOException;
 import java.text.ParseException;
 import javax.mail.MessagingException;
 import javax.naming.AuthenticationException;
@@ -94,18 +92,6 @@ public class ExceptionDialog extends JDialog {
 			addText("already running on this computer.");
 			addText("Please shut it down before");
 			addText("starting this program again.");
-			addAssistanceMessage();
-		}
-		catch(ConnectException ee) {
-			setFatal(true);
-			addText("This program was unable to");
-			addText("communicate with the IRIS server.");
-			addAssistanceMessage();
-		}
-		catch(ConnectIOException ee) {
-			setFatal(true);
-			addText("This program was unable to");
-			addText("communicate with the IRIS server.");
 			addAssistanceMessage();
 		}
 		catch(ChangeVetoException ee) {
