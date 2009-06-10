@@ -487,7 +487,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		BitmapGraphic bg = createBitmapGraphic(dms);
 		if(bg == null)
 			return null;
-		int blen = bg.getBitmap().length;
+		int blen = bg.length();
 		if(blen == 0 || bmaps.length % blen != 0)
 			return null;
 		int n_pages = bmaps.length / blen;
@@ -590,11 +590,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Encode the bitmaps to Base64 */
 	protected String encodeBitmaps(BitmapGraphic[] bmaps) {
-		int blen = bmaps[0].getBitmap().length;
+		int blen = bmaps[0].length();
 		byte[] bitmaps = new byte[bmaps.length * blen];
 		for(int i = 0; i < bmaps.length; i++) {
 			byte[] bm = bmaps[i].getBitmap();
-			System.arraycopy(bm, 0, bitmaps, i * blen,blen);
+			System.arraycopy(bm, 0, bitmaps, i * blen, blen);
 		}
 		return Base64.encode(bitmaps);
 	}

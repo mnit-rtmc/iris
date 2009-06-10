@@ -183,7 +183,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		BitmapGraphic bg = createBitmapGraphic(dms);
 		if(bg == null)
 			return null;
-		int blen = bg.getBitmap().length;
+		int blen = bg.length();
 		if(blen == 0 || bmaps.length % blen != 0)
 			return null;
 		byte[] b = new byte[blen];

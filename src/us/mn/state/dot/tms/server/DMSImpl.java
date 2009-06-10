@@ -903,7 +903,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	{
 		byte[] bitmaps = Base64.decode(bmaps);
 		BitmapGraphic bitmap = createBlankBitmap();
-		int blen = bitmap.getBitmap().length;
+		int blen = bitmap.length();
 		if(blen == 0)
 			throw new ChangeVetoException("Invalid sign size");
 		if(bitmaps.length % blen != 0)
@@ -1245,7 +1245,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
 		DMSMessagePriority p, Integer d) throws SonarException
 	{
-		int blen = pages[0].getBitmap().length;
+		int blen = pages[0].length();
 		byte[] bitmap = new byte[pages.length * blen];
 		for(int i = 0; i < pages.length; i++) {
 			byte[] page = pages[i].getBitmap();

@@ -64,7 +64,7 @@ public class OpMessage extends OpDms {
 		BitmapGraphic oldbmg = createBitmap();
 		if(oldbmg == null)
 			return "";
-		int blen = oldbmg.getBitmap().length;
+		int blen = oldbmg.length();
 		if(bitmaps.length % blen != 0)
 			return "";
 		int pages = bitmaps.length / blen;
@@ -138,7 +138,7 @@ public class OpMessage extends OpDms {
 	protected int getPageLength() {
 		BitmapGraphic b = createBitmap();
 		if(b != null)
-			return b.getBitmap().length;
+			return b.length();
 		else
 			return 0;
 	}
