@@ -22,10 +22,20 @@ package us.mn.state.dot.tms;
 public class BitmapGraphic {
 
 	/** Width of graphic */
-	public final int width;
+	protected final int width;
+
+	/** Get the raster graphic width */
+	public int getWidth() {
+		return width;
+	}
 
 	/** Height of graphic */
-	public final int height;
+	protected final int height;
+
+	/** Get the raster graphic height */
+	public int getHeight() {
+		return height;
+	}
 
 	/** Bitmap graphic data */
 	protected final byte[] bitmap;

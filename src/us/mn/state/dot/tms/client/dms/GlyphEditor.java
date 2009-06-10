@@ -142,7 +142,7 @@ public class GlyphEditor extends JPanel {
 		apply.setEnabled(font != null);
 		narrow.setEnabled(font != null && g != null);
 		widen.setEnabled(font != null);
-		if(g == gdata && bmap.height > 0)
+		if(g == gdata && bmap.getHeight() > 0)
 			return;
 		gdata = g;
 		if(g != null)
@@ -160,17 +160,17 @@ public class GlyphEditor extends JPanel {
 	protected void setBitmap(BitmapGraphic b) {
 		gpanel.removeAll();
 		bmap = b;
-		if(b.width < 1) {
+		if(b.getWidth() < 1) {
 			narrow.setEnabled(false);
 			repaint();
 			return;
 		}
 		narrow.setEnabled(true);
-		gpanel.setLayout(new GridLayout(b.height, b.width));
-		p_button = new JToggleButton[b.height * b.width];
-		for(int y = 0; y < b.height; y++) {
-			for(int x = 0; x < b.width; x++) {
-				int i = y * b.width + x;
+		gpanel.setLayout(new GridLayout(b.getHeight(), b.getWidth()));
+		p_button = new JToggleButton[b.getHeight() * b.getWidth()];
+		for(int y = 0; y < b.getHeight(); y++) {
+			for(int x = 0; x < b.getWidth(); x++) {
+				int i = y * b.getWidth() + x;
 				p_button[i] = createPixelButton();
 				p_button[i].setSelected(b.getPixel(x, y) > 0);
 				gpanel.add(p_button[i]);
@@ -183,9 +183,9 @@ public class GlyphEditor extends JPanel {
 	/** Update the bitmap with the current pixel button state */
 	protected void updateBitmap() {
 		BitmapGraphic b = bmap;
-		for(int y = 0; y < b.height; y++) {
-			for(int x = 0; x < b.width; x++) {
-				int i = y * b.width + x;
+		for(int y = 0; y < b.getHeight(); y++) {
+			for(int x = 0; x < b.getWidth(); x++) {
+				int i = y * b.getWidth() + x;
 				int p = 0;
 				if(p_button[i].isSelected())
 					p = 1;
@@ -196,10 +196,10 @@ public class GlyphEditor extends JPanel {
 
 	/** Narrow buton pressed */
 	protected void narrowPressed() {
-		if(bmap.width > 0) {
+		if(bmap.getWidth() > 0) {
 			updateBitmap();
-			BitmapGraphic b = new BitmapGraphic(bmap.width - 1,
-				bmap.height);
+			BitmapGraphic b = new BitmapGraphic(bmap.getWidth() - 1,
+				bmap.getHeight());
 			b.copy(bmap);
 			setBitmap(b);
 		}
@@ -207,10 +207,10 @@ public class GlyphEditor extends JPanel {
 
 	/** Widen buton pressed */
 	protected void widenPressed() {
-		if(bmap.width < 12) {
+		if(bmap.getWidth() < 12) {
 			updateBitmap();
-			BitmapGraphic b = new BitmapGraphic(bmap.width + 1,
-				bmap.height);
+			BitmapGraphic b = new BitmapGraphic(bmap.getWidth() + 1,
+				bmap.getHeight());
 			b.copy(bmap);
 			setBitmap(b);
 		}
@@ -218,8 +218,8 @@ public class GlyphEditor extends JPanel {
 
 	/** Update an existing Glyph */
 	protected void updateGlyph() {
-		if(bmap.width > 0) {
-			gdata.graphic.setWidth(bmap.width);
+		if(bmap.getWidth() > 0) {
+			gdata.graphic.setWidth(bmap.getWidth());
 			gdata.graphic.setPixels(Base64.encode(
 				bmap.getPixels()));
 		} else {
@@ -234,7 +234,7 @@ public class GlyphEditor extends JPanel {
 		updateBitmap();
 		if(gdata != null)
 			updateGlyph();
-		else if(bmap.width > 0)
+		else if(bmap.getWidth() > 0)
 			font_form.createGlyph(bmap);
 	}
 }

@@ -364,8 +364,8 @@ public class FontForm extends AbstractForm {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("bpp", 1);
-			attrs.put("height", bmap.height);
-			attrs.put("width", bmap.width);
+			attrs.put("height", bmap.getHeight());
+			attrs.put("width", bmap.getWidth());
 			attrs.put("pixels", Base64.encode(bmap.getPixels()));
 			graphics.createObject(name, attrs);
 			attrs.clear();

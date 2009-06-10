@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,11 +80,11 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	/** Calculate the pitch for the current glyph */
 	protected float calculatePitch() {
 		float w = 0;
-		if(bitmap.width > 0)
- 			w = getWidth() / bitmap.width;
+		if(bitmap.getWidth() > 0)
+ 			w = getWidth() / bitmap.getWidth();
 		float h = 0;
-		if(bitmap.height > 0)
-			h = getHeight() / bitmap.height;
+		if(bitmap.getHeight() > 0)
+			h = getHeight() / bitmap.getHeight();
 		return Math.min(w, h);
 	}
 
@@ -94,7 +94,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	/** Calculate the left side of the current glyph */
 	protected int calculateLeft() {
 		return MARGIN + (int)(getWidth() - MARGIN -
-			bitmap.width * pitch) / 2;
+			bitmap.getWidth() * pitch) / 2;
 	}
 
 	/** Top margin for currently configured glyph */
@@ -102,7 +102,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Calculate the top of the current glyph */
 	protected int calculateTop() {
-		return (int)(getHeight() - bitmap.height * pitch) / 2;
+		return (int)(getHeight() - bitmap.getHeight() * pitch) / 2;
 	}
 
 	/** Paint the pixels for the current glyph */
@@ -111,9 +111,9 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 			RenderingHints.VALUE_ANTIALIAS_ON);
 		Ellipse2D pixel = new Ellipse2D.Float();
 		float yy = top;
-		for(int y = 0; y < bitmap.height; y++, yy += pitch) {
+		for(int y = 0; y < bitmap.getHeight(); y++, yy += pitch) {
 			float xx = left;
-			for(int x = 0; x < bitmap.width; x++, xx += pitch) {
+			for(int x = 0; x < bitmap.getWidth(); x++, xx += pitch){
 				if(bitmap.getPixel(x, y) > 0)
 					g.setColor(Color.YELLOW);
 				else
@@ -130,8 +130,8 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 		if(bitmap != null) {
 			configureRenderer();
 			g.setColor(Color.BLACK);
-			g.fillRect(left, top, (int)(bitmap.width * pitch),
-				(int)(bitmap.height * pitch));
+			g.fillRect(left, top, (int)(bitmap.getWidth() * pitch),
+				(int)(bitmap.getHeight() * pitch));
 			paintPixels((Graphics2D)g);
 		}
 	}
