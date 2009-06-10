@@ -769,11 +769,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		BitmapGraphic stuckOn = createBlankBitmap();
 		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
 		if(b_off.length == stuckOff.length())
-			stuckOff.setBitmap(b_off);
+			stuckOff.setPixels(b_off);
 		stuck_off_pnl.setGraphic(stuckOff);
 		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
 		if(b_on.length == stuckOn.length())
-			stuckOn.setBitmap(b_on);
+			stuckOn.setPixels(b_on);
 		stuck_on_pnl.setGraphic(stuckOn);
 		int n_off = stuckOff.getLitCount();
 		int n_on = stuckOn.getLitCount();

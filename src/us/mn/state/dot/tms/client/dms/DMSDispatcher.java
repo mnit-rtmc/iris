@@ -496,7 +496,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			bitmaps[i] = createBitmapGraphic(dms);
 			byte[] b = new byte[blen];
 			System.arraycopy(bmaps, i * blen, b, 0, blen);
-			bitmaps[i].setBitmap(b);
+			bitmaps[i].setPixels(b);
 		}
 		return bitmaps;
 	}
@@ -593,8 +593,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		int blen = bmaps[0].length();
 		byte[] bitmaps = new byte[bmaps.length * blen];
 		for(int i = 0; i < bmaps.length; i++) {
-			byte[] bm = bmaps[i].getBitmap();
-			System.arraycopy(bm, 0, bitmaps, i * blen, blen);
+			byte[] pix = bmaps[i].getPixels();
+			System.arraycopy(pix, 0, bitmaps, i * blen, blen);
 		}
 		return Base64.encode(bitmaps);
 	}

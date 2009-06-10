@@ -37,8 +37,8 @@ public class BitmapGraphic {
 		bitmap = new byte[(width * height + 7) / 8];
 	}
 
-	/** Set the bitmap */
-	public void setBitmap(byte[] b) {
+	/** Set the pixel data */
+	public void setPixels(byte[] b) {
 		if(b.length != bitmap.length) {
 			throw new IndexOutOfBoundsException("b=" + b.length +
 				", bitmap.length=" + bitmap.length);
@@ -46,8 +46,8 @@ public class BitmapGraphic {
 		System.arraycopy(b, 0, bitmap, 0, bitmap.length);
 	}
 
-	/** Get the bitmap */
-	public byte[] getBitmap() {
+	/** Get the pixel data */
+	public byte[] getPixels() {
 		return bitmap;
 	}
 

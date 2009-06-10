@@ -70,12 +70,12 @@ public class OpMessage extends OpDms {
 		int pages = bitmaps.length / blen;
 		if(pg < 0 || pg >= pages)
 			return "";
-		byte[] bmap = new byte[blen];
-		System.arraycopy(bitmaps, pg * blen, bmap, 0, blen);
-		oldbmg.setBitmap(bmap);
+		byte[] pix = new byte[blen];
+		System.arraycopy(bitmaps, pg * blen, pix, 0, blen);
+		oldbmg.setPixels(pix);
 		BitmapGraphic newbmg = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
 		newbmg.copy(oldbmg);
-		return new HexString(newbmg.getBitmap()).toString();
+		return new HexString(newbmg.getPixels()).toString();
 	}
 
 	/** Get the sign message bitmaps */

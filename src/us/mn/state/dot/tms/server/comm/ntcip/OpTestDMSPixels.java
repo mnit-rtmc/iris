@@ -185,9 +185,9 @@ public class OpTestDMSPixels extends OpDMS {
 		if(success) {
 			String[] status = new String[2];
 			status[DMS.STUCK_OFF_BITMAP] =
-				Base64.encode(stuck_off.getBitmap());
+				Base64.encode(stuck_off.getPixels());
 			status[DMS.STUCK_ON_BITMAP] =
-				Base64.encode(stuck_on.getBitmap());
+				Base64.encode(stuck_on.getPixels());
 			dms.setPixelStatus(status);
 			if(rows.getInteger() > REPORT_PIXEL_ERROR_COUNT) {
 				errorStatus = "Too many pixel errors: " +

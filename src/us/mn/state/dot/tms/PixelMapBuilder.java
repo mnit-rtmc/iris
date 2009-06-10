@@ -253,12 +253,12 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	public BitmapGraphic[] getPixmaps() {
 		BitmapGraphic[] pixmaps = new BitmapGraphic[n_pages];
 		for(int p = 0; p < n_pages; p++)
-			pixmaps[p] = getBitmap(p);
+			pixmaps[p] = createBitmap(p);
 		return pixmaps;
 	}
 
-	/** Get a bitmap graphic for the specified page number */
-	protected BitmapGraphic getBitmap(int p) {
+	/** Create a bitmap graphic for the specified page number */
+	protected BitmapGraphic createBitmap(int p) {
 		int nltp = getLinesOnPage(p);
 		BitmapGraphic bg = new BitmapGraphic(width, height);
 		for(TextSpan span: spans) {
@@ -381,9 +381,9 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	{
 		int w = g.getWidth();
 		int h = g.getHeight();
-		byte[] bitmap = Base64.decode(g.getPixels());
+		byte[] pixels = Base64.decode(g.getPixels());
 		BitmapGraphic c = new BitmapGraphic(w, h);
-		c.setBitmap(bitmap);
+		c.setPixels(pixels);
 		for(int yy = 0; yy < h; yy++) {
 			for(int xx = 0; xx < w; xx++) {
 				int p = c.getPixel(xx, yy);

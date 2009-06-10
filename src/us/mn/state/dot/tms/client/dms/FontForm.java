@@ -258,7 +258,7 @@ public class FontForm extends AbstractForm {
 			bmap = new BitmapGraphic(graphic.getWidth(),
 				graphic.getHeight());
 			try {
-				bmap.setBitmap(Base64.decode(
+				bmap.setPixels(Base64.decode(
 					graphic.getPixels()));
 			}
 			catch(Exception e) {
@@ -366,7 +366,7 @@ public class FontForm extends AbstractForm {
 			attrs.put("bpp", 1);
 			attrs.put("height", bmap.height);
 			attrs.put("width", bmap.width);
-			attrs.put("pixels", Base64.encode(bmap.getBitmap()));
+			attrs.put("pixels", Base64.encode(bmap.getPixels()));
 			graphics.createObject(name, attrs);
 			attrs.clear();
 			attrs.put("font", f);

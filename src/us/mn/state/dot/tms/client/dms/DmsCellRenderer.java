@@ -188,7 +188,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			return null;
 		byte[] b = new byte[blen];
 		System.arraycopy(bmaps, 0, b, 0, blen);
-		bg.setBitmap(b);
+		bg.setPixels(b);
 		return bg;
 	}
 

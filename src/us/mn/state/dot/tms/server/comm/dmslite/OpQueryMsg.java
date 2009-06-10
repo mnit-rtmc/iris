@@ -130,9 +130,9 @@ public class OpQueryMsg extends OpDms {
 	 * @param pg Page number to extract
 	 * @return BitmapGraphic of requested page */
 	static protected BitmapGraphic extractBitmap(byte[] argbitmap, int pg) {
-		byte[] nbm = extractPage(argbitmap, pg);
+		byte[] pix = extractPage(argbitmap, pg);
 		BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
-		bm.setBitmap(nbm);
+		bm.setPixels(pix);
 		return bm;
 	}
 
@@ -141,10 +141,10 @@ public class OpQueryMsg extends OpDms {
 	 * @param pg Page number to extract
 	 * @return Bitmap of requested page only */
 	static protected byte[] extractPage(byte[] argbitmap, int pg) {
-		byte[] nbm = new byte[BM_PGLEN_BYTES];
-		System.arraycopy(argbitmap, pg * BM_PGLEN_BYTES, nbm, 0,
+		byte[] pix = new byte[BM_PGLEN_BYTES];
+		System.arraycopy(argbitmap, pg * BM_PGLEN_BYTES, pix, 0,
 			BM_PGLEN_BYTES);
-		return nbm;
+		return pix;
 	}
 
 	/** Create the first real phase of the operation */
