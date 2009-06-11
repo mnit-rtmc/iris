@@ -15,15 +15,23 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.EOFException;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.TreeMap;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.LaneUseGraphic;
 import us.mn.state.dot.tms.LaneUseGraphicHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -157,6 +165,73 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		// FIXME: create operation 
+		LinkedList<OpDMS> ops = new LinkedList<OpDMS>();
+		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
+		if(lcss.length != ind.length) {
+			System.err.println("NTCIP: LCS array length invalid");
+			return;
+		}
+		for(int i = 0; i < lcss.length; i++) {
+			DMS dms = DMSHelper.lookup(lcss[i].getName());
+			if(dms instanceof DMSImpl) {
+				OpDMS op = createGraphicOperation((DMSImpl)dms,
+					ind[i], o);
+				if(op != null) {
+					ops.add(op);
+					continue;
+				}
+			}
+			System.err.println("NTCIP: sendIndications aborted");
+			return;
+		}
+		for(OpDMS op: ops)
+			op.start();
+	}
+
+	/** Create an operation to set an indication on a DMS */
+	protected OpDMS createGraphicOperation(DMSImpl dms, int ind, User o) {
+		String ms = createIndicationMulti(ind);
+		if(ms != null) {
+			try {
+				SignMessage sm = dms.createMessage(ms,
+					DMSMessagePriority.OPERATOR, null);
+				return new OpSendDMSMessage(dms, sm, o);
+			}
+			catch(SonarException e) {
+				e.printStackTrace();
+			}
+		}
+		return null;
+	}
+
+	/** Create a MULTI string for a lane use indication */
+	protected String createIndicationMulti(final int ind) {
+		Collection<Integer> g_pages = getIndicationGraphics(ind);
+		if(g_pages.isEmpty()) {
+			System.err.println("NTCIP: no graphic for indication");
+			return null;
+		}
+		MultiString ms = new MultiString();
+		for(Integer g_num: g_pages) {
+			if(ms.toString().equals(""))
+				ms.addPage();
+			ms.addGraphic(g_num);
+		}
+		return ms.toString();
+	}
+
+	/** Get a collection of graphic numbers, one for each page of an
+	 * indication */
+	protected Collection<Integer> getIndicationGraphics(final int ind) {
+		final TreeMap<Integer, Integer> g_pages =
+			new TreeMap<Integer, Integer>();
+		LaneUseGraphicHelper.find(new Checker<LaneUseGraphic>() {
+			public boolean check(LaneUseGraphic g) {
+				if(g.getIndication() == ind)
+					g_pages.put(g.getPage(),g.getGNumber());
+				return false;
+			}
+		});
+		return g_pages.values();
 	}
 }

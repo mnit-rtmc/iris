@@ -290,6 +290,7 @@ public class MultiString {
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
+		// FIXME: also test for graphics
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
 				int l, JustificationLine jl, int f, String t)
@@ -381,9 +382,9 @@ public class MultiString {
 	}
 
 	/** Parse the MULTI string. The addSpan and addTag methods
-	 *  are called for each span and tag that are found.
+	 * are called for each span and tag that are found.
 	 * @param cb Normalization callback. */
-	public void parseNormalize(NormalizeCallback cb) {
+	protected void parseNormalize(NormalizeCallback cb) {
 		Matcher m = TAG.matcher(b);
 		for(String span: TAG.split(b)) {
 			if(span.length() > 0)
