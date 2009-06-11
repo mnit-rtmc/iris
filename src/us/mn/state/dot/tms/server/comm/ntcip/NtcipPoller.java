@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.LaneUseGraphic;
 import us.mn.state.dot.tms.LaneUseGraphicHelper;
@@ -188,8 +189,8 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
 	/** Create an operation to set an indication on a DMS */
 	protected OpDMS createGraphicOperation(DMSImpl dms, int ind, User o) {
-		String ms = createIndicationMulti(ind);
-		if(ms != null) {
+		String ms = createIndicationMulti(dms, ind);
+		if(ms != null && ms.length() > 0) {
 			try {
 				SignMessage sm = dms.createMessage(ms,
 					DMSMessagePriority.OPERATOR, null);
@@ -203,15 +204,28 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	protected String createIndicationMulti(int ind) {
+	protected String createIndicationMulti(DMS dms, int ind) {
 		MultiString ms = new MultiString();
 		for(LaneUseGraphic g:
 			LaneUseGraphicHelper.getIndicationGraphics(ind))
 		{
 			if(ms.toString().length() > 0)
 				ms.addPage();
-			ms.addGraphic(g.getGNumber());
+			int x = calculateGraphicX(dms, g.getGraphic());
+			int y = caluclateGraphicY(dms, g.getGraphic());
+			if(x > 0 && y > 0)
+				ms.addGraphic(g.getGNumber(), x, y);
 		}
 		return ms.toString();
+	}
+
+	/** Calculate the X position of a graphic */
+	static protected int calculateGraphicX(DMS dms, Graphic g) {
+		return 1 + (dms.getWidthPixels() - g.getWidth()) / 2;
+	}
+
+	/** Calculate the Y position of a graphic */
+	static protected int caluclateGraphicY(DMS dms, Graphic g) {
+		return 1 + (dms.getHeightPixels() - g.getHeight()) / 2;
 	}
 }
