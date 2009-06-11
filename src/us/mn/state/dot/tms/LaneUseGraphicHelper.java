@@ -62,9 +62,9 @@ public class LaneUseGraphicHelper extends BaseHelper {
 		final TreeMap<Integer, LaneUseGraphic> g_pages =
 			new TreeMap<Integer, LaneUseGraphic>();
 		find(new Checker<LaneUseGraphic>() {
-			public boolean check(LaneUseGraphic g) {
-				if(g.getIndication() == ind)
-					g_pages.put(g.getPage(), g);
+			public boolean check(LaneUseGraphic lug) {
+				if(lug.getIndication() == ind)
+					g_pages.put(lug.getPage(), lug);
 				return false;
 			}
 		});
