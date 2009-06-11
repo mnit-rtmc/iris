@@ -180,10 +180,8 @@ public class MultiString {
 	 * @param f_num Default font number, one based.
 	 * @return An array of font numbers for each page of the message. */
 	public int[] getFonts(int f_num) {
-		if(f_num < 1 || f_num > 255) {
-			assert false;
+		if(f_num < 1 || f_num > 255)
 			return new int[0];
-		}
 		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
@@ -198,7 +196,7 @@ public class MultiString {
 			return new int[0];
 		}
 		int[] ret = new int[np];
-		for(int i = 0; i<np; ++i) {
+		for(int i = 0; i < np; ++i) {
 			if(i >= al.size())
 				ret[i] = f_num;
 			else
