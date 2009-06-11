@@ -27,6 +27,20 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class MultiString {
 
+	/* FIXME: add support for page time [ptxoy] tag */
+
+	/** Regular expression to match supported MULTI tags */
+	static protected final Pattern TAG = Pattern.compile(
+		"\\[(nl|np|jl|jp|fo|tt|g)([A-Za-z,0-9]*)\\]");
+
+	/** Regular expression to match text between MULTI tags */
+	static protected final Pattern TEXT_PATTERN = Pattern.compile(
+		"[ !#$%&()*+,-./0-9:;<=>?@A-Z]*");
+
+	/** Regular expression to match travel time tag */
+	static protected final Pattern TRAVEL_TAG = Pattern.compile(
+		"(.*?)\\[tt([A-Za-z0-9]+)\\]");
+
 	/** New line MULTI tag */
 	static public final String NEWLINE = "[nl]";
 
@@ -79,32 +93,31 @@ public class MultiString {
 		}
 	}
 
-	/** Parse a font number 
-	 *  @param f String that is an integer.
-	 *  @return The argument f converted to a string.
-	 */
+	/** Parse a font number from an [fox] or [fox,cccc] tag.
+	 * @param f Font tag value (x or x,cccc from [fox] or [fox,cccc] tag).
+	 * @return Font number contained in the tag. */
 	static protected int parseFont(String f) {
+		String[] args = f.split(",", 2);
 		try {
-			return Integer.parseInt(f);
+			return Integer.parseInt(args[0]);
 		}
 		catch(NumberFormatException e) {
 			return 1;
 		}
 	}
 
-	/* FIXME: add support for page time [ptxoy] tag */
-
-	/** Regular expression to match supported MULTI tags */
-	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|jp|fo|tt)([A-Za-z0-9]*)\\]");
-
-	/** Regular expression to match text between MULTI tags */
-	static protected final Pattern TEXT_PATTERN = Pattern.compile(
-		"[ !#$%&()*+,-./0-9:;<=>?@A-Z]*");
-
-	/** Regular expression to match travel time tag */
-	static protected final Pattern TRAVEL_TAG = Pattern.compile(
-		"(.*?)\\[tt([A-Za-z0-9]+)\\]");
+	/** Parse a graphic number from a [gn] or [gn,x,y] or [gn,x,y,cccc] tag.
+	 * @param g Graphic tag value (n or n,x,y or n,x,y,cccc from tag).
+	 * @return Graphic number contained in the tag. */
+	static protected int parseGraphic(String g) {
+		String[] args = g.split(",", 3);
+		try {
+			return Integer.parseInt(args[0]);
+		}
+		catch(NumberFormatException e) {
+			return 1;
+		}
+	}
 
 	/** MULTI string buffer */
 	protected final StringBuilder b = new StringBuilder();
@@ -169,10 +182,28 @@ public class MultiString {
 		trailing = false;
 	}
 
+	/** Add a graphic */
+	public void addGraphic(int g_num) {
+		b.append("[g");
+		b.append(g_num);
+		b.append("]");
+	}
+
+	/** Add a graphic at the specified position */
+	public void addGraphic(int g_num, int x, int y) {
+		b.append("[g");
+		b.append(g_num);
+		b.append(',');
+		b.append(x);
+		b.append(',');
+		b.append(y);
+		b.append("]");
+	}
+
 	/** Set a new font number */
-	public void setFont(int f) {
+	public void setFont(int f_num) {
 		b.append("[fo");
-		b.append(f);
+		b.append(f_num);
 		b.append("]");
 	}
 
@@ -247,6 +278,10 @@ public class MultiString {
 				} else if(tag.equals("fo")) {
 					String v = m.group(2);
 					f_num = parseFont(v);
+				} else if(tag.equals("g")) {
+					String v = m.group(2);
+					int g_num = parseGraphic(v);
+					// FIXME: add a graphic to the callback
 				}
 			}
 		}
