@@ -14,8 +14,10 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 
 /**
@@ -49,5 +51,23 @@ public class LaneUseGraphicHelper extends BaseHelper {
 			}
 		});
 		return map;
+	}
+
+	/** Get a collection of lane-use graphics for a given indication.
+	 * @param ind LaneUseIndication ordinal value.
+	 * @return A collection of lane-use graphics, sorted by page number. */
+	static public Collection<LaneUseGraphic> getIndicationGraphics(
+		final int ind)
+	{
+		final TreeMap<Integer, LaneUseGraphic> g_pages =
+			new TreeMap<Integer, LaneUseGraphic>();
+		find(new Checker<LaneUseGraphic>() {
+			public boolean check(LaneUseGraphic g) {
+				if(g.getIndication() == ind)
+					g_pages.put(g.getPage(), g);
+				return false;
+			}
+		});
+		return g_pages.values();
 	}
 }

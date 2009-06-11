@@ -15,10 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.EOFException;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -205,33 +203,15 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	protected String createIndicationMulti(final int ind) {
-		Collection<Integer> g_pages = getIndicationGraphics(ind);
-		if(g_pages.isEmpty()) {
-			System.err.println("NTCIP: no graphic for indication");
-			return null;
-		}
+	protected String createIndicationMulti(int ind) {
 		MultiString ms = new MultiString();
-		for(Integer g_num: g_pages) {
+		for(LaneUseGraphic g:
+			LaneUseGraphicHelper.getIndicationGraphics(ind))
+		{
 			if(ms.toString().length() > 0)
 				ms.addPage();
-			ms.addGraphic(g_num);
+			ms.addGraphic(g.getGNumber());
 		}
 		return ms.toString();
-	}
-
-	/** Get a collection of graphic numbers, one for each page of an
-	 * indication */
-	protected Collection<Integer> getIndicationGraphics(final int ind) {
-		final TreeMap<Integer, Integer> g_pages =
-			new TreeMap<Integer, Integer>();
-		LaneUseGraphicHelper.find(new Checker<LaneUseGraphic>() {
-			public boolean check(LaneUseGraphic g) {
-				if(g.getIndication() == ind)
-					g_pages.put(g.getPage(),g.getGNumber());
-				return false;
-			}
-		});
-		return g_pages.values();
 	}
 }
