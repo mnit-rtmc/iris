@@ -31,7 +31,7 @@ public class MultiString {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|jp|fo|tt|g)([A-Za-z,0-9]*)\\]");
+		"\\[(nl|np|jl|jp|fo|tt|g|cf)([A-Za-z,0-9]*)\\]");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -204,6 +204,17 @@ public class MultiString {
 	public void setFont(int f_num) {
 		b.append("[fo");
 		b.append(f_num);
+		b.append("]");
+	}
+
+	/** Set the color foreground */
+	public void setColorForeground(int red, int green, int blue) {
+		b.append("[cf");
+		b.append(red);
+		b.append(',');
+		b.append(green);
+		b.append(',');
+		b.append(blue);
 		b.append("]");
 	}
 

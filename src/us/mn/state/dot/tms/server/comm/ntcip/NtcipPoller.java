@@ -209,12 +209,14 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		for(LaneUseGraphic g:
 			LaneUseGraphicHelper.getIndicationGraphics(ind))
 		{
-			if(ms.toString().length() > 0)
-				ms.addPage();
 			int x = calculateGraphicX(dms, g.getGraphic());
 			int y = caluclateGraphicY(dms, g.getGraphic());
-			if(x > 0 && y > 0)
+			if(x > 0 && y > 0) {
+				if(ms.toString().length() > 0)
+					ms.addPage();
+				ms.setColorForeground(255, 16, 16);
 				ms.addGraphic(g.getGNumber(), x, y);
+			}
 		}
 		return ms.toString();
 	}
