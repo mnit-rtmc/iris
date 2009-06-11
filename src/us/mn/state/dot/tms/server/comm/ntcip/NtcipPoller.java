@@ -213,7 +213,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		}
 		MultiString ms = new MultiString();
 		for(Integer g_num: g_pages) {
-			if(ms.toString().equals(""))
+			if(ms.toString().length() > 0)
 				ms.addPage();
 			ms.addGraphic(g_num);
 		}
