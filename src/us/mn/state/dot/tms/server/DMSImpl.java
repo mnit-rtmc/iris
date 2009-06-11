@@ -1476,7 +1476,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		desc.append(Kml.descItem("Author", owner));
 
 		desc.append(Kml.descItem("Font", SString.toString(
-			SignMessageHelper.getFontName(sm, 1))));
+			SignMessageHelper.getFontNames(sm, 1))));
 
 		desc.append(Kml.descItem("Notes", getNotes()));
 		desc.append(Kml.descItem("Last Operation", getUserNote()));

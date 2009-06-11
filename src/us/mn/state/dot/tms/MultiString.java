@@ -176,12 +176,11 @@ public class MultiString {
 		b.append("]");
 	}
 
-	/** get an array of fonts
+	/** Get an array of font numbers.
 	 * @param f_num Default font number, one based.
-	 * @return An integer array with length equal to the number 
-	 *	    of pages in the message */
-	public int[] getFont(int f_num) {
-		if(f_num<1 || f_num>255) {
+	 * @return An array of font numbers for each page of the message. */
+	public int[] getFonts(int f_num) {
+		if(f_num < 1 || f_num > 255) {
 			assert false;
 			return new int[0];
 		}
@@ -364,21 +363,22 @@ public class MultiString {
 	}
 
 	/** 
-	  * This is a hack. It is used by the ComboBoxEditor and 
-	  * SignMessageModel to recognize when a sign message line
-	  * should be ignored. By convention, a line begining and
-	  * ending with an underscore is to be ignored. IRIS assumes
-	  * that non-blank DMS messages have both a bitmap and multistring,
-	  * which is not the case for D10, so a bogus multistring is created
-	  * in comm/dmslite (with a prepended and appended underscore). 
-	  */
-	public static boolean ignoreLineHack(String line) {
+	 * This is a hack. It is used by the ComboBoxEditor and 
+	 * SignMessageModel to recognize when a sign message line
+	 * should be ignored. By convention, a line begining and
+	 * ending with an underscore is to be ignored. IRIS assumes
+	 * that non-blank DMS messages have both a bitmap and multistring,
+	 * which is not the case for D10, so a bogus multistring is created
+	 * in comm/dmslite (with a prepended and appended underscore). 
+	 */
+	static public boolean ignoreLineHack(String line) {
 		if(line == null)
 			return false;
-		return SString.enclosedBy(line,"_");
+		return SString.enclosedBy(line, "_");
 	}
+
 	// see the above note
-	public static String flagIgnoredSignLineHack(String line) {
-		return "_"+line+"_";
+	static public String flagIgnoredSignLineHack(String line) {
+		return "_" + line + "_";
 	}
 }

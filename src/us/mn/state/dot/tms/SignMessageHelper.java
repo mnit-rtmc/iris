@@ -31,25 +31,12 @@ public class SignMessageHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Return an array of font numbers in a message.
-	 * @param f_num Default font number, one based.
-	 * @return An integer array with length equal to the number 
-	 *	    of pages in the message */
-	static public int[] getFont(SignMessage sm, int f_num) {
-		if(sm == null)
-			return new int[0];
-		MultiString m = new MultiString(sm.getMulti());
-		if(m == null)
-			return new int[0];
-		return m.getFont(f_num);
-	}
-
 	/** Return an array of font names in a message.
 	 * @param f_num Default font number, one based.
 	 * @return A string array with length equal to the number 
 	 *	    of pages in the message */
-	static public String[] getFontName(SignMessage sm, int f_num) {
-		int[] fn = getFont(sm, f_num);
+	static public String[] getFontNames(SignMessage sm, int f_num) {
+		int[] fn = getFonts(sm, f_num);
 		if(fn == null || fn.length <= 0)
 			return new String[0];
 		String[] fns = new String[fn.length];
@@ -61,6 +48,18 @@ public class SignMessageHelper extends BaseHelper {
 				fns[i] = "Font #" + fn[i];
 		}
 		return fns;
+	}
+
+	/** Get an array of font numbers in a message.
+	 * @param f_num Default font number, one based.
+	 * @return An array of font numbers for each page of the message. */
+	static protected int[] getFonts(SignMessage sm, int f_num) {
+		if(sm == null)
+			return new int[0];
+		MultiString m = new MultiString(sm.getMulti());
+		if(m == null)
+			return new int[0];
+		return m.getFonts(f_num);
 	}
 
 	/** Create an array of lines from the given message */
@@ -126,7 +125,7 @@ public class SignMessageHelper extends BaseHelper {
 		String[] ml = createLines(sm);
 		if(ml != null && ml.length > 0) {
 			out.print("<" + SignMessage.SONAR_TYPE + " ");
-			String[] fonts = getFontName(sm, 1);
+			String[] fonts = getFontNames(sm, 1);
 			if(fonts.length > 0) {
 				String f = SString.toString(fonts);
 				out.print("font='" + f + "' ");
