@@ -1199,6 +1199,21 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
+	/** Create an message for the sign */
+	public SignMessage createMessage(String m) {
+		MultiString ms = new MultiString(m);
+		if(ms.isBlank())
+			return createBlankMessage();
+		try {
+			return createMessage(m, DMSMessagePriority.OPERATOR,
+				null);
+		}
+		catch(SonarException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	/** Create a message for the sign */
 	public SignMessage createMessage(String m, DMSMessagePriority p,
 		Integer d) throws SonarException

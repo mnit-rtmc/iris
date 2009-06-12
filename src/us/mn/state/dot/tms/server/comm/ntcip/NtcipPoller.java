@@ -23,11 +23,11 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.LaneUseGraphic;
 import us.mn.state.dot.tms.LaneUseGraphicHelper;
+import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.MultiString;
@@ -114,13 +114,18 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Send a new message to the sign */
-	public void sendMessage(DMSImpl dms, SignMessage m, User o)
+	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
-		if(shouldSetTimeRemaining(dms, m))
-			new OpUpdateDMSDuration(dms, m, o).start();
+		createOperation(dms, sm, o).start();
+	}
+
+	/** Create a DMS operation */
+	protected OpDMS createOperation(DMSImpl dms, SignMessage sm, User o) {
+		if(shouldSetTimeRemaining(dms, sm))
+			return new OpUpdateDMSDuration(dms, sm, o);
 		else
-			new OpSendDMSMessage(dms, m, o).start();
+			return new OpSendDMSMessage(dms, sm, o);
 	}
 
 	/** Check if we should just set the message time remaining */
@@ -190,15 +195,10 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	/** Create an operation to set an indication on a DMS */
 	protected OpDMS createGraphicOperation(DMSImpl dms, int ind, User o) {
 		String ms = createIndicationMulti(dms, ind);
-		if(ms != null && ms.length() > 0) {
-			try {
-				SignMessage sm = dms.createMessage(ms,
-					DMSMessagePriority.OPERATOR, null);
-				return new OpSendDMSMessage(dms, sm, o);
-			}
-			catch(SonarException e) {
-				e.printStackTrace();
-			}
+		if(ms != null) {
+			SignMessage sm = dms.createMessage(ms);
+			if(sm != null)
+				return createOperation(dms, sm, o);
 		}
 		return null;
 	}
@@ -214,11 +214,16 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 			if(x > 0 && y > 0) {
 				if(ms.toString().length() > 0)
 					ms.addPage();
-				ms.setColorForeground(255, 16, 16);
+				ms.setColorForeground(255, 0, 0);
 				ms.addGraphic(g.getGNumber(), x, y);
 			}
 		}
-		return ms.toString();
+		String m = ms.toString();
+		if(m.length() > 0 ||
+		   LaneUseIndication.fromOrdinal(ind) == LaneUseIndication.DARK)
+			return m;
+		else
+			return null;
 	}
 
 	/** Calculate the X position of a graphic */
