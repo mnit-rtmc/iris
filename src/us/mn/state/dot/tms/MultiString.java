@@ -31,7 +31,7 @@ public class MultiString {
 
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|jp|fo|tt|g|cf)([A-Za-z,0-9]*)\\]");
+		"\\[(nl|np|jl|jp|fo|g|cf|tt)([A-Za-z,0-9]*)\\]");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -271,33 +271,38 @@ public class MultiString {
 		int line = 0;
 		JustificationLine justl = JustificationLine.fromOrdinal(
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+		int offset = 0;
 		Matcher m = TAG.matcher(b);
-		for(String span: TAG.split(b)) {
-			if(span.length() > 0)
+		while(m.find()) {
+			if(m.start() > offset) {
+				String span = b.substring(offset, m.start());
 				cb.addSpan(page, justp, line, justl,f_num,span);
-			if(m.find()) {
-				String tag = m.group(1);
-				if(tag.equals("nl"))
-					line++;
-				else if(tag.equals("np")) {
-					line = 0;
-					page++;
-				} else if(tag.equals("jl")) {
-					String v = m.group(2);
-					justl = JustificationLine.parse(v);
-				} else if(tag.equals("jp")) {
-					String v = m.group(2);
-					justp = JustificationPage.parse(v);
-				} else if(tag.equals("fo")) {
-					String v = m.group(2);
-					f_num = parseFont(v);
-				} else if(tag.equals("g")) {
-					String v = m.group(2);
-					int g_num = parseGraphic(v);
-					// FIXME: fix x and y
-					cb.addGraphic(g_num, 1, 1);
-				}
 			}
+			String tag = m.group(1);
+			if(tag.equals("nl"))
+				line++;
+			else if(tag.equals("np")) {
+				line = 0;
+				page++;
+			} else if(tag.equals("jl")) {
+				String v = m.group(2);
+				justl = JustificationLine.parse(v);
+			} else if(tag.equals("jp")) {
+				String v = m.group(2);
+				justp = JustificationPage.parse(v);
+			} else if(tag.equals("fo")) {
+				String v = m.group(2);
+				f_num = parseFont(v);
+			} else if(tag.equals("g")) {
+				String v = m.group(2);
+				int g_num = parseGraphic(v);
+				// FIXME: fix x and y
+				cb.addGraphic(g_num, 1, 1);
+			}
+		}
+		if(offset < b.length()) {
+			String span = b.substring(offset);
+			cb.addSpan(page, justp, line, justl, f_num, span);
 		}
 	}
 
