@@ -93,6 +93,12 @@ public class OpSendLCSIndications extends OpLCS {
 
 		/** Wait for operations to complete */
 		protected Phase poll(AddressedMessage mess) {
+			try {
+				Thread.sleep(200);
+			}
+			catch(InterruptedException e) {
+				// Ignore
+			}
 			OpDMS op = ops.peekFirst();
 			if(op == null)
 				return null;
@@ -105,12 +111,6 @@ public class OpSendLCSIndications extends OpLCS {
 						"giving up");
 					success = false;
 					return null;
-				}
-				try {
-					Thread.sleep(100);
-				}
-				catch(InterruptedException e) {
-					// Ignore
 				}
 			}
 			return this;
