@@ -15,22 +15,15 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.EOFException;
-import java.util.LinkedList;
 import java.util.Map;
-import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.LaneUseGraphic;
 import us.mn.state.dot.tms.LaneUseGraphicHelper;
-import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -48,6 +41,29 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  */
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
+
+	/** Create an operation to send a DMS message */
+	static public OpDMS createOperation(DMSImpl dms, SignMessage sm,
+		User o)
+	{
+		if(shouldSetTimeRemaining(dms, sm))
+			return new OpUpdateDMSDuration(dms, sm, o);
+		else
+			return new OpSendDMSMessage(dms, sm, o);
+	}
+
+	/** Check if we should just set the message time remaining */
+	static protected boolean shouldSetTimeRemaining(DMSImpl dms,
+		SignMessage m)
+	{
+		return SignMessageHelper.isDurationZero(m) ||
+		       isMessageDeployed(dms, m);
+	}
+
+	/** Check if the message is already deployed on the sign */
+	static protected boolean isMessageDeployed(DMSImpl dms, SignMessage m) {
+		return m.getMulti().equals(dms.getMessageCurrent().getMulti());
+	}
 
 	/** SNMP message protocol */
 	protected final SNMP snmp = new SNMP();
@@ -120,25 +136,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		createOperation(dms, sm, o).start();
 	}
 
-	/** Create a DMS operation */
-	protected OpDMS createOperation(DMSImpl dms, SignMessage sm, User o) {
-		if(shouldSetTimeRemaining(dms, sm))
-			return new OpUpdateDMSDuration(dms, sm, o);
-		else
-			return new OpSendDMSMessage(dms, sm, o);
-	}
-
-	/** Check if we should just set the message time remaining */
-	protected boolean shouldSetTimeRemaining(DMSImpl dms, SignMessage m) {
-		return SignMessageHelper.isDurationZero(m) ||
-		       isMessageDeployed(dms, m);
-	}
-
-	/** Check if the message is already deployed on the sign */
-	protected boolean isMessageDeployed(DMSImpl dms, SignMessage m) {
-		return m.getMulti().equals(dms.getMessageCurrent().getMulti());
-	}
-
 	/** Send a device request message to an LCS array */
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
@@ -169,70 +166,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		LinkedList<OpDMS> ops = new LinkedList<OpDMS>();
-		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		if(lcss.length != ind.length) {
-			System.err.println("NTCIP: LCS array length invalid");
-			return;
-		}
-		for(int i = 0; i < lcss.length; i++) {
-			DMS dms = DMSHelper.lookup(lcss[i].getName());
-			if(dms instanceof DMSImpl) {
-				OpDMS op = createGraphicOperation((DMSImpl)dms,
-					ind[i], o);
-				if(op != null) {
-					ops.add(op);
-					continue;
-				}
-			}
-			System.err.println("NTCIP: sendIndications aborted");
-			return;
-		}
-		for(OpDMS op: ops)
-			op.start();
-	}
-
-	/** Create an operation to set an indication on a DMS */
-	protected OpDMS createGraphicOperation(DMSImpl dms, int ind, User o) {
-		String ms = createIndicationMulti(dms, ind);
-		if(ms != null) {
-			SignMessage sm = dms.createMessage(ms);
-			if(sm != null)
-				return createOperation(dms, sm, o);
-		}
-		return null;
-	}
-
-	/** Create a MULTI string for a lane use indication */
-	protected String createIndicationMulti(DMS dms, int ind) {
-		MultiString ms = new MultiString();
-		for(LaneUseGraphic g:
-			LaneUseGraphicHelper.getIndicationGraphics(ind))
-		{
-			int x = calculateGraphicX(dms, g.getGraphic());
-			int y = caluclateGraphicY(dms, g.getGraphic());
-			if(x > 0 && y > 0) {
-				if(ms.toString().length() > 0)
-					ms.addPage();
-				ms.setColorForeground(255, 0, 0);
-				ms.addGraphic(g.getGNumber(), x, y);
-			}
-		}
-		String m = ms.toString();
-		if(m.length() > 0 ||
-		   LaneUseIndication.fromOrdinal(ind) == LaneUseIndication.DARK)
-			return m;
-		else
-			return null;
-	}
-
-	/** Calculate the X position of a graphic */
-	static protected int calculateGraphicX(DMS dms, Graphic g) {
-		return 1 + (dms.getWidthPixels() - g.getWidth()) / 2;
-	}
-
-	/** Calculate the Y position of a graphic */
-	static protected int caluclateGraphicY(DMS dms, Graphic g) {
-		return 1 + (dms.getHeightPixels() - g.getHeight()) / 2;
+		new OpSendLCSIndications(lcs_array, ind, o).start();
 	}
 }
