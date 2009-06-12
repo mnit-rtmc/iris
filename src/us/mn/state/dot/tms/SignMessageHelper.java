@@ -84,6 +84,7 @@ public class SignMessageHelper extends BaseHelper {
 				String v = ls.get(i);
 				ls.set(i, SString.trimJoin(v, t));
 			}
+			public void addGraphic(int g_num, int x, int y) { }
 		}, 1);
 		return ls.toArray(new String[0]);
 	}

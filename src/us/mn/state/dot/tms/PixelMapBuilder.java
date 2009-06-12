@@ -238,6 +238,11 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 		n_pages = Math.max(page + 1, n_pages);
 	}
 
+	/** Add a graphic */
+	public void addGraphic(int g_num, int x, int y) {
+		// FIXME
+	}
+
 	/** Get a font with the given font number */
 	protected Font getFont(final int f_num) {
 		return (Font)namespace.findObject(Font.SONAR_TYPE,

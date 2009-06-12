@@ -231,6 +231,7 @@ public class MultiString {
 			{
 				al.add(new Integer(f));
 			}
+			public void addGraphic(int g_num, int x, int y) { }
 		}, f_num);
 		int np = getNumPages();
 		if(np > al.size()) {
@@ -257,6 +258,7 @@ public class MultiString {
 		void addSpan(int page, JustificationPage justp, 
 			int line, JustificationLine justl,
 			int f_num, String span);
+		void addGraphic(int g_num, int x, int y);
 	}
 
 	/** Parse the MULTI string 
@@ -292,7 +294,8 @@ public class MultiString {
 				} else if(tag.equals("g")) {
 					String v = m.group(2);
 					int g_num = parseGraphic(v);
-					// FIXME: add a graphic to the callback
+					// FIXME: fix x and y
+					cb.addGraphic(g_num, 1, 1);
 				}
 			}
 		}
@@ -301,12 +304,14 @@ public class MultiString {
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
-		// FIXME: also test for graphics
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
 				int l, JustificationLine jl, int f, String t)
 			{
 				_b.append(t);
+			}
+			public void addGraphic(int g_num, int x, int y) {
+				_b.append("GRAPHIC");
 			}
 		}, 1);
 		return _b.toString().trim().equals("");
@@ -320,6 +325,7 @@ public class MultiString {
 		{
 			num_pages = Math.max(p + 1, num_pages);
 		}
+		public void addGraphic(int g_num, int x, int y) { }
 	}
 
 	/** Get the number of pages in the multistring */
@@ -337,6 +343,7 @@ public class MultiString {
 		{
 			num_pages = Math.max(p + 1, num_pages);
 		}
+		public void addGraphic(int g_num, int x, int y) { }
 	}
 
 	/** Travel time calculating callback interface */
