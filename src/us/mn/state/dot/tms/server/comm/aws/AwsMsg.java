@@ -133,8 +133,7 @@ public class AwsMsg {
 			appendAwsReport(m_textlines);
 
 			// #12, on time: 0.0
-			m_pgontime = new DmsPgTime(SString.
-				stringToDouble(tok.nextToken()));
+			m_pgontime = createPgOnTime(tok.nextToken());
 
 			// #13, ignore this field, follows last semicolon if
 			//      there are 13 tokens.
@@ -150,6 +149,17 @@ public class AwsMsg {
 		}
 
 		this.setValid(ok);
+	}
+
+	/** Return the page on-time. If zero is read, the system 
+	 *  default is returned. */
+	protected DmsPgTime createPgOnTime(String pont) {
+		if(pont == null || pont.isEmpty() || 
+			SString.stringToDouble(pont) <= 0)
+		{
+			return DmsPgTime.getDefaultOn();
+		}
+		return new DmsPgTime((double)SString.stringToDouble(pont));
 	}
 
 	/** Return a MULTI string representation of the AWS message. */
