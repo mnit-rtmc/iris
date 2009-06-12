@@ -123,9 +123,9 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			break;
 		default:
 			// Ignore other requests
-			Log.warning("DmsLitePoller: "+
-				"unknown request in sendRequest(). "+
-				"r="+r+", desc="+r.description);
+			Log.finest("DmsLitePoller: ignored other request "+
+				"in sendRequest(). r=" + r + ", desc=" + 
+				r.description);
 			break;
 		}
 	}

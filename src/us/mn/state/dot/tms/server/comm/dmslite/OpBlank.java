@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Operation to blank the DMS.
@@ -29,13 +30,13 @@ import us.mn.state.dot.tms.utils.Log;
  */
 public class OpBlank extends OpDms
 {
-	/** blank message, which contains owner, duration */
-	private final SignMessage m_mess;
+	/** blank message, which contains owner, duration, priority */
+	private final SignMessage m_sm;
 
 	/** Create a new DMS query configuration object */
 	public OpBlank(DMSImpl d, SignMessage mess, User u) {
 		super(DOWNLOAD, d, "Blanking the CMS", u);
-		m_mess = mess;
+		m_sm = mess;
 	}
 
 	/** Create the first phase of the operation */
@@ -65,15 +66,15 @@ public class OpBlank extends OpDms
 			throws IOException {
 
 			Log.finest(
-			    "dmslite.OpBlank.PhaseGetConfig.poll(msg) called. m_mess.duration="
-			    + m_mess.getDuration());
+			    "dmslite.OpBlank.PhaseGetConfig.poll(msg) called. m_sm.duration="
+			    + m_sm.getDuration());
 			assert argmess instanceof Message :
 			       "wrong message type";
 
 			Message mess = (Message) argmess;
 
 			// sanity check
-			if(m_mess.getDuration() > 0) {
+			if(m_sm.getDuration() > 0) {
 				Log.severe("Bogus duration received in OpBlank.PhaseSetBlank().");
 				return null;
 			}
@@ -81,7 +82,13 @@ public class OpBlank extends OpDms
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
 
-			// build message: <DmsLite><SetBlankMsgReqMsg><Id></Id><Address>1</Address><Owner>bob</Owner></SetBlankMsgReqMsg></DmsLite>
+			// build message: 
+			// <DmsLite><SetBlankMsgReqMsg>
+			//	<Id></Id>
+			//	<Address>1</Address>
+			//	<Priority>3</Priority>
+			//	<Owner>bob</Owner>
+			// </SetBlankMsgReqMsg></DmsLite>
 
 			// build req msg
 			String reqname = "SetBlankMsgReqMsg";
@@ -93,25 +100,32 @@ public class OpBlank extends OpDms
 
 			// id
 			ReqRes rr0 = new ReqRes("Id", generateId(),
-						new String[] { "Id" });
+				new String[] { "Id" });
 			mess.add(rr0);
 
 			// drop
-			String drop = Integer.toString(controller.getDrop());
+			String drop = SString.intToString(controller.getDrop());
 			ReqRes rr1 = new ReqRes("Address", drop,
-						new String[] { "IsValid",
-				"ErrMsg" });
+				new String[] { "IsValid", "ErrMsg" });
 			mess.add(rr1);
+
+			// priority
+			String pri = SString.intToString(m_sm.getPriority());
+			ReqRes rr2 = new ReqRes("Priority", pri, new String[0]);
+			mess.add(rr2);
 
 			// owner
 			String user = m_user != null ? m_user.getName() : "";
-			ReqRes rr2 = new ReqRes("Owner", user, new String[0]);
-			mess.add(rr2);
+			ReqRes rr3 = new ReqRes("Owner", user, new String[0]);
+			mess.add(rr3);
 
 			// send msg
 			mess.getRequest();    // throws IOException
 
-			// response: <DmsLite><SetBlankMsgRespMsg><Id></Id><IsValid>true</IsValid><ErrMsg></ErrMsg></SetBlankMsgRespMsg></DmsLite>
+			// response: 
+			// <DmsLite><SetBlankMsgRespMsg>
+			//	<Id></Id><IsValid>true</IsValid><ErrMsg></ErrMsg>
+			// </SetBlankMsgRespMsg></DmsLite>
 
 			// parse resp msg
 			long id = 0;
@@ -147,7 +161,7 @@ public class OpBlank extends OpDms
 
 			// update dms
 			if(valid) {
-				m_dms.setMessageCurrent(m_mess, m_user);
+				m_dms.setMessageCurrent(m_sm, m_user);
 			} else {
 				Log.finest(
 					"OpBlank: response from SensorServer received, ignored because Xml valid field is false, errmsg="

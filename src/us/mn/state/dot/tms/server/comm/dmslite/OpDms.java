@@ -237,6 +237,13 @@ abstract public class OpDms extends OpDevice {
 		return DmsPgTime.getDefaultOn();
 	}
 
+	/** Set an error message. The field errStatus is defined in
+	 *  ControllerOperation and assigned to the controller in 
+	 *  ControllerOperation.cleanup(). */
+	protected void setErrorMsg(String msg) {
+		errorStatus = msg;
+	}
+
 	/** Phase to query the dms config, which is used by subclasses */
 	protected class PhaseGetConfig extends Phase
 	{
@@ -382,6 +389,7 @@ abstract public class OpDms extends OpDevice {
 			// set config values
 			// these values are displayed in the DMS dialog, Configuration tab
 			if(valid) {
+				setErrorMsg("");
 				m_dms.setModel(model);
 				m_dms.setSignAccess(signAccess);    // wizard, modem
 				m_dms.setMake(make);
@@ -410,9 +418,9 @@ abstract public class OpDms extends OpDevice {
 			// failure
 			} else {
 				Log.severe(
-					"PhaseGetConfig: response from SensorServer received, ignored because Xml valid field is false, errmsg="
-					+ errmsg);
-				errorStatus = errmsg;
+					"PhaseGetConfig: response from SensorServer received, " +
+					"ignored because Xml valid field is false, errmsg=" + errmsg);
+				setErrorMsg(errmsg);
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {

@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -45,12 +46,12 @@ public class OpMessage extends OpDms {
 	protected boolean modify = true;
 
 	/** Sign message */
-	protected final SignMessage m_signMessage;
+	protected final SignMessage m_sm;
 
 	/** Create a new DMS command message object */
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
 		super(COMMAND, d, "Sending new message", u);
-		m_signMessage = m;
+		m_sm = m;
 	}
 
 	/** 
@@ -58,7 +59,7 @@ public class OpMessage extends OpDms {
 	 * bitmap is adjusted as necessary.
 	 */
 	public String getBitmapPage(int pg) {
-		if(m_signMessage == null)
+		if(m_sm == null)
 			return "";
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)
@@ -83,7 +84,7 @@ public class OpMessage extends OpDms {
 	/** Get the sign message bitmaps */
 	protected byte[] getBitmaps() {
 		try {
-			return Base64.decode(m_signMessage.getBitmaps());
+			return Base64.decode(m_sm.getBitmaps());
 		}
 		catch(IOException e) {
 			return null;
@@ -116,7 +117,7 @@ public class OpMessage extends OpDms {
 	/** create 2nd phase */
 	private Phase createPhaseTwo()
 	{
-		if(!m_dms.checkPriority(m_signMessage.getPriority()))
+		if(!m_dms.checkPriority(m_sm.getPriority()))
 			return null;
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)
@@ -160,7 +161,7 @@ public class OpMessage extends OpDms {
 	 *  This method should not be called if duration is infinite.
 	 */
 	protected Calendar calcMsgOffTime(Calendar ontime) {
-		Integer mins = m_signMessage.getDuration();
+		Integer mins = m_sm.getDuration();
 		assert mins != null;
 		Calendar offtime = (Calendar)ontime.clone();
 		offtime.add(Calendar.MINUTE, mins);
@@ -207,6 +208,7 @@ public class OpMessage extends OpDms {
 			 *           <OnTime>...</OnTime>
 			 *           <UseOffTime>...</UseOffTime>
 		 	 *           <OffTime>...</OffTime>
+			 *           <Priority>...</Priority>
 			 *           <Owner>...</Owner>
 			 *           <Msg>...</Msg>
 			 *        </SetSnglPgReqMsg>
@@ -229,7 +231,7 @@ public class OpMessage extends OpDms {
 			mess.add(rr1);
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_signMessage.getMulti().toString()));
+			mess.add(new ReqRes("MsgText",m_sm.getMulti().toString()));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
@@ -239,12 +241,16 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime = m_signMessage.getDuration() !=null;
+			boolean useofftime = m_sm.getDuration() !=null;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
 			String offtime= (useofftime ? STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
 			mess.add(new ReqRes("OffTime",offtime));
+
+			// priority
+			String pri = SString.intToString(m_sm.getPriority());
+			mess.add(new ReqRes("Priority", pri, new String[0]));
 
 			// Owner
 			String owner = (m_user != null ? m_user.getName() : "");
@@ -292,14 +298,13 @@ public class OpMessage extends OpDms {
 
 				// parse rest of response
 				if (valid) {
-					// set new message
-					m_dms.setMessageCurrent(m_signMessage,
-						m_user);
+					setErrorMsg("");
+					m_dms.setMessageCurrent(m_sm, m_user);
 				} else {
 					Log.finest(
 					    "OpMessage: SensorServer response received, IsValid is false, errmsg="+
 					    errmsg+", id="+id);
-					errorStatus = errmsg;
+					setErrorMsg(errmsg);
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
@@ -362,6 +367,7 @@ public class OpMessage extends OpDms {
 			 *          <UseOffTime>...</UseOffTime>
 			 *          <OffTime>...</OffTime>
 			 *          <DisplayTimeMS>...<DisplayTimeMS>
+			 *          <Priority>...</Priority>
 			 *          <Owner>...</Owner>
 			 *          <Msg>...</Msg>
 			 *       </SetMultiplePageReqMsg>
@@ -389,7 +395,7 @@ public class OpMessage extends OpDms {
 			}
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_signMessage.getMulti()));
+			mess.add(new ReqRes("MsgText",m_sm.getMulti()));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
@@ -399,7 +405,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime = m_signMessage.getDuration() !=null;
+			boolean useofftime = m_sm.getDuration() !=null;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
@@ -407,8 +413,12 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// DisplayTimeMS: extract from 1st page of MULTI
-			DmsPgTime pt = determinePageOnTime(m_signMessage.getMulti());
+			DmsPgTime pt = determinePageOnTime(m_sm.getMulti());
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(pt.toMs()).toString()));
+
+			// priority
+			String pri = SString.intToString(m_sm.getPriority());
+			mess.add(new ReqRes("Priority", pri, new String[0]));
 
 			// Owner
 			String owner = (m_user != null ? m_user.getName() : "");
@@ -455,14 +465,13 @@ public class OpMessage extends OpDms {
 
 				// parse rest of response
 				if (valid) {
-					// set new message
-					m_dms.setMessageCurrent(
-						m_signMessage, m_user);
+					setErrorMsg("");
+					m_dms.setMessageCurrent(m_sm, m_user);
 				} else {
 					Log.finest(
 					    "OpMessage: response from SensorServer received, ignored because Xml valid field is false, errmsg="+
 					    errmsg+",id="+id);
-					errorStatus = errmsg;
+					setErrorMsg(errmsg);
 
 					// try again
 					if (flagFailureShouldRetry(errmsg)) {
