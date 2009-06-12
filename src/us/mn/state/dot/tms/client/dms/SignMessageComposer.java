@@ -267,8 +267,7 @@ public class SignMessageComposer extends JPanel {
 		disposeLines();
 		n_lines = nl;
 		n_pages = np;
-		boolean can_add = st_model != null &&
-			st_model.canAddLocalSignText();
+		boolean can_add = areEditable();
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i] = createLineCombo(can_add);
@@ -276,6 +275,15 @@ public class SignMessageComposer extends JPanel {
 			setTab(i, "p." + (i + 1), createPage(i));
 		while(n_pages < tab.getTabCount())
 			tab.removeTabAt(n_pages);
+	}
+
+	/** Determine if the message comboboxes are editable. */
+	protected boolean areEditable() {
+		// if attribute is true, then always editable
+		if(SystemAttrEnum.DMS_CBOXES_EDITABLE.getBoolean())
+			return true;
+		// otherwise, use rules
+		return st_model != null && st_model.canAddLocalSignText();
 	}
 
 	/** Create a line combo box */
