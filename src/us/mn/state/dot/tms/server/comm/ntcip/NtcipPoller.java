@@ -17,11 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -138,21 +134,11 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			sendLCSSettings(lcs_array);
+			new OpSendLCSSettings(lcs_array).start();
 			break;
 		default:
 			// Ignore other requests
 			break;
-		}
-	}
-
-	/** Send settings to an array of LCS devices */
-	protected void sendLCSSettings(LCSArrayImpl lcs_array) {
-		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		for(LCS lcs: lcss) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms instanceof DMSImpl)
-				new OpSendDMSGraphics((DMSImpl)dms).start();
 		}
 	}
 
