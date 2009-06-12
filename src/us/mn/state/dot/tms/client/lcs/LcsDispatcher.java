@@ -105,6 +105,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Currently logged in user */
 	protected final User user;
 
+	/** Currently watching LCS */
+	protected LCSArray watching;
+
 	/** Create a new LCS dispatcher */
 	public LcsDispatcher(LCSArrayManager manager, TmsConnection tc) {
 		super(new BorderLayout());
@@ -126,6 +129,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		indicationSelector.dispose();
+		if(watching != null) {
+			cache.ignoreObject(watching);
+			watching = null;
+		}
 		removeAll();
 	}
 
@@ -243,6 +250,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Set the selected LCS array */
 	public void setSelected(LCSArray lcs_array) {
+		if(watching != null)
+			cache.ignoreObject(watching);
+		watching = lcs_array;
+		cache.watchObject(watching);
 		indicationSelector.setEnabled(true);
 		indicationSelector.setLCSArray(lcs_array);
 		lcs_lock.setEnabled(true);
