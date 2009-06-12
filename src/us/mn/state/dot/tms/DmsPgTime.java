@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.utils.SString;
 public class DmsPgTime
 {
 	/** minimum, maximum, and increment for on-time */
-	public static final int MIN_ONTIME_TENTHS = 15;
-	public static final int MAX_ONTIME_TENTHS = 100;
+	public static final int MIN_ONTIME_TENTHS = 4;		// .4 secs
+	public static final int MAX_ONTIME_TENTHS = 101;	// 10.1 secs
 	public static final DmsPgTime MIN_ONTIME = 
 		new DmsPgTime(MIN_ONTIME_TENTHS);
 	public static final DmsPgTime MAX_ONTIME = 

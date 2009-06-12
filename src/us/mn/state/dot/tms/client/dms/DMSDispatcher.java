@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
@@ -55,7 +56,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of system attributes.
- * @see SignMessage, DMSPanelPager
+ * @see SignMessage, DMSPanelPager, SignMessageComposer
  *
  * @author Erik Engstrom
  * @author Douglas Lau
@@ -635,13 +636,32 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			clearCurrentPager();
 			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
-				bmaps);
+				bmaps, getPgOnTime(dms));
 			if(a == null) {
 				composer.setSign(dms, getLineCount(dms),
 					builder);
 			}
 			composer.setMessage();
 		}
+	}
+
+	/** Return the page on-time for the current message on the 
+	 *  specified DMS. */
+	protected DmsPgTime getPgOnTime(DMS dms) {
+		DmsPgTime ret = DmsPgTime.getDefaultOn();
+		if(dms == null)
+			return ret;
+		SignMessage sm = dms.getMessageCurrent();
+		if(sm == null)
+			return ret;
+		String m = sm.getMulti();
+		if(m == null)
+			return ret;
+		int[] pont = new MultiString(m).getPageOnTime(ret.toTenths());
+		if(pont == null || pont.length < 1)
+			return ret;
+		// return 1st page on-time read, even if specified per page
+		return new DmsPgTime(pont[0]);
 	}
 
 	/** Get the number of lines on the current sign */
@@ -688,7 +708,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			String multi = composer.getMessage();
 			BitmapGraphic[] bmaps = getBitmaps(multi);
 			previewPnlPager = new DMSPanelPager(previewPnl, dms,
-				bmaps);
+				bmaps, composer.getCurrentPgOnTime());
 		}
 	}
 

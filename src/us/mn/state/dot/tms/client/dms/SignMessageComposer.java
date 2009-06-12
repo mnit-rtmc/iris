@@ -37,6 +37,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -516,5 +517,11 @@ public class SignMessageComposer extends JPanel {
 	public void updateMessageLibrary() {
 		if(st_model != null)
 			st_model.updateMessageLibrary();
+	}
+
+	/** If the page on-time spinner is IRIS enabled, return the current 
+	 *  value else return the system default page on-time. */
+	public DmsPgTime getCurrentPgOnTime() {
+		return timeSpin.getValuePgTime();
 	}
 }

@@ -86,12 +86,18 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 		--m_ignore;
 	}
 
-	/** Get the current value */
+	/** If the spinner is IRIS enabled, return the current value, 
+	 *  otherwise return the system default. */
 	public DmsPgTime getValuePgTime() {
-		Object v = super.getValue();
-		if(v instanceof Number)
-			return new DmsPgTime(((Number)v).floatValue());
-		assert false;
+		// return current value
+		if(getIEnabled()) {
+			Object v = super.getValue();
+			if(v instanceof Number)
+				return new DmsPgTime(((Number)v).floatValue());
+			assert false;
+			return DmsPgTime.getDefaultOn();
+		}
+		// return system default
 		return DmsPgTime.getDefaultOn();
 	}
 
@@ -116,5 +122,6 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 
 	/** dispose */
 	public void dispose() {
+		removeChangeListener(this);
 	}
 }

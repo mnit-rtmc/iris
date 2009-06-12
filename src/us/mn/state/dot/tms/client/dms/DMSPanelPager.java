@@ -18,13 +18,15 @@ import javax.swing.Timer;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
- * Pager for a SignPixelPanel.  This allows multiple page messages
- * to be displayed on a SignPixelPanel.  The SystemAttribute objects
- * DMS message on-time and off-time (blank time) are read first.
+ * Pager for a SignPixelPanel.  This class enables multiple page messages
+ * to be displayed on a SignPixelPanel. The page on-time is passed as a
+ * constructor argument and represents the on-time for all pages. The page
+ * off time is determined from its system attribute.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -33,18 +35,6 @@ public class DMSPanelPager {
 
 	/** Time counter for amount of time message has been displayed */
 	static protected final int TIMER_TICK_MS = 100;
-
-	/** Get the system DMS page on time (ms) */
-	static protected int readSystemOnTime() {
-		return Math.round(1000 *
-			SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat());
-	}
-
-	/** Get the system DMS page off time (ms) */
-	static protected int readSystemOffTime() {
-		return Math.round(1000 *
-			SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat());
-	}
 
 	/** Sign pixel panel being controlled */
 	protected final SignPixelPanel panel;
@@ -59,10 +49,10 @@ public class DMSPanelPager {
 	protected int page = 0;
 
 	/** Multipage message on time, read from system attributes */
-	protected final int onTimeMS;
+	protected final DmsPgTime pgOnTime;
 
 	/** Multipage message off time, read from system attributes */
-	protected final int offTimeMS;
+	protected final DmsPgTime pgOffTime;
 
 	/** Swing timer */
 	protected final Timer timer;
@@ -74,14 +64,16 @@ public class DMSPanelPager {
 	protected boolean isBlanking = false;
 
 	/** Create a new DMS panel pager */
-	public DMSPanelPager(SignPixelPanel p, DMS proxy, BitmapGraphic[] b) {
+	public DMSPanelPager(SignPixelPanel p, DMS proxy, BitmapGraphic[] b,
+		DmsPgTime ot)
+	{
 		panel = p;
 		dms = proxy;
 		bitmaps = getBitmaps(b);
+		pgOnTime = ot;
+		pgOffTime = DmsPgTime.getDefaultOff();
 		setDimensions();
 		panel.setGraphic(bitmaps[page]);
-		onTimeMS = readSystemOnTime();
-		offTimeMS = readSystemOffTime();
 		timer = new Timer(TIMER_TICK_MS, new ActionListener() { 
 			public void actionPerformed(ActionEvent e) {
 				pageTimerTick();
@@ -167,14 +159,14 @@ public class DMSPanelPager {
 	protected boolean doTick() {
 		phaseTimeMS += TIMER_TICK_MS;
 		if(isBlanking) {
-			if(phaseTimeMS >= offTimeMS) {
+			if(phaseTimeMS >= pgOffTime.toMs()) {
 				isBlanking = false;
 				phaseTimeMS = 0;
 				return true;
 			}
 		} else {
-			if(phaseTimeMS >= onTimeMS) {
-				if(offTimeMS > 0)
+			if(phaseTimeMS >= pgOnTime.toMs()) {
+				if(pgOffTime.toMs() > 0)
 					isBlanking = true;
 				phaseTimeMS = 0;
 				return true;
