@@ -302,7 +302,12 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 				operationTxt.setForeground(Color.WHITE);
 				operationTxt.setBackground(Color.GRAY);
 			}
-			operationTxt.setText(lcs_array.getOperation());
+			String op = lcs_array.getOperation();
+			operationTxt.setText(op);
+			// These operations can be very slow -- discourage
+			// users from sending multiple operations at once
+			// RE: None -- see server.DeviceImpl.getOperation()
+			sendBtn.setEnabled(op.equals("None"));
 		}
 		if(a == null || a.equals("lcsLock")) {
 			Integer lk = lcs_array.getLcsLock();
