@@ -32,5 +32,14 @@ public enum DMSMessagePriority {
 	ALERT,		/* 5: alert priority (AMBER alerts, etc.) */
 	OPERATOR,	/* 6: operator (override activation) priority */
 	AWS,		/* 7: automated warning system */
-	CLEAR		/* 8: operator clear activation priority */
+	CLEAR;		/* 8: operator clear activation priority */
+
+	/** Validate a numeric priority value. */
+	public static DMSMessagePriority validate(int p) {
+		for(DMSMessagePriority e : values()) {
+			if(e.ordinal() == p)
+				return e;
+		}
+		return INVALID;
+	}
 }
