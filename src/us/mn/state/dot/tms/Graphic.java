@@ -26,6 +26,12 @@ public interface Graphic extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "graphic";
 
+	/** Set the graphic number */
+	void setGNumber(Integer n);
+
+	/** Get the graphic number */
+	Integer getGNumber();
+
 	/** Set the bits-per-pixel (1, 8, 24) */
 	void setBpp(int b);
 

@@ -160,15 +160,20 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Create a MULTI string for a lane use indication */
 	protected String createIndicationMulti(DMS dms, int ind) {
 		MultiString ms = new MultiString();
-		for(LaneUseGraphic g:
+		for(LaneUseGraphic lug:
 			LaneUseGraphicHelper.getIndicationGraphics(ind))
 		{
-			int x = calculateGraphicX(dms, g.getGraphic());
-			int y = caluclateGraphicY(dms, g.getGraphic());
+			Graphic g = lug.getGraphic();
+			int foreground = lug.getForeground();
+			int red = (foreground >> 16) & 0xFF;
+			int green = (foreground >> 8) & 0xFF;
+			int blue = foreground & 0xFF;
+			int x = calculateGraphicX(dms, g);
+			int y = caluclateGraphicY(dms, g);
 			if(x > 0 && y > 0) {
 				if(ms.toString().length() > 0)
 					ms.addPage();
-				ms.setColorForeground(255, 0, 0);
+				ms.setColorForeground(red, green, blue);
 				ms.addGraphic(g.getGNumber(), x, y);
 			}
 		}

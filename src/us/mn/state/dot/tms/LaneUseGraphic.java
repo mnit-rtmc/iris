@@ -33,17 +33,17 @@ public interface LaneUseGraphic extends SonarObject {
 	/** Get the indication (ordinal of LaneUseIndication) */
 	int getIndication();
 
-	/** Set the graphic number */
-	void setGNumber(int n);
-
-	/** Get the graphic number */
-	int getGNumber();
-
 	/** Set the graphic */
 	void setGraphic(Graphic g);
 
 	/** Get the graphic */
 	Graphic getGraphic();
+
+	/** Set the foreground color */
+	void setForeground(int f);
+
+	/** Get the foreground color */
+	int getForeground();
 
 	/** Set the page number */
 	void setPage(int p);

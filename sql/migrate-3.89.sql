@@ -6,6 +6,7 @@ UPDATE system_attribute SET value = '3.89.0' WHERE name = 'database_version';
 
 CREATE TABLE iris.graphic (
 	name VARCHAR(20) PRIMARY KEY,
+	g_number INTEGER UNIQUE,
 	bpp INTEGER NOT NULL,
 	height INTEGER NOT NULL,
 	width INTEGER NOT NULL,
@@ -32,8 +33,8 @@ CREATE TABLE iris.glyph (
 CREATE TABLE iris.lane_use_graphic (
 	name VARCHAR(10) PRIMARY KEY,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
-	g_number INTEGER NOT NULL UNIQUE,
 	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name),
+	foreground INTEGER NOT NULL,
 	page INTEGER NOT NULL,
 	on_time INTEGER NOT NULL
 );

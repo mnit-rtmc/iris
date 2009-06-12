@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 
@@ -36,21 +34,6 @@ public class LaneUseGraphicHelper extends BaseHelper {
 	static public LaneUseGraphic find(Checker<LaneUseGraphic> checker) {
 		return (LaneUseGraphic)namespace.findObject(
 			LaneUseGraphic.SONAR_TYPE, checker);
-	}
-
-	/** Create a mapping of graphic names to numbers for LCS */
-	static public Map<String, Integer> createMapping() {
-		final HashMap<String, Integer> map =
-			new HashMap<String, Integer>();
-		find(new Checker<LaneUseGraphic>() {
-			public boolean check(LaneUseGraphic lug) {
-				Graphic g = lug.getGraphic();
-				if(g != null)
-					map.put(g.getName(), lug.getGNumber());
-				return false;
-			}
-		});
-		return map;
 	}
 
 	/** Get a collection of lane-use graphics for a given indication.

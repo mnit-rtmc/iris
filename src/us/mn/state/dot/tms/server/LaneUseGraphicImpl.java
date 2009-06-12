@@ -37,7 +37,7 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading lane-use graphics...");
 		namespace.registerType(SONAR_TYPE, LaneUseGraphicImpl.class);
-		store.query("SELECT name, indication, g_number, graphic, " +
+		store.query("SELECT name, indication, graphic, foreground, " +
 			"page, on_time FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -46,8 +46,8 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 					namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// indication
-					row.getInt(3),		// g_number
-					row.getString(4),	// graphic
+					row.getString(3),	// graphic
+					row.getInt(4),		// foreground
 					row.getInt(5),		// page
 					row.getInt(6)		// on_time
 				));
@@ -60,8 +60,8 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("indication", indication);
-		map.put("g_number", g_number);
 		map.put("graphic", graphic);
+		map.put("foreground", foreground);
 		map.put("page", page);
 		map.put("on_time", on_time);
 		return map;
@@ -83,21 +83,21 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 	}
 
 	/** Create a new lane-use graphic */
-	public LaneUseGraphicImpl(Namespace ns, String n, int i, int gn,
-		String g, int p, int t)
+	public LaneUseGraphicImpl(Namespace ns, String n, int i, String g,
+		int f, int p, int t)
 	{
-		this(n, i, gn, (Graphic)ns.lookupObject(Graphic.SONAR_TYPE, g),
+		this(n, i, (Graphic)ns.lookupObject(Graphic.SONAR_TYPE, g), f,
 		     p, t);
 	}
 
 	/** Create a new lane-use graphic */
-	public LaneUseGraphicImpl(String n, int i, int gn, Graphic g, int p,
+	public LaneUseGraphicImpl(String n, int i, Graphic g, int f, int p,
 		int t)
 	{
 		this(n);
 		indication = i;
-		g_number = gn;
 		graphic = g;
+		foreground = f;
 		page = p;
 		on_time = t;
 	}
@@ -126,30 +126,6 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 		return indication;
 	}
 
-	/** Graphic number */
-	protected int g_number;
-
-	/** Set the graphic number */
-	public void setGNumber(int n) {
-		g_number = n;
-	}
-
-	/** Set the graphic number */
-	public void doSetGNumber(int n) throws TMSException {
-		if(n == g_number)
-			return;
-		// Restriction imposed by NTCIP 1203
-		if(n < 1 || n > 255)
-			throw new ChangeVetoException("Invalid number:" + n);
-		store.update(this, "g_number", n);
-		setGNumber(n);
-	}
-
-	/** Get the graphic number */
-	public int getGNumber() {
-		return g_number;
-	}
-
 	/** Graphic associated with the lane-use indication */
 	protected Graphic graphic;
 
@@ -169,6 +145,27 @@ public class LaneUseGraphicImpl extends BaseObjectImpl
 	/** Get the graphic */
 	public Graphic getGraphic() {
 		return graphic;
+	}
+
+	/** Foreground color */
+	protected int foreground;
+
+	/** Set the foreground color */
+	public void setForeground(int f) {
+		foreground = f;
+	}
+
+	/** Set the foreground color */
+	public void doSetForeground(int f) throws TMSException {
+		if(f == foreground)
+			return;
+		store.update(this, "foreground", f);
+		setForeground(f);
+	}
+
+	/** Get the foreground color */
+	public int getForeground() {
+		return foreground;
 	}
 
 	/** Page number */

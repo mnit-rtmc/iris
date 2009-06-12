@@ -65,9 +65,6 @@ public class OpSendDMSGraphics extends OpDMS {
 	/** Set of open rows in the graphic table */
 	protected final TreeSet<Integer> open_rows = new TreeSet<Integer>();
 
-	/** Mapping of graphic names to numbers */
-	protected final Map<String, Integer> graphic_map;
-
 	/** Iterator of graphics to be sent to the sign */
 	protected Iterator<Graphic> graphic_iterator;
 
@@ -78,9 +75,8 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected int row;
 
 	/** Create a new operation to send graphics to a DMS */
-	public OpSendDMSGraphics(DMSImpl d, Map<String, Integer> gmap) {
+	public OpSendDMSGraphics(DMSImpl d) {
 		super(DOWNLOAD, d);
-		graphic_map = gmap;
 	}
 
 	/** Create the first real phase of the operation */
@@ -124,13 +120,18 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected void lookupGraphics() {
 		final int bpp = getBpp();
 		final LinkedList<Graphic> graphics = new LinkedList<Graphic>();
-		for(String name: graphic_map.keySet()) {
-			Graphic g = GraphicHelper.lookup(name);
-			if(g.getBpp() == 1 || g.getBpp() == bpp)
-				graphics.add(g);
-		}
-		for(Graphic g: graphics)
-			num_2_row.put(graphic_map.get(g.getName()), null);
+		GraphicHelper.find(new Checker<Graphic>() {
+			public boolean check(Graphic g) {
+				Integer g_num = g.getGNumber();
+				if(g_num != null) {
+					if(g.getBpp()== 1 || g.getBpp() == bpp){
+						graphics.add(g);
+						num_2_row.put(g_num, null);
+					}
+				}
+				return false;
+			}
+		});
 		graphic_iterator = graphics.iterator();
 	}
 
@@ -193,7 +194,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	protected Phase nextGraphicPhase() {
 		while(graphic_iterator.hasNext()) {
 			graphic = graphic_iterator.next();
-			Integer g_num = graphic_map.get(graphic.getName());
+			Integer g_num = graphic.getGNumber();
 			if(num_2_row.containsKey(g_num)) {
 				row = num_2_row.get(g_num);
 				return new VerifyGraphic();
@@ -224,7 +225,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	/** Compare the graphic ID */
 	protected boolean isIDCorrect(int g) throws IOException {
 		GraphicInfoList gil = new GraphicInfoList(graphic,
-			graphic_map.get(graphic.getName()));
+			graphic.getGNumber());
 		int crc = gil.getCrc() ^ CRC16.INITIAL_CRC;
 		int gid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
 		return g == gid;
@@ -314,7 +315,7 @@ public class OpSendDMSGraphics extends OpDMS {
 				new DmsGraphicTransparentEnabled(row);
 			DmsGraphicTransparentColor trans_color =
 				new DmsGraphicTransparentColor(row);
-			number.setInteger(graphic_map.get(graphic.getName()));
+			number.setInteger(graphic.getGNumber());
 			name.setString(graphic.getName());
 			height.setInteger(graphic.getHeight());
 			width.setInteger(graphic.getWidth());
