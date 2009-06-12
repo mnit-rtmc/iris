@@ -50,6 +50,11 @@ public class DmsPgTime
 		m_tenths = validateTenths(secsToTenths(secs));
 	}
 
+	/** constructor */
+	public DmsPgTime(double secs) {
+		m_tenths = validateTenths(secsToTenths((float)secs));
+	}
+
 	/** Return the page time in tenths */
 	public int toTenths() {
 		return m_tenths;
@@ -70,8 +75,14 @@ public class DmsPgTime
 		return SString.intToString(m_tenths);
 	}
 
-	/** Validate page time, in tenths */
+	/** Validate page on-time, in tenths.
+	 *  @param t Page time, in tenths. If this value is zero,
+	 *	   the system default page on time is returned,
+	 *         otherwise the minimum and maximum values are
+	 *	   enforced. */
 	public static int validateTenths(int t) {
+		if(t == 0)
+			return getDefaultOn().toTenths();
 		t = (t < MIN_ONTIME_TENTHS ? MIN_ONTIME_TENTHS : t);
 		t = (t > MAX_ONTIME_TENTHS ? MAX_ONTIME_TENTHS : t);
 		return t;
