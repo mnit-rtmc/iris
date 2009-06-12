@@ -127,9 +127,9 @@ public class MultiString {
 	/** Test if the MULTI string is equal to another MULTI string */
 	public boolean equals(Object o) {
 		if(o instanceof MultiString)
-			return toString().equals(o.toString());
+			return normalize().equals(o.toString());
 		if(o instanceof String)
-			return toString().equals(o.toString());
+			return normalize().equals(o.toString());
 		return false;
 	}
 
@@ -187,6 +187,12 @@ public class MultiString {
 			b.append(NEWLINE);
 			trailing = false;
 		}
+	}
+
+	/** Add text followed by a new line */
+	public void addLine(String s) {
+		addText(s);
+		addLine();
 	}
 
 	/** Add a new page */
