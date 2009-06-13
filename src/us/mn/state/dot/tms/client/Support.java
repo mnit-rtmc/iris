@@ -60,7 +60,8 @@ public class Support extends AbstractForm {
 		// bottom panel, contains logo
 		JLabel logo = new JLabel();
 		URL url = getClass().getResource("/images/tmc.gif");
-		logo.setIcon(new ImageIcon(url));
+		if(url != null)
+			logo.setIcon(new ImageIcon(url));
 		JPanel bottomPanel = new JPanel();
 		bottomPanel.setLayout(new BoxLayout(bottomPanel, BoxLayout.X_AXIS));
 		bottomPanel.add(Box.createHorizontalStrut(10));
