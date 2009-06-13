@@ -202,7 +202,8 @@ public class SignMessageComposer extends JPanel {
 	protected void disposeEtcWidgets() {
 		timeSpin.dispose();
 		for(int i = 0; i < fontCmb.length; i++)
-			fontCmb[i].dispose();
+			if(fontCmb[i] != null)
+				fontCmb[i].dispose();
 	}
 
 	/** Set the preview mode.
@@ -227,8 +228,9 @@ public class SignMessageComposer extends JPanel {
 		initializeEtcWidgets(np, builder);
 		initializeWidgets(nl, np);
 		for(short i = 0; i < cmbLine.length; i++) {
-			cmbLine[i].setModel(stm.getLineModel(
-				(short)(i + 1)));
+			if(cmbLine[i] != null && stm != null)
+				cmbLine[i].setModel(stm.getLineModel(
+					(short)(i + 1)));
 		}
 	}
 
@@ -319,6 +321,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a font box */
 	protected Box createFontBox(int p) {
+		if(fontCmb == null || fontCmb[p] == null)
+			return Box.createHorizontalBox();
 		Box box = Box.createHorizontalBox();
 		JLabel label = new JLabel();
 		label.setLabelFor(fontCmb[p]);
@@ -401,7 +405,8 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i].setEnabled(b);
 		for(int i = 0; i < fontCmb.length; i++)
-			fontCmb[i].setEnabled(b);
+			if(fontCmb[i] != null)
+				fontCmb[i].setEnabled(b);
 	}
 
 	/** Return a MULTI string using the contents of the widgets. */
