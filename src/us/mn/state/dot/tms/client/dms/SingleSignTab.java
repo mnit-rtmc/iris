@@ -20,8 +20,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
@@ -100,7 +102,7 @@ public class SingleSignTab extends FormPanel {
 	protected final JTextField locationTxt = createTextField();
 
 	/** AWS controlled checkbox (optional) */
-	protected final JCheckBox awsControlledCbx = new JCheckBox();
+	protected final JCheckBox awsControlledCbx = new JCheckBox(); //FIXME: make subclass of IComboBox
 
 	/** Displays the current operation of the DMS */
 	protected final JTextField operationTxt = createTextField();
@@ -164,8 +166,16 @@ public class SingleSignTab extends FormPanel {
 				addRow("Expires", expiresTxt);
 		} else
 			finishRow();
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-			addRow(I18N.get("dms.aws.controlled"),awsControlledCbx);
+		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+			setWest();
+			final String mid = "dms.aws.controlled";
+			awsControlledCbx.setText(I18N.get(mid));
+			awsControlledCbx.setHorizontalTextPosition(
+				SwingConstants.LEFT);
+			awsControlledCbx.setToolTipText(
+				I18N.get(mid + ".tooltip"));
+			addRow(awsControlledCbx);
+		}
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
