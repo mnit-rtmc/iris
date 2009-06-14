@@ -117,13 +117,23 @@ public class DMSHelper extends BaseHelper {
 
 	/** Test if a DMS can be controlled by AWS */
 	static public boolean isAwsControlled(DMS proxy) {
+		if(proxy == null)
+			return false;
 		return proxy.getAwsAllowed() && proxy.getAwsControlled();
 	}
 
 	/** Test if a DMS has an AWS message deployed */
 	static public boolean isAwsDeployed(DMS proxy) {
+		if(proxy == null)
+			return false;
 		SignMessage m = proxy.getMessageCurrent();
-		return m.getPriority() == DMSMessagePriority.AWS.ordinal();
+		if(m != null) {
+			return m.getPriority() == DMSMessagePriority.AWS.ordinal();
+		} else {
+			// messageCurrent should never be null, so this means
+			// the proxy has just been removed
+			return false;
+		}
 	}
 
 	/** Test if a DMS is active, not failed and deployed by AWS */
