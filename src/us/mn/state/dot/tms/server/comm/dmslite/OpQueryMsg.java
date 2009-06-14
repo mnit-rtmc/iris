@@ -33,8 +33,6 @@ import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
-import us.mn.state.dot.tms.DMSHelper; //FIXME: remove?
-
 /**
  * Operation to query the current message on a DMS.
  *
@@ -447,7 +445,7 @@ public class OpQueryMsg extends OpDms {
 				setErrorMsg(errmsg);
 
 				// try again
-				if (flagFailureShouldRetry(errmsg)) {
+				if(flagFailureShouldRetry(errmsg)) {
 					Log.finest("OpQueryMsg: will retry failed operation.");
 					return this;
 				}

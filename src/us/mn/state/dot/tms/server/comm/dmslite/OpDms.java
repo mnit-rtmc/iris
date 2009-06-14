@@ -91,7 +91,8 @@ abstract public class OpDms extends OpDevice {
 		super.handleException(e);
 	}
 
-	/** Cleanup the operation. This method is called by MessagePoller.doPoll() if an operation is successful */
+	/** Cleanup the operation, which is called by MessagePoller.doPoll() 
+	 *  if an operation is successful. */
 	public void cleanup() {
 		if(success)
 			m_dms.requestConfigure();
@@ -172,11 +173,9 @@ abstract public class OpDms extends OpDevice {
 	 	String msg = m_dms.getName() + " error: " + errmsg;
 
 		// trigger error handling, changes status if necessary
+		// phase is set to null if no retry should be performed
 		handleException(new IOException(msg));
-
-		// retry?
-		boolean retry = (controller != null && controller.retry(msg));
-		return retry;
+		return phase != null;
 	}
 
 	/* reset error counter for DMS */
@@ -346,7 +345,7 @@ abstract public class OpDms extends OpDevice {
 
 					// determine matrix type
 					String stype = rr1.getResVal("type");
-					if (stype.toLowerCase().contains("full"))
+					if(stype.toLowerCase().contains("full"))
 						type = DMSType.VMS_FULL;
 					else
 						Log.severe("SEVERE: Unknown matrix type read ("+stype+")");
@@ -417,7 +416,7 @@ abstract public class OpDms extends OpDevice {
 
 			// failure
 			} else {
-				Log.severe(
+				Log.warning(
 					"PhaseGetConfig: response from SensorServer received, " +
 					"ignored because Xml valid field is false, errmsg=" + errmsg);
 				setErrorMsg(errmsg);
