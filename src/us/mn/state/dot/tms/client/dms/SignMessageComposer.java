@@ -177,6 +177,7 @@ public class SignMessageComposer extends JPanel {
 	public void dispose() {
 		removeAll();
 		disposeLines();
+		timeSpin.dispose();
 		disposeEtcWidgets();
 		SignTextModel stm = st_model;
 		if(stm != null) {
@@ -201,7 +202,6 @@ public class SignMessageComposer extends JPanel {
 
 	/** Dispose of the existing combobox widgets */
 	protected void disposeEtcWidgets() {
-		timeSpin.dispose();
 		for(int i = 0; i < fontCmb.length; i++)
 			if(fontCmb[i] != null)
 				fontCmb[i].dispose();
