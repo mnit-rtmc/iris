@@ -400,6 +400,8 @@ public class SignMessageComposer extends JPanel {
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
+		if(tab != null && tab.getTabCount() > 0)
+			tab.setSelectedIndex(0);
 		blankBtn.setEnabled(b);
 		timeSpin.setEnabled(b);
 		for(int i = 0; i < cmbLine.length; i++)
