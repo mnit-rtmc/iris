@@ -23,7 +23,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -58,18 +58,16 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Color for active camera style */
 	static protected final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Set of cameras in the playlist */
 	protected final HashSet<Camera> playlist = new HashSet<Camera>();
 
 	/** Create a new camera manager */
-	public CameraManager(TmsConnection tc, TypeCache<Camera> c,
-		GeoLocManager lm)
-	{
+	public CameraManager(Session s, TypeCache<Camera> c, GeoLocManager lm) {
 		super(c, lm);
-		connection = tc;
+		session = s;
 		initialize();
 	}
 
@@ -128,9 +126,9 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Show the properteis form for the given proxy */
 	protected void showPropertiesForm(Camera cam) {
-		SmartDesktop desktop = connection.getDesktop();
+		SmartDesktop desktop = session.getDesktop();
 		try {
-			desktop.show(new CameraProperties(connection, cam));
+			desktop.show(new CameraProperties(session, cam));
 		}
 		catch(Exception e) {
 			e.printStackTrace();

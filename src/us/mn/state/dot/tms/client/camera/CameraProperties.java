@@ -29,8 +29,8 @@ import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
@@ -72,8 +72,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	protected final JCheckBox publish = new JCheckBox();
 
 	/** Create a new camera properties form */
-	public CameraProperties(TmsConnection tc, Camera c) {
-		super(TITLE, tc, c);
+	public CameraProperties(Session s, Camera c) {
+		super(TITLE, s, c);
 	}
 
 	/** Get the SONAR type cache */
@@ -124,8 +124,8 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		if(c == null)
 			controller.setEnabled(false);
 		else {
-			connection.getDesktop().show(
-				new ControllerForm(connection, c));
+			session.getDesktop().show(
+				new ControllerForm(session, c));
 		}
 	}
 

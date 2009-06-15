@@ -20,7 +20,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -46,15 +46,15 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	/** Name of "no controller" style */
 	static public final String STYLE_NO_CONTROLLER = "No controller";
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Create a new warning sign manager */
-	public WarningSignManager(TmsConnection tc, TypeCache<WarningSign> c,
+	public WarningSignManager(Session s, TypeCache<WarningSign> c,
 		GeoLocManager lm)
 	{
 		super(c, lm);
-		connection = tc;
+		session = s;
 		initialize();
 	}
 
@@ -99,11 +99,11 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	/** Show the properties form for the selected proxy */
 	public void showPropertiesForm() {
 		if(s_model.getSelectedCount() == 1) {
-			for(WarningSign s: s_model.getSelected()) {
-				SmartDesktop desktop = connection.getDesktop();
+			SmartDesktop desktop = session.getDesktop();
+			for(WarningSign ws: s_model.getSelected()) {
 				try {
 					desktop.show(new WarningSignProperties(
-						connection, s));
+						session, ws));
 				}
 				catch(Exception e) {
 					e.printStackTrace();

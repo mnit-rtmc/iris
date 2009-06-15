@@ -28,7 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
@@ -63,8 +63,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return model;
 	}
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Currently selected corridor */
 	protected String corridor = "";
@@ -75,11 +75,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a new roadway node manager */
-	public R_NodeManager(TmsConnection tc, TypeCache<R_Node> c,
+	public R_NodeManager(Session s, TypeCache<R_Node> c,
 		GeoLocManager lm)
 	{
 		super(c, lm);
-		connection = tc;
+		session = s;
 		initialize();
 	}
 
@@ -184,9 +184,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Show the properties form for the given proxy */
 	protected void showPropertiesForm(R_Node n) {
-		SmartDesktop desktop = connection.getDesktop();
+		SmartDesktop desktop = session.getDesktop();
 		try {
-			desktop.show(new R_NodeProperties(connection, n));
+			desktop.show(new R_NodeProperties(session, n));
 		}
 		catch(Exception e) {
 			e.printStackTrace();

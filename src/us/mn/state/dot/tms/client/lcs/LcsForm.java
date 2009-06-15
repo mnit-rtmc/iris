@@ -23,7 +23,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -51,16 +51,16 @@ public class LcsForm extends AbstractForm {
 	/** Button to delete the selected proxy */
 	protected final JButton deleteBtn = new JButton("Delete");
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Type cache */
 	protected final TypeCache<LCSArray> cache;
 
 	/** Create a new LCS form */
-	public LcsForm(TmsConnection tc, TypeCache<LCSArray> c) {
+	public LcsForm(Session s, TypeCache<LCSArray> c) {
 		super(TITLE);
-		connection = tc;
+		session = s;
 		cache = c;
 	}
 
@@ -130,7 +130,7 @@ public class LcsForm extends AbstractForm {
 
 	/** Show the properties form */
 	protected void showPropertiesForm(LCSArray proxy) {
-		SmartDesktop desktop = connection.getDesktop();
-		desktop.show(new LCSArrayProperties(connection, proxy));
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(new LCSArrayProperties(session, proxy));
 	}
 }

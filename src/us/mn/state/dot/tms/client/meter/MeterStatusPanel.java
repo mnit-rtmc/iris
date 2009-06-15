@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -129,11 +129,11 @@ public class MeterStatusPanel extends FormPanel
 	protected RampMeter selected = null;
 
 	/** Create a new MeterStatusPanel */
-	public MeterStatusPanel(TmsConnection tc, MeterManager m) {
+	public MeterStatusPanel(Session session, MeterManager m) {
 		super(true);
 		manager = m;
 		selectionModel = manager.getSelectionModel();
-		cache = tc.getSonarState().getRampMeters();
+		cache = session.getSonarState().getRampMeters();
 		ButtonGroup group = new ButtonGroup();
 		group.add(meterOnBtn);
 		group.add(meterOffBtn);

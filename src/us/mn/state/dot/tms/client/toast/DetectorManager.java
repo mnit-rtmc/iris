@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
@@ -49,15 +49,9 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Name of "no r_node" style */
 	static public final String STYLE_NO_R_NODE = "No R_Node";
 
-	/** TMS connection */
-	protected final TmsConnection connection;
-
 	/** Create a new detector manager */
-	public DetectorManager(TmsConnection tc, TypeCache<Detector> c,
-		GeoLocManager lm)
-	{
+	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm) {
 		super(c, lm);
-		connection = tc;
 		initialize();
 	}
 

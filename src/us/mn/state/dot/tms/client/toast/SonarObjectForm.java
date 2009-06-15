@@ -19,8 +19,8 @@ import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 
 /**
  * SonarObjectForm is an abstract Swing dialog for SonarObject property forms
@@ -33,8 +33,8 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** SONAR object proxy */
 	protected final T proxy;
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User Session */
+	protected final Session session;
 
 	/** SONAR state */
 	protected final SonarState state;
@@ -43,11 +43,11 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	protected final boolean admin;
 
 	/** Create a new SONAR object form */
-	protected SonarObjectForm(String prefix, TmsConnection tc, T p) {
+	protected SonarObjectForm(String prefix, Session s, T p) {
 		super(prefix + p.getName());
 		proxy = p;
-		connection = tc;
-		state = tc.getSonarState();
+		session = s;
+		state = s.getSonarState();
 		admin = true;
 	}
 

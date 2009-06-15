@@ -42,8 +42,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.dms.quicklib.QuickMessageEditorTab;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -266,16 +266,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** SONAR user */
 	protected final User user;
 
-	/** Create a new DMS properties form 
-	 * @param tc TmsConnection
-	 * @param sign DMS proxy object
-	 */
-	public DMSProperties(TmsConnection tc, DMS sign) {
-		super(TITLE, tc, sign);
+	/** Create a new DMS properties form */
+	public DMSProperties(Session s, DMS sign) {
+		super(TITLE, s, sign);
 		setHelpPageName("Help.DMSProperties");
-		state = tc.getSonarState();
-		user = state.lookupUser(tc.getUser().getName());
-		messagesTab = new MessagesTab(tc, sign);
+		state = s.getSonarState();
+		user = s.getUser();
+		messagesTab = new MessagesTab(s, sign);
 		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
 			qlibTab = new QuickMessageEditorTab(
 				state.getQuickMessages(), this, user);
@@ -356,8 +353,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(c == null)
 			controllerBtn.setEnabled(false);
 		else {
-			connection.getDesktop().show(
-				new ControllerForm(connection, c));
+			session.getDesktop().show(
+				new ControllerForm(session, c));
 		}
 	}
 

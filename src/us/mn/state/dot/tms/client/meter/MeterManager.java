@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -117,22 +117,22 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return ctr != null && (!"".equals(ctr.getStatus()));
 	}
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Create a new meter manager */
-	public MeterManager(TmsConnection tc, TypeCache<RampMeter> c,
+	public MeterManager(Session s, TypeCache<RampMeter> c,
 		GeoLocManager lm)
 	{
 		super(c, lm);
-		connection = tc;
+		session = s;
 		initialize();
 	}
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<RampMeter> createStyleListModel(Symbol s) {
 		return new MeterStyleModel(this, s.getLabel(), s.getLegend(),
-			connection.getSonarState().getControllers());
+			session.getSonarState().getControllers());
 	}
 
 	/** Get the proxy type name */
@@ -193,9 +193,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Show the properteis form for the given proxy */
 	protected void showPropertiesForm(RampMeter meter) {
-		SmartDesktop desktop = connection.getDesktop();
+		SmartDesktop desktop = session.getDesktop();
 		try {
-			desktop.show(new RampMeterProperties(connection,meter));
+			desktop.show(new RampMeterProperties(session, meter));
 		}
 		catch(Exception e) {
 			e.printStackTrace();
@@ -239,8 +239,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 				showPropertiesForm(meter);
 			}
 		});
-// FIXME	p.add(new MeterDataAction(meter, connection.getDesktop(),
-//			connection.getDataFactory()));
 		return p;
 	}
 

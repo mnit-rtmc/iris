@@ -46,17 +46,19 @@ import us.mn.state.dot.tms.utils.I18N;
 public class ViewMenu extends JMenu {
 
 	/** Create a new view menu */
-	public ViewMenu(final TmsConnection tc, final SonarState st) {
+	public ViewMenu(final Session s) {
 		super("View");
-		final SmartDesktop desktop = tc.getDesktop();
-		final User user = st.lookupUser(tc.getUser().getName());
+		final SmartDesktop desktop = s.getDesktop();
+		final SonarState state = s.getSonarState();
+		final User user = s.getUser();
 		setMnemonic('V');
 		JMenuItem item = new JMenuItem("Users/Roles");
 		item.setMnemonic('U');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new UserRoleForm(st.getUsers(),
-					st.getRoles(), st.getConnections()));
+				desktop.show(new UserRoleForm(state.getUsers(),
+					state.getRoles(),
+					state.getConnections()));
 			}
 		};
 		add(item);
@@ -65,7 +67,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new SystemAttributeForm(
-					st.getSystemAttributes(), user));
+					state.getSystemAttributes(), user));
 			}
 		};
 		add(item);
@@ -74,7 +76,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new CabinetStyleForm(
-					st.getCabinetStyles()));
+					state.getCabinetStyles()));
 			}
 		};
 		add(item);
@@ -82,9 +84,9 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CommLinkForm(tc,
-					st.getCommLinks(),
-					st.getControllers()));
+				desktop.show(new CommLinkForm(s,
+					state.getCommLinks(),
+					state.getControllers()));
 			}
 		};
 		add(item);
@@ -92,7 +94,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('a');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new AlarmForm(st.getAlarms()));
+				desktop.show(new AlarmForm(state.getAlarms()));
 			}
 		};
 		add(item);
@@ -100,7 +102,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('R');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RoadForm(st.getRoads()));
+				desktop.show(new RoadForm(state.getRoads()));
 			}
 		};
 		add(item);
@@ -109,7 +111,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new DetectorForm(
-					st.getDetectors()));
+					state.getDetectors()));
 			}
 		};
 		add(item);
@@ -118,8 +120,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('M');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RampMeterForm(tc,
-					st.getRampMeters()));
+				desktop.show(new RampMeterForm(s,
+					state.getRampMeters()));
 			}
 		};
 		add(item);
@@ -127,7 +129,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('H');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new HolidayForm(st.getHolidays()));
+				desktop.show(new HolidayForm(
+					state.getHolidays()));
 			}
 		};
 		add(item);
@@ -141,7 +144,7 @@ public class ViewMenu extends JMenu {
 
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DMSForm(tc, st.getDMSs()));
+				desktop.show(new DMSForm(s, state.getDMSs()));
 			}
 		};
 		add(item);
@@ -149,8 +152,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('F');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new FontForm(st.getFonts(),
-					st.getGlyphs(), st.getGraphics()));
+				desktop.show(new FontForm(state.getFonts(),
+					state.getGlyphs(),state.getGraphics()));
 			}
 		};
 		add(item);
@@ -158,8 +161,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CameraForm(tc,
-					st.getCameras()));
+				desktop.show(new CameraForm(s,
+					state.getCameras()));
 			}
 		};
 		add(item);
@@ -168,8 +171,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic( 'L' );
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new LcsForm(tc,
-					st.getLCSArrays()));
+				desktop.show(new LcsForm(s,
+					state.getLCSArrays()));
 			}
 		};
 		add(item);
@@ -177,8 +180,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('W');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new WarningSignForm(tc,
-					st.getWarningSigns()));
+				desktop.show(new WarningSignForm(s,
+					state.getWarningSigns()));
 			}
 		};
 		add(item);
@@ -187,7 +190,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new VideoMonitorForm(
-					st.getVideoMonitors()));
+					state.getVideoMonitors()));
 			}
 		};
 		add(item);

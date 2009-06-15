@@ -50,6 +50,7 @@ import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
+import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -65,11 +66,29 @@ import us.mn.state.dot.tms.client.incidents.D10IncidentLayer;
  */
 public class Session {
 
-	/** Contains information about the current connection */
-	protected final TmsConnection tmsConnection;
+	/** User manager */
+	protected final UserManager userManager;
+
+	/** Get the currently logged-in user */
+	public User getUser() {
+		return userManager.getUser();
+	}
+
+	/** SONAR state */
+	protected final SonarState state;
+
+	/** Get the SONAR state */
+	public SonarState getSonarState() {
+		return state;
+	}
 
 	/** Desktop used by this session */
 	protected final SmartDesktop desktop;
+
+	/** Get the desktop */
+	public SmartDesktop getDesktop() {
+		return desktop;
+	}
 
 	/** Client properties */
 	protected final Properties props;
@@ -141,8 +160,8 @@ public class Session {
 	}
 
 	/** Create the station layer */
-	protected StationLayer createStationLayer(final SonarState st)
-		throws IOException, TdxmlException
+	protected StationLayer createStationLayer() throws IOException,
+		TdxmlException
 	{
 		String loc = props.getProperty("tdxml.station.url");
 		if(loc == null)
@@ -157,7 +176,7 @@ public class Session {
 		}
 		layer.setLabels(new StationLayer.Labeller() {
 			public String getLabel(String sid) throws IOException {
-				Station s = st.lookupStation(sid);
+				Station s = state.lookupStation(sid);
 				if(s != null)
 					return s.getLabel();
 				else
@@ -176,8 +195,7 @@ public class Session {
 		if(incLayer != null)
 			lstates.add(incLayer.createState());
 		lstates.add(warn_manager.getLayer().createState());
-		tabs.add(new DMSTab(dms_manager, lstates, vlayer,
-			tmsConnection));
+		tabs.add(new DMSTab(this, dms_manager, lstates, vlayer));
 	}
 
 	/** Add the meter tab */
@@ -191,8 +209,7 @@ public class Session {
 			}
 			lstates.add(gpolyState);
 		}
-		tabs.add(new RampMeterTab(meter_manager, lstates, vlayer,
-			tmsConnection));
+		tabs.add(new RampMeterTab(this, meter_manager, lstates,vlayer));
 	}
 
 	/** Add the incident tab */
@@ -203,31 +220,31 @@ public class Session {
 
 	/** Add the LCS tab */
 	protected void addLcsTab() throws IOException {
-		tabs.add(new LcsTab(lcs_array_manager, tmsConnection));
+		tabs.add(new LcsTab(this, lcs_array_manager));
 	}
 
 	/** Add the camera tab */
-	protected void addCameraTab(SonarState st, User user) {
-		tabs.add(new CameraTab(cam_manager, props, logger, st, user));
+	protected void addCameraTab(User user) {
+		tabs.add(new CameraTab(cam_manager, props, logger, state,user));
 	}
 
 	/** Add the roadway tab */
 	protected void addRoadwayTab() {
 		List<LayerState> lstates = createBaseLayers();
-		tabs.add(new RoadwayTab(r_node_manager, lstates, vlayer,
-			tmsConnection));
+		tabs.add(new RoadwayTab(this, r_node_manager, lstates, vlayer));
 	}
 
 	/** Create a new session */
-	public Session(TmsConnection tc, SonarState st, Properties p, Logger l)
+	public Session(UserManager um, SmartDesktop d, Properties p, Logger l)
 		throws TdxmlException, IOException
 	{
-		tmsConnection = tc;
-		desktop = tc.getDesktop();
+		userManager = um;
+		state = um.getSonarState();
+		desktop = d;
 		props = p;
 		logger = l;
 		baseLayers = new BaseLayers().getLayers();
-		gpoly = createStationLayer(st);
+		gpoly = createStationLayer();
 
 		String i_loc = props.getProperty("tdxml.incident.url");
 		if(i_loc != null) {
@@ -240,31 +257,31 @@ public class Session {
 			incLayer = null;
 		}
 
-		loc_manager = new GeoLocManager(st.getGeoLocs());
-		cam_manager = new CameraManager(tmsConnection, st.getCameras(),
+		loc_manager = new GeoLocManager(state.getGeoLocs());
+		cam_manager = new CameraManager(this, state.getCameras(),
 			loc_manager);
 		cam_manager_singleton = cam_manager;
-		dms_manager = new DMSManager(tmsConnection, st.getDMSs(),
+		dms_manager = new DMSManager(this, state.getDMSs(),
 			loc_manager);
 		dms_manager_singleton = dms_manager;
-		lcs_array_manager = new LCSArrayManager(tmsConnection,
-			st.getLCSArrays(), loc_manager);
-		lcsi_manager = new LCSIManager(st.getLCSIndications(),
+		lcs_array_manager = new LCSArrayManager(this,
+			state.getLCSArrays(), loc_manager);
+		lcsi_manager = new LCSIManager(state.getLCSIndications(),
 			loc_manager);
 		lcsi_manager_singleton = lcsi_manager;
-		det_manager = new DetectorManager(tmsConnection,
-			st.getDetectors(), loc_manager);
+		det_manager = new DetectorManager(state.getDetectors(),
+			loc_manager);
 		det_manager_singleton = det_manager;
-		r_node_manager = new R_NodeManager(tmsConnection,
-			st.getR_Nodes(), loc_manager);
-		warn_manager = new WarningSignManager(tmsConnection,
-			st.getWarningSigns(), loc_manager);
+		r_node_manager = new R_NodeManager(this,
+			state.getR_Nodes(), loc_manager);
+		warn_manager = new WarningSignManager(this,
+			state.getWarningSigns(), loc_manager);
 		warn_manager_singleton = warn_manager;
-		meter_manager = new MeterManager(tmsConnection,
-			st.getRampMeters(), loc_manager);
+		meter_manager = new MeterManager(this,
+			state.getRampMeters(), loc_manager);
 		meter_manager_singleton = meter_manager;
 		vlayer = new ViewLayer();
-		User user = tmsConnection.getUser();
+		User user = getUser();
 		if(canUpdate(user, DMS.SONAR_TYPE, "messageNext"))
 			addDMSTab();
 		if(canUpdate(user, RampMeter.SONAR_TYPE, "rateNext"))
@@ -273,7 +290,7 @@ public class Session {
 		if(canUpdate(user, LCSArray.SONAR_TYPE, "indicationsNext"))
 			addLcsTab();
 		if(user.canRead(Camera.SONAR_TYPE))
-			addCameraTab(st, user);
+			addCameraTab(user);
 		if(user.canAdd(new Name(R_Node.SONAR_TYPE, "oname").toString()))
 			addRoadwayTab();
 	}

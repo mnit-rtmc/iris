@@ -28,8 +28,8 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
@@ -63,8 +63,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	protected final JTextArea message = new JTextArea(3, 24);
 
 	/** Create a new warning sign form */
-	public WarningSignProperties(TmsConnection tc, WarningSign s) {
-		super(TITLE, tc, s);
+	public WarningSignProperties(Session s, WarningSign ws) {
+		super(TITLE, s, ws);
 	}
 
 	/** Get the SONAR type cache */
@@ -115,8 +115,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		if(c == null)
 			controller.setEnabled(false);
 		else {
-			connection.getDesktop().show(
-				new ControllerForm(connection, c));
+			SmartDesktop desktop = session.getDesktop();
+			desktop.show(new ControllerForm(session, c));
 		}
 	}
 

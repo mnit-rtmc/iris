@@ -23,7 +23,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -51,16 +51,16 @@ public class CameraForm extends AbstractForm {
 	/** Button to delete the selected camera */
 	protected final JButton del_camera = new JButton("Delete");
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Camera type cache */
 	protected final TypeCache<Camera> cache;
 
 	/** Create a new camera form */
-	public CameraForm(TmsConnection tc, TypeCache<Camera> c) {
+	public CameraForm(Session s, TypeCache<Camera> c) {
 		super(TITLE);
-		connection = tc;
+		session = s;
 		cache = c;
 	}
 
@@ -130,7 +130,7 @@ public class CameraForm extends AbstractForm {
 
 	/** Show the properties form for a camera */
 	protected void showPropertiesForm(Camera cam) throws Exception {
-		SmartDesktop desktop = connection.getDesktop();
-		desktop.show(new CameraProperties(connection, cam));
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(new CameraProperties(session, cam));
 	}
 }

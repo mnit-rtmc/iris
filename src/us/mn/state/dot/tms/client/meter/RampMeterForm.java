@@ -23,7 +23,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -51,16 +51,16 @@ public class RampMeterForm extends AbstractForm {
 	/** Button to delete the selected proxy */
 	protected final JButton deleteBtn = new JButton("Delete");
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Type cache */
 	protected final TypeCache<RampMeter> cache;
 
 	/** Create a new ramp meter form */
-	public RampMeterForm(TmsConnection tc, TypeCache<RampMeter> c) {
+	public RampMeterForm(Session s, TypeCache<RampMeter> c) {
 		super(TITLE);
-		connection = tc;
+		session = s;
 		cache = c;
 	}
 
@@ -130,7 +130,7 @@ public class RampMeterForm extends AbstractForm {
 
 	/** Show the properties form */
 	protected void showPropertiesForm(RampMeter meter) {
-		SmartDesktop desktop = connection.getDesktop();
-		desktop.show(new RampMeterProperties(connection, meter));
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(new RampMeterProperties(session, meter));
 	}
 }

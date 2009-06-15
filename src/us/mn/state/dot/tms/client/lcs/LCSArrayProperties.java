@@ -40,8 +40,8 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
@@ -96,10 +96,10 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected final JLabel operation = new JLabel();
 
 	/** Create a new lane control signal properties form */
-	public LCSArrayProperties(TmsConnection tc, LCSArray proxy) {
-		super(TITLE, tc, proxy);
-		state = tc.getSonarState();
-		User user = state.lookupUser(tc.getUser().getName());
+	public LCSArrayProperties(Session s, LCSArray proxy) {
+		super(TITLE, s, proxy);
+		state = s.getSonarState();
+		User user = s.getUser();
 		creator = new LCSIndicationCreator(state.getLCSIndications(),
 			user);
 		table_model = new LCSTableModel(proxy, state.getLCSs(),

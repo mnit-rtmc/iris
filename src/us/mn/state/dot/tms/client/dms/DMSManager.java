@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
@@ -51,8 +51,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Color definition for AWS controlled style */
 	static protected final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Action to clear the selected DMS */
 	protected ClearDmsAction clearAction;
@@ -63,17 +63,16 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a new DMS manager */
-	public DMSManager(TmsConnection tc, TypeCache<DMS> c, GeoLocManager lm)
-	{
+	public DMSManager(Session s, TypeCache<DMS> c, GeoLocManager lm) {
 		super(c, lm);
-		connection = tc;
+		session = s;
 		initialize();
 	}
 
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<DMS> createStyleListModel(Symbol s) {
 		return new DMSStyleModel(this, s.getLabel(), s.getLegend(),
-			connection.getSonarState().getControllers());
+			session.getSonarState().getControllers());
 	}
 
 	/** Get the proxy type name */
@@ -139,9 +138,9 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Show the properteis form for the given proxy */
 	protected void showPropertiesForm(DMS dms) {
-		SmartDesktop desktop = connection.getDesktop();
+		SmartDesktop desktop = session.getDesktop();
 		try {
-			desktop.show(new DMSProperties(connection, dms));
+			desktop.show(new DMSProperties(session, dms));
 		}
 		catch(Exception e) {
 			e.printStackTrace();

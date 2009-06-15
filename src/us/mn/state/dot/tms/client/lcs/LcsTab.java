@@ -22,7 +22,7 @@ import us.mn.state.dot.trafmap.BaseMapLayer;
 import us.mn.state.dot.trafmap.TunnelLayer;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
@@ -46,11 +46,11 @@ public class LcsTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new LCS tab */
-	public LcsTab(LCSArrayManager manager, TmsConnection tc)
+	public LcsTab(Session session, LCSArrayManager manager)
 		throws IOException
 	{
 		super("LCS", "Operate Lane Control Signals");
-		dispatcher = new LcsDispatcher(manager, tc);
+		dispatcher = new LcsDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		LayerState lstate =
 			BaseMapLayer.createTunnelMapLayer().createState();

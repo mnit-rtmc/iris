@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
@@ -123,8 +123,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return true;
 	}
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -138,12 +138,12 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Create a new LCS array manager */
-	public LCSArrayManager(TmsConnection tc, TypeCache<LCSArray> c,
+	public LCSArrayManager(Session s, TypeCache<LCSArray> c,
 		GeoLocManager lm)
 	{
 		super(c, lm);
-		connection = tc;
-		namespace = tc.getSonarState().getNamespace();
+		session = s;
+		namespace = s.getSonarState().getNamespace();
 		initialize();
 	}
 
@@ -209,9 +209,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Show the properteis form for the given proxy */
 	protected void showPropertiesForm(LCSArray la) {
-		SmartDesktop desktop = connection.getDesktop();
+		SmartDesktop desktop = session.getDesktop();
 		try {
-			desktop.show(new LCSArrayProperties(connection, la));
+			desktop.show(new LCSArrayProperties(session, la));
 		}
 		catch(Exception e) {
 			e.printStackTrace();

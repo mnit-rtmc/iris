@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -114,8 +114,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	protected final ProxyListModel<CabinetStyle> sty_model;
 
 	/** Create a new controller form */
-	public ControllerForm(TmsConnection tc, Controller c) {
-		super(TITLE, tc, c);
+	public ControllerForm(Session s, Controller c) {
+		super(TITLE, s, c);
 		link_model = state.getCommLinkModel();
 		cabinets = state.getCabinets();
 		cabinet = proxy.getCabinet();
@@ -195,7 +195,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Check if the user can activate a controller */
 	protected boolean canActivate() {
-		User user = connection.getUser();
+		User user = session.getUser();
 		Name name = new Name(Controller.SONAR_TYPE, "oname", "active");
 		return user.canUpdate(name.toString());
 	}

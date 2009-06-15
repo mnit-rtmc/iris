@@ -23,7 +23,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -52,16 +52,16 @@ public class DMSForm extends AbstractForm {
 	/** Button to delete the selected sign */
 	protected final JButton del_sign = new JButton("Delete");
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** DMS type cache */
 	protected final TypeCache<DMS> cache;
 
 	/** Create a new DMS form */
-	public DMSForm(TmsConnection tc, TypeCache<DMS> c) {
+	public DMSForm(Session s, TypeCache<DMS> c) {
 		super(TITLE);
-		connection = tc;
+		session = s;
 		cache = c;
 	}
 
@@ -131,7 +131,7 @@ public class DMSForm extends AbstractForm {
 
 	/** Show the properties form */
 	protected void showPropertiesForm(DMS dms) throws Exception {
-		SmartDesktop desktop = connection.getDesktop();
-		desktop.show(new DMSProperties(connection, dms));
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(new DMSProperties(session, dms));
 	}
 }

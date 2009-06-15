@@ -23,10 +23,9 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -51,16 +50,16 @@ public class WarningSignForm extends AbstractForm {
 	/** Button to delete the selected warning sign */
 	protected final JButton del_sign = new JButton("Delete");
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Warning sign type cache */
 	protected final TypeCache<WarningSign> cache;
 
 	/** Create a new warning sign form */
-	public WarningSignForm(TmsConnection tc, TypeCache<WarningSign> c) {
+	public WarningSignForm(Session s, TypeCache<WarningSign> c) {
 		super(TITLE);
-		connection = tc;
+		session = s;
 		cache = c;
 	}
 
@@ -130,7 +129,7 @@ public class WarningSignForm extends AbstractForm {
 
 	/** Show the properties form for a warning sign */
 	protected void showPropertiesForm(WarningSign ws) throws Exception {
-		SmartDesktop desktop = connection.getDesktop();
-		desktop.show(new WarningSignProperties(connection, ws));
+		session.getDesktop().show(
+			new WarningSignProperties(session, ws));
 	}
 }

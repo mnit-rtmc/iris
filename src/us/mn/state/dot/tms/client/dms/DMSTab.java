@@ -21,7 +21,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -46,11 +46,11 @@ public class DMSTab extends MapTab {
 	protected final JPanel mainPanel;
 
 	/** Create a new DMS tab */
-	public DMSTab(DMSManager manager, List<LayerState> lstates,
-		ViewLayer vlayer, TmsConnection tc)
+	public DMSTab(Session session, DMSManager manager,
+		List<LayerState> lstates, ViewLayer vlayer)
 	{
 		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
-		dispatcher = new DMSDispatcher(manager, tc);
+		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		map.addLayers(lstates);
 		map.addLayer(manager.getLayer().createState());

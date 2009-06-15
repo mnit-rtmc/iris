@@ -40,7 +40,6 @@ import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.utils.I18N;
 
-
 /**
  * The Main class for IrisClient.
  *
@@ -60,9 +59,6 @@ public class IrisClient extends JFrame {
 
 	/** Handles all user authentication */
 	protected final UserManager userManager;
-
-	/** Contains information about the current connection */
-	protected final TmsConnection tmsConnection;
 
 	/** Screen layout for desktop pane */
 	protected final ScreenLayout layout;
@@ -112,7 +108,6 @@ public class IrisClient extends JFrame {
 			}
 		});
 		userManager = new UserManager(desktop, props);
-		tmsConnection = new TmsConnection(desktop, userManager);
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
 		buildMenus();
@@ -176,11 +171,9 @@ public class IrisClient extends JFrame {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +
 			user.getFullName() + ")");
-		session = new Session(tmsConnection,
-			userManager.getSonarState(), props, logger);
+		session = new Session(userManager, desktop, props, logger);
 		arrangeTabs();
-		viewMenu = new ViewMenu(tmsConnection,
-			userManager.getSonarState());
+		viewMenu = new ViewMenu(session);
 		getJMenuBar().add(viewMenu, 1);
 
 		// post-login additions to help menu
@@ -222,4 +215,3 @@ public class IrisClient extends JFrame {
 			p.removeTabs();
 	}
 }
-

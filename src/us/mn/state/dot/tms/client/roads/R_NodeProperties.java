@@ -35,7 +35,7 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
@@ -95,8 +95,8 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected R_NodeDetectorModel det_model;
 
 	/** Create a new roadway node properties form */
-	public R_NodeProperties(TmsConnection tc, R_Node n) {
-		super(TITLE, tc, n);
+	public R_NodeProperties(Session s, R_Node n) {
+		super(TITLE, s, n);
 	}
 
 	/** Get the SONAR type cache */
@@ -107,7 +107,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		location = new LocationPanel(admin, proxy.getGeoLoc(),
-			connection.getSonarState());
+			session.getSonarState());
 		det_model = new R_NodeDetectorModel(state.getDetectors(),
 			proxy);
 		det_table.setAutoCreateColumnsFromModel(false);

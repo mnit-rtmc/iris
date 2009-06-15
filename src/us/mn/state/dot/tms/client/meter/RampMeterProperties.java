@@ -34,8 +34,8 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.RampMeterType;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -116,9 +116,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected final SonarState state;
 
 	/** Create a new ramp meter properties form */
-	public RampMeterProperties(TmsConnection tc, RampMeter meter) {
-		super(TITLE, tc, meter);
-		state = tc.getSonarState();
+	public RampMeterProperties(Session s, RampMeter meter) {
+		super(TITLE, s, meter);
+		state = s.getSonarState();
 		plan_model = new TimingPlanModel(state.getTimingPlans(), meter);
 	}
 
@@ -176,8 +176,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if(c == null)
 			controllerBtn.setEnabled(false);
 		else {
-			connection.getDesktop().show(
-				new ControllerForm(connection, c));
+			session.getDesktop().show(
+				new ControllerForm(session, c));
 		}
 	}
 

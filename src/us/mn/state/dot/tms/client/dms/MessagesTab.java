@@ -39,8 +39,8 @@ import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -97,14 +97,12 @@ public class MessagesTab extends JPanel {
 	/** SONAR user */
 	protected final User user;
 
-	/** Create a new messages tab.
-	 * @param tc TmsConnection
-	 * @param sign DMS proxy object */
-	public MessagesTab(TmsConnection tc, DMS sign) {
+	/** Create a new messages tab */
+	public MessagesTab(Session s, DMS sign) {
 		super(new GridBagLayout());
-		state = tc.getSonarState();
+		state = s.getSonarState();
 		proxy = sign;
-		user = state.lookupUser(tc.getUser().getName());
+		user = s.getUser();
 		sign_group_model = new SignGroupTableModel(sign,
 			state.getDmsSignGroups(), state.getSignGroups(), user);
 		initGroupTable();

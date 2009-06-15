@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -109,11 +109,11 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected LCSArray watching;
 
 	/** Create a new LCS dispatcher */
-	public LcsDispatcher(LCSArrayManager manager, TmsConnection tc) {
+	public LcsDispatcher(Session session, LCSArrayManager manager) {
 		super(new BorderLayout());
-		SonarState st = tc.getSonarState();
+		SonarState st = session.getSonarState();
 		cache = st.getLCSArrays();
-		user = st.lookupUser(tc.getUser().getName());
+		user = st.lookupUser(session.getUser().getName());
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearLcsAction(selectionModel, user);
 		clearBtn.setAction(clearAction);

@@ -34,7 +34,7 @@ import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -86,8 +86,8 @@ public class CommLinkForm extends AbstractForm {
 	/** Button to go to a failed controller */
 	protected final JButton go_button = new JButton("Go");
 
-	/** TMS connection */
-	protected final TmsConnection connection;
+	/** User session */
+	protected final Session session;
 
 	/** Comm Link type cache */
 	protected final TypeCache<CommLink> cache;
@@ -96,11 +96,11 @@ public class CommLinkForm extends AbstractForm {
 	protected final TypeCache<Controller> ccache;
 
 	/** Create a new comm link form */
-	public CommLinkForm(TmsConnection tc, TypeCache<CommLink> c,
+	public CommLinkForm(Session s, TypeCache<CommLink> c,
 		TypeCache<Controller> cc)
 	{
 		super(TITLE);
-		connection = tc;
+		session = s;
 		cache = c;
 		ccache = cc;
 	}
@@ -267,8 +267,8 @@ public class CommLinkForm extends AbstractForm {
 		int row = cs.getMinSelectionIndex();
 		if(row >= 0) {
 			Controller c = cmodel.getProxy(row);
-			connection.getDesktop().show(new ControllerForm(
-				connection, c));
+			session.getDesktop().show(new ControllerForm(
+				session, c));
 		}
 	}
 

@@ -43,7 +43,7 @@ import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.dms.quicklib.QLibCBox;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -136,12 +136,12 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected DMS watching;
 
 	/** Create a new DMS dispatcher */
-	public DMSDispatcher(DMSManager manager, TmsConnection tc) {
+	public DMSDispatcher(Session session, DMSManager manager) {
 		super(new BorderLayout());
-		SonarState st = tc.getSonarState();
+		SonarState st = session.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getDMSs();
-		user = st.lookupUser(tc.getUser().getName());
+		user = st.lookupUser(session.getUser().getName());
 		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearDmsAction(selectionModel, this, user);
