@@ -131,7 +131,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
-		io_model = new ControllerIOModel(proxy, state);
+		io_model = new ControllerIOModel(session, proxy);
 		io_model.initialize();
 		cabinets.addProxyListener(cab_listener);
 		comm_link.setModel(new WrapperComboBoxModel(link_model, false));

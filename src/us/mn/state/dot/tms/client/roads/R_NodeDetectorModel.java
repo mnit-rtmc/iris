@@ -54,11 +54,11 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 	protected final WrapperComboBoxModel det_model;
 
 	/** Create a new r_node detector table model */
-	public R_NodeDetectorModel(TypeCache<Detector> c, R_Node n) {
+	public R_NodeDetectorModel(Session s, TypeCache<Detector> c, R_Node n) {
 		super(c, true);
 		r_node = n;
 		det_model = new WrapperComboBoxModel(
-			Session.det_manager_singleton.getStyleModel(
+			s.getDetectorManager().getStyleModel(
 			DetectorManager.STYLE_NO_R_NODE), true);
 		initialize();
 	}

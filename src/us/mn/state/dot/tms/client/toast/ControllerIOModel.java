@@ -180,31 +180,31 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected final JComboBox d_combo = new JComboBox();
 
 	/** Create a new controller IO model */
-	public ControllerIOModel(Controller c, SonarState st) {
+	public ControllerIOModel(Session s, Controller c) {
+		state = s.getSonarState();;
 		controller = c;
-		state = st;
 		io = new ControllerIO[Controller.ALL_PINS];
 		types = new DeviceType[Controller.ALL_PINS];
 		d_combo.setRenderer(new DeviceComboRenderer());
 		a_model = new WrapperComboBoxModel(state.getAvailableAlarms(),
 			 true);
 		c_model = new WrapperComboBoxModel(
-			Session.cam_manager_singleton.getStyleModel(
+			s.getCameraManager().getStyleModel(
 			CameraManager.STYLE_NO_CONTROLLER), true);
 		dt_model = new WrapperComboBoxModel(
-			Session.det_manager_singleton.getStyleModel(
+			s.getDetectorManager().getStyleModel(
 			DetectorManager.STYLE_NO_CONTROLLER), true);
 		dms_model = new WrapperComboBoxModel(
-			Session.dms_manager_singleton.getStyleModel(
+			s.getDMSManager().getStyleModel(
 			DMSHelper.STYLE_NO_CONTROLLER), true);
 		lcsi_model = new WrapperComboBoxModel(
-			Session.lcsi_manager_singleton.getStyleModel(
+			s.getLCSIManager().getStyleModel(
 			LCSIManager.STYLE_NO_CONTROLLER), true);
 		m_model = new WrapperComboBoxModel(
-			Session.meter_manager_singleton.getStyleModel(
+			s.getMeterManager().getStyleModel(
 			MeterManager.STYLE_NO_CONTROLLER), true);
 		w_model = new WrapperComboBoxModel(
-			Session.warn_manager_singleton.getStyleModel(
+			s.getWarnManager().getStyleModel(
 			WarningSignManager.STYLE_NO_CONTROLLER), true);
 		a_watcher = new ControllerIOWatcher<Alarm>();
 		c_watcher = new ControllerIOWatcher<Camera>();

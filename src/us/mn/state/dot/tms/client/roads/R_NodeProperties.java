@@ -108,8 +108,8 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected void initialize() {
 		location = new LocationPanel(admin, proxy.getGeoLoc(),
 			session.getSonarState());
-		det_model = new R_NodeDetectorModel(state.getDetectors(),
-			proxy);
+		det_model = new R_NodeDetectorModel(session,
+			state.getDetectors(), proxy);
 		det_table.setAutoCreateColumnsFromModel(false);
 		det_table.setModel(det_model);
 		det_table.setColumnModel(det_model.createColumnModel());

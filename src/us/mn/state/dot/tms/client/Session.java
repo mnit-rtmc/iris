@@ -114,8 +114,18 @@ public class Session {
 	/** Camera manager */
 	protected final CameraManager cam_manager;
 
+	/** Get the camera manager */
+	public CameraManager getCameraManager() {
+		return cam_manager;
+	}
+
 	/** DMS manager */
 	protected final DMSManager dms_manager;
+
+	/** Get the DMS manager */
+	public DMSManager getDMSManager() {
+		return dms_manager;
+	}
 
 	/** LCS array manager */
 	protected final LCSArrayManager lcs_array_manager;
@@ -123,8 +133,18 @@ public class Session {
 	/** LCS indication manager */
 	protected final LCSIManager lcsi_manager;
 
+	/** Get the LCS indication manager */
+	public LCSIManager getLCSIManager() {
+		return lcsi_manager;
+	}
+
 	/** Detector manager */
 	protected final DetectorManager det_manager;
+
+	/** Get the detector manager */
+	public DetectorManager getDetectorManager() {
+		return det_manager;
+	}
 
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
@@ -132,16 +152,18 @@ public class Session {
 	/** Warning sign manager */
 	protected final WarningSignManager warn_manager;
 
+	/** Get the warning sign manager */
+	public WarningSignManager getWarnManager() {
+		return warn_manager;
+	}
+
 	/** Ramp meter manager */
 	protected final MeterManager meter_manager;
 
-	/** FIXME: this is a hack */
-	static public CameraManager cam_manager_singleton;
-	static public DMSManager dms_manager_singleton;
-	static public LCSIManager lcsi_manager_singleton;
-	static public DetectorManager det_manager_singleton;
-	static public MeterManager meter_manager_singleton;
-	static public WarningSignManager warn_manager_singleton;
+	/** Get the ramp meter manager */
+	public MeterManager getMeterManager() {
+		return meter_manager;
+	}
 
 	/** List of all tabs */
 	protected final List<IrisTab> tabs = new LinkedList<IrisTab>();
@@ -260,26 +282,20 @@ public class Session {
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		cam_manager = new CameraManager(this, state.getCameras(),
 			loc_manager);
-		cam_manager_singleton = cam_manager;
 		dms_manager = new DMSManager(this, state.getDMSs(),
 			loc_manager);
-		dms_manager_singleton = dms_manager;
 		lcs_array_manager = new LCSArrayManager(this,
 			state.getLCSArrays(), loc_manager);
 		lcsi_manager = new LCSIManager(state.getLCSIndications(),
 			loc_manager);
-		lcsi_manager_singleton = lcsi_manager;
 		det_manager = new DetectorManager(state.getDetectors(),
 			loc_manager);
-		det_manager_singleton = det_manager;
 		r_node_manager = new R_NodeManager(this,
 			state.getR_Nodes(), loc_manager);
 		warn_manager = new WarningSignManager(this,
 			state.getWarningSigns(), loc_manager);
-		warn_manager_singleton = warn_manager;
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
-		meter_manager_singleton = meter_manager;
 		vlayer = new ViewLayer();
 		User user = getUser();
 		if(canUpdate(user, DMS.SONAR_TYPE, "messageNext"))
