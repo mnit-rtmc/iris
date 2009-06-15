@@ -180,17 +180,21 @@ abstract public class OpDms extends OpDevice {
 		}
 	}
 
-	/** set message attributes which are a function of the operation, sign, etc. */
+	/** set message attributes which are a function of the 
+	 *  operation, sign, etc. */
 	public void setMsgAttributes(Message m) {
 		m.setTimeoutMS(this.calcTimeoutMS());
 	}
 
-	/**
-	  * handle a failed operation.
-	  * @return true if the operation should be retried else false.
-	  */
+	/** Handle a failed operation.
+	  * @param errmsg Error message
+	  * @return true if the operation should be retried else false. */
 	protected boolean flagFailureShouldRetry(String errmsg) {
-	 	String msg = m_dms.getName() + " error: " + errmsg;
+	 	String msg = m_dms.getName();
+		if(errmsg == null || errmsg.isEmpty())
+			msg += " unknown error.";
+		else
+			msg += " " + errmsg;
 
 		// trigger error handling, changes status if necessary
 		// phase is set to null if no retry should be performed
