@@ -17,15 +17,15 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A lane-use graphic is an association between lane-use indication and a
- * graphic.
+ * A lane-use MULTI is an association between lane-use indication and a
+ * MULTI string.
  *
  * @author Douglas Lau
  */
-public interface LaneUseGraphic extends SonarObject {
+public interface LaneUseMulti extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "lane_use_graphic";
+	String SONAR_TYPE = "lane_use_multi";
 
 	/** Set the indication (ordinal of LaneUseIndication) */
 	void setIndication(int i);
@@ -33,27 +33,9 @@ public interface LaneUseGraphic extends SonarObject {
 	/** Get the indication (ordinal of LaneUseIndication) */
 	int getIndication();
 
-	/** Set the graphic */
-	void setGraphic(Graphic g);
+	/** Set the MULTI string */
+	void setMulti(String m);
 
-	/** Get the graphic */
-	Graphic getGraphic();
-
-	/** Set the foreground color */
-	void setForeground(int f);
-
-	/** Get the foreground color */
-	int getForeground();
-
-	/** Set the page number */
-	void setPage(int p);
-
-	/** Get the page number */
-	int getPage();
-
-	/** Set the page on time (tenths of a second) */
-	void setOnTime(int t);
-
-	/** Get the page on time (tenths of a second) */
-	int getOnTime();
+	/** Get the MULTI string */
+	String getMulti();
 }

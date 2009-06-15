@@ -15,17 +15,14 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.LinkedList;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.LaneUseGraphic;
-import us.mn.state.dot.tms.LaneUseGraphicHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LaneUseMulti;
+import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArrayHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -37,16 +34,6 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  * @author Douglas Lau
  */
 public class OpSendLCSIndications extends OpLCS {
-
-	/** Calculate the X position of a graphic */
-	static protected int calculateGraphicX(DMS dms, Graphic g) {
-		return 1 + (dms.getWidthPixels() - g.getWidth()) / 2;
-	}
-
-	/** Calculate the Y position of a graphic */
-	static protected int caluclateGraphicY(DMS dms, Graphic g) {
-		return 1 + (dms.getHeightPixels() - g.getHeight()) / 2;
-	}
 
 	/** Indications to send */
 	protected final Integer[] indications;
@@ -159,25 +146,10 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Create a MULTI string for a lane use indication */
 	protected String createIndicationMulti(DMS dms, int ind) {
-		MultiString ms = new MultiString();
-		for(LaneUseGraphic lug:
-			LaneUseGraphicHelper.getIndicationGraphics(ind))
-		{
-			Graphic g = lug.getGraphic();
-			int foreground = lug.getForeground();
-			int red = (foreground >> 16) & 0xFF;
-			int green = (foreground >> 8) & 0xFF;
-			int blue = foreground & 0xFF;
-			int x = calculateGraphicX(dms, g);
-			int y = caluclateGraphicY(dms, g);
-			if(x > 0 && y > 0) {
-				if(ms.toString().length() > 0)
-					ms.addPage();
-				ms.setColorForeground(red, green, blue);
-				ms.addGraphic(g.getGNumber(), x, y);
-			}
-		}
-		String m = ms.toString();
+		String m = "";
+		LaneUseMulti lum = LaneUseMultiHelper.find(ind);
+		if(lum != null)
+			m = lum.getMulti();
 		if(m.length() > 0 ||
 		   LaneUseIndication.fromOrdinal(ind) == LaneUseIndication.DARK)
 			return m;
