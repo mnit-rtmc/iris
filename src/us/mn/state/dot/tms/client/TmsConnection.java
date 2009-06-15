@@ -57,9 +57,6 @@ public class TmsConnection {
 		return userManager.getUser();
 	}
 
-	/** Open the connection */
-	public void open() { }
-
 	/** Close the connection */
 	public void close() {
 		desktop.closeFrames();

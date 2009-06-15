@@ -176,7 +176,6 @@ public class IrisClient extends JFrame {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +
 			user.getFullName() + ")");
-		tmsConnection.open();
 		session = new Session(tmsConnection,
 			userManager.getSonarState(), props, logger);
 		arrangeTabs();
