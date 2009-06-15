@@ -38,11 +38,10 @@ import us.mn.state.dot.tms.utils.PropertyFile;
 
 /**
  * The UserManager is used to display a login prompt and to verify that the
- * user logging in has appropriate rights to use the client.  Checks for
- * administrative privaleges.  Also used to log out of the connection when
- * exiting the client. Auto-login functionality is enabled by adding
- * properties 'autologin.username' and 'autologin.password' to the client
- * properties file.
+ * user logging in has appropriate rights to use the client.  Also used to log
+ * out of the connection when exiting the client.  Auto-login functionality is
+ * enabled by adding properties 'autologin.username' and 'autologin.password'
+ * to the client properties file.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
