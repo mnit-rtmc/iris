@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -342,23 +343,40 @@ public class AwsMsg {
 		Log.finest("AwsMsg.shouldSendMessage(): DMS " +
 			getIrisDmsId() + " is AWS allowed & controlled.");
 
-		// be safe and send the aws message by default
+		// Be safe and send the aws message by default, unless:
+		//	1) AWS message deployed, and
+		//	2) priority is AWS, and
+		//	3) MULTI strings are equal.
 		boolean send = true;
-
-		// message already deployed?
-		SignMessage cur = dms.getMessageCurrent();
-		if(cur != null) {
-			// comparison of normalized MULTI strings
-			String m1 = cur.getMulti();
-			String m2 = createMultiString();
-			send = !(new MultiString(m1).
-				equals(new MultiString(m2)));
-			Log.finest("cur="+m1+", new="+m2+", equal="+!send);
-		}
+		if(DMSHelper.isAwsMessageDeployed(dms))
+			if(equalsCurrentSignMessage(dms, createMultiString()))
+				send = false;
 
 		Log.finest("AwsMsg.shouldSendMessage(): should send="
 			+ send);
 		return send;
+	}
+
+	/** Is the current sign message equal to the specified MULT? */
+	protected static boolean equalsCurrentSignMessage(DMSImpl dms, 
+		String multi) 
+	{
+		if(dms == null || multi == null)
+			return false;
+		SignMessage cur = dms.getMessageCurrent();
+		if(cur != null) {
+			// comparison of normalized MULTI strings
+			String curm = cur.getMulti();
+			boolean eq = new MultiString(curm).equals(
+				new MultiString(multi));
+			Log.finest("cur="+curm+", new="+multi+", equal="+eq);
+			Log.finest("cur normalized=" +
+				new MultiString(curm).normalize());
+			Log.finest("new normalized=" +
+				new MultiString(multi).normalize());
+			return eq; 
+		}
+		return false;
 	}
 
 	/** Send a message to the specified DMS.
