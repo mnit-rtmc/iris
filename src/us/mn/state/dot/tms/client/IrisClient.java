@@ -115,7 +115,7 @@ public class IrisClient extends JFrame {
 		tmsConnection = new TmsConnection(desktop, userManager);
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
-		buildMenus( userManager );
+		buildMenus();
 		userManager.addLoginListener(new LoginListener() {
 			public void login() throws Exception {
 				setUser(userManager.getUser());
@@ -138,9 +138,9 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Build all the menus */
-	protected void buildMenus(UserManager a) {
+	protected void buildMenus() {
 		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(new SessionMenu(a));
+		menuBar.add(new SessionMenu(userManager));
 		m_helpmenu = new HelpMenu(desktop);
 		menuBar.add(m_helpmenu);
 		this.setJMenuBar(menuBar);
