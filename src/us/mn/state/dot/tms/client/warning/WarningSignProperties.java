@@ -33,7 +33,6 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.ControllerForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.LocationPanel;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -114,10 +113,8 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		Controller c = proxy.getController();
 		if(c == null)
 			controller.setEnabled(false);
-		else {
-			SmartDesktop desktop = session.getDesktop();
-			desktop.show(new ControllerForm(session, c));
-		}
+		else
+			showForm(new ControllerForm(session, c));
 	}
 
 	/** Create the setup panel */

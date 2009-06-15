@@ -103,4 +103,10 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		cache.removeProxyListener(this);
 		cache.ignoreObject(proxy);
 	}
+
+	/** Show another form */
+	protected void showForm(SonarObjectForm form) {
+		SmartDesktop desktop = session.getDesktop();
+		desktop.show(form);
+	}
 }

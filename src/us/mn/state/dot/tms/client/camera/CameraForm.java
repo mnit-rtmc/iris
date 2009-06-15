@@ -129,7 +129,7 @@ public class CameraForm extends AbstractForm {
 	}
 
 	/** Show the properties form for a camera */
-	protected void showPropertiesForm(Camera cam) throws Exception {
+	protected void showPropertiesForm(Camera cam) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(new CameraProperties(session, cam));
 	}
