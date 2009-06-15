@@ -12,11 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.sonar;
+package us.mn.state.dot.tms.client.proxy;
 
 import javax.swing.Action;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
  * Action to access the properties of a SONAR map object.

@@ -35,11 +35,11 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
-import us.mn.state.dot.tms.client.sonar.PropertiesAction;
 import us.mn.state.dot.tms.client.sonar.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
