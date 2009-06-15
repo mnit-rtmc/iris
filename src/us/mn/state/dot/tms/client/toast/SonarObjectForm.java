@@ -51,11 +51,6 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		admin = true;
 	}
 
-	/** Get the TMS connection */
-	public TmsConnection getConnection() {
-		return connection;
-	}
-
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		setLayout(new BorderLayout());
