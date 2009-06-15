@@ -113,7 +113,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		super(new BorderLayout());
 		SonarState st = session.getSonarState();
 		cache = st.getLCSArrays();
-		user = st.lookupUser(session.getUser().getName());
+		user = session.getUser();
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearLcsAction(selectionModel, user);
 		clearBtn.setAction(clearAction);

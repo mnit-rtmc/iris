@@ -141,7 +141,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		SonarState st = session.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getDMSs();
-		user = st.lookupUser(session.getUser().getName());
+		user = session.getUser();
 		creator = new SignMessageCreator(st.getSignMessages(), user);
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearDmsAction(selectionModel, this, user);
