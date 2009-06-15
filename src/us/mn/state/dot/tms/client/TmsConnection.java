@@ -31,9 +31,6 @@ public class TmsConnection {
 	/** The desktop used by this connection */
 	private final SmartDesktop desktop;
 
-	/** Is the connection open? */
-	private boolean connectionOpen = false;
-
 	/** Currently login user */
 	protected final UserManager userManager;
 
@@ -60,19 +57,11 @@ public class TmsConnection {
 		return userManager.getUser();
 	}
 
-	/** Is the connection open? */
-	public boolean isOpen() {
-		return connectionOpen;
-	}
-
 	/** Open the connection */
-	public void open() throws IOException {
-		connectionOpen = true;
-	}
+	public void open() { }
 
 	/** Close the connection */
 	public void close() {
 		desktop.closeFrames();
-		connectionOpen = false;
 	}
 }
