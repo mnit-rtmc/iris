@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import javax.swing.Action;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
  * This action sets a lock on the selected LCS array.

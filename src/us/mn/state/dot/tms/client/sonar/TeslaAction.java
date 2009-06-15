@@ -20,6 +20,7 @@ import javax.swing.Action;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.WebBrowser;
+import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
  * An action to launch a web browser for TESLA error logging.

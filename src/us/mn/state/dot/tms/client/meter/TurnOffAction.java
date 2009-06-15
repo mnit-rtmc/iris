@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.Action;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.client.sonar.ProxyAction;
+import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
  * Turns off the selected mamp meter.
