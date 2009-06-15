@@ -112,7 +112,7 @@ public class IrisClient extends JFrame {
 			}
 		});
 		userManager = new UserManager(desktop, props);
-		tmsConnection = new TmsConnection(desktop, userManager, props);
+		tmsConnection = new TmsConnection(desktop, userManager);
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
 		buildMenus( userManager );
@@ -195,7 +195,6 @@ public class IrisClient extends JFrame {
 	protected void loggedout() {
 		clearViewMenu();
 		removeTabs();
-		tmsConnection.close();
 		closeSession();
 		setTitle("IRIS: Login to Start");
 		validate();

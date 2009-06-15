@@ -35,9 +35,7 @@ public class TmsConnection {
 	protected final UserManager userManager;
 
 	/** Create a new TmsConnection that is closed */
-	public TmsConnection(SmartDesktop desktop, UserManager userManager,
-		Properties props)
-	{
+	public TmsConnection(SmartDesktop desktop, UserManager userManager) {
 		this.desktop = desktop;
 		this.userManager = userManager;
 	}
@@ -55,10 +53,5 @@ public class TmsConnection {
 	/** Get the user information for the user who owns the connection */
 	public User getUser() {
 		return userManager.getUser();
-	}
-
-	/** Close the connection */
-	public void close() {
-		desktop.closeFrames();
 	}
 }

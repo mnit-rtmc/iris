@@ -51,6 +51,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
+import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
 // agency specific imports
@@ -66,6 +67,9 @@ public class Session {
 
 	/** Contains information about the current connection */
 	protected final TmsConnection tmsConnection;
+
+	/** Desktop used by this session */
+	protected final SmartDesktop desktop;
 
 	/** Client properties */
 	protected final Properties props;
@@ -219,6 +223,7 @@ public class Session {
 		throws TdxmlException, IOException
 	{
 		tmsConnection = tc;
+		desktop = tc.getDesktop();
 		props = p;
 		logger = l;
 		baseLayers = new BaseLayers().getLayers();
@@ -280,6 +285,7 @@ public class Session {
 
 	/** Dispose of the session */
 	public void dispose() {
+		desktop.closeFrames();
 		for(IrisTab tab: tabs)
 			tab.dispose();
 		if(gpoly != null)
