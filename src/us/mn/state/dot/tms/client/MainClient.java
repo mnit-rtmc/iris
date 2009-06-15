@@ -104,19 +104,6 @@ public class MainClient {
 	}
 
 	/**
-	 * Main entry point.
-	 *
-	 * @param args Arguments passed to the application.
-	 */
-	static protected void execute(final String[] args) throws IOException {
-		sanityChecks();
-		IrisClient c = createClientSplash(args);
-		ExceptionDialog.setOwner(c);
-		Scheduler.setHandler(new SimpleHandler());
-		c.setVisible(true);
-	}
-
-	/**
 	 * Main IRIS client entry point.
 	 *
 	 * @param args Arguments passed to the application.
@@ -130,25 +117,37 @@ public class MainClient {
 		}
 	}
 
-	/** perform sanity and debug checks */
-	static public void sanityChecks() {
-
-		// does the default time zone support DST?
-		if (!TimeZone.getDefault().useDaylightTime()) {
-			System.err.println("Warning: the default time zone ("+
-			TimeZone.getDefault().getDisplayName()+
-			") doesn't support DST. Specify the time zone via the command line.");
-		}
-
-		// flag if assertions on or off
-		if(true) {
-			//ClassLoader.getSystemClassLoader().setDefaultAssertionStatus(true);
-			boolean assertsEnabled = false;
-			assert assertsEnabled = true;    // Intentional side-effect
-			String msg = "Assertions are turned " + (assertsEnabled ? "on" : "off") + ".";
-			System.err.println(msg);
-		}
-
+	/**
+	 * Main entry point.
+	 *
+	 * @param args Arguments passed to the application.
+	 */
+	static protected void execute(final String[] args) throws IOException {
+		checkTimeZone();
+		checkAssert();
+		IrisClient c = createClientSplash(args);
+		ExceptionDialog.setOwner(c);
+		Scheduler.setHandler(new SimpleHandler());
+		c.setVisible(true);
 	}
 
+	/** Check time zone */
+	static protected void checkTimeZone() {
+		// does the default time zone support DST?
+		if(!TimeZone.getDefault().useDaylightTime()) {
+			System.err.println("Warning: the default time zone (" +
+				TimeZone.getDefault().getDisplayName() +
+				") doesn't support DST.  Specify the time " +
+				"zone via the command line.");
+		}
+	}
+
+	/** Check assertion status */
+	static protected void checkAssert() {
+		boolean assertsEnabled = false;
+		// Intentional assignment side-effect
+		assert assertsEnabled = true;
+		System.err.println("Assertions are turned " +
+			(assertsEnabled ? "on" : "off") + ".");
+	}
 }
