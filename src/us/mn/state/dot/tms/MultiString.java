@@ -127,9 +127,11 @@ public class MultiString {
 	/** Test if the MULTI string is equal to another MULTI string */
 	public boolean equals(Object o) {
 		if(o instanceof MultiString)
-			return normalize().equals(o.toString());
+			return normalize().equals(
+				((MultiString)o).normalize());
 		if(o instanceof String)
-			return normalize().equals(o.toString());
+			return normalize().equals(
+				new MultiString((String)o).normalize());
 		return false;
 	}
 
