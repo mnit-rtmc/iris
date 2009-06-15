@@ -47,9 +47,9 @@ import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.meter.MeterManager;
+import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
-import us.mn.state.dot.tms.client.sonar.GeoLocManager;
 import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 
 /**
  * This is an action to unpublish a set of cameras.

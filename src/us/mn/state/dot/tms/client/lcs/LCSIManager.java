@@ -19,9 +19,9 @@ import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.sonar.GeoLocManager;
-import us.mn.state.dot.tms.client.sonar.ProxyManager;
 
 /**
  * The LCSIManager class provides proxies for LCSIndication objects.

@@ -22,7 +22,7 @@ import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.sonar.StyleSummary;
+import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

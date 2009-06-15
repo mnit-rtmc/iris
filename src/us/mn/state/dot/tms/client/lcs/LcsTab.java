@@ -23,7 +23,7 @@ import us.mn.state.dot.trafmap.TunnelLayer;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.sonar.StyleSummary;
+import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
  * GUI form for working with LaneControlSignal objects.

@@ -26,11 +26,11 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.client.TmsConnection;
+import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.sonar.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
-import us.mn.state.dot.tms.client.sonar.ProxyManager;
-import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 

@@ -29,12 +29,11 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.TmsConnection;
-import us.mn.state.dot.tms.client.sonar.GeoLocManager;
-import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
+import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
+import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.sonar.PropertiesAction;
-import us.mn.state.dot.tms.client.sonar.ProxyManager;
-import us.mn.state.dot.tms.client.sonar.SonarLayer;
-import us.mn.state.dot.tms.client.sonar.StyleListModel;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**

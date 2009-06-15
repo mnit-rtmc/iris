@@ -21,7 +21,7 @@ import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 
 /**
  * Action to clear all selected LCS arrays.

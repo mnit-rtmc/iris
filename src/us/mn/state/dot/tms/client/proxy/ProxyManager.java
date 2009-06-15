@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.sonar;
+package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
@@ -80,7 +80,7 @@ abstract public class ProxyManager<T extends SonarObject>
 		new HashMap<Integer, T>();
 
 	/** Map layer for the proxy type */
-	protected final SonarLayer<T> layer;
+	protected final ProxyLayer<T> layer;
 
 	/** Create a new proxy manager */
 	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
@@ -96,8 +96,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Create a layer for this proxy type */
-	protected SonarLayer<T> createLayer() {
-		return new SonarLayer<T>(this);
+	protected ProxyLayer<T> createLayer() {
+		return new ProxyLayer<T>(this);
 	}
 
 	/** Initialize the proxy manager. This cannot be done in the constructor
@@ -192,7 +192,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Create a map layer for the proxy type */
-	public SonarLayer<T> getLayer() {
+	public ProxyLayer<T> getLayer() {
 		return layer;
 	}
 

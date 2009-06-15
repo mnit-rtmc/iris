@@ -31,8 +31,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.TmsForm;
 
 /**

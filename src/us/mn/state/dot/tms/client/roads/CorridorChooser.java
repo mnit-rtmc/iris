@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2008  Minnesota Department of Transportation
+ * Copyright (C) 2006-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.client.sonar.SonarLayer;
+import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
@@ -41,7 +41,7 @@ public class CorridorChooser extends JPanel {
 	protected final R_NodeManager manager;
 
 	/** Roadway node layer */
-	protected final SonarLayer<R_Node> layer;
+	protected final ProxyLayer<R_Node> layer;
 
 	/** Map bean */
 	protected final MapBean map;

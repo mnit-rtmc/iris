@@ -20,7 +20,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.client.sonar.StyleListModel;
+import us.mn.state.dot.tms.client.proxy.StyleListModel;
 
 /**
  * A model for ramp meter styles.  This is needed to listen for changes to

@@ -39,8 +39,8 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.video.AbstractDataSource;
@@ -56,7 +56,7 @@ import us.mn.state.dot.video.VideoException;
 public class CameraViewer extends JPanel
 	implements ProxySelectionListener<Camera>
 {
-	/** The system attribute for the number of frames to process (for streaming) */
+	/** System attribute for number of frames to process (for streaming) */
 	static protected final int STREAM_DURATION =
 		SystemAttrEnum.CAMERA_NUM_VIDEO_FRAMES.getInt();
 

@@ -46,8 +46,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.TmsConnection;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.dms.quicklib.QLibCBox;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionListener;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18N;
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.sonar;
+package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
@@ -29,11 +29,11 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 
 /**
- * Layer for drawing SONAR objects on the map.
+ * Layer for drawing SONAR proxy objects on the map.
  *
  * @author Douglas Lau
  */
-public class SonarLayer<T extends SonarObject> extends Layer
+public class ProxyLayer<T extends SonarObject> extends Layer
 	implements DynamicLayer, ProxyListener<T>
 {
 	/** Shape used for calculating the layer extent */
@@ -52,7 +52,7 @@ public class SonarLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Create a new SONAR map layer */
-	public SonarLayer(ProxyManager<T> m) {
+	public ProxyLayer(ProxyManager<T> m) {
 		super(m.getProxyType());
 		manager = m;
 		cache = manager.getCache();
@@ -165,7 +165,7 @@ public class SonarLayer<T extends SonarObject> extends Layer
 
 	/** Create a new layer state */
 	public LayerState createState() {
-		LayerState s = new SonarLayerState(this);
+		LayerState s = new ProxyLayerState(this);
 		s.addTheme(manager.getTheme());
 		s.setTheme(manager.getTheme());
 		return s;

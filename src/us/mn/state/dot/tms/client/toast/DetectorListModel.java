@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import java.util.TreeSet;
 import javax.swing.Icon;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.client.sonar.ProxyManager;
-import us.mn.state.dot.tms.client.sonar.StyleListModel;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
+import us.mn.state.dot.tms.client.proxy.StyleListModel;
 
 /**
  * A list model for detector styles.

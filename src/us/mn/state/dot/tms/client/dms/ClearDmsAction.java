@@ -23,7 +23,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.client.sonar.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 
 /**
  * Action to clear all selected DMS.

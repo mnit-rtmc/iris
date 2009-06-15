@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.sonar;
+package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.Component;
 import java.awt.event.InputEvent;
@@ -26,11 +26,11 @@ import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Base class for all SONAR map layer states.
+ * Base class for all SONAR proxy map layer states.
  *
  * @author Douglas Lau
  */
-public class SonarLayerState<T extends SonarObject> extends LayerState {
+public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
@@ -41,8 +41,8 @@ public class SonarLayerState<T extends SonarObject> extends LayerState {
 	/** Listener for proxy selection events */
 	protected final ProxySelectionListener<T> listener;
 
-	/** Create a new sonar layer state */
-	public SonarLayerState(SonarLayer<T> layer) {
+	/** Create a new sonar proxy layer state */
+	public ProxyLayerState(ProxyLayer<T> layer) {
 		super(layer);
 		manager = layer.getManager();
 		model = manager.getSelectionModel();
