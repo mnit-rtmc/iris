@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.sonar;
+package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.Color;
 import java.awt.Shape;
@@ -21,6 +21,8 @@ import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.client.sonar.MapGeoLoc;
+import us.mn.state.dot.tms.client.sonar.ProxyManager;
 
 /**
  * Theme for SONAR proxy objects on map
