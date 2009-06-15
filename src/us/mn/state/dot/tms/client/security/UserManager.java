@@ -121,7 +121,7 @@ public class UserManager {
 	}
 
 	/** auto-login the user if enabled */
-	public void autoLogin() throws Exception {
+	public void autoLogin() {
 		if(isLoggedIn())
 			return;
 		if(props == null)
@@ -144,6 +144,7 @@ public class UserManager {
 			}
 			catch(Exception ex) {
 				System.err.println("Auto-login failed.");
+				ex.printStackTrace();
 			}
 		}
 

@@ -80,7 +80,7 @@ public class MainClient {
 
 	/** Create the IRIS client */
 	static protected IrisClient createClient(String[] args)
-		throws Exception
+		throws IOException
 	{
 		URL url = createURL(getPropertyFile(args));
 		Properties props = readPropertyFile(url);
@@ -90,7 +90,7 @@ public class MainClient {
 
 	/** Create the IRIS client with a splash screen */
 	static protected IrisClient createClientSplash(String[] args)
-		throws Exception
+		throws IOException
 	{
 		SplashScreen splash = new SplashScreen();
 		splash.setVisible(true);
@@ -108,7 +108,7 @@ public class MainClient {
 	 *
 	 * @param args Arguments passed to the application.
 	 */
-	static protected void execute(final String[] args) throws Exception {
+	static protected void execute(final String[] args) throws IOException {
 		sanityChecks();
 		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
@@ -125,7 +125,7 @@ public class MainClient {
 		try {
 			execute(args);
 		}
-		catch(Exception e) {
+		catch(IOException e) {
 			new ExceptionDialog(e).setVisible(true);
 		}
 	}
