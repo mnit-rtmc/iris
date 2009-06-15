@@ -32,6 +32,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.SwingConstants;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -340,11 +341,15 @@ public class SignMessageComposer extends JPanel {
 		Box box = Box.createHorizontalBox();
 		JLabel label = new JLabel();
 		label.setLabelFor(timeSpin);
+		label.setHorizontalAlignment(SwingConstants.RIGHT);
 		label.setDisplayedMnemonic('P');
 		label.setText(I18N.get("PgOnTimeSpinner")); //FIXME: move to a new ISpinner class.
+		label.setMaximumSize(label.getMinimumSize());
+		box.add(Box.createHorizontalGlue());
 		box.add(label);
-		box.add(timeSpin);
 		box.add(Box.createHorizontalStrut(4));
+		box.add(timeSpin);
+		box.add(Box.createHorizontalGlue());
 		return box;
 	}
 
