@@ -96,10 +96,12 @@ abstract public class OpDms extends OpDevice {
 	/** Cleanup the operation, which is called by MessagePoller.doPoll() 
 	 *  if an operation is successful. */
 	public void cleanup() {
-		if(success)
+		if(success) {
 			m_dms.requestConfigure();
-		else
+		} else {
+			// flag dms not configured
 			m_dms.setConfigure(false);
+		}
 		super.cleanup();
 	}
 
@@ -134,6 +136,22 @@ abstract public class OpDms extends OpDevice {
 	/** return the timeout for this operation */
 	public int calcTimeoutMS() {
 		return getTimeoutSecs() * 1000;
+	}
+
+	/** Determine if the specified DMS is periodically queriable. */
+	public static boolean isDmsPeriodicallyQueriable(DMSImpl d) {
+		if(d == null)
+			return false;
+		SignAccessType at = getSignAccessType(d);
+		if(at == SignAccessType.DIALUPMODEM) {
+			return false;
+		} else if(at == SignAccessType.WIZARD) {
+			return true;
+		} else {
+			// if unknown access type, this happens when the 
+			// dms is not configured.
+			return false;
+		}
 	}
 
 	/** Get the timeout for this operation (seconds) */
@@ -223,8 +241,7 @@ abstract public class OpDms extends OpDevice {
 
 	/** return true if dms has been configured */
 	public boolean dmsConfigured() {
-		// FIXME: there must be a better way to check for this condition
-		return m_dms.getWidthPixels() != null;
+		return m_dms.getConfigure();
 	}
 
 	/** Return the page on-time. If a value is not found in the MULTI

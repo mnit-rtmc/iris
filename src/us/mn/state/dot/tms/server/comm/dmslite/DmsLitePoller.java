@@ -112,9 +112,13 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		case QUERY_CONFIGURATION:
 			new OpQueryConfig(dms, u).start();
 			break;
+		// periodic query originating from TMSImpl
 		case QUERY_MESSAGE:
+			new OpQueryMsg(dms, u, r).start();
+			break;
+		// User presses 'get status' button
 		case QUERY_STATUS:
-			new OpQueryMsg(dms, u).start();
+			new OpQueryMsg(dms, u, r).start();
 			break;
 		case RESET_DEVICE:
 			new OpReset(dms, u).start();

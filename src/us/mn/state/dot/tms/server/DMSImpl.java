@@ -210,9 +210,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Configure flag indicates that the sign has been configured */
 	protected boolean configure;
 
-	/** Set the configure flag */
+	/** Set the configure flag.
+	 *  @param c Set to true to indicate the DMS is configured. */
 	public void setConfigure(boolean c) {
 		configure = c;
+	}
+
+	/** Get the configure flag.
+	 *  @return True to indicate the DMS is configured else false. */
+	public boolean getConfigure() {
+		return configure;
 	}
 
 	/** Device location */

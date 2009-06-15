@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -41,9 +42,13 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class OpQueryMsg extends OpDms {
 
+	/** SignRequest from the poller */
+	protected final SignRequest m_sreq;
+
 	/** constructor */
-	public OpQueryMsg(DMSImpl d, User u) {
+	public OpQueryMsg(DMSImpl d, User u, SignRequest sreq) {
 		super(DEVICE_DATA, d, "Retrieving message", u);
+		m_sreq = sreq;
 	}
 
 	/**
@@ -158,6 +163,7 @@ public class OpQueryMsg extends OpDms {
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
 
+		// already have dms configuration
 		if(dmsConfigured())
 			return new PhaseQueryMsg();
 
@@ -244,9 +250,15 @@ public class OpQueryMsg extends OpDms {
 			throws IOException
 		{
 			Log.finest(
-			    "OpQueryMsg.PhaseQueryMsg.poll(msg) called.");
+				"OpQueryMsg.PhaseQueryMsg.poll(msg) called, " +
+				"dms=" + m_dms.getName());
 			assert argmess instanceof Message :
 			       "wrong message type";
+
+			// ignore periodic poll of dms on dial-up modem lines.
+			if(m_sreq == SignRequest.QUERY_MESSAGE)
+				if(!isDmsPeriodicallyQueriable(m_dms))
+					return null;
 
 			Message mess = (Message) argmess;
 
