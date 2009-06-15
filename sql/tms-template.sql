@@ -668,17 +668,11 @@ CREATE RULE lcs_indication_update AS ON UPDATE TO iris.lcs_indication DO INSTEAD
 CREATE RULE lcs_indication_delete AS ON DELETE TO iris.lcs_indication DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
-CREATE TABLE iris.lane_use_graphic (
+CREATE TABLE iris.lane_use_multi (
 	name VARCHAR(10) PRIMARY KEY,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
-	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name),
-	foreground INTEGER NOT NULL,
-	page INTEGER NOT NULL,
-	on_time INTEGER NOT NULL
+	multi VARCHAR(256) NOT NULL
 );
-
-CREATE UNIQUE INDEX lane_use_graphic_ipage ON iris.lane_use_graphic
-	USING btree (indication, page);
 
 CREATE TABLE sign_group (
 	name VARCHAR(16) PRIMARY KEY,

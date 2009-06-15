@@ -30,17 +30,11 @@ CREATE TABLE iris.glyph (
 	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name)
 );
 
-CREATE TABLE iris.lane_use_graphic (
+CREATE TABLE iris.lane_use_multi (
 	name VARCHAR(10) PRIMARY KEY,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
-	graphic VARCHAR(20) NOT NULL REFERENCES iris.graphic(name),
-	foreground INTEGER NOT NULL,
-	page INTEGER NOT NULL,
-	on_time INTEGER NOT NULL
+	multi VARCHAR(256) NOT NULL
 );
-
-CREATE UNIQUE INDEX lane_use_graphic_ipage ON iris.lane_use_graphic
-	USING btree (indication, page);
 
 INSERT INTO iris.graphic (name, bpp, height, width, pixels)
 	(SELECT name, bpp, height, width, pixels FROM graphic);
