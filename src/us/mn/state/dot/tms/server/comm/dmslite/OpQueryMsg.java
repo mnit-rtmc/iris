@@ -382,7 +382,7 @@ public class OpQueryMsg extends OpDms {
 					irisUser = IrisUserHelper.lookup(owner);
 					String iuser = (irisUser == null ? 
 						"null" : irisUser.getName());
-					Log.warning("OpQueryMsg: owner read from " + 
+					Log.finest("OpQueryMsg: owner read from " + 
 						"sensorserver="+owner+", Iris user lookup="+iuser);
 				}
 
