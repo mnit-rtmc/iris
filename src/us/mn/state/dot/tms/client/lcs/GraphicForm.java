@@ -14,13 +14,24 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.TreeSet;
+import javax.imageio.ImageIO;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -35,6 +46,11 @@ public class GraphicForm extends AbstractForm {
 
 	/** Frame title */
 	static protected final String TITLE = "Graphics";
+
+	/** Filename extension filter */
+	static protected final FileNameExtensionFilter FILTER =
+		new FileNameExtensionFilter("PNG, GIF and BMP Images",
+		"png", "gif", "bmp");
 
 	/** Table model for graphics */
 	protected GraphicModel model;
@@ -114,7 +130,72 @@ public class GraphicForm extends AbstractForm {
 	}
 
 	/** Create a new graphic */
-	protected void createGraphic() {
-		// FIXME: select file
+	protected void createGraphic() throws IOException {
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileFilter(FILTER);
+		int r = jfc.showOpenDialog(null);
+		if(r == JFileChooser.APPROVE_OPTION) {
+			BufferedImage im = ImageIO.read(jfc.getSelectedFile());
+			if(im.getHeight() <= 64 && im.getWidth() <= 80)
+				createGraphic(im);
+		}
+	}
+
+	/** Create a new graphic */
+	protected void createGraphic(BufferedImage im) {
+		String name = createUniqueName();
+		Integer g_number = getGNumber();
+		if(name != null) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("g_number", g_number);
+			attrs.put("bpp", 1);
+			attrs.put("width", im.getWidth());
+			attrs.put("height", im.getHeight());
+			attrs.put("pixels", encodePixels(im));
+			cache.createObject(name, attrs);
+		}
+	}
+
+	/** Encode the pixel data for an image */
+	protected String encodePixels(BufferedImage im) {
+		BitmapGraphic bg = new BitmapGraphic(im.getWidth(),
+			im.getHeight());
+		for(int y = 0; y < im.getHeight(); y++) {
+			for(int x = 0; x < im.getWidth(); x++) {
+				if((im.getRGB(x, y) & 0xFFFFFF) > 0)
+					bg.setPixel(x, y, 1);
+			}
+		}
+		return Base64.encode(bg.getPixels());
+	}
+
+	/** Create a unique Graphic name */
+	protected String createUniqueName() {
+		for(int uid = 1; uid <= 256; uid++) {
+			String n = "LUG_" + uid;
+			if(GraphicHelper.lookup(n) == null)
+				return n;
+		}
+		assert false;
+		return null;
+	}
+
+	/** Get the next available graphic number */
+	protected Integer getGNumber() {
+		final TreeSet<Integer> gnums = new TreeSet<Integer>();
+		GraphicHelper.find(new Checker<Graphic>() {
+			public boolean check(Graphic g) {
+				Integer gn = g.getGNumber();
+				if(gn != null)
+					gnums.add(gn);
+				return false;
+			}
+		});
+		for(int i = 1; i < 256; i++) {
+			if(!gnums.contains(i))
+				return i;
+		}
+		return null;
 	}
 }
