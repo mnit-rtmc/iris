@@ -127,7 +127,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		return c;
 	}
 
-	/** Create the month column */
+	/** Create the plan type column */
 	static protected TableColumn createTypeColumn() {
 		TableColumn c = new TableColumn(COL_TYPE, 140);
 		c.setHeaderValue("Plan Type");
