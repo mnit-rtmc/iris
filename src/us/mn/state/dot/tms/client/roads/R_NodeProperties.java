@@ -101,7 +101,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Get the SONAR type cache */
 	protected TypeCache<R_Node> getTypeCache() {
-		return state.getR_Nodes();
+		return state.getDetCache().getR_Nodes();
 	}
 
 	/** Initialize the widgets on the form */
@@ -109,7 +109,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 		location = new LocationPanel(true, proxy.getGeoLoc(),
 			session.getSonarState());
 		det_model = new R_NodeDetectorModel(session,
-			state.getDetectors(), proxy);
+			state.getDetCache().getDetectors(), proxy);
 		det_table.setAutoCreateColumnsFromModel(false);
 		det_table.setModel(det_model);
 		det_table.setColumnModel(det_model.createColumnModel());

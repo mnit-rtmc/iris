@@ -108,7 +108,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new DetectorForm(
-					state.getDetectors()));
+					state.getDetCache().getDetectors()));
 			}
 		};
 		add(item);

@@ -28,18 +28,16 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.client.detector.DetCache;
 import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.toast.ConCache;
@@ -156,30 +154,6 @@ public class SonarState extends Client {
 		return avail_alarm_model;
 	}
 
-	/** Cache of r_nodes */
-	protected final TypeCache<R_Node> r_nodes;
-
-	/** Get the r_node cache */
-	public TypeCache<R_Node> getR_Nodes() {
-		return r_nodes;
-	}
-
-	/** Cache of detectors */
-	protected final TypeCache<Detector> detectors;
-
-	/** Get the detector cache */
-	public TypeCache<Detector> getDetectors() {
-		return detectors;
-	}
-
-	/** Cache of stations */
-	protected final TypeCache<Station> stations;
-
-	/** Get the station cache */
-	public TypeCache<Station> getStations() {
-		return stations;
-	}
-
 	/** Cache of cameras */
 	protected final TypeCache<Camera> cameras;
 
@@ -218,6 +192,14 @@ public class SonarState extends Client {
 	/** Get the controller object cache */
 	public ConCache getConCache() {
 		return con_cache;
+	}
+
+	/** Cache of detector objects */
+	protected final DetCache det_cache;
+
+	/** Get the detector object cache */
+	public DetCache getDetCache() {
+		return det_cache;
 	}
 
 	/** Cache of DMS objects */
@@ -275,9 +257,6 @@ public class SonarState extends Client {
 			}
 		};
 		avail_alarm_model.initialize();
-		r_nodes = new TypeCache<R_Node>(R_Node.class, this);
-		detectors = new TypeCache<Detector>(Detector.class, this);
-		stations = new TypeCache<Station>(Station.class, this);
 		cameras = new TypeCache<Camera>(Camera.class, this);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
@@ -285,6 +264,7 @@ public class SonarState extends Client {
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
 		con_cache = new ConCache(this);
+		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
@@ -305,9 +285,7 @@ public class SonarState extends Client {
 		populate(monitors);
 		populate(alarms);
 
-		populate(r_nodes);
-		populate(detectors);
-		populate(stations);
+		det_cache.populate(this);
 
 		populate(cameras);
 		populate(warn_signs);
@@ -329,11 +307,6 @@ public class SonarState extends Client {
 	/** Lookup a geo location */
 	public GeoLoc lookupGeoLoc(String name) {
 		return geo_locs.lookupObject(name);
-	}
-
-	/** Lookup a station */
-	public Station lookupStation(String name) {
-		return stations.lookupObject(name);
 	}
 
 	/** Lookup a camera */

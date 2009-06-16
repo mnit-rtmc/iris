@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
@@ -198,7 +199,7 @@ public class Session {
 		}
 		layer.setLabels(new StationLayer.Labeller() {
 			public String getLabel(String sid) throws IOException {
-				Station s = state.lookupStation(sid);
+				Station s = StationHelper.lookup(sid);
 				if(s != null)
 					return s.getLabel();
 				else
@@ -286,10 +287,10 @@ public class Session {
 			loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
-		det_manager = new DetectorManager(state.getDetectors(),
-			loc_manager);
+		det_manager = new DetectorManager(
+			state.getDetCache().getDetectors(), loc_manager);
 		r_node_manager = new R_NodeManager(this,
-			state.getR_Nodes(), loc_manager);
+			state.getDetCache().getR_Nodes(), loc_manager);
 		warn_manager = new WarningSignManager(this,
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
