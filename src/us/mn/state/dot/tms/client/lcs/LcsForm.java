@@ -58,10 +58,10 @@ public class LcsForm extends AbstractForm {
 	protected final TypeCache<LCSArray> cache;
 
 	/** Create a new LCS form */
-	public LcsForm(Session s, TypeCache<LCSArray> c) {
+	public LcsForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		cache = s.getSonarState().getLcsCache().getLCSArrays();
 	}
 
 	/** Initializze the widgets in the form */

@@ -169,8 +169,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new LcsForm(s,
-					state.getLCSArrays()));
+				desktop.show(new LcsForm(s));
 			}
 		};
 		add(item);

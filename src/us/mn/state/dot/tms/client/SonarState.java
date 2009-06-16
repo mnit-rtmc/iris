@@ -40,9 +40,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
@@ -55,6 +52,7 @@ import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -336,28 +334,12 @@ public class SonarState extends Client {
 		return sign_text;
 	}
 
-	/** Cache of LCS arrays */
-	protected final TypeCache<LCSArray> lcs_arrays;
+	/** Cache of LCS objects */
+	protected final LcsCache lcs_cache;
 
-	/** Get the LCS array cache */
-	public TypeCache<LCSArray> getLCSArrays() {
-		return lcs_arrays;
-	}
-
-	/** Cache of LCS */
-	protected final TypeCache<LCS> lcss;
-
-	/** Get the LCS cache */
-	public TypeCache<LCS> getLCSs() {
-		return lcss;
-	}
-
-	/** Cache of LCS indications */
-	protected final TypeCache<LCSIndication> lcs_indications;
-
-	/** Get the LCS indication cache */
-	public TypeCache<LCSIndication> getLCSIndications() {
-		return lcs_indications;
+	/** Get the LCS object cache */
+	public LcsCache getLcsCache() {
+		return lcs_cache;
 	}
 
 	/** Cache of timing plans */
@@ -429,20 +411,16 @@ public class SonarState extends Client {
 		dms_sign_groups = new TypeCache<DmsSignGroup>(
 			DmsSignGroup.class, this);
 		sign_text = new TypeCache<SignText>(SignText.class, this);
-		lcs_arrays = new TypeCache<LCSArray>(LCSArray.class, this);
-		lcss = new TypeCache<LCS>(LCS.class, this);
-		lcs_indications = new TypeCache<LCSIndication>(
-			LCSIndication.class, this);
+		lcs_cache = new LcsCache(this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
 	}
 
-	/** Login to the SONAR server */
-	public void login(String user, String password)
-		throws SonarException
+	/** Populate the type caches */
+	public void populateCaches() throws IllegalAccessException,
+		NoSuchFieldException
 	{
-		super.login(user, password);
 		populate(roles);
 		populate(users);
 		populate(connections);
@@ -471,14 +449,11 @@ public class SonarState extends Client {
 		populate(sign_groups);
 		populate(dms_sign_groups);
 		populate(sign_text);
-		populate(lcs_arrays);
-		populate(lcss);
-		populate(lcs_indications);
+		lcs_cache.populate(this);
 		populate(timing_plans);
 
 		dmss.ignoreAttribute("operation");
 		ramp_meters.ignoreAttribute("operation");
-		lcs_arrays.ignoreAttribute("operation");
 	}
 
 	/** Look up the specified user */

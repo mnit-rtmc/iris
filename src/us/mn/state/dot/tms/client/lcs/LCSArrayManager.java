@@ -89,6 +89,12 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return false;
 	}
 
+	/** Get the LCS array cache */
+	static protected TypeCache<LCSArray> getCache(Session s) {
+		LcsCache cache = s.getSonarState().getLcsCache();
+		return cache.getLCSArrays();
+	}
+
 	/** Test if an LCS array is available */
 	protected boolean isAvailable(LCSArray proxy) {
 		return !isLocked(proxy) &&
@@ -138,10 +144,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Create a new LCS array manager */
-	public LCSArrayManager(Session s, TypeCache<LCSArray> c,
-		GeoLocManager lm)
-	{
-		super(c, lm);
+	public LCSArrayManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		session = s;
 		namespace = s.getSonarState().getNamespace();
 		initialize();

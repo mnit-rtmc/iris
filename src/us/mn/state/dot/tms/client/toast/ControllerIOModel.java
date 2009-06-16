@@ -221,7 +221,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		state.getCameras().addProxyListener(c_watcher);
 		state.getDetectors().addProxyListener(det_watcher);
 		state.getDMSs().addProxyListener(dms_watcher);
-		state.getLCSIndications().addProxyListener(lcsi_watcher);
+		state.getLcsCache().getLCSIndications().addProxyListener(
+			lcsi_watcher);
 		state.getRampMeters().addProxyListener(m_watcher);
 		state.getWarningSigns().addProxyListener(w_watcher);
 	}
@@ -232,7 +233,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		state.getCameras().removeProxyListener(c_watcher);
 		state.getDetectors().removeProxyListener(det_watcher);
 		state.getDMSs().removeProxyListener(dms_watcher);
-		state.getLCSIndications().removeProxyListener(lcsi_watcher);
+		state.getLcsCache().getLCSIndications().removeProxyListener(
+			lcsi_watcher);
 		state.getRampMeters().removeProxyListener(m_watcher);
 		state.getWarningSigns().removeProxyListener(w_watcher);
 	}

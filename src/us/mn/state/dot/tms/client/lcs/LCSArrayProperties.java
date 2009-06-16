@@ -100,16 +100,16 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		super(TITLE, s, proxy);
 		state = s.getSonarState();
 		User user = s.getUser();
-		creator = new LCSIndicationCreator(state.getLCSIndications(),
-			user);
-		table_model = new LCSTableModel(proxy, state.getLCSs(),
-			user);
+		creator = new LCSIndicationCreator(
+			state.getLcsCache().getLCSIndications(), user);
+		table_model = new LCSTableModel(proxy,
+			state.getLcsCache().getLCSs(), user);
 		plan_model = new TimingPlanModel(state.getTimingPlans(), proxy);
 	}
 
 	/** Get the SONAR type cache */
 	protected TypeCache<LCSArray> getTypeCache() {
-		return state.getLCSArrays();
+		return state.getLcsCache().getLCSArrays();
 	}
 
 	/** Initialize the widgets on the form */

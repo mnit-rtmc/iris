@@ -284,10 +284,8 @@ public class Session {
 			loc_manager);
 		dms_manager = new DMSManager(this, state.getDMSs(),
 			loc_manager);
-		lcs_array_manager = new LCSArrayManager(this,
-			state.getLCSArrays(), loc_manager);
-		lcsi_manager = new LCSIManager(state.getLCSIndications(),
-			loc_manager);
+		lcs_array_manager = new LCSArrayManager(this, loc_manager);
+		lcsi_manager = new LCSIManager(this, loc_manager);
 		det_manager = new DetectorManager(state.getDetectors(),
 			loc_manager);
 		r_node_manager = new R_NodeManager(this,

@@ -19,6 +19,7 @@ import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
@@ -36,9 +37,15 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	/** Name of all style */
 	static public final String STYLE_ALL = "All";
 
+	/** Get the LCS indication cache */
+	static protected TypeCache<LCSIndication> getCache(Session s) {
+		LcsCache cache = s.getSonarState().getLcsCache();
+		return cache.getLCSIndications();
+	}
+
 	/** Create a new LCS indicaiton manager */
-	public LCSIManager(TypeCache<LCSIndication> c, GeoLocManager lm) {
-		super(c, lm);
+	public LCSIManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		initialize();
 	}
 
