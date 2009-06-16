@@ -50,10 +50,11 @@ public class AwsMsg {
 	/** Assumed number of text rows in AWS message file */
 	private static final int NUM_TEXT_ROWS = 6;
 
-	/** constants */
+	/** Message type descriptions. A 'starts with' comparison is 
+	 *  used for matching. */
 	private static final String AWS_MDESC_BLANK = "Blank";
-	private static final String AWS_MDESC_ONEPAGE = "1 Page (Normal)";
-	private static final String AWS_MDESC_TWOPAGE = "2 Pages (Extended)";
+	private static final String AWS_MDESC_ONEPAGE = "1 Page";
+	private static final String AWS_MDESC_TWOPAGE = "2 Page";
 
 	/** Names of fonts in the AWS message file */
 	private static final String AWS_SINGLESTROKE = "Single Stroke";
@@ -270,13 +271,13 @@ public class AwsMsg {
 	 * @return AwsMsgType enum value.
 	 */
 	static protected AwsMsgType parseDescription(String d) {
-		if(d.equalsIgnoreCase(AWS_MDESC_BLANK))
+		if(SString.startsWithIgnoreCase(d, AWS_MDESC_BLANK)) {
 			return AwsMsgType.BLANK;
-		else if(d.equalsIgnoreCase(AWS_MDESC_ONEPAGE))
+		} else if(SString.startsWithIgnoreCase(d, AWS_MDESC_ONEPAGE)) {
 			return AwsMsgType.ONEPAGEMSG;
-		else if(d.equalsIgnoreCase(AWS_MDESC_TWOPAGE))
+		} else if(SString.startsWithIgnoreCase(d, AWS_MDESC_TWOPAGE)) {
 			return AwsMsgType.TWOPAGEMSG;
-		else {
+		} else {
 			Log.severe("AwsMsg.parseDescription: unknown AWS " +
 				"message description (" + d + ").");
 			return AwsMsgType.UNKNOWN;

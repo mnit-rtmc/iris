@@ -334,4 +334,11 @@ public class SString {
 		ex.printStackTrace(new PrintWriter(writer));
 		return writer.toString();
 	}
+
+	/** String comparison: starts with ignoring case */
+	public static boolean startsWithIgnoreCase(String s,String sw) {
+		if(s == null || sw == null)
+			return false;
+		return s.toLowerCase().startsWith(sw.toLowerCase());
+	}
 }
