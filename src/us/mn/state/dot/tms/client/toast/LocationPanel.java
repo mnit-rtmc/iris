@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.tms.Road;
@@ -114,7 +115,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 
 	/** Create a new location panel */
 	public LocationPanel(boolean enable, String l, SonarState st) {
-		this(enable, st.lookupGeoLoc(l), st);
+		this(enable, GeoLocHelper.lookup(l), st);
 	}
 
 	/** Initialize the location panel */

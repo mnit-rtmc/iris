@@ -369,4 +369,10 @@ public class GeoLocHelper extends BaseHelper {
 		return Transform.toLatLonPoint(easting_d, 
 			northing_d, UTM_ZONE, NORTHERN_HEMISPHERE);
 	}
+
+	/** Lookup a geo location */
+	static public GeoLoc lookup(String name) {
+		return (GeoLoc)namespace.lookupObject(GeoLoc.SONAR_TYPE,
+			name);
+	}
 }

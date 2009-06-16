@@ -280,33 +280,24 @@ public class SonarState extends Client {
 		populate(system_attributes);
 		populate(roads, true);
 		populate(geo_locs, true);
-		populate(graphics);
+		populate(graphics, true);
 		con_cache.populate(this);
-		populate(monitors);
-		populate(alarms);
-
 		det_cache.populate(this);
-
+		populate(monitors);
 		populate(cameras);
+		populate(alarms);
 		populate(warn_signs);
 		populate(ramp_meters);
+		ramp_meters.ignoreAttribute("operation");
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
-
 		populate(timing_plans);
 		populate(holidays);
-
-		ramp_meters.ignoreAttribute("operation");
 	}
 
 	/** Look up the specified user */
 	public User lookupUser(String name) {
 		return users.lookupObject(name);
-	}
-
-	/** Lookup a geo location */
-	public GeoLoc lookupGeoLoc(String name) {
-		return geo_locs.lookupObject(name);
 	}
 
 	/** Lookup a camera */
