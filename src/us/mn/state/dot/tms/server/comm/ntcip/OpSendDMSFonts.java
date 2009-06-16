@@ -332,7 +332,13 @@ public class OpSendDMSFonts extends OpDMS {
 			FontHeight height = new FontHeight(row);
 			mess.add(height);
 			DMS_LOG.log(dms.getName() + ":= " + height);
-			mess.setRequest();
+			try {
+				mess.setRequest();
+			}
+			catch(SNMP.Message.GenError e) {
+				// Some vendors (Skyline) respond with GenError
+				// if the font is not currently valid
+			}
 			return new CreateFont();
 		}
 	}
