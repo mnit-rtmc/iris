@@ -77,12 +77,12 @@ public class AwsPoller extends MessagePoller
 		return (drop == VALID_DROP_ADDRESS);
 	}
 
-	/** return name of AWS system */
+	/** Return name of AWS system */
 	public static String awsName() {
-		return I18N.get("Aws.Name");
+		return I18N.get("dms.aws.abbreviation");
 	}
 
-	/** get the one AWS controller */
+	/** Get the one AWS controller */
 	protected ControllerImpl getController() {
 		//if(m_namespace == null)
 		//	return null;

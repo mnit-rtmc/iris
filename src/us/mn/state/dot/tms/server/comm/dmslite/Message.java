@@ -228,10 +228,7 @@ public class Message implements AddressedMessage
 
 	/** Return true if message is owned by the AWS */
 	protected boolean ownerIsAws() {
-		String owner = this.searchForReqResItem("Owner");
-		if(owner == null)
-			return false;
-		return OpDms.ownerIsAws(owner);
+		return OpDms.ownerIsAws(searchForReqResItem("Owner"));
 	}
 
 	/** 

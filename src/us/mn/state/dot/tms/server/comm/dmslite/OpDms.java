@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.aws.AwsMsgs;
+import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -129,7 +130,7 @@ abstract public class OpDms extends OpDevice {
 	public static boolean ownerIsAws(final String msg_owner) {
 		if(msg_owner == null)
 			return false;
-		final String awsName = I18N.get("Aws.Name");
+		final String awsName = AwsPoller.awsName();
 		return msg_owner.toLowerCase().equals(awsName.toLowerCase());
 	}
 
