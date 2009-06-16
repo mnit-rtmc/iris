@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
+import us.mn.state.dot.tms.client.lcs.GraphicForm;
 import us.mn.state.dot.tms.client.lcs.LcsForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
@@ -170,6 +171,14 @@ public class ViewMenu extends JMenu {
 			public void perform() throws Exception {
 				desktop.show(new LcsForm(s,
 					state.getLCSArrays()));
+			}
+		};
+		add(item);
+		item = new JMenuItem("Graphics");
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new GraphicForm(s,
+					state.getGraphics()));
 			}
 		};
 		add(item);
