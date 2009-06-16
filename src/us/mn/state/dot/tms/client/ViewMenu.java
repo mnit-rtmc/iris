@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.utils.I18N;
 
-
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
  *
@@ -135,12 +134,10 @@ public class ViewMenu extends JMenu {
 		};
 		add(item);
 
-		// get DMS menu item name
-		String dmsmenuitem = I18N.get("dms.abbreviation");
-		item = new JMenuItem(dmsmenuitem, Icons.getIcon("drum-inactive"));
-		// use 1st char as mnemonic
-		if (dmsmenuitem.length()>0)
-			item.setMnemonic(dmsmenuitem.charAt(0));
+		String dms_name = I18N.get("dms.abbreviation");
+		item = new JMenuItem(dms_name, Icons.getIcon("drum-inactive"));
+		if(dms_name.length() > 0)
+			item.setMnemonic(dms_name.charAt(0));
 
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -168,7 +165,7 @@ public class ViewMenu extends JMenu {
 		add(item);
 		item = new JMenuItem("LCS", Icons.getIcon(
 			"lanecontrol-inactive"));
-		item.setMnemonic( 'L' );
+		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new LcsForm(s,
@@ -186,7 +183,6 @@ public class ViewMenu extends JMenu {
 		};
 		add(item);
 		item = new JMenuItem("Monitors");
-//		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new VideoMonitorForm(
