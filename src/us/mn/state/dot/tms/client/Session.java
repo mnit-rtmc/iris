@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
+import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
@@ -51,7 +52,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.security.UserManager;
-import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 

@@ -27,8 +27,8 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.toast.DetectorManager;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**

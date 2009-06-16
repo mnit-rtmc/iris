@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.toast;
+package us.mn.state.dot.tms.client.detector;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -21,6 +21,8 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
