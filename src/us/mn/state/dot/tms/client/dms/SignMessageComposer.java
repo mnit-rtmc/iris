@@ -449,7 +449,8 @@ public class SignMessageComposer extends JPanel {
 		int p = 0;
 		Integer f = FontHelper.getDefault();
 		if(FontComboBox.getIEnabled())
-			f = fontCmb[0].getFontNumber();
+			if(fontCmb[0] != null)
+				f = fontCmb[0].getFontNumber();
 		multi.setFont(f);
 		if(PgTimeSpinner.getIEnabled())
 			multi.setPageOnTime(timeSpin.
