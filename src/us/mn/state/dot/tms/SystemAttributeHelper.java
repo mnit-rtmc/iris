@@ -46,6 +46,8 @@ public class SystemAttributeHelper extends BaseHelper {
 	static protected SystemAttribute lookup(String aname) {
 		assert namespace != null;
 		assert aname != null && aname.length() > 0;
+		if(namespace == null || aname == null)
+			return null;
 		return (SystemAttribute)namespace.lookupObject(
 			SystemAttribute.SONAR_TYPE, aname);
 	}
