@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 
 	/** Create a new controller table model */
 	public ControllerModel(TypeCache<Controller> c, CommLink cl) {
-		super(c, true);
+		super(c);
 		comm_link = cl;
 		initialize();
 	}

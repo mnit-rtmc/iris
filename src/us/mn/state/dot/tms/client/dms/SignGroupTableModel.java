@@ -114,7 +114,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	public SignGroupTableModel(DMS proxy, TypeCache<DmsSignGroup> d,
 		TypeCache<SignGroup> g, User u)
 	{
-		super(g, true);
+		super(g);
 		dms = proxy;
 		dms_sign_groups = d;
 		user = u;

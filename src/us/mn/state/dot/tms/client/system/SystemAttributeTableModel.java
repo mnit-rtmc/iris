@@ -73,7 +73,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	public SystemAttributeTableModel(TypeCache<SystemAttribute> arg_tc,
 		SystemAttributeForm f)
 	{
-		super(arg_tc, true);
+		super(arg_tc);
 		m_form = f;
 		initialize();
 	}

@@ -132,7 +132,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Create a new holiday table model */
 	public HolidayModel(TypeCache<Holiday> c) {
-		super(c, true);
+		super(c);
 		initialize();
 	}
 

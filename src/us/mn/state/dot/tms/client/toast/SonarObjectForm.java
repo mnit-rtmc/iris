@@ -39,16 +39,12 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** SONAR state */
 	protected final SonarState state;
 
-	/** Administrator privilege flag */
-	protected final boolean admin;
-
 	/** Create a new SONAR object form */
 	protected SonarObjectForm(String prefix, Session s, T p) {
 		super(prefix + p.getName());
 		proxy = p;
 		session = s;
 		state = s.getSonarState();
-		admin = true;
 	}
 
 	/** Initialize the widgets on the form */

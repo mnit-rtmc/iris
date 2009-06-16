@@ -70,7 +70,7 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 
 	/** Create a new LCS table model */
 	public LCSTableModel(LCSArray la, TypeCache<LCS> c, User u) {
-		super(c, true);
+		super(c);
 		lcs_array = la;
 		user = u;
 		initialize();

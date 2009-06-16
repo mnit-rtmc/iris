@@ -141,9 +141,6 @@ public class FontForm extends AbstractForm {
 	/** Glyph editor */
 	protected GlyphEditor geditor;
 
-	/** Admin privileges */
-	protected final boolean admin = true;
-
 	/** Create a new font form */
 	public FontForm(TypeCache<Font> fc, TypeCache<Glyph> gc,
 		TypeCache<Graphic> grc)
@@ -156,7 +153,7 @@ public class FontForm extends AbstractForm {
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		f_model = new FontModel(cache, admin);
+		f_model = new FontModel(cache);
 		add(createFontPanel());
 		graphics.addProxyListener(gr_listener);
 		glyphs.addProxyListener(gl_listener);
@@ -193,25 +190,23 @@ public class FontForm extends AbstractForm {
 		f_table.setVisibleRowCount(6);
 		JScrollPane pane = new JScrollPane(f_table);
 		panel.add(pane, bag);
-		if(admin) {
-			del_font.setEnabled(false);
-			bag.gridwidth = 1;
-			panel.add(del_font, bag);
-			new ActionJob(this, del_font) {
-				public void perform() throws Exception {
-					int row = s.getMinSelectionIndex();
-					if(row >= 0)
-						f_model.deleteRow(row);
-				}
-			};
-		}
+		del_font.setEnabled(false);
+		bag.gridwidth = 1;
+		panel.add(del_font, bag);
+		new ActionJob(this, del_font) {
+			public void perform() throws Exception {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					f_model.deleteRow(row);
+			}
+		};
 		JPanel gpanel = createGlyphPanel();
 		bag.gridwidth = 1;
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.anchor = GridBagConstraints.WEST;
 		panel.add(gpanel, bag);
-		geditor = new GlyphEditor(this, admin);
+		geditor = new GlyphEditor(this);
 		bag.gridwidth = 2;
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.CENTER;

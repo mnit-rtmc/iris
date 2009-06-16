@@ -106,7 +106,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		location = new LocationPanel(admin, proxy.getGeoLoc(),
+		location = new LocationPanel(true, proxy.getGeoLoc(),
 			session.getSonarState());
 		det_model = new R_NodeDetectorModel(session,
 			state.getDetectors(), proxy);
@@ -150,7 +150,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Create the roadway node setup panel */
 	protected FormPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.addRow("Node type", node_type);
 		new ActionJob(this, node_type) {
 			public void perform() {

@@ -48,9 +48,6 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
 
-	/** Administrator flag */
-	protected final boolean admin;
-
 	/** Create an empty set of proxies */
 	protected TreeSet<T> createProxySet() {
 		return new TreeSet<T>(new NumericAlphaComparator<T>());
@@ -60,9 +57,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	protected final TreeSet<T> proxies = createProxySet();
 
 	/** Create a new proxy table model */
-	public ProxyTableModel(TypeCache<T> c, boolean a) {
+	public ProxyTableModel(TypeCache<T> c) {
 		cache = c;
-		admin = a;
 	}
 
 	/** Initialize the proxy table model. This cannot be done in the
@@ -196,10 +192,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Get the count of rows in the table */
 	public int getRowCount() {
 		synchronized(proxies) {
-			if(admin)
-				return proxies.size() + 1;
-			else
-				return proxies.size();
+			return proxies.size() + 1;
 		}
 	}
 

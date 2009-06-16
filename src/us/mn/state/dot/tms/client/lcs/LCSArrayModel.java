@@ -39,7 +39,7 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
 	/** Create a new LCS array table model */
 	public LCSArrayModel(TypeCache<LCSArray> c) {
-		super(c, true);
+		super(c);
 		initialize();
 	}
 

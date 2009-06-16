@@ -40,7 +40,7 @@ public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** Create a new DMS table model */
 	public DMSModel(TypeCache<DMS> c) {
-		super(c, true);
+		super(c);
 		initialize();
 	}
 

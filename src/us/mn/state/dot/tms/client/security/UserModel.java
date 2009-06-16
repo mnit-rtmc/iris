@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,8 @@ public class UserModel extends ProxyTableModel<User> {
 	protected final UserRoleModel rmodel;
 
 	/** Create a new user table model */
-	public UserModel(TypeCache<User> c, boolean a, UserRoleModel r) {
-		super(c, a);
+	public UserModel(TypeCache<User> c, UserRoleModel r) {
+		super(c);
 		rmodel = r;
 		initialize();
 	}
@@ -79,8 +79,6 @@ public class UserModel extends ProxyTableModel<User> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		if(!admin)
-			return false;
 		synchronized(proxies) {
 			if(row == proxies.size())
 				return column == COL_NAME;

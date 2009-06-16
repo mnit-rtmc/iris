@@ -100,7 +100,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location = new LocationPanel(admin, proxy.getGeoLoc(), state);
+		location = new LocationPanel(true, proxy.getGeoLoc(), state);
 		location.initialize();
 		location.addRow("Notes", notes);
 		new FocusJob(notes) {
@@ -131,7 +131,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create camera setup panel */
 	protected JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.addRow("Encoder", encoder);
 		new FocusJob(encoder) {
 			public void perform() {

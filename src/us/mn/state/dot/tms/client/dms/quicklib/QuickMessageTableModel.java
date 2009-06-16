@@ -68,7 +68,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	public QuickMessageTableModel(TypeCache<QuickMessage> arg_tc, 
 		User user)
 	{
-		super(arg_tc, true);
+		super(arg_tc);
 		m_user = user;
 		initialize();
 	}

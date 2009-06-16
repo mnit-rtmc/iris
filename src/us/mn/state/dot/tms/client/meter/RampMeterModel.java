@@ -39,7 +39,7 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 
 	/** Create a new ramp meter table model */
 	public RampMeterModel(TypeCache<RampMeter> c) {
-		super(c, true);
+		super(c);
 		initialize();
 	}
 

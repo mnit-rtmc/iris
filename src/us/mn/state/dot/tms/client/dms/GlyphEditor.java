@@ -81,43 +81,41 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Create a glyph editor */
-	public GlyphEditor(FontForm form, boolean admin) {
+	public GlyphEditor(FontForm form) {
 		font_form = form;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createTitledBorder(
 			"Selected Character"));
 		add(Box.createGlue());
 		add(createGlueBox(gpanel));
-		if(admin) {
-			add(Box.createVerticalStrut(TmsForm.VGAP));
-			Box box = Box.createHorizontalBox();
-			box.add(Box.createGlue());
-			box.add(narrow);
-			narrow.setEnabled(false);
-			new ActionJob(this, narrow) {
-				public void perform() {
-					narrowPressed();
-				}
-			};
-			box.add(Box.createGlue());
-			box.add(widen);
-			widen.setEnabled(false);
-			new ActionJob(this, widen) {
-				public void perform() {
-					widenPressed();
-				}
-			};
-			box.add(Box.createGlue());
-			add(box);
-			add(Box.createVerticalStrut(TmsForm.VGAP));
-			add(createGlueBox(apply));
-			apply.setEnabled(false);
-			new ActionJob(this, apply) {
-				public void perform() {
-					applyPressed();
-				}
-			};
-		}
+		add(Box.createVerticalStrut(TmsForm.VGAP));
+		Box box = Box.createHorizontalBox();
+		box.add(Box.createGlue());
+		box.add(narrow);
+		narrow.setEnabled(false);
+		new ActionJob(this, narrow) {
+			public void perform() {
+				narrowPressed();
+			}
+		};
+		box.add(Box.createGlue());
+		box.add(widen);
+		widen.setEnabled(false);
+		new ActionJob(this, widen) {
+			public void perform() {
+				widenPressed();
+			}
+		};
+		box.add(Box.createGlue());
+		add(box);
+		add(Box.createVerticalStrut(TmsForm.VGAP));
+		add(createGlueBox(apply));
+		apply.setEnabled(false);
+		new ActionJob(this, apply) {
+			public void perform() {
+				applyPressed();
+			}
+		};
 		add(Box.createGlue());
 	}
 

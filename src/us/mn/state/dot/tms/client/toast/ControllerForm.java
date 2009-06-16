@@ -173,7 +173,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 				proxy.setActive(active.isSelected());
 			}
 		};
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.add("Comm Link", comm_link);
 		panel.finishRow();
 		panel.add("Drop", drop_id);
@@ -222,7 +222,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 					cab_style.getSelectedItem());
 			}
 		};
-		location = new LocationPanel(admin, cabinet.getGeoLoc(), state);
+		location = new LocationPanel(true, cabinet.getGeoLoc(), state);
 		location.initialize();
 		location.add("Milepoint", mile);
 		location.finishRow();
@@ -270,7 +270,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(clearErrorBtn);
 		buttonPnl.add(reset);
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		panel.addRow("Status:", status);
 		panel.addRow("Error Detail:", error);
 		panel.addRow("Version:", version);

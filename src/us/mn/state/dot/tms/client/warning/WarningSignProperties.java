@@ -90,7 +90,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location = new LocationPanel(admin, proxy.getGeoLoc(), state);
+		location = new LocationPanel(true, proxy.getGeoLoc(), state);
 		location.initialize();
 		location.addRow("Notes", notes);
 		new FocusJob(notes) {
@@ -119,7 +119,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 
 	/** Create the setup panel */
 	protected JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(admin);
+		FormPanel panel = new FormPanel(true);
 		ListModel m = state.getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(m));
 		panel.addRow("Camera", camera);

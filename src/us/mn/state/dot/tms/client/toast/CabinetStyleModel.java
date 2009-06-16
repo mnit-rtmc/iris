@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(TypeCache<CabinetStyle> c) {
-		super(c, true);
+		super(c);
 		initialize();
 	}
 

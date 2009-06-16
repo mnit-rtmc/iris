@@ -66,7 +66,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create a new road table model */
 	public RoadModel(TypeCache<Road> c) {
-		super(c, true);
+		super(c);
 		initialize();
 	}
 

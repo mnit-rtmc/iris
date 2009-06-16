@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create a new r_node detector table model */
 	public R_NodeDetectorModel(Session s, TypeCache<Detector> c, R_Node n) {
-		super(c, true);
+		super(c);
 		r_node = n;
 		det_model = new WrapperComboBoxModel(
 			s.getDetectorManager().getStyleModel(

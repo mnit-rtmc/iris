@@ -53,8 +53,8 @@ public class FontModel extends ProxyTableModel<Font> {
 	static protected final int COL_VERSION_ID = 6;
 
 	/** Create a new font table model */
-	public FontModel(TypeCache<Font> c, boolean a) {
-		super(c, a);
+	public FontModel(TypeCache<Font> c) {
+		super(c);
 		initialize();
 	}
 
@@ -97,8 +97,6 @@ public class FontModel extends ProxyTableModel<Font> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		if(!admin)
-			return false;
 		synchronized(proxies) {
 			if(row == proxies.size())
 				return column == COL_NAME;

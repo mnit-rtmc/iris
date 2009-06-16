@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2008  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Create a new sign text table model */
 	public SignTextTableModel(SignGroup g, TypeCache<SignText> c, User u) {
-		super(c, true);
+		super(c);
 		group = g;
 		creator = new SignTextCreator(c, u);
 		initialize();

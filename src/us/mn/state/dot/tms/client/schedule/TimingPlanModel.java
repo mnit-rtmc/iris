@@ -156,7 +156,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 
 	/** Create a new timing plan table model */
 	public TimingPlanModel(TypeCache<TimingPlan> c, Device d) {
-		super(c, d != null);
+		super(c);
 		device = d;
 		initialize();
 	}

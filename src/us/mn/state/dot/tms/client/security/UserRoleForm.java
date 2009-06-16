@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,9 +88,6 @@ public class UserRoleForm extends AbstractForm {
 	/** Connection type cache */
 	protected final TypeCache<Connection> ccache;
 
-	/** Admin privileges */
-	protected final boolean admin = true;
-
 	/** Create a new user role form */
 	public UserRoleForm(TypeCache<User> uc, TypeCache<Role> rc,
 		TypeCache<Connection> cc)
@@ -104,10 +101,10 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		ur_model = new UserRoleModel(rcache, admin);
-		u_model = new UserModel(cache, admin, ur_model);
-		r_model = new RoleModel(rcache, admin);
-		c_model = new ConnectionModel(ccache, admin);
+		ur_model = new UserRoleModel(rcache);
+		u_model = new UserModel(cache, ur_model);
+		r_model = new RoleModel(rcache);
+		c_model = new ConnectionModel(ccache);
 		tab.add("Users", createUserPanel());
 		tab.add("Roles", createRolePanel());
 		tab.add("Connections", createConnectionPanel());
@@ -153,23 +150,21 @@ public class UserRoleForm extends AbstractForm {
 		JScrollPane spane = new JScrollPane(ur_table);
 		spane.setPreferredSize(new Dimension(140, 300));
 		panel.add(spane, bag);
-		if(admin) {
-			del_user.setEnabled(false);
-			Box box = Box.createHorizontalBox();
-			box.add(Box.createHorizontalGlue());
-			box.add(del_user);
-			box.add(Box.createHorizontalGlue());
-			bag.gridx = 1;
-			bag.gridy = 1;
-			panel.add(box, bag);
-			new ActionJob(this, del_user) {
-				public void perform() throws Exception {
-					int row = s.getMinSelectionIndex();
-					if(row >= 0)
-						u_model.deleteRow(row);
-				}
-			};
-		}
+		del_user.setEnabled(false);
+		Box box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
+		box.add(del_user);
+		box.add(Box.createHorizontalGlue());
+		bag.gridx = 1;
+		bag.gridy = 1;
+		panel.add(box, bag);
+		new ActionJob(this, del_user) {
+			public void perform() throws Exception {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					u_model.deleteRow(row);
+			}
+		};
 		return panel;
 	}
 
@@ -200,18 +195,16 @@ public class UserRoleForm extends AbstractForm {
 		r_table.setColumnModel(r_model.createColumnModel());
 		JScrollPane pane = new JScrollPane(r_table);
 		panel.add(pane, bag);
-		if(admin) {
-			del_role.setEnabled(false);
-			bag.insets.left = 6;
-			panel.add(del_role, bag);
-			new ActionJob(this, del_role) {
-				public void perform() throws Exception {
-					int row = s.getMinSelectionIndex();
-					if(row >= 0)
-						r_model.deleteRow(row);
-				}
-			};
-		}
+		del_role.setEnabled(false);
+		bag.insets.left = 6;
+		panel.add(del_role, bag);
+		new ActionJob(this, del_role) {
+			public void perform() throws Exception {
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					r_model.deleteRow(row);
+			}
+		};
 		return panel;
 	}
 
@@ -241,7 +234,7 @@ public class UserRoleForm extends AbstractForm {
 		c_table.setColumnModel(c_model.createColumnModel());
 		JScrollPane pane = new JScrollPane(c_table);
 		panel.add(pane, bag);
-		if(admin && false) {
+		if(false) {
 			del_conn.setEnabled(false);
 			bag.insets.left = 6;
 			panel.add(del_conn, bag);
