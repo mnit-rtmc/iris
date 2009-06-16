@@ -410,7 +410,8 @@ public class SignMessageComposer extends JPanel {
 		blankBtn.setEnabled(b);
 		timeSpin.setEnabled(b);
 		for(int i = 0; i < cmbLine.length; i++)
-			cmbLine[i].setEnabled(b);
+			if(cmbLine[i] != null)
+				cmbLine[i].setEnabled(b);
 		for(int i = 0; i < fontCmb.length; i++)
 			if(fontCmb[i] != null)
 				fontCmb[i].setEnabled(b);
@@ -506,7 +507,8 @@ public class SignMessageComposer extends JPanel {
 			int newfn = 1; // assumed default font number
 			if(fnum != null && i < fnum.length)
 				newfn = fnum[i];
-			fontCmb[i].setSelectedItemNoAction(newfn);
+			if(fontCmb[i] != null)
+				fontCmb[i].setSelectedItemNoAction(newfn);
 		}
 	}
 
