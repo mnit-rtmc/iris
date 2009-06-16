@@ -124,13 +124,11 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Create a new sign message composer */
-	public SignMessageComposer(DMSDispatcher ds, TypeCache<DmsSignGroup> d, 
-		TypeCache<SignText> t, TypeCache<Font> f, User u)
-	{
+	public SignMessageComposer(DMSDispatcher ds, DmsCache cache, User u) {
 		dispatcher = ds;
-		dms_sign_groups = d;
-		sign_text = t;
-		fonts = f;
+		dms_sign_groups = cache.getDmsSignGroups();
+		sign_text = cache.getSignText();
+		fonts = cache.getFonts();
 		user = u;
 		add(tab);
 		initializeFonts(1, null);

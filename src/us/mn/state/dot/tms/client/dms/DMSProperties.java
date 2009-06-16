@@ -273,17 +273,18 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		state = s.getSonarState();
 		user = s.getUser();
 		messagesTab = new MessagesTab(s, sign);
-		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean())
+		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean()) {
 			qlibTab = new QuickMessageEditorTab(
-				state.getQuickMessages(), this, user);
-			else
-				qlibTab = null;
+				state.getDmsCache().getQuickMessages(), this,
+				user);
+		} else
+			qlibTab = null;
 		plan_model = new TimingPlanModel(state.getTimingPlans(), sign);
 	}
 
 	/** Get the SONAR type cache */
 	protected TypeCache<DMS> getTypeCache() {
-		return state.getDMSs();
+		return state.getDmsCache().getDMSs();
 	}
 
 	/** Initialize the widgets on the form */

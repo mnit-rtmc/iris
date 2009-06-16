@@ -66,10 +66,9 @@ public class MultipleSignTab extends JPanel implements
 	protected final ProxySelectionModel<DMS> selectionModel;
 
 	/** Create a new multiple sign tab */
-	public MultipleSignTab(TypeCache<SignGroup> gc,
-		TypeCache<DmsSignGroup> dsg, ProxySelectionModel<DMS> sm)
-	{
+	public MultipleSignTab(DmsCache cache, ProxySelectionModel<DMS> sm) {
 		super(new GridBagLayout());
+		TypeCache<SignGroup> gc = cache.getSignGroups();
 		sign_group_model = new ProxyListModel<SignGroup>(gc) {
 			protected int doProxyAdded(SignGroup proxy) {
 				if(!proxy.getLocal())
@@ -79,7 +78,7 @@ public class MultipleSignTab extends JPanel implements
 			}
 		};
 		sign_group_model.initialize();
-		dms_sign_groups = dsg;
+		dms_sign_groups = cache.getDmsSignGroups();
 		group_list = new JList(sign_group_model);
 		new ListSelectionJob(this, group_list) {
 			public void perform() {

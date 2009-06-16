@@ -282,7 +282,7 @@ public class Session {
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		cam_manager = new CameraManager(this, state.getCameras(),
 			loc_manager);
-		dms_manager = new DMSManager(this, state.getDMSs(),
+		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
 			loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);

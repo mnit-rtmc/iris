@@ -33,25 +33,18 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsSignGroup;
-import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
@@ -156,22 +149,6 @@ public class SonarState extends Client {
 	/** Get the graphic type cache */
 	public TypeCache<Graphic> getGraphics() {
 		return graphics;
-	}
-
-	/** Cache of font proxies */
-	protected final TypeCache<Font> fonts;
-
-	/** Get the font type cache */
-	public TypeCache<Font> getFonts() {
-		return fonts;
-	}
-
-	/** Cache of glyph proxies */
-	protected final TypeCache<Glyph> glyphs;
-
-	/** Get the glyph type cache */
-	public TypeCache<Glyph> getGlyphs() {
-		return glyphs;
 	}
 
 	/** Cache of video monitor proxies */
@@ -286,52 +263,12 @@ public class SonarState extends Client {
 		return ramp_meters;
 	}
 
-	/** Cache of sign messages */
-	protected final TypeCache<SignMessage> sign_messages;
+	/** Cache of DMS objects */
+	protected final DmsCache dms_cache;
 
-	/** Get the sign message cache */
-	public TypeCache<SignMessage> getSignMessages() {
-		return sign_messages;
-	}
-
-	/** Cache of quick messages */
-	protected final TypeCache<QuickMessage> quick_messages;
-
-	/** Get the quick message cache */
-	public TypeCache<QuickMessage> getQuickMessages() {
-		return quick_messages;
-	}
-
-	/** Cache of dynamic message signs */
-	protected final TypeCache<DMS> dmss;
-
-	/** Get the dynamic message sign cache */
-	public TypeCache<DMS> getDMSs() {
-		return dmss;
-	}
-
-	/** Cache of sign groups */
-	protected final TypeCache<SignGroup> sign_groups;
-
-	/** Get the sign group cache */
-	public TypeCache<SignGroup> getSignGroups() {
-		return sign_groups;
-	}
-
-	/** Cache of DMS sign groups */
-	protected final TypeCache<DmsSignGroup> dms_sign_groups;
-
-	/** Get the DMS sign group cache */
-	public TypeCache<DmsSignGroup> getDmsSignGroups() {
-		return dms_sign_groups;
-	}
-
-	/** Cache of sign text */
-	protected final TypeCache<SignText> sign_text;
-
-	/** Get the sign text cache */
-	public TypeCache<SignText> getSignText() {
-		return sign_text;
+	/** Get the DMS object cache */
+	public DmsCache getDmsCache() {
+		return dms_cache;
 	}
 
 	/** Cache of LCS objects */
@@ -373,8 +310,6 @@ public class SonarState extends Client {
 		controllers = new TypeCache<Controller>(Controller.class, this);
 		holidays = new TypeCache<Holiday>(Holiday.class, this);
 		graphics = new TypeCache<Graphic>(Graphic.class, this);
-		fonts = new TypeCache<Font>(Font.class, this);
-		glyphs = new TypeCache<Glyph>(Glyph.class, this);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
 			this);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
@@ -402,15 +337,7 @@ public class SonarState extends Client {
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
-		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
-			this);
-		quick_messages = new TypeCache<QuickMessage>(
-			QuickMessage.class, this);
-		dmss = new TypeCache<DMS>(DMS.class, this);
-		sign_groups = new TypeCache<SignGroup>(SignGroup.class, this);
-		dms_sign_groups = new TypeCache<DmsSignGroup>(
-			DmsSignGroup.class, this);
-		sign_text = new TypeCache<SignText>(SignText.class, this);
+		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		// FIXME: this is an ugly hack
@@ -418,9 +345,7 @@ public class SonarState extends Client {
 	}
 
 	/** Populate the type caches */
-	public void populateCaches() throws IllegalAccessException,
-		NoSuchFieldException
-	{
+	public void populateCaches() {
 		populate(roles);
 		populate(users);
 		populate(connections);
@@ -433,8 +358,6 @@ public class SonarState extends Client {
 		populate(controllers);
 		populate(holidays);
 		populate(graphics);
-		populate(fonts);
-		populate(glyphs);
 		populate(monitors);
 		populate(alarms);
 		populate(r_nodes);
@@ -443,16 +366,10 @@ public class SonarState extends Client {
 		populate(cameras);
 		populate(warn_signs);
 		populate(ramp_meters);
-		populate(sign_messages);
-		populate(quick_messages);
-		populate(dmss);
-		populate(sign_groups);
-		populate(dms_sign_groups);
-		populate(sign_text);
+		dms_cache.populate(this);
 		lcs_cache.populate(this);
 		populate(timing_plans);
 
-		dmss.ignoreAttribute("operation");
 		ramp_meters.ignoreAttribute("operation");
 	}
 

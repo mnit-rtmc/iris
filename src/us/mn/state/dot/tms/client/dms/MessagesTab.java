@@ -91,6 +91,9 @@ public class MessagesTab extends JPanel {
 	/** Sonar state */
 	protected final SonarState state;
 
+	/** DMS cache */
+	protected final DmsCache dms_cache;
+
 	/** DMS proxy */
 	protected final DMS proxy;
 
@@ -101,10 +104,12 @@ public class MessagesTab extends JPanel {
 	public MessagesTab(Session s, DMS sign) {
 		super(new GridBagLayout());
 		state = s.getSonarState();
+		dms_cache = state.getDmsCache();
 		proxy = sign;
 		user = s.getUser();
 		sign_group_model = new SignGroupTableModel(sign,
-			state.getDmsSignGroups(), state.getSignGroups(), user);
+			dms_cache.getDmsSignGroups(), dms_cache.getSignGroups(),
+			user);
 		initGroupTable();
 		initSignTextTable();
 		createActions();
@@ -228,7 +233,7 @@ public class MessagesTab extends JPanel {
 			if(sign_text_model != null)
 				sign_text_model.dispose();
 			sign_text_model = new SignTextTableModel(group,
-				state.getSignText(), user);
+				dms_cache.getSignText(), user);
 			sign_text_table.setModel(sign_text_model);
 			delete_group.setEnabled(isGroupDeletable(group));
 		} else {
@@ -250,7 +255,7 @@ public class MessagesTab extends JPanel {
 	/** Check if a sign group has any members */
 	protected boolean hasMembers(final SignGroup group) {
 		TypeCache<DmsSignGroup> dms_sign_groups =
-			state.getDmsSignGroups();
+			dms_cache.getDmsSignGroups();
 		return null != dms_sign_groups.findObject(
 			new Checker<DmsSignGroup>()
 		{
@@ -262,7 +267,7 @@ public class MessagesTab extends JPanel {
 
 	/** Check if a sign group has any sign text messages */
 	protected boolean hasSignText(final SignGroup group) {
-		TypeCache<SignText> sign_text = state.getSignText();
+		TypeCache<SignText> sign_text = dms_cache.getSignText();
 		return null != sign_text.findObject(new Checker<SignText>() {
 			public boolean check(SignText t) {
 				return t.getSignGroup() == group;

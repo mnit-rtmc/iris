@@ -139,21 +139,21 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	public DMSDispatcher(Session session, DMSManager manager) {
 		super(new BorderLayout());
 		SonarState st = session.getSonarState();
+		DmsCache dms_cache = st.getDmsCache();
 		namespace = st.getNamespace();
-		cache = st.getDMSs();
+		cache = dms_cache.getDMSs();
 		user = session.getUser();
-		creator = new SignMessageCreator(st.getSignMessages(), user);
+		creator = new SignMessageCreator(dms_cache.getSignMessages(),
+			user);
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearDmsAction(selectionModel, this, user);
-		qlibCmb = new QLibCBox(this, st.getQuickMessages());
+		qlibCmb = new QLibCBox(this, dms_cache.getQuickMessages());
 		clearBtn.setAction(clearAction);
 		manager.setClearAction(clearAction);
-		composer = new SignMessageComposer(this, st.getDmsSignGroups(),
-			st.getSignText(), st.getFonts(), user);
+		composer = new SignMessageComposer(this, dms_cache, user);
 		currentPnl = singleTab.getCurrentPanel();
 		previewPnl = singleTab.getPreviewPanel();
-		multipleTab = new MultipleSignTab(st.getSignGroups(),
-			st.getDmsSignGroups(), selectionModel);
+		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
 		tabPane.addTab("Single", singleTab);
 		tabPane.addTab("Multiple", multipleTab);
 		add(tabPane, BorderLayout.CENTER);

@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -142,13 +143,11 @@ public class FontForm extends AbstractForm {
 	protected GlyphEditor geditor;
 
 	/** Create a new font form */
-	public FontForm(TypeCache<Font> fc, TypeCache<Glyph> gc,
-		TypeCache<Graphic> grc)
-	{
+	public FontForm(SonarState state) {
 		super(TITLE);
-		cache = fc;
-		glyphs = gc;
-		graphics = grc;
+		cache = state.getDmsCache().getFonts();
+		glyphs = state.getDmsCache().getGlyphs();
+		graphics = state.getGraphics();
 	}
 
 	/** Initializze the widgets in the form */

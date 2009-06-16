@@ -142,7 +142,7 @@ public class ViewMenu extends JMenu {
 
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DMSForm(s, state.getDMSs()));
+				desktop.show(new DMSForm(s));
 			}
 		};
 		add(item);
@@ -150,8 +150,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('F');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new FontForm(state.getFonts(),
-					state.getGlyphs(),state.getGraphics()));
+				desktop.show(new FontForm(state));
 			}
 		};
 		add(item);

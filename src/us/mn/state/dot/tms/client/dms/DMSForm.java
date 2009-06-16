@@ -59,10 +59,10 @@ public class DMSForm extends AbstractForm {
 	protected final TypeCache<DMS> cache;
 
 	/** Create a new DMS form */
-	public DMSForm(Session s, TypeCache<DMS> c) {
+	public DMSForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		cache = s.getSonarState().getDmsCache().getDMSs();
 	}
 
 	/** Initializze the widgets in the form */
