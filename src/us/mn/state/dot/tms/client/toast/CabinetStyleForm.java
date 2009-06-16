@@ -21,6 +21,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CabinetStyle;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -46,9 +47,9 @@ public class CabinetStyleForm extends AbstractForm {
 	protected final TypeCache<CabinetStyle> cache;
 
 	/** Create a new cabinet style form */
-	public CabinetStyleForm(TypeCache<CabinetStyle> c) {
+	public CabinetStyleForm(SonarState state) {
 		super(TITLE);
-		cache = c;
+		cache = state.getConCache().getCabinetStyles();
 	}
 
 	/** Initializze the widgets in the form */

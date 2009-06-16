@@ -27,11 +27,7 @@ import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
-import us.mn.state.dot.tms.Cabinet;
-import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
@@ -46,6 +42,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
+import us.mn.state.dot.tms.client.toast.ConCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -85,54 +82,6 @@ public class SonarState extends Client {
 	/** Get the system attribute type cache */
 	public TypeCache<SystemAttribute> getSystemAttributes() {
 		return system_attributes;
-	}
-
-	/** Cache of cabinet style proxies */
-	protected final TypeCache<CabinetStyle> cabinet_styles;
-
-	/** Get the cabinet style type cache */
-	public TypeCache<CabinetStyle> getCabinetStyles() {
-		return cabinet_styles;
-	}
-
-	/** Cabinet style proxy list model */
-	protected final ProxyListModel<CabinetStyle> cab_style_model;
-
-	/** Get the Cabinet Style list model */
-	public ProxyListModel<CabinetStyle> getCabinetStyleModel() {
-		return cab_style_model;
-	}
-
-	/** Cache of cabinet proxies */
-	protected final TypeCache<Cabinet> cabinets;
-
-	/** Get the cabinet type cache */
-	public TypeCache<Cabinet> getCabinets() {
-		return cabinets;
-	}
-
-	/** Cache of comm link proxies */
-	protected final TypeCache<CommLink> comm_links;
-
-	/** Get the comm link type cache */
-	public TypeCache<CommLink> getCommLinks() {
-		return comm_links;
-	}
-
-	/** Comm link proxy list model */
-	protected final ProxyListModel<CommLink> comm_link_model;
-
-	/** Get the CommLink list model */
-	public ProxyListModel<CommLink> getCommLinkModel() {
-		return comm_link_model;
-	}
-
-	/** Cache of controller proxies */
-	protected final TypeCache<Controller> controllers;
-
-	/** Get the controller type cache */
-	public TypeCache<Controller> getControllers() {
-		return controllers;
 	}
 
 	/** Cache of holiday proxies */
@@ -263,6 +212,14 @@ public class SonarState extends Client {
 		return ramp_meters;
 	}
 
+	/** Cache of controller objects */
+	protected final ConCache con_cache;
+
+	/** Get the controller object cache */
+	public ConCache getConCache() {
+		return con_cache;
+	}
+
 	/** Cache of DMS objects */
 	protected final DmsCache dms_cache;
 
@@ -298,16 +255,6 @@ public class SonarState extends Client {
 		connections = new TypeCache<Connection>(Connection.class, this);
 		system_attributes = new TypeCache<SystemAttribute>(
 			SystemAttribute.class, this);
-		cabinet_styles = new TypeCache<CabinetStyle>(
-			CabinetStyle.class, this);
-		cab_style_model = new ProxyListModel<CabinetStyle>(
-			cabinet_styles);
-		cab_style_model.initialize();
-		cabinets = new TypeCache<Cabinet>(Cabinet.class, this);
-		comm_links = new TypeCache<CommLink>(CommLink.class, this);
-		comm_link_model = new ProxyListModel<CommLink>(comm_links);
-		comm_link_model.initialize();
-		controllers = new TypeCache<Controller>(Controller.class, this);
 		holidays = new TypeCache<Holiday>(Holiday.class, this);
 		graphics = new TypeCache<Graphic>(Graphic.class, this);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
@@ -337,6 +284,7 @@ public class SonarState extends Client {
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
+		con_cache = new ConCache(this);
 		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
@@ -352,11 +300,7 @@ public class SonarState extends Client {
 		populate(system_attributes);
 		populate(roads, true);
 		populate(geo_locs, true);
-		populate(comm_links);
-		populate(cabinet_styles);
-		populate(cabinets);
-		populate(controllers);
-		populate(holidays);
+		con_cache.populate(this);
 		populate(graphics);
 		populate(monitors);
 		populate(alarms);
@@ -368,7 +312,9 @@ public class SonarState extends Client {
 		populate(ramp_meters);
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
+
 		populate(timing_plans);
+		populate(holidays);
 
 		ramp_meters.ignoreAttribute("operation");
 	}

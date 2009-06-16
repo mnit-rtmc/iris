@@ -96,7 +96,7 @@ public class DmsCache {
 		return sign_text;
 	}
 
-	/** Create a new Sonar state */
+	/** Create a new DMS cache */
 	public DmsCache(Client client) throws IllegalAccessException,
 		NoSuchFieldException
 	{

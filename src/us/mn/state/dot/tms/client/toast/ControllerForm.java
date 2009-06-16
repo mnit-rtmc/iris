@@ -116,16 +116,17 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create a new controller form */
 	public ControllerForm(Session s, Controller c) {
 		super(TITLE, s, c);
-		link_model = state.getCommLinkModel();
-		cabinets = state.getCabinets();
+		ConCache con_cache = state.getConCache();
+		link_model = con_cache.getCommLinkModel();
+		cabinets = con_cache.getCabinets();
 		cabinet = proxy.getCabinet();
 		cab_listener = new CabinetListener();
-		sty_model = state.getCabinetStyleModel();
+		sty_model = con_cache.getCabinetStyleModel();
 	}
 
 	/** Get the SONAR type cache */
 	protected TypeCache<Controller> getTypeCache() {
-		return state.getControllers();
+		return state.getConCache().getControllers();
 	}
 
 	/** Initialize the widgets on the form */

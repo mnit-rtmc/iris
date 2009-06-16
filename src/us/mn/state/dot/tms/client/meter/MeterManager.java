@@ -132,7 +132,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Create a style list model for the given symbol */
 	protected StyleListModel<RampMeter> createStyleListModel(Symbol s) {
 		return new MeterStyleModel(this, s.getLabel(), s.getLegend(),
-			session.getSonarState().getControllers());
+			session.getSonarState().getConCache().getControllers());
 	}
 
 	/** Get the proxy type name */

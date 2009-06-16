@@ -96,13 +96,12 @@ public class CommLinkForm extends AbstractForm {
 	protected final TypeCache<Controller> ccache;
 
 	/** Create a new comm link form */
-	public CommLinkForm(Session s, TypeCache<CommLink> c,
-		TypeCache<Controller> cc)
-	{
+	public CommLinkForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = c;
-		ccache = cc;
+		ConCache con_cache = s.getSonarState().getConCache();
+		cache = con_cache.getCommLinks();
+		ccache = con_cache.getControllers();
 	}
 
 	/** Initializze the widgets in the form */
