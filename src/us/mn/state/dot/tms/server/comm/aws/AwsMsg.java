@@ -51,9 +51,9 @@ public class AwsMsg {
 	private static final int NUM_TEXT_ROWS = 6;
 
 	/** constants */
-	private static final String DESC_BLANK = "Blank";
-	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
-	private static final String DESC_TWOPAGENORM = "2 Page (Normal)";
+	private static final String AWS_MDESC_BLANK = "Blank";
+	private static final String AWS_MDESC_ONEPAGE = "1 Page (Normal)";
+	private static final String AWS_MDESC_TWOPAGE = "2 Pages (Extended)";
 
 	/** Names of fonts in the AWS message file */
 	private static final String AWS_SINGLESTROKE = "Single Stroke";
@@ -270,11 +270,11 @@ public class AwsMsg {
 	 * @return AwsMsgType enum value.
 	 */
 	static protected AwsMsgType parseDescription(String d) {
-		if(d.equalsIgnoreCase(DESC_BLANK))
+		if(d.equalsIgnoreCase(AWS_MDESC_BLANK))
 			return AwsMsgType.BLANK;
-		else if(d.equalsIgnoreCase(DESC_ONEPAGENORM))
+		else if(d.equalsIgnoreCase(AWS_MDESC_ONEPAGE))
 			return AwsMsgType.ONEPAGEMSG;
-		else if(d.equalsIgnoreCase(DESC_TWOPAGENORM))
+		else if(d.equalsIgnoreCase(AWS_MDESC_TWOPAGE))
 			return AwsMsgType.TWOPAGEMSG;
 		else {
 			Log.severe("AwsMsg.parseDescription: unknown AWS " +
