@@ -491,11 +491,6 @@ public class SonarState extends Client {
 		return geo_locs.lookupObject(name);
 	}
 
-	/** Lookup a detector */
-	public Detector lookupDetector(String name) {
-		return detectors.lookupObject(name);
-	}
-
 	/** Lookup a station */
 	public Station lookupStation(String name) {
 		return stations.lookupObject(name);

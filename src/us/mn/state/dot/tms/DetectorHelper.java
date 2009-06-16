@@ -127,4 +127,10 @@ public class DetectorHelper extends BaseHelper {
 			return null;
 		}
 	}
+
+	/** Lookup the detector with the specified name */
+	static public Detector lookup(String name) {
+		return (Detector)namespace.lookupObject(Detector.SONAR_TYPE,
+			name);
+	}
 }
