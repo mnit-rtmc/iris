@@ -340,7 +340,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location.initialize();
 		location.addRow("Notes", notes);
 		camera.setModel(new WrapperComboBoxModel(
-			state.getCameraModel()));
+			state.getCamCache().getCameraModel()));
 		location.add("Camera", camera);
 		location.finishRow();
 		location.setCenter();

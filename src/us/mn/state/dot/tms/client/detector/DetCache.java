@@ -19,7 +19,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Cache for detector-related proxy objects.

@@ -120,7 +120,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	/** Create the setup panel */
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(true);
-		ListModel m = state.getCameraModel();
+		ListModel m = state.getCamCache().getCameraModel();
 		camera.setModel(new WrapperComboBoxModel(m));
 		panel.addRow("Camera", camera);
 		new ActionJob(this, camera) {

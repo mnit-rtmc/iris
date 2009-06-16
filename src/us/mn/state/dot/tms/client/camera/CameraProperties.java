@@ -78,7 +78,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Get the SONAR type cache */
 	protected TypeCache<Camera> getTypeCache() {
-		return state.getCameras();
+		return state.getCamCache().getCameras();
 	}
 
 	/** Initialize the widgets on the form */

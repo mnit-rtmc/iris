@@ -219,7 +219,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Initialize the model */
 	public void initialize() {
 		state.getAlarms().addProxyListener(a_watcher);
-		state.getCameras().addProxyListener(c_watcher);
+		state.getCamCache().getCameras().addProxyListener(c_watcher);
 		state.getDetCache().getDetectors().addProxyListener(
 			det_watcher);
 		state.getDmsCache().getDMSs().addProxyListener(dms_watcher);
@@ -232,7 +232,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Dispose of the model */
 	public void dispose() {
 		state.getAlarms().removeProxyListener(a_watcher);
-		state.getCameras().removeProxyListener(c_watcher);
+		state.getCamCache().getCameras().removeProxyListener(c_watcher);
 		state.getDetCache().getDetectors().removeProxyListener(
 			det_watcher);
 		state.getDmsCache().getDMSs().removeProxyListener(dms_watcher);

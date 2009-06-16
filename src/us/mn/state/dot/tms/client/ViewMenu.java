@@ -156,7 +156,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new CameraForm(s,
-					state.getCameras()));
+					state.getCamCache().getCameras()));
 			}
 		};
 		add(item);
@@ -190,7 +190,7 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new VideoMonitorForm(
-					state.getVideoMonitors()));
+					state.getCamCache().getVideoMonitors()));
 			}
 		};
 		add(item);

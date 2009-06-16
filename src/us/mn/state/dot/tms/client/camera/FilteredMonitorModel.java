@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 
 	/** Create a new filtered monitor model */
 	public FilteredMonitorModel(User u, SonarState st) {
-		super(st.getVideoMonitors());
+		super(st.getCamCache().getVideoMonitors());
 		user = u;
 		initialize();
 	}

@@ -27,7 +27,6 @@ import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
-import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
@@ -35,8 +34,8 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
+import us.mn.state.dot.tms.client.camera.CamCache;
 import us.mn.state.dot.tms.client.detector.DetCache;
 import us.mn.state.dot.tms.client.dms.DmsCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
@@ -98,22 +97,6 @@ public class SonarState extends Client {
 		return graphics;
 	}
 
-	/** Cache of video monitor proxies */
-	protected final TypeCache<VideoMonitor> monitors;
-
-	/** Get the video monitor type cache */
-	public TypeCache<VideoMonitor> getVideoMonitors() {
-		return monitors;
-	}
-
-	/** VideoMonitor proxy list model */
-	protected final ProxyListModel<VideoMonitor> monitor_model;
-
-	/** Get the VideoMonitor list model */
-	public ProxyListModel<VideoMonitor> getMonitorModel() {
-		return monitor_model;
-	}
-
 	/** Cache of road proxies */
 	protected final TypeCache<Road> roads;
 
@@ -154,22 +137,6 @@ public class SonarState extends Client {
 		return avail_alarm_model;
 	}
 
-	/** Cache of cameras */
-	protected final TypeCache<Camera> cameras;
-
-	/** Get the camera cache */
-	public TypeCache<Camera> getCameras() {
-		return cameras;
-	}
-
-	/** Camera proxy list model */
-	protected final ProxyListModel<Camera> camera_model;
-
-	/** Get the camera list model */
-	public ProxyListModel<Camera> getCameraModel() {
-		return camera_model;
-	}
-
 	/** Cache of warning signs */
 	protected final TypeCache<WarningSign> warn_signs;
 
@@ -192,6 +159,14 @@ public class SonarState extends Client {
 	/** Get the controller object cache */
 	public ConCache getConCache() {
 		return con_cache;
+	}
+
+	/** Cache of camera objects */
+	protected final CamCache cam_cache;
+
+	/** Get the camera object cache */
+	public CamCache getCamCache() {
+		return cam_cache;
 	}
 
 	/** Cache of detector objects */
@@ -239,10 +214,6 @@ public class SonarState extends Client {
 			SystemAttribute.class, this);
 		holidays = new TypeCache<Holiday>(Holiday.class, this);
 		graphics = new TypeCache<Graphic>(Graphic.class, this);
-		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
-			this);
-		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
-		monitor_model.initialize();
 		roads = new TypeCache<Road>(Road.class, this);
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
@@ -257,12 +228,10 @@ public class SonarState extends Client {
 			}
 		};
 		avail_alarm_model.initialize();
-		cameras = new TypeCache<Camera>(Camera.class, this);
-		camera_model = new ProxyListModel<Camera>(cameras);
-		camera_model.initialize();
 		warn_signs = new TypeCache<WarningSign>(WarningSign.class,
 			this);
 		ramp_meters = new TypeCache<RampMeter>(RampMeter.class, this);
+		cam_cache = new CamCache(this);
 		con_cache = new ConCache(this);
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
@@ -281,10 +250,9 @@ public class SonarState extends Client {
 		populate(roads, true);
 		populate(geo_locs, true);
 		populate(graphics, true);
+		cam_cache.populate(this);
 		con_cache.populate(this);
 		det_cache.populate(this);
-		populate(monitors);
-		populate(cameras);
 		populate(alarms);
 		populate(warn_signs);
 		populate(ramp_meters);
@@ -298,11 +266,6 @@ public class SonarState extends Client {
 	/** Look up the specified user */
 	public User lookupUser(String name) {
 		return users.lookupObject(name);
-	}
-
-	/** Lookup a camera */
-	public Camera lookupCamera(String name) {
-		return cameras.lookupObject(name);
 	}
 
 	/** Look up the specified connection */

@@ -34,6 +34,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -327,7 +328,7 @@ public class CameraViewer extends JPanel
 
 	/** Select the camera by ID */
 	protected void selectCamera(String id) {
-		Camera proxy = state.lookupCamera(id);
+		Camera proxy = CameraHelper.lookup(id);
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
 	}
