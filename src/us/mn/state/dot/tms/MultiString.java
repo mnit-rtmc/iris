@@ -27,11 +27,9 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class MultiString {
 
-	/* FIXME: add support for page time [ptxoy] tag */
-
 	/** Regular expression to match supported MULTI tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|jp|fo|g|cf|tt)([A-Za-z,0-9]*)\\]");
+		"\\[(nl|np|jl|jp|fo|g|cf|pt|tr|tt)([A-Za-z,0-9]*)\\]");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -299,6 +297,8 @@ public class MultiString {
 				// FIXME: fix x and y
 				cb.addGraphic(g_num, 1, 1);
 			}
+			// FIXME: parse tr (text rectangle) tags
+			// FIXME: parse pt (page time) tags
 		}
 		if(offset < b.length()) {
 			String span = b.substring(offset);
