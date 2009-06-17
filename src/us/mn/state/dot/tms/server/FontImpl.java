@@ -24,7 +24,6 @@ import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -289,27 +288,5 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Get the font version ID */
 	public int getVersionID() {
 		return versionID;
-	}
-
-	/** Lookup the glyph associated with a code point */
-	protected GlyphImpl getGlyph(int code_point) {
-		synchronized(glyphs) {
-			return glyphs.get(code_point);
-		}
-	}
-
-	/** Lookup the graphic associated with a code point */
-	protected GraphicImpl getGraphic(int code_point)
-		throws InvalidMessageException
-	{
-		GlyphImpl glyph = getGlyph(code_point);
-		if(glyph != null) {
-			GraphicImpl graphic = (GraphicImpl)glyph.getGraphic();
-			if(graphic != null)
-				return graphic;
-			throw new InvalidMessageException("Invalid graphic");
-		}
-		throw new InvalidMessageException("Invalid code point: " +
-			code_point);
 	}
 }
