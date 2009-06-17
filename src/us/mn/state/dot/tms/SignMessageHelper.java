@@ -69,6 +69,8 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Create an array of lines from the given message */
 	static public String[] createLines(SignMessage m, final int n_lines) {
+		if(m == null || m.getMulti() == null)
+			return new String[0];
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiString multi = new MultiString(m.getMulti());
 		multi.parse(new MultiString.SpanCallback() {
