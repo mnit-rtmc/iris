@@ -276,6 +276,7 @@ public class MultiString {
 				String span = b.substring(offset, m.start());
 				cb.addSpan(page, justp, line, justl,f_num,span);
 			}
+			offset = m.end();
 			String tag = m.group(1);
 			if(tag.equals("nl"))
 				line++;
