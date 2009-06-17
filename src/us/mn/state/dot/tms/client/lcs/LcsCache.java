@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSIndication;
@@ -51,6 +52,14 @@ public class LcsCache {
 		return lcs_indications;
 	}
 
+	/** Cache of lane-use MULTI strings */
+	protected final TypeCache<LaneUseMulti> lane_use_multis;
+
+	/** Get the lane-use MULTI cache */
+	public TypeCache<LaneUseMulti> getLaneUseMultis() {
+		return lane_use_multis;
+	}
+
 	/** Create a new LCS cache */
 	public LcsCache(Client client) throws IllegalAccessException,
 		NoSuchFieldException 
@@ -59,6 +68,8 @@ public class LcsCache {
 		lcss = new TypeCache<LCS>(LCS.class, client);
 		lcs_indications = new TypeCache<LCSIndication>(
 			LCSIndication.class, client);
+		lane_use_multis = new TypeCache<LaneUseMulti>(
+			LaneUseMulti.class, client);
 	}
 
 	/** Populate the LCS cache */
@@ -67,5 +78,6 @@ public class LcsCache {
 		lcs_arrays.ignoreAttribute("operation");
 		client.populate(lcss);
 		client.populate(lcs_indications);
+		client.populate(lane_use_multis);
 	}
 }

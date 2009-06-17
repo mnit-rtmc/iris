@@ -44,4 +44,10 @@ public class LaneUseMultiHelper extends BaseHelper {
 			}
 		});
 	}
+
+	/** Lookup the lane-use MULTI with the specified name */
+	static public LaneUseMulti lookup(String name) {
+		return (LaneUseMulti)namespace.lookupObject(
+			LaneUseMulti.SONAR_TYPE, name);
+	}
 }

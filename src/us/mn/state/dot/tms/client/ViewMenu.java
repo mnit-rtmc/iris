@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.GraphicForm;
+import us.mn.state.dot.tms.client.lcs.LaneUseMultiForm;
 import us.mn.state.dot.tms.client.lcs.LcsForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
@@ -174,6 +175,13 @@ public class ViewMenu extends JMenu {
 			public void perform() throws Exception {
 				desktop.show(new GraphicForm(s,
 					state.getGraphics()));
+			}
+		};
+		add(item);
+		item = new JMenuItem("Lane-Use MULTI");
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new LaneUseMultiForm(s));
 			}
 		};
 		add(item);
