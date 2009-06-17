@@ -340,17 +340,6 @@ public class MultiString {
 		return pc.num_pages;
 	}
 
-	/** Parsing callback to extract message text for each line */
-	protected class LineExtractor implements SpanCallback {
-		int num_pages = 0;
-		public void addSpan(int p, JustificationPage jp, int l,
-			JustificationLine jl, int f, String t)
-		{
-			num_pages = Math.max(p + 1, num_pages);
-		}
-		public void addGraphic(int g_num, int x, int y) { }
-	}
-
 	/** Travel time calculating callback interface */
 	public interface TravelCallback {
 
