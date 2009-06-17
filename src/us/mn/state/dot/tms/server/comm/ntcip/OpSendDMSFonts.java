@@ -24,12 +24,12 @@ import java.util.TreeSet;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.server.BaseObjectImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.FontImpl;
-import us.mn.state.dot.tms.server.GlyphImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
@@ -55,10 +55,10 @@ public class OpSendDMSFonts extends OpDMS {
 	protected final TreeSet<Integer> open_rows = new TreeSet<Integer>();
 
 	/** Iterator of fonts to be sent to the sign */
-	protected final Iterator<FontImpl> font_iterator;
+	protected final Iterator<Font> font_iterator;
 
 	/** Current font */
-	protected FontImpl font;
+	protected Font font;
 
 	/** Current row in font table */
 	protected int row;
@@ -72,7 +72,7 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
 		super(DOWNLOAD, d);
-		final LinkedList<FontImpl> fonts = new LinkedList<FontImpl>();
+		final LinkedList<Font> fonts = new LinkedList<Font>();
 		Integer w = dms.getWidthPixels();
 		Integer h = dms.getHeightPixels();
 		Integer cw = dms.getCharWidthPixels();
@@ -82,12 +82,12 @@ public class OpSendDMSFonts extends OpDMS {
 				BaseObjectImpl.namespace, w, h, cw, ch);
 			builder.findFonts(new Checker<Font>() {
 				public boolean check(Font font) {
-					fonts.add((FontImpl)font);
+					fonts.add(font);
 					return false;
 				}
 			});
 		}
-		for(FontImpl f: fonts)
+		for(Font f: fonts)
 			num_2_row.put(f.getNumber(), null);
 		font_iterator = fonts.iterator();
 	}
@@ -369,14 +369,14 @@ public class OpSendDMSFonts extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + char_spacing);
 			DMS_LOG.log(dms.getName() + ":= " + line_spacing);
 			mess.setRequest();
-			SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
+			Collection<Glyph> glyphs =FontHelper.lookupGlyphs(font);
 			if(glyphs.isEmpty()) {
 				if(version2)
 					return new ValidateFontV2();
 				else
 					return new ValidateFontV1();
 			} else
-				return new AddCharacter(glyphs.values());
+				return new AddCharacter(glyphs);
 		}
 	}
 
@@ -384,16 +384,16 @@ public class OpSendDMSFonts extends OpDMS {
 	protected class AddCharacter extends Phase {
 
 		/** Iterator for remaining glyphs */
-		protected final Iterator<GlyphImpl> chars;
+		protected final Iterator<Glyph> chars;
 
 		/** Current glyph */
-		protected GlyphImpl glyph;
+		protected Glyph glyph;
 
 		/** Count of characters added */
 		protected int count = 0;
 
 		/** Create a new add character phase */
-		public AddCharacter(Collection<GlyphImpl> c) {
+		public AddCharacter(Collection<Glyph> c) {
 			chars = c.iterator();
 			if(chars.hasNext())
 				glyph = chars.next();

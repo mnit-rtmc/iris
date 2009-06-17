@@ -14,12 +14,15 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Collection;
+import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 
 /**
  * Font helper methods.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class FontHelper extends BaseHelper {
 
@@ -40,8 +43,22 @@ public class FontHelper extends BaseHelper {
 	}
 
 	/** Lookup a Font in the SONAR namespace. 
-	 *  @return The specified font or null if it does not exist. */
-	static protected Font lookup(String name) {
+	 * @return The specified font or null if it does not exist. */
+	static public Font lookup(String name) {
 		return (Font)namespace.lookupObject(Font.SONAR_TYPE, name);
+	}
+
+	/** Lookup the glyphs in the specified font */
+	static public Collection<Glyph> lookupGlyphs(final Font font) {
+		final TreeMap<Integer, Glyph> glyphs =
+			new TreeMap<Integer, Glyph>();
+		namespace.findObject(Glyph.SONAR_TYPE, new Checker<Glyph>() {
+			public boolean check(Glyph g) {
+				if(g.getFont() == font)
+					glyphs.put(g.getCodePoint(), g);
+				return false;
+			}
+		});
+		return glyphs.values();
 	}
 }

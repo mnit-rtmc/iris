@@ -19,8 +19,6 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Font;
@@ -116,40 +114,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 		versionID = v;
 	}
 
-	/** Mapping of code points to glyphs */
-	protected final HashMap<Integer, GlyphImpl> glyphs =
-		new HashMap<Integer, GlyphImpl>();
-
-	/** Add a glyph */
-	public void addGlyph(int p, GlyphImpl g) throws TMSException {
-		synchronized(glyphs) {
-			if(glyphs.containsKey(p))
-				throw new ChangeVetoException("Glyph exists");
-			glyphs.put(p, g);
-		}
-	}
-
-	/** Remove a glyph */
-	public void removeGlyph(int p, GlyphImpl g) {
-		synchronized(glyphs) {
-			glyphs.remove(p);
-		}
-	}
-
-	/** Check if the font has any glyphs */
-	protected boolean hasGlyphs() throws TMSException {
-		synchronized(glyphs) {
-			return !glyphs.isEmpty();
-		}
-	}
-
-	/** Get a mapping of all the glyphs */
-	public SortedMap<Integer, GlyphImpl> getGlyphs() {
-		synchronized(glyphs) {
-			return new TreeMap<Integer, GlyphImpl>(glyphs);
-		}
-	}
-
 	/** Font number */
 	protected int f_number;
 
@@ -187,8 +151,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			return;
 		if(h < 4 || h > 24)
 			throw new ChangeVetoException("Invalid height");
-		if(hasGlyphs())
-			throw new ChangeVetoException("Glyphs exist");
 		store.update(this, "height", h);
 		setHeight(h);
 	}
@@ -212,8 +174,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 			return;
 		if(w < 0 || w > 12)
 			throw new ChangeVetoException("Invalid width");
-		if(hasGlyphs())
-			throw new ChangeVetoException("Glyphs exist");
 		store.update(this, "width", w);
 		setWidth(w);
 	}

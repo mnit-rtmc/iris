@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.TMSException;
@@ -58,13 +59,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		return map;
 	}
 
-	/** Destroy a glyph */
-	public void doDestroy() throws TMSException {
-		super.doDestroy();
-		if(font != null)
-			font.removeGlyph(codePoint, this);
-	}
-
 	/** Get the database table name */
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
@@ -83,11 +77,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		graphic = null;
 	}
 
-	/** Lookup a font in the SONAR namespace */
-	static protected FontImpl lookupFont(String f) {
-		return (FontImpl)namespace.lookupObject(Font.SONAR_TYPE, f);
-	}
-
 	/** Lookup a graphic in the SONAR namespace */
 	static protected GraphicImpl lookupGraphic(String g) {
 		return (GraphicImpl)namespace.lookupObject(Graphic.SONAR_TYPE,
@@ -99,22 +88,19 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		throws TMSException
 	{
 		this(n);
-		if(f != null) {
-			font = lookupFont(f);
-			if(font != null)
-				font.addGlyph(p, this);
-		}
+		if(f != null)
+			font = FontHelper.lookup(f);
 		codePoint = p;
 		if(g != null)
 			graphic = lookupGraphic(g);
 	}
 
 	/** Font to which the glyph belongs */
-	protected FontImpl font;
+	protected Font font;
 
 	/** Set the font */
 	public void setFont(Font f) {
-		font = (FontImpl)f;
+		font = f;
 	}
 
 	/** Set the font */
@@ -123,10 +109,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 			return;
 		if(f == null)
 			throw new ChangeVetoException("Font cannot be null");
-		((FontImpl)f).addGlyph(codePoint, this);
 		store.update(this, "font", f.getName());
-		if(font != null)
-			font.removeGlyph(codePoint, this);
 		setFont(f);
 	}
 
@@ -147,10 +130,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	public void doSetCodePoint(int p) throws TMSException {
 		if(p == codePoint)
 			return;
-		if(font != null) {
-			font.addGlyph(p, this);
-			font.removeGlyph(codePoint, this);
-		}
 		store.update(this, "code_point", p);
 		setCodePoint(p);
 	}

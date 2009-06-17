@@ -16,11 +16,12 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.SortedMap;
+import java.util.Collection;
 import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.server.FontImpl;
-import us.mn.state.dot.tms.server.GlyphImpl;
 import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
 
 /**
@@ -32,8 +33,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
 public class FontVersionByteStream extends CRC16 {
 
 	/** Create a new FontVersionByteStream */
-	public FontVersionByteStream(FontImpl font) throws IOException {
-		SortedMap<Integer, GlyphImpl> glyphs = font.getGlyphs();
+	public FontVersionByteStream(Font font) throws IOException {
+		Collection<Glyph> glyphs = FontHelper.lookupGlyphs(font);
 		DataOutputStream dos = new DataOutputStream(this);
 		dos.writeByte(font.getNumber());
 		dos.writeByte(font.getHeight());
@@ -41,7 +42,7 @@ public class FontVersionByteStream extends CRC16 {
 		dos.writeByte(font.getLineSpacing());
 		dos.writeByte(1); // number of subsequent length octets
 		dos.writeByte(glyphs.size());
-		for(GlyphImpl glyph: glyphs.values()) {
+		for(Glyph glyph: glyphs) {
 			Graphic graphic = glyph.getGraphic();
 			byte[] bitmap = Base64.decode(graphic.getPixels());
 			dos.writeShort(glyph.getCodePoint());
