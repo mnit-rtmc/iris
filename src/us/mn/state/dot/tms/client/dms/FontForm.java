@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -33,13 +33,13 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.SonarState;
@@ -263,20 +263,11 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Lookup the glyphs in the selected font */
-	protected void lookupGlyphs(final Font font) {
+	protected void lookupGlyphs(Font font) {
+		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
 		synchronized(gmap) {
 			gmap.clear();
-		}
-		final LinkedList<Glyph> glist = new LinkedList<Glyph>();
-		glyphs.findObject(new Checker<Glyph>() {
-			public boolean check(Glyph g) {
-				if(g.getFont() == font)
-					glist.add(g);
-				return false;
-			}
-		});
-		synchronized(gmap) {
-			for(Glyph g: glist)
+			for(Glyph g: gs)
 				addGlyph(g);
 		}
 	}
