@@ -104,15 +104,12 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
-		if(col == COL_NAME) {
-			return isLastRow(row) &&
-				m_form.canAddAttribute("test_attr");
-		} else if(col == COL_VALUE) {
+		if(col == COL_NAME)
+			return isLastRow(row) && m_form.canAdd("test_attr");
+		else if(col == COL_VALUE) {
 			SystemAttribute t = getProxy(row);
-			if(t != null) {
-				String a = t.getName() + '/' + t.getValue();
-				return m_form.canUpdateAttribute(a);
-			}
+			if(t != null)
+				return m_form.canUpdate(t.getName(), "value");
 		}
 		return false;
 	}

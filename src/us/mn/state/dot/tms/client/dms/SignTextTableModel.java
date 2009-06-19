@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -115,10 +116,10 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	protected Short m_priority;
 
 	/** Create a new sign text table model */
-	public SignTextTableModel(SignGroup g, TypeCache<SignText> c, User u) {
-		super(c);
+	public SignTextTableModel(SignGroup g, SonarState st, User u) {
+		super(st.getDmsCache().getSignText());
 		group = g;
-		creator = new SignTextCreator(c, u);
+		creator = new SignTextCreator(cache, st.getNamespace(), u);
 		initialize();
 	}
 

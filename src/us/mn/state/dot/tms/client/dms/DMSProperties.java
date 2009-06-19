@@ -276,7 +276,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean()) {
 			qlibTab = new QuickMessageEditorTab(
 				state.getDmsCache().getQuickMessages(), this,
-				user);
+				state.getNamespace(), user);
 		} else
 			qlibTab = null;
 		plan_model = new TimingPlanModel(state.getTimingPlans(), sign);

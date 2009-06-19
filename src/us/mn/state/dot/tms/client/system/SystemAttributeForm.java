@@ -24,11 +24,14 @@ import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ChangeJob;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -52,11 +55,6 @@ public class SystemAttributeForm extends AbstractForm {
 	static protected final String CAUTION_DMS = 
 		I18N.get("SystemAttributeForm.DmsCaution");
 
-	/** Create a SONAR name to check for allowed updates */
-	static protected String createNamespaceString(String name) {
-		return SystemAttribute.SONAR_TYPE + "/" + name;
-	}
-
 	/** Create a spinner */
 	static protected JSpinner createSpinner() {
 		return new JSpinner(new SpinnerNumberModel(0, 0, 5, 0.1));
@@ -77,6 +75,9 @@ public class SystemAttributeForm extends AbstractForm {
 
 	/** SystemAttribute type cache */
 	protected final TypeCache<SystemAttribute> cache;
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** Ramp meter green time spinner */
 	protected final JSpinner green = createSpinner();
@@ -137,10 +138,11 @@ public class SystemAttributeForm extends AbstractForm {
 	};
 
 	/** Create a new system attribute form */
-	public SystemAttributeForm(TypeCache<SystemAttribute> c, User u) {
+	public SystemAttributeForm(SonarState st, User u) {
 		super(TITLE);
 		setHelpPageName("Help.SystemAttributeForm");
-		cache = c;
+		cache = st.getSystemAttributes();
+		namespace = st.getNamespace();
 		user = u;
 		systemAttributeTab = new SystemAttributeTab(cache, this);
 	}
@@ -165,38 +167,45 @@ public class SystemAttributeForm extends AbstractForm {
 	}
 
 	/** Check if the user can add the named attribute */
-	public boolean canAddAttribute(String name) {
-		return name != null && user.canAdd(createNamespaceString(name));
+	public boolean canAdd(String name) {
+		return name != null && namespace.canAdd(user,
+			new Name(SystemAttribute.SONAR_TYPE, name));
 	}
 
 	/** Check if the user can update the named attribute */
-	public boolean canUpdateAttribute(String name) {
-		return name != null && user.canUpdate(createNamespaceString(
-			name));
+	public boolean canUpdate(String oname) {
+		return oname != null && namespace.canUpdate(user,
+			new Name(SystemAttribute.SONAR_TYPE, oname));
+	}
+
+	/** Check if the user can update the named attribute */
+	public boolean canUpdate(String oname, String aname) {
+		return namespace.canUpdate(user,
+			new Name(SystemAttribute.SONAR_TYPE, oname, aname));
 	}
 
 	/** Check if the user can change the named attribute */
-	public boolean canChangeAttribute(String name) {
-		SystemAttribute sa = cache.lookupObject(name);
+	public boolean canChange(String oname) {
+		SystemAttribute sa = cache.lookupObject(oname);
 		if(sa != null)
-			return canUpdateAttribute(name);
+			return canUpdate(oname);
 		else
-			return canAddAttribute(name);
+			return canAdd(oname);
 	}
 
-	/** Check if the user can remove the named attribute */
-	public boolean canRemoveAttribute(String name) {
-		return name != null && user.canRemove(createNamespaceString(
-			name));
+	/** Check if the user can remove a system attribute */
+	public boolean canRemove(String name) {
+		return name != null && namespace.canRemove(user,
+			new Name(SystemAttribute.SONAR_TYPE, name));
 	}
 
 	/** Initialize one spinner widget */
 	protected void initSpinner(final JSpinner spinner, SystemAttrEnum sa) {
-		final String aname = sa.aname();
-		if(canChangeAttribute(aname)) {
+		final String oname = sa.aname();
+		if(canChange(oname)) {
 			new ChangeJob(this, spinner) {
 				public void perform() {
-					setAttribute(aname, spinner.getValue());
+					setAttribute(oname, spinner.getValue());
 				}
 			};
 		} else
@@ -265,9 +274,9 @@ public class SystemAttributeForm extends AbstractForm {
 	protected void setAttribute(String attr, Object v) {
 		SystemAttribute sa = cache.lookupObject(attr);
 		if(sa != null) {
-			if(canUpdateAttribute(attr))
+			if(canUpdate(attr))
 				sa.setValue(v.toString());
-		} else if(canAddAttribute(attr)) {
+		} else if(canAdd(attr)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("value", v);

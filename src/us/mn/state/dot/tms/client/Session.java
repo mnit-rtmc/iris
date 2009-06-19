@@ -24,6 +24,7 @@ import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.Theme;
 import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
@@ -67,12 +68,12 @@ import us.mn.state.dot.tms.client.incidents.D10IncidentLayer;
  */
 public class Session {
 
-	/** User manager */
-	protected final UserManager userManager;
+	/** Session User */
+	protected final User user;
 
 	/** Get the currently logged-in user */
 	public User getUser() {
-		return userManager.getUser();
+		return user;
 	}
 
 	/** SONAR state */
@@ -82,6 +83,9 @@ public class Session {
 	public SonarState getSonarState() {
 		return state;
 	}
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** Desktop used by this session */
 	protected final SmartDesktop desktop;
@@ -247,7 +251,7 @@ public class Session {
 	}
 
 	/** Add the camera tab */
-	protected void addCameraTab(User user) {
+	protected void addCameraTab() {
 		tabs.add(new CameraTab(cam_manager, props, logger, state,user));
 	}
 
@@ -261,8 +265,9 @@ public class Session {
 	public Session(UserManager um, SmartDesktop d, Properties p, Logger l)
 		throws TdxmlException, IOException
 	{
-		userManager = um;
+		user = um.getUser();
 		state = um.getSonarState();
+		namespace = state.getNamespace();
 		desktop = d;
 		props = p;
 		logger = l;
@@ -296,23 +301,22 @@ public class Session {
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
 		vlayer = new ViewLayer();
-		User user = getUser();
-		if(canUpdate(user, DMS.SONAR_TYPE, "messageNext"))
+		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
 			addDMSTab();
-		if(canUpdate(user, RampMeter.SONAR_TYPE, "rateNext"))
+		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
 			addMeterTab();
 		addIncidentTab();
-		if(canUpdate(user, LCSArray.SONAR_TYPE, "indicationsNext"))
+		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
 			addLcsTab();
-		if(user.canRead(Camera.SONAR_TYPE))
-			addCameraTab(user);
-		if(user.canAdd(new Name(R_Node.SONAR_TYPE, "oname").toString()))
+		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
+			addCameraTab();
+		if(namespace.canAdd(user, new Name(R_Node.SONAR_TYPE, "oname")))
 			addRoadwayTab();
 	}
 
-	/** Check if a user can update an attribute */
-	protected boolean canUpdate(User user, String tname, String aname) {
-		return user.canUpdate(new Name(tname,"oname",aname).toString());
+	/** Check if the user can update an attribute */
+	protected boolean canUpdate(String tname, String aname) {
+		return namespace.canUpdate(user, new Name(tname,"oname",aname));
 	}
 
 	/** Dispose of the session */

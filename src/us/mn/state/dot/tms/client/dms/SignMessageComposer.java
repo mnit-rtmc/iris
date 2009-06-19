@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * Gui for composing messages for DMS.
@@ -62,6 +63,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
+
+	/** Soanr state */
+	protected final SonarState state;
 
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
@@ -124,11 +128,12 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Create a new sign message composer */
-	public SignMessageComposer(DMSDispatcher ds, DmsCache cache, User u) {
+	public SignMessageComposer(DMSDispatcher ds, SonarState st, User u) {
 		dispatcher = ds;
-		dms_sign_groups = cache.getDmsSignGroups();
-		sign_text = cache.getSignText();
-		fonts = cache.getFonts();
+		state = st;
+		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
+		sign_text = st.getDmsCache().getSignText();
+		fonts = st.getDmsCache().getFonts();
 		user = u;
 		add(tab);
 		initializeFonts(1, null);
@@ -196,8 +201,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new sign text model */
 	protected SignTextModel createSignTextModel(DMS proxy) {
-		SignTextModel stm = new SignTextModel(proxy, dms_sign_groups,
-			sign_text, user);
+		SignTextModel stm = new SignTextModel(proxy, state, user);
 		stm.initialize();
 		SignTextModel om = st_model;
 		st_model = stm;

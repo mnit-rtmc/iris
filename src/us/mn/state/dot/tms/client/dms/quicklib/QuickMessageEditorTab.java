@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.QuickMessage;
@@ -62,12 +63,12 @@ public class QuickMessageEditorTab extends FormPanel {
 	 * @param form Form this tab is placed onto. 
 	 * @param user SONAR user. */
 	public QuickMessageEditorTab(TypeCache<QuickMessage> tc,
-		AbstractForm form, User user)
+		AbstractForm form, Namespace ns, User user)
 	{
 		super(true);
 		m_form = form;
 		m_user = user;
-		m_tableModel = new QuickMessageTableModel(tc, user);
+		m_tableModel = new QuickMessageTableModel(tc, ns, user);
 		createControls();
 	}
 
@@ -126,7 +127,7 @@ public class QuickMessageEditorTab extends FormPanel {
 		QuickMessage proxy = m_tableModel.getProxy(
 			m_table.getSelectedRow());
 		del_btn.setEnabled(proxy == null ? false : 
-			m_tableModel.canRemoveProxy(proxy.getName()));
+			m_tableModel.canRemove(proxy.getName()));
 	}
 }
 

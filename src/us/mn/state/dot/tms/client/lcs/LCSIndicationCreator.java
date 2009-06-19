@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.client.lcs;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCS;
@@ -30,9 +32,12 @@ import us.mn.state.dot.tms.LCSIndication;
 public class LCSIndicationCreator {
 
 	/** Create a SONAR name to check for allowed updates */
-	static protected String createNamespaceString(String name) {
-		return LCSIndication.SONAR_TYPE + "/" + name;
+	static protected Name createLCSIName(String oname) {
+		return new Name(LCSIndication.SONAR_TYPE, oname);
 	}
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** LCS indication type cache */
 	protected final TypeCache<LCSIndication> indications;
@@ -44,7 +49,10 @@ public class LCSIndicationCreator {
 	protected int uid = 0;
 
 	/** Create a new LCS indication creator */
-	public LCSIndicationCreator(TypeCache<LCSIndication> tc, User u) {
+	public LCSIndicationCreator(Namespace ns, TypeCache<LCSIndication> tc,
+		User u)
+	{
+		namespace = ns;
 		indications = tc;
 		user = u;
 	}
@@ -66,14 +74,15 @@ public class LCSIndicationCreator {
 	}
 
 	/** Check if the user can add the named LCS indication */
-	public boolean canAdd(String name) {
-		return name != null && user.canAdd(createNamespaceString(name));
+	public boolean canAdd(String oname) {
+		return oname != null &&
+			namespace.canAdd(user, createLCSIName(oname));
 	}
 
 	/** Check if the user can update the named LCS indication */
-	public boolean canRemove(String name) {
-		return name != null &&
-			user.canRemove(createNamespaceString(name));
+	public boolean canRemove(String oname) {
+		return oname != null &&
+			namespace.canRemove(user, createLCSIName(oname));
 	}
 
 	/** Create a LCSIndication name */

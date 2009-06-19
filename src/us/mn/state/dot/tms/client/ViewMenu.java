@@ -67,8 +67,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('S');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new SystemAttributeForm(
-					state.getSystemAttributes(), user));
+				desktop.show(new SystemAttributeForm(state,
+					user));
 			}
 		};
 		add(item);

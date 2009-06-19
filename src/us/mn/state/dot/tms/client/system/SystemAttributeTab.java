@@ -118,7 +118,7 @@ public class SystemAttributeTab extends FormPanel {
 			m_table.getSelectedRow());
 		if(proxy != null) {
 			String a = proxy.getName();
-			del_attrib_btn.setEnabled(m_form.canRemoveAttribute(a));
+			del_attrib_btn.setEnabled(m_form.canRemove(a));
 		} else
 			del_attrib_btn.setEnabled(false);
 	}

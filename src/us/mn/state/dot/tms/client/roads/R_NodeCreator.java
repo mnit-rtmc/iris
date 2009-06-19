@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +16,15 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * This is a utility class to create new r_nodes. It creates both a GeoLoc and
@@ -37,14 +40,17 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	static protected final int MAX_IN_PROCESS_NAMES = 8;
 
 	/** Create a SONAR name to check for adding a geo_loc object */
-	static protected String createNamespaceGeoLoc(String name) {
-		return GeoLoc.SONAR_TYPE + "/" + name;
+	static protected Name createGeoLocName(String oname) {
+		return new Name(GeoLoc.SONAR_TYPE, oname);
 	}
 
 	/** Create a SONAR name to check for adding an r_node object */
-	static protected String createNamespaceR_Node(String name) {
-		return R_Node.SONAR_TYPE + "/" + name;
+	static protected Name createR_NodeName(String oname) {
+		return new Name(R_Node.SONAR_TYPE, oname);
 	}
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** R_Node type cache */
 	protected final TypeCache<R_Node> r_nodes;
@@ -72,9 +78,10 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	protected HashSet<String> in_process = new HashSet<String>();
 
 	/** Create a new r_node creator */
-	public R_NodeCreator(TypeCache<R_Node> c, TypeCache<GeoLoc> g, User u) {
-		r_nodes = c;
-		geo_locs = g;
+	public R_NodeCreator(SonarState st, User u) {
+		namespace = st.getNamespace();
+		r_nodes = st.getDetCache().getR_Nodes();
+		geo_locs = st.getGeoLocs();
 		user = u;
 		geo_locs.addProxyListener(this);
 	}
@@ -118,10 +125,10 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Check if the user can add the named r_node */
-	public boolean canAdd(String name) {
-		return name != null &&
-			user.canAdd(createNamespaceGeoLoc(name)) &&
-			user.canAdd(createNamespaceR_Node(name));
+	public boolean canAdd(String oname) {
+		return oname != null &&
+			namespace.canAdd(user, createGeoLocName(oname)) &&
+			namespace.canAdd(user, createR_NodeName(oname));
 	}
 
 	/** Called when a new GeoLoc is added */

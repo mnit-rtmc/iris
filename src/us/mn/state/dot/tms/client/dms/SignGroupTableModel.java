@@ -19,6 +19,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -26,6 +27,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -36,13 +38,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Create a SONAR sign group name to check for allowed updates */
-	static public String createSignGroupName(String name) {
-		return new Name(SignGroup.SONAR_TYPE, name).toString();
+	static public Name createSignGroupName(String oname) {
+		return new Name(SignGroup.SONAR_TYPE, oname);
 	}
 
 	/** Create a SONAR DMS sign group name to check for allowed updates */
-	static public String createDmsSignGroupName(String name) {
-		return new Name(DmsSignGroup.SONAR_TYPE, name).toString();
+	static public Name createDmsSignGroupName(String oname) {
+		return new Name(DmsSignGroup.SONAR_TYPE, oname);
 	}
 
 	/** Count of columns in table model */
@@ -99,6 +101,9 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** SONAR user */
 	protected final User user;
 
@@ -108,15 +113,14 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	/** 
 	 * Create a new sign group table model.
 	 * @param dms DMS proxy object.
-	 * @param d Sonar type cache.
+	 * @param st SonarState cache.
 	 * @param u Logged-in user.
 	 */
-	public SignGroupTableModel(DMS proxy, TypeCache<DmsSignGroup> d,
-		TypeCache<SignGroup> g, User u)
-	{
-		super(g);
+	public SignGroupTableModel(DMS proxy, SonarState st, User u) {
+		super(st.getDmsCache().getSignGroups());
 		dms = proxy;
-		dms_sign_groups = d;
+		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
+		namespace = st.getNamespace();
 		user = u;
 		initialize();
 		final SignGroupTableModel model = this;
@@ -198,13 +202,14 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	}
 
 	/** Check if the user can add and remove the specified name */
-	protected boolean canAddAndRemove(String name) {
-		return user.canAdd(name) && user.canRemove(name);
+	protected boolean canAddAndRemove(Name name) {
+		return namespace.canAdd(user, name) &&
+		       namespace.canRemove(user, name);
 	}
 
 	/** Check if the user is allowed to add a sign group */
 	protected boolean canAddSignGroup(String name) {
-		return user.canAdd(createSignGroupName(name));
+		return namespace.canAdd(user, createSignGroupName(name));
 	}
 
 	/** Set the value at the specified cell */

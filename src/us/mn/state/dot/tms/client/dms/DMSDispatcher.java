@@ -143,14 +143,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		namespace = st.getNamespace();
 		cache = dms_cache.getDMSs();
 		user = session.getUser();
-		creator = new SignMessageCreator(dms_cache.getSignMessages(),
-			user);
+		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
 		clearAction = new ClearDmsAction(selectionModel, this, user);
 		qlibCmb = new QLibCBox(this, dms_cache.getQuickMessages());
 		clearBtn.setAction(clearAction);
 		manager.setClearAction(clearAction);
-		composer = new SignMessageComposer(this, dms_cache, user);
+		composer = new SignMessageComposer(this, st, user);
 		currentPnl = singleTab.getCurrentPanel();
 		previewPnl = singleTab.getPreviewPanel();
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
@@ -706,9 +705,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return null;
 	}
 
-	/** Check is AWS is allowed and user has permission to change */
+	/** Check if AWS is allowed and user has permission to change */
 	public boolean isAwsPermitted(DMS dms) {
 		Name name = new Name(dms, "awsControlled");
-		return dms.getAwsAllowed() && user.canUpdate(name.toString());
+		return dms.getAwsAllowed() && namespace.canUpdate(user, name);
 	}
 }

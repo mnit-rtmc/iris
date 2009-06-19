@@ -29,6 +29,8 @@ import javax.swing.table.DefaultTableModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
@@ -54,8 +56,8 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MessagesTab extends JPanel {
 
 	/** Create a SONAR sign text name to check for allowed updates */
-	static public String createSignTextName(String name) {
-		return SignText.SONAR_TYPE + "/" + name;
+	static public Name createSignTextName(String oname) {
+		return new Name(SignText.SONAR_TYPE, oname);
 	}
 
 	/** Sign group table model */
@@ -97,6 +99,9 @@ public class MessagesTab extends JPanel {
 	/** DMS proxy */
 	protected final DMS proxy;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** SONAR user */
 	protected final User user;
 
@@ -106,10 +111,9 @@ public class MessagesTab extends JPanel {
 		state = s.getSonarState();
 		dms_cache = state.getDmsCache();
 		proxy = sign;
+		namespace = state.getNamespace();
 		user = s.getUser();
-		sign_group_model = new SignGroupTableModel(sign,
-			dms_cache.getDmsSignGroups(), dms_cache.getSignGroups(),
-			user);
+		sign_group_model = new SignGroupTableModel(sign, state, user);
 		initGroupTable();
 		initSignTextTable();
 		createActions();
@@ -232,8 +236,8 @@ public class MessagesTab extends JPanel {
 		if(group != null) {
 			if(sign_text_model != null)
 				sign_text_model.dispose();
-			sign_text_model = new SignTextTableModel(group,
-				dms_cache.getSignText(), user);
+			sign_text_model = new SignTextTableModel(group, state,
+				user);
 			sign_text_table.setModel(sign_text_model);
 			delete_group.setEnabled(isGroupDeletable(group));
 		} else {
@@ -276,9 +280,9 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Check if the user can remove the specified sign group */
-	protected boolean canRemove(SignGroup group) {
-		return user.canRemove(SignGroupTableModel.createSignGroupName(
-			group.getName()));
+	protected boolean canRemove(SignGroup sg) {
+		return namespace.canRemove(user,
+			SignGroupTableModel.createSignGroupName(sg.getName()));
 	}
 
 	/** Get the selected sign group */
@@ -332,8 +336,8 @@ public class MessagesTab extends JPanel {
 
 	/** Check if the user can remove the specified sign text */
 	protected boolean canRemove(SignText st) {
-		return st != null &&
-		       user.canRemove(createSignTextName(st.getName()));
+		return st != null && namespace.canRemove(user,
+			createSignTextName(st.getName()));
 	}
 
 	/** Get the line height of the sign */

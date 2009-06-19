@@ -196,9 +196,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Check if the user can activate a controller */
 	protected boolean canActivate() {
-		User user = session.getUser();
 		Name name = new Name(Controller.SONAR_TYPE, "oname", "active");
-		return user.canUpdate(name.toString());
+		return state.getNamespace().canUpdate(session.getUser(), name);
 	}
 
 	/** Create the cabinet panel */

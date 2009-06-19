@@ -17,10 +17,13 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * This is a utility class to create sign messages.
@@ -30,12 +33,15 @@ import us.mn.state.dot.tms.SignMessage;
 public class SignMessageCreator {
 
 	/** Create a SONAR name to check for allowed updates */
-	static protected String createNamespaceString(String name) {
-		return SignMessage.SONAR_TYPE + "/" + name;
+	static protected Name createSignMessageName(String oname) {
+		return new Name(SignMessage.SONAR_TYPE, oname);
 	}
 
 	/** Sign message type cache */
 	protected final TypeCache<SignMessage> sign_messages;
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** SONAR User for permission checks */
 	protected final User user;
@@ -44,8 +50,9 @@ public class SignMessageCreator {
 	protected int uid = 0;
 
 	/** Create a new sign message creator */
-	public SignMessageCreator(TypeCache<SignMessage> sm, User u) {
-		sign_messages = sm;
+	public SignMessageCreator(SonarState st, User u) {
+		sign_messages = st.getDmsCache().getSignMessages();
+		namespace = st.getNamespace();
 		user = u;
 	}
 
@@ -137,7 +144,8 @@ public class SignMessageCreator {
 
 	/** Check if the user can add the named sign message */
 	public boolean canAddSignMessage(String name) {
-		return name != null && user.canAdd(createNamespaceString(name));
+		return name != null && namespace.canAdd(user,
+			createSignMessageName(name));
 	}
 
 	/** 

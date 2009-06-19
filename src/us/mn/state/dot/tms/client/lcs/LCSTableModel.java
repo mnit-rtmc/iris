@@ -18,6 +18,8 @@ import java.util.HashMap;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCSArray;
@@ -32,8 +34,8 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class LCSTableModel extends ProxyTableModel<LCS> {
 
 	/** Create a SONAR name to check for allowed updates */
-	static protected String createNamespaceString(String name) {
-		return LCS.SONAR_TYPE + "/" + name;
+	static protected Name createLCSName(String oname) {
+		return new Name(LCS.SONAR_TYPE, oname);
 	}
 
 	/** Count of columns in table model */
@@ -65,13 +67,19 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	/** LCS array */
 	protected final LCSArray lcs_array;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
 	/** SONAR User for permission checks */
 	protected final User user;
 
 	/** Create a new LCS table model */
-	public LCSTableModel(LCSArray la, TypeCache<LCS> c, User u) {
+	public LCSTableModel(LCSArray la, TypeCache<LCS> c, Namespace ns,
+		User u)
+	{
 		super(c);
 		lcs_array = la;
+		namespace = ns;
 		user = u;
 		initialize();
 	}
@@ -120,8 +128,8 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	}
 
 	/** Check if the user can add the named LCS */
-	public boolean canAddLCS(String name) {
-		return user.canAdd(createNamespaceString(name));
+	public boolean canAddLCS(String oname) {
+		return namespace.canAdd(user, createLCSName(oname));
 	}
 
 	/** Set the value at the specified cell */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MultiString;
@@ -35,12 +37,15 @@ public class SignTextCreator {
 	static protected final int MAX_LINES = 12;
 
 	/** Create a SONAR name to check for allowed updates */
-	static protected String createNamespaceString(String name) {
-		return SignText.SONAR_TYPE + "/" + name;
+	static protected Name createSignTextName(String oname) {
+		return new Name(SignText.SONAR_TYPE, oname);
 	}
 
 	/** Sign text type cache, list of all sign text lines */
 	protected final TypeCache<SignText> sign_text;
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** SONAR User for permission checks */
 	protected final User user;
@@ -49,8 +54,9 @@ public class SignTextCreator {
 	protected int uid = 0;
 
 	/** Create a new sign text creator */
-	public SignTextCreator(TypeCache<SignText> st, User u) {
+	public SignTextCreator(TypeCache<SignText> st, Namespace ns, User u) {
 		sign_text = st;
+		namespace = ns;
 		user = u;
 	}
 
@@ -79,13 +85,14 @@ public class SignTextCreator {
 
 	/** Check if the user can add the named sign text */
 	public boolean canAddSignText(String name) {
-		return name != null && user.canAdd(createNamespaceString(name));
+		return name != null && namespace.canAdd(user,
+			createSignTextName(name));
 	}
 
 	/** Check if the user can update the named sign text */
 	public boolean canUpdateSignText(String name) {
-		return name != null &&
-			user.canUpdate(createNamespaceString(name));
+		return name != null && namespace.canUpdate(user,
+			createSignTextName(name));
 	}
 
 	/** 

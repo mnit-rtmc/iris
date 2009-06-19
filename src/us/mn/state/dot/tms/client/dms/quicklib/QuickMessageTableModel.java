@@ -18,6 +18,8 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
@@ -33,6 +35,16 @@ import us.mn.state.dot.tms.utils.SField;
  */
 public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 
+	/** Create a quick message object name */
+	static protected Name createQMName(String oname) {
+		return new Name(QuickMessage.SONAR_TYPE, oname);
+	}
+
+	/** Create a quick message object attribute name */
+	static protected Name createQMName(String oname, String aname) {
+		return new Name(QuickMessage.SONAR_TYPE, oname, aname);
+	}
+
 	/** Count of columns in table model */
 	static protected final int COLUMN_COUNT = 2;
 
@@ -42,6 +54,9 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** multi column number */
 	static protected final int COL_MULTI = 1;
 	static protected final String COL_MULTI_NAME = "multi";
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
 	/** SONAR User for permission checks */
 	protected final User m_user;
@@ -66,9 +81,10 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** Create a new table model.
 	 *  @param tc TypeCache for the table items being displayed/edited. */
 	public QuickMessageTableModel(TypeCache<QuickMessage> arg_tc, 
-		User user)
+		Namespace ns, User user)
 	{
 		super(arg_tc);
+		namespace = ns;
 		m_user = user;
 		initialize();
 	}
@@ -98,13 +114,11 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
 		if(col == COL_NAME)
-			return isLastRow(row) && 
-				canAddProxy("whatever");
+			return isLastRow(row) && canAdd("whatever");
 		else if(col == COL_MULTI) {
 			QuickMessage p = getProxy(row);
 			if(p != null)
-				return canUpdateProxyAttribute(p.getName() + 
-					'/' + COL_MULTI_NAME);
+				return canUpdate(p.getName(), COL_MULTI_NAME);
 		}
 		return false;
 	}
@@ -116,7 +130,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 			if(t == null) {
 				// trim
 				String name = (value == null ? "" : 
-					value.toString().replace(" ",""));
+					value.toString().replace(" ", ""));
 				addRow(name);
 			}
 		} else if(col == COL_MULTI) {
@@ -130,46 +144,40 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	 *  @param arg_name. */
 	protected void addRow(Object arg_name) {
 		String name = (arg_name == null ? "" : arg_name.toString());
-		if(canAddProxy(name))
+		if(canAdd(name))
 			cache.createObject(name);
 	}
 
 	/** Add a new proxy to the table model, if
 	 *  the user has read permission. */
 	protected int doProxyAdded(QuickMessage p) {
-		if(p != null && canReadProxy(p.getName()))
+		if(p != null && canRead(p.getName()))
 			return super.doProxyAdded(p);
 		return -1;
 	}
 
 	/** Check if the user can read a proxy */
-	public boolean canReadProxy(String objname) {
-		return objname != null && 
-			m_user.canRead(prependSonarType(objname));
+	public boolean canRead(String oname) {
+		return oname != null && 
+			namespace.canRead(m_user, createQMName(oname));
 	}
 
 	/** Check if the user can remove a proxy */
-	public boolean canRemoveProxy(String objname) {
-		return objname != null && 
-			m_user.canRemove(prependSonarType(objname));
+	public boolean canRemove(String oname) {
+		return oname != null && 
+			namespace.canRemove(m_user, createQMName(oname));
 	}
 
 	/** Check if the user can add a proxy */
-	public boolean canAddProxy(String objname) {
-		if(objname == null || objname.isEmpty())
+	public boolean canAdd(String oname) {
+		if(oname == null || oname.isEmpty())
 			return false;
-		return m_user.canAdd(prependSonarType(objname));
+		return namespace.canAdd(m_user, createQMName(oname));
 	}
 
 	/** Check if the user can update the named attribute,
 	 *  @param aname attribute name. */
-	public boolean canUpdateProxyAttribute(String aname) {
-		return aname != null && m_user.canUpdate(prependSonarType(
-			aname));
-	}
-
-	/** Prepend the SONAR type to the arg */
-	static protected String prependSonarType(String objname) {
-		return QuickMessage.SONAR_TYPE + "/" + objname;
+	public boolean canUpdate(String oname, String aname) {
+		return namespace.canUpdate(m_user, createQMName(oname, aname));
 	}
 }

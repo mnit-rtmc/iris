@@ -48,9 +48,7 @@ public class RoadwayTab extends MapTab {
 	{
 		super("Roadway", "View / edit roadway nodes");
 		SonarState st = session.getSonarState();
-		R_NodeCreator creator = new R_NodeCreator(
-			st.getDetCache().getR_Nodes(), st.getGeoLocs(),
-			session.getUser());
+		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
 		clist = new CorridorList(m, creator);
 		chooser = new CorridorChooser(m, map, clist);
 		map.addLayers(lstates);
