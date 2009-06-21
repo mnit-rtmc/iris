@@ -73,6 +73,11 @@ public class CoordinatePanel extends JPanel implements MouseMotionListener
 		m_map.addMouseMotionListener(this);		
 	}
 
+	/** is this panel IRIS enabled? */
+	public static boolean getIEnabled() {
+		return true;
+	}
+
 	/** Process the mouse moved event and update the status bar */
 	public void mouseMoved(MouseEvent e) {
 		Point2D p = m_map.transformPoint(e.getPoint());

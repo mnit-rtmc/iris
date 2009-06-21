@@ -63,23 +63,21 @@ public class IrisToolBar extends JToolBar
 		JPanel ret = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		if(m_st == null)
 			return ret;
-
-		// always display coordinates
-		m_cp = new CoordinatePanel(m);
-		ret.add(m_cp);
-
-		// optional AWS panel
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+		// map coordinate panel
+		if(CoordinatePanel.getIEnabled()) {
+			m_cp = new CoordinatePanel(m);
+			ret.add(m_cp);
+		}
+		// AWS panel
+		if(AwsStatusPanel.getIEnabled()) {
 			m_ap = new AwsStatusPanel(m_st, desktop);
 			ret.add(m_ap);
 		}
-
-		// optional map zoom panel
+		// map zoom panel
 		if(MapZoomPanel.getIEnabled()) {
 			m_zp = new MapZoomPanel(m);
 			ret.add(m_zp);
 		}
-
 		return ret;
 	}
 

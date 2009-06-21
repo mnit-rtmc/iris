@@ -98,6 +98,11 @@ public class AwsStatusPanel extends JPanel implements
 		m_sysattribs.addProxyListener(m_saListener);
 	}
 
+	/** is this panel IRIS enabled? */
+	public static boolean getIEnabled() {
+		return SystemAttrEnum.DMS_AWS_ENABLE.getBoolean();
+	}
+
 	/** set tooltip text */
 	public void setToolTipText() {
 		// none
@@ -147,7 +152,7 @@ public class AwsStatusPanel extends JPanel implements
 		final String redFontStop = "</font>";
 
 		// AWS not activated?
-		if(!SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
+		if(!getIEnabled())
 			return htmlStart + "<b>" + redFontStart + m_awsName + 
 				" is not activated" + redFontStop + "<b>" + 
 				htmlStop;
