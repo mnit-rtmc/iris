@@ -405,6 +405,8 @@ public class SignMessageComposer extends JPanel {
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
+		assert tab != null;
+		assert tab.getTabCount() > 0;
 		if(tab != null && tab.getTabCount() > 0)
 			tab.setSelectedIndex(0);
 		blankBtn.setEnabled(b);
@@ -412,9 +414,13 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < cmbLine.length; i++)
 			if(cmbLine[i] != null)
 				cmbLine[i].setEnabled(b);
+			else
+				assert false : "i="+i+", cmbLine[i]=null, cmbLine.length="+cmbLine.length;
 		for(int i = 0; i < fontCmb.length; i++)
 			if(fontCmb[i] != null)
 				fontCmb[i].setEnabled(b);
+			else
+				assert false : "i="+i+", fontCmb[i]=null, fontCmb.length="+fontCmb.length;
 	}
 
 	/** Return a MULTI string using the contents of the widgets. */
@@ -435,6 +441,11 @@ public class SignMessageComposer extends JPanel {
 	/** Get text from combobox line */
 	protected String getMessageFromCB(int line) {
 		assert line >= 0 && line < cmbLine.length;
+		assert(cmbLine[line] != null);
+		if(line < 0 || line >= cmbLine.length)
+			return "";
+		if(cmbLine[line] == null)
+			return "";
 		Object o = cmbLine[line].getSelectedItem();
 		if(o == null)
 			return "";
