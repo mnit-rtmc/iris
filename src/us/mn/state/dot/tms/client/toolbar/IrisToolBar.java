@@ -45,6 +45,9 @@ public class IrisToolBar extends JToolBar
 	/** AWS panel */
 	protected AwsStatusPanel m_ap;
 
+	/** Map zoom panel */
+	protected MapZoomPanel m_zp;
+
 	/** sonar state */
 	final SonarState m_st;
 
@@ -70,6 +73,13 @@ public class IrisToolBar extends JToolBar
 			m_ap = new AwsStatusPanel(m_st, desktop);
 			ret.add(m_ap);
 		}
+
+		// optional map zoom panel
+		if(MapZoomPanel.getIEnabled()) {
+			m_zp = new MapZoomPanel(m);
+			ret.add(m_zp);
+		}
+
 		return ret;
 	}
 
@@ -79,5 +89,7 @@ public class IrisToolBar extends JToolBar
 			m_cp.dispose();
 		if(m_ap != null)
 			m_ap.dispose();
+		if(m_zp != null)
+			m_zp.dispose();
 	}
 }
