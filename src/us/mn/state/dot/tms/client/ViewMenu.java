@@ -57,9 +57,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('U');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new UserRoleForm(state.getUsers(),
-					state.getRoles(),
-					state.getConnections()));
+				desktop.show(new UserRoleForm(state, user));
 			}
 		};
 		add(item);

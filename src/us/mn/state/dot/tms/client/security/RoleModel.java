@@ -28,25 +28,21 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class RoleModel extends ProxyTableModel<Role> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 6;
+	static protected final int COLUMN_COUNT = 2;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
 
-	/** Pattern column number */
-	static protected final int COL_PATTERN = 1;
+	/** Enabled column number */
+	static protected final int COL_ENABLED = 1;
 
-	/** Read privilege column number */
-	static protected final int COL_PRIV_R = 2;
-
-	/** Write privilege column number */
-	static protected final int COL_PRIV_W = 3;
-
-	/** Create privilege column number */
-	static protected final int COL_PRIV_C = 4;
-
-	/** Delete privilege column number */
-	static protected final int COL_PRIV_D = 5;
+	/** Create the table column model */
+	static public TableColumnModel createColumnModel() {
+		TableColumnModel m = new DefaultTableColumnModel();
+		m.addColumn(createColumn(COL_NAME, 200, "Name"));
+		m.addColumn(createColumn(COL_ENABLED, 80, "Enabled"));
+		return m;
+	}
 
 	/** Create a new role table model */
 	public RoleModel(TypeCache<Role> c) {
@@ -67,16 +63,8 @@ public class RoleModel extends ProxyTableModel<Role> {
 		switch(column) {
 			case COL_NAME:
 				return r.getName();
-			case COL_PATTERN:
-				return r.getPattern();
-			case COL_PRIV_R:
-				return r.getPrivR();
-			case COL_PRIV_W:
-				return r.getPrivW();
-			case COL_PRIV_C:
-				return r.getPrivC();
-			case COL_PRIV_D:
-				return r.getPrivD();
+			case COL_ENABLED:
+				return r.getEnabled();
 		}
 		return null;
 	}
@@ -84,10 +72,7 @@ public class RoleModel extends ProxyTableModel<Role> {
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
 		switch(column) {
-			case COL_PRIV_R:
-			case COL_PRIV_W:
-			case COL_PRIV_C:
-			case COL_PRIV_D:
+			case COL_ENABLED:
 				return Boolean.class;
 			default:
 				return String.class;
@@ -99,10 +84,9 @@ public class RoleModel extends ProxyTableModel<Role> {
 		synchronized(proxies) {
 			if(row == proxies.size())
 				return column == COL_NAME;
+			else
+				return column != COL_NAME;
 		}
-		if(column == COL_NAME)
-			return false;
-		return true;
 	}
 
 	/** Set the value at the specified cell */
@@ -113,33 +97,9 @@ public class RoleModel extends ProxyTableModel<Role> {
 			case COL_NAME:
 				cache.createObject(v);
 				break;
-			case COL_PATTERN:
-				r.setPattern(v);
-				break;
-			case COL_PRIV_R:
-				r.setPrivR((Boolean)value);
-				break;
-			case COL_PRIV_W:
-				r.setPrivW((Boolean)value);
-				break;
-			case COL_PRIV_C:
-				r.setPrivC((Boolean)value);
-				break;
-			case COL_PRIV_D:
-				r.setPrivD((Boolean)value);
+			case COL_ENABLED:
+				r.setEnabled((Boolean)value);
 				break;
 		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Role"));
-		m.addColumn(createColumn(COL_PATTERN, 420, "Pattern"));
-		m.addColumn(createColumn(COL_PRIV_R, 80, "Read"));
-		m.addColumn(createColumn(COL_PRIV_W, 80, "Write"));
-		m.addColumn(createColumn(COL_PRIV_C, 80, "Create"));
-		m.addColumn(createColumn(COL_PRIV_D, 80, "Delete"));
-		return m;
 	}
 }

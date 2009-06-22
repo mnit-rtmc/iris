@@ -22,14 +22,20 @@ CREATE TABLE system_attribute (
 	value VARCHAR(64) NOT NULL
 );
 
-CREATE TABLE iris_user (
+CREATE TABLE iris.i_user (
 	name VARCHAR(15) PRIMARY KEY,
 	dn text NOT NULL,
 	full_name VARCHAR(31) NOT NULL
 );
 
-CREATE TABLE role (
+CREATE TABLE iris.role (
 	name VARCHAR(15) PRIMARY KEY,
+	enabled BOOLEAN NOT NULL
+);
+
+CREATE TABLE iris.privilege (
+	name VARCHAR(8) PRIMARY KEY,
+	role VARCHAR(15) NOT NULL REFERENCES iris.role,
 	pattern VARCHAR(31) DEFAULT ''::VARCHAR NOT NULL,
 	priv_r boolean DEFAULT false NOT NULL,
 	priv_w boolean DEFAULT false NOT NULL,
@@ -37,9 +43,9 @@ CREATE TABLE role (
 	priv_d boolean DEFAULT false NOT NULL
 );
 
-CREATE TABLE iris_user_role (
-	iris_user VARCHAR(15) NOT NULL REFERENCES iris_user(name),
-	role VARCHAR(15) NOT NULL REFERENCES role(name)
+CREATE TABLE iris.i_user_role (
+	i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user(name),
+	role VARCHAR(15) NOT NULL REFERENCES iris.role(name)
 );
 
 CREATE TABLE direction (
@@ -1088,7 +1094,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.88.0
+database_version	3.90.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1123,21 +1129,80 @@ COPY r_node_transition (n_transition, name) FROM stdin;
 7	flyover
 \.
 
-COPY role (name, pattern, priv_r, priv_w, priv_c, priv_d) FROM stdin;
-admin		f	f	f	f
-alert		f	f	f	f
-dms	dms/.*/messageNext	f	t	f	f
-dms_owner	dms/.*/ownerNext	f	t	f	f
-font	font/.*	f	t	t	t
-glyph	glyph/.*	f	t	t	t
-graphic	graphic/.*	f	t	t	t
-incidents		f	f	f	f
-activate	.*/.*/active	f	t	f	f
-meter	ramp_meter/.*/rateNext	f	t	f	f
-lcs	lcs/.*/signals	f	t	f	f
-user_admin	user/.*	t	t	t	t
-role_admin	role/.*	t	t	t	t
-view	.*	t	f	f	f
+COPY iris.role (name, enabled) FROM stdin;
+login	t
+video	t
+operate	t
+policy	t
+device_admin	t
+maintenance	t
+integration	t
+system_admin	t
+user_admin	t
+\.
+
+COPY iris.privilege (name, role, pattern, priv_r, priv_w, priv_c, priv_d) FROM stdin;
+PRV_0001	login	role/.*	t	f	f	f
+PRV_0002	login	privilege/.*	t	f	f	f
+PRV_0003	login	user/.*	t	f	f	f
+PRV_0004	login	connection/.*	t	f	f	f
+PRV_0042	login	controller/.*	t	f	f	f
+PRV_0005	login	system_attribute/.*	t	f	f	f
+PRV_0006	login	road/.*	t	f	f	f
+PRV_0007	login	geo_loc/.*	t	f	f	f
+PRV_0008	login	graphic/.*	t	f	f	f
+PRV_0009	login	alarm/.*	t	f	f	f
+PRV_0010	login	warning_sign/.*	t	f	f	f
+PRV_0011	login	ramp_meter/.*	t	f	f	f
+PRV_0012	login	timing_plan/.*	t	f	f	f
+PRV_0013	login	holiday/.*	t	f	f	f
+PRV_0014	video	camera/.*	t	f	f	f
+PRV_0015	video	video_monitor/.*	t	f	f	f
+PRV_0016	operate	camera/.*	t	f	f	f
+PRV_0017	operate	dms/.*	t	f	f	f
+PRV_0018	operate	dms_sign_group/.*	t	f	f	f
+PRV_0019	operate	sign_group/.*	t	f	f	f
+PRV_0020	operate	sign_text/.*	t	f	f	f
+PRV_0021	operate	camera/.*/ptz	f	t	f	f
+PRV_0022	operate	sign_message/.*	f	t	t	t
+PRV_0023	operate	dms/.*/messageNext	f	t	f	f
+PRV_0024	operate	dms/.*/ownerNext	f	t	f	f
+PRV_0025	operate	ramp_meter/.*/rateNext	f	t	f	f
+PRV_0026	operate	ramp_meter/.*/mLock	f	t	f	f
+PRV_0027	operate	lcs_array/.*/indicationsNext	f	t	f	f
+PRV_0028	operate	lcs_array/.*/ownerNext	f	t	f	f
+PRV_0029	operate	lcs_array/.*/lcsLock	f	t	f	f
+PRV_0030	operate	warning_sign/.*/deployed	f	t	f	f
+PRV_0031	policy	camera/.*/publish	f	t	f	f
+PRV_0032	policy	detector/.*/forceFail	f	t	f	f
+PRV_0033	policy	detector/.*/fieldLength	f	t	f	f
+PRV_0034	policy	holiday/.*	f	t	t	t
+PRV_0035	policy	dms_sign_group/.*	f	t	t	t
+PRV_0036	policy	sign_group/.*	f	t	t	t
+PRV_0037	policy	sign_text/.*	f	t	t	t
+PRV_0038	policy	timing_plan/.*	f	t	t	t
+PRV_0039	device_admin	cabinet/.*	t	t	t	t
+PRV_0040	device_admin	camera/.*	t	t	t	t
+PRV_0041	device_admin	comm_link/.*	t	t	t	t
+PRV_0042	device_admin	controller/.*	t	t	t	t
+PRV_0043	device_admin	dms/.*	t	t	t	t
+PRV_0044	device_admin	lcs/.*	t	t	t	t
+PRV_0045	device_admin	lcs_array/.*	t	t	t	t
+PRV_0046	device_admin	lcs_indication/.*	t	t	t	t
+PRV_0047	device_admin	ramp_meter/.*	t	t	t	t
+PRV_0048	device_admin	video_monitor/.*	t	t	t	t
+PRV_0049	maintenance	controller/.*/active	f	t	f	f
+PRV_0050	maintenance	controller/.*/error	f	t	f	f
+PRV_0051	maintenance	dms/.*/signRequest	f	t	f	f
+PRV_0052	system_admin	cabinet_style/.*	t	t	t	t
+PRV_0053	system_admin	font/.*	t	t	t	t
+PRV_0054	system_admin	glyph/.*	t	t	t	t
+PRV_0055	system_admin	graphic/.*	t	t	t	t
+PRV_0056	system_admin	lane_use_multi/.*	t	t	t	t
+PRV_0057	system_admin	system_attribute/.*	f	t	t	t
+PRV_0058	user_admin	user/.*	t	t	t	t
+PRV_0059	user_admin	privilege/.*	t	t	t	t
+PRV_0060	user_admin	role/.*	t	t	t	t
 \.
 
 SET search_path = event, public, pg_catalog;
@@ -1183,7 +1248,7 @@ CREATE TABLE event.sign_event (
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
 	message text,
-	iris_user VARCHAR(15) REFERENCES iris_user(name)
+	iris_user VARCHAR(15) REFERENCES iris.i_user(name)
 );
 
 SET search_path = public, event, pg_catalog;

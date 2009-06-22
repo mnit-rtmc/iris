@@ -29,9 +29,13 @@ import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * A form for displaying and editing the users and roles
@@ -64,11 +68,20 @@ public class UserRoleForm extends AbstractForm {
 	/** Table model for roles */
 	protected RoleModel r_model;
 
+	/** Table model for privileges */
+	protected PrivilegeModel p_model;
+
 	/** Table to hold the role list */
 	protected final JTable r_table = new JTable();
 
+	/** Table to hold the privilege list */
+	protected final JTable p_table = new JTable();
+
 	/** Button to delete the selected role */
 	protected final JButton del_role = new JButton("Delete Role");
+
+	/** Button to delete the selected privilege */
+	protected final JButton del_privilege = new JButton("Delete Privilege");
 
 	/** Table model for connections */
 	protected ConnectionModel c_model;
@@ -79,24 +92,34 @@ public class UserRoleForm extends AbstractForm {
 	/** Button to delete the selected connection */
 	protected final JButton del_conn = new JButton("Disconnect");
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR User */
+	protected final User user;
+
 	/** User type cache */
 	protected final TypeCache<User> cache;
 
 	/** Role type cache */
 	protected final TypeCache<Role> rcache;
 
+	/** Privilege type cache */
+	protected final TypeCache<Privilege> pcache;
+
 	/** Connection type cache */
 	protected final TypeCache<Connection> ccache;
 
 	/** Create a new user role form */
-	public UserRoleForm(TypeCache<User> uc, TypeCache<Role> rc,
-		TypeCache<Connection> cc)
-	{
+	public UserRoleForm(SonarState st, User u) {
 		super(TITLE);
 		setHelpPageName("Help.UserRoleForm");
-		cache = uc;
-		rcache = rc;
-		ccache = cc;
+		namespace = st.getNamespace();
+		user = u;
+		cache = st.getUsers();
+		rcache = st.getRoles();
+		pcache = st.getPrivileges();
+		ccache = st.getConnections();
 	}
 
 	/** Initializze the widgets in the form */
@@ -104,6 +127,7 @@ public class UserRoleForm extends AbstractForm {
 		ur_model = new UserRoleModel(rcache);
 		u_model = new UserModel(cache, ur_model);
 		r_model = new RoleModel(rcache);
+		p_model = new PrivilegeModel(pcache, null);
 		c_model = new ConnectionModel(ccache);
 		tab.add("Users", createUserPanel());
 		tab.add("Roles", createRolePanel());
@@ -117,6 +141,7 @@ public class UserRoleForm extends AbstractForm {
 		u_model.dispose();
 		ur_model.dispose();
 		r_model.dispose();
+		p_model.dispose();
 		c_model.dispose();
 	}
 
@@ -181,6 +206,10 @@ public class UserRoleForm extends AbstractForm {
 		JPanel panel = new JPanel(new GridBagLayout());
 		panel.setBorder(BORDER);
 		GridBagConstraints bag = new GridBagConstraints();
+		bag.insets.left = 4;
+		bag.insets.right = 4;
+		bag.insets.top = 4;
+		bag.insets.bottom = 4;
 		final ListSelectionModel s = r_table.getSelectionModel();
 		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		s.addListSelectionListener(new ListSelectionListener() {
@@ -194,15 +223,43 @@ public class UserRoleForm extends AbstractForm {
 		r_table.setAutoCreateColumnsFromModel(false);
 		r_table.setColumnModel(r_model.createColumnModel());
 		JScrollPane pane = new JScrollPane(r_table);
+		bag.weightx = 0.3f;
+		panel.add(pane, bag);
+		final ListSelectionModel sp = p_table.getSelectionModel();
+		sp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		sp.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				if(e.getValueIsAdjusting())
+					return;
+				selectPrivilege();
+			}
+		});
+		p_table.setModel(p_model);
+		p_table.setAutoCreateColumnsFromModel(false);
+		p_table.setColumnModel(PrivilegeModel.createColumnModel());
+		pane = new JScrollPane(p_table);
+		bag.weightx = 0.7f;
 		panel.add(pane, bag);
 		del_role.setEnabled(false);
-		bag.insets.left = 6;
+		bag.gridx = 0;
+		bag.gridy = 1;
+		bag.weightx = 0;
 		panel.add(del_role, bag);
 		new ActionJob(this, del_role) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
 				if(row >= 0)
 					r_model.deleteRow(row);
+			}
+		};
+		del_privilege.setEnabled(false);
+		bag.gridx = 1;
+		panel.add(del_privilege, bag);
+		new ActionJob(this, del_privilege) {
+			public void perform() throws Exception {
+				int row = sp.getMinSelectionIndex();
+				if(row >= 0)
+					p_model.deleteRow(row);
 			}
 		};
 		return panel;
@@ -213,6 +270,23 @@ public class UserRoleForm extends AbstractForm {
 		ListSelectionModel s = r_table.getSelectionModel();
 		Role r = r_model.getProxy(s.getMinSelectionIndex());
 		del_role.setEnabled(r != null);
+		p_table.clearSelection();
+		final PrivilegeModel pm = p_model;
+		p_model = new PrivilegeModel(pcache, r);
+		p_table.setModel(p_model);
+		pm.dispose();
+	}
+
+	/** Select a privilege */
+	protected void selectPrivilege() {
+		del_privilege.setEnabled(isPrivilegeSelected());
+	}
+
+	/** Test if a privilege is selected */
+	protected boolean isPrivilegeSelected() {
+		final PrivilegeModel pm = p_model;
+		ListSelectionModel s = p_table.getSelectionModel();
+		return pm.getProxy(s.getMinSelectionIndex()) != null;
 	}
 
 	/** Create connection panel */
@@ -254,5 +328,10 @@ public class UserRoleForm extends AbstractForm {
 		ListSelectionModel s = c_table.getSelectionModel();
 		Connection c = c_model.getProxy(s.getMinSelectionIndex());
 		del_conn.setEnabled(c != null);
+	}
+
+	/** Check if the user can remove the specified name */
+	protected boolean canRemove(Name name) {
+		return namespace.canRemove(user, name);
 	}
 }

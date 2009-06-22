@@ -20,6 +20,7 @@ import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -55,6 +56,14 @@ public class SonarState extends Client {
 	/** Get the role type cache */
 	public TypeCache<Role> getRoles() {
 		return roles;
+	}
+
+	/** Cache of privilege proxies */
+	protected final TypeCache<Privilege> privileges;
+
+	/** Get the privilege type cache */
+	public TypeCache<Privilege> getPrivileges() {
+		return privileges;
 	}
 
 	/** Cache of user proxies */
@@ -208,6 +217,7 @@ public class SonarState extends Client {
 	{
 		super(props, handler);
 		roles = new TypeCache<Role>(Role.class, this);
+		privileges = new TypeCache<Privilege>(Privilege.class, this);
 		users = new TypeCache<User>(User.class, this);
 		connections = new TypeCache<Connection>(Connection.class, this);
 		system_attributes = new TypeCache<SystemAttribute>(
@@ -244,6 +254,7 @@ public class SonarState extends Client {
 	/** Populate the type caches */
 	public void populateCaches() {
 		populate(roles);
+		populate(privileges);
 		populate(users);
 		populate(connections);
 		populate(system_attributes);

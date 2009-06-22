@@ -15,15 +15,10 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeSet;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.NamespaceError;
-import us.mn.state.dot.sonar.Role;
-import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.RoleImpl;
 
@@ -43,17 +38,13 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, pattern, priv_r, priv_w, priv_c, " +
-			"priv_d FROM role;", new ResultFactory()
+		store.query("SELECT name, enabled FROM iris.role;",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisRoleImpl(
-					row.getString(1),  // name
-					row.getString(2),  // pattern
-					row.getBoolean(3), // priv_r
-					row.getBoolean(4), // priv_w
-					row.getBoolean(5), // priv_c
-					row.getBoolean(6)  // priv_d
+					row.getString(1),	// name
+					row.getBoolean(2)	// enabled
 				));
 			}
 		});
@@ -63,11 +54,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("pattern", pattern);
-		map.put("priv_r", priv_r);
-		map.put("priv_w", priv_w);
-		map.put("priv_c", priv_c);
-		map.put("priv_d", priv_d);
+		map.put("enabled", enabled);
 		return map;
 	}
 
@@ -78,25 +65,18 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 
 	/** Get the database table name */
 	public String getTable() {
-		return "role";
+		return "iris.role";
 	}
 
 	/** Create a new IRIS role */
 	public IrisRoleImpl(String n) {
 		super(n);
-		pattern = "";
 	}
 
 	/** Create an IRIS role from database lookup */
-	protected IrisRoleImpl(String n, String p, boolean r, boolean w,
-		boolean c, boolean d)
-	{
+	protected IrisRoleImpl(String n, boolean e) {
 		this(n);
-		pattern = p;
-		priv_r = r;
-		priv_w = w;
-		priv_c = c;
-		priv_d = d;
+		enabled = e;
 	}
 
 	/** Compare to another role */
@@ -127,49 +107,21 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		return name;
 	}
 
+	/** Get a string representation of the object */
+	public String toString() {
+		return name;
+	}
+
 	/** Destroy an IRIS role */
 	public void doDestroy() throws TMSException {
 		store.destroy(this);
 	}
 
-	/** Set the namespace pattern */
-	public void doSetPattern(String p) throws TMSException, NamespaceError {
-		if(p.equals(pattern))
+	/** Set the enabled flag */
+	public void doSetEnabled(boolean e) throws TMSException {
+		if(e == enabled)
 			return;
-		checkPattern(p);
-		store.update(this, "pattern", p);
-		pattern = p;
-	}
-
-	/** Set the read privilege */
-	public void doSetPrivR(boolean p) throws TMSException {
-		if(p == priv_r)
-			return;
-		store.update(this, "priv_r", p);
-		super.setPrivR(p);
-	}
-
-	/** Set the write privilege */
-	public void doSetPrivW(boolean p) throws TMSException {
-		if(p == priv_w)
-			return;
-		store.update(this, "priv_w", p);
-		super.setPrivW(p);
-	}
-
-	/** Set the create privilege */
-	public void doSetPrivC(boolean p) throws TMSException {
-		if(p == priv_c)
-			return;
-		store.update(this, "priv_c", p);
-		super.setPrivC(p);
-	}
-
-	/** Set the delete privilege */
-	public void doSetPrivD(boolean p) throws TMSException {
-		if(p == priv_d)
-			return;
-		store.update(this, "priv_d", p);
-		super.setPrivD(p);
+		store.update(this, "enabled", e);
+		super.setEnabled(e);
 	}
 }

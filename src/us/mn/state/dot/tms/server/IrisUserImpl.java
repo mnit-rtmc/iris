@@ -46,8 +46,8 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		throws TMSException
 	{
 		store = c;
-		mapping = new TableMapping(store, "iris_user", "role");
-		store.query("SELECT name, dn, full_name FROM iris_user;",
+		mapping = new TableMapping(store, "iris", "i_user", "role");
+		store.query("SELECT name, dn, full_name FROM iris.i_user;",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -76,7 +76,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Get the database table name */
 	public String getTable() {
-		return "iris_user";
+		return "iris.i_user";
 	}
 
 	/** Create a new IRIS user */
@@ -95,7 +95,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		dn = d;
 		fullName = fn;
 		TreeSet<IrisRoleImpl> r = new TreeSet<IrisRoleImpl>();
-		for(Object o: mapping.lookup("iris_user", this))
+		for(Object o: mapping.lookup("i_user", this))
 			r.add((IrisRoleImpl)ns.lookupObject("role", (String)o));
 		roles = r.toArray(new IrisRoleImpl[0]);
 	}
@@ -107,6 +107,11 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Get the primary key */
 	public String getKey() {
+		return name;
+	}
+
+	/** Get a string representation of the object */
+	public String toString() {
 		return name;
 	}
 
@@ -124,7 +129,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			else
 				throw new ChangeVetoException("Invalid role");
 		}
-		mapping.update("iris_user", this, rset);
+		mapping.update("i_user", this, rset);
 		super.setRoles(r);
 	}
 

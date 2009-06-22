@@ -30,6 +30,9 @@ public class TableMapping {
 	/** Connection to SQL database */
 	protected final SQLConnection store;
 
+	/** Schema name */
+	protected final String schema;
+
 	/** Name of mapping table */
 	protected final String name;
 
@@ -40,8 +43,9 @@ public class TableMapping {
 	protected final String table1;
 
 	/** Create a new database table mapping */
-	public TableMapping(SQLConnection s, String t0, String t1) {
+	public TableMapping(SQLConnection s, String sch, String t0, String t1) {
 		store = s;
+		schema = sch;
 		name = t0 + "_" + t1;
 		table0 = t0;
 		table1 = t1;
@@ -61,8 +65,8 @@ public class TableMapping {
 	protected String createLookup(String table, String key)
 		throws TMSException
 	{
-		return "SELECT " + getOtherTable(table) + " FROM " + name +
-			" WHERE " + table + " = '" + key + "';";
+		return "SELECT " + getOtherTable(table) + " FROM " + schema +
+			"." + name + " WHERE " + table + " = '" + key + "';";
 	}
 
 	/** Lookup related objects from the given table/key pair */
@@ -79,16 +83,16 @@ public class TableMapping {
 
 	/** Create an SQL delete statement */
 	protected String createDelete(String table, String key) {
-		return "DELETE FROM " + name + " WHERE " + table + " = '" +
-			key + "';";
+		return "DELETE FROM " + schema + "." + name + " WHERE " +
+			table + " = '" + key + "';";
 	}
 
 	/** Create the start of an SQL insert statement */
 	protected String createInsertStart(String table, String key)
 		throws TMSException
 	{
-		return "INSERT INTO " + name + "(" + table + "," +
-			getOtherTable(table) + ") VALUES ('" + key + "','";
+		return "INSERT INTO " + schema + "." + name + "(" + table +
+			"," + getOtherTable(table) + ") VALUES ('" + key +"','";
 	}
 
 	/** Update the relation from one table to a set in the other */

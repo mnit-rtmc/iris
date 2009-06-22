@@ -81,6 +81,7 @@ public class MainServer {
 			DMSList.namespace = ns;
 			BaseHelper.namespace = ns;
 			IrisRoleImpl.lookup(TMSImpl.store, ns);
+			IrisPrivilegeImpl.lookup(TMSImpl.store, ns);
 			IrisUserImpl.lookup(TMSImpl.store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);
 			ns.registerType(SignMessage.SONAR_TYPE,
