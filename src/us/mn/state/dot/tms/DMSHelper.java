@@ -128,7 +128,8 @@ public class DMSHelper extends BaseHelper {
 			return false;
 		SignMessage m = proxy.getMessageCurrent();
 		if(m != null) {
-			return m.getPriority() == DMSMessagePriority.AWS.ordinal();
+			return m.getPriority() == DMSMessagePriority.AWS.
+				ordinal() && !SignMessageHelper.isBlank(m);
 		} else {
 			// messageCurrent should never be null, so this means
 			// the proxy has just been removed
