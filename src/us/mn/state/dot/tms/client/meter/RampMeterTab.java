@@ -52,7 +52,7 @@ public class RampMeterTab extends MapTab {
   	public RampMeterTab(Session session, MeterManager m,
 		List<LayerState> lstates, ViewLayer vlayer) throws IOException
 	{
-		super("Meter", "Operate Ramp Meters");
+		super(session, "Meter", "Operate Ramp Meters");
 		manager = m;
 		map.addLayers(lstates);
 		map.addLayer(m.getLayer().createState());

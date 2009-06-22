@@ -25,6 +25,7 @@ import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
+import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
 /**
  * Base class for all Iris tabs which contain maps
@@ -33,12 +34,19 @@ import us.mn.state.dot.map.MapToolBar;
  */
 abstract public class MapTab extends IrisTab {
 
+	/** toolbar */
+	protected IrisToolBar m_tb;
+
 	/** Map to be displayed on the tab */
 	protected final MapBean map;
 
+	/** session */
+	final Session m_tc;
+
 	/** Create a new map tab */
-	public MapTab(String n, String t) {
+	public MapTab(final Session tc, String n, String t) {
 		super(n, t);
+		m_tc = tc;
 		map = new MapBean(true);
 		map.setBackground(new Color(208, 216, 208));
 	}
@@ -61,6 +69,14 @@ abstract public class MapTab extends IrisTab {
 		return b;
 	}
 
+	/** Create a map status bar */
+	protected IrisToolBar createIrisToolBar() {
+		IrisToolBar b = new IrisToolBar(map, m_tc.getSonarState(), 
+			m_tc.getDesktop());
+		b.setFloatable(false);
+		return b;
+	}
+
 	/** Create the map panel */
 	protected JPanel createMapPanel(ViewLayer vlayer) {
 		JPanel p = new JPanel(new BorderLayout());
@@ -71,6 +87,8 @@ abstract public class MapTab extends IrisTab {
 		MapToolBar toolBar = createToolBar(vlayer);
 		mapPanel.add(toolBar, BorderLayout.NORTH);
 		mapPanel.add(p, BorderLayout.CENTER);
+		m_tb = createIrisToolBar();
+		mapPanel.add(m_tb, BorderLayout.SOUTH);
 		return mapPanel;
 	}
 

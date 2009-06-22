@@ -46,7 +46,7 @@ public class RoadwayTab extends MapTab {
 	public RoadwayTab(Session session, R_NodeManager m,
 		List<LayerState> lstates, ViewLayer vlayer)
 	{
-		super("Roadway", "View / edit roadway nodes");
+		super(session, "Roadway", "View / edit roadway nodes");
 		SonarState st = session.getSonarState();
 		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
 		clist = new CorridorList(m, creator);
