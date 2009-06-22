@@ -533,6 +533,7 @@
 	<target name="distclean"
 	        description="Clean to the base repository distribution"
 	        depends="clean">
+		<mkdir dir="${lib.dir}" />
 		<delete>
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
