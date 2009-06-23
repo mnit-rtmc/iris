@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -118,8 +117,10 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		multi = m;
 		bitmaps = b;
 		priority = p.ordinal();
-		if(d != null && d.equals(0))
-			d = null;
+		//FIXME: these 2 lines are contrary to the use of null
+		//       to indicate an indefinite duration.
+		//if(d != null && d.equals(0))
+		//	d = null;
 		duration = d;
 	}
 

@@ -83,10 +83,12 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		// Are the DMS width and height valid?  If not, it's probably
 		// because a OpQueryConfig message has not been received yet,
 		// so the DMS physical properties are not yet valid.
+//FIXME: use m_dms.getConfigure();
 		if(dms.getWidthPixels() == null || dms.getHeightPixels() == null)
 			return;
 
-		// blank the sign
+		// Blank the sign: a duration of 0 indicates a blank and a 
+		// duration of null indicates infinite.
 		if(m.getDuration() != null && m.getDuration() <= 0) {
 			new OpBlank(dms, m, o).start();
 			return;
@@ -95,7 +97,6 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		// send message to field controller
 		new OpMessage(dms, m, o).start();
 	}
-
 
 	/** Send a device request message to the sign, no user specified */
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {

@@ -116,7 +116,7 @@ public class OpBlank extends OpDms
 			mess.add(rr2);
 
 			// owner
-			String user = m_user != null ? m_user.getName() : "";
+			String user = (m_user != null ? m_user.getName() : "");
 			ReqRes rr3 = new ReqRes("Owner", user, new String[0]);
 			mess.add(rr3);
 
@@ -165,8 +165,9 @@ public class OpBlank extends OpDms
 				m_dms.setMessageCurrent(m_sm, m_user);
 			} else {
 				Log.finest(
-					"OpBlank: response from SensorServer received, ignored because Xml valid field is false, errmsg="
-					+ errmsg);
+					"OpBlank: response from SensorServer " +
+					"received, ignored because Xml valid " +
+					"field is false, errmsg=" + errmsg);
 				errorStatus = errmsg;
 
 				// try again

@@ -429,6 +429,16 @@ public class AwsMsg {
 		return u;
 	}
 
+	/** Return the SignMessage duration. A null indicates an
+	 *  indefinite duration and 0 indicates a blank message.
+	 *  @see SignMessage, DmsLitePoller.sendMessage() */
+	protected Integer getSignMessageDuration() {
+		if(m_type == AwsMsgType.BLANK)
+			return 0;
+		// all dmslite messages have an indefinite duration
+		return null;
+	}
+
 	/** Build a SignMessage version of this message.
 	 * @param dms The associated DMS.
 	 * @return A SignMessage that contains the text of the message and
@@ -437,8 +447,8 @@ public class AwsMsg {
 		TMSException
 	{
 		String multi = createMultiString();
-		return dms.createMessage(multi, DMSMessagePriority.AWS,
-			null);
+		return dms.createMessage(multi, DMSMessagePriority.AWS,	
+			getSignMessageDuration());
 	}
 
 	/** toString */
