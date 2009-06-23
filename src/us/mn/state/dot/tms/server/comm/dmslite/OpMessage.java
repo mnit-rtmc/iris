@@ -162,11 +162,11 @@ public class OpMessage extends OpDms {
 	}
 
 	/** Calculate message off time, which is the start time + duration.
-	 *  This method should not be called if duration is infinite.
-	 */
+	 *  This method should not be called if duration is infinite. */
 	protected Calendar calcMsgOffTime(Calendar ontime) {
 		Integer mins = m_sm.getDuration();
-		assert mins != null;
+		if(mins == null)
+			return null;
 		Calendar offtime = (Calendar)ontime.clone();
 		offtime.add(Calendar.MINUTE, mins);
 		return offtime;
@@ -245,11 +245,13 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime = m_sm.getDuration() !=null;
+			boolean useofftime = m_sm.getDuration() != null;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
-			String offtime= (useofftime ? STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
+			String offtime= (useofftime ?
+				STime.CalendarToXML(calcMsgOffTime(ontime)) :
+				"");
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// priority
@@ -409,11 +411,13 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
-			boolean useofftime = m_sm.getDuration() !=null;
+			boolean useofftime = m_sm.getDuration() != null;
 			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
-			String offtime= (useofftime ? STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
+			String offtime= (useofftime ? 
+				STime.CalendarToXML(calcMsgOffTime(ontime)) : 
+				"");
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// DisplayTimeMS: extract from 1st page of MULTI

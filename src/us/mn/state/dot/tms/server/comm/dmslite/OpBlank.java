@@ -68,21 +68,13 @@ public class OpBlank extends OpDms
 	{
 		/** Query the number of modules */
 		protected Phase poll(AddressedMessage argmess)
-			throws IOException {
-
-			Log.finest(
-			    "dmslite.OpBlank.PhaseGetConfig.poll(msg) called. m_sm.duration="
-			    + m_sm.getDuration());
+			throws IOException 
+		{
+			if(m_sm == null)
+				return null;
 			assert argmess instanceof Message :
 			       "wrong message type";
-
 			Message mess = (Message) argmess;
-
-			// sanity check
-			if(m_sm.getDuration() > 0) {
-				Log.severe("Bogus duration received in OpBlank.PhaseSetBlank().");
-				return null;
-			}
 
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
