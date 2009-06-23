@@ -18,6 +18,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.TMSImpl;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -62,7 +63,7 @@ public class AwsMsgs implements Serializable
 		for(AwsMsg m: m_msgs) {
 			// get the iris DMS id, e.g. "V30"
 			String id = m.getIrisDmsId();
-			DMSImpl dms = null; // FIXME: was: TMSObjectImpl.lookupDms(id);
+			DMSImpl dms = TMSImpl.lookupDms(id);
 			if(dms != null)
 				m.activate(dms);
 		}

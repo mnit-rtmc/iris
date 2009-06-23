@@ -20,7 +20,12 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsPgTime;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
@@ -31,6 +36,7 @@ import us.mn.state.dot.tms.utils.SFile;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * AWS message.
@@ -40,25 +46,34 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class AwsMsg {
 
+	/** Assumed number of text rows in AWS message file */
+	private static final int NUM_TEXT_ROWS = 6;
+
 	/** constants */
 	private static final String DESC_BLANK = "Blank";
 	private static final String DESC_ONEPAGENORM = "1 Page (Normal)";
 	private static final String DESC_TWOPAGENORM = "2 Page (Normal)";
-	private static final String SINGLESTROKE = "Single Stroke";
-	private static final String DOUBLESTROKE = "Double Stroke";
+
+	/** Names of fonts in the AWS message file */
+	private static final String AWS_SINGLESTROKE = "Single Stroke";
+	private static final String AWS_DOUBLESTROKE = "Double Stroke";
+
+	/** Expected names of IRIS fonts */
+	private static final String IRIS_DOUBLESTROKE = "CT_Double_Stroke";
 
 	/** AWS message fields */
 	private int m_dmsid;			// DMS ID
 	private Date m_date;			// message date and time
 	private String m_desc;			// has predefined valid values
 	private AwsMsgType m_type;		// message type
-	private String m_multistring;		// message as multistring
+	private int m_fontnumpg1;		// IRIS font number
+	private int m_fontnumpg2;		// IRIS font number
+	private String[] m_textlines;		// lines of text
 	private boolean m_valid = false;	// is message valid?
-	private double m_ontime;
+	private DmsPgTime m_pgontime;		// pg on-time
 
-	/** AWS message type */
-	public enum AwsMsgType { BLANK, ONEPAGEMSG, TWOPAGEMSG, 
-		TRAVELTIME, UNKNOWN}
+	/** AWS message types */
+	public enum AwsMsgType {BLANK, ONEPAGEMSG, TWOPAGEMSG, UNKNOWN}
 
 	/** Parse a string that contains a single DMS message.
  	 * @param argline a single DMS message, fields delimited with ';'. */
@@ -101,63 +116,25 @@ public class AwsMsg {
 			m_type = parseDescription(m_desc);
 
 			// #4, pg 1 font
-			String f03 = tok.nextToken();
-			if(!f03.equals(SINGLESTROKE) && 
-				!f03.equals(DOUBLESTROKE)) 
-			{
-				String msg = "AwsMsg.parse(): unknown pg" +
-					" 1 font received: " + f03;
-				throw new IllegalArgumentException(msg);
-			}
+			m_fontnumpg1 = parseFont(tok.nextToken());
 
 			// #5, pg 2 font
-			String f04 = tok.nextToken();
-			if(!f04.equals(SINGLESTROKE) && 
-				!f04.equals(DOUBLESTROKE)) 
-			{
-				String msg = "AwsMsg.parse(): unknown pg" +
-					" 2 font received: " + f04;
-				throw new IllegalArgumentException(msg);
+			m_fontnumpg2 = parseFont(tok.nextToken());
+
+			// #6 - #11, six rows of text
+			m_textlines = new String[NUM_TEXT_ROWS];
+			for(int i = 0; i < NUM_TEXT_ROWS; ++i) {
+				String msgline = tok.nextToken().trim();
+				m_textlines[i] = new MultiString(
+					msgline).normalize();
 			}
 
-			// #6 - #11, rows of text
-			{
-				final int numrows = 6;
-				String[] row = new String[numrows];
-				for(int i = 0; i < numrows; ++i)
-					row[i] = new MultiString(
-						tok.nextToken()).normalize();
-
-				// write AWS report
-				appendAwsReport(row);
-
-				// create message-pg1
-				StringBuilder m = new StringBuilder();
-
-				m.append(row[0]);
-				m.append("[nl]");
-				m.append(row[1]);
-				m.append("[nl]");
-				m.append(row[2]);
-				m.append("[nl]");
-
-				// pg2
-				if(row[3].length() + row[4].length() + 
-					row[5].length() > 0) 
-				{
-					m.append("[np]");
-					m.append(row[3]);
-					m.append("[nl]");
-					m.append(row[4]);
-					m.append("[nl]");
-					m.append(row[5]);
-				}
-
-				m_multistring = m.toString();
-			}
+			// write AWS report
+			appendAwsReport(m_textlines);
 
 			// #12, on time: 0.0
-			m_ontime = SString.stringToDouble(tok.nextToken());
+			m_pgontime = new DmsPgTime(SString.
+				stringToDouble(tok.nextToken()));
 
 			// #13, ignore this field, follows last semicolon if
 			//      there are 13 tokens.
@@ -173,6 +150,33 @@ public class AwsMsg {
 		}
 
 		this.setValid(ok);
+	}
+
+	/** Return a MULTI string representation of the AWS message. */
+	protected String createMultiString() {
+		if(NUM_TEXT_ROWS != 6)
+			Log.severe("Bogus number of rows dependency " +
+				"in createMultiString()");
+		MultiString m = new MultiString();
+
+		// pg 1
+		m.setFont(m_fontnumpg1);
+		m.setPageOnTime(m_pgontime.toTenths());
+		m.addLine(m_textlines[0]);
+		m.addLine(m_textlines[1]);
+		m.addLine(m_textlines[2]);
+
+		// pg 2
+		if(m_textlines[3].length() + m_textlines[4].length() + 
+			m_textlines[5].length() > 0) 
+		{
+			m.addPage();
+			m.setFont(m_fontnumpg2);
+			m.addLine(m_textlines[3]);
+			m.addLine(m_textlines[4]);
+			m.addLine(m_textlines[5]);
+		}
+		return m.normalize().toString();
 	}
 
 	/**
@@ -261,31 +265,35 @@ public class AwsMsg {
 			return AwsMsgType.ONEPAGEMSG;
 		else if(d.equalsIgnoreCase(DESC_TWOPAGENORM))
 			return AwsMsgType.TWOPAGEMSG;
-		else if(false)
-			return AwsMsgType.TRAVELTIME; // future
 		else {
-			Log.severe("AwsMsg.parseDescription: " +
-				"unknown message description (" + d + ").");
+			Log.severe("AwsMsg.parseDescription: unknown AWS " +
+				"message description (" + d + ").");
 			return AwsMsgType.UNKNOWN;
 		}
 	}
 
-	/** Parse a font name 
-	 * @param f Font name.
-	 * @return Font number. */
+	/** Return the IRIS font number to use given an AWS font name.
+	 * @param f AWS font name.
+	 * @return IRIS font number. */
 	static protected int parseFont(String f) {
-		// FIXME: should lookup font number from name
-		if(f.equals(SINGLESTROKE))
-			return 1;
-		else if(f.equals(DOUBLESTROKE))
-			return 2;
-		else {
-			// FIXME: should throw InvalidArgumentException
-			Log.warning("WARNING: unknown font received " +
-				"in AwsMsg.parseFont(): " + f);
-			// FIXME: should return default font number for DMS
-			return 1;
+		int ret;
+		if(f.equals(AWS_SINGLESTROKE)) {
+			ret = FontHelper.getDefault();
+		} else if(f.equals(AWS_DOUBLESTROKE)) {
+			Font dsf = FontHelper.lookup(IRIS_DOUBLESTROKE);
+			if(dsf == null) {
+				Log.severe("Double stroke font (" + 
+					IRIS_DOUBLESTROKE + ") not found.");
+				ret = FontHelper.getDefault();
+			}
+			else
+				ret = dsf.getNumber();
+		} else {
+			Log.severe("Unknown AWS font name received (" + f +
+				") in AwsMsg.parseFont().");
+			ret = FontHelper.getDefault();
 		}
+		return ret;
 	}
 
 	/**
@@ -309,23 +317,34 @@ public class AwsMsg {
 		if(dms == null)
 			return false;
 
-		// is aws activated for the sign?
-		if(!(dms.getAwsAllowed() && dms.getAwsControlled())) {
-			Log.finest("AwsMsg.shouldSendMessage(): DMS "
-				+ getIrisDmsId() +
-				" is NOT activated for AWS control.");
+		// not allowed?
+		if(!dms.getAwsAllowed()) {
+			Log.finest("AwsMsg.shouldSendMessage(): " + 
+				getIrisDmsId() + " allowed = false");
+			return false;
+		}
+		// not controlled?
+		if(!dms.getAwsControlled()) {
+			Log.finest("AwsMsg.shouldSendMessage(): " + 
+				getIrisDmsId() + " controlled = false");
 			return false;
 		}
 		Log.finest("AwsMsg.shouldSendMessage(): DMS " +
-			getIrisDmsId() + " is activated for AWS control.");
+			getIrisDmsId() + " is AWS allowed & controlled.");
 
 		// be safe and send the aws message by default
 		boolean send = true;
 
 		// message already deployed?
 		SignMessage cur = dms.getMessageCurrent();
-		if(cur != null)
-			send = !cur.getMulti().equals(m_multistring);
+		if(cur != null) {
+			// comparison of normalized MULTI strings
+			String m1 = cur.getMulti();
+			String m2 = createMultiString();
+			send = !(new MultiString(m1).
+				equals(new MultiString(m2)));
+			Log.finest("cur="+m1+", new="+m2+", equal="+!send);
+		}
 
 		Log.finest("AwsMsg.shouldSendMessage(): should send="
 			+ send);
@@ -344,25 +363,41 @@ public class AwsMsg {
 			Log.finest("AwsMsg.sendMessage(): will activate" +
 				"DMS " + getIrisDmsId() + ":" + this);
 			try {
-				dms.sendMessage(toSignMessage(dms));
+				dms.setOwnerNext(getAwsUserName());
+				dms.doSetMessageNext(toSignMessage(dms));
 			}
 			catch(Exception e) {
 				Log.warning("AwsMsg.sendMessage(): " +
 					"exception:" + e);
 			}
 			break;
-		case TRAVELTIME:
-			//FIXME: add in future
-			Log.severe("AwsMsg: AWS TT not available.");
-			break;
 		case UNKNOWN:
+			// for safety, change the message type and send it
 			Log.severe("AwsMsg.sendMessage(): unknown AWS " +
-				"message type not sent."); 
+				"message type."); 
+			m_type = AwsMsgType.ONEPAGEMSG;
+			sendMessage(dms);
 			break;
 		default:
 			assert false;
 			Log.severe("AwsMsg: unknown AwsMsgType.");
 		}
+	}
+
+	/** Get the AWS user, which is assumed to be a user with the
+	 *  same name as the I18N AWS abbrievation, else "AWS". */
+	protected static User getAwsUserName() {
+		User u = null;
+
+		// check user named the same as the I18N AWS abbreviation
+		u = IrisUserHelper.lookup(I18N.getSilent(
+			"dms.aws.abbreviation"));
+
+		// check for user AWS
+		if(u == null)
+			u = IrisUserHelper.lookup("AWS");
+
+		return u;
 	}
 
 	/** Build a SignMessage version of this message.
@@ -372,7 +407,8 @@ public class AwsMsg {
 	public SignMessage toSignMessage(DMSImpl dms) throws SonarException,
 		TMSException
 	{
-		return dms.createMessage(m_multistring, DMSMessagePriority.AWS,
+		String multi = createMultiString();
+		return dms.createMessage(multi, DMSMessagePriority.AWS,
 			null);
 	}
 
@@ -380,8 +416,11 @@ public class AwsMsg {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("DMS ").append(m_dmsid).append(", ");
-		sb.append("Message: ").append(m_multistring).append(", ");
-		sb.append("On time: ").append(m_ontime);
+		sb.append("MultiString: ").append(
+			createMultiString()).append(", ");
+		sb.append("FontNum pg1: ").append(m_fontnumpg1).append(", ");
+		sb.append("FontNum pg2: ").append(m_fontnumpg2).append(", ");
+		sb.append("Pg On-time: ").append(m_pgontime.toString());
 		return sb.toString();
 	}
 
@@ -411,13 +450,13 @@ public class AwsMsg {
 		int numrows = line.length;
 
 		// anything to write?
-		/*
-		int totallinelen = 0;
-		for(int i = 0; i < numrows; ++i)
-			totallinelen += line[i].length();
-		if(totallinelen <= 0)
-			return;
-		*/
+		if(false) {
+			int totallinelen = 0;
+			for(int i = 0; i < numrows; ++i)
+				totallinelen += line[i].length();
+			if(totallinelen <= 0)
+				return;
+		}
 
 		// build report line
 		String rptline = "";

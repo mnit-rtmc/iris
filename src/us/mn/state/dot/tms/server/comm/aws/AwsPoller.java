@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-//import us.mn.state.dot.tms.server.comm.SignPoller; FIXME
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
@@ -37,7 +36,7 @@ import us.mn.state.dot.tms.utils.STime;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class AwsPoller extends MessagePoller // FIXME implements SignPoller
+public class AwsPoller extends MessagePoller
 {
 	/** 30 sec AWS job will execute at :08 and :38 */
 	private static final int JOB_EXEC_TIME_SECS = 8;
@@ -77,9 +76,6 @@ public class AwsPoller extends MessagePoller // FIXME implements SignPoller
 	public boolean isAddressValid(int drop) {
 		return (drop == VALID_DROP_ADDRESS);
 	}
-
-	/** Perform a sign status poll. Defined in SignPoller interface. */
-	// FIXME public void pollSigns(ControllerImpl c, Completer comp) {}
 
 	/** return name of AWS system */
 	public static String awsName() {
