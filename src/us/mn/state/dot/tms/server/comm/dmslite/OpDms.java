@@ -19,6 +19,7 @@ import java.util.Random;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -27,6 +28,7 @@ import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.comm.aws.AwsMsgs;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -241,6 +243,19 @@ abstract public class OpDms extends OpDevice {
 	 *  ControllerOperation.cleanup(). */
 	protected void setErrorMsg(String msg) {
 		errorStatus = msg;
+	}
+
+	/** set the number of times to retry a failed operation as a 
+	 *  function of the message being sent. */
+	public void setRetryThreshold(SignMessage sm) {
+		if(sm == null)
+			return;
+		// if message is from AWS, use different retry threshold
+		if(DMSMessagePriority.validate(sm.getPriority()) == 
+			DMSMessagePriority.AWS)
+		{
+			super.setRetryThreshold(AwsMsgs.getRetryThreshold());
+		}
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

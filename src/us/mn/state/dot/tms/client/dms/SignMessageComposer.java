@@ -492,7 +492,7 @@ public class SignMessageComposer extends JPanel {
 	/** set all font comboboxes using the specified MultiString */
 	protected void setFontComboBoxes(MultiString ms) {
 		// get the font numbers for each page in the multi
-		int[] fnum = ms.getFont(1);
+		int[] fnum = ms.getFonts(1);
 		// set font for each page tab
 		for(int i = 0; i < fontCmb.length; ++i) {	
 			int newfn = 1; // assumed default font number

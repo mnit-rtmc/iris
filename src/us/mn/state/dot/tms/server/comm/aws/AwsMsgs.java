@@ -17,8 +17,10 @@ package us.mn.state.dot.tms.server.comm.aws;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.TMSImpl;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -59,14 +61,19 @@ public class AwsMsgs implements Serializable
 	public void activate() {
 		if(m_msgs == null)
 			return;
-		Log.finest("=====Starting activating AWS messages");
+		Log.finest("=======Starting activating AWS messages");
 		for(AwsMsg m: m_msgs) {
 			// get the iris DMS id, e.g. "V30"
 			String id = m.getIrisDmsId();
-			DMSImpl dms = TMSImpl.lookupDms(id);
+			DMSImpl dms = (DMSImpl)DMSHelper.lookup(id);
 			if(dms != null)
 				m.activate(dms);
 		}
-		Log.finest("=====End activating AWS messages");
+		Log.finest("=======End activating AWS messages");
+	}
+
+	/** Get the retry threshold for all AWS operations. */
+	public static int getRetryThreshold() {
+		return SystemAttrEnum.DMS_AWS_RETRY_THRESHOLD.getInt();
 	}
 }

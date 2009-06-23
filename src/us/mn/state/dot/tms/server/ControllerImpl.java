@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -42,9 +43,6 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
-
-	/** Communication failure retry threshold */
-	static public final int RETRY_THRESHOLD = 3;
 
 	/** Load all the controllers */
 	static protected void loadAll() throws TMSException {
@@ -124,11 +122,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected void initTransients() throws TMSException {
 		version = "";
 		failed = true;
-		errorCounter = RETRY_THRESHOLD;
+		errorCounter = getDefaultRetryThreshold();
 		if(comm_link instanceof CommLinkImpl) {
 			CommLinkImpl link = (CommLinkImpl)comm_link;
 			link.putController(drop_id, this);
 		}
+	}
+
+	/** Get the retry threshold via a system attribute. */
+	public int getDefaultRetryThreshold() {
+		return SystemAttrEnum.CONTROLLER_RETRY_THRESHOLD.getInt();
 	}
 
 	/** Create a string representation of the controller */
@@ -591,18 +594,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Error counter for this controller */
-	protected transient int errorCounter = RETRY_THRESHOLD;
+	protected transient int errorCounter = getDefaultRetryThreshold();
 
-	/** Should a poll be tried again? This method is called after 
-	  * a failure and bumps the error counter.
+	/** Should a poll be tried again? This method is called after a
+	  * failure and bumps the controller error counter.
 	  * @param id The ID of the device that failed.
+	  * @param opRetryThreshold Operation retry threshold, which is
+	  *	   the number of operation retry attempts to make. When 
+	  *	   exceeded, the controller is marked as failed. This arg
+	  *	   is used if the operation has a retry threshold.
 	  * @return true if the operation should be retried. 
 	  */
-	public final boolean retry( String id ) {
+	public final boolean retry(String id, final int opRetryThreshold) {
 		if(isFailed())
 			return false;
 		errorCounter++;
-		if(errorCounter >= RETRY_THRESHOLD)
+		if(errorCounter >= opRetryThreshold)
 			setFailed(true, id);
 		return !isFailed();
 	}

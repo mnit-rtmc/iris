@@ -46,7 +46,7 @@ public class CollectEventData extends OpController {
 		if(!controller.hasActiveDetector())
 			phase = null;
 		if(e instanceof ParsingException)
-			controller.retry(id);
+			retry();
 		if(controller.getFailMillis() > VOL_COUNT_WRAP)
 			phase = null;
 	}

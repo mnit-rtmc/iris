@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -84,8 +85,16 @@ abstract public class OpController extends Operation {
 	/** Handle an exception */
 	public void handleException(IOException e) {
 		controller.logException(id, filterMessage(exceptionMessage(e)));
-		if(!controller.retry(id))
-			super.handleException(e);
+		if(!retry())
+ 			super.handleException(e);
+
+	}
+
+	/** Determine if this operation should be retried */
+	public boolean retry() {
+		if(controller == null)
+			return false;
+		return controller.retry(id, retryThreshold);
 	}
 
 	/** Cleanup the operation */
@@ -93,5 +102,24 @@ abstract public class OpController extends Operation {
 		if(errorStatus != null)
 			controller.setError(filterMessage(errorStatus));
 		controller.completeOperation(id, success);
+	}
+
+	/** Operation failure retry threshold */
+	protected int retryThreshold = getDefaultRetryThreshold();
+
+	/** Get default retry threshold */
+	public static int getDefaultRetryThreshold() {
+		return SystemAttrEnum.CONTROLLER_RETRY_THRESHOLD.getInt();
+	}
+
+	/** Set the error retry threshold */
+	public void setRetryThreshold(int rt) {
+		final int RT_MIN = 1;
+		retryThreshold = (rt < RT_MIN ? RT_MIN : rt);
+	}
+
+	/** Get the error retry threshold */
+	public int getRetryThreshold() {
+		return retryThreshold;
 	}
 }
