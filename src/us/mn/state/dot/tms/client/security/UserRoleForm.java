@@ -196,7 +196,7 @@ public class UserRoleForm extends AbstractForm {
 	protected void selectUser() {
 		ListSelectionModel s = u_table.getSelectionModel();
 		User u = u_model.getProxy(s.getMinSelectionIndex());
-		del_user.setEnabled(u != null && u.getRoles().length == 0);
+		del_user.setEnabled(u_model.canRemove(u));
 		ur_model.setSelectedUser(u);
 	}
 
@@ -267,7 +267,7 @@ public class UserRoleForm extends AbstractForm {
 	protected void selectRole() {
 		ListSelectionModel s = r_table.getSelectionModel();
 		Role r = r_model.getProxy(s.getMinSelectionIndex());
-		del_role.setEnabled(r != null);
+		del_role.setEnabled(r_model.canRemove(r));
 		p_table.clearSelection();
 		final PrivilegeModel pm = p_model;
 		p_model = new PrivilegeModel(pcache, r, namespace, user);
@@ -277,14 +277,15 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Select a privilege */
 	protected void selectPrivilege() {
-		del_privilege.setEnabled(isPrivilegeSelected());
+		Privilege p = getSelectedPrivilege();
+		del_privilege.setEnabled(p_model.canRemove(p));
 	}
 
-	/** Test if a privilege is selected */
-	protected boolean isPrivilegeSelected() {
-		final PrivilegeModel pm = p_model;
+	/** Get the selected privilege */
+	protected Privilege getSelectedPrivilege() {
+		final PrivilegeModel pm = p_model;	// Avoid race
 		ListSelectionModel s = p_table.getSelectionModel();
-		return pm.getProxy(s.getMinSelectionIndex()) != null;
+		return pm.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Create connection panel */

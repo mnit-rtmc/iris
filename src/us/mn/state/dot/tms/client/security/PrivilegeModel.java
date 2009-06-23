@@ -196,4 +196,12 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 		return namespace.canUpdate(user, new Name(Privilege.SONAR_TYPE,
 			p.getName()));
 	}
+
+	/** Check if the user can remove a privilege */
+	public boolean canRemove(Privilege p) {
+		if(p == null)
+			return false;
+		return namespace.canRemove(user, new Name(Privilege.SONAR_TYPE,
+			p.getName()));
+	}
 }

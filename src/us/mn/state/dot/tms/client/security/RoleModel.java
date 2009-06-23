@@ -102,10 +102,11 @@ public class RoleModel extends ProxyTableModel<Role> {
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		Role r = getProxy(row);
-		String v = value.toString();
+		String v = value.toString().trim();
 		switch(column) {
 			case COL_NAME:
-				cache.createObject(v);
+				if(v.length() > 0)
+					cache.createObject(v);
 				break;
 			case COL_ENABLED:
 				r.setEnabled((Boolean)value);
@@ -121,6 +122,14 @@ public class RoleModel extends ProxyTableModel<Role> {
 	/** Check if the user can update */
 	public boolean canUpdate(Role r) {
 		return namespace.canUpdate(user, new Name(Role.SONAR_TYPE,
+			r.getName()));
+	}
+
+	/** Check if the user can remove a role */
+	public boolean canRemove(Role r) {
+		if(r == null)
+			return false;
+		return namespace.canRemove(user, new Name(Role.SONAR_TYPE,
 			r.getName()));
 	}
 }

@@ -101,10 +101,11 @@ public class UserModel extends ProxyTableModel<User> {
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		User u = getProxy(row);
-		String v = value.toString();
+		String v = value.toString().trim();
 		switch(column) {
 			case COL_NAME:
-				cache.createObject(v);
+				if(v.length() > 0)
+					cache.createObject(v);
 				break;
 			case COL_FULL_NAME:
 				u.setFullName(v);
@@ -132,6 +133,14 @@ public class UserModel extends ProxyTableModel<User> {
 	/** Check if the user can update */
 	public boolean canUpdate(User u) {
 		return namespace.canUpdate(user, new Name(User.SONAR_TYPE,
+			u.getName()));
+	}
+
+	/** Check if the user can remove a user */
+	public boolean canRemove(User u) {
+		if(u == null || u.getRoles().length > 0)
+			return false;
+		return namespace.canRemove(user, new Name(User.SONAR_TYPE,
 			u.getName()));
 	}
 }
