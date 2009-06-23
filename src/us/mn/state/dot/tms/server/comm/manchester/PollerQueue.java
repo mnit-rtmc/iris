@@ -29,6 +29,9 @@ public class PollerQueue extends Thread {
 	private static final HashMap<String, MoveCamera> commands =
 		new HashMap<String, MoveCamera>();
 
+	/** The number of milliseconds between commands. */
+	private static final int CMD_INTERVAL = 60;
+	
 	/** Add a PTZ command to the queue.
 	 * cmd The MoveCamera command to be added.
 	 */
@@ -55,6 +58,7 @@ public class PollerQueue extends Thread {
 				synchronized(commands){
 					for(MoveCamera cmd : commands.values()) cmd.start();
 				}
+				Thread.sleep(PollerQueue.CMD_INTERVAL);
 			}catch(Exception e){
 				//swallow the exception and resume
 			}
