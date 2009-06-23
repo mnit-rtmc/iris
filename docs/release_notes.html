@@ -11,6 +11,21 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.90.0 (23 June 2009)</dt>
+	<dd><ul>
+		<li>
+			Roles can now contain multiple "privileges".
+			Individual roles can be enabled and disabled.
+		</li>
+		<li>
+			SONAR dependency updated to 2.11.4.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.90.sql</code>
+		</li>
+	</ul></dd>
 	<dt>3.89.0 (17 June 2009)</dt>
 	<dd><ul>
 		<li>
