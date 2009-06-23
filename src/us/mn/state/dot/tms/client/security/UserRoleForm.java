@@ -123,7 +123,7 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		ur_model = new UserRoleModel(rcache);
+		ur_model = new UserRoleModel(rcache, namespace, user);
 		u_model = new UserModel(cache, ur_model, namespace, user);
 		r_model = new RoleModel(rcache);
 		p_model = new PrivilegeModel(pcache, null);
@@ -197,7 +197,7 @@ public class UserRoleForm extends AbstractForm {
 		ListSelectionModel s = u_table.getSelectionModel();
 		User u = u_model.getProxy(s.getMinSelectionIndex());
 		del_user.setEnabled(u != null && u.getRoles().length == 0);
-		ur_model.setUser(u);
+		ur_model.setSelectedUser(u);
 	}
 
 	/** Create role panel */

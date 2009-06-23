@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.client.security;
 import java.util.TreeSet;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -38,24 +40,32 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 	/** Assigned column number */
 	static protected final int COL_ASSIGNED = 1;
 
-	/** User being assigned */
-	protected User user;
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** Logged-in user */
+	protected final User user;
+
+	/** Currently selected user */
+	protected User sel_user;
 
 	/** Create a new user-role table model */
-	public UserRoleModel(TypeCache<Role> c) {
+	public UserRoleModel(TypeCache<Role> c, Namespace ns, User u) {
 		super(c);
+		namespace = ns;
+		user = u;
 		initialize();
 	}
 
 	/** Set the roles for a new user */
-	public void setUser(User u) {
-		user = u;
+	public void setSelectedUser(User u) {
+		sel_user = u;
 		fireTableDataChanged();
 	}
 
 	/** Update the roles for the specified user */
 	public void updateUserRoles(User u) {
-		if(u == user)
+		if(u == sel_user)
 			fireTableDataChanged();
 	}
 
@@ -78,7 +88,7 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 			return "";
 		if(column == COL_NAME)
 			return role.getName();
-		User u = user;	// Avoid NPE
+		User u = sel_user;	// Avoid NPE
 		if(u != null) {
 			for(Role r: u.getRoles())
 				if(r == role)
@@ -97,7 +107,8 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		return (column == COL_ASSIGNED) && (user != null);
+		return (column == COL_ASSIGNED) && (sel_user != null) &&
+			canUpdate();
 	}
 
 	/** Add a role to an array of roles */
@@ -120,7 +131,7 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
-		User u = user;	// Avoid NPE
+		User u = sel_user;	// Avoid NPE
 		if((column != COL_ASSIGNED) || (u == null))
 			return;
 		Boolean v = (Boolean)value;
@@ -141,5 +152,11 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 		m.addColumn(createColumn(COL_NAME, 120, "Role"));
 		m.addColumn(createColumn(COL_ASSIGNED, 80, "Assigned"));
 		return m;
+	}
+
+	/** Check if the user can set user roles */
+	public boolean canUpdate() {
+		return namespace.canUpdate(user, new Name(User.SONAR_TYPE,
+			"roles"));
 	}
 }
