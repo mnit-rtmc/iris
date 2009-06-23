@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.ArrayList;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -235,31 +234,25 @@ public class MultiString {
 	/** Get an array of font numbers.
 	 * @param f_num Default font number, one based.
 	 * @return An array of font numbers for each page of the message. */
-	public int[] getFonts(int f_num) {
+	public int[] getFonts(final int f_num) {
 		if(f_num < 1 || f_num > 255)
 			return new int[0];
-		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
+		int np = getNumPages();
+		final int[] ret = new int[np]; // font numbers indexed by pg
+		for(int i = 0; i<ret.length; ++i)
+			ret[i] = f_num;
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
 				int l, JustificationLine jl, int f, String t, 
 				int pont, int pofft)
 			{
-				al.add(new Integer(f));
+				if(p >= 0 && p < ret.length)
+					ret[p] = f;
+				else
+					assert false : "bogus # pages";
 			}
 			public void addGraphic(int g_num, int x, int y) { }
 		}, f_num);
-		int np = getNumPages();
-		if(np > al.size()) {
-			assert false;
-			return new int[0];
-		}
-		int[] ret = new int[np];
-		for(int i = 0; i < np; ++i) {
-			if(i >= al.size())
-				ret[i] = f_num;
-			else
-				ret[i] = (int)al.get(i).intValue();
-		}
 		return ret;
 	}
 
@@ -336,9 +329,11 @@ public class MultiString {
 					String v = m.group(2); // e.g. 25o6
 					String[] t = v.split("o", 2);
 					if(t.length >= 1 && t[0].length() > 0)
-						dpont = SString.stringToInt(t[0]);
+						dpont = SString.
+							stringToInt(t[0]);
 					if(t.length >= 2 && t[1].length() > 0)
-						dpofft = SString.stringToInt(t[1]);
+						dpofft = SString.
+							stringToInt(t[1]);
 			}
 			// FIXME: parse tr (text rectangle) tags
 		}
@@ -478,31 +473,25 @@ public class MultiString {
 	 *  @param def_pont Default page on time, in tenths of a sec.
 	 *  @return An integer array with length equal to the number 
 	 *	    of pages in the message, containing tenths of secs. */
-	public int[] getPageOnTime(int def_pont) {
-		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
+	public int[] getPageOnTime(final int def_pont) {
 		final int DEF_FONT = 1;
 		final int DEF_POFFT = 0;
+		int np = getNumPages();
+		final int[] ret = new int[np]; // pg time indexed by pg
+		for(int i = 0; i<ret.length; ++i)
+			ret[i] = def_pont;
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
 				int l, JustificationLine jl, int f, String t,
 				int pont, int pofft)
 			{
-				al.add(new Integer(pont));
+				if(p >= 0 && p < ret.length)
+					ret[p] = pont;
+				else
+					assert false : "bogus # pages";
 			}
 			public void addGraphic(int g_num, int x, int y) { }
 		}, DEF_FONT, def_pont, DEF_POFFT);
-		int np = getNumPages();
-		if(np > al.size()) {
-			assert false : "np=" + np + ", al.size()=" + al.size();
-			return new int[0];
-		}
-		int[] ret = new int[np];
-		for(int i = 0; i<np; ++i) {
-			if(i >= al.size())
-				ret[i] = def_pont;
-			else
-				ret[i] = (int)al.get(i).intValue();
-		}
 		return ret;
 	}
 
@@ -535,7 +524,8 @@ public class MultiString {
 					String[] t = tag.split("o", 2);
 					// page on time: replace existing
 					if(t.length >= 1 && t[0].length() > 0)
-						ret.append(SString.intToString(pont,0));
+						ret.append(SString.
+							intToString(pont,0));
 					ret.append('o');
 					// page off time: use existing
 					if(t.length >= 2 && t[1].length() > 0)
@@ -547,5 +537,4 @@ public class MultiString {
 		});
 		return ret.toString();
 	}
-
 }

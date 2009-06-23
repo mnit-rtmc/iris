@@ -174,5 +174,43 @@ public class MultiStringTest extends TestCase {
 			assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 			assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".equals(t2.toString()));
 		}
+
+		// getFont
+		{
+			MultiString t1, t2;
+			int[] fn;
+
+			t1 = new MultiString(null);
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 0);
+
+			t1 = new MultiString("");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 0);
+
+			t1 = new MultiString("YA1");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 1 && fn[0] == 255);
+
+			t1 = new MultiString("[fo2]YA1");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 1 && fn[0] == 2);
+
+			t1 = new MultiString("YA1[np]YA2");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 2 && fn[0] == 255 && fn[1] == 255);
+
+			t1 = new MultiString("[fo2]YA1[np][fo3]YA2");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 2 && fn[0] == 2 && fn[1] == 3);
+
+			t1 = new MultiString("YA1[np][fo3]YA2");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 2 && fn[0] == 255 && fn[1] == 3);
+
+			t1 = new MultiString("[fo3]YA1[np]YA2");
+			fn = t1.getFont(255);
+			assertTrue(fn.length == 2 && fn[0] == 3 && fn[1] == 3);
+		}
 	}
 }
