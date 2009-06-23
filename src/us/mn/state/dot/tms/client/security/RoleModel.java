@@ -16,7 +16,10 @@ package us.mn.state.dot.tms.client.security;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
@@ -44,9 +47,17 @@ public class RoleModel extends ProxyTableModel<Role> {
 		return m;
 	}
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new role table model */
-	public RoleModel(TypeCache<Role> c) {
+	public RoleModel(TypeCache<Role> c, Namespace ns, User u) {
 		super(c);
+		namespace = ns;
+		user = u;
 		initialize();
 	}
 
@@ -81,12 +92,11 @@ public class RoleModel extends ProxyTableModel<Role> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		synchronized(proxies) {
-			if(row == proxies.size())
-				return column == COL_NAME;
-			else
-				return column != COL_NAME;
-		}
+		Role r = getProxy(row);
+		if(r != null)
+			return column != COL_NAME && canUpdate(r);
+		else
+			return column == COL_NAME && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -101,5 +111,16 @@ public class RoleModel extends ProxyTableModel<Role> {
 				r.setEnabled((Boolean)value);
 				break;
 		}
+	}
+
+	/** Check if the user can add a role */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Role.SONAR_TYPE,"name"));
+	}
+
+	/** Check if the user can update */
+	public boolean canUpdate(Role r) {
+		return namespace.canUpdate(user, new Name(Role.SONAR_TYPE,
+			r.getName()));
 	}
 }

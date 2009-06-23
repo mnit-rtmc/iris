@@ -125,7 +125,7 @@ public class UserRoleForm extends AbstractForm {
 	protected void initialize() {
 		ur_model = new UserRoleModel(rcache, namespace, user);
 		u_model = new UserModel(cache, ur_model, namespace, user);
-		r_model = new RoleModel(rcache);
+		r_model = new RoleModel(rcache, namespace, user);
 		p_model = new PrivilegeModel(pcache, null);
 		c_model = new ConnectionModel(ccache);
 		tab.add("Users", createUserPanel());

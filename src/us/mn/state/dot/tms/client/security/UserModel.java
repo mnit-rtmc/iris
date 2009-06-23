@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.security;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -93,7 +93,7 @@ public class UserModel extends ProxyTableModel<User> {
 	public boolean isCellEditable(int row, int column) {
 		User u = getProxy(row);
 		if(u != null)
-			return column != COL_NAME && canUpdate(u.getName());
+			return column != COL_NAME && canUpdate(u);
 		else
 			return column == COL_NAME && canAdd();
 	}
@@ -130,8 +130,8 @@ public class UserModel extends ProxyTableModel<User> {
 	}
 
 	/** Check if the user can update */
-	public boolean canUpdate(String oname) {
-		return namespace.canUpdate(user,
-			new Name(User.SONAR_TYPE, oname));
+	public boolean canUpdate(User u) {
+		return namespace.canUpdate(user, new Name(User.SONAR_TYPE,
+			u.getName()));
 	}
 }
