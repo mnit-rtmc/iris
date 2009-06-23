@@ -992,12 +992,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Send a sign message creates by IRIS server */
 	public void sendMessage(SignMessage m) throws TMSException {
-		try {
-			doSetMessageNext(m, null);
-		}
-		catch(TMSException e) {
-			throw e;
-		}
+		doSetMessageNext(m, null);
 	}
 
 	/** Current message (Shall not be null) */
@@ -1196,7 +1191,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		try {
 			SignMessage m = createMessage(t,
 				DMSMessagePriority.TRAVEL_TIME, null);
-			sendMessage(m);
+			doSetMessageNext(m, null);
 		}
 		catch(Exception e) {
 			RouteBuilder.TRAVEL_LOG.log(e.getMessage());
