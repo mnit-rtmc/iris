@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -80,16 +81,12 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		if(dms == null || m == null || m.getBitmaps() == null)
 			return;
 
-		// Are the DMS width and height valid?  If not, it's probably
-		// because a OpQueryConfig message has not been received yet,
-		// so the DMS physical properties are not yet valid.
-//FIXME: use m_dms.getConfigure();
-		if(dms.getWidthPixels() == null || dms.getHeightPixels() == null)
+		// dms isn't configured
+		if(!dms.getConfigure())
 			return;
 
-		// Blank the sign: a duration of 0 indicates a blank and a 
-		// duration of null indicates infinite.
-		if(m.getDuration() != null && m.getDuration() <= 0) {
+		// Send blank if no message
+		if(SignMessageHelper.isBlank(m)) {
 			new OpBlank(dms, m, o).start();
 			return;
 		}
@@ -110,6 +107,11 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		if(dms == null)
 			return;
 		switch(r) {
+		case SEND_SETTINGS:
+			// on startup, this request is sent to all devices and
+			// query config and query msg requests are sent.
+			new OpQueryMsg(dms, u, r).start();
+			break;
 		case QUERY_CONFIGURATION:
 			new OpQueryConfig(dms, u).start();
 			break;
@@ -128,8 +130,8 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 			break;
 		default:
 			// Ignore other requests
-			Log.finest("DmsLitePoller: ignored other request "+
-				"in sendRequest(). r=" + r + ", desc=" + 
+			Log.finest("DmsLitePoller.sendRequest("+dms.getName() +
+				"): ignored request r=" + r + ", desc=" + 
 				r.description);
 			break;
 		}
