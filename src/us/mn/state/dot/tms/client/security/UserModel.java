@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.security;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -42,10 +44,20 @@ public class UserModel extends ProxyTableModel<User> {
 	/** User role model */
 	protected final UserRoleModel rmodel;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new user table model */
-	public UserModel(TypeCache<User> c, UserRoleModel r) {
+	public UserModel(TypeCache<User> c, UserRoleModel r, Namespace ns,
+		User u)
+	{
 		super(c);
 		rmodel = r;
+		namespace = ns;
+		user = u;
 		initialize();
 	}
 
@@ -79,13 +91,11 @@ public class UserModel extends ProxyTableModel<User> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		synchronized(proxies) {
-			if(row == proxies.size())
-				return column == COL_NAME;
-		}
-		if(column == COL_NAME)
-			return false;
-		return true;
+		User u = getProxy(row);
+		if(u != null)
+			return column != COL_NAME && canUpdate(u.getName());
+		else
+			return column == COL_NAME && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -112,5 +122,16 @@ public class UserModel extends ProxyTableModel<User> {
 		m.addColumn(createColumn(COL_FULL_NAME, 180, "Full Name"));
 		m.addColumn(createColumn(COL_DN, 420, "Dn"));
 		return m;
+	}
+
+	/** Check if the user can add a user */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(User.SONAR_TYPE,"name"));
+	}
+
+	/** Check if the user can update */
+	public boolean canUpdate(String oname) {
+		return namespace.canUpdate(user,
+			new Name(User.SONAR_TYPE, oname));
 	}
 }

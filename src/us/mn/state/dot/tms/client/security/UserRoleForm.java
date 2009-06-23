@@ -124,7 +124,7 @@ public class UserRoleForm extends AbstractForm {
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		ur_model = new UserRoleModel(rcache);
-		u_model = new UserModel(cache, ur_model);
+		u_model = new UserModel(cache, ur_model, namespace, user);
 		r_model = new RoleModel(rcache);
 		p_model = new PrivilegeModel(pcache, null);
 		c_model = new ConnectionModel(ccache);
