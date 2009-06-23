@@ -221,17 +221,18 @@ public class PixelMapBuilder implements MultiString.SpanCallback {
 	}
 
 	/**
-	 * Add a span of text.
+	 * Add a span of text. Defined in interface MultiString.SpanCallback.
 	 * @param page Page number, zero based.
 	 * @param jp Page justification, e.g. top, middle, bottom.
 	 * @param line Line number, zero based.
 	 * @param jl Line justification, e.g. centered, left, right.
 	 * @param f_num Font to use for rendering.
 	 * @param text Text span to render.
+	 * @see MultiString
 	 */
 	public void addSpan(int page, MultiString.JustificationPage jp,
 		int line, MultiString.JustificationLine jl, int f_num,
-		String text)
+		String text, int pont, int pofft)
 	{
 		Font font = getFont(f_num);
 		spans.add(new TextSpan(page, jp, line, jl, font, text));

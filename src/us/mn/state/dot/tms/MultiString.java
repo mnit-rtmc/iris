@@ -20,14 +20,16 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * NTCIP -- MULTI (MarkUp Language for Transportation Information)
+ * NTCIP -- MULTI (MarkUp Language for Transportation Information),
+ * as specified in NTCIP 1203.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
 public class MultiString {
 
-	/** Regular expression to match supported MULTI tags */
+	/** Regular expression to match supported MULTI tags.
+	 *  @see MultiStringTest */
 	static protected final Pattern TAG = Pattern.compile(
 		"\\[(nl|np|jl|jp|fo|g|cf|pt|tr|tt)([A-Za-z,0-9]*)\\]");
 
@@ -156,12 +158,26 @@ public class MultiString {
 		return true;
 	}
 
+	/** Set a page on time.
+	 *  @param pgont Page on-time in tenths of a second. */
+	public void setPageOnTime(int pgont) {
+		b.append("[pt");
+		b.append(pgont);
+		b.append('o');
+		b.append("]");
+	}
+
+	/** Append to the MULTI */
+	private void append(String m) {
+		b.append(m);
+	}
+
 	/** Add text to the current line */
 	public void addText(String s) {
-		if(s.length() > 0) {
-			b.append(s);
-			trailing = true;
-		}
+		if(s == null || s.isEmpty())
+			return;
+		b.append(s);
+		trailing = true;
 	}
 
 	/** Add a new line */
@@ -225,7 +241,8 @@ public class MultiString {
 		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
-				int l, JustificationLine jl, int f, String t)
+				int l, JustificationLine jl, int f, String t, 
+				int pont, int pofft)
 			{
 				al.add(new Integer(f));
 			}
@@ -253,16 +270,33 @@ public class MultiString {
 
 	/** MULTI string parsing callback interface */
 	public interface SpanCallback {
+		/* @param page Page number, zero based.
+		 * @param justp Page justification.
+		 * @param line Line number, zero based.
+		 * @param justl Line justification.
+		 * @param f_num Font number, one based.
+		 * @param span Message text.
+		 * @param pont Page on time, 1/10 secs.
+		 * @param pofft Page off time, 1/10 secs. */
 		void addSpan(int page, JustificationPage justp, 
 			int line, JustificationLine justl,
-			int f_num, String span);
+			int f_num, String span, int pont, int pofft);
 		void addGraphic(int g_num, int x, int y);
 	}
 
-	/** Parse the MULTI string 
+	/** Parse the MULTI string, ignoring page on and off times.
 	 * @param cb SpanCallback, called per span.
-	 * @param f_num Default font number */
+	 * @param f_num Default font number. */
 	public void parse(SpanCallback cb, int f_num) {
+		parse(cb, f_num, 0, 0);
+	}
+
+	/** Parse the MULTI string, using default on and off times.
+	 * @param cb SpanCallback, called per span.
+	 * @param f_num Default font number.
+	 * @param dpont Default page on time, 1/10 secs.
+	 * @param dpofft Default page off time, 1/10 secs. */
+	public void parse(SpanCallback cb, int f_num, int dpont, int dpofft) {
 		int page = 0;
 		JustificationPage justp = JustificationPage.fromOrdinal(
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
@@ -274,7 +308,8 @@ public class MultiString {
 		while(m.find()) {
 			if(m.start() > offset) {
 				String span = b.substring(offset, m.start());
-				cb.addSpan(page, justp, line, justl,f_num,span);
+				cb.addSpan(page, justp, line, justl, f_num, 
+					span, dpont, dpofft);
 			}
 			offset = m.end();
 			String tag = m.group(1);
@@ -297,13 +332,20 @@ public class MultiString {
 				int g_num = parseGraphic(v);
 				// FIXME: fix x and y
 				cb.addGraphic(g_num, 1, 1);
+			} else if(tag.startsWith("pt")) {
+					String v = m.group(2); // e.g. 25o6
+					String[] t = v.split("o", 2);
+					if(t.length >= 1 && t[0].length() > 0)
+						dpont = SString.stringToInt(t[0]);
+					if(t.length >= 2 && t[1].length() > 0)
+						dpofft = SString.stringToInt(t[1]);
 			}
 			// FIXME: parse tr (text rectangle) tags
-			// FIXME: parse pt (page time) tags
 		}
 		if(offset < b.length()) {
 			String span = b.substring(offset);
-			cb.addSpan(page, justp, line, justl, f_num, span);
+			cb.addSpan(page, justp, line, justl, f_num, span, 
+				dpont, dpofft);
 		}
 	}
 
@@ -312,7 +354,8 @@ public class MultiString {
 		final StringBuilder _b = new StringBuilder();
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,
-				int l, JustificationLine jl, int f, String t)
+				int l, JustificationLine jl, int f, String t,
+				int pont, int pofft)
 			{
 				_b.append(t);
 			}
@@ -327,7 +370,8 @@ public class MultiString {
 	protected class PageCounter implements SpanCallback {
 		int num_pages = 0;
 		public void addSpan(int p, JustificationPage jp, int l,
-			JustificationLine jl, int f, String t)
+			JustificationLine jl, int f, String t, int pont, 
+			int pofft)
 		{
 			num_pages = Math.max(p + 1, num_pages);
 		}
@@ -428,4 +472,80 @@ public class MultiString {
 	static public String flagIgnoredSignLineHack(String line) {
 		return "_" + line + "_";
 	}
+
+	/** Get an array of page on times. The page on time is assumed
+	 *  to apply to subsequent pages if not specified on each page.
+	 *  @param def_pont Default page on time, in tenths of a sec.
+	 *  @return An integer array with length equal to the number 
+	 *	    of pages in the message, containing tenths of secs. */
+	public int[] getPageOnTime(int def_pont) {
+		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
+		final int DEF_FONT = 1;
+		final int DEF_POFFT = 0;
+		parse(new SpanCallback() {
+			public void addSpan(int p, JustificationPage jp,
+				int l, JustificationLine jl, int f, String t,
+				int pont, int pofft)
+			{
+				al.add(new Integer(pont));
+			}
+			public void addGraphic(int g_num, int x, int y) { }
+		}, DEF_FONT, def_pont, DEF_POFFT);
+		int np = getNumPages();
+		if(np > al.size()) {
+			assert false : "np=" + np + ", al.size()=" + al.size();
+			return new int[0];
+		}
+		int[] ret = new int[np];
+		for(int i = 0; i<np; ++i) {
+			if(i >= al.size())
+				ret[i] = def_pont;
+			else
+				ret[i] = (int)al.get(i).intValue();
+		}
+		return ret;
+	}
+
+	/** Return the existing MULTI string with all of the on-times 
+	 *  replaced with the specified value. If no on-time is specified
+	 *  then a page time tag is prepended.
+	 *  @param pont Page on-time in tenths of a second.
+	 *  @return The updated MULTI string. */
+	public String replacePageOnTime(final int pont) {
+		final StringBuilder ret = new StringBuilder();
+		if(b.toString().indexOf("[pt") < 0) {
+			MultiString t = new MultiString();
+			t.setPageOnTime(pont);
+			t.append(b.toString());
+			return t.toString();
+		}
+		parseNormalize(new NormalizeCallback() {
+			public void addSpan(String s) {
+				s = (s == null ? "" : s);
+				Matcher m = TEXT_PATTERN.matcher(s);
+				while(m.find()) {
+					ret.append(m.group());
+				}
+			}
+			// e.g. tag = "[pt25o15]"
+			public void addTag(String tag) {
+				if(tag.startsWith("[pt")) {
+					ret.append("[pt");
+					//String v = m.group(2); // e.g. 25o6
+					String[] t = tag.split("o", 2);
+					// page on time: replace existing
+					if(t.length >= 1 && t[0].length() > 0)
+						ret.append(SString.intToString(pont,0));
+					ret.append('o');
+					// page off time: use existing
+					if(t.length >= 2 && t[1].length() > 0)
+						ret.append(t[1]);
+				} else {
+					ret.append(tag);
+				}
+			}
+		});
+		return ret.toString();
+	}
+
 }

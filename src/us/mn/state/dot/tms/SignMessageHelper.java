@@ -75,7 +75,7 @@ public class SignMessageHelper extends BaseHelper {
 			public void addSpan(
 				int p, MultiString.JustificationPage jp,
 				int l, MultiString.JustificationLine jl,
-				int f_num, String t)
+				int f_num, String t, int pont, int pofft)
 			{
 				int m_lines = Math.max(n_lines, l + 1);
 				while(ls.size() < (p + 1) * m_lines)
