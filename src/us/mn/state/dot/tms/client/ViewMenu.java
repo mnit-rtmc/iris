@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.client.camera.CameraForm;
 import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.dms.DMSForm;
+import us.mn.state.dot.tms.client.dms.DMSForm2;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.lcs.GraphicForm;
 import us.mn.state.dot.tms.client.lcs.LaneUseMultiForm;
@@ -31,12 +32,14 @@ import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.HolidayForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.system.SystemAttributeForm;
+import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -138,7 +141,13 @@ public class ViewMenu extends JMenu {
 
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DMSForm(s));
+				int fn = SystemAttrEnum.DMS_FORM.getInt();
+				AbstractForm f;
+				if(fn == 2)
+					f = new DMSForm2(s);
+				else
+					f = new DMSForm(s);
+				desktop.show(f);
 			}
 		};
 		add(item);
