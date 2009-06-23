@@ -78,8 +78,9 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 			return "";
 		if(column == COL_NAME)
 			return role.getName();
-		if(user != null) {
-			for(Role r: user.getRoles())
+		User u = user;	// Avoid NPE
+		if(u != null) {
+			for(Role r: u.getRoles())
 				if(r == role)
 					return true;
 		}
@@ -119,17 +120,18 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
-		if((column != COL_ASSIGNED) || (user == null))
+		User u = user;	// Avoid NPE
+		if((column != COL_ASSIGNED) || (u == null))
 			return;
 		Boolean v = (Boolean)value;
 		Role role = getProxy(row);
 		if(role != null) {
-			Role[] roles = user.getRoles();
+			Role[] roles = u.getRoles();
 			if(v)
 				roles = addRole(roles, role);
 			else
 				roles = removeRole(roles, role);
-			user.setRoles(roles);
+			u.setRoles(roles);
 		}
 	}
 
