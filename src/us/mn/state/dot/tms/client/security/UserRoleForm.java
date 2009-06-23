@@ -126,7 +126,7 @@ public class UserRoleForm extends AbstractForm {
 		ur_model = new UserRoleModel(rcache, namespace, user);
 		u_model = new UserModel(cache, ur_model, namespace, user);
 		r_model = new RoleModel(rcache, namespace, user);
-		p_model = new PrivilegeModel(pcache, null);
+		p_model = new PrivilegeModel(pcache, null, namespace, user);
 		c_model = new ConnectionModel(ccache);
 		tab.add("Users", createUserPanel());
 		tab.add("Roles", createRolePanel());
@@ -270,7 +270,7 @@ public class UserRoleForm extends AbstractForm {
 		del_role.setEnabled(r != null);
 		p_table.clearSelection();
 		final PrivilegeModel pm = p_model;
-		p_model = new PrivilegeModel(pcache, r);
+		p_model = new PrivilegeModel(pcache, r, namespace, user);
 		p_table.setModel(p_model);
 		pm.dispose();
 	}

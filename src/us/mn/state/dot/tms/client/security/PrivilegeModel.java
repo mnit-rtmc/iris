@@ -17,8 +17,11 @@ package us.mn.state.dot.tms.client.security;
 import java.util.HashMap;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
@@ -61,10 +64,20 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	/** Role associated with privileges */
 	protected final Role role;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new privilege table model */
-	public PrivilegeModel(TypeCache<Privilege> c, Role r) {
+	public PrivilegeModel(TypeCache<Privilege> c, Role r, Namespace ns,
+		User u)
+	{
 		super(c);
 		role = r;
+		namespace = ns;
+		user = u;
 		initialize();
 	}
 
@@ -116,11 +129,11 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		synchronized(proxies) {
-			if(row == proxies.size())
-				return column == COL_PATTERN;
-		}
-		return true;
+		Privilege p = getProxy(row);
+		if(p != null)
+			return canUpdate(p);
+		else
+			return column == COL_PATTERN && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -170,5 +183,17 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 		}
 		assert false;
 		return null;
+	}
+
+	/** Check if the user can add a privilege */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Privilege.SONAR_TYPE,
+			"name"));
+	}
+
+	/** Check if the user can update */
+	public boolean canUpdate(Privilege p) {
+		return namespace.canUpdate(user, new Name(Privilege.SONAR_TYPE,
+			p.getName()));
 	}
 }
