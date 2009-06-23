@@ -20,12 +20,12 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignRequest;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -42,13 +42,13 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class OpQueryMsg extends OpDms {
 
-	/** SignRequest from the poller */
-	protected final SignRequest m_sreq;
+	/** device request */
+	private DeviceRequest m_req;
 
 	/** constructor */
-	public OpQueryMsg(DMSImpl d, User u, SignRequest sreq) {
+	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req) {
 		super(DEVICE_DATA, d, "Retrieving message", u);
-		m_sreq = sreq;
+		m_req = req;
 	}
 
 	/**
@@ -256,7 +256,7 @@ public class OpQueryMsg extends OpDms {
 			       "wrong message type";
 
 			// ignore periodic poll of dms on dial-up modem lines.
-			if(m_sreq == SignRequest.QUERY_MESSAGE)
+			if(m_req == DeviceRequest.QUERY_MESSAGE)
 				if(!isDmsPeriodicallyQueriable(m_dms))
 					return null;
 
