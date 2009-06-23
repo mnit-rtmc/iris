@@ -858,16 +858,20 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		throws TMSException
 	{
 		final DMSPoller p = getDMSPoller();
-		if(p == null)
-			throw new ChangeVetoException("No active poller");
+		if(p == null) {
+			throw new ChangeVetoException(name +
+				": NO ACTIVE POLLER");
+		}
 		MultiString multi = new MultiString(m.getMulti());
 		if(!multi.isValid()) {
-			throw new ChangeVetoException("Invalid message: " +
-				m.getMulti());
+			throw new InvalidMessageException(name +
+				": INVALID MESSAGE, " + m.getMulti());
 		}
 		int ap = m.getPriority();
-		if(!checkPriority(ap))
-			throw new ChangeVetoException("Priority too low");
+		if(!checkPriority(ap)) {
+			throw new ChangeVetoException(name +
+				": PRIORITY TOO LOW");
+		}
 		if(ap != DMSMessagePriority.CLEAR.ordinal()) {
 			// NOTE: only send a "blank" message if activation
 			//       priority matches current runtime priority.
@@ -1398,8 +1402,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return (int)(hours * 60) + 1;
 		}
 		catch(BadRouteException e) {
-			throw new InvalidMessageException("Bad route for " +
-				name + ": " + e.getMessage());
+			throw new InvalidMessageException(name +
+				": BAD ROUTE, " + e.getMessage());
 		}
 	}
 
