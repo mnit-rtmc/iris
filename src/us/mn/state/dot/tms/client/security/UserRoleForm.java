@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.security;
 
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import javax.swing.Box;
@@ -22,7 +21,6 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -34,8 +32,9 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A form for displaying and editing the users and roles
@@ -54,13 +53,13 @@ public class UserRoleForm extends AbstractForm {
 	protected UserModel u_model;
 
 	/** Table to hold the user list */
-	protected final JTable u_table = new JTable();
+	protected final ZTable u_table = new ZTable();
 
 	/** Table model for user roles */
 	protected UserRoleModel ur_model;
 
 	/** Table to hold the user role list */
-	protected final JTable ur_table = new JTable();
+	protected final ZTable ur_table = new ZTable();
 
 	/** Button to delete the selected user */
 	protected final JButton del_user = new JButton("Delete User");
@@ -72,10 +71,10 @@ public class UserRoleForm extends AbstractForm {
 	protected PrivilegeModel p_model;
 
 	/** Table to hold the role list */
-	protected final JTable r_table = new JTable();
+	protected final ZTable r_table = new ZTable();
 
 	/** Table to hold the privilege list */
-	protected final JTable p_table = new JTable();
+	protected final ZTable p_table = new ZTable();
 
 	/** Button to delete the selected role */
 	protected final JButton del_role = new JButton("Delete Role");
@@ -87,7 +86,7 @@ public class UserRoleForm extends AbstractForm {
 	protected ConnectionModel c_model;
 
 	/** Table to hold the connection list */
-	protected final JTable c_table = new JTable();
+	protected final ZTable c_table = new ZTable();
 
 	/** Button to delete the selected connection */
 	protected final JButton del_conn = new JButton("Disconnect");
@@ -162,18 +161,18 @@ public class UserRoleForm extends AbstractForm {
 		u_table.setModel(u_model);
 		u_table.setAutoCreateColumnsFromModel(false);
 		u_table.setColumnModel(u_model.createColumnModel());
+		u_table.setVisibleRowCount(16);
 		JScrollPane upane = new JScrollPane(u_table);
-		upane.setPreferredSize(new Dimension(720, 400));
 		bag.gridheight = 2;
 		panel.add(upane, bag);
 		ur_table.setModel(ur_model);
 		ur_table.setAutoCreateColumnsFromModel(false);
 		ur_table.setColumnModel(ur_model.createColumnModel());
 		ur_table.setRowSelectionAllowed(false);
+		ur_table.setVisibleRowCount(12);
 		bag.gridheight = 1;
 		bag.insets.left = 6;
 		JScrollPane spane = new JScrollPane(ur_table);
-		spane.setPreferredSize(new Dimension(140, 300));
 		panel.add(spane, bag);
 		del_user.setEnabled(false);
 		Box box = Box.createHorizontalBox();
@@ -222,8 +221,8 @@ public class UserRoleForm extends AbstractForm {
 		r_table.setModel(r_model);
 		r_table.setAutoCreateColumnsFromModel(false);
 		r_table.setColumnModel(r_model.createColumnModel());
+		r_table.setVisibleRowCount(16);
 		JScrollPane pane = new JScrollPane(r_table);
-		bag.weightx = 0.3f;
 		panel.add(pane, bag);
 		final ListSelectionModel sp = p_table.getSelectionModel();
 		sp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -237,13 +236,12 @@ public class UserRoleForm extends AbstractForm {
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(PrivilegeModel.createColumnModel());
+		p_table.setVisibleRowCount(16);
 		pane = new JScrollPane(p_table);
-		bag.weightx = 0.7f;
 		panel.add(pane, bag);
 		del_role.setEnabled(false);
 		bag.gridx = 0;
 		bag.gridy = 1;
-		bag.weightx = 0;
 		panel.add(del_role, bag);
 		new ActionJob(this, del_role) {
 			public void perform() throws Exception {
@@ -306,6 +304,7 @@ public class UserRoleForm extends AbstractForm {
 		c_table.setModel(c_model);
 		c_table.setAutoCreateColumnsFromModel(false);
 		c_table.setColumnModel(c_model.createColumnModel());
+		c_table.setVisibleRowCount(16);
 		JScrollPane pane = new JScrollPane(c_table);
 		panel.add(pane, bag);
 		if(false) {

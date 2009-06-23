@@ -86,7 +86,7 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 100, "Host:Port"));
+		m.addColumn(createColumn(COL_NAME, 140, "Host:Port"));
 		m.addColumn(createColumn(COL_USER, 180, "User"));
 		return m;
 	}
