@@ -1153,7 +1153,7 @@ PRV_0008	login	controller(/.*)?	t	f	f	f
 PRV_0009	login	detector(/.*)?	t	f	f	f
 PRV_0010	login	dms(/.*)?	t	f	f	f
 PRV_0011	login	dms_sign_group(/.*)?	t	f	f	f
-PRV_0012	login	font(/.*)/	t	f	f	f
+PRV_0012	login	font(/.*)?	t	f	f	f
 PRV_0013	login	geo_loc(/.*)?	t	f	f	f
 PRV_0014	login	glyph(/.*)?	t	f	f	f
 PRV_0015	login	graphic(/.*)?	t	f	f	f
