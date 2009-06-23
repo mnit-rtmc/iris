@@ -19,6 +19,8 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.HttpFileMessenger;
@@ -51,10 +53,6 @@ public class AwsPoller extends MessagePoller
 	/** server namespace */
 	final ServerNamespace m_namespace;
 
-	/** associated controller */
-	// FIXME: should get the controller from sonar
-	private ControllerImpl m_awsController = null;
-
 	/** Create a new poller */
 	public AwsPoller(String n, Messenger m, ServerNamespace namespace) {
 		super(n, m);
@@ -84,9 +82,7 @@ public class AwsPoller extends MessagePoller
 
 	/** Get the one AWS controller */
 	protected ControllerImpl getController() {
-		//if(m_namespace == null)
-		//	return null;
-		return m_awsController;
+		return (ControllerImpl)ControllerHelper.getAwsController();
 	}
 
 	/** AWS timer job */
@@ -129,8 +125,11 @@ public class AwsPoller extends MessagePoller
 
 		/** do the job work */
 		private void doWork() {
-			if(getController() == null) 
+			if(getController() == null) {
+				Log.config("AWS controller not defined, " +
+					"unable to activate AWS messages.");
 				return;
+			}
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
 				new OpProcessAwsMsgs(getController()).start();
 		}

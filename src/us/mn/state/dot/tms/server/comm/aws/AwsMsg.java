@@ -435,8 +435,8 @@ public class AwsMsg {
 	}
 
 	/** Return the SignMessage duration. A null indicates an
-	 *  indefinite duration and 0 indicates a blank message.
-	 *  @see SignMessage, DmsLitePoller.sendMessage() */
+	 *  indefinite duration.
+	 *  @see DmsLitePoller.sendMessage() */
 	protected Integer getSignMessageDuration() {
 		if(m_type == AwsMsgType.BLANK)
 			return 0;
