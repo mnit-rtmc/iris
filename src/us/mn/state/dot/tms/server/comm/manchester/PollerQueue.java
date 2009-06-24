@@ -37,6 +37,7 @@ public class PollerQueue extends Thread {
 	 */
 	public static void addCommand(CameraImpl c, MoveCamera cmd){
 		if( isStopCmd(cmd) ){
+			cmd.start();
 			synchronized(commands) { commands.remove(c.getName()); }
 		}else{
 			synchronized(commands) { commands.put(c.getName(), cmd); }
