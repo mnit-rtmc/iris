@@ -829,8 +829,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
-	/** Set the next sign message */
-	protected synchronized void doSetMessageNext(SignMessage sm, User o)
+	/** Set the next sign message and owner. */
+	public synchronized void doSetMessageNext(SignMessage sm, User o)
 		throws TMSException
 	{
 		final DMSPoller p = getDMSPoller();
