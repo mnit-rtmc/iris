@@ -57,6 +57,7 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
 		queue.addCommand(c, new MoveCamera(c, p, t, z));
+		if(!queue.isAlive()) queue.start();
 	}
 
 	/** Send a PTZ set camera preset command */
