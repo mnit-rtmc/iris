@@ -347,13 +347,30 @@ public class AwsMsg {
 		Log.finest("AwsMsg.shouldSendMessage(): DMS " +
 			getIrisDmsId() + " is AWS allowed & controlled.");
 
+		boolean isDeployed = DMSHelper.isAwsMessageDeployed(dms);
+		Log.finest("AwsMsg.shouldSendMessage(" + dms.getName() + 
+			") isDeployed="+isDeployed);
+		String newmulti = createMultiString();
+		Log.finest("AwsMsg.shouldSendMessage(" + dms.getName() + 
+			") newMulti="+newmulti);
+
+		// DMS already blank and sending a blank?
+		if(!isDeployed) {
+			if(new MultiString(newmulti).isBlank()) {
+				Log.finest("AwsMsg.shouldSendMessage(" + 
+					dms.getName() + "): sign and new " +
+					"multi both blank, send=false.");
+				return false;
+			}
+		}
+
 		// Be safe and send the aws message by default, unless:
 		//	1) AWS message deployed, and
 		//	2) priority is AWS, and
 		//	3) MULTI strings are equal.
 		boolean send = true;
-		if(DMSHelper.isAwsMessageDeployed(dms))
-			if(equalsCurrentSignMessage(dms, createMultiString()))
+		if(isDeployed)
+			if(equalsCurrentSignMessage(dms, newmulti))
 				send = false;
 
 		Log.finest("AwsMsg.shouldSendMessage(): should send="
