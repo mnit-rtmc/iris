@@ -155,9 +155,7 @@ public class AwsStatusPanel extends ToolPanel implements
 			text.append(htmlStart);
 			text.append("All ");
 			text.append(m_dmsAbbr);
-			text.append(" are activated for ");
-			text.append(m_awsName);
-			text.append(" messages ");
+			text.append(" activated");
 			text.append(htmlStop);
 			return text.toString();
 		}
@@ -247,7 +245,7 @@ public class AwsStatusPanel extends ToolPanel implements
 		tc.findObject(new Checker<DMS>()
 		{
 			public boolean check(DMS d) {
-				if(d.getAwsAllowed())
+				if(d != null && d.getAwsAllowed())
 					if(avalue == d.getAwsControlled())
 						list.add(d.getName());
 				return false;
