@@ -56,6 +56,14 @@ public class MoveCamera extends OpDevice {
 		zoom = map_float(z, PTZ_RANGE);
 	}
 
+	/**
+	 * Test whether or not the command is to stop all PTZ.
+	 * @return boolean True if it is a stop command, false otherwise.
+	 */
+	public boolean isStopCmd() {
+		return pan == 0 && tilt == 0 && zoom == 0;
+	}
+
 	/** Begin the operation */
 	public Phase phaseOne() {
 		return new Move();

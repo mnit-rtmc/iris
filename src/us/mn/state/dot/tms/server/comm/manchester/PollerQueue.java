@@ -21,52 +21,44 @@ import us.mn.state.dot.tms.server.CameraImpl;
  * A static thread which is responsible for streaming Manchester PTZ commands.
  *
  * @author Timothy A. Johnson
+ * @author Douglas Lau
  */
 public class PollerQueue extends Thread {
 
-	private static final HashMap<String, MoveCamera> commands =
+	/** The number of milliseconds between commands */
+	protected static final int CMD_INTERVAL = 60;
+
+	/** Mapping of camera names to current PTZ commands */
+	protected final HashMap<String, MoveCamera> commands =
 		new HashMap<String, MoveCamera>();
 
-	/** The number of milliseconds between commands. */
-	private static final int CMD_INTERVAL = 60;
-	
 	/** Add a PTZ command to the queue.
 	 * cmd The MoveCamera command to be added.
 	 */
-	public static void addCommand(CameraImpl c, MoveCamera cmd) {
-		if(isStopCmd(cmd)) {
+	public synchronized void addCommand(CameraImpl c, MoveCamera cmd) {
+		if(cmd.isStopCmd()) {
 			cmd.start();
-			synchronized(commands) {
-				commands.remove(c.getName());
-			}
-		} else {
-			synchronized(commands) {
-				commands.put(c.getName(), cmd);
-			}
-		}
+			commands.remove(c.getName());
+		} else
+			commands.put(c.getName(), cmd);
 	}
-	
-	/**
-	 * Test whether or not the command is to stop all PTZ.
-	 * @param cmd The command to check
-	 * @return boolean True if it is a stop command, false otherwise.
-	 */
-	protected static boolean isStopCmd(MoveCamera cmd) {
-		return cmd.pan == 0 && cmd.tilt == 0 && cmd.zoom == 0;
-	}
-	
+
+	/** Run method for thread */
 	public void run() {
 		while(true) {
+			sendCommands();
 			try {
-				synchronized(commands) {
-					for(MoveCamera cmd: commands.values())
-						cmd.start();
-				}
-				Thread.sleep(PollerQueue.CMD_INTERVAL);
+				Thread.sleep(CMD_INTERVAL);
 			}
-			catch(Exception e) {
-				//swallow the exception and resume
+			catch(InterruptedException e) {
+				// ignore
 			}
 		}
+	}
+
+	/** Send all current commands to cameras */
+	protected synchronized void sendCommands() {
+		for(MoveCamera cmd: commands.values())
+			cmd.start();
 	}
 }
