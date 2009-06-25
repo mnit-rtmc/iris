@@ -20,33 +20,33 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
- * Pelco operation to goto a camera preset.
+ * Pelco operation to store a camera preset.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
  */
-public class GoToCameraPreset extends OpDevice {
+public class OpStorePreset extends OpDevice {
 
-	/** The camera preset to goto */
+	/** The camera preset to set */
 	private final int m_preset;
 
-	/** Create a new operation to goto a camera preset */
-	public GoToCameraPreset(CameraImpl c, int preset) {
+	/** Create a new operation to store a camera preset */
+	public OpStorePreset(CameraImpl c, int preset) {
 		super(COMMAND, c);
 		m_preset = preset;
 	}
 
 	/** Begin the operation */
 	public Phase phaseOne() {
-		return new GoToPreset();
+		return new StorePreset();
 	}
 
-	/** Phase to set the camera preset */
-	protected class GoToPreset extends Phase {
+	/** Phase to store a camera preset */
+	protected class StorePreset extends Phase {
 
-		/** Command controller to set the camera preset */
+		/** Command controller to store the camera preset */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new GoToPresetCommandRequest(m_preset));
+			mess.add(new StorePresetRequest(m_preset));
 			mess.setRequest();
 			return null;
 		}

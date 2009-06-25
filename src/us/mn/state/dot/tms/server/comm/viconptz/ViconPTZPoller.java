@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
- * ViconPoller is a java implementation of the Vicon camera control 
+ * ViconPoller is a java implementation of the Vicon camera control
  * communication protocol
  *
  * @author Douglas Lau
@@ -54,14 +54,14 @@ public class ViconPTZPoller extends MessagePoller implements CameraPoller {
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
 		new MoveCamera(c, p, t, z).start();
 	}
-	
-	/** Send a PTZ set camera preset command */
-	public void sendSetPreset(CameraImpl c, int preset) {
-		new SetCameraPreset(c, preset).start();
+
+	/** Send a PTZ store camera preset command */
+	public void sendStorePreset(CameraImpl c, int preset) {
+		new OpStorePreset(c, preset).start();
 	}
 
-	/** Send a PTZ goto camera preset command */
-	public void sendGoToPreset(CameraImpl c, int preset) {
-		new GoToCameraPreset(c, preset).start();
+	/** Send a PTZ recall camera preset command */
+	public void sendRecallPreset(CameraImpl c, int preset) {
+		new OpRecallPreset(c, preset).start();
 	}
 }

@@ -15,19 +15,19 @@
 package us.mn.state.dot.tms.server.comm.pelcod;
 
 /**
- * This class creates a Pelco D request to instruct a camera to 
+ * This class creates a Pelco D request to instruct a camera to
  * store the current state in a preset location.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
  */
-public class SetPresetCommandRequest extends Request {
+public class StorePresetRequest extends Request {
 
 	/** Requested preset to set */
 	private final int m_preset;
 
-	/** Create a new set preset command request */
-	public SetPresetCommandRequest(int preset) {
+	/** Create a new store preset command request */
+	public StorePresetRequest(int preset) {
 		m_preset = preset;
 	}
 
@@ -46,9 +46,9 @@ public class SetPresetCommandRequest extends Request {
 		message[0] = (byte)0xFF;
 		message[1] = (byte)drop;
 		message[2] = 0x0;
-		message[3] = 0x3; // set preset 
+		message[3] = 0x3; // store preset
 		message[4] = 0x0;
-		message[5] = (byte) m_preset; 
+		message[5] = (byte) m_preset;
 		message[6] = calculateChecksum(message);
 		return message;
 	}

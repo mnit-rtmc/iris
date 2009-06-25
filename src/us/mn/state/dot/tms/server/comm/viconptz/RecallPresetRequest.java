@@ -12,22 +12,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.pelcod;
+package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
- * This class creates a Pelco D request to instruct the camera to go to
+ * This class creates a Vicon request to instruct the camera to recall
  * a preset state.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
  */
-public class GoToPresetCommandRequest extends Request {
+public class RecallPresetRequest extends Request {
 
 	/** Requested preset to set */
 	private final int m_preset;
 
-	/** Create a new set preset command request */
-	public GoToPresetCommandRequest(int preset) {
+	/** Create a new recall preset command request */
+	public RecallPresetRequest(int preset) {
 		m_preset = preset;
 	}
 
@@ -46,9 +46,9 @@ public class GoToPresetCommandRequest extends Request {
 		message[0] = (byte)0xFF;
 		message[1] = (byte)drop;
 		message[2] = 0x0;
-		message[3] = 0x7; // goto preset
+		message[3] = 0x7; // recall preset
 		message[4] = 0x0;
-		message[5] = (byte) m_preset; 
+		message[5] = (byte)m_preset;
 		message[6] = calculateChecksum(message);
 		return message;
 	}

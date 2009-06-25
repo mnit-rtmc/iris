@@ -60,13 +60,13 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 			queue.start();
 	}
 
-	/** Send a PTZ set camera preset command */
-	public void sendSetPreset(CameraImpl c, int preset) {
+	/** Send a PTZ store camera preset command */
+	public void sendStorePreset(CameraImpl c, int preset) {
 		// FIXME
 	}
 
-	/** Send a PTZ goto camera preset command */
-	public void sendGoToPreset(CameraImpl c, int preset) {
+	/** Send a PTZ recall camera preset command */
+	public void sendRecallPreset(CameraImpl c, int preset) {
 		// FIXME
 	}
 }

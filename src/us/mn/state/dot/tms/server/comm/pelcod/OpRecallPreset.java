@@ -20,33 +20,33 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
- * Pelco operation to set a camera preset.
+ * Pelco operation to recall a camera preset.
  *
  * @author Stephen Donecker
  * @company University of California, Davis
  */
-public class SetCameraPreset extends OpDevice {
+public class OpRecallPreset extends OpDevice {
 
-	/** The camera preset to set */
+	/** The camera preset to goto */
 	private final int m_preset;
 
-	/** Create a new operation to set a camera preset */
-	public SetCameraPreset(CameraImpl c, int preset) {
+	/** Create a new operation to recall a camera preset */
+	public OpRecallPreset(CameraImpl c, int preset) {
 		super(COMMAND, c);
 		m_preset = preset;
 	}
 
 	/** Begin the operation */
 	public Phase phaseOne() {
-		return new SetPreset();
+		return new RecallPreset();
 	}
 
-	/** Phase to set the camera preset */
-	protected class SetPreset extends Phase {
+	/** Phase to recall a camera preset */
+	protected class RecallPreset extends Phase {
 
 		/** Command controller to set the camera preset */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new SetPresetCommandRequest(m_preset));
+			mess.add(new RecallPresetRequest(m_preset));
 			mess.setRequest();
 			return null;
 		}

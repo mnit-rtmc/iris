@@ -240,21 +240,21 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		}
 	}
 
-	/** Command the camera to set the preset */
-	public void setPreset(int preset) {
+	/** Command the camera to store a preset */
+	public void setStorePreset(int preset) {
 		MessagePoller mp = getPoller();
 		if(mp instanceof CameraPoller) {
 			CameraPoller cp = (CameraPoller)mp;
-			cp.sendSetPreset(this, preset);
+			cp.sendStorePreset(this, preset);
 		}
 	}
 
-	/** Command the camera to goto the preset */
-	public void setGoToPreset(int preset) {
+	/** Command the camera to recall a preset */
+	public void setRecallPreset(int preset) {
 		MessagePoller mp = getPoller();
 		if(mp instanceof CameraPoller) {
 			CameraPoller cp = (CameraPoller)mp;
-			cp.sendGoToPreset(this, preset);
+			cp.sendRecallPreset(this, preset);
 		}
 	}
 

@@ -54,9 +54,9 @@ public interface Camera extends Device {
 	/** Command the camera to pan, tilt or zoom */
 	void setPtz(Float[] ptz);
 
-	/** Command the camera to set the preset */
-	void setPreset(int preset);
+	/** Store the current position as a preset */
+	void setStorePreset(int preset);
 
-	/** Command the camera to goto the preset */
-	void setGoToPreset(int preset);
+	/** Recall the specified preset */
+	void setRecallPreset(int preset);
 }

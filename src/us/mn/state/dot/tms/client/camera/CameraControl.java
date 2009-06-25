@@ -1,4 +1,7 @@
 /*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -31,66 +34,76 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  *
  * @author Stephen Donecker
  * @company University of California, Davis
- * @created June 26, 2008
  */
-public class CameraControl extends JPanel implements ChangeListener, ActionListener {
-
-	/** Button used to pan left */
-	protected final PTZButton m_panLeft = new PTZButton("\u2190", "Pan left", new int[] {-1, 0, 0});
-
-	/** Button used to pan right */
-	protected final PTZButton m_panRight = new PTZButton("\u2192", "Pan right", new int[] {1, 0, 0});
-
-	/** Button used to tilt up */
-	protected final PTZButton m_tiltUp = new PTZButton("\u2191", "Tilt up", new int[] {0, 1, 0});
-
-	/** Button used to tilt down */
-	protected final PTZButton m_tiltDown = new PTZButton("\u2193", "Tilt down", new int[] {0, -1, 0});
-
-	/** Button used to pan left and tilt up */
-	protected final PTZButton m_panLeftTiltUp = new PTZButton("\u2196", "Pan left and tilt up", new int[] {-1, 1, 0});
-
-	/** Button used to pan right and tilt up */
-	protected final PTZButton m_panRightTiltUp = new PTZButton("\u2197", "Pan right and tilt up", new int[] {1, 1, 0});
-
-	/** Button used to pan left and tilt down */
-	protected final PTZButton m_panLeftTiltDown = new PTZButton("\u2199", "Pan left and tilt down", new int[] {-1, -1, 0});
-
-	/** Button used to pan right and tilt down */
-	protected final PTZButton m_panRightTiltDown = new PTZButton("\u2198", "Pan right and tilt down", new int[] {1, -1, 0});
-
-	/** Button used to zoom in */
-	protected final PTZButton m_zoomIn = new PTZButton("+", "Zoom in", new int[] {0, 0, 1});
-
-	/** Button used to zoom out */
-	protected final PTZButton m_zoomOut = new PTZButton("-", "Zoom out", new int[] {0, 0, -1});
-
+public class CameraControl extends JPanel implements ChangeListener,
+	ActionListener
+{
 	/** Number of buttons used to go to preset location */
 	static private final int NUMBER_PRESET_BUTTONS =
 		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
 
-	/** Array of buttons used to go to preset locations */
-	private final PresetButton[] m_preset = new PresetButton[NUMBER_PRESET_BUTTONS];
-	
 	/** The preferred size of the slider */
 	static protected final Dimension SLIDER_SIZE = new Dimension(150, 30);
 
+	/** Button used to pan left */
+	protected final PTZButton m_panLeft =
+		new PTZButton("\u2190", "Pan left", new int[] {-1, 0, 0});
+
+	/** Button used to pan right */
+	protected final PTZButton m_panRight =
+		new PTZButton("\u2192", "Pan right", new int[] {1, 0, 0});
+
+	/** Button used to tilt up */
+	protected final PTZButton m_tiltUp =
+		new PTZButton("\u2191", "Tilt up", new int[] {0, 1, 0});
+
+	/** Button used to tilt down */
+	protected final PTZButton m_tiltDown =
+		new PTZButton("\u2193", "Tilt down", new int[] {0, -1, 0});
+
+	/** Button used to pan left and tilt up */
+	protected final PTZButton m_panLeftTiltUp = new PTZButton("\u2196",
+		"Pan left and tilt up", new int[] {-1, 1, 0});
+
+	/** Button used to pan right and tilt up */
+	protected final PTZButton m_panRightTiltUp = new PTZButton("\u2197",
+		"Pan right and tilt up", new int[] {1, 1, 0});
+
+	/** Button used to pan left and tilt down */
+	protected final PTZButton m_panLeftTiltDown = new PTZButton("\u2199",
+		"Pan left and tilt down", new int[] {-1, -1, 0});
+
+	/** Button used to pan right and tilt down */
+	protected final PTZButton m_panRightTiltDown = new PTZButton("\u2198",
+		"Pan right and tilt down", new int[] {1, -1, 0});
+
+	/** Button used to zoom in */
+	protected final PTZButton m_zoomIn = new PTZButton("+", "Zoom in",
+		new int[] {0, 0, 1});
+
+	/** Button used to zoom out */
+	protected final PTZButton m_zoomOut = new PTZButton("-", "Zoom out",
+		new int[] {0, 0, -1});
+
+	/** Array of buttons used to go to preset locations */
+	private final PresetButton[] m_preset =
+		new PresetButton[NUMBER_PRESET_BUTTONS];
+
 	/** The slider used to select the pan-tilt-zoom speed */
 	private final JSlider m_ptzSpeed = new JSlider();
-	
+
 	/** Pan-tilt-zoom speed */
-	private float m_speed = (float) 0.5;
+	private float m_speed = 0.5f;
 
 	/** The camera proxy for the current camera to control */
 	private Camera m_cameraProxy = null;
 
 	/** Constructor */
 	public CameraControl() {
-		// add controls 
 		super(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
-		
+
 		//c.gridx = 0;
 		//c.gridy = 0;
 		//add(m_panLeftTiltUp, c);
@@ -103,7 +116,7 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		//c.gridx = 2;
 		//c.gridy = 2;
 		//add(m_panRightTiltDown, c);
-		
+
 		c.gridx = 1;
 		c.gridy = 0;
 		add(m_tiltUp, c);
@@ -122,37 +135,21 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		c.gridx = 4;
 		c.gridy = 2;
 		add(m_zoomOut, c);
-	
+
 		c.gridwidth = 5;
-		c.insets = new Insets(15,0,0,0);
+		c.insets = new Insets(15, 0, 0, 0);
 		c.gridx = 0;
 		c.gridy = 3;
 		add(m_ptzSpeed, c);
 
-		// add button controls	
 		c.gridwidth = 1;
-		for (int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
-			m_preset[i] = new PresetButton(i + 1, new String("Preset " + (i + 1)));
+		for(int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
+			m_preset[i] = new PresetButton(i + 1,
+				new String("Preset " + (i + 1)));
 			c.gridx = i % 5;
 			c.gridy = 4 + (i / 5);
 			add(m_preset[i], c);
 		}
-	
-		//c.gridx = 0;
-		//c.gridy = 4;
-		//add(m_preset1, c);
-		//c.gridx = 1;
-		//c.gridy = 4;
-		//add(m_preset2, c);
-		//c.gridx = 2;
-		//c.gridy = 4;
-		//add(m_preset3, c);
-		//c.gridx = 3;
-		//c.gridy = 4;
-		//add(m_preset4, c);
-		//c.gridx = 4;
-		//c.gridy = 4;
-		//add(m_preset5, c);
 
 		// configure slider
 		m_ptzSpeed.setMajorTickSpacing(10);
@@ -185,16 +182,14 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		m_panRightTiltDown.addActionListener(this);
 		m_zoomIn.addActionListener(this);
 		m_zoomOut.addActionListener(this);
-		for (int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
-			m_preset[i].addActionListener(this);
-		}
+		for(PresetButton b: m_preset)
+			b.addActionListener(this);
 
 		// add change listener for speed slider
 		m_ptzSpeed.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
-				if (!m_ptzSpeed.getValueIsAdjusting()) {
-					m_speed = (float) m_ptzSpeed.getValue()/100;
-				}
+				if(!m_ptzSpeed.getValueIsAdjusting())
+					m_speed = m_ptzSpeed.getValue() / 100f;
 			}
 		});
 
@@ -202,7 +197,7 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 
 	/** Process the button change event (button pressed) */
 	public void stateChanged(ChangeEvent ce) {
-		PTZButton button = (PTZButton) ce.getSource();
+		PTZButton button = (PTZButton)ce.getSource();
 		ButtonModel model = button.getModel();
 		if(model.isPressed()) {
 			Float[] ptz = new Float[] {
@@ -213,23 +208,20 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 			m_cameraProxy.setPtz(ptz);
 		}
 	}
-	
+
 	/** Process the button action event (button released) */
 	public void actionPerformed(ActionEvent ae) {
 		JButton button = (JButton) ae.getSource();
 		if(button instanceof PresetButton) {
 			PresetButton pbutton = (PresetButton)button;
-			m_cameraProxy.setGoToPreset(pbutton.getPreset());
+			m_cameraProxy.setRecallPreset(pbutton.getPreset());
 		} else
 			m_cameraProxy.setPtz(new Float[] { 0f, 0f, 0f } );
 	}
-	
+
 	/** Set the camera to control */
 	public void setCamera(Camera proxy) {
-
-		// check preconditions
-		assert proxy != null : "CameraControl.setCamera: The camera proxy is null";
-
+		assert proxy != null;
 		m_cameraProxy = proxy;
 	}
 
@@ -246,8 +238,7 @@ public class CameraControl extends JPanel implements ChangeListener, ActionListe
 		m_zoomIn.setEnabled(enable);
 		m_zoomOut.setEnabled(enable);
 		m_ptzSpeed.setEnabled(enable);
-		for (int i = 0; i < NUMBER_PRESET_BUTTONS; i++) {
-			m_preset[i].setEnabled(enable);
-		}
+		for(PresetButton b: m_preset)
+			b.setEnabled(enable);
 	}
 }

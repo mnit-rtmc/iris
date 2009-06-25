@@ -314,7 +314,7 @@ public class CameraViewer extends JPanel
 	protected void selectCameraPreset(int preset) {
 		Camera proxy = selected;	// Avoid race
 		if(proxy != null)
-			proxy.setGoToPreset(preset);
+			proxy.setRecallPreset(preset);
 	}
 
 	/** Select the camera by number */
