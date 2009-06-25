@@ -261,8 +261,8 @@ public class SonarState extends Client {
 		populate(roads, true);
 		populate(geo_locs, true);
 		populate(graphics, true);
-		cam_cache.populate(this);
 		con_cache.populate(this);
+		cam_cache.populate(this);
 		det_cache.populate(this);
 		populate(alarms);
 		populate(warn_signs);
