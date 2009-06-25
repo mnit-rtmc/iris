@@ -317,7 +317,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Create a Manchester poller */
 	protected MessagePoller createManchesterPoller() throws IOException {
-		return new ManchesterPoller(name, createSocketMessenger());
+		return new ManchesterPoller(name, createDatagramMessenger());
 	}
 
 	/** Create a DMS Lite poller */

@@ -30,6 +30,10 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  */
 public class ManchesterPoller extends MessagePoller implements CameraPoller {
 
+	/** The thread responsible for sending PTZ commands. */
+	static protected final PollerQueue queue =
+		new PollerQueue();
+	
 	/** Highest allowed address for Manchester protocol */
 	static protected final int ADDRESS_MAX = 1024;
 
@@ -52,7 +56,8 @@ public class ManchesterPoller extends MessagePoller implements CameraPoller {
 
 	/** Send a PTZ camera move command */
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		new MoveCamera(c, p, t, z).start();
+		PollerQueue.addCommand(c, new MoveCamera(c, p, t, z));
+		if(!queue.isAlive()) queue.start();
 	}
 
 	/** Send a PTZ set camera preset command */
