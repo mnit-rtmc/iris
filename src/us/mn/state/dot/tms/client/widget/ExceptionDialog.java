@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.SEmail;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A swing dialog for displaying exception stack traces.
@@ -146,7 +147,9 @@ public class ExceptionDialog extends JDialog {
 			addAssistanceMessage();
 		}
 		box.add(Box.createVerticalStrut(6));
-		box.add(new CenteredLabel("Have a nice day."));
+		String lastLine = I18N.get("ExceptionForm.LastLine");
+		if(lastLine != null)
+			box.add(new CenteredLabel(lastLine));
 		box.add(Box.createVerticalGlue());
 		box.add(Box.createVerticalStrut(6));
 		Box hbox = Box.createHorizontalBox();
