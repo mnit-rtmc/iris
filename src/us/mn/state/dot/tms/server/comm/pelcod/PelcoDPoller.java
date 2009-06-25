@@ -55,12 +55,12 @@ public class PelcoDPoller extends MessagePoller implements CameraPoller {
 		new MoveCamera(c, p, t, z).start();
 	}
 
-	/** Send a PTZ store camera preset command */
+	/** Send a store camera preset command */
 	public void sendStorePreset(CameraImpl c, int preset) {
 		new OpStorePreset(c, preset).start();
 	}
 
-	/** Send a PTZ recall camera preset command */
+	/** Send a recall camera preset command */
 	public void sendRecallPreset(CameraImpl c, int preset) {
 		new OpRecallPreset(c, preset).start();
 	}
