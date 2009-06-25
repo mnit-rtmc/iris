@@ -15,11 +15,20 @@
 package us.mn.state.dot.tms.server.comm.pelcod;
 
 /**
- * Pelco Request
+ * Pelco D Request
  *
  * @author Douglas Lau
  */
 abstract public class Request {
+
+	/** Calculate the checksum of a request */
+	protected byte calculateChecksum(byte[] message) {
+		int i;
+		byte checksum = 0;
+		for(i = 1; i < 6; i++)
+			checksum += message[i];
+		return checksum;
+	}
 
 	/** Format a request for the specified receiver address */
 	abstract public byte[] format(int drop);

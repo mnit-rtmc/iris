@@ -31,15 +31,6 @@ public class StorePresetRequest extends Request {
 		m_preset = preset;
 	}
 
-	/** Calculate the checksum of a message */
-	private byte calculateChecksum(byte[] message) {
-		int i;
-		byte checksum = 0;
-		for(i = 1; i < 6; i++)
-			checksum += message[i];
-		return checksum;
-	}
-
 	/** Format the request for the specified receiver address */
 	public byte[] format(int drop) {
 		byte[] message = new byte[7];
@@ -48,7 +39,7 @@ public class StorePresetRequest extends Request {
 		message[2] = 0x0;
 		message[3] = 0x3; // store preset
 		message[4] = 0x0;
-		message[5] = (byte) m_preset;
+		message[5] = (byte)m_preset;
 		message[6] = calculateChecksum(message);
 		return message;
 	}

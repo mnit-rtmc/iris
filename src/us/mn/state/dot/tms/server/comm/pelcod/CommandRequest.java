@@ -90,15 +90,6 @@ public class CommandRequest extends Request {
 		return (byte)(getPanFlags() | getTiltFlags() | getZoomFlags());
 	}
 
-	/** Calculate the checksum of a message */
-	protected byte calculateChecksum(byte[] message) {
-		int i;
-		byte checksum = 0;
-		for(i = 1; i < 6; i++)
-			checksum += message[i];
-		return checksum;
-	}
-
 	/** Format the request for the specified receiver address */
 	public byte[] format(int drop) {
 		byte[] message = new byte[7];
