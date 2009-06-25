@@ -89,11 +89,11 @@ public class CommandRequest extends Request {
 	public byte[] format(int drop) {
 		byte[] message = new byte[10];
 		message[0] = (byte)(0x80 | (drop >> 4));
-		message[1] = (byte)((0x0f & drop) | 0x50);
-		message[2] = (byte)(getPanFlags() | getTiltFlags() );
+		message[1] = (byte)((0x0f & drop) | EXTENDED_CMD);
+		message[2] = (byte)(getPanFlags() | getTiltFlags());
 		message[3] = getZoomFlags();
-		message[4] = (byte)0x00; //not implemented
-		message[5] = (byte)0x00; //not implemented
+		message[4] = (byte)0x00; // not implemented
+		message[5] = (byte)0x00; // not implemented
 		message[6] = (byte)((Math.abs(pan) >> 7) & 0x0f);
 		message[7] = (byte)((byte)Math.abs(pan) & 0x7f);
 		message[8] = (byte)((Math.abs(tilt) >> 7) & 0x0f);

@@ -21,6 +21,12 @@ package us.mn.state.dot.tms.server.comm.viconptz;
  */
 abstract public class Request {
 
+	/** Mask for command requests (second byte) */
+	static protected final byte CMD = 0x10;
+
+	/** Mask for extended command requests (second byte) */
+	static protected final byte EXTENDED_CMD = 0x50;
+
 	/** Format a request for the specified receiver address */
 	abstract public byte[] format(int drop);
 }

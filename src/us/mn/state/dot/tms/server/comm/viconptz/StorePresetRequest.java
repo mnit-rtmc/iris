@@ -15,41 +15,29 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 /**
- * This class creates a Vicon request to instruct a camera to
- * store the current state in a preset location.
+ * Vicon request to store the current state in a preset location.
  *
- * @author Stephen Donecker
- * @company University of California, Davis
+ * @author Douglas Lau
  */
 public class StorePresetRequest extends Request {
 
-	/** Requested preset to set */
-	private final int m_preset;
+	/** Preset to store */
+	protected final int preset;
 
-	/** Create a new store preset command request */
-	public StorePresetRequest(int preset) {
-		m_preset = preset;
-	}
-
-	/** Calculate the checksum of a message */
-	private byte calculateChecksum(byte[] message) {
-		int i;
-		byte checksum = 0;
-		for(i = 1; i < 6; i++)
-			checksum += message[i];
-		return checksum;
+	/** Create a new store preset request */
+	public StorePresetRequest(int p) {
+		preset = p;
 	}
 
 	/** Format the request for the specified receiver address */
 	public byte[] format(int drop) {
-		byte[] message = new byte[7];
-		message[0] = (byte)0xFF;
-		message[1] = (byte)drop;
-		message[2] = 0x0;
-		message[3] = 0x3; // set preset
-		message[4] = 0x0;
-		message[5] = (byte) m_preset;
-		message[6] = calculateChecksum(message);
+		byte[] message = new byte[6];
+		message[0] = (byte)(0x80 | (drop >> 4));
+		message[1] = (byte)((0x0f & drop) | CMD);
+		message[2] = (byte)0x00; // pan/tilt functions
+		message[3] = (byte)0x00; // lens functions
+		message[4] = (byte)0x00; // aux functions
+		message[5] = (byte)(0x40 | (preset & 0x0f));
 		return message;
 	}
 }
