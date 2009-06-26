@@ -188,23 +188,19 @@ public class SignMessageComposer extends JPanel {
 
 	/** Dispose of the existing line widgets */
 	protected void disposeLines() {
-		for(int i = 0; i < cmbLine.length; i++) {
-			cmbLine[i].removeActionListener(comboListener);
-			// dispose of focus listeners
-			Component c = cmbLine[i].getEditor().
-				getEditorComponent();
-			FocusListener[] listeners = cmbLine[i].getEditor().
-				getEditorComponent().getFocusListeners();
-			for(int j = 0; j < listeners.length; ++j)
-				c.removeFocusListener(listeners[j]);
+		for(JComboBox cbox: cmbLine) {
+			cbox.removeActionListener(comboListener);
+			Component c = cbox.getEditor().getEditorComponent();
+			for(FocusListener fl: c.getFocusListeners())
+				c.removeFocusListener(fl);
 		}
 	}
 
 	/** Dispose of the existing combobox widgets */
 	protected void disposeEtcWidgets() {
-		for(int i = 0; i < fontCmb.length; i++)
-			if(fontCmb[i] != null)
-				fontCmb[i].dispose();
+		for(FontComboBox f: fontCmb)
+			f.dispose();
+		fontCmb = new FontComboBox[0];
 	}
 
 	/** Set the preview mode.
@@ -259,15 +255,14 @@ public class SignMessageComposer extends JPanel {
 	/** Initialize the other widgets for all pages */
 	protected void initializeEtcWidgets(int np, PixelMapBuilder builder) {
 		disposeEtcWidgets();
-		fontCmb = new FontComboBox[np];
+		FontComboBox[] fc = new FontComboBox[np];
 		for(int i = 0; i < np; i++)
-			fontCmb[i] = new FontComboBox(fonts, builder, this);
+			fc[i] = new FontComboBox(fonts, builder, this);
+		fontCmb = fc;
 	}
 
 	/** Initialize the page tabs and message combo boxes */
 	protected void initializeWidgets(int nl, int np) {
-		//if(nl == n_lines && np == n_pages)
-		//	return;
 		disposeLines();
 		n_lines = nl;
 		n_pages = np;
@@ -322,17 +317,27 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a font box */
 	protected Box createFontBox(int p) {
-		if(fontCmb == null || fontCmb[p] == null)
-			return Box.createHorizontalBox();
+		final FontComboBox[] fc = fontCmb;
 		Box box = Box.createHorizontalBox();
-		JLabel label = new JLabel();
-		label.setLabelFor(fontCmb[p]);
-		//label.setDisplayedMnemonic('F');
-		//box.add(new JLabel("<html><u>F</u>ont</html>"));
-		box.add(new JLabel("Font"));
-		box.add(Box.createHorizontalStrut(4));
-		box.add(fontCmb[p]);
+		if(p < fc.length) {
+			JLabel label = new JLabel();
+			label.setLabelFor(fc[p]);
+			box.add(new JLabel("Font"));
+			box.add(Box.createHorizontalStrut(4));
+			box.add(fc[p]);
+		}
 		return box;
+	}
+
+	/** Get the font number for a given page */
+	protected Integer getFontNumber(int p) {
+		final FontComboBox[] fc = fontCmb;
+		if(p < fc.length) {
+			Font font = (Font)fc[p].getSelectedItem();
+			if(font != null)
+				return font.getNumber();
+		}
+		return null;
 	}
 
 	/** Create page on-time box */
@@ -411,16 +416,10 @@ public class SignMessageComposer extends JPanel {
 			tab.setSelectedIndex(0);
 		blankBtn.setEnabled(b);
 		timeSpin.setEnabled(b);
-		for(int i = 0; i < cmbLine.length; i++)
-			if(cmbLine[i] != null)
-				cmbLine[i].setEnabled(b);
-			else
-				assert false : "i="+i+", cmbLine[i]=null, cmbLine.length="+cmbLine.length;
-		for(int i = 0; i < fontCmb.length; i++)
-			if(fontCmb[i] != null)
-				fontCmb[i].setEnabled(b);
-			else
-				assert false : "i="+i+", fontCmb[i]=null, fontCmb.length="+fontCmb.length;
+		for(JComboBox cbox: cmbLine)
+			cbox.setEnabled(b);
+		for(FontComboBox f: fontCmb)
+			f.setEnabled(b);
 	}
 
 	/** Return a MULTI string using the contents of the widgets. */
@@ -441,7 +440,7 @@ public class SignMessageComposer extends JPanel {
 	/** Get text from combobox line */
 	protected String getMessageFromCB(int line) {
 		assert line >= 0 && line < cmbLine.length;
-		assert(cmbLine[line] != null);
+		assert cmbLine[line] != null;
 		if(line < 0 || line >= cmbLine.length)
 			return "";
 		if(cmbLine[line] == null)
@@ -518,8 +517,7 @@ public class SignMessageComposer extends JPanel {
 			int newfn = 1; // assumed default font number
 			if(fnum != null && i < fnum.length)
 				newfn = fnum[i];
-			if(fontCmb[i] != null)
-				fontCmb[i].setSelectedItemNoAction(newfn);
+			fontCmb[i].setSelectedItemNoAction(newfn);
 		}
 	}
 
@@ -534,8 +532,8 @@ public class SignMessageComposer extends JPanel {
 	/** Clear the combobox selections */
 	public void clearSelections() {
 		adjusting++;
-		for(int i = 0; i < cmbLine.length; i++)
-			cmbLine[i].setSelectedIndex(-1);
+		for(JComboBox cbox: cmbLine)
+			cbox.setSelectedIndex(-1);
 		adjusting--;
 	}
 
