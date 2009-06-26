@@ -368,7 +368,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			if(block * block_size.getInteger() < bitmap.length) {
 				block++;
 				if(block % 20 == 0 && !controller.isFailed())
-					controller.resetErrorCounter(id);
+					errorCounter = 0;
 				return this;
 			} else
 				return new ValidateGraphic();

@@ -37,7 +37,11 @@ public class OpBlank extends OpDms
 	public OpBlank(DMSImpl d, SignMessage mess, User u) {
 		super(DOWNLOAD, d, "Blanking the CMS", u);
 		m_sm = mess;
-		setRetryThreshold(m_sm);
+	}
+
+	/** Get the error retry threshold */
+	public int getRetryThreshold() {
+		return getRetryThreshold(m_sm);
 	}
 
 	/** Create the first phase of the operation */

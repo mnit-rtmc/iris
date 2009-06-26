@@ -52,7 +52,11 @@ public class OpMessage extends OpDms {
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
 		super(COMMAND, d, "Sending new message", u);
 		m_sm = m;
-		setRetryThreshold(m_sm);
+	}
+
+	/** Get the error retry threshold */
+	public int getRetryThreshold() {
+		return getRetryThreshold(m_sm);
 	}
 
 	/** 

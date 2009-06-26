@@ -417,7 +417,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.setRequest();
 			count++;
 			if(count % 20 == 0 && !controller.isFailed())
-				controller.resetErrorCounter(id);
+				errorCounter = 0;
 			if(chars.hasNext()) {
 				glyph = chars.next();
 				return this;

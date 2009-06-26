@@ -81,6 +81,19 @@ abstract public class OpDms extends OpDevice {
 		return getClass().getName();
 	}
 
+	/** Get the error retry threshold for a given SignMessage.
+	 * @throws NullPointerException if sm is null */
+	public int getRetryThreshold(SignMessage sm) {
+		assert sm != null;
+		// if message is from AWS, use different retry threshold
+		if(DMSMessagePriority.fromOrdinal(sm.getPriority()) == 
+		   DMSMessagePriority.AWS)
+		{
+			return AwsMsgs.getRetryThreshold();
+		} else
+			return super.getRetryThreshold();
+	}
+
 	/** 
 	* Log exceptions in the DMS debug log. This method should be called by
 	* operations that fail.
@@ -203,14 +216,6 @@ abstract public class OpDms extends OpDevice {
 		return phase != null;
 	}
 
-	/* reset error counter for DMS */
-	protected void resetErrorCounter() {
-	 	String id = m_dms.getName();
-		if(controller != null) {
-			controller.resetErrorCounter(id);
-		}
-	}
-
 	/** random number generator */
 	static private Random m_rand = new Random(System.currentTimeMillis());
 
@@ -265,19 +270,6 @@ abstract public class OpDms extends OpDevice {
 	 *  ControllerOperation.cleanup(). */
 	protected void setErrorMsg(String msg) {
 		errorStatus = msg;
-	}
-
-	/** set the number of times to retry a failed operation as a 
-	 *  function of the message being sent. */
-	public void setRetryThreshold(SignMessage sm) {
-		if(sm == null)
-			return;
-		// if message is from AWS, use different retry threshold
-		if(DMSMessagePriority.fromOrdinal(sm.getPriority()) == 
-			DMSMessagePriority.AWS)
-		{
-			super.setRetryThreshold(AwsMsgs.getRetryThreshold());
-		}
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

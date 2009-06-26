@@ -58,9 +58,13 @@ abstract public class OpController extends Operation {
 	/** Error status message */
 	protected String errorStatus = null;
 
+	/** Operation error counter */
+	protected int errorCounter = 0;
+
 	/** Create a new controller operation */
 	protected OpController(int p, ControllerImpl c, String i) {
 		super(p);
+		assert c != null;
 		controller = c;
 		drop = controller.getDrop();
 		id = i;
@@ -73,8 +77,7 @@ abstract public class OpController extends Operation {
 
 	/** Start an operation on the device */
 	public void start() {
-		if(controller != null)
-			controller.addOperation(this);
+		controller.addOperation(this);
 	}
 
 	/** Get a string description of the operation */
@@ -87,14 +90,14 @@ abstract public class OpController extends Operation {
 		controller.logException(id, filterMessage(exceptionMessage(e)));
 		if(!retry())
  			super.handleException(e);
-
 	}
 
 	/** Determine if this operation should be retried */
 	public boolean retry() {
-		if(controller == null)
+		if(controller.isFailed())
 			return false;
-		return controller.retry(id, retryThreshold);
+		errorCounter++;
+		return errorCounter < getRetryThreshold();
 	}
 
 	/** Cleanup the operation */
@@ -104,22 +107,8 @@ abstract public class OpController extends Operation {
 		controller.completeOperation(id, success);
 	}
 
-	/** Operation failure retry threshold */
-	protected int retryThreshold = getDefaultRetryThreshold();
-
-	/** Get default retry threshold */
-	public static int getDefaultRetryThreshold() {
-		return SystemAttrEnum.CONTROLLER_RETRY_THRESHOLD.getInt();
-	}
-
-	/** Set the error retry threshold */
-	public void setRetryThreshold(int rt) {
-		final int RT_MIN = 1;
-		retryThreshold = (rt < RT_MIN ? RT_MIN : rt);
-	}
-
 	/** Get the error retry threshold */
 	public int getRetryThreshold() {
-		return retryThreshold;
+		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
 	}
 }
