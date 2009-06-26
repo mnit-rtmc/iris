@@ -117,10 +117,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		multi = m;
 		bitmaps = b;
 		priority = p.ordinal();
-		//FIXME: these 2 lines are contrary to the use of null
-		//       to indicate an indefinite duration.
-		//if(d != null && d.equals(0))
-		//	d = null;
 		duration = d;
 	}
 
