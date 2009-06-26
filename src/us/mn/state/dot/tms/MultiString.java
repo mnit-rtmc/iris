@@ -126,12 +126,14 @@ public class MultiString {
 
 	/** Test if the MULTI string is equal to another MULTI string */
 	public boolean equals(Object o) {
-		if(o instanceof MultiString)
-			return normalize().equals(
-				((MultiString)o).normalize());
-		if(o instanceof String)
-			return normalize().equals(
-				new MultiString((String)o).normalize());
+		if(o instanceof MultiString) {
+			MultiString ms = (MultiString)o;
+			return normalize().equals(ms.normalize());
+		}
+		if(o instanceof String) {
+			MultiString ms = new MultiString((String)o);
+			return normalize().equals(ms.normalize());
+		}
 		return false;
 	}
 
@@ -175,10 +177,10 @@ public class MultiString {
 
 	/** Add text to the current line */
 	public void addText(String s) {
-		if(s == null || s.isEmpty())
-			return;
-		b.append(s);
-		trailing = true;
+		if(s != null && s.length() > 0) {
+			b.append(s);
+			trailing = true;
+		}
 	}
 
 	/** Add a new line */
@@ -334,14 +336,12 @@ public class MultiString {
 				// FIXME: fix x and y
 				cb.addGraphic(g_num, 1, 1);
 			} else if(tag.startsWith("pt")) {
-					String v = m.group(2); // e.g. 25o6
-					String[] t = v.split("o", 2);
-					if(t.length >= 1 && t[0].length() > 0)
-						dpont = SString.
-							stringToInt(t[0]);
-					if(t.length >= 2 && t[1].length() > 0)
-						dpofft = SString.
-							stringToInt(t[1]);
+				String v = m.group(2); // e.g. 25o6
+				String[] t = v.split("o", 2);
+				if(t.length >= 1 && t[0].length() > 0)
+					dpont = SString.stringToInt(t[0]);
+				if(t.length >= 2 && t[1].length() > 0)
+					dpofft = SString.stringToInt(t[1]);
 			}
 			// FIXME: parse tr (text rectangle) tags
 		}
