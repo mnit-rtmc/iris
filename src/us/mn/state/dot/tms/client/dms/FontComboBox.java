@@ -85,10 +85,10 @@ public class FontComboBox extends JComboBox implements ActionListener
 	/** Get the selected font number or null if nothing selected. */
 	protected Integer getFontNumber() {
 		Font font = (Font)getSelectedItem();
-		Integer ret = null;
 		if(font != null)
-			ret = font.getNumber();
-		return ret;
+			return font.getNumber();
+		else
+			return null;
 	}
 
 	/** dispose */

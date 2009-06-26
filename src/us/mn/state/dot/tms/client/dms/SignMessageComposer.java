@@ -332,12 +332,10 @@ public class SignMessageComposer extends JPanel {
 	/** Get the font number for a given page */
 	protected Integer getFontNumber(int p) {
 		final FontComboBox[] fc = fontCmb;
-		if(p < fc.length) {
-			Font font = (Font)fc[p].getSelectedItem();
-			if(font != null)
-				return font.getNumber();
-		}
-		return null;
+		if(p < fc.length)
+			return fc[p].getFontNumber();
+		else
+			return null;
 	}
 
 	/** Create page on-time box */
@@ -458,11 +456,9 @@ public class SignMessageComposer extends JPanel {
 	protected MultiString buildMulti(String[] mess, int m) {
 		MultiString multi = new MultiString();
 		int p = 0;
-		Integer f = FontHelper.getDefault();
-		if(FontComboBox.getIEnabled())
-			if(fontCmb[0] != null)
-				f = fontCmb[0].getFontNumber();
-		multi.setFont(f);
+		Integer f = getFontNumber(0);
+		if(f != null)
+			multi.setFont(f);
 		if(PgTimeSpinner.getIEnabled())
 			multi.setPageOnTime(timeSpin.
 				getValuePgTime().toTenths());
@@ -471,7 +467,7 @@ public class SignMessageComposer extends JPanel {
 				if(i % n_lines == 0) {
 					multi.addPage();
 					p++;
-					f = fontCmb[p].getFontNumber();
+					f = getFontNumber(p);
 					if(f != null)
 						multi.setFont(f);
 				} else
