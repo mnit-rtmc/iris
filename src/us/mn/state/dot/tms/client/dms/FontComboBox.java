@@ -53,32 +53,15 @@ public class FontComboBox extends JComboBox implements ActionListener
 		addActionListener(this);
 	}
 
-	/** Set the selected item.
-	 *  @param obj Should be an Integer which is the font number, else
-	 *	       the default font will be set. */
-	public void setSelectedItem(Object obj) {
-		if(obj == null) {
-			obj = FontHelper.getDefault();
-		} else if(obj instanceof Font) {
-			// set arg
-		// set current using font number
-		} else if(obj instanceof Integer) {
-			obj = FontHelper.find((Integer)obj);
-		} else {
-			obj = FontHelper.getDefault();
-		}
-		super.setSelectedItem(obj);
-	}
-
 	/** Ignore flag is > 0 when actionPerformed events should 
 	 *  be ignored. */
 	private int m_ignore = 0;
 
-	/** Set the selected item and ignore any actionPerformed 
+	/** Set the selected font number and ignore any actionPerformed 
 	 *  events that are generated. */
-	public void setSelectedItemNoAction(Object obj) {
+	public void setSelectedFontNumber(Integer fnum) {
 		++m_ignore;
-		setSelectedItem(obj);
+		setSelectedItem(FontHelper.find(fnum));
 		--m_ignore;
 	}
 
@@ -102,9 +85,10 @@ public class FontComboBox extends JComboBox implements ActionListener
 	 *  setSelectedItem() call. Defined in interface ActionListener. */
 	public void actionPerformed(ActionEvent e) {
 		// only update preview if user clicked font cbox
-		if(m_ignore == 0)
+		if(m_ignore == 0) {
 			if("comboBoxChanged".equals(e.getActionCommand()))
 				m_composer.selectPreview(true);
+		}
 	}
 
 	/** is this control IRIS enabled? */
@@ -118,6 +102,6 @@ public class FontComboBox extends JComboBox implements ActionListener
 		super.setEnabled(b);
 		// if disabled, reset value to default
 		if(!b)
-			setSelectedItem(FontHelper.getDefault());
+			setSelectedItem(null);
 	}
 }

@@ -249,7 +249,7 @@ public class MultiString {
 			return new int[0];
 		int np = getNumPages();
 		final int[] ret = new int[np]; // font numbers indexed by pg
-		for(int i = 0; i<ret.length; ++i)
+		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
 		parse(new SpanCallback() {
 			public void addSpan(int p, JustificationPage jp,

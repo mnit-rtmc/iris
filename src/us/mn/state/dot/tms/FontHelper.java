@@ -32,18 +32,6 @@ public class FontHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Return the default font number, which is the font with 
-	 *  the lowest font number. Even if no fonts are defined,
-	 *  the smallest font number returned will be 1. */
-	static public Integer getDefault() {
-		int lowest = 1;
-		int[] fn = getFontNumbers();
-		for(int i = 0; i<fn.length; ++i)
-			if(fn[i] < lowest)
-				lowest = fn[i];
-		return lowest;
-	}
-
 	/** Find the font using a font number */
 	static public Font find(final int f_num) {
 		return (Font)namespace.findObject(Font.SONAR_TYPE, 
@@ -85,7 +73,7 @@ public class FontHelper extends BaseHelper {
 			}
 		});
 		int[] ret = new int[al.size()];
-		for(int i = 0; i<ret.length; ++i)
+		for(int i = 0; i < ret.length; i++)
 			ret[i] = al.get(i);
 		return ret;
 	}

@@ -290,20 +290,23 @@ public class AwsMsg {
 	static protected int parseFont(String f) {
 		int ret;
 		if(f.equals(AWS_SINGLESTROKE)) {
-			ret = FontHelper.getDefault();
+			// FIXME: add DMSHelper.getDefaultFontNumber
+			ret = 1;
 		} else if(f.equals(AWS_DOUBLESTROKE)) {
 			Font dsf = FontHelper.lookup(IRIS_DOUBLESTROKE);
 			if(dsf == null) {
 				Log.severe("Double stroke font (" + 
 					IRIS_DOUBLESTROKE + ") not found.");
-				ret = FontHelper.getDefault();
+				// FIXME: add DMSHelper.getDefaultFontNumber
+				ret = 1;
 			}
 			else
 				ret = dsf.getNumber();
 		} else {
 			Log.severe("Unknown AWS font name received (" + f +
 				") in AwsMsg.parseFont().");
-			ret = FontHelper.getDefault();
+			// FIXME: add DMSHelper.getDefaultFontNumber
+			ret = 1;
 		}
 		return ret;
 	}
