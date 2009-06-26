@@ -34,10 +34,10 @@ public enum DMSMessagePriority {
 	AWS,		/* 7: automated warning system */
 	CLEAR;		/* 8: operator clear activation priority */
 
-	/** Validate a numeric priority value. */
-	public static DMSMessagePriority validate(int p) {
-		for(DMSMessagePriority e : values()) {
-			if(e.ordinal() == p)
+	/** Get a DMSMessagePriority from an ordinal value */
+	public static DMSMessagePriority fromOrdinal(int o) {
+		for(DMSMessagePriority e: values()) {
+			if(e.ordinal() == o)
 				return e;
 		}
 		return INVALID;

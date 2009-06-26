@@ -273,7 +273,7 @@ abstract public class OpDms extends OpDevice {
 		if(sm == null)
 			return;
 		// if message is from AWS, use different retry threshold
-		if(DMSMessagePriority.validate(sm.getPriority()) == 
+		if(DMSMessagePriority.fromOrdinal(sm.getPriority()) == 
 			DMSMessagePriority.AWS)
 		{
 			super.setRetryThreshold(AwsMsgs.getRetryThreshold());

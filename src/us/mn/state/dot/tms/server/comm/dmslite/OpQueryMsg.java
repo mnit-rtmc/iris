@@ -324,7 +324,7 @@ public class OpQueryMsg extends OpDms {
 					msgtext = rr1.getResVal("MsgText");
 
 					// priority
-					pri = DMSMessagePriority.validate(SString.
+					pri = DMSMessagePriority.fromOrdinal(SString.
 						stringToInt(rr1.getResVal("Priority")));
 
 					// owner
