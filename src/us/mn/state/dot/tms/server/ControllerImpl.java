@@ -252,7 +252,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return;
 		store.update(this, "active", a);
 		setActive(a);
-		updateNowCounters();
 	}
 
 	/** Get the active status */
@@ -466,21 +465,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			link.addOperation(o);
 	}
 
-	/** Increment a counter */
-	public void incrementCounter(int counter) {
-		// FIXME
-	}
-
-	/** Reset all counters for one time period */
-	public void resetPeriod(int period) {
-		// FIXME
-	}
-
-	/** Update the counters for the 'now' period */
-	protected final void updateNowCounters() {
-		// FIXME
-	}
-
 	/** Controller communication status */
 	protected transient String status = Constants.UNKNOWN;
 
@@ -590,7 +574,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		catch(TMSException e) {
 			e.printStackTrace();
 		};
-		updateNowCounters();
 	}
 
 	/** Error counter for this controller */
@@ -627,11 +610,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Complete a controller operation */
 	public void completeOperation(String id, boolean success) {
-		if(success) {
+		if(success)
 			resetErrorCounter(id);
-			incrementCounter(ErrorCounter.TYPE_GOOD);
-		} else
-			incrementCounter(ErrorCounter.TYPE_FAIL);
 	}
 
 	/** Get the message poller */

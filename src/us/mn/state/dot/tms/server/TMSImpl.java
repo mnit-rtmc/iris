@@ -108,15 +108,9 @@ public final class TMSImpl implements KmlDocument {
 		TIMER.addJob(new TimerJob5Min());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
-				poll1Hour();
 				System.out.println(new Date());
 				Profile.printMemory(System.out);
 				Profile.printThreads(System.out);
-			}
-		} );
-		TIMER.addJob(new Job(Calendar.DATE, 1) {
-			public void perform() throws Exception {
-				poll1Day();
 			}
 		} );
 		TIMER.addJob(new Job(Calendar.DATE, 1,
@@ -483,30 +477,6 @@ public final class TMSImpl implements KmlDocument {
 			}
 		});
 		System.err.println("Finished FLUSH @ " + new Date());
-	}
-
-	/** Poll all controllers for 1 hour interval */
-	static protected void poll1Hour() throws NamespaceError {
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				c.resetPeriod(ErrorCounter.PERIOD_1_HOUR);
-				return false;
-			}
-		});
-	}
-
-	/** Poll all controllers for 1 day interval */
-	static protected void poll1Day() throws NamespaceError {
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				c.resetPeriod(ErrorCounter.PERIOD_1_DAY);
-				return false;
-			}
-		});
 	}
 
 	/** Poll all DMS message status */
