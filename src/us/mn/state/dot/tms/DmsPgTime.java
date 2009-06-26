@@ -14,12 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -27,8 +22,8 @@ import us.mn.state.dot.tms.utils.SString;
  *  @see MultiString, DmsPgTimeSpinner, SignMessageComposer
  *  @author Michael Darter
  */
-public class DmsPgTime
-{
+public class DmsPgTime {
+
 	/** minimum, maximum, and increment for on-time */
 	public static final int MIN_ONTIME_TENTHS = 4;		// .4 secs
 	public static final int MAX_ONTIME_TENTHS = 101;	// 10.1 secs
