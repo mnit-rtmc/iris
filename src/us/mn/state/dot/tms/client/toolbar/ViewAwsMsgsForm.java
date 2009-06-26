@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,12 +62,11 @@ public class ViewAwsMsgsForm extends AbstractForm
 
 	/** Create a new form */
 	public ViewAwsMsgsForm(SonarState st) {
-		super();
+		super("Current " + I18N.get("dms.aws.abbreviation") +
+			" Messages");
 		m_st = st;
 		if(st == null)
 			return;
-		setTitle("Current " + I18N.get("dms.aws.abbreviation") + 
-			" Messages");
 		setPreferredSize(new Dimension(850,425));
 
 		// create refresh timer

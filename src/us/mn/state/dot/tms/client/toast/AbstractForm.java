@@ -31,15 +31,10 @@ import us.mn.state.dot.tms.utils.I18N;
 abstract public class AbstractForm extends JPanel implements TmsForm {
 
 	/** Form title */
-	protected String title;
+	protected final String title;
 
 	/** Help page name, which is an I18N string */
 	protected String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
-
-	/** Create a new abstract form */
-	protected AbstractForm() {
-		setBorder(BORDER);
-	}
 
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
@@ -50,11 +45,6 @@ abstract public class AbstractForm extends JPanel implements TmsForm {
 	/** Get the title of the form */
 	public String getTitle() {
 		return title;
-	}
-
-	/** Set the title of the form */
-	public void setTitle(String t) {
-		title = t;
 	}
 
 	/** Initialize the form */

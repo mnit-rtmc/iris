@@ -63,7 +63,7 @@ public class DMSForm2 extends AbstractForm {
 
 	/** Create a new DMS form */
 	public DMSForm2(Session s) {
-		setTitle(TITLE);
+		super(TITLE);
 		m_session = s;
 		m_dmsCache = s.getSonarState().getDmsCache();
 	}
