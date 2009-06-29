@@ -102,11 +102,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Button used to send a message to the DMS */
 	protected final IButton sendBtn = new IButton("dms.send");
 
-	/** Button used to clear the DMS */
-	protected final JButton clearBtn = new IButton("dms.clear");
+	/** Button used to blank the DMS */
+	protected final JButton blankBtn = new IButton("dms.blank");
 
-	/** Action to clear selected DMS */
-	protected final ClearDmsAction clearAction;
+	/** Action to blank selected DMS */
+	protected final BlankDmsAction blankAction;
 
 	/** Card layout for alert panel */
 	protected final CardLayout cards = new CardLayout();
@@ -146,10 +146,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		user = session.getUser();
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
-		clearAction = new ClearDmsAction(selectionModel, this, user);
+		blankAction = new BlankDmsAction(selectionModel, this, user);
 		qlibCmb = new QLibCBox(this, dms_cache.getQuickMessages());
-		clearBtn.setAction(clearAction);
-		manager.setClearAction(clearAction);
+		blankBtn.setAction(blankAction);
+		manager.setBlankAction(blankAction);
 		composer = new SignMessageComposer(this, st, user);
 		currentPnl = singleTab.getCurrentPanel();
 		previewPnl = singleTab.getPreviewPanel();
@@ -279,7 +279,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
 		box.add(Box.createHorizontalStrut(4));
-		box.add(clearBtn);
+		box.add(blankBtn);
 		box.add(Box.createHorizontalGlue());
 		return box;
 	}
@@ -361,7 +361,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		durationCmb.setEnabled(false);
 		durationCmb.setSelectedItem(null);
 		sendBtn.setEnabled(false);
-		clearBtn.setEnabled(false);
+		blankBtn.setEnabled(false);
 		qlibCmb.setEnabled(false);
 		qlibCmb.setSelectedItem("");
 		builder = null;
@@ -373,7 +373,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		durationCmb.setEnabled(true);
 		durationCmb.setSelectedIndex(0);
 		sendBtn.setEnabled(true);
-		clearBtn.setEnabled(true);
+		blankBtn.setEnabled(true);
 		qlibCmb.setEnabled(true);
 		updateTextQLibCBox(true);
 		selectPreview(false);

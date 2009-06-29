@@ -54,12 +54,12 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** User session */
 	protected final Session session;
 
-	/** Action to clear the selected DMS */
-	protected ClearDmsAction clearAction;
+	/** Action to blank the selected DMS */
+	protected BlankDmsAction blankAction;
 
-	/** Set the clear DMS action */
-	public void setClearAction(ClearDmsAction a) {
-		clearAction = a;
+	/** Set the blank DMS action */
+	public void setBlankAction(BlankDmsAction a) {
+		blankAction = a;
 	}
 
 	/** Create a new DMS manager */
@@ -159,8 +159,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(new javax.swing.JLabel("" + n_selected + " DMSs"));
 		p.addSeparator();
-		if(clearAction != null)
-			p.add(clearAction);
+		if(blankAction != null)
+			p.add(blankAction);
 		return p;
 	}
 
@@ -169,8 +169,8 @@ public class DMSManager extends ProxyManager<DMS> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
-		if(clearAction != null)
-			p.add(clearAction);
+		if(blankAction != null)
+			p.add(blankAction);
 		if(TeslaAction.isConfigured())
 			p.add(new TeslaAction<DMS>(proxy));
 		p.add(new PropertiesAction<DMS>(proxy) {

@@ -135,12 +135,12 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
-	/** Action to clear the selected LCS array */
-	protected ClearLcsAction clearAction;
+	/** Action to blank the selected LCS array */
+	protected BlankLcsAction blankAction;
 
-	/** Set the clear LCS action */
-	public void setClearAction(ClearLcsAction a) {
-		clearAction = a;
+	/** Set the blank LCS action */
+	public void setBlankAction(BlankLcsAction a) {
+		blankAction = a;
 	}
 
 	/** Create a new LCS array manager */
@@ -242,8 +242,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(la)));
 		p.addSeparator();
-		if(isDeployed(la) && clearAction != null)
-			p.add(clearAction);
+		if(isDeployed(la) && blankAction != null)
+			p.add(blankAction);
 		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
 			p.add(new TeslaAction<LCSArray>(la));

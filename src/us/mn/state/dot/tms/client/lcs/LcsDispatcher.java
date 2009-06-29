@@ -95,11 +95,11 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	/** Button to send new indications to the LCS array */
 	protected final JButton sendBtn = new JButton("Send");
 
-	/** Button to clear the LCS array indications */
-	protected final JButton clearBtn = new JButton();
+	/** Button to blank the LCS array indications */
+	protected final JButton blankBtn = new JButton();
 
-	/** Action to clear selected LCS */
-	protected final ClearLcsAction clearAction;
+	/** Action to blank selected LCS */
+	protected final BlankLcsAction blankAction;
 
 	/** Currently logged in user */
 	protected final User user;
@@ -113,9 +113,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		cache = session.getSonarState().getLcsCache().getLCSArrays();
 		user = session.getUser();
 		selectionModel = manager.getSelectionModel();
-		clearAction = new ClearLcsAction(selectionModel, user);
-		clearBtn.setAction(clearAction);
-		manager.setClearAction(clearAction);
+		blankAction = new BlankLcsAction(selectionModel, user);
+		blankBtn.setAction(blankAction);
+		manager.setBlankAction(blankAction);
 		add(createMainPanel(), BorderLayout.CENTER);
 		clearSelected();
 		cache.addProxyListener(this);
@@ -181,7 +181,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		};
 		box.add(sendBtn);
 		box.add(Box.createHorizontalStrut(4));
-		box.add(clearBtn);
+		box.add(blankBtn);
 		return box;
 	}
 
@@ -257,7 +257,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		lcs_lock.setEnabled(true);
 		lcs_lock.setAction(new LockLcsAction(lcs_array, lcs_lock));
 		sendBtn.setEnabled(true);
-		clearBtn.setEnabled(true);
+		blankBtn.setEnabled(true);
 		updateAttribute(lcs_array, null);
 	}
 
@@ -273,7 +273,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		lcs_lock.setSelectedItem(null);
 		indicationSelector.setEnabled(false);
 		sendBtn.setEnabled(false);
-		clearBtn.setEnabled(false);
+		blankBtn.setEnabled(false);
 		lcsPnl.clear();
 	}
 

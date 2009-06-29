@@ -110,8 +110,8 @@ public class SignMessageComposer extends JPanel {
 	/** page on-time spinner */
 	protected PgTimeSpinner timeSpin = new PgTimeSpinner(null);
 
-	/** blank button */
-	protected IButton blankBtn = new IButton("dms.blank");
+	/** Clear button */
+	protected IButton clearBtn = new IButton("dms.clear");
 
 	/** Preview mode */
 	protected boolean preview = false;
@@ -163,14 +163,14 @@ public class SignMessageComposer extends JPanel {
 	/** Add blank button */
 	protected JPanel addBlankBtn() {
 		JPanel panel = new JPanel();
-		new ActionJob(blankBtn) {
+		new ActionJob(clearBtn) {
 			public void perform() {
 				clearSelections();
 				dispatcher.qlibCmb.setSelectedIndex(-1);
 			}
 		};
-		blankBtn.setMaximumSize(blankBtn.getMinimumSize());
-		panel.add(blankBtn);
+		clearBtn.setMaximumSize(clearBtn.getMinimumSize());
+		panel.add(clearBtn);
 		return panel;
 	}
 
@@ -413,7 +413,7 @@ public class SignMessageComposer extends JPanel {
 		assert tab.getTabCount() > 0;
 		if(tab != null && tab.getTabCount() > 0)
 			tab.setSelectedIndex(0);
-		blankBtn.setEnabled(b);
+		clearBtn.setEnabled(b);
 		timeSpin.setEnabled(b);
 		for(JComboBox cbox: cmbLine)
 			cbox.setEnabled(b);

@@ -12,45 +12,36 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms;
+package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
-import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 
 /**
- * Action to clear all selected DMS.
+ * Action to blank all selected LCS arrays.
  *
  * @author Douglas Lau
  */
-public class ClearDmsAction extends AbstractAction {
+public class BlankLcsAction extends AbstractAction {
 
 	/** Selection model */
-	protected final ProxySelectionModel<DMS> selectionModel;
-
-	/** DMS dispatcher */
-	protected final DMSDispatcher dispatcher;
+	protected final ProxySelectionModel<LCSArray> selectionModel;
 
 	/** User who is sending message */
 	protected final User owner;
 
-	/** Create a new action to clear the selected DMS */
-	public ClearDmsAction(ProxySelectionModel<DMS> s, DMSDispatcher d,
-		User o)
-	{
+	/** Create a new action to blank the selected LCS array */
+	public BlankLcsAction(ProxySelectionModel<LCSArray> s, User o) {
 		selectionModel = s;
-		dispatcher = d;
 		owner = o;
-		putValue(Action.NAME, I18N.get("dms.clear"));
-		putValue(Action.SHORT_DESCRIPTION, 
-			I18N.get("dms.clear.tooltip")); 
+		putValue(Action.NAME, "Blank");
+		putValue(Action.SHORT_DESCRIPTION, "Blank the selected LCS");
 	}
 
 	/** Schedule the action to be performed */
@@ -64,15 +55,13 @@ public class ClearDmsAction extends AbstractAction {
 
 	/** Actually perform the action */
 	protected void do_perform() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() > 0) {
-			SignMessage m = dispatcher.createBlankMessage();
-			if(m != null) {
-				for(DMS dms: sel) {
-					dms.setOwnerNext(owner);
-					dms.setMessageNext(m);
-				}
-			}
+		for(LCSArray lcs_array: selectionModel.getSelected()) {
+			Integer[] ind = lcs_array.getIndicationsCurrent();
+			ind = new Integer[ind.length];
+			for(int i = 0; i < ind.length; i++)
+				ind[i] = LaneUseIndication.DARK.ordinal();
+			lcs_array.setOwnerNext(owner);
+			lcs_array.setIndicationsNext(ind);
 		}
 	}
 }
