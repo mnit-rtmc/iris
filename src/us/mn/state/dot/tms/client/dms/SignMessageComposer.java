@@ -38,6 +38,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
@@ -506,8 +507,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** set all font comboboxes using the specified MultiString */
 	protected void setFontComboBoxes(MultiString ms) {
-		// FIXME: don't assume the default font number is 1
-		final int dfnum = 1;
+		final int dfnum = getDefaultFontNumber();
 		int[] fnum = ms.getFonts(dfnum);
 		for(int i = 0; i < fontCmb.length; i++) {
 			if(i < fnum.length)
@@ -515,6 +515,15 @@ public class SignMessageComposer extends JPanel {
 			else
 				fontCmb[i].setSelectedFontNumber(dfnum);
 		}
+	}
+
+	/** Get default font number for the selected DMS */
+	protected int getDefaultFontNumber() {
+		DMS proxy = dms;	// Avoid races
+		if(proxy != null)
+			return DMSHelper.getDefaultFontNumber(proxy);
+		else
+			return 1;
 	}
 
 	/** Set the selected message for a message line combo box */
