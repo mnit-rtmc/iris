@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -65,15 +64,11 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Set the current message on the sign */
 	protected void setCurrentMessage(String multi, Integer duration) {
-		try {
-			// FIXME: this should be on SONAR thread
-			SignMessage sm = dms.createMessage(multi,
-				getPriority(multi), duration);
+		// FIXME: this should be on SONAR thread
+		SignMessage sm = dms.createMessage(multi, getPriority(multi),
+			duration);
+		if(sm != null)
 			dms.setMessageCurrent(sm, null);
-		}
-		catch(SonarException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/** Get the message priority for a MULTI string */

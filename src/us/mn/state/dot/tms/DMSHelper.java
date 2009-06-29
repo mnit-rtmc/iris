@@ -249,4 +249,27 @@ public class DMSHelper extends BaseHelper {
 		String free = Direction.DIRECTION[fd];
 		return free;
 	}
+
+	/** Get the default font number for a DMS */
+	static public int getDefaultFontNumber(DMS dms) {
+		PixelMapBuilder b = createPixelMapBuilder(dms);
+		if(b != null)
+			return b.getDefaultFontNumber();
+		else
+			return 1;
+	}
+
+	/** Create a pixel map builder for a DMS.
+	 * @param dms DMS with proper dimensions for the builder.
+	 * @return A pixel map builder, or null is dimensions are invalid. */
+	static public PixelMapBuilder createPixelMapBuilder(DMS dms) {
+		Integer w = dms.getWidthPixels();
+		Integer h = dms.getHeightPixels();
+		Integer cw = dms.getCharWidthPixels();
+		Integer ch = dms.getCharHeightPixels();
+		if(w != null && h != null && cw != null && ch != null)
+			return new PixelMapBuilder(namespace, w, h, cw, ch);
+		else
+			return null;
+	}
 }

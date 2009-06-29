@@ -35,6 +35,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
@@ -342,15 +343,11 @@ public class MessagesTab extends JPanel {
 
 	/** Get the line height of the sign */
 	protected Integer getLineHeightPixels() {
-		Integer w = proxy.getWidthPixels();
-		Integer h = proxy.getHeightPixels();
-		Integer cw = proxy.getCharWidthPixels();
-		Integer ch = proxy.getCharHeightPixels();
-		if(w == null || h == null || cw == null || ch == null)
+		PixelMapBuilder b = DMSHelper.createPixelMapBuilder(proxy);
+		if(b != null)
+			return b.getLineHeightPixels();
+		else
 			return null;
-		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
-			w, h, cw, ch);
-		return b.getLineHeightPixels();
 	}
 
 	/** Render a message to a bitmap graphic */

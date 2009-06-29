@@ -323,7 +323,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		watching = dms;
 		cache.watchObject(watching);
 		if(DMSHelper.isActive(dms)) {
-			builder = createPixelMapBuilder(dms);
+			builder = DMSHelper.createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
 			enableWidgets();
 		} else {
@@ -414,9 +414,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		// set sign message if MULTIs are different or no widget multi
 		if(set) {
 			SignMessage sm = createMessage(qlib_multi);
-			m_updating_widgets = true; // see SignMessageComposer
-			setMessage(sm);
-			m_updating_widgets = false;
+			if(sm != null) {
+				m_updating_widgets = true;
+				setMessage(sm);
+				m_updating_widgets = false;
+			}
 		}
 	}
 
@@ -460,18 +462,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			if(sm != null && qlibCmb != null)
 				qlibCmb.setSelectedItem(sm);
 		}
-	}
-
-	/** Create the pixel map builder */
-	protected PixelMapBuilder createPixelMapBuilder(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
-			return new PixelMapBuilder(namespace, wp, hp, cw, ch);
-		else
-			return null;
 	}
 
 	/** Get the bitmap graphic for all pages */
@@ -549,21 +539,21 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Create a new message from the widgets */
 	protected SignMessage createMessage() {
-		if(composer == null)
+		String multi = composer.getMessage();
+		if(multi != null)
+			return createMessage(multi);
+		else
 			return null;
-		return createMessage(composer.getMessage());
 	}
 
 	/** Create a new message using the specified MULTI */
 	protected SignMessage createMessage(String multi) {
-		if(creator == null || multi == null)
-			return null;
 		String bitmaps = createBitmaps(multi);
-		SignMessage ret = null;
-		if(bitmaps != null)
-			ret = creator.create(multi, bitmaps,
-			       getPriority(), getDuration());
-		return ret;
+		if(bitmaps != null) {
+			return creator.create(multi, bitmaps, getPriority(),
+				getDuration());
+		} else
+			return null;
 	}
 
 	/** Create a new blank message */

@@ -171,16 +171,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Create a blank message for the sign */
-	protected SignMessage createBlankMessage() {
+	public SignMessage createBlankMessage() {
 		String bitmaps = Base64.encode(new byte[0]);
-		try {
-			return createMessage("", bitmaps,
-				DMSMessagePriority.BLANK, null);
-		}
-		catch(SonarException e) {
-			e.printStackTrace();
-			return null;
-		}
+		return createMessage("", bitmaps, DMSMessagePriority.BLANK,
+			null);
 	}
 
 	/** Destroy an object */
@@ -1196,57 +1190,54 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(!checkPriority(DMSMessagePriority.TRAVEL_TIME.ordinal()))
 			return;
 		try {
-			SignMessage m = createMessage(t,
+			SignMessage sm = createMessage(t,
 				DMSMessagePriority.TRAVEL_TIME, null);
-			doSetMessageNext(m, null);
+			if(sm != null)
+				doSetMessageNext(sm, null);
 		}
 		catch(Exception e) {
 			RouteBuilder.TRAVEL_LOG.log(e.getMessage());
 		}
 	}
 
-	/** Create an message for the sign */
+	/** Create a message for the sign.
+	 * @param m MULTI string for message.
+	 * @return New sign message, or null on error. */
 	public SignMessage createMessage(String m) {
 		MultiString ms = new MultiString(m);
 		if(ms.isBlank())
 			return createBlankMessage();
-		try {
+		else
 			return createMessage(m, DMSMessagePriority.OPERATOR,
 				null);
-		}
-		catch(SonarException e) {
-			e.printStackTrace();
-			return null;
-		}
 	}
 
-	/** Create a message for the sign */
+	/** Create a message for the sign.
+	 * @param m MULTI string for message.
+	 * @param p Activation priority.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
 	public SignMessage createMessage(String m, DMSMessagePriority p,
-		Integer d) throws SonarException
+		Integer d)
 	{
-		Integer w = widthPixels;
-		Integer h = heightPixels;
-		Integer cw = charWidthPixels;
-		Integer ch = charHeightPixels;
-		if(w == null)
-			w = 0;
-		if(h == null)
-			h = 0;
-		if(cw == null)
-			cw = 0;
-		if(ch == null)
-			ch = 0;
-		PixelMapBuilder builder = new PixelMapBuilder(namespace, w, h,
-			cw, ch);
-		MultiString multi = new MultiString(m);
-		multi.parse(builder, builder.getDefaultFontNumber());
-		BitmapGraphic[] pages = builder.getPixmaps();
-		return createMessageB(m, pages, p, d);
+		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(this);
+		if(builder != null) {
+			MultiString multi = new MultiString(m);
+			multi.parse(builder, builder.getDefaultFontNumber());
+			BitmapGraphic[] pages = builder.getPixmaps();
+			return createMessageB(m, pages, p, d);
+		} else
+			return null;
 	}
 
-	/** Create a message for the sign */
+	/** Create a message for the sign.
+	 * @param m MULTI string for message.
+	 * @param pages Pre-rendered graphics for all pages.
+	 * @param p Activation priority.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
 	public SignMessage createMessage(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p, Integer d) throws SonarException
+		DMSMessagePriority p, Integer d)
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
@@ -1264,7 +1255,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a new message (B version) */
 	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p, Integer d) throws SonarException
+		DMSMessagePriority p, Integer d)
 	{
 		int blen = pages[0].length();
 		byte[] bitmap = new byte[pages.length * blen];
@@ -1279,7 +1270,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create a sign message */
 	protected SignMessage createMessage(final String m, final String b,
 		final DMSMessagePriority p, final Integer d)
-		throws SonarException
 	{
 		SignMessage esm = (SignMessage)namespace.findObject(
 			SignMessage.SONAR_TYPE, new Checker<SignMessage>()
@@ -1299,14 +1289,25 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a new sign message (C version) */
 	protected SignMessage createMessageC(String m, String b,
-		DMSMessagePriority p, Integer d) throws SonarException
+		DMSMessagePriority p, Integer d)
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, b, p, d);
-		if(MainServer.server != null)
-			MainServer.server.createObject(sm);
-		else
-			namespace.storeObject(sm);
+		notifyNewSignMessage(sm);
 		return sm;
+	}
+
+	/** Notify SONAR that a new sign message exists */
+	protected void notifyNewSignMessage(SignMessageImpl sm) {
+		try {
+			if(MainServer.server != null)
+				MainServer.server.createObject(sm);
+			else
+				namespace.storeObject(sm);
+		}
+		catch(SonarException e) {
+			// FIXME: we should do something more here...
+			e.printStackTrace();
+		}
 	}
 
 	/** Compose a travel time message */

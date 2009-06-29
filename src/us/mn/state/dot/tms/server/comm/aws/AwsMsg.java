@@ -396,7 +396,9 @@ public class AwsMsg {
 				"DMS " + getIrisDmsId() + ":" + this);
 			try {
 				dms.setOwnerNext(getAwsUserName());
-				dms.doSetMessageNext(toSignMessage(dms));
+				SignMessage sm = toSignMessage(dms);
+				if(sm != null)
+					dms.doSetMessageNext(sm);
 			}
 			catch(Exception e) {
 				Log.warning("AwsMsg.sendMessage(): " +

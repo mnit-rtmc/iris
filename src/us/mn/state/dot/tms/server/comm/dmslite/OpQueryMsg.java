@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
-import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -213,15 +212,8 @@ public class OpQueryMsg extends OpDms {
 		Log.finest("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"multistring=" + multi);
 
-		try {
-			return (SignMessageImpl)m_dms.createMessage(multi,
-				pages, pri, duration);
-		}
-		catch(SonarException e) {
-			Log.warning("OpQueryMsg: sonar exception: e=" + e +
-				", stack=" + SString.getStackTrace(e));
-			return null;
-		}
+		return (SignMessageImpl)m_dms.createMessage(multi, pages, pri,
+			duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with 
@@ -412,20 +404,16 @@ public class OpQueryMsg extends OpDms {
 					// from controller, which comes from the DisplayTimeMS
 					// XML field, not the MULTI string.
 					msgtext = updatePageOnTime(msgtext, pgOnTime);
-					try {
-						// this shouldn't happen if we have msg text
-						if( pri == DMSMessagePriority.INVALID) {
-							Log.warning("Received invalid priority for id=" + id);
-							pri = DMSMessagePriority.OPERATOR;
-						}
-						SignMessageImpl sm = (SignMessageImpl)
-							m_dms.createMessage(msgtext,
-							pri, duramins);
-						m_dms.setMessageCurrent(sm, irisUser);
-					} catch(SonarException e) {
-						Log.warning("OpQueryMsg: sonar exception: e=" + e +
-							", stack=" + SString.getStackTrace(e));
+					// this shouldn't happen if we have msg text
+					if(pri == DMSMessagePriority.INVALID) {
+						Log.warning("Received invalid priority for id=" + id);
+						pri = DMSMessagePriority.OPERATOR;
 					}
+					SignMessageImpl sm = (SignMessageImpl)
+						m_dms.createMessage(msgtext,
+						pri, duramins);
+					if(sm != null)
+						m_dms.setMessageCurrent(sm, irisUser);
 
 				// don't have text
 				} else {
@@ -434,18 +422,14 @@ public class OpQueryMsg extends OpDms {
 					if(usebitmap) {
 						sm = createSignMessageWithBitmap(bitmap, 
 							duramins, pgOnTime, pri);
-						m_dms.setMessageCurrent(sm, irisUser);
+						if(sm != null)
+							m_dms.setMessageCurrent(sm, irisUser);
 					}
 					if(sm == null) {
-						try {
-							sm = (SignMessageImpl)m_dms.createMessage("",
-								DMSMessagePriority.BLANK, null);
+						sm = (SignMessageImpl)m_dms.createMessage("",
+							DMSMessagePriority.BLANK, null);
+						if(sm != null)
 							m_dms.setMessageCurrent(sm, irisUser);
-						}
-						catch(SonarException e) {
-							Log.warning("OpQueryMsg: sonar exception: e=" + e +
-								", stack=" + SString.getStackTrace(e));
-						}
 					}
 				}
 

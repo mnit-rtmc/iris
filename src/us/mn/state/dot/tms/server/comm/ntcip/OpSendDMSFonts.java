@@ -23,12 +23,12 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.PixelMapBuilder;
-import us.mn.state.dot.tms.server.BaseObjectImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
@@ -73,13 +73,8 @@ public class OpSendDMSFonts extends OpDMS {
 	public OpSendDMSFonts(DMSImpl d) {
 		super(DOWNLOAD, d);
 		final LinkedList<Font> fonts = new LinkedList<Font>();
-		Integer w = dms.getWidthPixels();
-		Integer h = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if(w != null && h != null && cw != null && ch != null) {
-			PixelMapBuilder builder = new PixelMapBuilder(
-				BaseObjectImpl.namespace, w, h, cw, ch);
+		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(d);
+		if(builder != null) {
 			builder.findFonts(new Checker<Font>() {
 				public boolean check(Font font) {
 					fonts.add(font);

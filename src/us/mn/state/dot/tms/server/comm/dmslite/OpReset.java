@@ -15,9 +15,7 @@
 package us.mn.state.dot.tms.server.comm.dmslite;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -123,16 +121,9 @@ public class OpReset extends OpDms
 				setErrorMsg("");
 
 				// set blank message
-				try {
-					SignMessage m = m_dms.createMessage("",
-						DMSMessagePriority.BLANK,
-						null);
-	                		m_dms.setMessageCurrent(m, null);
-				}
-				catch(SonarException e) {
-					Log.warning("OpReset: sonar exception: e=" + e +
-						", stack=" + SString.getStackTrace(e));
-				}
+				SignMessage sm = m_dms.createBlankMessage();
+				if(sm != null)
+	                		m_dms.setMessageCurrent(sm, null);
 
 			// valid flag is false
 			} else {
