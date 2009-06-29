@@ -28,13 +28,13 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  *  @author Michael Darter
  */
-public class IButton extends JButton
-{
+public class IButton extends JButton {
+
 	/** Attribute that controls if buttin is IRIS enabled */
-	final private SystemAttrEnum m_sa;
+	private final SystemAttrEnum m_sa;
 
 	/** I18N id that identifies the button's text */
-	private String m_textid;
+	private final String m_textid;
 
 	/** Constructor for a standardized IRIS button.
 	 *  @param textid I18N id for button text. If the I18N string contains
@@ -44,7 +44,6 @@ public class IButton extends JButton
 	 *	   tooltip.
 	 */
 	public IButton(String textid) {
-		super();
 		m_sa = null;
 		m_textid = textid;
 		init();
@@ -59,7 +58,6 @@ public class IButton extends JButton
 	 *  @param sa Attribute that specifies boolean true if button is used.
 	 */
 	public IButton(String textid, SystemAttrEnum sa) {
-		super();
 		m_textid = textid;
 		m_sa = sa;
 		init();
@@ -67,8 +65,6 @@ public class IButton extends JButton
 
 	/** Init, called by constructors. */
 	private void init() {
-		if(m_textid == null)
-			return;
 		setText(I18N.get(m_textid));
 		// set mnemonic
 		int m = I18N.getKeyEvent(m_textid);
@@ -87,9 +83,10 @@ public class IButton extends JButton
 
 	/** IRIS enabled? */
 	public boolean getIEnabled() {
-		if(m_sa == null)
+		if(m_sa != null)
+			return m_sa.getBoolean();
+		else
 			return true;
-		return m_sa.getBoolean();
 	}
 
 	/** Set the button action */
