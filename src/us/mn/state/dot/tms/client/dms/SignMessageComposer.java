@@ -87,7 +87,7 @@ public class SignMessageComposer extends JPanel {
 	protected final User user;
 
 	/** Tab pane to hold pages */
-	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.RIGHT);
+	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
 
 	/** Currently selected DMS */
 	protected DMS dms;
@@ -153,15 +153,34 @@ public class SignMessageComposer extends JPanel {
 	/** Create all widgets */
 	protected JPanel createAllWidgets() {
 		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(addClearBtn(), BorderLayout.LINE_START);
+		panel.add(pages, BorderLayout.CENTER);
 		if(PgTimeSpinner.getIEnabled())
-			panel.add(createOnTimeBox(), BorderLayout.PAGE_START);
-		panel.add(addBlankBtn(), BorderLayout.LINE_START);
-		panel.add(tab, BorderLayout.CENTER);
+			panel.add(createOnTimeBox(), BorderLayout.SOUTH);
 		return panel;
 	}
 
-	/** Add blank button */
-	protected JPanel addBlankBtn() {
+	/** Create page on-time box */
+	protected Box createOnTimeBox() {
+		timeSpin = new PgTimeSpinner(this);
+		Box box = Box.createHorizontalBox();
+		JLabel label = new JLabel();
+		label.setLabelFor(timeSpin);
+		label.setHorizontalAlignment(SwingConstants.RIGHT);
+		label.setDisplayedMnemonic('P');
+		// FIXME: move to a new ISpinner class.
+		label.setText(I18N.get("PgOnTimeSpinner"));
+		label.setMaximumSize(label.getMinimumSize());
+		box.add(Box.createHorizontalGlue());
+		box.add(label);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(timeSpin);
+		box.add(Box.createHorizontalGlue());
+		return box;
+	}
+
+	/** Add clear button */
+	protected JPanel addClearBtn() {
 		JPanel panel = new JPanel();
 		new ActionJob(clearBtn) {
 			public void perform() {
@@ -272,9 +291,9 @@ public class SignMessageComposer extends JPanel {
 		for(int i = 0; i < cmbLine.length; i++)
 			cmbLine[i] = createLineCombo(can_add);
 		for(int i = 0; i < n_pages; i++)
-			setTab(i, "p." + (i + 1), createPage(i));
-		while(n_pages < tab.getTabCount())
-			tab.removeTabAt(n_pages);
+			setPage(i, createPage(i));
+		while(n_pages < pages.getTabCount())
+			pages.removeTabAt(n_pages);
 	}
 
 	/** Determine if the message comboboxes are editable. */
@@ -339,31 +358,14 @@ public class SignMessageComposer extends JPanel {
 			return null;
 	}
 
-	/** Create page on-time box */
-	protected Box createOnTimeBox() {
-		timeSpin = new PgTimeSpinner(this);
-		Box box = Box.createHorizontalBox();
-		JLabel label = new JLabel();
-		label.setLabelFor(timeSpin);
-		label.setHorizontalAlignment(SwingConstants.RIGHT);
-		label.setDisplayedMnemonic('P');
-		label.setText(I18N.get("PgOnTimeSpinner")); //FIXME: move to a new ISpinner class.
-		label.setMaximumSize(label.getMinimumSize());
-		box.add(Box.createHorizontalGlue());
-		box.add(label);
-		box.add(Box.createHorizontalStrut(4));
-		box.add(timeSpin);
-		box.add(Box.createHorizontalGlue());
-		return box;
-	}
-
 	/** Set a page on one tab */
-	protected void setTab(int n, String title, JPanel page) {
-		if(n < tab.getTabCount()) {
-			tab.setComponentAt(n, page);
-			tab.setTitleAt(n, title);
+	protected void setPage(int n, JPanel page) {
+		String title = "p." + (n + 1);
+		if(n < pages.getTabCount()) {
+			pages.setComponentAt(n, page);
+			pages.setTitleAt(n, title);
 		} else
-			tab.addTab(title, page);
+			pages.addTab(title, page);
 	}
 
 	/** Key event saved when making combobox editable */
@@ -409,10 +411,8 @@ public class SignMessageComposer extends JPanel {
 	/** Enable or Disable the message selector */
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		assert tab != null;
-		assert tab.getTabCount() > 0;
-		if(tab != null && tab.getTabCount() > 0)
-			tab.setSelectedIndex(0);
+		if(pages.getTabCount() > 0)
+			pages.setSelectedIndex(0);
 		clearBtn.setEnabled(b);
 		timeSpin.setEnabled(b);
 		for(JComboBox cbox: cmbLine)
