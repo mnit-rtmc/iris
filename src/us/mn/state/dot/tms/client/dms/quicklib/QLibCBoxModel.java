@@ -110,7 +110,11 @@ public class QLibCBoxModel extends AbstractListModel implements ComboBoxModel
 			return true;
 		else if(m_selected == null || selected == null)
 			return false;
-		return m_selected.getName().equals(selected.getName());
+		String name = m_selected.getName();
+		// name may be null if current qlib msg deleted
+		if(name == null)
+			return false;
+		return name.equals(selected.getName());
 	}
 
 	/** Determine if the specified quick library proxy exists.
