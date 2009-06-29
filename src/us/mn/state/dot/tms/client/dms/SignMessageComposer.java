@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -151,13 +152,13 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Create all widgets */
-	protected JPanel createAllWidgets() {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(addClearBtn(), BorderLayout.LINE_START);
-		panel.add(pages, BorderLayout.CENTER);
+	protected Box createAllWidgets() {
+		Box box = Box.createVerticalBox();
+		box.add(pages);
 		if(PgTimeSpinner.getIEnabled())
-			panel.add(createOnTimeBox(), BorderLayout.SOUTH);
-		return panel;
+			box.add(createOnTimeBox());
+		box.add(createClearBtn());
+		return box;
 	}
 
 	/** Create page on-time box */
@@ -179,15 +180,17 @@ public class SignMessageComposer extends JPanel {
 		return box;
 	}
 
-	/** Add clear button */
-	protected JPanel addClearBtn() {
+	/** Create the clear button */
+	protected JPanel createClearBtn() {
 		JPanel panel = new JPanel();
 		new ActionJob(clearBtn) {
 			public void perform() {
 				clearSelections();
 				dispatcher.qlibCmb.setSelectedIndex(-1);
+				selectPreview(true);
 			}
 		};
+		clearBtn.setMargin(new Insets(0, 6, 0, 6));
 		clearBtn.setMaximumSize(clearBtn.getMinimumSize());
 		panel.add(clearBtn);
 		return panel;
