@@ -664,20 +664,20 @@ CREATE TABLE iris.lane_use_multi (
 	multi VARCHAR(256) NOT NULL
 );
 
-CREATE TABLE sign_group (
+CREATE TABLE iris.sign_group (
 	name VARCHAR(16) PRIMARY KEY,
 	local BOOLEAN NOT NULL
 );
 
-CREATE TABLE dms_sign_group (
+CREATE TABLE iris.dms_sign_group (
 	name VARCHAR(24) PRIMARY KEY,
 	dms VARCHAR(10) NOT NULL REFERENCES iris._dms,
-	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group
+	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group
 );
 
-CREATE TABLE sign_text (
+CREATE TABLE iris.sign_text (
 	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES sign_group,
+	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	line smallint NOT NULL,
 	message VARCHAR(24) NOT NULL,
 	priority smallint NOT NULL,
@@ -834,9 +834,9 @@ GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW sign_text_view AS
 	SELECT dms, local, line, message, priority
-	FROM dms_sign_group
-	JOIN sign_group ON dms_sign_group.sign_group = sign_group.name
-	JOIN sign_text ON sign_group.name = sign_text.sign_group;
+	FROM iris.dms_sign_group dsg
+	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
+	JOIN iris.sign_text st ON sg.name = st.sign_group;
 GRANT SELECT ON sign_text_view TO PUBLIC;
 
 CREATE VIEW ramp_meter_view AS
