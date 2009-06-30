@@ -571,22 +571,6 @@ CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
 CREATE RULE dms_delete AS ON DELETE TO iris.dms DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
-CREATE TABLE iris.timing_plan_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE iris.timing_plan (
-	name VARCHAR(16) PRIMARY KEY,
-	plan_type INTEGER NOT NULL REFERENCES iris.timing_plan_type,
-	device VARCHAR(10) NOT NULL REFERENCES iris._device_io,
-	start_min INTEGER NOT NULL,
-	stop_min INTEGER NOT NULL,
-	active BOOLEAN NOT NULL,
-	testing BOOLEAN NOT NULL,
-	target INTEGER NOT NULL
-);
-
 CREATE TABLE iris.lcs_lock (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -713,6 +697,45 @@ CREATE TABLE iris.sign_message (
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	multi VARCHAR(256) NOT NULL
+);
+
+CREATE TABLE iris.action_plan (
+	name VARCHAR(8) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
+	active BOOLEAN NOT NULL,
+	deployed BOOLEAN NOT NULL
+);
+
+CREATE TABLE iris.time_action (
+	name VARCHAR(12) PRIMARY KEY,
+	action_plan VARCHAR(8) NOT NULL REFERENCES iris.action_plan,
+	minute SMALLINT NOT NULL,
+	deploy BOOLEAN NOT NULL
+);
+
+CREATE TABLE iris.dms_action (
+	name VARCHAR(12) PRIMARY KEY,
+	action_plan VARCHAR(8) NOT NULL REFERENCES iris.action_plan,
+	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
+	on_deploy BOOLEAN NOT NULL,
+	quick_message VARCHAR(20) NOT NULL REFERENCES iris.quick_message,
+	priority INTEGER NOT NULL
+);
+
+CREATE TABLE iris.timing_plan_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE iris.timing_plan (
+	name VARCHAR(16) PRIMARY KEY,
+	plan_type INTEGER NOT NULL REFERENCES iris.timing_plan_type,
+	device VARCHAR(10) NOT NULL REFERENCES iris._device_io,
+	start_min INTEGER NOT NULL,
+	stop_min INTEGER NOT NULL,
+	active BOOLEAN NOT NULL,
+	testing BOOLEAN NOT NULL,
+	target INTEGER NOT NULL
 );
 
 CREATE FUNCTION hour_min(integer) RETURNS text
@@ -1094,7 +1117,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.91.0
+database_version	3.92.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1202,30 +1225,33 @@ PRV_0057	policy_admin	sign_group/.*	f	t	t	t
 PRV_0058	policy_admin	sign_text/.*	f	t	t	t
 PRV_0059	policy_admin	quick_message/.*	f	t	t	t
 PRV_0060	policy_admin	timing_plan/.*	f	t	t	t
-PRV_0061	device_admin	alarm/.*	f	t	t	t
-PRV_0062	device_admin	cabinet/.*	f	t	t	t
-PRV_0063	device_admin	camera/.*	f	t	t	t
-PRV_0064	device_admin	comm_link/.*	f	t	t	t
-PRV_0065	device_admin	controller/.*	f	t	t	t
-PRV_0066	device_admin	detector/.*	f	t	t	t
-PRV_0067	device_admin	dms/.*	f	t	t	t
-PRV_0068	device_admin	geo_loc/.*	f	t	t	t
-PRV_0069	device_admin	lcs/.*	f	t	t	t
-PRV_0070	device_admin	lcs_array/.*	f	t	t	t
-PRV_0071	device_admin	lcs_indication/.*	f	t	t	t
-PRV_0072	device_admin	r_node/.*	f	t	t	t
-PRV_0073	device_admin	ramp_meter/.*	f	t	t	t
-PRV_0074	device_admin	road/.*	f	t	t	t
-PRV_0075	device_admin	video_monitor/.*	f	t	t	t
-PRV_0076	system_admin	cabinet_style/.*	f	t	t	t
-PRV_0077	system_admin	font/.*	f	t	t	t
-PRV_0078	system_admin	glyph/.*	f	t	t	t
-PRV_0079	system_admin	graphic/.*	f	t	t	t
-PRV_0080	system_admin	lane_use_multi/.*	f	t	t	t
-PRV_0081	system_admin	system_attribute/.*	f	t	t	t
-PRV_0082	user_admin	user/.*	f	t	t	t
-PRV_0083	user_admin	privilege/.*	f	t	t	t
-PRV_0084	user_admin	role/.*	f	t	t	t
+PRV_0061	policy_admin	action_plan/.*	f	t	t	t
+PRV_0062	policy_admin	dms_action/.*	f	t	t	t
+PRV_0063	policy_admin	time_action/.*	f	t	t	t
+PRV_0064	device_admin	alarm/.*	f	t	t	t
+PRV_0065	device_admin	cabinet/.*	f	t	t	t
+PRV_0066	device_admin	camera/.*	f	t	t	t
+PRV_0067	device_admin	comm_link/.*	f	t	t	t
+PRV_0068	device_admin	controller/.*	f	t	t	t
+PRV_0069	device_admin	detector/.*	f	t	t	t
+PRV_0070	device_admin	dms/.*	f	t	t	t
+PRV_0071	device_admin	geo_loc/.*	f	t	t	t
+PRV_0072	device_admin	lcs/.*	f	t	t	t
+PRV_0073	device_admin	lcs_array/.*	f	t	t	t
+PRV_0074	device_admin	lcs_indication/.*	f	t	t	t
+PRV_0075	device_admin	r_node/.*	f	t	t	t
+PRV_0076	device_admin	ramp_meter/.*	f	t	t	t
+PRV_0077	device_admin	road/.*	f	t	t	t
+PRV_0078	device_admin	video_monitor/.*	f	t	t	t
+PRV_0079	system_admin	cabinet_style/.*	f	t	t	t
+PRV_0080	system_admin	font/.*	f	t	t	t
+PRV_0081	system_admin	glyph/.*	f	t	t	t
+PRV_0082	system_admin	graphic/.*	f	t	t	t
+PRV_0083	system_admin	lane_use_multi/.*	f	t	t	t
+PRV_0084	system_admin	system_attribute/.*	f	t	t	t
+PRV_0085	user_admin	user/.*	f	t	t	t
+PRV_0086	user_admin	privilege/.*	f	t	t	t
+PRV_0087	user_admin	role/.*	f	t	t	t
 \.
 
 SET search_path = event, public, pg_catalog;
