@@ -40,7 +40,7 @@ public class ActionPlanPanel extends FormPanel {
 	static protected final int ROW_HEIGHT = 24;
 
 	/** Table model for action plans */
-	protected ActionPlanModel p_model;
+	protected final ActionPlanModel p_model;
 
 	/** Table to hold the action plans */
 	protected final ZTable p_table = new ZTable();
@@ -76,6 +76,7 @@ public class ActionPlanPanel extends FormPanel {
 		user = s.getUser();
 		cache = s.getSonarState().getActionPlans();
 		t_cache = s.getSonarState().getTimeActions();
+		p_model = new ActionPlanModel(cache, namespace, user);
 	}
 
 	/** Initializze the widgets on the panel */
@@ -134,10 +135,7 @@ public class ActionPlanPanel extends FormPanel {
 
 	/** Dispose of the form */
 	protected void dispose() {
-		if(p_model != null) {
-			p_model.dispose();
-			p_model = null;
-		}
+		p_model.dispose();
 		if(t_model != null) {
 			t_model.dispose();
 			t_model = null;
