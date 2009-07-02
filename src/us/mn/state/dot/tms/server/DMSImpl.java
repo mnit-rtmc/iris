@@ -961,7 +961,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the current message */
 	public void setMessageCurrent(SignMessage sm, User o) {
-		if(sm.equals(messageCurrent))
+		if(SignMessageHelper.equals(messageCurrent, sm))
 			return;
 		logMessage(sm, o);
 		setDeployTime();
