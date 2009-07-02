@@ -540,7 +540,7 @@ public final class TMSImpl implements KmlDocument {
 		final int req = DeviceRequest.QUERY_STATUS.ordinal();
 		DMSHelper.find(new Checker<DMS>() {
 			public boolean check(DMS dms) {
-				if(!isConnectedViaModem(dms))
+				if(DMSHelper.isPeriodicallyQueriable(dms))
 					dms.setDeviceRequest(req);
 				return false;
 			}
@@ -569,20 +569,11 @@ public final class TMSImpl implements KmlDocument {
 		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
 		DMSHelper.find(new Checker<DMS>() {
 			public boolean check(DMS dms) {
-				if(!isConnectedViaModem(dms))
+				if(DMSHelper.isPeriodicallyQueriable(dms))
 					dms.setDeviceRequest(req);
 				return false;
 			}
 		});
-	}
-
-	/** Test if a DMS is connected via modem */
-	static protected boolean isConnectedViaModem(DMS s) {
-		if(s instanceof DMSImpl) {
-			DMSImpl dms = (DMSImpl)s;
-			return dms.isConnectedViaModem();
-		} else
-			return true;
 	}
 
 	/** Poll all LCS indications */
