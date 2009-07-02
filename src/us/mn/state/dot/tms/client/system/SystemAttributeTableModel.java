@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.system;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -131,8 +132,14 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	/** Add a row to the table */
 	protected void addRow(Object value) {
 		String aname = value.toString().replace(" ","");
-		if(aname.length() > 0)
-			cache.createObject(aname);
+		if(aname.isEmpty())
+			return;
+		// use default value if SA exists
+		SystemAttrEnum sa = SystemAttrEnum.lookup(aname); 
+		final String def = (sa == null ? "" : sa.getDefault());
+		HashMap<String, Object> attrs =	new HashMap<String, Object>();
+		attrs.put("value", def);
+		cache.createObject(aname, attrs);
 	}
 
 	/** Renderer for system attribute names in a table cell */

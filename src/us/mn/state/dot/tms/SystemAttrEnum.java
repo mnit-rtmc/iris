@@ -193,6 +193,14 @@ public enum SystemAttrEnum {
 		return (String)get();
 	}
 
+	/** Get the default value as a String. */
+	public String getDefault() {
+		if(def_value != null)
+			return def_value.toString();
+		else
+			return "";
+	}
+
 	/** Get the value of the attribute as a boolean */
 	public boolean getBoolean() {
 		assert atype == Boolean.class;
