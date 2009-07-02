@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.schedule;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -58,6 +59,18 @@ public class ActionPlanPanel extends FormPanel {
 	/** Button to delete the selected time action */
 	protected final JButton del_t_btn = new JButton("Delete");
 
+	/** Table model for DMS actions */
+	protected DmsActionModel d_model;
+
+	/** Table to hold DMS actions */
+	protected final ZTable d_table = new ZTable();
+
+	/** Button to delete the selected DMS action */
+	protected final JButton del_d_btn = new JButton("Delete");
+
+	/** Tabbed pane */
+	protected final JTabbedPane tab = new JTabbedPane();
+
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
@@ -88,25 +101,36 @@ public class ActionPlanPanel extends FormPanel {
 	protected void initialize() {
 		addActionPlanJobs();
 		addTimeActionJobs();
+		addDmsActionJobs();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(ActionPlanModel.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
 		p_table.setVisibleRowCount(10);
 		addRow(p_table);
-		del_p_btn.setEnabled(false);
 		addRow(del_p_btn);
+		del_p_btn.setEnabled(false);
 		JPanel panel = new JPanel(new FlowLayout());
 		FormPanel t_panel = new FormPanel(true);
 		t_table.setAutoCreateColumnsFromModel(false);
 		t_table.setColumnModel(TimeActionModel.createColumnModel());
 		t_table.setRowHeight(ROW_HEIGHT);
-		t_table.setVisibleRowCount(6);
+		t_table.setVisibleRowCount(8);
 		t_panel.addRow(t_table);
-		del_t_btn.setEnabled(false);
 		t_panel.addRow(del_t_btn);
+		del_t_btn.setEnabled(false);
 		panel.add(t_panel);
-		// FIXME: add tab pane containing dms actions, etc.
+		FormPanel d_panel = new FormPanel(true);
+		d_table.setAutoCreateColumnsFromModel(false);
+		d_table.setColumnModel(DmsActionModel.createColumnModel());
+		d_table.setRowHeight(ROW_HEIGHT);
+		d_table.setVisibleRowCount(6);
+		d_panel.addRow(d_table);
+		d_panel.addRow(del_d_btn);
+		del_d_btn.setEnabled(false);
+		panel.add(d_panel);
+		tab.add("DMS Actions", d_panel);
+		panel.add(tab);
 		addRow(panel);
 	}
 
@@ -148,12 +172,35 @@ public class ActionPlanPanel extends FormPanel {
 		};
 	}
 
+	/** Add jobs for DMS action table */
+	protected void addDmsActionJobs() {
+		final ListSelectionModel sm = d_table.getSelectionModel();
+		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, sm) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectDmsAction();
+			}
+		};
+		new ActionJob(this, del_d_btn) {
+			public void perform() throws Exception {
+				int row = sm.getMinSelectionIndex();
+				if(row >= 0)
+					d_model.deleteRow(row);
+			}
+		};
+	}
+
 	/** Dispose of the form */
 	protected void dispose() {
 		p_model.dispose();
 		if(t_model != null) {
 			t_model.dispose();
 			t_model = null;
+		}
+		if(d_model != null) {
+			d_model.dispose();
+			d_model = null;
 		}
 	}
 
@@ -163,16 +210,28 @@ public class ActionPlanPanel extends FormPanel {
 		ActionPlan ap = p_model.getProxy(row);
 		del_p_btn.setEnabled(p_model.canRemove(row));
 		del_t_btn.setEnabled(false);
-		TimeActionModel old_model = t_model;
+		TimeActionModel ot_model = t_model;
 		t_model = new TimeActionModel(t_cache, ap, namespace, user);
 		t_table.setModel(t_model);
-		if(old_model != null)
-			old_model.dispose();
+		if(ot_model != null)
+			ot_model.dispose();
+		del_d_btn.setEnabled(false);
+		DmsActionModel od_model = d_model;
+		d_model = new DmsActionModel(d_cache, ap, namespace, user);
+		d_table.setModel(d_model);
+		if(od_model != null)
+			od_model.dispose();
 	}
 
 	/** Change the selected time action */
 	protected void selectTimeAction() {
 		int row = t_table.getSelectedRow();
 		del_t_btn.setEnabled(t_model.canRemove(row));
+	}
+
+	/** Change the selected DMS action */
+	protected void selectDmsAction() {
+		int row = d_table.getSelectedRow();
+		del_d_btn.setEnabled(d_model.canRemove(row));
 	}
 }
