@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.lang.NullPointerException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -24,13 +25,11 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DmsPgTime {
 
-	/** minimum, maximum, and increment for on-time */
-	public static final int MIN_ONTIME_TENTHS = 4;		// .4 secs
-	public static final int MAX_ONTIME_TENTHS = 101;	// 10.1 secs
-	public static final DmsPgTime MIN_ONTIME = 
-		new DmsPgTime(MIN_ONTIME_TENTHS);
-	public static final DmsPgTime MAX_ONTIME = 
-		new DmsPgTime(MAX_ONTIME_TENTHS);
+	/** on-time min, max */
+	public static final DmsPgTime MIN_ONTIME = new DmsPgTime(4);
+	public static final DmsPgTime MAX_ONTIME = new DmsPgTime(101);
+	/** on-time default, used only if system default is bogus. */
+	private static final DmsPgTime DEF_ONTIME = new DmsPgTime(25);
 
 	/** page time */
 	private final int m_tenths;
@@ -95,5 +94,18 @@ public class DmsPgTime {
 	/** Convert from seconds to 10ths. */
 	public static int MsToTenths(int ms) {
 		return (int)(ms / 100);
+	}
+
+	/** Validate an on-time. */
+	public static DmsPgTime validateOnTime(DmsPgTime t) {
+		if(t == null)
+			throw new NullPointerException();
+		if(t.toTenths() > MAX_ONTIME.toTenths())
+			return MAX_ONTIME;
+		if(t.toTenths() < MIN_ONTIME.toTenths())
+			t = getDefaultOn();
+		if(t.toTenths() < MIN_ONTIME.toTenths())
+			t = getDefaultOn();
+		return t;
 	}
 }
