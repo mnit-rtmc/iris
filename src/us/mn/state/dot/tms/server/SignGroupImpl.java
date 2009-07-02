@@ -31,7 +31,7 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading sign groups...");
 		namespace.registerType(SONAR_TYPE, SignGroupImpl.class);
-		store.query("SELECT name, local FROM sign_group;",
+		store.query("SELECT name, local FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -53,7 +53,7 @@ public class SignGroupImpl extends BaseObjectImpl implements SignGroup {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

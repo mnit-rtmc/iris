@@ -37,7 +37,7 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 		System.err.println("Loading DMS sign groups...");
 		namespace.registerType(SONAR_TYPE, DmsSignGroupImpl.class);
 		store.query("SELECT name, dms, sign_group" +
-			" FROM dms_sign_group;", new ResultFactory()
+			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DmsSignGroupImpl(
@@ -61,7 +61,7 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

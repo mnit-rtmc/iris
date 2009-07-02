@@ -54,7 +54,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 		System.err.println("Loading sign text...");
 		namespace.registerType(SONAR_TYPE, SignTextImpl.class);
 		store.query("SELECT name, sign_group, line, message, priority" +
-			" FROM sign_text;", new ResultFactory()
+			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignTextImpl(namespace,
@@ -81,7 +81,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
