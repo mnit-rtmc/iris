@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -69,6 +70,9 @@ public class ActionPlanPanel extends FormPanel {
 	/** Time action type cache */
 	protected final TypeCache<TimeAction> t_cache;
 
+	/** DMS action type cache */
+	protected final TypeCache<DmsAction> d_cache;
+
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(true);
@@ -76,41 +80,14 @@ public class ActionPlanPanel extends FormPanel {
 		user = s.getUser();
 		cache = s.getSonarState().getActionPlans();
 		t_cache = s.getSonarState().getTimeActions();
+		d_cache = s.getSonarState().getDmsActions();
 		p_model = new ActionPlanModel(cache, namespace, user);
 	}
 
 	/** Initializze the widgets on the panel */
 	protected void initialize() {
-		final ListSelectionModel s = p_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectActionPlan();
-			}
-		};
-		new ActionJob(this, del_p_btn) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					p_model.deleteRow(row);
-			}
-		};
-		final ListSelectionModel cs = t_table.getSelectionModel();
-		cs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, cs) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectTimeAction();
-			}
-		};
-		new ActionJob(this, del_t_btn) {
-			public void perform() throws Exception {
-				int row = cs.getMinSelectionIndex();
-				if(row >= 0)
-					t_model.deleteRow(row);
-			}
-		};
+		addActionPlanJobs();
+		addTimeActionJobs();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(ActionPlanModel.createColumnModel());
@@ -131,6 +108,44 @@ public class ActionPlanPanel extends FormPanel {
 		panel.add(t_panel);
 		// FIXME: add tab pane containing dms actions, etc.
 		addRow(panel);
+	}
+
+	/** Add jobs for action plan table */
+	protected void addActionPlanJobs() {
+		final ListSelectionModel sm = p_table.getSelectionModel();
+		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, sm) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectActionPlan();
+			}
+		};
+		new ActionJob(this, del_p_btn) {
+			public void perform() throws Exception {
+				int row = sm.getMinSelectionIndex();
+				if(row >= 0)
+					p_model.deleteRow(row);
+			}
+		};
+	}
+
+	/** Add jobs for time action table */
+	protected void addTimeActionJobs() {
+		final ListSelectionModel sm = t_table.getSelectionModel();
+		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, sm) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectTimeAction();
+			}
+		};
+		new ActionJob(this, del_t_btn) {
+			public void perform() throws Exception {
+				int row = sm.getMinSelectionIndex();
+				if(row >= 0)
+					t_model.deleteRow(row);
+			}
+		};
 	}
 
 	/** Dispose of the form */
