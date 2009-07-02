@@ -124,7 +124,7 @@ public class ActionPlanPanel extends FormPanel {
 		t_table.setAutoCreateColumnsFromModel(false);
 		t_table.setColumnModel(TimeActionModel.createColumnModel());
 		t_table.setRowHeight(ROW_HEIGHT);
-		p_table.setVisibleRowCount(6);
+		t_table.setVisibleRowCount(6);
 		t_panel.addRow(t_table);
 		del_t_btn.setEnabled(false);
 		t_panel.addRow(del_t_btn);

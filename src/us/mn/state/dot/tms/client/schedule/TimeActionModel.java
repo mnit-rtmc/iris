@@ -58,8 +58,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_TIME, 120, "Time"));
-		m.addColumn(createColumn(COL_DEPLOY, 80, "Deploy"));
+		m.addColumn(createColumn(COL_TIME, 80, "Time"));
+		m.addColumn(createColumn(COL_DEPLOY, 60, "Deploy"));
 		return m;
 	}
 
