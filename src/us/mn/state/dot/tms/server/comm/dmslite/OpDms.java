@@ -81,10 +81,8 @@ abstract public class OpDms extends OpDevice {
 		return getClass().getName();
 	}
 
-	/** Get the error retry threshold for a given SignMessage.
-	 * @throws NullPointerException if sm is null */
+	/** Get the error retry threshold for a given SignMessage. */
 	public int getRetryThreshold(SignMessage sm) {
-		assert sm != null;
 		// if message is from AWS, use different retry threshold
 		if(DMSMessagePriority.fromOrdinal(sm.getRunTimePriority()) == 
 		   DMSMessagePriority.AWS)
@@ -244,9 +242,12 @@ abstract public class OpDms extends OpDevice {
 		// extract from 1st page of MULTI
 		int[] pont = new MultiString(multi).getPageOnTime(
 			DmsPgTime.getDefaultOn().toTenths());
+		DmsPgTime ret;
 		if(pont != null && pont.length > 0)
-			return new DmsPgTime(pont[0]);
-		return DmsPgTime.getDefaultOn();
+			ret = new DmsPgTime(pont[0]);
+		else
+			ret = DmsPgTime.getDefaultOn();
+		return DmsPgTime.validateOnTime(ret);
 	}
 
 	/** Set an error message. The field errStatus is defined in
