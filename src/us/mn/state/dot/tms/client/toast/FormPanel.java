@@ -112,13 +112,6 @@ public class FormPanel extends JPanel {
 		comp.setEnabled(enable);
 	}
 
-	/** Add a component to the panel */
-	public void addRow(JComponent comp) {
-		setWidth(GridBagConstraints.REMAINDER);
-		add(comp);
-		finishRow();
-	}
-
 	/** Add a pair of components to the panel */
 	public void add(JComponent c1, JComponent c2) {
 		setEast();
@@ -130,6 +123,13 @@ public class FormPanel extends JPanel {
 	/** Add a component with a label on the left side */
 	public void add(String name, JComponent comp) {
 		add(new JLabel(name), comp);
+	}
+
+	/** Add a component to the panel */
+	public void addRow(JComponent comp) {
+		setWidth(GridBagConstraints.REMAINDER);
+		add(comp);
+		finishRow();
 	}
 
 	/** Add a pair of components to the panel */

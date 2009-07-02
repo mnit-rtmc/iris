@@ -26,14 +26,17 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
+import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CamCache;
@@ -202,6 +205,30 @@ public class SonarState extends Client {
 		return lcs_cache;
 	}
 
+	/** Cache of action plans */
+	protected final TypeCache<ActionPlan> action_plans;
+
+	/** Get the action plan cache */
+	public TypeCache<ActionPlan> getActionPlans() {
+		return action_plans;
+	}
+
+	/** Cache of time actions */
+	protected final TypeCache<TimeAction> time_actions;
+
+	/** Get the time action cache */
+	public TypeCache<TimeAction> getTimeActions() {
+		return time_actions;
+	}
+
+	/** Cache of DMS actions */
+	protected final TypeCache<DmsAction> dms_actions;
+
+	/** Get the DMS action cache */
+	public TypeCache<DmsAction> getDmsActions() {
+		return dms_actions;
+	}
+
 	/** Cache of timing plans */
 	protected final TypeCache<TimingPlan> timing_plans;
 
@@ -246,6 +273,9 @@ public class SonarState extends Client {
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
+		action_plans = new TypeCache<ActionPlan>(ActionPlan.class,this);
+		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
+		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
@@ -270,6 +300,9 @@ public class SonarState extends Client {
 		ramp_meters.ignoreAttribute("operation");
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
+		populate(action_plans);
+		populate(time_actions);
+		populate(dms_actions);
 		populate(timing_plans);
 		populate(holidays);
 	}

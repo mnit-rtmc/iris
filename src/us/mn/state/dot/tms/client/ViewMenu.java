@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.lcs.LaneUseMultiForm;
 import us.mn.state.dot.tms.client.lcs.LcsForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
-import us.mn.state.dot.tms.client.schedule.HolidayForm;
+import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.system.SystemAttributeForm;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -124,12 +124,11 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Holidays");
-		item.setMnemonic('H');
+		item = new JMenuItem("Plans and Schedules");
+		item.setMnemonic('P');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new HolidayForm(
-					state.getHolidays()));
+				desktop.show(new ScheduleForm(s));
 			}
 		};
 		add(item);

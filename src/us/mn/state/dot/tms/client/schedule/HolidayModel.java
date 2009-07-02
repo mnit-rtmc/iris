@@ -62,6 +62,52 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	/** Period column number */
 	static protected final int COL_PERIOD = 6;
 
+	/** Create the table column model */
+	static public TableColumnModel createColumnModel() {
+		TableColumnModel m = new DefaultTableColumnModel();
+		m.addColumn(createNameColumn());
+		m.addColumn(createMonthColumn());
+		m.addColumn(createDayColumn());
+		m.addColumn(createWeekColumn());
+		m.addColumn(createWeekdayColumn());
+		m.addColumn(createShiftColumn());
+		m.addColumn(createPeriodColumn());
+		return m;
+	}
+
+	/** Create the holiday name column */
+	static protected TableColumn createNameColumn() {
+		TableColumn c = new TableColumn(COL_NAME, 200);
+		c.setHeaderValue("Holiday Name");
+		c.setCellEditor(new NameCellEditor());
+		return c;
+	}
+
+	/** Inner class for editing cells in the name column */
+	static protected class NameCellEditor extends AbstractCellEditor
+		implements TableCellEditor
+	{
+		protected final JTextField text = new JTextField();
+		public Component getTableCellEditorComponent(JTable table,
+			Object value, boolean isSelected, int row, int column)
+		{
+			text.setText("");
+			return text;
+		}
+		public Object getCellEditorValue() {
+			return text.getText();
+		}
+	}
+
+	/** Create the month column */
+	static protected TableColumn createMonthColumn() {
+		TableColumn c = new TableColumn(COL_MONTH, 100);
+		c.setHeaderValue("Month");
+		JComboBox combo = new JComboBox(MONTHS.toArray());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
 	/** Date format symbols */
 	static protected final DateFormatSymbols SYMBOLS =
 		new DateFormatSymbols();
@@ -79,6 +125,15 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 			MONTHS.add(months[m]);
 	}
 
+	/** Create the day column */
+	static protected TableColumn createDayColumn() {
+		TableColumn c = new TableColumn(COL_DAY, 64);
+		c.setHeaderValue("Day");
+		JComboBox combo = new JComboBox(DAYS.toArray());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
 	/** List of all possible day selections */
 	static protected final LinkedList<String> DAYS =
 		new LinkedList<String>();
@@ -86,6 +141,15 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		DAYS.add(ANY);
 		for(int d = 1; d <= 31; d++)
 			DAYS.add(String.valueOf(d));
+	}
+
+	/** Create the week column */
+	static protected TableColumn createWeekColumn() {
+		TableColumn c = new TableColumn(COL_WEEK, 80);
+		c.setHeaderValue("Week");
+		JComboBox combo = new JComboBox(WEEKS.toArray());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
 	}
 
 	/** List of all possible week selections */
@@ -100,6 +164,15 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		WEEKS.add("Fourth");
 	}
 
+	/** Create the weekday column */
+	static protected TableColumn createWeekdayColumn() {
+		TableColumn c = new TableColumn(COL_WEEKDAY, 100);
+		c.setHeaderValue("Weekday");
+		JComboBox combo = new JComboBox(WEEKDAYS.toArray());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
 	/** List of all possible weekday selections */
 	static protected final LinkedList<String> WEEKDAYS =
 		new LinkedList<String>();
@@ -108,6 +181,15 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		WEEKDAYS.add(ANY);
 		for(int d = Calendar.SUNDAY; d <= Calendar.SATURDAY; d++)
 			WEEKDAYS.add(weekdays[d]);
+	}
+
+	/** Create the shift column */
+	static protected TableColumn createShiftColumn() {
+		TableColumn c = new TableColumn(COL_SHIFT, 64);
+		c.setHeaderValue("Shift");
+		JComboBox combo = new JComboBox(SHIFTS.toArray());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
 	}
 
 	/** List of all possible shift selections */
@@ -119,6 +201,15 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		SHIFTS.add(ANY);
 		SHIFTS.add("+1");
 		SHIFTS.add("+2");
+	}
+
+	/** Create the period column */
+	static protected TableColumn createPeriodColumn() {
+		TableColumn c = new TableColumn(COL_PERIOD, 64);
+		c.setHeaderValue("Period");
+		JComboBox combo = new JComboBox(PERIODS.toArray());
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
 	}
 
 	/** List of all possible period selections */
@@ -219,97 +310,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 			case COL_PERIOD:
 				h.setPeriod(PERIODS.indexOf(value) - 1);
 				break;
-		}
-	}
-
-	/** Create the holiday name column */
-	protected TableColumn createNameColumn() {
-		TableColumn c = new TableColumn(COL_NAME, 200);
-		c.setHeaderValue("Holiday Name");
-		c.setCellEditor(new NameCellEditor());
-		return c;
-	}
-
-	/** Create the month column */
-	protected TableColumn createMonthColumn() {
-		TableColumn c = new TableColumn(COL_MONTH, 100);
-		c.setHeaderValue("Month");
-		JComboBox combo = new JComboBox(MONTHS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the day column */
-	protected TableColumn createDayColumn() {
-		TableColumn c = new TableColumn(COL_DAY, 64);
-		c.setHeaderValue("Day");
-		JComboBox combo = new JComboBox(DAYS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the week column */
-	protected TableColumn createWeekColumn() {
-		TableColumn c = new TableColumn(COL_WEEK, 80);
-		c.setHeaderValue("Week");
-		JComboBox combo = new JComboBox(WEEKS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the weekday column */
-	protected TableColumn createWeekdayColumn() {
-		TableColumn c = new TableColumn(COL_WEEKDAY, 100);
-		c.setHeaderValue("Weekday");
-		JComboBox combo = new JComboBox(WEEKDAYS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the shift column */
-	protected TableColumn createShiftColumn() {
-		TableColumn c = new TableColumn(COL_SHIFT, 64);
-		c.setHeaderValue("Shift");
-		JComboBox combo = new JComboBox(SHIFTS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the period column */
-	protected TableColumn createPeriodColumn() {
-		TableColumn c = new TableColumn(COL_PERIOD, 64);
-		c.setHeaderValue("Period");
-		JComboBox combo = new JComboBox(PERIODS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createNameColumn());
-		m.addColumn(createMonthColumn());
-		m.addColumn(createDayColumn());
-		m.addColumn(createWeekColumn());
-		m.addColumn(createWeekdayColumn());
-		m.addColumn(createShiftColumn());
-		m.addColumn(createPeriodColumn());
-		return m;
-	}
-
-	/** Inner class for editing cells in the name column */
-	static protected class NameCellEditor extends AbstractCellEditor
-		implements TableCellEditor
-	{
-		protected final JTextField text = new JTextField();
-		public Component getTableCellEditorComponent(JTable table,
-			Object value, boolean isSelected, int row, int column)
-		{
-			text.setText("");
-			return text;
-		}
-		public Object getCellEditorValue() {
-			return text.getText();
 		}
 	}
 }
