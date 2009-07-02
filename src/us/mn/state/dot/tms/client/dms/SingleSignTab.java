@@ -107,9 +107,9 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the current operation of the DMS */
 	protected final JTextField operationTxt = createTextField();
 
-	/** Button used to get the DMS status (optional) */
-	protected final IButton queryBtn = new IButton("dms.query_status",
-		SystemAttrEnum.DMS_STATUS_ENABLE);
+	/** Button used to get the DMS message (optional) */
+	protected final IButton queryMsgBtn = new IButton("dms.query.msg",
+		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
 
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
@@ -156,8 +156,8 @@ public class SingleSignTab extends FormPanel {
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
 		addRow(I18N.get("DMSDispatcher.OperationTitle"), operationTxt);
-		if(queryBtn.getIEnabled())
-			addRow("Status", statusTxt, queryBtn);
+		if(queryMsgBtn.getIEnabled())
+			addRow("Status", statusTxt, queryMsgBtn);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
@@ -185,11 +185,11 @@ public class SingleSignTab extends FormPanel {
 					togglePreview();
 			}
 		});
-		new ActionJob(this, queryBtn) {
+		new ActionJob(this, queryMsgBtn) {
 			public void perform() {
 				if(proxy != null) {
 					proxy.setDeviceRequest(DeviceRequest.
-						QUERY_STATUS.ordinal());
+						QUERY_MESSAGE.ordinal());
 				}
 			}
 		};
@@ -243,7 +243,7 @@ public class SingleSignTab extends FormPanel {
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
 		operationTxt.setText("");
-		queryBtn.setEnabled(false);
+		queryMsgBtn.setEnabled(false);
 		statusTxt.setText("");
 		deployTxt.setText("");
 		expiresTxt.setText(EMPTY_TXT);
@@ -278,7 +278,7 @@ public class SingleSignTab extends FormPanel {
 				operationTxt.setBackground(Color.GRAY);
 			}
 			operationTxt.setText(dms.getOperation());
-			queryBtn.setEnabled(true);
+			queryMsgBtn.setEnabled(true);
 			statusTxt.setText(status);
 		}
 		if(a == null || a.equals("messageCurrent")) {

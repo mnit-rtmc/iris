@@ -388,11 +388,11 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
 		panel.add("Operation", operation);
-		IButton queryBtn = new IButton("dms.query_status", 
-			SystemAttrEnum.DMS_STATUS_ENABLE);
-		if(queryBtn.getIEnabled()) {
-			panel.add(queryBtn);
-			new ActionJob(this, queryBtn) {
+		IButton queryMsgBtn = new IButton("dms.query.msg", 
+			SystemAttrEnum.DMS_QUERYMSG_ENABLE);
+		if(queryMsgBtn.getIEnabled()) {
+			panel.add(queryMsgBtn);
+			new ActionJob(this, queryMsgBtn) {
 				public void perform() throws Exception {
 					proxy.setDeviceRequest(DeviceRequest.
 						QUERY_MESSAGE.ordinal());
