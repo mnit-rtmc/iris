@@ -74,6 +74,17 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		return COLUMN_COUNT;
 	}
 
+	/** Get the class of the specified column */
+	public Class getColumnClass(int column) {
+		switch(column) {
+		case COL_ACTIVE:
+		case COL_DEPLOYED:
+			return Boolean.class;
+		default:
+			return String.class;
+		}
+	}
+
 	/** Get the value at the specified cell */
 	public Object getValueAt(int row, int column) {
 		ActionPlan plan = getProxy(row);
