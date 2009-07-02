@@ -319,8 +319,12 @@ public class AwsMsg {
 	public void activate(DMSImpl dms) {
 		Log.finest("-----AwsMsg.activate(" + dms +
 			") called, msg=" + this);
-		if(shouldSendMessage(dms))
+		if(shouldSendMessage(dms)) {
 			sendMessage(dms);
+//FIXME: the sleep below is a temporary fix for a problem that disconnects
+//       clients if AWS messages are sent without the sleep between them.
+			STime.sleep(1000);
+		}
 	}
 
 	/**
