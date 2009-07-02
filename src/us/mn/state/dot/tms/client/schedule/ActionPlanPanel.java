@@ -30,14 +30,14 @@ import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
- * A form for displaying and editing comm links
+ * A form for displaying and editing action plans.
  *
  * @author Douglas Lau
  */
 public class ActionPlanPanel extends FormPanel {
 
-	/** Comm link table row height */
-	static protected final int ROW_HEIGHT = 24;
+	/** Table row height */
+	static protected final int ROW_HEIGHT = 22;
 
 	/** Table model for action plans */
 	protected final ActionPlanModel p_model;
