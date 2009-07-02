@@ -48,8 +48,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 100, "Name"));
-		m.addColumn(createColumn(COL_DESCRIPTION, 180, "Description"));
+		m.addColumn(createColumn(COL_NAME, 100, "Plan Name"));
+		m.addColumn(createColumn(COL_DESCRIPTION, 380, "Description"));
 		m.addColumn(createColumn(COL_ACTIVE, 80, "Active"));
 		m.addColumn(createColumn(COL_DEPLOYED, 80, "Deployed"));
 		return m;

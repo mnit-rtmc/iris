@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.widget.ZTable;
 public class ActionPlanPanel extends FormPanel {
 
 	/** Table row height */
-	static protected final int ROW_HEIGHT = 22;
+	static protected final int ROW_HEIGHT = 20;
 
 	/** Table model for action plans */
 	protected final ActionPlanModel p_model;
@@ -115,7 +115,7 @@ public class ActionPlanPanel extends FormPanel {
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(ActionPlanModel.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
-		p_table.setVisibleRowCount(12);
+		p_table.setVisibleRowCount(10);
 		addRow(p_table);
 		del_p_btn.setEnabled(false);
 		addRow(del_p_btn);
