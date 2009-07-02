@@ -173,13 +173,13 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	public void setValueAt(Object value, int row, int column) {
 		TimeAction ta = getProxy(row);
 		if(ta == null) {
-			if(row == COL_TIME) {
+			if(column == COL_TIME) {
 				Integer m = parseMinute(value.toString());
 				if(m != null)
 					create(m);
 			}
 		} else {
-			if(row == COL_DEPLOY) {
+			if(column == COL_DEPLOY) {
 				if(value instanceof Boolean)
 					ta.setDeploy((Boolean)value);
 			}
@@ -205,7 +205,6 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 			if(cache.lookupObject(n) == null)
 				return n;
 		}
-		assert false;
 		return null;
 	}
 
