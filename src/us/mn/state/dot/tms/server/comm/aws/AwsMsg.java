@@ -395,10 +395,8 @@ public class AwsMsg {
 			Log.finest("AwsMsg.sendMessage(): will activate" +
 				"DMS " + getIrisDmsId() + ":" + this);
 			try {
-				dms.setOwnerNext(getAwsUserName());
-				SignMessage sm = toSignMessage(dms);
-				if(sm != null)
-					dms.doSetMessageNext(sm);
+				dms.doSetMessageNext(toSignMessage(dms), 
+					getAwsUserName());
 			}
 			catch(Exception e) {
 				Log.warning("AwsMsg.sendMessage(): " +
