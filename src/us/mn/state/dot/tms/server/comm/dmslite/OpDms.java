@@ -152,22 +152,6 @@ abstract public class OpDms extends OpDevice {
 		return getTimeoutSecs() * 1000;
 	}
 
-	/** Determine if the specified DMS is periodically queriable. */
-	public static boolean isDmsPeriodicallyQueriable(DMSImpl d) {
-		if(d == null)
-			return false;
-		SignAccessType at = getSignAccessType(d);
-		if(at == SignAccessType.DIALUPMODEM) {
-			return false;
-		} else if(at == SignAccessType.WIZARD) {
-			return true;
-		} else {
-			// if unknown access type, this happens when the 
-			// dms is not configured.
-			return false;
-		}
-	}
-
 	/** Get the timeout for this operation (seconds) */
 	protected int getTimeoutSecs() {
 		assert m_dms != null;

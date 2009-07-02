@@ -20,6 +20,7 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.IrisUserHelper;
@@ -44,10 +45,19 @@ public class OpQueryMsg extends OpDms {
 	/** device request */
 	private DeviceRequest m_req;
 
-	/** constructor */
-	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req) {
+	/** Indicates if this operation is the startup operation */
+	private boolean m_startup;
+
+	/** Constructor. 
+	 *  @param d DMS.
+	 *  @param u User originating the request or null for IRIS.
+	 *  @param req Device request.
+	 *  @param startup True to indicate this is the device startup 
+	 *	   request, which is ignored for DMS on dial-up lines. */
+	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req, boolean startup) {
 		super(DEVICE_DATA, d, "Retrieving message", u);
 		m_req = req;
+		m_startup = startup;
 	}
 
 	/**
@@ -247,12 +257,11 @@ public class OpQueryMsg extends OpDms {
 			assert argmess instanceof Message :
 			       "wrong message type";
 
-			// ignore periodic poll of dms on dial-up modem lines.
-			if(m_req == DeviceRequest.QUERY_MESSAGE)
-				if(!isDmsPeriodicallyQueriable(m_dms))
-					return null;
-
 			Message mess = (Message) argmess;
+
+			// ignore startup operations for DMS on dial-up lines
+			if(m_startup && !DMSHelper.isPeriodicallyQueriable(m_dms))
+				return null;
 
 			// user who created the message retrieved from the DMS
 			User irisUser = null;
