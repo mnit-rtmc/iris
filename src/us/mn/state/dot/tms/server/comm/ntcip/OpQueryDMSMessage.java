@@ -65,19 +65,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	protected void setCurrentMessage(String multi, Integer duration) {
 		// FIXME: this should be on SONAR thread
-		SignMessage sm = dms.createMessage(multi, getPriority(multi),
-			duration);
+		SignMessage sm = dms.createMessage(multi,
+			DMSMessagePriority.OTHER_SYSTEM, duration);
 		if(sm != null)
 			dms.setMessageCurrent(sm, null);
-	}
-
-	/** Get the message priority for a MULTI string */
-	protected DMSMessagePriority getPriority(String multi) {
-		MultiString ms = new MultiString(multi);
-		if(ms.isBlank())
-			return DMSMessagePriority.BLANK;
-		else
-			return DMSMessagePriority.OTHER_SYSTEM;
 	}
 
 	/** Phase to query the current message source */

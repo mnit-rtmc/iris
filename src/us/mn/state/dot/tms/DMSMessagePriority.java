@@ -25,14 +25,14 @@ package us.mn.state.dot.tms;
  */
 public enum DMSMessagePriority {
 	INVALID,	/* 0: invalid priority */
-	BLANK,		/* 1: blank message run-time priority */
+	BLANK_RP,	/* 1: blank message run-time priority */
 	TRAVEL_TIME,	/* 2: travel time priority */
 	OTHER_SYSTEM,	/* 3: other system priority */
 	SCHEDULED,	/* 4: scheduled priority (planned events) */
 	ALERT,		/* 5: alert priority (AMBER alerts, etc.) */
 	OPERATOR,	/* 6: operator (override activation) priority */
 	AWS,		/* 7: automated warning system */
-	CLEAR;		/* 8: operator clear activation priority */
+	BLANK_AP;	/* 8: operator blank activation priority */
 
 	/** Get a DMSMessagePriority from an ordinal value */
 	public static DMSMessagePriority fromOrdinal(int o) {

@@ -178,7 +178,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create a blank message for the sign */
 	public SignMessage createBlankMessage() {
 		String bitmaps = Base64.encode(new byte[0]);
-		return createMessage("", bitmaps, DMSMessagePriority.BLANK,
+		return createMessage("", bitmaps, DMSMessagePriority.BLANK_AP,
 			null);
 	}
 
@@ -876,7 +876,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException(name +
 				": PRIORITY TOO LOW");
 		}
-		if(ap != DMSMessagePriority.CLEAR.ordinal()) {
+		if(ap != DMSMessagePriority.BLANK_AP.ordinal()) {
 			// NOTE: only send a "blank" message if activation
 			//       priority matches current runtime priority.
 			//       This means that a blank AWS message will not
