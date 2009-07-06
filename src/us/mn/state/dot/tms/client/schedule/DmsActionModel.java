@@ -23,6 +23,8 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -137,8 +139,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	public void setValueAt(Object value, int row, int column) {
 		DmsAction da = getProxy(row);
 		if(da == null) {
-			if(column == COL_GROUP)
-				create(value.toString());
+			if(column == COL_GROUP) {
+				String v = value.toString();
+				SignGroup sg = SignGroupHelper.lookup(v);
+				if(sg != null)
+					create(sg);
+			}
 			return;
 		}
 		switch(column) {
@@ -156,13 +162,13 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	}
 
 	/** Create a new DMS action */
-	protected void create(String sg) {
+	protected void create(SignGroup sg) {
 		String name = createUniqueName();
 		if(name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
-// FIXME		attrs.put("sign_group", sg);
+			attrs.put("sign_group", sg);
 			cache.createObject(name, attrs);
 		}
 	}
