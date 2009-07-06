@@ -58,7 +58,7 @@ CREATE TABLE iris.dms_action (
 	action_plan VARCHAR(8) NOT NULL REFERENCES iris.action_plan,
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	on_deploy BOOLEAN NOT NULL,
-	quick_message VARCHAR(20) NOT NULL REFERENCES iris.quick_message,
+	quick_message VARCHAR(20) REFERENCES iris.quick_message,
 	priority INTEGER NOT NULL
 );
 
