@@ -340,7 +340,8 @@ public final class TMSImpl implements KmlDocument {
 		ActionPlan ap = ta.getActionPlan();
 		if(ap instanceof ActionPlanImpl) {
 			ActionPlanImpl api = (ActionPlanImpl)ap;
-			api.setDeployedNotify(ta.getDeploy());
+			if(api.getActive())
+				api.setDeployedNotify(ta.getDeploy());
 		}
 	}
 
