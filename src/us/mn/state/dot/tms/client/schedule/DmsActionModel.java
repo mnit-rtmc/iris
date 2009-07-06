@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -140,7 +141,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DmsAction da = getProxy(row);
 		if(da == null) {
 			if(column == COL_GROUP) {
-				String v = value.toString();
+				String v = value.toString().trim();
 				SignGroup sg = SignGroupHelper.lookup(v);
 				if(sg != null)
 					create(sg);
@@ -153,7 +154,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				da.setOnDeploy((Boolean)value);
 			break;
 		case COL_Q_MSG:
-//			da.setQuickMessage(value);
+			String v = value.toString().trim();
+			da.setQuickMessage(QuickMessageHelper.lookup(v));
 			break;
 		case COL_PRIORITY:
 //			da.setPriority(value);
