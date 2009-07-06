@@ -495,16 +495,20 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set the currently selected message */
 	protected void setMessage(SignMessage m, int n_lines) {
+		// Note: order here is crucial. The font cbox must be updated
+		// first because the line combobox updates (each) result in 
+		// intermediate preview updates which read the (incorrect) 
+		// font from the font combobox.
+		if(m != null) {
+			timeSpin.setValueNoAction(m.getMulti());
+			setFontComboBoxes(new MultiString(m.getMulti()));
+		}
 		String[] lines = SignMessageHelper.createLines(m, n_lines);
 		for(int i = 0; i < cmbLine.length; i++) {
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);
 			else if(cmbLine[i].getItemCount() > 0)
 				cmbLine[i].setSelectedIndex(0);
-		}
-		if(m != null) {
-			timeSpin.setValueNoAction(m.getMulti());
-			setFontComboBoxes(new MultiString(m.getMulti()));
 		}
 	}
 
