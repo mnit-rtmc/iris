@@ -15,7 +15,10 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.util.HashMap;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
@@ -23,6 +26,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
@@ -56,9 +60,25 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		m.addColumn(createColumn(COL_GROUP, 120, "Sign Group"));
 		m.addColumn(createColumn(COL_DEPLOY, 80, "On Deploy"));
 		m.addColumn(createColumn(COL_Q_MSG, 160, "Quick Message"));
-		m.addColumn(createColumn(COL_PRIORITY, 120, "Priority"));
+		m.addColumn(createPriorityColumn());
 		return m;
 	}
+
+	/** Create the priority column */
+	static protected TableColumn createPriorityColumn() {
+		TableColumn c = createColumn(COL_PRIORITY, 120, "Priority");
+		JComboBox combo = new JComboBox(PRIORITIES);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Allowed priorities */
+	static protected final DMSMessagePriority[] PRIORITIES = {
+		DMSMessagePriority.TRAVEL_TIME,
+		DMSMessagePriority.OTHER_SYSTEM,
+		DMSMessagePriority.SCHEDULED,
+		DMSMessagePriority.ALERT
+	};
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -113,7 +133,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		case COL_Q_MSG:
 			return da.getQuickMessage();
 		case COL_PRIORITY:
-			return da.getPriority();
+			return DMSMessagePriority.fromOrdinal(da.getPriority());
 		default:
 			return null;
 		}
@@ -158,7 +178,10 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			da.setQuickMessage(QuickMessageHelper.lookup(v));
 			break;
 		case COL_PRIORITY:
-//			da.setPriority(value);
+			if(value instanceof DMSMessagePriority) {
+				DMSMessagePriority p =(DMSMessagePriority)value;
+				da.setPriority(p.ordinal());
+			}
 			break;
 		}
 	}
@@ -171,6 +194,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
 			attrs.put("sign_group", sg);
+			attrs.put("priority",
+				DMSMessagePriority.SCHEDULED.ordinal());
 			cache.createObject(name, attrs);
 		}
 	}
