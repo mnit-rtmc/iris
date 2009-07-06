@@ -884,6 +884,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			//       an AWS message.
 			if(multi.isBlank() && !checkPriorityBlank(ap))
 				return;
+		} else {
+			// Clear travel time route cache
+			s_routes.clear();
 		}
 		validateBitmaps(m);
 		p.sendMessage(this, m, o);
