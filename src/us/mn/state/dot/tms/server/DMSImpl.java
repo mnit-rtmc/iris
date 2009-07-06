@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.Station;
@@ -71,6 +73,9 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Michael Darter
  */
 public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
+
+	/** Action debug log */
+	static protected final DebugLog ACTION_LOG = new DebugLog("action");
 
 	/** Calculate the maximum trip minute to display on the sign */
 	static protected int maximumTripMinutes(float miles) {
@@ -842,9 +847,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Set the next sign message */
-	public void doSetMessageNext(SignMessage m)
-		throws TMSException
-	{
+	public void doSetMessageNext(SignMessage m) throws TMSException {
 		try {
 			doSetMessageNext(m, ownerNext);
 		}
@@ -989,6 +992,35 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected boolean checkPriorityBlank(int ap) {
 		SignMessageImpl m = (SignMessageImpl)messageCurrent;
 		return ap == m.getRunTimePriority();
+	}
+
+	/** Send a DMS action to the sign */
+	public void sendAction(DmsAction da) {
+		DMSMessagePriority p =
+			DMSMessagePriority.fromOrdinal(da.getPriority());
+		if(checkPriority(p.ordinal())) {
+			String multi = createMulti(da.getQuickMessage());
+			SignMessage sm = createMessage(multi, p, 2);
+			if(sm != null) {
+				try {
+					doSetMessageNext(sm, null);
+				}
+				catch(TMSException e) {
+					ACTION_LOG.log(getName() + ": " +
+						e.getMessage());
+				}
+			}
+		}
+	}
+
+	/** Create a MULTI string for a quick message */
+	protected String createMulti(QuickMessage qm) {
+		if(qm != null) {
+			String multi = qm.getMulti();
+			// FIXME: replace [tt...] tags with travel times
+			return multi;
+		} else
+			return "";
 	}
 
 	/** Send a sign message creates by IRIS server */

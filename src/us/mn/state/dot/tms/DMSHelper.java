@@ -225,6 +225,24 @@ public class DMSHelper extends BaseHelper {
 		return (DMS)namespace.findObject(DMS.SONAR_TYPE, checker);
 	}
 
+	/** Find DMS using a Checker */
+	static public DMS find(final Checker<DMS> checker, final SignGroup sg) {
+		DmsSignGroup dsg = (DmsSignGroup)namespace.findObject(
+			DmsSignGroup.SONAR_TYPE, new Checker<DmsSignGroup>()
+		{
+			public boolean check(DmsSignGroup dsg) {
+				if(sg == dsg.getSignGroup())
+					return checker.check(dsg.getDms());
+				else
+					return false;
+			}
+		});
+		if(dsg != null)
+			return dsg.getDms();
+		else
+			return null;
+	}
+
 	/** Empty text field */
 	static protected final String EMPTY_TXT = "    ";
 

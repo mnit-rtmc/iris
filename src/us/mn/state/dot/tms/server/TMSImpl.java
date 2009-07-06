@@ -34,11 +34,14 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
+import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
@@ -333,6 +336,16 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
+		DmsActionHelper.find(new Checker<DmsAction>() {
+			public boolean check(DmsAction da) {
+				ActionPlan ap = da.getActionPlan();
+				if(ap.getActive()) {
+					if(ap.getDeployed() == da.getOnDeploy())
+						performDmsAction(da);
+				}
+				return false;
+			}
+		});
 	}
 
 	/** Perform a time action */
@@ -343,6 +356,18 @@ public final class TMSImpl implements KmlDocument {
 			if(api.getActive())
 				api.setDeployedNotify(ta.getDeploy());
 		}
+	}
+
+	/** Perform a DMS action */
+	protected void performDmsAction(final DmsAction da) {
+		SignGroup sg = da.getSignGroup();
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(dms instanceof DMSImpl)
+					((DMSImpl)dms).sendAction(da);
+				return false;
+			}
+		}, sg);
 	}
 
 	/** 1-minute timer job */
