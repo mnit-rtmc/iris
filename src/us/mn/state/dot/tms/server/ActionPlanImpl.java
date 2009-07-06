@@ -137,6 +137,19 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		setDeployed(d);
 	}
 
+	/** Set the deployed state (and notify clients) */
+	public void setDeployedNotify(boolean d) {
+		if(d != deployed) {
+			try {
+				doSetDeployed(d);
+				notifyAttribute("deployed");
+			}
+			catch(TMSException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	/** Get the deployed status */
 	public boolean getDeployed() {
 		return deployed;

@@ -27,6 +27,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
@@ -39,6 +40,8 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -74,6 +77,18 @@ public final class TMSImpl implements KmlDocument {
 	/** Detector data flush thread */
 	static public final Scheduler FLUSH =
 		new Scheduler("Scheduler: FLUSH");
+
+	/** Calendar instance for calculating the minute of day */
+	static protected final Calendar STAMP = Calendar.getInstance();
+
+	/** Get the current minute of the day */
+	static protected int minute_of_day() {
+		synchronized(STAMP) {
+			STAMP.setTimeInMillis(System.currentTimeMillis());
+			return STAMP.get(Calendar.HOUR_OF_DAY) * 60 +
+				STAMP.get(Calendar.MINUTE);
+		}
+	}
 
 	/** SQL connection */
 	static SQLConnection store;
@@ -310,6 +325,23 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
+		final int minute = minute_of_day();
+		TimeActionHelper.find(new Checker<TimeAction>() {
+			public boolean check(TimeAction ta) {
+				if(ta.getMinute() == minute)
+					performTimeAction(ta);
+				return false;
+			}
+		});
+	}
+
+	/** Perform a time action */
+	protected void performTimeAction(TimeAction ta) {
+		ActionPlan ap = ta.getActionPlan();
+		if(ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl)ap;
+			api.setDeployedNotify(ta.getDeploy());
+		}
 	}
 
 	/** 1-minute timer job */
