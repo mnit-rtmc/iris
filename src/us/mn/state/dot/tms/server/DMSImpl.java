@@ -999,8 +999,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		DMSMessagePriority p =
 			DMSMessagePriority.fromOrdinal(da.getPriority());
 		if(checkPriority(p.ordinal())) {
-			String multi = createMulti(da.getQuickMessage());
-			SignMessage sm = createMessage(multi, p, 2);
+			String m = createMulti(da.getQuickMessage());
+			SignMessage sm = createMessage(m, p, 2);
 			if(sm != null) {
 				try {
 					doSetMessageNext(sm, null);
@@ -1016,11 +1016,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create a MULTI string for a quick message */
 	protected String createMulti(QuickMessage qm) {
 		if(qm != null) {
-			String multi = qm.getMulti();
-			// FIXME: replace [tt...] tags with travel times
-			return multi;
-		} else
-			return "";
+			try {
+				return replaceTravelTimes(qm.getMulti());
+			}
+			catch(InvalidMessageException e) {
+				if(RouteBuilder.TRAVEL_LOG.isOpen()) {
+					RouteBuilder.TRAVEL_LOG.log(
+						e.getMessage());
+				}
+			}
+		}
+		return "";
 	}
 
 	/** Send a sign message creates by IRIS server */
@@ -1202,7 +1208,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Send a travel time message to the sign */
 	protected void sendTravelTime() {
 		try {
-			sendTravelTime(composeTravelTimeMessage());
+			sendTravelTime(replaceTravelTimes(travel));
 		}
 		catch(InvalidMessageException e) {
 			if(RouteBuilder.TRAVEL_LOG.isOpen())
@@ -1342,11 +1348,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
-	/** Compose a travel time message */
-	protected String composeTravelTimeMessage()
+	/** Replace travel time tags in a MULTI string */
+	protected String replaceTravelTimes(String trav)
 		throws InvalidMessageException
 	{
-		MultiString m = new MultiString(travel);
+		MultiString m = new MultiString(trav);
 		MultiString.TravelCallback cb = new MultiString.TravelCallback()
 		{
 			/* If all routes are on the same corridor, when the
