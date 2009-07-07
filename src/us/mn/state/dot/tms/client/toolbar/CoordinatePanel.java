@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008 Minnesota Department of Transportation
+ * Copyright (C) 2008-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,7 @@ package us.mn.state.dot.tms.client.toolbar;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import javax.swing.BorderFactory;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import us.mn.state.dot.map.MapBean;
@@ -29,15 +26,14 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
 /**
- * A JPanel that contains the map coordinates of the mouse pointer.
+ * A tool panel that contains the map coordinates of the mouse pointer.
  *
  * @author Stephen Donecker
  * @author Michael Darter
  * @company University of California, Davis
- * @created October 30, 2008
  */
-public class CoordinatePanel extends JPanel implements MouseMotionListener
-{
+public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
+
 	/** The map */
 	protected final MapBean m_map;
 
@@ -66,8 +62,6 @@ public class CoordinatePanel extends JPanel implements MouseMotionListener
 	public CoordinatePanel(MapBean m) {
 		assert m !=  null;
 		m_map = m;
-		setBorder(BorderFactory.
-			createBevelBorder(BevelBorder.LOWERED));
 		add(m_coordinates);
 		// listen for mouse motion
 		m_map.addMouseMotionListener(this);		

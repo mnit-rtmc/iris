@@ -14,19 +14,15 @@
  */
 package us.mn.state.dot.tms.client.toolbar;
 
-import java.awt.FlowLayout;
-import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
- * A JPanel that deploys action plans.
+ * A tool panel that deploys action plans.
  *
  * @author Douglas Lau
  */
-public class ActionPlanPanel extends JPanel {
+public class ActionPlanPanel extends ToolPanel {
 
 	/** SONAR state */
 	protected final SonarState state;
@@ -39,8 +35,6 @@ public class ActionPlanPanel extends JPanel {
 
 	/** Create an action plan panel */
 	public ActionPlanPanel(SonarState st) {
-		super(new FlowLayout());
-		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 		state = st;
 		model = new ActionPlanComboModel(state.getActionPlans());
 		combo_box.setModel(model);
