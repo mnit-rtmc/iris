@@ -35,10 +35,9 @@ import us.mn.state.dot.tms.client.toolbar.CoordinatePanel;
  *
  * @author Michael Darter
  * @company AHMCT
- * @created November 18, 2008
  */
-public class IrisToolBar extends JToolBar
-{
+public class IrisToolBar extends JToolBar {
+
 	/** coordinate panel */
 	protected CoordinatePanel m_cp;
 
@@ -52,7 +51,7 @@ public class IrisToolBar extends JToolBar
 	protected ActionPlanPanel plan_panel;
 
 	/** sonar state */
-	final SonarState m_st;
+	protected final SonarState m_st;
 
 	/** Constructor */
 	public IrisToolBar(MapBean m, SonarState st, SmartDesktop desktop) {
@@ -64,13 +63,8 @@ public class IrisToolBar extends JToolBar
 	/** Build toolbar components */
 	protected JPanel buildComponents(MapBean m, SmartDesktop desktop) {
 		JPanel ret = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		if(m_st == null)
-			return ret;
-		// map coordinate panel
-		if(CoordinatePanel.getIEnabled()) {
-			m_cp = new CoordinatePanel(m);
-			ret.add(m_cp);
-		}
+		plan_panel = new ActionPlanPanel(m_st);
+		ret.add(plan_panel);
 		// AWS panel
 		if(AwsStatusPanel.getIEnabled()) {
 			m_ap = new AwsStatusPanel(m_st, desktop);
@@ -81,19 +75,22 @@ public class IrisToolBar extends JToolBar
 			m_zp = new MapZoomPanel(m);
 			ret.add(m_zp);
 		}
-		plan_panel = new ActionPlanPanel(m_st);
-		ret.add(plan_panel);
+		// map coordinate panel
+		if(CoordinatePanel.getIEnabled()) {
+			m_cp = new CoordinatePanel(m);
+			ret.add(m_cp);
+		}
 		return ret;
 	}
 
 	/** cleanup */
 	public void dispose() {
+		plan_panel.dispose();
 		if(m_cp != null)
 			m_cp.dispose();
 		if(m_ap != null)
 			m_ap.dispose();
 		if(m_zp != null)
 			m_zp.dispose();
-		plan_panel.dispose();
 	}
 }
