@@ -445,15 +445,16 @@ public class MultiString {
 	 * are called for each span and tag that are found.
 	 * @param cb Normalization callback. */
 	protected void parseNormalize(NormalizeCallback cb) {
+		int offset = 0;
 		Matcher m = TAG.matcher(b);
-		for(String span: TAG.split(b)) {
-			if(span.length() > 0)
-				cb.addSpan(span);
-			if(m.find()) {
-				String tag = m.group();
-				cb.addTag(tag);
-			}
+		while(m.find()) {
+			if(m.start() > offset)
+				cb.addSpan(b.substring(offset, m.start()));
+			offset = m.end();
+			cb.addTag(m.group());
 		}
+		if(offset < b.length())
+			cb.addSpan(b.substring(offset));
 	}
 
 	/** 
