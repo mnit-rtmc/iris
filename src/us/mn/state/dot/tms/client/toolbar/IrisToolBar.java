@@ -18,15 +18,8 @@ import java.awt.FlowLayout;
 import javax.swing.JToolBar;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.SystemAttributeHelper;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.toolbar.AwsStatusPanel;
-import us.mn.state.dot.tms.client.toolbar.CoordinatePanel;
+import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
  * This status bar contains JPanel components such as the real-time map 
@@ -39,58 +32,55 @@ import us.mn.state.dot.tms.client.toolbar.CoordinatePanel;
 public class IrisToolBar extends JToolBar {
 
 	/** coordinate panel */
-	protected CoordinatePanel m_cp;
+	protected CoordinatePanel c_panel;
 
 	/** AWS panel */
-	protected AwsStatusPanel m_ap;
+	protected AwsStatusPanel aws_panel;
 
 	/** Map zoom panel */
-	protected MapZoomPanel m_zp;
+	protected MapZoomPanel z_panel;
 
 	/** Action plan panel */
 	protected ActionPlanPanel plan_panel;
 
 	/** sonar state */
-	protected final SonarState m_st;
+	protected final SonarState state;
 
 	/** Constructor */
 	public IrisToolBar(MapBean m, SonarState st, SmartDesktop desktop) {
 		super();
-		m_st = st;
+		state = st;
 		add(buildComponents(m, desktop));
 	}
 
 	/** Build toolbar components */
 	protected JPanel buildComponents(MapBean m, SmartDesktop desktop) {
-		JPanel ret = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		plan_panel = new ActionPlanPanel(m_st);
-		ret.add(plan_panel);
-		// AWS panel
+		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		plan_panel = new ActionPlanPanel(state);
+		p.add(plan_panel);
 		if(AwsStatusPanel.getIEnabled()) {
-			m_ap = new AwsStatusPanel(m_st, desktop);
-			ret.add(m_ap);
+			aws_panel = new AwsStatusPanel(state, desktop);
+			p.add(aws_panel);
 		}
-		// map zoom panel
 		if(MapZoomPanel.getIEnabled()) {
-			m_zp = new MapZoomPanel(m);
-			ret.add(m_zp);
+			z_panel = new MapZoomPanel(m);
+			p.add(z_panel);
 		}
-		// map coordinate panel
 		if(CoordinatePanel.getIEnabled()) {
-			m_cp = new CoordinatePanel(m);
-			ret.add(m_cp);
+			c_panel = new CoordinatePanel(m);
+			p.add(c_panel);
 		}
-		return ret;
+		return p;
 	}
 
 	/** cleanup */
 	public void dispose() {
 		plan_panel.dispose();
-		if(m_cp != null)
-			m_cp.dispose();
-		if(m_ap != null)
-			m_ap.dispose();
-		if(m_zp != null)
-			m_zp.dispose();
+		if(c_panel != null)
+			c_panel.dispose();
+		if(aws_panel != null)
+			aws_panel.dispose();
+		if(z_panel != null)
+			z_panel.dispose();
 	}
 }
