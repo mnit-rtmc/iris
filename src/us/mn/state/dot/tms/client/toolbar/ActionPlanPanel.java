@@ -36,7 +36,7 @@ public class ActionPlanPanel extends ToolPanel {
 	/** Create an action plan panel */
 	public ActionPlanPanel(SonarState st) {
 		state = st;
-		model = new ActionPlanComboModel(state.getActionPlans());
+		model = new ActionPlanComboModel(state.getActionPlans(), this);
 		combo_box.setModel(model);
 		add(combo_box);
 		add(model.getCheckBox());
@@ -50,5 +50,11 @@ public class ActionPlanPanel extends ToolPanel {
 	/** Is this panel IRIS enabled? */
 	public static boolean getIEnabled() {
 		return true;
+	}
+
+	/** Set the tool tip text */
+	public void setToolTipText(String t) {
+		super.setToolTipText(t);
+		combo_box.setToolTipText(t);
 	}
 }

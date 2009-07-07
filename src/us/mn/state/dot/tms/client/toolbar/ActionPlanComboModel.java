@@ -31,6 +31,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 	implements ComboBoxModel 
 {
+	/** Action plan panel */
+	protected final ActionPlanPanel panel;
+
 	/** Check box for deploying selected action plan */
 	protected final JCheckBox check_box = new JCheckBox();
 
@@ -56,8 +59,9 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 	protected ActionPlan removed;
 
 	/** Create a new action plan combo box model */
-	public ActionPlanComboModel(TypeCache<ActionPlan> c) {
+	public ActionPlanComboModel(TypeCache<ActionPlan> c, ActionPlanPanel p){
 		super(c);
+		panel = p;
 		initialize();
 	}
 
@@ -101,6 +105,7 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				updateCheckBox();
+				updateToolTip();
 			}
 		});
 	}
@@ -115,5 +120,18 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 			check_box.addChangeListener(listener);
 		} else
 			check_box.setSelected(false);
+	}
+
+	/** Update the panel tool tip */
+	protected void updateToolTip() {
+		StringBuilder b = new StringBuilder();
+		b.append("Action Plan: ");
+		ActionPlan p = selected;
+		if(p != null)
+			b.append(p.getDescription());
+		else
+			b.append("None selected");
+		panel.setToolTipText(b.toString());
+		check_box.setToolTipText(b.toString());
 	}
 }
