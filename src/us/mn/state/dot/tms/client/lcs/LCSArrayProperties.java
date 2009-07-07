@@ -23,9 +23,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.FocusJob;
@@ -42,7 +40,6 @@ import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -75,18 +72,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
 
-	/** Timing plan table component */
-	protected final ZTable plan_table = new ZTable();
-
-	/** Timing plan model */
-	protected final TimingPlanModel plan_model;
-
 	/** List of indication buttons */
 	protected final LinkedList<JCheckBox> indications =
 		new LinkedList<JCheckBox>();
-
-	/** Button to delete the selected timing plan */
-	protected final JButton delete_plan_btn = new JButton("Delete");
 
 	/** LCS lock combo box component */
 	protected final JComboBox lcs_lock = new JComboBox(
@@ -105,7 +93,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		table_model = new LCSTableModel(proxy,
 			state.getLcsCache().getLCSs(), state.getNamespace(),
 			user);
-		plan_model = new TimingPlanModel(state.getTimingPlans(), proxy);
 	}
 
 	/** Get the SONAR type cache */
@@ -118,7 +105,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		super.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Setup", createSetupPanel());
-		tab.add("Timing Plans", createTimingPlanPanel());
 		tab.add("Status", createStatusPanel());
 		add(tab);
 		updateAttribute(null);
@@ -262,26 +248,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 				btn.setSelected(false);
 			}
 		}
-	}
-
-	/** Create timing plan panel */
-	protected JPanel createTimingPlanPanel() {
-		final ListSelectionModel s = plan_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ActionJob(delete_plan_btn) {
-			public void perform() {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					plan_model.deleteRow(row);
-			}
-		};
-		plan_table.setAutoCreateColumnsFromModel(false);
-		plan_table.setModel(plan_model);
-		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(plan_table);
-		panel.addRow(delete_plan_btn);
-		return panel;
 	}
 
 	/** Create status panel */
