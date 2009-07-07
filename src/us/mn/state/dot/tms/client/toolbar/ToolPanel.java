@@ -15,9 +15,7 @@
 package us.mn.state.dot.tms.client.toolbar;
 
 import java.awt.FlowLayout;
-import javax.swing.BorderFactory;
 import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 
 /**
  * A panel for use on the toolbar.
@@ -29,6 +27,5 @@ public class ToolPanel extends JPanel {
 	/** Create a new tool panel */
 	public ToolPanel() {
 		super(new FlowLayout());
-		setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
 	}
 }
