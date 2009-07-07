@@ -210,8 +210,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		final LCSPoller p = getLCSPoller();
 		if(p == null)
 			throw new ChangeVetoException("No active poller");
-		for(int i: ind) {
-			if(i != 0 && LaneUseIndication.fromOrdinal(i) == null)
+		for(Integer i: ind) {
+			if(LaneUseIndication.fromOrdinal(i) == null)
 				throw new ChangeVetoException(
 					"Invalid indication: " + i);
 		}
@@ -280,8 +280,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	public synchronized void setLane(int lane, LCS lcs)
 		throws TMSException
 	{
-		for(int i: indicationsCurrent) {
-			if(i != LaneUseIndication.DARK.ordinal())
+		for(Integer i: indicationsCurrent) {
+			if(i != null && i != LaneUseIndication.DARK.ordinal())
 				throw new ChangeVetoException("LCS in use");
 		}
 		if(lane < 1 || lane > 16)
