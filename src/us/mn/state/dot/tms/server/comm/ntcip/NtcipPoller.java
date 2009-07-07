@@ -136,6 +136,9 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		case SEND_SETTINGS:
 			new OpSendLCSSettings(lcs_array).start();
 			break;
+		case QUERY_MESSAGE:
+			new OpQueryLCSIndications(lcs_array).start();
+			break;
 		default:
 			// Ignore other requests
 			break;

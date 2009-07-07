@@ -547,6 +547,12 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
+		LCSArrayHelper.find(new Checker<LCSArray>() {
+			public boolean check(LCSArray lcs_array) {
+				lcs_array.setDeviceRequest(req);
+				return false;
+			}
+		});
 	}
 
 	/** Test if a DMS is connected via modem */

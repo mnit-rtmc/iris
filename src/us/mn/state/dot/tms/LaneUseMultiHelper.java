@@ -50,4 +50,13 @@ public class LaneUseMultiHelper extends BaseHelper {
 		return (LaneUseMulti)namespace.lookupObject(
 			LaneUseMulti.SONAR_TYPE, name);
 	}
+
+	/** Find a lane-use MULTI which matches a MULTI string */
+	static public LaneUseMulti find(final MultiString multi) {
+		return find(new Checker<LaneUseMulti>() {
+			public boolean check(LaneUseMulti lum) {
+				return multi.equals(lum.getMulti());
+			}
+		});
+	}
 }
