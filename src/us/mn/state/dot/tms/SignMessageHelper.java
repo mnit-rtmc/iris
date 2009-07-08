@@ -97,20 +97,16 @@ public class SignMessageHelper extends BaseHelper {
 			return new String[0];
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiString multi = new MultiString(m.getMulti());
-		multi.parse(new MultiString.SpanCallback() {
-			public void addSpan(
-				int p, MultiString.JustificationPage jp,
-				int l, MultiString.JustificationLine jl,
-				int f_num, String t, int pont, int pofft)
-			{
-				int m_lines = Math.max(n_lines, l + 1);
-				while(ls.size() < (p + 1) * m_lines)
+		multi.parse(new MultiStringStateAdapter() {
+			public void spanComplete() {
+				// note: fields in span use ms prefix
+				int m_lines = Math.max(n_lines, ms_line + 1);
+				while(ls.size() < (ms_page + 1) * m_lines)
 					ls.add("");
-				int i = p * m_lines + l;
+				int i = ms_page * m_lines + ms_line;
 				String v = ls.get(i);
-				ls.set(i, SString.trimJoin(v, t));
+				ls.set(i, SString.trimJoin(v, ms_span));
 			}
-			public void addGraphic(int g_num, int x, int y) { }
 		}, 1);
 		return ls.toArray(new String[0]);
 	}

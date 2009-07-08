@@ -574,7 +574,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		if(b != null) {
 			b.clear();
 			MultiString m = new MultiString(multi);
-			m.parse(b, b.getDefaultFontNumber());
+			m.parse(b.m_span, b.getDefaultFontNumber());
 			return encodeBitmaps(b.getPixmaps());
 		} else
 			return null;
@@ -667,11 +667,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		int lh = getLineHeightPixels();
 		Integer h = dms.getHeightPixels();
+		int ret;
 		if(h != null && h > 0 && lh >= h) {
 			int nl = h / lh;
-			return Math.min(nl, ml);
+			ret = Math.min(nl, ml);
 		} else
-			return ml;
+			ret = ml;
+		return ret;
 	}
 
 	/** Get the line height */
@@ -711,7 +713,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			MultiString multi = new MultiString();
 			if(m != null)
 				multi.addText(m);
-			multi.parse(b, b.getDefaultFontNumber());
+			multi.parse(b.m_span, b.getDefaultFontNumber());
 			return b.getPixmaps();
 		} else
 			return null;

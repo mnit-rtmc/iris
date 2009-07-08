@@ -251,17 +251,14 @@ public class MultiString {
 		final int[] ret = new int[np]; // font numbers indexed by pg
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
-		parse(new SpanCallback() {
-			public void addSpan(int p, JustificationPage jp,
-				int l, JustificationLine jl, int f, String t, 
-				int pont, int pofft)
-			{
-				if(p >= 0 && p < ret.length)
-					ret[p] = f;
+		parse(new MultiStringStateAdapter() {
+			public void spanComplete() {
+				// note: fields in span use ms prefix
+				if(ms_page >= 0 && ms_page < ret.length)
+					ret[ms_page] = ms_fnum;
 				else
 					assert false : "bogus # pages";
 			}
-			public void addGraphic(int g_num, int x, int y) { }
 		}, f_num);
 		return ret;
 	}
@@ -271,35 +268,22 @@ public class MultiString {
 		return b.toString();
 	}
 
-	/** MULTI string parsing callback interface */
-	public interface SpanCallback {
-		/* @param page Page number, zero based.
-		 * @param justp Page justification.
-		 * @param line Line number, zero based.
-		 * @param justl Line justification.
-		 * @param f_num Font number, one based.
-		 * @param span Message text.
-		 * @param pont Page on time, 1/10 secs.
-		 * @param pofft Page off time, 1/10 secs. */
-		void addSpan(int page, JustificationPage justp, 
-			int line, JustificationLine justl,
-			int f_num, String span, int pont, int pofft);
-		void addGraphic(int g_num, int x, int y);
-	}
-
 	/** Parse the MULTI string, ignoring page on and off times.
 	 * @param cb SpanCallback, called per span.
 	 * @param f_num Default font number. */
-	public void parse(SpanCallback cb, int f_num) {
+	public void parse(MultiStringState cb, int f_num) {
 		parse(cb, f_num, 0, 0);
 	}
 
 	/** Parse the MULTI string, using default on and off times.
-	 * @param cb SpanCallback, called per span.
+	 * @param cb A MultiStringState which contains parsed attributes 
+	 *	     per span.
 	 * @param f_num Default font number.
 	 * @param dpont Default page on time, 1/10 secs.
 	 * @param dpofft Default page off time, 1/10 secs. */
-	public void parse(SpanCallback cb, int f_num, int dpont, int dpofft) {
+	public void parse(MultiStringState cb, int f_num, 
+		int dpont, int dpofft) 
+	{
 		int page = 0;
 		JustificationPage justp = JustificationPage.fromOrdinal(
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
@@ -311,8 +295,9 @@ public class MultiString {
 		while(m.find()) {
 			if(m.start() > offset) {
 				String span = b.substring(offset, m.start());
-				cb.addSpan(page, justp, line, justl, f_num, 
+				cb.setFields(page, justp, line, justl, f_num, 
 					span, dpont, dpofft);
+				cb.spanComplete();
 			}
 			offset = m.end();
 			String tag = m.group(1);
@@ -342,43 +327,42 @@ public class MultiString {
 					dpont = SString.stringToInt(t[0]);
 				if(t.length >= 2 && t[1].length() > 0)
 					dpofft = SString.stringToInt(t[1]);
+			} else if(tag.startsWith("tr")) {
+				// FIXME: complete
 			}
-			// FIXME: parse tr (text rectangle) tags
 		}
 		if(offset < b.length()) {
 			String span = b.substring(offset);
-			cb.addSpan(page, justp, line, justl, f_num, span, 
+			// FIXME: cleanup, replace setFields(...) call with 
+			//        calls to specific methods in else blocks 
+			//	  above.
+			cb.setFields(page, justp, line, justl, f_num, span, 
 				dpont, dpofft);
+			cb.spanComplete();
 		}
 	}
 
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
-		parse(new SpanCallback() {
-			public void addSpan(int p, JustificationPage jp,
-				int l, JustificationLine jl, int f, String t,
-				int pont, int pofft)
-			{
-				_b.append(t);
-			}
+		parse(new MultiStringStateAdapter() {
 			public void addGraphic(int g_num, int x, int y) {
 				_b.append("GRAPHIC");
+			}
+			public void spanComplete() {
+				_b.append(ms_span);
 			}
 		}, 1);
 		return _b.toString().trim().equals("");
 	}
 
 	/** Parsing callback to count the number of pages */
-	protected class PageCounter implements SpanCallback {
+	protected class PageCounter extends MultiStringStateAdapter {
 		int num_pages = 0;
-		public void addSpan(int p, JustificationPage jp, int l,
-			JustificationLine jl, int f, String t, int pont, 
-			int pofft)
-		{
-			num_pages = Math.max(p + 1, num_pages);
+		public void spanComplete() {
+			// note: fields in span use ms prefix
+			num_pages = Math.max(ms_page + 1, num_pages);
 		}
-		public void addGraphic(int g_num, int x, int y) { }
 	}
 
 	/** Get the number of pages in the multistring */
@@ -392,7 +376,8 @@ public class MultiString {
 	public interface TravelCallback {
 
 		/** Calculate the travel time to a destination */
-		String calculateTime(String sid) throws InvalidMessageException;
+		String calculateTime(String sid) 
+			throws InvalidMessageException;
 
 		/** Check if the callback changed state */
 		boolean isChanged();
@@ -441,8 +426,8 @@ public class MultiString {
 		void addTag(String tag);
 	}
 
-	/** Parse the MULTI string. The addSpan and addTag methods
-	 * are called for each span and tag that are found.
+	/** Parse the MULTI string. The setFields and addTag methods
+	 * are called for each span and tag that is found.
 	 * @param cb Normalization callback. */
 	protected void parseNormalize(NormalizeCallback cb) {
 		int offset = 0;
@@ -489,17 +474,14 @@ public class MultiString {
 		final int[] ret = new int[np]; // pg time indexed by pg
 		for(int i = 0; i<ret.length; ++i)
 			ret[i] = def_pont;
-		parse(new SpanCallback() {
-			public void addSpan(int p, JustificationPage jp,
-				int l, JustificationLine jl, int f, String t,
-				int pont, int pofft)
-			{
-				if(p >= 0 && p < ret.length)
-					ret[p] = pont;
+		parse(new MultiStringStateAdapter() {
+			public void spanComplete() {
+				// note: fields in span use ms prefix
+				if(ms_page >= 0 && ms_page < ret.length)
+					ret[ms_page] = ms_pont;
 				else
 					assert false : "bogus # pages";
 			}
-			public void addGraphic(int g_num, int x, int y) { }
 		}, DEF_FONT, def_pont, DEF_POFFT);
 		return ret;
 	}
