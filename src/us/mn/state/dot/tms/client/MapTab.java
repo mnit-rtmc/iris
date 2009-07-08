@@ -35,18 +35,18 @@ import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 abstract public class MapTab extends IrisTab {
 
 	/** toolbar */
-	protected IrisToolBar m_tb;
+	protected IrisToolBar toolbar;
 
 	/** Map to be displayed on the tab */
 	protected final MapBean map;
 
-	/** session */
-	final Session m_tc;
+	/** Session */
+	protected final Session session;
 
 	/** Create a new map tab */
-	public MapTab(final Session tc, String n, String t) {
+	public MapTab(final Session s, String n, String t) {
 		super(n, t);
-		m_tc = tc;
+		session = s;
 		map = new MapBean(true);
 		map.setBackground(new Color(208, 216, 208));
 	}
@@ -71,7 +71,7 @@ abstract public class MapTab extends IrisTab {
 
 	/** Create a map status bar */
 	protected IrisToolBar createIrisToolBar() {
-		IrisToolBar b = new IrisToolBar(map, m_tc);
+		IrisToolBar b = new IrisToolBar(map, session);
 		b.setFloatable(false);
 		return b;
 	}
@@ -86,8 +86,8 @@ abstract public class MapTab extends IrisTab {
 		MapToolBar toolBar = createToolBar(vlayer);
 		mapPanel.add(toolBar, BorderLayout.NORTH);
 		mapPanel.add(p, BorderLayout.CENTER);
-		m_tb = createIrisToolBar();
-		mapPanel.add(m_tb, BorderLayout.SOUTH);
+		toolbar = createIrisToolBar();
+		mapPanel.add(toolbar, BorderLayout.SOUTH);
 		return mapPanel;
 	}
 
