@@ -35,9 +35,9 @@ INSERT INTO iris.dms_sign_group (name, dms, sign_group)
 INSERT INTO iris.sign_text (name, sign_group, line, message, priority)
 	(SELECT name, sign_group, line, message, priority FROM sign_text);
 
-DROP TABLE sign_group;
 DROP TABLE dms_sign_group;
 DROP TABLE sign_text;
+DROP TABLE sign_group;
 
 CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
