@@ -1032,7 +1032,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return "";
 	}
 
-	/** Send a sign message creates by IRIS server */
+	/** Send a sign message created by IRIS server */
 	public void sendMessage(SignMessage m) throws TMSException {
 		doSetMessageNext(m, null);
 	}
