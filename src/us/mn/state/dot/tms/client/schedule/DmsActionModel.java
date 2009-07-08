@@ -74,6 +74,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Allowed priorities */
 	static protected final DMSMessagePriority[] PRIORITIES = {
+		DMSMessagePriority.PSA,
 		DMSMessagePriority.TRAVEL_TIME,
 		DMSMessagePriority.SCHEDULED
 	};
