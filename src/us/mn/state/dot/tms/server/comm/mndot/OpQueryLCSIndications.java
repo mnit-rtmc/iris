@@ -23,11 +23,11 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 
 /**
- * Operation to query the status of a Lane Control Signal array.
+ * Operation to query the indications of a Lane Control Signal array.
  *
  * @author Douglas Lau
  */
-public class OpQueryLCSStatus extends OpLCS {
+public class OpQueryLCSIndications extends OpLCS {
 
 	/** Device on/off status ("metering" status) */
 	protected final byte[] status = new byte[1];
@@ -36,7 +36,7 @@ public class OpQueryLCSStatus extends OpLCS {
 	protected final byte[] outputs = new byte[2];
 
 	/** Create a new operation to query the LCS */
-	public OpQueryLCSStatus(LCSArrayImpl l) {
+	public OpQueryLCSIndications(LCSArrayImpl l) {
 		super(DATA_30_SEC, l);
 	}
 

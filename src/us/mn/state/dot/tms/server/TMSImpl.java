@@ -121,6 +121,8 @@ public final class TMSImpl implements KmlDocument {
 		station_manager = new StationManager(namespace);
 		TIMER.addJob(new TimerJobDMS(
 			SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt()));
+		TIMER.addJob(new TimerJobLCS(
+			SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt()));
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new TimerJob5Min());
@@ -235,6 +237,21 @@ public final class TMSImpl implements KmlDocument {
 		}
 	}
 
+	/** LCS polling timer job */
+	protected class TimerJobLCS extends Job {
+
+		/** Create a new LCS polling timer job */
+		protected TimerJobLCS(int intervalSecs) {
+			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,
+				19);
+		}
+
+		/** Perform the LCS poll job */
+		public void perform() throws Exception {
+			pollLCSs();
+		}
+	}
+
 	/** 30-second timer job */
 	protected class TimerJob30Sec extends Job {
 
@@ -280,7 +297,6 @@ public final class TMSImpl implements KmlDocument {
 			comp.reset(stamp);
 			try {
 				poll30Second(comp);
-				pollLCSs();
 				pollWarningSigns();
 			}
 			finally {
@@ -538,18 +554,12 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Poll all DMS message status */
-	static protected void pollDMSs() throws NamespaceError {
+	static protected void pollDMSs() {
 		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
 		DMSHelper.find(new Checker<DMS>() {
 			public boolean check(DMS dms) {
 				if(!isConnectedViaModem(dms))
 					dms.setDeviceRequest(req);
-				return false;
-			}
-		});
-		LCSArrayHelper.find(new Checker<LCSArray>() {
-			public boolean check(LCSArray lcs_array) {
-				lcs_array.setDeviceRequest(req);
 				return false;
 			}
 		});
@@ -564,9 +574,9 @@ public final class TMSImpl implements KmlDocument {
 			return true;
 	}
 
-	/** Poll all LCS status */
-	static protected void pollLCSs() throws NamespaceError {
-		final int req = DeviceRequest.QUERY_STATUS.ordinal();
+	/** Poll all LCS indications */
+	static protected void pollLCSs() {
+		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
 		LCSArrayHelper.find(new Checker<LCSArray>() {
 			public boolean check(LCSArray lcs_array) {
 				lcs_array.setDeviceRequest(req);
@@ -576,7 +586,7 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Poll all warning signs */
-	static protected void pollWarningSigns() throws NamespaceError {
+	static protected void pollWarningSigns() {
 		final int req = DeviceRequest.QUERY_STATUS.ordinal();
 		WarningSignHelper.find(new Checker<WarningSign>() {
 			public boolean check(WarningSign sign) {
