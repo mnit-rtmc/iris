@@ -427,7 +427,7 @@ public class OpQueryMsg extends OpDms {
 					}
 					if(sm == null) {
 						sm = (SignMessageImpl)m_dms.createMessage("",
-							DMSMessagePriority.BLANK_RP, null);
+							DMSMessagePriority.BLANK, null);
 						if(sm != null)
 							m_dms.setMessageCurrent(sm, irisUser);
 					}

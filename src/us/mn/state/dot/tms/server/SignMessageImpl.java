@@ -155,7 +155,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	public int getRunTimePriority() {
 		if(SignMessageHelper.isBlank(this))
-			return DMSMessagePriority.BLANK_RP.ordinal();
+			return DMSMessagePriority.BLANK.ordinal();
 		else
 			return getPriority();
 	}
