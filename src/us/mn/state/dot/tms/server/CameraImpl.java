@@ -219,6 +219,13 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return publish;
 	}
 
+	/** Clear the camera failed status */
+	public void clearFailed() {
+		ControllerImpl ctl = controller;
+		if(ctl != null)
+			ctl.setFailed(false);
+	}
+
 	/** Get the camera poller */
 	protected CameraPoller getCameraPoller() {
 		if(isActive()) {

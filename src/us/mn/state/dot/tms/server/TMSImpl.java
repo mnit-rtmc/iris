@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -504,6 +505,15 @@ public final class TMSImpl implements KmlDocument {
 		KmlFile.writeServerFile(this);
 		UptimeLog.writeServerLog(namespace);
 		writeXmlState();
+		CameraHelper.find(new Checker<Camera>() {
+			public boolean check(Camera c) {
+				if(c instanceof CameraImpl) {
+					CameraImpl cam = (CameraImpl)c;
+					cam.clearFailed();
+				}
+				return false;
+			}
+		});
 	}
 
 	/** Poll all controllers 5 minute interval */

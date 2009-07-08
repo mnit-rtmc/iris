@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.Checker;
+
 /**
  * Helper class for cameras.
  *
@@ -24,6 +26,11 @@ public class CameraHelper extends BaseHelper {
 	/** Don't allow instances to be created */
 	private CameraHelper() {
 		assert false;
+	}
+
+	/** Find camera using a Checker */
+	static public Camera find(final Checker<Camera> checker) {
+		return (Camera)namespace.findObject(Camera.SONAR_TYPE, checker);
 	}
 
 	/** Lookup the camera with the specified name */
