@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.toolbar;
 
 import javax.swing.JComboBox;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * A tool panel that deploys action plans.
@@ -24,9 +24,6 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class ActionPlanPanel extends ToolPanel {
 
-	/** SONAR state */
-	protected final SonarState state;
-
 	/** Combo box for all action plans */
 	protected final JComboBox combo_box = new JComboBox();
 
@@ -34,9 +31,8 @@ public class ActionPlanPanel extends ToolPanel {
 	protected final ActionPlanComboModel model;
 
 	/** Create an action plan panel */
-	public ActionPlanPanel(SonarState st) {
-		state = st;
-		model = new ActionPlanComboModel(state.getActionPlans(), this);
+	public ActionPlanPanel(Session s) {
+		model = new ActionPlanComboModel(s, this);
 		combo_box.setModel(model);
 		add(combo_box);
 		add(model.getCheckBox());

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2007  Minnesota Department of Transportation
+ * Copyright (C) 2005-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,8 +71,7 @@ abstract public class MapTab extends IrisTab {
 
 	/** Create a map status bar */
 	protected IrisToolBar createIrisToolBar() {
-		IrisToolBar b = new IrisToolBar(map, m_tc.getSonarState(), 
-			m_tc.getDesktop());
+		IrisToolBar b = new IrisToolBar(map, m_tc);
 		b.setFloatable(false);
 		return b;
 	}

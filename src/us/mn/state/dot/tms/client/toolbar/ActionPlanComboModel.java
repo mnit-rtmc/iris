@@ -19,8 +19,12 @@ import javax.swing.JCheckBox;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -33,6 +37,12 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 {
 	/** Action plan panel */
 	protected final ActionPlanPanel panel;
+
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
 
 	/** Check box for deploying selected action plan */
 	protected final JCheckBox check_box = new JCheckBox();
@@ -59,9 +69,11 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 	protected ActionPlan removed;
 
 	/** Create a new action plan combo box model */
-	public ActionPlanComboModel(TypeCache<ActionPlan> c, ActionPlanPanel p){
-		super(c);
+	public ActionPlanComboModel(Session s, ActionPlanPanel p) {
+		super(s.getSonarState().getActionPlans());
 		panel = p;
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 		initialize();
 	}
 
@@ -114,7 +126,7 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 	protected void updateCheckBox() {
 		ActionPlan p = selected;
 		check_box.removeChangeListener(listener);
-		check_box.setEnabled(p != null);
+		check_box.setEnabled(canUpdate(p));
 		if(p != null) {
 			check_box.setSelected(p.getDeployed());
 			check_box.addChangeListener(listener);
@@ -133,5 +145,15 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 			b.append("None selected");
 		panel.setToolTipText(b.toString());
 		check_box.setToolTipText(b.toString());
+	}
+
+	/** Check if the user can update */
+	public boolean canUpdate(ActionPlan p) {
+		if(p == null)
+			return false;
+		else {
+			return namespace.canUpdate(user,
+				new Name(ActionPlan.SONAR_TYPE, p.getName()));
+		}
 	}
 }

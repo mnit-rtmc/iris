@@ -18,8 +18,8 @@ import java.awt.FlowLayout;
 import javax.swing.JToolBar;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
  * This status bar contains JPanel components such as the real-time map 
@@ -43,23 +43,23 @@ public class IrisToolBar extends JToolBar {
 	/** Action plan panel */
 	protected ActionPlanPanel plan_panel;
 
-	/** sonar state */
-	protected final SonarState state;
+	/** Current session */
+	protected final Session session;
 
 	/** Constructor */
-	public IrisToolBar(MapBean m, SonarState st, SmartDesktop desktop) {
-		super();
-		state = st;
-		add(buildComponents(m, desktop));
+	public IrisToolBar(MapBean m, Session s) {
+		session = s;
+		add(buildComponents(m));
 	}
 
 	/** Build toolbar components */
-	protected JPanel buildComponents(MapBean m, SmartDesktop desktop) {
+	protected JPanel buildComponents(MapBean m) {
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		plan_panel = new ActionPlanPanel(state);
+		plan_panel = new ActionPlanPanel(session);
 		p.add(plan_panel);
 		if(AwsStatusPanel.getIEnabled()) {
-			aws_panel = new AwsStatusPanel(state, desktop);
+			aws_panel = new AwsStatusPanel(session.getSonarState(),
+				session.getDesktop());
 			p.add(aws_panel);
 		}
 		if(MapZoomPanel.getIEnabled()) {
