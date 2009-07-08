@@ -99,7 +99,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 		if(t == null)
 			return null;
 		if(col == COL_NAME)
-			return SField.tail(t.getName());
+			return t.getName();
 		else if(col == COL_MULTI)
 			return t.getMulti();
 		return null;
@@ -128,15 +128,16 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 		QuickMessage t = getProxy(row);
 		if(col == COL_NAME) {
 			if(t == null) {
-				// trim
 				String name = (value == null ? "" : 
 					value.toString().replace(" ", ""));
-				addRow(name);
+				if(name.length() > 0)
+					addRow(name);
 			}
 		} else if(col == COL_MULTI) {
-			if(t != null)
+			if(t != null) {
 				t.setMulti(new MultiString(
 					value.toString()).normalize());
+			}
 		}
 	}
 
