@@ -219,6 +219,16 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return publish;
 	}
 
+	/** Get the camera poller */
+	protected CameraPoller getCameraPoller() {
+		if(isActive()) {
+			MessagePoller p = getPoller();
+			if(p instanceof CameraPoller)
+				return (CameraPoller)p;
+		}
+		return null;
+	}
+
 	/** Request a device operation */
 	public void setDeviceRequest(int r) {
 		// no camera device requests
@@ -233,29 +243,23 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		float p = ptz[0];
 		float t = ptz[1];
 		float z = ptz[2];
-		MessagePoller mp = getPoller();
-		if(mp instanceof CameraPoller) {
-			CameraPoller cp = (CameraPoller)mp;
+		CameraPoller cp = getCameraPoller();
+		if(cp != null)
 			cp.sendPTZ(this, p, t, z);
-		}
 	}
 
 	/** Command the camera to store a preset */
 	public void setStorePreset(int preset) {
-		MessagePoller mp = getPoller();
-		if(mp instanceof CameraPoller) {
-			CameraPoller cp = (CameraPoller)mp;
+		CameraPoller cp = getCameraPoller();
+		if(cp != null)
 			cp.sendStorePreset(this, preset);
-		}
 	}
 
 	/** Command the camera to recall a preset */
 	public void setRecallPreset(int preset) {
-		MessagePoller mp = getPoller();
-		if(mp instanceof CameraPoller) {
-			CameraPoller cp = (CameraPoller)mp;
+		CameraPoller cp = getCameraPoller();
+		if(cp != null)
 			cp.sendRecallPreset(this, preset);
-		}
 	}
 
 	/** Render the camera object as xml */
