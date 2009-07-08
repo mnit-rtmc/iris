@@ -551,7 +551,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
 			return creator.create(multi, bitmaps, getPriority(),
-				getDuration());
+				getPriority(), getDuration());
 		} else
 			return null;
 	}
@@ -562,7 +562,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		String bitmaps = createBitmaps(multi);
 		if(bitmaps != null) {
 			return creator.create(multi, bitmaps,
-				DMSMessagePriority.OVERRIDE, 0);
+			       DMSMessagePriority.OVERRIDE,
+			       DMSMessagePriority.BLANK, 0);
 		} else
 			return null;
 	}

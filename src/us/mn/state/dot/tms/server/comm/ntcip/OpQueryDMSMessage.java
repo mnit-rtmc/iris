@@ -66,6 +66,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	protected void setCurrentMessage(String multi, Integer duration) {
 		// FIXME: this should be on SONAR thread
 		SignMessage sm = dms.createMessage(multi,
+			DMSMessagePriority.OTHER_SYSTEM,
 			DMSMessagePriority.OTHER_SYSTEM, duration);
 		if(sm != null)
 			dms.setMessageCurrent(sm, null);

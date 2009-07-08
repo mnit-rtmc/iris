@@ -87,7 +87,7 @@ public class DMSHelper extends BaseHelper {
 	static public boolean isTravelTime(DMS proxy) {
 		SignMessage m = proxy.getMessageCurrent();
 		if(m != null) {
-			return m.getPriority() ==
+			return m.getRunTimePriority() ==
 			       DMSMessagePriority.TRAVEL_TIME.ordinal();
 		} else {
 			// messageCurrent should never be null, so this means
@@ -128,7 +128,7 @@ public class DMSHelper extends BaseHelper {
 			return false;
 		SignMessage m = proxy.getMessageCurrent();
 		if(m != null) {
-			return m.getPriority() == DMSMessagePriority.AWS.
+			return m.getRunTimePriority() == DMSMessagePriority.AWS.
 				ordinal() && !SignMessageHelper.isBlank(m);
 		} else {
 			// messageCurrent should never be null, so this means

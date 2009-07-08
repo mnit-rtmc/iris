@@ -60,35 +60,37 @@ public class SignMessageCreator {
 	 * Create a new sign message.
 	 * @param multi MULTI text.
 	 * @param bitmaps Base64-encoded bitmaps.
-	 * @param priority Message priority.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message.
 	 */
 	public SignMessage create(String multi, String bitmaps,
-		DMSMessagePriority priority, Integer duration)
+		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
 	{
-		SignMessage sm = lookupMessage(multi, bitmaps, priority,
-			duration);
+		SignMessage sm = lookupMessage(multi, bitmaps, ap, rp,duration);
 		if(sm != null)
 			return sm;
 		String name = createName();
 		if(name != null)
-			return create(name, multi, bitmaps, priority, duration);
+			return create(name, multi, bitmaps, ap, rp, duration);
 		else
 			return null;
 	}
 
 	/** Lookup an existing sign message */
 	protected SignMessage lookupMessage(final String multi,
-		final String bitmaps, DMSMessagePriority priority,
-		final Integer duration)
+		final String bitmaps, DMSMessagePriority ap,
+		DMSMessagePriority rp, final Integer duration)
 	{
-		final int p = priority.ordinal();
+		final int api = ap.ordinal();
+		final int rpi = rp.ordinal();
 		return sign_messages.findObject(new Checker<SignMessage>() {
 			public boolean check(SignMessage sm) {
 				return multi.equals(sm.getMulti()) &&
 				       bitmaps.equals(sm.getBitmaps()) &&
-				       p == sm.getPriority() &&
+				       api == sm.getActivationPriority() &&
+				       rpi == sm.getRunTimePriority() &&
 				       duration == sm.getDuration();
 			}
 		});
@@ -99,17 +101,19 @@ public class SignMessageCreator {
 	 * @param name Sign message name.
 	 * @param multi MULTI text.
 	 * @param bitmaps Base64-encoded bitmaps.
-	 * @param priority Message priority.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message.
 	 */
 	protected SignMessage create(String name, String multi, String bitmaps,
-		DMSMessagePriority priority, Integer duration)
+		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("multi", multi);
 		attrs.put("bitmaps", bitmaps);
-		attrs.put("priority", new Integer(priority.ordinal()));
+		attrs.put("activationPriority", new Integer(ap.ordinal()));
+		attrs.put("runTimePriority", new Integer(rp.ordinal()));
 		if(duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);

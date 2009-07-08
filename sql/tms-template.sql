@@ -690,7 +690,8 @@ CREATE TABLE iris.sign_message (
 	name VARCHAR(20) PRIMARY KEY,
 	multi VARCHAR(256) NOT NULL,
 	bitmaps text NOT NULL,
-	priority INTEGER NOT NULL,
+	a_priority INTEGER NOT NULL,
+	r_priority INTEGER NOT NULL,
 	duration INTEGER
 );
 
@@ -1117,7 +1118,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.92.0
+database_version	3.93.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3

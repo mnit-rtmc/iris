@@ -122,7 +122,7 @@ public class OpMessage extends OpDms {
 	/** create 2nd phase */
 	private Phase createPhaseTwo()
 	{
-		if(!m_dms.checkPriority(m_sm.getPriority()))
+		if(!m_dms.checkPriority(m_sm.getActivationPriority()))
 			return null;
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)
@@ -254,7 +254,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("OffTime",offtime));
 
 			// priority
-			String pri = SString.intToString(m_sm.getPriority());
+			String pri = SString.intToString(m_sm.getRunTimePriority());
 			mess.add(new ReqRes("Priority", pri, new String[0]));
 
 			// Owner
@@ -422,7 +422,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(pt.toMs()).toString()));
 
 			// priority
-			String pri = SString.intToString(m_sm.getPriority());
+			String pri = SString.intToString(m_sm.getRunTimePriority());
 			mess.add(new ReqRes("Priority", pri, new String[0]));
 
 			// Owner

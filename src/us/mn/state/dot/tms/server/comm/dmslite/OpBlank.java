@@ -115,7 +115,7 @@ public class OpBlank extends OpDms
 			mess.add(rr1);
 
 			// priority
-			String pri = SString.intToString(m_sm.getPriority());
+			String pri = SString.intToString(m_sm.getRunTimePriority());
 			ReqRes rr2 = new ReqRes("Priority", pri, new String[0]);
 			mess.add(rr2);
 

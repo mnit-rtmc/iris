@@ -179,7 +179,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public SignMessage createBlankMessage() {
 		String bitmaps = Base64.encode(new byte[0]);
 		return createMessage("", bitmaps, DMSMessagePriority.OVERRIDE,
-			null);
+		       DMSMessagePriority.BLANK, null);
 	}
 
 	/** Destroy an object */
@@ -871,7 +871,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + m.getMulti());
 		}
-		int ap = m.getPriority();
+		int ap = m.getActivationPriority();
 		if(!checkPriority(ap)) {
 			throw new ChangeVetoException(name +
 				": PRIORITY TOO LOW");
@@ -999,11 +999,13 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Send a DMS action to the sign */
 	public void sendAction(DmsAction da) {
-		DMSMessagePriority p =
-			DMSMessagePriority.fromOrdinal(da.getPriority());
-		if(checkPriority(p.ordinal())) {
+		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+			da.getPriority());
+		if(checkPriority(ap.ordinal())) {
 			String m = createMulti(da.getQuickMessage());
-			SignMessage sm = createMessage(m, p, 2);
+			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+				da.getPriority());
+			SignMessage sm = createMessage(m, ap, rp, 2);
 			if(sm != null) {
 				try {
 					doSetMessageNext(sm, null);
@@ -1232,6 +1234,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return;
 		try {
 			SignMessage sm = createMessage(t,
+				DMSMessagePriority.TRAVEL_TIME,
 				DMSMessagePriority.TRAVEL_TIME, null);
 			if(sm != null)
 				doSetMessageNext(sm, null);
@@ -1250,23 +1253,24 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			return createBlankMessage();
 		else
 			return createMessage(m, DMSMessagePriority.OPERATOR,
-				null);
+				DMSMessagePriority.OPERATOR, null);
 	}
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
-	 * @param p Activation priority.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, DMSMessagePriority p,
-		Integer d)
+	public SignMessage createMessage(String m, DMSMessagePriority ap,
+		DMSMessagePriority rp, Integer d)
 	{
 		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(this);
 		if(builder != null) {
 			MultiString multi = new MultiString(m);
 			multi.parse(builder, builder.getDefaultFontNumber());
 			BitmapGraphic[] pages = builder.getPixmaps();
-			return createMessageB(m, pages, p, d);
+			return createMessageB(m, pages, ap, rp, d);
 		} else
 			return null;
 	}
@@ -1274,11 +1278,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
 	 * @param pages Pre-rendered graphics for all pages.
-	 * @param p Activation priority.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMessage(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p, Integer d)
+		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
@@ -1291,12 +1296,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			bmaps[i] = new BitmapGraphic(w, h);
 			bmaps[i].copy(pages[i]);
 		}
-		return createMessageB(m, bmaps, p, d);
+		return createMessageB(m, bmaps, ap, rp, d);
 	}
 
 	/** Create a new message (B version) */
 	protected SignMessage createMessageB(String m, BitmapGraphic[] pages,
-		DMSMessagePriority p, Integer d)
+		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
 		int blen = pages[0].length();
 		byte[] bitmap = new byte[pages.length * blen];
@@ -1305,34 +1310,37 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			System.arraycopy(page, 0, bitmap, i * blen, blen);
 		}
 		String bitmaps = Base64.encode(bitmap);
-		return createMessage(m, bitmaps, p, d);
+		return createMessage(m, bitmaps, ap, rp, d);
 	}
 
 	/** Create a sign message */
 	protected SignMessage createMessage(final String m, final String b,
-		final DMSMessagePriority p, final Integer d)
+		DMSMessagePriority ap, DMSMessagePriority rp, final Integer d)
 	{
+		final int api = ap.ordinal();
+		final int rpi = rp.ordinal();
 		SignMessage esm = (SignMessage)namespace.findObject(
 			SignMessage.SONAR_TYPE, new Checker<SignMessage>()
 		{
 			public boolean check(SignMessage sm) {
 				return m.equals(sm.getMulti()) &&
 				       b.equals(sm.getBitmaps()) &&
-				       p.ordinal() == sm.getPriority() &&
+				       api == sm.getActivationPriority() &&
+				       rpi == sm.getRunTimePriority() &&
 				       d == sm.getDuration();
 			}
 		});
 		if(esm != null)
 			return esm;
 		else
-			return createMessageC(m, b, p, d);
+			return createMessageC(m, b, ap, rp, d);
 	}
 
 	/** Create a new sign message (C version) */
 	protected SignMessage createMessageC(String m, String b,
-		DMSMessagePriority p, Integer d)
+		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, b, p, d);
+		SignMessageImpl sm = new SignMessageImpl(m, b, ap, rp, d);
 		notifyNewSignMessage(sm);
 		return sm;
 	}

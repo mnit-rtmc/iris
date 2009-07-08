@@ -452,8 +452,8 @@ public class AwsMsg {
 		TMSException
 	{
 		String multi = createMultiString();
-		return dms.createMessage(multi, DMSMessagePriority.AWS,	
-			getSignMessageDuration());
+		return dms.createMessage(multi, DMSMessagePriority.AWS,
+			DMSMessagePriority.AWS, getSignMessageDuration());
 	}
 
 	/** toString */

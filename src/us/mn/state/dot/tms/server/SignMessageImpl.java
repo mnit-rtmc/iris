@@ -57,16 +57,18 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading sign messages...");
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
-		store.query("SELECT name, multi, bitmaps, priority, " +
-			"duration FROM iris.sign_message;", new ResultFactory()
+		store.query("SELECT name, multi, bitmaps, a_priority, " +
+			"r_priority, duration FROM iris.sign_message;",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(
 					row.getString(1),	// name
 					row.getString(2),	// multi
 					row.getString(3),	// bitmaps
-					row.getInt(4),		// priority
-					(Integer)row.getObject(5) // duration
+					row.getInt(4),		// a_priority
+					row.getInt(5),		// r_priority
+					(Integer)row.getObject(6) // duration
 				));
 			}
 		});
@@ -78,7 +80,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("name", name);
 		map.put("multi", multi);
 		map.put("bitmaps", bitmaps);
-		map.put("priority", priority);
+		map.put("a_priority", activationPriority);
+		map.put("r_priority", runTimePriority);
 		map.put("duration", duration);
 		return map;
 	}
@@ -99,24 +102,26 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a sign message */
-	protected SignMessageImpl(String n, String m, String b, int p,
+	protected SignMessageImpl(String n, String m, String b, int ap, int rp,
 		Integer d)
 	{
 		super(n);
 		multi = m;
 		bitmaps = b;
-		priority = p;
+		activationPriority = ap;
+		runTimePriority = rp;
 		duration = d;		
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, String b, DMSMessagePriority p,
-		Integer d)
+	public SignMessageImpl(String m, String b, DMSMessagePriority ap,
+		DMSMessagePriority rp, Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
 		bitmaps = b;
-		priority = p.ordinal();
+		activationPriority = ap.ordinal();
+		runTimePriority = rp.ordinal();
 		duration = d;
 	}
 
@@ -141,23 +146,23 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Message activation priority */
-	protected int priority;
+	protected int activationPriority;
 
-	/** Get the message priority.
+	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
-	public int getPriority() {
-		return priority;
+	public int getActivationPriority() {
+		return activationPriority;
 	}
 
-	/** Get the message run-time priority.
+	/** Run-time priority */
+	protected int runTimePriority;
+
+	/** Get the run-time priority.
 	 * @return Run-time priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	public int getRunTimePriority() {
-		if(SignMessageHelper.isBlank(this))
-			return DMSMessagePriority.BLANK.ordinal();
-		else
-			return getPriority();
+		return runTimePriority;
 	}
 
 	/** Duration of this message (minutes) */

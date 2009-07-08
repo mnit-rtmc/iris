@@ -86,7 +86,7 @@ abstract public class OpDms extends OpDevice {
 	public int getRetryThreshold(SignMessage sm) {
 		assert sm != null;
 		// if message is from AWS, use different retry threshold
-		if(DMSMessagePriority.fromOrdinal(sm.getPriority()) == 
+		if(DMSMessagePriority.fromOrdinal(sm.getRunTimePriority()) == 
 		   DMSMessagePriority.AWS)
 		{
 			return AwsMsgs.getRetryThreshold();

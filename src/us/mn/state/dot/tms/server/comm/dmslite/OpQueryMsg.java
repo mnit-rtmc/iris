@@ -213,7 +213,7 @@ public class OpQueryMsg extends OpDms {
 			"multistring=" + multi);
 
 		return (SignMessageImpl)m_dms.createMessage(multi, pages, pri,
-			duration);
+			pri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with 
@@ -411,7 +411,7 @@ public class OpQueryMsg extends OpDms {
 					}
 					SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
-						pri, duramins);
+						pri, pri, duramins);
 					if(sm != null)
 						m_dms.setMessageCurrent(sm, irisUser);
 
@@ -427,7 +427,7 @@ public class OpQueryMsg extends OpDms {
 					}
 					if(sm == null) {
 						sm = (SignMessageImpl)m_dms.createMessage("",
-							DMSMessagePriority.BLANK, null);
+							DMSMessagePriority.OVERRIDE, DMSMessagePriority.BLANK, null);
 						if(sm != null)
 							m_dms.setMessageCurrent(sm, irisUser);
 					}
