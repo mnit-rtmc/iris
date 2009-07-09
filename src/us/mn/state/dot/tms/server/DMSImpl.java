@@ -1518,16 +1518,26 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public void printXmlElement(PrintWriter out) {
 		// DMS name, e.g. CMS or DMS
 		final String DMSABBR = I18N.get("dms.abbreviation");
+		final User owner = getOwnerCurrent();	// Avoid race
+		final String user_note = getUserNote();	// Avoid race
+		final GeoLoc loc = getGeoLoc();		// Avoid race
 		out.print("<" + DMSABBR);
 		out.print(XmlWriter.createAttribute("id", getName()));
-		out.print(XmlWriter.createAttribute("status", DMSHelper.getAllStyles(this)));
-		if(getOwnerCurrent() != null)
-			out.print(XmlWriter.createAttribute("owner", getOwnerCurrent().getFullName()));
+		out.print(XmlWriter.createAttribute("status",
+			DMSHelper.getAllStyles(this)));
+		if(owner != null) {
+			out.print(XmlWriter.createAttribute("owner",
+				owner.getFullName()));
+		}
 		out.print(XmlWriter.createAttribute("notes", getNotes()));
-		if(getUserNote() != null)
-			out.print(XmlWriter.createAttribute("last_operation", getUserNote()));
-		if(getGeoLoc() != null)
-			out.print(XmlWriter.createAttribute("geoloc", getGeoLoc().getName()));
+		if(user_note != null) {
+			out.print(XmlWriter.createAttribute("last_operation",
+				user_note));
+		}
+		if(loc != null) {
+			out.print(XmlWriter.createAttribute("geoloc",
+				loc.getName()));
+		}
 		out.println(">");
 		SignMessageHelper.printXmlElement(getMessageCurrent(), out);
 		out.println("</" + DMSABBR + ">");
