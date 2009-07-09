@@ -28,12 +28,17 @@ public enum DMSMessagePriority {
 	BLANK,		/* 1: blank message run-time priority */
 	PSA,		/* 2: public service announcement */
 	TRAVEL_TIME,	/* 3: travel time priority */
-	SCHEDULED,	/* 4: scheduled priority (planned events) */
-	OTHER_SYSTEM,	/* 5: other system priority */
-	ALERT,		/* 6: alert priority (AMBER alerts, etc.) */
-	OPERATOR,	/* 7: operator priority */
-	AWS,		/* 8: automated warning system */
-	OVERRIDE;	/* 9: override priority */
+	SPEED_LIMIT,	/* 4: variable speed limit priority */
+	SCHEDULED,	/* 5: scheduled priority (planned events) */
+	OTHER_SYSTEM,	/* 6: other system priority */
+	ALERT,		/* 7: alert priority (AMBER alerts, etc.) */
+	OPERATOR,	/* 8: operator priority */
+	INCIDENT,	/* 9: incident priority */
+	INCIDENT_LOW,	/* 10: low-priority incident */
+	INCIDENT_MED,	/* 11: medium-priority incident */
+	INCIDENT_HIGH,	/* 12: high-priority incident */
+	AWS,		/* 13: automated warning system */
+	OVERRIDE;	/* 14: override priority */
 
 	/** Get a DMSMessagePriority from an ordinal value */
 	public static DMSMessagePriority fromOrdinal(int o) {
