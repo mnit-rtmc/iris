@@ -969,43 +969,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return ap == m.getRunTimePriority();
 	}
 
-	/** Send a DMS action to the sign */
-	public void sendAction(DmsAction da) {
-		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
-			da.getPriority());
-		if(checkPriority(ap.ordinal())) {
-			String m = createMulti(da.getQuickMessage());
-			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
-				da.getPriority());
-			SignMessage sm = createMessage(m, ap, rp, 2);
-			if(sm != null) {
-				try {
-					doSetMessageNext(sm, null);
-				}
-				catch(TMSException e) {
-					ACTION_LOG.log(getName() + ": " +
-						e.getMessage());
-				}
-			}
-		}
-	}
-
-	/** Create a MULTI string for a quick message */
-	protected String createMulti(QuickMessage qm) {
-		if(qm != null) {
-			try {
-				return replaceTravelTimes(qm.getMulti());
-			}
-			catch(InvalidMessageException e) {
-				if(RouteBuilder.TRAVEL_LOG.isOpen()) {
-					RouteBuilder.TRAVEL_LOG.log(
-						e.getMessage());
-				}
-			}
-		}
-		return "";
-	}
-
 	/** Send a sign message created by IRIS server */
 	public void sendMessage(SignMessage m) throws TMSException {
 		doSetMessageNext(m, null);
@@ -1278,6 +1241,43 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			// FIXME: we should do something more here...
 			e.printStackTrace();
 		}
+	}
+
+	/** Send a DMS action to the sign */
+	public void sendAction(DmsAction da) {
+		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+			da.getPriority());
+		if(checkPriority(ap.ordinal())) {
+			String m = createMulti(da.getQuickMessage());
+			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+				da.getPriority());
+			SignMessage sm = createMessage(m, ap, rp, 2);
+			if(sm != null) {
+				try {
+					doSetMessageNext(sm, null);
+				}
+				catch(TMSException e) {
+					ACTION_LOG.log(getName() + ": " +
+						e.getMessage());
+				}
+			}
+		}
+	}
+
+	/** Create a MULTI string for a quick message */
+	protected String createMulti(QuickMessage qm) {
+		if(qm != null) {
+			try {
+				return replaceTravelTimes(qm.getMulti());
+			}
+			catch(InvalidMessageException e) {
+				if(RouteBuilder.TRAVEL_LOG.isOpen()) {
+					RouteBuilder.TRAVEL_LOG.log(
+						e.getMessage());
+				}
+			}
+		}
+		return "";
 	}
 
 	/** Replace travel time tags in a MULTI string */
