@@ -339,12 +339,6 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
-		namespace.findObject(DMS.SONAR_TYPE, new Checker<DMSImpl>() {
-			public boolean check(DMSImpl s) {
-				s.updateTravelTime();
-				return false;
-			}
-		});
 		final int minute = minute_of_day();
 		TimeActionHelper.find(new Checker<TimeAction>() {
 			public boolean check(TimeAction ta) {

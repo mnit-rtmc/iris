@@ -256,10 +256,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 
 	/** Create a new timing plan */
 	protected void createPlan(String pdesc) {
-		if(pdesc.equals(TimingPlanType.TRAVEL.description)) {
-			if(device instanceof DMS)
-				create(TimingPlanType.TRAVEL);
-		} else if(pdesc.equals(TimingPlanType.SIMPLE.description)) {
+		if(pdesc.equals(TimingPlanType.SIMPLE.description)) {
 			if(device instanceof RampMeter)
 				create(TimingPlanType.SIMPLE);
 		} else if(pdesc.equals(TimingPlanType.STRATIFIED.description)) {

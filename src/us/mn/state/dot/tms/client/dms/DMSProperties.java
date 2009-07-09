@@ -130,18 +130,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Quick Library tab */
 	protected final QuickMessageEditorTab qlibTab;
 
-	/** Travel time template string field */
-	protected final JTextArea travel = new JTextArea(6, 24);
-
-	/** Timing plan table component */
-	protected final ZTable plan_table = new ZTable();
-
-	/** Timing plan model */
-	protected final TimingPlanModel plan_model;
-
-	/** Button to delete a timing plan */
-	protected final JButton deleteBtn = new JButton("Delete");
-
 	/** Sign type label */
 	protected final JLabel type = new JLabel();
 
@@ -276,7 +264,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		qlibTab = new QuickMessageEditorTab(
 			state.getDmsCache().getQuickMessages(), this,
 			state.getNamespace(), user);
-		plan_model = new TimingPlanModel(state.getTimingPlans(), sign);
 	}
 
 	/** Get the SONAR type cache */
@@ -290,7 +277,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
 		tab.add("Messages", messagesTab);
-		tab.add("Travel Time", createTravelTimePanel());
 		tab.add("Configuration", createConfigurationPanel());
 		tab.add("Status", createStatusPanel());
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
@@ -352,33 +338,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			session.getDesktop().show(
 				new ControllerForm(session, c));
 		}
-	}
-
-	/** Create the travel time panel */
-	protected JPanel createTravelTimePanel() {
-		final ListSelectionModel s = plan_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new FocusJob(travel) {
-			public void perform() {
-				proxy.setTravel(travel.getText());
-			}
-		};
-		new ActionJob(deleteBtn) {
-			public void perform() {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					plan_model.deleteRow(row);
-			}
-		};
-		plan_table.setAutoCreateColumnsFromModel(false);
-		plan_table.setModel(plan_model);
-		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
-		plan_table.setVisibleRowCount(4);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow("Travel template", travel);
-		panel.addRow(plan_table);
-		panel.addRow(deleteBtn);
-		return panel;
 	}
 
 	/** Create the configuration panel */
@@ -601,8 +560,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
 			camera.setSelectedItem(proxy.getCamera());
-		if(a == null || a.equals("travel"))
-			travel.setText(proxy.getTravel());
 		if(a == null || a.equals("make")) {
 			String m = formatString(proxy.getMake());
 			make.setText(m);

@@ -14,22 +14,13 @@
  */
 package us.mn.state.dot.tms.server;
 
-import us.mn.state.dot.tms.Device;
-
 /**
  * Timing plan state
  *
  * @author Douglas Lau
  */
-public class TimingPlanState {
+abstract public class TimingPlanState {
 
 	/** Validate a timing plan */
-	public void validate(TimingPlanImpl plan) {
-		Device device = plan.getDevice();
-		if(device instanceof DMSImpl) {
-			DMSImpl dms = (DMSImpl)device;
-			if(plan.isOperating())
-				dms.setTravelOperating(true);
-		}
-	}
+	abstract public void validate(TimingPlanImpl plan);
 }

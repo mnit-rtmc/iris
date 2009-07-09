@@ -100,8 +100,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		System.err.println("Loading DMS...");
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"travel, camera, aws_allowed, aws_controlled FROM " +
-			"iris." + SONAR_TYPE  + ";", new ResultFactory()
+			"camera, aws_allowed, aws_controlled FROM iris." +
+			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(namespace,
@@ -110,10 +110,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
 					row.getString(5),	// notes
-					row.getString(6),	// travel
-					row.getString(7),	// camera
-					row.getBoolean(8),	// aws_allowed
-					row.getBoolean(9)      // aws_controlled
+					row.getString(6),	// camera
+					row.getBoolean(7),	// aws_allowed
+					row.getBoolean(8)      // aws_controlled
 				));
 			}
 		});
@@ -127,7 +126,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("travel", travel);
 		map.put("camera", camera);
 		map.put("aws_allowed", awsAllowed);
 		map.put("aws_controlled", awsControlled);
@@ -154,11 +152,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, String t, Camera cam, boolean aa, boolean ac)
+		int p, String nt, Camera cam, boolean aa, boolean ac)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
-		travel = t;
 		camera = cam;
 		awsAllowed = aa;
 		awsControlled = ac;
@@ -167,11 +164,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a dynamic message sign */
 	protected DMSImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String t, String cam, boolean aa, boolean ac)
+		int p, String nt, String cam, boolean aa, boolean ac)
 	{
 		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
 		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, t, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
+		     p, nt, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
 		     aa, ac);
 	}
 
@@ -227,31 +224,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Get the device location */
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
-	}
-
-	/** Travel time message template */
-	protected String travel = "";
-
-	/** Set the travel time message template */
-	public void setTravel(String t) {
-		travel = t;
-		s_routes.clear();
-	}
-
-	/** Set the travel time message template */
-	public void doSetTravel(String t) throws TMSException {
-		if(t.equals(travel))
-			return;
-		MultiString multi = new MultiString(t);
-		if(!multi.isValid())
-			throw new ChangeVetoException("Invalid travel: " + t);
-		store.update(this, "travel", t);
-		setTravel(t);
-	}
-
-	/** Get the travel time message template */
-	public String getTravel() {
-		return travel;
 	}
 
 	/** Camera from which this can be seen */
@@ -1191,57 +1163,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Lookup recent brightness feedback sample data */
 	public void queryBrightnessFeedback(BrightnessSample.Handler h) {
 		// FIXME: lookup samples in database
-	}
-
-	/** Flag to indicate if a travel time plan is operating */
-	protected boolean travelOperating = false;
-
-	/** Set the travel time operating flag */
-	public void setTravelOperating(boolean o) {
-		travelOperating = o;
-	}
-
-	/** Update the travel times for this sign */
-	public void updateTravelTime() {
-		if(travelOperating)
-			sendTravelTime();
-		else
-			clearTravelTime();
-		setTravelOperating(false);
-	}
-
-	/** Send a travel time message to the sign */
-	protected void sendTravelTime() {
-		try {
-			sendTravelTime(replaceTravelTimes(travel));
-		}
-		catch(InvalidMessageException e) {
-			if(RouteBuilder.TRAVEL_LOG.isOpen())
-				RouteBuilder.TRAVEL_LOG.log(e.getMessage());
-			sendTravelTime("");
-		}
-	}
-
-	/** Clear the travel time for this sign */
-	protected void clearTravelTime() {
-		s_routes.clear();
-		sendTravelTime("");
-	}
-
-	/** Send a new travel time message */
-	protected void sendTravelTime(String t) {
-		if(!checkPriority(DMSMessagePriority.TRAVEL_TIME.ordinal()))
-			return;
-		try {
-			SignMessage sm = createMessage(t,
-				DMSMessagePriority.TRAVEL_TIME,
-				DMSMessagePriority.TRAVEL_TIME, null);
-			if(sm != null)
-				doSetMessageNext(sm, null);
-		}
-		catch(Exception e) {
-			RouteBuilder.TRAVEL_LOG.log(e.getMessage());
-		}
 	}
 
 	/** Create a message for the sign.

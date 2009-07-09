@@ -531,7 +531,6 @@ CREATE TABLE iris._dms (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES geo_loc,
 	notes text NOT NULL,
-	travel text NOT NULL,
 	camera VARCHAR(10) REFERENCES iris._camera,
 	aws_allowed BOOLEAN NOT NULL,
 	aws_controlled BOOLEAN NOT NULL
@@ -541,7 +540,7 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.dms AS SELECT
-	d.name, geo_loc, controller, pin, notes, travel, camera, aws_allowed,
+	d.name, geo_loc, controller, pin, notes, camera, aws_allowed,
 	aws_controlled
 	FROM iris._dms dms JOIN iris._device_io d ON dms.name = d.name;
 
@@ -549,7 +548,7 @@ CREATE RULE dms_insert AS ON INSERT TO iris.dms DO INSTEAD
 (
 	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._dms VALUES (NEW.name, NEW.geo_loc, NEW.notes,
-		NEW.travel, NEW.camera, NEW.aws_allowed, NEW.aws_controlled);
+		NEW.camera, NEW.aws_allowed, NEW.aws_controlled);
 );
 
 CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
@@ -561,7 +560,6 @@ CREATE RULE dms_update AS ON UPDATE TO iris.dms DO INSTEAD
 	UPDATE iris._dms SET
 		geo_loc = NEW.geo_loc,
 		notes = NEW.notes,
-		travel = NEW.travel,
 		camera = NEW.camera,
 		aws_allowed = NEW.aws_allowed,
 		aws_controlled = NEW.aws_controlled
@@ -825,8 +823,8 @@ CREATE VIEW alarm_view AS
 GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.travel,
-	d.camera, d.aws_allowed, d.aws_controlled,
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.camera,
+	d.aws_allowed, d.aws_controlled,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	l.easting, l.east_off, l.northing, l.north_off
 	FROM iris.dms d

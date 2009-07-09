@@ -23,8 +23,8 @@ import java.util.LinkedList;
  */
 public enum TimingPlanType {
 
-	/** Travel time timing plan */
-	TRAVEL("Travel Time"),
+	/** Invalid timing plan (was Travel Time) */
+	INVALID("Invalid"),
 
 	/** Simple metering plan */
 	SIMPLE("Simple Metering"),
@@ -46,7 +46,7 @@ public enum TimingPlanType {
 			if(t.ordinal() == o)
 				return t;
 		}
-		return TRAVEL;
+		return INVALID;
 	}
 
 	/** Get an array of timing plan type descriptions */

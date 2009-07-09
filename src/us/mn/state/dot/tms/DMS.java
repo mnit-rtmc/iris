@@ -29,12 +29,6 @@ public interface DMS extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
-	/** Set the travel time message template */
-	void setTravel(String t);
-
-	/** Get the travel time message template */
-	String getTravel();
-
 	/** Set verification camera */
 	void setCamera(Camera c);
 

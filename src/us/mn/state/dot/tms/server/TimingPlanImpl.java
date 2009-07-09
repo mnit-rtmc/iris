@@ -361,8 +361,6 @@ public class TimingPlanImpl extends BaseObjectImpl implements TimingPlan {
 	/** Create the timing plan state */
 	protected TimingPlanState createState() {
 		switch(TimingPlanType.fromOrdinal(plan_type)) {
-		case TRAVEL:
-			return new TimingPlanState();
 		case SIMPLE:
 			return new SimplePlanState();
 		case STRATIFIED:
