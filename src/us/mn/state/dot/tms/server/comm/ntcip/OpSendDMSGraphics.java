@@ -322,7 +322,11 @@ public class OpSendDMSGraphics extends OpDMS {
 			type.setEnum(DmsColorScheme.Enum.fromBpp(
 				graphic.getBpp()));
 			trans_enabled.setInteger(1);
-			trans_color.setOctetString(new byte[] { 1, 0, 1 });
+			if(graphic.getBpp() == 24) {
+				trans_color.setOctetString(
+					new byte[] { 0, 0, 0 });
+			} else
+				trans_color.setOctetString(new byte[] { 0 });
 			mess.add(number);
 			mess.add(name);
 			mess.add(height);
