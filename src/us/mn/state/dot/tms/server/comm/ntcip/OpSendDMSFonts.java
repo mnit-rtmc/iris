@@ -212,7 +212,10 @@ public class OpSendDMSFonts extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + version);
 			if(isVersionIDCorrect(v)) {
 				DMS_LOG.log(dms.getName() + ": Font is valid");
-				return nextFontPhase();
+				if(first)
+					return new SetDefaultFont();
+				else
+					return nextFontPhase();
 			} else {
 				if(version2)
 					return new QueryInitialStatus();
