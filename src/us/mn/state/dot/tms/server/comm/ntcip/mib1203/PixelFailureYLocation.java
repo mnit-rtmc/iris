@@ -24,8 +24,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 public class PixelFailureYLocation extends ASN1Integer {
 
 	/** Create a new pixel failure Y location object */
-	public PixelFailureYLocation(int row) {
+	public PixelFailureYLocation(PixelFailureDetectionType.Enum t, int row){
 		super(MIB1203.pixelFailureEntry.create(new int[] {4,
-		      PixelFailureDetectionType.Enum.pixelTest.ordinal(),row}));
+		      t.ordinal(), row}));
 	}
 }

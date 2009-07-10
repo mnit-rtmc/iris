@@ -43,8 +43,16 @@ public class OpTestDMSPixels extends OpDMS {
 	protected final BitmapGraphic stuck_off;
 
 	/** Number of rows in pixel failure table */
-	protected final PixelFailureTableNumRows rows =
+	protected final PixelFailureTableNumRows total_rows =
 		new PixelFailureTableNumRows();
+
+	/** Number of rows in pixel failure table found by pixel testing */
+	protected final DmsPixelFailureTestRows test_rows =
+		new DmsPixelFailureTestRows();
+
+	/** Number of rows in pixel failure table found by message display */
+	protected final DmsPixelFailureMessageRows message_rows =
+		new DmsPixelFailureMessageRows();
 
 	/** Create a new test DMS pixel operation */
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
@@ -65,7 +73,7 @@ public class OpTestDMSPixels extends OpDMS {
 		if(perform_test)
 			return new QueryTestStatus();
 		else
-			return new QueryRows();
+			return new QueryRowCount();
 	}
 
 	/** Phase to query the status of pixel test activation */
@@ -115,45 +123,95 @@ public class OpTestDMSPixels extends OpDMS {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + test);
 			if(test.getEnum() == PixelTestActivation.Enum.noTest)
-				return new QueryRows();
+				return new QueryRowCount();
 			if(System.currentTimeMillis() > expire) {
 				DMS_LOG.log(dms.getName() + ": pixel test " +
 					"timeout expired -- giving up");
-				return new QueryRows();
+				return new QueryRowCount();
 			} else
 				return this;
 		}
 	}
 
-	/** Phase to query the rows in the pixel failure table */
-	protected class QueryRows extends Phase {
+	/** Phase to query the row count in the pixel failure table */
+	protected class QueryRowCount extends Phase {
 
-		/** Query the rows in pixel failure table */
+		/** Query the row count in pixel failure table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(rows);
+			mess.add(total_rows);
 			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + rows);
-			if(rows.getInteger() > 0)
-				return new QueryNextRow();
+			DMS_LOG.log(dms.getName() + ": " + total_rows);
+			if(total_rows.getInteger() > 0)
+				return new QueryTestAndMessageRows();
 			else
 				return null;
 		}
 	}
 
-	/** Phase to query the next row in the pixel failure table */
-	protected class QueryNextRow extends Phase {
+	/** Phase to query (v2) test/message rows in pixel failure table */
+	protected class QueryTestAndMessageRows extends Phase {
+
+		/** Query test/message rows in pixel failure table */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(test_rows);
+			mess.add(message_rows);
+			try {
+				mess.getRequest();
+				DMS_LOG.log(dms.getName() + ": " + test_rows);
+				DMS_LOG.log(dms.getName() + ": " +message_rows);
+			}
+			catch(SNMP.Message.NoSuchName e) {
+				// Must be 1203v1 only, so assume all the
+				// rows are pixelTest and hope for the best
+				test_rows.setInteger(total_rows.getInteger());
+				message_rows.setInteger(0);
+			}
+			if(test_rows.getInteger() > 0) {
+				return new QueryRows(PixelFailureDetectionType.
+					Enum.pixelTest);
+			} else if(message_rows.getInteger() > 0) {
+				return new QueryRows(PixelFailureDetectionType.
+					Enum.messageDisplay);
+			} else
+				return null;
+		}
+	}
+
+	/** Phase to query rows in the pixel failure table */
+	protected class QueryRows extends Phase {
+
+		/** Detection type */
+		protected final PixelFailureDetectionType.Enum detectionType;
+
+		/** Number of rows to query */
+		protected final int n_rows;
 
 		/** Row to query */
 		protected int row = 1;
 
-		/** Add a character to the font table */
+		/** Create a new phase to query the rows */
+		public QueryRows(PixelFailureDetectionType.Enum dt) {
+			detectionType = dt;
+			if(isPixelTest())
+				n_rows = test_rows.getInteger();
+			else
+				n_rows = message_rows.getInteger();
+		}
+
+		/** Is this phase querying pixel test rows? */
+		protected boolean isPixelTest() {
+			return detectionType ==
+			       PixelFailureDetectionType.Enum.pixelTest;
+		}
+
+		/** Query one row in the pixel failure table */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			PixelFailureXLocation x_loc =
-				new PixelFailureXLocation(row);
-			PixelFailureYLocation y_loc =
-				new PixelFailureYLocation(row);
-			PixelFailureStatus status =
-				new PixelFailureStatus(row);
+			PixelFailureXLocation x_loc = new PixelFailureXLocation(
+				detectionType, row);
+			PixelFailureYLocation y_loc = new PixelFailureYLocation(
+				detectionType, row);
+			PixelFailureStatus status = new PixelFailureStatus(
+				detectionType, row);
 			mess.add(x_loc);
 			mess.add(y_loc);
 			mess.add(status);
@@ -173,9 +231,12 @@ public class OpTestDMSPixels extends OpDMS {
 				// Ignore; configuration has not been read yet
 			}
 			row++;
-			if(row <= rows.getInteger())
+			if(row <= n_rows)
 				return this;
-			else
+			else if(isPixelTest() && message_rows.getInteger() > 0){
+				return new QueryRows(PixelFailureDetectionType.
+					Enum.messageDisplay);
+			} else
 				return null;
 		}
 	}
@@ -189,9 +250,9 @@ public class OpTestDMSPixels extends OpDMS {
 			status[DMS.STUCK_ON_BITMAP] =
 				Base64.encode(stuck_on.getPixels());
 			dms.setPixelStatus(status);
-			if(rows.getInteger() > REPORT_PIXEL_ERROR_COUNT) {
+			if(total_rows.getInteger() > REPORT_PIXEL_ERROR_COUNT) {
 				errorStatus = "Too many pixel errors: " +
-					rows.getInteger();
+					total_rows.getInteger();
 			}
 		}
 		super.cleanup();

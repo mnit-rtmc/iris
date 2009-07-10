@@ -42,9 +42,9 @@ public class PixelFailureStatus extends ASN1Integer {
 	static public final int PARTIAL_FAILURE = 1 << 5;
 
 	/** Create a new pixel failure status object */
-	public PixelFailureStatus(int row) {
+	public PixelFailureStatus(PixelFailureDetectionType.Enum t, int row) {
 		super(MIB1203.pixelFailureEntry.create(new int[] {5,
-		      PixelFailureDetectionType.Enum.pixelTest.ordinal(),row}));
+		      t.ordinal(), row}));
 	}
 
 	/** Test if the pixel is stuck on */

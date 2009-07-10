@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,15 +17,16 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 
 /**
- * PixelFailureIndex
+ * The DmsPixelFailureMessageRows object indicates the number of rows in the
+ * pixel failure table which have a pixelFailureDetectionType of
+ * 'messageDisplay'.  This object was added in NTCIP 1203 v2.
  *
  * @author Douglas Lau
  */
-public class PixelFailureIndex extends ASN1Integer {
+public class DmsPixelFailureMessageRows extends ASN1Integer {
 
-	/** Create a new pixel failure index object */
-	public PixelFailureIndex(PixelFailureDetectionType.Enum t, int row) {
-		super(MIB1203.pixelFailureEntry.create(new int[] {2,
-		      t.ordinal(), row}));
+	/** Create a new DmsPixelFailureMessageRows object */
+	public DmsPixelFailureMessageRows() {
+		super(MIB1203.statError.create(new int[] {20, 0}));
 	}
 }
