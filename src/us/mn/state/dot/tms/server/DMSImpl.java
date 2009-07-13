@@ -814,14 +814,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	protected transient SignMessage messageNext;
 
 	/** Set the next sign message */
-	public void setMessageNext(SignMessage m) {
-		messageNext = m;
+	public void setMessageNext(SignMessage sm) {
+		messageNext = sm;
 	}
 
 	/** Set the next sign message */
-	public void doSetMessageNext(SignMessage m) throws TMSException {
+	public void doSetMessageNext(SignMessage sm) throws TMSException {
 		try {
-			doSetMessageNext(m, ownerNext);
+			doSetMessageNext(sm, ownerNext);
 		}
 		finally {
 			// Clear the owner even if there was an exception
@@ -830,7 +830,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Set the next sign message */
-	protected synchronized void doSetMessageNext(SignMessage m, User o)
+	protected synchronized void doSetMessageNext(SignMessage sm, User o)
 		throws TMSException
 	{
 		final DMSPoller p = getDMSPoller();
@@ -838,16 +838,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		MultiString multi = new MultiString(m.getMulti());
+		MultiString multi = new MultiString(sm.getMulti());
 		if(!multi.isValid()) {
 			throw new InvalidMessageException(name +
-				": INVALID MESSAGE, " + m.getMulti());
+				": INVALID MESSAGE, " + sm.getMulti());
 		}
-		int ap = m.getActivationPriority();
-		if(!checkPriority(m)) {
+		if(!checkPriority(sm)) {
 			throw new ChangeVetoException(name +
 				": PRIORITY TOO LOW");
 		}
+		int ap = sm.getActivationPriority();
 		if(ap != DMSMessagePriority.OVERRIDE.ordinal()) {
 			// NOTE: only send a "blank" message if activation
 			//       priority matches current runtime priority.
@@ -860,9 +860,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			// Clear travel time route cache
 			s_routes.clear();
 		}
-		validateBitmaps(m);
-		p.sendMessage(this, m, o);
-		setMessageNext(m);
+		validateBitmaps(sm);
+		p.sendMessage(this, sm, o);
+		setMessageNext(sm);
 	}
 
 	/** Check if activation priority should allow blanking the sign.
@@ -874,11 +874,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(SignMessage m)
+	protected void validateBitmaps(SignMessage sm)
 		throws ChangeVetoException
 	{
 		try {
-			validateBitmaps(m.getBitmaps());
+			validateBitmaps(sm.getBitmaps());
 		}
 		catch(IOException e) {
 			throw new ChangeVetoException("Base64 decode error");
@@ -979,8 +979,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Send a sign message created by IRIS server */
-	public void sendMessage(SignMessage m) throws TMSException {
-		doSetMessageNext(m, null);
+	public void sendMessage(SignMessage sm) throws TMSException {
+		doSetMessageNext(sm, null);
 	}
 
 	/** Current message (Shall not be null) */
@@ -988,12 +988,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		createBlankMessage();
 
 	/** Set the current message */
-	public void setMessageCurrent(SignMessage m, User o) {
-		if(m.equals(messageCurrent))
+	public void setMessageCurrent(SignMessage sm, User o) {
+		if(sm.equals(messageCurrent))
 			return;
-		logMessage(m, o);
+		logMessage(sm, o);
 		setDeployTime();
-		messageCurrent = m;
+		messageCurrent = sm;
 		notifyAttribute("messageCurrent");
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
@@ -1018,10 +1018,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Log a message */
-	protected void logMessage(SignMessage m, User o) {
+	protected void logMessage(SignMessage sm, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
-		String text = m.getMulti();
-		if(SignMessageHelper.isBlank(m)) {
+		String text = sm.getMulti();
+		if(SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
@@ -1313,18 +1313,18 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 						": NO ROUTE TO " + sid);
 				}
 				boolean final_dest = isFinalDest(r);
-				int m = calculateTravelTime(r, final_dest);
+				int mn = calculateTravelTime(r, final_dest);
 				int slow = maximumTripMinutes(r.getLength());
-				boolean over = m > slow;
+				boolean over = mn > slow;
 				if(over) {
 					any_over = true;
-					m = slow;
+					mn = slow;
 				}
 				if(over || all_over) {
-					m = roundUp5Min(m);
-					return "OVER " + String.valueOf(m);
+					mn = roundUp5Min(mn);
+					return "OVER " + String.valueOf(mn);
 				} else
-					return String.valueOf(m);
+					return String.valueOf(mn);
 			}
 
 			/** Check if the callback has changed formatting mode */
