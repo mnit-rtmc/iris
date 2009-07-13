@@ -843,7 +843,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
 		}
-		if(!checkPriority(sm)) {
+		if(!shouldActivate(sm)) {
 			throw new ChangeVetoException(name +
 				": PRIORITY TOO LOW");
 		}
@@ -954,28 +954,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException("Width/height is null");
 	}
 
-	/** Check if a message has priority over existing messages.
+	/** Check if a message should be activated based on priority.
 	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
-	public boolean checkPriority(SignMessage sm) {
-		return checkCurrentPriority(sm) && checkNextPriority(sm);
-	}
-
-	/** Check if a message has priority over "current" message.
-	 * @param sm SignMessage being activated.
-	 * @return true If priority is high enough to deploy. */
-	protected boolean checkCurrentPriority(SignMessage sm) {
-		return sm.getActivationPriority() >=
-		       messageCurrent.getRunTimePriority();
-	}
-
-	/** Check if a message has priority over "next" message.
-	 * @param sm SignMessage being activated.
-	 * @return true If priority is high enough to deploy. */
-	protected boolean checkNextPriority(SignMessage sm) {
-		SignMessage mn = messageNext;
-		return mn == null || sm.getActivationPriority() >=
-		       mn.getRunTimePriority();
+	public boolean shouldActivate(SignMessage sm) {
+		return SignMessageHelper.shouldActivate(messageCurrent, sm) &&
+		       SignMessageHelper.shouldActivate(messageNext, sm);
 	}
 
 	/** Send a sign message created by IRIS server */
@@ -1291,7 +1275,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			da.getPriority());
 		String m = createMulti(da.getQuickMessage());
 		SignMessage sm = createMessage(m, p, p, true, 2);
-		if(sm != null && checkPriority(sm)) {
+		if(sm != null && shouldActivate(sm)) {
 			try {
 				doSetMessageNext(sm, null);
 			}

@@ -53,7 +53,7 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		if(dms.checkPriority(message))
+		if(dms.shouldActivate(message))
 			return new ModifyRequest();
 		else
 			return null;

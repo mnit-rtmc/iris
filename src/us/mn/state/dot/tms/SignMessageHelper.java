@@ -121,6 +121,20 @@ public class SignMessageHelper extends BaseHelper {
 		}
 	}
 
+	/** Test if a sign message should be activated */
+	static public boolean shouldActivate(final SignMessage existing,
+		final SignMessage activating)
+	{
+		if(existing == null)
+			return true;
+		if(activating == null)
+			return false;
+		if(existing.getScheduled() && activating.getScheduled())
+			return true;
+		return activating.getActivationPriority() >=
+		       existing.getRunTimePriority();
+	}
+
 	/** Render the SignMessage object as xml */
 	static public void printXmlElement(SignMessage sm, PrintWriter out) {
 		if(isBlank(sm))
