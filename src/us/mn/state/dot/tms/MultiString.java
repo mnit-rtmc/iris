@@ -116,6 +116,16 @@ public class MultiString {
 			mss.addGraphic(g_num, x, y, g_id);
 	}
 
+	/** Parse page times form a [pt.o.] tag.
+	 * @param v Page time tag value.
+	 * @param mss Callback to set page times. */
+	static protected void parsePageTimes(String v, MultiStringState mss) {
+		String[] args = v.split("o", 2);
+		Integer pt_on = parseInt(args, 0);
+		Integer pt_off = parseInt(args, 1);
+		mss.setPageTimes(pt_on, pt_off);
+	}
+
 	/** Parse an integer value */
 	static protected Integer parseInt(String[] args, int n) {
 		try {
@@ -175,8 +185,8 @@ public class MultiString {
 	}
 
 	/** Set page times.
-	 * @param pt_on Page on-time in tenths of a second.
-	 * @param pt_off Page off-time in tenths of a second. */
+	 * @param pt_on Page on-time (tenths of second; null for default).
+	 * @param pt_off Page off-time (tenths of second; null for default). */
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
 		b.append("[pt");
 		if(pt_on != null)
@@ -308,15 +318,8 @@ public class MultiString {
 				String v = m.group(2);
 				parseGraphic(v, cb);
 			} else if(tag.startsWith("pt")) {
-				Integer pt_on = null;
-				Integer pt_off = null;
-				String v = m.group(2); // e.g. 25o6
-				String[] t = v.split("o", 2);
-				if(t.length >= 1 && t[0].length() > 0)
-					pt_on = SString.stringToInt(t[0]);
-				if(t.length >= 2 && t[1].length() > 0)
-					pt_off = SString.stringToInt(t[1]);
-				cb.setPageTimes(pt_on, pt_off);
+				String v = m.group(2);
+				parsePageTimes(v, cb);
 			} else if(tag.startsWith("tr")) {
 				// FIXME: complete
 			}
