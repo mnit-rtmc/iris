@@ -957,24 +957,24 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @param ap Activation priority of new message.
 	 * @return true If priority is high enough to deploy. */
 	protected boolean checkCurrentPriority(int ap) {
-		SignMessageImpl m = (SignMessageImpl)messageCurrent;
-		return ap >= m.getRunTimePriority();
+		SignMessage sm = messageCurrent;
+		return ap >= sm.getRunTimePriority();
 	}
 
 	/** Check if a message has priority over "next" message.
 	 * @param ap Activation priority of new message.
 	 * @return true If priority is high enough to deploy. */
 	protected boolean checkNextPriority(int ap) {
-		SignMessageImpl n = (SignMessageImpl)messageNext;
-		return n == null || ap >= n.getRunTimePriority();
+		SignMessage sm = messageNext;
+		return sm == null || ap >= sm.getRunTimePriority();
 	}
 
 	/** Check if activation priority should allow blanking the sign.
 	 * @param ap Activation priority of new message.
 	 * @return true If current message should be blanked. */
 	protected boolean checkPriorityBlank(int ap) {
-		SignMessageImpl m = (SignMessageImpl)messageCurrent;
-		return ap == m.getRunTimePriority();
+		SignMessage sm = messageCurrent;
+		return ap == sm.getRunTimePriority();
 	}
 
 	/** Send a sign message created by IRIS server */
