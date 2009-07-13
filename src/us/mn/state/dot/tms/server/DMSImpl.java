@@ -843,6 +843,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				": PRIORITY TOO LOW");
 		}
 		MultiString multi = new MultiString(sm.getMulti());
+		SignMessage sched = messageSched;	// Avoid race
+		if(multi.isBlank() && sched != null) {
+			// Don't blank the sign if there's a scheduled message
+			// -- send the scheduled message instead.
+			sm = sched;
+			o = null;
+			multi = new MultiString(sm.getMulti());
+		}
 		if(!multi.isValid()) {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
