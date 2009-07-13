@@ -284,34 +284,28 @@ public class MultiString {
 	public void parse(MultiStringState cb, int f_num, 
 		int dpont, int dpofft) 
 	{
-		int page = 0;
-		JustificationPage justp = JustificationPage.fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
-		int line = 0;
-		JustificationLine justl = JustificationLine.fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
 		int offset = 0;
 		Matcher m = TAG.matcher(b);
 		while(m.find()) {
 			if(m.start() > offset) {
 				String span = b.substring(offset, m.start());
-				cb.setFields(page, justp, line, justl, f_num, 
-					span, dpont, dpofft);
+				cb.setFields(f_num, span, dpont, dpofft);
 				cb.spanComplete();
 			}
 			offset = m.end();
 			String tag = m.group(1);
 			if(tag.equals("nl"))
-				line++;
-			else if(tag.equals("np")) {
-				line = 0;
-				page++;
-			} else if(tag.equals("jl")) {
+				cb.addLine();
+			else if(tag.equals("np"))
+				cb.addPage();
+			else if(tag.equals("jl")) {
 				String v = m.group(2);
-				justl = JustificationLine.parse(v);
+				cb.setLineJustification(
+					JustificationLine.parse(v));
 			} else if(tag.equals("jp")) {
 				String v = m.group(2);
-				justp = JustificationPage.parse(v);
+				cb.setPageJustification(
+					JustificationPage.parse(v));
 			} else if(tag.equals("fo")) {
 				String v = m.group(2);
 				f_num = parseFont(v);
@@ -336,8 +330,7 @@ public class MultiString {
 			// FIXME: cleanup, replace setFields(...) call with 
 			//        calls to specific methods in else blocks 
 			//	  above.
-			cb.setFields(page, justp, line, justl, f_num, span, 
-				dpont, dpofft);
+			cb.setFields(f_num, span, dpont, dpofft);
 			cb.spanComplete();
 		}
 	}

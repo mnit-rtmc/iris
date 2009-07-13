@@ -22,21 +22,27 @@ package us.mn.state.dot.tms;
  */
 public interface MultiStringState {
 
-	/** Called by parse methods to indicate span update is complete. */
-	public void spanComplete();
+	/** Add a page */
+	void addPage();
+
+	/** Set the page justification */
+	void setPageJustification(MultiString.JustificationPage jp);
+
+	/** Add a line */
+	void addLine();
+
+	/** Set the line justification */
+	void setLineJustification(MultiString.JustificationLine jl);
+
+	/** Called by parse methods to indicate span update is complete */
+	void spanComplete();
 
 	/** Set multiple span fields.
-	 *  @param page Page number, zero based.
-	 *  @param justp Page justification.
-	 *  @param line Line number, zero based.
-	 *  @param justl Line justification.
 	 *  @param f_num Font number, one based.
 	 *  @param span Message text.
 	 *  @param pont Page on time, 1/10 secs.
 	 *  @param pofft Page off time, 1/10 secs. */
-	void setFields(int page, MultiString.JustificationPage justp, 
-		int line, MultiString.JustificationLine justl,
-		int f_num, String span, int pont, int pofft);
+	void setFields(int f_num, String span, int pont, int pofft);
 
 	/** add graphic info */
 	void addGraphic(int g_num, int x, int y);

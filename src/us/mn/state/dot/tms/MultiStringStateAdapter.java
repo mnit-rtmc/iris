@@ -23,58 +23,71 @@ package us.mn.state.dot.tms;
  * @author Michael Darter
  * @author Douglas Lau
  */
-abstract public class MultiStringStateAdapter 
-	implements MultiStringState
-{
+abstract public class MultiStringStateAdapter implements MultiStringState {
+
 	/** Page number, zero based */
-	protected int ms_page;
+	protected int ms_page = 0;
 
-	/* Page justification */
-	protected MultiString.JustificationPage ms_justp;
+	/** Add a page */
+	public void addPage() {
+		ms_page++;
+		ms_line = 0;
+	}
 
-	/* Line number on page, zero based */
-	protected int ms_line;
+	/** Page justification */
+	protected MultiString.JustificationPage ms_justp =
+		MultiString.JustificationPage.fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 
-	/* Line justification */
-	protected MultiString.JustificationLine ms_justl;
+	/** Set the page justification */
+	public void setPageJustification(MultiString.JustificationPage jp) {
+		ms_justp = jp;
+	}
 
-	/* Font number */
+	/** Line number on page, zero based */
+	protected int ms_line = 0;
+
+	/** Add a line */
+	public void addLine() {
+		ms_line++;
+	}
+
+	/** Line justification */
+	protected MultiString.JustificationLine ms_justl =
+		MultiString.JustificationLine.fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+
+	/** Set the line justification */
+	public void setLineJustification(MultiString.JustificationLine jl) {
+		ms_justl = jl;
+	}
+
+	/** Font number */
 	protected int ms_fnum;
 
-	/* Span text */
+	/** Span text */
 	protected String ms_span;
 
-	/* Page on-time in tenths */
+	/** Page on-time in tenths */
 	protected int ms_pont;
 
-	/* Page off-time in tenths */
+	/** Page off-time in tenths */
 	protected int ms_pofft;
 
 	/* Set multiple span fields.
-	 * @param page Page number, zero based.
-	 * @param justp Page justification.
-	 * @param line Line number, zero based.
-	 * @param justl Line justification.
 	 * @param f_num Font number, one based.
 	 * @param span Message text.
 	 * @param pont Page on time, 1/10 secs.
 	 * @param pofft Page off time, 1/10 secs. */
 	// FIXME: remove this method and use setters for each field
-	public void setFields(int page, MultiString.JustificationPage justp, 
-		int line, MultiString.JustificationLine justl,
-		int fnum, String span, int pont, int pofft)
-	{
-		ms_page = page;
-		ms_justp = justp;
-		ms_line = line;
-		ms_justl = justl;
+	public void setFields(int fnum, String span, int pont, int pofft) {
 		ms_fnum = fnum;
 		ms_span = span;
 		ms_pont = pont;
 		ms_pofft = pofft;
 	}
 
-	/** Add graphic tag fields. */
+	/** Add graphic tag fields */
 	public void addGraphic(int g_num, int x, int y) {
 	}
 }
