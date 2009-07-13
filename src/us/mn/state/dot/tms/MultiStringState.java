@@ -34,15 +34,17 @@ public interface MultiStringState {
 	/** Set the line justification */
 	void setLineJustification(MultiString.JustificationLine jl);
 
+	/** Set the font number */
+	void setFont(int fn);
+
 	/** Called by parse methods to indicate span update is complete */
 	void spanComplete();
 
 	/** Set multiple span fields.
-	 *  @param f_num Font number, one based.
 	 *  @param span Message text.
 	 *  @param pont Page on time, 1/10 secs.
 	 *  @param pofft Page off time, 1/10 secs. */
-	void setFields(int f_num, String span, int pont, int pofft);
+	void setFields(String span, int pont, int pofft);
 
 	/** add graphic info */
 	void addGraphic(int g_num, int x, int y);

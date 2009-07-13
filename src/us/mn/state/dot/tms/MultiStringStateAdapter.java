@@ -23,10 +23,10 @@ package us.mn.state.dot.tms;
  * @author Michael Darter
  * @author Douglas Lau
  */
-abstract public class MultiStringStateAdapter implements MultiStringState {
+public class MultiStringStateAdapter implements MultiStringState {
 
 	/** Page number, zero based */
-	protected int ms_page = 0;
+	protected int ms_page;
 
 	/** Add a page */
 	public void addPage() {
@@ -35,9 +35,7 @@ abstract public class MultiStringStateAdapter implements MultiStringState {
 	}
 
 	/** Page justification */
-	protected MultiString.JustificationPage ms_justp =
-		MultiString.JustificationPage.fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+	protected MultiString.JustificationPage ms_justp;
 
 	/** Set the page justification */
 	public void setPageJustification(MultiString.JustificationPage jp) {
@@ -45,7 +43,7 @@ abstract public class MultiStringStateAdapter implements MultiStringState {
 	}
 
 	/** Line number on page, zero based */
-	protected int ms_line = 0;
+	protected int ms_line;
 
 	/** Add a line */
 	public void addLine() {
@@ -53,9 +51,7 @@ abstract public class MultiStringStateAdapter implements MultiStringState {
 	}
 
 	/** Line justification */
-	protected MultiString.JustificationLine ms_justl =
-		MultiString.JustificationLine.fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+	protected MultiString.JustificationLine ms_justl;
 
 	/** Set the line justification */
 	public void setLineJustification(MultiString.JustificationLine jl) {
@@ -64,6 +60,11 @@ abstract public class MultiStringStateAdapter implements MultiStringState {
 
 	/** Font number */
 	protected int ms_fnum;
+
+	/** Set the font number */
+	public void setFont(int fn) {
+		ms_fnum = fn;
+	}
 
 	/** Span text */
 	protected String ms_span;
@@ -74,17 +75,30 @@ abstract public class MultiStringStateAdapter implements MultiStringState {
 	/** Page off-time in tenths */
 	protected int ms_pofft;
 
+	/** Create a new MULTI string adapter */
+	public MultiStringStateAdapter() {
+		ms_page = 0;
+		ms_justp = MultiString.JustificationPage.fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+		ms_line = 0;
+		ms_justl = MultiString.JustificationLine.fromOrdinal(
+			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+		ms_fnum = 0;
+	}
+
 	/* Set multiple span fields.
-	 * @param f_num Font number, one based.
 	 * @param span Message text.
 	 * @param pont Page on time, 1/10 secs.
 	 * @param pofft Page off time, 1/10 secs. */
 	// FIXME: remove this method and use setters for each field
-	public void setFields(int fnum, String span, int pont, int pofft) {
-		ms_fnum = fnum;
+	public void setFields(String span, int pont, int pofft) {
 		ms_span = span;
 		ms_pont = pont;
 		ms_pofft = pofft;
+	}
+
+	/** Called by parse methods to indicate span update is complete */
+	public void spanComplete() {
 	}
 
 	/** Add graphic tag fields */

@@ -251,7 +251,7 @@ public class MultiString {
 		final int[] ret = new int[np]; // font numbers indexed by pg
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
-		parse(new MultiStringStateAdapter() {
+		MultiStringStateAdapter msa = new MultiStringStateAdapter() {
 			public void spanComplete() {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length)
@@ -259,7 +259,9 @@ public class MultiString {
 				else
 					assert false : "bogus # pages";
 			}
-		}, f_num);
+		};
+		msa.setFont(f_num);
+		parse(msa);
 		return ret;
 	}
 
@@ -269,27 +271,23 @@ public class MultiString {
 	}
 
 	/** Parse the MULTI string, ignoring page on and off times.
-	 * @param cb SpanCallback, called per span.
-	 * @param f_num Default font number. */
-	public void parse(MultiStringState cb, int f_num) {
-		parse(cb, f_num, 0, 0);
+	 * @param cb SpanCallback, called per span. */
+	public void parse(MultiStringState cb) {
+		parse(cb, 0, 0);
 	}
 
 	/** Parse the MULTI string, using default on and off times.
 	 * @param cb A MultiStringState which contains parsed attributes 
 	 *	     per span.
-	 * @param f_num Default font number.
 	 * @param dpont Default page on time, 1/10 secs.
 	 * @param dpofft Default page off time, 1/10 secs. */
-	public void parse(MultiStringState cb, int f_num, 
-		int dpont, int dpofft) 
-	{
+	public void parse(MultiStringState cb, int dpont, int dpofft) {
 		int offset = 0;
 		Matcher m = TAG.matcher(b);
 		while(m.find()) {
 			if(m.start() > offset) {
 				String span = b.substring(offset, m.start());
-				cb.setFields(f_num, span, dpont, dpofft);
+				cb.setFields(span, dpont, dpofft);
 				cb.spanComplete();
 			}
 			offset = m.end();
@@ -308,7 +306,7 @@ public class MultiString {
 					JustificationPage.parse(v));
 			} else if(tag.equals("fo")) {
 				String v = m.group(2);
-				f_num = parseFont(v);
+				cb.setFont(parseFont(v));
 			} else if(tag.equals("g")) {
 				String v = m.group(2);
 				int g_num = parseGraphic(v);
@@ -330,7 +328,7 @@ public class MultiString {
 			// FIXME: cleanup, replace setFields(...) call with 
 			//        calls to specific methods in else blocks 
 			//	  above.
-			cb.setFields(f_num, span, dpont, dpofft);
+			cb.setFields(span, dpont, dpofft);
 			cb.spanComplete();
 		}
 	}
@@ -345,24 +343,15 @@ public class MultiString {
 			public void spanComplete() {
 				_b.append(ms_span);
 			}
-		}, 1);
+		});
 		return _b.toString().trim().equals("");
-	}
-
-	/** Parsing callback to count the number of pages */
-	protected class PageCounter extends MultiStringStateAdapter {
-		int num_pages = 0;
-		public void spanComplete() {
-			// note: fields in span use ms prefix
-			num_pages = Math.max(ms_page + 1, num_pages);
-		}
 	}
 
 	/** Get the number of pages in the multistring */
 	public int getNumPages() {
-		PageCounter pc = new PageCounter();
-		parse(pc, 1);
-		return pc.num_pages;
+		MultiStringStateAdapter msa = new MultiStringStateAdapter();
+		parse(msa);
+		return msa.ms_page + 1;
 	}
 
 	/** Travel time calculating callback interface */
@@ -461,11 +450,10 @@ public class MultiString {
 	 *  @return An integer array with length equal to the number 
 	 *	    of pages in the message, containing tenths of secs. */
 	public int[] getPageOnTime(final int def_pont) {
-		final int DEF_FONT = 1;
 		final int DEF_POFFT = 0;
 		int np = getNumPages();
 		final int[] ret = new int[np]; // pg time indexed by pg
-		for(int i = 0; i<ret.length; ++i)
+		for(int i = 0; i < ret.length; ++i)
 			ret[i] = def_pont;
 		parse(new MultiStringStateAdapter() {
 			public void spanComplete() {
@@ -475,7 +463,7 @@ public class MultiString {
 				else
 					assert false : "bogus # pages";
 			}
-		}, DEF_FONT, def_pont, DEF_POFFT);
+		}, def_pont, DEF_POFFT);
 		return ret;
 	}
 

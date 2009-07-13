@@ -26,7 +26,7 @@ import java.util.TreeMap;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class PixelMapBuilder {
+public class PixelMapBuilder extends MultiStringStateAdapter {
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -63,21 +63,13 @@ public class PixelMapBuilder {
 		c_height = ch;
 	}
 
-	/** Used by parse methods to build the linked list of spans. */
-	public MultiStringState m_span = 
-		new MultiStringStateAdapter() {
-			public void spanComplete() {
-				// note: fields in span use ms prefix
-				Font font = getFont(ms_fnum);
-				spans.add(new TextSpan(ms_page, ms_justp, 
-					ms_line, ms_justl, font, ms_span));
-				n_pages = Math.max(ms_page + 1, n_pages);
-		}
-		/** Add a graphic */
-		public void addGraphic(int g_num, int x, int y) {
-			// FIXME
-		}
-	};
+	/** Complete a MULTI text span */
+	public void spanComplete() {
+		Font font = getFont(ms_fnum);
+		spans.add(new TextSpan(ms_page, ms_justp, 
+			ms_line, ms_justl, font, ms_span));
+		n_pages = Math.max(ms_page + 1, n_pages);
+	}
 
 	/** Find all matching fonts */
 	public void findFonts(Checker<Font> checker) {
@@ -259,7 +251,7 @@ public class PixelMapBuilder {
 		return pixmaps;
 	}
 
-	/** Create and render a BitmapGraphic for the specified page number. */
+	/** Create and render a BitmapGraphic for the specified page number */
 	protected BitmapGraphic createBitmap(int p) {
 		int nltp = getLinesOnPage(p);
 		BitmapGraphic bg = new BitmapGraphic(width, height);

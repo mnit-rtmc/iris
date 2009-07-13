@@ -107,7 +107,7 @@ public class SignMessageHelper extends BaseHelper {
 				String v = ls.get(i);
 				ls.set(i, SString.trimJoin(v, ms_span));
 			}
-		}, 1);
+		});
 		return ls.toArray(new String[0]);
 	}
 
