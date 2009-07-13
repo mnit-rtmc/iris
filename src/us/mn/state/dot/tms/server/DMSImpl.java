@@ -844,7 +844,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				": INVALID MESSAGE, " + m.getMulti());
 		}
 		int ap = m.getActivationPriority();
-		if(!checkPriority(ap)) {
+		if(!checkPriority(m)) {
 			throw new ChangeVetoException(name +
 				": PRIORITY TOO LOW");
 		}
@@ -863,6 +863,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		validateBitmaps(m);
 		p.sendMessage(this, m, o);
 		setMessageNext(m);
+	}
+
+	/** Check if activation priority should allow blanking the sign.
+	 * @param ap Activation priority of new message.
+	 * @return true If current message should be blanked. */
+	protected boolean checkPriorityBlank(int ap) {
+		SignMessage sm = messageCurrent;
+		return ap == sm.getRunTimePriority();
 	}
 
 	/** Validate the message bitmaps */
@@ -947,34 +955,27 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	}
 
 	/** Check if a message has priority over existing messages.
-	 * @param ap Activation priority of new message.
+	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
-	public boolean checkPriority(int ap) {
-		return checkCurrentPriority(ap) && checkNextPriority(ap);
+	public boolean checkPriority(SignMessage sm) {
+		return checkCurrentPriority(sm) && checkNextPriority(sm);
 	}
 
 	/** Check if a message has priority over "current" message.
-	 * @param ap Activation priority of new message.
+	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
-	protected boolean checkCurrentPriority(int ap) {
-		SignMessage sm = messageCurrent;
-		return ap >= sm.getRunTimePriority();
+	protected boolean checkCurrentPriority(SignMessage sm) {
+		return sm.getActivationPriority() >=
+		       messageCurrent.getRunTimePriority();
 	}
 
 	/** Check if a message has priority over "next" message.
-	 * @param ap Activation priority of new message.
+	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
-	protected boolean checkNextPriority(int ap) {
-		SignMessage sm = messageNext;
-		return sm == null || ap >= sm.getRunTimePriority();
-	}
-
-	/** Check if activation priority should allow blanking the sign.
-	 * @param ap Activation priority of new message.
-	 * @return true If current message should be blanked. */
-	protected boolean checkPriorityBlank(int ap) {
-		SignMessage sm = messageCurrent;
-		return ap == sm.getRunTimePriority();
+	protected boolean checkNextPriority(SignMessage sm) {
+		SignMessage mn = messageNext;
+		return mn == null || sm.getActivationPriority() >=
+		       mn.getRunTimePriority();
 	}
 
 	/** Send a sign message created by IRIS server */
@@ -1255,19 +1256,17 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public void sendAction(DmsAction da) {
 		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
 			da.getPriority());
-		if(checkPriority(ap.ordinal())) {
-			String m = createMulti(da.getQuickMessage());
-			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
-				da.getPriority());
-			SignMessage sm = createMessage(m, ap, rp, 2);
-			if(sm != null) {
-				try {
-					doSetMessageNext(sm, null);
-				}
-				catch(TMSException e) {
-					ACTION_LOG.log(getName() + ": " +
-						e.getMessage());
-				}
+		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+			da.getPriority());
+		String m = createMulti(da.getQuickMessage());
+		SignMessage sm = createMessage(m, ap, rp, 2);
+		if(sm != null && checkPriority(sm)) {
+			try {
+				doSetMessageNext(sm, null);
+			}
+			catch(TMSException e) {
+				ACTION_LOG.log(getName() + ": " +
+					e.getMessage());
 			}
 		}
 	}

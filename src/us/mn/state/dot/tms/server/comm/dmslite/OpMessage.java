@@ -120,9 +120,8 @@ public class OpMessage extends OpDms {
 	}
 
 	/** create 2nd phase */
-	private Phase createPhaseTwo()
-	{
-		if(!m_dms.checkPriority(m_sm.getActivationPriority()))
+	private Phase createPhaseTwo() {
+		if(!m_dms.checkPriority(m_sm))
 			return null;
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)
