@@ -83,7 +83,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_line = 0;
 		ms_justl = MultiString.JustificationLine.fromOrdinal(
 			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
-		ms_fnum = 0;
+		ms_fnum = 1;
 	}
 
 	/* Set multiple span fields.
