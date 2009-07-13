@@ -1111,14 +1111,15 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a message for the sign.
 	 * @param m MULTI string for message.
+	 * @param p Activation priority.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m) {
+	public SignMessage createMessage(String m, DMSMessagePriority ap) {
 		MultiString ms = new MultiString(m);
 		if(ms.isBlank())
 			return createBlankMessage();
 		else
-			return createMessage(m, DMSMessagePriority.OPERATOR,
-				DMSMessagePriority.OPERATOR, null);
+			return createMessage(m, ap, DMSMessagePriority.OPERATOR,
+				null);
 	}
 
 	/** Create a message for the sign.

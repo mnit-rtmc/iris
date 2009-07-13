@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -34,6 +35,25 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
  * @author Douglas Lau
  */
 public class OpSendLCSIndications extends OpLCS {
+
+	/** Get the activation priority for the specified indication */
+	static protected DMSMessagePriority getActivationPriority(int ind) {
+		switch(LaneUseIndication.fromOrdinal(ind)) {
+		case LANE_CLOSED:
+			return DMSMessagePriority.INCIDENT_HIGH;
+		case LANE_CLOSED_AHEAD:
+		case MERGE_RIGHT:
+		case MERGE_LEFT:
+		case MERGE_BOTH:
+		case MUST_EXIT_RIGHT:
+		case MUST_EXIT_LEFT:
+			return DMSMessagePriority.INCIDENT_MED;
+		case USE_CAUTION:
+			return DMSMessagePriority.INCIDENT_LOW;
+		default:
+			return DMSMessagePriority.OPERATOR;
+		}
+	}
 
 	/** Indications to send */
 	protected final Integer[] indications;
@@ -137,7 +157,8 @@ public class OpSendLCSIndications extends OpLCS {
 	protected OpDMS createGraphicOperation(DMSImpl dms, int ind) {
 		String ms = createIndicationMulti(dms, ind);
 		if(ms != null) {
-			SignMessage sm = dms.createMessage(ms);
+			SignMessage sm = dms.createMessage(ms,
+				getActivationPriority(ind));
 			if(sm != null)
 				return NtcipPoller.createOperation(dms,sm,user);
 		}
