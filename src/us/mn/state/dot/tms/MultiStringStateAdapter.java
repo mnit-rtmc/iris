@@ -94,7 +94,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 	}
 
 	/** Add a span of text */
-	public void addText(String span) {
+	public void addSpan(String span) {
 	}
 
 	/** Add a graphic */

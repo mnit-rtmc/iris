@@ -45,7 +45,7 @@ public interface MultiStringState {
 	void setFont(int f_num, Integer f_id);
 
 	/** Add a span of text */
-	void addText(String span);
+	void addSpan(String span);
 
 	/** Add a graphic */
 	void addGraphic(int g_num, Integer x, Integer y, Integer g_id);

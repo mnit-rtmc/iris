@@ -174,11 +174,11 @@ public class AwsMsg {
 		// pg 1
 		m.setFont(m_fontnumpg1, null);
 		m.setPageTimes(m_pgontime.toTenths(), null);
-		m.addText(m_textlines[0]);
+		m.addSpan(m_textlines[0]);
 		m.addLine();
-		m.addText(m_textlines[1]);
+		m.addSpan(m_textlines[1]);
 		m.addLine();
-		m.addText(m_textlines[2]);
+		m.addSpan(m_textlines[2]);
 		m.addLine();
 
 		// pg 2
@@ -187,11 +187,11 @@ public class AwsMsg {
 		{
 			m.addPage();
 			m.setFont(m_fontnumpg2, null);
-			m.addText(m_textlines[3]);
+			m.addSpan(m_textlines[3]);
 			m.addLine();
-			m.addText(m_textlines[4]);
+			m.addSpan(m_textlines[4]);
 			m.addLine();
-			m.addText(m_textlines[5]);
+			m.addSpan(m_textlines[5]);
 			m.addLine();
 		}
 		return m.normalize().toString();

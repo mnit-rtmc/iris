@@ -98,7 +98,7 @@ public class SignMessageHelper extends BaseHelper {
 		final LinkedList<String> ls = new LinkedList<String>();
 		MultiString multi = new MultiString(m.getMulti());
 		multi.parse(new MultiStringStateAdapter() {
-			public void addText(String span) {
+			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				int m_lines = Math.max(n_lines, ms_line + 1);
 				while(ls.size() < (ms_page + 1) * m_lines)

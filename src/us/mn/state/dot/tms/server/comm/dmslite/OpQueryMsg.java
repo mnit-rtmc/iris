@@ -122,13 +122,13 @@ public class OpQueryMsg extends OpDms {
 		// default text if no bitmap, see comments in 
 		// method for why this is a hack.
 		for(int i = 0; i < pages.length; i++) {
-			multi.addText(MultiString.
+			multi.addSpan(MultiString.
 				flagIgnoredSignLineHack("OTHER"));
 			multi.addLine();
-			multi.addText(MultiString.
+			multi.addSpan(MultiString.
 				flagIgnoredSignLineHack("SYSTEM"));
 			multi.addLine();
-			multi.addText(MultiString.
+			multi.addSpan(MultiString.
 				flagIgnoredSignLineHack("MESSAGE"));
 			multi.addLine();
 			if(i + 1 < pages.length)

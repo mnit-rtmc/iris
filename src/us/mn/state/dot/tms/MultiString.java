@@ -197,8 +197,8 @@ public class MultiString {
 		b.append("]");
 	}
 
-	/** Add text to the current line */
-	public void addText(String s) {
+	/** Add a spann of text */
+	public void addSpan(String s) {
 		if(s != null && s.length() > 0) {
 			b.append(s);
 			trailing = true;
@@ -271,7 +271,7 @@ public class MultiString {
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
 		MultiStringStateAdapter msa = new MultiStringStateAdapter() {
-			public void addText(String span) {
+			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length)
 					ret[ms_page] = ms_fnum;
@@ -296,7 +296,7 @@ public class MultiString {
 		Matcher m = TAG.matcher(b);
 		while(m.find()) {
 			if(m.start() > offset)
-				cb.addText(b.substring(offset, m.start()));
+				cb.addSpan(b.substring(offset, m.start()));
 			offset = m.end();
 			String tag = m.group(1);
 			if(tag.equals("nl"))
@@ -325,14 +325,14 @@ public class MultiString {
 			}
 		}
 		if(offset < b.length())
-			cb.addText(b.substring(offset));
+			cb.addSpan(b.substring(offset));
 	}
 
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
 		parse(new MultiStringStateAdapter() {
-			public void addText(String span) {
+			public void addSpan(String span) {
 				_b.append(span);
 			}
 			public void addGraphic(int g_num, Integer x, Integer y,
@@ -451,7 +451,7 @@ public class MultiString {
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = def_pont;
 		parse(new MultiStringStateAdapter() {
-			public void addText(String span) {
+			public void addSpan(String span) {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length) {
 					if(ms_pt_on != null)

@@ -424,7 +424,7 @@ public class SignMessageComposer extends JPanel {
 			f.setEnabled(b);
 	}
 
-	/** Return a MULTI string using the contents of the widgets. */
+	/** Return a MULTI string using the contents of the widgets */
 	public String getMessage() {
 		String[] mess = new String[cmbLine.length];
 		int m = 0;
@@ -478,7 +478,7 @@ public class SignMessageComposer extends JPanel {
 				} else
 					multi.addLine();
 			}
-			multi.addText(mess[i]);
+			multi.addSpan(mess[i]);
 		}
 		return multi;
 	}
