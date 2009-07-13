@@ -45,6 +45,6 @@ public interface MultiStringState {
 	/** Add a span of text */
 	void addText(String span);
 
-	/** add graphic info */
-	void addGraphic(int g_num, int x, int y);
+	/** Add a graphic */
+	void addGraphic(int g_num, Integer x, Integer y, Integer g_id);
 }

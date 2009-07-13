@@ -108,13 +108,26 @@ public class MultiString {
 	/** Parse a graphic number from a [gn] or [gn,x,y] or [gn,x,y,cccc] tag.
 	 * @param g Graphic tag value (n or n,x,y or n,x,y,cccc from tag).
 	 * @return Graphic number contained in the tag. */
-	static protected int parseGraphic(String g) {
-		String[] args = g.split(",", 3);
+	static protected void parseGraphic(String g, MultiStringState mss) {
+		String[] args = g.split(",", 4);
+		Integer g_num = parseInt(args, 0);
+		Integer x = parseInt(args, 1);
+		Integer y = parseInt(args, 2);
+		Integer g_id = parseInt(args, 3);
+		if(g_num != null)
+			mss.addGraphic(g_num, x, y, g_id);
+	}
+
+	/** Parse an integer value */
+	static protected Integer parseInt(String[] args, int n) {
 		try {
-			return Integer.parseInt(args[0]);
+			if(n < args.length)
+				return Integer.parseInt(args[n]);
+			else
+				return null;
 		}
 		catch(NumberFormatException e) {
-			return 1;
+			return null;
 		}
 	}
 
@@ -201,20 +214,19 @@ public class MultiString {
 	}
 
 	/** Add a graphic */
-	public void addGraphic(int g_num) {
+	public void addGraphic(int g_num, Integer x, Integer y, Integer g_id) {
 		b.append("[g");
 		b.append(g_num);
-		b.append("]");
-	}
-
-	/** Add a graphic at the specified position */
-	public void addGraphic(int g_num, int x, int y) {
-		b.append("[g");
-		b.append(g_num);
-		b.append(',');
-		b.append(x);
-		b.append(',');
-		b.append(y);
+		if(x != null && y != null) {
+			b.append(',');
+			b.append(x);
+			b.append(',');
+			b.append(y);
+			if(g_id != null) {
+				b.append(',');
+				b.append(g_id);
+			}
+		}
 		b.append("]");
 	}
 
@@ -292,9 +304,7 @@ public class MultiString {
 				cb.setFont(parseFont(v));
 			} else if(tag.equals("g")) {
 				String v = m.group(2);
-				int g_num = parseGraphic(v);
-				// FIXME: fix x and y
-				cb.addGraphic(g_num, 1, 1);
+				parseGraphic(v, cb);
 			} else if(tag.startsWith("pt")) {
 				Integer pt_on = null;
 				Integer pt_off = null;
@@ -320,7 +330,9 @@ public class MultiString {
 			public void addText(String span) {
 				_b.append(span);
 			}
-			public void addGraphic(int g_num, int x, int y) {
+			public void addGraphic(int g_num, Integer x, Integer y,
+				Integer g_id)
+			{
 				_b.append("GRAPHIC");
 			}
 		});

@@ -95,7 +95,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 	public void addText(String span) {
 	}
 
-	/** Add graphic tag fields */
-	public void addGraphic(int g_num, int x, int y) {
+	/** Add a graphic */
+	public void addGraphic(int g_num, Integer x, Integer y, Integer g_id) {
 	}
 }
