@@ -265,18 +265,9 @@ public class MultiString {
 		return b.toString();
 	}
 
-	/** Parse the MULTI string, ignoring page on and off times.
-	 * @param cb SpanCallback, called per span. */
+	/** Parse the MULTI string.
+	 * @param cb A callback which keeps track of the MULTI state. */
 	public void parse(MultiStringState cb) {
-		parse(cb, 0, 0);
-	}
-
-	/** Parse the MULTI string, using default on and off times.
-	 * @param cb A MultiStringState which contains parsed attributes 
-	 *	     per span.
-	 * @param dpont Default page on time, 1/10 secs.
-	 * @param dpofft Default page off time, 1/10 secs. */
-	public void parse(MultiStringState cb, int dpont, int dpofft) {
 		int offset = 0;
 		Matcher m = TAG.matcher(b);
 		while(m.find()) {
@@ -305,12 +296,15 @@ public class MultiString {
 				// FIXME: fix x and y
 				cb.addGraphic(g_num, 1, 1);
 			} else if(tag.startsWith("pt")) {
+				Integer pt_on = null;
+				Integer pt_off = null;
 				String v = m.group(2); // e.g. 25o6
 				String[] t = v.split("o", 2);
 				if(t.length >= 1 && t[0].length() > 0)
-					dpont = SString.stringToInt(t[0]);
+					pt_on = SString.stringToInt(t[0]);
 				if(t.length >= 2 && t[1].length() > 0)
-					dpofft = SString.stringToInt(t[1]);
+					pt_off = SString.stringToInt(t[1]);
+				cb.setPageTimes(pt_on, pt_off);
 			} else if(tag.startsWith("tr")) {
 				// FIXME: complete
 			}
