@@ -192,12 +192,6 @@ public class MultiString {
 		}
 	}
 
-	/** Add text followed by a new line */
-	public void addLine(String s) {
-		addText(s);
-		addLine();
-	}
-
 	/** Add a new page */
 	public void addPage() {
 		b.append(NEWPAGE);
