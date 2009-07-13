@@ -1269,12 +1269,29 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
-	/** Send a DMS action to the sign */
-	public void sendAction(DmsAction da) {
+	/** Flag for current scheduled message.  This is used to guarantee that
+	 * performAction is called at least once between each call to
+	 * updateScheduledMessage.  If not, then the scheduled message is
+	 * cleared. */
+	protected transient boolean is_scheduled;
+
+	/** Current scheduled message */
+	protected transient SignMessage messageSched;
+
+	/** Perform a DMS action */
+	public void performAction(DmsAction da) {
 		DMSMessagePriority p = DMSMessagePriority.fromOrdinal(
 			da.getPriority());
 		String m = createMulti(da.getQuickMessage());
-		SignMessage sm = createMessage(m, p, p, true, 2);
+		messageSched = createMessage(m, p, p, true, 2);
+		is_scheduled = true;
+	}
+
+	/** Update the scheduled message on the sign */
+	public void updateScheduledMessage() {
+		if(!is_scheduled)
+			messageSched = null;
+		SignMessage sm = messageSched;
 		if(shouldActivate(sm)) {
 			try {
 				doSetMessageNext(sm, null);
@@ -1284,6 +1301,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 					e.getMessage());
 			}
 		}
+		is_scheduled = false;
 	}
 
 	/** Create a MULTI string for a quick message */

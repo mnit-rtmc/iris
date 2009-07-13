@@ -357,6 +357,13 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(dms instanceof DMSImpl)
+					((DMSImpl)dms).updateScheduledMessage();
+				return false;
+			}
+		});
 	}
 
 	/** Perform a time action */
@@ -375,7 +382,7 @@ public final class TMSImpl implements KmlDocument {
 		DMSHelper.find(new Checker<DMS>() {
 			public boolean check(DMS dms) {
 				if(dms instanceof DMSImpl)
-					((DMSImpl)dms).sendAction(da);
+					((DMSImpl)dms).performAction(da);
 				return false;
 			}
 		}, sg);
