@@ -844,7 +844,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = messageSched;	// Avoid race
-		if(multi.isBlank() && sched != null) {
+		if(sched != null && multi.isBlank()) {
 			// Don't blank the sign if there's a scheduled message
 			// -- send the scheduled message instead.
 			sm = sched;
