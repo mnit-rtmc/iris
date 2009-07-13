@@ -148,7 +148,9 @@ public class MultiString {
 
 	/** Create a new MULTI string */
 	public MultiString(String t) {
-		addText(t);
+		b.append(t);
+		if(b.length() > 0)
+			trailing = true;
 	}
 
 	/** Validate message text */
@@ -460,8 +462,7 @@ public class MultiString {
 		if(b.toString().indexOf("[pt") < 0) {
 			MultiString t = new MultiString();
 			t.setPageTimes(pont, null);
-			t.addText(b.toString());
-			return t.toString();
+			return t.toString() + b.toString();
 		}
 		parseNormalize(new NormalizeCallback() {
 			public void addSpan(String s) {
