@@ -50,6 +50,10 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	int getRunTimePriority();
 
+	/** Get the scheduled flag.
+	 * @return True if the message was scheduled. */
+	boolean getScheduled();
+
 	/** Get the message duration.
 	 * @return Duration in minutes; null means indefinite. */
 	Integer getDuration();

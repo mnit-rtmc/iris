@@ -58,8 +58,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		System.err.println("Loading sign messages...");
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, multi, bitmaps, a_priority, " +
-			"r_priority, duration FROM iris.sign_message;",
-			new ResultFactory()
+			"r_priority, scheduled, duration FROM " +
+			"iris.sign_message;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(
@@ -68,7 +68,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 					row.getString(3),	// bitmaps
 					row.getInt(4),		// a_priority
 					row.getInt(5),		// r_priority
-					(Integer)row.getObject(6) // duration
+					row.getBoolean(6),	// scheduled
+					(Integer)row.getObject(7) // duration
 				));
 			}
 		});
@@ -82,6 +83,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("bitmaps", bitmaps);
 		map.put("a_priority", activationPriority);
 		map.put("r_priority", runTimePriority);
+		map.put("scheduled", scheduled);
 		map.put("duration", duration);
 		return map;
 	}
@@ -103,25 +105,27 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a sign message */
 	protected SignMessageImpl(String n, String m, String b, int ap, int rp,
-		Integer d)
+		boolean s, Integer d)
 	{
 		super(n);
 		multi = m;
 		bitmaps = b;
 		activationPriority = ap;
 		runTimePriority = rp;
+		scheduled = s;
 		duration = d;		
 	}
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(String m, String b, DMSMessagePriority ap,
-		DMSMessagePriority rp, Integer d)
+		DMSMessagePriority rp, boolean s, Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
 		bitmaps = b;
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
+		scheduled = s;
 		duration = d;
 	}
 
@@ -163,6 +167,15 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
 	public int getRunTimePriority() {
 		return runTimePriority;
+	}
+
+	/** Scheduled flag */
+	protected boolean scheduled;
+
+	/** Get the scheduled flag.
+	 * @return True if the message was scheduled. */
+	public boolean getScheduled() {
+		return scheduled;
 	}
 
 	/** Duration of this message (minutes) */

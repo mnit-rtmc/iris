@@ -12,6 +12,7 @@ CREATE TABLE iris.sign_message (
 	bitmaps text NOT NULL,
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL,
+	scheduled BOOLEAN NOT NULL,
 	duration INTEGER
 );
 
