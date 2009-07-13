@@ -134,8 +134,23 @@ public class SignMessageHelper extends BaseHelper {
 			return false;
 		if(existing.getScheduled() && activating.getScheduled())
 			return true;
-		return activating.getActivationPriority() >=
-		       existing.getRunTimePriority();
+		// This check is needed because even blank messages will always
+		// activate if the priority is OVERRIDE.
+		if(activating.getActivationPriority() ==
+		   DMSMessagePriority.OVERRIDE.ordinal())
+			return true;
+		MultiString ms = new MultiString(activating.getMulti());
+		if(ms.isBlank()) {
+			// Only send a blank message if the new activation
+			// priority matches the current runtime priority.  This
+			// means that a blank AWS message will not blank the
+			// sign unless the current message is an AWS message.
+			return activating.getActivationPriority() ==
+			       existing.getRunTimePriority();
+		} else {
+			return activating.getActivationPriority() >=
+			       existing.getRunTimePriority();
+		}
 	}
 
 	/** Render the SignMessage object as xml */

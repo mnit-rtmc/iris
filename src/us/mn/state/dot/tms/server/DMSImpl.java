@@ -838,10 +838,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		if(!shouldActivate(sm)) {
-			throw new ChangeVetoException(name +
-				": PRIORITY TOO LOW");
-		}
+		if(!shouldActivate(sm))
+			return;
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = messageSched;	// Avoid race
 		if(sched != null && multi.isBlank()) {
@@ -856,29 +854,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				": INVALID MESSAGE, " + sm.getMulti());
 		}
 		int ap = sm.getActivationPriority();
-		if(ap != DMSMessagePriority.OVERRIDE.ordinal()) {
-			// NOTE: only send a "blank" message if activation
-			//       priority matches current runtime priority.
-			//       This means that a blank AWS message will not
-			//       blank the sign unless the current message is
-			//       an AWS message.
-			if(multi.isBlank() && !checkPriorityBlank(ap))
-				return;
-		} else {
-			// Clear travel time route cache
+		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
 			s_routes.clear();
-		}
 		validateBitmaps(sm);
 		p.sendMessage(this, sm, o);
 		setMessageNext(sm);
-	}
-
-	/** Check if activation priority should allow blanking the sign.
-	 * @param ap Activation priority of new message.
-	 * @return true If current message should be blanked. */
-	protected boolean checkPriorityBlank(int ap) {
-		SignMessage sm = messageCurrent;
-		return ap == sm.getRunTimePriority();
 	}
 
 	/** Validate the message bitmaps */
