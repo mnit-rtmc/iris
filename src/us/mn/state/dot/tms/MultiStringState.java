@@ -39,6 +39,9 @@ public interface MultiStringState {
 	/** Set the line justification */
 	void setLineJustification(MultiString.JustificationLine jl);
 
+	/** Set the foreground color */
+	void setColorForeground(int r, int g, int b);
+
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
 	 * @param f_id Font version ID */

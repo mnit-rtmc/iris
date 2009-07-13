@@ -92,6 +92,18 @@ public class MultiString {
 		}
 	}
 
+	/** Parse a color foreground tag */
+	static protected void parseColorForeground(String v,
+		MultiStringState mss)
+	{
+		String[] args = v.split(",", 3);
+		Integer r = parseInt(args, 0);
+		Integer g = parseInt(args, 1);
+		Integer b = parseInt(args, 2);
+		if(r != null && g != null && b != null)
+			mss.setColorForeground(r, g, b);
+	}
+
 	/** Parse a font number from an [fox] or [fox,cccc] tag.
 	 * @param f Font tag value (x or x,cccc from [fox] or [fox,cccc] tag).
 	 * @param mss Callback to set font information. */
@@ -311,6 +323,9 @@ public class MultiString {
 				String v = m.group(2);
 				cb.setPageJustification(
 					JustificationPage.parse(v));
+			} else if(tag.equals("cf")) {
+				String v = m.group(2);
+				parseColorForeground(v, cb);
 			} else if(tag.equals("fo")) {
 				String v = m.group(2);
 				parseFont(v, cb);

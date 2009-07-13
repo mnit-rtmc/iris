@@ -72,6 +72,10 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_justl = jl;
 	}
 
+	/** Set the foreground color */
+	public void setColorForeground(int r, int g, int b) {
+	}
+
 	/** Font number */
 	protected int ms_fnum;
 
