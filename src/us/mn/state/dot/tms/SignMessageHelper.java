@@ -32,25 +32,27 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Compare 2 sign messages.
-	 *  @param sm1 SignMessage which may be null.
-	 *  @param sm2 SignMessage which may be null.
-	 *  @return True if both SignMessages have equal normalized
-	 *	    MULTIs, priorities, and bitmaps. */
-	static public boolean equals(SignMessage sm1, SignMessage sm2) 
-	{
+	 * @param sm1 SignMessage which may be null.
+	 * @param sm2 SignMessage which may be null.
+	 * @return True if both SignMessages have equal normalized
+	 *         MULTIs, priorities, and bitmaps. */
+	static public boolean equals(SignMessage sm1, SignMessage sm2) {
 		if(sm1 == null && sm2 == null)
 			return true;
 		if(sm1 == null || sm2 == null)
 			return false;
 		if(!(new MultiString(sm1.getMulti()).equals(sm2.getMulti())))
 			return false;
-		if(sm1.getPriority() != sm2.getPriority())
+		if(sm1.getActivationPriority() != sm2.getActivationPriority())
+			return false;
+		if(sm1.getRunTimePriority() != sm2.getRunTimePriority())
 			return false;
 		final String bm1 = sm1.getBitmaps();
 		final String bm2 = sm2.getBitmaps();
 		if(bm1 == null)
 			return bm2 == null;
-		return bm1.equals(bm2);
+		else
+			return bm1.equals(bm2);
 	}
 
 	/** Return an array of font names in a message.
