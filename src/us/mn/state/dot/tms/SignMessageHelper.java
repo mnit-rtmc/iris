@@ -121,7 +121,10 @@ public class SignMessageHelper extends BaseHelper {
 		}
 	}
 
-	/** Test if a sign message should be activated */
+	/** Test if a sign message should be activated.
+	 * @param existing Message existing on DMS.
+	 * @param activating Message to be activated.
+	 * @return True if message should be activated; false otherwise. */
 	static public boolean shouldActivate(final SignMessage existing,
 		final SignMessage activating)
 	{

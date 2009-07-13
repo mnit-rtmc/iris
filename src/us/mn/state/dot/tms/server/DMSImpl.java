@@ -838,14 +838,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
+		if(!shouldActivate(sm)) {
+			throw new ChangeVetoException(name +
+				": PRIORITY TOO LOW");
+		}
 		MultiString multi = new MultiString(sm.getMulti());
 		if(!multi.isValid()) {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
-		}
-		if(!shouldActivate(sm)) {
-			throw new ChangeVetoException(name +
-				": PRIORITY TOO LOW");
 		}
 		int ap = sm.getActivationPriority();
 		if(ap != DMSMessagePriority.OVERRIDE.ordinal()) {
@@ -1275,7 +1275,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			da.getPriority());
 		String m = createMulti(da.getQuickMessage());
 		SignMessage sm = createMessage(m, p, p, true, 2);
-		if(sm != null && shouldActivate(sm)) {
+		if(shouldActivate(sm)) {
 			try {
 				doSetMessageNext(sm, null);
 			}
