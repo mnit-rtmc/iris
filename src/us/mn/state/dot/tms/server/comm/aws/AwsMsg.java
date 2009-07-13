@@ -173,7 +173,7 @@ public class AwsMsg {
 
 		// pg 1
 		m.setFont(m_fontnumpg1);
-		m.setPageOnTime(m_pgontime.toTenths());
+		m.setPageTimes(m_pgontime.toTenths(), null);
 		m.addLine(m_textlines[0]);
 		m.addLine(m_textlines[1]);
 		m.addLine(m_textlines[2]);

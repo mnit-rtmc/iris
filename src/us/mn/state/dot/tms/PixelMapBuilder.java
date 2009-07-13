@@ -64,10 +64,10 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 	}
 
 	/** Complete a MULTI text span */
-	public void spanComplete() {
+	public void addText(String span) {
 		Font font = getFont(ms_fnum);
 		spans.add(new TextSpan(ms_page, ms_justp, 
-			ms_line, ms_justl, font, ms_span));
+			ms_line, ms_justl, font, span));
 		n_pages = Math.max(ms_page + 1, n_pages);
 	}
 

@@ -42,6 +42,20 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_justp = jp;
 	}
 
+	/** Page on time (tenths of a second) */
+	protected Integer ms_pt_on;
+
+	/** Page off time (tenths of a second) */
+	protected Integer ms_pt_off;
+
+	/** Set the page times.
+	 * @param pt_on Page on time (tenths of second; null means default)
+	 * @param pt_off Page off time (tenths of second; null means default) */
+	public void setPageTimes(Integer pt_on, Integer pt_off) {
+		ms_pt_on = pt_on;
+		ms_pt_off = pt_off;
+	}
+
 	/** Line number on page, zero based */
 	protected int ms_line;
 
@@ -66,15 +80,6 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_fnum = fn;
 	}
 
-	/** Span text */
-	protected String ms_span;
-
-	/** Page on-time in tenths */
-	protected int ms_pont;
-
-	/** Page off-time in tenths */
-	protected int ms_pofft;
-
 	/** Create a new MULTI string adapter */
 	public MultiStringStateAdapter() {
 		ms_page = 0;
@@ -86,19 +91,8 @@ public class MultiStringStateAdapter implements MultiStringState {
 		ms_fnum = 1;
 	}
 
-	/* Set multiple span fields.
-	 * @param span Message text.
-	 * @param pont Page on time, 1/10 secs.
-	 * @param pofft Page off time, 1/10 secs. */
-	// FIXME: remove this method and use setters for each field
-	public void setFields(String span, int pont, int pofft) {
-		ms_span = span;
-		ms_pont = pont;
-		ms_pofft = pofft;
-	}
-
-	/** Called by parse methods to indicate span update is complete */
-	public void spanComplete() {
+	/** Add a span of text */
+	public void addText(String span) {
 	}
 
 	/** Add graphic tag fields */

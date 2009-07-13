@@ -161,18 +161,17 @@ public class MultiString {
 		return true;
 	}
 
-	/** Set a page on time.
-	 *  @param pgont Page on-time in tenths of a second. */
-	public void setPageOnTime(int pgont) {
+	/** Set page times.
+	 * @param pt_on Page on-time in tenths of a second.
+	 * @param pt_off Page off-time in tenths of a second. */
+	public void setPageTimes(Integer pt_on, Integer pt_off) {
 		b.append("[pt");
-		b.append(pgont);
+		if(pt_on != null)
+			b.append(pt_on);
 		b.append('o');
+		if(pt_off != null)
+			b.append(pt_off);
 		b.append("]");
-	}
-
-	/** Append to the MULTI */
-	private void append(String m) {
-		b.append(m);
 	}
 
 	/** Add text to the current line */
@@ -252,7 +251,7 @@ public class MultiString {
 		for(int i = 0; i < ret.length; i++)
 			ret[i] = f_num;
 		MultiStringStateAdapter msa = new MultiStringStateAdapter() {
-			public void spanComplete() {
+			public void addText(String span) {
 				// note: fields in span use ms prefix
 				if(ms_page >= 0 && ms_page < ret.length)
 					ret[ms_page] = ms_fnum;
@@ -285,11 +284,8 @@ public class MultiString {
 		int offset = 0;
 		Matcher m = TAG.matcher(b);
 		while(m.find()) {
-			if(m.start() > offset) {
-				String span = b.substring(offset, m.start());
-				cb.setFields(span, dpont, dpofft);
-				cb.spanComplete();
-			}
+			if(m.start() > offset)
+				cb.addText(b.substring(offset, m.start()));
 			offset = m.end();
 			String tag = m.group(1);
 			if(tag.equals("nl"))
@@ -323,25 +319,19 @@ public class MultiString {
 				// FIXME: complete
 			}
 		}
-		if(offset < b.length()) {
-			String span = b.substring(offset);
-			// FIXME: cleanup, replace setFields(...) call with 
-			//        calls to specific methods in else blocks 
-			//	  above.
-			cb.setFields(span, dpont, dpofft);
-			cb.spanComplete();
-		}
+		if(offset < b.length())
+			cb.addText(b.substring(offset));
 	}
 
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
 		parse(new MultiStringStateAdapter() {
+			public void addText(String span) {
+				_b.append(span);
+			}
 			public void addGraphic(int g_num, int x, int y) {
 				_b.append("GRAPHIC");
-			}
-			public void spanComplete() {
-				_b.append(ms_span);
 			}
 		});
 		return _b.toString().trim().equals("");
@@ -408,8 +398,7 @@ public class MultiString {
 		void addTag(String tag);
 	}
 
-	/** Parse the MULTI string. The setFields and addTag methods
-	 * are called for each span and tag that is found.
+	/** Parse the MULTI string.
 	 * @param cb Normalization callback. */
 	protected void parseNormalize(NormalizeCallback cb) {
 		int offset = 0;
@@ -450,20 +439,20 @@ public class MultiString {
 	 *  @return An integer array with length equal to the number 
 	 *	    of pages in the message, containing tenths of secs. */
 	public int[] getPageOnTime(final int def_pont) {
-		final int DEF_POFFT = 0;
 		int np = getNumPages();
 		final int[] ret = new int[np]; // pg time indexed by pg
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = def_pont;
 		parse(new MultiStringStateAdapter() {
-			public void spanComplete() {
+			public void addText(String span) {
 				// note: fields in span use ms prefix
-				if(ms_page >= 0 && ms_page < ret.length)
-					ret[ms_page] = ms_pont;
-				else
+				if(ms_page >= 0 && ms_page < ret.length) {
+					if(ms_pt_on != null)
+						ret[ms_page] = ms_pt_on;
+				} else
 					assert false : "bogus # pages";
 			}
-		}, def_pont, DEF_POFFT);
+		});
 		return ret;
 	}
 
@@ -476,8 +465,8 @@ public class MultiString {
 		final StringBuilder ret = new StringBuilder();
 		if(b.toString().indexOf("[pt") < 0) {
 			MultiString t = new MultiString();
-			t.setPageOnTime(pont);
-			t.append(b.toString());
+			t.setPageTimes(pont, null);
+			t.addText(b.toString());
 			return t.toString();
 		}
 		parseNormalize(new NormalizeCallback() {

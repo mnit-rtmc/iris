@@ -28,6 +28,11 @@ public interface MultiStringState {
 	/** Set the page justification */
 	void setPageJustification(MultiString.JustificationPage jp);
 
+	/** Set the page times.
+	 * @param pt_on Page on time (tenths of second; null means default)
+	 * @param pt_off Page off time (tenths of second; null means default) */
+	void setPageTimes(Integer pt_on, Integer pt_off);
+
 	/** Add a line */
 	void addLine();
 
@@ -37,14 +42,8 @@ public interface MultiStringState {
 	/** Set the font number */
 	void setFont(int fn);
 
-	/** Called by parse methods to indicate span update is complete */
-	void spanComplete();
-
-	/** Set multiple span fields.
-	 *  @param span Message text.
-	 *  @param pont Page on time, 1/10 secs.
-	 *  @param pofft Page off time, 1/10 secs. */
-	void setFields(String span, int pont, int pofft);
+	/** Add a span of text */
+	void addText(String span);
 
 	/** add graphic info */
 	void addGraphic(int g_num, int x, int y);

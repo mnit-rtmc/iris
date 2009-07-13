@@ -464,8 +464,8 @@ public class SignMessageComposer extends JPanel {
 		if(f != null)
 			multi.setFont(f);
 		if(PgTimeSpinner.getIEnabled())
-			multi.setPageOnTime(timeSpin.
-				getValuePgTime().toTenths());
+			multi.setPageTimes(timeSpin.
+				getValuePgTime().toTenths(), null);
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0) {

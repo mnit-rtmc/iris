@@ -113,7 +113,7 @@ public class OpQueryMsg extends OpDms {
 		MultiString multi = new MultiString();
 
 		// pg on-time read from controller
-		multi.setPageOnTime(pgOnTime.toTenths());
+		multi.setPageTimes(pgOnTime.toTenths(), null);
 
 		// priority is invalid, as expected
 		if( pri == DMSMessagePriority.INVALID)
