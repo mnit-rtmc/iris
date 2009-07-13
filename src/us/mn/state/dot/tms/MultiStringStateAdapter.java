@@ -75,9 +75,11 @@ public class MultiStringStateAdapter implements MultiStringState {
 	/** Font number */
 	protected int ms_fnum;
 
-	/** Set the font number */
-	public void setFont(int fn) {
-		ms_fnum = fn;
+	/** Set the font number.
+	 * @param f_num Font number (1 to 255)
+	 * @param f_id Font version ID */
+	public void setFont(int f_num, Integer f_id) {
+		ms_fnum = f_num;
 	}
 
 	/** Create a new MULTI string adapter */

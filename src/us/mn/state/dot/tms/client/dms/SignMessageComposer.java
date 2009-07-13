@@ -462,10 +462,11 @@ public class SignMessageComposer extends JPanel {
 		int p = 0;
 		Integer f = getFontNumber(0);
 		if(f != null)
-			multi.setFont(f);
-		if(PgTimeSpinner.getIEnabled())
+			multi.setFont(f, null);
+		if(PgTimeSpinner.getIEnabled()) {
 			multi.setPageTimes(timeSpin.
 				getValuePgTime().toTenths(), null);
+		}
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
 				if(i % n_lines == 0) {
@@ -473,7 +474,7 @@ public class SignMessageComposer extends JPanel {
 					p++;
 					f = getFontNumber(p);
 					if(f != null)
-						multi.setFont(f);
+						multi.setFont(f, null);
 				} else
 					multi.addLine();
 			}

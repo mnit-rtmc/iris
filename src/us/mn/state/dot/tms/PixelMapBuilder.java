@@ -61,6 +61,7 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 		height = h;
 		c_width = cw;
 		c_height = ch;
+		ms_fnum = getDefaultFontNumber();
 	}
 
 	/** Complete a MULTI text span */

@@ -94,20 +94,18 @@ public class MultiString {
 
 	/** Parse a font number from an [fox] or [fox,cccc] tag.
 	 * @param f Font tag value (x or x,cccc from [fox] or [fox,cccc] tag).
-	 * @return Font number contained in the tag. */
-	static protected int parseFont(String f) {
+	 * @param mss Callback to set font information. */
+	static protected void parseFont(String f, MultiStringState mss) {
 		String[] args = f.split(",", 2);
-		try {
-			return Integer.parseInt(args[0]);
-		}
-		catch(NumberFormatException e) {
-			return 1;
-		}
+		Integer f_num = parseInt(args, 0);
+		Integer f_id = parseInt(args, 1);
+		if(f_num != null)
+			mss.setFont(f_num, f_id);
 	}
 
 	/** Parse a graphic number from a [gn] or [gn,x,y] or [gn,x,y,cccc] tag.
 	 * @param g Graphic tag value (n or n,x,y or n,x,y,cccc from tag).
-	 * @return Graphic number contained in the tag. */
+	 * @param mss Callback to set graphic information */
 	static protected void parseGraphic(String g, MultiStringState mss) {
 		String[] args = g.split(",", 4);
 		Integer g_num = parseInt(args, 0);
@@ -231,9 +229,13 @@ public class MultiString {
 	}
 
 	/** Set a new font number */
-	public void setFont(int f_num) {
+	public void setFont(int f_num, Integer f_id) {
 		b.append("[fo");
 		b.append(f_num);
+		if(f_id != null) {
+			b.append(',');
+			b.append(f_id);
+		}
 		b.append("]");
 	}
 
@@ -267,7 +269,7 @@ public class MultiString {
 					assert false : "bogus # pages";
 			}
 		};
-		msa.setFont(f_num);
+		msa.setFont(f_num, null);
 		parse(msa);
 		return ret;
 	}
@@ -301,7 +303,7 @@ public class MultiString {
 					JustificationPage.parse(v));
 			} else if(tag.equals("fo")) {
 				String v = m.group(2);
-				cb.setFont(parseFont(v));
+				parseFont(v, cb);
 			} else if(tag.equals("g")) {
 				String v = m.group(2);
 				parseGraphic(v, cb);

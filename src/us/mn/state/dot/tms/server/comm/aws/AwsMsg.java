@@ -172,7 +172,7 @@ public class AwsMsg {
 		MultiString m = new MultiString();
 
 		// pg 1
-		m.setFont(m_fontnumpg1);
+		m.setFont(m_fontnumpg1, null);
 		m.setPageTimes(m_pgontime.toTenths(), null);
 		m.addText(m_textlines[0]);
 		m.addLine();
@@ -186,7 +186,7 @@ public class AwsMsg {
 			m_textlines[5].length() > 0) 
 		{
 			m.addPage();
-			m.setFont(m_fontnumpg2);
+			m.setFont(m_fontnumpg2, null);
 			m.addText(m_textlines[3]);
 			m.addLine();
 			m.addText(m_textlines[4]);
