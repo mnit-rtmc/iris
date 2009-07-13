@@ -946,24 +946,32 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			throw new ChangeVetoException("Width/height is null");
 	}
 
-	/** Check if a message has priority over existing messages */
+	/** Check if a message has priority over existing messages.
+	 * @param ap Activation priority of new message.
+	 * @return true If priority is high enough to deploy. */
 	public boolean checkPriority(int ap) {
 		return checkCurrentPriority(ap) && checkNextPriority(ap);
 	}
 
-	/** Check if a message has priority over "current" message */
+	/** Check if a message has priority over "current" message.
+	 * @param ap Activation priority of new message.
+	 * @return true If priority is high enough to deploy. */
 	protected boolean checkCurrentPriority(int ap) {
 		SignMessageImpl m = (SignMessageImpl)messageCurrent;
 		return ap >= m.getRunTimePriority();
 	}
 
-	/** Check if a message has priority over "next" message */
+	/** Check if a message has priority over "next" message.
+	 * @param ap Activation priority of new message.
+	 * @return true If priority is high enough to deploy. */
 	protected boolean checkNextPriority(int ap) {
 		SignMessageImpl n = (SignMessageImpl)messageNext;
 		return n == null || ap >= n.getRunTimePriority();
 	}
 
-	/** Check if activation priority should allow blanking the sign */
+	/** Check if activation priority should allow blanking the sign.
+	 * @param ap Activation priority of new message.
+	 * @return true If current message should be blanked. */
 	protected boolean checkPriorityBlank(int ap) {
 		SignMessageImpl m = (SignMessageImpl)messageCurrent;
 		return ap == m.getRunTimePriority();
