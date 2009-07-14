@@ -211,19 +211,6 @@ public class MultiString {
 		return true;
 	}
 
-	/** Set page times.
-	 * @param pt_on Page on-time (tenths of second; null for default).
-	 * @param pt_off Page off-time (tenths of second; null for default). */
-	public void setPageTimes(Integer pt_on, Integer pt_off) {
-		b.append("[pt");
-		if(pt_on != null)
-			b.append(pt_on);
-		b.append('o');
-		if(pt_off != null)
-			b.append(pt_off);
-		b.append("]");
-	}
-
 	/** Add a spann of text */
 	public void addSpan(String s) {
 		if(s != null && s.length() > 0) {
@@ -246,6 +233,19 @@ public class MultiString {
 	public void addPage() {
 		b.append(NEWPAGE);
 		trailing = false;
+	}
+
+	/** Set page times.
+	 * @param pt_on Page on-time (tenths of second; null for default).
+	 * @param pt_off Page off-time (tenths of second; null for default). */
+	public void setPageTimes(Integer pt_on, Integer pt_off) {
+		b.append("[pt");
+		if(pt_on != null)
+			b.append(pt_on);
+		b.append('o');
+		if(pt_off != null)
+			b.append(pt_off);
+		b.append("]");
 	}
 
 	/** Add a graphic */
