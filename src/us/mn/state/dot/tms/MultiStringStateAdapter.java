@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,10 +74,12 @@ public class MultiStringStateAdapter implements MultiStringState {
 
 	/** Set the foreground color */
 	public void setColorForeground(int r, int g, int b) {
+		// subclass must handle
 	}
 
 	/** Set the text rectangle */
 	public void setTextRectangle(int x, int y, int w, int h) {
+		// subclass must handle
 	}
 
 	/** Font number */
@@ -103,9 +105,16 @@ public class MultiStringStateAdapter implements MultiStringState {
 
 	/** Add a span of text */
 	public void addSpan(String span) {
+		// subclass must handle
 	}
 
 	/** Add a graphic */
 	public void addGraphic(int g_num, Integer x, Integer y, Integer g_id) {
+		// subclass must handle
+	}
+
+	/** Add a travel time destination */
+	public void addTravelTime(String sid) {
+		// subclass must handle
 	}
 }

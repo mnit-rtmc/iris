@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MultiString {
+public class MultiString implements MultiStringState {
 
 	/** Regular expression to match supported MULTI tags.
 	 *  @see MultiStringTest */
@@ -318,6 +318,13 @@ public class MultiString {
 		b.append("]");
 	}
 
+	/** Add a travel time destination */
+	public void addTravelTime(String sid) {
+		b.append("[tt");
+		b.append(sid);
+		b.append("]");
+	}
+
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return b.toString();
@@ -360,6 +367,9 @@ public class MultiString {
 			} else if(tag.startsWith("tr")) {
 				String v = m.group(2);
 				parseTextRectangle(v, cb);
+			} else if(tag.startsWith("tt")) {
+				String v = m.group(2);
+				cb.addTravelTime(v);
 			}
 		}
 		if(offset < b.length())
