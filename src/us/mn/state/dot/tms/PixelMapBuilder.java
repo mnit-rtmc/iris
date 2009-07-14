@@ -67,7 +67,7 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 	/** Find all matching fonts */
 	public void findFonts(Checker<Font> checker) {
 		FontFinder ff = new FontFinder();
-		namespace.findObject(Font.SONAR_TYPE, ff);
+		FontHelper.find(ff);
 		ff.findFonts(checker);
 	}
 

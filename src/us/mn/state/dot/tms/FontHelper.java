@@ -32,11 +32,14 @@ public class FontHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Find the font using a font number */
+	/** Find a font using a checker */
+	static public Font find(Checker<Font> checker) {
+		return (Font)namespace.findObject(Font.SONAR_TYPE, checker);
+	}
+
+	/** Find a font using a font number */
 	static public Font find(final int f_num) {
-		return (Font)namespace.findObject(Font.SONAR_TYPE, 
-			new Checker<Font>()
-		{
+		return find(new Checker<Font>() {
 			public boolean check(Font f) {
 				return f.getNumber() == f_num;
 			}
