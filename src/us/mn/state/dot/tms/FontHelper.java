@@ -63,18 +63,15 @@ public class FontHelper extends BaseHelper {
 		return glyphs.values();
 	}
 
-	/** Get an array of all fonts by font number. */
-	static public int[] getFontNumbers() {
-		final ArrayList<Integer> al = new ArrayList<Integer>(3); 
-		namespace.findObject(Font.SONAR_TYPE, new Checker<Font>() {
-			public boolean check(Font f) {
-				al.add(new Integer(f.getNumber()));
-				return false;
+	/** Lookup a glyph in the specified font */
+	static public Glyph lookupGlyph(final Font font, final int cp) {
+		return (Glyph)namespace.findObject(Glyph.SONAR_TYPE,
+			new Checker<Glyph>()
+		{
+			public boolean check(Glyph g) {
+				return g.getFont() == font &&
+				       g.getCodePoint() == cp;
 			}
 		});
-		int[] ret = new int[al.size()];
-		for(int i = 0; i < ret.length; i++)
-			ret[i] = al.get(i);
-		return ret;
 	}
 }

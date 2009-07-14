@@ -360,24 +360,12 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 	protected Graphic lookupGraphic(Font font, int cp)
 		throws InvalidMessageException
 	{
-		Glyph g = lookupGlyph(font, cp);
+		Glyph g = FontHelper.lookupGlyph(font, cp);
 		if(g != null) {
 			Graphic gr = g.getGraphic();
 			if(gr != null)
 				return gr;
 		}
 		throw new InvalidMessageException("Invalid code point");
-	}
-
-	/** Lookup a glyph in the specified font */
-	protected Glyph lookupGlyph(final Font f, final int cp) {
-		return (Glyph)namespace.findObject(Glyph.SONAR_TYPE,
-			new Checker<Glyph>()
-		{
-			public boolean check(Glyph g) {
-				return g.getFont() == f &&
-				       g.getCodePoint() == cp;
-			}
-		});
 	}
 }
