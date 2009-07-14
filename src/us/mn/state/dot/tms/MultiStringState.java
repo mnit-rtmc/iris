@@ -47,14 +47,14 @@ public interface MultiStringState {
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
-	 * @param f_id Font version ID */
-	void setFont(int f_num, Integer f_id);
+	 * @param f_id Font version ID (4-digit hex) */
+	void setFont(int f_num, String f_id);
 
 	/** Add a span of text */
 	void addSpan(String span);
 
 	/** Add a graphic */
-	void addGraphic(int g_num, Integer x, Integer y, Integer g_id);
+	void addGraphic(int g_num, Integer x, Integer y, String g_id);
 
 	/** Add a travel time destination */
 	void addTravelTime(String sid);

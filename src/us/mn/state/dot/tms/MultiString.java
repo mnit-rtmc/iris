@@ -110,7 +110,9 @@ public class MultiString implements MultiStringState {
 	static protected void parseFont(String f, MultiStringState cb) {
 		String[] args = f.split(",", 2);
 		Integer f_num = parseInt(args, 0);
-		Integer f_id = parseInt(args, 1);
+		String f_id = null;
+		if(args.length > 1)
+			f_id = args[1];
 		if(f_num != null)
 			cb.setFont(f_num, f_id);
 	}
@@ -123,7 +125,9 @@ public class MultiString implements MultiStringState {
 		Integer g_num = parseInt(args, 0);
 		Integer x = parseInt(args, 1);
 		Integer y = parseInt(args, 2);
-		Integer g_id = parseInt(args, 3);
+		String g_id = null;
+		if(args.length > 3)
+			g_id = args[3];
 		if(g_num != null)
 			cb.addGraphic(g_num, x, y, g_id);
 	}
@@ -213,7 +217,7 @@ public class MultiString implements MultiStringState {
 
 	/** Add a spann of text */
 	public void addSpan(String s) {
-		if(s != null && s.length() > 0) {
+		if(s.length() > 0) {
 			b.append(s);
 			trailing = true;
 		}
@@ -267,7 +271,7 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Add a graphic */
-	public void addGraphic(int g_num, Integer x, Integer y, Integer g_id) {
+	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
 		b.append("[g");
 		b.append(g_num);
 		if(x != null && y != null) {
@@ -284,7 +288,7 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Set a new font number */
-	public void setFont(int f_num, Integer f_id) {
+	public void setFont(int f_num, String f_id) {
 		b.append("[fo");
 		b.append(f_num);
 		if(f_id != null) {
@@ -384,7 +388,7 @@ public class MultiString implements MultiStringState {
 				_b.append(span);
 			}
 			public void addGraphic(int g_num, Integer x, Integer y,
-				Integer g_id)
+				String g_id)
 			{
 				_b.append("GRAPHIC");
 			}
@@ -427,45 +431,20 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Return the MULTI string as a normalized valid MULTI string.
-	 *  @return A normalized MULTI string with lowercase spans converted
-	 *	    to uppercase, invalid character removed, invalid tags
-	 *	    removed, etc. */
+	 * @return A normalized MULTI string with lowercase spans converted
+	 *         to uppercase, invalid character removed, invalid tags
+	 *         removed, etc. */
 	public String normalize() {
-		final StringBuilder _b = new StringBuilder();
-		parseNormalize(new NormalizeCallback() {
+		MultiString ms = new MultiString() {
 			public void addSpan(String s) {
-				s = (s == null ? "" : s.toUpperCase());
+				s = s.toUpperCase();
 				Matcher m = TEXT_PATTERN.matcher(s);
-				while(m.find()) {
-					_b.append(m.group());
-				}
+				while(m.find())
+					super.addSpan(m.group());
 			}
-			public void addTag(String tag) {
-				_b.append(tag);
-			}
-		});
-		return _b.toString();
-	}
-
-	/** MULTI string parsing callback interface */
-	public interface NormalizeCallback {
-		void addSpan(String span);
-		void addTag(String tag);
-	}
-
-	/** Parse the MULTI string.
-	 * @param cb Normalization callback. */
-	protected void parseNormalize(NormalizeCallback cb) {
-		int offset = 0;
-		Matcher m = TAG.matcher(b);
-		while(m.find()) {
-			if(m.start() > offset)
-				cb.addSpan(b.substring(offset, m.start()));
-			offset = m.end();
-			cb.addTag(m.group());
-		}
-		if(offset < b.length())
-			cb.addSpan(b.substring(offset));
+		};
+		parse(ms);
+		return ms.toString();
 	}
 
 	/** 

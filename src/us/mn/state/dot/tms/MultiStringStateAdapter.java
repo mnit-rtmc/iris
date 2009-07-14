@@ -87,8 +87,8 @@ public class MultiStringStateAdapter implements MultiStringState {
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
-	 * @param f_id Font version ID */
-	public void setFont(int f_num, Integer f_id) {
+	 * @param f_id Font version ID (4-digit hex) */
+	public void setFont(int f_num, String f_id) {
 		ms_fnum = f_num;
 	}
 
@@ -109,7 +109,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 	}
 
 	/** Add a graphic */
-	public void addGraphic(int g_num, Integer x, Integer y, Integer g_id) {
+	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
 		// subclass must handle
 	}
 

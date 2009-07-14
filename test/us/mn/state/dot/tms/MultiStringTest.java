@@ -75,16 +75,50 @@ public class MultiStringTest extends TestCase {
 			equals("ABC"));
 		assertTrue(new MultiString("AB|{}{}C{}").normalize().
 			equals("ABC"));
-		assertTrue(new MultiString("ABC[nl]").normalize().
-			equals("ABC[nl]"));
-		assertTrue(new MultiString("ABC[nl3]").normalize().
-			equals("ABC[nl3]"));
-		assertTrue(new MultiString("ABC[np]").normalize().
-			equals("ABC[np]"));
-		assertTrue(new MultiString("ABC[jl]").normalize().
-			equals("ABC[jl]"));
 		assertTrue(new MultiString("ABC DEF").normalize().
 			equals("ABC DEF"));
+		assertTrue(new MultiString("ABC[nl]DEF").normalize().
+			equals("ABC[nl]DEF"));
+		assertTrue(new MultiString("ABC[nl3]DEF").normalize().
+			equals("ABC[nl]DEF"));
+		assertTrue(new MultiString("ABC[np]DEF").normalize().
+			equals("ABC[np]DEF"));
+		assertTrue(new MultiString("ABC[jl4]DEF").normalize().
+			equals("ABC[jl4]DEF"));
+		assertTrue(new MultiString("ABC[jl6]DEF").normalize().
+			equals("ABCDEF"));
+		assertTrue(new MultiString("ABC[jp4]DEF").normalize().
+			equals("ABC[jp4]DEF"));
+		assertTrue(new MultiString("[fo3]ABC DEF").normalize().
+			equals("[fo3]ABC DEF"));
+		assertTrue(new MultiString("[fo3,beef]ABC DEF").normalize().
+			equals("[fo3,beef]ABC DEF"));
+		assertTrue(new MultiString("[g1]").normalize().
+			equals("[g1]"));
+		assertTrue(new MultiString("[g1,5,5]").normalize().
+			equals("[g1,5,5]"));
+		assertTrue(new MultiString("[g1,5,5,beef]").normalize().
+			equals("[g1,5,5,beef]"));
+		assertTrue(new MultiString("[cf255,255,255]").normalize().
+			equals("[cf255,255,255]"));
+		assertTrue(new MultiString("[cf0,255,255]").normalize().
+			equals("[cf0,255,255]"));
+		assertTrue(new MultiString("[cf0,255,0]").normalize().
+			equals("[cf0,255,0]"));
+		assertTrue(new MultiString("[pto]").normalize().
+			equals("[pto]"));
+		assertTrue(new MultiString("[pt10o]").normalize().
+			equals("[pt10o]"));
+		assertTrue(new MultiString("[pt10o5]").normalize().
+			equals("[pt10o5]"));
+		assertTrue(new MultiString("[pto5]").normalize().
+			equals("[pto5]"));
+		assertTrue(new MultiString("[tr1,1,40,20]").normalize().
+			equals("[tr1,1,40,20]"));
+		assertTrue(new MultiString("[tr1,1,0,0]").normalize().
+			equals("[tr1,1,0,0]"));
+		assertTrue(new MultiString("[ttS100]").normalize().
+			equals("[ttS100]"));
 		// FIXME: note, this case fails, should it? This causes
 		//        mismatches in the quick message library between
 		//        what the user typed and lib messages.
