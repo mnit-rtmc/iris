@@ -536,15 +536,15 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Return the existing MULTI string with all of the on-times 
-	 *  replaced with the specified value. If no on-time is specified
-	 *  then a page time tag is prepended.
-	 *  @param pont Page on-time in tenths of a second.
-	 *  @return The updated MULTI string. */
-	public String replacePageOnTime(final int pont) {
+	 * replaced with the specified value. If no on-time is specified
+	 * then a page time tag is prepended.
+	 * @param pt_on Page on-time in tenths of a second.
+	 * @return The updated MULTI string. */
+	public String replacePageOnTime(final int pt_on) {
 		final StringBuilder ret = new StringBuilder();
 		if(b.toString().indexOf("[pt") < 0) {
 			MultiString t = new MultiString();
-			t.setPageTimes(pont, null);
+			t.setPageTimes(pt_on, null);
 			return t.toString() + b.toString();
 		}
 		parseNormalize(new NormalizeCallback() {
@@ -564,7 +564,7 @@ public class MultiString implements MultiStringState {
 					// page on time: replace existing
 					if(t.length >= 1 && t[0].length() > 0)
 						ret.append(SString.
-							intToString(pont,0));
+							intToString(pt_on, 0));
 					ret.append('o');
 					// page off time: use existing
 					if(t.length >= 2 && t[1].length() > 0)
