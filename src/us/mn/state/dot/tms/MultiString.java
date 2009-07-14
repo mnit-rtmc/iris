@@ -235,6 +235,24 @@ public class MultiString {
 		trailing = false;
 	}
 
+	/** Set the page justification */
+	public void setJustificationPage(JustificationPage jp) {
+		if(jp != JustificationPage.UNDEFINED) {
+			b.append("[jp");
+			b.append(jp.ordinal());
+			b.append("]");
+		}
+	}
+
+	/** Set the line justification */
+	public void setJustificationLine(JustificationLine jl) {
+		if(jl != JustificationLine.UNDEFINED) {
+			b.append("[jl");
+			b.append(jl.ordinal());
+			b.append("]");
+		}
+	}
+
 	/** Set page times.
 	 * @param pt_on Page on-time (tenths of second; null for default).
 	 * @param pt_off Page off-time (tenths of second; null for default). */
