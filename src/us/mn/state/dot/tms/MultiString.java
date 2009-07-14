@@ -321,11 +321,11 @@ public class MultiString {
 				cb.addPage();
 			else if(tag.equals("jl")) {
 				String v = m.group(2);
-				cb.setLineJustification(
+				cb.setJustificationLine(
 					JustificationLine.parse(v));
 			} else if(tag.equals("jp")) {
 				String v = m.group(2);
-				cb.setPageJustification(
+				cb.setJustificationPage(
 					JustificationPage.parse(v));
 			} else if(tag.equals("cf")) {
 				String v = m.group(2);

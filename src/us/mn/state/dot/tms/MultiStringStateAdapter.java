@@ -38,7 +38,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 	protected MultiString.JustificationPage ms_justp;
 
 	/** Set the page justification */
-	public void setPageJustification(MultiString.JustificationPage jp) {
+	public void setJustificationPage(MultiString.JustificationPage jp) {
 		ms_justp = jp;
 	}
 
@@ -68,7 +68,7 @@ public class MultiStringStateAdapter implements MultiStringState {
 	protected MultiString.JustificationLine ms_justl;
 
 	/** Set the line justification */
-	public void setLineJustification(MultiString.JustificationLine jl) {
+	public void setJustificationLine(MultiString.JustificationLine jl) {
 		ms_justl = jl;
 	}
 

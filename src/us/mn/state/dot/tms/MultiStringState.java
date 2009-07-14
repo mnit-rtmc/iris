@@ -26,7 +26,7 @@ public interface MultiStringState {
 	void addPage();
 
 	/** Set the page justification */
-	void setPageJustification(MultiString.JustificationPage jp);
+	void setJustificationPage(MultiString.JustificationPage jp);
 
 	/** Set the page times.
 	 * @param pt_on Page on time (tenths of second; null means default)
@@ -37,7 +37,7 @@ public interface MultiStringState {
 	void addLine();
 
 	/** Set the line justification */
-	void setLineJustification(MultiString.JustificationLine jl);
+	void setJustificationLine(MultiString.JustificationLine jl);
 
 	/** Set the foreground color */
 	void setColorForeground(int r, int g, int b);
