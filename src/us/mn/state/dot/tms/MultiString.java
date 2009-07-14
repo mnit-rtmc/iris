@@ -287,6 +287,19 @@ public class MultiString {
 		b.append("]");
 	}
 
+	/** Set the text rectangle */
+	public void setTextRectangle(int x, int y, int w, int h) {
+		b.append("[tr");
+		b.append(x);
+		b.append(',');
+		b.append(y);
+		b.append(',');
+		b.append(w);
+		b.append(',');
+		b.append(h);
+		b.append("]");
+	}
+
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return b.toString();
