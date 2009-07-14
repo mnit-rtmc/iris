@@ -76,6 +76,10 @@ public class MultiStringStateAdapter implements MultiStringState {
 	public void setColorForeground(int r, int g, int b) {
 	}
 
+	/** Set the text rectangle */
+	public void setTextRectangle(int x, int y, int w, int h) {
+	}
+
 	/** Font number */
 	protected int ms_fnum;
 

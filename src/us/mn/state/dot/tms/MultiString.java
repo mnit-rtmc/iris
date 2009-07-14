@@ -128,7 +128,7 @@ public class MultiString {
 			mss.addGraphic(g_num, x, y, g_id);
 	}
 
-	/** Parse page times form a [pt.o.] tag.
+	/** Parse page times from a [pt.o.] tag.
 	 * @param v Page time tag value.
 	 * @param mss Callback to set page times. */
 	static protected void parsePageTimes(String v, MultiStringState mss) {
@@ -136,6 +136,19 @@ public class MultiString {
 		Integer pt_on = parseInt(args, 0);
 		Integer pt_off = parseInt(args, 1);
 		mss.setPageTimes(pt_on, pt_off);
+	}
+
+	/** Parse text rectangle from a [tr...] tag.
+	 * @param v Text rectangle tag value.
+	 * @param mss Callback to set text rectangle. */
+	static protected void parseTextRectangle(String v, MultiStringState cb){
+		String[] args = v.split(",", 4);
+		Integer x = parseInt(args, 0);
+		Integer y = parseInt(args, 1);
+		Integer w = parseInt(args, 2);
+		Integer h = parseInt(args, 3);
+		if(x != null && y != null && w != null && h != null)
+			cb.setTextRectangle(x, y, w, h);
 	}
 
 	/** Parse an integer value */
@@ -274,30 +287,6 @@ public class MultiString {
 		b.append("]");
 	}
 
-	/** Get an array of font numbers.
-	 * @param f_num Default font number, one based.
-	 * @return An array of font numbers for each page of the message. */
-	public int[] getFonts(final int f_num) {
-		if(f_num < 1 || f_num > 255)
-			return new int[0];
-		int np = getNumPages();
-		final int[] ret = new int[np]; // font numbers indexed by pg
-		for(int i = 0; i < ret.length; i++)
-			ret[i] = f_num;
-		MultiStringStateAdapter msa = new MultiStringStateAdapter() {
-			public void addSpan(String span) {
-				// note: fields in span use ms prefix
-				if(ms_page >= 0 && ms_page < ret.length)
-					ret[ms_page] = ms_fnum;
-				else
-					assert false : "bogus # pages";
-			}
-		};
-		msa.setFont(f_num, null);
-		parse(msa);
-		return ret;
-	}
-
 	/** Get the value of the MULTI string */
 	public String toString() {
 		return b.toString();
@@ -338,7 +327,8 @@ public class MultiString {
 				String v = m.group(2);
 				parsePageTimes(v, cb);
 			} else if(tag.startsWith("tr")) {
-				// FIXME: complete
+				String v = m.group(2);
+				parseTextRectangle(v, cb);
 			}
 		}
 		if(offset < b.length())
@@ -455,6 +445,30 @@ public class MultiString {
 	// see the above note
 	static public String flagIgnoredSignLineHack(String line) {
 		return "_" + line + "_";
+	}
+
+	/** Get an array of font numbers.
+	 * @param f_num Default font number, one based.
+	 * @return An array of font numbers for each page of the message. */
+	public int[] getFonts(final int f_num) {
+		if(f_num < 1 || f_num > 255)
+			return new int[0];
+		int np = getNumPages();
+		final int[] ret = new int[np]; // font numbers indexed by pg
+		for(int i = 0; i < ret.length; i++)
+			ret[i] = f_num;
+		MultiStringStateAdapter msa = new MultiStringStateAdapter() {
+			public void addSpan(String span) {
+				// note: fields in span use ms prefix
+				if(ms_page >= 0 && ms_page < ret.length)
+					ret[ms_page] = ms_fnum;
+				else
+					assert false : "bogus # pages";
+			}
+		};
+		msa.setFont(f_num, null);
+		parse(msa);
+		return ret;
 	}
 
 	/** Get an array of page on times. The page on time is assumed

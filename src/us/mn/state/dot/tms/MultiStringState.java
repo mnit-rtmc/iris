@@ -42,6 +42,9 @@ public interface MultiStringState {
 	/** Set the foreground color */
 	void setColorForeground(int r, int g, int b);
 
+	/** Set the text rectangle */
+	void setTextRectangle(int x, int y, int w, int h);
+
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
 	 * @param f_id Font version ID */
