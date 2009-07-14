@@ -541,39 +541,17 @@ public class MultiString implements MultiStringState {
 	 * @param pt_on Page on-time in tenths of a second.
 	 * @return The updated MULTI string. */
 	public String replacePageOnTime(final int pt_on) {
-		final StringBuilder ret = new StringBuilder();
-		if(b.toString().indexOf("[pt") < 0) {
-			MultiString t = new MultiString();
-			t.setPageTimes(pt_on, null);
-			return t.toString() + b.toString();
+		if(b.indexOf("[pt") < 0) {
+			MultiString ms = new MultiString();
+			ms.setPageTimes(pt_on, null);
+			return ms.toString() + toString();
 		}
-		parseNormalize(new NormalizeCallback() {
-			public void addSpan(String s) {
-				s = (s == null ? "" : s);
-				Matcher m = TEXT_PATTERN.matcher(s);
-				while(m.find()) {
-					ret.append(m.group());
-				}
+		MultiString ms = new MultiString() {
+			public void setPageTimes(Integer on, Integer off) {
+				super.setPageTimes(pt_on, off);
 			}
-			// e.g. tag = "[pt25o15]"
-			public void addTag(String tag) {
-				if(tag.startsWith("[pt")) {
-					ret.append("[pt");
-					//String v = m.group(2); // e.g. 25o6
-					String[] t = tag.split("o", 2);
-					// page on time: replace existing
-					if(t.length >= 1 && t[0].length() > 0)
-						ret.append(SString.
-							intToString(pt_on, 0));
-					ret.append('o');
-					// page off time: use existing
-					if(t.length >= 2 && t[1].length() > 0)
-						ret.append(t[1]);
-				} else {
-					ret.append(tag);
-				}
-			}
-		});
-		return ret.toString();
+		};
+		parse(ms);
+		return ms.toString();
 	}
 }
