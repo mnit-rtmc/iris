@@ -191,6 +191,25 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 				// not much we can do here ...
 			}
 		}
+		public void addGraphic(int g_num, Integer x, Integer y,
+			String g_id)
+		{
+			Graphic graphic = GraphicHelper.find(g_num);
+			if(graphic == null)
+				return;
+			int x0 = 0;
+			int y0 = 0;
+			if(x != null)
+				x0 = x - 1;
+			if(y != null)
+				y0 = y - 1;
+			try {
+				renderGraphic(graphic, bg, x0, y0);
+			}
+			catch(IOException e) {
+				// not much we can do here ...
+			}
+		}
 	}
 
 	/** Calculate the number of text lines on a page */

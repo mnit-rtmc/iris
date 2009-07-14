@@ -34,6 +34,15 @@ public class GraphicHelper extends BaseHelper {
 			checker);
 	}
 
+	/** Find a graphic using a graphic number */
+	static public Graphic find(final int g_num) {
+		return find(new Checker<Graphic>() {
+			public boolean check(Graphic g) {
+				return g.getGNumber() == g_num;
+			}
+		});
+	}
+
 	/** Lookup the graphic with the specified name */
 	static public Graphic lookup(String name) {
 		return (Graphic)namespace.lookupObject(Graphic.SONAR_TYPE,name);
