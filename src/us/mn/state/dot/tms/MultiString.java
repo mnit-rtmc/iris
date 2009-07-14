@@ -534,24 +534,4 @@ public class MultiString implements MultiStringState {
 		});
 		return ret;
 	}
-
-	/** Return the existing MULTI string with all of the on-times 
-	 * replaced with the specified value. If no on-time is specified
-	 * then a page time tag is prepended.
-	 * @param pt_on Page on-time in tenths of a second.
-	 * @return The updated MULTI string. */
-	public String replacePageOnTime(final int pt_on) {
-		if(b.indexOf("[pt") < 0) {
-			MultiString ms = new MultiString();
-			ms.setPageTimes(pt_on, null);
-			return ms.toString() + toString();
-		}
-		MultiString ms = new MultiString() {
-			public void setPageTimes(Integer on, Integer off) {
-				super.setPageTimes(pt_on, off);
-			}
-		};
-		parse(ms);
-		return ms.toString();
-	}
 }
