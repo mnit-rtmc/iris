@@ -38,10 +38,6 @@ public class MultiString implements MultiStringState {
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
 		"[ !#$%&()*+,-./0-9:;<=>?@A-Z]*");
 
-	/** Regular expression to match travel time tag */
-	static protected final Pattern TRAVEL_TAG = Pattern.compile(
-		"(.*?)\\[tt([A-Za-z0-9]+)\\]");
-
 	/** New line MULTI tag */
 	static public final String NEWLINE = "[nl]";
 
@@ -336,6 +332,11 @@ public class MultiString implements MultiStringState {
 		return b.toString();
 	}
 
+	/** Clear the MULTI string */
+	public void clear() {
+		b.setLength(0);
+	}
+
 	/** Parse the MULTI string.
 	 * @param cb A callback which keeps track of the MULTI state. */
 	public void parse(MultiStringState cb) {
@@ -404,33 +405,6 @@ public class MultiString implements MultiStringState {
 		MultiStringStateAdapter msa = new MultiStringStateAdapter();
 		parse(msa);
 		return msa.ms_page + 1;
-	}
-
-	/** Travel time calculating callback interface */
-	public interface TravelCallback {
-
-		/** Calculate the travel time to a destination */
-		String calculateTime(String sid) 
-			throws InvalidMessageException;
-
-		/** Check if the callback changed state */
-		boolean isChanged();
-	}
-
-	/** Replace travel time tags with current travel time data */
-	public String replaceTravelTimes(TravelCallback cb)
-		throws InvalidMessageException
-	{
-		int end = 0;
-		StringBuilder _b = new StringBuilder();
-		Matcher m = TRAVEL_TAG.matcher(b);
-		while(m.find()) {
-			_b.append(m.group(1));
-			_b.append(cb.calculateTime(m.group(2)));
-			end = m.end();
-		}
-		_b.append(b.substring(end));
-		return _b.toString();
 	}
 
 	/** Return the MULTI string as a normalized valid MULTI string.

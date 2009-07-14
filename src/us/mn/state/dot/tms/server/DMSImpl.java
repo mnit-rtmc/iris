@@ -1263,7 +1263,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		DMSMessagePriority p = DMSMessagePriority.fromOrdinal(
 			da.getPriority());
 		String m = createMulti(da.getQuickMessage());
-		if(!"".equals(m)) {
+		if(m != null) {
 			messageSched = createMessage(m, p, p, true, 2);
 			is_scheduled = true;
 		}
@@ -1288,70 +1288,91 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a MULTI string for a quick message */
 	protected String createMulti(QuickMessage qm) {
-		if(qm != null) {
-			try {
-				return replaceTravelTimes(qm.getMulti());
-			}
-			catch(InvalidMessageException e) {
-				if(RouteBuilder.TRAVEL_LOG.isOpen()) {
-					RouteBuilder.TRAVEL_LOG.log(
-						e.getMessage());
-				}
+		if(qm != null)
+			return replaceTravelTimes(qm.getMulti());
+		else
+			return null;
+	}
+
+	/** MultiString for replacing travel time tags */
+	protected class TravelCallback extends MultiString {
+
+		/* If all routes are on the same corridor, when the
+		 * "OVER X" form is used, it must be used for all
+		 * destinations. So, first we must calculate the times
+		 * for each destination. Then, determine if the "OVER"
+		 * form should be used. After that, replace the travel
+		 * time tags with the selected values. */
+		protected boolean any_over = false;
+		protected boolean all_over = false;
+
+		protected boolean valid = true;
+
+		/** Add a travel time destination */
+		public void addTravelTime(String sid) {
+			Route r = lookupRoute(sid);
+			if(r != null)
+				addTravelTime(r);
+			else {
+				logTravel("NO ROUTE TO " + sid);
+				valid = false;
 			}
 		}
-		return "";
+
+		/** Add a travel time for a route */
+		protected void addTravelTime(Route r) {
+			boolean final_dest = isFinalDest(r);
+			try {
+				int mn = calculateTravelTime(r, final_dest);
+				int slow = maximumTripMinutes(r.getLength());
+				addTravelTime(mn, slow);
+			}
+			catch(BadRouteException e) {
+				logTravel("BAD ROUTE, " + e.getMessage());
+				valid = false;
+			}
+		}
+
+		/** Add a travel time */
+		protected void addTravelTime(int mn, int slow) {
+			boolean over = mn > slow;
+			if(over) {
+				any_over = true;
+				mn = slow;
+			}
+			if(over || all_over) {
+				mn = roundUp5Min(mn);
+				addSpan("OVER " + String.valueOf(mn));
+			} else
+				addSpan(String.valueOf(mn));
+		}
+
+		/** Check if the callback has changed formatting mode */
+		protected boolean isChanged() {
+			all_over = any_over && isSingleCorridor();
+			return all_over;
+		}
+	}
+
+	/** Log a travel time error */
+	protected void logTravel(String m) {
+		if(RouteBuilder.TRAVEL_LOG.isOpen())
+			RouteBuilder.TRAVEL_LOG.log(name + ": " + m);
 	}
 
 	/** Replace travel time tags in a MULTI string */
-	protected String replaceTravelTimes(String trav)
-		throws InvalidMessageException
-	{
+	protected String replaceTravelTimes(String trav) {
 		MultiString m = new MultiString(trav);
-		MultiString.TravelCallback cb = new MultiString.TravelCallback()
-		{
-			/* If all routes are on the same corridor, when the
-			 * "OVER X" form is used, it must be used for all
-			 * destinations. So, first we must calculate the times
-			 * for each destination. Then, determine if the "OVER"
-			 * form should be used. After that, replace the travel
-			 * time tags with the selected values. */
-			protected boolean any_over = false;
-			protected boolean all_over = false;
-
-			/** Calculate the travel time to the given station */
-			public String calculateTime(String sid)
-				throws InvalidMessageException
-			{
-				Route r = lookupRoute(sid);
-				if(r == null) {
-					throw new InvalidMessageException(name +
-						": NO ROUTE TO " + sid);
-				}
-				boolean final_dest = isFinalDest(r);
-				int mn = calculateTravelTime(r, final_dest);
-				int slow = maximumTripMinutes(r.getLength());
-				boolean over = mn > slow;
-				if(over) {
-					any_over = true;
-					mn = slow;
-				}
-				if(over || all_over) {
-					mn = roundUp5Min(mn);
-					return "OVER " + String.valueOf(mn);
-				} else
-					return String.valueOf(mn);
-			}
-
-			/** Check if the callback has changed formatting mode */
-			public boolean isChanged() {
-				all_over = any_over && isSingleCorridor();
-				return all_over;
-			}
-		};
-		String t = m.replaceTravelTimes(cb);
-		if(cb.isChanged())
-			t = m.replaceTravelTimes(cb);
-		return t;
+		TravelCallback cb = new TravelCallback();
+		m.parse(cb);
+		if(cb.isChanged()) {
+			cb.clear();
+			m.parse(cb);
+		}
+		if(cb.valid)
+			return cb.toString();
+		else
+			return null;
 	}
 
 	/** Mapping of station IDs to routes */
@@ -1390,16 +1411,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Calculate the travel time for the given route */
 	protected int calculateTravelTime(Route route, boolean final_dest)
-		throws InvalidMessageException
+		throws BadRouteException
 	{
-		try {
-			float hours = route.getTravelTime(final_dest);
-			return (int)(hours * 60) + 1;
-		}
-		catch(BadRouteException e) {
-			throw new InvalidMessageException(name +
-				": BAD ROUTE, " + e.getMessage());
-		}
+		float hours = route.getTravelTime(final_dest);
+		return (int)(hours * 60) + 1;
 	}
 
 	/** Are all the routes confined to the same single corridor */
