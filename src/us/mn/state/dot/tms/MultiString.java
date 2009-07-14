@@ -94,53 +94,53 @@ public class MultiString {
 
 	/** Parse a color foreground tag */
 	static protected void parseColorForeground(String v,
-		MultiStringState mss)
+		MultiStringState cb)
 	{
 		String[] args = v.split(",", 3);
 		Integer r = parseInt(args, 0);
 		Integer g = parseInt(args, 1);
 		Integer b = parseInt(args, 2);
 		if(r != null && g != null && b != null)
-			mss.setColorForeground(r, g, b);
+			cb.setColorForeground(r, g, b);
 	}
 
 	/** Parse a font number from an [fox] or [fox,cccc] tag.
 	 * @param f Font tag value (x or x,cccc from [fox] or [fox,cccc] tag).
-	 * @param mss Callback to set font information. */
-	static protected void parseFont(String f, MultiStringState mss) {
+	 * @param cb Callback to set font information. */
+	static protected void parseFont(String f, MultiStringState cb) {
 		String[] args = f.split(",", 2);
 		Integer f_num = parseInt(args, 0);
 		Integer f_id = parseInt(args, 1);
 		if(f_num != null)
-			mss.setFont(f_num, f_id);
+			cb.setFont(f_num, f_id);
 	}
 
 	/** Parse a graphic number from a [gn] or [gn,x,y] or [gn,x,y,cccc] tag.
 	 * @param g Graphic tag value (n or n,x,y or n,x,y,cccc from tag).
-	 * @param mss Callback to set graphic information */
-	static protected void parseGraphic(String g, MultiStringState mss) {
+	 * @param cb Callback to set graphic information */
+	static protected void parseGraphic(String g, MultiStringState cb) {
 		String[] args = g.split(",", 4);
 		Integer g_num = parseInt(args, 0);
 		Integer x = parseInt(args, 1);
 		Integer y = parseInt(args, 2);
 		Integer g_id = parseInt(args, 3);
 		if(g_num != null)
-			mss.addGraphic(g_num, x, y, g_id);
+			cb.addGraphic(g_num, x, y, g_id);
 	}
 
 	/** Parse page times from a [pt.o.] tag.
 	 * @param v Page time tag value.
-	 * @param mss Callback to set page times. */
-	static protected void parsePageTimes(String v, MultiStringState mss) {
+	 * @param cb Callback to set page times. */
+	static protected void parsePageTimes(String v, MultiStringState cb) {
 		String[] args = v.split("o", 2);
 		Integer pt_on = parseInt(args, 0);
 		Integer pt_off = parseInt(args, 1);
-		mss.setPageTimes(pt_on, pt_off);
+		cb.setPageTimes(pt_on, pt_off);
 	}
 
 	/** Parse text rectangle from a [tr...] tag.
 	 * @param v Text rectangle tag value.
-	 * @param mss Callback to set text rectangle. */
+	 * @param cb Callback to set text rectangle. */
 	static protected void parseTextRectangle(String v, MultiStringState cb){
 		String[] args = v.split(",", 4);
 		Integer x = parseInt(args, 0);
