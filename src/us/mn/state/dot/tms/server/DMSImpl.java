@@ -1263,8 +1263,10 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		DMSMessagePriority p = DMSMessagePriority.fromOrdinal(
 			da.getPriority());
 		String m = createMulti(da.getQuickMessage());
-		messageSched = createMessage(m, p, p, true, 2);
-		is_scheduled = true;
+		if(!"".equals(m)) {
+			messageSched = createMessage(m, p, p, true, 2);
+			is_scheduled = true;
+		}
 	}
 
 	/** Update the scheduled message on the sign */
