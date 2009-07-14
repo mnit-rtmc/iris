@@ -18,7 +18,9 @@ import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper for controllers.
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class ControllerHelper extends BaseHelper {
 
@@ -28,23 +30,17 @@ public class ControllerHelper extends BaseHelper {
 	}
 
 	/** Get the AWS controller associated with the AWS comm link.
-	 *  @return The AWS controller or null if one is not defined. */
+	 * @return The AWS controller or null if one is not defined. */
 	static public Controller getAwsController() {
 		final CommLink awscl = CommLinkHelper.getAwsCommLink();
 		if(awscl == null)
 			return null;
-		final Controller[] ret = new Controller[1];
-		namespace.findObject(Controller.SONAR_TYPE, 
+		return (Controller)namespace.findObject(Controller.SONAR_TYPE, 
 			new Checker<Controller>() 
-			{
-				public boolean check(Controller c) {
-					if(c.getCommLink() == awscl) {
-						ret[0] = c;
-						return true;
-					}
-					return false;
-				}
-			});
-		return ret[0];
+		{
+			public boolean check(Controller c) {
+				return c.getCommLink() == awscl;
+			}
+		});
 	}
 }

@@ -18,7 +18,9 @@ import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper for comm links.
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class CommLinkHelper extends BaseHelper {
 
@@ -28,24 +30,16 @@ public class CommLinkHelper extends BaseHelper {
 	}
 
 	/** Get the AWS comm link.
-	 *  @return The AWS comm link or null if one is not defined. If 
-	 *	    AWS comm links are defined (which shouldn't be) the 
-	 *	    1st one found is returned. */
+	 * @return The AWS comm link or null if one is not defined. If 
+	 *         AWS comm links are defined (which shouldn't be) the 
+	 *         1st one found is returned. */
 	static public CommLink getAwsCommLink() {
-		final CommLink[] ret = new CommLink[1];
-		namespace.findObject(CommLink.SONAR_TYPE, 
+		return (CommLink)namespace.findObject(CommLink.SONAR_TYPE, 
 			new Checker<CommLink>() 
-			{
-				public boolean check(CommLink c) {
-					if(c.getProtocol() == 
-						CommLink.PROTO_AWS) 
-					{
-						ret[0] = c;
-						return true;
-					}
-					return false;
-				}
-			});
-		return ret[0];
+		{
+			public boolean check(CommLink c) {
+				return c.getProtocol() == CommLink.PROTO_AWS;
+			}
+		});
 	}
 }
