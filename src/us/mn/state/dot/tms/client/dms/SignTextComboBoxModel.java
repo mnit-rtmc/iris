@@ -83,11 +83,27 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Get the selected item */
 	public Object getSelectedItem() {
 		SignText st = m_selected;
-		// this is a hack, see the note in ignoreLineHack()
-		if(st != null && st instanceof ClientSignText)
-			if(MultiString.ignoreLineHack(st.getMessage()))
+		// this is a hack, see the note in ignoreLineHack
+		if(st != null && st instanceof ClientSignText) {
+			if(ignoreLineHack(st.getMessage()))
 				return BLANK_SIGN_TEXT;
+		}
 		return st;
+	}
+
+	/** 
+	 * This is a hack. It is used by the ComboBoxEditor and 
+	 * SignMessageModel to recognize when a sign message line
+	 * should be ignored. By convention, a line begining and
+	 * ending with an underscore is to be ignored. IRIS assumes
+	 * that non-blank DMS messages have both a bitmap and multistring,
+	 * which is not the case for D10, so a bogus multistring is created
+	 * in comm/dmslite (with a prepended and appended underscore). 
+	 */
+	static public boolean ignoreLineHack(String line) {
+		if(line == null)
+			return false;
+		return SString.enclosedBy(line, "_");
 	}
 
 	/** 
