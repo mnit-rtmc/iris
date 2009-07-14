@@ -91,17 +91,16 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	 * @return Message text in MULTI markup.
 	 * @see us.mn.state.dot.tms.MultiString */
 	public void setMulti(String m) {
-		multi = (m == null ? "" : m);
+		multi = m;
 	}
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
-		if(multi.equals(m))
+		if(m.equals(multi))
 			return;
-		String nm = new MultiString(m).normalize();
-		if(!(new MultiString(nm).isValid()))
+		if(!new MultiString(m).isValid())
 			throw new ChangeVetoException("Invalid MULTI: " + m);
-		store.update(this, "multi", nm);
-		setMulti(nm);
+		store.update(this, "multi", m);
+		setMulti(m);
 	}
 }
