@@ -357,7 +357,7 @@ public class MultiString implements MultiStringState {
 	protected void parseTag(String tag, MultiStringState cb) {
 		Matcher mtag = TAGS.matcher(tag);
 		if(mtag.find()) {
-			String tid = mtag.group(1);
+			String tid = mtag.group(1).toLowerCase();
 			String tparam = mtag.group(2);
 			if(tid.equals("nl"))
 				cb.addLine();
@@ -375,11 +375,11 @@ public class MultiString implements MultiStringState {
 				parseFont(tparam, cb);
 			else if(tid.equals("g"))
 				parseGraphic(tparam, cb);
-			else if(tid.startsWith("pt"))
+			else if(tid.equals("pt"))
 				parsePageTimes(tparam, cb);
-			else if(tid.startsWith("tr"))
+			else if(tid.equals("tr"))
 				parseTextRectangle(tparam, cb);
-			else if(tid.startsWith("tt"))
+			else if(tid.equals("tt"))
 				cb.addTravelTime(tparam);
 		}
 	}
