@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Namespace;
 import java.io.IOException;
 import java.util.TreeMap;
 
@@ -27,9 +26,6 @@ import java.util.TreeMap;
  * @author Michael Darter
  */
 public class PixelMapBuilder extends MultiStringStateAdapter {
-
-	/** SONAR namespace */
-	protected final Namespace namespace;
 
 	/** Pixel width of sign */
 	public final int width;
@@ -47,7 +43,6 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 
 	/**
 	 * Create a new pixel map builder.
-	 * @param ns SONAR namespace.
 	 * @param w Sign width in pixels.
 	 * @param h Sign height in pixels.
 	 * @param cw Character width (pixels) for character-matrix signs.
@@ -55,8 +50,7 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 	 * @param ch Character height (pixels) for character- or line-matrix
 	 *           signs.  Use 0 for full-matrix signs.
 	 */
-	public PixelMapBuilder(Namespace ns, int w, int h, int cw, int ch) {
-		namespace = ns;
+	public PixelMapBuilder(int w, int h, int cw, int ch) {
 		width = w;
 		height = h;
 		c_width = cw;

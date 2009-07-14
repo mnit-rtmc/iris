@@ -368,8 +368,7 @@ public class MessagesTab extends JPanel {
 		Integer ch = proxy.getCharHeightPixels();
 		if(w == null || h == null || cw == null || ch == null)
 			return new BitmapGraphic[0];
-		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
-			w, h, cw, ch);
+		PixelMapBuilder b = new PixelMapBuilder(w, h, cw, ch);
 		return b.createPixmaps(ms);
 	}
 

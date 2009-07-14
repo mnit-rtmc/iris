@@ -286,7 +286,7 @@ public class DMSHelper extends BaseHelper {
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
 		if(w != null && h != null && cw != null && ch != null)
-			return new PixelMapBuilder(namespace, w, h, cw, ch);
+			return new PixelMapBuilder(w, h, cw, ch);
 		else
 			return null;
 	}
