@@ -139,7 +139,7 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 	/** Get the default font */
 	protected Font getDefaultFont() {
 		FontFinder ff = new FontFinder();
-		namespace.findObject(Font.SONAR_TYPE, ff);
+		FontHelper.find(ff);
 		return ff.getFirstFont();
 	}
 
@@ -150,17 +150,6 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 			return f.getNumber();
 		else
 			return 1;
-	}
-
-	/** Get a font with the given font number */
-	protected Font getFont(final int f_num) {
-		return (Font)namespace.findObject(Font.SONAR_TYPE,
-			new Checker<Font>()
-		{
-			public boolean check(Font f) {
-				return f.getNumber() == f_num;
-			}
-		});
 	}
 
 	/** Render a BitmapGraphic for each page */
@@ -195,7 +184,9 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 				render(span);
 		}
 		protected void render(String span) {
-			Font font = getFont(ms_fnum);
+			Font font = FontHelper.find(ms_fnum);
+			if(font == null)
+				return;
 			try {
 				int x = _calculatePixelX(ms_justl, font, span);
 				int y = _calculatePixelY(ms_justp, font,
