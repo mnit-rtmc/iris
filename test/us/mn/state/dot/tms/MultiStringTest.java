@@ -12,7 +12,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms;
 
 import junit.framework.TestCase;
@@ -20,7 +19,6 @@ import junit.framework.TestCase;
 /** 
  * MultiString test cases
  * @author Michael Darter
- * @created 05/05/09
  */
 public class MultiStringTest extends TestCase {
 
@@ -32,7 +30,7 @@ public class MultiStringTest extends TestCase {
 	/** test cases */
 	public void test() {
 		// isValid
-		assertTrue(new MultiString(null).isValid());
+		assertTrue(new MultiString().isValid());
 		assertTrue(new MultiString("").isValid());
 		assertTrue(new MultiString("ABC").isValid());
 		// nl tag

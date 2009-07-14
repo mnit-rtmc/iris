@@ -179,9 +179,11 @@ public class MultiString {
 	public MultiString() {
 	}
 
-	/** Create a new MULTI string */
-	public MultiString(String t) {
-		b.append(t);
+	/** Create a new MULTI string.
+	 * @param m MULTI string.
+	 * @throws NullPointerException if m is null. */
+	public MultiString(String m) {
+		b.append(m);
 		if(b.length() > 0)
 			trailing = true;
 	}
