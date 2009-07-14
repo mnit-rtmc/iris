@@ -77,6 +77,8 @@ public class MultiStringTest extends TestCase {
 			equals("ABC"));
 		assertTrue(new MultiString("ABC DEF").normalize().
 			equals("ABC DEF"));
+		assertTrue(new MultiString("ABC[bad]DEF").normalize().
+			equals("ABCDEF"));
 		assertTrue(new MultiString("ABC[nl]DEF").normalize().
 			equals("ABC[nl]DEF"));
 		assertTrue(new MultiString("ABC[nl3]DEF").normalize().

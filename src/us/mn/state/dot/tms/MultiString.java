@@ -27,10 +27,13 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class MultiString implements MultiStringState {
 
-	/** Regular expression to match supported MULTI tags.
-	 *  @see MultiStringTest */
+	/** Regular expression to locate tags */
 	static protected final Pattern TAG = Pattern.compile(
-		"\\[(nl|np|jl|jp|fo|g|cf|pt|tr|tt)([A-Za-z,0-9]*)\\]");
+		"\\[([A-Za-z,0-9]*)\\]");
+
+	/** Regular expression to match supported MULTI tags */
+	static protected final Pattern TAGS = Pattern.compile(
+		"(nl|np|jl|jp|fo|g|cf|pt|tr|tt)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
@@ -343,41 +346,42 @@ public class MultiString implements MultiStringState {
 			if(m.start() > offset)
 				cb.addSpan(b.substring(offset, m.start()));
 			offset = m.end();
-			String tag = m.group(1);
-			if(tag.equals("nl"))
-				cb.addLine();
-			else if(tag.equals("np"))
-				cb.addPage();
-			else if(tag.equals("jl")) {
-				String v = m.group(2);
-				cb.setJustificationLine(
-					JustificationLine.parse(v));
-			} else if(tag.equals("jp")) {
-				String v = m.group(2);
-				cb.setJustificationPage(
-					JustificationPage.parse(v));
-			} else if(tag.equals("cf")) {
-				String v = m.group(2);
-				parseColorForeground(v, cb);
-			} else if(tag.equals("fo")) {
-				String v = m.group(2);
-				parseFont(v, cb);
-			} else if(tag.equals("g")) {
-				String v = m.group(2);
-				parseGraphic(v, cb);
-			} else if(tag.startsWith("pt")) {
-				String v = m.group(2);
-				parsePageTimes(v, cb);
-			} else if(tag.startsWith("tr")) {
-				String v = m.group(2);
-				parseTextRectangle(v, cb);
-			} else if(tag.startsWith("tt")) {
-				String v = m.group(2);
-				cb.addTravelTime(v);
-			}
+			// m.group(1) strips off tag brackets
+			parseTag(m.group(1), cb);
 		}
 		if(offset < b.length())
 			cb.addSpan(b.substring(offset));
+	}
+
+	/** Parse one MULTI tag */
+	protected void parseTag(String tag, MultiStringState cb) {
+		Matcher mtag = TAGS.matcher(tag);
+		if(mtag.find()) {
+			String tid = mtag.group(1);
+			String tparam = mtag.group(2);
+			if(tid.equals("nl"))
+				cb.addLine();
+			else if(tid.equals("np"))
+				cb.addPage();
+			else if(tid.equals("jl")) {
+				cb.setJustificationLine(
+					JustificationLine.parse(tparam));
+			} else if(tid.equals("jp")) {
+				cb.setJustificationPage(
+					JustificationPage.parse(tparam));
+			} else if(tid.equals("cf"))
+				parseColorForeground(tparam, cb);
+			else if(tid.equals("fo"))
+				parseFont(tparam, cb);
+			else if(tid.equals("g"))
+				parseGraphic(tparam, cb);
+			else if(tid.startsWith("pt"))
+				parsePageTimes(tparam, cb);
+			else if(tid.startsWith("tr"))
+				parseTextRectangle(tparam, cb);
+			else if(tid.startsWith("tt"))
+				cb.addTravelTime(tparam);
+		}
 	}
 
 	/** Is the MULTI string blank? */
