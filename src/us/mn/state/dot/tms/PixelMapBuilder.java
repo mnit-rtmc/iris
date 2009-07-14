@@ -163,7 +163,8 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 		return cb.bg;
 	}
 
-	/** Bitmap renderer */
+	/** Bitmap renderer.
+	 * FIXME: add support for text rectangles */
 	protected class BitmapRenderer extends MultiStringStateAdapter {
 		protected final BitmapGraphic bg =
 			new BitmapGraphic(width, height);
