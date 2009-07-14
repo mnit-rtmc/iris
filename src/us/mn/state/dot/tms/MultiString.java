@@ -453,7 +453,7 @@ public class MultiString implements MultiStringState {
 	 *  @param def_pont Default page on time, in tenths of a sec.
 	 *  @return An integer array with length equal to the number 
 	 *	    of pages in the message, containing tenths of secs. */
-	public int[] getPageOnTime(final int def_pont) {
+	public int[] getPageOnTimes(final int def_pont) {
 		int np = getNumPages();
 		final int[] ret = new int[np]; // pg time indexed by pg
 		for(int i = 0; i < ret.length; ++i)

@@ -240,7 +240,7 @@ abstract public class OpDms extends OpDevice {
 	 *  string, the system default value is returned. */
 	protected DmsPgTime determinePageOnTime(String multi) {
 		// extract from 1st page of MULTI
-		int[] pont = new MultiString(multi).getPageOnTime(
+		int[] pont = new MultiString(multi).getPageOnTimes(
 			DmsPgTime.getDefaultOn().toTenths());
 		DmsPgTime ret;
 		if(pont != null && pont.length > 0)

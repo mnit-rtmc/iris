@@ -106,7 +106,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	 *  @param smulti A MULTI string, containing possible page times. */
 	public void setValue(String smulti) {
 		MultiString m = new MultiString(smulti);
-		int[] ponts = m.getPageOnTime(
+		int[] ponts = m.getPageOnTimes(
 			DmsPgTime.getDefaultOn().toTenths());
 		setValue(ponts.length > 0 ? new DmsPgTime(ponts[0]) : 
 			DmsPgTime.getDefaultOn());

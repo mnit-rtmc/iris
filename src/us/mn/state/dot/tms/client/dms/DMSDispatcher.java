@@ -646,8 +646,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		String m = sm.getMulti();
 		if(m == null)
 			return ret;
-		int[] pont = new MultiString(m).getPageOnTime(ret.toTenths());
-		if(pont == null || pont.length < 1)
+		int[] pont = new MultiString(m).getPageOnTimes(ret.toTenths());
+		if(pont.length < 1)
 			return ret;
 		// return 1st page on-time read, even if specified per page
 		return new DmsPgTime(pont[0]);
