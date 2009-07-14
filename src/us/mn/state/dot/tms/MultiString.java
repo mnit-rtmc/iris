@@ -16,7 +16,6 @@ package us.mn.state.dot.tms;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * NTCIP -- MULTI (MarkUp Language for Transportation Information),
@@ -449,11 +448,6 @@ public class MultiString implements MultiStringState {
 		};
 		parse(ms);
 		return ms.toString();
-	}
-
-	// see the above note
-	static public String flagIgnoredSignLineHack(String line) {
-		return "_" + line + "_";
 	}
 
 	/** Get an array of font numbers.

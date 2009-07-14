@@ -122,19 +122,23 @@ public class OpQueryMsg extends OpDms {
 		// default text if no bitmap, see comments in 
 		// method for why this is a hack.
 		for(int i = 0; i < pages.length; i++) {
-			multi.addSpan(MultiString.
-				flagIgnoredSignLineHack("OTHER"));
+			multi.addSpan(flagIgnoredSignLineHack("OTHER"));
 			multi.addLine();
-			multi.addSpan(MultiString.
-				flagIgnoredSignLineHack("SYSTEM"));
+			multi.addSpan(flagIgnoredSignLineHack("SYSTEM"));
 			multi.addLine();
-			multi.addSpan(MultiString.
-				flagIgnoredSignLineHack("MESSAGE"));
+			multi.addSpan(flagIgnoredSignLineHack("MESSAGE"));
 			multi.addLine();
 			if(i + 1 < pages.length)
 				multi.addPage();
 		}
 		return multi.toString();
+	}
+
+	/** This is a hack.
+	 * @see us.mn.state.dot.tms.client.dms.SignTextComboBoxModel.ignoreLineHack
+	 */
+	static protected String flagIgnoredSignLineHack(String line) {
+		return "_" + line + "_";
 	}
 
 	/** Check if an array of bitmaps is blank */
