@@ -38,7 +38,8 @@ public class GraphicHelper extends BaseHelper {
 	static public Graphic find(final int g_num) {
 		return find(new Checker<Graphic>() {
 			public boolean check(Graphic g) {
-				return g.getGNumber() == g_num;
+				Integer gn = g.getGNumber();
+				return gn != null && gn == g_num;
 			}
 		});
 	}
