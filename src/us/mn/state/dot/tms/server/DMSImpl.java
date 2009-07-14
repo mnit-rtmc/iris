@@ -1138,9 +1138,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	{
 		PixelMapBuilder builder = DMSHelper.createPixelMapBuilder(this);
 		if(builder != null) {
-			MultiString multi = new MultiString(m);
-			multi.parse(builder);
-			BitmapGraphic[] pages = builder.getPixmaps();
+			MultiString ms = new MultiString(m);
+			BitmapGraphic[] pages = builder.createPixmaps(ms);
 			return createMessageB(m, pages, ap, rp, s, d);
 		} else
 			return null;

@@ -17,12 +17,12 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.TreeMap;
 
 /**
  * A pixel map builder creates pixel maps for DMS display.
  * @see MultiStringState, MultiStringStateAdapter, MultiString
+ *
  * @author Douglas Lau
  * @author Michael Darter
  */
@@ -62,14 +62,6 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 		c_width = cw;
 		c_height = ch;
 		ms_fnum = getDefaultFontNumber();
-	}
-
-	/** Complete a MULTI text span */
-	public void addSpan(String span) {
-		Font font = getFont(ms_fnum);
-		spans.add(new TextSpan(ms_page, ms_justp, 
-			ms_line, ms_justl, font, span));
-		n_pages = Math.max(ms_page + 1, n_pages);
 	}
 
 	/** Find all matching fonts */
@@ -160,79 +152,6 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 			return 1;
 	}
 
-	/** Count of pages */
-	protected int n_pages = 1;
-
-	/** List of all text spans */
-	protected final LinkedList<TextSpan> spans = 
-		new LinkedList<TextSpan>();
-
-	/** Clear the pixel map builder */
-	public void clear() {
-		n_pages = 1;
-		spans.clear();
-	}
-
-	/** Text span encapsulation */
-	protected class TextSpan {
-		final int page;
-		final MultiString.JustificationPage jp;
-		final int line;
-		final MultiString.JustificationLine jl;
-		final Font font;
-		final String text;
-		TextSpan(int p, MultiString.JustificationPage _jp, int l,
-			MultiString.JustificationLine _jl, Font f, String t)
-		{
-			page = p;
-			jp = _jp;
-			line = l;
-			jl = _jl;
-			font = f;
-			text = t;
-		}
-
-		/** Render one span on the given bitmap */
-		protected void render(BitmapGraphic bg, int nltp) {
-			try {
-				int x = _calculatePixelX();
-				int y = _calculatePixelY(nltp);
-				renderSpan(bg, font, text, x, y);
-			}
-			catch(IndexOutOfBoundsException e) {
-//				PIXEL_LOG.log("Message text too long: " + text);
-			}
-			catch(InvalidMessageException e) {
-//				PIXEL_LOG.log(e.getMessage() + ": " + text);
-			}
-			catch(IOException e) {
-//				PIXEL_LOG.log("Invalid Base64 glyph data");
-			}
-		}
-
-		/** Calculate the X pixel position to place a span */
-		protected int _calculatePixelX() 
-			throws InvalidMessageException
-		{
-			int x = calculatePixelX(jl, font, text);
-			if(x >= 0)
-				return x;
-			throw new InvalidMessageException("Message too long: " +
-				text);
-		}
-
-		/** Calculate the Y pixel position to place a span.
-		 * @param nltp Number of lines of actual text on the page. */
-		protected int _calculatePixelY(int nltp)
-			throws InvalidMessageException
-		{
-			int y = calculatePixelY(jp, font, line, nltp);
-			if(y >= 0)
-				return y;
-			throw new InvalidMessageException("Too many lines");
-		}
-	}
-
 	/** Get a font with the given font number */
 	protected Font getFont(final int f_num) {
 		return (Font)namespace.findObject(Font.SONAR_TYPE,
@@ -244,33 +163,72 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 		});
 	}
 
-	/** Render and return a BitmapGraphic for each page. */
-	public BitmapGraphic[] getPixmaps() {
+	/** Render a BitmapGraphic for each page */
+	public BitmapGraphic[] createPixmaps(MultiString ms) {
+		int n_pages = ms.getNumPages();
 		BitmapGraphic[] pixmaps = new BitmapGraphic[n_pages];
 		for(int p = 0; p < n_pages; p++)
-			pixmaps[p] = createBitmap(p);
+			pixmaps[p] = createBitmap(ms, p);
 		return pixmaps;
 	}
 
 	/** Create and render a BitmapGraphic for the specified page number */
-	protected BitmapGraphic createBitmap(int p) {
-		int nltp = getLinesOnPage(p);
-		BitmapGraphic bg = new BitmapGraphic(width, height);
-		for(TextSpan span: spans) {
-			if(p == span.page)
-				span.render(bg, nltp);
+	protected BitmapGraphic createBitmap(MultiString ms, final int p) {
+		int nltp = getLinesOnPage(ms, p);
+		BitmapRenderer cb = new BitmapRenderer(nltp, p);
+		ms.parse(cb);
+		return cb.bg;
+	}
+
+	/** Bitmap renderer */
+	protected class BitmapRenderer extends MultiStringStateAdapter {
+		protected final BitmapGraphic bg =
+			new BitmapGraphic(width, height);
+		protected final int nltp;
+		protected final int page;
+		public BitmapRenderer(int nl, int p) {
+			nltp = nl;
+			page = p;
 		}
-		return bg;
+		public void addSpan(String span) {
+			if(page == ms_page)
+				render(span);
+		}
+		protected void render(String span) {
+			Font font = getFont(ms_fnum);
+			try {
+				int x = _calculatePixelX(ms_justl, font, span);
+				int y = _calculatePixelY(ms_justp, font,
+					ms_line, nltp);
+				renderSpan(bg, font, span, x, y);
+			}
+			catch(Exception e) {
+				// not much we can do here ...
+			}
+		}
 	}
 
 	/** Calculate the number of text lines on a page */
-	protected int getLinesOnPage(int p) {
-		int n_lines = 0;
-		for(TextSpan span: spans) {
-			if(p == span.page)
-				n_lines = Math.max(span.line + 1, n_lines);
-		}
-		return n_lines;
+	protected int getLinesOnPage(MultiString ms, final int p) {
+		final int[] n_lines = new int[1];
+		MultiStringStateAdapter cb = new MultiStringStateAdapter() {
+			public void addLine() {
+				if(p == ms_page)
+					n_lines[0]++;
+			}
+		};
+		ms.parse(cb);
+		return n_lines[0];
+	}
+
+	/** Calculate the X pixel position to place a span */
+	protected int _calculatePixelX(MultiString.JustificationLine jl,
+		Font font, String span) throws InvalidMessageException
+	{
+		int x = calculatePixelX(jl, font, span);
+		if(x >= 0)
+			return x;
+		throw new InvalidMessageException("Message too long: " + span);
 	}
 
 	/** Calculate the X pixel position to place text */
@@ -307,6 +265,17 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 			w += c.getWidth();
 		}
 		return w;
+	}
+
+	/** Calculate the Y pixel position to place a span.
+	 * @param nltp Number of lines of actual text on the page. */
+	protected int _calculatePixelY(MultiString.JustificationPage jp,
+		Font font, int line, int nltp) throws InvalidMessageException
+	{
+		int y = calculatePixelY(jp, font, line, nltp);
+		if(y >= 0)
+			return y;
+		throw new InvalidMessageException("Too many lines");
 	}
 
 	/** Calculate the Y pixel position to place text

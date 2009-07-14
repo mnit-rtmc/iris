@@ -361,7 +361,7 @@ public class MessagesTab extends JPanel {
 	}
 
 	/** Render the pages of a text message */
-	protected BitmapGraphic[] renderPages(MultiString multi) {
+	protected BitmapGraphic[] renderPages(MultiString ms) {
 		Integer w = proxy.getWidthPixels();
 		Integer h = getLineHeightPixels();
 		Integer cw = proxy.getCharWidthPixels();
@@ -370,8 +370,7 @@ public class MessagesTab extends JPanel {
 			return new BitmapGraphic[0];
 		PixelMapBuilder b = new PixelMapBuilder(state.getNamespace(),
 			w, h, cw, ch);
-		multi.parse(b);
-		return b.getPixmaps();
+		return b.createPixmaps(ms);
 	}
 
 	/** Get the selected sign text message */

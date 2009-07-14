@@ -572,10 +572,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected String createBitmaps(String multi) {
 		PixelMapBuilder b = builder;
 		if(b != null) {
-			b.clear();
-			MultiString m = new MultiString(multi);
-			m.parse(b);
-			return encodeBitmaps(b.getPixmaps());
+			MultiString ms = new MultiString(multi);
+			return encodeBitmaps(b.createPixmaps(ms));
 		} else
 			return null;
 	}
@@ -712,10 +710,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected BitmapGraphic[] getBitmaps(String m) {
 		PixelMapBuilder b = builder;
 		if(b != null) {
-			b.clear();
-			MultiString multi = new MultiString(m);
-			multi.parse(b);
-			return b.getPixmaps();
+			MultiString ms = new MultiString(m);
+			return b.createPixmaps(ms);
 		} else
 			return null;
 	}
