@@ -25,7 +25,7 @@ import java.util.TreeMap;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class PixelMapBuilder extends MultiStringStateAdapter {
+public class PixelMapBuilder {
 
 	/** Pixel width of sign */
 	public final int width;
@@ -55,7 +55,6 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 		height = h;
 		c_width = cw;
 		c_height = ch;
-		ms_fnum = getDefaultFontNumber();
 	}
 
 	/** Find all matching fonts */
@@ -173,6 +172,7 @@ public class PixelMapBuilder extends MultiStringStateAdapter {
 		public BitmapRenderer(int nl, int p) {
 			nltp = nl;
 			page = p;
+			ms_fnum = getDefaultFontNumber();
 		}
 		public void addSpan(String span) {
 			if(page == ms_page)
