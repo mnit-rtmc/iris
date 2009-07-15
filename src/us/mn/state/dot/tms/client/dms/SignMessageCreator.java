@@ -91,6 +91,7 @@ public class SignMessageCreator {
 				       bitmaps.equals(sm.getBitmaps()) &&
 				       api == sm.getActivationPriority() &&
 				       rpi == sm.getRunTimePriority() &&
+				       false == sm.getScheduled() &&
 				       duration == sm.getDuration();
 			}
 		});
