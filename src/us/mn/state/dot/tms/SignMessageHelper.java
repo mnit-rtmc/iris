@@ -81,8 +81,6 @@ public class SignMessageHelper extends BaseHelper {
 		if(sm == null)
 			return new int[0];
 		MultiString m = new MultiString(sm.getMulti());
-		if(m == null)
-			return new int[0];
 		return m.getFonts(f_num);
 	}
 
