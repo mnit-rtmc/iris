@@ -11,6 +11,39 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.93.0 (15 July 2009)</dt>
+	<dd><ul>
+		<li>
+			Travel time timing plans have been replaced with
+			DMS action plans.
+		</li>
+		<li>
+			Sign messages now have activation and run-time
+			priority, plus a "scheduled" flag.
+			Added more priority levels for use with DMS action
+			plans.
+			LCS indications now have different activation
+			priorities.
+		</li>
+		<li>
+			If a DMS has a scheduled message, blanking the sign
+			will send the scheduled message instead.
+		</li>
+		<li>
+			Rewrote the MULTI string parsing and formatting code.
+		</li>
+		<li>
+			Fixed some bugs.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.93.sql</code>.
+			WARNING: the migrate script may not work correctly,
+			depending on travel time configurations.
+			Please test before upgrading production systems.
+		</li>
+	</ul></dd>
 	<dt>3.92.0 (8 July 2009)</dt>
 	<dd><ul>
 		<li>
