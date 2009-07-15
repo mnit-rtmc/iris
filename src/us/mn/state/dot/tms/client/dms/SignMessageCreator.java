@@ -87,14 +87,23 @@ public class SignMessageCreator {
 		final int rpi = rp.ordinal();
 		return sign_messages.findObject(new Checker<SignMessage>() {
 			public boolean check(SignMessage sm) {
+				Integer d = sm.getDuration();
 				return multi.equals(sm.getMulti()) &&
 				       bitmaps.equals(sm.getBitmaps()) &&
 				       api == sm.getActivationPriority() &&
 				       rpi == sm.getRunTimePriority() &&
 				       false == sm.getScheduled() &&
-				       duration == sm.getDuration();
+				       integerEquals(duration, d);
 			}
 		});
+	}
+
+	/** Compare two (possibly-null) integers for equality */
+	static protected boolean integerEquals(Integer i0, Integer i1) {
+		if(i0 == null)
+			return i1 == null;
+		else
+			return i0.equals(i1);
 	}
 
 	/** 
