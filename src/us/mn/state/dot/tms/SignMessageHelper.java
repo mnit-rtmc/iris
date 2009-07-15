@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.LinkedList;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -29,6 +30,35 @@ public class SignMessageHelper extends BaseHelper {
 	/** Do not allow objects of this class */
 	private SignMessageHelper() {
 		assert false;
+	}
+
+	/** Find a sign message with matching attributes */
+	static public SignMessage find(final String multi, final String bitmaps,
+		DMSMessagePriority ap, DMSMessagePriority rp, final boolean s,
+		final Integer d)
+	{
+		final int api = ap.ordinal();
+		final int rpi = rp.ordinal();
+		return (SignMessage)namespace.findObject(SignMessage.SONAR_TYPE,
+			new Checker<SignMessage>()
+		{
+			public boolean check(SignMessage sm) {
+				return multi.equals(sm.getMulti()) &&
+				       bitmaps.equals(sm.getBitmaps()) &&
+				       api == sm.getActivationPriority() &&
+				       rpi == sm.getRunTimePriority() &&
+				       s == sm.getScheduled() &&
+				       integerEquals(d, sm.getDuration());
+			}
+		});
+	}
+
+	/** Compare two (possibly-null) integers for equality */
+	static protected boolean integerEquals(Integer i0, Integer i1) {
+		if(i0 == null)
+			return i1 == null;
+		else
+			return i0.equals(i1);
 	}
 
 	/** Compare 2 sign messages.

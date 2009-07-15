@@ -21,7 +21,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -1204,20 +1203,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		DMSMessagePriority ap, DMSMessagePriority rp, final boolean s,
 		final Integer d)
 	{
-		final int api = ap.ordinal();
-		final int rpi = rp.ordinal();
-		SignMessage esm = (SignMessage)namespace.findObject(
-			SignMessage.SONAR_TYPE, new Checker<SignMessage>()
-		{
-			public boolean check(SignMessage sm) {
-				return m.equals(sm.getMulti()) &&
-				       b.equals(sm.getBitmaps()) &&
-				       api == sm.getActivationPriority() &&
-				       rpi == sm.getRunTimePriority() &&
-				       s == sm.getScheduled() &&
-				       d == sm.getDuration();
-			}
-		});
+		SignMessage esm = SignMessageHelper.find(m, b, ap, rp, s, d);
 		if(esm != null)
 			return esm;
 		else

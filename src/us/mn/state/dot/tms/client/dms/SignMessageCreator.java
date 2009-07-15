@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -68,7 +69,8 @@ public class SignMessageCreator {
 	public SignMessage create(String multi, String bitmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
 	{
-		SignMessage sm = lookupMessage(multi, bitmaps, ap, rp,duration);
+		SignMessage sm = SignMessageHelper.find(multi, bitmaps, ap, rp,
+			false, duration);
 		if(sm != null)
 			return sm;
 		String name = createName();
@@ -76,34 +78,6 @@ public class SignMessageCreator {
 			return create(name, multi, bitmaps, ap, rp, duration);
 		else
 			return null;
-	}
-
-	/** Lookup an existing sign message */
-	protected SignMessage lookupMessage(final String multi,
-		final String bitmaps, DMSMessagePriority ap,
-		DMSMessagePriority rp, final Integer duration)
-	{
-		final int api = ap.ordinal();
-		final int rpi = rp.ordinal();
-		return sign_messages.findObject(new Checker<SignMessage>() {
-			public boolean check(SignMessage sm) {
-				Integer d = sm.getDuration();
-				return multi.equals(sm.getMulti()) &&
-				       bitmaps.equals(sm.getBitmaps()) &&
-				       api == sm.getActivationPriority() &&
-				       rpi == sm.getRunTimePriority() &&
-				       false == sm.getScheduled() &&
-				       integerEquals(duration, d);
-			}
-		});
-	}
-
-	/** Compare two (possibly-null) integers for equality */
-	static protected boolean integerEquals(Integer i0, Integer i1) {
-		if(i0 == null)
-			return i1 == null;
-		else
-			return i0.equals(i1);
 	}
 
 	/** 
