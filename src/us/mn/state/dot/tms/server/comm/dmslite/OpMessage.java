@@ -121,8 +121,6 @@ public class OpMessage extends OpDms {
 
 	/** create 2nd phase */
 	private Phase createPhaseTwo() {
-		if(!m_dms.shouldActivate(m_sm))
-			return null;
 		byte[] bitmaps = getBitmaps();
 		if(bitmaps == null)
 			return null;
