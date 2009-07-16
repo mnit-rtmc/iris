@@ -159,7 +159,12 @@ public class OpSendLCSIndications extends OpLCS {
 		if(ms != null) {
 			SignMessage sm = dms.createMessage(ms,
 				getActivationPriority(ind));
-			if(sm != null)
+			// We need to call shouldActivate here, because we're
+			// bypassing the standard doSetMessageNext call.
+			// The reason we bypass doSetMessageNext is we need
+			// to keep track of the operations, so we can tell
+			// when they have completed.  Ugly, but it works.
+			if(dms.shouldActivate(sm))
 				return NtcipPoller.createOperation(dms,sm,user);
 		}
 		return null;
