@@ -173,9 +173,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Create a blank message for the sign */
 	public SignMessage createBlankMessage() {
+		return createBlankMessage(DMSMessagePriority.OVERRIDE);
+	}
+
+	/** Create a blank message for the sign */
+	protected SignMessage createBlankMessage(DMSMessagePriority ap) {
 		String bitmaps = Base64.encode(new byte[0]);
-		return createMessage("", bitmaps, DMSMessagePriority.OVERRIDE,
-		       DMSMessagePriority.BLANK, false, null);
+		return createMessage("", bitmaps, ap, DMSMessagePriority.BLANK,
+			false, null);
 	}
 
 	/** Destroy an object */
@@ -1106,7 +1111,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public SignMessage createMessage(String m, DMSMessagePriority ap) {
 		MultiString ms = new MultiString(m);
 		if(ms.isBlank())
-			return createBlankMessage();
+			return createBlankMessage(ap);
 		else
 			return createMessage(m, ap, DMSMessagePriority.OPERATOR,
 				null);
