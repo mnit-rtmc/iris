@@ -106,7 +106,7 @@ public class ActionPlanPanel extends FormPanel {
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(ActionPlanModel.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
-		p_table.setVisibleRowCount(10);
+		p_table.setVisibleRowCount(6);
 		addRow(p_table);
 		addRow(del_p_btn);
 		del_p_btn.setEnabled(false);
@@ -115,7 +115,7 @@ public class ActionPlanPanel extends FormPanel {
 		t_table.setAutoCreateColumnsFromModel(false);
 		t_table.setColumnModel(TimeActionModel.createColumnModel());
 		t_table.setRowHeight(ROW_HEIGHT);
-		t_table.setVisibleRowCount(8);
+		t_table.setVisibleRowCount(12);
 		t_panel.addRow(t_table);
 		t_panel.addRow(del_t_btn);
 		del_t_btn.setEnabled(false);
@@ -124,7 +124,7 @@ public class ActionPlanPanel extends FormPanel {
 		d_table.setAutoCreateColumnsFromModel(false);
 		d_table.setColumnModel(DmsActionModel.createColumnModel());
 		d_table.setRowHeight(ROW_HEIGHT);
-		d_table.setVisibleRowCount(6);
+		d_table.setVisibleRowCount(10);
 		d_panel.addRow(d_table);
 		d_panel.addRow(del_d_btn);
 		del_d_btn.setEnabled(false);
