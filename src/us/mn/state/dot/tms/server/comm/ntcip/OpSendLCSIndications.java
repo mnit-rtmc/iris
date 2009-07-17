@@ -83,19 +83,21 @@ public class OpSendLCSIndications extends OpLCS {
 		for(int i = 0; i < lcss.length; i++) {
 			DMS dms = DMSHelper.lookup(lcss[i].getName());
 			if(dms instanceof DMSImpl)
-				sendIndication((DMSImpl)dms, indications[i]);
+				sendIndication((DMSImpl)dms, i);
 		}
 	}
 
 	/** Send an indication to a DMS */
-	protected void sendIndication(DMSImpl dms, int ind) {
+	protected void sendIndication(DMSImpl dms, int lane) {
+		int ind = indications[lane];
 		String ms = createIndicationMulti(dms, ind);
 		if(ms != null) {
 			SignMessage sm = dms.createMessage(ms,
 				getActivationPriority(ind));
-			if(sm != null) {
+			if(dms.shouldActivate(sm)) {
 				try {
 					dms.doSetMessageNext(sm, user);
+					ind_after[lane] = ind;
 				}
 				catch(TMSException e) {
 					e.printStackTrace();
