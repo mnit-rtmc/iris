@@ -380,9 +380,15 @@ public final class TMSImpl implements KmlDocument {
 	protected void performDmsAction(final DmsAction da) {
 		SignGroup sg = da.getSignGroup();
 		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					((DMSImpl)dms).performAction(da);
+			public boolean check(DMS d) {
+				if(d instanceof DMSImpl) {
+					final DMSImpl dms = (DMSImpl)d;
+					TIMER.addJob(new Job() {
+						public void perform() {
+							dms.performAction(da);
+						}
+					});
+				}
 				return false;
 			}
 		}, sg);
