@@ -383,6 +383,10 @@ public final class TMSImpl implements KmlDocument {
 			public boolean check(DMS d) {
 				if(d instanceof DMSImpl) {
 					final DMSImpl dms = (DMSImpl)d;
+					// We need to create a new Job here so
+					// that when performAction is called,
+					// we're not holding the SONAR TypeNode
+					// locks for DMS and DmsAction.
 					TIMER.addJob(new Job() {
 						public void perform() {
 							dms.performAction(da);

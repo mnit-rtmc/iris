@@ -92,6 +92,10 @@ public class OpSendLCSIndications extends OpLCS {
 		int ind = indications[lane];
 		String ms = createIndicationMulti(dms, ind);
 		if(ms != null) {
+			// NOTE: this is a *slow* operation, because it has to
+			//       schedule a job on the SONAR task processor
+			//       thread, which might have a queue of tasks
+			//       already pending.
 			SignMessage sm = dms.createMessage(ms,
 				getActivationPriority(ind));
 			if(dms.shouldActivate(sm)) {
