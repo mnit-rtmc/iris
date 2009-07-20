@@ -37,6 +37,9 @@ public class DMSHelper extends BaseHelper {
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "User Deployed";
 
+	/** Name of travel time style */
+	static public final String STYLE_TRAVEL_TIME = "Travel Time";
+
 	/** Name of scheduled style */
 	static public final String STYLE_SCHEDULED = "Scheduled";
 
@@ -65,9 +68,9 @@ public class DMSHelper extends BaseHelper {
 
 	/** all styles */
 	static public final String[] STYLES_ALL = {STYLE_AVAILABLE, 
-		STYLE_DEPLOYED, STYLE_SCHEDULED, STYLE_MAINTENANCE, 
-		STYLE_INACTIVE, STYLE_FAILED, STYLE_AWS_CONTROLLED, 
-		STYLE_NO_CONTROLLER};
+		STYLE_DEPLOYED, STYLE_SCHEDULED, STYLE_TRAVEL_TIME,
+		STYLE_MAINTENANCE, STYLE_INACTIVE, STYLE_FAILED,
+		STYLE_AWS_CONTROLLED, STYLE_NO_CONTROLLER};
 
 	/** Test if a DMS is available */
 	static public boolean isAvailable(DMS proxy) {
@@ -81,6 +84,19 @@ public class DMSHelper extends BaseHelper {
 	static public boolean isActive(DMS proxy) {
 		Controller ctr = proxy.getController();
 		return ctr != null && ctr.getActive();
+	}
+
+	/** Test if a DMS has a travel time message deployed */
+	static public boolean isTravelTime(DMS proxy) {
+		SignMessage sm = proxy.getMessageCurrent();
+		if(sm != null) {
+			return sm.getRunTimePriority() ==
+			       DMSMessagePriority.TRAVEL_TIME.ordinal();
+		} else {
+			// messageCurrent should never be null, so this means
+			// the proxy has just been removed
+			return false;
+		}
 	}
 
 	/** Test if a DMS has a scheduled message deployed */
@@ -162,6 +178,12 @@ public class DMSHelper extends BaseHelper {
 		       !isAwsDeployed(proxy);
 	}
 
+	/** Test if a DMS has been deployed by travel time */
+	static public boolean isTravelTimeDeployed(DMS proxy) {
+		return isMessageDeployed(proxy) &&
+		       isTravelTime(proxy);
+	}
+
 	/** Test if a DMS has been deployed by schedule */
 	static public boolean isScheduleDeployed(DMS proxy) {
 		return isMessageDeployed(proxy) &&
@@ -198,6 +220,8 @@ public class DMSHelper extends BaseHelper {
 			return isAvailable(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
 			return isUserDeployed(proxy);
+		else if(STYLE_TRAVEL_TIME.equals(s))
+			return isTravelTimeDeployed(proxy);
 		else if(STYLE_SCHEDULED.equals(s))
 			return isScheduleDeployed(proxy);
 		else if(STYLE_AWS_DEPLOYED.equals(s))
