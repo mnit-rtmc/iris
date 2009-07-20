@@ -153,7 +153,5 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		User o)
 	{
 		new OpSendLCSIndications(lcs_array, ind, o).start();
-		// FIXME: it would be nice to query the indications after a
-		//        short delay.
 	}
 }

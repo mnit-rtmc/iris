@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.comm.AddressedMessage;
 
 /**
  * Operation to send new indicaitons to a Lane Control Signal array.
@@ -57,6 +58,12 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Indications to send */
 	protected final Integer[] indications;
 
+	/** DMS corresponsing to each LCS in the array */
+	protected final DMSImpl[] dmss;
+
+	/** Sign messages for each DMS in the LCS array */
+	protected final SignMessage[] msgs;
+
 	/** User who sent the indications */
 	protected final User user;
 
@@ -64,54 +71,68 @@ public class OpSendLCSIndications extends OpLCS {
 	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
 		super(DEVICE_DATA, l);
 		indications = ind;
+		dmss = new DMSImpl[ind.length];
+		msgs = new SignMessage[ind.length];
 		user = u;
-		sendIndications();
+		lookupDMSs();
 	}
 
-	/** Create the first real phase of the operation */
-	protected Phase phaseOne() {
-		return null;
-	}
-
-	/** Send new indications to an LCS array */
-	protected void sendIndications() {
+	/** Lookup DMSs for an LCS array */
+	protected void lookupDMSs() {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if(lcss.length != indications.length) {
-			System.err.println("sendIndications: array invalid");
+			System.err.println("lookupDMS: array invalid");
 			return;
 		}
 		for(int i = 0; i < lcss.length; i++) {
 			DMS dms = DMSHelper.lookup(lcss[i].getName());
 			if(dms instanceof DMSImpl)
-				sendIndication((DMSImpl)dms, i);
+				dmss[i] = (DMSImpl)dms;
 		}
 	}
 
-	/** Send an indication to a DMS */
-	protected void sendIndication(DMSImpl dms, int lane) {
+	/** Create the first real phase of the operation */
+	protected Phase phaseOne() {
+		return new CreateSignMessages();
+	}
+
+	/** Phase to create sign messages */
+	protected class CreateSignMessages extends Phase {
+
+		/** Lane of DMS for sign message */
+		protected int lane = 0;
+
+		/** Create a sign message */
+		protected Phase poll(AddressedMessage mess) {
+			if(lane < msgs.length) {
+				msgs[lane] = createSignMessage(lane);
+				lane++;
+				return this;
+			} else
+				return new SendMessages();
+		}
+	}
+
+	/** Create a sign message */
+	protected SignMessage createSignMessage(int lane) {
 		int ind = indications[lane];
-		String ms = createIndicationMulti(dms, ind);
-		if(ms != null) {
-			// NOTE: this is a *slow* operation, because it has to
-			//       schedule a job on the SONAR task processor
-			//       thread, which might have a queue of tasks
-			//       already pending.
-			SignMessage sm = dms.createMessage(ms,
-				getActivationPriority(ind));
-			if(dms.shouldActivate(sm)) {
-				try {
-					dms.doSetMessageNext(sm, user);
-					ind_after[lane] = ind;
-				}
-				catch(TMSException e) {
-					e.printStackTrace();
-				}
+		DMSImpl dms = dmss[lane];
+		if(dms != null) {
+			String ms = createIndicationMulti(ind);
+			if(ms != null) {
+				// This is a *slow* operation, because it has
+				// to schedule a job on the SONAR task processor
+				// thread, which might have a queue of tasks
+				// already pending.
+				return dms.createMessage(ms,
+					getActivationPriority(ind));
 			}
 		}
+		return null;
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	protected String createIndicationMulti(DMS dms, int ind) {
+	protected String createIndicationMulti(int ind) {
 		String m = "";
 		LaneUseMulti lum = LaneUseMultiHelper.find(ind);
 		if(lum != null)
@@ -121,5 +142,33 @@ public class OpSendLCSIndications extends OpLCS {
 			return m;
 		else
 			return null;
+	}
+
+	/** Phase to send all sign messages to DMS */
+	protected class SendMessages extends Phase {
+
+		/** Send sign messages */
+		protected Phase poll(AddressedMessage mess) {
+			for(int lane = 0; lane < msgs.length; lane++)
+				sendIndication(lane);
+			return null;
+		}
+	}
+
+	/** Send an indication to a DMS */
+	protected void sendIndication(int lane) {
+		DMSImpl dms = dmss[lane];
+		if(dms != null) {
+			SignMessage sm = msgs[lane];
+			if(dms.shouldActivate(sm)) {
+				try {
+					dms.doSetMessageNext(sm, user);
+					ind_after[lane] = indications[lane];
+				}
+				catch(TMSException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 	}
 }
