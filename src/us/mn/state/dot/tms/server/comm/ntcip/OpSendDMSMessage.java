@@ -142,14 +142,18 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Get the validate message error */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsValidateMessageError error = new
-				DmsValidateMessageError();
+			DmsValidateMessageError error =
+				new DmsValidateMessageError();
 			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
+			DmsMultiSyntaxErrorPosition e_pos =
+				new DmsMultiSyntaxErrorPosition();
 			mess.add(error);
 			mess.add(m_err);
+			mess.add(e_pos);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + error);
 			DMS_LOG.log(dms.getName() + ": " + m_err);
+			DMS_LOG.log(dms.getName() + ": " + e_pos);
 			if(error.isSyntaxMulti())
 				errorStatus = m_err.toString();
 			else if(error.isError())
@@ -212,11 +216,15 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsActivateMsgError error = new DmsActivateMsgError();
 			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
+			DmsMultiSyntaxErrorPosition e_pos =
+				new DmsMultiSyntaxErrorPosition();
 			mess.add(error);
 			mess.add(m_err);
+			mess.add(e_pos);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + error);
 			DMS_LOG.log(dms.getName() + ": " + m_err);
+			DMS_LOG.log(dms.getName() + ": " + e_pos);
 			switch(error.getEnum()) {
 			case syntaxMULTI:
 				errorStatus = m_err.toString();
