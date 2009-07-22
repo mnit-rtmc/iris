@@ -51,7 +51,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			 * be a message on the sign, that's wrong and
 			 * needs to be updated */
 			if(!SignMessageHelper.isBlank(m))
-				setCurrentMessage("", null);
+				setCurrentMessage(dms.createBlankMessage());
 		} else {
 			/* The sign is not blank. If IRIS says it
 			 * should be blank, then we need to query the
@@ -60,16 +60,6 @@ public class OpQueryDMSMessage extends OpDMS {
 				return new QueryCurrentMessage();
 		}
 		return null;
-	}
-
-	/** Set the current message on the sign */
-	protected void setCurrentMessage(String multi, Integer duration) {
-		// FIXME: this should be on SONAR thread
-		SignMessage sm = dms.createMessage(multi,
-			DMSMessagePriority.OTHER_SYSTEM,
-			DMSMessagePriority.OTHER_SYSTEM, duration);
-		if(sm != null)
-			dms.setMessageCurrent(sm, null);
 	}
 
 	/** Phase to query the current message source */
@@ -108,5 +98,18 @@ public class OpQueryDMSMessage extends OpDMS {
 			}
 			return null;
 		}
+	}
+
+	/** Set the current message on the sign */
+	protected void setCurrentMessage(String multi, Integer duration) {
+		setCurrentMessage(dms.createMessage(multi,
+			DMSMessagePriority.OTHER_SYSTEM,
+			DMSMessagePriority.OTHER_SYSTEM, duration));
+	}
+
+	/** Set the current message on the sign */
+	protected void setCurrentMessage(SignMessage sm) {
+		if(sm != null)
+			dms.setMessageCurrent(sm, null);
 	}
 }
