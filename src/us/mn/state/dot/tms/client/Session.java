@@ -241,8 +241,7 @@ public class Session {
 
 	/** Add the incident tab */
 	protected void addIncidentTab() {
-		if(incLayer != null)
-			tabs.add(new IncidentTab(incLayer));
+		tabs.add(new IncidentTab(incLayer));
 	}
 
 	/** Add the LCS tab */
@@ -273,18 +272,7 @@ public class Session {
 		logger = l;
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer();
-
-		String i_loc = props.getProperty("tdxml.incident.url");
-		if(i_loc != null) {
-			URL u = new URL(i_loc);
-			if(SystemAttrEnum.INCIDENT_CALTRANS_ENABLE.getBoolean())
-				incLayer = new D10IncidentLayer(u, logger);
-			else
-				incLayer = new TmsIncidentLayer(u, logger);
-		} else {
-			incLayer = null;
-		}
-
+		incLayer = createIncidentLayer();
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		cam_manager = new CameraManager(this,
 			state.getCamCache().getCameras(), loc_manager);
@@ -305,13 +293,29 @@ public class Session {
 			addDMSTab();
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
 			addMeterTab();
-		addIncidentTab();
+		if(incLayer != null)
+			addIncidentTab();
 		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
 			addLcsTab();
 		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
 			addCameraTab();
 		if(namespace.canAdd(user, new Name(R_Node.SONAR_TYPE, "oname")))
 			addRoadwayTab();
+	}
+
+	/** Create the incident layer */
+	protected TmsIncidentLayer createIncidentLayer() throws TdxmlException,
+		IOException
+	{
+		String i_loc = props.getProperty("tdxml.incident.url");
+		if(i_loc != null) {
+			URL u = new URL(i_loc);
+			if(SystemAttrEnum.INCIDENT_CALTRANS_ENABLE.getBoolean())
+				return new D10IncidentLayer(u, logger);
+			else
+				return new TmsIncidentLayer(u, logger);
+		} else
+			return null;
 	}
 
 	/** Check if the user can update an attribute */
