@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
 import us.mn.state.dot.tms.client.incidents.IncidentTab;
+import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
@@ -255,6 +256,7 @@ public class Session {
 
 	/** Add the LCS tab */
 	protected void addLcsTab() throws IOException {
+		v_menu.add(new LaneUseMenu(this));
 		tabs.add(new LcsTab(this, lcs_array_manager));
 	}
 
