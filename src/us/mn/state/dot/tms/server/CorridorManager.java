@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -41,7 +40,7 @@ public class CorridorManager {
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */
-	public CorridorManager(ServerNamespace ns) throws NamespaceError {
+	public CorridorManager(ServerNamespace ns) {
 		namespace = ns;
 		namespace.findObject(R_Node.SONAR_TYPE,
 			new Checker<R_NodeImpl>()
@@ -68,22 +67,15 @@ public class CorridorManager {
 	/** Find downstream links (not in corridor) for the given node */
 	protected void findDownstreamLinks(R_NodeImpl r_node) {
 		r_node.clearDownstream();
-		try {
-			if(r_node.isExit())
-				linkExitToEntrance(r_node);
-			else if(r_node.isAccess())
-				linkAccessToEntrance(r_node);
-			// FIXME: link intersections together
-		}
-		catch(NamespaceError e) {
-			e.printStackTrace();
-		}
+		if(r_node.isExit())
+			linkExitToEntrance(r_node);
+		else if(r_node.isAccess())
+			linkAccessToEntrance(r_node);
+		// FIXME: link intersections together
 	}
 
 	/** Link an exit node with a corresponding entrance node */
-	protected void linkExitToEntrance(final R_NodeImpl r_node)
-		throws NamespaceError
-	{
+	protected void linkExitToEntrance(final R_NodeImpl r_node) {
 		final LinkedList<R_NodeImpl> links =
 			new LinkedList<R_NodeImpl>();
 		namespace.findObject(R_Node.SONAR_TYPE,
@@ -117,9 +109,7 @@ public class CorridorManager {
 	}
 
 	/** Link an access node with all corresponding entrance nodes */
-	protected void linkAccessToEntrance(final R_NodeImpl r_node)
-		throws NamespaceError
-	{
+	protected void linkAccessToEntrance(final R_NodeImpl r_node) {
 		namespace.findObject(R_Node.SONAR_TYPE,
 			new Checker<R_NodeImpl>()
 		{
