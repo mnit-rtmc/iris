@@ -21,7 +21,6 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.zip.GZIPOutputStream;
 import javax.xml.XMLConstants;
-import us.mn.state.dot.sonar.NamespaceError;
 
 /**
  * A simple class for writing out XML documents
@@ -91,7 +90,7 @@ abstract public class XmlWriter {
 	}
 
 	/** Write the XML file */
-	public void write() throws IOException, NamespaceError {
+	public void write() throws IOException {
 		PrintWriter out = new PrintWriter(createOutputStream());
 		try {
 			print(out);
@@ -104,5 +103,5 @@ abstract public class XmlWriter {
 	}
 
 	/** Print the XML to a print writer */
-	abstract public void print(PrintWriter out) throws NamespaceError;
+	abstract public void print(PrintWriter out);
 }

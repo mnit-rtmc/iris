@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.TMSException;
@@ -151,12 +150,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor */
-	public void selectCamera(String cam) throws TMSException {
-		try {
-			TMSImpl.selectMonitorCamera(this, cam);
-		}
-		catch(NamespaceError e) {
-			throw new TMSException(e);
-		}
+	public void selectCamera(String cam) {
+		TMSImpl.selectMonitorCamera(this, cam);
 	}
 }

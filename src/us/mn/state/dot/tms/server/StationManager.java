@@ -19,7 +19,6 @@ import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.Station;
 
@@ -49,7 +48,7 @@ class StationManager {
 	}
 
 	/** Calculate the current data for all stations */
-	public void calculateData(Calendar st) throws NamespaceError {
+	public void calculateData(Calendar st) {
 		if(stamp.after(st)) {
 			System.err.println("StationData OUT OF ORDER: " +
 				stamp.getTime() + " > " + st.getTime());
@@ -67,7 +66,7 @@ class StationManager {
 	}
 
 	/** Write the station sample data out as XML */
-	public void writeSampleXml() throws NamespaceError {
+	public void writeSampleXml() {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			public void print(PrintWriter out) {
 				printSampleXmlHead(out);
@@ -112,7 +111,7 @@ class StationManager {
 	}
 
 	/** Write the station data out as XML */
-	public void writeStationXml() throws NamespaceError {
+	public void writeStationXml() {
 		XmlWriter w = new XmlWriter(STATION_XML, false) {
 			public void print(PrintWriter out) {
 				printStationXmlHead(out);

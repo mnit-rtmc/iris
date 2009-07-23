@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.DMS;
@@ -83,7 +82,7 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 
 	/** Create a new DMS sign group */
 	protected DmsSignGroupImpl(ServerNamespace ns, String n, String d,
-		String g) throws NamespaceError
+		String g)
 	{
 		this(n, (DMS)ns.lookupObject(DMS.SONAR_TYPE, d),
 		     (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, g));

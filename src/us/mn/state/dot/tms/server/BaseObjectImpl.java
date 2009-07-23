@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.TMSException;
@@ -34,7 +33,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Load all objects from the database into the SONAR Namespace */
 	static void loadAll(SQLConnection s, ServerNamespace ns)
-		throws TMSException, NamespaceError
+		throws TMSException
 	{
 		store = s;
 		namespace = ns;

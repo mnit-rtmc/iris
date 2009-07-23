@@ -25,7 +25,6 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
@@ -165,9 +164,7 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Write the TMS xml configuration files */
-	protected void writeXmlConfiguration() throws IOException,
-		NamespaceError
-	{
+	protected void writeXmlConfiguration() throws IOException {
 		System.err.println("Writing TMS XML files @ " + new Date());
 		new DetectorXmlWriter(namespace).write();
 		corridors = new CorridorManager(namespace);
@@ -179,14 +176,12 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Write the current state to XML files */
-	protected void writeXmlState() throws IOException,
-		NamespaceError
-	{
+	protected void writeXmlState() throws IOException {
 		new DMSXmlWriter(namespace).write();
 	}
 
 	/** Write the sample data out as XML */
-	public void writeSampleXml() throws IOException, NamespaceError {
+	public void writeSampleXml() throws IOException {
 		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
 			public void print(PrintWriter out) {
 				printSampleXmlHead(out);
@@ -272,9 +267,6 @@ public final class TMSImpl implements KmlDocument {
 					station_manager.writeStationXml();
 				}
 				catch(IOException e) {
-					e.printStackTrace();
-				}
-				catch(NamespaceError e) {
 					e.printStackTrace();
 				}
 				if(!isHoliday(stamp))
@@ -424,7 +416,7 @@ public final class TMSImpl implements KmlDocument {
 
 		/** Job to be performed on completion */
 		protected final Job job = new Job(500) {
-			public void perform() throws NamespaceError {
+			public void perform() {
 				flushDetectorData(stamp);
 			}
 		};
@@ -461,7 +453,7 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Download to all controllers */
-	static protected void download() throws NamespaceError {
+	static protected void download() {
 		namespace.findObject(Controller.SONAR_TYPE,
 			new Checker<ControllerImpl>()
 		{
@@ -494,9 +486,7 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Poll all sampling controllers 30 second interval */
-	static protected void poll30Second(final Completer comp)
-		throws NamespaceError
-	{
+	static protected void poll30Second(final Completer comp) {
 		namespace.findObject(Controller.SONAR_TYPE,
 			new Checker<ControllerImpl>()
 		{
@@ -528,9 +518,7 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Poll all controllers 5 minute interval */
-	static protected void poll5Minute(final Completer comp)
-		throws NamespaceError
-	{
+	static protected void poll5Minute(final Completer comp) {
 		namespace.findObject(Controller.SONAR_TYPE,
 			new Checker<ControllerImpl>()
 		{
@@ -558,9 +546,7 @@ public final class TMSImpl implements KmlDocument {
 	}
 
 	/** Flush the detector data to disk */
-	static protected void flushDetectorData(final Calendar stamp)
-		throws NamespaceError
-	{
+	static protected void flushDetectorData(final Calendar stamp) {
 		System.err.println("Starting FLUSH @ " + new Date() + " for " +
 			stamp.getTime());
 		namespace.findObject(Detector.SONAR_TYPE,
@@ -610,7 +596,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Select a camera on a video monitor */
 	static public void selectMonitorCamera(final VideoMonitor m,
-		final String cam) throws NamespaceError
+		final String cam)
 	{
 		namespace.findObject(Controller.SONAR_TYPE,
 			new Checker<ControllerImpl>()
@@ -629,7 +615,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Unpublish a camera */
 	static public void unpublishCamera(final Camera cam)
-		throws NamespaceError, TMSException
+		throws TMSException
 	{
 		final LinkedList<VideoMonitorImpl> restricted =
 			new LinkedList<VideoMonitorImpl>();

@@ -21,7 +21,6 @@ import java.util.Map;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
@@ -89,7 +88,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Create an IRIS user from database lookup */
 	protected IrisUserImpl(ServerNamespace ns, String n, String d,
-		String fn) throws TMSException, NamespaceError
+		String fn) throws TMSException
 	{
 		this(n);
 		dn = d;

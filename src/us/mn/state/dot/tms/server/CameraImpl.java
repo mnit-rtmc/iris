@@ -19,7 +19,6 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
@@ -206,12 +205,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			return;
 		store.update(this, "publish", p);
 		setPublish(p);
-		try {
-			TMSImpl.unpublishCamera(this);
-		}
-		catch(NamespaceError e) {
-			throw new TMSException(e);
-		}
+		TMSImpl.unpublishCamera(this);
 	}
 
 	/** Get flag to allow publishing camera images */
