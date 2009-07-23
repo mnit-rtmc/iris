@@ -225,7 +225,7 @@ public class Session {
 
 	/** Add the DMS tab */
 	protected void addDMSTab() {
-		v_menu.addDMSItems(this);
+		v_menu.addDMSItems();
 		List<LayerState> lstates = createBaseLayers();
 		if(gpoly != null)
 			lstates.add(gpoly.createState());
@@ -238,6 +238,7 @@ public class Session {
 
 	/** Add the meter tab */
 	protected void addMeterTab() throws IOException {
+		v_menu.addMeterItem();
 		List<LayerState> lstates = createBaseLayers();
 		if(gpoly != null) {
 			LayerState gpolyState = gpoly.createState();

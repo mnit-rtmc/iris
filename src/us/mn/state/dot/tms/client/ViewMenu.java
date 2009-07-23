@@ -44,12 +44,25 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class ViewMenu extends JMenu {
 
+	/** Session */
+	protected final Session session;
+
+	/** Smart desktop */
+	protected final SmartDesktop desktop;
+
+	/** SONAR state */
+	protected final SonarState state;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new view menu */
-	public ViewMenu(final Session s) {
+	public ViewMenu(Session s) {
 		super("View");
-		final SmartDesktop desktop = s.getDesktop();
-		final SonarState state = s.getSonarState();
-		final User user = s.getUser();
+		session = s;
+		desktop = session.getDesktop();
+		state = session.getSonarState();
+		user = session.getUser();
 		setMnemonic('V');
 		JMenuItem item = new JMenuItem("Users/Roles");
 		item.setMnemonic('U');
@@ -80,7 +93,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CommLinkForm(s));
+				desktop.show(new CommLinkForm(session));
 			}
 		};
 		add(item);
@@ -109,21 +122,11 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Ramp Meters", Icons.getIcon(
-			"meter-inactive"));
-		item.setMnemonic('M');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new RampMeterForm(s,
-					state.getRampMeters()));
-			}
-		};
-		add(item);
 		item = new JMenuItem("Plans and Schedules");
 		item.setMnemonic('P');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new ScheduleForm(s));
+				desktop.show(new ScheduleForm(session));
 			}
 		};
 		add(item);
@@ -131,7 +134,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('W');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new WarningSignForm(s,
+				desktop.show(new WarningSignForm(session,
 					state.getWarningSigns()));
 			}
 		};
@@ -139,9 +142,7 @@ public class ViewMenu extends JMenu {
 	}
 
 	/** Add DMS items to the menu */
-	public void addDMSItems(final Session s) {
-		final SmartDesktop desktop = s.getDesktop();
-		final SonarState state = s.getSonarState();
+	public void addDMSItems() {
 		String dms_name = I18N.get("dms.abbreviation");
 		JMenuItem item = new JMenuItem(dms_name,
 			Icons.getIcon("drum-inactive"));
@@ -149,7 +150,7 @@ public class ViewMenu extends JMenu {
 			item.setMnemonic(dms_name.charAt(0));
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(createDMSForm(s));
+				desktop.show(createDMSForm());
 			}
 		};
 		add(item);
@@ -164,10 +165,24 @@ public class ViewMenu extends JMenu {
 	}
 
 	/** Create the DMS form */
-	protected AbstractForm createDMSForm(Session s) {
+	protected AbstractForm createDMSForm() {
 		if(SystemAttrEnum.DMS_FORM.getInt() == 2)
-			return new DMSForm2(s);
+			return new DMSForm2(session);
 		else
-			return new DMSForm(s);
+			return new DMSForm(session);
+	}
+
+	/** Add the ramp meter menu item */
+	public void addMeterItem() {
+		JMenuItem item = new JMenuItem("Ramp Meters", Icons.getIcon(
+			"meter-inactive"));
+		item.setMnemonic('M');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new RampMeterForm(session,
+					state.getRampMeters()));
+			}
+		};
+		add(item);
 	}
 }
