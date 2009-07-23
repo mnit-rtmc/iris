@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
+import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
@@ -259,6 +260,7 @@ public class Session {
 
 	/** Add the camera tab */
 	protected void addCameraTab() {
+		v_menu.add(new VideoMenu(this));
 		tabs.add(new CameraTab(cam_manager, props, logger, state,user));
 	}
 

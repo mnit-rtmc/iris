@@ -18,8 +18,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.client.camera.CameraForm;
-import us.mn.state.dot.tms.client.camera.VideoMonitorForm;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.DMSForm2;
@@ -158,15 +156,6 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Cameras");
-		item.setMnemonic('C');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new CameraForm(s,
-					state.getCamCache().getCameras()));
-			}
-		};
-		add(item);
 		item = new JMenuItem("LCS", Icons.getIcon(
 			"lanecontrol-inactive"));
 		item.setMnemonic('L');
@@ -197,14 +186,6 @@ public class ViewMenu extends JMenu {
 			public void perform() throws Exception {
 				desktop.show(new WarningSignForm(s,
 					state.getWarningSigns()));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Monitors");
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new VideoMonitorForm(
-					state.getCamCache().getVideoMonitors()));
 			}
 		};
 		add(item);
