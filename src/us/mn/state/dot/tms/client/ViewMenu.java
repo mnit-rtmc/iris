@@ -127,21 +127,29 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-
-		String dms_name = I18N.get("dms.abbreviation");
-		item = new JMenuItem(dms_name, Icons.getIcon("drum-inactive"));
-		if(dms_name.length() > 0)
-			item.setMnemonic(dms_name.charAt(0));
-
+		item = new JMenuItem("Warning Signs");
+		item.setMnemonic('W');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				int fn = SystemAttrEnum.DMS_FORM.getInt();
-				AbstractForm f;
-				if(fn == 2)
-					f = new DMSForm2(s);
-				else
-					f = new DMSForm(s);
-				desktop.show(f);
+				desktop.show(new WarningSignForm(s,
+					state.getWarningSigns()));
+			}
+		};
+		add(item);
+	}
+
+	/** Add DMS items to the menu */
+	public void addDMSItems(final Session s) {
+		final SmartDesktop desktop = s.getDesktop();
+		final SonarState state = s.getSonarState();
+		String dms_name = I18N.get("dms.abbreviation");
+		JMenuItem item = new JMenuItem(dms_name,
+			Icons.getIcon("drum-inactive"));
+		if(dms_name.length() > 0)
+			item.setMnemonic(dms_name.charAt(0));
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(createDMSForm(s));
 			}
 		};
 		add(item);
@@ -153,14 +161,13 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Warning Signs");
-		item.setMnemonic('W');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new WarningSignForm(s,
-					state.getWarningSigns()));
-			}
-		};
-		add(item);
+	}
+
+	/** Create the DMS form */
+	protected AbstractForm createDMSForm(Session s) {
+		if(SystemAttrEnum.DMS_FORM.getInt() == 2)
+			return new DMSForm2(s);
+		else
+			return new DMSForm(s);
 	}
 }

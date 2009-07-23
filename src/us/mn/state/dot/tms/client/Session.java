@@ -225,6 +225,7 @@ public class Session {
 
 	/** Add the DMS tab */
 	protected void addDMSTab() {
+		v_menu.addDMSItems(this);
 		List<LayerState> lstates = createBaseLayers();
 		if(gpoly != null)
 			lstates.add(gpoly.createState());
