@@ -101,6 +101,14 @@ public class Session {
 	/** Message logger */
 	protected final Logger logger;
 
+	/** View menu */
+	protected final ViewMenu v_menu;
+
+	/** Get the view menu */
+	public ViewMenu getViewMenu() {
+		return v_menu;
+	}
+
 	/** Base layers */
 	protected final List<Layer> baseLayers;
 
@@ -270,6 +278,7 @@ public class Session {
 		desktop = d;
 		props = p;
 		logger = l;
+		v_menu = new ViewMenu(this);
 		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer();
 		incLayer = createIncidentLayer();
