@@ -744,7 +744,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void updatePixelPanel(SignPixelPanel p) {
 		updatePixelPhysical(p);
 		updatePixelLogical(p);
-		p.verifyDimensions();
+		p.repaint();
 	}
 
 	/** Update the physical dimensions of a sign pixel panel */

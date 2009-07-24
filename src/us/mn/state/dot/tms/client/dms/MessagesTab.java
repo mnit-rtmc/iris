@@ -326,7 +326,7 @@ public class MessagesTab extends JPanel {
 		Integer cw = proxy.getCharWidthPixels();
 		if(wp != null && lh != null && cw != null)
 			pixel_panel.setLogicalDimensions(wp, lh, cw, 0);
-		pixel_panel.verifyDimensions();
+		pixel_panel.repaint();
 		SignText st = getSelectedSignText();
 		if(st != null)
 			pixel_panel.setGraphic(renderMessage(st));

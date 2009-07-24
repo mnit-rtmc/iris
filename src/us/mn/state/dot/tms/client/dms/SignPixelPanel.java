@@ -99,37 +99,11 @@ public class SignPixelPanel extends JPanel {
 		face_color = f;
 		addComponentListener(new ComponentAdapter() {
 			public void componentResized(ComponentEvent e) {
-				rescale();
+				dirty = true;
+				repaint();
 			}
 		});
 		setMinimumSize(new Dimension(128, 32));
-	}
-
-	/** Rescale when the component is resized or the sign changes */
-	protected void rescale() {
-		double w = getWidth();
-		double h = getHeight();
-		if(w > 0 && h > 0)
-			rescale(w, h);
-	}
-
-	/** Rescale the component to the specified size */
-	protected void rescale(double w, double h) {
-		buffer = null;
-		dirty = true;
-		if(width_mm > 0 && height_mm > 0) {
-			double sx = w / width_mm;
-			double sy = h / height_mm;
-			double scale = Math.min(sx, sy);
-			double tx = width_mm * (sx - scale) / 2;
-			double ty = height_mm * (sy - scale) / 2;
-			AffineTransform t = new AffineTransform();
-			t.translate(tx, ty);
-			t.scale(scale, scale);
-			transform = t;
-		} else
-			transform = null;
-		repaint();
 	}
 
 	/** Set the physical sign dimensions */
@@ -142,6 +116,7 @@ public class SignPixelPanel extends JPanel {
 		vborder_mm = Math.max(0, vb);
 		hpitch_mm = Math.max(1, hp);
 		vpitch_mm = Math.max(1, vp);
+		dirty = true;
 	}
 
 	/** Set the logical sign dimensions */
@@ -150,30 +125,20 @@ public class SignPixelPanel extends JPanel {
 		height_pix = Math.max(0, h);
 		width_char = Math.max(0, wc);
 		height_line = Math.max(0, hl);
-	}
-
-	/** Verify the sign dimensions */
-	public void verifyDimensions() {
-		float w = width_mm - hborder_mm * 2;
-		if(width_pix > 0 && w > 0 && width_pix * hpitch_mm > w)
-			hpitch_mm = w / width_pix;
-		float h = height_mm - vborder_mm * 2;
-		if(height_pix > 0 && h > 0 && height_pix * vpitch_mm > h)
-			vpitch_mm = h / height_pix;
-		rescale();
+		dirty = true;
 	}
 
 	/** Clear the pixel panel */
 	public void clear() {
 		setPhysicalDimensions(0, 0, 0, 0, 1, 1);
 		setLogicalDimensions(0, 0, 0, 0);
-		verifyDimensions();
+		dirty = true;
 	}
 
 	/** Set the bitmap graphic displayed */
 	public void setGraphic(BitmapGraphic g) {
-		dirty = true;
 		graphic = g;
+		dirty = true;
 		repaint();
 	}
 
@@ -189,13 +154,53 @@ public class SignPixelPanel extends JPanel {
 	/** Update the screen buffer to reflect current sign state */
 	protected void updateBuffer() {
 		dirty = false;
-		BufferedImage b = buffer;	// Avoid NPE race
-		if(b == null) {
-			b = new BufferedImage(getWidth(), getHeight(),
-				BufferedImage.TYPE_INT_RGB);
-			buffer = b;
-		}
+		BufferedImage b = getBufferedImage();
+		rescale();
 		doPaint(b.createGraphics());
+		buffer = b;
+	}
+
+	/** Get an appropriate buffered image */
+	protected BufferedImage getBufferedImage() {
+		BufferedImage b = buffer;	// Avoid NPE race
+		int w = getWidth();
+		int h = getHeight();
+		if(b == null || w  != b.getWidth() || h != b.getHeight()) {
+			return new BufferedImage(w, h,
+				BufferedImage.TYPE_INT_RGB);
+		} else
+			return b;
+	}
+
+	/** Rescale when the component is resized or the sign changes */
+	protected void rescale() {
+		float w = width_mm - hborder_mm * 2;
+		if(width_pix > 0 && w > 0 && width_pix * hpitch_mm > w)
+			hpitch_mm = w / width_pix;
+		float h = height_mm - vborder_mm * 2;
+		if(height_pix > 0 && h > 0 && height_pix * vpitch_mm > h)
+			vpitch_mm = h / height_pix; 
+
+		int wp = getWidth();
+		int hp = getHeight();
+		if(wp > 0 && hp > 0)
+			rescale(wp, hp);
+	}
+
+	/** Rescale the component to the specified size */
+	protected void rescale(double w, double h) {
+		if(width_mm > 0 && height_mm > 0) {
+			double sx = w / width_mm;
+			double sy = h / height_mm;
+			double scale = Math.min(sx, sy);
+			double tx = width_mm * (sx - scale) / 2;
+			double ty = height_mm * (sy - scale) / 2;
+			AffineTransform t = new AffineTransform();
+			t.translate(tx, ty);
+			t.scale(scale, scale);
+			transform = t;
+		} else
+			transform = null;
 	}
 
 	/** Paint the pixel panel onto a graphics context */

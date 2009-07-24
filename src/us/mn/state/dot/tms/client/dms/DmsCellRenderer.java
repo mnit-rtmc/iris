@@ -42,15 +42,6 @@ import us.mn.state.dot.tms.SignMessage;
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
-	/** Test if a message is deployed */
-	static public boolean isDeployed(SignMessage m) {
-		if(m != null) {
-			MultiString ms = new MultiString(m.getMulti());
-			return !ms.isBlank();
-		} else
-			return false;
-	}
-
 	/** Sign pixel panel to display sign message */
 	protected final SignPixelPanel pixelPnl = new SignPixelPanel(false);
 
@@ -100,8 +91,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		if(value instanceof DMS)
-			setDms((DMS)value);
 		if(isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
 				value, index, isSelected, cellHasFocus);
@@ -126,7 +115,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Set the DMS to be displayed */
-	protected void setDms(DMS dms) {
+	public void setDms(DMS dms) {
 		lblID.setText(dms.getName());
 		lblLocation.setText(GeoLocHelper.getDescription(
 			dms.getGeoLoc()));
@@ -139,7 +128,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	protected void setDimensions(DMS dms) {
 		setPhysicalDimensions(dms);
 		setLogicalDimensions(dms);
-		pixelPnl.verifyDimensions();
 	}
 
 	/** Set the physical dimensions of the pixel panel */

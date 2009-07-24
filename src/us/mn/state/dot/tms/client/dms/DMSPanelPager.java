@@ -103,7 +103,7 @@ public class DMSPanelPager {
 	protected void setDimensions() {
 		setPhysicalDimensions();
 		setLogicalDimensions();
-		panel.verifyDimensions();
+		panel.repaint();
 	}
 
 	/** Set the physical dimensions of the pixel panel */

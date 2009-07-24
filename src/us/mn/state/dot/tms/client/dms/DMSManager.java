@@ -15,6 +15,9 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.util.HashMap;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
@@ -53,6 +56,10 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** User session */
 	protected final Session session;
+
+	/** Mapping of DMS names to cell renderers */
+	protected final HashMap<String, DmsCellRenderer> renderers =
+		new HashMap<String, DmsCellRenderer>();
 
 	/** Action to blank the selected DMS */
 	protected BlankDmsAction blankAction;
@@ -110,7 +117,46 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
-		return new DmsCellRenderer();
+		return new ListCellRenderer() {
+			public Component getListCellRendererComponent(
+				JList list, Object value, int index,
+				boolean isSelected, boolean cellHasFocus)
+			{
+				DmsCellRenderer r = lookupRenderer(value);
+				if(r != null) {
+					return r.getListCellRendererComponent(
+						list, value, index, isSelected,
+						cellHasFocus);
+				} else
+					return new JLabel();
+			}
+		};
+	}
+
+	/** Lookup a DMS cell renderer */
+	protected DmsCellRenderer lookupRenderer(Object value) {
+		if(value instanceof DMS) {
+			DMS dms = (DMS)value;
+			return renderers.get(dms.getName());
+		}
+		return null;
+	}
+
+	/** Add a proxy to the manager */
+	protected void proxyAddedSlow(DMS dms) {
+		super.proxyAddedSlow(dms);
+		DmsCellRenderer r = new DmsCellRenderer();
+		r.setDms(dms);
+		renderers.put(dms.getName(), r);
+	}
+
+	/** Called when a proxy attribute has changed */
+	public void proxyChanged(DMS dms, String a) {
+		if(a.equals("messageCurrent")) {
+			DmsCellRenderer r = lookupRenderer(dms);
+			if(r != null)
+				r.setDms(dms);
+		}
 	}
 
 	/** Create a proxy JList for the given style */
@@ -157,7 +203,7 @@ public class DMSManager extends ProxyManager<DMS> {
 				return createSinglePopup(dms);
 		}
 		JPopupMenu p = new JPopupMenu();
-		p.add(new javax.swing.JLabel("" + n_selected + " DMSs"));
+		p.add(new JLabel("" + n_selected + " DMSs"));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);
