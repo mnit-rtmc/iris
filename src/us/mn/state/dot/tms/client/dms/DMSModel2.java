@@ -36,30 +36,26 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	/** AWS abbreviation */
 	protected final String m_awsAbbr = I18N.get("dms.aws.abbreviation");
 
-	interface ColAction {
-		Object getValueAt(DMS d);
-	}
-
 	/** A single column */
-	private class Column
-	{
+	abstract private class Column {
 		String label;
 		Class cclass;
 		int width;
-		ColAction action;
 
 		/** Constructor */
-		Column(String l, Class c, int w, ColAction ca) {
+		Column(String l, Class c, int w) {
 			label = l;
 			cclass = c;
 			width = w;
-			action = ca;
 		}
 
 		/** add a column to the model */
 		void addColumn(TableColumnModel m, int index) {
 			m.addColumn(createColumn(index, width, label));
 		}
+
+		/** Get the value of the column */
+		abstract Object getValueAt(DMS d);
 	}
 
 	/** Name column number, assumed to be 0th */
@@ -67,55 +63,54 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Create columns */
 	Column[] m_columns = new Column[] {
-		new Column(I18N.get("dms.abbreviation"), String.class, 40,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return d.getName();
-				}}),
-		new Column("Location", String.class, 200,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return GeoLocHelper.getDescription(
-						d.getGeoLoc());
-				}}),
-		new Column("Dir.", String.class, 30,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return DMSHelper.getFreeDir(d);
-				}}),
-		new Column(m_awsAbbr +" Allowed", Boolean.class, 80,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return d.getAwsAllowed();
-				}}),
-		new Column(m_awsAbbr + " Controlled", Boolean.class, 80, 
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return d.getAwsControlled();
-				}}),
-		new Column("Author", String.class, 60, 
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					User u = d.getOwnerCurrent();
-					String name = (u == null ? "" : 
-						u.getName());
-					return (name == null ? "" : name);
-				}}),
-		new Column("Status", String.class, 100,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return DMSHelper.getAllStyles(d);
-				}}),
-		new Column("Model", String.class, 40,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return d.getModel();
-				}}),
-		new Column("Com Type", String.class, 140,
-			new ColAction() {
-				public Object getValueAt(DMS d) {
-					return d.getSignAccess();
-				}}),
+		new Column(I18N.get("dms.abbreviation"), String.class, 40) {
+			Object getValueAt(DMS d) {
+				return d.getName();
+			}
+		},
+		new Column("Location", String.class, 200) {
+			Object getValueAt(DMS d) {
+				return GeoLocHelper.getDescription(
+					d.getGeoLoc());
+			}
+		},
+		new Column("Dir.", String.class, 30) {
+			Object getValueAt(DMS d) {
+				return DMSHelper.getFreeDir(d);
+			}
+		},
+		new Column(m_awsAbbr +" Allowed", Boolean.class, 80) {
+			Object getValueAt(DMS d) {
+				return d.getAwsAllowed();
+			}
+		},
+		new Column(m_awsAbbr + " Controlled", Boolean.class, 80) {
+			Object getValueAt(DMS d) {
+				return d.getAwsControlled();
+			}
+		},
+		new Column("Author", String.class, 60) {
+			Object getValueAt(DMS d) {
+				User u = d.getOwnerCurrent();
+				String name = (u == null ? "" : u.getName());
+				return (name == null ? "" : name);
+			}
+		},
+		new Column("Status", String.class, 100) {
+			Object getValueAt(DMS d) {
+				return DMSHelper.getAllStyles(d);
+			}
+		},
+		new Column("Model", String.class, 40) {
+			Object getValueAt(DMS d) {
+				return d.getModel();
+			}
+		},
+		new Column("Com Type", String.class, 140) {
+			Object getValueAt(DMS d) {
+				return d.getSignAccess();
+			}
+		}
 	};
 
 	/** Create a new DMS table model */
@@ -134,7 +129,7 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 		DMS s = getProxy(row);
 		if(s == null)
 			return null;
-		return m_columns[column].action.getValueAt(s);
+		return m_columns[column].getValueAt(s);
 	}
 
 	/** Get the class of the specified column */
