@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.Icon;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
@@ -80,7 +81,7 @@ public class DMSStyleModel extends StyleListModel<DMS> {
 
 	/** Respond to a controller changed event */
 	protected void controllerChanged(final Controller c) {
-		DMS proxy = find(new ProxyFinder<DMS>() {
+		DMS proxy = find(new Checker<DMS>() {
 			public boolean check(DMS proxy) {
 				return proxy.getController() == c;
 			}

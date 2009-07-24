@@ -21,6 +21,7 @@ import javax.swing.AbstractListModel;
 import javax.swing.ListModel;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -243,16 +244,11 @@ public class ProxyListModel<T extends SonarObject>
 			proxy.destroy();
 	}
 
-	/** Callback interface to find a proxy in the list */
-	public interface ProxyFinder<T> {
-		boolean check(T proxy);
-	}
-
 	/** Find a proxy in the list */
-	public T find(ProxyFinder pf) {
+	public T find(Checker<T> checker) {
 		synchronized(proxies) {
 			for(T proxy: proxies) {
-				if(pf.check(proxy))
+				if(checker.check(proxy))
 					return proxy;
 			}
 		}
