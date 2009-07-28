@@ -17,9 +17,7 @@ package us.mn.state.dot.tms.client.meter;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import java.util.List;
-import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -42,32 +40,19 @@ public class RampMeterTab extends MapTab {
 	/** Summary of meters of each status */
 	protected final StyleSummary<RampMeter> summary;
 
-	/** Tab panel */
-	protected final JPanel tabPanel;
-
-	/** Main panel */
-	protected final JPanel mainPanel;
-
 	/** Create a new ramp meter tab */
   	public RampMeterTab(Session session, MeterManager m,
-		List<LayerState> lstates, ViewLayer vlayer) throws IOException
+		List<LayerState> lstates) throws IOException
 	{
 		super(session, "Meter", "Operate Ramp Meters");
 		manager = m;
-		map.addLayers(lstates);
-		map.addLayer(m.getLayer().createState());
-		mainPanel = createMapPanel(vlayer);
+		for(LayerState ls: lstates)
+			map_model.addLayer(ls);
+		map_model.addLayer(m.getLayer().createState());
 		statusPanel = new MeterStatusPanel(session, manager);
 		summary = manager.createStyleSummary();
-		tabPanel = createSideBar();
- 	}
-
-	/** Create the side bar */
-	protected JPanel createSideBar() {
-		JPanel p = new JPanel(new BorderLayout());
-		p.add(statusPanel, BorderLayout.NORTH);
-		p.add(summary, BorderLayout.CENTER);
-		return p;
+		add(statusPanel, BorderLayout.NORTH);
+		add(summary, BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
@@ -81,16 +66,5 @@ public class RampMeterTab extends MapTab {
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 		statusPanel.dispose();
-		mainPanel.removeAll();
-	}
-
-	/** Get the tab panel */
-	public JPanel getTabPanel() {
-		return tabPanel;
-	}
-
-	/** Get the main panel */
-	public JPanel getMainPanel() {
-		return mainPanel;
 	}
 }

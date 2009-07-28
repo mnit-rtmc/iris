@@ -20,7 +20,6 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-import java.rmi.NotBoundException;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.logging.Level;
@@ -33,6 +32,7 @@ import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
+import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -79,7 +79,7 @@ public class IrisClient extends JFrame {
 	protected HelpMenu m_helpmenu;
 
 	/** Create a new Iris client */
-	public IrisClient(Properties props) {
+	public IrisClient(Properties props) throws IOException {
 		super("IRIS: Login to Start");
 		this.props = props;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
@@ -90,8 +90,9 @@ public class IrisClient extends JFrame {
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0]);
+		ViewLayer vlayer = new ViewLayer();
 		for(int s = 0; s < s_panes.length; s++) {
-			s_panes[s] = new ScreenPane();
+			s_panes[s] = new ScreenPane(vlayer);
 			s_panes[s].addComponentListener(new ComponentAdapter() {
 				public void componentHidden(ComponentEvent e) {
 					arrangeTabs();
@@ -160,13 +161,17 @@ public class IrisClient extends JFrame {
 				int p = tab.getNumber() % visible.size();
 				ScreenPane pane = visible.get(p);
 				pane.addTab(tab);
+				if(tab instanceof MapTab) {
+					MapTab mp = (MapTab)tab;
+					mp.setMap(pane.getMap());
+				}
 			}
 		}
 	}
 
 	/** Set the logged in user */
 	protected void setUser(User user) throws IOException,
-		TdxmlException, NotBoundException
+		TdxmlException
 	{
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +

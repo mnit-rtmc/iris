@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.BorderLayout;
 import java.util.Properties;
 import java.util.logging.Logger;
-import javax.swing.JPanel;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.IrisTab;
 import us.mn.state.dot.tms.client.SonarState;
@@ -29,44 +28,22 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class CameraTab extends IrisTab {
 
-	/** Tab panel */
-	protected final JPanel tabPanel;
-
 	/** Message logger */
 	protected final Logger logger;
 
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(CameraManager manager, Properties p, Logger l,
+	public CameraTab(CameraManager manager, Properties props, Logger l,
 		SonarState st, User user)
 	{
 		super("Camera", "Camera summary");
-		tabPanel = createSideBar(manager, p, st, user);
 		logger = l;
-	}
-
-	/** Create the side bar component */
-	protected JPanel createSideBar(CameraManager manager, Properties props,
-		SonarState st, User user)
-	{
-		JPanel p = new JPanel(new BorderLayout());
-		p.add(new CameraViewer(manager, props, logger, st, user),
+		add(new CameraViewer(manager, props, logger, st, user),
 			BorderLayout.NORTH);
-		p.add(manager.createStyleSummary(), BorderLayout.CENTER);
-		return p;
+		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
 	public int getNumber() {
 		return 4;
-	}
-
-	/** Get the tab panel */
-	public JPanel getTabPanel() {
-		return tabPanel;
-	}
-
-	/** Get the main panel */
-	public JPanel getMainPanel() {
-		return null;
 	}
 }

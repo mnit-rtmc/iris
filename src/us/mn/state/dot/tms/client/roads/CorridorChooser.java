@@ -44,17 +44,21 @@ public class CorridorChooser extends JPanel {
 	protected final ProxyLayer<R_Node> layer;
 
 	/** Map bean */
-	protected final MapBean map;
+	protected MapBean map;
+
+	/** Set the map */
+	public void setMap(MapBean m) {
+		map = m;
+	}
 
 	/** Corridor node list component */
 	protected final CorridorList clist;
 
 	/** Create a new corridor chooser */
-	public CorridorChooser(R_NodeManager man, MapBean m, CorridorList c) {
+	public CorridorChooser(R_NodeManager man, CorridorList c) {
 		super(new GridBagLayout());
 		manager = man;
 		layer = man.getLayer();
-		map = m;
 		clist = c;
 		corridor_combo.setModel(new WrapperComboBoxModel(
 			manager.getCorridorModel()));
@@ -84,7 +88,8 @@ public class CorridorChooser extends JPanel {
 		manager.setCorridor(c);
 		clist.updateListModel();
 		layer.updateExtent();
-		map.zoomTo(layer.getExtent());
+		if(map != null)
+			map.zoomTo(layer.getExtent());
 	}
 
 	/** Dispose of the corridor chooser */

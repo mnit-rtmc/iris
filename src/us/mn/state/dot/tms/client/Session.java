@@ -30,7 +30,6 @@ import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.StationLayer;
-import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
@@ -113,9 +112,6 @@ public class Session {
 
 	/** Base layers */
 	protected final List<Layer> baseLayers;
-
-	/** View layer */
-	protected final ViewLayer vlayer;
 
 	/** Station layer */
 	protected final StationLayer gpoly;
@@ -233,7 +229,7 @@ public class Session {
 		if(incLayer != null)
 			lstates.add(incLayer.createState());
 		lstates.add(warn_manager.getLayer().createState());
-		tabs.add(new DMSTab(this, dms_manager, lstates, vlayer));
+		tabs.add(new DMSTab(this, dms_manager, lstates));
 	}
 
 	/** Add the meter tab */
@@ -248,7 +244,7 @@ public class Session {
 			}
 			lstates.add(gpolyState);
 		}
-		tabs.add(new RampMeterTab(this, meter_manager, lstates,vlayer));
+		tabs.add(new RampMeterTab(this, meter_manager, lstates));
 	}
 
 	/** Add the incident tab */
@@ -271,7 +267,7 @@ public class Session {
 	/** Add the roadway tab */
 	protected void addRoadwayTab() {
 		List<LayerState> lstates = createBaseLayers();
-		tabs.add(new RoadwayTab(this, r_node_manager, lstates, vlayer));
+		tabs.add(new RoadwayTab(this, r_node_manager, lstates));
 	}
 
 	/** Create a new session */
@@ -303,7 +299,6 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
-		vlayer = new ViewLayer();
 		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
 			addDMSTab();
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))

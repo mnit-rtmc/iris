@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 /**
@@ -22,7 +23,7 @@ import javax.swing.JPanel;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-abstract public class IrisTab {
+abstract public class IrisTab extends JPanel {
 
 	/** Name of tab */
 	protected final String name;
@@ -45,15 +46,10 @@ abstract public class IrisTab {
 
 	/** Create a new Iris tab */
 	public IrisTab(String n, String t) {
+		super(new BorderLayout());
 		name = n;
 		tip = t;
 	}
-
-	/** Get the tab panel */
-	abstract public JPanel getTabPanel();
-
-	/** Get the main panel */
-	abstract public JPanel getMainPanel();
 
 	/** Perform any clean up necessary */
 	public void dispose() { }

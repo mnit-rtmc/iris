@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.incidents;
 import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.tdxml.XmlIncidentClient;
@@ -37,18 +36,10 @@ public class IncidentTab extends IrisTab {
 	/** List model to hold current incidents */
 	protected final IncidentListModel model = new IncidentListModel();
 
-	/** Tab panel */
-	protected final JPanel tabPanel;
-
 	/** Create a new incident tab for the IRIS client */
 	public IncidentTab(TmsIncidentLayer layer) {
 		super("Incident", "Incident summary");
 		incidentClient = layer.getIncidentClient();
-		tabPanel = createSideBar();
-	}
-
-	/** Create the side bar component */
-	protected JPanel createSideBar() {
 		incidentClient.addTdxmlListener(model);
 		JList incidents = new JList(model);
 		incidents.getSelectionModel().setSelectionMode(
@@ -59,9 +50,7 @@ public class IncidentTab extends IrisTab {
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		spIncidents.setBorder(BorderFactory.createTitledBorder(
 			"Incidents"));
-		JPanel sidePanel = new JPanel(new BorderLayout());
-		sidePanel.add(spIncidents, BorderLayout.CENTER);
-		return sidePanel;
+		add(spIncidents, BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
@@ -72,15 +61,5 @@ public class IncidentTab extends IrisTab {
 	/** Dispose of the incident tab */
 	public void dispose() {
 		incidentClient.removeTdxmlListener(model);
-	}
-
-	/** Get the tab panel */
-	public JPanel getTabPanel() {
-		return tabPanel;
-	}
-
-	/** Get the main panel */
-	public JPanel getMainPanel() {
-		return null;
 	}
 }

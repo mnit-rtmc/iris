@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,22 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.BorderLayout;
-import java.awt.CardLayout;
+import java.awt.Color;
+import java.awt.Component;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
+import us.mn.state.dot.map.MapToolBar;
+import us.mn.state.dot.trafmap.ViewLayer;
+import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
 /**
  * A screen pane is a pane which contains all components for one screen on
@@ -33,26 +43,32 @@ public class ScreenPane extends JPanel {
 	/** Tabbed side pane */
 	protected final JTabbedPane tab_pane;
 
-	/** Card layout for main panel */
-	protected final CardLayout cards;
+	/** Map to be displayed on the screen pane */
+	protected final MapBean map;
 
-	/** Main panel */
-	protected final JPanel main_panel;
+	/** Get the map */
+	public MapBean getMap() {
+		return map;
+	}
+
+	/** Map panel */
+	protected final JPanel map_panel;
 
 	/** Create a new screen pane */
-	public ScreenPane() {
+	public ScreenPane(ViewLayer vlayer) {
 		setLayout(new BorderLayout());
 		tab_pane = new JTabbedPane(SwingConstants.TOP);
 		add(tab_pane, BorderLayout.WEST);
-		cards = new CardLayout();
-		main_panel = new JPanel(cards);
-		add(main_panel, BorderLayout.CENTER);
+		map = new MapBean(true);
+		map.setBackground(new Color(208, 216, 208));
+		map_panel = createMapPanel(vlayer);
+		add(map_panel, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				int i = tab_pane.getSelectedIndex();
-				if(i >= 0) {
-					String t = tab_pane.getTitleAt(i);
-					cards.show(main_panel, t);
+				Component tab = tab_pane.getSelectedComponent();
+				if(tab instanceof MapTab) {
+					MapTab mt = (MapTab)tab;
+					map.setModel(mt.getMapModel());
 				}
 			}
 		});
@@ -60,16 +76,50 @@ public class ScreenPane extends JPanel {
 
 	/** Add a tab to the screen pane */
 	public void addTab(IrisTab tab) {
-		tab_pane.addTab(tab.getName(), null, tab.getTabPanel(),
-			tab.getTip());
-		JPanel main = tab.getMainPanel();
-		if(main != null)
-			main_panel.add(main, tab.getName());
+		tab_pane.addTab(tab.getName(), null, tab, tab.getTip());
 	}
 
 	/** Remove all the tabs */
 	public void removeTabs() {
 		tab_pane.removeAll();
-		main_panel.removeAll();
 	}
+
+	/** Create the map panel */
+	protected JPanel createMapPanel(ViewLayer vlayer) {
+		JPanel p = new JPanel(new BorderLayout());
+		p.setBorder(BorderFactory.createBevelBorder(
+			BevelBorder.LOWERED));
+		p.add(map, BorderLayout.CENTER);
+		JPanel mp = new JPanel(new BorderLayout());
+		MapToolBar toolBar = createToolBar(vlayer);
+		mp.add(toolBar, BorderLayout.NORTH);
+		mp.add(p, BorderLayout.CENTER);
+//		mp.add(createIrisToolBar(), BorderLayout.SOUTH);
+		return mp;
+	}
+
+	/** Create a map tool bar with appropriate view buttons */
+	protected MapToolBar createToolBar(ViewLayer vlayer) {
+		MapToolBar b = new MapToolBar(map);
+		for(LayerState ls: map.getLayers())
+			b.addThemeLegend(ls);
+		b.add(Box.createGlue());
+		b.add(Box.createGlue());
+		if(vlayer == null)
+			b.addButton(b.createHomeButton());
+		else {
+			JButton[] views = vlayer.createViewButtons(map);
+			for(int i = 0; i < views.length; i++)
+				b.addButton(views[i]);
+		}
+		b.setFloatable(false);
+		return b;
+	}
+
+	/** Create a map status bar */
+/*	protected IrisToolBar createIrisToolBar() {
+		IrisToolBar b = new IrisToolBar(map, session);
+		b.setFloatable(false);
+		return b;
+	} */
 }

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
-import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.BaseMapLayer;
 import us.mn.state.dot.trafmap.TunnelLayer;
@@ -39,12 +38,6 @@ public class LcsTab extends MapTab {
 	/** Summary of LCS arrays of each status */
 	protected final StyleSummary<LCSArray> summary;
 
-	/** Tab panel */
-	protected final JPanel tabPanel;
-
-	/** Main panel */
-	protected final JPanel mainPanel;
-
 	/** Create a new LCS tab */
 	public LcsTab(Session session, LCSArrayManager manager)
 		throws IOException
@@ -55,20 +48,11 @@ public class LcsTab extends MapTab {
 		LayerState lstate =
 			BaseMapLayer.createTunnelMapLayer().createState();
 		LayerState tunnel = new TunnelLayer().createState();
-		map.addLayer(lstate);
-		map.addLayer(tunnel);
-		map.addLayer(manager.getLayer().createState());
-		map.setHomeExtent(lstate.getExtent());
-		mainPanel = createMapPanel(null);
-		tabPanel = createSideBar();
-	}
-
-	/** Create the side bar component */
-	protected JPanel createSideBar() {
-		JPanel p = new JPanel(new BorderLayout());
-		p.add(dispatcher, BorderLayout.NORTH);
-		p.add(summary, BorderLayout.CENTER);
-		return p;
+		map_model.addLayer(lstate);
+		map_model.addLayer(tunnel);
+		map_model.addLayer(manager.getLayer().createState());
+		add(dispatcher, BorderLayout.NORTH);
+		add(summary, BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
@@ -81,16 +65,5 @@ public class LcsTab extends MapTab {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();
-		mainPanel.removeAll();
-	}
-
-	/** Get the tab panel */
-	public JPanel getTabPanel() {
-		return tabPanel;
-	}
-
-	/** Get the main panel */
-	public JPanel getMainPanel() {
-		return mainPanel;
 	}
 }

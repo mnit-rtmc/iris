@@ -16,12 +16,11 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BorderLayout;
 import java.util.List;
-import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.trafmap.ViewLayer;
 
 /**
  * The RoadwayTab class provides the GUI for editing roadway nodes.
@@ -36,35 +35,27 @@ public class RoadwayTab extends MapTab {
 	/** Selected corridor list */
 	protected final CorridorList clist;
 
-	/** Panel for the map */
-	protected final JPanel mapPanel;
-
-	/** Tab panel */
-	protected final JPanel tabPanel;
-
 	/** Create a new roadway node tab */
 	public RoadwayTab(Session session, R_NodeManager m,
-		List<LayerState> lstates, ViewLayer vlayer)
+		List<LayerState> lstates)
 	{
 		super(session, "Roadway", "View / edit roadway nodes");
 		SonarState st = session.getSonarState();
 		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
 		clist = new CorridorList(m, creator);
-		chooser = new CorridorChooser(m, map, clist);
-		map.addLayers(lstates);
-		map.addLayer(m.getLayer().createState());
-		tabPanel = createSideBar();
-		mapPanel = createMapPanel(vlayer);
-		// FIXME: this is ugly
-		R_NodeProperties.map = map;
+		chooser = new CorridorChooser(m, clist);
+		for(LayerState ls: lstates)
+			map_model.addLayer(ls);
+		map_model.addLayer(m.getLayer().createState());
+		add(chooser, BorderLayout.NORTH);
+		add(clist, BorderLayout.CENTER);
 	}
 
-	/** Create the side bar panel */
-	protected JPanel createSideBar() {
-		JPanel p = new JPanel(new BorderLayout());
-		p.add(chooser, BorderLayout.NORTH);
-		p.add(clist, BorderLayout.CENTER);
-		return p;
+	/** Set the map */
+	public void setMap(MapBean map) {
+		chooser.setMap(map);
+		// FIXME: this is ugly
+		R_NodeProperties.map = map;
 	}
 
 	/** Get the tab number */
@@ -75,17 +66,6 @@ public class RoadwayTab extends MapTab {
 	/** Dispose of the DMS tab */
 	public void dispose() {
 		super.dispose();
-		mapPanel.removeAll();
 		chooser.dispose();
-	}
-
-	/** Get the tab panel */
-	public JPanel getTabPanel() {
-		return tabPanel;
-	}
-
-	/** Get the main panel */
-	public JPanel getMainPanel() {
-		return mapPanel;
 	}
 }

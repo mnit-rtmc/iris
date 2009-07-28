@@ -22,6 +22,7 @@ import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
+import us.mn.state.dot.map.event.LayerChange;
 import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
@@ -112,7 +113,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		new AbstractJob() {
 			public void perform() {
 				// Can an attribute change affect the layer?
-				notifyLayerChanged();
+				notifyLayerChanged(LayerChange.status);
 			}
 		}.addToScheduler();
 	}
@@ -123,7 +124,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		manager.forEach(calc);
 		if(calc.extent != null)
 			extent.setRect(calc.extent);
-		notifyLayerChanged();
+		notifyLayerChanged(LayerChange.extent);
 	}
 
 	/** Class to calculate the extent of the layer */
@@ -149,8 +150,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	}
 
 	/** Notify listeners that the layer has changed */
-	protected void notifyLayerChanged() {
-		int reason = LayerChangedEvent.DATA;
+	protected void notifyLayerChanged(LayerChange reason) {
 		final LayerChangedEvent e = new LayerChangedEvent(this, reason);
 		Runnable notifier = new Runnable() {
 			public void run() {

@@ -16,9 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.util.List;
-import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -39,32 +37,19 @@ public class DMSTab extends MapTab {
 	/** Summary of DMSs of each status */
 	protected final StyleSummary<DMS> summary;
 
-	/** Tab panel */
-	protected final JPanel tabPanel;
-
-	/** Main panel */
-	protected final JPanel mainPanel;
-
 	/** Create a new DMS tab */
  	public DMSTab(Session session, DMSManager manager, 
-		List<LayerState> lstates, ViewLayer vlayer)
+		List<LayerState> lstates)
 	{
 		super(session, I18N.get("dms.abbreviation"), 
 			I18N.get("dms.title"));
 		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary();
-		map.addLayers(lstates);
-		map.addLayer(manager.getLayer().createState());
-		tabPanel = createSideBar();
-		mainPanel = createMapPanel(vlayer);
-	}
-
-	/** Create the side bar panel */
-	protected JPanel createSideBar() {
-		JPanel p = new JPanel(new BorderLayout());
-		p.add(dispatcher, BorderLayout.NORTH);
-		p.add(summary, BorderLayout.CENTER);
-		return p;
+		for(LayerState ls: lstates)
+			map_model.addLayer(ls);
+		map_model.addLayer(manager.getLayer().createState());
+		add(dispatcher, BorderLayout.NORTH);
+		add(summary, BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
@@ -75,18 +60,7 @@ public class DMSTab extends MapTab {
 	/** Dispose of the DMS tab */
 	public void dispose() {
 		super.dispose();
-		mainPanel.removeAll();
 		dispatcher.dispose();
 		summary.dispose();
-	}
-
-	/** Get the tab panel */
-	public JPanel getTabPanel() {
-		return tabPanel;
-	}
-
-	/** Get the main panel */
-	public JPanel getMainPanel() {
-		return mainPanel;
 	}
 }
