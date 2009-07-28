@@ -78,9 +78,12 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	public void proxyAdded(T proxy) {
 		// Don't hog the SONAR TaskProcessor thread
 		if(complete) {
+			// NOTE: this also gets called when we "watch" an
+			//       object after it is selected.
 			new AbstractJob() {
 				public void perform() {
-					updateExtent();
+					notifyLayerChanged(
+						LayerChange.geometry);
 				}
 			}.addToScheduler();
 		}
@@ -102,7 +105,8 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		// Don't hog the SONAR TaskProcessor thread
 		new AbstractJob() {
 			public void perform() {
-				updateExtent();
+				notifyLayerChanged(
+					LayerChange.geometry);
 			}
 		}.addToScheduler();
 	}
