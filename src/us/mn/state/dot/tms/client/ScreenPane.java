@@ -18,7 +18,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -26,7 +25,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
 import us.mn.state.dot.trafmap.ViewLayer;
@@ -101,18 +99,12 @@ public class ScreenPane extends JPanel {
 	/** Create a map tool bar with appropriate view buttons */
 	protected MapToolBar createToolBar(ViewLayer vlayer) {
 		MapToolBar b = new MapToolBar(map);
-		for(LayerState ls: map.getLayers())
-			b.addThemeLegend(ls);
-		b.add(Box.createGlue());
-		b.add(Box.createGlue());
-		if(vlayer == null)
-			b.addButton(b.createHomeButton());
-		else {
-			JButton[] views = vlayer.createViewButtons(map);
-			for(int i = 0; i < views.length; i++)
-				b.addButton(views[i]);
-		}
 		b.setFloatable(false);
+		if(vlayer != null) {
+			for(JButton v: vlayer.createViewButtons(map))
+				b.addButton(v);
+		} else
+			b.addHomeButton();
 		return b;
 	}
 
