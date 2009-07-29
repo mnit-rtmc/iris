@@ -47,10 +47,6 @@ public class IrisToolBar extends JToolBar {
 				s.getSonarState(), s.getDesktop());
 			add(aws_panel);
 		}
-		if(MapZoomPanel.getIEnabled()) {
-			MapZoomPanel z_panel = new MapZoomPanel(map);
-			add(z_panel);
-		}
 		if(CoordinatePanel.getIEnabled()) {
 			CoordinatePanel c_panel = new CoordinatePanel(map);
 			add(c_panel);
