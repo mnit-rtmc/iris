@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -30,8 +31,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
+import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
+import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
@@ -53,6 +56,9 @@ public class IrisClient extends JFrame {
 
 	/** Array of screen panes */
 	protected final ScreenPane[] s_panes;
+
+	/** Base layers */
+	protected final List<Layer> baseLayers;
 
 	/** Desktop pane */
 	protected final SmartDesktop desktop;
@@ -90,6 +96,7 @@ public class IrisClient extends JFrame {
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0]);
+		baseLayers = new BaseLayers().getLayers();
 		ViewLayer vlayer = new ViewLayer();
 		for(int s = 0; s < s_panes.length; s++) {
 			s_panes[s] = new ScreenPane(vlayer);
@@ -175,7 +182,8 @@ public class IrisClient extends JFrame {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		setTitle("IRIS: User = " + user.getName() + " (" +
 			user.getFullName() + ")");
-		session = new Session(userManager, desktop, props, logger);
+		session = new Session(userManager, desktop, props, logger,
+			baseLayers);
 		arrangeTabs();
 		viewMenu = session.getViewMenu();
 		getJMenuBar().add(viewMenu, 1);

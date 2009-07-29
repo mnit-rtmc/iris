@@ -27,7 +27,6 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
-import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.StationLayer;
 import us.mn.state.dot.trafmap.StationLayerState;
@@ -195,8 +194,8 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(UserManager um, SmartDesktop d, Properties p, Logger l)
-		throws TdxmlException, IOException
+	public Session(UserManager um, SmartDesktop d, Properties p, Logger l,
+		List<Layer> bl) throws TdxmlException, IOException
 	{
 		user = um.getUser();
 		state = um.getSonarState();
@@ -204,8 +203,8 @@ public class Session {
 		desktop = d;
 		props = p;
 		logger = l;
+		baseLayers = bl;
 		v_menu = new ViewMenu(this);
-		baseLayers = new BaseLayers().getLayers();
 		gpoly = createStationLayer();
 		incLayer = createIncidentLayer();
 		loc_manager = new GeoLocManager(state.getGeoLocs());
