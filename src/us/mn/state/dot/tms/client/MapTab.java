@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,40 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 
 /**
- * Base class for all Iris tabs which contain maps
+ * Super class of all tabs used in the IrisClient.
  *
+ * @author Erik Engstrom
  * @author Douglas Lau
  */
-abstract public class MapTab extends IrisTab {
+abstract public class MapTab extends JPanel {
+
+	/** Name of tab */
+	protected final String name;
+
+	/** Get the name of the tab */
+	public String getName() {
+		return name;
+	}
+
+	/** Get the tab number */
+	abstract public int getNumber();
+
+	/** Tip for hovering */
+	protected final String tip;
+
+	/** Get the tip */
+	public String getTip() {
+		return tip;
+	}
 
 	/** Map model for the tab */
-	protected final MapModel map_model = new MapModel();;
+	protected final MapModel map_model = new MapModel();
 
 	/** Get the map model */
 	public MapModel getMapModel() {
@@ -34,7 +56,9 @@ abstract public class MapTab extends IrisTab {
 
 	/** Create a new map tab */
 	public MapTab(String n, String t) {
-		super(n, t);
+		super(new BorderLayout());
+		name = n;
+		tip = t;
 	}
 
 	/** Set the map */

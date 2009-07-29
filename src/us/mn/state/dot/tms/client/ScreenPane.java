@@ -65,15 +65,15 @@ public class ScreenPane extends JPanel {
 			public void stateChanged(ChangeEvent e) {
 				Component tab = tab_pane.getSelectedComponent();
 				if(tab instanceof MapTab) {
-					MapTab mt = (MapTab)tab;
-					map.setModel(mt.getMapModel());
+					MapTab it = (MapTab)tab;
+					map.setModel(it.getMapModel());
 				}
 			}
 		});
 	}
 
 	/** Add a tab to the screen pane */
-	public void addTab(IrisTab tab) {
+	public void addTab(MapTab tab) {
 		tab_pane.addTab(tab.getName(), null, tab, tab.getTip());
 	}
 

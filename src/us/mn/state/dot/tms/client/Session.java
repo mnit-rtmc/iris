@@ -187,10 +187,10 @@ public class Session {
 	}
 
 	/** List of all tabs */
-	protected final List<IrisTab> tabs = new LinkedList<IrisTab>();
+	protected final List<MapTab> tabs = new LinkedList<MapTab>();
 
 	/** Get a list of all tabs */
-	public List<IrisTab> getTabs() {
+	public List<MapTab> getTabs() {
 		return tabs;
 	}
 
@@ -385,7 +385,7 @@ public class Session {
 	/** Dispose of the session */
 	public void dispose() {
 		desktop.closeFrames();
-		for(IrisTab tab: tabs)
+		for(MapTab tab: tabs)
 			tab.dispose();
 		if(gpoly != null)
 			gpoly.dispose();
