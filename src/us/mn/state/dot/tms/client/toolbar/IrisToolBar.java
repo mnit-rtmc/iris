@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.toolbar;
 
+import java.awt.Component;
 import java.awt.FlowLayout;
 import javax.swing.JToolBar;
 import javax.swing.JPanel;
@@ -31,18 +32,6 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class IrisToolBar extends JToolBar {
 
-	/** coordinate panel */
-	protected CoordinatePanel c_panel;
-
-	/** AWS panel */
-	protected AwsStatusPanel aws_panel;
-
-	/** Map zoom panel */
-	protected MapZoomPanel z_panel;
-
-	/** Action plan panel */
-	protected ActionPlanPanel plan_panel;
-
 	/** Current session */
 	protected final Session session;
 
@@ -55,32 +44,32 @@ public class IrisToolBar extends JToolBar {
 	/** Build toolbar components */
 	protected JPanel buildComponents(MapBean m) {
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		plan_panel = new ActionPlanPanel(session);
+		ActionPlanPanel plan_panel = new ActionPlanPanel(session);
 		p.add(plan_panel);
 		if(AwsStatusPanel.getIEnabled()) {
-			aws_panel = new AwsStatusPanel(session.getSonarState(),
-				session.getDesktop());
+			AwsStatusPanel aws_panel = new AwsStatusPanel(
+				session.getSonarState(), session.getDesktop());
 			p.add(aws_panel);
 		}
 		if(MapZoomPanel.getIEnabled()) {
-			z_panel = new MapZoomPanel(m);
+			MapZoomPanel z_panel = new MapZoomPanel(m);
 			p.add(z_panel);
 		}
 		if(CoordinatePanel.getIEnabled()) {
-			c_panel = new CoordinatePanel(m);
+			CoordinatePanel c_panel = new CoordinatePanel(m);
 			p.add(c_panel);
 		}
 		return p;
 	}
 
-	/** cleanup */
+	/** Dispose of the toolbar */
 	public void dispose() {
-		plan_panel.dispose();
-		if(c_panel != null)
-			c_panel.dispose();
-		if(aws_panel != null)
-			aws_panel.dispose();
-		if(z_panel != null)
-			z_panel.dispose();
+		for(Component c: getComponents()) {
+			if(c instanceof ToolPanel) {
+				ToolPanel tp = (ToolPanel)c;
+				tp.dispose();
+			}
+		}
+		removeAll();
 	}
 }

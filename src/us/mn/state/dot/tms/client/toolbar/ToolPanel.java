@@ -22,10 +22,13 @@ import javax.swing.JPanel;
  *
  * @author Douglas Lau
  */
-public class ToolPanel extends JPanel {
+abstract public class ToolPanel extends JPanel {
 
 	/** Create a new tool panel */
 	public ToolPanel() {
 		super(new FlowLayout());
 	}
+
+	/** Dispose of the tool panel */
+	public void dispose() { }
 }
