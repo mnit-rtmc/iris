@@ -15,12 +15,9 @@
 package us.mn.state.dot.tms.client.toolbar;
 
 import java.awt.Component;
-import java.awt.FlowLayout;
 import javax.swing.JToolBar;
-import javax.swing.JPanel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * This status bar contains JPanel components such as the real-time map 
@@ -28,42 +25,40 @@ import us.mn.state.dot.tms.client.SonarState;
  * @see CoordinatePanel, AwsStatusPanel
  *
  * @author Michael Darter
- * @company AHMCT
+ * @author Douglas Lau
  */
 public class IrisToolBar extends JToolBar {
 
-	/** Current session */
-	protected final Session session;
+	/** Map widget */
+	protected final MapBean map;
 
-	/** Constructor */
-	public IrisToolBar(MapBean m, Session s) {
-		session = s;
-		add(buildComponents(m));
+	/** Create a new IRIS toolbar */
+	public IrisToolBar(MapBean m) {
+		map = m;
 	}
 
 	/** Build toolbar components */
-	protected JPanel buildComponents(MapBean m) {
-		JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		ActionPlanPanel plan_panel = new ActionPlanPanel(session);
-		p.add(plan_panel);
+	public void createToolPanels(Session s) {
+		clear();
+		ActionPlanPanel plan_panel = new ActionPlanPanel(s);
+		add(plan_panel);
 		if(AwsStatusPanel.getIEnabled()) {
 			AwsStatusPanel aws_panel = new AwsStatusPanel(
-				session.getSonarState(), session.getDesktop());
-			p.add(aws_panel);
+				s.getSonarState(), s.getDesktop());
+			add(aws_panel);
 		}
 		if(MapZoomPanel.getIEnabled()) {
-			MapZoomPanel z_panel = new MapZoomPanel(m);
-			p.add(z_panel);
+			MapZoomPanel z_panel = new MapZoomPanel(map);
+			add(z_panel);
 		}
 		if(CoordinatePanel.getIEnabled()) {
-			CoordinatePanel c_panel = new CoordinatePanel(m);
-			p.add(c_panel);
+			CoordinatePanel c_panel = new CoordinatePanel(map);
+			add(c_panel);
 		}
-		return p;
 	}
 
-	/** Dispose of the toolbar */
-	public void dispose() {
+	/** Clear the toolbar */
+	public void clear() {
 		for(Component c: getComponents()) {
 			if(c instanceof ToolPanel) {
 				ToolPanel tp = (ToolPanel)c;
@@ -71,5 +66,10 @@ public class IrisToolBar extends JToolBar {
 			}
 		}
 		removeAll();
+	}
+
+	/** Dispose of the toolbar */
+	public void dispose() {
+		clear();
 	}
 }

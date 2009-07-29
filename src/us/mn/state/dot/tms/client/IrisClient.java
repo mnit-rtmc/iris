@@ -163,6 +163,8 @@ public class IrisClient extends JFrame {
 				pane.addTab(tab);
 				tab.setMap(pane.getMap());
 			}
+			for(ScreenPane sp: visible)
+				sp.createToolPanels(s);
 		}
 	}
 
@@ -213,7 +215,7 @@ public class IrisClient extends JFrame {
 
 	/** Removed all the tabs */
 	protected void removeTabs() {
-		for(ScreenPane p: s_panes)
-			p.removeTabs();
+		for(ScreenPane sp: s_panes)
+			sp.removeTabs();
 	}
 }

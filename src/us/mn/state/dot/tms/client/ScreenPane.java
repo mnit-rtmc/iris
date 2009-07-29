@@ -52,6 +52,9 @@ public class ScreenPane extends JPanel {
 	/** Map panel */
 	protected final JPanel map_panel;
 
+	/** IRIS tool bar */
+	protected final IrisToolBar tool_bar;
+
 	/** Create a new screen pane */
 	public ScreenPane(ViewLayer vlayer) {
 		setLayout(new BorderLayout());
@@ -59,6 +62,8 @@ public class ScreenPane extends JPanel {
 		add(tab_pane, BorderLayout.WEST);
 		map = new MapBean(true);
 		map.setBackground(new Color(208, 216, 208));
+		tool_bar = new IrisToolBar(map);
+		tool_bar.setFloatable(false);
 		map_panel = createMapPanel(vlayer);
 		add(map_panel, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
@@ -80,6 +85,7 @@ public class ScreenPane extends JPanel {
 	/** Remove all the tabs */
 	public void removeTabs() {
 		tab_pane.removeAll();
+		tool_bar.clear();
 	}
 
 	/** Create the map panel */
@@ -89,10 +95,10 @@ public class ScreenPane extends JPanel {
 			BevelBorder.LOWERED));
 		p.add(map, BorderLayout.CENTER);
 		JPanel mp = new JPanel(new BorderLayout());
-		MapToolBar toolBar = createToolBar(vlayer);
-		mp.add(toolBar, BorderLayout.NORTH);
+		MapToolBar mtb = createToolBar(vlayer);
+		mp.add(mtb, BorderLayout.NORTH);
 		mp.add(p, BorderLayout.CENTER);
-//		mp.add(createIrisToolBar(), BorderLayout.SOUTH);
+		mp.add(tool_bar, BorderLayout.SOUTH);
 		return mp;
 	}
 
@@ -108,10 +114,8 @@ public class ScreenPane extends JPanel {
 		return b;
 	}
 
-	/** Create a map status bar */
-/*	protected IrisToolBar createIrisToolBar() {
-		IrisToolBar b = new IrisToolBar(map, session);
-		b.setFloatable(false);
-		return b;
-	} */
+	/** Create the tool panels */
+	public void createToolPanels(Session s) {
+		tool_bar.createToolPanels(s);
+	}
 }
