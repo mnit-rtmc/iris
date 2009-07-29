@@ -161,10 +161,7 @@ public class IrisClient extends JFrame {
 				int p = tab.getNumber() % visible.size();
 				ScreenPane pane = visible.get(p);
 				pane.addTab(tab);
-				if(tab instanceof MapTab) {
-					MapTab mp = (MapTab)tab;
-					mp.setMap(pane.getMap());
-				}
+				tab.setMap(pane.getMap());
 			}
 		}
 	}
