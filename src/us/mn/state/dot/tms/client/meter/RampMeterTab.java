@@ -46,11 +46,11 @@ public class RampMeterTab extends MapTab {
 	{
 		super(session, "Meter", "Operate Ramp Meters");
 		manager = m;
-		for(LayerState ls: lstates)
+		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
-		LayerState ls = manager.getLayer().createState();
-		map_model.addLayer(ls);
-		map_model.setHomeLayer(ls);
+			if(ls.getLayer().getName().equals(m.getProxyType()))
+				map_model.setHomeLayer(ls);
+		}
 		statusPanel = new MeterStatusPanel(session, manager);
 		summary = manager.createStyleSummary();
 		add(statusPanel, BorderLayout.NORTH);

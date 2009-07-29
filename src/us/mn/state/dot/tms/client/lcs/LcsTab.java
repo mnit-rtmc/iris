@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
+import java.util.List;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.trafmap.BaseMapLayer;
 import us.mn.state.dot.trafmap.TunnelLayer;
@@ -39,20 +40,18 @@ public class LcsTab extends MapTab {
 	protected final StyleSummary<LCSArray> summary;
 
 	/** Create a new LCS tab */
-	public LcsTab(Session session, LCSArrayManager manager)
-		throws IOException
+	public LcsTab(Session session, LCSArrayManager manager,
+		List<LayerState> lstates) throws IOException
 	{
 		super(session, "LCS", "Operate Lane Control Signals");
 		dispatcher = new LcsDispatcher(session, manager);
 		summary = manager.createStyleSummary();
-		LayerState lstate =
-			BaseMapLayer.createTunnelMapLayer().createState();
-		LayerState tunnel = new TunnelLayer().createState();
-		map_model.addLayer(lstate);
-		map_model.addLayer(tunnel);
-		LayerState ls = manager.getLayer().createState();
-		map_model.addLayer(ls);
-		map_model.setHomeLayer(ls);
+		for(LayerState ls: lstates) {
+			map_model.addLayer(ls);
+			String name = ls.getLayer().getName();
+			if(name.equals(manager.getProxyType()))
+				map_model.setHomeLayer(ls);
+		}
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

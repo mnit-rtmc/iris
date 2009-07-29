@@ -45,11 +45,12 @@ public class DMSTab extends MapTab {
 			I18N.get("dms.title"));
 		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary();
-		for(LayerState ls: lstates)
+		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
-		LayerState ls = manager.getLayer().createState();
-		map_model.addLayer(ls);
-		map_model.setHomeLayer(ls);
+			String name = ls.getLayer().getName();
+			if(name.equals(I18N.get("dms.abbreviation")))
+				map_model.setHomeLayer(ls);
+		}
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}

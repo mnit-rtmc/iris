@@ -30,6 +30,7 @@ import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.trafmap.FreewayTheme;
 import us.mn.state.dot.trafmap.StationLayer;
+import us.mn.state.dot.trafmap.StationLayerState;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
@@ -38,6 +39,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
@@ -68,6 +70,14 @@ import us.mn.state.dot.tms.client.incidents.D10IncidentLayer;
  * @author Douglas Lau
  */
 public class Session {
+
+	/** Hide the named layer */
+	static protected void hideLayer(List<LayerState> lstates, String name) {
+		for(LayerState ls: lstates) {
+			if(ls.getLayer().getName().equals(name))
+				ls.setVisible(false);
+		}
+	}
 
 	/** Session User */
 	protected final User user;
@@ -184,6 +194,26 @@ public class Session {
 		return tabs;
 	}
 
+	/** Create the layer states */
+	protected List<LayerState> createLayers() {
+		List<LayerState> lstates = createBaseLayers();
+		if(gpoly != null)
+			lstates.add(gpoly.createState());
+		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
+			lstates.add(cam_manager.getLayer().createState());
+		if(incLayer != null)
+			lstates.add(incLayer.createState());
+		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
+			lstates.add(meter_manager.getLayer().createState());
+		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
+			lstates.add(dms_manager.getLayer().createState());
+		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
+			lstates.add(lcs_array_manager.getLayer().createState());
+		if(canUpdate(WarningSign.SONAR_TYPE, "deployed"))
+			lstates.add(warn_manager.getLayer().createState());
+		return lstates;
+	}
+
 	/** Create the base layer states */
 	protected List<LayerState> createBaseLayers() {
 		LinkedList<LayerState> lstates = new LinkedList<LayerState>();
@@ -222,28 +252,27 @@ public class Session {
 	/** Add the DMS tab */
 	protected void addDMSTab() {
 		v_menu.addDMSItems();
-		List<LayerState> lstates = createBaseLayers();
-		if(gpoly != null)
-			lstates.add(gpoly.createState());
-		lstates.add(cam_manager.getLayer().createState());
-		if(incLayer != null)
-			lstates.add(incLayer.createState());
-		lstates.add(warn_manager.getLayer().createState());
+		List<LayerState> lstates = createLayers();
+		hideLayer(lstates, meter_manager.getProxyType());
+		hideLayer(lstates, lcs_array_manager.getProxyType());
 		tabs.add(new DMSTab(this, dms_manager, lstates));
 	}
 
 	/** Add the meter tab */
 	protected void addMeterTab() throws IOException {
 		v_menu.addMeterItem();
-		List<LayerState> lstates = createBaseLayers();
-		if(gpoly != null) {
-			LayerState gpolyState = gpoly.createState();
-			for(Theme t: gpolyState.getThemes()) {
-				if(t instanceof FreewayTheme)
-					gpolyState.setTheme(t);
+		List<LayerState> lstates = createLayers();
+		for(LayerState ls: lstates) {
+			if(ls instanceof StationLayerState) {
+				for(Theme t: ls.getThemes()) {
+					if(t instanceof FreewayTheme)
+						ls.setTheme(t);
+				}
 			}
-			lstates.add(gpolyState);
 		}
+		hideLayer(lstates, dms_manager.getProxyType());
+		hideLayer(lstates, lcs_array_manager.getProxyType());
+		hideLayer(lstates, warn_manager.getProxyType());
 		tabs.add(new RampMeterTab(this, meter_manager, lstates));
 	}
 
@@ -255,7 +284,11 @@ public class Session {
 	/** Add the LCS tab */
 	protected void addLcsTab() throws IOException {
 		v_menu.add(new LaneUseMenu(this));
-		tabs.add(new LcsTab(this, lcs_array_manager));
+		List<LayerState> lstates = createLayers();
+		hideLayer(lstates, meter_manager.getProxyType());
+		hideLayer(lstates, dms_manager.getProxyType());
+		hideLayer(lstates, warn_manager.getProxyType());
+		tabs.add(new LcsTab(this, lcs_array_manager, lstates));
 	}
 
 	/** Add the camera tab */
@@ -299,6 +332,11 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
+		addTabs();
+	}
+
+	/** Add the tabs */
+	protected void addTabs() throws IOException {
 		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
 			addDMSTab();
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
