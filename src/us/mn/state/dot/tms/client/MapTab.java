@@ -32,13 +32,9 @@ abstract public class MapTab extends IrisTab {
 		return map_model;
 	}
 
-	/** Session */
-	protected final Session session;
-
 	/** Create a new map tab */
-	public MapTab(Session s, String n, String t) {
+	public MapTab(String n, String t) {
 		super(n, t);
-		session = s;
 	}
 
 	/** Set the map */

@@ -44,7 +44,7 @@ public class RampMeterTab extends MapTab {
   	public RampMeterTab(Session session, MeterManager m,
 		List<LayerState> lstates) throws IOException
 	{
-		super(session, "Meter", "Operate Ramp Meters");
+		super("Meter", "Operate Ramp Meters");
 		manager = m;
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);

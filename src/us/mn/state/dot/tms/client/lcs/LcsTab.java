@@ -41,7 +41,7 @@ public class LcsTab extends MapTab {
 	public LcsTab(Session session, LCSArrayManager manager,
 		List<LayerState> lstates) throws IOException
 	{
-		super(session, "LCS", "Operate Lane Control Signals");
+		super("LCS", "Operate Lane Control Signals");
 		dispatcher = new LcsDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		for(LayerState ls: lstates) {

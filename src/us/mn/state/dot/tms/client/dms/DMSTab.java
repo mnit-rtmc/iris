@@ -41,8 +41,7 @@ public class DMSTab extends MapTab {
  	public DMSTab(Session session, DMSManager manager, 
 		List<LayerState> lstates)
 	{
-		super(session, I18N.get("dms.abbreviation"), 
-			I18N.get("dms.title"));
+		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
 		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		for(LayerState ls: lstates) {
