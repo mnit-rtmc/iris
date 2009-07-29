@@ -18,8 +18,6 @@ import java.awt.BorderLayout;
 import java.io.IOException;
 import java.util.List;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.trafmap.BaseMapLayer;
-import us.mn.state.dot.trafmap.TunnelLayer;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
