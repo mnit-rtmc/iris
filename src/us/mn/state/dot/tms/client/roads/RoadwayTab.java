@@ -46,7 +46,9 @@ public class RoadwayTab extends MapTab {
 		chooser = new CorridorChooser(m, clist);
 		for(LayerState ls: lstates)
 			map_model.addLayer(ls);
-		map_model.addLayer(m.getLayer().createState());
+		LayerState ls = m.getLayer().createState();
+		map_model.addLayer(ls);
+		map_model.setHomeLayer(ls);
 		add(chooser, BorderLayout.NORTH);
 		add(clist, BorderLayout.CENTER);
 	}

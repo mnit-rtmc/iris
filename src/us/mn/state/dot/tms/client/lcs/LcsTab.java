@@ -50,7 +50,9 @@ public class LcsTab extends MapTab {
 		LayerState tunnel = new TunnelLayer().createState();
 		map_model.addLayer(lstate);
 		map_model.addLayer(tunnel);
-		map_model.addLayer(manager.getLayer().createState());
+		LayerState ls = manager.getLayer().createState();
+		map_model.addLayer(ls);
+		map_model.setHomeLayer(ls);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
