@@ -341,7 +341,12 @@ public class Session {
 
 	/** Add the incident tab */
 	protected void addIncidentTab() {
-		tabs.add(new IncidentTab(incLayer));
+		List<LayerState> lstates = createLayers();
+		hideLayer(lstates, meter_manager.getProxyType());
+		hideLayer(lstates, dms_manager.getProxyType());
+		hideLayer(lstates, lcs_array_manager.getProxyType());
+		hideLayer(lstates, warn_manager.getProxyType());
+		tabs.add(new IncidentTab(incLayer, lstates));
 	}
 
 	/** Add the LCS tab */
@@ -357,7 +362,13 @@ public class Session {
 	/** Add the camera tab */
 	protected void addCameraTab() {
 		v_menu.add(new VideoMenu(this));
-		tabs.add(new CameraTab(cam_manager, props, logger, state,user));
+		List<LayerState> lstates = createLayers();
+		hideLayer(lstates, meter_manager.getProxyType());
+		hideLayer(lstates, dms_manager.getProxyType());
+		hideLayer(lstates, lcs_array_manager.getProxyType());
+		hideLayer(lstates, warn_manager.getProxyType());
+		tabs.add(new CameraTab(cam_manager, lstates, props, logger,
+			state, user));
 	}
 
 	/** Add the roadway tab */

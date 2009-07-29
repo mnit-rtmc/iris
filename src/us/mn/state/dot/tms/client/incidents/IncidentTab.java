@@ -15,12 +15,14 @@
 package us.mn.state.dot.tms.client.incidents;
 
 import java.awt.BorderLayout;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tdxml.XmlIncidentClient;
-import us.mn.state.dot.tms.client.IrisTab;
+import us.mn.state.dot.tms.client.MapTab;
 
 /**
  * Provides a GUI for the incident tab on the operator interface for IRIS.
@@ -28,7 +30,7 @@ import us.mn.state.dot.tms.client.IrisTab;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-public class IncidentTab extends IrisTab {
+public class IncidentTab extends MapTab {
 
 	/** Client for XML incident data */
 	protected final XmlIncidentClient incidentClient;
@@ -37,8 +39,14 @@ public class IncidentTab extends IrisTab {
 	protected final IncidentListModel model = new IncidentListModel();
 
 	/** Create a new incident tab for the IRIS client */
-	public IncidentTab(TmsIncidentLayer layer) {
+	public IncidentTab(TmsIncidentLayer layer, List<LayerState> lstates) {
 		super("Incident", "Incident summary");
+		for(LayerState ls: lstates) {
+			map_model.addLayer(ls);
+			String name = ls.getLayer().getName();
+			if(name.equals("Freeway"))
+				map_model.setHomeLayer(ls);
+		}
 		incidentClient = layer.getIncidentClient();
 		incidentClient.addTdxmlListener(model);
 		JList incidents = new JList(model);

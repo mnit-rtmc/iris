@@ -15,10 +15,12 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
+import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
+import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.client.IrisTab;
+import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -26,17 +28,23 @@ import us.mn.state.dot.tms.client.SonarState;
  *
  * @author Douglas Lau
  */
-public class CameraTab extends IrisTab {
+public class CameraTab extends MapTab {
 
 	/** Message logger */
 	protected final Logger logger;
 
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(CameraManager manager, Properties props, Logger l,
-		SonarState st, User user)
+	public CameraTab(CameraManager manager, List<LayerState> lstates,
+		Properties props, Logger l, SonarState st, User user)
 	{
 		super("Camera", "Camera summary");
 		logger = l;
+		for(LayerState ls: lstates) {
+			map_model.addLayer(ls);
+			String name = ls.getLayer().getName();
+			if(name.equals("Freeway"))
+				map_model.setHomeLayer(ls);
+		}
 		add(new CameraViewer(manager, props, logger, st, user),
 			BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
