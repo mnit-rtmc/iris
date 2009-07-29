@@ -213,13 +213,17 @@ public class PixelMapBuilder {
 		}
 	}
 
-	/** Calculate the number of text lines on a page */
-	protected int getLinesOnPage(MultiString ms, final int p) {
+	/** Calculate the number of text lines on the specified page. A
+	 *  blank line between 2 text lines on the same page counts as a
+	 *  line. A trailing blank line on a page isn't counted.
+	 *  @param ms MULTI string.
+	 *  @param p Page number, zero based. */
+	public static int getLinesOnPage(MultiString ms, final int p) {
 		final int[] n_lines = new int[1];
 		MultiStringStateAdapter cb = new MultiStringStateAdapter() {
-			public void addLine() {
+			public void addSpan(String s) {
 				if(p == ms_page)
-					n_lines[0]++;
+					n_lines[0] = ms_line + 1;
 			}
 		};
 		ms.parse(cb);
