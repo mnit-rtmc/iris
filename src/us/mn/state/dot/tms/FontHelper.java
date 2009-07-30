@@ -90,4 +90,19 @@ public class FontHelper extends BaseHelper {
 		}
 		throw new InvalidMessageException("Invalid code point");
 	}
+
+	/** Calculate the width of a span of text */
+	static public int calculateWidth(Font font, String t)
+		throws InvalidMessageException
+	{
+		int w = 0;
+		for(int i = 0; i < t.length(); i++) {
+			if(i > 0)
+				w += font.getCharSpacing();
+			int cp = t.charAt(i);
+			Graphic c = lookupGraphic(font, cp);
+			w += c.getWidth();
+		}
+		return w;
+	}
 }

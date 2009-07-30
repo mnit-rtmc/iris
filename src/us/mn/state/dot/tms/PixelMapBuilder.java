@@ -232,31 +232,16 @@ public class PixelMapBuilder {
 			return 0;
 		case CENTER:
 			// determine centering mode: block or bit oriented.
-			int pseudo_c_width = (c_width <= 0 ? 1 : c_width);
-			int w = width / pseudo_c_width;
-			int r = calculateWidth(font, t) / pseudo_c_width;
-			return (w - r) / 2 * pseudo_c_width;
+			int cw = (c_width <= 0 ? 1 : c_width);
+			int w = width / cw;
+			int r = FontHelper.calculateWidth(font, t) / cw;
+			return (w - r) / 2 * cw;
 		case RIGHT:
-			return width - calculateWidth(font, t) - 1;
+			return width - FontHelper.calculateWidth(font, t) - 1;
 		default:
 			throw new InvalidMessageException(
 				"Invalid line justification: " + jl);
 		}
-	}
-
-	/** Calculate the width of a span of text */
-	protected int calculateWidth(Font font, String t)
-		throws InvalidMessageException
-	{
-		int w = 0;
-		for(int i = 0; i < t.length(); i++) {
-			if(i > 0)
-				w += font.getCharSpacing();
-			int cp = t.charAt(i);
-			Graphic c = FontHelper.lookupGraphic(font, cp);
-			w += c.getWidth();
-		}
-		return w;
 	}
 
 	/** Calculate the Y pixel position to place a span.
