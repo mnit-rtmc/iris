@@ -156,7 +156,7 @@ public class PixelMapBuilder {
 
 	/** Create and render a BitmapGraphic for the specified page number */
 	protected BitmapGraphic createBitmap(MultiString ms, final int p) {
-		int nltp = getLinesOnPage(ms, p);
+		int nltp = ms.countPageLines(p);
 		BitmapRenderer cb = new BitmapRenderer(nltp, p);
 		ms.parse(cb);
 		return cb.bg;
@@ -211,23 +211,6 @@ public class PixelMapBuilder {
 				// not much we can do here ...
 			}
 		}
-	}
-
-	/** Calculate the number of text lines on the specified page. A
-	 *  blank line between 2 text lines on the same page counts as a
-	 *  line. A trailing blank line on a page isn't counted.
-	 *  @param ms MULTI string.
-	 *  @param p Page number, zero based. */
-	public static int getLinesOnPage(MultiString ms, final int p) {
-		final int[] n_lines = new int[1];
-		MultiStringStateAdapter cb = new MultiStringStateAdapter() {
-			public void addSpan(String s) {
-				if(p == ms_page)
-					n_lines[0] = ms_line + 1;
-			}
-		};
-		ms.parse(cb);
-		return n_lines[0];
 	}
 
 	/** Calculate the X pixel position to place a span */

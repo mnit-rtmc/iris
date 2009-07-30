@@ -470,4 +470,21 @@ public class MultiString implements MultiStringState {
 		});
 		return ret;
 	}
+
+	/** Count the number of text lines on the specified page. A
+	 * blank line between text lines on the same page counts as a
+	 * line. A trailing blank line on a page isn't counted.
+	 * @param p Page number, zero based.
+	 * @returns Number of lines on the specified page. */
+	public int countPageLines(final int p) {
+		final int[] n_lines = new int[1];
+		MultiStringStateAdapter cb = new MultiStringStateAdapter() {
+			public void addSpan(String s) {
+				if(p == ms_page)
+					n_lines[0] = ms_line + 1;
+			}
+		};
+		parse(cb);
+		return n_lines[0];
+	}
 }
