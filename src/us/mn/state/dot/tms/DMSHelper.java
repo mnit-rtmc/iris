@@ -214,6 +214,10 @@ public class DMSHelper extends BaseHelper {
 
 	/** Check the style of the specified proxy */
 	static public boolean checkStyle(String s, DMS proxy) {
+		// FIXME: this grabs to LCS type lock, and we probably
+		//        already have the DMS type lock.  Plus, this doesn't
+		//        work until the LCS objects have been enumerated.
+		//        There's got to be a better way...
 		if(LCSHelper.lookup(proxy.getName()) != null)
 			return false;
 		if(STYLE_AVAILABLE.equals(s))

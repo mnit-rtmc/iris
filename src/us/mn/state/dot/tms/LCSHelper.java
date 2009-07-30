@@ -63,4 +63,16 @@ public class LCSHelper extends BaseHelper {
 	static public LCS lookup(String name) {
 		return (LCS)namespace.lookupObject(LCS.SONAR_TYPE, name);
 	}
+
+	/** Check if an LCS is failed */
+	static public boolean isFailed(LCS lcs) {
+		String name = lcs.getName();
+		DMS dms = DMSHelper.lookup(name);
+		if(dms != null) {
+			Controller ctr = dms.getController();
+			if(ctr != null && "".equals(ctr.getStatus()))
+				return false;
+		}
+		return true;
+	}
 }

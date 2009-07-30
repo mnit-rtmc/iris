@@ -113,4 +113,20 @@ public class LCSArrayHelper extends BaseHelper {
 		});
 		return status.getLast();
 	}
+
+	/** Check if an LCS array is failed */
+	static public boolean isFailed(final LCSArray lcs_array) {
+		final LinkedList<LCS> lcss = new LinkedList<LCS>();
+		lookupLCS(lcs_array, new Checker<LCS>() {
+			public boolean check(LCS lcs) {
+				lcss.add(lcs);
+				return false;
+			}
+		});
+		for(LCS lcs: lcss) {
+			if(LCSHelper.isFailed(lcs))
+				return true;
+		}
+		return false;
+	}
 }

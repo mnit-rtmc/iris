@@ -22,11 +22,9 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
@@ -98,42 +96,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Test if an LCS array is available */
 	protected boolean isAvailable(LCSArray proxy) {
 		return !isLocked(proxy) &&
-		       !isFailed(proxy) &&
+		       !LCSArrayHelper.isFailed(proxy) &&
 		       !isDeployed(proxy) &&
 		       !needsMaintenance(proxy);
 	}
 
-	/** Test if an LCS array is failed */
-	protected boolean isFailed(final LCSArray proxy) {
-		return null != namespace.findObject(LCS.SONAR_TYPE,
-		       new Checker<LCS>()
-		{
-			public boolean check(LCS lcs) {
-				if(lcs.getArray() == proxy)
-					return isFailed(lcs);
-				else
-					return false;
-			}
-		});
-	}
-
-	/** Test if an LCS is failed */
-	protected boolean isFailed(LCS lcs) {
-		String name = lcs.getName();
-		DMS dms = (DMS)namespace.lookupObject(DMS.SONAR_TYPE, name);
-		if(dms != null) {
-			Controller ctr = dms.getController();
-			if(ctr != null && "".equals(ctr.getStatus()))
-				return false;
-		}
-		return true;
-	}
-
 	/** User session */
 	protected final Session session;
-
-	/** SONAR namespace */
-	protected final Namespace namespace;
 
 	/** Action to blank the selected LCS array */
 	protected BlankLcsAction blankAction;
@@ -147,7 +116,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	public LCSArrayManager(Session s, GeoLocManager lm) {
 		super(getCache(s), lm);
 		session = s;
-		namespace = s.getSonarState().getNamespace();
 		initialize();
 	}
 
@@ -198,7 +166,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		else if(STYLE_MAINTENANCE.equals(s))
 			return needsMaintenance(proxy);
 		else if(STYLE_FAILED.equals(s))
-			return isFailed(proxy);
+			return LCSArrayHelper.isFailed(proxy);
 		else
 			return STYLE_ALL.equals(s);
 	}
@@ -262,8 +230,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		LCS lcs = LCSArrayHelper.lookupLCS(proxy, 1);
 		if(lcs != null) {
 			String name = lcs.getName();
-			DMS dms = (DMS)namespace.lookupObject(DMS.SONAR_TYPE,
-				name);
+			DMS dms = DMSHelper.lookup(name);
 			if(dms != null)
 				return dms.getGeoLoc();
 		}
