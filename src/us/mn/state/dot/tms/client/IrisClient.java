@@ -157,7 +157,8 @@ public class IrisClient extends JFrame {
 		this.setJMenuBar(menuBar);
 	}
 
-	/** Get a list of all visible screen panes */
+	/** Get a list of all visible screen panes. Will return an empty
+	 *  list if IRIS is minimized. */
 	protected LinkedList<ScreenPane> getVisiblePanes() {
 		LinkedList<ScreenPane> visible = new LinkedList<ScreenPane>();
 		for(ScreenPane s: s_panes)
@@ -172,6 +173,8 @@ public class IrisClient extends JFrame {
 		Session s = session;
 		if(s != null) {
 			LinkedList<ScreenPane> visible = getVisiblePanes();
+			if(visible.size() <= 0)
+				return;
 			for(MapTab tab: s.getTabs()) {
 				int p = tab.getNumber() % visible.size();
 				ScreenPane pane = visible.get(p);
