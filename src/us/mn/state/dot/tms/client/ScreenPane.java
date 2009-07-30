@@ -27,7 +27,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
-import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
 /**
@@ -56,7 +55,7 @@ public class ScreenPane extends JPanel {
 	protected final IrisToolBar tool_bar;
 
 	/** Create a new screen pane */
-	public ScreenPane(ViewLayer vlayer) {
+	public ScreenPane() {
 		setLayout(new BorderLayout());
 		tab_pane = new JTabbedPane(SwingConstants.TOP);
 		add(tab_pane, BorderLayout.WEST);
@@ -64,7 +63,7 @@ public class ScreenPane extends JPanel {
 		map.setBackground(new Color(208, 216, 208));
 		tool_bar = new IrisToolBar(map);
 		tool_bar.setFloatable(false);
-		map_panel = createMapPanel(vlayer);
+		map_panel = createMapPanel();
 		add(map_panel, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
@@ -89,13 +88,13 @@ public class ScreenPane extends JPanel {
 	}
 
 	/** Create the map panel */
-	protected JPanel createMapPanel(ViewLayer vlayer) {
+	protected JPanel createMapPanel() {
 		JPanel p = new JPanel(new BorderLayout());
 		p.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
 		p.add(map, BorderLayout.CENTER);
 		JPanel mp = new JPanel(new BorderLayout());
-		MapToolBar mtb = createToolBar(vlayer);
+		MapToolBar mtb = createToolBar();
 		mp.add(mtb, BorderLayout.NORTH);
 		mp.add(p, BorderLayout.CENTER);
 		mp.add(tool_bar, BorderLayout.SOUTH);
@@ -103,14 +102,10 @@ public class ScreenPane extends JPanel {
 	}
 
 	/** Create a map tool bar with appropriate view buttons */
-	protected MapToolBar createToolBar(ViewLayer vlayer) {
+	protected MapToolBar createToolBar() {
 		MapToolBar b = new MapToolBar(map);
 		b.setFloatable(false);
-		if(vlayer != null) {
-			for(JButton v: vlayer.createViewButtons(map))
-				b.addButton(v);
-		} else
-			b.addHomeButton();
+		b.addHomeButton();
 		return b;
 	}
 

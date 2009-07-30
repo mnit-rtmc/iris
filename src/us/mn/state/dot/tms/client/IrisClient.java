@@ -32,10 +32,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.log.TmsLogFactory;
 import us.mn.state.dot.map.Layer;
+import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
-import us.mn.state.dot.trafmap.ViewLayer;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -97,10 +98,10 @@ public class IrisClient extends JFrame {
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0]);
 		baseLayers = new BaseLayers().getLayers();
-		ViewLayer vlayer = new ViewLayer();
-		for(int s = 0; s < s_panes.length; s++) {
-			s_panes[s] = new ScreenPane(vlayer);
-			s_panes[s].addComponentListener(new ComponentAdapter() {
+		for(int s = 0; s < s_panes.length; s++)
+			s_panes[s] = new ScreenPane();
+		for(ScreenPane sp: s_panes) {
+			sp.addComponentListener(new ComponentAdapter() {
 				public void componentHidden(ComponentEvent e) {
 					arrangeTabs();
 				}
@@ -108,7 +109,14 @@ public class IrisClient extends JFrame {
 					arrangeTabs();
 				}
 			});
-			desktop.add(s_panes[s], JLayeredPane.DEFAULT_LAYER);
+			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
+			MapModel mm = new MapModel();
+			for(Layer l: baseLayers) {
+				LayerState ls = l.createState();
+				mm.addLayer(ls);
+				mm.setHomeLayer(ls);
+			}
+			sp.getMap().setModel(mm);
 		}
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
