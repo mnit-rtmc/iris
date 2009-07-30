@@ -45,6 +45,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		VideoMonitorImpl.loadAll();
 		RoadImpl.loadAll();
 		GeoLocImpl.loadAll();
+		MapExtentImpl.loadAll();
 		CommLinkImpl.loadAll();
 		CabinetStyleImpl.loadAll();
 		CabinetImpl.loadAll();

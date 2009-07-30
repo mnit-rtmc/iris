@@ -230,6 +230,11 @@ CREATE TABLE geo_loc (
 	north_off integer
 );
 
+CREATE TABLE iris.map_extent (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES geo_loc(name)
+);
+
 CREATE TABLE lane_type (
 	id smallint PRIMARY KEY,
 	description text NOT NULL,
@@ -1117,7 +1122,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.93.0
+database_version	3.94.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1187,74 +1192,76 @@ PRV_0019	login	lane_use_multi(/.*)?	t	f	f	f
 PRV_0020	login	lcs(/.*)?	t	f	f	f
 PRV_0021	login	lcs_array(/.*)?	t	f	f	f
 PRV_0022	login	lcs_indication(/.*)?	t	f	f	f
-PRV_0023	login	privilege(/.*)?	t	f	f	f
-PRV_0024	login	quick_message(/.*)?	t	f	f	f
-PRV_0025	login	r_node(/.*)?	t	f	f	f
-PRV_0026	login	ramp_meter(/.*)?	t	f	f	f
-PRV_0027	login	road(/.*)?	t	f	f	f
-PRV_0028	login	role(/.*)?	t	f	f	f
-PRV_0029	login	sign_group(/.*)?	t	f	f	f
-PRV_0030	login	sign_message(/.*)?	t	f	f	f
-PRV_0031	login	sign_text(/.*)?	t	f	f	f
-PRV_0032	login	station(/.*)?	t	f	f	f
-PRV_0033	login	system_attribute(/.*)?	t	f	f	f
-PRV_0034	login	time_action(/.*)?	t	f	f	f
-PRV_0035	login	timing_plan(/.*)?	t	f	f	f
-PRV_0036	login	user(/.*)?	t	f	f	f
-PRV_0037	login	warning_sign(/.*)?	t	f	f	f
-PRV_0038	login	video_monitor(/.*)?	t	f	f	f
-PRV_0039	operate	camera/.*/ptz	f	t	f	f
-PRV_0040	operate	sign_message/.*	f	t	t	t
-PRV_0041	operate	dms/.*/messageNext	f	t	f	f
-PRV_0042	operate	dms/.*/ownerNext	f	t	f	f
-PRV_0043	operate	ramp_meter/.*/rateNext	f	t	f	f
-PRV_0044	operate	ramp_meter/.*/mLock	f	t	f	f
-PRV_0045	operate	lcs_array/.*/indicationsNext	f	t	f	f
-PRV_0046	operate	lcs_array/.*/ownerNext	f	t	f	f
-PRV_0047	operate	lcs_array/.*/lcsLock	f	t	f	f
-PRV_0048	operate	warning_sign/.*/deployed	f	t	f	f
-PRV_0049	maintenance	controller/.*/active	f	t	f	f
-PRV_0050	maintenance	controller/.*/download	f	t	f	f
-PRV_0051	maintenance	controller/.*/error	f	t	f	f
-PRV_0052	maintenance	dms/.*/deviceRequest	f	t	f	f
-PRV_0053	maintenance	lcs_array/.*/deviceRequest	f	t	f	f
-PRV_0054	maintenance	ramp_meter/.*/deviceRequest	f	t	f	f
-PRV_0055	policy_admin	camera/.*/publish	f	t	f	f
-PRV_0056	policy_admin	detector/.*/forceFail	f	t	f	f
-PRV_0057	policy_admin	detector/.*/fieldLength	f	t	f	f
-PRV_0058	policy_admin	holiday/.*	f	t	t	t
-PRV_0059	policy_admin	dms_sign_group/.*	f	t	t	t
-PRV_0060	policy_admin	sign_group/.*	f	t	t	t
-PRV_0061	policy_admin	sign_text/.*	f	t	t	t
-PRV_0062	policy_admin	quick_message/.*	f	t	t	t
-PRV_0063	policy_admin	timing_plan/.*	f	t	t	t
-PRV_0064	policy_admin	action_plan/.*	f	t	t	t
-PRV_0065	policy_admin	dms_action/.*	f	t	t	t
-PRV_0066	policy_admin	time_action/.*	f	t	t	t
-PRV_0067	device_admin	alarm/.*	f	t	t	t
-PRV_0068	device_admin	cabinet/.*	f	t	t	t
-PRV_0069	device_admin	camera/.*	f	t	t	t
-PRV_0070	device_admin	comm_link/.*	f	t	t	t
-PRV_0071	device_admin	controller/.*	f	t	t	t
-PRV_0072	device_admin	detector/.*	f	t	t	t
-PRV_0073	device_admin	dms/.*	f	t	t	t
-PRV_0074	device_admin	geo_loc/.*	f	t	t	t
-PRV_0075	device_admin	lcs/.*	f	t	t	t
-PRV_0076	device_admin	lcs_array/.*	f	t	t	t
-PRV_0077	device_admin	lcs_indication/.*	f	t	t	t
-PRV_0078	device_admin	r_node/.*	f	t	t	t
-PRV_0079	device_admin	ramp_meter/.*	f	t	t	t
-PRV_0080	device_admin	road/.*	f	t	t	t
-PRV_0081	device_admin	video_monitor/.*	f	t	t	t
-PRV_0082	system_admin	cabinet_style/.*	f	t	t	t
-PRV_0083	system_admin	font/.*	f	t	t	t
-PRV_0084	system_admin	glyph/.*	f	t	t	t
-PRV_0085	system_admin	graphic/.*	f	t	t	t
-PRV_0086	system_admin	lane_use_multi/.*	f	t	t	t
-PRV_0087	system_admin	system_attribute/.*	f	t	t	t
-PRV_0088	user_admin	user/.*	f	t	t	t
-PRV_0089	user_admin	privilege/.*	f	t	t	t
-PRV_0090	user_admin	role/.*	f	t	t	t
+PRV_0023	login	map_extent(/.*)?	t	f	f	f
+PRV_0024	login	privilege(/.*)?	t	f	f	f
+PRV_0025	login	quick_message(/.*)?	t	f	f	f
+PRV_0026	login	r_node(/.*)?	t	f	f	f
+PRV_0027	login	ramp_meter(/.*)?	t	f	f	f
+PRV_0028	login	road(/.*)?	t	f	f	f
+PRV_0029	login	role(/.*)?	t	f	f	f
+PRV_0030	login	sign_group(/.*)?	t	f	f	f
+PRV_0031	login	sign_message(/.*)?	t	f	f	f
+PRV_0032	login	sign_text(/.*)?	t	f	f	f
+PRV_0033	login	station(/.*)?	t	f	f	f
+PRV_0034	login	system_attribute(/.*)?	t	f	f	f
+PRV_0035	login	time_action(/.*)?	t	f	f	f
+PRV_0036	login	timing_plan(/.*)?	t	f	f	f
+PRV_0037	login	user(/.*)?	t	f	f	f
+PRV_0038	login	warning_sign(/.*)?	t	f	f	f
+PRV_0039	login	video_monitor(/.*)?	t	f	f	f
+PRV_0040	operate	camera/.*/ptz	f	t	f	f
+PRV_0041	operate	sign_message/.*	f	t	t	t
+PRV_0042	operate	dms/.*/messageNext	f	t	f	f
+PRV_0043	operate	dms/.*/ownerNext	f	t	f	f
+PRV_0044	operate	ramp_meter/.*/rateNext	f	t	f	f
+PRV_0045	operate	ramp_meter/.*/mLock	f	t	f	f
+PRV_0046	operate	lcs_array/.*/indicationsNext	f	t	f	f
+PRV_0047	operate	lcs_array/.*/ownerNext	f	t	f	f
+PRV_0048	operate	lcs_array/.*/lcsLock	f	t	f	f
+PRV_0049	operate	warning_sign/.*/deployed	f	t	f	f
+PRV_0050	maintenance	controller/.*/active	f	t	f	f
+PRV_0051	maintenance	controller/.*/download	f	t	f	f
+PRV_0052	maintenance	controller/.*/error	f	t	f	f
+PRV_0053	maintenance	dms/.*/deviceRequest	f	t	f	f
+PRV_0054	maintenance	lcs_array/.*/deviceRequest	f	t	f	f
+PRV_0055	maintenance	ramp_meter/.*/deviceRequest	f	t	f	f
+PRV_0056	policy_admin	camera/.*/publish	f	t	f	f
+PRV_0057	policy_admin	detector/.*/forceFail	f	t	f	f
+PRV_0058	policy_admin	detector/.*/fieldLength	f	t	f	f
+PRV_0059	policy_admin	holiday/.*	f	t	t	t
+PRV_0060	policy_admin	dms_sign_group/.*	f	t	t	t
+PRV_0061	policy_admin	map_extent/.*	f	t	t	t
+PRV_0062	policy_admin	sign_group/.*	f	t	t	t
+PRV_0063	policy_admin	sign_text/.*	f	t	t	t
+PRV_0064	policy_admin	quick_message/.*	f	t	t	t
+PRV_0065	policy_admin	timing_plan/.*	f	t	t	t
+PRV_0066	policy_admin	action_plan/.*	f	t	t	t
+PRV_0067	policy_admin	dms_action/.*	f	t	t	t
+PRV_0068	policy_admin	time_action/.*	f	t	t	t
+PRV_0069	device_admin	alarm/.*	f	t	t	t
+PRV_0070	device_admin	cabinet/.*	f	t	t	t
+PRV_0071	device_admin	camera/.*	f	t	t	t
+PRV_0072	device_admin	comm_link/.*	f	t	t	t
+PRV_0073	device_admin	controller/.*	f	t	t	t
+PRV_0074	device_admin	detector/.*	f	t	t	t
+PRV_0075	device_admin	dms/.*	f	t	t	t
+PRV_0076	device_admin	geo_loc/.*	f	t	t	t
+PRV_0077	device_admin	lcs/.*	f	t	t	t
+PRV_0078	device_admin	lcs_array/.*	f	t	t	t
+PRV_0079	device_admin	lcs_indication/.*	f	t	t	t
+PRV_0080	device_admin	r_node/.*	f	t	t	t
+PRV_0081	device_admin	ramp_meter/.*	f	t	t	t
+PRV_0082	device_admin	road/.*	f	t	t	t
+PRV_0083	device_admin	video_monitor/.*	f	t	t	t
+PRV_0084	system_admin	cabinet_style/.*	f	t	t	t
+PRV_0085	system_admin	font/.*	f	t	t	t
+PRV_0086	system_admin	glyph/.*	f	t	t	t
+PRV_0087	system_admin	graphic/.*	f	t	t	t
+PRV_0088	system_admin	lane_use_multi/.*	f	t	t	t
+PRV_0089	system_admin	system_attribute/.*	f	t	t	t
+PRV_0090	user_admin	user/.*	f	t	t	t
+PRV_0091	user_admin	privilege/.*	f	t	t	t
+PRV_0092	user_admin	role/.*	f	t	t	t
 \.
 
 SET search_path = event, public, pg_catalog;
