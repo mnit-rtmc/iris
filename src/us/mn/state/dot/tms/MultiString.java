@@ -167,7 +167,7 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** MULTI string buffer */
-	protected final StringBuilder b = new StringBuilder();
+	protected final StringBuilder multi = new StringBuilder();
 
 	/** Flag for trailing message text */
 	protected boolean trailing = false;
@@ -198,14 +198,14 @@ public class MultiString implements MultiStringState {
 	 * @param m MULTI string.
 	 * @throws NullPointerException if m is null. */
 	public MultiString(String m) {
-		b.append(m);
-		if(b.length() > 0)
+		multi.append(m);
+		if(multi.length() > 0)
 			trailing = true;
 	}
 
 	/** Validate message text */
 	public boolean isValid() {
-		for(String t: TAG.split(b.toString())) {
+		for(String t: TAG.split(multi.toString())) {
 			Matcher m = TEXT_PATTERN.matcher(t);
 			if(!m.matches())
 				return false;
@@ -216,7 +216,7 @@ public class MultiString implements MultiStringState {
 	/** Add a spann of text */
 	public void addSpan(String s) {
 		if(s.length() > 0) {
-			b.append(s);
+			multi.append(s);
 			trailing = true;
 		}
 	}
@@ -226,32 +226,32 @@ public class MultiString implements MultiStringState {
 		if(trailing ||
 		   SystemAttrEnum.DMS_MESSAGE_BLANK_LINE_ENABLE.getBoolean())
 		{
-			b.append(NEWLINE);
+			multi.append(NEWLINE);
 			trailing = false;
 		}
 	}
 
 	/** Add a new page */
 	public void addPage() {
-		b.append(NEWPAGE);
+		multi.append(NEWPAGE);
 		trailing = false;
 	}
 
 	/** Set the page justification */
 	public void setJustificationPage(JustificationPage jp) {
 		if(jp != JustificationPage.UNDEFINED) {
-			b.append("[jp");
-			b.append(jp.ordinal());
-			b.append("]");
+			multi.append("[jp");
+			multi.append(jp.ordinal());
+			multi.append("]");
 		}
 	}
 
 	/** Set the line justification */
 	public void setJustificationLine(JustificationLine jl) {
 		if(jl != JustificationLine.UNDEFINED) {
-			b.append("[jl");
-			b.append(jl.ordinal());
-			b.append("]");
+			multi.append("[jl");
+			multi.append(jl.ordinal());
+			multi.append("]");
 		}
 	}
 
@@ -259,98 +259,98 @@ public class MultiString implements MultiStringState {
 	 * @param pt_on Page on-time (tenths of second; null for default).
 	 * @param pt_off Page off-time (tenths of second; null for default). */
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
-		b.append("[pt");
+		multi.append("[pt");
 		if(pt_on != null)
-			b.append(pt_on);
-		b.append('o');
+			multi.append(pt_on);
+		multi.append('o');
 		if(pt_off != null)
-			b.append(pt_off);
-		b.append("]");
+			multi.append(pt_off);
+		multi.append("]");
 	}
 
 	/** Add a graphic */
 	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
-		b.append("[g");
-		b.append(g_num);
+		multi.append("[g");
+		multi.append(g_num);
 		if(x != null && y != null) {
-			b.append(',');
-			b.append(x);
-			b.append(',');
-			b.append(y);
+			multi.append(',');
+			multi.append(x);
+			multi.append(',');
+			multi.append(y);
 			if(g_id != null) {
-				b.append(',');
-				b.append(g_id);
+				multi.append(',');
+				multi.append(g_id);
 			}
 		}
-		b.append("]");
+		multi.append("]");
 	}
 
 	/** Set a new font number */
 	public void setFont(int f_num, String f_id) {
-		b.append("[fo");
-		b.append(f_num);
+		multi.append("[fo");
+		multi.append(f_num);
 		if(f_id != null) {
-			b.append(',');
-			b.append(f_id);
+			multi.append(',');
+			multi.append(f_id);
 		}
-		b.append("]");
+		multi.append("]");
 	}
 
 	/** Set the color foreground */
 	public void setColorForeground(int red, int green, int blue) {
-		b.append("[cf");
-		b.append(red);
-		b.append(',');
-		b.append(green);
-		b.append(',');
-		b.append(blue);
-		b.append("]");
+		multi.append("[cf");
+		multi.append(red);
+		multi.append(',');
+		multi.append(green);
+		multi.append(',');
+		multi.append(blue);
+		multi.append("]");
 	}
 
 	/** Set the text rectangle */
 	public void setTextRectangle(int x, int y, int w, int h) {
-		b.append("[tr");
-		b.append(x);
-		b.append(',');
-		b.append(y);
-		b.append(',');
-		b.append(w);
-		b.append(',');
-		b.append(h);
-		b.append("]");
+		multi.append("[tr");
+		multi.append(x);
+		multi.append(',');
+		multi.append(y);
+		multi.append(',');
+		multi.append(w);
+		multi.append(',');
+		multi.append(h);
+		multi.append("]");
 	}
 
 	/** Add a travel time destination */
 	public void addTravelTime(String sid) {
-		b.append("[tt");
-		b.append(sid);
-		b.append("]");
+		multi.append("[tt");
+		multi.append(sid);
+		multi.append("]");
 	}
 
 	/** Get the value of the MULTI string */
 	public String toString() {
-		return b.toString();
+		return multi.toString();
 	}
 
 	/** Clear the MULTI string */
 	public void clear() {
-		b.setLength(0);
+		multi.setLength(0);
 	}
 
 	/** Parse the MULTI string.
 	 * @param cb A callback which keeps track of the MULTI state. */
 	public void parse(MultiStringState cb) {
 		int offset = 0;
-		Matcher m = TAG.matcher(b);
+		Matcher m = TAG.matcher(multi);
 		while(m.find()) {
 			if(m.start() > offset)
-				cb.addSpan(b.substring(offset, m.start()));
+				cb.addSpan(multi.substring(offset, m.start()));
 			offset = m.end();
 			// m.group(1) strips off tag brackets
 			parseTag(m.group(1), cb);
 		}
-		if(offset < b.length())
-			cb.addSpan(b.substring(offset));
+		if(offset < multi.length())
+			cb.addSpan(multi.substring(offset));
 	}
 
 	/** Parse one MULTI tag */
