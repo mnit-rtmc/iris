@@ -253,7 +253,7 @@ public class PixelMapBuilder {
 			if(i > 0)
 				w += font.getCharSpacing();
 			int cp = t.charAt(i);
-			Graphic c = lookupGraphic(font, cp);
+			Graphic c = FontHelper.lookupGraphic(font, cp);
 			w += c.getWidth();
 		}
 		return w;
@@ -325,7 +325,7 @@ public class PixelMapBuilder {
 	{
 		for(int i = 0; i < t.length(); i++) {
 			int cp = t.charAt(i);
-			Graphic g = lookupGraphic(font, cp);
+			Graphic g = FontHelper.lookupGraphic(font, cp);
 			renderGraphic(g, bg, x, y);
 			x += g.getWidth() + font.getCharSpacing();
 		}
@@ -346,18 +346,5 @@ public class PixelMapBuilder {
 				bg.setPixel(x + xx, y + yy, p);
 			}
 		}
-	}
-
-	/** Look up a code point in the specified font */
-	protected Graphic lookupGraphic(Font font, int cp)
-		throws InvalidMessageException
-	{
-		Glyph g = FontHelper.lookupGlyph(font, cp);
-		if(g != null) {
-			Graphic gr = g.getGraphic();
-			if(gr != null)
-				return gr;
-		}
-		throw new InvalidMessageException("Invalid code point");
 	}
 }

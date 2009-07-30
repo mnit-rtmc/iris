@@ -77,4 +77,17 @@ public class FontHelper extends BaseHelper {
 			}
 		});
 	}
+
+	/** Look up a code point in the specified font */
+	static public Graphic lookupGraphic(Font font, int cp)
+		throws InvalidMessageException
+	{
+		Glyph g = lookupGlyph(font, cp);
+		if(g != null) {
+			Graphic gr = g.getGraphic();
+			if(gr != null)
+				return gr;
+		}
+		throw new InvalidMessageException("Invalid code point");
+	}
 }
