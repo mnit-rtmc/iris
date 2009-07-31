@@ -232,7 +232,10 @@ CREATE TABLE geo_loc (
 
 CREATE TABLE iris.map_extent (
 	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES geo_loc(name)
+	easting INTEGER NOT NULL,
+	east_off INTEGER NOT NULL,
+	northing INTEGER NOT NULL,
+	north_off INTEGER NOT NULL
 );
 
 CREATE TABLE lane_type (

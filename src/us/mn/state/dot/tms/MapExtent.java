@@ -26,6 +26,27 @@ public interface MapExtent extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "map_extent";
 
-	/** Get the device location */
-	GeoLoc getGeoLoc();
+	/** Set the UTM Easting */
+	void setEasting(int x);
+
+	/** Get the UTM Easting */
+	int getEasting();
+
+	/** Set the UTM Easting span */
+	void setEastSpan(int x);
+
+	/** Get the UTM Easting span */
+	int getEastSpan();
+
+	/** Set the UTM Northing */
+	void setNorthing(int y);
+
+	/** Get the UTM Northing */
+	int getNorthing();
+
+	/** Set the UTM Northing span */
+	void setNorthSpan(int y);
+
+	/** Get the UTM Northing span */
+	int getNorthSpan();
 }

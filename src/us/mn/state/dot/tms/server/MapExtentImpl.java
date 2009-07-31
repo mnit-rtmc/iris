@@ -17,9 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.TMSException;
 
@@ -34,13 +32,17 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading map extents...");
 		namespace.registerType(SONAR_TYPE, MapExtentImpl.class);
-		store.query("SELECT name, geo_loc FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+		store.query("SELECT name, easting, east_span, northing, " +
+			"north_span FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new MapExtentImpl(namespace,
+				namespace.addObject(new MapExtentImpl(
 					row.getString(1),	// name
-					row.getString(2)	// geo_loc
+					row.getInt(2),		// easting
+					row.getInt(3),		// east_span
+					row.getInt(4),		// northing
+					row.getInt(5)		// north_span
 				));
 			}
 		});
@@ -50,7 +52,10 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("geo_loc", geo_loc);
+		map.put("easting", easting);
+		map.put("east_span", east_span);
+		map.put("northing", northing);
+		map.put("north_span", north_span);
 		return map;
 	}
 
@@ -65,35 +70,106 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	}
 
 	/** Create a new map extent */
-	public MapExtentImpl(String n) throws SonarException {
+	public MapExtentImpl(String n) {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
-		MainServer.server.createObject(g);
-		geo_loc = g;
 	}
 
 	/** Create a map extent */
-	protected MapExtentImpl(Namespace ns, String n, String loc) {
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc));
-	}
-
-	/** Create a map extent */
-	protected MapExtentImpl(String n, GeoLocImpl loc) {
+	protected MapExtentImpl(String n, int x, int xs, int y, int ys) {
 		super(n);
-		geo_loc = loc;
+		easting = x;
+		east_span = xs;
+		northing = y;
+		north_span = ys;
 	}
 
-	/** Destroy an object */
-	public void doDestroy() throws TMSException {
-		super.doDestroy();
-		MainServer.server.removeObject(geo_loc);
+	/** UTM Easting */
+	protected int easting;
+
+	/** Set the UTM Easting */
+	public void setEasting(int x) {
+		easting = x;
 	}
 
-	/** Device location */
-	protected GeoLocImpl geo_loc;
+	/** Set the UTM Easting */
+	public void doSetEasting(int x) throws TMSException {
+		if(x == easting)
+			return;
+		if(x < 0)
+			throw new ChangeVetoException("Invalid Easting");
+		store.update(this, "easting", x);
+		setEasting(x);
+	}
 
-	/** Get the device location */
-	public GeoLoc getGeoLoc() {
-		return geo_loc;
+	/** Get the UTM Easting */
+	public int getEasting() {
+		return easting;
+	}
+
+	/** UTM Easting span */
+	protected int east_span;
+
+	/** Set the UTM Easting span */
+	public void setEastSpan(int xs) {
+		east_span = xs;
+	}
+
+	/** Set the UTM Easting span */
+	public void doSetEastSpan(int xs) throws TMSException {
+		if(xs == east_span)
+			return;
+		if(xs < 0)
+			throw new ChangeVetoException("Invalid Easting span");
+		store.update(this, "east_span", xs);
+		setEastSpan(xs);
+	}
+
+	/** Get the UTM Easting span */
+	public int getEastSpan() {
+		return east_span;
+	}
+
+	/** UTM Northing */
+	protected int northing;
+
+	/** Set the UTM Northing */
+	public void setNorthing(int y) {
+		northing = y;
+	}
+
+	/** Set the UTM Northing */
+	public void doSetNorthing(int y) throws TMSException {
+		if(y == northing)
+			return;
+		if(y < 0)
+			throw new ChangeVetoException("Invalid Northing");
+		store.update(this, "northing", y);
+		setNorthing(y);
+	}
+
+	/** Get the UTM Northing */
+	public int getNorthing() {
+		return northing;
+	}
+
+	/** UTM Northing span */
+	protected int north_span;
+
+	/** Set the UTM Northing span */
+	public void setNorthSpan(int ys) {
+		north_span = ys;
+	}
+
+	/** Set the UTM Northing span */
+	public void doSetNorthSpan(int ys) throws TMSException {
+		if(ys == north_span)
+			return;
+		store.update(this, "north_span", ys);
+		setNorthSpan(ys);
+	}
+
+	/** Get the UTM Northing span */
+	public int getNorthSpan() {
+		return north_span;
 	}
 }
