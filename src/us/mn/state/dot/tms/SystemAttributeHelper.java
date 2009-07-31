@@ -41,10 +41,18 @@ public class SystemAttributeHelper extends BaseHelper {
 
 	/** Lookup a SystemAttribute in the SONAR namespace. 
 	 *  @return The specified system attribute, or null if the it does not
-	 *  exist in the namespace.
-	 */
+	 *  exist in the namespace. */
 	static protected SystemAttribute lookup(String aname) {
-		assert namespace != null;
+		// assume that if the namespace is null junit test cases 
+		// are running and we're not connected to a live server.
+		if(namespace == null) {
+			System.err.println("SONAR namespace is null.");
+			SystemAttrEnum sa = SystemAttrEnum.lookup(aname);
+			SystemAttribute ret = null;
+			if(sa != null)
+				ret = new SystemAttrFake(sa.getDefault());
+			return ret;
+		}
 		assert aname != null && aname.length() > 0;
 		if(namespace == null || aname == null)
 			return null;
