@@ -42,6 +42,12 @@ import us.mn.state.dot.tms.utils.I18N;
 public class AwsStatusPanel extends ToolPanel implements
 	ProxyListener<DMS>
 {
+	/** AWS abbreviation */
+	protected final String m_awsName = I18N.get("dms.aws.abbreviation");
+
+	/** DMS abbreviation */
+	protected final String m_dmsAbbr = I18N.get("dms.abbreviation");
+
 	/** DMS cache */
 	protected final DmsCache m_dms;
 
@@ -52,20 +58,14 @@ public class AwsStatusPanel extends ToolPanel implements
 	protected final JLabel m_coordinates = new JLabel();
 
 	/** Button to view all AWS messages */
-	protected final String m_btnViewText = "Messages";
+	protected final String m_btnViewText = m_awsName + " Messages";
 	protected final JButton m_btnView = new JButton(m_btnViewText);
 
 	/** The label used for AWS messages */
 	protected final JLabel m_awstext = new JLabel();
 
-	/** AWS abbreviation */
-	protected final String m_awsName = I18N.get("dms.aws.abbreviation");
-
 	/** listener object for system attributes */
 	protected final saListener m_saListener = new saListener();
-
-	/** DMS abbreviation */
-	protected final String m_dmsAbbr = I18N.get("dms.abbreviation");
 
 	/** desktop */
 	final SmartDesktop m_desktop;
@@ -150,15 +150,8 @@ public class AwsStatusPanel extends ToolPanel implements
 		String dal = createDeactivatedDMSList();
 
 		// no deactivated dms?
-		if(dal == null || dal.length() <= 0) {
-			StringBuilder text = new StringBuilder();
-			text.append(htmlStart);
-			text.append("All ");
-			text.append(m_dmsAbbr);
-			text.append(" activated");
-			text.append(htmlStop);
-			return text.toString();
-		}
+		if(dal == null || dal.length() <= 0)
+			return "";
 
 		// construct list of deactivated dms
 		StringBuilder text = new StringBuilder();
