@@ -54,12 +54,51 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Gui for composing messages for DMS.
+ * GUI for composing DMS messages.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SignMessageComposer extends JPanel {
+
+	/** Combobox edit mode */
+	public enum EditMode {
+		NOT(0), ALWAYS(1), AFTERKEY(2);
+
+		/** The id must correspond with the system attribute value */
+		private final int m_id;
+
+		/** constructor */
+	 	EditMode(int id) {
+			m_id = id;
+		}
+
+		/** Convert an int to enum */
+		public static EditMode fromId(final int id) {
+			for(EditMode e : EditMode.values())
+				if (e.m_id == id)
+					return e;
+			return EditMode.NOT;
+		}
+
+		/** Get the edit mode */
+		public static EditMode getEditMode(SignTextModel stm) {
+			EditMode m = EditMode.fromId(SystemAttrEnum.
+				DMS_COMPOSER_EDIT_MODE.getInt());
+			return rules(m, stm);
+		}
+
+		/** Apply rules */
+		private static EditMode rules(EditMode m, SignTextModel stm) {
+			// AFTERKEY is only active if a sign group with the
+			// same name as the DMS (e.g. 'V2') exists.
+			if(m == EditMode.AFTERKEY)
+				if(stm == null || !stm.canAddLocalSignText())
+					m = EditMode.NOT;
+			return m;
+		}
+	}
 
 	/** Prototype sign text */
 	static protected final SignText PROTOTYPE_SIGN_TEXT =
@@ -289,30 +328,19 @@ public class SignMessageComposer extends JPanel {
 		disposeLines();
 		n_lines = nl;
 		n_pages = np;
-		boolean can_add = areEditable();
 		cmbLine = new JComboBox[n_lines * n_pages];
 		for(int i = 0; i < cmbLine.length; i++)
-			cmbLine[i] = createLineCombo(can_add);
+			cmbLine[i] = createLineCombo();
 		for(int i = 0; i < n_pages; i++)
 			setPage(i, createPage(i));
 		while(n_pages < pages.getTabCount())
 			pages.removeTabAt(n_pages);
 	}
 
-	/** Determine if the message comboboxes are editable. */
-	protected boolean areEditable() {
-		// if attribute is true, then always editable
-		if(SystemAttrEnum.DMS_CBOXES_EDITABLE.getBoolean())
-			return true;
-		// otherwise, use rules
-		return st_model != null && st_model.canAddLocalSignText();
-	}
-
 	/** Create a line combo box */
-	protected JComboBox createLineCombo(boolean can_add) {
+	protected JComboBox createLineCombo() {
 		JComboBox cmb = new JComboBox();
-		if(can_add)
-			createEditor(cmb);
+		createEditor(cmb);
 		cmb.setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the
@@ -376,20 +404,28 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create an editor for a combo box */
 	protected void createEditor(final JComboBox cbox) {
+		final EditMode editmode = EditMode.getEditMode(st_model);
+		if(editmode == EditMode.NOT)
+			return;
 		final MsgComboBoxEditor cbe = new MsgComboBoxEditor();
 		final java.awt.Component editor = cbe.getEditorComponent();
 		cbox.setEditor(cbe);
+		if(editmode == EditMode.ALWAYS)
+			if(!cbox.isEditable())
+				cbox.setEditable(true);
 		cbox.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				if(!cbox.isEditable()) {
-					cbox.setEditable(true);
+					if(editmode == EditMode.AFTERKEY)
+						cbox.setEditable(true);
 					first_key_event = e;
 				}
 			}
 		});
 		cbe.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				cbox.setEditable(false);
+				if(editmode == EditMode.AFTERKEY)
+					cbox.setEditable(false);
 			}
 		});
 		editor.addFocusListener(new FocusAdapter() {
@@ -402,7 +438,8 @@ public class SignMessageComposer extends JPanel {
 			// the cbox editor lost focus, which only happens
 			// if the cbox is editable.
 			public void focusLost(FocusEvent e) {
-				cbox.setEditable(false);
+				if(editmode == EditMode.AFTERKEY)
+					cbox.setEditable(false);
 				// the user might have changed cbox contents, 
 				// so reevaluate the currently selected quick 
 				// message.
