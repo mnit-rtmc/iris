@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.client.dms.DMSForm;
 import us.mn.state.dot.tms.client.dms.DMSForm2;
 import us.mn.state.dot.tms.client.dms.FontForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
+import us.mn.state.dot.tms.client.roads.MapExtentForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
@@ -110,6 +111,16 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new RoadForm(state.getRoads()));
+			}
+		};
+		add(item);
+		item = new JMenuItem("Map extents");
+		item.setMnemonic('e');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new MapExtentForm(
+					state.getMapExtents(),
+					state.getNamespace(), user));
 			}
 		};
 		add(item);

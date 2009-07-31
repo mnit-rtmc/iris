@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
@@ -131,6 +132,14 @@ public class SonarState extends Client {
 	/** Get the geo location cache */
 	public TypeCache<GeoLoc> getGeoLocs() {
 		return geo_locs;
+	}
+
+	/** Cache of map extents */
+	protected final TypeCache<MapExtent> map_extents;
+
+	/** Get the map extent cache */
+	public TypeCache<MapExtent> getMapExtents() {
+		return map_extents;
 	}
 
 	/** Cache of alarms */
@@ -255,6 +264,7 @@ public class SonarState extends Client {
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
 		geo_locs = new TypeCache<GeoLoc>(GeoLoc.class, this);
+		map_extents = new TypeCache<MapExtent>(MapExtent.class, this);
 		alarms = new TypeCache<Alarm>(Alarm.class, this);
 		avail_alarm_model = new ProxyListModel<Alarm>(alarms) {
 			protected int doProxyAdded(Alarm proxy) {
@@ -290,6 +300,7 @@ public class SonarState extends Client {
 		populate(system_attributes);
 		populate(roads, true);
 		populate(geo_locs, true);
+		populate(map_extents);
 		populate(graphics, true);
 		con_cache.populate(this);
 		cam_cache.populate(this);
