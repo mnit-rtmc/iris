@@ -278,33 +278,34 @@ CREATE TABLE comm_link (
 	timeout integer NOT NULL
 );
 
-CREATE TABLE cabinet_style (
+CREATE TABLE iris.cabinet_style (
 	name VARCHAR(20) PRIMARY KEY,
 	dip integer
 );
 
-CREATE TABLE cabinet (
+CREATE TABLE iris.cabinet (
 	name VARCHAR(20) PRIMARY KEY,
-	style VARCHAR(20) REFERENCES cabinet_style(name),
+	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
 	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
 	mile real
 );
 
-CREATE TABLE controller (
+CREATE TABLE iris.controller (
 	name VARCHAR(20) PRIMARY KEY,
 	drop_id smallint NOT NULL,
 	comm_link VARCHAR(20) NOT NULL REFERENCES comm_link(name),
-	cabinet VARCHAR(20) NOT NULL REFERENCES cabinet(name),
+	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
 	active boolean NOT NULL,
-	notes text NOT NULL
+	password VARCHAR(16),
+	notes VARCHAR(128) NOT NULL
 );
 
-CREATE UNIQUE INDEX ctrl_link_drop_idx ON controller
+CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
 	USING btree (comm_link, drop_id);
 
 CREATE TABLE iris._device_io (
 	name VARCHAR(10) PRIMARY KEY,
-	controller VARCHAR(20) REFERENCES controller(name),
+	controller VARCHAR(20) REFERENCES iris.controller(name),
 	pin integer NOT NULL
 );
 
@@ -820,15 +821,15 @@ GRANT SELECT ON freeway_station_view TO PUBLIC;
 CREATE VIEW controller_loc_view AS
 	SELECT c.name, c.drop_id, c.comm_link, c.cabinet, c.active, c.notes,
 	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir
-	FROM controller c
-	LEFT JOIN cabinet cab ON c.cabinet = cab.name
+	FROM iris.controller c
+	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW alarm_view AS
 	SELECT a.name, a.description, a.state, a.controller, a.pin, c.comm_link,
 		c.drop_id
-	FROM iris.alarm a LEFT JOIN controller c ON a.controller = c.name;
+	FROM iris.alarm a LEFT JOIN iris.controller c ON a.controller = c.name;
 GRANT SELECT ON alarm_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
@@ -866,7 +867,7 @@ CREATE VIEW camera_view AS
 	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.camera c
 	JOIN geo_loc_view l ON c.geo_loc = l.name
-	LEFT JOIN controller ctr ON c.controller = ctr.name;
+	LEFT JOIN iris.controller ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE VIEW warning_sign_view AS
@@ -876,7 +877,7 @@ CREATE VIEW warning_sign_view AS
 	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
 	FROM iris.warning_sign w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
-	LEFT JOIN controller ctr ON w.controller = ctr.name;
+	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
 GRANT SELECT ON warning_sign_view TO PUBLIC;
 
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
@@ -949,13 +950,13 @@ CREATE VIEW detector_view AS
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
 	LEFT JOIN lane_type ln ON d.lane_type = ln.id
-	LEFT JOIN controller c ON d.controller = c.name;
+	LEFT JOIN iris.controller c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
 CREATE VIEW controller_view AS
 	SELECT c.name, drop_id, comm_link, cabinet, active, notes, cab.geo_loc
-	FROM controller c
-	JOIN cabinet cab ON c.cabinet = cab.name;
+	FROM iris.controller c
+	JOIN iris.cabinet cab ON c.cabinet = cab.name;
 GRANT SELECT ON controller_view TO PUBLIC;
 
 CREATE VIEW iris.controller_dms AS
@@ -1005,8 +1006,8 @@ CREATE VIEW controller_report AS
 		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
 	cab.style AS "type", d.name AS device, d.pin,
 	d.cross_street AS cross_street, d.freeway AS freeway, c.notes
-	FROM controller c
-	LEFT JOIN cabinet cab ON c.cabinet = cab.name
+	FROM iris.controller c
+	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
@@ -1045,7 +1046,7 @@ COPY road_modifier (id, modifier, mod) FROM stdin;
 8	W Junction	Wj
 \.
 
-COPY cabinet_style (name, dip) FROM stdin;
+COPY iris.cabinet_style (name, dip) FROM stdin;
 336	0
 334Z	1
 334D	2
@@ -1290,7 +1291,7 @@ CREATE TABLE event.comm_event (
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	controller VARCHAR(20) NOT NULL REFERENCES controller(name)
+	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
 		ON DELETE CASCADE,
 	device_id VARCHAR(20)
 );
@@ -1328,7 +1329,7 @@ CREATE VIEW comm_event_view AS
 		e.controller, c.comm_link, c.drop_id
 	FROM comm_event e
 	JOIN event_description ed ON e.event_desc_id = ed.event_desc_id
-	LEFT JOIN controller c ON e.controller = c.name;
+	LEFT JOIN iris.controller c ON e.controller = c.name;
 GRANT SELECT ON comm_event_view TO PUBLIC;
 
 CREATE VIEW detector_event_view AS

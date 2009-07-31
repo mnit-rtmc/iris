@@ -48,7 +48,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		System.err.println("Loading controllers...");
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, cabinet, comm_link, drop_id, " +
-			"active, notes FROM " + SONAR_TYPE  + ";",
+			"active, password, notes FROM " + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -59,7 +59,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 					row.getString(3),	// comm_link
 					row.getShort(4),	// drop_id
 					row.getBoolean(5),	// active
-					row.getString(6)	// notes
+					row.getString(6),	// password
+					row.getString(7)	// notes
 				));
 			}
 		});
@@ -73,6 +74,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("comm_link", comm_link);
 		map.put("drop_id", drop_id);
 		map.put("active", active);
+		map.put("password", password);
 		map.put("notes", notes);
 		return map;
 	}
@@ -97,24 +99,25 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Create a new controller */
 	protected ControllerImpl(String n, Cabinet c, CommLink l, short d,
-		boolean a, String nt) throws TMSException
+		boolean a, String p, String nt) throws TMSException
 	{
 		super(n);
 		cabinet = c;
 		comm_link = l;
 		drop_id = d;
 		active = a;
+		password = p;
 		notes = nt;
 		initTransients();
 	}
 
 	/** Create a new controller */
 	protected ControllerImpl(Namespace ns, String n, String c, String l,
-		short d, boolean a, String nt) throws TMSException
+		short d, boolean a, String p, String nt) throws TMSException
 	{
 		this(n, (Cabinet)ns.lookupObject(Cabinet.SONAR_TYPE, c),
 			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, l),
-			d, a, nt);
+			d, a, p, nt);
 	}
 
 	/** Initialize the transient fields */
@@ -250,6 +253,32 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the active status */
 	public boolean getActive() {
 		return active;
+	}
+
+	/** Access password */
+	protected String password;
+
+	/** Set the access password */
+	public void setPassword(String pwd) {
+		password = pwd;
+	}
+
+	/** Set the access password */
+	public void doSetPassword(String pwd) throws TMSException {
+		if(pwd == null) {
+			if(password == null)
+				return;
+		} else {
+			if(pwd.equals(password))
+				return;
+		}
+		store.update(this, "password", pwd);
+		setPassword(pwd);
+	}
+
+	/** Get the access password */
+	public String getPassword() {
+		return password;
 	}
 
 	/** Administrator notes for this controller */

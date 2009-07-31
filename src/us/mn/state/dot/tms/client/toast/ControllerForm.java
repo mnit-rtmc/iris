@@ -20,6 +20,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -66,6 +67,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Controller notes text */
 	protected final JTextArea notes = new JTextArea(3, 24);
+
+	/** Access password */
+	protected final JPasswordField password = new JPasswordField(16);
 
 	/** Active checkbox */
 	protected final JCheckBox active = new JCheckBox();
@@ -179,6 +183,19 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.finishRow();
 		panel.add("Drop", drop_id);
 		panel.finishRow();
+		panel.addRow("Password", password);
+		new FocusJob(password) {
+			public void perform() {
+				if(wasLost()) {
+					String pwd = new String(
+						password.getPassword()).trim();
+					if(pwd.length() > 0)
+						proxy.setPassword(pwd);
+					else
+						proxy.setPassword(null);
+				}
+			}
+		};
 		panel.addRow("Notes", notes);
 		new FocusJob(notes) {
 			public void perform() {

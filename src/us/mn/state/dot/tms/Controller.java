@@ -56,6 +56,9 @@ public interface Controller extends SonarObject {
 	/** Get the active status */
 	boolean getActive();
 
+	/** Set the access password */
+	void setPassword(String pwd);
+
 	/** Set the administrator notes */
 	void setNotes(String n);
 
