@@ -29,23 +29,37 @@ public class MultiStringTest extends TestCase {
 
 	/** test cases */
 	public void test() {
+
+		countPageLines();
+		getFonts();
+		getPageOnTime();
+		normalization();
+		etc();
+	}
+
+	/** everything else */
+	private void etc() {
 		// isValid
 		assertTrue(new MultiString().isValid());
 		assertTrue(new MultiString("").isValid());
 		assertTrue(new MultiString("ABC").isValid());
+
 		// nl tag
 		assertTrue(new MultiString("ABC[nl]DEF").isValid());
 		assertTrue(new MultiString("ABC[nl1]DEF").isValid());
 		//assertFalse(new MultiString("ABC[nl12]DEF").isValid());
+
 		// fo tag
 		assertTrue(new MultiString("ABC[fo]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo1]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo12]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo123]DEF").isValid());
 		//assertFalse(new MultiString("ABC[fo1234]DEF").isValid());
+
 		// np tag
 		assertTrue(new MultiString("ABC[np]DEF").isValid());
 		assertTrue(new MultiString("ABC[nl1]DEF").isValid());
+
 		// jp tag
 		//assertFalse(new MultiString("ABC[jp]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp1]DEF").isValid());
@@ -53,6 +67,7 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("ABC[jp3]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp4]DEF").isValid());
 		//assertFalse(new MultiString("ABC[jp5]DEF").isValid());
+
 		// pt tag
 		assertTrue(new MultiString("ABC[pto]").isValid());
 		assertTrue(new MultiString("ABC[pt1o]").isValid());
@@ -64,7 +79,170 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("ABC[pto123]").isValid());
 		//assertFalse(new MultiString("ABC[pto1234]").isValid());
 
-		// normalization
+		// replacePageOnTime
+		/* FIXME: this method has been moved to dmslite, so either 
+			  move these test cases to dmslite or move the 
+			  method to MultiString.
+		// Note: these test require system attributes
+		MultiString t1, t2;
+		int[] pt;
+
+		t1 = new MultiString("YA1[np]YA2");
+		t2 = new MultiString(t1.replacePageOnTime(4));
+		pt = t2.getPageOnTimes(7);
+		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
+		assertTrue("[pt4o]YA1[np]YA2".equals(t2.toString()));
+
+		t1 = new MultiString("[pt3o]YA1[np]OH YA2");
+		t2 = new MultiString(t1.replacePageOnTime(4));
+		pt = t2.getPageOnTimes(7);
+		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
+		assertTrue("[pt4o]YA1[np]OH YA2".equals(t2.toString()));
+
+		t1 = new MultiString("[pt3o50]YA1[np]OH YA2");
+		t2 = new MultiString(t1.replacePageOnTime(4));
+		pt = t2.getPageOnTimes(7);
+		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
+		assertTrue("[pt4o50]YA1[np]OH YA2".equals(t2.toString()));
+
+		t1 = new MultiString("[pt3o50]YA1[np][pt22o60]OH YA2");
+		t2 = new MultiString(t1.replacePageOnTime(4));
+		pt = t2.getPageOnTimes(7);
+		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
+		assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".
+			equals(t2.toString()));
+		*/
+	}
+
+	/** countPageLines */
+	private void countPageLines() {
+
+		//FIXME: add test for null arg? Depends on constructor 
+		//       contract, which is presently ill-defined.
+		//assertTrue(new MultiString(null).countPageLines(0) == 0);
+
+		assertTrue(new MultiString("").
+			countPageLines(0) == 0);
+		assertTrue(new MultiString("").
+			countPageLines(1) == 0);
+		assertTrue(new MultiString("L1").
+			countPageLines(0) == 1);
+		assertTrue(new MultiString("L1[nl]").
+			countPageLines(0) == 1);
+		assertTrue(new MultiString("L1[nl]L2").
+			countPageLines(0) == 2);
+		assertTrue(new MultiString("L1[nl]L2").
+			countPageLines(1) == 0);
+		assertTrue(new MultiString("L1[nl]L2[nl]").
+			countPageLines(0) == 2);
+		assertTrue(new MultiString("L1[nl]L2[nl][np]").
+			countPageLines(0) == 2);
+		assertTrue(new MultiString("L1[nl]L2[nl][np]A").
+			countPageLines(0) == 2);
+		assertTrue(new MultiString("L1[nl]L2[nl][np]A").
+			countPageLines(1) == 1);
+		assertTrue(new MultiString("L1[nl]L2[nl][np]A[nl]B").
+			countPageLines(1) == 2);
+	}
+
+	/** getFonts */
+	private void getFonts() {
+		// bogus default font numbers
+		assertTrue(new MultiString("").getFonts(-10).length == 0);
+		assertTrue(new MultiString("").getFonts(0).length == 0);
+		assertTrue(new MultiString("").getFonts(256).length == 0);
+		assertTrue(new MultiString("").getFonts(257).length == 0);
+
+		// default is used - 1 page
+		assertTrue(new MultiString("YA1").getFonts(255).length == 1);
+		assertTrue(new MultiString("YA1").getFonts(255)[0] == 255);
+
+		// default is used - 2 page
+		assertTrue(new MultiString("YA1[np]YA2").
+			getFonts(255).length == 2);
+		assertTrue(new MultiString("YA1[np]YA2").
+			getFonts(255)[0] == 255);
+		assertTrue(new MultiString("YA1[np]YA2").
+			getFonts(255)[1] == 255);
+
+		// mainline 1 page
+		assertTrue(new MultiString("[fo2]YA1").
+			getFonts(255).length == 1);
+		assertTrue(new MultiString("[fo2]YA1").
+			getFonts(255)[0] == 2);
+
+		// mainline 2 page
+		assertTrue(new MultiString("[fo2]YA1[np][fo3]YA2").
+			getFonts(255).length == 2);
+		assertTrue(new MultiString("[fo2]YA1[np][fo3]YA2").
+			getFonts(255)[0] == 2);
+		assertTrue(new MultiString("[fo2]YA1[np][fo3]YA2").
+			getFonts(255)[1] == 3);
+
+		// mainline 2 page w/ default
+		assertTrue(new MultiString("YA1[np][fo3]YA2").
+			getFonts(255).length == 2);
+		assertTrue(new MultiString("YA1[np][fo3]YA2").
+			getFonts(255)[0] == 255);
+		assertTrue(new MultiString("YA1[np][fo3]YA2").
+			getFonts(255)[1] == 3);
+
+		// mainline 2 page w/ font carryover
+		assertTrue(new MultiString("[fo3]YA1[np]YA2").
+			getFonts(255).length == 2);
+		assertTrue(new MultiString("[fo3]YA1[np]YA2").
+			getFonts(255)[0] == 3);
+		assertTrue(new MultiString("[fo3]YA1[np]YA2").
+			getFonts(255)[1] == 3);
+	}
+
+	/** getPageOnTime */
+	private void getPageOnTime() {
+		int[] t;
+
+		// FIXME: this fails!
+		//assertTrue(new MultiString("").getPageOnTimes(6).length == 0);
+
+		t = new MultiString("ABC1[np]ABC2").
+			getPageOnTimes(7);
+		assertTrue(t.length == 2);
+		assertTrue(t[0] == 7 && t[1] == 7);
+
+		t = new MultiString("ABC1[np]ABC2").
+			getPageOnTimes(7);
+		assertTrue(t.length == 2);
+		assertTrue(t[0] == 7 && t[1] == 7);
+
+		t = new MultiString("[pto]YA1[np]OH YA2").
+			getPageOnTimes(7);
+		assertTrue(t.length == 2);
+		assertTrue(t[0] == 7 && t[1] == 7);
+
+		t = new MultiString("[pt3o]YA1[np]OH YA2").
+			getPageOnTimes(7);
+		assertTrue(t.length == 2);
+		assertTrue(t[0] == 3 && t[1] == 3);
+
+		t = new MultiString("[pto4]YA1[np]OH YA2").
+			getPageOnTimes(7);
+		assertTrue(t.length == 2);
+		assertTrue(t[0] == 7 && t[1] == 7);
+
+		t = new MultiString("[pt7o4]PG1[np][pt8o4]PG2" +
+			"[np]PG3").getPageOnTimes(7);
+		assertTrue(t.length == 3);
+		assertTrue(t[0] == 7 && t[1] == 8 && t[2] == 8);
+
+		t = new MultiString("[pt7o4][np][pt8o4][np]A").
+			getPageOnTimes(7);
+		assertTrue(t.length == 3);
+		assertTrue(t[0] == 7);
+		//assertTrue(t[1] == 8); //FIXME: this fails!
+		assertTrue(t[2] == 8);
+	}
+
+	/** normalization */
+	private void normalization() {
 		assertTrue(new MultiString("01234567890").normalize().
 			equals("01234567890"));
 		assertTrue(new MultiString("ABC").normalize().
@@ -128,132 +306,5 @@ public class MultiStringTest extends TestCase {
 		//	equals("ABC[nl]"));
 		//assertTrue(new MultiString("ABC[nl]").normalize().
 		//	equals("ABC"));
-
-		// getFont
-		// FIXME: need to login to an IRIS server to run this test case
-		{
-			//int[] pgs = (new MultiString("[fo1]PAGE ONE")).getFonts(5);
-			//assertTrue(pgs.length == 1 && pgs[0] == 1);
-		}
-
-		// getPageOnTime
-		{
-			// note: these tests require system attributes
-			/*
-			int[] t;
-
-			t = new MultiString("").getPageOnTime(6);
-			assertTrue(t.length == 0);
-
-			t = new MultiString("ABC1[np]ABC2").
-				getPageOnTime(7);
-			assertTrue(t.length == 2);
-			assertTrue(t[0] == 7 && t[1] == 7);
-
-			t = new MultiString("[pto]YA1[np]OH YA2").
-				getPageOnTime(7);
-			assertTrue(t.length == 2);
-			assertTrue(t[0] == 7 && t[1] == 7);
-
-			t = new MultiString("[pt3o]YA1[np]OH YA2").
-				getPageOnTime(7);
-			assertTrue(t.length == 2);
-			assertTrue(t[0] == 3 && t[1] == 3);
-
-			t = new MultiString("[pto4]YA1[np]OH YA2").
-				getPageOnTime(7);
-			assertTrue(t.length == 2);
-			assertTrue(t[0] == 7 && t[1] == 7);
-
-			t = new MultiString("[pt7o4]PG1[np][pt8o4]PG2" +
-				"[np]PG3").getPageOnTime(7);
-			assertTrue(t.length == 3);
-			assertTrue(t[0] == 7 && t[1] == 8 && t[2] == 8);
-			*/
-
-			/*
-			FIXME: this test case fails: with no text on each
-			       page, the parse method isn't behaving as
-			       expected--is this a bug?
-			t = new MultiString("[pt7o4][np][pt8o4][np]A").
-				getPageOnTime(7);
-			assertTrue(t.length == 3);
-			assertTrue(t[0] == 7 && t[1] == 8 && t[2] == 8);
-			*/
-		}
-
-		// replacePageOnTime
-		{
-			// Note: these test require system attributes
-			/*
-			MultiString t1, t2;
-			int[] pt;
-
-			t1 = new MultiString("YA1[np]YA2");
-			t2 = new MultiString(t1.replacePageOnTime(4));
-			pt = t2.getPageOnTime(7);
-			assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-			assertTrue("[pt4o]YA1[np]YA2".equals(t2.toString()));
-
-			t1 = new MultiString("[pt3o]YA1[np]OH YA2");
-			t2 = new MultiString(t1.replacePageOnTime(4));
-			pt = t2.getPageOnTime(7);
-			assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-			assertTrue("[pt4o]YA1[np]OH YA2".equals(t2.toString()));
-
-			t1 = new MultiString("[pt3o50]YA1[np]OH YA2");
-			t2 = new MultiString(t1.replacePageOnTime(4));
-			pt = t2.getPageOnTime(7);
-			assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-			assertTrue("[pt4o50]YA1[np]OH YA2".equals(t2.toString()));
-
-			t1 = new MultiString("[pt3o50]YA1[np][pt22o60]OH YA2");
-			t2 = new MultiString(t1.replacePageOnTime(4));
-			pt = t2.getPageOnTime(7);
-			assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
-			assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".equals(t2.toString()));
-			*/
-		}
-
-		// getFont
-		{
-			// Note: these test require system attributes (see MultiString.java)
-			/*
-			MultiString t1, t2;
-			int[] fn;
-
-			t1 = new MultiString(null);
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 0);
-
-			t1 = new MultiString("");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 0);
-
-			t1 = new MultiString("YA1");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 1 && fn[0] == 255);
-
-			t1 = new MultiString("[fo2]YA1");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 1 && fn[0] == 2);
-
-			t1 = new MultiString("YA1[np]YA2");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 2 && fn[0] == 255 && fn[1] == 255);
-
-			t1 = new MultiString("[fo2]YA1[np][fo3]YA2");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 2 && fn[0] == 2 && fn[1] == 3);
-
-			t1 = new MultiString("YA1[np][fo3]YA2");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 2 && fn[0] == 255 && fn[1] == 3);
-
-			t1 = new MultiString("[fo3]YA1[np]YA2");
-			fn = t1.getFonts(255);
-			assertTrue(fn.length == 2 && fn[0] == 3 && fn[1] == 3);
-			*/
-		}
 	}
 }
