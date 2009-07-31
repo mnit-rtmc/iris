@@ -71,6 +71,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Access password */
 	protected final JPasswordField password = new JPasswordField(16);
 
+	/** Button to clear the access password */
+	protected final JButton clear_btn = new JButton("Clear");
+
 	/** Active checkbox */
 	protected final JCheckBox active = new JCheckBox();
 
@@ -184,7 +187,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.add("Drop", drop_id);
 		panel.finishRow();
 		panel.add("Password", password);
-		panel.finishRow();
+		panel.setEast();
+		panel.addRow(clear_btn);
+		new ActionJob(this, clear_btn) {
+			public void perform() {
+				proxy.setPassword(null);
+			}
+		};
 		new FocusJob(password) {
 			public void perform() {
 				if(wasLost()) {
@@ -193,8 +202,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 					password.setText("");
 					if(pwd.length() > 0)
 						proxy.setPassword(pwd);
-					else
-						proxy.setPassword(null);
 				}
 			}
 		};
