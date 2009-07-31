@@ -183,12 +183,14 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		panel.finishRow();
 		panel.add("Drop", drop_id);
 		panel.finishRow();
-		panel.addRow("Password", password);
+		panel.add("Password", password);
+		panel.finishRow();
 		new FocusJob(password) {
 			public void perform() {
 				if(wasLost()) {
 					String pwd = new String(
 						password.getPassword()).trim();
+					password.setText("");
 					if(pwd.length() > 0)
 						proxy.setPassword(pwd);
 					else
