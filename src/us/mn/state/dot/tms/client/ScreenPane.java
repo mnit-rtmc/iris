@@ -17,6 +17,9 @@ package us.mn.state.dot.tms.client;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -27,6 +30,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
 /**
@@ -48,6 +54,9 @@ public class ScreenPane extends JPanel {
 		return map;
 	}
 
+	/** Map tool bar */
+	protected final MapToolBar map_bar;
+
 	/** Map panel */
 	protected final JPanel map_panel;
 
@@ -61,6 +70,7 @@ public class ScreenPane extends JPanel {
 		add(tab_pane, BorderLayout.WEST);
 		map = new MapBean(true);
 		map.setBackground(new Color(208, 216, 208));
+		map_bar = createMapToolBar();
 		tool_bar = new IrisToolBar(map);
 		tool_bar.setFloatable(false);
 		map_panel = createMapPanel();
@@ -94,15 +104,14 @@ public class ScreenPane extends JPanel {
 			BevelBorder.LOWERED));
 		p.add(map, BorderLayout.CENTER);
 		JPanel mp = new JPanel(new BorderLayout());
-		MapToolBar mtb = createToolBar();
-		mp.add(mtb, BorderLayout.NORTH);
+		mp.add(map_bar, BorderLayout.NORTH);
 		mp.add(p, BorderLayout.CENTER);
 		mp.add(tool_bar, BorderLayout.SOUTH);
 		return mp;
 	}
 
 	/** Create a map tool bar with appropriate view buttons */
-	protected MapToolBar createToolBar() {
+	protected MapToolBar createMapToolBar() {
 		MapToolBar b = new MapToolBar(map);
 		b.setFloatable(false);
 		b.addHomeButton();
@@ -111,6 +120,27 @@ public class ScreenPane extends JPanel {
 
 	/** Create the tool panels */
 	public void createToolPanels(Session s) {
+		TypeCache<MapExtent> c = s.getSonarState().getMapExtents();
+		c.findObject(new Checker<MapExtent>() {
+			public boolean check(MapExtent me) {
+				map_bar.addButton(createMapButton(me));
+				return false;
+			}
+		});
 		tool_bar.createToolPanels(s);
+	}
+
+	/** Create a map extent button */
+	protected JButton createMapButton(final MapExtent me) {
+		JButton b = new JButton(me.getName());
+		b.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ev) {
+				map.zoomTo(new Rectangle2D.Double(
+					me.getEasting(), me.getNorthing(),
+					me.getEastSpan(), me.getNorthSpan()
+				));
+			}
+		});
+		return b;
 	}
 }
