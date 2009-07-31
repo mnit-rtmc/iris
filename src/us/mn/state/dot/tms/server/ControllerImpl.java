@@ -48,7 +48,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		System.err.println("Loading controllers...");
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, cabinet, comm_link, drop_id, " +
-			"active, password, notes FROM " + SONAR_TYPE  + ";",
+			"active, password, notes FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -81,7 +81,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

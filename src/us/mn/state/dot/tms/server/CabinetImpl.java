@@ -35,7 +35,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading cabinets...");
 		namespace.registerType(SONAR_TYPE, CabinetImpl.class);
-		store.query("SELECT name, style, geo_loc, mile FROM " +
+		store.query("SELECT name, style, geo_loc, mile FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -61,7 +61,7 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

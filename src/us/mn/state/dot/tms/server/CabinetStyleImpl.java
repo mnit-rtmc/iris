@@ -32,7 +32,7 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading cabinet styles...");
 		namespace.registerType(SONAR_TYPE, CabinetStyleImpl.class);
-		store.query("SELECT name, dip FROM " + SONAR_TYPE  + ";",
+		store.query("SELECT name, dip FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -54,7 +54,7 @@ public class CabinetStyleImpl extends BaseObjectImpl implements CabinetStyle {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
