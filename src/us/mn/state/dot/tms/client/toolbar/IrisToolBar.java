@@ -40,8 +40,10 @@ public class IrisToolBar extends JToolBar {
 	/** Build toolbar components */
 	public void createToolPanels(Session s) {
 		clear();
-		ActionPlanPanel plan_panel = new ActionPlanPanel(s);
-		add(plan_panel);
+		if(ActionPlanPanel.getIEnabled()) {
+			ActionPlanPanel plan_panel = new ActionPlanPanel(s);
+			add(plan_panel);
+		}
 		if(AwsStatusPanel.getIEnabled()) {
 			AwsStatusPanel aws_panel = new AwsStatusPanel(
 				s.getSonarState(), s.getDesktop());

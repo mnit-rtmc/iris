@@ -22,6 +22,7 @@ import java.util.HashMap;
  * @author Douglas Lau
  */
 public enum SystemAttrEnum {
+	ACTIONPLAN_TOOLBAR_ENABLE(true),
 	CAMERA_NUM_PRESET_BTNS(3, 0, 20),
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
 	CAMERA_PTZ_PANEL_ENABLE(false),

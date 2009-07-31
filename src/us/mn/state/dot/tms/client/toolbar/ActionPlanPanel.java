@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.toolbar;
 
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A tool panel that deploys action plans.
@@ -45,7 +46,8 @@ public class ActionPlanPanel extends ToolPanel {
 
 	/** Is this panel IRIS enabled? */
 	public static boolean getIEnabled() {
-		return true;
+		return SystemAttrEnum.
+			ACTIONPLAN_TOOLBAR_ENABLE.getBoolean();
 	}
 
 	/** Set the tool tip text */
