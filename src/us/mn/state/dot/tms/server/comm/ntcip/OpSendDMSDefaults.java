@@ -225,9 +225,14 @@ public class OpSendDMSDefaults extends OpDMS {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
 			String make = dms.getMake();
+			// NOTE: setting these objects requires use of the
+			//       "administrator" community name.  We need to
+			//       check that the password is not null before
+			//       attempting to set them.
 			if(make != null &&
 			   make.startsWith("ADDCO") &&
-			   dms.getDmsType() == DMSType.VMS_CHAR.ordinal())
+			   dms.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
+			   controller.getPassword() != null)
 			{
 				DmsHorizontalBorder h_border =
 					new DmsHorizontalBorder();
@@ -245,7 +250,7 @@ public class OpSendDMSDefaults extends OpDMS {
 				mess.add(v_border);
 				mess.add(h_pitch);
 				mess.add(v_pitch);
-				mess.setRequest("administrator");
+				mess.setRequest();
 				DMS_LOG.log(dms.getName() + ":= " + h_border);
 				DMS_LOG.log(dms.getName() + ":= " + v_border);
 				DMS_LOG.log(dms.getName() + ":= " + h_pitch);

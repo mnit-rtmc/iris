@@ -134,6 +134,9 @@ public class SNMP extends BER {
 		/** Input stream for this message */
 		protected final InputStream is;
 
+		/** Community name */
+		protected final String community;
+
 		/** SNMP request-id */
 		public final int request_id;
 
@@ -142,9 +145,10 @@ public class SNMP extends BER {
 			new LinkedList<ASN1Object>();
 
 		/** Create a new SNMP message */
-		public Message(OutputStream o, InputStream i) {
+		public Message(OutputStream o, InputStream i, String c) {
 			os = o;
 			is = i;
+			community = (c != null) ? c : PUBLIC;
 			request_id = last_request++;
 			if(last_request > REQUEST_ID_MAX_LEDSTAR_BUG)
 				last_request = 0;
@@ -157,7 +161,7 @@ public class SNMP extends BER {
 		}
 
 		/** Send an SNMP get request message */
-		public void getRequest(String community) throws IOException {
+		public void getRequest() throws IOException {
 			is.skip(is.available());
 			encodeVarBindList(false);
 			encodeRequestPDU(Tag.GET_REQUEST);
@@ -165,16 +169,11 @@ public class SNMP extends BER {
 			encoder.writeTo(os);
 			encoder.reset();
 			os.flush();
-			decodeResponse(community);
-		}
-
-		/** Send an SNMP get request message */
-		public void getRequest() throws IOException {
-			getRequest(PUBLIC);
+			decodeResponse();
 		}
 
 		/** Send an SNMP set request message */
-		public void setRequest(String community) throws IOException {
+		public void setRequest() throws IOException {
 			is.skip(is.available());
 			encodeVarBindList(true);
 			encodeRequestPDU(Tag.SET_REQUEST);
@@ -182,18 +181,11 @@ public class SNMP extends BER {
 			encoder.writeTo(os);
 			encoder.reset();
 			os.flush();
-			decodeResponse(community);
-		}
-
-		/** Send an SNMP set request message */
-		public void setRequest() throws IOException {
-			setRequest(PUBLIC);
+			decodeResponse();
 		}
 
 		/** Decode a response to a SET or GET request */
-		protected void decodeResponse(String community)
-			throws IOException
-		{
+		protected void decodeResponse() throws IOException {
 			for(int i = 0; i < 5; i++) {
 				try {
 					decodeSNMPMessage(is, community);

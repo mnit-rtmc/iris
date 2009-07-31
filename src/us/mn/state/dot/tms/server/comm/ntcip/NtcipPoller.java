@@ -72,7 +72,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		throws EOFException
 	{
 		return snmp.new Message(messenger.getOutputStream(c),
-			messenger.getInputStream(c));
+			messenger.getInputStream(c), c.getPassword());
 	}
 
 	/** Check if a drop address is valid */

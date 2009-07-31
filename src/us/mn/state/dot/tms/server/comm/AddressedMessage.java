@@ -31,7 +31,4 @@ public interface AddressedMessage {
 
 	/** Send a set request message */
 	public void setRequest() throws IOException;
-
-	/** Send a set request message */
-	public void setRequest(String community) throws IOException;
 }
