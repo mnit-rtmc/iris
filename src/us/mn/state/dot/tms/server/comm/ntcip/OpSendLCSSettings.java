@@ -15,10 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.LinkedList;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
@@ -93,11 +89,9 @@ public class OpSendLCSSettings extends OpLCS {
 
 	/** Create operations to send new indications to an LCS array */
 	protected void createOperations() {
-		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		for(LCS lcs: lcss) {
-			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms instanceof DMSImpl)
-				ops.add(new OpSendDMSGraphics((DMSImpl)dms));
+		for(DMSImpl dms: dmss) {
+			if(dms != null)
+				ops.add(new OpSendDMSGraphics(dms));
 		}
 	}
 }

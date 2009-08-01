@@ -15,12 +15,9 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -45,15 +42,12 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup the indications on the LCS array */
 	protected void lookupIndications() {
-		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		if(lcss.length != ind_after.length) {
-			System.err.println("lookupIndications: array invalid");
-			return;
-		}
-		for(int i = 0; i < lcss.length; i++) {
-			DMS dms = DMSHelper.lookup(lcss[i].getName());
-			SignMessage sm = dms.getMessageCurrent();
-			ind_after[i] = lookupIndication(sm);
+		for(int i = 0; i < dmss.length; i++) {
+			DMS dms = dmss[i];
+			if(dms != null) {
+				SignMessage sm = dms.getMessageCurrent();
+				ind_after[i] = lookupIndication(sm);
+			}
 		}
 	}
 

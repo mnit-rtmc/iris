@@ -15,14 +15,10 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.LCS;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -58,9 +54,6 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Indications to send */
 	protected final Integer[] indications;
 
-	/** DMS corresponsing to each LCS in the array */
-	protected final DMSImpl[] dmss;
-
 	/** Sign messages for each DMS in the LCS array */
 	protected final SignMessage[] msgs;
 
@@ -71,24 +64,8 @@ public class OpSendLCSIndications extends OpLCS {
 	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
 		super(DEVICE_DATA, l);
 		indications = ind;
-		dmss = new DMSImpl[ind.length];
 		msgs = new SignMessage[ind.length];
 		user = u;
-		lookupDMSs();
-	}
-
-	/** Lookup DMSs for an LCS array */
-	protected void lookupDMSs() {
-		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		if(lcss.length != indications.length) {
-			System.err.println("lookupDMS: array invalid");
-			return;
-		}
-		for(int i = 0; i < lcss.length; i++) {
-			DMS dms = DMSHelper.lookup(lcss[i].getName());
-			if(dms instanceof DMSImpl)
-				dmss[i] = (DMSImpl)dms;
-		}
 	}
 
 	/** Create the first real phase of the operation */

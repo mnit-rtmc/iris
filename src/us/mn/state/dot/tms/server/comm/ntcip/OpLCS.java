@@ -15,6 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.Arrays;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LCS;
+import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 
@@ -34,18 +39,41 @@ abstract public class OpLCS extends OpDevice {
 	/** Indications after operation */
 	protected final Integer[] ind_after;
 
+	/** DMS corresponsing to each LCS in the array */
+	protected final DMSImpl[] dmss;
+
 	/** Create a new LCS operation */
 	protected OpLCS(int p, LCSArrayImpl l) {
 		super(p, l);
 		lcs_array = l;
 		ind_before = l.getIndicationsCurrent();
 		ind_after = Arrays.copyOf(ind_before, ind_before.length);
+		dmss = new DMSImpl[ind_before.length];
+		lookupDMSs();
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(!Arrays.equals(ind_before, ind_after))
 			lcs_array.setIndicationsCurrent(ind_after, null);
+		for(DMSImpl dms: dmss) {
+			if(dms == null || dms.isFailed())
+				success = false;
+		}
 		super.cleanup();
+	}
+
+	/** Lookup DMSs for an LCS array */
+	protected void lookupDMSs() {
+		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
+		if(lcss.length != ind_before.length) {
+			System.err.println("lookupDMS: array invalid");
+			return;
+		}
+		for(int i = 0; i < lcss.length; i++) {
+			DMS dms = DMSHelper.lookup(lcss[i].getName());
+			if(dms instanceof DMSImpl)
+				dmss[i] = (DMSImpl)dms;
+		}
 	}
 }
