@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -77,12 +78,6 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 		graphic = null;
 	}
 
-	/** Lookup a graphic in the SONAR namespace */
-	static protected GraphicImpl lookupGraphic(String g) {
-		return (GraphicImpl)namespace.lookupObject(Graphic.SONAR_TYPE,
-			g);
-	}
-
 	/** Create a glyph from database lookup */
 	protected GlyphImpl(String n, String f, int p, String g)
 		throws TMSException
@@ -92,7 +87,7 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 			font = FontHelper.lookup(f);
 		codePoint = p;
 		if(g != null)
-			graphic = lookupGraphic(g);
+			graphic = GraphicHelper.lookup(g);
 	}
 
 	/** Font to which the glyph belongs */
@@ -140,11 +135,11 @@ public class GlyphImpl extends BaseObjectImpl implements Glyph {
 	}
 
 	/** Graphic image of glyph */
-	protected GraphicImpl graphic;
+	protected Graphic graphic;
 
 	/** Set the graphic */
 	public void setGraphic(Graphic g) {
-		graphic = (GraphicImpl)g;
+		graphic = g;
 	}
 
 	/** Set the graphic */
