@@ -169,6 +169,7 @@ public class PixelMapBuilder {
 		int nltp = ms.countPageLines(p);
 		BitmapRenderer cb = new BitmapRenderer(nltp, p);
 		ms.parse(cb);
+		// FIXME: check BitmapRenderer.render_err
 		return cb.bg;
 	}
 
@@ -179,28 +180,39 @@ public class PixelMapBuilder {
 			new BitmapGraphic(width, height);
 		protected final int nltp;
 		protected final int page;
+		protected boolean render_err = false;
 		public BitmapRenderer(int nl, int p) {
 			nltp = nl;
 			page = p;
 			ms_fnum = getDefaultFontNumber();
 		}
 		public void addSpan(String span) {
-			if(page == ms_page)
-				render(span);
+			if(page == ms_page) {
+				try {
+					render(span);
+				}
+				catch(InvalidMessageException e) {
+					// This can happen if the text is too
+					// large or if there is an undefined
+					// character.
+					render_err = true;
+				}
+				catch(IOException e) {
+					// This happens if the graphic contains
+					// invalid Base64 pixel data.
+					render_err = true;
+				}
+			}
 		}
-		protected void render(String span) {
+		protected void render(String span) throws IOException,
+			InvalidMessageException
+		{
 			Font font = FontHelper.find(ms_fnum);
 			if(font == null)
 				return;
-			try {
-				int x = _calculatePixelX(ms_justl, font, span);
-				int y = _calculatePixelY(ms_justp, font,
-					ms_line, nltp);
-				renderSpan(bg, font, span, x, y);
-			}
-			catch(Exception e) {
-				// not much we can do here ...
-			}
+			int x = _calculatePixelX(ms_justl, font, span);
+			int y = _calculatePixelY(ms_justp, font, ms_line, nltp);
+			renderSpan(bg, font, span, x, y);
 		}
 		public void addGraphic(int g_num, Integer x, Integer y,
 			String g_id)
@@ -218,7 +230,9 @@ public class PixelMapBuilder {
 				renderGraphic(graphic, bg, x0, y0);
 			}
 			catch(IOException e) {
-				// not much we can do here ...
+				// This happens if the graphic contains
+				// invalid Base64 pixel data.
+				render_err = true;
 			}
 		}
 	}
