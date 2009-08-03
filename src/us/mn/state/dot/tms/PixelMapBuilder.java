@@ -87,9 +87,12 @@ public class PixelMapBuilder {
 
 	/** Check if a font is usable */
 	public boolean isFontUsable(Font f) {
+		return isFontWidthUsable(f) && isFontHeightUsable(f);
+	}
+
+	/** Check if a font width is usable */
+	protected boolean isFontWidthUsable(Font f) {
 		if(f.getWidth() > width)
-			return false;
-		if(f.getHeight() > height)
 			return false;
 		if(c_width > 0) {
 			// char-matrix signs must match font width
@@ -103,6 +106,13 @@ public class PixelMapBuilder {
 			if(f.getCharSpacing() == 0)
 				return false;
 		}
+		return true;
+	}
+
+	/** Check if a font height is usable */
+	protected boolean isFontHeightUsable(Font f) {
+		if(f.getHeight() > height)
+			return false;
 		if(c_height > 0) {
 			// char- or line-matrix signs must match font height
 			if(c_height != f.getHeight())
