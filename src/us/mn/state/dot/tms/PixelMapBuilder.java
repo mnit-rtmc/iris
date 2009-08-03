@@ -244,7 +244,7 @@ public class PixelMapBuilder {
 		int x = calculatePixelX(jl, font, span);
 		if(x >= 0)
 			return x;
-		throw new InvalidMessageException("Message too long: " + span);
+		throw new InvalidMessageException("Text too wide: " + span);
 	}
 
 	/** Calculate the X pixel position to place text */
