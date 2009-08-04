@@ -116,13 +116,22 @@ public final class TMSImpl implements KmlDocument {
 	/** Station manager */
 	protected transient StationManager station_manager;
 
+	/** Get DMS and LCS periodic polling frequency in seconds */
+	private int getPeriodicDmsPollingFreqSecs() {
+		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
+		if(secs <= 0)
+			return 0;
+		return (secs < 5 ? 5 : secs);
+	}
+
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
 		station_manager = new StationManager(namespace);
-		TIMER.addJob(new TimerJobDMS(
-			SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt()));
-		TIMER.addJob(new TimerJobLCS(
-			SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt()));
+		int secs = getPeriodicDmsPollingFreqSecs();
+		if(secs > 0) {
+			TIMER.addJob(new TimerJobDMS(secs));
+			TIMER.addJob(new TimerJobLCS(secs));
+		}
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new TimerJob5Min());
