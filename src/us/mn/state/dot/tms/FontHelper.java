@@ -91,7 +91,11 @@ public class FontHelper extends BaseHelper {
 		throw new InvalidMessageException("Invalid code point");
 	}
 
-	/** Calculate the width of a span of text */
+	/** Calculate the width of a span of text.
+	 * @param font Font to use for text
+	 * @param t Text to calculate
+	 * @return Width in pixels of text
+	 * @throws InvalidMessageException if the font is missing a character */
 	static public int calculateWidth(Font font, String t)
 		throws InvalidMessageException
 	{
