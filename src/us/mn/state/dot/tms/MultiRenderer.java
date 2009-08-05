@@ -226,7 +226,14 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			line.addSpan(s);
 		}
 		void addLine() {
-			currentLine();
+			Line line = currentLine();
+			if(line.getHeight() == 0) {
+				// The line height can be zero on full-matrix
+				// signs when no text has been specified.
+				// Adding an empty span to the line allows the
+				// height to be taken from the current font.
+				line.addSpan(new Span(""));
+			}
 			lines.addLast(new Line());
 		}
 		Line currentLine() {
@@ -268,8 +275,11 @@ public class MultiRenderer extends MultiStringStateAdapter {
 			int h = 0;
 			Line pline = null;
 			for(Line line: lines) {
-				h += line.getSpacing(pline) + line.getHeight();
-				pline = line;
+				int lh = line.getHeight();
+				if(lh > 0) {
+					h += line.getSpacing(pline) + lh;
+					pline = line;
+				}
 			}
 			return h;
 		}
