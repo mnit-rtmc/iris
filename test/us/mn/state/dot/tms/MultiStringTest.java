@@ -29,8 +29,6 @@ public class MultiStringTest extends TestCase {
 
 	/** test cases */
 	public void test() {
-
-		countPageLines();
 		getFonts();
 		getPageOnTime();
 		normalization();
@@ -112,37 +110,6 @@ public class MultiStringTest extends TestCase {
 		assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".
 			equals(t2.toString()));
 		*/
-	}
-
-	/** countPageLines */
-	private void countPageLines() {
-
-		//FIXME: add test for null arg? Depends on constructor 
-		//       contract, which is presently ill-defined.
-		//assertTrue(new MultiString(null).countPageLines(0) == 0);
-
-		assertTrue(new MultiString("").
-			countPageLines(0) == 0);
-		assertTrue(new MultiString("").
-			countPageLines(1) == 0);
-		assertTrue(new MultiString("L1").
-			countPageLines(0) == 1);
-		assertTrue(new MultiString("L1[nl]").
-			countPageLines(0) == 1);
-		assertTrue(new MultiString("L1[nl]L2").
-			countPageLines(0) == 2);
-		assertTrue(new MultiString("L1[nl]L2").
-			countPageLines(1) == 0);
-		assertTrue(new MultiString("L1[nl]L2[nl]").
-			countPageLines(0) == 2);
-		assertTrue(new MultiString("L1[nl]L2[nl][np]").
-			countPageLines(0) == 2);
-		assertTrue(new MultiString("L1[nl]L2[nl][np]A").
-			countPageLines(0) == 2);
-		assertTrue(new MultiString("L1[nl]L2[nl][np]A").
-			countPageLines(1) == 1);
-		assertTrue(new MultiString("L1[nl]L2[nl][np]A[nl]B").
-			countPageLines(1) == 2);
 	}
 
 	/** getFonts */
