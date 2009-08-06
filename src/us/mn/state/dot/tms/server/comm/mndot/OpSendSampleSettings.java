@@ -112,35 +112,6 @@ public class OpSendSampleSettings extends Op170 {
 			mess.add(new MemoryRequest(Address.PROM_VERSION, data));
 			mess.getRequest();
 			setVersion(data[0], data[1]);
-			if(data[0] > 4 || data[1] > 0)
-				return new ResetDetectors();
-			else
-				return new QueueBitmap();
-		}
-	}
-
-	/** Phase to reset the detectors */
-	protected class ResetDetectors extends Phase {
-
-		/** Reset the detectors */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			byte[] data = {Address.DETECTOR_RESET};
-			mess.add(new MemoryRequest(
-				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
-			mess.setRequest();
-			return new ClearDetectors();
-		}
-	}
-
-	/** Phase to clear the detector reset */
-	protected class ClearDetectors extends Phase {
-
-		/** Clear the detector reset */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			byte[] data = new byte[1];
-			mess.add(new MemoryRequest(
-				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
-			mess.setRequest();
 			return new QueueBitmap();
 		}
 	}

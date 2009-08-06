@@ -32,7 +32,33 @@ public class OpReset170 extends Op170 {
 
 	/** Begin the operation */
 	public void begin() {
-		phase = new Level1Restart();
+		phase = new ResetDetectors();
+	}
+
+	/** Phase to reset the detectors */
+	protected class ResetDetectors extends Phase {
+
+		/** Reset the detectors */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			byte[] data = {Address.DETECTOR_RESET};
+			mess.add(new MemoryRequest(
+				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
+			mess.setRequest();
+			return new ClearDetectors();
+		}
+	}
+
+	/** Phase to clear the detector reset */
+	protected class ClearDetectors extends Phase {
+
+		/** Clear the detector reset */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			byte[] data = new byte[1];
+			mess.add(new MemoryRequest(
+				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
+			mess.setRequest();
+			return new Level1Restart();
+		}
 	}
 
 	/** Phase to restart the controller */
