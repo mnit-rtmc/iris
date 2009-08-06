@@ -40,6 +40,10 @@ public class OpReset170 extends Op170 {
 
 		/** Reset the detectors */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			// Enabling the detector-reset pin can cause some
+			// detector cards to have "chattering" volume, along
+			// with "occupancy plateaus".  This can happen if there
+			// is a comm error during the ClearDetectors phase.
 			byte[] data = {Address.DETECTOR_RESET};
 			mess.add(new MemoryRequest(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data));
