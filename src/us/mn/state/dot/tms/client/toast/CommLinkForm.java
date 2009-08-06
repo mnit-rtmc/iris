@@ -196,6 +196,7 @@ public class CommLinkForm extends AbstractForm {
 		panel.add(link_status, bag);
 		bag.gridx = 2;
 		bag.anchor = GridBagConstraints.EAST;
+		del_button.setMnemonic('C');
 		del_button.setEnabled(false);
 		panel.add(del_button, bag);
 		bag.gridx = 0;
@@ -224,9 +225,11 @@ public class CommLinkForm extends AbstractForm {
 		panel.add(new JLabel("Selected Controller:"), bag);
 		bag.gridx = 1;
 		bag.anchor = GridBagConstraints.EAST;
+		ctr_props.setMnemonic('P');
 		ctr_props.setEnabled(false);
 		panel.add(ctr_props, bag);
 		bag.gridx = 2;
+		del_ctr.setMnemonic('D');
 		del_ctr.setEnabled(false);
 		panel.add(del_ctr, bag);
 		return panel;
