@@ -120,6 +120,12 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 				m_composer.selectPreview(true);
 	}
 
+	/** Validate the current value using the specified number of pages. */
+	public void validateWithNumPages(int np) {
+		if(np > 1 && getValuePgTime().isZero())
+			setValue(DmsPgTime.getDefaultOn());
+	}
+
 	/** dispose */
 	public void dispose() {
 		removeChangeListener(this);

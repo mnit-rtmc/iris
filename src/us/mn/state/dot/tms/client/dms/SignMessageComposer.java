@@ -592,9 +592,11 @@ public class SignMessageComposer extends JPanel {
 			st_model.updateMessageLibrary();
 	}
 
-	/** If the page on-time spinner is IRIS enabled, return the current 
-	 *  value else return the system default page on-time. */
+	/** Return the current validated page on-time. If the page on-time 
+	 *  spinner is not enabled, the default pg on-time is returned. */
 	public DmsPgTime getCurrentPgOnTime() {
+		MultiString ms = new MultiString(getMessage());
+		timeSpin.validateWithNumPages(ms.getNumPages());
 		return timeSpin.getValuePgTime();
 	}
 }
