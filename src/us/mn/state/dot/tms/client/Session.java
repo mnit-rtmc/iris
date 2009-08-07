@@ -205,8 +205,6 @@ public class Session {
 		logger = l;
 		baseLayers = bl;
 		v_menu = new ViewMenu(this);
-		gpoly = createStationLayer();
-		incLayer = createIncidentLayer();
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		cam_manager = new CameraManager(this,
 			state.getCamCache().getCameras(), loc_manager);
@@ -222,6 +220,8 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
+		gpoly = createStationLayer();
+		incLayer = createIncidentLayer();
 		addTabs();
 	}
 
