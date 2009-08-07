@@ -216,6 +216,10 @@ public class MultiStringTest extends TestCase {
 			equals("ABC"));
 		assertTrue(new MultiString("abc").normalize().
 			equals("ABC"));
+		assertTrue(new MultiString("DON'T").normalize().
+			equals("DON'T"));
+		assertTrue(new MultiString("SPACE SPACE").normalize().
+			equals("SPACE SPACE"));
 		assertTrue(new MultiString("AB|C").normalize().
 			equals("ABC"));
 		assertTrue(new MultiString("AB|{}{}C{}").normalize().

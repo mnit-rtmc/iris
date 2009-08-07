@@ -36,7 +36,7 @@ public class MultiString implements MultiStringState {
 
 	/** Regular expression to match text between MULTI tags */
 	static protected final Pattern TEXT_PATTERN = Pattern.compile(
-		"[ !#$%&()*+,-./0-9:;<=>?@A-Z]*");
+		"[' !#$%&()*+,-./0-9:;<=>?@A-Z]*");
 
 	/** New line MULTI tag */
 	static public final String NEWLINE = "[nl]";
