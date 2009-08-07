@@ -63,14 +63,19 @@ public class DMSPanelPager {
 	/** Blanking state -- true during blank time between pages */
 	protected boolean isBlanking = false;
 
-	/** Create a new DMS panel pager */
+	/** Create a new DMS panel pager.
+	 *  @param p SignPixelPanel.
+	 *  @param proxy DMS proxy.
+	 *  @param b Array of bitmapgraphics.
+	 *  @param ot Page on-time, which is validated, so if zero, is 
+	 *	   assigned the system default. */
 	public DMSPanelPager(SignPixelPanel p, DMS proxy, BitmapGraphic[] b,
 		DmsPgTime ot)
 	{
 		panel = p;
 		dms = proxy;
 		bitmaps = getBitmaps(b);
-		pgOnTime = ot;
+		pgOnTime = DmsPgTime.validateOnTime(ot);
 		pgOffTime = DmsPgTime.getDefaultOff();
 		setDimensions();
 		panel.setGraphic(bitmaps[page]);
