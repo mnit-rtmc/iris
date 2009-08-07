@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
  * CorridorList is a graphical freeway corridor list.
@@ -279,7 +278,6 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		}
 		corridor = createCorridor(node_s);
 		List<R_Node> node_t = getSortedList();
-		setTangentAngles(node_t);
 		R_NodeRenderer prev = null;
 		for(R_Node proxy: node_t) {
 			R_NodeRenderer r = new R_NodeRenderer(proxy);
@@ -297,30 +295,6 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 			return corridor.getNodes();
 		else
 			return new LinkedList<R_Node>();
-	}
-
-	/** Set the tangent angles for all the roadway nodes in a list */
-	protected void setTangentAngles(List<R_Node> node_t) {
-		// FIXME: should really check for coincident points, since they
-		// cause the tangent angle to be calculated as NaN
-		MapGeoLoc loc, loc_a, loc_b;
-		for(int i = 0; i < node_t.size(); i++) {
-			if(i == 0)
-				loc_a = manager.findGeoLoc(node_t.get(0));
-			else
-				loc_a = manager.findGeoLoc(node_t.get(i - 1));
-			loc = manager.findGeoLoc(node_t.get(i));
-			if(i == node_t.size() - 1)
-				loc_b = manager.findGeoLoc(node_t.get(i));
-			else
-				loc_b = manager.findGeoLoc(node_t.get(i + 1));
-			if(loc_a != loc_b) {
-				Vector va = Vector.create(loc_a.getGeoLoc());
-				Vector vb = Vector.create(loc_b.getGeoLoc());
-				Vector a = va.subtract(vb);
-				loc.setTangent(a.getAngle() - NORTH_ANGLE);
-			}
-		}
 	}
 
 	/** Get the selected roadway node */

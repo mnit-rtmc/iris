@@ -14,10 +14,14 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
@@ -25,9 +29,11 @@ import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -43,6 +49,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class R_NodeManager extends ProxyManager<R_Node> {
 
+	/** Offset angle for default North map markers */
+	static protected final double NORTH_ANGLE = Math.PI / 2;
+
 	/** Name of "has GPS" style */
 	static public final String STYLE_GPS = "Has GPS";
 
@@ -52,8 +61,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Name of "no location" style */
 	static public final String STYLE_NO_LOC = "No Location";
 
-	/** Set of all defined corridors */
-	protected final TreeSet<String> corridors = new TreeSet<String>();
+	/** Map to of corridor names to corridors */
+	protected final Map<String, CorridorBase> corridors =
+		new TreeMap<String, CorridorBase>();
+
+	/** Map to hold exit/entrance links */
+	protected final Map<String, R_Node> e_links =
+		new HashMap<String, R_Node>();
 
 	/** List model of all corridors */
 	protected final DefaultListModel model = new DefaultListModel();
@@ -86,9 +100,88 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Add a new proxy to the r_node manager */
 	protected void proxyAddedSlow(R_Node n) {
 		super.proxyAddedSlow(n);
-		String c = GeoLocHelper.getCorridorName(n.getGeoLoc());
-		if(c != null)
-			addCorridor(c);
+		addCorridor(n);
+	}
+
+	/** Called when proxy enumeration is complete */
+	public void enumerationComplete() {
+		R_NodeHelper.find(new Checker<R_Node>() {
+			public boolean check(R_Node r_node) {
+				findDownstreamLinks(r_node);
+				return false;
+			}
+		});
+		for(CorridorBase c: corridors.values()) {
+			c.arrangeNodes();
+			setTangentAngles(c);
+		}
+	}
+
+	/** Set the tangent angles for all the nodes in a corridor */
+	protected void setTangentAngles(CorridorBase c) {
+		LinkedList<MapGeoLoc> locs = new LinkedList<MapGeoLoc>();
+		for(R_Node n: c.getNodes()) {
+			MapGeoLoc loc = super.findGeoLoc(n);
+			if(loc != null)
+				locs.add(loc);
+		}
+		if(locs.size() > 0) {
+			// The first and last locations need to be in the list
+			// twice to allow tangents to be calculated.
+			locs.addFirst(locs.getFirst());
+			locs.addLast(locs.getLast());
+		}
+		MapGeoLoc loc_a = null;
+		MapGeoLoc loc = null;
+		for(MapGeoLoc loc_b: locs) {
+			if(loc_a != null) {
+				Vector va = Vector.create(loc_a.getGeoLoc());
+				Vector vb = Vector.create(loc_b.getGeoLoc());
+				Vector a = va.subtract(vb);
+				double t = a.getAngle();
+				if(!Double.isInfinite(t) && !Double.isNaN(t))
+					loc.setTangent(t - NORTH_ANGLE);
+			}
+			loc_a = loc;
+			loc = loc_b;
+		}
+	}
+
+	/** Find downstream links (not in corridor) for the given node */
+	protected void findDownstreamLinks(R_Node r_node) {
+		if(R_NodeHelper.isExit(r_node))
+			linkExitToEntrance(r_node);
+	}
+
+	/** Link an exit node with a corresponding entrance node */
+	protected void linkExitToEntrance(final R_Node r_node) {
+		final LinkedList<R_Node> nl = new LinkedList<R_Node>();
+		R_NodeHelper.find(new Checker<R_Node>() {
+			public boolean check(R_Node other) {
+				if(R_NodeHelper.isExitLink(r_node, other))
+					nl.add(other);
+				return false;
+			}
+		});
+		R_Node link = findNearest(r_node, nl);
+		if(link != null) {
+			e_links.put(r_node.getName(), link);
+			e_links.put(link.getName(), r_node);
+		}
+	}
+
+	/** Find the nearest r_node in a list */
+	static protected R_Node findNearest(R_Node r_node, List<R_Node> others){
+		R_Node nearest = null;
+		double distance = 0;
+		for(R_Node other: others) {
+			double m = CorridorBase.metersTo(r_node, other);
+			if(nearest == null || m < distance) {
+				nearest = other;
+				distance = m;
+			}
+		}
+		return nearest;
 	}
 
 	/** Get the proxy type */
@@ -104,7 +197,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return !GeoLocHelper.hasGPS(getGeoLoc(proxy));
 		else if(STYLE_NO_LOC.equals(s))
 			return GeoLocHelper.isNull(getGeoLoc(proxy));
-		else if(corridors.contains(s)) {
+		else if(corridors.containsKey(s)) {
 			String c=GeoLocHelper.getCorridorName(getGeoLoc(proxy));
 			return s.equals(c);
 		} else
@@ -127,16 +220,28 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return theme;
 	}
 
+	/** Add a corridor for the specified r_node */
+	protected void addCorridor(R_Node r_node) {
+		GeoLoc loc = r_node.getGeoLoc();
+		String cid = GeoLocHelper.getCorridorName(loc);
+		if(cid != null) {
+			if(!corridors.containsKey(cid))
+				addCorridor(new CorridorBase(loc, false));
+			CorridorBase c = corridors.get(cid);
+			if(c != null)
+				c.addNode(r_node);
+		}
+	}
+
 	/** Add a corridor to the corridor model */
-	protected void addCorridor(String cor) {
-		if(corridors.add(cor)) {
-			Iterator<String> it = corridors.iterator();
-			for(int i = 0; it.hasNext(); i++) {
-				String c = it.next();
-				if(cor.equals(c)) {
-					model.add(i, c);
-					return;
-				}
+	protected void addCorridor(CorridorBase c) {
+		String cid = c.getName();
+		corridors.put(cid, c);
+		Iterator<String> it = corridors.keySet().iterator();
+		for(int i = 0; it.hasNext(); i++) {
+			if(cid.equals(it.next())) {
+				model.add(i, cid);
+				return;
 			}
 		}
 	}
