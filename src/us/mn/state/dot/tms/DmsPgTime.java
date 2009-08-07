@@ -69,6 +69,11 @@ public class DmsPgTime {
 		return SString.intToString(m_tenths);
 	}
 
+	/** Is the value zero? */
+	public Boolean isZero() {
+		return toTenths() == 0;
+	}
+
 	/** Get default page on-time */
 	public static DmsPgTime getDefaultOn() {
 		return new DmsPgTime(secsToTenths(
@@ -102,8 +107,6 @@ public class DmsPgTime {
 			throw new NullPointerException();
 		if(t.toTenths() > MAX_ONTIME.toTenths())
 			return MAX_ONTIME;
-		if(t.toTenths() < MIN_ONTIME.toTenths())
-			t = getDefaultOn();
 		if(t.toTenths() < MIN_ONTIME.toTenths())
 			t = getDefaultOn();
 		return t;
