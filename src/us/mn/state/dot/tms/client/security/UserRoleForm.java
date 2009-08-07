@@ -175,6 +175,8 @@ public class UserRoleForm extends AbstractForm {
 		JScrollPane spane = new JScrollPane(ur_table);
 		panel.add(spane, bag);
 		del_user.setEnabled(false);
+		del_user.setToolTipText("Delete the selected user, which " +
+			"is active only if all roles are deactivated.");
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(del_user);
