@@ -21,6 +21,7 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 
 /**
  * Operation to query 5-minute sample data + meter green counts
@@ -110,7 +111,8 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 						return this;
 				}
 			}
-			catch(ControllerException.NoSampleData e) {
+			catch(ControllerException e) {
+				errorStatus = e.getMessage();
 				rec = new byte[75];
 				mess.add(new MemoryRequest(
 					Address.DATA_BUFFER_5_MINUTE, rec));

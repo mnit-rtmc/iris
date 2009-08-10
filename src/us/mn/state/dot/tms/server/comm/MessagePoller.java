@@ -178,6 +178,9 @@ abstract public class MessagePoller extends Thread {
 			o.handleException(e);
 			messenger.drain();
 		}
+		catch(ControllerException e) {
+			o.handleException(e);
+		}
 		catch(SocketTimeoutException e) {
 			o.handleException(e);
 		}

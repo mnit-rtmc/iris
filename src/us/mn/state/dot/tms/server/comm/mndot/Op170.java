@@ -14,9 +14,11 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
@@ -62,6 +64,15 @@ abstract public class Op170 extends OpController {
 			return (RampMeterImpl)io;
 		else
 			return null;
+	}
+
+	/** Handle an exception */
+	public void handleException(IOException e) {
+		if(e instanceof ControllerException) {
+			errorStatus = e.getMessage();
+			phase = null;
+		}
+		super.handleException(e);
 	}
 
 	/** Ramp meter being queried */

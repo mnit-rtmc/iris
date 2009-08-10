@@ -19,6 +19,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -27,6 +30,43 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class Message implements AddressedMessage {
+
+	/** Status codes for 170 communication protocol */
+	static public final int OK = 0;
+	static public final int BAD_MESSAGE = 1;
+	static public final int BAD_POLL_CHECKSUM = 2;
+	static public final int DOWNLOAD_REQUEST = 3;
+	static public final int WRITE_PROTECT = 4;
+	static public final int MESSAGE_SIZE = 5;
+	static public final int NO_DATA = 6;
+	static public final int NO_RAM = 7;
+	static public final int DOWNLOAD_REQUEST_4 = 8; // 4-bit addressing
+
+	/** Check controller status code and throw an equivalent exception */
+	protected void checkStatus(int status) throws IOException {
+		switch(status) {
+		case OK:
+			return;
+		case BAD_MESSAGE:
+			throw new ControllerException("BAD MESSAGE");
+		case BAD_POLL_CHECKSUM:
+			throw new ChecksumException(
+				"CONTROLLER I/O CHECKSUM ERROR");
+		case DOWNLOAD_REQUEST:
+		case DOWNLOAD_REQUEST_4:
+			throw new DownloadRequestException("CODE: " + status);
+		case WRITE_PROTECT:
+			throw new ControllerException("WRITE PROTECT");
+		case MESSAGE_SIZE:
+			throw new ControllerException("MESSAGE SIZE");
+		case NO_DATA:
+			throw new ControllerException("NO SAMPLE DATA");
+		case NO_RAM:
+			throw new ControllerException("NO RAM");
+		default:
+			throw new ParsingException("BAD STATUS: " + status);
+		}
+	}
 
 	/** Serial output stream */
 	protected final OutputStream output;
@@ -99,7 +139,7 @@ public class Message implements AddressedMessage {
 			throw new ParsingException("DROP ADDRESS MISMATCH");
 		if(res.length < 2 || res.length != res[Request.OFF_LENGTH] + 3)
 			throw new ParsingException("INVALID LENGTH");
-		ControllerException.checkStatus(getStat(res));
+		checkStatus(getStat(res));
 	}
 
 	/** Make the initical drop/category byte */
