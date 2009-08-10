@@ -25,8 +25,10 @@ import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
+import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -80,6 +82,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** User session */
 	protected final Session session;
 
+	/** Segment layer */
+	protected SegmentLayer seg_layer = null;
+
 	/** Currently selected corridor */
 	protected String corridor = "";
 
@@ -105,6 +110,17 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Called when proxy enumeration is complete */
 	public void enumerationComplete() {
+		// Don't hog the SONAR TaskProcessor thread
+		new AbstractJob() {
+			public void perform() {
+				arrangeCorridors();
+				createSegmentLayer();
+			}
+		}.addToScheduler();
+	}
+
+	/** Arrange the corridor mapping */
+	protected void arrangeCorridors() {
 		R_NodeHelper.find(new Checker<R_Node>() {
 			public boolean check(R_Node r_node) {
 				findDownstreamLinks(r_node);
@@ -137,7 +153,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			if(loc_a != null) {
 				Vector va = Vector.create(loc_a.getGeoLoc());
 				Vector vb = Vector.create(loc_b.getGeoLoc());
-				Vector a = va.subtract(vb);
+				Vector a = vb.subtract(va);
 				double t = a.getAngle();
 				if(!Double.isInfinite(t) && !Double.isNaN(t))
 					loc.setTangent(t - NORTH_ANGLE);
@@ -182,6 +198,25 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			}
 		}
 		return nearest;
+	}
+
+	/** Create the segment layer */
+	protected synchronized void createSegmentLayer() {
+		seg_layer = new SegmentLayer(this);
+		for(CorridorBase c: corridors.values())
+			seg_layer.addCorridor(c);
+		notify();
+	}
+
+	/** Get the segment layer */
+	public synchronized SegmentLayer getSegmentLayer() {
+		while(seg_layer == null) {
+			try {
+				wait();
+			}
+			catch(InterruptedException e) { }
+		}
+		return seg_layer;
 	}
 
 	/** Get the proxy type */

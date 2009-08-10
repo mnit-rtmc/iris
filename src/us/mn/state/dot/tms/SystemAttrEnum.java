@@ -73,6 +73,7 @@ public enum SystemAttrEnum {
 	KML_FILENAME("/var/www/html/iris-client/iris.kmz"),
 	MAP_NORTHERN_HEMISPHERE(true),
 	MAP_UTM_ZONE(15, 1, 60),
+	MAP_SEGMENT_MAX_METERS(2000, 100),
 	MAP_TOOLBAR_COORDS("WGS84"),
 	METER_GREEN_SECS(1.3f, 0.1f, 10f),
 	METER_MAX_RED_SECS(13f, 5f, 30f),

@@ -46,6 +46,6 @@ abstract public class ProxyAction<T extends SonarObject>
 		}.addToScheduler();
 	}
 
-	/** Do the actual job (on the AbstractJob thread) */
+	/** Do the actual job (on the WORKER thread) */
 	abstract protected void do_perform() throws Exception;
 }

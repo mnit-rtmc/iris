@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -96,6 +97,23 @@ public class MapGeoLoc implements MapObject {
 			return tangent;
 		else
 			return getDefaultAngle();
+	}
+
+	/** Set a point */
+	public boolean setPoint(Point2D p, float distance) {
+		Integer x = GeoLocHelper.getCombinedEasting(loc);
+		Integer y = GeoLocHelper.getCombinedNorthing(loc);
+		if(x != null && y != null) {
+			Double t = tangent;
+			if(t != null) {
+				double xo = distance * Math.cos(t);
+				double yo = distance * Math.sin(t);
+				p.setLocation(x + xo, y + yo);
+			} else
+				p.setLocation(x, y);
+			return true;
+		} else
+			return false;
 	}
 
 	/** Transform for drawing device on map */

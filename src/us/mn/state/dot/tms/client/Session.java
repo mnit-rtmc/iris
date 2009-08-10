@@ -55,6 +55,7 @@ import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
+import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -124,6 +125,9 @@ public class Session {
 
 	/** Station layer */
 	protected final StationLayer gpoly;
+
+	/** Segment layer */
+	protected final SegmentLayer seg_layer;
 
 	/** Incident layer */
 	protected final TmsIncidentLayer incLayer;
@@ -222,6 +226,7 @@ public class Session {
 			state.getRampMeters(), loc_manager);
 		gpoly = createStationLayer();
 		incLayer = createIncidentLayer();
+		seg_layer = r_node_manager.getSegmentLayer();
 		addTabs();
 	}
 
@@ -295,6 +300,8 @@ public class Session {
 	/** Create the layer states */
 	protected List<LayerState> createLayers() {
 		List<LayerState> lstates = createBaseLayers();
+		if(seg_layer != null)
+			lstates.add(seg_layer.createState());
 		if(gpoly != null)
 			lstates.add(gpoly.createState());
 		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))

@@ -23,7 +23,9 @@ import java.util.Properties;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.FlushError;
 import us.mn.state.dot.sonar.Role;
@@ -48,6 +50,9 @@ import us.mn.state.dot.tms.utils.PropertyFile;
  * @author Michael Darter
  */
 public class UserManager {
+
+	/** Login scheduler */
+	static protected final Scheduler LOGIN = new Scheduler("LOGIN");
 
 	/** Smart desktp */
 	protected final SmartDesktop desktop;
@@ -154,11 +159,15 @@ public class UserManager {
 		pw = null;
 	}
 
-	/** perform user login */
+	/** Perform user login */
 	protected void doUserLogin(String un, char[] pw) throws Exception {
 		state = createSonarState();
 		user = createUser(un, pw);
-		fireLogin();
+		new AbstractJob(LOGIN) {
+			public void perform() throws Exception {
+				fireLogin();
+			}
+		}.addToScheduler();
 	}
 
 	/** Logout the current user */
@@ -168,7 +177,11 @@ public class UserManager {
 			s.quit();
 		state = null;
 		user = null;
-		fireLogout();
+		new AbstractJob(LOGIN) {
+			public void perform() {
+				fireLogout();
+			}
+		}.addToScheduler();
 	}
 
 	/** Form to allow user to log in */
@@ -194,7 +207,7 @@ public class UserManager {
 			panel.addRow("Username", user_name);
 			panel.addRow("Password", password);
 			new ActionJob(desktop, b_log_in) {
-				public void perform() throws Exception{
+				public void perform() throws Exception {
 					doLogin();
 				}
 			};
