@@ -91,11 +91,6 @@ public class Message implements AddressedMessage {
 		getResponse();
 	}
 
-	/** Perform a "set" request */
-	public void setRequest(String community) throws IOException {
-		throw new ProtocolException("Community not handled by Pelco");
-	}
-
 	/** Get a response from the switcher */
 	protected String getResponse() throws IOException {
 		StringBuffer resp = new StringBuffer();

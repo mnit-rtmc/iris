@@ -60,10 +60,6 @@ public class Message implements AddressedMessage
 		m_msgs = m_mess.read();
 	}
 
-	/** Send a set request message. Defined in the 
-	 * AddressedMessage interface. */
-	public void setRequest(String community) throws IOException {}
-
 	/** Send an set request message. Defined in the
 	 *  AddressedMessage interface. */
 	public void setRequest() throws IOException {}

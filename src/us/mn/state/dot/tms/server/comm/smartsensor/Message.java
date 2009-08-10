@@ -83,9 +83,4 @@ public class Message implements AddressedMessage {
 			throw new ProtocolException("No request");
 		req.doSetRequest(ps, is, formatHeader());
 	}
-
-	/** Perform a "set" request */
-	public void setRequest(String community) throws IOException {
-		setRequest();
-	}
 }

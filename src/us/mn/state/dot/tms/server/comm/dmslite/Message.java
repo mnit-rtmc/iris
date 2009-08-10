@@ -135,9 +135,6 @@ public class Message implements AddressedMessage
 		m_objlist.add(mo);
 	}
 
-	/** Send a get request message */
-	public void getRequest(String community) throws IOException {}
-
 	/**
 	 * Send a get request message
 	 * @throws IOException if received response is malformed or timed out.
@@ -347,9 +344,6 @@ public class Message implements AddressedMessage
 			}
 		}
 	}
-
-	/** Send a set request message */
-	public void setRequest(String community) throws IOException {}
 
 	/** Send an set request message */
 	public void setRequest() throws IOException {}

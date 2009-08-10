@@ -73,11 +73,6 @@ public class Message implements AddressedMessage {
 		req.doSetRequest(this);
 	}
 
-	/** Perform a "set" request */
-	public void setRequest(String community) throws IOException {
-		setRequest();
-	}
-
 	/** Get the drop from the response drop/status byte */
 	protected int getDrop(byte[] buf) {
 		byte drop_stat = buf[Request.OFF_DROP_CAT];

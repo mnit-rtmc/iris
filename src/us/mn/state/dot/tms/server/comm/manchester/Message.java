@@ -59,9 +59,4 @@ public class Message implements AddressedMessage {
 			os.flush();
 		}
 	}
-
-	/** Perform a "set" request */
-	public void setRequest(String community) throws IOException {
-		setRequest();
-	}
 }
