@@ -28,10 +28,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class Request {
 
-	/** Exception thrown for unexpected response length */
-	static protected final ParsingException RESPONSE_LENGTH =
-		new ParsingException("UNEXPECTED RESPONSE LENGTH");
-
 	/** "Shut up" command category code */
 	static protected final int SHUT_UP = 0;
 
@@ -89,8 +85,11 @@ abstract public class Request {
 		int b = is.read(buf);
 		if(b < 0)
 			throw new EOFException("END OF STREAM");
-		if(b != buf.length)
-			throw RESPONSE_LENGTH;
+		if(b != buf.length) {
+			byte[] res = new byte[b];
+			System.arraycopy(buf, 0, res, 0, b);
+			return res;
+		}
 		return buf;
 	}
 
