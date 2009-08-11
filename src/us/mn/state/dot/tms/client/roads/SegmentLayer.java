@@ -97,11 +97,6 @@ public class SegmentLayer extends Layer {
 		       n.getNodeType() == R_NodeType.ENTRANCE.ordinal();
 	}
 
-	/** Get the style to draw the segment layer */
-	protected Style getStyle() {
-		return new Style("Segment", null, Color.BLACK);
-	}
-
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
 		for(Segment seg: segments) {
@@ -113,6 +108,6 @@ public class SegmentLayer extends Layer {
 
 	/** Create a new layer state */
 	public LayerState createState() {
-		return new LayerState(this, new SegmentTheme(getStyle()));
+		return new LayerState(this, new DensityTheme());
 	}
 }
