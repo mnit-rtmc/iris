@@ -27,9 +27,6 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
-import us.mn.state.dot.trafmap.FreewayTheme;
-import us.mn.state.dot.trafmap.StationLayer;
-import us.mn.state.dot.trafmap.StationLayerState;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
@@ -53,6 +50,7 @@ import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.roads.FreewayTheme;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
@@ -132,9 +130,6 @@ public class Session {
 
 	/** Base layers */
 	protected final List<Layer> baseLayers;
-
-	/** Station layer */
-	protected final StationLayer gpoly;
 
 	/** Segment layer */
 	protected final SegmentLayer seg_layer;
@@ -234,37 +229,9 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
-		gpoly = createStationLayer();
 		incLayer = createIncidentLayer();
 		seg_layer = r_node_manager.getSegmentLayer();
 		addTabs();
-	}
-
-	/** Create the station layer */
-	protected StationLayer createStationLayer() throws IOException,
-		TdxmlException
-	{
-		String loc = props.getProperty("tdxml.station.url");
-		if(loc == null)
-			return null;
-		StationLayer layer;
-		try {
-			layer = new StationLayer(new URL(loc), logger);
-		}
-		catch(IOException e) {
-			System.err.println("gpoly.shp file was not found");
-			return null;
-		}
-		layer.setLabels(new StationLayer.Labeller() {
-			public String getLabel(String sid) throws IOException {
-				Station s = StationHelper.lookup(sid);
-				if(s != null)
-					return s.getLabel();
-				else
-					return null;
-			}
-		});
-		return layer;
 	}
 
 	/** Create the incident layer */
@@ -312,8 +279,6 @@ public class Session {
 		List<LayerState> lstates = createBaseLayers();
 		if(seg_layer != null)
 			lstates.add(seg_layer.createState());
-		if(gpoly != null)
-			lstates.add(gpoly.createState());
 		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
 			lstates.add(cam_manager.getLayer().createState());
 		if(incLayer != null)
@@ -342,11 +307,9 @@ public class Session {
 		v_menu.addMeterItem();
 		List<LayerState> lstates = createLayers();
 		for(LayerState ls: lstates) {
-			if(ls instanceof StationLayerState) {
-				for(Theme t: ls.getThemes()) {
-					if(t instanceof FreewayTheme)
-						ls.setTheme(t);
-				}
+			for(Theme t: ls.getThemes()) {
+				if(t instanceof FreewayTheme)
+					ls.setTheme(t);
 			}
 		}
 		hideLayer(lstates, dms_manager.getProxyType());
@@ -408,8 +371,6 @@ public class Session {
 		desktop.closeFrames();
 		for(MapTab tab: tabs)
 			tab.dispose();
-		if(gpoly != null)
-			gpoly.dispose();
 		if(incLayer != null)
 			incLayer.dispose();
 	}
