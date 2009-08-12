@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
+import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapObject;
@@ -48,7 +49,7 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
  *
  * @author Douglas Lau
   */
-public class SegmentLayer extends Layer {
+public class SegmentLayer extends Layer implements DynamicLayer {
 
 	/** List of segments in the layer */
 	protected final List<Segment> segments = new LinkedList<Segment>();

@@ -46,6 +46,14 @@ public class Segment implements MapObject {
 	/** R_Node for segment */
 	protected final R_Node r_node;
 
+	/** Get the station ID */
+	public String getStationID() {
+		if(r_node != null)
+			return r_node.getStationID();
+		else
+			return "";
+	}
+
 	/** List of map geo locations */
 	protected final List<MapGeoLoc> locs = new LinkedList<MapGeoLoc>();
 
