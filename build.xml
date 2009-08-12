@@ -66,6 +66,7 @@
 	<property name="trafmap.jar" value="TrafMap-${trafmap.version}.jar"/>
 	<property name="shapes.jar" value="shapes-${shapes.version}.jar"/>
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
+	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
 	<property name="videoclient.jar"
 		  value="video-client-${videoclient.version}.jar"/>
@@ -165,6 +166,11 @@
 			<param name="repo.version" value="${sonar.version}"/>
 		</antcall>
 		<antcall target="check-subproject">
+			<param name="file.dep" value="${geokit.jar}"/>
+			<param name="repo.name" value="geokit"/>
+			<param name="repo.version" value="${geokit.version}"/>
+		</antcall>
+		<antcall target="check-subproject">
 			<param name="file.dep" value="${tdxml.jar}"/>
 			<param name="repo.name" value="tdxml"/>
 			<param name="repo.version" value="${tdxml.version}"/>
@@ -207,6 +213,8 @@
 					value="${sonar.version}"/>
 				<filter token="TMSLOG.VERSION"
 					value="${tms-log.version}"/>
+				<filter token="GEOKIT.VERSION"
+				        value="${geokit.version}"/>
 				<filter token="TDXML.VERSION"
 					value="${tdxml.version}"/>
 				<filter token="MAPBEAN.VERSION"
@@ -376,6 +384,7 @@
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
+				<include name="${geokit.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${trafmap.jar}"/>
@@ -537,6 +546,7 @@
 		<delete>
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
+				<include name="${geokit.jar}"/>
 				<include name="${tdxml.jar}"/>
 				<include name="${mapbean.jar}"/>
 				<include name="${trafmap.jar}"/>

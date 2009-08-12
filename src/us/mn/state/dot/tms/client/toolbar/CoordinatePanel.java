@@ -20,8 +20,11 @@ import java.awt.geom.Point2D;
 import javax.swing.JLabel;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import us.mn.state.dot.geokit.GeodeticDatum;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.UTMPosition;
+import us.mn.state.dot.geokit.UTMZone;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.tdxml.geo.Transform;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttributeHelper;
 
@@ -44,13 +47,10 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 	static protected final String COORDINATE_TYPE = 
 		SystemAttrEnum.MAP_TOOLBAR_COORDS.getString();
 
-	/** Determine displayed coordinate type, may be UTM or WGS84 */
-	static protected final int UTM_ZONE = 
-		SystemAttrEnum.MAP_UTM_ZONE.getInt();
-
-	/** The system attribute for northern hemisphere */
-	static protected final boolean NORTHERN_HEMISPHERE = 
-		SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean();
+	/** UTM zone for conversion to lat/lon */
+	static protected final UTMZone UTM_ZONE =
+		new UTMZone(SystemAttrEnum.MAP_UTM_ZONE.getInt(),
+			SystemAttrEnum.MAP_NORTHERN_HEMISPHERE.getBoolean());
 
 	/** The lat long decimal format */
 	static protected final String LAT_LONG_DECIMAL_FORMAT = "0.000000";
@@ -85,12 +85,13 @@ public class CoordinatePanel extends ToolPanel implements MouseMotionListener {
 				northing + " m N");
 		// WGS84
 		} else {
-			double[] latLon = Transform.toLatLong(p.getX(), 
-				p.getY(), UTM_ZONE, NORTHERN_HEMISPHERE);
+			UTMPosition utm = new UTMPosition(UTM_ZONE, p.getX(),
+				p.getY());
+			Position pos = utm.getPosition(GeodeticDatum.WGS_84);
 			DecimalFormat df = 
 				new DecimalFormat(LAT_LONG_DECIMAL_FORMAT);
-			String lat = df.format(latLon[0]);
-			String lon = df.format(latLon[1]);
+			String lat = df.format(pos.getLatitude());
+			String lon = df.format(pos.getLongitude());
 			m_coordinates.setText("lat " + lat + 
 				"\u00B0 lon " + lon + "\u00B0"); 
 		}

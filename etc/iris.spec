@@ -136,6 +136,7 @@ fi
 %{_clientdir}/lib/shapes-@@SHAPES.VERSION@@.jar
 %{_clientdir}/lib/sonar-client-@@SONAR.VERSION@@.jar
 %{_clientdir}/lib/tdxml-@@TDXML.VERSION@@.jar
+%{_clientdir}/lib/geokit-@@GEOKIT.VERSION@@.jar
 %{_clientdir}/lib/tms-log-@@TMSLOG.VERSION@@.jar
 %{_clientdir}/lib/TrafMap-@@TRAFMAP.VERSION@@.jar
 %{_clientdir}/lib/video-client-@@VIDEOCLIENT.VERSION@@.jar
