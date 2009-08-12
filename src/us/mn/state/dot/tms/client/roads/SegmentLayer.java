@@ -15,14 +15,24 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
+import java.io.IOException;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
+import java.util.logging.Logger;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
+import us.mn.state.dot.map.event.LayerChange;
+import us.mn.state.dot.map.event.LayerChangedEvent;
+import us.mn.state.dot.tdxml.SensorListener;
+import us.mn.state.dot.tdxml.SensorSample;
+import us.mn.state.dot.tdxml.TdxmlException;
+import us.mn.state.dot.tdxml.XmlSensorClient;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -30,6 +40,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -40,15 +51,57 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 public class SegmentLayer extends Layer {
 
 	/** List of segments in the layer */
-	protected final List<Segment> segments = new LinkedList<Segment>();;
+	protected final List<Segment> segments = new LinkedList<Segment>();
 
 	/** R_Node manager */
 	protected final R_NodeManager manager;
 
 	/** Create a new segment layer */
-	public SegmentLayer(R_NodeManager m) {
+	public SegmentLayer(R_NodeManager m, Session s) {
 		super("Segments");
 		manager = m;
+		Properties p = s.getProperties();
+		String loc = p.getProperty("tdxml.detector.url");
+		if(loc != null) {
+			try {
+				createSensorClient(loc, s.getLogger());
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+			catch(TdxmlException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/** Create a sensor cleint */
+	protected void createSensorClient(String loc, Logger l)
+		throws IOException, TdxmlException
+	{
+		XmlSensorClient sc = new XmlSensorClient(new URL(loc), l);
+		sc.addTdxmlListener(new SensorListener() {
+			public void update(boolean finish) {
+				if(finish) {
+					notifyLayerChanged();
+					return;
+				}
+				for(Segment seg: segments)
+					seg.clearSamples();
+			}
+			public void update(SensorSample s) {
+				for(Segment seg: segments)
+					seg.updateSample(s);
+			}
+		});
+		sc.start();
+	}
+
+	/** Notify listeners that the layer has changed status */
+	protected void notifyLayerChanged() {
+		LayerChangedEvent ev = new LayerChangedEvent(this,
+			LayerChange.status);
+		notifyLayerChangedListeners(ev);
 	}
 
 	/** Add a corridor to the segment layer */
@@ -108,6 +161,10 @@ public class SegmentLayer extends Layer {
 
 	/** Create a new layer state */
 	public LayerState createState() {
-		return new LayerState(this, new DensityTheme());
+		DensityTheme den = new DensityTheme();
+		LayerState ls = new LayerState(this, den);
+		ls.addTheme(new SpeedTheme());
+		ls.addTheme(new FlowTheme());
+		return ls;
 	}
 }

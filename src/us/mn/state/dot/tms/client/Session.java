@@ -109,8 +109,18 @@ public class Session {
 	/** Client properties */
 	protected final Properties props;
 
+	/** Get the client properties */
+	public Properties getProperties() {
+		return props;
+	}
+
 	/** Message logger */
 	protected final Logger logger;
+
+	/** Get the logger */
+	public Logger getLogger() {
+		return logger;
+	}
 
 	/** View menu */
 	protected final ViewMenu v_menu;

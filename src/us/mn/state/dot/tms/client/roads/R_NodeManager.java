@@ -202,7 +202,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Create the segment layer */
 	protected synchronized void createSegmentLayer() {
-		seg_layer = new SegmentLayer(this);
+		seg_layer = new SegmentLayer(this, session);
 		for(CorridorBase c: corridors.values())
 			seg_layer.addCorridor(c);
 		notify();

@@ -18,38 +18,41 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Style;
 
 /**
- * A theme for drawing segment objects based on density thresholds.
+ * A theme for drawing segment objects based on flow thresholds.
  *
  * @author Douglas Lau
  */
-public class DensityTheme extends SegmentTheme {
+public class FlowTheme extends SegmentTheme {
 
-	/** Density styles */
-	static protected final Style[] D_STYLES = new Style[] {
-		new Style("0-29 veh/mi", GREEN),
-		new Style("30-49 veh/mi", ORANGE),
-		new Style("50+ veh/mi", RED),
+	/** Flow styles */
+	static protected final Style[] F_STYLES = new Style[] {
+		new Style("0-1500 veh/hr", GREEN),
+		new Style("1501-2000 veh/hr", YELLOW),
+		new Style("2001-2500 veh/hr", ORANGE),
+		new Style("2501-4000 veh/hr", RED),
 		new Style("Crazy data", VIOLET)
 	};
 
-	/** Create a new density theme */
-	public DensityTheme() {
-		super("Density");
-		for(Style s: D_STYLES)
+	/** Create a new flow theme */
+	public FlowTheme() {
+		super("Flow");
+		for(Style s: F_STYLES)
 			addStyle(s);
 	}
 
 	/** Get the style to draw a given segment */
 	protected Style getStyle(Segment s) {
-		Integer d = s.getDensity(null);
-		if(d == null)
+		Integer f = s.getFlow(null);
+		if(f == null)
 			return DEFAULT_STYLE;
-		if(d < 30)
-			return D_STYLES[0];
-		if(d < 50)
-			return D_STYLES[1];
-		if(d < 200)
-			return D_STYLES[2];
-		return D_STYLES[3];
+		if(f <= 1500)
+			return F_STYLES[0];
+		if(f <= 2000)
+			return F_STYLES[1];
+		if(f <= 2500)
+			return F_STYLES[2];
+		if(f <= 4000)
+			return F_STYLES[3];
+		return F_STYLES[4];
 	}
 }

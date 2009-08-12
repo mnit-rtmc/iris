@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import us.mn.state.dot.sonar.Checker;
 
 /**
  * Helper class for detectors.
@@ -126,6 +127,12 @@ public class DetectorHelper extends BaseHelper {
 		catch(NumberFormatException e) {
 			return null;
 		}
+	}
+
+	/** Find detectors using a Checker */
+	static public Detector find(Checker<Detector> checker) {
+		return (Detector)namespace.findObject(Detector.SONAR_TYPE,
+			checker);
 	}
 
 	/** Lookup the detector with the specified name */

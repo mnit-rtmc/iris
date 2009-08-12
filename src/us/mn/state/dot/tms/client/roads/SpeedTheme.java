@@ -18,38 +18,41 @@ import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Style;
 
 /**
- * A theme for drawing segment objects based on density thresholds.
+ * A theme for drawing segment objects based on speed thresholds.
  *
  * @author Douglas Lau
  */
-public class DensityTheme extends SegmentTheme {
+public class SpeedTheme extends SegmentTheme {
 
-	/** Density styles */
-	static protected final Style[] D_STYLES = new Style[] {
-		new Style("0-29 veh/mi", GREEN),
-		new Style("30-49 veh/mi", ORANGE),
-		new Style("50+ veh/mi", RED),
-		new Style("Crazy data", VIOLET)
+	/** Speed styles */
+	static protected final Style[] S_STYLES = new Style[] {
+		new Style("0-24 mph", GREEN),
+		new Style("25-39 mph", YELLOW),
+		new Style("40-54 mph", ORANGE),
+		new Style("55-90 mph", RED),
+		new Style("Over 90 mph", VIOLET)
 	};
 
-	/** Create a new density theme */
-	public DensityTheme() {
-		super("Density");
-		for(Style s: D_STYLES)
+	/** Create a new speed theme */
+	public SpeedTheme() {
+		super("Speed");
+		for(Style s: S_STYLES)
 			addStyle(s);
 	}
 
 	/** Get the style to draw a given segment */
 	protected Style getStyle(Segment s) {
-		Integer d = s.getDensity(null);
-		if(d == null)
+		Integer spd = s.getSpeed(null);
+		if(spd == null)
 			return DEFAULT_STYLE;
-		if(d < 30)
-			return D_STYLES[0];
-		if(d < 50)
-			return D_STYLES[1];
-		if(d < 200)
-			return D_STYLES[2];
-		return D_STYLES[3];
+		if(spd < 25)
+			return S_STYLES[0];
+		if(spd < 40)
+			return S_STYLES[1];
+		if(spd < 55)
+			return S_STYLES[2];
+		if(spd < 90)
+			return S_STYLES[3];
+		return S_STYLES[4];
 	}
 }
