@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.zip.GZIPOutputStream;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A simple class for writing out XML documents
@@ -27,9 +28,6 @@ import java.util.zip.GZIPOutputStream;
  * @author Douglas Lau
  */
 abstract public class XmlWriter {
-
-	/** Filesystem directory to write XML files */
-	static protected final String XML_DIR = "/var/lib/iris/xml";
 
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =
@@ -74,7 +72,8 @@ abstract public class XmlWriter {
 	public XmlWriter(String f, boolean gz) {
 		if(gz)
 			f = f + ".gz";
-		file = new File(XML_DIR, f);
+		file = new File(
+			SystemAttrEnum.XML_OUTPUT_DIRECTORY.getString(), f);
 		temp = new File(file.getAbsolutePath() + "~");
 		gzip = gz;
 	}
