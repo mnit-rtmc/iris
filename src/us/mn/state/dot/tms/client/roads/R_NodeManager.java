@@ -205,6 +205,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		seg_layer = new SegmentLayer(this, session);
 		for(CorridorBase c: corridors.values())
 			seg_layer.addCorridor(c);
+		seg_layer.createShapes();
 		notify();
 	}
 

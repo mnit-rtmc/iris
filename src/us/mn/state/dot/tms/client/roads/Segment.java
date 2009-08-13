@@ -65,6 +65,14 @@ public class Segment implements MapObject {
 	protected final HashMap<String, SensorSample> samples =
 		new HashMap<String, SensorSample>();
 
+	/** Shape to render */
+	protected Shape shape = null;
+
+	/** Get the shape to draw this object */
+	public Shape getShape() {
+		return shape;
+	}
+
 	/** Create a new segment */
 	public Segment() {
 		this(null);
@@ -92,9 +100,8 @@ public class Segment implements MapObject {
 		locs.add(loc);
 	}
 
-	/** Get the shape to draw this object */
-	public Shape getShape() {
-		// FIXME: cache the shape whenever the zoom extent changes
+	/** Create the shape to draw this object */
+	public void createShape() {
 		boolean first = true;
 		Point2D.Float p = new Point2D.Float();
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
@@ -116,7 +123,7 @@ public class Segment implements MapObject {
 		}
 		if(!locs.isEmpty())
 			path.closePath();
-		return path;
+		shape = path;
 	}
 
 	/** Get the coordinate transform */
