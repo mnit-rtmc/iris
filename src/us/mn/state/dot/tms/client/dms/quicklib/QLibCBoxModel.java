@@ -23,6 +23,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
+//FIXME: QLibCBoxModel should be removed, and instead use ProxyListModel 
+//       and WrapperComboBoxModel like in the rest of the client.
+
 /**
  * Model for a quick library combobox.
  * @see QLibCBox, NumericAlphaComparator
@@ -70,7 +73,7 @@ public class QLibCBoxModel extends AbstractListModel implements ComboBoxModel
 	}
 
 	/** Get the element at the specified index (from AbstractListModel) */
-	public QuickMessage getElementAt(int index) {
+	public synchronized QuickMessage getElementAt(int index) {
 		int i = 0;
 		for(QuickMessage p: m_proxies) {
 			if(i == index)
@@ -136,7 +139,7 @@ public class QLibCBoxModel extends AbstractListModel implements ComboBoxModel
 	}
 
 	/** Find the index of the proxy */
-	protected int findIndex(QuickMessage arg_proxy) {
+	protected synchronized int findIndex(QuickMessage arg_proxy) {
 		if(arg_proxy == null || !isMember(arg_proxy))
 			return -1;
 		int i = 0;
@@ -155,7 +158,7 @@ public class QLibCBoxModel extends AbstractListModel implements ComboBoxModel
 	}
 
 	/** Add a proxy to the model */
-	protected void addProxy(QuickMessage p) {
+	protected synchronized void addProxy(QuickMessage p) {
 		if(!isMember(p))
 			return;
 		if(!m_proxies.add(p))
@@ -174,7 +177,7 @@ public class QLibCBoxModel extends AbstractListModel implements ComboBoxModel
 	}
 
 	/** Remove a proxy from the model */
-	protected void removeProxy(QuickMessage p) {
+	protected synchronized void removeProxy(QuickMessage p) {
 		if(!isMember(p))
 			return;
 		final int i = findIndex(p);
@@ -191,7 +194,7 @@ public class QLibCBoxModel extends AbstractListModel implements ComboBoxModel
 	}
 
 	/** Change a proxy in the model */
-	protected void changeProxy(QuickMessage p) {
+	protected synchronized void changeProxy(QuickMessage p) {
 		if(!isMember(p))
 			return;
 		final int i = findIndex(p);
