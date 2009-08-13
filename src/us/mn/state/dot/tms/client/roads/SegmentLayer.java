@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -114,7 +115,7 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 			if(isWithinThreshold(ploc, loc) &&
 			   !isSegmentDisjointed(n))
 				seg.addNode(loc);
-			if(isSegmentBreak(n)) {
+			if(isSegmentDisjointed(n) || isSegmentBreak(n)) {
 				segments.add(seg);
 				seg = new Segment(n);
 				if(loc != null)
@@ -141,8 +142,8 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 
 	/** Check if a node is at a segment break */
 	protected boolean isSegmentBreak(R_Node n) {
-		return n.getNodeType() == R_NodeType.STATION.ordinal() ||
-		       isSegmentDisjointed(n);
+		return n.getNodeType() == R_NodeType.STATION.ordinal() &&
+		       R_NodeHelper.hasDetection(n);
 	}
 
 	/** Check if a node should be disjointed from a segment */
