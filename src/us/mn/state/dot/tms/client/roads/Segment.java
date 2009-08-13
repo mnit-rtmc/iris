@@ -97,7 +97,7 @@ public class Segment implements MapObject {
 		// FIXME: cache the shape whenever the zoom extent changes
 		boolean first = true;
 		Point2D.Float p = new Point2D.Float();
-		Path2D.Float path = new Path2D.Float(Path2D.WIND_EVEN_ODD);
+		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
 		ListIterator<MapGeoLoc> li = locs.listIterator();
 		while(li.hasNext()) {
 			MapGeoLoc loc = li.next();
