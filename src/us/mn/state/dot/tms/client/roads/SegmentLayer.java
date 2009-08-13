@@ -169,12 +169,6 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 
 	/** Create a new layer state */
 	public LayerState createState() {
-		DensityTheme den = new DensityTheme();
-		LayerState ls = new LayerState(this, den);
-		ls.addTheme(new DensityTheme());
-		ls.addTheme(new SpeedTheme());
-		ls.addTheme(new FlowTheme());
-		ls.addTheme(new FreewayTheme());
-		return ls;
+		return new SegmentLayerState(this);
 	}
 }

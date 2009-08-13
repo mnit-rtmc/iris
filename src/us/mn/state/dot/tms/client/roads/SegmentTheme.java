@@ -18,10 +18,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.Point2D;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.Symbol;
@@ -65,7 +63,7 @@ abstract public class SegmentTheme extends StyledTheme {
 	}
 
 	/** Get the shape to draw a given map object */
-	protected Shape getShape(MapObject mo) {
+	public Shape getShape(MapObject mo) {
 		Segment s = (Segment)mo;
 		return s.getShape();
 	}
@@ -86,15 +84,6 @@ abstract public class SegmentTheme extends StyledTheme {
 		Shape ellipse = createEllipse(shape);
 		g.setStroke(outline.stroke);
 		g.draw(ellipse);
-	}
-
-	/** Search a layer for a map object containing the given point */
-	public MapObject search(Layer layer, final Point2D p) {
-		return layer.forEach(new MapSearcher() {
-			public boolean next(MapObject mo) {
-				return getShape(mo).contains(p);
-			}
-		});
 	}
 
 	/** Get the style to draw a given map object */
