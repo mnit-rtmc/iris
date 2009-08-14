@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -142,6 +143,7 @@ abstract public class ProxyManager<T extends SonarObject>
 			synchronized(map_proxies) {
 				map_proxies.put(i, proxy);
 			}
+			loc.setShape(getShape(proxy));
 		}
 	}
 
@@ -185,6 +187,9 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Create a styled theme for this type of proxy */
 	abstract protected StyledTheme createTheme();
+
+	/** Get the shape for a given proxy */
+	abstract protected Shape getShape(T proxy);
 
 	/** Get the theme */
 	public StyledTheme getTheme() {
@@ -244,7 +249,11 @@ abstract public class ProxyManager<T extends SonarObject>
 		T result = cache.findObject(new Checker<T>() {
 			public boolean check(T proxy) {
 				MapGeoLoc loc = findGeoLoc(proxy);
-				return isLocationSet(loc) && s.next(loc);
+				if(isLocationSet(loc)) {
+					loc.setShape(getShape(proxy));
+					return s.next(loc);
+				}
+				return false;
 			}
 		});
 		if(result != null)

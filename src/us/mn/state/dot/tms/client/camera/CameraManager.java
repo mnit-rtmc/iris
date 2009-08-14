@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
+import java.awt.Shape;
 import java.util.List;
 import java.util.HashSet;
 import javax.swing.JPopupMenu;
@@ -39,6 +40,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  * @author Douglas Lau
  */
 public class CameraManager extends ProxyManager<Camera> {
+
+	/** Camera map object shape */
+	static protected final Shape SHAPE = new CameraMarker();
 
 	/** Name of active style */
 	static public final String STYLE_ACTIVE = "Active";
@@ -76,10 +80,15 @@ public class CameraManager extends ProxyManager<Camera> {
 		return "Camera";
 	}
 
+	/** Get the shape for a given proxy */
+	protected Shape getShape(Camera proxy) {
+		return SHAPE;
+	}
+
 	/** Create a styled theme for cameras */
 	protected StyledTheme createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
-			getProxyType(), new CameraMarker());
+			getProxyType(), SHAPE);
 		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);

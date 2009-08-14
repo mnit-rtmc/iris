@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
+import java.awt.Shape;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
@@ -40,6 +41,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  * @author Douglas Lau
  */
 public class MeterManager extends ProxyManager<RampMeter> {
+
+	/** Ramp meter map object shape */
+	static protected final Shape SHAPE = new MeterMarker();
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
@@ -140,10 +144,15 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return "Ramp Meter";
 	}
 
+	/** Get the shape for a given proxy */
+	protected Shape getShape(RampMeter proxy) {
+		return SHAPE;
+	}
+
 	/** Create a styled theme for ramp meters */
 	protected StyledTheme createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
-			getProxyType(), new MeterMarker());
+			getProxyType(), SHAPE);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
 		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);

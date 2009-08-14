@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
+import java.awt.Shape;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -52,6 +53,11 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	/** Get the proxy type name */
 	public String getProxyType() {
 		return "LCSIndication";
+	}
+
+	/** Get the shape for a given proxy */
+	protected Shape getShape(LCSIndication proxy) {
+		return null;
 	}
 
 	/** Create a styled theme for LCS arrays */

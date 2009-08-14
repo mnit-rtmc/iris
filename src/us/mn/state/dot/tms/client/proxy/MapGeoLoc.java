@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
@@ -161,5 +162,18 @@ public class MapGeoLoc implements MapObject {
 	/** Get a description of the location */
 	public String getDescription() {
 		return GeoLocHelper.getDescription(loc);
+	}
+
+	/** Shape to draw map object */
+	protected Shape shape = null;
+
+	/** Get the map object shape */
+	public Shape getShape() {
+		return shape;
+	}
+
+	/** Set the map object shape */
+	public void setShape(Shape s) {
+		shape = s;
 	}
 }

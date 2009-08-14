@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
+import java.awt.Shape;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -47,6 +48,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  * @author Douglas Lau
  */
 public class LCSArrayManager extends ProxyManager<LCSArray> {
+
+	/** LCS array map object shape */
+	static protected final Shape SHAPE = new LcsMarker();
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
@@ -124,10 +128,15 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return "LCS";
 	}
 
+	/** Get the shape for a given proxy */
+	protected Shape getShape(LCSArray proxy) {
+		return SHAPE;
+	}
+
 	/** Create a styled theme for LCS arrays */
 	protected StyledTheme createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
-			getProxyType(), new LcsMarker());
+			getProxyType(), SHAPE);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE,
 			Outline.createSolid(Color.BLACK, 10));
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED,

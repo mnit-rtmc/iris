@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.Color;
+import java.awt.Shape;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -26,6 +28,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
 import us.mn.state.dot.map.Layer;
+import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
@@ -36,6 +39,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -50,6 +54,22 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  * @author Douglas Lau
  */
 public class R_NodeManager extends ProxyManager<R_Node> {
+
+	/** Marker to draw roadway entrance nodes */
+	static protected final Shape ENTRANCE_MARKER = new EntranceMarker();
+
+	/** Marker to draw roadway exit nodes */
+	static protected final Shape EXIT_MARKER = new ExitMarker();
+
+	/** Marker to draw roadway station nodes */
+	static protected final Shape STATION_MARKER = new StationMarker();
+
+	/** Marker to draw roadway intersection nodes */
+	static protected final Shape INTERSECTION_MARKER =
+		new IntersectionMarker();
+
+	/** Marker to draw access nodes */
+	static protected final Shape ACCESS_MARKER = new AccessMarker();
 
 	/** Offset angle for default North map markers */
 	static protected final double NORTH_ANGLE = Math.PI / 2;
@@ -223,6 +243,23 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Get the proxy type */
 	public String getProxyType() {
 		return "R_Node";
+	}
+
+	/** Get the shape to use for the given r_node */
+	protected Shape getShape(R_Node n) {
+		R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+		switch(nt) {
+		case ENTRANCE:
+			return ENTRANCE_MARKER;
+		case EXIT:
+			return EXIT_MARKER;
+		case INTERSECTION:
+			return INTERSECTION_MARKER;
+		case ACCESS:
+			return ACCESS_MARKER;
+		default:
+			return STATION_MARKER;
+		}
 	}
 
 	/** Check the style of the specified proxy */

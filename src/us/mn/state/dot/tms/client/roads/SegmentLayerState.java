@@ -39,7 +39,7 @@ public class SegmentLayerState extends LayerState {
 	public MapObject search(final Point2D p) {
 		return layer.forEach(new MapSearcher() {
 			public boolean next(MapObject mo) {
-				return theme.getShape(mo).contains(p);
+				return mo.getShape().contains(p);
 			}
 		});
 	}

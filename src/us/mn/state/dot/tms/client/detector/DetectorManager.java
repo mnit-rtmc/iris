@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
+import java.awt.Shape;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
@@ -36,6 +37,9 @@ import us.mn.state.dot.tms.client.roads.StationMarker;
  * @author Douglas Lau
  */
 public class DetectorManager extends ProxyManager<Detector> {
+
+	/** Shape for map object rendering */
+	static protected final Shape SHAPE = new StationMarker();
 
 	/** Name of active style */
 	static public final String STYLE_ACTIVE = "Active";
@@ -65,10 +69,15 @@ public class DetectorManager extends ProxyManager<Detector> {
 		return "Detector";
 	}
 
+	/** Get the shape for a given proxy */
+	protected Shape getShape(Detector proxy) {
+		return SHAPE;
+	}
+
 	/** Create a styled theme for detectors */
 	protected StyledTheme createTheme() {
 		ProxyTheme<Detector> theme = new ProxyTheme<Detector>(this,
-			getProxyType(), new StationMarker());
+			getProxyType(), SHAPE);
 		theme.addStyle(STYLE_ACTIVE, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);

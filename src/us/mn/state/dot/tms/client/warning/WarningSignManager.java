@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.warning;
 
+import java.awt.Shape;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -33,6 +34,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  * @author Douglas Lau
  */
 public class WarningSignManager extends ProxyManager<WarningSign> {
+
+	/** Warning sign map object shape */
+	static protected final Shape SHAPE = new WarningSignMarker();
 
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "Deployed";
@@ -63,10 +67,15 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 		return "Warning Sign";
 	}
 
+	/** Get the shape for a given proxy */
+	protected Shape getShape(WarningSign proxy) {
+		return SHAPE;
+	}
+
 	/** Create a styled theme for warning signs */
 	protected StyledTheme createTheme() {
 		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
-			getProxyType(), new WarningSignMarker());
+			getProxyType(), SHAPE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);

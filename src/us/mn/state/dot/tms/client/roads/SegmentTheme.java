@@ -18,13 +18,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.map.StyledTheme;
-import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 
@@ -62,20 +59,14 @@ abstract public class SegmentTheme extends StyledTheme {
 		addStyle(DEFAULT_STYLE);
 	}
 
-	/** Get the shape to draw a given map object */
-	public Shape getShape(MapObject mo) {
-		Segment s = (Segment)mo;
-		return s.getShape();
-	}
-
 	/** Draw the specified map object */
 	public void draw(Graphics2D g, MapObject mo) {
-		getSymbol(mo).draw(g);
+		getSymbol(mo).draw(g, mo.getShape());
 	}
 
 	/** Draw a selected map object */
 	public void drawSelected(Graphics2D g, MapObject mo) {
-		Shape shape = getShape(mo);
+		Shape shape = mo.getShape();
 		Outline outline = Outline.createDashed(Color.WHITE, 20);
 		g.setColor(outline.color);
 		g.setStroke(outline.stroke);
@@ -94,13 +85,6 @@ abstract public class SegmentTheme extends StyledTheme {
 
 	/** Get the style to draw a given segment */
 	abstract protected Style getStyle(Segment s);
-
-	/** Get a symbol to draw a given map object */
-	public Symbol getSymbol(MapObject mo) {
-		VectorSymbol sym = (VectorSymbol)super.getSymbol(mo);
-		sym.setShape(getShape(mo));
-		return sym;
-	}
 
 	/** Get the tooltip text for a given segment */
 	public String getTip(MapObject mo) {
