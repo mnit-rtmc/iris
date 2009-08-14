@@ -152,12 +152,6 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 		       n.getNodeType() == R_NodeType.ENTRANCE.ordinal();
 	}
 
-	/** Create the shapes for each segment */
-	public void createShapes() {
-/*		for(Segment seg: segments)
-			seg.createShape(); */
-	}
-
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
 		for(Segment seg: segments) {
