@@ -271,8 +271,8 @@ abstract public class ProxyManager<T extends SonarObject>
 	abstract protected GeoLoc getGeoLoc(T proxy);
 
 	/** Find a proxy matching the given map object */
-	public T findProxy(MapObject o) {
-		int i = System.identityHashCode(o);
+	public T findProxy(MapObject mo) {
+		int i = System.identityHashCode(mo);
 		synchronized(map_proxies) {
 			return map_proxies.get(i);
 		}
