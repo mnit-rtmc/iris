@@ -59,14 +59,14 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Create a new segment */
-	public MapSegment(Segment s, Integer l) {
+	public MapSegment(Segment s, Integer l, float scale) {
 		segment = s;
 		lane = l;
-		shape = createShape();
+		shape = createShape(scale);
 	}
 
 	/** Create the shape to draw this object */
-	protected Shape createShape() {
+	protected Shape createShape(float scale) {
 		boolean first = true;
 		Point2D.Float p = new Point2D.Float();
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
@@ -74,7 +74,7 @@ public class MapSegment implements MapObject {
 		ListIterator<MapGeoLoc> li = locs.listIterator();
 		while(li.hasNext()) {
 			MapGeoLoc loc = li.next();
-			if(loc.setPoint(p, 300)) {
+			if(loc.setPoint(p, 6 * scale)) {
 				if(first) {
 					path.moveTo(p.getX(), p.getY());
 					first = false;
@@ -84,7 +84,7 @@ public class MapSegment implements MapObject {
 		}
 		while(li.hasPrevious()) {
 			MapGeoLoc loc = li.previous();
-			if(loc.setPoint(p, 75))
+			if(loc.setPoint(p, scale / 2))
 				path.lineTo(p.getX(), p.getY());
 		}
 		if(!locs.isEmpty())

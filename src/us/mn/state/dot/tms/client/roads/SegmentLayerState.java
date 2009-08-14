@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.geom.Point2D;
 import java.util.List;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 
@@ -30,6 +31,9 @@ public class SegmentLayerState extends LayerState {
 	/** List of segments in the layer */
 	protected final List<Segment> segments;
 
+	/** Map for scaling */
+	protected MapBean map;
+
 	/** Create a new segment layer */
 	public SegmentLayerState(SegmentLayer sl) {
 		super(sl, new DensityTheme());
@@ -40,10 +44,16 @@ public class SegmentLayerState extends LayerState {
 		segments = sl.getSegments();
 	}
 
+	/** Set the map for scaling */
+	public void setMap(MapBean m) {
+		map = m;
+	}
+
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
+		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
 		for(Segment seg: segments) {
-			MapSegment ms = new MapSegment(seg, null);
+			MapSegment ms = new MapSegment(seg, null, scale);
 			if(s.next(ms))
 				return ms;
 		}
