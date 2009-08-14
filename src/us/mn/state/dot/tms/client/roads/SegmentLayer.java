@@ -24,8 +24,6 @@ import java.util.logging.Logger;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.event.LayerChange;
@@ -54,6 +52,11 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 
 	/** List of segments in the layer */
 	protected final List<Segment> segments = new LinkedList<Segment>();
+
+	/** Get the list of segments */
+	public List<Segment> getSegments() {
+		return segments;
+	}
 
 	/** R_Node manager */
 	protected final R_NodeManager manager;
@@ -150,16 +153,6 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	protected boolean isSegmentDisjointed(R_Node n) {
 		return n.getTransition() == R_NodeTransition.COMMON.ordinal() &&
 		       n.getNodeType() == R_NodeType.ENTRANCE.ordinal();
-	}
-
-	/** Iterate through the segments in the layer */
-	public MapObject forEach(MapSearcher s) {
-		for(Segment seg: segments) {
-			MapSegment ms = new MapSegment(seg, null);
-			if(s.next(ms))
-				return ms;
-		}
-		return null;
 	}
 
 	/** Create a new layer state */

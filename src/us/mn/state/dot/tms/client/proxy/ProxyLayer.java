@@ -148,11 +148,6 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 		}
 	}
 
-	/** Iterate through all shapes in the layer */
-	public MapObject forEach(MapSearcher s) {
-		return manager.forEach(s);
-	}
-
 	/** Notify listeners that the layer has changed */
 	protected void notifyLayerChanged(LayerChange reason) {
 		final LayerChangedEvent e = new LayerChangedEvent(this, reason);

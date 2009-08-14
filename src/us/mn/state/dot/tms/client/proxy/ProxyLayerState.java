@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.sonar.SonarObject;
@@ -73,6 +74,11 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	public void dispose() {
 		super.dispose();
 		model.removeProxySelectionListener(listener);
+	}
+
+	/** Iterate through all shapes in the layer */
+	public MapObject forEach(MapSearcher s) {
+		return manager.forEach(s);
 	}
 
 	/** Do mouse click event processing */

@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.client.incidents;
 import java.net.URL;
 import java.util.logging.Logger;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.IncidentLayer;
 
@@ -39,6 +41,16 @@ public class TmsIncidentLayer extends IncidentLayer {
 
 	/** Create a new layer state */
 	public LayerState createState() {
-		return new LayerState(this, theme);
+		return new LayerState(this, theme) {
+			public MapObject forEach(MapSearcher s) {
+				synchronized(incidents) {
+					for(IncidentWrapper i: incidents) {
+						if(s.next(i))
+							return i;
+					}
+				}
+				return null;
+			}
+		};
 	}
 }

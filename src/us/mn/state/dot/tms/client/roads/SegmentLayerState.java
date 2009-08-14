@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.geom.Point2D;
+import java.util.List;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
@@ -26,6 +27,9 @@ import us.mn.state.dot.map.MapSearcher;
  */
 public class SegmentLayerState extends LayerState {
 
+	/** List of segments in the layer */
+	protected final List<Segment> segments;
+
 	/** Create a new segment layer */
 	public SegmentLayerState(SegmentLayer sl) {
 		super(sl, new DensityTheme());
@@ -33,11 +37,22 @@ public class SegmentLayerState extends LayerState {
 		addTheme(new SpeedTheme());
 		addTheme(new FlowTheme());
 		addTheme(new FreewayTheme());
+		segments = sl.getSegments();
+	}
+
+	/** Iterate through the segments in the layer */
+	public MapObject forEach(MapSearcher s) {
+		for(Segment seg: segments) {
+			MapSegment ms = new MapSegment(seg, null);
+			if(s.next(ms))
+				return ms;
+		}
+		return null;
 	}
 
 	/** Search a layer for a map object containing the given point */
 	public MapObject search(final Point2D p) {
-		return layer.forEach(new MapSearcher() {
+		return forEach(new MapSearcher() {
 			public boolean next(MapObject mo) {
 				return mo.getShape().contains(p);
 			}
