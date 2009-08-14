@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Style;
 
 /**
@@ -41,8 +40,8 @@ public class FlowTheme extends SegmentTheme {
 	}
 
 	/** Get the style to draw a given segment */
-	protected Style getStyle(Segment s) {
-		Integer f = s.getFlow(null);
+	protected Style getStyle(MapSegment ms) {
+		Integer f = ms.getFlow();
 		if(f == null)
 			return DEFAULT_STYLE;
 		if(f <= 1500)

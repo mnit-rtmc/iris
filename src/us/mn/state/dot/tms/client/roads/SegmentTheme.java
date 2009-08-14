@@ -79,29 +79,29 @@ abstract public class SegmentTheme extends StyledTheme {
 
 	/** Get the style to draw a given map object */
 	public Style getStyle(MapObject mo) {
-		Segment s = (Segment)mo;
-		return getStyle(s);
+		MapSegment ms = (MapSegment)mo;
+		return getStyle(ms);
 	}
 
 	/** Get the style to draw a given segment */
-	abstract protected Style getStyle(Segment s);
+	abstract protected Style getStyle(MapSegment ms);
 
 	/** Get the tooltip text for a given segment */
 	public String getTip(MapObject mo) {
-		Segment s = (Segment)mo;
+		MapSegment ms = (MapSegment)mo;
 		StringBuffer b = new StringBuffer("Station ");
-		String sid = s.getStationID();
+		String sid = ms.getStationID();
 		b.append(sid);
 		b.append(": ");
 		Station sta = StationHelper.lookup(sid);
 		if(sta != null)
 			b.append(sta.getLabel());
 		b.append("\n Flow = ");
-		b.append(s.getFlow(null));
+		b.append(ms.getFlow());
 		b.append("\n Density = ");
-		b.append(s.getDensity(null));
+		b.append(ms.getDensity());
 		b.append("\n Speed = ");
-		b.append(s.getSpeed(null));
+		b.append(ms.getSpeed());
 		return b.toString();
 	}
 }

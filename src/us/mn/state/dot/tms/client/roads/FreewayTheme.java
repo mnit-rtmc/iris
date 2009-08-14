@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Style;
 
 /**
@@ -30,7 +29,7 @@ public class FreewayTheme extends SegmentTheme {
 	}
 
 	/** Get the style to draw a given segment */
-	protected Style getStyle(Segment s) {
+	protected Style getStyle(MapSegment ms) {
 		return DEFAULT_STYLE;
 	}
 }

@@ -154,15 +154,16 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 
 	/** Create the shapes for each segment */
 	public void createShapes() {
-		for(Segment seg: segments)
-			seg.createShape();
+/*		for(Segment seg: segments)
+			seg.createShape(); */
 	}
 
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
 		for(Segment seg: segments) {
-			if(s.next(seg))
-				return seg;
+			MapSegment ms = new MapSegment(seg, null);
+			if(s.next(ms))
+				return ms;
 		}
 		return null;
 	}
