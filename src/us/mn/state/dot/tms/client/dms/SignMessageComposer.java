@@ -226,6 +226,10 @@ public class SignMessageComposer extends JPanel {
 			public void perform() {
 				clearSelections();
 				dispatcher.qlibCmb.setSelectedIndex(-1);
+				// note: set the spinner to zero after 
+				// clearing message lines because spinner 
+				// validation depends on message lines.
+				timeSpin.setValue(0);
 				selectPreview(true);
 			}
 		};
@@ -595,8 +599,7 @@ public class SignMessageComposer extends JPanel {
 	/** Return the current validated page on-time. If the page on-time 
 	 *  spinner is not enabled, the default pg on-time is returned. */
 	public DmsPgTime getCurrentPgOnTime() {
-		MultiString ms = new MultiString(getMessage());
-		timeSpin.validateWithNumPages(ms.getNumPages());
+		timeSpin.updateValidation(getMessage());
 		return timeSpin.getValuePgTime();
 	}
 }

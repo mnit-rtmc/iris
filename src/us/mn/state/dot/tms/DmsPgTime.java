@@ -25,9 +25,9 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DmsPgTime {
 
-	/** on-time min, max */
-	public static final DmsPgTime MIN_ONTIME = new DmsPgTime(4);
-	public static final DmsPgTime MAX_ONTIME = new DmsPgTime(101);
+	/** On-time minimum and maximum values, inclusive */
+	public static final DmsPgTime MIN_ONTIME = new DmsPgTime(5);
+	public static final DmsPgTime MAX_ONTIME = new DmsPgTime(100);
 	/** on-time default, used only if system default is bogus. */
 	private static final DmsPgTime DEF_ONTIME = new DmsPgTime(25);
 
