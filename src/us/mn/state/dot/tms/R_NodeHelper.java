@@ -65,11 +65,12 @@ public class R_NodeHelper extends BaseHelper {
 		       ex.getGeoLoc(), ac.getGeoLoc());
 	}
 
-	/** Check if an R_Node has detection */
+	/** Check if an R_Node has detection (not abandoned) */
 	static public boolean hasDetection(final R_Node r_node) {
 		return null != DetectorHelper.find(new Checker<Detector>() {
 			public boolean check(Detector d) {
-				return d.getR_Node() == r_node;
+				return d.getR_Node() == r_node &&
+				       !d.getAbandoned();
 			}
 		});
 	}
