@@ -52,8 +52,10 @@ public class SegmentLayerState extends LayerState {
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
 		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
+		float inner = scale / 2;		// inner scale
+		float outer = 6 * scale;		// outer scale
 		for(Segment seg: segments) {
-			MapSegment ms = new MapSegment(seg, null, scale);
+			MapSegment ms = new MapSegment(seg, null, inner, outer);
 			if(s.next(ms))
 				return ms;
 		}
