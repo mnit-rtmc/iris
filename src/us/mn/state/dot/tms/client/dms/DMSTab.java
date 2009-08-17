@@ -17,12 +17,10 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.util.List;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -66,15 +64,5 @@ public class DMSTab extends MapTab {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();
-	}
-
-	/** Set the map */
-	public void setMap(MapBean map) {
-		for(LayerState ls: map_model.getLayers()) {
-			if(ls instanceof SegmentLayerState) {
-				SegmentLayerState sls = (SegmentLayerState)ls;
-				sls.setMap(map);
-			}
-		}
 	}
 }

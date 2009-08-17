@@ -16,8 +16,10 @@ package us.mn.state.dot.tms.client;
 
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
+import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
+import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 
 /**
  * Super class of all tabs used in the IrisClient.
@@ -62,7 +64,14 @@ abstract public class MapTab extends JPanel {
 	}
 
 	/** Set the map */
-	public void setMap(MapBean map) { }
+	public void setMap(MapBean map) {
+		for(LayerState ls: map_model.getLayers()) {
+			if(ls instanceof SegmentLayerState) {
+				SegmentLayerState sls = (SegmentLayerState)ls;
+				sls.setMap(map);
+			}
+		}
+	}
 
 	/** Perform any clean up necessary */
 	public void dispose() {
