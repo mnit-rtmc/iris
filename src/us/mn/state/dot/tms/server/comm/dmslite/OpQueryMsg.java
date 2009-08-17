@@ -237,31 +237,11 @@ public class OpQueryMsg extends OpDms {
 	/** Return a MULTI with an updated page on-time with 
 	 *  the value read from controller. */
 	private String updatePageOnTime(String multi, DmsPgTime pt) {
-		String ret = replacePageOnTime(multi, pt.toTenths());
+		String ret = MultiString.replacePageOnTime(
+			multi, pt.toTenths());
 		Log.finest("OpQueryMsg.updatePageOnTime(): " +
 			"updated multi w/ page display time: " + ret);
 		return ret;
-	}
-
-	/** Replace all the page on times in a MULTI string with the specified
-	 * value.  If no on-time is specified, then a page time tag is
-	 * prepended.
-	 * @param multi MULTI string.
-	 * @param pt_on Page on-time in tenths of a second.
-	 * @return The updated MULTI string. */
-	static private String replacePageOnTime(String multi, final int pt_on) {
-		if(multi.indexOf("[pt") < 0) {
-			MultiString ms = new MultiString();
-			ms.setPageTimes(pt_on, null);
-			return ms.toString() + multi;
-		}
-		MultiString ms = new MultiString() {
-			public void setPageTimes(Integer on, Integer off) {
-				super.setPageTimes(pt_on, off);
-			}
-		};
-		new MultiString(multi).parse(ms);
-		return ms.toString();
 	}
 
 	/**

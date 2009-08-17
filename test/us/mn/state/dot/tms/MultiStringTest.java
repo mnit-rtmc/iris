@@ -32,6 +32,7 @@ public class MultiStringTest extends TestCase {
 		getFonts();
 		getPageOnTime();
 		normalization();
+		replacePageOnTime();
 		etc();
 	}
 
@@ -76,40 +77,37 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("ABC[pto12]").isValid());
 		assertTrue(new MultiString("ABC[pto123]").isValid());
 		//assertFalse(new MultiString("ABC[pto1234]").isValid());
+	}
 
-		// replacePageOnTime
-		/* FIXME: this method has been moved to dmslite, so either 
-			  move these test cases to dmslite or move the 
-			  method to MultiString.
-		// Note: these test require system attributes
+	/** replacePageOnTime */
+	private void replacePageOnTime() {
 		MultiString t1, t2;
 		int[] pt;
 
 		t1 = new MultiString("YA1[np]YA2");
-		t2 = new MultiString(t1.replacePageOnTime(4));
+		t2 = t1.replacePageOnTime(4);
 		pt = t2.getPageOnTimes(7);
 		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 		assertTrue("[pt4o]YA1[np]YA2".equals(t2.toString()));
 
 		t1 = new MultiString("[pt3o]YA1[np]OH YA2");
-		t2 = new MultiString(t1.replacePageOnTime(4));
+		t2 = t1.replacePageOnTime(4);
 		pt = t2.getPageOnTimes(7);
 		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 		assertTrue("[pt4o]YA1[np]OH YA2".equals(t2.toString()));
 
 		t1 = new MultiString("[pt3o50]YA1[np]OH YA2");
-		t2 = new MultiString(t1.replacePageOnTime(4));
+		t2 = new MultiString(MultiString.replacePageOnTime(t1.toString(), 4));
 		pt = t2.getPageOnTimes(7);
 		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 		assertTrue("[pt4o50]YA1[np]OH YA2".equals(t2.toString()));
 
 		t1 = new MultiString("[pt3o50]YA1[np][pt22o60]OH YA2");
-		t2 = new MultiString(t1.replacePageOnTime(4));
+		t2 = new MultiString(MultiString.replacePageOnTime(t1.toString(), 4));
 		pt = t2.getPageOnTimes(7);
 		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 		assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".
 			equals(t2.toString()));
-		*/
 	}
 
 	/** getFonts */

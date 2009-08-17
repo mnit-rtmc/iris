@@ -120,6 +120,15 @@ public class OpMessage extends OpDms {
 		return phase1;
 	}
 
+	/** Determine if single page message is flashing or not. */
+	public static boolean isFlashing(String multi) {
+		int[] pont = new MultiString(multi).getPageOnTimes(0);
+		boolean flashing = false;
+		if(pont != null && pont.length == 1)
+			flashing = (pont[0] != 0);
+		return flashing;
+	}
+
 	/** create 2nd phase */
 	private Phase createPhaseTwo() {
 		byte[] bitmaps = getBitmaps();
@@ -131,9 +140,14 @@ public class OpMessage extends OpDms {
 		int np = bitmaps.length / blen;
 		if(np <= 0)
 			return null;
-		else if(np == 1)
-			return new PhaseSendOnePageMessage();
-		else if(np == 2)
+		else if(np == 1) {
+			if(isFlashing(m_sm.getMulti())) {
+				// FIXME: add support for 1 pg flashing here
+				//validateMultiOnePageMessage();
+				return new PhaseSendOnePageMessage();
+			} else
+				return new PhaseSendOnePageMessage();
+		} else if(np == 2)
 			return new PhaseSendTwoPageMessage();
 		Log.severe("Bogus number of pages (" + np +
 			") in dmslite.OpMessage.OpMessage(). Ignored.");
@@ -169,6 +183,13 @@ public class OpMessage extends OpDms {
 		Calendar offtime = (Calendar)ontime.clone();
 		offtime.add(Calendar.MINUTE, mins);
 		return offtime;
+	}
+
+	/** Return a validated MULTI string for a non-flashing single page 
+	 *  message, which by definition must have a page on-time of zero. */
+	protected String validateMultiOnePageMessage(String ms) {
+		String ret = MultiString.replacePageOnTime(ms, 0);
+		return ret;
 	}
 
 	/**
@@ -234,7 +255,7 @@ public class OpMessage extends OpDms {
 			mess.add(rr1);
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_sm.getMulti().toString()));
+			mess.add(new ReqRes("MsgText", m_sm.getMulti()));
 
 			// UseOnTime, always true
 			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
