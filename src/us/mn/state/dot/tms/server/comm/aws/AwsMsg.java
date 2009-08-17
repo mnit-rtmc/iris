@@ -135,7 +135,7 @@ public class AwsMsg {
 			appendAwsReport(m_textlines);
 
 			// #12, on time: 0.0
-			m_pgontime = createPgOnTime(tok.nextToken());
+			m_pgontime = createPgOnTime(tok.nextToken(), m_type);
 
 			// #13, ignore this field, follows last semicolon if
 			//      there are 13 tokens.
@@ -153,13 +153,14 @@ public class AwsMsg {
 		this.setValid(ok);
 	}
 
-	/** Return the page on-time. If zero is read, the system 
-	 *  default is returned. */
-	protected DmsPgTime createPgOnTime(String pont) {
+	/** Return the page on-time. If zero is read, the system default 
+	 *  is returned, as a function of the number of pages. */
+	protected DmsPgTime createPgOnTime(String pont, AwsMsgType mtype) {
+		boolean singlepg = (mtype == mtype.ONEPAGEMSG);
 		if(pont == null || pont.isEmpty() || 
 			SString.stringToDouble(pont) <= 0)
 		{
-			return DmsPgTime.getDefaultOn();
+			return DmsPgTime.getDefaultOn(singlepg);
 		}
 		return new DmsPgTime((double)SString.stringToDouble(pont));
 	}

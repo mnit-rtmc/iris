@@ -637,7 +637,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Return the page on-time for the current message on the 
 	 *  specified DMS. */
 	protected DmsPgTime getPgOnTime(DMS dms) {
-		DmsPgTime ret = DmsPgTime.getDefaultOn();
+		DmsPgTime ret = DmsPgTime.getDefaultOn(true);
 		if(dms == null)
 			return ret;
 		SignMessage sm = dms.getMessageCurrent();

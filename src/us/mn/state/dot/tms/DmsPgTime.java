@@ -49,6 +49,18 @@ public class DmsPgTime {
 		m_tenths = secsToTenths((float)secs);
 	}
 
+	/** Test if the DmsPgTime is equal to another DmsPgTime */
+	public boolean equals(Object o) {
+		if(o instanceof DmsPgTime)
+			return toTenths() == ((DmsPgTime)o).toTenths();
+		return false;
+	}
+
+	/** Calculate a hash code */
+	public int hashCode() {
+		return new Integer(m_tenths).hashCode();
+	}
+
 	/** Return the page time in tenths */
 	public int toTenths() {
 		return m_tenths;
@@ -74,10 +86,13 @@ public class DmsPgTime {
 		return toTenths() == 0;
 	}
 
-	/** Get default page on-time */
-	public static DmsPgTime getDefaultOn() {
-		return new DmsPgTime(secsToTenths(
-			SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat()));
+	/** Get default page on-time for sigle and multi-page messages. */
+	public static DmsPgTime getDefaultOn(boolean singlepg) {
+		if(singlepg)
+			return new DmsPgTime(0);
+		else
+			return new DmsPgTime(secsToTenths(
+				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat()));
 	}
 
 	/** Get default page off-time */
@@ -101,14 +116,50 @@ public class DmsPgTime {
 		return (int)(ms / 100);
 	}
 
-	/** Validate an on-time. */
-	public static DmsPgTime validateOnTime(DmsPgTime t) {
+	/** Validate an on-time as a function of if the message is single
+	 *  or multi-page. */
+	public static DmsPgTime validateOnTime(DmsPgTime t, 
+		boolean singlepg)
+	{
 		if(t == null)
 			throw new NullPointerException();
-		if(t.toTenths() > MAX_ONTIME.toTenths())
-			return MAX_ONTIME;
-		if(t.toTenths() < MIN_ONTIME.toTenths())
-			t = getDefaultOn();
-		return t;
+		int tenths = (int)validateValue(t.toTenths(), singlepg, 
+			MIN_ONTIME.toTenths(), MAX_ONTIME.toTenths());
+		return new DmsPgTime(tenths);
+	}
+
+	/** Return a validated spinner value. A value of zero is valid
+	 *  for single page messages only. */
+	public DmsPgTime validateValue(boolean singlepg, 
+		DmsPgTime min, DmsPgTime max)
+	{
+		int tenths = validateValue(toTenths(), 
+			singlepg, min.toTenths(), max.toTenths());
+		return new DmsPgTime(tenths);
+	}
+
+	/** Validate a page time. A value of zero is valid for single 
+	 *  page messages only. 
+	 *  @param value Page time in tenths.
+	 *  @param min Minimum page time in tenths.
+	 *  @param max Maximum page time in tenths.
+	 *  @return The validated page time in tenths. */
+	public static int validateValue(int value, boolean singlepg, 
+		int min, int max)
+	{
+		if(singlepg) {
+			if(value == 0)
+				return 0;
+			if(value < min)
+				return 0;
+			if(value > max)
+				return max;
+		} else {
+			if(value < min)
+				return min;
+			if(value > max)
+				return max;
+		}
+		return value;
 	}
 }

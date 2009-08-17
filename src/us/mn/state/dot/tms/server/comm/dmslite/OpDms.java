@@ -222,15 +222,17 @@ abstract public class OpDms extends OpDevice {
 	/** Return the page on-time. If a value is not found in the MULTI
 	 *  string, the system default value is returned. */
 	protected DmsPgTime determinePageOnTime(String multi) {
+		MultiString ms = new MultiString(multi);
+		boolean singlepg = (ms.getNumPages() <= 1);
 		// extract from 1st page of MULTI
-		int[] pont = new MultiString(multi).getPageOnTimes(
-			DmsPgTime.getDefaultOn().toTenths());
+		int[] pont = ms.getPageOnTimes(
+			DmsPgTime.getDefaultOn(singlepg).toTenths());
 		DmsPgTime ret;
 		if(pont != null && pont.length > 0)
 			ret = new DmsPgTime(pont[0]);
 		else
-			ret = DmsPgTime.getDefaultOn();
-		return DmsPgTime.validateOnTime(ret);
+			ret = DmsPgTime.getDefaultOn(singlepg);
+		return DmsPgTime.validateOnTime(ret, singlepg);
 	}
 
 	/** Set an error message. The field errStatus is defined in

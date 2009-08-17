@@ -75,7 +75,8 @@ public class DMSPanelPager {
 		panel = p;
 		dms = proxy;
 		bitmaps = getBitmaps(b);
-		pgOnTime = DmsPgTime.validateOnTime(ot);
+		int npg = bitmaps.length;
+		pgOnTime = DmsPgTime.validateOnTime(ot, npg <= 1);
 		pgOffTime = DmsPgTime.getDefaultOff();
 		setDimensions();
 		panel.setGraphic(bitmaps[page]);

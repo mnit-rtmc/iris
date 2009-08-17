@@ -70,10 +70,13 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 			m_inc = roundSingle(inc);
 		}
 
-		/** Return a validated spinner value. A value of zero is valid
-		 *  for single page messages only. */
+		/** Return a validated spinner value in seconds. A value of 
+		 *  zero is valid for single page messages only. */
 		private double validate(double value) {
-			return validateValue(value, m_singlepg, m_min, m_max);
+			DmsPgTime t = new DmsPgTime(value).validateValue(
+				m_singlepg, new DmsPgTime(m_min), 
+				new DmsPgTime(m_max));
+			return t.toSecs();
 		}
 
 		/** Get the next value, or null if the next value would be
@@ -123,7 +126,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	public PgTimeSpinner(SignMessageComposer c) {
 		m_composer = c;
 		setModel(new PgTimeSpinnerModel(
-			DmsPgTime.getDefaultOn().toSecs(),
+			DmsPgTime.getDefaultOn(true).toSecs(),
 			DmsPgTime.MIN_ONTIME.toSecs(), 
 			DmsPgTime.MAX_ONTIME.toSecs(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("PgOnTimeSpinner.ToolTip"));
@@ -146,7 +149,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 		super.setEnabled(b);
 		// if disabled, reset value to default
 		if(!b)
-			setValue(DmsPgTime.getDefaultOn().toSecs());
+			setValue(DmsPgTime.getDefaultOn(true).toSecs());
 	}
 
 	/** Set value using seconds. */
@@ -175,7 +178,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	/** If the spinner is IRIS enabled, return the current value, 
 	 *  otherwise return the system default. */
 	public DmsPgTime getValuePgTime() {
-		DmsPgTime ret = DmsPgTime.getDefaultOn();
+		DmsPgTime ret = DmsPgTime.getDefaultOn(true);
 		// return current value
 		if(getIEnabled()) {
 			Object v = super.getValue();
@@ -191,9 +194,9 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	public void setValue(String smulti) {
 		MultiString m = new MultiString(smulti);
 		int[] ponts = m.getPageOnTimes(
-			DmsPgTime.getDefaultOn().toTenths());
+			DmsPgTime.getDefaultOn(true).toTenths());
 		setValue(ponts.length > 0 ? new DmsPgTime(ponts[0]) : 
-			DmsPgTime.getDefaultOn());
+			DmsPgTime.getDefaultOn(true));
 	}
 
 	/** Catch state change events. Defined in interface ChangeListener. */
@@ -219,33 +222,12 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 		// validate
 		if(!m_singlepg)
 			if(pt.isZero())
-				setValue(DmsPgTime.getDefaultOn());
+				setValue(DmsPgTime.getDefaultOn(m_singlepg));
 	}
 
 	/** Round to a single decimal point */
 	protected static double roundSingle(double v) {
 		return (double)Math.round(v * 10.0) / 10.0;
-	}
-
-	/** Return a validated spinner value. A value of zero is valid
-	 *  for single page messages only. */
-	protected static double validateValue(double value, boolean singlepg, 
-		double min, double max)
-	{
-		if(singlepg) {
-			if(value == 0)
-				return 0;
-			if(value < min)
-				return 0;
-			if(value > max)
-				return max;
-		} else {
-			if(value < min)
-				return min;
-			if(value > max)
-				return max;
-		}
-		return value;
 	}
 
 	/** Dispose */
