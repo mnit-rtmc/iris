@@ -52,12 +52,40 @@ public class SegmentLayerState extends LayerState {
 	/** Iterate through the segments in the layer */
 	public MapObject forEach(MapSearcher s) {
 		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
+		if(scale > 40)
+			return forEachStation(s, scale);
+		else
+			return forEachLane(s, scale);
+	}
+
+	/** Iterate through the stations in the layer */
+	protected MapObject forEachStation(MapSearcher s, float scale) {
 		float inner = scale / 2;		// inner scale
 		float outer = 6 * scale;		// outer scale
 		for(Segment seg: segments) {
 			MapSegment ms = new MapSegment(seg, null, inner, outer);
 			if(s.next(ms))
 				return ms;
+		}
+		return null;
+	}
+
+	/** Iterate through each lane segment in the layer */
+	protected MapObject forEachLane(MapSearcher s, float scale) {
+		scale = Math.max(scale, 5);
+		for(Segment seg: segments) {
+			int n_lanes = Math.max(seg.getLaneCount(), 1);
+			float inner = scale / 2;
+			float outer = 3 * scale * n_lanes;
+			float width = (outer - inner) / n_lanes;
+			for(int i = 0; i < n_lanes; i++) {
+				int l = i + 1;
+				float out = outer - (i * width);
+				float in = out - width;
+				MapSegment ms = new MapSegment(seg, l, in, out);
+				if(s.next(ms))
+					return ms;
+			}
 		}
 		return null;
 	}

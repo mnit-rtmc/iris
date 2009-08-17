@@ -58,6 +58,11 @@ public class Segment {
 	protected final HashMap<String, SensorSample> samples =
 		new HashMap<String, SensorSample>();
 
+	/** Get the count of lanes */
+	public int getLaneCount() {
+		return lane_sensors.size();
+	}
+
 	/** Create a new segment */
 	public Segment() {
 		this(null);
