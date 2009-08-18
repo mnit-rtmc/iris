@@ -71,29 +71,21 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
 	}
 
-	/**
-	 * Send a new message to the sign. Called by DMSImpl.
-	 * @throws InvalidMessageException
-	 * @see DMSImpl,DMS
-	 */
+	/** Send a new message to the sign. Called by DMSImpl.
+	 *  @param dms May be null.
+	 *  @param m Sign message to send, may be null.
+	 *  @param o User sending message, may be null.
+	 *  @throws InvalidMessageException
+	 *  @see DMSImpl, DMS */
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		if(dms == null || m == null || m.getBitmaps() == null)
+		if(dms == null || m == null)
 			return;
-
-		// dms isn't configured
-		if(!dms.getConfigure())
-			return;
-
-		// Send blank if no message
-		if(SignMessageHelper.isBlank(m)) {
+		if(SignMessageHelper.isBlank(m))
 			new OpBlank(dms, m, o).start();
-			return;
-		}
-
-		// send message to field controller
-		new OpMessage(dms, m, o).start();
+		else
+			new OpMessage(dms, m, o).start();
 	}
 
 	/** Send a device request message to the sign, no user specified */
