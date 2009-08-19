@@ -244,22 +244,22 @@ CREATE TABLE lane_type (
 	dcode VARCHAR(2) NOT NULL
 );
 
-CREATE TABLE r_node_type (
+CREATE TABLE iris.r_node_type (
 	n_type integer PRIMARY KEY,
-	name text NOT NULL
+	name VARCHAR(12) NOT NULL
 );
 
-CREATE TABLE r_node_transition (
+CREATE TABLE iris.r_node_transition (
 	n_transition integer PRIMARY KEY,
-	name text NOT NULL
+	name VARCHAR(12) NOT NULL
 );
 
 CREATE TABLE iris.r_node (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
-	node_type integer NOT NULL REFERENCES r_node_type(n_type),
+	node_type integer NOT NULL REFERENCES iris.r_node_type(n_type),
 	pickable boolean NOT NULL,
-	transition integer NOT NULL REFERENCES r_node_transition(n_transition),
+	transition integer NOT NULL REFERENCES iris.r_node_transition(n_transition),
 	lanes integer NOT NULL,
 	attach_side boolean NOT NULL,
 	shift integer NOT NULL,
@@ -807,8 +807,8 @@ CREATE VIEW r_node_view AS
 	n.lanes, n.attach_side, n.shift, n.station_id, n.speed_limit, n.notes
 	FROM iris.r_node n
 	JOIN geo_loc_view l ON n.geo_loc = l.name
-	JOIN r_node_type nt ON n.node_type = nt.n_type
-	JOIN r_node_transition tr ON n.transition = tr.n_transition;
+	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
+	JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
 GRANT SELECT ON r_node_view TO PUBLIC;
 
 CREATE VIEW freeway_station_view AS
@@ -1143,7 +1143,7 @@ kml_file_enable	false
 uptime_log_enable	false
 \.
 
-COPY r_node_type (n_type, name) FROM stdin;
+COPY iris.r_node_type (n_type, name) FROM stdin;
 0	station
 1	entrance
 2	exit
@@ -1152,7 +1152,7 @@ COPY r_node_type (n_type, name) FROM stdin;
 5	interchange
 \.
 
-COPY r_node_transition (n_transition, name) FROM stdin;
+COPY iris.r_node_transition (n_transition, name) FROM stdin;
 0	none
 1	loop
 2	leg
