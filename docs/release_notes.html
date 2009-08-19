@@ -11,6 +11,37 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.95.0 (19 August 2009)</dt>
+	<dd><ul>
+		<li>
+			Replaced "gpoly" shapefile layer with a dynamic
+			"segment" layer based on r_nodes.
+			The segment layer can display lane-by-lane data.
+			The iris-client.properties file needs a new property
+			called "tdxml.detector.url", which points to the
+			det_sample.xml.gz file.
+		</li>
+		<li>
+			Rewrote MULTI renderer to fix some bugs and support
+			the [tr] tag (text rectangle).
+		</li>
+		<li>
+			New system attributes: dms_composer_edit_mode,
+			actionplan_toolbar_enable, xml_output_directory.
+		</li>
+		<li>
+			Fixed some bugs.
+		</li>
+		<li>
+			Added new "geokit" dependency, for coordinate
+			conversion (lat/lon &lt;-&gt; utm).
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.95.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.94.0 (1 August 2009)</dt>
 	<dd><ul>
 		<li>
