@@ -75,9 +75,9 @@ public class MemoryRequest extends Request {
 
 	/** Parse the response from a GET request */
 	protected void parseGetResponse(byte[] buf) throws IOException {
-		if(buf.length != payload.length)
+		if(buf.length > payload.length)
 			throw new ParsingException("Bad resp len:"+ buf.length);
-		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, payload.length);
+		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, buf.length);
 	}
 
 	/** Format a basic "SET" request */
