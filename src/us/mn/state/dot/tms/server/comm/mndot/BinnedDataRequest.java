@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Calendar;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Binned data request to query or clear oldest binned data record.
@@ -84,7 +85,9 @@ public class BinnedDataRequest extends Request {
 	}
 
 	/** Parse the response to a GET request */
-	protected void parseGetResponse(byte[] buf) {
+	protected void parseGetResponse(byte[] buf) throws IOException {
+		if(buf.length != payload.length)
+			throw new ParsingException("Bad resp len:"+ buf.length);
 		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 

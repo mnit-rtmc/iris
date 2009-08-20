@@ -124,7 +124,7 @@ abstract public class Request {
 	abstract protected int expectedGetOctets();
 
 	/** Set the value of the GET request */
-	protected void parseGetResponse(byte[] buf) {
+	protected void parseGetResponse(byte[] buf) throws IOException {
 		// override this if necessary
 	}
 

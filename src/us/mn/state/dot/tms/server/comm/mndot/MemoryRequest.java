@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -73,7 +74,9 @@ public class MemoryRequest extends Request {
 	}
 
 	/** Parse the response from a GET request */
-	protected void parseGetResponse(byte[] buf) {
+	protected void parseGetResponse(byte[] buf) throws IOException {
+		if(buf.length != payload.length)
+			throw new ParsingException("Bad resp len:"+ buf.length);
 		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 
