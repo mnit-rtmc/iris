@@ -221,10 +221,11 @@ public class Session {
 			loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
-		det_manager = new DetectorManager(
-			state.getDetCache().getDetectors(), loc_manager);
 		r_node_manager = new R_NodeManager(this,
 			state.getDetCache().getR_Nodes(), loc_manager);
+		det_manager = new DetectorManager(
+			state.getDetCache().getDetectors(), loc_manager,
+			r_node_manager);
 		warn_manager = new WarningSignManager(this,
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,

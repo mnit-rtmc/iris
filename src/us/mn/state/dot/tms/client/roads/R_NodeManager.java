@@ -134,7 +134,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		new AbstractJob() {
 			public void perform() {
 				arrangeCorridors();
-				createSegmentLayer();
 			}
 		}.addToScheduler();
 	}
@@ -221,7 +220,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create the segment layer */
-	protected synchronized void createSegmentLayer() {
+	public synchronized void createSegmentLayer() {
 		seg_layer = new SegmentLayer(this, session);
 		for(CorridorBase c: corridors.values())
 			seg_layer.addCorridor(c);
