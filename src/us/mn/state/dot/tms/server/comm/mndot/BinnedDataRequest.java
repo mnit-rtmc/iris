@@ -86,9 +86,9 @@ public class BinnedDataRequest extends Request {
 
 	/** Parse the response to a GET request */
 	protected void parseGetResponse(byte[] buf) throws IOException {
-		if(buf.length > payload.length)
+		if(buf.length != expectedGetOctets())
 			throw new ParsingException("Bad resp len:"+ buf.length);
-		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, buf.length);
+		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 
 	/** Format a basic "SET" request */
