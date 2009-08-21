@@ -20,9 +20,10 @@ import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JPopupMenu;
+import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.sonar.SonarObject;
 
@@ -42,6 +43,9 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Listener for proxy selection events */
 	protected final ProxySelectionListener<T> listener;
 
+	/** Map for scaling */
+	protected MapBean map;
+
 	/** Create a new sonar proxy layer state */
 	public ProxyLayerState(ProxyLayer<T> layer) {
 		super(layer);
@@ -56,6 +60,11 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 			}
 		};
 		model.addProxySelectionListener(listener);
+	}
+
+	/** Set the map for scaling */
+	public void setMap(MapBean m) {
+		map = m;
 	}
 
 	/** Set the selection */
@@ -78,7 +87,8 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Iterate through all shapes in the layer */
 	public MapObject forEach(MapSearcher s) {
-		return manager.forEach(s);
+		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
+		return manager.forEach(s, scale);
 	}
 
 	/** Do mouse click event processing */

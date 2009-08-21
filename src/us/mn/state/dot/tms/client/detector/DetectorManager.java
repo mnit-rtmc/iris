@@ -78,7 +78,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(Detector proxy) {
+	protected Shape getShape(Detector proxy, float scale) {
 		return SHAPE;
 	}
 

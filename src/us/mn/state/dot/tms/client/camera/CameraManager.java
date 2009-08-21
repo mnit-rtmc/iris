@@ -81,8 +81,8 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(Camera proxy) {
-		return SHAPE;
+	protected Shape getShape(Camera proxy, float scale) {
+		return new CameraMarker(20 * scale);
 	}
 
 	/** Create a styled theme for cameras */

@@ -338,7 +338,6 @@ public class Session {
 		hideLayer(lstates, "C.S.A.H.");
 		hideLayer(lstates, "Highway");
 		hideLayer(lstates, "Freeway");
-		hideLayer(lstates, cam_manager.getProxyType());
 		hideLayer(lstates, "Incident");
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, dms_manager.getProxyType());

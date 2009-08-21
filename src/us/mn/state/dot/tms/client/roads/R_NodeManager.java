@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,8 +26,6 @@ import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
-import us.mn.state.dot.map.Layer;
-import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
@@ -244,7 +241,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get the shape to use for the given r_node */
-	protected Shape getShape(R_Node n) {
+	protected Shape getShape(R_Node n, float scale) {
 		R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
 		switch(nt) {
 		case ENTRANCE:

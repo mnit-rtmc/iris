@@ -143,7 +143,6 @@ abstract public class ProxyManager<T extends SonarObject>
 			synchronized(map_proxies) {
 				map_proxies.put(i, proxy);
 			}
-			loc.setShape(getShape(proxy));
 		}
 	}
 
@@ -189,7 +188,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	abstract protected StyledTheme createTheme();
 
 	/** Get the shape for a given proxy */
-	abstract protected Shape getShape(T proxy);
+	abstract protected Shape getShape(T proxy, float scale);
 
 	/** Get the theme */
 	public StyledTheme getTheme() {
@@ -245,12 +244,12 @@ abstract public class ProxyManager<T extends SonarObject>
 	abstract protected JPopupMenu createPopup();
 
 	/** Iterate through all proxy objects */
-	public MapObject forEach(final MapSearcher s) {
+	public MapObject forEach(final MapSearcher s, final float scale) {
 		T result = cache.findObject(new Checker<T>() {
 			public boolean check(T proxy) {
 				MapGeoLoc loc = findGeoLoc(proxy);
 				if(isLocationSet(loc)) {
-					loc.setShape(getShape(proxy));
+					loc.setShape(getShape(proxy, scale));
 					return s.next(loc);
 				}
 				return false;

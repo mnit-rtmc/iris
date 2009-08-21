@@ -125,7 +125,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer
 	/** Update the layer extent */
 	public void updateExtent() {
 		ExtentCalculator calc = new ExtentCalculator();
-		manager.forEach(calc);
+		manager.forEach(calc, 1);
 		if(calc.extent != null)
 			extent.setRect(calc.extent);
 		notifyLayerChanged(LayerChange.extent);

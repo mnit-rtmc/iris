@@ -80,7 +80,8 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Add a style to the theme */
 	public void addStyle(String name, Color color) {
-		addStyle(name, color, OUTLINE);
+//		addStyle(name, color, OUTLINE);
+		addStyle(name, color, null);
 	}
 
 	/** Add a default style to the theme */

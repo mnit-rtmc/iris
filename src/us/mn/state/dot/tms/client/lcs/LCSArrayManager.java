@@ -129,7 +129,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(LCSArray proxy) {
+	protected Shape getShape(LCSArray proxy, float scale) {
 		return SHAPE;
 	}
 

@@ -56,7 +56,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(LCSIndication proxy) {
+	protected Shape getShape(LCSIndication proxy, float scale) {
 		return null;
 	}
 

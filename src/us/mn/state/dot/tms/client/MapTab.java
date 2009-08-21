@@ -19,6 +19,7 @@ import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
+import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 
 /**
@@ -66,6 +67,10 @@ abstract public class MapTab extends JPanel {
 	/** Set the map */
 	public void setMap(MapBean map) {
 		for(LayerState ls: map_model.getLayers()) {
+			if(ls instanceof ProxyLayerState) {
+				ProxyLayerState pls = (ProxyLayerState)ls;
+				pls.setMap(map);
+			}
 			if(ls instanceof SegmentLayerState) {
 				SegmentLayerState sls = (SegmentLayerState)ls;
 				sls.setMap(map);

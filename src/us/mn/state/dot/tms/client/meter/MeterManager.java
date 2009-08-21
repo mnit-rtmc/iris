@@ -145,7 +145,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(RampMeter proxy) {
+	protected Shape getShape(RampMeter proxy, float scale) {
 		return SHAPE;
 	}
 
