@@ -215,14 +215,14 @@ public class Session {
 		baseLayers = bl;
 		v_menu = new ViewMenu(this);
 		loc_manager = new GeoLocManager(state.getGeoLocs());
+		r_node_manager = new R_NodeManager(this,
+			state.getDetCache().getR_Nodes(), loc_manager);
 		cam_manager = new CameraManager(this,
 			state.getCamCache().getCameras(), loc_manager);
 		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
 			loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
-		r_node_manager = new R_NodeManager(this,
-			state.getDetCache().getR_Nodes(), loc_manager);
 		det_manager = new DetectorManager(
 			state.getDetCache().getDetectors(), loc_manager,
 			r_node_manager);

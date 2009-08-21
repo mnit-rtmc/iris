@@ -143,6 +143,7 @@ abstract public class ProxyManager<T extends SonarObject>
 			synchronized(map_proxies) {
 				map_proxies.put(i, proxy);
 			}
+			loc_manager.setTangentAngle(loc);
 		}
 	}
 

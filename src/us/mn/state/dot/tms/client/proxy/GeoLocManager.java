@@ -18,7 +18,10 @@ import java.util.HashMap;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
  * Manager for GeoLoc proxy objects.
@@ -33,6 +36,14 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	/** Map of all GeoLocs */
 	protected final HashMap<String, MapGeoLoc> proxies =
 		new HashMap<String, MapGeoLoc>();
+
+	/** R_Node manager */
+	protected R_NodeManager r_node_manager;
+
+	/** Set the r_node manager */
+	public void setR_NodeManager(R_NodeManager m) {
+		r_node_manager = m;
+	}
 
 	/** Create a new GeoLoc manager */
 	public GeoLocManager(TypeCache<GeoLoc> c) {
@@ -96,6 +107,21 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 	public MapGeoLoc findMapGeoLoc(GeoLoc proxy) {
 		synchronized(proxies) {
 			return proxies.get(proxy.getName());
+		}
+	}
+
+	/** Set the tangent angle for a location */
+	public void setTangentAngle(MapGeoLoc mloc) {
+		GeoLoc loc = mloc.getGeoLoc();
+		CorridorBase c = r_node_manager.lookupCorridor(loc);
+		if(c != null) {
+			R_Node r_node = c.findNearest(loc);
+			if(r_node != null) {
+				MapGeoLoc n_loc = r_node_manager.findGeoLoc(
+					r_node);
+				if(n_loc != null)
+					mloc.setTangent(n_loc.getTangent());
+			}
 		}
 	}
 }

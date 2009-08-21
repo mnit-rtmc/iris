@@ -116,6 +116,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	{
 		super(c, lm);
 		session = s;
+		lm.setR_NodeManager(this);
 		initialize();
 	}
 
@@ -286,6 +287,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		theme.addStyle(STYLE_NO_LOC, R_NodeRenderer.COLOR_NO_LOC);
 		theme.addStyle(STYLE_ALL);
 		return theme;
+	}
+
+	/** Lookup the corridor for a location */
+	public CorridorBase lookupCorridor(GeoLoc loc) {
+		String cid = GeoLocHelper.getCorridorName(loc);
+		if(cid != null)
+			return corridors.get(cid);
+		else
+			return null;
 	}
 
 	/** Add a corridor for the specified r_node */

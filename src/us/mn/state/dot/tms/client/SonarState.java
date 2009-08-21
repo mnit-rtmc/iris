@@ -303,8 +303,8 @@ public class SonarState extends Client {
 		populate(map_extents);
 		populate(graphics, true);
 		con_cache.populate(this);
-		cam_cache.populate(this);
 		det_cache.populate(this);
+		cam_cache.populate(this);
 		populate(alarms);
 		populate(warn_signs);
 		populate(ramp_meters);

@@ -204,4 +204,18 @@ public class CorridorBase {
 	public List<R_Node> getNodes() {
 		return r_nodes;
 	}
+
+	/** Find the nearest node to the given location */
+	public R_Node findNearest(GeoLoc loc) {
+		R_Node nearest = null;
+		double n_meters = 0;
+		for(R_Node n: r_nodes) {
+			double m = GeoLocHelper.metersTo(n.getGeoLoc(), loc);
+			if(nearest == null || m < n_meters) {
+				nearest = n;
+				n_meters = m;
+			}
+		}
+		return nearest;
+	}
 }
