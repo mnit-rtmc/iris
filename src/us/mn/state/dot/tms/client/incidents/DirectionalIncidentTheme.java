@@ -55,7 +55,7 @@ public class DirectionalIncidentTheme extends StyledTheme {
 
 	/** Style for rendering incidents */
 	static protected final Style STYLE = new Style("Incident",
-		Outline.createSolid(Color.BLACK, 20), Color.MAGENTA);
+		Outline.createSolid(Color.BLACK, 1), Color.MAGENTA);
 
 	/** Get the style to render incidents */
 	public Style getStyle(MapObject o) {
@@ -79,8 +79,8 @@ public class DirectionalIncidentTheme extends StyledTheme {
 	}
 
 	/** Draw a selected incident */
-	public void drawSelected(Graphics2D g, MapObject o) {
-		super.drawSelected(g, o);
+	public void drawSelected(Graphics2D g, MapObject o, float scale) {
+		super.drawSelected(g, o, scale);
 		g.setColor(Color.RED);
 		g.setStroke(STROKE);
 		for(Ellipse2D e: ellipses)

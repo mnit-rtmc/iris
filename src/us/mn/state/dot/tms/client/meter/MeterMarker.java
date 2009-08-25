@@ -35,6 +35,7 @@ public class MeterMarker extends AbstractMarker {
 	/** Create a new ramp meter marker */
 	public MeterMarker(float size) {
 		super(4);
+		size = Math.min(size, MARKER_SIZE);
 		path.moveTo(0, 0);
 		Arc2D.Float arc = new Arc2D.Float(0, -size, size, size,
 			-90, 270, Arc2D.OPEN);

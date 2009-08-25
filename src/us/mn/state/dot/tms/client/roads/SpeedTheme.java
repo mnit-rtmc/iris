@@ -25,11 +25,11 @@ public class SpeedTheme extends SegmentTheme {
 
 	/** Speed styles */
 	static protected final Style[] S_STYLES = new Style[] {
-		new Style("0-24 mph", RED),
-		new Style("25-39 mph", ORANGE),
-		new Style("40-54 mph", YELLOW),
-		new Style("55-90 mph", GREEN),
-		new Style("Over 90 mph", VIOLET)
+		new Style("0-24 mph", OUTLINE, RED),
+		new Style("25-39 mph", OUTLINE, ORANGE),
+		new Style("40-54 mph", OUTLINE, YELLOW),
+		new Style("55-90 mph", OUTLINE, GREEN),
+		new Style("Over 90 mph", OUTLINE, VIOLET)
 	};
 
 	/** Create a new speed theme */

@@ -25,11 +25,11 @@ public class FlowTheme extends SegmentTheme {
 
 	/** Flow styles */
 	static protected final Style[] F_STYLES = new Style[] {
-		new Style("0-1500 veh/hr", GREEN),
-		new Style("1501-2000 veh/hr", YELLOW),
-		new Style("2001-2500 veh/hr", ORANGE),
-		new Style("2501-4000 veh/hr", RED),
-		new Style("Crazy data", VIOLET)
+		new Style("0-1500 veh/hr", OUTLINE, GREEN),
+		new Style("1501-2000 veh/hr", OUTLINE, YELLOW),
+		new Style("2001-2500 veh/hr", OUTLINE, ORANGE),
+		new Style("2501-4000 veh/hr", OUTLINE, RED),
+		new Style("Crazy data", OUTLINE, VIOLET)
 	};
 
 	/** Create a new flow theme */

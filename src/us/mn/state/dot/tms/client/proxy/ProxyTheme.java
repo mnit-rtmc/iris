@@ -31,15 +31,15 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Outline for stroking traffic devices */
 	static public final Outline OUTLINE = Outline.createSolid(
-		Color.BLACK, 30);
+		Color.BLACK, 1);
 
 	/** Outline for stroking inactive traffic devices */
 	static public final Outline OUTLINE_INACTIVE = Outline.createSolid(
-		Color.BLACK, 10);
+		Color.BLACK, 1);
 
 	/** Outline for stroking locked traffic devices */
 	static public final Outline OUTLINE_LOCKED = Outline.createSolid(
-		Color.RED, 30);
+		Color.RED, 2);
 
 	/** Color to display inactive devices */
 	static public final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
@@ -80,8 +80,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Add a style to the theme */
 	public void addStyle(String name, Color color) {
-//		addStyle(name, color, OUTLINE);
-		addStyle(name, color, null);
+		addStyle(name, color, OUTLINE);
 	}
 
 	/** Add a default style to the theme */

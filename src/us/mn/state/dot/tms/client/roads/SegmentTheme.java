@@ -50,8 +50,13 @@ abstract public class SegmentTheme extends StyledTheme {
 	/** Color for rendering violet stations */
 	static public final Color VIOLET = new Color(192, 0, 240);
 
+	/** Black outline */
+	static protected final Outline OUTLINE = Outline.createSolid(
+		Color.BLACK, 0.6f);
+
 	/** Default segment style theme */
-	static protected final Style DEFAULT_STYLE = new Style("No Data", GRAY);
+	static protected final Style DEFAULT_STYLE = new Style("No Data",
+		OUTLINE, GRAY);
 
 	/** Create a new segment theme */
 	protected SegmentTheme(String name) {
@@ -60,20 +65,20 @@ abstract public class SegmentTheme extends StyledTheme {
 	}
 
 	/** Draw the specified map object */
-	public void draw(Graphics2D g, MapObject mo) {
-		getSymbol(mo).draw(g, mo.getShape());
+	public void draw(Graphics2D g, MapObject mo, float scale) {
+		getSymbol(mo).draw(g, mo.getShape(), scale);
 	}
 
 	/** Draw a selected map object */
-	public void drawSelected(Graphics2D g, MapObject mo) {
+	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
 		Shape shape = mo.getShape();
-		Outline outline = Outline.createDashed(Color.WHITE, 20);
+		Outline outline = Outline.createDashed(Color.WHITE, 2);
 		g.setColor(outline.color);
-		g.setStroke(outline.stroke);
+		g.setStroke(outline.getStroke(scale));
 		g.draw(shape);
-		outline = Outline.createSolid(Color.WHITE, getThickness(shape));
+		outline = Outline.createSolid(Color.WHITE, 4);
 		Shape ellipse = createEllipse(shape);
-		g.setStroke(outline.stroke);
+		g.setStroke(outline.getStroke(scale));
 		g.draw(ellipse);
 	}
 

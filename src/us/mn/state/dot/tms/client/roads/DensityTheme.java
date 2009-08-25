@@ -25,10 +25,10 @@ public class DensityTheme extends SegmentTheme {
 
 	/** Density styles */
 	static protected final Style[] D_STYLES = new Style[] {
-		new Style("0-29 veh/mi", GREEN),
-		new Style("30-49 veh/mi", ORANGE),
-		new Style("50+ veh/mi", RED),
-		new Style("Crazy data", VIOLET)
+		new Style("0-29 veh/mi", OUTLINE, GREEN),
+		new Style("30-49 veh/mi", OUTLINE, ORANGE),
+		new Style("50+ veh/mi", OUTLINE, RED),
+		new Style("Crazy data", OUTLINE, VIOLET)
 	};
 
 	/** Create a new density theme */
