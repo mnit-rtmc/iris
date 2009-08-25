@@ -214,6 +214,8 @@ public class DMSHelper extends BaseHelper {
 
 	/** Check the style of the specified proxy */
 	static public boolean checkStyle(String s, DMS proxy) {
+		if(STYLE_NO_CONTROLLER.equals(s))
+			return proxy.getController() == null;
 		// FIXME: this grabs to LCS type lock, and we probably
 		//        already have the DMS type lock.  Plus, this doesn't
 		//        work until the LCS objects have been enumerated.
@@ -238,8 +240,6 @@ public class DMSHelper extends BaseHelper {
 			return isFailed(proxy);
 		else if(STYLE_AWS_CONTROLLED.equals(s))
 			return isAwsControlled(proxy);
-		else if(STYLE_NO_CONTROLLER.equals(s))
-			return proxy.getController() == null;
 		else
 			return STYLE_ALL.equals(s);
 	}
