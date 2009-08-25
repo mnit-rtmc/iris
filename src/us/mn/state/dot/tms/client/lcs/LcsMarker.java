@@ -33,6 +33,6 @@ public class LcsMarker extends Rectangle2D.Float {
 
 	/** Create a new LCS marker */
 	public LcsMarker(float size) {
-		super(0, 0, size, size / 2);
+		super(0, -size / 4, size, size / 2);
 	}
 }
