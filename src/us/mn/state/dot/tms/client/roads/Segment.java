@@ -21,7 +21,13 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.R_NodeTransition;
+import us.mn.state.dot.tms.R_NodeType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -33,6 +39,11 @@ public class Segment {
 
 	/** R_Node for segment */
 	protected final R_Node r_node;
+
+	/** Get the segment r_node */
+	public R_Node getR_Node() {
+		return r_node;
+	}
 
 	/** Get the station ID */
 	public String getStationID() {
@@ -60,7 +71,10 @@ public class Segment {
 
 	/** Get the count of lanes */
 	public int getLaneCount() {
-		return lane_sensors.size();
+		if(r_node != null)
+			return r_node.getLanes();
+		else
+			return lane_sensors.size();
 	}
 
 	/** Create a new segment */
@@ -87,7 +101,45 @@ public class Segment {
 
 	/** Add a point to the segment */
 	public void addNode(MapGeoLoc loc) {
-		locs.add(loc);
+		if(loc != null)
+			locs.add(loc);
+	}
+
+	/** Check if a node is at a segment break */
+	public boolean isBreak(R_Node n) {
+		return isStationBreak(n) || isLaneChange(n) || !isJoined(n);
+	}
+
+	/** Check if a node is at a station break */
+	public boolean isStationBreak(R_Node n) {
+		return n.getNodeType() == R_NodeType.STATION.ordinal() &&
+		       R_NodeHelper.hasDetection(n);
+	}
+
+	/** Check if a node has a change in lane count */
+	protected boolean isLaneChange(R_Node n) {
+		return n.getNodeType() == R_NodeType.STATION.ordinal() &&
+		       n.getLanes() != getLaneCount();
+	}
+
+	/** Check if a node should be joined with a segment */
+	public boolean isJoined(R_Node n) {
+		return n.getTransition() != R_NodeTransition.COMMON.ordinal() ||
+		       n.getNodeType() != R_NodeType.ENTRANCE.ordinal();
+	}
+
+	/** Check if a location is beyond distance threshold */
+	public boolean isTooDistant(MapGeoLoc loc) {
+		if(r_node == null)
+			return false;
+		else {
+			if(loc == null)
+				return true;
+			GeoLoc g0 = r_node.getGeoLoc();
+			GeoLoc g1 = loc.getGeoLoc();
+			return GeoLocHelper.metersTo(g0, g1) >
+			       SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
+		}
 	}
 
 	/** Update one sample */

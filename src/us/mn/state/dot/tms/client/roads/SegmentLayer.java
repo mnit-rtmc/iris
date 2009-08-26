@@ -33,13 +33,7 @@ import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tdxml.XmlSensorClient;
 import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeHelper;
-import us.mn.state.dot.tms.R_NodeTransition;
-import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
@@ -112,47 +106,30 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 	/** Add a corridor to the segment layer */
 	public void addCorridor(CorridorBase c) {
 		Segment seg = new Segment();
+		R_Node pn = null;
 		MapGeoLoc ploc = null;
 		for(R_Node n: c.getNodes()) {
 			MapGeoLoc loc = manager.findGeoLoc(n);
-			if(isWithinThreshold(ploc, loc) &&
-			   !isSegmentDisjointed(n))
-				seg.addNode(loc);
-			if(isSegmentDisjointed(n) || isSegmentBreak(n)) {
+			if(seg.isTooDistant(loc)) {
 				segments.add(seg);
-				seg = new Segment(n);
-				if(loc != null)
-					seg.addNode(loc);
+				seg = new Segment(pn);
+				seg.addNode(ploc);
 			}
+			if(seg.isJoined(n) && !seg.isTooDistant(loc))
+				seg.addNode(loc);
+			if(seg.isBreak(n)) {
+				segments.add(seg);
+				R_Node sn = seg.getR_Node();
+				if(seg.isStationBreak(n) || sn == null)
+					seg = new Segment(n);
+				else
+					seg = new Segment(sn);
+				seg.addNode(loc);
+			}
+			pn = n;
 			ploc = loc;
 		}
 		segments.add(seg);
-	}
-
-	/** Check if two locations are within distance threshold */
-	protected boolean isWithinThreshold(MapGeoLoc l0, MapGeoLoc l1) {
-		if(l0 == null)
-			return l1 != null;
-		else {
-			if(l1 == null)
-				return false;
-			GeoLoc g0 = l0.getGeoLoc();
-			GeoLoc g1 = l1.getGeoLoc();
-			return GeoLocHelper.metersTo(g0, g1) <
-			       SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
-		}
-	}
-
-	/** Check if a node is at a segment break */
-	protected boolean isSegmentBreak(R_Node n) {
-		return n.getNodeType() == R_NodeType.STATION.ordinal() &&
-		       R_NodeHelper.hasDetection(n);
-	}
-
-	/** Check if a node should be disjointed from a segment */
-	protected boolean isSegmentDisjointed(R_Node n) {
-		return n.getTransition() == R_NodeTransition.COMMON.ordinal() &&
-		       n.getNodeType() == R_NodeType.ENTRANCE.ordinal();
 	}
 
 	/** Create a new layer state */
