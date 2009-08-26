@@ -50,9 +50,9 @@ abstract public class SegmentTheme extends StyledTheme {
 	/** Color for rendering violet stations */
 	static public final Color VIOLET = new Color(192, 0, 240);
 
-	/** Black outline */
+	/** Transparent black outline */
 	static protected final Outline OUTLINE = Outline.createSolid(
-		Color.BLACK, 0.6f);
+		new Color(0, 0, 0, 128), 0.6f);
 
 	/** Default segment style theme */
 	static protected final Style DEFAULT_STYLE = new Style("No Data",

@@ -29,13 +29,16 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
+	/** Outline color */
+	static protected final Color OUTLINE_COLOR = new Color(0, 0, 0, 128);
+
 	/** Outline for stroking traffic devices */
 	static public final Outline OUTLINE = Outline.createSolid(
-		Color.BLACK, 1);
+		OUTLINE_COLOR, 1);
 
 	/** Outline for stroking inactive traffic devices */
 	static public final Outline OUTLINE_INACTIVE = Outline.createSolid(
-		Color.BLACK, 1);
+		OUTLINE_COLOR, 1);
 
 	/** Outline for stroking locked traffic devices */
 	static public final Outline OUTLINE_LOCKED = Outline.createSolid(
