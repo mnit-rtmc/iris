@@ -373,7 +373,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			int pin = row + 1;
 			ComboBoxModel model = getDeviceModel(types[pin]);
 			model.setSelectedItem(value);
-			d_combo.setModel(model);
+			d_combo.setModel(new CellEditorComboBoxModel(this,
+				model));
 			return d_combo;
 		}
 		public Object getCellEditorValue() {
