@@ -265,6 +265,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the access password */
 	public void doSetPassword(String pwd) throws TMSException {
+		if(pwd.length() == 0)
+			pwd =  null;
 		if(pwd == null) {
 			if(password == null)
 				return;
