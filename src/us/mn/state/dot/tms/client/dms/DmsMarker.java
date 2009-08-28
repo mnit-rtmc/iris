@@ -41,7 +41,7 @@ public class DmsMarker extends AbstractMarker {
 		float third_width = size / 3;
 		float fifth_width = size / 5;
 		float half_height = height / 2;
-		float x = 0;
+		float x = size;
 		float y = 0;
 		path.moveTo(x -= half_width, y -= half_height);
 		path.lineTo(x += size, y);
