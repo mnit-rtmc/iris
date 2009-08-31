@@ -38,7 +38,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
 		store.query("SELECT name, freeway, free_dir, cross_street, " +
 			" cross_dir, cross_mod, easting, east_off, northing, " +
-			"north_off FROM " + SONAR_TYPE  + ";",
+			"north_off FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -76,7 +76,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

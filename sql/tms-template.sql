@@ -48,35 +48,31 @@ CREATE TABLE iris.i_user_role (
 	role VARCHAR(15) NOT NULL REFERENCES iris.role(name)
 );
 
-CREATE TABLE direction (
+CREATE TABLE iris.direction (
 	id smallint PRIMARY KEY,
 	direction VARCHAR(4) NOT NULL,
 	dir VARCHAR(4) NOT NULL
 );
 
-CREATE TABLE road_class (
+CREATE TABLE iris.road_class (
 	id integer PRIMARY KEY,
 	description VARCHAR(12) NOT NULL,
 	grade CHAR NOT NULL
 );
 
-CREATE TABLE road_modifier (
+CREATE TABLE iris.road_modifier (
 	id smallint PRIMARY KEY,
 	modifier text NOT NULL,
 	mod VARCHAR(2) NOT NULL
 );
 
-GRANT SELECT ON TABLE road_modifier TO PUBLIC;
-
-CREATE TABLE road (
+CREATE TABLE iris.road (
 	name VARCHAR(20) PRIMARY KEY,
 	abbrev VARCHAR(6) NOT NULL,
-	r_class smallint NOT NULL REFERENCES road_class(id),
-	direction smallint NOT NULL REFERENCES direction(id),
-	alt_dir smallint NOT NULL REFERENCES direction(id)
+	r_class smallint NOT NULL REFERENCES iris.road_class(id),
+	direction smallint NOT NULL REFERENCES iris.direction(id),
+	alt_dir smallint NOT NULL REFERENCES iris.direction(id)
 );
-
-REVOKE ALL ON TABLE road FROM PUBLIC;
 
 CREATE TABLE iris.graphic (
 	name VARCHAR(20) PRIMARY KEY,
@@ -215,15 +211,13 @@ CREATE TABLE holiday (
 	period INTEGER NOT NULL
 );
 
-GRANT SELECT ON TABLE holiday TO PUBLIC;
-
-CREATE TABLE geo_loc (
+CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
-	freeway VARCHAR(20) REFERENCES road(name),
-	free_dir smallint REFERENCES direction(id),
-	cross_street VARCHAR(20) REFERENCES road(name),
-	cross_dir smallint REFERENCES direction(id),
-	cross_mod smallint REFERENCES road_modifier(id),
+	freeway VARCHAR(20) REFERENCES iris.road(name),
+	free_dir smallint REFERENCES iris.direction(id),
+	cross_street VARCHAR(20) REFERENCES iris.road(name),
+	cross_dir smallint REFERENCES iris.direction(id),
+	cross_mod smallint REFERENCES iris.road_modifier(id),
 	easting integer,
 	east_off integer,
 	northing integer,
@@ -256,7 +250,7 @@ CREATE TABLE iris.r_node_transition (
 
 CREATE TABLE iris.r_node (
 	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
 	node_type integer NOT NULL REFERENCES iris.r_node_type(n_type),
 	pickable boolean NOT NULL,
 	transition integer NOT NULL REFERENCES iris.r_node_transition(n_transition),
@@ -286,7 +280,7 @@ CREATE TABLE iris.cabinet_style (
 CREATE TABLE iris.cabinet (
 	name VARCHAR(20) PRIMARY KEY,
 	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
-	geo_loc VARCHAR(20) NOT NULL REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
 	mile real
 );
 
@@ -397,7 +391,7 @@ CREATE RULE detector_delete AS ON DELETE TO iris.detector DO INSTEAD
 
 CREATE TABLE iris._camera (
 	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	encoder text NOT NULL,
 	encoder_channel integer NOT NULL,
@@ -441,7 +435,7 @@ CREATE RULE camera_delete AS ON DELETE TO iris.camera DO INSTEAD
 
 CREATE TABLE iris._warning_sign (
 	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	message text NOT NULL,
 	camera VARCHAR(10) REFERENCES iris._camera(name)
@@ -491,7 +485,7 @@ CREATE TABLE iris.meter_lock (
 
 CREATE TABLE iris._ramp_meter (
 	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES geo_loc(name),
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
 	storage INTEGER NOT NULL,
@@ -538,7 +532,7 @@ CREATE RULE ramp_meter_delete AS ON DELETE TO iris.ramp_meter DO INSTEAD
 
 CREATE TABLE iris._dms (
 	name VARCHAR(10) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES geo_loc,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes text NOT NULL,
 	camera VARCHAR(10) REFERENCES iris._camera,
 	aws_allowed BOOLEAN NOT NULL,
@@ -781,10 +775,10 @@ GRANT SELECT ON timing_plan_view TO PUBLIC;
 CREATE VIEW road_view AS
 	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
 	adir.direction AS alt_dir
-	FROM road
-	LEFT JOIN road_class rcl ON road.r_class = rcl.id
-	LEFT JOIN direction dir ON road.direction = dir.id
-	LEFT JOIN direction adir ON road.alt_dir = adir.id;
+	FROM iris.road r
+	LEFT JOIN iris.road_class rcl ON r.r_class = rcl.id
+	LEFT JOIN iris.direction dir ON r.direction = dir.id
+	LEFT JOIN iris.direction adir ON r.alt_dir = adir.id;
 GRANT SELECT ON road_view TO PUBLIC;
 
 CREATE VIEW geo_loc_view AS
@@ -793,12 +787,12 @@ CREATE VIEW geo_loc_view AS
 	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
 	l.cross_street, c_dir.direction AS cross_dir,
 	l.easting, l.east_off, l.northing, l.north_off
-	FROM geo_loc l
-	LEFT JOIN road f ON l.freeway = f.name
-	LEFT JOIN road_modifier m ON l.cross_mod = m.id
-	LEFT JOIN road c ON l.cross_street = c.name
-	LEFT JOIN direction f_dir ON l.free_dir = f_dir.id
-	LEFT JOIN direction c_dir ON l.cross_dir = c_dir.id;
+	FROM iris.geo_loc l
+	LEFT JOIN iris.road f ON l.freeway = f.name
+	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
+	LEFT JOIN iris.road c ON l.cross_street = c.name
+	LEFT JOIN iris.direction f_dir ON l.free_dir = f_dir.id
+	LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
 GRANT SELECT ON geo_loc_view TO PUBLIC;
 
 CREATE VIEW r_node_view AS
@@ -1013,7 +1007,7 @@ CREATE VIEW controller_report AS
 GRANT SELECT ON controller_report TO PUBLIC;
 
 
-COPY direction (id, direction, dir) FROM stdin;
+COPY iris.direction (id, direction, dir) FROM stdin;
 0		
 1	NB	N
 2	SB	S
@@ -1023,7 +1017,7 @@ COPY direction (id, direction, dir) FROM stdin;
 6	E-W	E-W
 \.
 
-COPY road_class (id, description, grade) FROM stdin;
+COPY iris.road_class (id, description, grade) FROM stdin;
 0		
 1	residential	A
 2	business	B
@@ -1034,7 +1028,7 @@ COPY road_class (id, description, grade) FROM stdin;
 7	CD road	
 \.
 
-COPY road_modifier (id, modifier, mod) FROM stdin;
+COPY iris.road_modifier (id, modifier, mod) FROM stdin;
 0	@	
 1	N of	N
 2	S of	S

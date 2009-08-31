@@ -9,3 +9,247 @@ INSERT INTO event.event_description VALUES (11, 'Comm POLL TIMEOUT');
 INSERT INTO event.event_description VALUES (12, 'Comm PARSING ERROR');
 INSERT INTO event.event_description VALUES (13, 'Comm CHECKSUM ERROR');
 INSERT INTO event.event_description VALUES (14, 'Comm CONTROLLER ERROR');
+
+
+CREATE TABLE iris.direction (
+	id smallint PRIMARY KEY,
+	direction VARCHAR(4) NOT NULL,
+	dir VARCHAR(4) NOT NULL
+);
+
+INSERT INTO iris.direction (id, direction, dir)
+	(SELECT id, direction, dir FROM direction);
+
+CREATE TABLE iris.road_class (
+	id integer PRIMARY KEY,
+	description VARCHAR(12) NOT NULL,
+	grade CHAR NOT NULL
+);
+
+INSERT INTO iris.road_class (id, description, grade)
+	(SELECT id, description, grade FROM road_class);
+
+CREATE TABLE iris.road_modifier (
+	id smallint PRIMARY KEY,
+	modifier text NOT NULL,
+	mod VARCHAR(2) NOT NULL
+);
+
+INSERT INTO iris.road_modifier (id, modifier, mod)
+	(SELECT id, modifier, mod FROM road_modifier);
+
+CREATE TABLE iris.road (
+	name VARCHAR(20) PRIMARY KEY,
+	abbrev VARCHAR(6) NOT NULL,
+	r_class smallint NOT NULL REFERENCES iris.road_class(id),
+	direction smallint NOT NULL REFERENCES iris.direction(id),
+	alt_dir smallint NOT NULL REFERENCES iris.direction(id)
+);
+
+INSERT INTO iris.road (name, abbrev, r_class, direction, alt_dir)
+	(SELECT name, abbrev, r_class, direction, alt_dir FROM road);
+
+CREATE TABLE iris.geo_loc (
+	name VARCHAR(20) PRIMARY KEY,
+	freeway VARCHAR(20) REFERENCES iris.road(name),
+	free_dir smallint REFERENCES iris.direction(id),
+	cross_street VARCHAR(20) REFERENCES iris.road(name),
+	cross_dir smallint REFERENCES iris.direction(id),
+	cross_mod smallint REFERENCES iris.road_modifier(id),
+	easting integer,
+	east_off integer,
+	northing integer,
+	north_off integer
+);
+
+INSERT INTO iris.geo_loc (name, freeway, free_dir, cross_street, cross_dir,
+	cross_mod, easting, east_off, northing, north_off)
+	(SELECT name, freeway, free_dir, cross_street, cross_dir, cross_mod,
+	 easting, east_off, northing, north_off FROM geo_loc);
+
+DROP VIEW controller_report;
+DROP VIEW controller_device_view;
+DROP VIEW detector_event_view;
+DROP VIEW detector_view;
+DROP VIEW detector_label_view;
+DROP VIEW warning_sign_view;
+DROP VIEW camera_view;
+DROP VIEW ramp_meter_view;
+DROP VIEW dms_view;
+DROP VIEW controller_loc_view;
+DROP VIEW freeway_station_view;
+DROP VIEW r_node_view;
+DROP VIEW road_view;
+DROP VIEW geo_loc_view;
+
+CREATE VIEW road_view AS
+	SELECT name, abbrev, rcl.description AS r_class, dir.direction,
+	adir.direction AS alt_dir
+	FROM iris.road r
+	LEFT JOIN iris.road_class rcl ON r.r_class = rcl.id
+	LEFT JOIN iris.direction dir ON r.direction = dir.id
+	LEFT JOIN iris.direction adir ON r.alt_dir = adir.id;
+GRANT SELECT ON road_view TO PUBLIC;
+
+CREATE VIEW geo_loc_view AS
+	SELECT l.name, f.abbrev AS fwy, l.freeway,
+	f_dir.direction AS free_dir, f_dir.dir AS fdir,
+	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
+	l.cross_street, c_dir.direction AS cross_dir,
+	l.easting, l.east_off, l.northing, l.north_off
+	FROM iris.geo_loc l
+	LEFT JOIN iris.road f ON l.freeway = f.name
+	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
+	LEFT JOIN iris.road c ON l.cross_street = c.name
+	LEFT JOIN iris.direction f_dir ON l.free_dir = f_dir.id
+	LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
+GRANT SELECT ON geo_loc_view TO PUBLIC;
+
+CREATE VIEW r_node_view AS
+	SELECT n.name, freeway, free_dir, cross_mod, cross_street,
+	cross_dir, nt.name AS node_type, n.pickable, tr.name AS transition,
+	n.lanes, n.attach_side, n.shift, n.station_id, n.speed_limit, n.notes
+	FROM iris.r_node n
+	JOIN geo_loc_view l ON n.geo_loc = l.name
+	JOIN iris.r_node_type nt ON n.node_type = nt.n_type
+	JOIN iris.r_node_transition tr ON n.transition = tr.n_transition;
+GRANT SELECT ON r_node_view TO PUBLIC;
+
+CREATE VIEW freeway_station_view AS
+	SELECT station_id, freeway, free_dir, cross_mod, cross_street,
+	speed_limit
+	FROM iris.r_node r, geo_loc_view l
+	WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
+GRANT SELECT ON freeway_station_view TO PUBLIC;
+
+CREATE VIEW controller_loc_view AS
+	SELECT c.name, c.drop_id, c.comm_link, c.cabinet, c.active, c.notes,
+	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir
+	FROM iris.controller c
+	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
+	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name;
+GRANT SELECT ON controller_loc_view TO PUBLIC;
+
+CREATE VIEW dms_view AS
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.camera,
+	d.aws_allowed, d.aws_controlled,
+	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.easting, l.east_off, l.northing, l.north_off
+	FROM iris.dms d
+	JOIN geo_loc_view l ON d.geo_loc = l.name;
+GRANT SELECT ON dms_view TO PUBLIC;
+
+CREATE VIEW ramp_meter_view AS
+	SELECT m.name, geo_loc, controller, pin, notes,
+	mt.description AS meter_type, storage, max_wait, camera,
+	ml.description AS meter_lock,
+	l.fwy, l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.easting, l.northing, l.east_off, l.north_off
+	FROM iris.ramp_meter m
+	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
+	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
+	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
+GRANT SELECT ON ramp_meter_view TO PUBLIC;
+
+CREATE VIEW camera_view AS
+	SELECT c.name, c.notes, c.encoder, c.encoder_channel, c.nvr, c.publish,
+	c.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, l.easting, l.northing, l.east_off, l.north_off,
+	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.camera c
+	JOIN geo_loc_view l ON c.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON c.controller = ctr.name;
+GRANT SELECT ON camera_view TO PUBLIC;
+
+CREATE VIEW warning_sign_view AS
+	SELECT w.name, w.notes, w.message, w.camera, w.geo_loc,
+	l.freeway, l.free_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.easting, l.northing, l.east_off, l.north_off,
+	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.warning_sign w
+	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
+GRANT SELECT ON warning_sign_view TO PUBLIC;
+
+CREATE VIEW detector_label_view AS
+	SELECT d.name AS det_id,
+	detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
+		d.lane_type, d.lane_number, d.abandoned) AS label
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
+GRANT SELECT ON detector_label_view TO PUBLIC;
+
+CREATE VIEW detector_view AS
+	SELECT d.name AS det_id, d.r_node, d.controller, c.comm_link, c.drop_id,
+	d.pin, detector_label(l.fwy, l.fdir, l.xst, l.cross_dir, l.xmod,
+		d.lane_type, d.lane_number, d.abandoned) AS label,
+	rnd.geo_loc, l.freeway, l.free_dir, l.cross_mod, l.cross_street,
+	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
+	boolean_converter(d.abandoned) AS abandoned,
+	boolean_converter(d.force_fail) AS force_fail,
+	boolean_converter(c.active) AS active, d.fake, d.notes
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+	LEFT JOIN lane_type ln ON d.lane_type = ln.id
+	LEFT JOIN iris.controller c ON d.controller = c.name;
+GRANT SELECT ON detector_view TO PUBLIC;
+
+CREATE VIEW detector_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
+	FROM event.detector_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON e.device_id = dl.det_id;
+GRANT SELECT ON detector_event_view TO PUBLIC;
+
+CREATE VIEW controller_device_view AS
+	SELECT d.name, d.controller, d.pin, d.geo_loc,
+	trim(l.freeway || ' ' || l.free_dir) AS freeway,
+	trim(trim(' @' FROM l.cross_mod || ' ' || l.cross_street)
+		|| ' ' || l.cross_dir) AS cross_street
+	FROM iris.controller_device d
+	JOIN geo_loc_view l ON d.geo_loc = l.name;
+GRANT SELECT ON controller_device_view TO PUBLIC;
+
+CREATE VIEW controller_report AS
+	SELECT c.name, c.comm_link, c.drop_id, cab.mile, cab.geo_loc,
+	trim(l.freeway || ' ' || l.free_dir) || ' ' || l.cross_mod || ' ' ||
+		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
+	cab.style AS "type", d.name AS device, d.pin,
+	d.cross_street AS cross_street, d.freeway AS freeway, c.notes
+	FROM iris.controller c
+	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
+	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
+	LEFT JOIN controller_device_view d ON d.controller = c.name;
+GRANT SELECT ON controller_report TO PUBLIC;
+
+ALTER TABLE iris.r_node DROP CONSTRAINT r_node_geo_loc_fkey;
+ALTER TABLE iris.r_node ADD CONSTRAINT r_node_geo_loc_fkey
+	FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc;
+
+ALTER TABLE iris.cabinet DROP CONSTRAINT cabinet_geo_loc_fkey;
+ALTER TABLE iris.cabinet ADD CONSTRAINT cabinet_geo_loc_fkey
+	FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc;
+
+ALTER TABLE iris._camera DROP CONSTRAINT _camera_geo_loc_fkey;
+ALTER TABLE iris._camera ADD CONSTRAINT _camera_geo_loc_fkey
+	FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc;
+
+ALTER TABLE iris._warning_sign DROP CONSTRAINT _warning_sign_geo_loc_fkey;
+ALTER TABLE iris._warning_sign ADD CONSTRAINT _warning_sign_geo_loc_fkey
+	FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc;
+
+ALTER TABLE iris._ramp_meter DROP CONSTRAINT _ramp_meter_geo_loc_fkey;
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_geo_loc_fkey
+	FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc;
+
+ALTER TABLE iris._dms DROP CONSTRAINT _dms_geo_loc_fkey;
+ALTER TABLE iris._dms ADD CONSTRAINT _dms_geo_loc_fkey
+	FOREIGN KEY (geo_loc) REFERENCES iris.geo_loc;
+
+DROP TABLE geo_loc;
+DROP TABLE road;
+DROP TABLE road_modifier;
+DROP TABLE road_class;
+DROP TABLE direction;

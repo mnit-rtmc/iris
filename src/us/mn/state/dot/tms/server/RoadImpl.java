@@ -40,7 +40,7 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 		System.err.println("Loading roads...");
 		namespace.registerType(SONAR_TYPE, RoadImpl.class);
 		store.query("SELECT name, abbrev, r_class, direction, alt_dir" +
-			" FROM road;", new ResultFactory()
+			" FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new RoadImpl(
@@ -67,7 +67,7 @@ public class RoadImpl extends BaseObjectImpl implements Road {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
