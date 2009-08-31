@@ -125,7 +125,7 @@ abstract public class Request {
 
 	/** Validate a response message */
 	protected void validateResponse(byte[] req, byte[] res)
-		throws ChecksumException, ParsingException
+		throws ParsingException
 	{
 		if(res[OFF_HEADER] != '<')
 			throw new ParsingException("INVALID HEADER");
