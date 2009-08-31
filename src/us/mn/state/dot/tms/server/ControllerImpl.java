@@ -532,9 +532,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return;
 		if(f) {
 			failTime = new Date();
-			logFailMessage(EventType.COMM_FAILED, id);
+			logCommEvent(EventType.COMM_FAILED, id);
 		} else
-			logFailMessage(EventType.COMM_RESTORED, id);
+			logCommEvent(EventType.COMM_RESTORED, id);
 		failed = f;
 		notifyAttribute("status");
 		notifyAttribute("error");
@@ -589,8 +589,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return 0;
 	}
 
-	/** Log a FAILURE class message */
-	protected final void logFailMessage(EventType event, String id) {
+	/** Log a comm event */
+	protected final void logCommEvent(EventType event, String id) {
 		CommEvent ev = new CommEvent(event, getName(), id);
 		try {
 			ev.doStore();
