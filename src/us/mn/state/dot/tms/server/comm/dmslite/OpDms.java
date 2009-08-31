@@ -24,9 +24,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.aws.AwsMsgs;
 import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
@@ -45,9 +43,6 @@ abstract public class OpDms extends OpDevice {
 
 	/** failure message for unknown reasons */
 	final static String FAILURE_UNKNOWN = "Failure, unknown reason";
-
-	/** DMS debug log */
-	static protected final DebugLog DMS_LOG = new DebugLog("dms");
 
 	/** Bitmap width for dmslite protocol */
 	static protected final int BM_WIDTH = 96;
@@ -90,19 +85,6 @@ abstract public class OpDms extends OpDevice {
 			return AwsMsgs.getRetryThreshold();
 		} else
 			return super.getRetryThreshold();
-	}
-
-	/** 
-	* Log exceptions in the DMS debug log. This method should be called by
-	* operations that fail.
-	*/
-	public void handleException(IOException e) {
-		if(e instanceof ChecksumException) {
-			ChecksumException ce = (ChecksumException)e;
-			DMS_LOG.log(m_dms.getName() + " (" + toString() +
-				"), " + ce.getScannedData());
-		}
-		super.handleException(e);
 	}
 
 	/** Cleanup the operation, which is called by MessagePoller.doPoll() 
