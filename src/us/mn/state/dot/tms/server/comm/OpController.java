@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -25,6 +26,9 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  */
 abstract public class OpController extends Operation {
+
+	/** Comm error log */
+	static protected final DebugLog COMM_LOG = new DebugLog("comm");
 
 	/** Get a message describing an IO exception */
 	static protected String exceptionMessage(IOException e) {
@@ -87,7 +91,9 @@ abstract public class OpController extends Operation {
 
 	/** Handle an exception */
 	public void handleException(IOException e) {
-		controller.logException(id, filterMessage(exceptionMessage(e)));
+		String msg = exceptionMessage(e);
+		COMM_LOG.log(id + " " + msg);
+		controller.logException(id, filterMessage(msg));
 		if(!retry())
  			super.handleException(e);
 	}
