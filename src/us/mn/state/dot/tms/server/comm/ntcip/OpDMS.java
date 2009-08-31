@@ -60,16 +60,6 @@ abstract public class OpDMS extends OpDevice {
 		dms = d;
 	}
 
-	/** Log exceptions in the DMS debug log */
-	public void handleException(IOException e) {
-		if(e instanceof ChecksumException) {
-			ChecksumException ce = (ChecksumException)e;
-			DMS_LOG.log(dms.getName() + ": " + toString() +
-				", BAD CHECKSUM " + ce.getScannedData());
-		}
-		super.handleException(e);
-	}
-
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(success)

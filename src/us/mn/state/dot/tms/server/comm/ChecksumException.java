@@ -21,35 +21,29 @@ package us.mn.state.dot.tms.server.comm;
  */
 public class ChecksumException extends ParsingException {
 
-	/** Scanned data for debugging checksum exceptions */
-	protected final String scannedData;
-
-	/** Get the scanned data for debugging checksum exceptions */
-	public String getScannedData() {
-		return scannedData;
-	}
-
-	/** Create a new checksum exception */
-	public ChecksumException() {
-		super("CHECKSUM ERROR");
-		scannedData = "";
-	}
-
-	/** Create a new checksum exception with the specified message */
-	public ChecksumException(String m) {
-		super("CHECKSUM ERROR: " + m);
-		scannedData = "";
-	}
-
-	/** Create a new checksum exception with scanned data */
-	public ChecksumException(byte[] data) {
-		super("CHECKSUM ERROR");
+	/** Format scanned data for debugging output */
+	static protected String formatScannedData(byte[] data) {
 		StringBuffer s = new StringBuffer();
 		for(int i = 0; i < data.length; i++) {
 			if(i > 0)
 				s.append(':');
 			s.append(Integer.toHexString(data[i] & 0xFF));
 		}
-		scannedData = s.toString().toUpperCase();
+		return s.toString().toUpperCase();
+	}
+
+	/** Create a new checksum exception */
+	public ChecksumException() {
+		super("CHECKSUM ERROR");
+	}
+
+	/** Create a new checksum exception with the specified message */
+	public ChecksumException(String m) {
+		super("CHECKSUM ERROR: " + m);
+	}
+
+	/** Create a new checksum exception with scanned data */
+	public ChecksumException(byte[] data) {
+		super("CHECKSUM ERROR: " + formatScannedData(data));
 	}
 }
