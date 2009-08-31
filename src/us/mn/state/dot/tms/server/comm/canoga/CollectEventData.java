@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * Controller operation to collect vehicle event data
@@ -39,14 +39,18 @@ public class CollectEventData extends OpController {
 		super(DATA_5_MIN, c, c.toString());
 	}
 
-	/** Handle an exception */
-	public void handleException(IOException e) {
+	/** Handle a communication error */
+	public void handleCommError(EventType et, String msg) {
+		COMM_LOG.log(id + " " + et + ", " + msg);
 		success = false;
-		controller.logException(id, e.getMessage());
+		controller.logException(id, filterMessage(msg));
 		if(!controller.hasActiveDetector())
 			phase = null;
-		if(e instanceof ParsingException)
+		switch(et) {
+		case CHECKSUM_ERROR:
+		case PARSING_ERROR:
 			retry();
+		}
 		if(controller.getFailMillis() > VOL_COUNT_WRAP)
 			phase = null;
 	}

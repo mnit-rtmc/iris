@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 
 /**
  * Send sample settings to a 170 controller
@@ -33,14 +32,6 @@ public class OpSendSampleSettings extends Op170 {
 	/** Create a new send sample settings operation */
 	public OpSendSampleSettings(ControllerImpl c) {
 		super(DOWNLOAD, c);
-	}
-
-	/** Handle an exception */
-	public void handleException(IOException e) {
-		if(e instanceof DownloadRequestException)
-			return;
-		else
-			super.handleException(e);
 	}
 
 	/** Begin the send sample settings operation */

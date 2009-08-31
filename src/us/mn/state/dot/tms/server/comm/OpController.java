@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -29,15 +30,6 @@ abstract public class OpController extends Operation {
 
 	/** Comm error log */
 	static protected final DebugLog COMM_LOG = new DebugLog("comm");
-
-	/** Get a message describing an IO exception */
-	static protected String exceptionMessage(IOException e) {
-		String m = e.getMessage();
-		if(m != null && m.length() > 0)
-			return m;
-		else
-			return e.getClass().getSimpleName();
-	}
 
 	/** Filter a message */
 	static protected String filterMessage(String m) {
@@ -61,6 +53,11 @@ abstract public class OpController extends Operation {
 
 	/** Error status message */
 	protected String errorStatus = null;
+
+	/** Set the error status message */
+	public void setErrorStatus(String s) {
+		errorStatus = s;
+	}
 
 	/** Operation error counter */
 	protected int errorCounter = 0;
@@ -89,13 +86,12 @@ abstract public class OpController extends Operation {
 		return super.toString() + " (" + id + ")";
 	}
 
-	/** Handle an exception */
-	public void handleException(IOException e) {
-		String msg = exceptionMessage(e);
-		COMM_LOG.log(id + " " + msg);
+	/** Handle a communication error */
+	public void handleCommError(EventType et, String msg) {
+		COMM_LOG.log(id + " " + et + ", " + msg);
 		controller.logException(id, filterMessage(msg));
 		if(!retry())
- 			super.handleException(e);
+ 			super.handleCommError(et, msg);
 	}
 
 	/** Determine if this operation should be retried */

@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -176,7 +177,7 @@ public class OpMessage extends OpDms {
 	 * if the messenger reopens the connection on failure.
 	 *
 	 * @see MessagePoller#doPoll()
-	 * @see Messenger#handleException()
+	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
 	protected class PhaseSendOnePageMessage extends Phase {
@@ -294,7 +295,8 @@ public class OpMessage extends OpDms {
 					    + ex+", id="+id);
 					valid=false;
 					errmsg=ex.getMessage();
-					handleException(new IOException(errmsg));
+					handleCommError(EventType.PARSING_ERROR,
+						errmsg);
 				}
 
 				// update 
@@ -335,7 +337,7 @@ public class OpMessage extends OpDms {
 	 * if the messenger reopens the connection on failure.
 	 *
 	 * @see MessagePoller#doPoll()
-	 * @see Messenger#handleException()
+	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
 	protected class PhaseSendTwoPageMessage extends Phase {
@@ -463,7 +465,8 @@ public class OpMessage extends OpDms {
 					    + ex+", id="+id);
 					valid=false;
 					errmsg=ex.getMessage();
-					handleException(new IOException(errmsg));
+					handleCommError(EventType.PARSING_ERROR,
+						errmsg);
 				}
 
 				// update 

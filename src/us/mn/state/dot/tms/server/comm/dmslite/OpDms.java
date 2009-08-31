@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.aws.AwsMsgs;
 import us.mn.state.dot.tms.server.comm.aws.AwsPoller;
+import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
@@ -176,7 +177,7 @@ abstract public class OpDms extends OpDevice {
 
 		// trigger error handling, changes status if necessary
 		// phase is set to null if no retry should be performed
-		handleException(new IOException(msg));
+		handleCommError(EventType.PARSING_ERROR, msg);
 		return phase != null;
 	}
 
@@ -262,7 +263,7 @@ abstract public class OpDms extends OpDevice {
 		 * Note, the type of exception throw here determines
 		 * if the messenger reopens the connection on failure.
 		 * @see MessagePoller#doPoll()
-		 * @see Messenger#handleException()
+		 * @see Messenger#handleCommError()
 		 * @see Messenger#shouldReopen()
 		 */
 		protected Phase poll(AddressedMessage argmess)
@@ -378,7 +379,7 @@ abstract public class OpDms extends OpDevice {
 				Log.severe("PhaseGetConfig: Malformed XML received:"+ex+", id="+id);
 				valid = false;
 				errmsg = ex.getMessage();
-				handleException(new IOException(errmsg));
+				handleCommError(EventType.PARSING_ERROR,errmsg);
 			}
 
 			// set config values

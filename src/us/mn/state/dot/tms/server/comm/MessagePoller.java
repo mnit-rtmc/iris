@@ -20,6 +20,7 @@ import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
+import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * MessagePoller is an abstract class which represents a communication channel 
@@ -28,6 +29,15 @@ import us.mn.state.dot.tms.server.DebugLog;
  * @author Douglas Lau
  */
 abstract public class MessagePoller extends Thread {
+
+	/** Get a message describing an IO exception */
+	static protected String exceptionMessage(IOException e) {
+		String m = e.getMessage();
+		if(m != null && m.length() > 0)
+			return m;
+		else
+			return e.getClass().getSimpleName();
+	}
 
 	/** Interval time for load calculation is 30,000 miliseconds */
 	static protected final long INTERVAL_TIME = 30000;
@@ -121,7 +131,7 @@ abstract public class MessagePoller extends Thread {
 			status = "CLOSING";
 		}
 		catch(IOException e) {
-			status = e.getMessage();
+			status = exceptionMessage(e);
 		}
 		finally {
 			messenger.close();
@@ -134,10 +144,9 @@ abstract public class MessagePoller extends Thread {
 	/** Drain the poll queue */
 	protected void drainQueue() {
 		queue.close();
-		IOException e = new IOException(status);
 		while(queue.hasNext()) {
 			Operation o = queue.next();
-			o.handleException(e);
+			o.handleCommError(EventType.QUEUE_DRAINED, status);
 			o.cleanup();
 		}
 	}
@@ -174,19 +183,29 @@ abstract public class MessagePoller extends Thread {
 		catch(DownloadRequestException e) {
 			download(o.getController(), o.getPriority());
 		}
+		catch(ChecksumException e) {
+			o.handleCommError(EventType.CHECKSUM_ERROR,
+				exceptionMessage(e));
+			messenger.drain();
+		}
 		catch(ParsingException e) {
-			o.handleException(e);
+			o.handleCommError(EventType.PARSING_ERROR,
+				exceptionMessage(e));
 			messenger.drain();
 		}
 		catch(ControllerException e) {
-			o.handleException(e);
+			o.handleCommError(EventType.CONTROLLER_ERROR,
+				exceptionMessage(e));
+			o.setFailed();
+			o.setErrorStatus(exceptionMessage(e));
 		}
 		catch(SocketTimeoutException e) {
-			o.handleException(e);
+			o.handleCommError(EventType.POLL_TIMEOUT_ERROR,
+				exceptionMessage(e));
 		}
 		catch(NumberFormatException e) {
-			o.handleException(new IOException(
-				"NUMBER FORMAT EXCEPTION"));
+			o.handleCommError(EventType.PARSING_ERROR,
+				"NUMBER FORMAT ERROR");
 		}
 		finally {
 			if(o.isDone() || !queueOperation(o))

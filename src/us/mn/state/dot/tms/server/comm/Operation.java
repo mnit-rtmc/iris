@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * An operation to be performed on a field controller.  Each message
@@ -95,8 +96,13 @@ abstract public class Operation {
 	/** Cleanup the operation */
 	public void cleanup() {}
 
-	/** Handle an exception */
-	public void handleException(IOException e) {
+	/** Handle a communication error */
+	public void handleCommError(EventType et, String msg) {
+		setFailed();
+	}
+
+	/** Set the operation to failed */
+	public void setFailed() {
 		success = false;
 		phase = null;
 	}
