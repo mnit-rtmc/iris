@@ -204,6 +204,7 @@ abstract public class MessagePoller extends Thread {
 				exceptionMessage(e));
 		}
 		catch(NumberFormatException e) {
+			// FIXME: this should be caught at lower levels ...
 			o.handleCommError(EventType.PARSING_ERROR,
 				"NUMBER FORMAT ERROR");
 		}
