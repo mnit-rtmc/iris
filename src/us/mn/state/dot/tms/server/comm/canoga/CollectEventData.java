@@ -43,7 +43,7 @@ public class CollectEventData extends OpController {
 	public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);
 		success = false;
-		controller.logException(id, filterMessage(msg));
+		controller.logCommEvent(et, id, filterMessage(msg));
 		if(!controller.hasActiveDetector())
 			phase = null;
 		switch(et) {

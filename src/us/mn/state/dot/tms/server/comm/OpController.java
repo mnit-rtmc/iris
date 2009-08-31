@@ -89,7 +89,7 @@ abstract public class OpController extends Operation {
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
 		COMM_LOG.log(id + " " + et + ", " + msg);
-		controller.logException(id, filterMessage(msg));
+		controller.logCommEvent(et, id, filterMessage(msg));
 		if(!retry())
  			super.handleCommError(et, msg);
 	}

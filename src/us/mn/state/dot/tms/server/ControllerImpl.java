@@ -508,11 +508,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		status = s;
 	}
 
-	/** Log an exception */
-	public void logException(String id, String message) {
+	/** Log a comm event */
+	public void logCommEvent(EventType et, String id, String message) {
 		setStatus(message);
 		if(!isFailed())
-			logCommEvent(EventType.COMM_ERROR, id);
+			logCommEvent(et, id);
 	}
 
 	/** Failed status of controller */
