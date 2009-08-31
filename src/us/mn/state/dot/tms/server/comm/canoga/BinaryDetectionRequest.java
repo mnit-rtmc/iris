@@ -87,8 +87,7 @@ public class BinaryDetectionRequest extends Request {
 		res[OFF_CHECKSUM] = 0;
 		byte hexsum = checksum(res);
 		if(paysum != hexsum)
-			throw new ChecksumException("CHECKSUM ERROR: " +
-				paysum + " != " + hexsum);
+			throw new ChecksumException(""+ paysum +" != "+ hexsum);
 	}
 
 	/** Class for vehicle detection events */

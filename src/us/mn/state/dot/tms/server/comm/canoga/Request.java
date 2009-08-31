@@ -152,8 +152,7 @@ abstract public class Request {
 		res[rl - 3] = 0;
 		byte hexsum = checksum(res);
 		if(paysum != hexsum)
-			throw new ChecksumException("CHECKSUM ERROR: " +
-				paysum + " != " + hexsum);
+			throw new ChecksumException(""+ paysum +" != "+ hexsum);
 	}
 
 	/** Get the message payload */

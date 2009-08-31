@@ -31,19 +31,19 @@ public class ChecksumException extends ParsingException {
 
 	/** Create a new checksum exception */
 	public ChecksumException() {
-		super("CHECKSUM ERROR" );
+		super("CHECKSUM ERROR");
 		scannedData = "";
 	}
 
 	/** Create a new checksum exception with the specified message */
 	public ChecksumException(String m) {
-		super(m);
+		super("CHECKSUM ERROR: " + m);
 		scannedData = "";
 	}
 
 	/** Create a new checksum exception with scanned data */
 	public ChecksumException(byte[] data) {
-		super("CHECKSUM ERROR" );
+		super("CHECKSUM ERROR");
 		StringBuffer s = new StringBuffer();
 		for(int i = 0; i < data.length; i++) {
 			if(i > 0)
