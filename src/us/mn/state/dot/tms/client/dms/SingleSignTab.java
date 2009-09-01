@@ -178,11 +178,11 @@ public class SingleSignTab extends FormPanel {
 		} else
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
-		addRow(I18N.get("DMSDispatcher.OperationTitle"), operationTxt);
+		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", interstatusTxt);
 		if(queryMsgBtn.getIEnabled())
-			addRow("Status", statusTxt, queryMsgBtn);
+			addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt, queryMsgBtn);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
