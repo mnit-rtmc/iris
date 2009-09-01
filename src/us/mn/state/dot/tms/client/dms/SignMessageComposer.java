@@ -552,13 +552,14 @@ public class SignMessageComposer extends JPanel {
 
 	/** set all font comboboxes using the specified MultiString */
 	protected void setFontComboBoxes(MultiString ms) {
+		final FontComboBox[] fc = fontCmb;
 		final int dfnum = getDefaultFontNumber();
 		int[] fnum = ms.getFonts(dfnum);
-		for(int i = 0; i < fontCmb.length; i++) {
+		for(int i = 0; i < fc.length; i++) {
 			if(i < fnum.length)
-				fontCmb[i].setSelectedFontNumber(fnum[i]);
+				fc[i].setSelectedFontNumber(fnum[i]);
 			else
-				fontCmb[i].setSelectedFontNumber(dfnum);
+				fc[i].setSelectedFontNumber(dfnum);
 		}
 	}
 
