@@ -775,22 +775,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
-	/** User note */
-	protected transient String userNote;
-
-	/** Set the user note */
-	public void setUserNote(String n) {
-		if(!n.equals(userNote)) {
-			userNote = n;
-			notifyAttribute("userNote");
-		}
-	}
-
-	/** Get the user note */
-	public String getUserNote() {
-		return userNote;
-	}
-
 	/** Next message owner */
 	protected transient User ownerNext;
 
@@ -1498,7 +1482,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			SignMessageHelper.getFontNames(sm, 1))));
 
 		desc.append(Kml.descItem("Notes", getNotes()));
-		desc.append(Kml.descItem("Last Operation", getUserNote()));
+		desc.append(Kml.descItem("Last Operation", getInterStatus()));
 
 		desc.append("<br>Updated by IRIS " + 
 			new Date().toString() + "<br><br>");
@@ -1506,6 +1490,14 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		desc.append("<br>");
 
 		return Kml.htmlDesc(desc.toString());
+	}
+
+	/** Get controller intermediate status */
+	protected String getInterStatus() {
+		Controller c = getController();
+		if(c == null)
+			return "";
+		return c.getInterStatus();
 	}
 
 	/** get kml style selector (KmlFolder interface) */
@@ -1546,7 +1538,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		// DMS name, e.g. CMS or DMS
 		final String DMSABBR = I18N.get("dms.abbreviation");
 		final User owner = getOwnerCurrent();	// Avoid race
-		final String user_note = getUserNote();	// Avoid race
+		final String istatus = getInterStatus();	// Avoid race
 		final GeoLoc loc = getGeoLoc();		// Avoid race
 		out.print("<" + DMSABBR);
 		out.print(XmlWriter.createAttribute("id", getName()));
@@ -1557,9 +1549,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				owner.getFullName()));
 		}
 		out.print(XmlWriter.createAttribute("notes", getNotes()));
-		if(user_note != null) {
+		if(istatus != null) {
 			out.print(XmlWriter.createAttribute("last_operation",
-				user_note));
+				istatus));
 		}
 		if(loc != null) {
 			out.print(XmlWriter.createAttribute("geoloc",

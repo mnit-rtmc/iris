@@ -187,9 +187,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Operation description label */
 	protected final JLabel operation = new JLabel();
 
-	/** User Note */
-	protected final JLabel userNote = new JLabel();
-
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
 
@@ -390,7 +387,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		ambientTemp.setForeground(OK);
 		housingTemp.setForeground(OK);
 		operation.setForeground(OK);
-		userNote.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Cabinet temp", cabinetTemp);
 		panel.addRow("Ambient temp", ambientTemp);
@@ -408,7 +404,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			};
 		}
 		panel.finishRow();
-		panel.addRow("User Note", userNote);
 		IButton resetBtn = new IButton("dms.reset", 
 			SystemAttrEnum.DMS_RESET_ENABLE);
 		if(resetBtn.getIEnabled()) {
@@ -672,8 +667,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		}
 		if(a == null || a.equals("operation"))
 			operation.setText(proxy.getOperation());
-		if(a == null || a.equals("userNote"))
-			userNote.setText(proxy.getUserNote());
 	}
 
 	/** Select card on manufacturer panel for the given make */

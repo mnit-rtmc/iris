@@ -192,7 +192,6 @@ abstract public class OpDms extends OpDevice {
 
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
-		m_dms.setUserNote(buildOpStatusCompletionNote(m)); //FIXME: delete
 	}
 
 	/** Build operation status completion note */

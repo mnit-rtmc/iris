@@ -158,9 +158,6 @@ public interface DMS extends Device {
 	 *         power status is not known, null is returned. */
 	String[] getPowerStatus();
 
-	/** Get user note */
-	String getUserNote();
-
 	/** Set the next message owner */
 	void setOwnerNext(User o);
 
