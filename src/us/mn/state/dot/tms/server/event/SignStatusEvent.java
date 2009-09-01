@@ -36,6 +36,10 @@ public class SignStatusEvent extends BaseEvent {
 	/** Create a new sign status event */
 	public SignStatusEvent(EventType e, String d, String m, String u) {
 		super(e);
+		assert e == EventType.DMS_DEPLOYED ||
+		       e == EventType.DMS_CLEARED ||
+		       e == EventType.LCS_DEPLOYED ||
+		       e == EventType.LCS_CLEARED;
 		device_id = d;
 		message = m;
 		iris_user = u;

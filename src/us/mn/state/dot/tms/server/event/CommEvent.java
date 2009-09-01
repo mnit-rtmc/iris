@@ -33,6 +33,14 @@ public class CommEvent extends BaseEvent {
 	/** Create a new comm event */
 	public CommEvent(EventType e, String c, String dev) {
 		super(e);
+		assert e == EventType.QUEUE_DRAINED ||
+		       e == EventType.POLL_TIMEOUT_ERROR ||
+		       e == EventType.PARSING_ERROR ||
+		       e == EventType.CHECKSUM_ERROR ||
+		       e == EventType.CONTROLLER_ERROR ||
+		       e == EventType.COMM_ERROR ||
+		       e == EventType.COMM_FAILED ||
+		       e == EventType.COMM_RESTORED;
 		controller = c;
 		device_id = dev;
 	}

@@ -30,6 +30,8 @@ public class AlarmEvent extends BaseEvent {
 	/** Create a new alarm event */
 	public AlarmEvent(EventType e, String a) {
 		super(e);
+		assert e == EventType.ALARM_TRIGGERED ||
+		       e == EventType.ALARM_CLEARED;
 		alarm = a;
 	}
 

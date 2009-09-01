@@ -30,6 +30,9 @@ public class DetFailEvent extends BaseEvent {
 	/** Create a new detector fail event */
 	public DetFailEvent(EventType e, String d) {
 		super(e);
+		assert e == EventType.DET_CHATTER ||
+		       e == EventType.DET_LOCKED_ON ||
+		       e == EventType.DET_NO_HITS;
 		device_id = d;
 	}
 
