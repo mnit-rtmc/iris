@@ -368,7 +368,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a font box */
 	protected Box createFontBox(int p) {
-		final FontComboBox[] fc = fontCmb;
+		final FontComboBox[] fc = fontCmb;	// Avoid races
 		Box box = Box.createHorizontalBox();
 		if(p < fc.length) {
 			JLabel label = new JLabel();
@@ -382,7 +382,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get the font number for a given page */
 	protected Integer getFontNumber(int p) {
-		final FontComboBox[] fc = fontCmb;
+		final FontComboBox[] fc = fontCmb;	// Avoid races
 		if(p < fc.length)
 			return fc[p].getFontNumber();
 		else
@@ -552,7 +552,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** set all font comboboxes using the specified MultiString */
 	protected void setFontComboBoxes(MultiString ms) {
-		final FontComboBox[] fc = fontCmb;
+		final FontComboBox[] fc = fontCmb;	// Avoid races
 		final int dfnum = getDefaultFontNumber();
 		int[] fnum = ms.getFonts(dfnum);
 		for(int i = 0; i < fc.length; i++) {
