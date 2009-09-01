@@ -17,12 +17,14 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
@@ -291,7 +293,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected Box buildButtonPanel() {
 		new ActionJob(sendBtn) {
 			public void perform() {
-				sendMessage();
+				if(sendConfirm())
+					sendMessage();
 			}
 		};
 		Box box = Box.createHorizontalBox();
@@ -301,6 +304,45 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		box.add(blankBtn);
 		box.add(Box.createHorizontalGlue());
 		return box;
+	}
+
+	/** If enabled, prompt the user with a send confirmation.
+	 *  @return True to send the message else false to cancel. */
+	protected boolean sendConfirm() {
+		// send confirmation is not enabled
+		if(!SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
+			return true;
+		int res = 0;
+		try {
+			String m = buildConfirmMsg();
+			if(!m.isEmpty())
+				res = JOptionPane.showConfirmDialog(null, m, 
+					"Send Confirmation",
+					JOptionPane.OK_CANCEL_OPTION);
+		} catch(Exception ex) {}
+		return res == 0;
+	}
+
+	/** Return a string which is a list of selected DMS.
+	 *  @return An empty string if no DMS selected else the message. */
+	protected String buildConfirmMsg() {
+		StringBuilder ret = new StringBuilder("Send message to ");
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() <= 0)
+			return "";
+		if(sel.size() == 1)
+			ret.append(((DMS)sel.get(0)).getName());
+		else {
+			for(Iterator iter = sel.iterator(); iter.hasNext();) {
+			   DMS dms = (DMS) iter.next();
+				if(checkDimensions(dms))
+					ret.append(dms.getName());
+				if(iter.hasNext())
+					ret.append(", ");
+			}
+		}
+		ret.append("?");
+		return ret.toString();
 	}
 
 	/** Called whenever a sign is added to the selection */
