@@ -373,6 +373,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Sign height", pHeight);
 		panel.addRow("Character width", cWidth);
 		panel.addRow("Character height", cHeight);
+		JButton configBtn = new JButton("Query Configuration");
+		new ActionJob(this, configBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					QUERY_CONFIGURATION.ordinal());
+			}
+		};
+		panel.addRow(configBtn);
 		return panel;
 	}
 
