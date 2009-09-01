@@ -256,6 +256,7 @@ public class SignMessageComposer extends JPanel {
 			for(FocusListener fl: c.getFocusListeners())
 				c.removeFocusListener(fl);
 		}
+		cmbLine = new JComboBox[0];
 	}
 
 	/** Dispose of the existing combobox widgets */
@@ -286,10 +287,10 @@ public class SignMessageComposer extends JPanel {
 			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
 		initializeEtcWidgets(np, builder);
 		initializeWidgets(nl, np);
-		for(short i = 0; i < cmbLine.length; i++) {
-			if(cmbLine[i] != null && stm != null)
-				cmbLine[i].setModel(stm.getLineModel(
-					(short)(i + 1)));
+		if(stm != null) {
+			final JComboBox[] cl = cmbLine;		// Avoid races
+			for(short i = 1; i <= cl.length; i++)
+				cl[i-1].setModel(stm.getLineModel(i));
 		}
 	}
 
@@ -328,9 +329,10 @@ public class SignMessageComposer extends JPanel {
 		disposeLines();
 		n_lines = nl;
 		n_pages = np;
-		cmbLine = new JComboBox[n_lines * n_pages];
-		for(int i = 0; i < cmbLine.length; i++)
-			cmbLine[i] = createLineCombo();
+		JComboBox[] cl = new JComboBox[n_lines * n_pages];
+		for(int i = 0; i < cl.length; i++)
+			cl[i] = createLineCombo();
+		cmbLine = cl;
 		for(int i = 0; i < n_pages; i++)
 			setPage(i, createPage(i));
 		while(n_pages < pages.getTabCount())
@@ -463,10 +465,11 @@ public class SignMessageComposer extends JPanel {
 
 	/** Return a MULTI string using the contents of the widgets */
 	public String getMessage() {
-		String[] mess = new String[cmbLine.length];
+		final JComboBox[] cl = cmbLine;		// Avoid races
+		String[] mess = new String[cl.length];
 		int m = 0;
-		for(int i = 0; i < cmbLine.length; i++) {
-			mess[i] = getMessageFromCB(i);
+		for(int i = 0; i < cl.length; i++) {
+			mess[i] = getMessageFromCB(cl[i]);
 			if(mess[i].length() > 0)
 				m = i + 1;
 		}
@@ -477,14 +480,8 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Get text from combobox line */
-	protected String getMessageFromCB(int line) {
-		assert line >= 0 && line < cmbLine.length;
-		assert cmbLine[line] != null;
-		if(line < 0 || line >= cmbLine.length)
-			return "";
-		if(cmbLine[line] == null)
-			return "";
-		Object o = cmbLine[line].getSelectedItem();
+	protected String getMessageFromCB(JComboBox cb) {
+		Object o = cb.getSelectedItem();
 		if(o == null)
 			return "";
 		if(o instanceof SignText)
@@ -542,11 +539,12 @@ public class SignMessageComposer extends JPanel {
 			setFontComboBoxes(new MultiString(m.getMulti()));
 		}
 		String[] lines = SignMessageHelper.createLines(m, n_lines);
-		for(int i = 0; i < cmbLine.length; i++) {
+		final JComboBox[] cl = cmbLine;		// Avoid races
+		for(int i = 0; i < cl.length; i++) {
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);
-			else if(cmbLine[i].getItemCount() > 0)
-				cmbLine[i].setSelectedIndex(0);
+			else if(cl[i].getItemCount() > 0)
+				cl[i].setSelectedIndex(0);
 		}
 	}
 
