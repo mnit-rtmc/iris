@@ -87,6 +87,7 @@ public enum SystemAttrEnum {
 	TRAVEL_TIME_MIN_MPH(15, 1, 50),
 	UPTIME_LOG_ENABLE(false),
 	UPTIME_LOG_FILENAME("/var/www/html/irisuptimelog.csv"),
+	WINDOW_TITLE("IRIS: "),
 	XML_OUTPUT_DIRECTORY("/var/www/html/dds/");
 
 	/** System attribute class */

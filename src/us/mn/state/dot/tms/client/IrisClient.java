@@ -37,6 +37,7 @@ import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.security.LoginListener;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
@@ -85,9 +86,13 @@ public class IrisClient extends JFrame {
 	/** the help menu changes after login */
 	protected HelpMenu m_helpmenu;
 
+	/** Window title login message */
+	protected final static String WINDOW_TITLE_LOGIN = 
+		"IRIS: Login to Start";
+
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws IOException {
-		super("IRIS: Login to Start");
+		super(WINDOW_TITLE_LOGIN);
 		this.props = props;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
@@ -191,8 +196,7 @@ public class IrisClient extends JFrame {
 		TdxmlException
 	{
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		setTitle("IRIS: User = " + user.getName() + " (" +
-			user.getFullName() + ")");
+		setTitle(getWindowTitle(user));
 		session = new Session(userManager, desktop, props, logger,
 			baseLayers);
 		arrangeTabs();
@@ -212,7 +216,7 @@ public class IrisClient extends JFrame {
 		clearViewMenu();
 		removeTabs();
 		closeSession();
-		setTitle("IRIS: Login to Start");
+		setTitle(WINDOW_TITLE_LOGIN);
 		validate();
 	}
 
@@ -236,5 +240,15 @@ public class IrisClient extends JFrame {
 	protected void removeTabs() {
 		for(ScreenPane sp: s_panes)
 			sp.removeTabs();
+	}
+
+	/** Get window title.
+	 *  @param u User, may be null. */
+	protected String getWindowTitle(User u) {
+		String title = SystemAttrEnum.WINDOW_TITLE.getString();
+		if(u != null)
+			title += "User = " + u.getName() + " (" + 
+				u.getFullName() + ")";
+		return title;
 	}
 }
