@@ -474,8 +474,11 @@ public class AwsMsg {
 		TMSException
 	{
 		String multi = createMultiString();
+		boolean isblank = new MultiString(multi).isBlank();
+		DMSMessagePriority runp = (isblank ? 
+			DMSMessagePriority.BLANK : DMSMessagePriority.AWS);
 		return dms.createMessage(multi, DMSMessagePriority.AWS,
-			DMSMessagePriority.AWS, getSignMessageDuration());
+			runp, getSignMessageDuration());
 	}
 
 	/** toString */
