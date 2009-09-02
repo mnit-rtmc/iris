@@ -26,7 +26,6 @@ import us.mn.state.dot.map.Theme;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
@@ -42,7 +41,6 @@ import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
-import us.mn.state.dot.tms.client.incidents.IncidentTab;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
@@ -57,10 +55,6 @@ import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.security.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
-
-// agency specific imports
-import us.mn.state.dot.tms.client.incidents.TmsIncidentLayer;
-import us.mn.state.dot.tms.client.incidents.D10IncidentLayer;
 
 /**
  * A session is one IRIS login session.
@@ -134,9 +128,6 @@ public class Session {
 	/** Segment layer */
 	protected final SegmentLayer seg_layer;
 
-	/** Incident layer */
-	protected final TmsIncidentLayer incLayer;
-
 	/** Location manager */
 	protected final GeoLocManager loc_manager;
 
@@ -204,7 +195,7 @@ public class Session {
 
 	/** Create a new session */
 	public Session(UserManager um, SmartDesktop d, Properties p, Logger l,
-		List<Layer> bl) throws TdxmlException, IOException
+		List<Layer> bl) throws IOException
 	{
 		user = um.getUser();
 		state = um.getSonarState();
@@ -230,24 +221,8 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
-		incLayer = createIncidentLayer();
 		seg_layer = r_node_manager.getSegmentLayer();
 		addTabs();
-	}
-
-	/** Create the incident layer */
-	protected TmsIncidentLayer createIncidentLayer() throws TdxmlException,
-		IOException
-	{
-		String i_loc = props.getProperty("tdxml.incident.url");
-		if(i_loc != null) {
-			URL u = new URL(i_loc);
-			if(SystemAttrEnum.INCIDENT_CALTRANS_ENABLE.getBoolean())
-				return new D10IncidentLayer(u, logger);
-			else
-				return new TmsIncidentLayer(u, logger);
-		} else
-			return null;
 	}
 
 	/** Add the tabs */
@@ -256,8 +231,6 @@ public class Session {
 			addDMSTab();
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
 			addMeterTab();
-		if(incLayer != null)
-			addIncidentTab();
 		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
 			addLcsTab();
 		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
@@ -282,8 +255,6 @@ public class Session {
 			lstates.add(seg_layer.createState());
 		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
 			lstates.add(cam_manager.getLayer().createState());
-		if(incLayer != null)
-			lstates.add(incLayer.createState());
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
 			lstates.add(meter_manager.getLayer().createState());
 		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
@@ -317,16 +288,6 @@ public class Session {
 		hideLayer(lstates, lcs_array_manager.getProxyType());
 		hideLayer(lstates, warn_manager.getProxyType());
 		tabs.add(new RampMeterTab(this, meter_manager, lstates));
-	}
-
-	/** Add the incident tab */
-	protected void addIncidentTab() {
-		List<LayerState> lstates = createLayers();
-		hideLayer(lstates, meter_manager.getProxyType());
-		hideLayer(lstates, dms_manager.getProxyType());
-		hideLayer(lstates, lcs_array_manager.getProxyType());
-		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new IncidentTab(incLayer, lstates));
 	}
 
 	/** Add the LCS tab */
@@ -373,7 +334,5 @@ public class Session {
 		desktop.closeFrames();
 		for(MapTab tab: tabs)
 			tab.dispose();
-		if(incLayer != null)
-			incLayer.dispose();
 	}
 }
