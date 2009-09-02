@@ -60,6 +60,11 @@ public class OpMessage extends OpDms {
 		return getRetryThreshold(m_sm);
 	}
 
+	/** Get the OpDms */
+	public OpDms getOpDms() {
+		return this;
+	}
+
 	/** 
 	 * Return the bitmap page as a hex string. The width of the 
 	 * bitmap is adjusted as necessary.
@@ -212,6 +217,7 @@ public class OpMessage extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException 
 		{
+			updateInterStatus("Starting operation");
 			Log.finest(
 			    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg) called.");
 			assert argmess instanceof Message :
@@ -286,7 +292,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("Bitmap", getBitmapPage(0)));
 
 			// send msg to field controller
-            		mess.getRequest();	// throws IOException
+            		mess.getRequest(getOpDms());	// throws IOException
 
 			// parse resp msg
 			{
@@ -348,6 +354,7 @@ public class OpMessage extends OpDms {
 			}
 
 			// this operation is complete
+			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}
@@ -369,8 +376,10 @@ public class OpMessage extends OpDms {
 		 * @return next Phase to execute else null.
 		 * @throws IOException
 		 */
-		protected Phase poll(AddressedMessage argmess)
-			throws IOException {
+		protected Phase poll(AddressedMessage argmess) 
+			throws IOException 
+		{
+			updateInterStatus("Starting operation");
 			Log.finest(
 			    "dmslite.OpMessage.PhaseSendTwoPageMessage.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";
@@ -457,7 +466,7 @@ public class OpMessage extends OpDms {
 			mess.add(new ReqRes("Bitmap", getBitmapPage(0) + getBitmapPage(1)));
 
 			// send msg
-            		mess.getRequest();	// throws IOException
+           		mess.getRequest(getOpDms());	// throws IOException
 
 			// parse resp msg
 			{
@@ -518,6 +527,7 @@ public class OpMessage extends OpDms {
 			}
 
 			// this operation is complete
+			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}

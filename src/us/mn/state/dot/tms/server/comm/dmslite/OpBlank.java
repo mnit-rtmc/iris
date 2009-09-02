@@ -71,6 +71,8 @@ public class OpBlank extends OpDms
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException 
 		{
+			updateInterStatus("Starting operation");
+
 			if(m_sm == null)
 				return null;
 			assert argmess instanceof Message :
@@ -181,6 +183,7 @@ public class OpBlank extends OpDms
 			}
 
 			// done
+			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}

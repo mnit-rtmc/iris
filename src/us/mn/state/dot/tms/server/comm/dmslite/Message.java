@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import javax.mail.MessagingException;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.Log;
@@ -42,6 +43,9 @@ public class Message implements AddressedMessage
 
     	// default max wait time for DMS response
 	static final int DEFAULT_TIMEOUT_DMS_MS = 1000*30;
+
+	// associated operation
+	OpDms m_opdms = null;
 
 	// fields
 	private String m_name = "DmsLiteMsg";
@@ -135,6 +139,21 @@ public class Message implements AddressedMessage
 		m_objlist.add(mo);
 	}
 
+	/** Update intermediate status */
+	private void updateInterStatus(String m) {
+		if(m_opdms != null)
+			m_opdms.updateInterStatus(m);
+	}
+
+	/**
+	 * Send a get request message
+	 * @throws IOException if received response is malformed or timed out.
+	 */
+	public void getRequest(OpDms op) throws IOException {
+		m_opdms = op;
+		getRequest();
+	}
+
 	/**
 	 * Send a get request message
 	 * @throws IOException if received response is malformed or timed out.
@@ -146,6 +165,7 @@ public class Message implements AddressedMessage
 		byte[] array = this.buildReqMsg();
 
 		// send message
+		updateInterStatus("Sending request to sensorserver.");
 		long starttime=STime.getCurTimeUTCinMillis();
 		Log.finest("getRequest(): Writing " + array.length + 
 			" bytes to SensorServer.");
@@ -154,6 +174,7 @@ public class Message implements AddressedMessage
 		m_os.flush();
 
 		// read response
+		updateInterStatus("Reading response from sensorserver.");
 		String token=null;
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,

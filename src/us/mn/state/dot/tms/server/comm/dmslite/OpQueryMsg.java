@@ -259,6 +259,7 @@ public class OpQueryMsg extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException
 		{
+			updateInterStatus("Starting operation");
 			Log.finest(
 				"OpQueryMsg.PhaseQueryMsg.poll(msg) called, " +
 				"dms=" + m_dms.getName());
@@ -293,7 +294,9 @@ public class OpQueryMsg extends OpDms {
 			// send msg
 			mess.add(rr0);
 			mess.add(rr1);
+			updateInterStatus("Sending to sensorserver");
             		mess.getRequest();	// throws IOException
+			updateInterStatus("Received response from sensorserver");
 
 			// parse resp msg
 			long id = 0;
@@ -465,6 +468,7 @@ public class OpQueryMsg extends OpDms {
 			}
 
 			// this operation is complete
+			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}

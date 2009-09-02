@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -191,13 +192,13 @@ abstract public class OpDms extends OpDevice {
 
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
-		m_dms.setUserNote(buildUserNote(m));
+		m_dms.setUserNote(buildOpStatusCompletionNote(m)); //FIXME: delete
 	}
 
-	/** Build user note */
-	public String buildUserNote(Message m) {
+	/** Build operation status completion note */
+	public String buildOpStatusCompletionNote(Message m) {
 		StringBuilder note = new StringBuilder();
-		note.append("Last operation at " +
+		note.append("Last message at " +
 			STime.getCurTimeShortString());
 		String delta = SString.doubleToString((
 			((double)m.getCompletionTimeMS()) / 1000), 2);
@@ -240,6 +241,11 @@ abstract public class OpDms extends OpDevice {
 	 *  ControllerOperation.cleanup(). */
 	protected void setErrorMsg(String msg) {
 		errorStatus = msg;
+	}
+
+	/** Update operation intermediate status in the client */
+	protected void updateInterStatus(String is) {
+		ControllerHelper.updateInterStatus(controller, is);
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

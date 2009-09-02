@@ -60,6 +60,8 @@ public class OpReset extends OpDms
 	{
 		/** Query current message */
 		protected Phase poll(AddressedMessage argmess) throws IOException {
+			updateInterStatus("Starting operation");
+
 			Log.finest(
 			    "OpReset.PhaseResetDms.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";
@@ -140,6 +142,7 @@ public class OpReset extends OpDms
 			}
 
 			// this operation is complete
+			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}
