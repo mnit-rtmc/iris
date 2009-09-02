@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
-import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.utils.SString;
 
 /**

@@ -22,9 +22,9 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.AlarmEvent;
-import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * AlarmImpl is a class for reading alarm inputs on controllers.

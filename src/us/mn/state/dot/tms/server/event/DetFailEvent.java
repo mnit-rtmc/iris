@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.event;
 
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.tms.EventType;
 
 /**
  * This is a class for logging detector fail events to a database.

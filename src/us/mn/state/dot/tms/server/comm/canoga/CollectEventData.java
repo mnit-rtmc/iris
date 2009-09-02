@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * Controller operation to collect vehicle event data

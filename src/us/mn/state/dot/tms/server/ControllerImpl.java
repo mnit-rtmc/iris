@@ -23,18 +23,18 @@ import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.comm.SamplePoller;
-import us.mn.state.dot.tms.server.event.CommEvent;
-import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
+import us.mn.state.dot.tms.server.event.CommEvent;
 
 /**
  * A controller represents a field device controller.

@@ -18,9 +18,9 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.SocketTimeoutException;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DebugLog;
-import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * MessagePoller is an abstract class which represents a communication channel 

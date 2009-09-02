@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.event.EventType;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 

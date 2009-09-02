@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.event.EventType;
+import us.mn.state.dot.tms.EventType;
 
 /**
  * An operation to be performed on a field controller.  Each message

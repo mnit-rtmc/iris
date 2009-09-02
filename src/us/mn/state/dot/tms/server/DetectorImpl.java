@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Interval;
@@ -40,7 +41,6 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
-import us.mn.state.dot.tms.server.event.EventType;
 
 /**
  * Detector for traffic data sampling

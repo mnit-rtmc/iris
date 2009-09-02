@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.event;
 
 import java.util.Date;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.SQLConnection;
 import us.mn.state.dot.tms.server.Storable;
