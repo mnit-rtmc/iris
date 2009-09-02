@@ -1281,7 +1281,7 @@ CREATE TABLE event.alarm_event (
 );
 
 CREATE TABLE event.comm_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event_id_seq'),
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
@@ -1291,7 +1291,7 @@ CREATE TABLE event.comm_event (
 );
 
 CREATE TABLE event.detector_event (
-	event_id integer DEFAULT nextval('event_id_seq') NOT NULL,
+	event_id integer DEFAULT nextval('event.event_id_seq') NOT NULL,
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
@@ -1299,13 +1299,27 @@ CREATE TABLE event.detector_event (
 );
 
 CREATE TABLE event.sign_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event_id_seq'),
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
 	message text,
 	iris_user VARCHAR(15) REFERENCES iris.i_user(name)
+);
+
+CREATE TABLE event.incident (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	name VARCHAR(16) NOT NULL UNIQUE,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	road VARCHAR(20) NOT NULL,
+	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+	easting INTEGER NOT NULL,
+	northing INTEGER NOT NULL,
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL
 );
 
 SET search_path = public, event, pg_catalog;

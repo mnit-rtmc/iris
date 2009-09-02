@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 /**
- * This enumeration contains events in the event_type table.
+ * This enumeration contains events in the event_description table.
  *
  * @author Douglas Lau
  */

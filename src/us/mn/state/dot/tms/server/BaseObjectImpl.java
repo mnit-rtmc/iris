@@ -66,6 +66,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		LCSImpl.loadAll();
 		LCSIndicationImpl.loadAll();
 		LaneUseMultiImpl.loadAll();
+		IncidentImpl.loadAll();
 		ActionPlanImpl.loadAll();
 		TimeActionImpl.loadAll();
 		DmsActionImpl.loadAll();
