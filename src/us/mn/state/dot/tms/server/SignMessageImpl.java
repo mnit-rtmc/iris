@@ -53,7 +53,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return "system_" + last_id;
 	}
 
-	/** Load all the sign text */
+	/** Load all the sign messages */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading sign messages...");
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
