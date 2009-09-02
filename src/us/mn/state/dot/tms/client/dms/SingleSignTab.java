@@ -29,6 +29,7 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -57,6 +58,25 @@ public class SingleSignTab extends FormPanel {
 			return "???";
 		else
 			return c.getStatus();
+	}
+
+	/** Get the controller intermediate status */
+	static protected String getInterStatus(DMS proxy) {
+		Controller c = proxy.getController();
+		if(c == null)
+			return "???";
+		else
+			return getInterStatus(c);
+	}
+
+	/** Get the controller intermediate status */
+	static protected String getInterStatus(Controller c) {
+		String is = "";
+		if(c != null) {
+			is = c.getInterStatus();
+			is = (is == null ? "" : is);
+		}
+		return is;
 	}
 
 	/** Formatter for displaying the hour and minute */
@@ -114,6 +134,9 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
 
+	/** Displays the controller's intermediate status (optional) */
+	protected final JTextField interstatusTxt = createTextField();
+
 	/** Displays the current message deploy time */
 	protected final JTextField deployTxt = createTextField();
 
@@ -156,6 +179,8 @@ public class SingleSignTab extends FormPanel {
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
 		addRow(I18N.get("DMSDispatcher.OperationTitle"), operationTxt);
+		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
+			addRow("Operation Status", interstatusTxt);
 		if(queryMsgBtn.getIEnabled())
 			addRow("Status", statusTxt, queryMsgBtn);
 		add("Deployed", deployTxt);
@@ -245,8 +270,15 @@ public class SingleSignTab extends FormPanel {
 		operationTxt.setText("");
 		queryMsgBtn.setEnabled(false);
 		statusTxt.setText("");
+		interstatusTxt.setText("");
 		deployTxt.setText("");
 		expiresTxt.setText(EMPTY_TXT);
+	}
+
+	/** Update one attribute on the form */
+	public void updateAttribute(Controller c, String a) {
+		if(a.equals("interStatus"))
+			interstatusTxt.setText(getInterStatus(c));
 	}
 
 	/** Update one attribute on the form */
@@ -280,6 +312,7 @@ public class SingleSignTab extends FormPanel {
 			operationTxt.setText(dms.getOperation());
 			queryMsgBtn.setEnabled(true);
 			statusTxt.setText(status);
+			interstatusTxt.setText(getInterStatus(dms));
 		}
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));

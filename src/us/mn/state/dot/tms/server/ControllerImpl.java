@@ -627,4 +627,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		super.doDestroy();
 		MainServer.server.removeObject(cabinet);
 	}
+
+	/** Controller intermediate communication status. Unlike the status
+	 *  field, this field is updated during the course of an operation to
+	 *  indicate the real-time status. A system attribute is used to
+	 *  control if interStatus is activated (see ControllerHelper). */
+	protected transient String interStatus = "";
+
+	/** Get the controller intermediate communication status. */
+	public String getInterStatus() {
+		return interStatus;
+	}
+
+	/** Set the controller intermediate communication status. */
+	public void setInterStatus(String s) {
+		interStatus = s;
+		notifyAttribute("interStatus");
+	}
 }
