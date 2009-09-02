@@ -60,11 +60,6 @@ public class OpMessage extends OpDms {
 		return getRetryThreshold(m_sm);
 	}
 
-	/** Get the OpDms */
-	public OpDms getOpDms() {
-		return this;
-	}
-
 	/** 
 	 * Return the bitmap page as a hex string. The width of the 
 	 * bitmap is adjusted as necessary.
@@ -354,7 +349,6 @@ public class OpMessage extends OpDms {
 			}
 
 			// this operation is complete
-			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}
@@ -465,7 +459,7 @@ public class OpMessage extends OpDms {
 			// bitmap
 			mess.add(new ReqRes("Bitmap", getBitmapPage(0) + getBitmapPage(1)));
 
-			// send msg
+			// send msg to field controller
            		mess.getRequest(getOpDms());	// throws IOException
 
 			// parse resp msg
@@ -527,7 +521,6 @@ public class OpMessage extends OpDms {
 			}
 
 			// this operation is complete
-			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}

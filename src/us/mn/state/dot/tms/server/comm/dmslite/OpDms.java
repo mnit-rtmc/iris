@@ -73,6 +73,11 @@ abstract public class OpDms extends OpDevice {
 		m_user = user;
 	}
 
+	/** Get the OpDms */
+	public OpDms getOpDms() {
+		return this;
+	}
+
 	/** get operation name */
 	public String getOpName() {
 		return getClass().getName();
@@ -192,6 +197,7 @@ abstract public class OpDms extends OpDevice {
 
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
+		updateInterStatus(buildOpStatusCompletionNote(m));
 	}
 
 	/** Build operation status completion note */
@@ -303,7 +309,7 @@ abstract public class OpDms extends OpDevice {
 			mess.add(rr1);
 
 			// send msg
-            		mess.getRequest();	// throws IOException
+            		mess.getRequest(getOpDms());	// throws IOException
 
 			// parse resp msg
 			long id = 0;

@@ -87,7 +87,7 @@ public class OpReset extends OpDms
 			mess.add(rr1);
 
 			// send msg
-			mess.getRequest(); // throws IOException
+			mess.getRequest(getOpDms()); // throws IOException
 
 			// parse resp msg
 			// e.g. <DmsLite><SetInitRespMsg><Id>123</Id><IsValid>true</IsValid><ErrMsg></ErrMsg></SetInitRespMsg></DmsLite>
@@ -142,7 +142,6 @@ public class OpReset extends OpDms
 			}
 
 			// this operation is complete
-			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}

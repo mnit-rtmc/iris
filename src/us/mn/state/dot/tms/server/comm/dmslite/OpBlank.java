@@ -120,7 +120,7 @@ public class OpBlank extends OpDms
 			mess.add(rr3);
 
 			// send msg
-			mess.getRequest();    // throws IOException
+			mess.getRequest(getOpDms());    // throws IOException
 
 			// response: 
 			// <DmsLite><SetBlankMsgRespMsg>
@@ -183,7 +183,6 @@ public class OpBlank extends OpDms
 			}
 
 			// done
-			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}

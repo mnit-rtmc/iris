@@ -291,11 +291,11 @@ public class OpQueryMsg extends OpDms {
 				"OnTime", "UseOffTime", "OffTime", 
 				"DisplayTimeMS", "UseBitmap", "Bitmap"});
 
-			// send msg
+			// send msg to field controller
 			mess.add(rr0);
 			mess.add(rr1);
 			updateInterStatus("Sending to sensorserver");
-            		mess.getRequest();	// throws IOException
+            		mess.getRequest(getOpDms());	// throws IOException
 			updateInterStatus("Received response from sensorserver");
 
 			// parse resp msg
@@ -468,7 +468,6 @@ public class OpQueryMsg extends OpDms {
 			}
 
 			// this operation is complete
-			updateInterStatus(buildOpStatusCompletionNote(mess));
 			return null;
 		}
 	}
