@@ -48,9 +48,9 @@ public class ControllerHelper extends BaseHelper {
 	 *  method is in the helper so the system attribute can be used
 	 *  to conrol if the field is updated, so no network traffic will
 	 *  be generated if it is not enabled. */
-	static public void updateInterStatus(Controller proxy, String is) {
+	static public void updateInterStatus(Controller ctrl, String is) {
 		// intermediate status enabled?
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
-			proxy.setInterStatus(is);
+			ctrl.setInterStatus(is);
 	}
 }
