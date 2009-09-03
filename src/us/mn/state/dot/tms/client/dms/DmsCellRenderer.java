@@ -114,14 +114,24 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			return "";
 	}
 
-	/** Set the DMS to be displayed */
+	/** Set the DMS to be displayed. All attributes are updated. */
 	public void setDms(DMS dms) {
-		lblID.setText(dms.getName());
-		lblLocation.setText(GeoLocHelper.getDescription(
-			dms.getGeoLoc()));
-		setDimensions(dms);
-		pixelPnl.setGraphic(getPageOne(dms));
-		lblUser.setText(formatOwner(dms.getOwnerCurrent()));
+		updateDms(dms, "messageCurrent");
+		updateDms(dms, "ownerCurrent");
+	}
+
+	/** Update a specified attribute on the DMS.
+	 *  @param dms DMS to update.
+	 *  @param a Attribute to update. */
+	public void updateDms(DMS dms, String a) {
+		if(a.equals("messageCurrent")) {
+			lblID.setText(dms.getName());
+			lblLocation.setText(GeoLocHelper.getDescription(
+				dms.getGeoLoc()));
+			setDimensions(dms);
+			pixelPnl.setGraphic(getPageOne(dms));
+		} else if(a.equals("ownerCurrent"))
+			lblUser.setText(formatOwner(dms.getOwnerCurrent()));
 	}
 
 	/** Set the dimensions of the pixel panel */

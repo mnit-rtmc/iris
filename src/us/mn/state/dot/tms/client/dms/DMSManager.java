@@ -161,11 +161,9 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Called when a proxy attribute has changed */
 	public void proxyChanged(DMS dms, String a) {
-		if(a.equals("messageCurrent")) {
-			DmsCellRenderer r = lookupRenderer(dms);
-			if(r != null)
-				r.setDms(dms);
-		}
+		DmsCellRenderer r = lookupRenderer(dms);
+		if(r != null)
+			r.updateDms(dms, a);
 	}
 
 	/** Create a proxy JList for the given style */
