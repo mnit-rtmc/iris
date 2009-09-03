@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * selected DMS within the DMS dispatcher.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SingleSignTab extends FormPanel {
 
@@ -58,15 +59,6 @@ public class SingleSignTab extends FormPanel {
 			return "???";
 		else
 			return c.getStatus();
-	}
-
-	/** Get the controller intermediate status */
-	static protected String getInterStatus(DMS proxy) {
-		Controller c = proxy.getController();
-		if(c == null)
-			return "???";
-		else
-			return getInterStatus(c);
 	}
 
 	/** Get the controller intermediate status */
@@ -156,7 +148,8 @@ public class SingleSignTab extends FormPanel {
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();
 
-	/** DMS proxy */
+	/** DMS proxy, which is null if none or multiple DMS are selected,
+	 *  otherwise it is the currently single selected DMS. */
 	protected DMS proxy;
 
 	/** Preview mode */
@@ -182,7 +175,8 @@ public class SingleSignTab extends FormPanel {
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", interstatusTxt);
 		if(queryMsgBtn.getIEnabled())
-			addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt, queryMsgBtn);
+			addRow(I18N.get("SingleSignTab.ControllerStatus"), 
+			statusTxt, queryMsgBtn);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
@@ -226,6 +220,12 @@ public class SingleSignTab extends FormPanel {
 				}
 			}
 		};
+	}
+
+	/** Return true if a single DMS is selected else false 
+	 *  if none or multiple are selected. */
+	protected boolean singleSel() {
+		return proxy != null;
 	}
 
 	/** Get the panel for drawing current pixel status */
@@ -275,13 +275,8 @@ public class SingleSignTab extends FormPanel {
 		expiresTxt.setText(EMPTY_TXT);
 	}
 
-	/** Update one attribute on the form */
-	public void updateAttribute(Controller c, String a) {
-		if(a.equals("interStatus"))
-			interstatusTxt.setText(getInterStatus(c));
-	}
-
-	/** Update one attribute on the form */
+	/** Update one attribute on the form and update the current proxy.
+	 *  @param dms The newly selected DMS. May not be null. */
 	public void updateAttribute(DMS dms, String a) {
 		proxy = dms;
 		if(a == null || a.equals("name"))
@@ -312,7 +307,7 @@ public class SingleSignTab extends FormPanel {
 			operationTxt.setText(dms.getOperation());
 			queryMsgBtn.setEnabled(true);
 			statusTxt.setText(status);
-			interstatusTxt.setText(getInterStatus(dms));
+			updateAttribute(dms.getController(), "interStatus");
 		}
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
@@ -324,5 +319,15 @@ public class SingleSignTab extends FormPanel {
 		}
 		if(a == null || a.equals("awsControlled"))
 			awsControlledCbx.setSelected(dms.getAwsControlled());
+	}
+
+	/** Update one attribute on the form using the controller.
+	 *  @see DMSDispatcher */
+	public void updateAttribute(Controller c, String a) {
+		if(!singleSel())
+			return;
+		if(a.equals("interStatus"))
+			if(c == proxy.getController())
+				interstatusTxt.setText(getInterStatus(c));
 	}
 }
