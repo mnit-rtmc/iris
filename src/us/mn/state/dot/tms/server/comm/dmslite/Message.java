@@ -33,8 +33,8 @@ import us.mn.state.dot.tms.utils.SEmail;
  * flexible enough so that a single class can be used for
  * all message types. The DMSLite Message syntax uses XML.
  *
- * @author Douglas Lau
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class Message implements AddressedMessage
 {
@@ -142,7 +142,7 @@ public class Message implements AddressedMessage
 	/** Update intermediate status */
 	private void updateInterStatus(String m) {
 		if(m_opdms != null)
-			m_opdms.updateInterStatus(m);
+			m_opdms.updateInterStatus(m, false);
 	}
 
 	/**
@@ -174,7 +174,7 @@ public class Message implements AddressedMessage
 		m_os.flush();
 
 		// read response
-		updateInterStatus("Reading response from sensorserver.");
+		updateInterStatus("Waiting for sensorserver.");
 		String token=null;
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,

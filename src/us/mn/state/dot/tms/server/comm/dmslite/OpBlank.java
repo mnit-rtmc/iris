@@ -26,8 +26,8 @@ import us.mn.state.dot.tms.utils.SString;
 /**
  * Operation to blank the DMS.
  *
- * @author Douglas Lau
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpBlank extends OpDms
 {
@@ -38,11 +38,6 @@ public class OpBlank extends OpDms
 	public OpBlank(DMSImpl d, SignMessage mess, User u) {
 		super(DOWNLOAD, d, "Blanking the CMS", u);
 		m_sm = mess;
-	}
-
-	/** Get the error retry threshold */
-	public int getRetryThreshold() {
-		return getRetryThreshold(m_sm);
 	}
 
 	/** Create the first phase of the operation */
@@ -71,7 +66,7 @@ public class OpBlank extends OpDms
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException 
 		{
-			updateInterStatus("Starting operation");
+			updateInterStatus("Starting operation", false);
 
 			if(m_sm == null)
 				return null;

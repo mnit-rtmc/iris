@@ -26,8 +26,8 @@ import us.mn.state.dot.tms.utils.SString;
 /**
  * Operation to reset the DMS.
  *
- * @author Douglas Lau
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpReset extends OpDms
 {
@@ -60,7 +60,7 @@ public class OpReset extends OpDms
 	{
 		/** Query current message */
 		protected Phase poll(AddressedMessage argmess) throws IOException {
-			updateInterStatus("Starting operation");
+			updateInterStatus("Starting operation", false);
 
 			Log.finest(
 			    "OpReset.PhaseResetDms.poll(msg) called.");

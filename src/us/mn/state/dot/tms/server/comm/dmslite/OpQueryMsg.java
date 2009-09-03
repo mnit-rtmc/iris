@@ -38,8 +38,8 @@ import us.mn.state.dot.tms.utils.STime;
 /**
  * Operation to query the current message on a DMS.
  *
- * @author Douglas Lau
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpQueryMsg extends OpDms {
 
@@ -259,7 +259,7 @@ public class OpQueryMsg extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException
 		{
-			updateInterStatus("Starting operation");
+			updateInterStatus("Starting operation", false);
 			Log.finest(
 				"OpQueryMsg.PhaseQueryMsg.poll(msg) called, " +
 				"dms=" + m_dms.getName());
@@ -294,9 +294,7 @@ public class OpQueryMsg extends OpDms {
 			// send msg to field controller
 			mess.add(rr0);
 			mess.add(rr1);
-			updateInterStatus("Sending to sensorserver");
             		mess.getRequest(getOpDms());	// throws IOException
-			updateInterStatus("Received response from sensorserver");
 
 			// parse resp msg
 			long id = 0;

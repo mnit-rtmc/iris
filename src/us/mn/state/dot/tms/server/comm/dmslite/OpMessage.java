@@ -35,8 +35,8 @@ import us.mn.state.dot.tms.utils.STime;
 /**
  * Operation to send a new message to a DMS.
  *
- * @author Douglas Lau
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpMessage extends OpDms {
 
@@ -53,11 +53,6 @@ public class OpMessage extends OpDms {
 	public OpMessage(DMSImpl d, SignMessage m, User u) {
 		super(COMMAND, d, "Sending new message", u);
 		m_sm = m;
-	}
-
-	/** Get the error retry threshold */
-	public int getRetryThreshold() {
-		return getRetryThreshold(m_sm);
 	}
 
 	/** 
@@ -212,7 +207,7 @@ public class OpMessage extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException 
 		{
-			updateInterStatus("Starting operation");
+			updateInterStatus("Starting operation", false);
 			Log.finest(
 			    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg) called.");
 			assert argmess instanceof Message :
@@ -373,7 +368,7 @@ public class OpMessage extends OpDms {
 		protected Phase poll(AddressedMessage argmess) 
 			throws IOException 
 		{
-			updateInterStatus("Starting operation");
+			updateInterStatus("Starting operation", false);
 			Log.finest(
 			    "dmslite.OpMessage.PhaseSendTwoPageMessage.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";

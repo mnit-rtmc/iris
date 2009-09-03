@@ -38,8 +38,8 @@ import us.mn.state.dot.tms.utils.STime;
 /**
  * Operation to be performed on a dynamic message sign
  *
- * @author Douglas Lau
  * @author Michael Darter
+ * @author Douglas Lau
  */
 abstract public class OpDms extends OpDevice {
 
@@ -63,6 +63,9 @@ abstract public class OpDms extends OpDevice {
 
 	/** operation description */
 	private String m_opDesc = "";
+
+	/** Number of times this operation has been previously attempted */
+	protected int m_retry = 0;
 
 	/** Create a new DMS operation */
 	public OpDms(int p, DMSImpl d, String opDesc, User user) 
@@ -184,23 +187,28 @@ abstract public class OpDms extends OpDevice {
 		// trigger error handling, changes status if necessary
 		// phase is set to null if no retry should be performed
 		handleCommError(EventType.PARSING_ERROR, msg);
-		return phase != null;
+		boolean retry = (phase != null);
+		if(retry)
+			++m_retry;
+		return retry;
 	}
 
 	/** random number generator */
 	static private Random m_rand = new Random(System.currentTimeMillis());
 
-	/** generate a unique operation id, which is a long, returned as a string */
+	/** generate a unique operation id, which is a long, 
+	 *  returned as a string. */
 	public static String generateId() {
-		return new Long(System.currentTimeMillis()+m_rand.nextInt()).toString();
+		return new Long(System.currentTimeMillis() + 
+			m_rand.nextInt()).toString();
 	}
 
 	/** update iris status, called after operation complete */
 	public void complete(Message m) {
-		updateInterStatus(buildOpStatusCompletionNote(m));
+		updateInterStatus(buildOpStatusCompletionNote(m), true);
 	}
 
-	/** Build operation status completion note */
+	/** Build operation status completion note. */
 	public String buildOpStatusCompletionNote(Message m) {
 		StringBuilder note = new StringBuilder();
 		note.append("Last message at " +
@@ -209,6 +217,10 @@ abstract public class OpDms extends OpDevice {
 			((double)m.getCompletionTimeMS()) / 1000), 2);
 		note.append(" (").append(delta).append(" secs)");
 		note.append(".");
+		if(m_retry > 0) {
+			note.append(String.valueOf(m_retry + 1));
+			note.append(" attempts.");
+		}
 		return note.toString();
 	}
 
@@ -248,8 +260,13 @@ abstract public class OpDms extends OpDevice {
 		errorStatus = msg;
 	}
 
-	/** Update operation intermediate status in the client */
-	protected void updateInterStatus(String is) {
+	/** Update operation intermediate status in the client.
+	 *  @param is String to display.
+	 *  @param last True for completion message else false. */
+	protected void updateInterStatus(String is, boolean last) {
+		if(m_retry > 0 && !last)
+			is = "(attempt " + String.valueOf(m_retry + 1) + 
+				") " + is;
 		ControllerHelper.updateInterStatus(controller, is);
 	}
 
