@@ -33,12 +33,14 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This class renders DMSs in a JList within the DMS StyleSummary.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
@@ -64,12 +66,46 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	/** The label that displays the sign location */
 	protected final JLabel lblLocation = new JLabel();
 
+	/** Render mode */
+	protected enum RenderMode {LARGE, MEDIUM};
+	protected RenderMode m_mode = RenderMode.LARGE;
+
 	/** Create a new DMS cell renderer */
 	public DmsCellRenderer() {
 		super(new BorderLayout());
+		m_mode = determineMode();
+		if(m_mode == RenderMode.MEDIUM)
+			createMedium();
+		else
+			createLarge();
+	}
+
+	/** Determine mode */
+	protected RenderMode determineMode() {
+		//FIXME: determine mode as a function of the 
+		// jpanel size. See DMSManager.createStyleSummary().
+		return RenderMode.LARGE;
+	}
+
+	/** Create a new DMS cell renderer with medium cells */
+	public void createMedium() {
 		setBorder(BorderFactory.createCompoundBorder(
-		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
-		          BorderFactory.createRaisedBevelBorder()));
+			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
+			  BorderFactory.createRaisedBevelBorder()));
+		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
+		title.add(lblID);
+		title.add(Box.createGlue());
+		title.add(lblUser);
+		add(title, BorderLayout.NORTH);
+		add(pixelPnl, BorderLayout.CENTER);
+		setPreferredSize(new Dimension(46 * 2, 46));
+	}
+
+	/** Create a new DMS cell renderer with large cells */
+	public void createLarge() {
+		setBorder(BorderFactory.createCompoundBorder(
+			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
+			  BorderFactory.createRaisedBevelBorder()));
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(lblID);
 		title.add(Box.createGlue());
@@ -79,7 +115,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(title, BorderLayout.NORTH);
 		add(pixelPnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
-		setPreferredSize(new Dimension(190, 92));
+		setPreferredSize(new Dimension(190, 92)); // aspect 2.065
 	}
 
 	/** Check if the background is opaque */
@@ -100,9 +136,17 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		return this;
 	}
 
-	/** Prune the owner string to the first dot.
-	 * FIXME: move to UserHelper */
-	static protected String formatOwner(User owner) {
+	/** Return the owner name as a function of the display mode */
+	protected String formatOwner(DMS dms) {
+		User u = dms.getOwnerCurrent();
+		String s = pruneOwner(u);
+		if(m_mode == RenderMode.MEDIUM)
+			s = SString.truncate(s, 8);
+		return s;
+	}
+
+	/** Prune the owner string to the first dot. FIXME:move to UserHelper*/
+	static protected String pruneOwner(User owner) {
 		if(owner != null) {
 			String o = owner.getName();
 			int i = o.indexOf('.');
@@ -125,13 +169,22 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	 *  @param a Attribute to update. */
 	public void updateDms(DMS dms, String a) {
 		if(a.equals("messageCurrent")) {
-			lblID.setText(dms.getName());
-			lblLocation.setText(GeoLocHelper.getDescription(
-				dms.getGeoLoc()));
+			String dmsname = dms.getName();
+			lblID.setText(dmsname);
+			String loca = GeoLocHelper.
+				getDescription(dms.getGeoLoc());
+			lblLocation.setText(loca);
 			setDimensions(dms);
 			pixelPnl.setGraphic(getPageOne(dms));
+			updateToolTip(dmsname, loca);
 		} else if(a.equals("ownerCurrent"))
-			lblUser.setText(formatOwner(dms.getOwnerCurrent()));
+			lblUser.setText(formatOwner(dms));
+	}
+
+	/** Update tooltip */
+	protected void updateToolTip(String dmsname, String loca) {
+		if(m_mode == RenderMode.MEDIUM)
+			setToolTipText(dmsname + ": " + loca);
 	}
 
 	/** Set the dimensions of the pixel panel */
