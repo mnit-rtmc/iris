@@ -1398,6 +1398,12 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 12	Comm PARSING ERROR
 13	Comm CHECKSUM ERROR
 14	Comm CONTROLLER ERROR
+20	Incident CLEARED
+21	Incident CRASH
+22	Incident STALL
+23	Incident BLOCKAGE
+24	Incident CONSTRUCTION
+29	Incident IMPACT
 65	Comm FAILED
 89	LCS DEPLOYED
 90	LCS CLEARED

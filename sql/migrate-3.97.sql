@@ -4,6 +4,13 @@ SET SESSION AUTHORIZATION 'tms';
 
 UPDATE system_attribute SET value = '3.97.0' WHERE name = 'database_version';
 
+INSERT INTO event.event_description VALUES (20, 'Incident CLEARED');
+INSERT INTO event.event_description VALUES (21, 'Incident CRASH');
+INSERT INTO event.event_description VALUES (22, 'Incident STALL');
+INSERT INTO event.event_description VALUES (23, 'Incident BLOCKAGE');
+INSERT INTO event.event_description VALUES (24, 'Incident CONSTRUCTION');
+INSERT INTO event.event_description VALUES (29, 'Incident IMPACT');
+
 CREATE TABLE event.incident (
 	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	name VARCHAR(16) NOT NULL UNIQUE,
