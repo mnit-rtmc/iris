@@ -1,0 +1,168 @@
+/*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2009  Minnesota Department of Transportation
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+package us.mn.state.dot.tms.client.incident;
+
+import java.awt.BorderLayout;
+import java.util.List;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+
+/**
+ * The IncidentDispatcher is a GUI component for creating incidents.
+ *
+ * @author Douglas Lau
+ */
+public class IncidentDispatcher extends JPanel
+	implements ProxyListener<Incident>, ProxySelectionListener<Incident>
+{
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** Cache of incident proxy objects */
+	protected final TypeCache<Incident> cache;
+
+	/** Selection model */
+	protected final ProxySelectionModel<Incident> selectionModel;
+
+	/** Currently logged in user */
+	protected final User user;
+
+	/** Currently watching incident */
+	protected Incident watching;
+
+	/** Create a new incident dispatcher */
+	public IncidentDispatcher(Session session, IncidentManager manager) {
+		super(new BorderLayout());
+		SonarState st = session.getSonarState();
+		namespace = st.getNamespace();
+		cache = st.getIncidents();
+		user = session.getUser();
+		selectionModel = manager.getSelectionModel();
+		cache.addProxyListener(this);
+		selectionModel.addProxySelectionListener(this);
+	}
+
+	/** A new proxy has been added */
+	public void proxyAdded(Incident proxy) {
+		// we're not interested
+	}
+
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
+	}
+
+	/** A proxy has been removed */
+	public void proxyRemoved(Incident proxy) {
+		// Note: the IncidentManager will remove the proxy from the
+		//       ProxySelectionModel, so we can ignore this.
+	}
+
+	/** A proxy has been changed */
+	public void proxyChanged(final Incident proxy, final String a) {
+		if(proxy == getSingleSelection()) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					updateAttribute(proxy, a);
+				}
+			});
+		}
+	}
+
+	/** Get the selected incident (if only one is selected) */
+	protected Incident getSingleSelection() {
+		if(selectionModel.getSelectedCount() == 1) {
+			for(Incident inc: selectionModel.getSelected())
+				return inc;
+		}
+		return null;
+	}
+
+	/** Dispose of the dispatcher */
+	public void dispose() {
+		selectionModel.removeProxySelectionListener(this);
+		cache.removeProxyListener(this);
+		if(watching != null) {
+			cache.ignoreObject(watching);
+			watching = null;
+		}
+		clearSelected();
+		removeAll();
+	}
+
+	/** Called whenever an object is added to the selection */
+	public void selectionAdded(Incident s) {
+		updateSelected();
+	}
+
+	/** Called whenever an object is removed from the selection */
+	public void selectionRemoved(Incident s) {
+		updateSelected();
+	}
+
+	/** Update the selected object(s) */
+	protected void updateSelected() {
+		List<Incident> selected = selectionModel.getSelected();
+		if(selected.size() == 0)
+			clearSelected();
+		else if(selected.size() == 1) {
+			for(Incident inc: selected)
+				setSelected(inc);
+		} else
+			enableWidgets();
+	}
+
+	/** Clear the selection */
+	protected void clearSelected() {
+		disableWidgets();
+	}
+
+	/** Set a single selected incident */
+	protected void setSelected(Incident inc) {
+		if(watching != null)
+			cache.ignoreObject(watching);
+		watching = inc;
+		cache.watchObject(watching);
+		if(!inc.getCleared()) {
+			updateAttribute(inc, null);
+			enableWidgets();
+		} else
+			disableWidgets();
+	}
+
+	/** Disable the dispatcher widgets */
+	protected void disableWidgets() {
+		// FIXME
+	}
+
+	/** Enable the dispatcher widgets */
+	protected void enableWidgets() {
+		// FIXME
+	}
+
+	/** Update one attribute on the form */
+	protected void updateAttribute(Incident inc, String a) {
+		// FIXME
+	}
+}

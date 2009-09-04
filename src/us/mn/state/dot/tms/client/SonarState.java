@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
@@ -214,6 +215,14 @@ public class SonarState extends Client {
 		return lcs_cache;
 	}
 
+	/** Cache of incidents */
+	protected final TypeCache<Incident> incidents;
+
+	/** Get the incident object cache */
+	public TypeCache<Incident> getIncidents() {
+		return incidents;
+	}
+
 	/** Cache of action plans */
 	protected final TypeCache<ActionPlan> action_plans;
 
@@ -283,6 +292,7 @@ public class SonarState extends Client {
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
+		incidents = new TypeCache<Incident>(Incident.class, this);
 		action_plans = new TypeCache<ActionPlan>(ActionPlan.class,this);
 		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
 		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
@@ -311,6 +321,7 @@ public class SonarState extends Client {
 		ramp_meters.ignoreAttribute("operation");
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
+		populate(incidents);
 		populate(action_plans);
 		populate(time_actions);
 		populate(dms_actions);

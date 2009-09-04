@@ -62,4 +62,10 @@ public interface Incident extends SonarObject {
 
 	/** Set the impact code */
 	void setImpact(String imp);
+
+	/** Get the cleared status */
+	boolean getCleared();
+
+	/** Set the cleared status */
+	void setCleared(boolean c);
 }

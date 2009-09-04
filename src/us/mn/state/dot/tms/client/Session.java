@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
@@ -41,6 +42,8 @@ import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
+import us.mn.state.dot.tms.client.incident.IncidentManager;
+import us.mn.state.dot.tms.client.incident.IncidentTab;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
@@ -185,6 +188,9 @@ public class Session {
 		return meter_manager;
 	}
 
+	/** Incident manager */
+	protected final IncidentManager inc_manager;
+
 	/** List of all tabs */
 	protected final List<MapTab> tabs = new LinkedList<MapTab>();
 
@@ -221,6 +227,8 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
+		inc_manager = new IncidentManager(this, state.getIncidents(),
+			loc_manager);
 		seg_layer = r_node_manager.getSegmentLayer();
 		addTabs();
 	}
@@ -229,6 +237,8 @@ public class Session {
 	protected void addTabs() throws IOException {
 		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
 			addDMSTab();
+		if(canUpdate(Incident.SONAR_TYPE, "cleared"))
+			addIncidentTab();
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
 			addMeterTab();
 		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
@@ -272,6 +282,15 @@ public class Session {
 		for(Layer l: baseLayers)
 			lstates.add(l.createState());
 		return lstates;
+	}
+
+	/** Add the incident tab */
+	protected void addIncidentTab() throws IOException {
+		List<LayerState> lstates = createLayers();
+		hideLayer(lstates, dms_manager.getProxyType());
+		hideLayer(lstates, lcs_array_manager.getProxyType());
+		hideLayer(lstates, warn_manager.getProxyType());
+		tabs.add(new IncidentTab(this, inc_manager, lstates));
 	}
 
 	/** Add the meter tab */
