@@ -32,6 +32,8 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -65,6 +67,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** LCS table */
 	protected final ZTable lcs_table = new ZTable();
+
+	/** Button to edit the selected LCS */
+	protected final JButton edit_btn = new JButton("Edit");
 
 	/** Button to delete the selected LCS */
 	protected final JButton delete_btn = new JButton("Delete");
@@ -128,6 +133,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		initTable();
 		FormPanel tpnl = new FormPanel(true);
 		tpnl.addRow(lcs_table);
+		tpnl.add(edit_btn);
+		edit_btn.setEnabled(false);
 		tpnl.addRow(delete_btn);
 		delete_btn.setEnabled(false);
 		// this panel is needed to make the widgets line up
@@ -151,6 +158,11 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		lcs_table.setColumnModel(LCSTableModel.createColumnModel());
 		lcs_table.setModel(table_model);
 		lcs_table.setVisibleRowCount(12);
+		new ActionJob(this, edit_btn) {
+			public void perform() {
+				editPressed();
+			}
+		};
 		new ActionJob(this, delete_btn) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
@@ -158,6 +170,22 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 					table_model.deleteRow(row);
 			}
 		};
+	}
+
+	/** Edit button pressed */
+	protected void editPressed() {
+		LCS lcs = getSelectedLCS();
+		if(lcs != null) {
+			DMS dms = DMSHelper.lookup(lcs.getName());
+			if(dms != null)
+				session.getDMSManager().showPropertiesForm(dms);
+		}
+	}
+
+	/** Get the selected LCS */
+	protected LCS getSelectedLCS() {
+		ListSelectionModel s = lcs_table.getSelectionModel();
+		return table_model.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Create the indication panel */
@@ -181,9 +209,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Toggle one LCS indication checkbox */
 	protected void toggleIndication(int ind) {
-		ListSelectionModel s = lcs_table.getSelectionModel();
-		int row = s.getMinSelectionIndex();
-		LCS lcs = table_model.getProxy(row);
+		LCS lcs = getSelectedLCS();
 		if(lcs != null) {
 			JCheckBox btn = indications.get(ind);
 			if(btn.isSelected())
@@ -208,13 +234,12 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Select an LCS in the table */
 	protected void selectLCS() {
-		final ListSelectionModel s = 
-			lcs_table.getSelectionModel();
-		int row = s.getMinSelectionIndex();
-		LCS lcs = table_model.getProxy(row);
+		LCS lcs = getSelectedLCS();
 		if(lcs != null)
 			selectLCS(lcs);
 		else {
+			edit_btn.setEnabled(false);
+			delete_btn.setEnabled(false);
 			for(JCheckBox btn: indications) {
 				btn.setEnabled(false);
 				btn.setSelected(false);
@@ -224,6 +249,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Select an LCS in the table */
 	protected void selectLCS(LCS lcs) {
+		edit_btn.setEnabled(true);
 		final HashMap<Integer, LCSIndication> ind =
 			new HashMap<Integer, LCSIndication>();
 		LCSHelper.lookupIndication(lcs, new Checker<LCSIndication>() {

@@ -192,7 +192,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Show the properteis form for the given proxy */
-	protected void showPropertiesForm(DMS dms) {
+	public void showPropertiesForm(DMS dms) {
 		SmartDesktop desktop = session.getDesktop();
 		try {
 			desktop.show(new DMSProperties(session, dms));
