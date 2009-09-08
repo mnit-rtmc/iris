@@ -61,9 +61,10 @@ public class OpQueryDMSMessage extends OpDMS {
 			if(SignMessageHelper.isBlank(m))
 				return new QueryCurrentMessage();
 		} else {
-			/* The source is not valid. Set the errorStatus so the
-			 * sign will go into maintenance status. */
-			errorStatus = source.toString(); 
+			/* The source is not valid. Create a new operation to
+			 * send the "current" message to the sign. */
+			NtcipPoller.createOperation(dms, m,
+				dms.getOwnerCurrent()).start();
 		}
 		return null;
 	}
