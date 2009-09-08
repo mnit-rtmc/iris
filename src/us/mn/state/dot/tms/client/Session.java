@@ -289,6 +289,7 @@ public class Session {
 		List<LayerState> lstates = createLayers();
 		hideLayer(lstates, dms_manager.getProxyType());
 		hideLayer(lstates, lcs_array_manager.getProxyType());
+		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, warn_manager.getProxyType());
 		tabs.add(new IncidentTab(this, inc_manager, lstates));
 	}
