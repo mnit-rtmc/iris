@@ -30,9 +30,20 @@ public enum EventType {
 	INCIDENT_CLEARED(20), INCIDENT_CRASH(21), INCIDENT_STALL(22),
 	INCIDENT_BLOCKAGE(23), INCIDENT_CONST(24), INCIDENT_IMPACT(29);
 
+	/** Event type ID */
 	public final int id;
 
+	/** Create an event type */
 	private EventType(int i) {
 		id = i;
+	}
+
+	/** Get an event type from the ID */
+	static public EventType fromId(int id) {
+		for(EventType et: values()) {
+			if(et.id == id)
+				return et;
+		}
+		return null;
 	}
 }

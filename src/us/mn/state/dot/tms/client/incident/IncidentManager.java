@@ -14,11 +14,13 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import java.awt.Color;
 import java.awt.Shape;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.Session;
@@ -35,6 +37,24 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Incident Map object shape */
 	static protected final Shape SHAPE = new IncidentMarker();
+
+	/** Name of crash style */
+	static public final String STYLE_CRASH = "Crash";
+
+	/** Name of stall style */
+	static public final String STYLE_STALL = "Stall";
+
+	/** Name of blockage style */
+	static public final String STYLE_BLOCKAGE = "Blockage";
+
+	/** Name of construction style */
+	static public final String STYLE_CONST = "Construction";
+
+	/** Name of cleared style */
+	static public final String STYLE_CLEARED = "Cleared";
+
+	/** Name of all style */
+	static public final String STYLE_ALL = "All";
 
 	/** User session */
 	protected final Session session;
@@ -62,6 +82,12 @@ public class IncidentManager extends ProxyManager<Incident> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<Incident> theme = new ProxyTheme<Incident>(this,
 			getProxyType(), SHAPE);
+		theme.addStyle(STYLE_CRASH, Color.RED);
+		theme.addStyle(STYLE_STALL, Color.MAGENTA);
+		theme.addStyle(STYLE_BLOCKAGE, Color.YELLOW);
+		theme.addStyle(STYLE_CONST, Color.ORANGE);
+		theme.addStyle(STYLE_CLEARED, Color.GREEN);
+		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
 
@@ -102,7 +128,18 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(String s, Incident proxy) {
-		// FIXME
-		return true;
+		EventType et = EventType.fromId(proxy.getEventType());
+		if(STYLE_CRASH.equals(s))
+			return et == EventType.INCIDENT_CRASH;
+		else if(STYLE_STALL.equals(s))
+			return et == EventType.INCIDENT_STALL;
+		else if(STYLE_BLOCKAGE.equals(s))
+			return et == EventType.INCIDENT_BLOCKAGE;
+		else if(STYLE_CONST.equals(s))
+			return et == EventType.INCIDENT_CONST;
+		else if(STYLE_CLEARED.equals(s))
+			return proxy.getCleared();
+		else
+			return STYLE_ALL.equals(s);
 	}
 }
