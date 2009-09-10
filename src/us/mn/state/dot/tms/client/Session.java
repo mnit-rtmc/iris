@@ -273,6 +273,8 @@ public class Session {
 			lstates.add(lcs_array_manager.getLayer().createState());
 		if(canUpdate(WarningSign.SONAR_TYPE, "deployed"))
 			lstates.add(warn_manager.getLayer().createState());
+		if(canUpdate(Incident.SONAR_TYPE, "cleared"))
+			lstates.add(inc_manager.getLayer().createState());
 		return lstates;
 	}
 
@@ -318,8 +320,7 @@ public class Session {
 		hideLayer(lstates, "County Road");
 		hideLayer(lstates, "C.S.A.H.");
 		hideLayer(lstates, "Highway");
-		hideLayer(lstates, "Freeway");
-		hideLayer(lstates, "Incident");
+		hideLayer(lstates, inc_manager.getProxyType());
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, dms_manager.getProxyType());
 		hideLayer(lstates, warn_manager.getProxyType());
