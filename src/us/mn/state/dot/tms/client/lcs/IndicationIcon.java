@@ -133,6 +133,8 @@ abstract public class IndicationIcon implements Icon {
 			return new MergeRightIndicationIcon(p);
 		case MERGE_LEFT:
 			return new MergeLeftIndicationIcon(p);
+		case MERGE_BOTH:
+			return new MergeBothIndicationIcon(p);
 		default:
 			return new UnknownIndicationIcon(p);
 		}
@@ -147,6 +149,9 @@ abstract public class IndicationIcon implements Icon {
 	/** Stroke for drawing symbols */
 	protected final BasicStroke stroke;
 
+	/** Stroke for thin symbols */
+	protected final BasicStroke thin;
+
 	/**
 	 * Create a new IndicationIcon.
 	 *
@@ -157,6 +162,8 @@ abstract public class IndicationIcon implements Icon {
 		shadow = new BasicStroke(5f / pixels, BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_MITER);
 		stroke = new BasicStroke(3f / pixels, BasicStroke.CAP_ROUND,
+			BasicStroke.JOIN_MITER);
+		thin = new BasicStroke(1f / pixels, BasicStroke.CAP_ROUND,
 			BasicStroke.JOIN_MITER);
 	}
 
@@ -311,6 +318,39 @@ abstract public class IndicationIcon implements Icon {
 				g2.setStroke(stroke);
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.25f, 0);
+			}
+		}
+	}
+
+	/** Icon for merge both lane-use indication */
+	static protected class MergeBothIndicationIcon extends IndicationIcon {
+		protected MergeBothIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			AffineTransform at = g2.getTransform();
+			g2.translate(0.40f, 0);
+			for(int i = 0; i < 2; i++) {
+				g2.setColor(Color.BLACK);
+				g2.setStroke(stroke);
+				g2.draw(CHEVRON_SHAPE);
+				g2.setColor(Color.YELLOW);
+				g2.setStroke(thin);
+				g2.draw(CHEVRON_SHAPE);
+				g2.translate(0.15f, 0);
+			}
+			g2.setTransform(at);
+			g2.scale(-1, 1);
+			g2.translate(-1, 0);
+			g2.translate(0.40f, 0);
+			for(int i = 0; i < 2; i++) {
+				g2.setColor(Color.BLACK);
+				g2.setStroke(stroke);
+				g2.draw(CHEVRON_SHAPE);
+				g2.setColor(Color.YELLOW);
+				g2.setStroke(thin);
+				g2.draw(CHEVRON_SHAPE);
+				g2.translate(0.15f, 0);
 			}
 		}
 	}
