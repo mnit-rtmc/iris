@@ -48,15 +48,15 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
 	/** Check if we should just set the message time remaining */
 	static protected boolean shouldSetTimeRemaining(DMSImpl dms,
-		SignMessage m)
+		SignMessage sm)
 	{
-		return SignMessageHelper.isDurationZero(m) ||
-		       isMessageDeployed(dms, m);
+		return SignMessageHelper.isDurationZero(sm) ||
+		       isMessageDeployed(dms, sm);
 	}
 
 	/** Check if the message is already deployed on the sign */
-	static protected boolean isMessageDeployed(DMSImpl dms, SignMessage m) {
-		return m.getMulti().equals(dms.getMessageCurrent().getMulti());
+	static protected boolean isMessageDeployed(DMSImpl dms, SignMessage sm){
+		return sm.getMulti().equals(dms.getMessageCurrent().getMulti());
 	}
 
 	/** SNMP message protocol */
