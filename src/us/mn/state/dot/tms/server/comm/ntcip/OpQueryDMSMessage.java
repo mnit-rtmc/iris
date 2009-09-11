@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -29,6 +30,18 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  * @author Douglas Lau
  */
 public class OpQueryDMSMessage extends OpDMS {
+
+	/** Create an operation to send a DMS message. This is similar to
+	 * NtcipPoller.createOperation, but does not check if the sign message
+	 * is the current IRIS message. */
+	static protected OpDMS createSendMsgOp(DMSImpl dms, SignMessage sm,
+		User o)
+	{
+		if(SignMessageHelper.isDurationZero(sm))
+			return new OpUpdateDMSDuration(dms, sm, o);
+		else
+			return new OpSendDMSMessage(dms, sm, o);
+	}
 
 	/** Create a new DMS query status object */
 	public OpQueryDMSMessage(DMSImpl d) {
@@ -63,8 +76,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		} else {
 			/* The source is not valid. Create a new operation to
 			 * send the "current" message to the sign. */
-			NtcipPoller.createOperation(dms, m,
-				dms.getOwnerCurrent()).start();
+			createSendMsgOp(dms, m, dms.getOwnerCurrent()).start();
 		}
 		return null;
 	}

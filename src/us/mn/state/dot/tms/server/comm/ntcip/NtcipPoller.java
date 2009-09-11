@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
 	/** Create an operation to send a DMS message */
-	static public OpDMS createOperation(DMSImpl dms, SignMessage sm,
+	static protected OpDMS createOperation(DMSImpl dms, SignMessage sm,
 		User o)
 	{
 		if(shouldSetTimeRemaining(dms, sm))
