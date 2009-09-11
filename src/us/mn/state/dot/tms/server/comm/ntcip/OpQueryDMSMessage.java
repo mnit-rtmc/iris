@@ -58,25 +58,25 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process the message table source from the sign controller */
 	protected Phase processMessageSource() {
-		SignMessage m = dms.getMessageCurrent();
+		SignMessage sm = dms.getMessageCurrent();
 		/* We have to test isBlank before isValid, because some
 		 * signs use 'undefined' source for blank messages. */
 		if(source.getMemoryType().isBlank()) {
 			/* The sign is blank. If IRIS says there should
 			 * be a message on the sign, that's wrong and
 			 * needs to be updated */
-			if(!SignMessageHelper.isBlank(m))
+			if(!SignMessageHelper.isBlank(sm))
 				setCurrentMessage(dms.createBlankMessage());
 		} else if(source.isValid()) {
 			/* The sign is not blank. If IRIS says it
 			 * should be blank, then we need to query the
 			 * current message on the sign. */
-			if(SignMessageHelper.isBlank(m))
+			if(SignMessageHelper.isBlank(sm))
 				return new QueryCurrentMessage();
 		} else {
 			/* The source is not valid. Create a new operation to
 			 * send the "current" message to the sign. */
-			createSendMsgOp(dms, m, dms.getOwnerCurrent()).start();
+			createSendMsgOp(dms, sm, dms.getOwnerCurrent()).start();
 		}
 		return null;
 	}
