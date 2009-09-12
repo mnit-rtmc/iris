@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
- * WarningSignForm is a Swing dialog for entering and editing warning signs 
+ * WarningSignProperties is a dialog for entering and editing warning signs 
  *
  * @author Douglas Lau
  */
