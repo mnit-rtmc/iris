@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
@@ -50,6 +51,7 @@ import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
+import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
@@ -74,8 +76,8 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
-		Alarm, Camera, Detector, DMS, LCSIndication, Ramp_Meter,
-		Warning_Sign
+		Alarm, Camera, Detector, DMS, LaneMarking, LCSIndication,
+		Ramp_Meter, Warning_Sign
 	}
 
 	/** Types of IO devices */
@@ -87,6 +89,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Camera);
 		IO_TYPE.add(DeviceType.Detector);
 		IO_TYPE.add(DeviceType.DMS);
+		IO_TYPE.add(DeviceType.LaneMarking);
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Warning_Sign);
@@ -102,6 +105,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Detector;
 		else if(cio instanceof DMS)
 			return DeviceType.DMS;
+		else if(cio instanceof LaneMarking)
+			return DeviceType.LaneMarking;
 		else if(cio instanceof LCSIndication)
 			return DeviceType.LCSIndication;
 		else if(cio instanceof RampMeter)
@@ -156,6 +161,12 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO watcher for DMSs */
 	protected final ControllerIOWatcher<DMS> dms_watcher;
 
+	/** Available lane markings model */
+	protected final WrapperComboBoxModel lmark_model;
+
+	/** Controller IO watcher for lane markings */
+	protected final ControllerIOWatcher<LaneMarking> lmark_watcher;
+
 	/** Available LCS indication model */
 	protected final WrapperComboBoxModel lcsi_model;
 
@@ -198,6 +209,9 @@ public class ControllerIOModel extends AbstractTableModel {
 		dms_model = new WrapperComboBoxModel(
 			s.getDMSManager().getStyleModel(
 			DMSHelper.STYLE_NO_CONTROLLER), true);
+		lmark_model = new WrapperComboBoxModel(
+			s.getLaneMarkingManager().getStyleModel(
+			LaneMarkingManager.STYLE_NO_CONTROLLER), true);
 		lcsi_model = new WrapperComboBoxModel(
 			s.getLCSIManager().getStyleModel(
 			LCSIManager.STYLE_NO_CONTROLLER), true);
@@ -211,6 +225,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		c_watcher = new ControllerIOWatcher<Camera>();
 		det_watcher = new ControllerIOWatcher<Detector>();
 		dms_watcher = new ControllerIOWatcher<DMS>();
+		lmark_watcher = new ControllerIOWatcher<LaneMarking>();
 		lcsi_watcher = new ControllerIOWatcher<LCSIndication>();
 		m_watcher = new ControllerIOWatcher<RampMeter>();
 		w_watcher = new ControllerIOWatcher<WarningSign>();
@@ -223,6 +238,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		state.getDetCache().getDetectors().addProxyListener(
 			det_watcher);
 		state.getDmsCache().getDMSs().addProxyListener(dms_watcher);
+		state.getLaneMarkings().addProxyListener(lmark_watcher);
 		state.getLcsCache().getLCSIndications().addProxyListener(
 			lcsi_watcher);
 		state.getRampMeters().addProxyListener(m_watcher);
@@ -236,6 +252,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		state.getDetCache().getDetectors().removeProxyListener(
 			det_watcher);
 		state.getDmsCache().getDMSs().removeProxyListener(dms_watcher);
+		state.getLaneMarkings().removeProxyListener(lmark_watcher);
 		state.getLcsCache().getLCSIndications().removeProxyListener(
 			lcsi_watcher);
 		state.getRampMeters().removeProxyListener(m_watcher);
@@ -352,6 +369,8 @@ public class ControllerIOModel extends AbstractTableModel {
 				return dt_model;
 			case DMS:
 				return dms_model;
+			case LaneMarking:
+				return lmark_model;
 			case LCSIndication:
 				return lcsi_model;
 			case Ramp_Meter:

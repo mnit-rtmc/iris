@@ -34,6 +34,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneAction;
+import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
@@ -215,6 +217,14 @@ public class SonarState extends Client {
 		return lcs_cache;
 	}
 
+	/** Cache of lane markings */
+	protected final TypeCache<LaneMarking> lane_markings;
+
+	/** Get the lane marking cache */
+	public TypeCache<LaneMarking> getLaneMarkings() {
+		return lane_markings;
+	}
+
 	/** Cache of incidents */
 	protected final TypeCache<Incident> incidents;
 
@@ -245,6 +255,14 @@ public class SonarState extends Client {
 	/** Get the DMS action cache */
 	public TypeCache<DmsAction> getDmsActions() {
 		return dms_actions;
+	}
+
+	/** Cache of lane actions */
+	protected final TypeCache<LaneAction> lane_actions;
+
+	/** Get the lane action cache */
+	public TypeCache<LaneAction> getLaneActions() {
+		return lane_actions;
 	}
 
 	/** Cache of timing plans */
@@ -292,10 +310,13 @@ public class SonarState extends Client {
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
 		lcs_cache = new LcsCache(this);
+		lane_markings = new TypeCache<LaneMarking>(LaneMarking.class,
+			this);
 		incidents = new TypeCache<Incident>(Incident.class, this);
 		action_plans = new TypeCache<ActionPlan>(ActionPlan.class,this);
 		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
 		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
+		lane_actions = new TypeCache<LaneAction>(LaneAction.class,this);
 		timing_plans = new TypeCache<TimingPlan>(TimingPlan.class,this);
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
@@ -321,10 +342,12 @@ public class SonarState extends Client {
 		ramp_meters.ignoreAttribute("operation");
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
+		populate(lane_markings);
 		populate(incidents);
 		populate(action_plans);
 		populate(time_actions);
 		populate(dms_actions);
+		populate(lane_actions);
 		populate(timing_plans);
 		populate(holidays);
 	}

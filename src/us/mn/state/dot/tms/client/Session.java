@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.lcs.LcsTab;
 import us.mn.state.dot.tms.client.lcs.LCSArrayManager;
 import us.mn.state.dot.tms.client.lcs.LCSIManager;
+import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.RampMeterTab;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -161,6 +162,14 @@ public class Session {
 		return lcsi_manager;
 	}
 
+	/** Lane marking manager */
+	protected final LaneMarkingManager lane_marking_manager;
+
+	/** Get the lane marking manager */
+	public LaneMarkingManager getLaneMarkingManager() {
+		return lane_marking_manager;
+	}
+
 	/** Detector manager */
 	protected final DetectorManager det_manager;
 
@@ -220,6 +229,8 @@ public class Session {
 			loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
+		lane_marking_manager = new LaneMarkingManager(this,
+			state.getLaneMarkings(), loc_manager);
 		det_manager = new DetectorManager(
 			state.getDetCache().getDetectors(), loc_manager,
 			r_node_manager);
