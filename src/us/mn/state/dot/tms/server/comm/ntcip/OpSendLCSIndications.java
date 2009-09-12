@@ -136,16 +136,22 @@ public class OpSendLCSIndications extends OpLCS {
 	protected void sendIndication(int lane) {
 		DMSImpl dms = dmss[lane];
 		if(dms != null) {
-			SignMessage sm = msgs[lane];
-			if(dms.shouldActivate(sm)) {
-				try {
-					dms.doSetMessageNext(sm, user);
-					ind_after[lane] = indications[lane];
-				}
-				catch(TMSException e) {
-					e.printStackTrace();
-				}
-			}
+			if(dms.shouldActivate(msgs[lane]))
+				sendIndication(lane, dms);
+		}
+	}
+
+	/** Send an indication to a DMS */
+	protected void sendIndication(int lane, DMSImpl dms) {
+		SignMessage sm = msgs[lane];
+		try {
+			dms.doSetMessageNext(sm, user);
+			ind_after[lane] = indications[lane];
+		}
+		catch(TMSException e) {
+			System.err.println(
+				"OpSendLCSIndications.sendIndication: " +
+				dms.getName() + ", " + e.getMessage());
 		}
 	}
 }
