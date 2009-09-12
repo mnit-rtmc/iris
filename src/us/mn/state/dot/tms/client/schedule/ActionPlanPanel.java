@@ -26,6 +26,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -68,6 +69,15 @@ public class ActionPlanPanel extends FormPanel {
 	/** Button to delete the selected DMS action */
 	protected final JButton del_d_btn = new JButton("Delete");
 
+	/** Table model for lane actions */
+	protected LaneActionModel l_model;
+
+	/** Table to hold lane actions */
+	protected final ZTable l_table = new ZTable();
+
+	/** Button to delete the selected lane action */
+	protected final JButton del_l_btn = new JButton("Delete");
+
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane();
 
@@ -86,6 +96,9 @@ public class ActionPlanPanel extends FormPanel {
 	/** DMS action type cache */
 	protected final TypeCache<DmsAction> d_cache;
 
+	/** Lane action type cache */
+	protected final TypeCache<LaneAction> l_cache;
+
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(true);
@@ -94,6 +107,7 @@ public class ActionPlanPanel extends FormPanel {
 		cache = s.getSonarState().getActionPlans();
 		t_cache = s.getSonarState().getTimeActions();
 		d_cache = s.getSonarState().getDmsActions();
+		l_cache = s.getSonarState().getLaneActions();
 		p_model = new ActionPlanModel(cache, namespace, user);
 	}
 
@@ -102,6 +116,7 @@ public class ActionPlanPanel extends FormPanel {
 		addActionPlanJobs();
 		addTimeActionJobs();
 		addDmsActionJobs();
+		addLaneActionJobs();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
 		p_table.setColumnModel(ActionPlanModel.createColumnModel());
@@ -128,8 +143,16 @@ public class ActionPlanPanel extends FormPanel {
 		d_panel.addRow(d_table);
 		d_panel.addRow(del_d_btn);
 		del_d_btn.setEnabled(false);
-		panel.add(d_panel);
 		tab.add("DMS Actions", d_panel);
+		FormPanel l_panel = new FormPanel(true);
+		l_table.setAutoCreateColumnsFromModel(false);
+		l_table.setColumnModel(LaneActionModel.createColumnModel());
+		l_table.setRowHeight(ROW_HEIGHT);
+		l_table.setVisibleRowCount(10);
+		l_panel.addRow(l_table);
+		l_panel.addRow(del_l_btn);
+		del_l_btn.setEnabled(false);
+		tab.add("Lane Actions", l_panel);
 		panel.add(tab);
 		addRow(panel);
 	}
@@ -191,6 +214,25 @@ public class ActionPlanPanel extends FormPanel {
 		};
 	}
 
+	/** Add jobs for lane action table */
+	protected void addLaneActionJobs() {
+		final ListSelectionModel sm = l_table.getSelectionModel();
+		sm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, sm) {
+			public void perform() {
+				if(!event.getValueIsAdjusting())
+					selectLaneAction();
+			}
+		};
+		new ActionJob(this, del_l_btn) {
+			public void perform() throws Exception {
+				int row = sm.getMinSelectionIndex();
+				if(row >= 0)
+					l_model.deleteRow(row);
+			}
+		};
+	}
+
 	/** Dispose of the form */
 	protected void dispose() {
 		p_model.dispose();
@@ -201,6 +243,10 @@ public class ActionPlanPanel extends FormPanel {
 		if(d_model != null) {
 			d_model.dispose();
 			d_model = null;
+		}
+		if(l_model != null) {
+			l_model.dispose();
+			l_model = null;
 		}
 	}
 
@@ -221,6 +267,12 @@ public class ActionPlanPanel extends FormPanel {
 		d_table.setModel(d_model);
 		if(od_model != null)
 			od_model.dispose();
+		del_l_btn.setEnabled(false);
+		LaneActionModel ol_model = l_model;
+		l_model = new LaneActionModel(l_cache, ap, namespace, user);
+		l_table.setModel(l_model);
+		if(ol_model != null)
+			ol_model.dispose();
 	}
 
 	/** Change the selected time action */
@@ -233,5 +285,11 @@ public class ActionPlanPanel extends FormPanel {
 	protected void selectDmsAction() {
 		int row = d_table.getSelectedRow();
 		del_d_btn.setEnabled(d_model.canRemove(row));
+	}
+
+	/** Change the selected lane action */
+	protected void selectLaneAction() {
+		int row = l_table.getSelectedRow();
+		del_l_btn.setEnabled(l_model.canRemove(row));
 	}
 }
