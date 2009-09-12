@@ -280,6 +280,7 @@ public final class TMSImpl implements KmlDocument {
 				}
 				if(!isHoliday(stamp))
 					validateTimingPlans();
+				performActions();
 			}
 		};
 
@@ -348,6 +349,20 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
+	}
+
+	/** Perform a time action */
+	protected void performTimeAction(TimeAction ta) {
+		ActionPlan ap = ta.getActionPlan();
+		if(ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl)ap;
+			if(api.getActive())
+				api.setDeployedNotify(ta.getDeploy());
+		}
+	}
+
+	/** Perform all current actions */
+	protected void performActions() {
 		DmsActionHelper.find(new Checker<DmsAction>() {
 			public boolean check(DmsAction da) {
 				ActionPlan ap = da.getActionPlan();
@@ -365,16 +380,6 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
-	}
-
-	/** Perform a time action */
-	protected void performTimeAction(TimeAction ta) {
-		ActionPlan ap = ta.getActionPlan();
-		if(ap instanceof ActionPlanImpl) {
-			ActionPlanImpl api = (ActionPlanImpl)ap;
-			if(api.getActive())
-				api.setDeployedNotify(ta.getDeploy());
-		}
 	}
 
 	/** Perform a DMS action */
