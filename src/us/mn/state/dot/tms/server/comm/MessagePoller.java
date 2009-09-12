@@ -133,6 +133,9 @@ abstract public class MessagePoller extends Thread {
 		catch(IOException e) {
 			status = exceptionMessage(e);
 		}
+		catch(RuntimeException e) {
+			e.printStackTrace();
+		}
 		finally {
 			messenger.close();
 			drainQueue();
