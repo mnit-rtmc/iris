@@ -131,18 +131,7 @@ public class OpSendLCSIndications extends OpLCS {
 		// was added after the "indications" array was created
 		if(i >= 0 && i < indications.length) {
 			if(indications[i] == li.getIndication())
-				setPin(buffer, li.getPin());
+				Op170.setSpecFuncOutput(buffer, li.getPin());
 		}
-	}
-
-	/** Set the specified pin in a special function output buffer */
-	protected void setPin(byte[] buffer, int pin) {
-		int i = pin -
-			Op170.SPECIAL_FUNCTION_OUTPUT_PIN;
-		if(i >= 0 && i < 8)
-			buffer[0] |= 1 << i;
-		i -= 8;
-		if(i >= 0 && i < 8)
-			buffer[1] |= 1 << i;
 	}
 }

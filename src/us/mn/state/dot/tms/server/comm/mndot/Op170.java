@@ -45,6 +45,16 @@ abstract public class Op170 extends OpController {
 	/** Special function input pin for first alarm */
 	static protected final int ALARM_PIN = 70;
 
+	/** Set the specified pin in a special function output buffer */
+	static public void setSpecFuncOutput(byte[] buffer, int pin) {
+		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
+		if(i >= 0 && i < 8)
+			buffer[0] |= 1 << i;
+		i -= 8;
+		if(i >= 0 && i < 8)
+			buffer[1] |= 1 << i;
+	}
+
 	/** Lookup the first ramp meter on a 170 controller */
 	static public RampMeterImpl lookupMeter1(ControllerImpl c) {
 		ControllerIO[] io_pins = c.getIO();
