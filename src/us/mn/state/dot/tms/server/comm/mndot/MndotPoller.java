@@ -24,11 +24,13 @@ import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.LaneMarkingImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.WarningSignImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
+import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -43,7 +45,7 @@ import us.mn.state.dot.tms.server.comm.WarningSignPoller;
  * @author Douglas Lau
  */
 public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
-	MeterPoller, SamplePoller, WarningSignPoller
+	MeterPoller, SamplePoller, WarningSignPoller, LaneMarkingPoller
 {
 	/** Test if it is afternoon */
 	static protected boolean isAfternoon() {
@@ -261,6 +263,11 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 			// Ignore other requests
 			break;
 		}
+	}
+
+	/** Set the deployed status of a lane marking */
+	public void setDeployed(LaneMarkingImpl dev, boolean d) {
+		new OpDeployLaneMarking(dev, d).start();
 	}
 
 	/** Send new indications to an LCS array.

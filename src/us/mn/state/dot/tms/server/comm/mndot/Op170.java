@@ -66,6 +66,16 @@ abstract public class Op170 extends OpController {
 			buffer[1] |= 1 << i;
 	}
 
+	/** Clear the specified pin in a special function output buffer */
+	static public void clearSpecFuncOutput(byte[] buffer, int pin) {
+		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
+		if(i >= 0 && i < 8)
+			buffer[0] &= (1 << i) ^ 0xFF;
+		i -= 8;
+		if(i >= 0 && i < 8)
+			buffer[1] &= (1 << i) ^ 0xFF;
+	}
+
 	/** Lookup the first ramp meter on a 170 controller */
 	static public RampMeterImpl lookupMeter1(ControllerImpl c) {
 		ControllerIO[] io_pins = c.getIO();

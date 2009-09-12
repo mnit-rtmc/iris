@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.LaneMarkingImpl;
 
 /**
@@ -24,9 +23,6 @@ import us.mn.state.dot.tms.server.LaneMarkingImpl;
  * @author Douglas Lau
  */
 public interface LaneMarkingPoller {
-
-	/** Send a device request */
-	void sendRequest(LaneMarkingImpl dev, DeviceRequest r);
 
 	/** Set the deployed status of a lane marking */
 	void setDeployed(LaneMarkingImpl dev, boolean d);

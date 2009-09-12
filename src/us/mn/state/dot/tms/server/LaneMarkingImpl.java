@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.TMSException;
@@ -149,9 +148,6 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 
 	/** Request a device operation */
 	public void setDeviceRequest(int r) {
-		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
-		LaneMarkingPoller p = getLaneMarkingPoller();
-		if(p != null)
-			p.sendRequest(this, dr);
+		// no device requests are currently supported
 	}
 }
