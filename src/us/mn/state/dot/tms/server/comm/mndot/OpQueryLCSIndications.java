@@ -103,7 +103,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Check if an indication is set */
 	protected void checkIndication(LCSIndication li, Integer[] ind) {
-		if(isPinSet(li.getPin())) {
+		if(Op170.getSpecFuncOutput(outputs, li.getPin())) {
 			LCS lcs = li.getLcs();
 			int i = lcs.getLane() - 1;
 			// We must check bounds here in case the LCSIndication
@@ -111,17 +111,5 @@ public class OpQueryLCSIndications extends OpLCS {
 			if(i >= 0 && i < ind.length)
 				ind[i] = li.getIndication();
 		}
-	}
-
-	/** Test if a pin is set in the special function output buffer */
-	protected boolean isPinSet(int pin) {
-		int i = pin -
-			Op170.SPECIAL_FUNCTION_OUTPUT_PIN;
-		if(i >= 0 && i < 8)
-			return ((outputs[0] >> i) & 1) != 0;
-		i -= 8;
-		if(i >= 0 && i < 8)
-			return ((outputs[1] >> i) & 1) != 0;
-		return false;
 	}
 }

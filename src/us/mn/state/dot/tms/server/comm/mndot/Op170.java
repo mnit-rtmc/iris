@@ -45,6 +45,17 @@ abstract public class Op170 extends OpController {
 	/** Special function input pin for first alarm */
 	static protected final int ALARM_PIN = 70;
 
+	/** Test if a pin is set in the special function output buffer */
+	static public boolean getSpecFuncOutput(byte[] buffer, int pin) {
+		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
+		if(i >= 0 && i < 8)
+			return ((buffer[0] >> i) & 1) != 0;
+		i -= 8;
+		if(i >= 0 && i < 8)
+			return ((buffer[1] >> i) & 1) != 0;
+		return false;
+	}
+
 	/** Set the specified pin in a special function output buffer */
 	static public void setSpecFuncOutput(byte[] buffer, int pin) {
 		int i = pin - SPECIAL_FUNCTION_OUTPUT_PIN;
