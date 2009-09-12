@@ -37,6 +37,9 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.LaneAction;
+import us.mn.state.dot.tms.LaneActionHelper;
+import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
@@ -377,6 +380,17 @@ public final class TMSImpl implements KmlDocument {
 			public boolean check(DMS dms) {
 				if(dms instanceof DMSImpl)
 					((DMSImpl)dms).updateScheduledMessage();
+				return false;
+			}
+		});
+		LaneActionHelper.find(new Checker<LaneAction>() {
+			public boolean check(LaneAction la) {
+				ActionPlan ap = la.getActionPlan();
+				if(ap.getActive()) {
+					LaneMarking m = la.getLaneMarking();
+					if(m != null)
+						m.setDeployed(ap.getDeployed());
+				}
 				return false;
 			}
 		});

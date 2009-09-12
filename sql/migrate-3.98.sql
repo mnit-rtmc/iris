@@ -37,3 +37,9 @@ CREATE RULE lane_marking_update AS ON UPDATE TO iris.lane_marking DO INSTEAD
 
 CREATE RULE lane_marking_delete AS ON DELETE TO iris.lane_marking DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+
+CREATE TABLE iris.lane_action (
+	name VARCHAR(20) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	lane_marking VARCHAR(10) NOT NULL REFERENCES iris._lane_marking
+);

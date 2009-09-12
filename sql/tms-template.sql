@@ -759,6 +759,12 @@ CREATE TABLE iris.dms_action (
 	priority INTEGER NOT NULL
 );
 
+CREATE TABLE iris.lane_action (
+	name VARCHAR(20) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	lane_marking VARCHAR(10) NOT NULL REFERENCES iris._lane_marking
+);
+
 CREATE TABLE iris.timing_plan_type (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(32) NOT NULL

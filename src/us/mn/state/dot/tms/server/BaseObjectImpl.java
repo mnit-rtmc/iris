@@ -71,6 +71,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		ActionPlanImpl.loadAll();
 		TimeActionImpl.loadAll();
 		DmsActionImpl.loadAll();
+		LaneActionImpl.loadAll();
 		TimingPlanImpl.loadAll();
 	}
 
