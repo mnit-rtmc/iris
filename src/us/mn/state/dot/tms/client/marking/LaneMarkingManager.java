@@ -33,6 +33,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
+	/** Lane marking map object shape */
+	static protected final Shape SHAPE = new LaneMarkingMarker();
+
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "Deployed";
 
@@ -64,13 +67,13 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(LaneMarking proxy, float scale) {
-		return null;
+		return new LaneMarkingMarker(20 * scale);
 	}
 
 	/** Create a styled theme for lane markings */
 	protected StyledTheme createTheme() {
 		ProxyTheme<LaneMarking> theme = new ProxyTheme<LaneMarking>(
-			this, getProxyType(), null);
+			this, getProxyType(), SHAPE);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);
