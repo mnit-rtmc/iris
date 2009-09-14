@@ -76,7 +76,7 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
-		Alarm, Camera, Detector, DMS, LaneMarking, LCSIndication,
+		Alarm, Camera, Detector, DMS, Lane_Marking, LCSIndication,
 		Ramp_Meter, Warning_Sign
 	}
 
@@ -89,7 +89,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Camera);
 		IO_TYPE.add(DeviceType.Detector);
 		IO_TYPE.add(DeviceType.DMS);
-		IO_TYPE.add(DeviceType.LaneMarking);
+		IO_TYPE.add(DeviceType.Lane_Marking);
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Warning_Sign);
@@ -106,7 +106,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		else if(cio instanceof DMS)
 			return DeviceType.DMS;
 		else if(cio instanceof LaneMarking)
-			return DeviceType.LaneMarking;
+			return DeviceType.Lane_Marking;
 		else if(cio instanceof LCSIndication)
 			return DeviceType.LCSIndication;
 		else if(cio instanceof RampMeter)
@@ -369,7 +369,7 @@ public class ControllerIOModel extends AbstractTableModel {
 				return dt_model;
 			case DMS:
 				return dms_model;
-			case LaneMarking:
+			case Lane_Marking:
 				return lmark_model;
 			case LCSIndication:
 				return lcsi_model;
