@@ -97,7 +97,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
 		LaneAction la = getProxy(row);
-		return la != null && canAdd();
+		return la == null && canAdd();
 	}
 
 	/** Set the value at the specified cell */
