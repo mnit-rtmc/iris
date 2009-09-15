@@ -400,6 +400,13 @@ public class MultiString implements MultiStringState {
 		return _b.toString().trim().equals("");
 	}
 
+	/** Return a value indicating if the message is single or multi-page.
+	 *  @return True if the message contains a single page else false 
+	 *  for multi-page. */
+	public boolean singlePage() {
+		return getNumPages() <= 1;
+	}
+
 	/** Get the number of pages in the multistring */
 	public int getNumPages() {
 		MultiStringStateAdapter msa = new MultiStringStateAdapter();
@@ -446,6 +453,19 @@ public class MultiString implements MultiStringState {
 		msa.setFont(f_num, null);
 		parse(msa);
 		return ret;
+	}
+
+	/** Get the page on-time for the 1st page. If no page on-time is 
+	 *  specified in the MULTI string, the default is returned, which
+	 *  is a function of the number of pages in the multi-string.
+	 *  @return An integer, which is in tenths of secs. */
+	public DmsPgTime getPageOnTime() {
+		DmsPgTime def = DmsPgTime.getDefaultOn(singlePage());
+		int[] pont = getPageOnTimes(def.toTenths());
+		if(pont.length < 1)
+			return def;
+		// return 1st page on-time read, even if specified per page
+		return new DmsPgTime(pont[0]);
 	}
 
 	/** Get an array of page on times. The page on time is assumed

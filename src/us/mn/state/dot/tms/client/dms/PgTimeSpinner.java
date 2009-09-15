@@ -149,7 +149,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 		super.setEnabled(b);
 		// if disabled, reset value to default
 		if(!b)
-			setValue(DmsPgTime.getDefaultOn(true).toSecs());
+			setValue(DmsPgTime.getDefaultOn(m_singlepg).toSecs());
 	}
 
 	/** Set value using seconds. */
@@ -178,7 +178,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	/** If the spinner is IRIS enabled, return the current value, 
 	 *  otherwise return the system default. */
 	public DmsPgTime getValuePgTime() {
-		DmsPgTime ret = DmsPgTime.getDefaultOn(true);
+		DmsPgTime ret = DmsPgTime.getDefaultOn(m_singlepg);
 		// return current value
 		if(getIEnabled()) {
 			Object v = super.getValue();
@@ -189,14 +189,12 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	}
 
 	/** Set value using the page-on time specified in the 1st page 
-	 *  of the MULTI string.
+	 *  of the MULTI string. If no value is specified in the MULTI,
+	 *  the default value is used for multi-page messages else 0 
+	 *  for single page messages.
 	 *  @param smulti A MULTI string, containing possible page times. */
-	public void setValue(String smulti) {
-		MultiString m = new MultiString(smulti);
-		int[] ponts = m.getPageOnTimes(
-			DmsPgTime.getDefaultOn(true).toTenths());
-		setValue(ponts.length > 0 ? new DmsPgTime(ponts[0]) : 
-			DmsPgTime.getDefaultOn(true));
+	public void setValue(String m) {
+		setValue(new MultiString(m).getPageOnTime());
 	}
 
 	/** Catch state change events. Defined in interface ChangeListener. */

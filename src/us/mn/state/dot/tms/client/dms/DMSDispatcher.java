@@ -695,23 +695,25 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		}
 	}
 
-	/** Return the page on-time for the current message on the 
-	 *  specified DMS. */
-	protected DmsPgTime getPgOnTime(DMS dms) {
-		DmsPgTime ret = DmsPgTime.getDefaultOn(true);
+	/** Return the MULTI string currently on the specified dms. */
+	private MultiString getMultiString(DMS dms) {
 		if(dms == null)
-			return ret;
+			return null;
 		SignMessage sm = dms.getMessageCurrent();
 		if(sm == null)
-			return ret;
+			return null;
 		String m = sm.getMulti();
 		if(m == null)
-			return ret;
-		int[] pont = new MultiString(m).getPageOnTimes(ret.toTenths());
-		if(pont.length < 1)
-			return ret;
-		// return 1st page on-time read, even if specified per page
-		return new DmsPgTime(pont[0]);
+			return null;
+		return new MultiString(m);
+	}
+
+	/** Return the page on-time for the current message on the 
+	 *  specified DMS. */
+	private DmsPgTime getPgOnTime(DMS dms) {
+		MultiString ms = getMultiString(dms);
+		return (ms == null ? 
+			DmsPgTime.getDefaultOn(true) : ms.getPageOnTime());
 	}
 
 	/** Get the number of lines on the current sign */

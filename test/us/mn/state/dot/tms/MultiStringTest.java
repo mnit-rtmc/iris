@@ -163,6 +163,8 @@ public class MultiStringTest extends TestCase {
 
 	/** getPageOnTime */
 	private void getPageOnTime() {
+
+		// test page time specified for each page
 		int[] t;
 
 		// FIXME: this fails!
@@ -204,6 +206,29 @@ public class MultiStringTest extends TestCase {
 		assertTrue(t[0] == 7);
 		//assertTrue(t[1] == 8); //FIXME: this fails!
 		assertTrue(t[2] == 8);
+
+		// test page time specified once for entire message
+		assertTrue(new MultiString("ABC[nl]DEF").
+			getPageOnTime().toTenths() == 0);
+		DmsPgTime defspg = DmsPgTime.getDefaultOn(true);
+		DmsPgTime defmpg = DmsPgTime.getDefaultOn(false);
+		assertTrue(new MultiString("").
+			getPageOnTime().equals(defspg));
+		assertTrue(new MultiString("ABC[nl]DEF").
+			getPageOnTime().equals(defspg));
+		assertTrue(new MultiString("ABC[np]DEF").
+			getPageOnTime().equals(defmpg));
+		assertTrue(new MultiString("[pt13o0]ABC[nl]DEF").
+			getPageOnTime().toTenths() == 13);
+		assertTrue(new MultiString("ABC[nl][pt14o]DEF").
+			getPageOnTime().toTenths() == 14);
+		//FIXME: this fails, probably shouldn't
+		//assertTrue(new MultiString("ABC[nl]DEF[pt14o]").
+		//	getPageOnTime().toTenths() == 14);
+		assertTrue(new MultiString("ABC[np][pt14o]DEF").
+			getPageOnTime().equals(defmpg));
+		assertTrue(new MultiString("ABC[np]DEF[pt14o]").
+			getPageOnTime().equals(defmpg));
 	}
 
 	/** normalization */
