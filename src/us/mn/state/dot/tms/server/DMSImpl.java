@@ -808,36 +808,51 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		}
 	}
 
-	/** Set the next sign message and owner. */
+	/** Set the next sign message and owner */
 	public synchronized void doSetMessageNext(SignMessage sm, User o)
 		throws TMSException
 	{
-		final DMSPoller p = getDMSPoller();
+		DMSPoller p = getDMSPoller();
 		if(p == null) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		if(!shouldActivate(sm))
-			return;
+		if(shouldActivate(sm))
+			doSetMessageNext(sm, o, p);
+	}
+
+	/** Set the next sign message */
+	protected void doSetMessageNext(SignMessage sm, User o, DMSPoller p)
+		throws TMSException
+	{
+		SignMessage smn = validateMessage(sm);
+		if(smn != sm)
+			o = null;
+		int ap = smn.getActivationPriority();
+		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
+			s_routes.clear();
+		p.sendMessage(this, smn, o);
+		setMessageNext(smn);
+	}
+
+	/** Validate a sign message to send */
+	protected SignMessage validateMessage(SignMessage sm)
+		throws TMSException
+	{
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = messageSched;	// Avoid race
 		if(sched != null && multi.isBlank()) {
 			// Don't blank the sign if there's a scheduled message
 			// -- send the scheduled message instead.
 			sm = sched;
-			o = null;
 			multi = new MultiString(sm.getMulti());
 		}
 		if(!multi.isValid()) {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
 		}
-		int ap = sm.getActivationPriority();
-		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
-			s_routes.clear();
 		validateBitmaps(sm);
-		p.sendMessage(this, sm, o);
-		setMessageNext(sm);
+		return sm;
 	}
 
 	/** Validate the message bitmaps */
