@@ -155,7 +155,7 @@ public class SystemAttributeForm extends AbstractForm {
 		JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 		add(tab);
 		tab.add("Meters", createMeterPanel());
-		tab.add("DMS", createDMSPanel());
+		tab.add(I18N.get("dms.abbreviation"), createDMSPanel());
 		tab.add("Incidents", createIncidentPanel());
 		tab.add(systemAttributeTab);
 		updateAttribute(null);
