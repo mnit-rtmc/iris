@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 
@@ -205,7 +207,16 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			return;
 		store.update(this, "publish", p);
 		setPublish(p);
-		TMSImpl.unpublishCamera(this);
+		if(!p)
+			blankRestrictedMonitors();
+	}
+
+	/** Blank restricted video monitors viewing the camera */
+	protected void blankRestrictedMonitors() throws TMSException {
+		for(VideoMonitor m: VideoMonitorHelper.findRestricted(this)) {
+			if(m instanceof VideoMonitorImpl)
+				((VideoMonitorImpl)m).selectCamera("");
+		}
 	}
 
 	/** Get flag to allow publishing camera images */

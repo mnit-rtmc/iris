@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
 import java.util.Properties;
 import java.util.ArrayList;
 import us.mn.state.dot.sched.Completer;
@@ -639,25 +638,6 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
-	}
-
-	/** Unpublish a camera */
-	static public void unpublishCamera(final Camera cam)
-		throws TMSException
-	{
-		final LinkedList<VideoMonitorImpl> restricted =
-			new LinkedList<VideoMonitorImpl>();
-		namespace.findObject(VideoMonitor.SONAR_TYPE,
-			new Checker<VideoMonitorImpl>()
-		{
-			public boolean check(VideoMonitorImpl m) {
-				if(m.getRestricted() && (m.getCamera() == cam))
-					restricted.add(m);
-				return false;
-			}
-		});
-		for(VideoMonitorImpl m: restricted)
-			m.selectCamera("");
 	}
 
 	/** get kml document name (KmlDocument interface) */
