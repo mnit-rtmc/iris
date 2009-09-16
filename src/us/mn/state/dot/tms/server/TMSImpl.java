@@ -39,8 +39,6 @@ import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
-import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.SignGroup;
@@ -130,7 +128,7 @@ public final class TMSImpl implements KmlDocument {
 		int secs = getPeriodicDmsPollingFreqSecs();
 		if(secs > 0) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
-			TIMER.addJob(new TimerJobLCS(secs));
+			TIMER.addJob(new LcsQueryMsgJob(secs));
 		}
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
@@ -226,21 +224,6 @@ public final class TMSImpl implements KmlDocument {
 	/** Print the tail of the detector sample XML file */
 	protected void printSampleXmlTail(PrintWriter out) {
 		out.println("</traffic_sample>");
-	}
-
-	/** LCS polling timer job */
-	protected class TimerJobLCS extends Job {
-
-		/** Create a new LCS polling timer job */
-		protected TimerJobLCS(int intervalSecs) {
-			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,
-				19);
-		}
-
-		/** Perform the LCS poll job */
-		public void perform() throws Exception {
-			pollLCSs();
-		}
 	}
 
 	/** 30-second timer job */
@@ -569,17 +552,6 @@ public final class TMSImpl implements KmlDocument {
 			}
 		});
 		System.err.println("Finished FLUSH @ " + new Date());
-	}
-
-	/** Poll all LCS indications */
-	static protected void pollLCSs() {
-		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
-		LCSArrayHelper.find(new Checker<LCSArray>() {
-			public boolean check(LCSArray lcs_array) {
-				lcs_array.setDeviceRequest(req);
-				return false;
-			}
-		});
 	}
 
 	/** Poll all warning signs */
