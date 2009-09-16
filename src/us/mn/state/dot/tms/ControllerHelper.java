@@ -29,15 +29,19 @@ public class ControllerHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Find a controller using a Checker */
+	static public Controller find(final Checker<Controller> checker) {
+		return (Controller)namespace.findObject(Controller.SONAR_TYPE,
+			checker);
+	}
+
 	/** Get the AWS controller associated with the AWS comm link.
 	 * @return The AWS controller or null if one is not defined. */
 	static public Controller getAwsController() {
 		final CommLink awscl = CommLinkHelper.getAwsCommLink();
 		if(awscl == null)
 			return null;
-		return (Controller)namespace.findObject(Controller.SONAR_TYPE, 
-			new Checker<Controller>() 
-		{
+		return find(new Checker<Controller>() {
 			public boolean check(Controller c) {
 				return c.getCommLink() == awscl;
 			}
