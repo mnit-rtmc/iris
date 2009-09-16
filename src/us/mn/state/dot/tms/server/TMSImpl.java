@@ -131,6 +131,7 @@ public final class TMSImpl implements KmlDocument {
 			TIMER.addJob(new LcsQueryMsgJob(secs));
 			TIMER.addJob(new WarnQueryStatusJob(secs));
 		}
+		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new TimerJob5Min());
@@ -526,14 +527,6 @@ public final class TMSImpl implements KmlDocument {
 					AlarmPoller ap = (AlarmPoller)p;
 					ap.queryAlarms(c);
 				}
-				return false;
-			}
-		});
-		final int req = DeviceRequest.QUERY_STATUS.ordinal();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(DMSHelper.isPeriodicallyQueriable(dms))
-					dms.setDeviceRequest(req);
 				return false;
 			}
 		});
