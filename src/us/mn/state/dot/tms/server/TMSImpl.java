@@ -129,7 +129,7 @@ public final class TMSImpl implements KmlDocument {
 		station_manager = new StationManager(namespace);
 		int secs = getPeriodicDmsPollingFreqSecs();
 		if(secs > 0) {
-			TIMER.addJob(new TimerJobDMS(secs));
+			TIMER.addJob(new DmsQueryMsgJob(secs));
 			TIMER.addJob(new TimerJobLCS(secs));
 		}
 		TIMER.addJob(new TimerJob30Sec());
@@ -226,20 +226,6 @@ public final class TMSImpl implements KmlDocument {
 	/** Print the tail of the detector sample XML file */
 	protected void printSampleXmlTail(PrintWriter out) {
 		out.println("</traffic_sample>");
-	}
-
-	/** DMS polling timer job */
-	protected class TimerJobDMS extends Job {
-
-		/** Create a new DMS polling timer job */
-		protected TimerJobDMS(int intervalSecs) {
-			super(Calendar.SECOND, intervalSecs, Calendar.SECOND,4);
-		}
-
-		/** Perform the DMS poll job */
-		public void perform() throws Exception {
-			pollDMSs();
-		}
 	}
 
 	/** LCS polling timer job */
@@ -583,18 +569,6 @@ public final class TMSImpl implements KmlDocument {
 			}
 		});
 		System.err.println("Finished FLUSH @ " + new Date());
-	}
-
-	/** Poll all DMS message status */
-	static protected void pollDMSs() {
-		final int req = DeviceRequest.QUERY_MESSAGE.ordinal();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(DMSHelper.isPeriodicallyQueriable(dms))
-					dms.setDeviceRequest(req);
-				return false;
-			}
-		});
 	}
 
 	/** Poll all LCS indications */
