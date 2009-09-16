@@ -50,13 +50,11 @@ import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WarningSignHelper;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
-import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 import us.mn.state.dot.tms.kml.KmlDocument;
 import us.mn.state.dot.tms.kml.KmlFolder;
 import us.mn.state.dot.tms.kml.KmlFeature;
@@ -616,25 +614,6 @@ public final class TMSImpl implements KmlDocument {
 		WarningSignHelper.find(new Checker<WarningSign>() {
 			public boolean check(WarningSign sign) {
 				sign.setDeviceRequest(req);
-				return false;
-			}
-		});
-	}
-
-	/** Select a camera on a video monitor */
-	static public void selectMonitorCamera(final VideoMonitor m,
-		final String cam)
-	{
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				MessagePoller p = c.getPoller();
-				if(p instanceof VideoMonitorPoller) {
-					VideoMonitorPoller vmp =
-						(VideoMonitorPoller)p;
-					vmp.setMonitorCamera(c, m, cam);
-				}
 				return false;
 			}
 		});

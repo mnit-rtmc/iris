@@ -17,9 +17,14 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 
 /**
  * A video monitor output from a video switch
@@ -150,7 +155,22 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor */
-	public void selectCamera(String cam) {
-		TMSImpl.selectMonitorCamera(this, cam);
+	public void selectCamera(final String cam) {
+		ControllerHelper.find(new Checker<Controller>() {
+			public boolean check(Controller c) {
+				if(c instanceof ControllerImpl)
+					selectCamera((ControllerImpl)c, cam);
+				return false;
+			}
+		});
+	}
+
+	/** Select a camera for the video monitor */
+	protected void selectCamera(ControllerImpl c, String cam) {
+		MessagePoller p = c.getPoller();
+		if(p instanceof VideoMonitorPoller) {
+			VideoMonitorPoller vmp = (VideoMonitorPoller)p;
+			vmp.setMonitorCamera(c, this, cam);
+		}
 	}
 }
