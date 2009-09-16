@@ -129,6 +129,7 @@ public final class TMSImpl implements KmlDocument {
 		if(secs > 0) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
 			TIMER.addJob(new LcsQueryMsgJob(secs));
+			TIMER.addJob(new WarnQueryStatusJob(secs));
 		}
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
@@ -269,7 +270,6 @@ public final class TMSImpl implements KmlDocument {
 			comp.reset(stamp);
 			try {
 				poll30Second(comp);
-				pollWarningSigns();
 			}
 			finally {
 				comp.makeReady();
@@ -552,17 +552,6 @@ public final class TMSImpl implements KmlDocument {
 			}
 		});
 		System.err.println("Finished FLUSH @ " + new Date());
-	}
-
-	/** Poll all warning signs */
-	static protected void pollWarningSigns() {
-		final int req = DeviceRequest.QUERY_STATUS.ordinal();
-		WarningSignHelper.find(new Checker<WarningSign>() {
-			public boolean check(WarningSign sign) {
-				sign.setDeviceRequest(req);
-				return false;
-			}
-		});
 	}
 
 	/** get kml document name (KmlDocument interface) */
