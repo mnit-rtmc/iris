@@ -50,7 +50,6 @@ import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WarningSignHelper;
-import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.kml.KmlDocument;
@@ -132,9 +131,10 @@ public final class TMSImpl implements KmlDocument {
 			TIMER.addJob(new WarnQueryStatusJob(secs));
 		}
 		TIMER.addJob(new DmsQueryStatusJob());
+		TIMER.addJob(new AlarmQueryStatusJob());
 		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
-		TIMER.addJob(new TimerJob5Min());
+		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
 				System.out.println(new Date());
@@ -400,47 +400,6 @@ public final class TMSImpl implements KmlDocument {
 		}
 	}
 
-	/** 5-minute timer job */
-	protected class TimerJob5Min extends Job {
-
-		/** Job completer */
-		protected final Completer comp;
-
-		/** Current time stamp */
-		protected Calendar stamp;
-
-		/** Job to be performed on completion */
-		protected final Job job = new Job(500) {
-			public void perform() {
-				flushDetectorData(stamp);
-			}
-		};
-
-		/** Create a new 5-minute timer job */
-		protected TimerJob5Min() {
-			super(Calendar.MINUTE, 5, Calendar.SECOND, 12);
-			comp = new Completer("5-Minute", FLUSH, job);
-		}
-
-		/** Perform the 5-minute timer job */
-		public void perform() throws Exception {
-			if(!comp.checkComplete()) {
-				// FIXME: print some error msg
-				return;
-			}
-			stamp = Calendar.getInstance();
-			Calendar s = (Calendar)stamp.clone();
-			s.add(Calendar.MINUTE, -5);
-			comp.reset(s);
-			try {
-				poll5Minute(comp);
-			}
-			finally {
-				comp.makeReady();
-			}
-		}
-	}
-
 	/** Create a new TMS object */
 	TMSImpl(Properties props) throws IOException, TMSException {
 		super();
@@ -510,41 +469,6 @@ public final class TMSImpl implements KmlDocument {
 				return false;
 			}
 		});
-	}
-
-	/** Poll all controllers 5 minute interval */
-	static protected void poll5Minute(final Completer comp) {
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				MessagePoller p = c.getPoller();
-				if(p instanceof SamplePoller) {
-					SamplePoller sp = (SamplePoller)p;
-					sp.querySamples(c, 300, comp);
-				}
-				if(p instanceof AlarmPoller) {
-					AlarmPoller ap = (AlarmPoller)p;
-					ap.queryAlarms(c);
-				}
-				return false;
-			}
-		});
-	}
-
-	/** Flush the detector data to disk */
-	static protected void flushDetectorData(final Calendar stamp) {
-		System.err.println("Starting FLUSH @ " + new Date() + " for " +
-			stamp.getTime());
-		namespace.findObject(Detector.SONAR_TYPE,
-			new Checker<DetectorImpl>()
-		{
-			public boolean check(DetectorImpl det) {
-				det.flush(stamp);
-				return false;
-			}
-		});
-		System.err.println("Finished FLUSH @ " + new Date());
 	}
 
 	/** get kml document name (KmlDocument interface) */
