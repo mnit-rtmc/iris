@@ -23,8 +23,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
@@ -99,6 +97,7 @@ public final class TMSImpl implements KmlDocument {
 		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new SampleQuery30SecJob(TIMER));
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
+		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
 				System.out.println(new Date());
@@ -212,15 +211,6 @@ public final class TMSImpl implements KmlDocument {
 		KmlFile.writeServerFile(this);
 		UptimeLog.writeServerLog(namespace);
 		writeXmlState();
-		CameraHelper.find(new Checker<Camera>() {
-			public boolean check(Camera c) {
-				if(c instanceof CameraImpl) {
-					CameraImpl cam = (CameraImpl)c;
-					cam.clearFailed();
-				}
-				return false;
-			}
-		});
 	}
 
 	/** get kml document name (KmlDocument interface) */
