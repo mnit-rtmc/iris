@@ -259,6 +259,10 @@ public class OpQueryMsg extends OpDms {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException
 		{
+			// ignore startup operations for DMS on dial-up lines
+			if(m_startup && !DMSHelper.isPeriodicallyQueriable(m_dms))
+				return null;
+
 			updateInterStatus("Starting operation", false);
 			Log.finest(
 				"OpQueryMsg.PhaseQueryMsg.poll(msg) called, " +
@@ -267,10 +271,6 @@ public class OpQueryMsg extends OpDms {
 			       "wrong message type";
 
 			Message mess = (Message) argmess;
-
-			// ignore startup operations for DMS on dial-up lines
-			if(m_startup && !DMSHelper.isPeriodicallyQueriable(m_dms))
-				return null;
 
 			// user who created the message retrieved from the DMS
 			User irisUser = null;
