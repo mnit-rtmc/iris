@@ -225,6 +225,7 @@ public class SignMessageComposer extends JPanel {
 		new ActionJob(clearBtn) {
 			public void perform() {
 				clearSelections();
+				clearFonts();
 				dispatcher.qlibCmb.setSelectedIndex(-1);
 				// note: set the spinner to zero after 
 				// clearing message lines because spinner 
@@ -588,6 +589,13 @@ public class SignMessageComposer extends JPanel {
 		for(JComboBox cbox: cmbLine)
 			cbox.setSelectedIndex(-1);
 		adjusting--;
+	}
+
+	/** Clear the font comboboxes */
+	public void clearFonts() {
+		final int dfnum = getDefaultFontNumber();
+		for(FontComboBox f: fontCmb)
+			f.setSelectedFontNumber(dfnum);
 	}
 
 	/** Update the message library with the currently selected messages */
