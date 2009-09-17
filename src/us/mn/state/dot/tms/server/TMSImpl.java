@@ -138,12 +138,12 @@ public final class TMSImpl implements KmlDocument {
 	/** Write the TMS xml configuration files */
 	protected void writeXmlConfiguration() throws IOException {
 		System.err.println("Writing TMS XML files @ " + new Date());
-		new DetectorXmlWriter(namespace).write();
+		new DetectorXmlWriter().write();
 		corridors = new CorridorManager(namespace);
 		new R_NodeXmlWriter(corridors).write();
-		new RampMeterXmlWriter(namespace).write();
-		new CameraXmlWriter(namespace).write();
-		new GeoLocXmlWriter(namespace).write();
+		new RampMeterXmlWriter().write();
+		new CameraXmlWriter().write();
+		new GeoLocXmlWriter().write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
 	}
 

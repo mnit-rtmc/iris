@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DetectorHelper;
 
 /**
  * This class writes out the current detector configuration to an XML file.
@@ -30,22 +30,17 @@ public class DetectorXmlWriter extends XmlWriter {
 	/** Detector list XML file */
 	static protected final String DETS_XML = "detectors.xml";
 
-	/** SONAR namespace */
-	protected final ServerNamespace namespace;
-
 	/** Create a new detector XML writer */
-	public DetectorXmlWriter(ServerNamespace ns) {
+	public DetectorXmlWriter() {
 		super(DETS_XML, false);
-		namespace = ns;
 	}
 
 	/** Print the body of the detector list XML file */
 	public void print(final PrintWriter out) {
-		namespace.findObject(Detector.SONAR_TYPE,
-			new Checker<DetectorImpl>()
-		{
-			public boolean check(DetectorImpl det) {
-				det.printXmlElement(out);
+		DetectorHelper.find(new Checker<Detector>() {
+			public boolean check(Detector d) {
+				if(d instanceof DetectorImpl)
+					((DetectorImpl)d).printXmlElement(out);
 				return false;
 			}
 		});

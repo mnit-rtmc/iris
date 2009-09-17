@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -25,29 +24,24 @@ import us.mn.state.dot.tms.GeoLocHelper;
  * This class writes out the current GeoLoc configuration to an XML file.
  *
  * @author Tim Johnson
+ * @author Douglas Lau
  */
 public class GeoLocXmlWriter extends XmlWriter {
 
 	/** GeoLoc XML file */
 	static protected final String GEOLOC_XML = "geoloc.xml";
 
-	/** SONAR namespace */
-	protected final ServerNamespace namespace;
-
 	/** Create a new GeoLoc XML writer */
-	public GeoLocXmlWriter(ServerNamespace ns) {
+	public GeoLocXmlWriter() {
 		super(GEOLOC_XML, false);
-		namespace = ns;
 	}
 
 	/** Print the body of the GeoLoc list XML file */
 	public void print(final PrintWriter out) {
 		out.println(XML_DECLARATION);
 		out.println("<list>");
-		namespace.findObject(GeoLoc.SONAR_TYPE,
-			new Checker<GeoLocImpl>()
-		{
-			public boolean check(GeoLocImpl loc) {
+		GeoLocHelper.find(new Checker<GeoLoc>() {
+			public boolean check(GeoLoc loc) {
 				printXmlElement(loc, out);
 				return false;
 			}

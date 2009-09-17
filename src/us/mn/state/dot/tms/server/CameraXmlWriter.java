@@ -17,37 +17,33 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 
 /**
  * This class writes out the current camera configuration to an XML file.
  *
  * @author Tim Johnson
+ * @author Douglas Lau
  */
 public class CameraXmlWriter extends XmlWriter {
 
 	/** Camera XML file */
 	static protected final String CAMERA_XML = "camera.xml";
 
-	/** SONAR namespace */
-	protected final ServerNamespace namespace;
-
 	/** Create a new camera XML writer */
-	public CameraXmlWriter(ServerNamespace ns) {
+	public CameraXmlWriter() {
 		super(CAMERA_XML, false);
-		namespace = ns;
 	}
 
 	/** Print the body of the camera list XML file */
 	public void print(final PrintWriter out) {
 		out.println(XML_DECLARATION);
 		out.println("<list>");
-		namespace.findObject(Camera.SONAR_TYPE,
-			new Checker<CameraImpl>()
-		{
-			public boolean check(CameraImpl camera) {
-				camera.printXmlElement(out);
+		CameraHelper.find(new Checker<Camera>() {
+			public boolean check(Camera cam) {
+				if(cam instanceof CameraImpl)
+					((CameraImpl)cam).printXmlElement(out);
 				return false;
 			}
 		});

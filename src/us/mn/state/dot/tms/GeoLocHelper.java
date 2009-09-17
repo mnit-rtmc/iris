@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.PrintWriter;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.utils.Transform;
 
@@ -368,6 +369,11 @@ public class GeoLocHelper extends BaseHelper {
 		double northing_d = p.getNorthing().doubleValue();
 		return Transform.toLatLonPoint(easting_d, 
 			northing_d, UTM_ZONE, NORTHERN_HEMISPHERE);
+	}
+
+	/** Find geo-locs using a Checker */
+	static public GeoLoc find(Checker<GeoLoc> checker) {
+		return (GeoLoc)namespace.findObject(GeoLoc.SONAR_TYPE, checker);
 	}
 
 	/** Lookup a geo location */
