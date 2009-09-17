@@ -758,19 +758,17 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected void updatePreviewPanel() {
 		clearPreviewPager();
 		DMS dms = getSingleSelection();
-		if(dms != null) {
-			String multi = composer.getMessage();
-			if(multi != null) {
-				BitmapGraphic[] bmaps = getBitmaps(multi);
-				previewPnlPager = new DMSPanelPager(previewPnl,
-					dms, bmaps,
-					composer.getCurrentPgOnTime());
-			}
-		}
+		if(dms == null)
+			return;
+		BitmapGraphic[] bmaps = getBitmaps(composer.getMessage());
+		previewPnlPager = new DMSPanelPager(previewPnl,	dms, bmaps,
+			composer.getCurrentPgOnTime());
 	}
 
-	/** Get the bitmap graphic for the given message */
+	/** Get the bitmap graphic for the given message.
+	 *  @param m MULTI string, may be null. */
 	protected BitmapGraphic[] getBitmaps(String m) {
+		m = (m == null ? "" : m);
 		PixelMapBuilder b = builder;
 		if(b != null) {
 			MultiString ms = new MultiString(m);
