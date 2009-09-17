@@ -15,43 +15,26 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.ArrayList;
-import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.HolidayHelper;
-import us.mn.state.dot.tms.LaneAction;
-import us.mn.state.dot.tms.LaneActionHelper;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimeActionHelper;
-import us.mn.state.dot.tms.TimingPlan;
-import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.WarningSignHelper;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.kml.KmlDocument;
 import us.mn.state.dot.tms.kml.KmlFolder;
 import us.mn.state.dot.tms.kml.KmlFeature;
@@ -67,9 +50,6 @@ import us.mn.state.dot.tms.kml.KmlStyleSelector;
  */
 public final class TMSImpl implements KmlDocument {
 
-	/** Detector sample file */
-	static protected final String SAMPLE_XML = "det_sample.xml";
-
 	/** Worker thread */
 	static protected final Scheduler TIMER =
 		new Scheduler("Scheduler: TIMER");
@@ -77,18 +57,6 @@ public final class TMSImpl implements KmlDocument {
 	/** Detector data flush thread */
 	static public final Scheduler FLUSH =
 		new Scheduler("Scheduler: FLUSH");
-
-	/** Calendar instance for calculating the minute of day */
-	static protected final Calendar STAMP = Calendar.getInstance();
-
-	/** Get the current minute of the day */
-	static protected int minute_of_day() {
-		synchronized(STAMP) {
-			STAMP.setTimeInMillis(System.currentTimeMillis());
-			return STAMP.get(Calendar.HOUR_OF_DAY) * 60 +
-				STAMP.get(Calendar.MINUTE);
-		}
-	}
 
 	/** SQL connection */
 	static SQLConnection store;
@@ -110,9 +78,6 @@ public final class TMSImpl implements KmlDocument {
 		);
 	}
 
-	/** Station manager */
-	protected transient StationManager station_manager;
-
 	/** Get DMS and LCS periodic polling frequency in seconds */
 	private int getPeriodicDmsPollingFreqSecs() {
 		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
@@ -123,7 +88,6 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
-		station_manager = new StationManager();
 		int secs = getPeriodicDmsPollingFreqSecs();
 		if(secs > 0) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
@@ -132,8 +96,8 @@ public final class TMSImpl implements KmlDocument {
 		}
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new AlarmQueryStatusJob());
-		TIMER.addJob(new TimerJob30Sec());
 		TIMER.addJob(new TimerJob1Min());
+		TIMER.addJob(new SampleQuery30SecJob(TIMER));
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
@@ -189,186 +153,6 @@ public final class TMSImpl implements KmlDocument {
 		new DMSXmlWriter(namespace).write();
 	}
 
-	/** Write the sample data out as XML */
-	public void writeSampleXml() throws IOException {
-		XmlWriter w = new XmlWriter(SAMPLE_XML, true) {
-			public void print(PrintWriter out) {
-				printSampleXmlHead(out);
-				printSampleXmlBody(out);
-				printSampleXmlTail(out);
-			}
-		};
-		w.write();
-	}
-
-	/** Print the header of the detector sample XML file */
-	protected void printSampleXmlHead(PrintWriter out) {
-		out.println(XmlWriter.XML_DECLARATION);
-		out.println("<!DOCTYPE traffic_sample SYSTEM 'tms.dtd'>");
-		out.println("<traffic_sample time_stamp='" + new Date() +
-			"' period='30'>");
-		out.println("\t&detectors;");
-	}
-
-	/** Print the body of the detector sample XML file */
-	static protected void printSampleXmlBody(final PrintWriter out) {
-		namespace.findObject(Detector.SONAR_TYPE,
-			new Checker<DetectorImpl>()
-		{
-			public boolean check(DetectorImpl det) {
-				det.calculateFakeData();
-				det.printSampleXmlElement(out);
-				return false;
-			}
-		});
-	}
-
-	/** Print the tail of the detector sample XML file */
-	protected void printSampleXmlTail(PrintWriter out) {
-		out.println("</traffic_sample>");
-	}
-
-	/** 30-second timer job */
-	protected class TimerJob30Sec extends Job {
-
-		/** Job completer */
-		protected final Completer comp;
-
-		/** Current time stamp */
-		protected Calendar stamp;
-
-		/** Job to be performed on completion */
-		protected final Job job = new Job() {
-			public void perform() {
-				try {
-					writeSampleXml();
-					station_manager.calculateData(stamp);
-					station_manager.writeSampleXml();
-					station_manager.writeStationXml();
-				}
-				catch(IOException e) {
-					e.printStackTrace();
-				}
-				if(!HolidayHelper.isHoliday(stamp))
-					validateTimingPlans();
-				performActions();
-			}
-		};
-
-		/** Create a new 30-second timer job */
-		protected TimerJob30Sec() {
-			super(Calendar.SECOND, 30, Calendar.SECOND, 8);
-			comp = new Completer("30-Second", TIMER, job);
-		}
-
-		/** Perform the 30-second timer job */
-		public void perform() throws Exception {
-			if(!comp.checkComplete())
-				return;
-			Calendar s = Calendar.getInstance();
-			s.add(Calendar.SECOND, -30);
-			stamp = s;
-			comp.reset(stamp);
-			try {
-				poll30Second(comp);
-			}
-			finally {
-				comp.makeReady();
-			}
-		}
-	}
-
-	/** Validate all timing plans */
-	protected void validateTimingPlans() {
-		TimingPlanHelper.find(new Checker<TimingPlan>() {
-			public boolean check(TimingPlan p) {
-				TimingPlanImpl plan = (TimingPlanImpl)p;
-				plan.validate();
-				return false;
-			}
-		});
-		StratifiedPlanState.processAllStates();
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter m) {
-				RampMeterImpl meter = (RampMeterImpl)m;
-				meter.updateRatePlanned();
-				return false;
-			}
-		});
-		final int minute = minute_of_day();
-		TimeActionHelper.find(new Checker<TimeAction>() {
-			public boolean check(TimeAction ta) {
-				if(ta.getMinute() == minute)
-					performTimeAction(ta);
-				return false;
-			}
-		});
-	}
-
-	/** Perform a time action */
-	protected void performTimeAction(TimeAction ta) {
-		ActionPlan ap = ta.getActionPlan();
-		if(ap instanceof ActionPlanImpl) {
-			ActionPlanImpl api = (ActionPlanImpl)ap;
-			if(api.getActive())
-				api.setDeployedNotify(ta.getDeploy());
-		}
-	}
-
-	/** Perform all current actions */
-	protected void performActions() {
-		DmsActionHelper.find(new Checker<DmsAction>() {
-			public boolean check(DmsAction da) {
-				ActionPlan ap = da.getActionPlan();
-				if(ap.getActive()) {
-					if(ap.getDeployed() == da.getOnDeploy())
-						performDmsAction(da);
-				}
-				return false;
-			}
-		});
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					((DMSImpl)dms).updateScheduledMessage();
-				return false;
-			}
-		});
-		LaneActionHelper.find(new Checker<LaneAction>() {
-			public boolean check(LaneAction la) {
-				ActionPlan ap = la.getActionPlan();
-				if(ap.getActive()) {
-					LaneMarking m = la.getLaneMarking();
-					if(m != null)
-						m.setDeployed(ap.getDeployed());
-				}
-				return false;
-			}
-		});
-	}
-
-	/** Perform a DMS action */
-	protected void performDmsAction(final DmsAction da) {
-		SignGroup sg = da.getSignGroup();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS d) {
-				if(d instanceof DMSImpl) {
-					final DMSImpl dms = (DMSImpl)d;
-					// We need to create a new Job here so
-					// that when performAction is called,
-					// we're not holding the SONAR TypeNode
-					// locks for DMS and DmsAction.
-					TIMER.addJob(new Job() {
-						public void perform() {
-							dms.performAction(da);
-						}
-					});
-				}
-				return false;
-			}
-		}, sg);
-	}
-
 	/** 1-minute timer job */
 	protected class TimerJob1Min extends Job {
 
@@ -418,22 +202,6 @@ public final class TMSImpl implements KmlDocument {
 		WarningSignHelper.find(new Checker<WarningSign>() {
 			public boolean check(WarningSign sign) {
 				sign.setDeviceRequest(req);
-				return false;
-			}
-		});
-	}
-
-	/** Poll all sampling controllers 30 second interval */
-	static protected void poll30Second(final Completer comp) {
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				MessagePoller p = c.getPoller();
-				if(p instanceof SamplePoller) {
-					SamplePoller sp = (SamplePoller)p;
-					sp.querySamples(c, 30, comp);
-				}
 				return false;
 			}
 		});
