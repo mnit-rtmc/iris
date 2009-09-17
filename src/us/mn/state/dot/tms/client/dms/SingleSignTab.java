@@ -172,6 +172,8 @@ public class SingleSignTab extends FormPanel {
 			addRow("Camera", cameraTxt);
 		addRow("Location", locationTxt);
 		addRow(I18N.get("SingleSignTab.OperationTitle"), operationTxt);
+		statusTxt.setColumns(10);
+		interstatusTxt.setColumns(10);
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", interstatusTxt);
 		if(queryMsgBtn.getIEnabled())
