@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.Checker;
+
 /**
  * Helper class for stations.
  *
@@ -24,6 +26,12 @@ public class StationHelper extends BaseHelper {
 	/** Don't allow instances to be created */
 	private StationHelper() {
 		assert false;
+	}
+
+	/** Find stations using a Checker */
+	static public Station find(Checker<Station> checker) {
+		return (Station)namespace.findObject(Station.SONAR_TYPE,
+			checker);
 	}
 
 	/** Lookup the station with the specified name */

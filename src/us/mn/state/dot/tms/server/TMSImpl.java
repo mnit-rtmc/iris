@@ -123,7 +123,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
-		station_manager = new StationManager(namespace);
+		station_manager = new StationManager();
 		int secs = getPeriodicDmsPollingFreqSecs();
 		if(secs > 0) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));

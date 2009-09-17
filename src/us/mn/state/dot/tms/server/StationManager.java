@@ -19,8 +19,8 @@ import java.io.PrintWriter;
 import java.util.Calendar;
 import java.util.Date;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.StationHelper;
 
 /**
  * This class writes out station XML files.
@@ -35,15 +35,11 @@ class StationManager {
 	/** Location of station XML file */
 	static protected final String STATION_XML = "station.xml";
 
-	/** SONAR namespace */
-	protected final ServerNamespace namespace;
-
 	/** Most recent time stamp of calculated data */
 	protected transient Calendar stamp;
 
 	/** Create a new station manager */
-	public StationManager(ServerNamespace ns) {
-		namespace = ns;
+	public StationManager() {
 		stamp = Calendar.getInstance();
 	}
 
@@ -55,11 +51,12 @@ class StationManager {
 			return;
 		}
 		stamp = st;
-		namespace.findObject(Station.SONAR_TYPE,
-			new Checker<StationImpl>()
-		{
-			public boolean check(StationImpl s) {
-				s.calculateData();
+		StationHelper.find(new Checker<Station>() {
+			public boolean check(Station s) {
+				if(s instanceof StationImpl) {
+					StationImpl si = (StationImpl)s;
+					si.calculateData();
+				}
 				return false;
 			}
 		});
@@ -95,11 +92,12 @@ class StationManager {
 
 	/** Print the body of the station sample XML file */
 	protected void printSampleXmlBody(final PrintWriter out) {
-		namespace.findObject(Station.SONAR_TYPE,
-			new Checker<StationImpl>()
-		{
-			public boolean check(StationImpl s) {
-				s.printSampleXmlElement(out);
+		StationHelper.find(new Checker<Station>() {
+			public boolean check(Station s) {
+				if(s instanceof StationImpl) {
+					StationImpl si = (StationImpl)s;
+					si.printSampleXmlElement(out);
+				}
 				return false;
 			}
 		});
@@ -136,11 +134,12 @@ class StationManager {
 
 	/** Print the body of the station sample XML file */
 	protected void printStationXmlBody(final PrintWriter out) {
-		namespace.findObject(Station.SONAR_TYPE,
-			new Checker<StationImpl>()
-		{
-			public boolean check(StationImpl s) {
-				s.printStationXmlElement(out);
+		StationHelper.find(new Checker<Station>() {
+			public boolean check(Station s) {
+				if(s instanceof StationImpl) {
+					StationImpl si = (StationImpl)s;
+					si.printStationXmlElement(out);
+				}
 				return false;
 			}
 		});
