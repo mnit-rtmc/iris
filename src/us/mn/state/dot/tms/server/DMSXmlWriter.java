@@ -16,37 +16,33 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintWriter;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 
 /**
  * This class writes out the current DMS configuration and state to an XML file.
  *
  * @author Tim Johnson
+ * @author Douglas Lau
  */
 public class DMSXmlWriter extends XmlWriter {
 
 	/** DMS XML file */
 	static protected final String DMS_XML = "dms.xml";
 
-	/** SONAR namespace */
-	protected final ServerNamespace namespace;
-
 	/** Create a new DMS XML writer */
-	public DMSXmlWriter(ServerNamespace ns) {
+	public DMSXmlWriter() {
 		super(DMS_XML, false);
-		namespace = ns;
 	}
 
 	/** Print the body of the DMS list XML file */
 	public void print(final PrintWriter out) {
 		out.println(XML_DECLARATION);
 		out.println("<list>");
-		namespace.findObject(DMS.SONAR_TYPE,
-			new Checker<DMSImpl>()
-		{
-			public boolean check(DMSImpl dms) {
-				dms.printXmlElement(out);
+		DMSHelper.find(new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(dms instanceof DMSImpl)
+					((DMSImpl)dms).printXmlElement(out);
 				return false;
 			}
 		});

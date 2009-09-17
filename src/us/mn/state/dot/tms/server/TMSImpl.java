@@ -150,7 +150,7 @@ public final class TMSImpl implements KmlDocument {
 
 	/** Write the current state to XML files */
 	protected void writeXmlState() throws IOException {
-		new DMSXmlWriter(namespace).write();
+		new DMSXmlWriter().write();
 	}
 
 	/** 1-minute timer job */
