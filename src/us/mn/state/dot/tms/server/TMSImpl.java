@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.HolidayHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
@@ -249,7 +249,7 @@ public final class TMSImpl implements KmlDocument {
 				catch(IOException e) {
 					e.printStackTrace();
 				}
-				if(!isHoliday(stamp))
+				if(!HolidayHelper.isHoliday(stamp))
 					validateTimingPlans();
 				performActions();
 			}
@@ -276,22 +276,6 @@ public final class TMSImpl implements KmlDocument {
 				comp.makeReady();
 			}
 		}
-	}
-
-	/** Check if the given date/time matches any holiday */
-	static protected boolean isHoliday(Calendar stamp) {
-		return lookupHoliday(stamp) != null;
-	}
-
-	/** Lookup a holiday which matches the given calendar */
-	static protected HolidayImpl lookupHoliday(final Calendar stamp) {
-		return (HolidayImpl)namespace.findObject(Holiday.SONAR_TYPE,
-			new Checker<HolidayImpl>()
-		{
-			public boolean check(HolidayImpl h) {
-				return h.matches(stamp);
-			}
-		});
 	}
 
 	/** Validate all timing plans */

@@ -260,26 +260,4 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday {
 	public int getPeriod() {
 		return period;
 	}
-
-	/** Check if the holiday matches the given time */
-	public boolean matches(Calendar stamp) {
-		if(month != ANY_MONTH && month != stamp.get(Calendar.MONTH))
-			return false;
-		if(day != ANY_DAY && day != stamp.get(Calendar.DAY_OF_MONTH))
-			return false;
-		if(week != ANY_WEEK) {
-			Calendar t = (Calendar)stamp.clone();
-			t.set(Calendar.DAY_OF_WEEK, weekday);
-			t.set(Calendar.DAY_OF_WEEK_IN_MONTH, week);
-			t.add(Calendar.DAY_OF_MONTH, shift);
-			if(!t.equals(stamp))
-				return false;
-		} else if(weekday != ANY_WEEKDAY) {
-			if(weekday != stamp.get(Calendar.DAY_OF_WEEK))
-				return false;
-		}
-		if(period != ANY_PERIOD && period != stamp.get(Calendar.AM_PM))
-			return false;
-		return true;
-	}
 }
