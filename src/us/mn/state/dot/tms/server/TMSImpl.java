@@ -20,18 +20,9 @@ import java.util.Date;
 import java.util.Properties;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.server.ServerNamespace;
-import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.WarningSign;
-import us.mn.state.dot.tms.WarningSignHelper;
 
 /**
  * The TMSImpl class is an RMI object which contains all the global traffic
@@ -93,6 +84,8 @@ public final class TMSImpl {
 		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new ProfilingJob());
 		TIMER.addJob(new KmlWriterJob());
+		TIMER.addJob(new SendSettingsJob());
+		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new Job(Calendar.DATE, 1,
 			Calendar.HOUR, 20)
 		{
@@ -100,22 +93,6 @@ public final class TMSImpl {
 				writeXmlConfiguration();
 			}
 		});
-		TIMER.addJob(new Job(Calendar.DATE, 1,
-			Calendar.HOUR, 4)
-		{
-			public void perform() throws Exception {
-				System.err.println( "Performing download to"
-					+ " all controllers @ " + new Date() );
-				download();
-			}
-		} );
-		TIMER.addJob(new Job(500) {
-			public void perform() throws Exception {
-				System.err.println( "Performing download to"
-					+ " all controllers @ " + new Date() );
-				download();
-			}
-		} );
 		TIMER.addJob(new Job(1000) {
 			public void perform() throws Exception {
 				writeXmlConfiguration();
@@ -139,38 +116,5 @@ public final class TMSImpl {
 	TMSImpl(Properties props) throws IOException, TMSException {
 		super();
 		openVault(props);
-	}
-
-	/** Download to all controllers */
-	static protected void download() {
-		namespace.findObject(Controller.SONAR_TYPE,
-			new Checker<ControllerImpl>()
-		{
-			public boolean check(ControllerImpl c) {
-				c.setDownload(false);
-				return false;
-			}
-		});
-		final int req = DeviceRequest.SEND_SETTINGS.ordinal();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				dms.setDeviceRequest(req);
-				dms.setDeviceRequest(DeviceRequest.
-					QUERY_PIXEL_FAILURES.ordinal());
-				return false;
-			}
-		});
-		RampMeterHelper.find(new Checker<RampMeter>() {
-			public boolean check(RampMeter meter) {
-				meter.setDeviceRequest(req);
-				return false;
-			}
-		});
-		WarningSignHelper.find(new Checker<WarningSign>() {
-			public boolean check(WarningSign sign) {
-				sign.setDeviceRequest(req);
-				return false;
-			}
-		});
 	}
 }
