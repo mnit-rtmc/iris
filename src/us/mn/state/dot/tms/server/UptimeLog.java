@@ -68,8 +68,10 @@ public class UptimeLog {
 		ManagementFactory.getOperatingSystemMXBean();
 
 	/** Create a new uptime log.
-	 *  @param fname Log file name. */
+	 * @param fname Log file name. */
 	public UptimeLog(String fname, ServerNamespace namespace) {
+		if(fname == null)
+			throw new NullPointerException();
 		m_fname = fname;
 		m_namespace = namespace;
 	}
@@ -77,12 +79,6 @@ public class UptimeLog {
 	/** Append to uptime log.
 	 *  @return true on success else false on error. */
 	public boolean write() {
-		if(m_fname == null || m_fname.length() <= 0) {
-			Log.config("UptimeLog.write(): warning: " + 
-				" bogus name: " + m_fname);
-			return false;
-		}
-
 		OutputStream os = null;
 		boolean ok = false;
 		try {
