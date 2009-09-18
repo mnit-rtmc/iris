@@ -14,10 +14,25 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.IOException;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.tms.BaseHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.STime;
+
 /**
- * Profiler is used to profile the memory and thread usage
+ * The server profiler is used to periodically write interesting server 
+ * statistics to a persistent log.  This is used for long-term IRIS 
+ * reliability tracking.  It also can log memory and thread usage.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class Profiler {
 
@@ -28,13 +43,17 @@ public class Profiler {
 	protected final DebugLog PROFILE_LOG = new DebugLog("profile");
 
 	/** Runtime used to get memory information */
-	protected final Runtime JVM = Runtime.getRuntime();
+	protected final Runtime jvm = Runtime.getRuntime();
+
+	/** OS bean */
+	protected final OperatingSystemMXBean osbean = 
+		ManagementFactory.getOperatingSystemMXBean();
 
 	/** Debug memory profiling information */
 	public void debugMemory() {
 		if(PROFILE_LOG.isOpen()) {
-			long free = JVM.freeMemory();
-			long total = JVM.totalMemory();
+			long free = jvm.freeMemory();
+			long total = jvm.totalMemory();
 			PROFILE_LOG.log("Free memory: " + free / MIB + "MiB");
 			PROFILE_LOG.log("Total memory: " + total / MIB + "MiB");
 		}
@@ -87,5 +106,55 @@ public class Profiler {
 		count = group.enumerate(groups, false);
 		for(int i = 0; i < count; i++)
 			debugThreads(groups[i], deep + 2);
+	}
+
+	/** Append to uptime log */
+	public void appendUptimeLog() throws IOException {
+		String fn = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();
+		if(fn == null || fn.length() <= 0 ) {
+			PROFILE_LOG.log("warning: bogus file name: " + fn);
+			return;
+		}
+		File f = new File(fn);
+		FileOutputStream fos = new FileOutputStream(f, true);
+		try {
+			PrintWriter pw = new PrintWriter(fos);
+			pw.println(createLogEntry());
+		}
+		finally {
+			fos.close();
+		}
+	}
+
+	/** Create a log entry */
+	protected String createLogEntry() {
+		StringBuilder sb = new StringBuilder();
+
+		// date and time in UTC
+		sb.append(STime.getCurDateTimeString(false));
+		sb.append(',');
+
+		// cpu utilization in last 60 seconds as int, e.g. 13 is 13%
+		sb.append((int)Math.round(100 * osbean.getSystemLoadAverage()));
+		sb.append(',');
+
+		// heap size
+		long heapsize = jvm.totalMemory() - jvm.freeMemory();
+		sb.append(heapsize);
+		sb.append(',');
+
+		// number of user connections
+		sb.append(getConnectionCount());
+
+		return sb.toString();
+	}
+
+	/** Get the current connection count */
+	protected int getConnectionCount() {
+		Namespace ns = BaseHelper.namespace;
+		if(ns != null)
+			return ns.getCount(Connection.SONAR_TYPE);
+		else
+			return -1;
 	}
 }

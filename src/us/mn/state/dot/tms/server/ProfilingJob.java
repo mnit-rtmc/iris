@@ -39,9 +39,9 @@ public class ProfilingJob extends Job {
 
 	/** Perform the profiling job */
 	public void perform() throws IOException {
-		if(SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
-			UptimeLog.writeServerLog();
 		profiler.debugMemory();
 		profiler.debugThreads();
+		if(SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
+			profiler.appendUptimeLog();
 	}
 }
