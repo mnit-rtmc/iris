@@ -15,23 +15,23 @@
 package us.mn.state.dot.tms.server;
 
 /**
- * Profile is used to profile the memory and thread usage
+ * Profiler is used to profile the memory and thread usage
  *
  * @author Douglas Lau
  */
-public class Profile {
-
-	/** Profile debug log */
-	static protected final DebugLog PROFILE_LOG = new DebugLog("profile");
+public class Profiler {
 
 	/** Constant value of one megabyte */
 	static protected final float MIB = 1024.0f * 1024.0f;
 
-	/** Runtime used to get memory information */
-	static protected final Runtime JVM = Runtime.getRuntime();
+	/** Profile debug log */
+	protected final DebugLog PROFILE_LOG = new DebugLog("profile");
 
-	/** Print memory profiling information */
-	static public void printMemory() {
+	/** Runtime used to get memory information */
+	protected final Runtime JVM = Runtime.getRuntime();
+
+	/** Debug memory profiling information */
+	public void debugMemory() {
 		if(PROFILE_LOG.isOpen()) {
 			long free = JVM.freeMemory();
 			long total = JVM.totalMemory();
@@ -40,18 +40,18 @@ public class Profile {
 		}
 	}
 
-	/** Print thread profiling information for all threads */
-	static public void printThreads() {
+	/** Debug thread profiling information for all threads */
+	public void debugThreads() {
 		if(PROFILE_LOG.isOpen()) {
 			ThreadGroup g = Thread.currentThread().getThreadGroup();
 			while(g.getParent() != null)
 				g = g.getParent();
-			printThreads(g, 0);
+			debugThreads(g, 0);
 		}
 	}
 
 	/** Print thread profiling information for the specified group */
-	static protected void printThreads(ThreadGroup group, int deep) {
+	protected void debugThreads(ThreadGroup group, int deep) {
 		Thread[] thread = new Thread[group.activeCount() + 1];
 		int count = group.enumerate(thread, false);
 		StringBuilder g = new StringBuilder();
@@ -86,6 +86,6 @@ public class Profile {
 			new ThreadGroup[group.activeGroupCount() + 1];
 		count = group.enumerate(groups, false);
 		for(int i = 0; i < count; i++)
-			printThreads(groups[i], deep + 2);
+			debugThreads(groups[i], deep + 2);
 	}
 }

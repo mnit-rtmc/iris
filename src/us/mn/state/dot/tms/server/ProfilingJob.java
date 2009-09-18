@@ -29,6 +29,9 @@ public class ProfilingJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 1;
 
+	/** Profiler instance */
+	protected final Profiler profiler = new Profiler();
+
 	/** Create a new profiling job */
 	public ProfilingJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
@@ -38,7 +41,7 @@ public class ProfilingJob extends Job {
 	public void perform() throws IOException {
 		if(SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
 			UptimeLog.writeServerLog();
-		Profile.printMemory();
-		Profile.printThreads();
+		profiler.debugMemory();
+		profiler.debugThreads();
 	}
 }
