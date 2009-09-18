@@ -101,9 +101,8 @@ public final class TMSImpl implements KmlDocument {
 		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
-				System.out.println(new Date());
-				Profile.printMemory(System.out);
-				Profile.printThreads(System.out);
+				Profile.printMemory();
+				Profile.printThreads();
 			}
 		} );
 		TIMER.addJob(new Job(Calendar.DATE, 1,
