@@ -23,6 +23,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.Runtime;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
@@ -38,9 +39,8 @@ import us.mn.state.dot.tms.utils.STime;
 public class UptimeLog {
 
 	/** Write to iris server uptime log */
-	static public void writeServerLog(Namespace namespace) {
-		if(!SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
-			return;
+	static public void writeServerLog() {
+		Namespace namespace = BaseHelper.namespace;
 		if(namespace == null)
 			return;
 		String fname = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();

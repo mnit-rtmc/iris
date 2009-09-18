@@ -99,12 +99,7 @@ public final class TMSImpl implements KmlDocument {
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
 		TIMER.addJob(new DmsXmlJob());
 		TIMER.addJob(new CameraNoFailJob());
-		TIMER.addJob(new Job(Calendar.HOUR, 1) {
-			public void perform() throws Exception {
-				Profile.printMemory();
-				Profile.printThreads();
-			}
-		} );
+		TIMER.addJob(new ProfilingJob());
 		TIMER.addJob(new Job(Calendar.DATE, 1,
 			Calendar.HOUR, 20)
 		{
@@ -204,7 +199,6 @@ public final class TMSImpl implements KmlDocument {
 	/** Perform 1 minute jobs */
 	protected void do1MinuteJobs() throws Exception {
 		KmlFile.writeServerFile(this);
-		UptimeLog.writeServerLog(namespace);
 	}
 
 	/** get kml document name (KmlDocument interface) */
