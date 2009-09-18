@@ -22,7 +22,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.Runtime;
 import us.mn.state.dot.sonar.Connection;
-import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.STime;
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.utils.STime;
 public class UptimeLog {
 
 	/** Write to iris server uptime log */
-	static public void writeServerLog(ServerNamespace namespace) {
+	static public void writeServerLog(Namespace namespace) {
 		if(!SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
 			return;
 		if(namespace == null)
@@ -57,8 +57,8 @@ public class UptimeLog {
 	/** log file name */
 	protected final String m_fname;
 
-	/** server namespace */
-	protected final ServerNamespace m_namespace;
+	/** Namespace */
+	protected final Namespace m_namespace;
 
 	/** runtime */
 	protected final Runtime m_rt = Runtime.getRuntime();
@@ -69,7 +69,7 @@ public class UptimeLog {
 
 	/** Create a new uptime log.
 	 * @param fname Log file name. */
-	public UptimeLog(String fname, ServerNamespace namespace) {
+	public UptimeLog(String fname, Namespace namespace) {
 		if(fname == null)
 			throw new NullPointerException();
 		m_fname = fname;
