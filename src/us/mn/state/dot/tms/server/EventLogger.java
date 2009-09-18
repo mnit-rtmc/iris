@@ -77,7 +77,9 @@ public class EventLogger {
 	{
 		File f = file(stamp, det_id);
 		FileWriter fw = new FileWriter(f, true);
-		try { fw.write(line); }
+		try {
+			fw.write(line);
+		}
 		finally {
 			fw.close();
 		}
