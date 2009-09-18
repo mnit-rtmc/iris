@@ -84,7 +84,8 @@ public class UptimeLog {
 		try {
 			File f = new File(m_fname);
 			os = new FileOutputStream(f.getAbsolutePath(), true);
-			ok = appendLog(os);
+			String le = createLogEntry();
+			os.write(le.getBytes());
 		}
 		catch(IOException ex) {
 			Log.warning("UptimeLog.write(): ex: " + ex);
@@ -102,11 +103,8 @@ public class UptimeLog {
 		return ok;
 	}
 
-	/** append to log */
-	protected boolean appendLog(OutputStream os) {
-		if(os == null)
-			return false;
-
+	/** Create a log entry */
+	protected String createLogEntry() {
 		StringBuilder sb = new StringBuilder();
 
 		// date and time in UTC
@@ -126,21 +124,7 @@ public class UptimeLog {
 		sb.append(m_namespace.getCount(Connection.SONAR_TYPE));
 		sb.append('\n');
 
-		// write
-		try {
-			os.write(sb.toString().getBytes());
-		}
-		catch(IOException ex) {
-			Log.warning("Warning: UptimeLog.appendLog(): ex: " 
-				+ ex);
-			return false;
-		}
-		catch(Exception ex) {
-			Log.warning("Warning: UptimeLog.appendLog(): ex: " 
-				+ ex);
-			return false;
-		}
-		return true;
+		return sb.toString();
 	}
 
 	/** close */
