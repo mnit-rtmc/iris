@@ -33,26 +33,12 @@ import us.mn.state.dot.tms.utils.STime;
  * reliability tracking.
  *
  * @author Michael Darter
- * @created 01/22/09
- * @see TMSImpl
+ * @author Douglas Lau
  */
 public class UptimeLog {
 
-	/** log file name */
-	protected String m_fname = "";
-
-	/** server namespace */
-	protected ServerNamespace m_namespace = null;
-
-	/** runtime */
-	protected final Runtime m_rt = Runtime.getRuntime();
-
-	/** OS bean */
-	protected final OperatingSystemMXBean m_osb = 
-		ManagementFactory.getOperatingSystemMXBean();
-
-	/** write to iris server uptime log */
-	public static void writeServerLog(ServerNamespace namespace) {
+	/** Write to iris server uptime log */
+	static public void writeServerLog(ServerNamespace namespace) {
 		if(!SystemAttrEnum.UPTIME_LOG_ENABLE.getBoolean())
 			return;
 		if(namespace == null)
@@ -67,6 +53,19 @@ public class UptimeLog {
 		if(log.write())
 			Log.finest("Wrote uptime log: " + fname);
 	}
+
+	/** log file name */
+	protected final String m_fname;
+
+	/** server namespace */
+	protected final ServerNamespace m_namespace;
+
+	/** runtime */
+	protected final Runtime m_rt = Runtime.getRuntime();
+
+	/** OS bean */
+	protected final OperatingSystemMXBean m_osb = 
+		ManagementFactory.getOperatingSystemMXBean();
 
 	/** Create a new uptime log.
 	 *  @param fname Log file name. */
