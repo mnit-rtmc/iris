@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.lang.Runtime;
@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.utils.STime;
 public class UptimeLog {
 
 	/** Write to iris server uptime log */
-	static public void writeServerLog() {
+	static public void writeServerLog() throws IOException {
 		Namespace namespace = BaseHelper.namespace;
 		if(namespace == null)
 			return;
@@ -50,8 +50,8 @@ public class UptimeLog {
 			return;
 		}
 		UptimeLog log = new UptimeLog(fname, namespace);
-		if(log.write())
-			Log.finest("Wrote uptime log: " + fname);
+		log.write();
+		Log.finest("Wrote uptime log: " + fname);
 	}
 
 	/** log file name */
@@ -76,31 +76,17 @@ public class UptimeLog {
 		m_namespace = namespace;
 	}
 
-	/** Append to uptime log.
-	 *  @return true on success else false on error. */
-	public boolean write() {
-		OutputStream os = null;
-		boolean ok = false;
+	/** Append to uptime log */
+	public void write() throws IOException {
+		File f = new File(m_fname);
+		FileOutputStream fos = new FileOutputStream(f, true);
 		try {
-			File f = new File(m_fname);
-			os = new FileOutputStream(f.getAbsolutePath(), true);
-			String le = createLogEntry();
-			os.write(le.getBytes());
-		}
-		catch(IOException ex) {
-			Log.warning("UptimeLog.write(): ex: " + ex);
-			return false;
-		}
-		catch(Exception ex) {
-			Log.warning("UptimeLog.write(): ex: " + ex);
-			ex.printStackTrace();
-			return false;
+			PrintWriter pw = new PrintWriter(fos);
+			pw.println(createLogEntry());
 		}
 		finally {
-			if(!close(os))
-				return false;
+			fos.close();
 		}
-		return ok;
 	}
 
 	/** Create a log entry */
@@ -122,21 +108,7 @@ public class UptimeLog {
 
 		// number of user connections
 		sb.append(m_namespace.getCount(Connection.SONAR_TYPE));
-		sb.append('\n');
 
 		return sb.toString();
-	}
-
-	/** close */
-	protected boolean close(OutputStream os) {
-		try {
-			if(os != null)
-				os.close();
-			return true;
-		}
-		catch(Exception e) {
-			Log.warning("Warning: UptimeLog.close(): " + e);
-		}
-		return false;
 	}
 }
