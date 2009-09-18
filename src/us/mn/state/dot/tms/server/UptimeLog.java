@@ -40,25 +40,19 @@ public class UptimeLog {
 
 	/** Write to iris server uptime log */
 	static public void writeServerLog() throws IOException {
-		Namespace namespace = BaseHelper.namespace;
-		if(namespace == null)
-			return;
 		String fname = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();
 		if(fname == null || fname.length() <= 0 ) {
 			Log.config("UptimeLog.writeServerLog(): " +
 				"warning: bogus file name: "+fname);
 			return;
 		}
-		UptimeLog log = new UptimeLog(fname, namespace);
+		UptimeLog log = new UptimeLog(fname);
 		log.write();
 		Log.finest("Wrote uptime log: " + fname);
 	}
 
 	/** log file name */
 	protected final String m_fname;
-
-	/** Namespace */
-	protected final Namespace m_namespace;
 
 	/** runtime */
 	protected final Runtime m_rt = Runtime.getRuntime();
@@ -69,11 +63,10 @@ public class UptimeLog {
 
 	/** Create a new uptime log.
 	 * @param fname Log file name. */
-	public UptimeLog(String fname, Namespace namespace) {
+	public UptimeLog(String fname) {
 		if(fname == null)
 			throw new NullPointerException();
 		m_fname = fname;
-		m_namespace = namespace;
 	}
 
 	/** Append to uptime log */
@@ -107,8 +100,17 @@ public class UptimeLog {
 		sb.append(',');
 
 		// number of user connections
-		sb.append(m_namespace.getCount(Connection.SONAR_TYPE));
+		sb.append(getConnectionCount());
 
 		return sb.toString();
+	}
+
+	/** Get the current connection count */
+	protected int getConnectionCount() {
+		Namespace ns = BaseHelper.namespace;
+		if(ns != null)
+			return ns.getCount(Connection.SONAR_TYPE);
+		else
+			return -1;
 	}
 }
