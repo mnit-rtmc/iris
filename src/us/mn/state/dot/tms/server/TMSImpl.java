@@ -97,6 +97,7 @@ public final class TMSImpl implements KmlDocument {
 		TIMER.addJob(new TimerJob1Min());
 		TIMER.addJob(new SampleQuery30SecJob(TIMER));
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
+		TIMER.addJob(new DmsXmlJob());
 		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new Job(Calendar.HOUR, 1) {
 			public void perform() throws Exception {
@@ -145,11 +146,6 @@ public final class TMSImpl implements KmlDocument {
 		new CameraXmlWriter().write();
 		new GeoLocXmlWriter().write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
-	}
-
-	/** Write the current state to XML files */
-	protected void writeXmlState() throws IOException {
-		new DMSXmlWriter().write();
 	}
 
 	/** 1-minute timer job */
@@ -210,7 +206,6 @@ public final class TMSImpl implements KmlDocument {
 	protected void do1MinuteJobs() throws Exception {
 		KmlFile.writeServerFile(this);
 		UptimeLog.writeServerLog(namespace);
-		writeXmlState();
 	}
 
 	/** get kml document name (KmlDocument interface) */
