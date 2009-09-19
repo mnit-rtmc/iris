@@ -22,7 +22,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TMSException;
 
 /**
  * The TMSImpl class is an RMI object which contains all the global traffic
@@ -40,25 +39,11 @@ public final class TMSImpl {
 	static public final Scheduler FLUSH =
 		new Scheduler("Scheduler: FLUSH");
 
-	/** SQL connection */
-	static SQLConnection store;
-
 	/** SONAR namespace */
 	static ServerNamespace namespace;
 
 	/** Corridor manager */
 	static CorridorManager corridors;
-
-	/** Open the database connection */
-	static protected void openVault(Properties props) throws IOException,
-		TMSException
-	{
-		store = new SQLConnection(
-			props.getProperty("db.url"),
-			props.getProperty("db.user"),
-			props.getProperty("db.password")
-		);
-	}
 
 	/** Get DMS and LCS periodic polling frequency in seconds */
 	private int getPeriodicDmsPollingFreqSecs() {
@@ -110,11 +95,5 @@ public final class TMSImpl {
 		new CameraXmlWriter().write();
 		new GeoLocXmlWriter().write();
 		System.err.println("Completed TMS XML dump @ " + new Date());
-	}
-
-	/** Create a new TMS object */
-	TMSImpl(Properties props) throws IOException, TMSException {
-		super();
-		openVault(props);
 	}
 }

@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -67,27 +68,31 @@ public class MainServer {
 	/** SONAR server */
 	static public Server server;
 
+	/** SQL connection */
+	static protected SQLConnection store;
+
 	/** Start the server and register it with the RMI registry */
 	static public void main(String[] args) {
 		try {
 			redirectStdStreams();
 			sanityChecks();
 			Properties props = PropertyLoader.load(PROP_FILE);
-			TMSImpl tms = new TMSImpl(props);
+			store = createStore(props);
+			TMSImpl tms = new TMSImpl();
 			I18N.initialize(props);
 			ServerNamespace ns = new ServerNamespace();
 			// FIXME: static namespace hacks
 			TMSImpl.namespace = ns;
 			DMSList.namespace = ns;
 			BaseHelper.namespace = ns;
-			IrisRoleImpl.lookup(TMSImpl.store, ns);
-			IrisPrivilegeImpl.lookup(TMSImpl.store, ns);
-			IrisUserImpl.lookup(TMSImpl.store, ns);
+			IrisRoleImpl.lookup(store, ns);
+			IrisPrivilegeImpl.lookup(store, ns);
+			IrisUserImpl.lookup(store, ns);
 			ns.registerType(Station.SONAR_TYPE, StationImpl.class);
 			ns.registerType(SignMessage.SONAR_TYPE,
 				SignMessageImpl.class);
-			BaseObjectImpl.loadAll(TMSImpl.store, ns);
-			BaseEvent.store = TMSImpl.store;
+			BaseObjectImpl.loadAll(store, ns);
+			BaseEvent.store = store;
 			tms.scheduleJobs();
 			server = new Server(ns, props);
 			System.err.println("IRIS Server active");
@@ -98,14 +103,23 @@ public class MainServer {
 		}
 	}
 
-	/** perform sanity and debug checks */
-	static public void sanityChecks() {
-
-		// does the default time zone support DST?
-		if (!TimeZone.getDefault().useDaylightTime()) {
+	/** Perform sanity and debug checks */
+	static protected void sanityChecks() {
+		if(!TimeZone.getDefault().useDaylightTime()) {
 			System.err.println("Warning: the default time zone ("+
-			TimeZone.getDefault().getDisplayName()+
+			TimeZone.getDefault().getDisplayName() +
 			") doesn't support DST. Specify the time zone via the command line.");
 		}
+	}
+
+	/** Create the database connection */
+	static protected SQLConnection createStore(Properties props)
+		throws IOException, TMSException
+	{
+		return new SQLConnection(
+			props.getProperty("db.url"),
+			props.getProperty("db.user"),
+			props.getProperty("db.password")
+		);
 	}
 }
