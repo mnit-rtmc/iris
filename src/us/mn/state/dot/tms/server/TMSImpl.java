@@ -33,18 +33,10 @@ public final class TMSImpl {
 	static public final Scheduler FLUSH =
 		new Scheduler("Scheduler: FLUSH");
 
-	/** Get DMS and LCS periodic polling frequency in seconds */
-	private int getPeriodicDmsPollingFreqSecs() {
-		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
-		if(secs <= 0)
-			return 0;
-		return (secs < 5 ? 5 : secs);
-	}
-
 	/** Schedule all repeating jobs */
 	public void scheduleJobs() {
-		int secs = getPeriodicDmsPollingFreqSecs();
-		if(secs > 0) {
+		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
+		if(secs > 5) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
 			TIMER.addJob(new LcsQueryMsgJob(secs));
 			TIMER.addJob(new WarnQueryStatusJob(secs));
