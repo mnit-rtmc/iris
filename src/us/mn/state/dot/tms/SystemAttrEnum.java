@@ -27,6 +27,7 @@ public enum SystemAttrEnum {
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
 	CAMERA_PTZ_PANEL_ENABLE(false),
 	DATABASE_VERSION(String.class),
+	DETECTOR_AUTO_FAIL_ENABLE(true),
 	DMS_AWS_ENABLE(false),
 	DMS_AWS_LOG_ENABLE(false),
 	DMS_AWS_LOG_FILENAME("/var/www/html/awsreport.txt"),

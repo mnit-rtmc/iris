@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
 
@@ -572,21 +573,31 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 			return Constants.MISSING_DATA;
 	}
 
-	/** Force fail detector and log the cause */
+	/** Handle a detector malfunction */
 	protected void malfunction(EventType event_type) {
 		if(force_fail)
 			return;
-		try {
-			doSetForceFail(true);
-			notifyAttribute("forceFail");
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-			return;
-		}
+		if(isDetectorAutoFailEnabled())
+			doForceFail();
 		DetFailEvent ev = new DetFailEvent(event_type, getName());
 		try {
 			ev.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Is detector auto-fail enabled? */
+	protected boolean isDetectorAutoFailEnabled() {
+		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
+	}
+
+	/** Force fail the detector */
+	protected void doForceFail() {
+		try {
+			doSetForceFail(true);
+			notifyAttribute("forceFail");
 		}
 		catch(TMSException e) {
 			e.printStackTrace();
