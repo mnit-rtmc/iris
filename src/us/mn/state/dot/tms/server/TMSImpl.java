@@ -14,11 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Properties;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -41,9 +36,6 @@ public final class TMSImpl {
 
 	/** SONAR namespace */
 	static ServerNamespace namespace;
-
-	/** Corridor manager */
-	static CorridorManager corridors;
 
 	/** Get DMS and LCS periodic polling frequency in seconds */
 	private int getPeriodicDmsPollingFreqSecs() {
@@ -71,29 +63,7 @@ public final class TMSImpl {
 		TIMER.addJob(new KmlWriterJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
-		TIMER.addJob(new Job(Calendar.DATE, 1,
-			Calendar.HOUR, 20)
-		{
-			public void perform() throws Exception {
-				writeXmlConfiguration();
-			}
-		});
-		TIMER.addJob(new Job(1000) {
-			public void perform() throws Exception {
-				writeXmlConfiguration();
-			}
-		});
-	}
-
-	/** Write the TMS xml configuration files */
-	protected void writeXmlConfiguration() throws IOException {
-		System.err.println("Writing TMS XML files @ " + new Date());
-		new DetectorXmlWriter().write();
-		corridors = new CorridorManager(namespace);
-		new R_NodeXmlWriter(corridors).write();
-		new RampMeterXmlWriter().write();
-		new CameraXmlWriter().write();
-		new GeoLocXmlWriter().write();
-		System.err.println("Completed TMS XML dump @ " + new Date());
+		TIMER.addJob(new XmlConfigJob());
+		TIMER.addJob(new XmlConfigJob(1000));
 	}
 }

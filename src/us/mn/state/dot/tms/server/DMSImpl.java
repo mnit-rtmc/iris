@@ -1424,8 +1424,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Create one route to a travel time destination */
 	protected Route createRoute(StationImpl s) {
 		GeoLoc dest = s.getR_Node().getGeoLoc();
-		RouteBuilder builder = new RouteBuilder(getName(),
-			TMSImpl.corridors);
+		RouteBuilder builder = new RouteBuilder(getName(), corridors);
 		SortedSet<Route> routes = builder.findRoutes(geo_loc, dest);
 		if(routes.size() > 0)
 			return routes.first();

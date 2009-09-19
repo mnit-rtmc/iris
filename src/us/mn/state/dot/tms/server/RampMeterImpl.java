@@ -480,12 +480,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			}
 		};
 		Corridor corridor = getCorridor();
-		if(corridor != null && TMSImpl.corridors != null) {
+		if(corridor != null && corridors != null) {
 			corridor.findNode(finder);
 			String cd = corridor.getLinkedCDRoad();
 			if(cd != null) {
-				Corridor cd_road =
-					TMSImpl.corridors.getCorridor(cd);
+				Corridor cd_road = corridors.getCorridor(cd);
 				if(cd_road != null)
 					cd_road.findNode(finder);
 			}
@@ -552,9 +551,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
-		if(TMSImpl.corridors != null) {
+		if(corridors != null) {
 			String c = GeoLocHelper.getCorridorName(geo_loc);
-			return TMSImpl.corridors.getCorridor(c);
+			return corridors.getCorridor(c);
 		}
 		return null;
 	}

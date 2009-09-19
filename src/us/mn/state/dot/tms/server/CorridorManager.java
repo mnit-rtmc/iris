@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -33,15 +33,15 @@ import us.mn.state.dot.tms.R_Node;
 public class CorridorManager {
 
 	/** SONAR namespace */
-	protected final ServerNamespace namespace;
+	protected final Namespace namespace;
 
 	/** Map to hold all corridors */
 	protected final Map<String, Corridor> corridors =
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */
-	public CorridorManager(ServerNamespace ns) {
-		namespace = ns;
+	public CorridorManager() {
+		namespace = BaseObjectImpl.namespace;
 		namespace.findObject(R_Node.SONAR_TYPE,
 			new Checker<R_NodeImpl>()
 		{

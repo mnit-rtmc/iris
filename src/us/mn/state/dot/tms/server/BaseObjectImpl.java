@@ -31,6 +31,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** SQL connection to database */
 	static protected SQLConnection store;
 
+	/** Corridor manager */
+	static CorridorManager corridors;
+
 	/** Load all objects from the database into the SONAR Namespace */
 	static void loadAll(SQLConnection s, ServerNamespace ns)
 		throws TMSException
