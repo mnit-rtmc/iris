@@ -1160,7 +1160,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.94.0
+database_version	3.99.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
