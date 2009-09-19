@@ -232,9 +232,9 @@ CREATE TABLE iris.map_extent (
 	north_span INTEGER NOT NULL
 );
 
-CREATE TABLE lane_type (
+CREATE TABLE iris.lane_type (
 	id smallint PRIMARY KEY,
-	description text NOT NULL,
+	description VARCHAR(12) NOT NULL,
 	dcode VARCHAR(2) NOT NULL
 );
 
@@ -343,7 +343,7 @@ CREATE RULE alarm_delete AS ON DELETE TO iris.alarm DO INSTEAD
 CREATE TABLE iris._detector (
 	name VARCHAR(10) PRIMARY KEY,
 	r_node VARCHAR(10) REFERENCES iris.r_node(name),
-	lane_type smallint NOT NULL REFERENCES lane_type(id),
+	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	lane_number smallint NOT NULL,
 	abandoned boolean NOT NULL,
 	force_fail boolean NOT NULL,
@@ -933,7 +933,7 @@ CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 		IF fwy IS NULL OR xst IS NULL THEN
 			RETURN ''FUTURE'';
 		END IF;
-		SELECT INTO ltyp dcode FROM lane_type WHERE id = l_type;
+		SELECT INTO ltyp dcode FROM iris.lane_type WHERE id = l_type;
 		lnum = '''';
 		IF lane_number > 0 THEN
 			lnum = TO_CHAR(lane_number, ''FM9'');
@@ -983,7 +983,7 @@ CREATE VIEW detector_view AS
 	FROM iris.detector d
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
-	LEFT JOIN lane_type ln ON d.lane_type = ln.id
+	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
 	LEFT JOIN iris.controller c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
@@ -1096,7 +1096,7 @@ Prehistoric	10
 334ZP	15
 \.
 
-COPY lane_type (id, description, dcode) FROM stdin;
+COPY iris.lane_type (id, description, dcode) FROM stdin;
 0		
 1	Mainline	
 2	Auxiliary	A
