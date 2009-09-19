@@ -108,3 +108,14 @@ CREATE VIEW detector_event_view AS
 GRANT SELECT ON detector_event_view TO PUBLIC;
 
 DROP TABLE lane_type;
+
+CREATE TABLE iris.video_monitor (
+	name VARCHAR(12) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
+	restricted boolean NOT NULL
+);
+
+INSERT INTO iris.video_monitor (name, description, restricted)
+	(SELECT name, description, restricted FROM video_monitor);
+
+DROP TABLE video_monitor;

@@ -38,7 +38,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		System.err.println("Loading video monitors...");
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, description, restricted " +
-			"FROM video_monitor;", new ResultFactory()
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new VideoMonitorImpl(
@@ -61,7 +61,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

@@ -193,13 +193,11 @@ ALTER TABLE iris.font
 		(graphic_height(font_graphic(name)) = height AND
 		(width = 0 OR graphic_width(font_graphic(name)) = width)));
 
-CREATE TABLE video_monitor (
-	name TEXT PRIMARY KEY,
-	description TEXT NOT NULL,
+CREATE TABLE iris.video_monitor (
+	name VARCHAR(12) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
 	restricted boolean NOT NULL
 );
-
-GRANT SELECT ON TABLE video_monitor TO PUBLIC;
 
 CREATE TABLE iris.holiday (
 	name VARCHAR(32) PRIMARY KEY,
