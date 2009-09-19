@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -33,9 +32,6 @@ public final class TMSImpl {
 	/** Detector data flush thread */
 	static public final Scheduler FLUSH =
 		new Scheduler("Scheduler: FLUSH");
-
-	/** SONAR namespace */
-	static ServerNamespace namespace;
 
 	/** Get DMS and LCS periodic polling frequency in seconds */
 	private int getPeriodicDmsPollingFreqSecs() {

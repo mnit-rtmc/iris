@@ -78,11 +78,9 @@ public class MainServer {
 			sanityChecks();
 			Properties props = PropertyLoader.load(PROP_FILE);
 			store = createStore(props);
-			TMSImpl tms = new TMSImpl();
 			I18N.initialize(props);
 			ServerNamespace ns = new ServerNamespace();
 			// FIXME: static namespace hacks
-			TMSImpl.namespace = ns;
 			DMSList.namespace = ns;
 			BaseHelper.namespace = ns;
 			IrisRoleImpl.lookup(store, ns);
@@ -93,6 +91,7 @@ public class MainServer {
 				SignMessageImpl.class);
 			BaseObjectImpl.loadAll(store, ns);
 			BaseEvent.store = store;
+			TMSImpl tms = new TMSImpl();
 			tms.scheduleJobs();
 			server = new Server(ns, props);
 			System.err.println("IRIS Server active");
