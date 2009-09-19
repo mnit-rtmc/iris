@@ -201,8 +201,8 @@ CREATE TABLE video_monitor (
 
 GRANT SELECT ON TABLE video_monitor TO PUBLIC;
 
-CREATE TABLE holiday (
-	name TEXT PRIMARY KEY,
+CREATE TABLE iris.holiday (
+	name VARCHAR(32) PRIMARY KEY,
 	month INTEGER NOT NULL,
 	day INTEGER NOT NULL,
 	week INTEGER NOT NULL,

@@ -34,7 +34,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday {
 		System.err.println("Loading holidays...");
 		namespace.registerType(SONAR_TYPE, HolidayImpl.class);
 		store.query("SELECT name, month, day, week, weekday, " +
-			"shift, period FROM " + SONAR_TYPE  + ";",
+			"shift, period FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -66,7 +66,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
