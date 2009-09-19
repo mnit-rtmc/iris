@@ -996,6 +996,11 @@ CREATE VIEW iris.controller_dms AS
 	FROM iris._device_io dio
 	JOIN iris.dms d ON dio.name = d.name;
 
+CREATE VIEW iris.controller_lane_marking AS
+	SELECT dio.name, dio.controller, dio.pin, m.geo_loc
+	FROM iris._device_io dio
+	JOIN iris.lane_marking m ON dio.name = m.name;
+
 CREATE VIEW iris.controller_lcs AS
 	SELECT dio.name, dio.controller, dio.pin, d.geo_loc
 	FROM iris._device_io dio
@@ -1018,6 +1023,7 @@ CREATE VIEW iris.controller_camera AS
 
 CREATE VIEW iris.controller_device AS
 	SELECT * FROM iris.controller_dms UNION ALL
+	SELECT * FROM iris.controller_lane_marking UNION ALL
 	SELECT * FROM iris.controller_lcs UNION ALL
 	SELECT * FROM iris.controller_meter UNION ALL
 	SELECT * FROM iris.controller_warning_sign UNION ALL
