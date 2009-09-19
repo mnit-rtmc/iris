@@ -757,7 +757,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 	{
 		final String line = formatEvent(stamp, duration, headway,
 			speed);
-		TMSImpl.FLUSH.addJob(new Job() {
+		MainServer.FLUSH.addJob(new Job() {
 			public void perform() throws IOException {
 				EventLogger.print(stamp, name, line);
 			}

@@ -18,15 +18,16 @@ import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
 import java.util.TimeZone;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.utils.I18N;
@@ -65,6 +66,14 @@ public class MainServer {
 		System.err.println(msg);
 	}
 
+	/** Timer thread for repeating jobs */
+	static protected final Scheduler TIMER =
+		new Scheduler("Scheduler: TIMER");
+
+	/** Flush thread for disk writing jobs */
+	static public final Scheduler FLUSH =
+		new Scheduler("Scheduler: FLUSH");
+
 	/** SONAR server */
 	static public Server server;
 
@@ -91,8 +100,7 @@ public class MainServer {
 				SignMessageImpl.class);
 			BaseObjectImpl.loadAll(store, ns);
 			BaseEvent.store = store;
-			TMSImpl tms = new TMSImpl();
-			tms.scheduleJobs();
+			scheduleJobs();
 			server = new Server(ns, props);
 			System.err.println("IRIS Server active");
 			server.join();
@@ -120,5 +128,27 @@ public class MainServer {
 			props.getProperty("db.user"),
 			props.getProperty("db.password")
 		);
+	}
+
+	/** Schedule all repeating jobs */
+	static protected void scheduleJobs() {
+		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
+		if(secs > 5) {
+			TIMER.addJob(new DmsQueryMsgJob(secs));
+			TIMER.addJob(new LcsQueryMsgJob(secs));
+			TIMER.addJob(new WarnQueryStatusJob(secs));
+		}
+		TIMER.addJob(new DmsQueryStatusJob());
+		TIMER.addJob(new AlarmQueryStatusJob());
+		TIMER.addJob(new SampleQuery30SecJob(TIMER));
+		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
+		TIMER.addJob(new DmsXmlJob());
+		TIMER.addJob(new CameraNoFailJob());
+		TIMER.addJob(new ProfilingJob());
+		TIMER.addJob(new KmlWriterJob());
+		TIMER.addJob(new SendSettingsJob());
+		TIMER.addJob(new SendSettingsJob(500));
+		TIMER.addJob(new XmlConfigJob());
+		TIMER.addJob(new XmlConfigJob(1000));
 	}
 }
