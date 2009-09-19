@@ -100,7 +100,8 @@ public class MainServer {
 				SignMessageImpl.class);
 			BaseObjectImpl.loadAll(store, ns);
 			BaseEvent.store = store;
-			scheduleJobs();
+			scheduleTimerJobs();
+			scheduleFlushJobs();
 			server = new Server(ns, props);
 			System.err.println("IRIS Server active");
 			server.join();
@@ -130,8 +131,8 @@ public class MainServer {
 		);
 	}
 
-	/** Schedule all repeating jobs */
-	static protected void scheduleJobs() {
+	/** Schedule jobs on TIMER thread */
+	static protected void scheduleTimerJobs() {
 		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
 		if(secs > 5) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
@@ -142,13 +143,17 @@ public class MainServer {
 		TIMER.addJob(new AlarmQueryStatusJob());
 		TIMER.addJob(new SampleQuery30SecJob(TIMER));
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
-		TIMER.addJob(new DmsXmlJob());
 		TIMER.addJob(new CameraNoFailJob());
-		TIMER.addJob(new ProfilingJob());
-		TIMER.addJob(new KmlWriterJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
-		TIMER.addJob(new XmlConfigJob());
-		TIMER.addJob(new XmlConfigJob(1000));
+	}
+
+	/** Schedule jobs on FLUSH thread */
+	static protected void scheduleFlushJobs() {
+		FLUSH.addJob(new ProfilingJob());
+		FLUSH.addJob(new KmlWriterJob());
+		FLUSH.addJob(new XmlConfigJob());
+		FLUSH.addJob(new XmlConfigJob(1000));
+		FLUSH.addJob(new DmsXmlJob());
 	}
 }
