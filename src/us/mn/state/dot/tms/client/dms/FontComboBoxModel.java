@@ -90,5 +90,7 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 			m_selected = null;
 		else
 			assert false : "unexpected type in setSelectedItem().";
+		// this results in a call to editor's setSelectedItem method
+		fireContentsChanged(this, -1, -1);
 	}
 }
