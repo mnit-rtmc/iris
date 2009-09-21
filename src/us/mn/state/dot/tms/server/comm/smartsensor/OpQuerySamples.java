@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.DownloadRequestException;
  *
  * @author Douglas Lau
  */
-public class GetBinnedSamples extends OpController {
+public class OpQuerySamples extends OpController {
 
 	/** Sample debug log */
 	static public final DebugLog SAMPLE_LOG = new DebugLog("samples");
@@ -55,8 +55,8 @@ public class GetBinnedSamples extends OpController {
 	/** Speed data for each detector */
 	protected int[] speed = new int[8];
 
-	/** Create a new "get binned samples" operation */
-	public GetBinnedSamples(ControllerImpl c, Completer comp) {
+	/** Create a new "query binned samples" operation */
+	public OpQuerySamples(ControllerImpl c, Completer comp) {
 		super(DATA_30_SEC, c);
 		completer = comp;
 		long s = comp.getStamp().getTimeInMillis();

@@ -76,7 +76,7 @@ public class SmartSensorPoller extends MessagePoller implements SamplePoller {
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
 		if(intvl == 30) {
 			if(c.hasActiveDetector())
-				new GetBinnedSamples(c, comp).start();
+				new OpQuerySamples(c, comp).start();
 		}
 	}
 }
