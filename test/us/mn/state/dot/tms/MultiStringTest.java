@@ -38,6 +38,14 @@ public class MultiStringTest extends TestCase {
 
 	/** everything else */
 	private void etc() {
+		// constructor
+		try {
+			new MultiString(null);
+			assertTrue(false);
+		} catch(NullPointerException ex) {
+			assertTrue(true);
+		}
+
 		// isValid
 		assertTrue(new MultiString().isValid());
 		assertTrue(new MultiString("").isValid());

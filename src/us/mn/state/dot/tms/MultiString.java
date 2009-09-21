@@ -195,9 +195,11 @@ public class MultiString implements MultiStringState {
 	}
 
 	/** Create a new MULTI string.
-	 * @param m MULTI string.
+	 * @param m MULTI string, may not be null.
 	 * @throws NullPointerException if m is null. */
 	public MultiString(String m) {
+		if(m == null)
+			throw new NullPointerException();
 		multi.append(m);
 		if(multi.length() > 0)
 			trailing = true;
