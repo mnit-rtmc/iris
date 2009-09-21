@@ -45,7 +45,9 @@ public class BinnedSampleRequest extends Request {
 	}
 
 	/** Check if the request has a checksum */
-	protected boolean hasChecksum() { return true; }
+	protected boolean hasChecksum() {
+		return true;
+	}
 
 	/** Format a basic "GET" request */
 	protected String formatGetRequest() {
@@ -105,7 +107,9 @@ public class BinnedSampleRequest extends Request {
 
 	/** Set the response to the request */
 	protected void setResponse(String r) throws IOException {
-		try { timestamp = TimeStamp.parse(r.substring(0, 8)); }
+		try {
+			timestamp = TimeStamp.parse(r.substring(0, 8));
+		}
 		catch(NumberFormatException e) {
 			throw new ParsingException("INVALID TIME STAMP: " + r);
 		}

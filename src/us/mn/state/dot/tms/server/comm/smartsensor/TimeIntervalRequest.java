@@ -38,18 +38,26 @@ public class TimeIntervalRequest extends MemoryRequest {
 	int value;
 
 	/** Get the SmartSensor memory buffer address */
-	protected int memoryAddress() { return 0x00008E; }
+	protected int memoryAddress() {
+		return 0x00008E;
+	}
 
 	/** Get the SmartSensor memory buffer length */
-	protected short memoryLength() { return 8; }
+	protected short memoryLength() {
+		return 8;
+	}
 
 	/** Format the buffer to write to SmartSensor memory */
-	protected String formatBuffer() { return hex(value, 8); }
+	protected String formatBuffer() {
+		return hex(value, 8);
+	}
 
 	/** Set the response to the request */
 	protected void setResponse(String r) throws IOException {
 		super.setResponse(r);
-		try { value = Integer.parseInt(r, 16); }
+		try {
+			value = Integer.parseInt(r, 16);
+		}
 		catch(NumberFormatException e) {
 			throw new ParsingException(
 				"Invalid time interval: " + r);

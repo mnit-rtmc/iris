@@ -61,10 +61,14 @@ public class ClassificationRequest extends MemoryRequest {
 	int long_max = LONG_MAX;
 
 	/** Get the SmartSensor memory buffer address */
-	protected int memoryAddress() { return 0x020000; }
+	protected int memoryAddress() {
+		return 0x020000;
+	}
 
 	/** Get the SmartSensor memory buffer length */
-	protected short memoryLength() { return 40; }
+	protected short memoryLength() {
+		return 40;
+	}
 
 	/** Format the buffer to write to SmartSensor memory */
 	protected String formatBuffer() {

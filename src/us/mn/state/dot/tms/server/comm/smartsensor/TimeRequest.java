@@ -57,7 +57,9 @@ public class TimeRequest extends Request {
 			else
 				throw new SmartSensorError("Time set error");
 		}
-		try { time = TimeStamp.parse(r); }
+		try {
+			time = TimeStamp.parse(r);
+		}
 		catch(NumberFormatException e) {
 			throw new ParsingException("Invalid time stamp: " + r);
 		}

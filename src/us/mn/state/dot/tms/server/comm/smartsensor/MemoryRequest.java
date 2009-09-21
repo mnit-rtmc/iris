@@ -68,8 +68,12 @@ abstract public class MemoryRequest extends Request {
 		if(is_set) {
 			// NOTE: The SmartSensor needs 4 extra seconds to
 			// respond (probably to update FLASH memory).
-			try { Thread.sleep(4000); }
-			catch(InterruptedException e) {}
+			try {
+				Thread.sleep(4000);
+			}
+			catch(InterruptedException e) {
+				// not sleepy?
+			}
 		}
 	}
 
