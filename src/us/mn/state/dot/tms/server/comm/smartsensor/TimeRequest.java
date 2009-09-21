@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.smartsensor;
 
 import java.io.IOException;
 import java.util.Date;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -55,7 +56,7 @@ public class TimeRequest extends Request {
 			if(r.equals("Success"))
 				return;
 			else
-				throw new SmartSensorError("Time set error");
+				throw new ControllerException("Time set error");
 		}
 		try {
 			time = TimeStamp.parse(r);

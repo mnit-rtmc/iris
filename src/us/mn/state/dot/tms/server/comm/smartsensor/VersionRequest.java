@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.smartsensor;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Firmware Version Request
@@ -38,7 +39,7 @@ public class VersionRequest extends Request {
 
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() throws IOException {
-		throw new SmartSensorError("Firmware version is read-only");
+		throw new ProtocolException("Firmware version is read-only");
 	}
 
 	/** Set the response to the request */

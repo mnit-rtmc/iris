@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.smartsensor;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 
 /**
  * Memory Request
@@ -83,7 +84,7 @@ abstract public class MemoryRequest extends Request {
 			if(r.equals("Success"))
 				return;
 			else
-				throw new SmartSensorError(
+				throw new ControllerException(
 					"Error writing SmartSensor memory");
 		}
 	}
