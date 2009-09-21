@@ -11,6 +11,37 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.99.0 (21 September 2009)</dt>
+	<dd><ul>
+		<li>
+			Fixed a server deadlock which could happen when
+			changing a comm link url (race condition).
+		</li>
+		<li>
+			Fixed a sonar race which could cause the client to
+			hang during login.
+		</li>
+		<li>
+			Cleaned up server TIMER job scheduling.
+			Isolated some unrelated jobs from each other.
+			Disk writing jobs were moved to FLUSH scheduler.
+		</li>
+		<li>
+			Moved holiday, lane_type, and video_monitor tables
+			to iris schema.
+		</li>
+		<li>
+			Added "low visibility" lane use indication.
+		</li>
+		<li>
+			Fixed client page time display regression.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.99.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.98.0 (14 September 2009)</dt>
 	<dd><ul>
 		<li>
