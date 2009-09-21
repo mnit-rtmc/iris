@@ -598,13 +598,14 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		}
 	}
 
-	/** Create a new message from the widgets */
+	/** Create a new message from the widgets.
+	 * @return A newly created SignMessage else null. */
 	protected SignMessage createMessage() {
 		String multi = composer.getMessage();
-		if(multi != null)
-			return createMessage(multi);
-		else
+		if(multi.isEmpty())
 			return null;
+		else
+			return createMessage(multi);
 	}
 
 	/** Create a new message using the specified MULTI */

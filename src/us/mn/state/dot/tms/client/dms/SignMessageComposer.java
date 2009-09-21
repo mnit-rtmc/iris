@@ -481,7 +481,7 @@ public class SignMessageComposer extends JPanel {
 		if(m > 0)
 			return buildMulti(mess, m).toString();
 		else
-			return null;
+			return "";
 	}
 
 	/** Get text from combobox line */
