@@ -79,6 +79,18 @@ abstract public class IndicationIcon implements Icon {
 		ARROW_SHAPE = path;
 	}
 
+	/** Shape to draw a small arrow */
+	static protected final Shape SMALL_ARROW_SHAPE;
+	static {
+		GeneralPath path = new GeneralPath();
+		path.moveTo(0.5f, 0.25f);
+		path.lineTo(0.5f, 0.75f);
+		path.moveTo(0.25f, 0.5f);
+		path.lineTo(0.5f, 0.75f);
+		path.lineTo(0.75f, 0.5f);
+		SMALL_ARROW_SHAPE = path;
+	}
+
 	/** Shape to draw an X */
 	static protected final Shape CROSS_SHAPE;
 	static {
@@ -135,6 +147,8 @@ abstract public class IndicationIcon implements Icon {
 			return new MergeLeftIndicationIcon(p);
 		case MERGE_BOTH:
 			return new MergeBothIndicationIcon(p);
+		case LOW_VISIBILITY:
+			return new LowVisibilityIndicationIcon(p);
 		default:
 			return new UnknownIndicationIcon(p);
 		}
@@ -352,6 +366,23 @@ abstract public class IndicationIcon implements Icon {
 				g2.draw(CHEVRON_SHAPE);
 				g2.translate(0.15f, 0);
 			}
+		}
+	}
+
+	/** Icon for LOW_VISIBILITY lane-use indication */
+	static protected class LowVisibilityIndicationIcon
+		extends IndicationIcon
+	{
+		protected LowVisibilityIndicationIcon(int p) {
+			super(p);
+		}
+		protected void paintIcon(Graphics2D g2) {
+			g2.setColor(Color.BLACK);
+			g2.setStroke(shadow);
+			g2.draw(SMALL_ARROW_SHAPE);
+			g2.setColor(Color.GREEN);
+			g2.setStroke(stroke);
+			g2.draw(SMALL_ARROW_SHAPE);
 		}
 	}
 

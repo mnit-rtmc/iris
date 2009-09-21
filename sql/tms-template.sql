@@ -1133,6 +1133,7 @@ COPY iris.lane_use_indication (id, description) FROM stdin;
 10	Must exit left
 11	Advisory variable speed limit
 12	Variable speed limit
+13	Low visibility
 \.
 
 COPY iris.lcs_lock (id, description) FROM stdin;

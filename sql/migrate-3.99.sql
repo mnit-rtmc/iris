@@ -157,3 +157,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
+
+INSERT INTO iris.lane_use_indication (id, description)
+	VALUES (13, 'Low visibility');

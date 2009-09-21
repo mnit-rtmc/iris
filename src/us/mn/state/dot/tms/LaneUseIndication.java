@@ -62,7 +62,10 @@ public enum LaneUseIndication {
 	AVSL(I18N.get("lane.use.avsl")),
 
 	/** Variable speed limit (black on white) */
-	VSL(I18N.get("lane.use.vsl"));
+	VSL(I18N.get("lane.use.vsl")),
+
+	/** Low visibility (small green arrow) */
+	LOW_VISIBILITY(I18N.get("lane.use.low.visibility"));
 
 	/** Create a new lane use indication */
 	private LaneUseIndication(String d) {
