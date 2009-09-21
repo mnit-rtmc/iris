@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.WarningSign;
@@ -67,6 +69,12 @@ public class SendSettingsJob extends Job {
 				dms.setDeviceRequest(req);
 				dms.setDeviceRequest(DeviceRequest.
 					QUERY_PIXEL_FAILURES.ordinal());
+				return false;
+			}
+		});
+		LCSArrayHelper.find(new Checker<LCSArray>() {
+			public boolean check(LCSArray lcs_array) {
+				lcs_array.setDeviceRequest(req);
 				return false;
 			}
 		});
