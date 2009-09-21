@@ -53,7 +53,8 @@ public class SmartSensorPoller extends MessagePoller implements SamplePoller {
 	/** Perform a controller download */
 	protected void download(ControllerImpl c, int p) {
 		if(c.getActive()) {
-			InitializeSensor o = new InitializeSensor(c, true);
+			OpSendSensorSettings o =
+				new OpSendSensorSettings(c, true);
 			o.setPriority(p);
 			o.start();
 		}
@@ -62,13 +63,13 @@ public class SmartSensorPoller extends MessagePoller implements SamplePoller {
 	/** Perform a controller reset */
 	public void resetController(ControllerImpl c) {
 		if(c.getActive())
-			new InitializeSensor(c, true).start();
+			new OpSendSensorSettings(c, true).start();
 	}
 
 	/** Send sample settings to a controller */
 	public void sendSettings(ControllerImpl c) {
 		if(c.getActive())
-			new InitializeSensor(c, false).start();
+			new OpSendSensorSettings(c, false).start();
 	}
 
 	/** Query sample data */

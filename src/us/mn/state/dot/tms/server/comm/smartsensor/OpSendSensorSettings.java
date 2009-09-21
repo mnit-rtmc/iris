@@ -20,11 +20,11 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
- * Controller operation to initialize a SmartSensor
+ * Controller operation to send settings to a SmartSensor
  *
  * @author Douglas Lau
  */
-public class InitializeSensor extends OpController {
+public class OpSendSensorSettings extends OpController {
 
 	/** Time interval for data binning */
 	static protected final int BINNING_INTERVAL = 30;
@@ -32,8 +32,8 @@ public class InitializeSensor extends OpController {
 	/** Flag to perform a controller restart */
 	protected final boolean restart;
 
-	/** Create a new initialize sensor object */
-	public InitializeSensor(ControllerImpl c, boolean r) {
+	/** Create a new operation to send settings to a sensor */
+	public OpSendSensorSettings(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c, c.toString());
 		restart = r;
 	}
