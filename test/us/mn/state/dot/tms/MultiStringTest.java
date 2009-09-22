@@ -33,6 +33,9 @@ public class MultiStringTest extends TestCase {
 		getPageOnTime();
 		normalization();
 		replacePageOnTime();
+		equals();
+		getText();
+		getNumPages();
 		etc();
 	}
 
@@ -105,13 +108,15 @@ public class MultiStringTest extends TestCase {
 		assertTrue("[pt4o]YA1[np]OH YA2".equals(t2.toString()));
 
 		t1 = new MultiString("[pt3o50]YA1[np]OH YA2");
-		t2 = new MultiString(MultiString.replacePageOnTime(t1.toString(), 4));
+		t2 = new MultiString(MultiString.
+			replacePageOnTime(t1.toString(), 4));
 		pt = t2.getPageOnTimes(7);
 		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 		assertTrue("[pt4o50]YA1[np]OH YA2".equals(t2.toString()));
 
 		t1 = new MultiString("[pt3o50]YA1[np][pt22o60]OH YA2");
-		t2 = new MultiString(MultiString.replacePageOnTime(t1.toString(), 4));
+		t2 = new MultiString(MultiString.
+			replacePageOnTime(t1.toString(), 4));
 		pt = t2.getPageOnTimes(7);
 		assertTrue(pt.length == 2 && pt[0] == 4 && pt[1] == 4);
 		assertTrue("[pt4o50]YA1[np][pt4o60]OH YA2".
@@ -171,12 +176,11 @@ public class MultiStringTest extends TestCase {
 
 	/** getPageOnTime */
 	private void getPageOnTime() {
-
-		// test page time specified for each page
 		int[] t;
 
-		// FIXME: this fails!
-		//assertTrue(new MultiString("").getPageOnTimes(6).length == 0);
+		t = new MultiString("").getPageOnTimes(254);
+		assertTrue(t.length == 1);
+		assertTrue(t[0] == 254);
 
 		t = new MultiString("ABC1[np]ABC2").
 			getPageOnTimes(7);
@@ -301,12 +305,65 @@ public class MultiStringTest extends TestCase {
 			equals("[tr1,1,0,0]"));
 		assertTrue(new MultiString("[ttS100]").normalize().
 			equals("[ttS100]"));
-		// FIXME: note, this case fails, should it? This causes
-		//        mismatches in the quick message library between
-		//        what the user typed and lib messages.
-		//assertTrue(new MultiString("ABC[nl][nl]").normalize().
-		//	equals("ABC[nl]"));
-		//assertTrue(new MultiString("ABC[nl]").normalize().
-		//	equals("ABC"));
+	}
+
+	/** equals */
+	private void equals() {
+		{
+			MultiString s1 = null;
+			MultiString s2 = null;
+			assertTrue(MultiString.equals(s1, s2));
+		}
+		assertFalse(MultiString.equals(null, new MultiString("")));
+		assertTrue(MultiString.equals("", ""));
+		assertFalse(MultiString.equals("[fo2]LINE1", "[fo1]LINE1"));
+		assertTrue(MultiString.equals("LINE1[nl][nl]", "LINE1"));
+		assertTrue(MultiString.equals("LINE1[nl][np]", "LINE1[np]"));
+	}
+
+	/** getText */
+	private void getText() {
+		String[] s;
+
+		s = new MultiString("").getText();
+		assertTrue(s.length == 0);
+
+		s = new MultiString("ABC").getText();
+		assertTrue(s.length == 1);
+		assertTrue(s[0].equals("ABC"));
+
+		s = new MultiString("ABC[nl]").getText();
+		assertTrue(s.length == 1);
+		assertTrue(s[0].equals("ABC"));
+
+		s = new MultiString("ABC[nl]DEF").getText();
+		assertTrue(s.length == 2);
+		assertTrue(s[0].equals("ABC"));
+		assertTrue(s[1].equals("DEF"));
+
+		s = new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123").getText();
+		assertTrue(s.length == 4);
+		assertTrue(s[0].equals("ABC"));
+		assertTrue(s[1].equals("DEF"));
+		assertTrue(s[2].equals("GHI"));
+		assertTrue(s[3].equals("123"));
+	}
+
+	/** getNumPages */
+	private void getNumPages() {
+		assertTrue(new MultiString("").
+			getNumPages() == 1);
+		assertTrue(new MultiString("ABC").
+			getNumPages() == 1);
+		assertTrue(new MultiString("ABC[nl][nl]").
+			getNumPages() == 1);
+		assertTrue(new MultiString("ABC[nl][nl]").
+			getNumPages() == 1);
+		assertTrue(new MultiString("ABC[nl][np]").
+			getNumPages() == 2);
+		assertTrue(new MultiString("ABC[nl][np]DEF").
+			getNumPages() == 2);
+		assertTrue(new MultiString("ABC[nl][np]DEF[np]").
+			getNumPages() == 3);
 	}
 }

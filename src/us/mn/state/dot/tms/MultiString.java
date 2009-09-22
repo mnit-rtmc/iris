@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -174,15 +176,40 @@ public class MultiString implements MultiStringState {
 
 	/** Test if the MULTI string is equal to another MULTI string */
 	public boolean equals(Object o) {
-		if(o instanceof MultiString) {
-			MultiString ms = (MultiString)o;
-			return normalize().equals(ms.normalize());
-		}
-		if(o instanceof String) {
-			MultiString ms = new MultiString((String)o);
-			return normalize().equals(ms.normalize());
-		}
-		return false;
+		if(o instanceof MultiString)
+			return equals(this, (MultiString)o);
+		else if(o instanceof String)
+			return equals(toString(), (String)o);
+		else
+			return false;
+	}
+
+	/** Test if the MULTI string is equal to another MULTI string.
+	 * @param a MULTI string, may not be null.
+	 * @param b MULTI string, may not be null. 
+	 * @return True if ms1 equals ms2 else false. */
+	public static boolean equals(String a, String b) {
+		return equals(new MultiString(a), new MultiString(b));
+	}
+
+	/** Test if the MULTI string is equal to another MULTI string.
+	 * @param a MultiString, may be null.
+	 * @param b MultiString, may be null. 
+	 * @return True if ms1 equals ms2 else false. */
+	public static boolean equals(MultiString a, MultiString b) {
+		if(a == null && b == null)
+			return true;
+		if(a == null || b == null)
+			return false;
+		if(!Arrays.equals(a.getFonts(1), b.getFonts(1)))
+			return false;
+		if(!Arrays.equals(a.getPageOnTimes(0), b.getPageOnTimes(0)))
+			return false;
+		if(!Arrays.equals(a.getText(), b.getText()))
+			return false;
+		if(a.getNumPages() != b.getNumPages())
+			return false;
+		return true;
 	}
 
 	/** Calculate a hash code for the MULTI string */
@@ -522,5 +549,21 @@ public class MultiString implements MultiStringState {
 		};
 		new MultiString(multi).parse(ms);
 		return ms.toString();
+	}
+
+	/** Get message line text as an array of strings. */
+	public String[] getText() {
+		final ArrayList<String> al = new ArrayList<String>();
+		MultiString ms = new MultiString() {
+			public void addSpan(String s) {
+				al.add(s);
+			}
+		};
+		parse(ms);
+		Object[] oa = al.toArray();
+		String[] ret = new String[al.size()];
+		for(int i = 0; i < ret.length; ++i)
+			ret[i] = (String)oa[i];
+		return ret;
 	}
 }
