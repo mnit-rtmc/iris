@@ -47,9 +47,6 @@ public class SampleQuery30SecJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 8;
 
-	/** Timer scheduler */
-	protected final Scheduler timer;
-
 	/** Station manager */
 	protected final StationManager station_manager;
 
@@ -76,11 +73,10 @@ public class SampleQuery30SecJob extends Job {
 	};
 
 	/** Create a new 30-second timer job */
-	public SampleQuery30SecJob(Scheduler t) {
+	public SampleQuery30SecJob(Scheduler flush) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
-		timer = t;
 		station_manager = new StationManager();
-		comp = new Completer("30-Second", timer, complete_job);
+		comp = new Completer("30-Second", flush, complete_job);
 	}
 
 	/** Perform the 30-second timer job */

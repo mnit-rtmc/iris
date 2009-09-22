@@ -141,7 +141,7 @@ public class MainServer {
 		}
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new AlarmQueryStatusJob());
-		TIMER.addJob(new SampleQuery30SecJob(TIMER));
+		TIMER.addJob(new SampleQuery30SecJob(FLUSH));
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
 		TIMER.addJob(new ActionJob(TIMER));
 		TIMER.addJob(new CameraNoFailJob());
