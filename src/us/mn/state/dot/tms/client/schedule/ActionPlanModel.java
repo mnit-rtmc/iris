@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 4;
+	static protected final int COLUMN_COUNT = 5;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
@@ -39,17 +39,21 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	/** Description column number */
 	static protected final int COL_DESCRIPTION = 1;
 
+	/** Sync actions column number */
+	static protected final int COL_SYNC_ACTIONS = 2;
+
 	/** Active column number */
-	static protected final int COL_ACTIVE = 2;
+	static protected final int COL_ACTIVE = 3;
 
 	/** Deployed column number */
-	static protected final int COL_DEPLOYED = 3;
+	static protected final int COL_DEPLOYED = 4;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 100, "Plan Name"));
 		m.addColumn(createColumn(COL_DESCRIPTION, 380, "Description"));
+		m.addColumn(createColumn(COL_SYNC_ACTIONS, 80, "Sync Actions"));
 		m.addColumn(createColumn(COL_ACTIVE, 80, "Active"));
 		m.addColumn(createColumn(COL_DEPLOYED, 80, "Deployed"));
 		return m;
@@ -77,6 +81,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
 		switch(column) {
+		case COL_SYNC_ACTIONS:
 		case COL_ACTIVE:
 		case COL_DEPLOYED:
 			return Boolean.class;
@@ -95,6 +100,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return plan.getName();
 			case COL_DESCRIPTION:
 				return plan.getDescription();
+			case COL_SYNC_ACTIONS:
+				return plan.getSyncActions();
 			case COL_ACTIVE:
 				return plan.getActive();
 			case COL_DEPLOYED:
@@ -123,6 +130,10 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				break;
 			case COL_DESCRIPTION:
 				plan.setDescription(v);
+				break;
+			case COL_SYNC_ACTIONS:
+				if(value instanceof Boolean)
+					plan.setSyncActions((Boolean)value);
 				break;
 			case COL_ACTIVE:
 				if(value instanceof Boolean)

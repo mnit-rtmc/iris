@@ -32,6 +32,12 @@ public interface ActionPlan extends SonarObject {
 	/** Get the description */
 	String getDescription();
 
+	/** Set the sync actions flag */
+	void setSyncActions(boolean s);
+
+	/** Get the sync actions flag */
+	boolean getSyncActions();
+
 	/** Set the active status */
 	void setActive(boolean a);
 

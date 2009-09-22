@@ -31,15 +31,17 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading action plans...");
 		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
-		store.query("SELECT name, description, active, deployed FROM " +
-			"iris." + SONAR_TYPE  + ";", new ResultFactory()
+		store.query("SELECT name, description, sync_actions, active, " +
+			"deployed FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(
 					row.getString(1),	// name
 					row.getString(2),	// description
-					row.getBoolean(3),	// active
-					row.getBoolean(4)	// deployed
+					row.getBoolean(3),	// sync_actions
+					row.getBoolean(4),	// active
+					row.getBoolean(5)	// deployed
 				));
 			}
 		});
@@ -50,6 +52,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
+		map.put("sync_actions", sync_actions);
 		map.put("active", active);
 		map.put("deployed", deployed);
 		return map;
@@ -72,9 +75,12 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Create a new action plan */
-	protected ActionPlanImpl(String n, String dsc, boolean a, boolean d) {
+	protected ActionPlanImpl(String n, String dsc, boolean s, boolean a,
+		boolean d)
+	{
 		this(n);
 		description = dsc;
+		sync_actions = s;
 		active = a;
 		deployed = d;
 	}
@@ -98,6 +104,27 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Get the description */
 	public String getDescription() {
 		return description;
+	}
+
+	/** Sync actions flag */
+	protected boolean sync_actions;
+
+	/** Set the sync actions flag */
+	public void setSyncActions(boolean s) {
+		sync_actions = s;
+	}
+
+	/** Set the sync actions flag */
+	public void doSetSyncActions(boolean s) throws TMSException {
+		if(s == sync_actions)
+			return;
+		store.update(this, "sync_actions", s);
+		setSyncActions(s);
+	}
+
+	/** Get the sync actions flag */
+	public boolean getSyncActions() {
+		return sync_actions;
 	}
 
 	/** Active status */

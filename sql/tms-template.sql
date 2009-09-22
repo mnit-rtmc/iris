@@ -737,6 +737,7 @@ CREATE TABLE iris.quick_message (
 CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
 	description VARCHAR(64) NOT NULL,
+	sync_actions BOOLEAN NOT NULL,
 	active BOOLEAN NOT NULL,
 	deployed BOOLEAN NOT NULL
 );
