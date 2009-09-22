@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 
 /**
@@ -44,10 +45,18 @@ public class OpQueryLCSIndications extends OpLCS {
 	protected void lookupIndications() {
 		for(int i = 0; i < dmss.length; i++) {
 			DMS dms = dmss[i];
-			if(dms != null) {
-				SignMessage sm = dms.getMessageCurrent();
-				ind_after[i] = lookupIndication(sm);
-			}
+			if(dms instanceof DMSImpl)
+				ind_after[i] = lookupIndication((DMSImpl)dms);
+		}
+	}
+
+	/** Lookup an indication on a DMS */
+	protected Integer lookupIndication(DMSImpl dms) {
+		if(dms.isFailed())
+			return null;
+		else {
+			SignMessage sm = dms.getMessageCurrent();
+			return lookupIndication(sm);
 		}
 	}
 
