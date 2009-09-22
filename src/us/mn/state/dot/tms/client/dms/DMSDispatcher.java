@@ -478,15 +478,12 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				return;
 		}
 
-		boolean set = true;
-
 		// compare MULTI strings
 		SignMessage widg_sm = createMessage();
-		if(widg_sm != null) {
-			String widg_multi = new MultiString(
-				widg_sm.getMulti()).normalize();
-			set = !widg_multi.equals(qlib_multi);
-		}
+		boolean set = true;
+		if(widg_sm != null)
+			set = !(MultiString.equals(qlib_multi, 
+				widg_sm.getMulti()));
 
 		// set sign message if MULTIs are different or no widget multi
 		if(set) {

@@ -448,15 +448,10 @@ public class AwsMsg {
 			return false;
 		SignMessage cur = dms.getMessageCurrent();
 		if(cur != null) {
-			// comparison of normalized MULTI strings
-			String curm = cur.getMulti();
-			boolean eq = new MultiString(curm).equals(
-				new MultiString(multi));
-			Log.finest("cur="+curm+", new="+multi+", equal="+eq);
-			Log.finest("cur normalized=" +
-				new MultiString(curm).normalize());
-			Log.finest("new normalized=" +
-				new MultiString(multi).normalize());
+			// comparison of MULTI strings
+			boolean eq = MultiString.equals(cur.getMulti(), multi);
+			Log.finest("cur=" + cur.getMulti() + ", new=" + 
+				multi + ", equal=" + eq);
 			return eq; 
 		}
 		return false;

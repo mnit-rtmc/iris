@@ -64,14 +64,14 @@ public class SignMessageHelper extends BaseHelper {
 	/** Compare 2 sign messages.
 	 * @param sm1 SignMessage which may be null.
 	 * @param sm2 SignMessage which may be null.
-	 * @return True if both SignMessages have equal normalized
-	 *         MULTIs, priorities, and bitmaps. */
+	 * @return True if sm1 and sm2 have equal MULTIs, priorities, 
+	 *         and bitmaps. */
 	static public boolean equals(SignMessage sm1, SignMessage sm2) {
 		if(sm1 == null && sm2 == null)
 			return true;
 		if(sm1 == null || sm2 == null)
 			return false;
-		if(!(new MultiString(sm1.getMulti()).equals(sm2.getMulti())))
+		if(!MultiString.equals(sm1.getMulti(), sm2.getMulti()))
 			return false;
 		if(sm1.getActivationPriority() != sm2.getActivationPriority())
 			return false;

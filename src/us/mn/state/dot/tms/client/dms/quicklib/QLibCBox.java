@@ -218,22 +218,20 @@ public class QLibCBox extends JComboBox implements ActionListener
 	}
 
 	/** Lookup a quick message in the library using a MULTI string.
-	 *  @param multi A MULTI string, which is normalized.
+	 *  @param m A MULTI string, which is normalized.
 	 *  @return The quick message in the quick library that matches multi
 	 *	    or null if it doesn't exist in the library. */
-	protected QuickMessage lookupMulti(String arg_multi) {
-		if(arg_multi == null || m_tc == null)
+	protected QuickMessage lookupMulti(final String m) {
+		if(m == null || m_tc == null)
 			return null;
-		final String multi = new MultiString(arg_multi).normalize();
-		QuickMessage m = m_tc.findObject(new Checker<QuickMessage>() {
+		QuickMessage r = m_tc.findObject(new Checker<QuickMessage>() {
 			public boolean check(QuickMessage qm) {
 				if(qm == null)
 					return false;
-				return multi.equals(new MultiString(
-					qm.getMulti()).normalize());
+				return MultiString.equals(qm.getMulti(), m);
 			}
 		});
-		return m;
+		return r;
 	}
 
 	/** Dispose */
