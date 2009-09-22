@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.TimeActionHelper;
  *
  * @author Douglas Lau
  */
-public class ActionJob extends Job {
+public class ActionPlanJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 29;
@@ -56,13 +56,13 @@ public class ActionJob extends Job {
 	/** Timer scheduler */
 	protected final Scheduler timer;
 
-	/** Create a new action job */
-	public ActionJob(Scheduler t) {
+	/** Create a new action plan job */
+	public ActionPlanJob(Scheduler t) {
 		super(Calendar.SECOND, 30, Calendar.SECOND, OFFSET_SECS);
 		timer = t;
 	}
 
-	/** Perform the action job */
+	/** Perform the action plan job */
 	public void perform() {
 		// FIXME: TimeAction should have an associated DayPlan
 		if(!HolidayHelper.isHoliday(Calendar.getInstance()))
