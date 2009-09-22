@@ -21,6 +21,9 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.DeviceContentionException;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 
 /**
  * Operation to query indicaitons on a Lane Control Signal array.
@@ -29,24 +32,51 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
  */
 public class OpQueryLCSIndications extends OpLCS {
 
+	/** Current lane */
+	protected int lane = 0;
+
 	/** Create a new operation to send LCS indications */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
 		super(DEVICE_DATA, l);
-		lookupIndications();
 	}
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return null;
+		if(lane < dmss.length)
+			return new LookupIndication();
+		else
+			return null;
+	}
+
+	/** Phase to lookup the indication on the DMS in the current lane */
+	protected class LookupIndication extends Phase {
+
+		/** Perform the acquire DMS phase */
+		protected Phase poll(AddressedMessage mess)
+			throws DeviceContentionException
+		{
+			DMSImpl dms = dmss[lane];
+			if(dms != null)
+				lookupDMSIndication(dms);
+			lane++;
+			if(lane < dmss.length)
+				return this;
+			else
+				return null;
+		}
 	}
 
 	/** Lookup the indications on the LCS array */
-	protected void lookupIndications() {
-		for(int i = 0; i < dmss.length; i++) {
-			DMSImpl dms = dmss[i];
-			if(dms != null)
-				ind_after[i] = lookupIndication(dms);
-		}
+	protected void lookupDMSIndication(DMSImpl dms)
+		throws DeviceContentionException
+	{
+		// We need to acquire access to the DMS to ensure there is no
+		// message currently being sent
+		OpDevice owner = dms.acquire(operation);
+		if(owner != operation)
+			throw new DeviceContentionException(owner);
+		ind_after[lane] = lookupIndication(dms);
+		dms.release(operation);
 	}
 
 	/** Lookup an indication on a DMS */
