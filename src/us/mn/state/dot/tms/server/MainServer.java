@@ -143,6 +143,7 @@ public class MainServer {
 		TIMER.addJob(new AlarmQueryStatusJob());
 		TIMER.addJob(new SampleQuery30SecJob(TIMER));
 		TIMER.addJob(new SampleQuery5MinJob(FLUSH));
+		TIMER.addJob(new ActionJob(TIMER));
 		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));

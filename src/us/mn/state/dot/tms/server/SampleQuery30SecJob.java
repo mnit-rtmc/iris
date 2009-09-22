@@ -22,24 +22,13 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.tms.ActionPlan;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.HolidayHelper;
-import us.mn.state.dot.tms.LaneAction;
-import us.mn.state.dot.tms.LaneActionHelper;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.TimeAction;
-import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanHelper;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -57,18 +46,6 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
 	static protected final int OFFSET_SECS = 8;
-
-	/** Calendar instance for calculating the minute of day */
-	static protected final Calendar STAMP = Calendar.getInstance();
-
-	/** Get the current minute of the day */
-	static protected int minute_of_day() {
-		synchronized(STAMP) {
-			STAMP.setTimeInMillis(System.currentTimeMillis());
-			return STAMP.get(Calendar.HOUR_OF_DAY) * 60 +
-				STAMP.get(Calendar.MINUTE);
-		}
-	}
 
 	/** Timer scheduler */
 	protected final Scheduler timer;
@@ -94,7 +71,6 @@ public class SampleQuery30SecJob extends Job {
 			finally {
 				if(!HolidayHelper.isHoliday(stamp))
 					validateTimingPlans();
-				performActions();
 			}
 		}
 	};
@@ -200,77 +176,5 @@ public class SampleQuery30SecJob extends Job {
 				return false;
 			}
 		});
-		final int minute = minute_of_day();
-		TimeActionHelper.find(new Checker<TimeAction>() {
-			public boolean check(TimeAction ta) {
-				if(ta.getMinute() == minute)
-					performTimeAction(ta);
-				return false;
-			}
-		});
-	}
-
-	/** Perform a time action */
-	protected void performTimeAction(TimeAction ta) {
-		ActionPlan ap = ta.getActionPlan();
-		if(ap instanceof ActionPlanImpl) {
-			ActionPlanImpl api = (ActionPlanImpl)ap;
-			if(api.getActive())
-				api.setDeployedNotify(ta.getDeploy());
-		}
-	}
-
-	/** Perform all current actions */
-	protected void performActions() {
-		DmsActionHelper.find(new Checker<DmsAction>() {
-			public boolean check(DmsAction da) {
-				ActionPlan ap = da.getActionPlan();
-				if(ap.getActive()) {
-					if(ap.getDeployed() == da.getOnDeploy())
-						performDmsAction(da);
-				}
-				return false;
-			}
-		});
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					((DMSImpl)dms).updateScheduledMessage();
-				return false;
-			}
-		});
-		LaneActionHelper.find(new Checker<LaneAction>() {
-			public boolean check(LaneAction la) {
-				ActionPlan ap = la.getActionPlan();
-				if(ap.getActive()) {
-					LaneMarking m = la.getLaneMarking();
-					if(m != null)
-						m.setDeployed(ap.getDeployed());
-				}
-				return false;
-			}
-		});
-	}
-
-	/** Perform a DMS action */
-	protected void performDmsAction(final DmsAction da) {
-		SignGroup sg = da.getSignGroup();
-		DMSHelper.find(new Checker<DMS>() {
-			public boolean check(DMS d) {
-				if(d instanceof DMSImpl) {
-					final DMSImpl dms = (DMSImpl)d;
-					// We need to create a new Job here so
-					// that when performAction is called,
-					// we're not holding the SONAR TypeNode
-					// locks for DMS and DmsAction.
-					timer.addJob(new Job() {
-						public void perform() {
-							dms.performAction(da);
-						}
-					});
-				}
-				return false;
-			}
-		}, sg);
 	}
 }
