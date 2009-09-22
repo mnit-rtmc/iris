@@ -218,7 +218,17 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		// FIXME: check that all indications are either dark or lit
 		// FIXME: check the priority of each sign
 		p.sendIndications(this, ind, o);
+		// wait 15 seconds before allowing indications to be queried
+		allow_query_time = System.currentTimeMillis() + 15 * 1000;
 		setIndicationsNext(ind);
+	}
+
+	/** Time after which indications are allowed to be queried */
+	protected long allow_query_time = System.currentTimeMillis();
+
+	/** Is indication query allowed? */
+	public boolean isQueryAllowed() {
+		return System.currentTimeMillis() >= allow_query_time;
 	}
 
 	/** Owner of current indications */

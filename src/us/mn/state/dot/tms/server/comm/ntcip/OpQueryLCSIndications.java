@@ -32,7 +32,8 @@ public class OpQueryLCSIndications extends OpLCS {
 	/** Create a new operation to send LCS indications */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
 		super(DEVICE_DATA, l);
-		lookupIndications();
+		if(l.isQueryAllowed())
+			lookupIndications();
 	}
 
 	/** Create the first real phase of the operation */
