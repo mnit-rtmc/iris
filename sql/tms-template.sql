@@ -913,6 +913,10 @@ CREATE VIEW warning_sign_view AS
 	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
 GRANT SELECT ON warning_sign_view TO PUBLIC;
 
+CREATE VIEW lane_type_view AS
+	SELECT id, description, dcode FROM iris.lane_type;
+GRANT SELECT ON lane_type_view TO PUBLIC;
+
 CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 	smallint, boolean) RETURNS text AS
 '	DECLARE
@@ -932,7 +936,7 @@ CREATE FUNCTION detector_label(text, varchar, text, varchar, text, smallint,
 		IF fwy IS NULL OR xst IS NULL THEN
 			RETURN ''FUTURE'';
 		END IF;
-		SELECT INTO ltyp dcode FROM iris.lane_type WHERE id = l_type;
+		SELECT INTO ltyp dcode FROM lane_type_view WHERE id = l_type;
 		lnum = '''';
 		IF lane_number > 0 THEN
 			lnum = TO_CHAR(lane_number, ''FM9'');
