@@ -48,22 +48,15 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set the comm loss action */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsTimeCommLoss comm_time = new DmsTimeCommLoss();
-			DmsCommunicationsLossMessage comm_msg =
-				new DmsCommunicationsLossMessage();
 			DmsEndDurationMessage end_msg =
 				new DmsEndDurationMessage();
 			comm_time.setInteger(10);
-			comm_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
-			comm_msg.setNumber(1);
-			comm_msg.setCrc(0);
 			end_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
 			end_msg.setNumber(1);
 			end_msg.setCrc(0);
 			mess.add(comm_time);
-			mess.add(comm_msg);
 			mess.add(end_msg);
 			DMS_LOG.log(dms.getName() + ":= " + comm_time);
-			DMS_LOG.log(dms.getName() + ":= " + comm_msg);
 			DMS_LOG.log(dms.getName() + ":= " + end_msg);
 			mess.setRequest();
 			return new PowerLoss();
@@ -76,22 +69,9 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set the comm loss action */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsShortPowerLossTime time =new DmsShortPowerLossTime();
-			DmsLongPowerRecoveryMessage long_msg =
-				new DmsLongPowerRecoveryMessage();
-			DmsPowerLossMessage loss_msg =new DmsPowerLossMessage();
 			time.setInteger(0);
-			long_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
-			long_msg.setNumber(1);
-			long_msg.setCrc(0);
-			loss_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
-			loss_msg.setNumber(1);
-			loss_msg.setCrc(0);
 			mess.add(time);
-			mess.add(long_msg);
-//			mess.add(loss_msg);
 			DMS_LOG.log(dms.getName() + ":= " + time);
-			DMS_LOG.log(dms.getName() + ":= " + long_msg);
-			DMS_LOG.log(dms.getName() + ":= " + loss_msg);
 			mess.setRequest();
 			return new PixelService();
 		}

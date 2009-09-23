@@ -32,6 +32,14 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;
 
+	/** Communication loss message */
+	protected final DmsCommunicationsLossMessage comm_msg =
+		new DmsCommunicationsLossMessage();
+
+	/** Long power recovery message */
+	protected final DmsLongPowerRecoveryMessage long_msg =
+		new DmsLongPowerRecoveryMessage();
+
 	/** Flag to avoid phase loops */
 	protected boolean modify = true;
 
@@ -205,7 +213,7 @@ public class OpSendDMSMessage extends OpDMS {
 			}
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
-			return new TimeRemaining();
+			return new SetCommLossPowerRecovery();
 		}
 	}
 
@@ -257,6 +265,49 @@ public class OpSendDMSMessage extends OpDMS {
 			errorStatus = error.toString();
 			return null;
 		}
+	}
+
+	/** Phase to set the comm loss and power recovery message */
+	protected class SetCommLossPowerRecovery extends Phase {
+
+		/** Set the comm loss action */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			if(isScheduledIndefinite())
+				setCommAndPower();
+			else
+				setCommAndPowerBlank();
+			mess.add(comm_msg);
+			mess.add(long_msg);
+			DMS_LOG.log(dms.getName() + ":= " + comm_msg);
+			DMS_LOG.log(dms.getName() + ":= " + long_msg);
+			mess.setRequest();
+			return new TimeRemaining();
+		}
+	}
+
+	/** Check if the message is scheduled and has indefinite duration */
+	protected boolean isScheduledIndefinite() {
+		return message.getScheduled() && message.getDuration() == null;
+	}
+
+	/** Set the comm loss and power recovery msgs */
+	protected void setCommAndPower() {
+		comm_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
+		comm_msg.setNumber(1);
+		comm_msg.setCrc(messageCRC);
+		long_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
+		long_msg.setNumber(1);
+		long_msg.setCrc(messageCRC);
+	}
+
+	/** Set the comm loss and power recovery msgs to blank */
+	protected void setCommAndPowerBlank() {
+		comm_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
+		comm_msg.setNumber(1);
+		comm_msg.setCrc(0);
+		long_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
+		long_msg.setNumber(1);
+		long_msg.setCrc(0);
 	}
 
 	/** Phase to set the message time remaining */
