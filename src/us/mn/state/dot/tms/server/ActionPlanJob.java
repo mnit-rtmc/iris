@@ -154,19 +154,17 @@ public class ActionPlanJob extends Job {
 		LaneActionHelper.find(new Checker<LaneAction>() {
 			public boolean check(LaneAction la) {
 				ActionPlan ap = la.getActionPlan();
-				if(ap.getActive()) {
-					if(ap.getDeployed() == la.getOnDeploy())
-						performLaneAction(la);
-				}
+				if(ap.getActive())
+					performLaneAction(la, ap.getDeployed());
 				return false;
 			}
 		});
 	}
 
 	/** Perform a lane action */
-	protected void performLaneAction(LaneAction la) {
+	protected void performLaneAction(LaneAction la, boolean d) {
 		LaneMarking lm = la.getLaneMarking();
 		if(lm != null)
-			lm.setDeployed(la.getOnDeploy());
+			lm.setDeployed(d == la.getOnDeploy());
 	}
 }
