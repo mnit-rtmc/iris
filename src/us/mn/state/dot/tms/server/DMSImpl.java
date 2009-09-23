@@ -1120,7 +1120,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @param m MULTI string for message.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMessage(String m, DMSMessagePriority ap,
