@@ -206,15 +206,13 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	}
 
 	/** Set number of pages in current message. */
-	protected void setNumPages(int np) {
-		m_singlepg = (np <= 1);
+	private void setSinglePage(boolean sp) {
+		m_singlepg = sp;
 	}
 
 	/** Validate the current value using the current multistring. */
 	public void updateValidation(String multi) {
-		// single or multi-page message?
-		int np = new MultiString(multi).getNumPages();
-		setNumPages(new MultiString(multi).getNumPages());
+		setSinglePage(new MultiString(multi).singlePage());
 		DmsPgTime pt = getValuePgTime();
 
 		// validate
