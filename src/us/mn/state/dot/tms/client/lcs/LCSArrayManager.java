@@ -90,12 +90,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return false;
 	}
 
-	/** Test is an LCS array is deployed and not failed */
-	static protected boolean isGoodDeployed(LCSArray proxy) {
-		return isDeployed(proxy) &&
-		       !LCSArrayHelper.isFailed(proxy);
-	}
-
 	/** Get the LCS array cache */
 	static protected TypeCache<LCSArray> getCache(Session s) {
 		LcsCache cache = s.getSonarState().getLcsCache();
@@ -170,7 +164,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		if(STYLE_AVAILABLE.equals(s))
 			return isAvailable(proxy);
 		else if(STYLE_DEPLOYED.equals(s))
-			return isGoodDeployed(proxy);
+			return isDeployed(proxy);
 		else if(STYLE_LOCKED.equals(s))
 			return isLocked(proxy);
 		else if(STYLE_MAINTENANCE.equals(s))
