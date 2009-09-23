@@ -1247,15 +1247,40 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Current scheduled message */
 	protected transient SignMessage messageSched;
 
+	/** Check if a DMS action is deployable */
+	public boolean isDeployable(DmsAction da) {
+		if(isFailed())
+			return false;
+		SignMessage sm = createMessage(da);
+		try {
+			return sm == validateMessage(sm);
+		}
+		catch(TMSException e) {
+			return false;
+		}
+	}
+
 	/** Perform a DMS action */
 	public void performAction(DmsAction da) {
+		SignMessage sm = createMessage(da);
+		if(sm != null) {
+			messageSched = sm;
+			is_scheduled = true;
+		}
+	}
+
+	/** Create a message for the sign.
+	 * @param da DMS action
+	 * @return New sign message, or null on error */
+	protected SignMessage createMessage(DmsAction da) {
+		Integer d = da.getActionPlan().getSyncActions() ? null : 2;
 		DMSMessagePriority p = DMSMessagePriority.fromOrdinal(
 			da.getPriority());
 		String m = createMulti(da.getQuickMessage());
-		if(m != null) {
-			messageSched = createMessage(m, p, p, true, 2);
-			is_scheduled = true;
-		}
+		if(m != null)
+			return createMessage(m, p, p, true, d);
+		else
+			return null;
 	}
 
 	/** Update the scheduled message on the sign */

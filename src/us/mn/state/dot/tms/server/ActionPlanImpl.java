@@ -16,8 +16,18 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DmsActionHelper;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
+import us.mn.state.dot.tms.LaneAction;
+import us.mn.state.dot.tms.LaneActionHelper;
+import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -160,8 +170,68 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void doSetDeployed(boolean d) throws TMSException {
 		if(d == deployed)
 			return;
+		if(sync_actions) {
+			validateDmsActions();
+			validateLaneActions();
+		}
 		store.update(this, "deployed", d);
 		setDeployed(d);
+	}
+
+	/** Validate that all DMS actions are deployable */
+	protected void validateDmsActions() throws ChangeVetoException {
+		final ActionPlan ap = this;
+		DmsAction da = DmsActionHelper.find(new Checker<DmsAction>() {
+			public boolean check(DmsAction da) {
+				return da.getActionPlan() == ap &&
+				       !isDeployable(da);
+			}
+		});
+		if(da != null) {
+			throw new ChangeVetoException("DMS action " +
+				da.getName() + " not deployable");
+		}
+	}
+
+	/** Check if a DMS action is deployable */
+	protected boolean isDeployable(final DmsAction da) {
+		final LinkedList<DMSImpl> dmss = new LinkedList<DMSImpl>();
+		DmsSignGroupHelper.find(da.getSignGroup(), new Checker<DMS>() {
+			public boolean check(DMS dms) {
+				if(dms instanceof DMSImpl)
+					dmss.add((DMSImpl)dms);
+				return true;
+			}
+		});
+		for(DMSImpl dms: dmss) {
+			if(!dms.isDeployable(da))
+				return false;
+		}
+		return true;
+	}
+
+	/** Validate that all lane actions are deployable */
+	protected void validateLaneActions() throws ChangeVetoException {
+		final ActionPlan ap = this;
+		LaneAction la = LaneActionHelper.find(new Checker<LaneAction>(){
+			public boolean check(LaneAction la) {
+				return la.getActionPlan() == ap &&
+				       !isDeployable(la);
+			}
+		});
+		if(la != null) {
+			throw new ChangeVetoException("Lane action " +
+				la.getName() + " not deployable");
+		}
+	}
+
+	/** Check if a lane action is deployable */
+	protected boolean isDeployable(LaneAction la) {
+		LaneMarking lm = la.getLaneMarking();
+		if(lm instanceof LaneMarkingImpl)
+			return !((LaneMarkingImpl)lm).isFailed();
+		else
+			return false;
 	}
 
 	/** Set the deployed state (and notify clients) */
