@@ -155,12 +155,18 @@ public class ActionPlanJob extends Job {
 			public boolean check(LaneAction la) {
 				ActionPlan ap = la.getActionPlan();
 				if(ap.getActive()) {
-					LaneMarking m = la.getLaneMarking();
-					if(m != null)
-						m.setDeployed(ap.getDeployed());
+					if(ap.getDeployed() == la.getOnDeploy())
+						performLaneAction(la);
 				}
 				return false;
 			}
 		});
+	}
+
+	/** Perform a lane action */
+	protected void performLaneAction(LaneAction la) {
+		LaneMarking lm = la.getLaneMarking();
+		if(lm != null)
+			lm.setDeployed(la.getOnDeploy());
 	}
 }

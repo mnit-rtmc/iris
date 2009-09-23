@@ -8,6 +8,10 @@ ALTER TABLE iris.action_plan ADD COLUMN sync_actions BOOLEAN;
 UPDATE iris.action_plan SET sync_actions = false;
 ALTER TABLE iris.action_plan ALTER COLUMN sync_actions SET NOT NULL;
 
+ALTER TABLE iris.lane_action ADD COLUMN on_deploy BOOLEAN;
+UPDATE iris.lane_action SET on_deploy = true;
+ALTER TABLE iris.lane_action ALTER COLUMN on_deploy SET NOT NULL;
+
 CREATE VIEW lane_type_view AS
 	SELECT id, description, dcode FROM iris.lane_type;
 GRANT SELECT ON lane_type_view TO PUBLIC;

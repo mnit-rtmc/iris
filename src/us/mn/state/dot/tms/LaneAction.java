@@ -31,4 +31,10 @@ public interface LaneAction extends SonarObject {
 
 	/** Get the lane marking */
 	LaneMarking getLaneMarking();
+
+	/** Set the "on deploy" trigger flag */
+	void setOnDeploy(boolean od);
+
+	/** Get the "on deploy" trigger flag */
+	boolean getOnDeploy();
 }

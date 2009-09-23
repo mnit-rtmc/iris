@@ -34,15 +34,16 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading lane actions...");
 		namespace.registerType(SONAR_TYPE, LaneActionImpl.class);
-		store.query("SELECT name, action_plan, lane_marking " +
-			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
+		store.query("SELECT name, action_plan, lane_marking, on_deploy"+
+			" FROM iris." + SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LaneActionImpl(
 					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
-					row.getString(3)	// lane_marking
+					row.getString(3),	// lane_marking
+					row.getBoolean(4)	// on_deploy
 				));
 			}
 		});
@@ -54,6 +55,7 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("lane_marking", lane_marking);
+		map.put("on_deploy", on_deploy);
 		return map;
 	}
 
@@ -73,16 +75,22 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 	}
 
 	/** Create a new lane action */
-	protected LaneActionImpl(Namespace ns, String n, String a, String lm) {
+	protected LaneActionImpl(Namespace ns, String n, String a, String lm,
+		boolean od)
+	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (LaneMarking)ns.lookupObject(LaneMarking.SONAR_TYPE, lm));
+		    (LaneMarking)ns.lookupObject(LaneMarking.SONAR_TYPE, lm),
+		    od);
 	}
 
 	/** Create a new lane action */
-	protected LaneActionImpl(String n, ActionPlan a, LaneMarking lm) {
+	protected LaneActionImpl(String n, ActionPlan a, LaneMarking lm,
+		boolean od)
+	{
 		this(n);
 		action_plan = a;
 		lane_marking = lm;
+		on_deploy = od;
 	}
 
 	/** Action plan */
@@ -99,5 +107,26 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 	/** Get the lane marking */
 	public LaneMarking getLaneMarking() {
 		return lane_marking;
+	}
+
+	/** Flag to trigger when action plan deployed / undeployed */
+	protected boolean on_deploy;
+
+	/** Set the "on deploy" trigger flag */
+	public void setOnDeploy(boolean od) {
+		on_deploy = od;
+	}
+
+	/** Set the "on deploy" trigger flag */
+	public void doSetOnDeploy(boolean od) throws TMSException {
+		if(od == on_deploy)
+			return;
+		store.update(this, "on_deploy", od);
+		setOnDeploy(od);
+	}
+
+	/** Get the "on deploy" trigger flag */
+	public boolean getOnDeploy() {
+		return on_deploy;
 	}
 }

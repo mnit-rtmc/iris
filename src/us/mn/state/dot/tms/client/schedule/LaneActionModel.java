@@ -35,15 +35,19 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 1;
+	static protected final int COLUMN_COUNT = 2;
 
 	/** Lane marking column number */
 	static protected final int COL_MARKING = 0;
+
+	/** On-deploy column number */
+	static protected final int COL_DEPLOY = 1;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_MARKING, 160, "Lane Marking"));
+		m.addColumn(createColumn(COL_DEPLOY, 80, "On Deploy"));
 		return m;
 	}
 
@@ -83,29 +87,51 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	/** Get the value at the specified cell */
 	public Object getValueAt(int row, int column) {
 		LaneAction la = getProxy(row);
-		if(la != null)
-			return la.getLaneMarking();
-		else
+		if(la == null)
 			return null;
+		switch(column) {
+		case COL_MARKING:
+			return la.getLaneMarking();
+		case COL_DEPLOY:
+			return la.getOnDeploy();
+		default:
+			return null;
+		}
 	}
 
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
-		return String.class;
+		if(column == COL_DEPLOY)
+			return Boolean.class;
+		else
+			return String.class;
 	}
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
 		LaneAction la = getProxy(row);
-		return la == null && canAdd();
+		if(la != null)
+			return column != COL_MARKING && canUpdate();
+		else
+			return column == COL_MARKING && canAdd();
 	}
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
-		String v = value.toString().trim();
-		LaneMarking lm = LaneMarkingHelper.lookup(v);
-		if(lm != null)
-			create(lm);
+		LaneAction la = getProxy(row);
+		if(la == null) {
+			if(column == COL_MARKING) {
+				String v = value.toString().trim();
+				LaneMarking lm = LaneMarkingHelper.lookup(v);
+				if(lm != null)
+					create(lm);
+			}
+			return;
+		}
+		if(column == COL_DEPLOY) {
+			if(value instanceof Boolean)
+				la.setOnDeploy((Boolean)value);
+		}
 	}
 
 	/** Create a new lane action */
@@ -134,6 +160,12 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(LaneAction.SONAR_TYPE,
 			"oname"));
+	}
+
+	/** Check if the user can update */
+	public boolean canUpdate() {
+		return namespace.canUpdate(user, new Name(LaneAction.SONAR_TYPE,
+			"oname", "aname"));
 	}
 
 	/** Check if the user can remove the action at the specified row */
