@@ -77,7 +77,9 @@ public class ExceptionDialog extends JDialog {
 		e.printStackTrace();
 		box = Box.createVerticalBox();
 		box.add(Box.createVerticalGlue());
-		try { throw e; }
+		try {
+			throw e;
+		}
 		catch(AuthenticationException ee) {
 			addText("Authentication failed:");
 			addText(ee.getMessage());
