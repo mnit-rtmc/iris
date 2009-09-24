@@ -22,7 +22,7 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * ProxyAction is an abstract action which is associated with one type
  * of SONAR proxy. It also passes off calls to actionPerformed to a
- * worker thread so RMI calls never happen on the Swing thread.
+ * worker thread so SONAR calls never happen on the Swing thread.
  *
  * @author Douglas Lau
  */

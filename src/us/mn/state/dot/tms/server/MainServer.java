@@ -80,7 +80,7 @@ public class MainServer {
 	/** SQL connection */
 	static protected SQLConnection store;
 
-	/** Start the server and register it with the RMI registry */
+	/** Main server entry point */
 	static public void main(String[] args) {
 		try {
 			redirectStdStreams();
