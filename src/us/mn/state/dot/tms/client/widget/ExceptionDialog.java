@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.BindException;
 import java.text.ParseException;
 import javax.mail.MessagingException;
 import javax.naming.AuthenticationException;
@@ -86,14 +85,6 @@ public class ExceptionDialog extends JDialog {
 			addText("Please make sure your user");
 			addText("name is correct, then");
 			addText("type your password again.");
-		}
-		catch(BindException ee) {
-			setFatal(true);
-			addText("Another copy of this program is");
-			addText("already running on this computer.");
-			addText("Please shut it down before");
-			addText("starting this program again.");
-			addAssistanceMessage();
 		}
 		catch(ChangeVetoException ee) {
 			addText("The change has been prevented");
