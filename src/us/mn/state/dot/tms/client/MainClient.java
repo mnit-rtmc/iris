@@ -109,11 +109,13 @@ public class MainClient {
 	 * @param args Arguments passed to the application.
 	 */
 	static public void main(String[] args) {
+		SimpleHandler handler = new SimpleHandler();
+		Scheduler.setHandler(handler);
 		try {
 			execute(args);
 		}
 		catch(IOException e) {
-			new ExceptionDialog(e).setVisible(true);
+			handler.handle(e);
 		}
 	}
 
@@ -127,7 +129,6 @@ public class MainClient {
 		checkAssert();
 		IrisClient c = createClientSplash(args);
 		ExceptionDialog.setOwner(c);
-		Scheduler.setHandler(new SimpleHandler());
 		c.setVisible(true);
 	}
 
