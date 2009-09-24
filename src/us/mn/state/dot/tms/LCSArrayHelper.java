@@ -129,4 +129,20 @@ public class LCSArrayHelper extends BaseHelper {
 		}
 		return false;
 	}
+
+	/** Check if all LCSs in an array are failed */
+	static public boolean isAllFailed(final LCSArray lcs_array) {
+		final LinkedList<LCS> lcss = new LinkedList<LCS>();
+		lookupLCS(lcs_array, new Checker<LCS>() {
+			public boolean check(LCS lcs) {
+				lcss.add(lcs);
+				return false;
+			}
+		});
+		for(LCS lcs: lcss) {
+			if(!LCSHelper.isFailed(lcs))
+				return false;
+		}
+		return true;
+	}
 }
