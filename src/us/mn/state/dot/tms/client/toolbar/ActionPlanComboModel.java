@@ -153,7 +153,8 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 			return false;
 		else {
 			return namespace.canUpdate(user,
-				new Name(ActionPlan.SONAR_TYPE, p.getName()));
+				new Name(ActionPlan.SONAR_TYPE, p.getName(),
+				"deployed"));
 		}
 	}
 }
