@@ -105,14 +105,6 @@ public class ExceptionDialog extends JDialog {
 			box.add(Box.createVerticalStrut(6));
 			addText(ee.getMessage());
 		}
-		catch(SonarException ee) {
-			setFatal(true);
-			addText("This program has encountered");
-			addText("a problem while communicating");
-			addText("with the IRIS server.");
-			box.add(Box.createVerticalStrut(6));
-			addText(ee.getMessage());
-		}
 		catch(NumberFormatException ee) {
 			addText("Number formatting error");
 			box.add(Box.createVerticalStrut(6));
@@ -131,6 +123,14 @@ public class ExceptionDialog extends JDialog {
 			addText("Parsing error");
 			box.add(Box.createVerticalStrut(6));
 			addText("Please try again.");
+		}
+		catch(SonarException ee) {
+			setFatal(true);
+			addText("This program has encountered");
+			addText("a problem while communicating");
+			addText("with the IRIS server.");
+			box.add(Box.createVerticalStrut(6));
+			addText(ee.getMessage());
 		}
 		catch(Exception ee) {
 			sendEmailAlert(e);
