@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.Frame;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.tms.client.widget.ExceptionDialog;
@@ -33,5 +34,10 @@ public class SimpleHandler implements ExceptionHandler {
 			}
 		});
 		return true;
+	}
+
+	/** Set the owner frame */
+	public void setOwner(Frame f) {
+		ExceptionDialog.setOwner(f);
 	}
 }

@@ -21,7 +21,6 @@ import java.net.URL;
 import java.util.Properties;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.tms.client.widget.ExceptionDialog;
 import us.mn.state.dot.util.HTTPProxySelector;
 
 /**
@@ -111,25 +110,16 @@ public class MainClient {
 	static public void main(String[] args) {
 		SimpleHandler handler = new SimpleHandler();
 		Scheduler.setHandler(handler);
+		checkTimeZone();
+		checkAssert();
 		try {
-			execute(args);
+			IrisClient c = createClientSplash(args);
+			handler.setOwner(c);
+			c.setVisible(true);
 		}
 		catch(IOException e) {
 			handler.handle(e);
 		}
-	}
-
-	/**
-	 * Main entry point.
-	 *
-	 * @param args Arguments passed to the application.
-	 */
-	static protected void execute(final String[] args) throws IOException {
-		checkTimeZone();
-		checkAssert();
-		IrisClient c = createClientSplash(args);
-		ExceptionDialog.setOwner(c);
-		c.setVisible(true);
 	}
 
 	/** Check time zone */
