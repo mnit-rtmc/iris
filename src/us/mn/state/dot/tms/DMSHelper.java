@@ -339,4 +339,30 @@ public class DMSHelper extends BaseHelper {
 		//	  agency specific code (Caltrans).
 		return !SString.containsIgnoreCase(d.getSignAccess(), "modem");
 	}
+
+	/** Get current sign message text as an array of strings. */
+	public static String[] getText(DMS proxy) {
+		SignMessage sm = proxy.getMessageCurrent();
+		if(sm != null) {
+			String multi = sm.getMulti();
+			if(multi != null)
+				return new MultiString(multi).getText();
+		}
+		return new String[0];
+	}
+
+	/** Return a single string which is formated to be readable 
+	 *  by the user and contains all sign message lines on the 
+	 *  specified DMS. */
+	public static String buildMsgLine(DMS proxy) {
+		String[] lines = getText(proxy);
+		StringBuilder ret = new StringBuilder();
+		for(int i = 0; i < lines.length; ++i) {
+			if(lines[i] != null)
+				ret.append(lines[i]);
+			if(i + 1 < lines.length)
+				ret.append(" / ");
+		}
+		return ret.toString();
+	}
 }
