@@ -46,14 +46,6 @@ public class ExceptionDialog extends JDialog {
 	/** Vertical box for components in the exception dialog */
 	protected final Box box = Box.createVerticalBox();
 
-	/** Owner of any new exception dialogs */
-	static protected Frame owner;
-
-	/** Set the owner to use for new exception dialogs */
-	static public void setOwner(Frame f) {
-		owner = f;
-	}
-
 	/** Flag for fatal exceptions */
 	protected boolean fatal = false;
 
@@ -66,11 +58,20 @@ public class ExceptionDialog extends JDialog {
 			setTitle("Warning");
 	}
 
-	/** Create a new ExceptionDialog */
-	public ExceptionDialog(final Exception e) {
+	/** Create a new exception dialog without an owner */
+	public ExceptionDialog() {
+		super();
+	}
+
+	/** Create a new exception dialog */
+	public ExceptionDialog(Frame owner) {
 		super(owner, true);
-		setFatal(false);
+	}
+
+	/** Show an exception */
+	public void show(final Exception e) {
 		e.printStackTrace();
+		setFatal(false);
 		TextPanel tpanel = new TextPanel();
 		tpanel.addGlue();
 		try {
@@ -170,9 +171,11 @@ public class ExceptionDialog extends JDialog {
 		Dimension size = panel.getPreferredSize();
 		size.height += 24;
 		size.width += 16;
+		getContentPane().removeAll();
 		getContentPane().add(panel);
 		setSize(size);
 		Screen.centerOnCurrent(this);
+		setVisible(true);
 	}
 
 	/** Add a message about what to do for assistance */

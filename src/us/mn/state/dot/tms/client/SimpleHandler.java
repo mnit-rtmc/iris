@@ -26,11 +26,14 @@ import us.mn.state.dot.tms.client.widget.ExceptionDialog;
  */
 public class SimpleHandler implements ExceptionHandler {
 
+	/** Exception dialog */
+	protected ExceptionDialog dialog = new ExceptionDialog();
+
 	/** Handle an exception */
 	public boolean handle(final Exception e) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				new ExceptionDialog(e).setVisible(true);
+				dialog.show(e);
 			}
 		});
 		return true;
@@ -38,6 +41,8 @@ public class SimpleHandler implements ExceptionHandler {
 
 	/** Set the owner frame */
 	public void setOwner(Frame f) {
-		ExceptionDialog.setOwner(f);
+		dialog.setVisible(false);
+		dialog.dispose();
+		dialog = new ExceptionDialog(f);
 	}
 }
