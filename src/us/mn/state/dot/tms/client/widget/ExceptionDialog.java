@@ -24,10 +24,8 @@ import java.text.ParseException;
 import javax.mail.MessagingException;
 import javax.naming.AuthenticationException;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -48,7 +46,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class ExceptionDialog extends JDialog {
 
 	/** Vertical box for components in the exception dialog */
-	protected final Box box;
+	protected final Box box = Box.createVerticalBox();
 
 	/** Owner of any new exception dialogs */
 	static protected Frame owner;
@@ -75,75 +73,76 @@ public class ExceptionDialog extends JDialog {
 		super(owner, true);
 		setFatal(false);
 		e.printStackTrace();
-		box = Box.createVerticalBox();
-		box.add(Box.createVerticalGlue());
+		TextPanel tpanel = new TextPanel();
+		tpanel.addGlue();
 		try {
 			throw e;
 		}
 		catch(AuthenticationException ee) {
-			addText("Authentication failed:");
-			addText(ee.getMessage());
-			box.add(Box.createVerticalStrut(6));
-			addText("Please make sure your user");
-			addText("name is correct, then");
-			addText("type your password again.");
+			tpanel.addText("Authentication failed:");
+			tpanel.addText(ee.getMessage());
+			tpanel.addSpacing();
+			tpanel.addText("Please make sure your user");
+			tpanel.addText("name is correct, then");
+			tpanel.addText("type your password again.");
 		}
 		catch(ChangeVetoException ee) {
-			addText("The change has been prevented");
-			addText("for the following reason:");
-			box.add(Box.createVerticalStrut(6));
-			addText(ee.getMessage());
+			tpanel.addText("The change has been prevented");
+			tpanel.addText("for the following reason:");
+			tpanel.addSpacing();
+			tpanel.addText(ee.getMessage());
 		}
 		catch(PermissionException ee) {
-			addText("Permission denied:");
-			box.add(Box.createVerticalStrut(6));
-			addText(ee.getMessage());
+			tpanel.addText("Permission denied:");
+			tpanel.addSpacing();
+			tpanel.addText(ee.getMessage());
 		}
 		catch(SonarShowException ee) {
-			addText("The following message was");
-			addText("received from the IRIS server:");
-			box.add(Box.createVerticalStrut(6));
-			addText(ee.getMessage());
+			tpanel.addText("The following message was");
+			tpanel.addText("received from the IRIS server:");
+			tpanel.addSpacing();
+			tpanel.addText(ee.getMessage());
 		}
 		catch(NumberFormatException ee) {
-			addText("Number formatting error");
-			box.add(Box.createVerticalStrut(6));
-			addText("Please check all numeric");
-			addText("fields and try again.");
+			tpanel.addText("Number formatting error");
+			tpanel.addSpacing();
+			tpanel.addText("Please check all numeric");
+			tpanel.addText("fields and try again.");
 		}
 		catch(InvalidMessageException ee) {
-			addText("Invalid message");
-			box.add(Box.createVerticalStrut(6));
-			addText("The sign is unable to display");
-			addText("the following message:");
-			addText(ee.getMessage());
-			addText("Please select a different message");
+			tpanel.addText("Invalid message");
+			tpanel.addSpacing();
+			tpanel.addText("The sign is unable to display");
+			tpanel.addText("the following message:");
+			tpanel.addText(ee.getMessage());
+			tpanel.addText("Please select a different message");
 		}
 		catch(ParseException ee) {
-			addText("Parsing error");
-			box.add(Box.createVerticalStrut(6));
-			addText("Please try again.");
+			tpanel.addText("Parsing error");
+			tpanel.addText(ee.getMessage());
+			tpanel.addText("Please try again.");
 		}
 		catch(SonarException ee) {
 			setFatal(true);
-			addText("This program has encountered");
-			addText("a problem while communicating");
-			addText("with the IRIS server.");
-			box.add(Box.createVerticalStrut(6));
-			addText(ee.getMessage());
+			tpanel.addText("This program has encountered");
+			tpanel.addText("a problem while communicating");
+			tpanel.addText("with the IRIS server.");
+			tpanel.addSpacing();
+			tpanel.addText(ee.getMessage());
 		}
 		catch(Exception ee) {
-			sendEmailAlert(e);
+			sendEmailAlert(e, tpanel);
 			setFatal(true);
-			addText("This program has encountered");
-			addText("a serious problem.");
-			addAssistanceMessage();
+			tpanel.addText("This program has encountered");
+			tpanel.addText("a serious problem.");
+			addAssistanceMessage(tpanel);
 		}
-		box.add(Box.createVerticalStrut(6));
+		tpanel.addSpacing();
 		String lastLine = I18N.get("ExceptionForm.LastLine");
 		if(lastLine != null)
-			box.add(new CenteredLabel(lastLine));
-		box.add(Box.createVerticalGlue());
+			tpanel.addText(lastLine);
+		tpanel.addGlue();
+		box.add(tpanel);
 		box.add(Box.createVerticalStrut(6));
 		Box hbox = Box.createHorizontalBox();
 		hbox.add(Box.createHorizontalGlue());
@@ -178,37 +177,31 @@ public class ExceptionDialog extends JDialog {
 		Screen.centerOnCurrent(this);
 	}
 
-	/** Add a line of text to the exception dialog */
-	protected void addText(String text) {
-		box.add(new CenteredLabel(text));
-	}
-
 	/** Add a message about what to do for assistance */
-	protected void addAssistanceMessage() {
-		box.add(Box.createVerticalStrut(6));
-		addText("For assistance, contact an");
-		addText("IRIS system administrator.");
+	protected void addAssistanceMessage(TextPanel tpanel) {
+		tpanel.addSpacing();
+		tpanel.addText("For assistance, contact an");
+		tpanel.addText("IRIS system administrator.");
 	}
 
 	/** Send an e-mail alert to the system administrators */
-	protected void sendEmailAlert(Exception e) {
+	protected void sendEmailAlert(Exception e, TextPanel tpanel) {
 		String sender = SystemAttrEnum.EMAIL_SENDER_CLIENT.getString();
 		String recipient =
 			SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
 		if(sender != null && recipient != null) {
+			tpanel.addSpacing();
 			try {
 				sendEmailAlert(sender, recipient, e);
-				box.add(Box.createVerticalStrut(6));
-				addText("A detailed error report");
-				addText("has been emailed to:");
-				addText(recipient);
+				tpanel.addText("A detailed error report");
+				tpanel.addText("has been emailed to:");
+				tpanel.addText(recipient);
 			}
 			catch(MessagingException ex) {
 				ex.printStackTrace();
-				box.add(Box.createVerticalStrut(6));
-				addText("Unable to send error");
-				addText("report to:");
-				addText(recipient);
+				tpanel.addText("Unable to send error");
+				tpanel.addText("report to:");
+				tpanel.addText(recipient);
 			}
 		}
 	}
@@ -222,16 +215,6 @@ public class ExceptionDialog extends JDialog {
 		SEmail email = new SEmail(sender, recipient, "IRIS Exception",
 			writer.toString());
 		email.send();
-	}
-
-	/** Centered label component */
-	static protected class CenteredLabel extends Box {
-		CenteredLabel(String s) {
-			super(BoxLayout.X_AXIS);
-			add(Box.createHorizontalGlue());
-			add(new JLabel(s));
-			add(Box.createHorizontalGlue());
-		}
 	}
 
 	/** Exception detail dialog */
