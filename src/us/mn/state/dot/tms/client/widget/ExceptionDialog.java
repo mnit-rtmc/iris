@@ -27,8 +27,6 @@ import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.client.SonarShowException;
 import us.mn.state.dot.sonar.client.PermissionException;
@@ -160,7 +158,7 @@ public class ExceptionDialog extends JDialog {
 		button = new JButton("Detail");
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent a) {
-				new DetailDialog(e).setVisible(true);
+				new StackTraceDialog(e).setVisible(true);
 			}
 		});
 		hbox.add(button);
@@ -215,36 +213,5 @@ public class ExceptionDialog extends JDialog {
 		SEmail email = new SEmail(sender, recipient, "IRIS Exception",
 			writer.toString());
 		email.send();
-	}
-
-	/** Exception detail dialog */
-	static protected class DetailDialog extends JDialog {
-		protected DetailDialog(Exception e) {
-			setTitle("Exception detail");
-			setModal(true);
-			Box box = Box.createVerticalBox();
-			JTextArea area = new JTextArea();
-			StringWriter writer = new StringWriter(200);
-			e.printStackTrace(new PrintWriter(writer));
-			area.append(writer.toString());
-			JScrollPane scroll = new JScrollPane(area);
-			box.add(scroll);
-			box.add(Box.createVerticalStrut(6));
-			JButton ok = new JButton("OK");
-			ok.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent a) {
-					setVisible(false);
-					dispose();
-				}
-			});
-			box.add(ok);
-			box.add(Box.createVerticalStrut(6));
-			Dimension size = box.getPreferredSize();
-			size.height += 32;
-			size.width += 16;
-			getContentPane().add(box);
-			setSize(size);
-			Screen.centerOnCurrent(this);
-		}
 	}
 }
