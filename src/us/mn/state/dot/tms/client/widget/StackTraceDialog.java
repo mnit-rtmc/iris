@@ -38,9 +38,7 @@ public class StackTraceDialog extends JDialog {
 		setModal(true);
 		Box box = Box.createVerticalBox();
 		JTextArea area = new JTextArea();
-		StringWriter writer = new StringWriter(200);
-		e.printStackTrace(new PrintWriter(writer));
-		area.append(writer.toString());
+		area.append(getStackTrace(e));
 		JScrollPane scroll = new JScrollPane(area);
 		box.add(scroll);
 		box.add(Box.createVerticalStrut(6));
@@ -59,5 +57,12 @@ public class StackTraceDialog extends JDialog {
 		getContentPane().add(box);
 		setSize(size);
 		Screen.centerOnCurrent(this);
+	}
+
+	/** Get stack trace as a string */
+	protected String getStackTrace(Exception e) {
+		StringWriter writer = new StringWriter(200);
+		e.printStackTrace(new PrintWriter(writer));
+		return writer.toString();
 	}
 }

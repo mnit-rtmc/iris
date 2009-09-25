@@ -188,9 +188,12 @@ public class ExceptionDialog extends JDialog {
 		String recipient =
 			SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
 		if(sender != null && recipient != null) {
+			String trace = getStackTrace(e);
 			tpanel.addSpacing();
 			try {
-				sendEmailAlert(sender, recipient, e);
+				SEmail email = new SEmail(sender, recipient,
+					"IRIS Exception", trace);
+				email.send();
 				tpanel.addText("A detailed error report");
 				tpanel.addText("has been emailed to:");
 				tpanel.addText(recipient);
@@ -204,14 +207,10 @@ public class ExceptionDialog extends JDialog {
 		}
 	}
 
-	/** Send an email alert to the specified recipient */
-	protected void sendEmailAlert(String sender, String recipient,
-		Exception e) throws MessagingException
-	{
+	/** Get stack trace as a string */
+	protected String getStackTrace(Exception e) {
 		StringWriter writer = new StringWriter(200);
 		e.printStackTrace(new PrintWriter(writer));
-		SEmail email = new SEmail(sender, recipient, "IRIS Exception",
-			writer.toString());
-		email.send();
+		return writer.toString();
 	}
 }
