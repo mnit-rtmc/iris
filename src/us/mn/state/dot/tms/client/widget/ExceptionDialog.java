@@ -166,7 +166,7 @@ public class ExceptionDialog extends JDialog {
 		tpanel.add(hbox);
 		tpanel.addSpacing();
 		Dimension size = tpanel.getPreferredSize();
-		size.height += 24;
+		size.height += 32;
 		size.width += 16;
 		getContentPane().removeAll();
 		getContentPane().add(tpanel);
