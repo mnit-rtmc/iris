@@ -151,14 +151,17 @@ public class ExceptionDialog extends JDialog {
 			}
 		});
 		hbox.add(button);
-		hbox.add(Box.createHorizontalStrut(10));
-		button = new JButton("Detail");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent a) {
-				new StackTraceDialog(e).setVisible(true);
-			}
-		});
-		hbox.add(button);
+		if(fatal) {
+			hbox.add(Box.createHorizontalStrut(10));
+			button = new JButton("Detail");
+			button.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent a) {
+					JDialog std = new StackTraceDialog(e);
+					std.setVisible(true);
+				}
+			});
+			hbox.add(button);
+		}
 		hbox.add(Box.createHorizontalGlue());
 		tpanel.add(hbox);
 		tpanel.addSpacing();
