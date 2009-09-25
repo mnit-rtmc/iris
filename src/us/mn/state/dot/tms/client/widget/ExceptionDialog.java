@@ -43,9 +43,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class ExceptionDialog extends JDialog {
 
-	/** Vertical box for components in the exception dialog */
-	protected final Box box = Box.createVerticalBox();
-
 	/** Flag for fatal exceptions */
 	protected boolean fatal = false;
 
@@ -141,8 +138,7 @@ public class ExceptionDialog extends JDialog {
 		if(lastLine != null)
 			tpanel.addText(lastLine);
 		tpanel.addGlue();
-		box.add(tpanel);
-		box.add(Box.createVerticalStrut(6));
+		tpanel.addSpacing();
 		Box hbox = Box.createHorizontalBox();
 		hbox.add(Box.createHorizontalGlue());
 		JButton button = new JButton("OK");
@@ -164,15 +160,13 @@ public class ExceptionDialog extends JDialog {
 		});
 		hbox.add(button);
 		hbox.add(Box.createHorizontalGlue());
-		box.add(hbox);
-		box.add(Box.createVerticalStrut(6));
-		JPanel panel = new JPanel();
-		panel.add(box);
-		Dimension size = panel.getPreferredSize();
+		tpanel.add(hbox);
+		tpanel.addSpacing();
+		Dimension size = tpanel.getPreferredSize();
 		size.height += 24;
 		size.width += 16;
 		getContentPane().removeAll();
-		getContentPane().add(panel);
+		getContentPane().add(tpanel);
 		setSize(size);
 		Screen.centerOnCurrent(this);
 		setVisible(true);

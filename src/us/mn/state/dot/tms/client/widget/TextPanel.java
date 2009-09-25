@@ -26,22 +26,24 @@ import javax.swing.JPanel;
  */
 public class TextPanel extends JPanel {
 
-	/** Vertical box for components in the panel */
-	protected final Box box = Box.createVerticalBox();
+	/** Create a new text panel */
+	public TextPanel() {
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+	}
 
 	/** Add glue to take excess space */
 	public void addGlue() {
-		box.add(Box.createVerticalGlue());
+		add(Box.createVerticalGlue());
 	}
 
 	/** Add spacing between lines of text */
 	public void addSpacing() {
-		box.add(Box.createVerticalStrut(6));
+		add(Box.createVerticalStrut(6));
 	}
 
 	/** Add a line of text to the text panel */
 	protected void addText(String text) {
-		box.add(new CenteredLabel(text));
+		add(new CenteredLabel(text));
 	}
 
 	/** Centered label component */
