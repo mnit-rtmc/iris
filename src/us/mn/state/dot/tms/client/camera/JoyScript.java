@@ -111,7 +111,13 @@ public class JoyScript {
 
 	/** Create the joystick polling process */
 	public Process createProcess() throws IOException {
-		return Runtime.getRuntime().exec(getCommand());
+		final Process process = Runtime.getRuntime().exec(getCommand());
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() {
+				process.destroy();
+			}
+		});
+		return process;
 	}
 
 	/** Get the command to execute the python script */
