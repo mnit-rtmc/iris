@@ -114,6 +114,10 @@ public class OpQueryDMSMessage extends OpDMS {
 			if(status.isValid()) {
 				Integer d = parseDuration(time.getInteger());
 				setCurrentMessage(multi.getValue(), d);
+			} else {
+				System.err.println("OpQueryDMSMessage: " +
+					dms.getName() + ", " + status);
+				errorStatus = status.toString();
 			}
 			return null;
 		}
