@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.toolbar;
 
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -35,6 +36,7 @@ public class ActionPlanPanel extends ToolPanel {
 	public ActionPlanPanel(Session s) {
 		model = new ActionPlanComboModel(s, this);
 		combo_box.setModel(model);
+		add(new JLabel("Action Plan"));
 		add(combo_box);
 		add(model.getCheckBox());
 	}
