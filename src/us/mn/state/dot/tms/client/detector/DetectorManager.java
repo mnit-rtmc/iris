@@ -18,7 +18,6 @@ import java.awt.Shape;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -30,7 +29,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.StationMarker;
 
 /**
@@ -55,15 +53,9 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Name of "no r_node" style */
 	static public final String STYLE_NO_R_NODE = "No R_Node";
 
-	/** R_Node manager */
-	protected final R_NodeManager r_node_manager;
-
 	/** Create a new detector manager */
-	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm,
-		R_NodeManager rnm)
-	{
+	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm) {
 		super(c, lm);
-		r_node_manager = rnm;
 		initialize();
 	}
 
@@ -132,15 +124,5 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Find the map geo location for a proxy */
 	protected GeoLoc getGeoLoc(Detector proxy) {
 		return DetectorHelper.getGeoLoc(proxy);
-	}
-
-	/** Called when proxy enumeration is complete */
-	public void enumerationComplete() {
-		// Don't hog the SONAR TaskProcessor thread
-		new AbstractJob() {
-			public void perform() {
-				r_node_manager.createSegmentLayer();
-			}
-		}.addToScheduler();
 	}
 }

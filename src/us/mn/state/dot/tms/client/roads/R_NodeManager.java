@@ -99,9 +99,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** User session */
 	protected final Session session;
 
-	/** Segment layer */
-	protected SegmentLayer seg_layer = null;
-
 	/** Currently selected corridor */
 	protected String corridor = "";
 
@@ -218,21 +215,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create the segment layer */
-	public synchronized void createSegmentLayer() {
-		seg_layer = new SegmentLayer(this, session);
+	public SegmentLayer createSegmentLayer() {
+		SegmentLayer seg_layer = new SegmentLayer(this, session);
 		for(CorridorBase c: corridors.values())
 			seg_layer.addCorridor(c);
-		notify();
-	}
-
-	/** Get the segment layer */
-	public synchronized SegmentLayer getSegmentLayer() {
-		while(seg_layer == null) {
-			try {
-				wait();
-			}
-			catch(InterruptedException e) { }
-		}
 		return seg_layer;
 	}
 

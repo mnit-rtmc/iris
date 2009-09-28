@@ -232,22 +232,23 @@ public class Session {
 		lane_marking_manager = new LaneMarkingManager(this,
 			state.getLaneMarkings(), loc_manager);
 		det_manager = new DetectorManager(
-			state.getDetCache().getDetectors(), loc_manager,
-			r_node_manager);
+			state.getDetCache().getDetectors(), loc_manager);
 		warn_manager = new WarningSignManager(this,
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, state.getIncidents(),
 			loc_manager);
+		// NOTE: The segment layer must not be created before all
+		//       detectors have been enumerated.
+		det_manager.waitForEnumeration();
+		seg_layer = r_node_manager.createSegmentLayer();
 		// NOTE: Since incidents are populated last, we can wait for
 		//       them to be enumerated, and all other previous objects
 		//       will also have been enumerated.  For example, the
 		//       DMS tab must not be created before LCS objects have
-		//       been enumerated.  Also, the segment layer must not be
-		//       created before detectors have been enumerated.
+		//       been enumerated.
 		inc_manager.waitForEnumeration();
-		seg_layer = r_node_manager.getSegmentLayer();
 		addTabs();
 	}
 
