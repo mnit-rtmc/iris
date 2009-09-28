@@ -83,6 +83,9 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Map layer for the proxy type */
 	protected final ProxyLayer<T> layer;
 
+	/** Flag to indicate enumeration of all objects has completed */
+	protected boolean enumerated = false;
+
 	/** Create a new proxy manager */
 	protected ProxyManager(TypeCache<T> c, GeoLocManager lm) {
 		cache = c;
@@ -148,8 +151,21 @@ abstract public class ProxyManager<T extends SonarObject>
 	}
 
 	/** Called when proxy enumeration is complete */
-	public void enumerationComplete() {
-		// not interested
+	public synchronized void enumerationComplete() {
+		enumerated = true;
+		notify();
+	}
+
+	/** Wait for the objects to be enumerated */
+	public synchronized void waitForEnumeration() {
+		while(!enumerated) {
+			try {
+				wait();
+			}
+			catch(InterruptedException e) {
+				// whoops, try again
+			}
+		}
 	}
 
 	/** Called when a proxy has been removed */

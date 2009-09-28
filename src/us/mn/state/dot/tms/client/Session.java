@@ -240,6 +240,13 @@ public class Session {
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, state.getIncidents(),
 			loc_manager);
+		// NOTE: Since incidents are populated last, we can wait for
+		//       them to be enumerated, and all other previous objects
+		//       will also have been enumerated.  For example, the
+		//       DMS tab must not be created before LCS objects have
+		//       been enumerated.  Also, the segment layer must not be
+		//       created before detectors have been enumerated.
+		inc_manager.waitForEnumeration();
 		seg_layer = r_node_manager.getSegmentLayer();
 		addTabs();
 	}
