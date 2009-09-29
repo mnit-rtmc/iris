@@ -32,6 +32,7 @@ import java.util.StringTokenizer;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -129,7 +130,9 @@ public class ViewAwsMsgsForm extends AbstractForm
 		TypeCache<CommLink> tc = m_st.getConCache().getCommLinks();
 		tc.findObject(new Checker<CommLink>() {
 			public boolean check(CommLink c) {
-				if(c.getProtocol() == CommLink.PROTO_AWS) {
+				if(c.getProtocol() ==
+				   CommProtocol.AWS.ordinal())
+				{
 					url.append(c.getUrl());
 					return true;
 				}

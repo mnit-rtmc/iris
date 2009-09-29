@@ -26,66 +26,6 @@ public interface CommLink extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "comm_link";
 
-	/** NTCIP Class B protocol */
-	int PROTO_NTCIP_B = 0;
-
-	/** Mn/DOT 170 4-bit protocol */
-	int PROTO_MNDOT_4 = 1;
-
-	/** Mn/DOT 170 5-bit protocol */
-	int PROTO_MNDOT_5 = 2;
-
-	/** Wavetronix SmartSensor data protocol */
-	int PROTO_SMART_SENSOR = 3;
-
-	/** 3M Canoga data protocol */
-	int PROTO_CANOGA = 4;
-
-	/** Vicon video matrix switch protocol */
-	int PROTO_VICON = 5;
-
-	/** Pelco D camera control protocol */
-	int PROTO_PELCO_D = 6;
-
-	/** NTCIP Class C protocol */
-	int PROTO_NTCIP_C = 7;
-
-	/** Manchester camera control protocol */
-	int PROTO_MANCHESTER = 8;
-
-	/** DMS Lite protocol */
-	int PROTO_DMSLITE = 9;
-
-	/** AWS protocol */
-	int PROTO_AWS = 10;
-
-	/** NTCIP Class A protocol */
-	int PROTO_NTCIP_A = 11;
-
-	/** Pelco video matrix switch protocol */
-	int PROTO_PELCO = 12;
-
-	/** Vicon camera control protocol */
-	int PROTO_VICON_PTZ = 13;
-
-	/** Protocol string constants */
-	String[] PROTOCOLS = {
-		"NTCIP Class B",
-		"Mn/DOT 170 (4-bit)",
-		"Mn/DOT 170 (5-bit)",
-		"SmartSensor",
-		"Canoga",
-		"Vicon",
-		"Pelco D",
-		"NTCIP Class C",
-		"Manchester",
-		"DMS Lite",
-		"AWS",
-		"NTCIP Class A",
-		"Pelco video switch",
-		"Vicon PTZ"
-	};
-
 	/** Set text description */
 	void setDescription(String d);
 

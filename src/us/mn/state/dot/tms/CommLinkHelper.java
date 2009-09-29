@@ -38,7 +38,8 @@ public class CommLinkHelper extends BaseHelper {
 			new Checker<CommLink>() 
 		{
 			public boolean check(CommLink c) {
-				return c.getProtocol() == CommLink.PROTO_AWS;
+				return c.getProtocol() ==
+				       CommProtocol.AWS.ordinal();
 			}
 		});
 	}

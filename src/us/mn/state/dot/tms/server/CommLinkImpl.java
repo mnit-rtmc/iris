@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.TMSException;
@@ -107,7 +108,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		map.put("name", name);
 		map.put("description", description);
 		map.put("url", url);
-		map.put("protocol", protocol);
+		map.put("protocol", (short)protocol.ordinal());
 		map.put("timeout", timeout);
 		return map;
 	}
@@ -132,7 +133,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		super(n);
 		description = d;
 		url = u;
-		protocol = p;
+		CommProtocol cp = CommProtocol.fromOrdinal(p);
+		if(cp != null)
+			protocol = cp;
 		timeout = t;
 		openPoller();
 	}
@@ -187,19 +190,22 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Communication protocol */
-	protected short protocol = PROTO_NTCIP_C;
+	protected CommProtocol protocol = CommProtocol.NTCIP_C;
 
 	/** Set the communication protocol */
 	public void setProtocol(short p) {
-		protocol = p;
+		CommProtocol cp = CommProtocol.fromOrdinal(p);
+		if(cp != null)
+			protocol = cp;
 	}
 
 	/** Set the communication protocol */
 	public void doSetProtocol(short p) throws TMSException {
-		if(p == protocol)
-			return;
-		if(p < 0 || p >= PROTOCOLS.length)
+		CommProtocol cp = CommProtocol.fromOrdinal(p);
+		if(cp == null)
 			throw new ChangeVetoException("Invalid protocol: " + p);
+		if(cp == protocol)
+			return;
 		store.update(this, "protocol", p);
 		setProtocol(p);
 		openPoller();
@@ -207,7 +213,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Get the communication protocol */
 	public short getProtocol() {
-		return protocol;
+		return (short)protocol.ordinal();
 	}
 
 	/** Polling timeout (milliseconds) */
@@ -340,32 +346,32 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Try to open the communication link */
 	protected MessagePoller createPoller() throws IOException {
 		switch(protocol) {
-		case PROTO_NTCIP_A:
+		case NTCIP_A:
 			return createNtcipAPoller();
-		case PROTO_NTCIP_B:
+		case NTCIP_B:
 			return createNtcipBPoller();
-		case PROTO_NTCIP_C:
+		case NTCIP_C:
 			return createNtcipCPoller();
-		case PROTO_MNDOT_4:
-		case PROTO_MNDOT_5:
+		case MNDOT_4:
+		case MNDOT_5:
 			return createMndotPoller();
-		case PROTO_SMART_SENSOR:
+		case SS_105:
 			return createSmartSensorPoller();
-		case PROTO_CANOGA:
+		case CANOGA:
 			return createCanogaPoller();
-		case PROTO_VICON:
+		case VICON_SWITCHER:
 			return createViconPoller();
-		case PROTO_PELCO_D:
+		case PELCO_D_PTZ:
 			return createPelcoDPoller();
-		case PROTO_MANCHESTER:
+		case MANCHESTER_PTZ:
 			return createManchesterPoller();
-		case PROTO_DMSLITE:
+		case DMSLITE:
 			return createDmsLitePoller();
-		case PROTO_AWS:
+		case AWS:
 			return createAwsPoller();
-		case PROTO_PELCO:
+		case PELCO_SWITCHER:
 			return createPelcoPoller();
-		case PROTO_VICON_PTZ:
+		case VICON_PTZ:
 			return createViconPTZPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");

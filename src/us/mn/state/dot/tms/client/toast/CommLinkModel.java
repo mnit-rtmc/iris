@@ -32,6 +32,7 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -66,8 +67,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	static protected final LinkedList<String> PROTOCOLS =
 		new LinkedList<String>();
 	static {
-		for(String p: CommLink.PROTOCOLS)
-			PROTOCOLS.add(p);
+		for(String cp: CommProtocol.getDescriptions())
+			PROTOCOLS.add(cp);
 	}
 
 	/** Create a new comm link table model */

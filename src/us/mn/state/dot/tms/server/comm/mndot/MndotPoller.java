@@ -18,7 +18,7 @@ import java.io.EOFException;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Interval;
 import us.mn.state.dot.tms.RampMeterType;
@@ -92,11 +92,11 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 		return Math.round(Interval.HOUR / secs_per_veh);
 	}
 
-	/** CommLink protocol (4-bit or 5-bit) */
-	protected final int protocol;
+	/** CommProtocol (4-bit or 5-bit) */
+	protected final CommProtocol protocol;
 
 	/** Create a new Mn/DOT 170 poller */
-	public MndotPoller(String n, Messenger m, int p) {
+	public MndotPoller(String n, Messenger m, CommProtocol p) {
 		super(n, m);
 		protocol = p;
 	}
@@ -113,7 +113,7 @@ public class MndotPoller extends MessagePoller implements AlarmPoller,LCSPoller,
 	public boolean isAddressValid(int drop) {
 		if(drop < 1 || drop > 31)
 			return false;
-		if(drop > 15 && protocol != CommLink.PROTO_MNDOT_5)
+		if(drop > 15 && protocol != CommProtocol.MNDOT_5)
 			return false;
 		return true;
 	}

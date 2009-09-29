@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -78,13 +78,13 @@ public class Message implements AddressedMessage {
 	protected final int drop;
 
 	/** Protocol version */
-	protected final int protocol;
+	protected final CommProtocol protocol;
 
 	/** Request object */
 	protected Request req;
 
 	/** Create a new Mndot protocol message */
-	public Message(OutputStream o, InputStream i, int d, int p) {
+	public Message(OutputStream o, InputStream i, int d, CommProtocol p) {
 		output = o;
 		input = i;
 		drop = d;
@@ -116,7 +116,7 @@ public class Message implements AddressedMessage {
 	/** Get the drop from the response drop/status byte */
 	protected int getDrop(byte[] buf) {
 		byte drop_stat = buf[Request.OFF_DROP_CAT];
-		if(protocol == CommLink.PROTO_MNDOT_5)
+		if(protocol == CommProtocol.MNDOT_5)
 			return (drop_stat & 0xFF) >> 3;
 		else
 			return (drop_stat & 0xFF) >> 4;
@@ -125,7 +125,7 @@ public class Message implements AddressedMessage {
 	/** Get the stat from the response drop/status byte */
 	protected int getStat(byte[] buf) {
 		byte drop_stat = buf[Request.OFF_DROP_CAT];
-		if(protocol == CommLink.PROTO_MNDOT_5)
+		if(protocol == CommProtocol.MNDOT_5)
 			return drop_stat & 0x07;
 		else
 			return drop_stat & 0x0F;
@@ -144,7 +144,7 @@ public class Message implements AddressedMessage {
 
 	/** Make the initical drop/category byte */
 	protected byte dropCat(int cat) {
-		if(protocol == CommLink.PROTO_MNDOT_5)
+		if(protocol == CommProtocol.MNDOT_5)
 			return (byte)(drop << 3 | cat);
 		else
 			return (byte)(drop << 4 | cat);
