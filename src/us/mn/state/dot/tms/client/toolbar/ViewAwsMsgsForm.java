@@ -17,10 +17,8 @@ package us.mn.state.dot.tms.client.toolbar;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.net.URL;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
@@ -29,11 +27,8 @@ import javax.swing.Timer;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
-import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
-import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
@@ -49,10 +44,7 @@ import us.mn.state.dot.tms.utils.SString;
  *
  * @author Michael Darter
  */
-public class ViewAwsMsgsForm extends AbstractForm 
-{
-	/** sonar state */
-	final SonarState m_st;
+public class ViewAwsMsgsForm extends AbstractForm {
 
 	/** table */
 	protected JTable m_table = null;
@@ -62,12 +54,9 @@ public class ViewAwsMsgsForm extends AbstractForm
 	protected final int timerTickLengthMS = 10*1000;
 
 	/** Create a new form */
-	public ViewAwsMsgsForm(SonarState st) {
+	public ViewAwsMsgsForm() {
 		super("Current " + I18N.get("dms.aws.abbreviation") +
 			" Messages");
-		m_st = st;
-		if(st == null)
-			return;
 		setPreferredSize(new Dimension(850,425));
 
 		// create refresh timer
@@ -123,23 +112,11 @@ public class ViewAwsMsgsForm extends AbstractForm
 
 	/** Get the AWS message URL, which is specified in the comm link URL */
 	protected String getAwsUrl() {
-		if(m_st == null)
+		CommLink cl = CommLinkHelper.getAwsCommLink();
+		if(cl != null)
+			return cl.getUrl();
+		else
 			return null;
-		// enumerate comm links, looking for AWS comm link
-		final StringBuilder url = new StringBuilder();
-		TypeCache<CommLink> tc = m_st.getConCache().getCommLinks();
-		tc.findObject(new Checker<CommLink>() {
-			public boolean check(CommLink c) {
-				if(c.getProtocol() ==
-				   CommProtocol.AWS.ordinal())
-				{
-					url.append(c.getUrl());
-					return true;
-				}
-				return false;
-			}
-		});
-		return url.toString();
 	}
 
 	/** refresh table timer tick */
