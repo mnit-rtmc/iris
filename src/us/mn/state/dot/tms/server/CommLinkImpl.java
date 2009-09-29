@@ -340,35 +340,35 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Try to open the communication link */
 	protected MessagePoller createPoller() throws IOException {
 		switch(protocol) {
-			case PROTO_NTCIP_A:
-				return createNtcipAPoller();
-			case PROTO_NTCIP_B:
-				return createNtcipBPoller();
-			case PROTO_NTCIP_C:
-				return createNtcipCPoller();
-			case PROTO_MNDOT_4:
-			case PROTO_MNDOT_5:
-				return createMndotPoller();
-			case PROTO_SMART_SENSOR:
-				return createSmartSensorPoller();
-			case PROTO_CANOGA:
-				return createCanogaPoller();
-			case PROTO_VICON:
-				return createViconPoller();
-			case PROTO_PELCO_D:
-				return createPelcoDPoller();
-			case PROTO_MANCHESTER:
-				return createManchesterPoller();
-			case PROTO_DMSLITE:
-				return createDmsLitePoller();
-			case PROTO_AWS:
-				return createAwsPoller();
-			case PROTO_PELCO:
-				return createPelcoPoller();
-			case PROTO_VICON_PTZ:
-				return createViconPTZPoller();
-			default:
-				throw new ProtocolException("INVALID PROTOCOL");
+		case PROTO_NTCIP_A:
+			return createNtcipAPoller();
+		case PROTO_NTCIP_B:
+			return createNtcipBPoller();
+		case PROTO_NTCIP_C:
+			return createNtcipCPoller();
+		case PROTO_MNDOT_4:
+		case PROTO_MNDOT_5:
+			return createMndotPoller();
+		case PROTO_SMART_SENSOR:
+			return createSmartSensorPoller();
+		case PROTO_CANOGA:
+			return createCanogaPoller();
+		case PROTO_VICON:
+			return createViconPoller();
+		case PROTO_PELCO_D:
+			return createPelcoDPoller();
+		case PROTO_MANCHESTER:
+			return createManchesterPoller();
+		case PROTO_DMSLITE:
+			return createDmsLitePoller();
+		case PROTO_AWS:
+			return createAwsPoller();
+		case PROTO_PELCO:
+			return createPelcoPoller();
+		case PROTO_VICON_PTZ:
+			return createViconPTZPoller();
+		default:
+			throw new ProtocolException("INVALID PROTOCOL");
 		}
 	}
 
