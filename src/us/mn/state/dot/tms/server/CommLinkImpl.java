@@ -86,7 +86,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		System.err.println("Loading comm links...");
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
 		store.query("SELECT name, description, url, protocol, " +
-			"timeout FROM " + SONAR_TYPE  + ";", new ResultFactory()
+			"timeout FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CommLinkImpl(
@@ -113,7 +114,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */

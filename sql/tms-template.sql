@@ -262,7 +262,7 @@ CREATE TABLE iris.r_node (
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
-CREATE TABLE comm_link (
+CREATE TABLE iris.comm_link (
 	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
 	url VARCHAR(64) NOT NULL,
