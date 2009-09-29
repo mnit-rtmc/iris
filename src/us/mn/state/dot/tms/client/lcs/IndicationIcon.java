@@ -140,7 +140,9 @@ abstract public class IndicationIcon implements Icon {
 		case LANE_CLOSED:
 			return new LaneClosedIndicationIcon(p);
 		case HOV:
-			return new HovIndicationIcon(p);
+			return new HovIndicationIcon(p, Color.WHITE);
+		case HOV_BEGINS:
+			return new HovIndicationIcon(p, Color.GRAY);
 		case MERGE_RIGHT:
 			return new MergeRightIndicationIcon(p);
 		case MERGE_LEFT:
@@ -285,14 +287,16 @@ abstract public class IndicationIcon implements Icon {
 
 	/** Icon for HOV lane-use indication */
 	static protected class HovIndicationIcon extends IndicationIcon {
-		protected HovIndicationIcon(int p) {
+		protected final Color color;
+		protected HovIndicationIcon(int p, Color c) {
 			super(p);
+			color = c;
 		}
 		protected void paintIcon(Graphics2D g2) {
 			g2.setColor(Color.BLACK);
 			g2.setStroke(shadow);
 			g2.draw(DIAMOND_SHAPE);
-			g2.setColor(Color.WHITE);
+			g2.setColor(color);
 			g2.setStroke(stroke);
 			g2.draw(DIAMOND_SHAPE);
 		}

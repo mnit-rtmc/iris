@@ -1140,6 +1140,7 @@ COPY iris.lane_use_indication (id, description) FROM stdin;
 11	Advisory variable speed limit
 12	Variable speed limit
 13	Low visibility
+14	HOV / HOT begins
 \.
 
 COPY iris.lcs_lock (id, description) FROM stdin;
@@ -1171,7 +1172,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY system_attribute (name, value) FROM stdin;
-database_version	3.100.0
+database_version	3.101.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3

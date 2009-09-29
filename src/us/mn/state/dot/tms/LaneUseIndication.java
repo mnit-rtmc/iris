@@ -65,7 +65,10 @@ public enum LaneUseIndication {
 	VSL(I18N.get("lane.use.vsl")),
 
 	/** Low visibility (small green arrow) */
-	LOW_VISIBILITY(I18N.get("lane.use.low.visibility"));
+	LOW_VISIBILITY(I18N.get("lane.use.low.visibility")),
+
+	/** HOV / HOT begins (white diamond) */
+	HOV_BEGINS(I18N.get("lane.use.hov.hot.begins"));
 
 	/** Create a new lane use indication */
 	private LaneUseIndication(String d) {
