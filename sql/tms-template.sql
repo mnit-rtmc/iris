@@ -17,7 +17,7 @@ SET SESSION AUTHORIZATION 'tms';
 
 SET search_path = public, pg_catalog;
 
-CREATE TABLE system_attribute (
+CREATE TABLE iris.system_attribute (
 	name VARCHAR(32) PRIMARY KEY,
 	value VARCHAR(64) NOT NULL
 );
@@ -1171,7 +1171,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 2	Stratified Metering
 \.
 
-COPY system_attribute (name, value) FROM stdin;
+COPY iris.system_attribute (name, value) FROM stdin;
 database_version	3.101.0
 dms_default_justification_line	3
 dms_default_justification_page	2

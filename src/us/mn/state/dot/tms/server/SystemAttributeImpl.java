@@ -33,9 +33,8 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	/** Load all */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading system attributes...");
-		namespace.registerType(SONAR_TYPE, 
-			SystemAttributeImpl.class);
-		store.query("SELECT name, value FROM system_attribute;",
+		namespace.registerType(SONAR_TYPE, SystemAttributeImpl.class);
+		store.query("SELECT name, value FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -45,7 +44,6 @@ public class SystemAttributeImpl extends BaseObjectImpl
 				));
 			}
 		});
-
 		validateDatabaseVersion();
 	}
 
@@ -92,7 +90,7 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Get the database table name */
 	public String getTable() {
-		return SONAR_TYPE;
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
