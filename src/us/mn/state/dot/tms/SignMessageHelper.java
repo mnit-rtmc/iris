@@ -121,22 +121,9 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Create an array of lines from the given message */
 	static public String[] createLines(SignMessage m, final int n_lines) {
-		if(m == null || m.getMulti() == null)
+		if(m == null)
 			return new String[0];
-		final LinkedList<String> ls = new LinkedList<String>();
-		MultiString multi = new MultiString(m.getMulti());
-		multi.parse(new MultiStringStateAdapter() {
-			public void addSpan(String span) {
-				// note: fields in span use ms prefix
-				int m_lines = Math.max(n_lines, ms_line + 1);
-				while(ls.size() < (ms_page + 1) * m_lines)
-					ls.add("");
-				int i = ms_page * m_lines + ms_line;
-				String v = ls.get(i);
-				ls.set(i, SString.trimJoin(v, span));
-			}
-		});
-		return ls.toArray(new String[0]);
+		return new MultiString(m.getMulti()).getText(n_lines);
 	}
 
 	/** Check if a sign message is blank */

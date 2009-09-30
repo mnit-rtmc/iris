@@ -16,8 +16,10 @@ package us.mn.state.dot.tms;
 
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * NTCIP -- MULTI (MarkUp Language for Transportation Information),
@@ -565,5 +567,26 @@ public class MultiString implements MultiStringState {
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = (String)oa[i];
 		return ret;
+	}
+
+	/** Get message lines text as an array of strings. See the test
+	 *  cases for further information.
+	 * @param n_lines Number of lines in the MULTI string argument.
+	 * @return A string array with length <= n_lines and >= the maximum
+	 *	   defined number of lines per page (system attribute). */
+	public String[] getText(final int n_lines) {
+		final LinkedList<String> ls = new LinkedList<String>();
+		parse(new MultiStringStateAdapter() {
+			public void addSpan(String span) {
+				// note: fields in span use ms prefix
+				int m_lines = Math.max(n_lines, ms_line + 1);
+				while(ls.size() < (ms_page + 1) * m_lines)
+					ls.add("");
+				int i = ms_page * m_lines + ms_line;
+				String v = ls.get(i);
+				ls.set(i, SString.trimJoin(v, span));
+			}
+		});
+		return ls.toArray(new String[0]);
 	}
 }
