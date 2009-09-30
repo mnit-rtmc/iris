@@ -81,7 +81,8 @@ public class OpBlank extends OpDms
 			// <DmsLite><SetBlankMsgReqMsg>
 			//	<Id></Id>
 			//	<Address>1</Address>
-			//	<Priority>3</Priority>
+			//	<ActPriority>3</ActPriority>
+			//	<RunPriority>3</RunPriority>
 			//	<Owner>bob</Owner>
 			// </SetBlankMsgReqMsg></DmsLite>
 
@@ -104,10 +105,13 @@ public class OpBlank extends OpDms
 				new String[] { "IsValid", "ErrMsg" });
 			mess.add(rr1);
 
-			// priority
-			String pri = SString.intToString(m_sm.getRunTimePriority());
-			ReqRes rr2 = new ReqRes("Priority", pri, new String[0]);
-			mess.add(rr2);
+			// ActPriority
+			mess.add(new ReqRes("ActPriority", 
+				m_sm.getActivationPriority(), new String[0]));
+
+			// RunPriority
+			mess.add(new ReqRes("RunPriority", 
+				m_sm.getRunTimePriority(), new String[0]));
 
 			// owner
 			String user = (m_user != null ? m_user.getName() : "");

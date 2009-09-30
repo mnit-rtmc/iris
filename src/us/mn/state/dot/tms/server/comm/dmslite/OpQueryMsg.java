@@ -92,21 +92,17 @@ public class OpQueryMsg extends OpDms {
 		return (int)m;
 	}
 
-	/**
-	 * Create message MULTI string using a bitmap.
+	/** Create message MULTI string using a bitmap.
 	 * A MULTI string must be created because the SensorServer can
 	 * return a bitmap and no message text. IRIS requires both a 
 	 * bitmap and message text.
 	 * @param pages Bitmap containing pages.
 	 * @param pgOnTime DMS page on time.
-	 * @param pri DMS message priority.
 	 * @return If bitmap is not blank, a MULTI indicating it is an 
 	 *         other system message. If bitmap is blank, then an
-	 *         empty MULTI is returned.
-	 */
+	 *         empty MULTI is returned. */
 	static protected String createMultiUsingBitmap(
-		BitmapGraphic[] pages, DmsPgTime pgOnTime,
-		DMSMessagePriority pri)
+		BitmapGraphic[] pages, DmsPgTime pgOnTime)
 	{
 		if(areBitmapsBlank(pages))
 			return ""; 
@@ -115,10 +111,6 @@ public class OpQueryMsg extends OpDms {
 
 		// pg on-time read from controller
 		multi.setPageTimes(pgOnTime.toTenths(), null);
-
-		// priority is invalid, as expected
-		if( pri == DMSMessagePriority.INVALID)
-			pri = DMSMessagePriority.OTHER_SYSTEM;
 
 		// default text if no bitmap, see comments in 
 		// method for why this is a hack.
@@ -197,12 +189,13 @@ public class OpQueryMsg extends OpDms {
 	 *        which dmslite will always return.
 	 * @param duration Message duration (in minutes).
 	 * @param pgOnTime DMS page on time.
-	 * @param pri DMS message priority.
+	 * @param apri DMS message activation priority.
+	 * @param rpri DMS message runtime priority.
 	 * @return A SignMessage that contains the text of the message and 
-	 *         a rendered bitmap.
-	 */
+	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, DmsPgTime pgOnTime, DMSMessagePriority pri)
+		Integer duration, DmsPgTime pgOnTime, DMSMessagePriority apri,
+		DMSMessagePriority rpri)
 	{
 		if(sbitmap == null)
 			return null;
@@ -226,17 +219,29 @@ public class OpQueryMsg extends OpDms {
 		for(int pg = 0; pg < numpgs; pg++)
 			pages[pg] = extractBitmap(argbitmap, pg);
 
-		String multi = createMultiUsingBitmap(pages, pgOnTime, pri);
+		String multi = createMultiUsingBitmap(pages, pgOnTime);
 		Log.finest("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"multistring=" + multi);
 
-		return (SignMessageImpl)m_dms.createMessage(multi, pages, pri,
-			pri, duration);
+		// priority is invalid, as expected
+		if(apri == DMSMessagePriority.INVALID)
+			apri = DMSMessagePriority.OTHER_SYSTEM;
+		if(rpri == DMSMessagePriority.INVALID)
+			rpri = DMSMessagePriority.OTHER_SYSTEM;
+
+		return (SignMessageImpl)m_dms.createMessage(multi, pages, 
+			apri, rpri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with 
-	 *  the value read from controller. */
+	 *  the value read from controller.
+	 *  @param pt Page on time, used to update returned MultiString. 
+	 *  @return MULTI string containing updated page on time. */
 	private String updatePageOnTime(String multi, DmsPgTime pt) {
+		int npgs = new MultiString(multi).getNumPages();
+		// if one page, use page on-time of zero.
+		if(npgs <= 1)
+			pt = DmsPgTime.getDefaultOn(true);
 		String ret = MultiString.replacePageOnTime(
 			multi, pt.toTenths());
 		Log.finest("OpQueryMsg.updatePageOnTime(): " +
@@ -287,9 +292,10 @@ public class OpQueryMsg extends OpDms {
 				new String[] {"Id"});
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", 
-				"MsgText", "Priority", "Owner", "UseOnTime", 
-				"OnTime", "UseOffTime", "OffTime", 
-				"DisplayTimeMS", "UseBitmap", "Bitmap"});
+				"MsgText", "ActPriority", "RunPriority", 
+				"Owner", "UseOnTime", "OnTime", "UseOffTime", 
+				"OffTime", "DisplayTimeMS", "UseBitmap", 
+				"Bitmap"});
 
 			// send msg to field controller
 			mess.add(rr0);
@@ -302,7 +308,8 @@ public class OpQueryMsg extends OpDms {
 			String errmsg = "";
 			boolean msgtextavailable = false;
 			String msgtext = "";
-			DMSMessagePriority pri = DMSMessagePriority.INVALID;
+			DMSMessagePriority apri = DMSMessagePriority.INVALID;
+			DMSMessagePriority rpri = DMSMessagePriority.INVALID;
 			String owner = "";
 			boolean useont = false;
 			Calendar ont = new GregorianCalendar();
@@ -333,9 +340,13 @@ public class OpQueryMsg extends OpDms {
 					// msg text
 					msgtext = rr1.getResVal("MsgText");
 
-					// priority
-					pri = DMSMessagePriority.fromOrdinal(SString.
-						stringToInt(rr1.getResVal("Priority")));
+					// activation priority
+					apri = DMSMessagePriority.fromOrdinal(SString.
+						stringToInt(rr1.getResVal("ActPriority")));
+
+					// runtime priority
+					rpri = DMSMessagePriority.fromOrdinal(SString.
+						stringToInt(rr1.getResVal("RunPriority")));
 
 					// owner
 					owner = rr1.getResVal("Owner");
@@ -365,7 +376,8 @@ public class OpQueryMsg extends OpDms {
 						"IsValid:" + valid + 
 						", MsgTextAvailable:" + msgtextavailable + 
 						", MsgText:" + msgtext + 
-						", Priority:"  + pri + 
+						", ActPriority:"  + apri + 
+						", RunPriority:"  + rpri + 
 						", Owner:"  + owner + 
 						", OnTime:"  + ont.getTime() + 
 						", OffTime:" + offt.getTime() + 
@@ -422,14 +434,19 @@ public class OpQueryMsg extends OpDms {
 					// from controller, which comes from the DisplayTimeMS
 					// XML field, not the MULTI string.
 					msgtext = updatePageOnTime(msgtext, pgOnTime);
+
 					// this shouldn't happen if we have msg text
-					if(pri == DMSMessagePriority.INVALID) {
-						Log.warning("Received invalid priority for id=" + id);
-						pri = DMSMessagePriority.OPERATOR;
+					if(apri == DMSMessagePriority.INVALID) {
+						Log.warning("Received invalid actpriority for id=" + id);
+						apri = DMSMessagePriority.OPERATOR;
+					}
+					if(rpri == DMSMessagePriority.INVALID) {
+						Log.warning("Received invalid runpriority for id=" + id);
+						rpri = DMSMessagePriority.OPERATOR;
 					}
 					SignMessageImpl sm = (SignMessageImpl)
 						m_dms.createMessage(msgtext,
-						pri, pri, duramins);
+						apri, rpri, duramins);
 					if(sm != null)
 						m_dms.setMessageCurrent(sm, irisUser);
 
@@ -439,13 +456,14 @@ public class OpQueryMsg extends OpDms {
 					SignMessageImpl sm = null;
 					if(usebitmap) {
 						sm = createSignMessageWithBitmap(bitmap, 
-							duramins, pgOnTime, pri);
+							duramins, pgOnTime, apri, rpri);
 						if(sm != null)
 							m_dms.setMessageCurrent(sm, irisUser);
 					}
 					if(sm == null) {
 						sm = (SignMessageImpl)m_dms.createMessage("",
-							DMSMessagePriority.OVERRIDE, DMSMessagePriority.BLANK, null);
+							DMSMessagePriority.OVERRIDE, 
+							DMSMessagePriority.OVERRIDE, null);
 						if(sm != null)
 							m_dms.setMessageCurrent(sm, irisUser);
 					}

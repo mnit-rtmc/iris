@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.Log;
-import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.utils.STime;
 
 /**
@@ -228,7 +227,8 @@ public class OpMessage extends OpDms {
 			 *           <OnTime>...</OnTime>
 			 *           <UseOffTime>...</UseOffTime>
 		 	 *           <OffTime>...</OffTime>
-			 *           <Priority>...</Priority>
+			 *           <ActPriority>...</ActPriority>
+			 *           <RunPriority>...</RunPriority>
 			 *           <Owner>...</Owner>
 			 *           <Msg>...</Msg>
 			 *        </SetSnglPgReqMsg>
@@ -270,9 +270,13 @@ public class OpMessage extends OpDms {
 				"");
 			mess.add(new ReqRes("OffTime",offtime));
 
-			// priority
-			String pri = SString.intToString(m_sm.getRunTimePriority());
-			mess.add(new ReqRes("Priority", pri, new String[0]));
+			// activation priority
+			mess.add(new ReqRes("ActPriority", 
+				m_sm.getActivationPriority(), new String[0]));
+
+			// runtime priority
+			mess.add(new ReqRes("RunPriority", 
+				m_sm.getRunTimePriority(), new String[0]));
 
 			// Owner
 			String owner = (m_user != null ? m_user.getName() : "");
@@ -392,7 +396,8 @@ public class OpMessage extends OpDms {
 			 *          <UseOffTime>...</UseOffTime>
 			 *          <OffTime>...</OffTime>
 			 *          <DisplayTimeMS>...<DisplayTimeMS>
-			 *          <Priority>...</Priority>
+			 *           <ActPriority>...</ActPriority>
+			 *           <RunPriority>...</RunPriority>
 			 *          <Owner>...</Owner>
 			 *          <Msg>...</Msg>
 			 *       </SetMultiplePageReqMsg>
@@ -443,9 +448,13 @@ public class OpMessage extends OpDms {
 			DmsPgTime pt = determinePageOnTime(m_sm.getMulti());
 			mess.add(new ReqRes("DisplayTimeMS", new Integer(pt.toMs()).toString()));
 
-			// priority
-			String pri = SString.intToString(m_sm.getRunTimePriority());
-			mess.add(new ReqRes("Priority", pri, new String[0]));
+			// activation priority
+			mess.add(new ReqRes("ActPriority", 
+				m_sm.getActivationPriority(), new String[0]));
+
+			// runtime priority
+			mess.add(new ReqRes("RunPriority", 
+				m_sm.getRunTimePriority(), new String[0]));
 
 			// Owner
 			String owner = (m_user != null ? m_user.getName() : "");
