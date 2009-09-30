@@ -11,6 +11,38 @@
 <body>
 <h1>Mn/DOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.101.0 (29 September 2009)</dt>
+	<dd><ul>
+		<li>
+			Fixed a client race which caused DMS and LCS lists
+			to be initialized incorrectly.
+		</li>
+		<li>
+			Don't leave zombie python subprocesses around after
+			client quits (joystick handling).
+		</li>
+		<li>
+			Cleaned up client exception handling.
+			Only create a single dialog for displaying messages
+			and exceptions to the user.
+		</li>
+		<li>
+			Cleaned up LCS status for communication failures.
+		</li>
+		<li>
+			Fixed client permission problem for deploying action
+			plans.
+		</li>
+		<li>
+			Moved both remaining database tables from public schema
+			into iris schema.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.101.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.100.0 (24 September 2009)</dt>
 	<dd><ul>
 		<li>
