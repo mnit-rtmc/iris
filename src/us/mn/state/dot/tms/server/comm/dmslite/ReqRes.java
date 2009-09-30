@@ -27,6 +27,7 @@ import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A message request and response container. The response may contain multiple tags.
@@ -51,8 +52,22 @@ public class ReqRes
 	 * @param reqname Name of the request field.
 	 * @param reqval Value of the request field.
 	 */
-	ReqRes(String reqname, String reqval) {
+	ReqRes(String reqname, int reqval) {
+		constructor(reqname, SString.intToString(reqval));
+	}
 
+	/**
+	 * Constructor for a request that contains no associated responses.
+	 *
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 */
+	ReqRes(String reqname, String reqval) {
+		constructor(reqname, reqval);
+	}
+
+	/** Constructor convienence method */
+	private void constructor(String reqname, String reqval) {
 		String[] resnames = new String[0];
 
 		// check args
@@ -78,8 +93,27 @@ public class ReqRes
 	 * @param reqval Value of the request field.
 	 * @param resnames Names of all associated response fields (may be 
 	 *                 zero length if none). */
-	ReqRes(String reqname, String reqval, String[] resnames) {
+	ReqRes(String reqname, int reqval, String[] resnames) {
+		constructor(reqname, SString.intToString(reqval), resnames);
+	}
 
+	/** Constructor for a request that contains associated responses.
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 * @param resnames Names of all associated response fields (may be 
+	 *                 zero length if none). */
+	ReqRes(String reqname, String reqval, String[] resnames) {
+		constructor(reqname, reqval, resnames);
+	}
+
+	/** Constructor for a request that contains associated responses.
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 * @param resnames Names of all associated response fields (may be 
+	 *                 zero length if none). */
+	private void constructor(String reqname, String reqval, 
+		String[] resnames) 
+	{
 		// check args
 		if((reqname == null) || (reqval == null)
 			|| (resnames == null)) {
@@ -92,9 +126,8 @@ public class ReqRes
 		m_resnames = resnames;
 		m_resvals = new String[resnames.length];
 
-		for(int i = 0; i < resnames.length; ++i) {
+		for(int i = 0; i < resnames.length; ++i)
 			m_resvals[i] = "";
-		}
 	}
 
 	/** get request name */
