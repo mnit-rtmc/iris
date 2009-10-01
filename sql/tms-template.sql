@@ -285,7 +285,7 @@ CREATE TABLE iris.cabinet (
 CREATE TABLE iris.controller (
 	name VARCHAR(20) PRIMARY KEY,
 	drop_id smallint NOT NULL,
-	comm_link VARCHAR(20) NOT NULL REFERENCES comm_link(name),
+	comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
 	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
 	active boolean NOT NULL,
 	password VARCHAR(16),
