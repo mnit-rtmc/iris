@@ -91,6 +91,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(vol_num);
 			mess.add(vol_max);
 			mess.add(vol_mem);
+			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + perm_num);
 			DMS_LOG.log(dms.getName() + ": " + chg_num);
 			DMS_LOG.log(dms.getName() + ": " + chg_max);
