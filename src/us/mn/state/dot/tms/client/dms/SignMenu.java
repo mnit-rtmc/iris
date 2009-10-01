@@ -61,6 +61,14 @@ public class SignMenu extends JMenu {
 			}
 		};
 		add(item);
+		item = new JMenuItem("Quick Messages");
+		item.setMnemonic('Q');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new QuickMessageForm(session));
+			}
+		};
+		add(item);
 	}
 
 	/** Create the DMS form */

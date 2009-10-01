@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.dms.quicklib.QuickMessageEditorTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.schedule.TimingPlanModel;
@@ -126,9 +125,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Messages tab */
 	protected final MessagesTab messagesTab;
-
-	/** Quick Library tab */
-	protected final QuickMessageEditorTab qlibTab;
 
 	/** Sign type label */
 	protected final JLabel type = new JLabel();
@@ -258,9 +254,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		state = s.getSonarState();
 		user = s.getUser();
 		messagesTab = new MessagesTab(s, sign);
-		qlibTab = new QuickMessageEditorTab(
-			state.getDmsCache().getQuickMessages(), this,
-			state.getNamespace(), user);
 	}
 
 	/** Get the SONAR type cache */
@@ -282,7 +275,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			tab.add("Brightness", createBrightnessPanel());
 		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
 			tab.add("Manufacturer", createManufacturerPanel());
-		tab.add(qlibTab.getTabText(), qlibTab);
 		add(tab);
 		updateAttribute(null);
 		setBackground(Color.LIGHT_GRAY);
@@ -292,7 +284,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void dispose() {
 		location.dispose();
 		messagesTab.dispose();
-		qlibTab.dispose();
 		super.dispose();
 	}
 
