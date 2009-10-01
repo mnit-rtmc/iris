@@ -1123,6 +1123,7 @@ COPY iris.lane_type (id, description, dcode) FROM stdin;
 13	Wrong Way	Y
 14	HOV	H
 15	HOT	HT
+16	Shoulder	D
 \.
 
 COPY iris.lane_use_indication (id, description) FROM stdin;
@@ -1172,7 +1173,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.101.0
+database_version	3.102.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
