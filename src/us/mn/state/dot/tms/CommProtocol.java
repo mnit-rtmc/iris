@@ -26,11 +26,11 @@ public enum CommProtocol {
 	/** NTCIP Class B (0) */
 	NTCIP_B("NTCIP Class B"),
 
-	/** Mn/DOT 170 4-bit (1) */
-	MNDOT_4("Mn/DOT 170 (4-bit)"),
+	/** MnDOT 170 4-bit (1) */
+	MNDOT_4("MnDOT 170 (4-bit)"),
 
-	/** Mn/DOT 170 5-bit (2) */
-	MNDOT_5("Mn/DOT 170 (5-bit)"),
+	/** MnDOT 170 5-bit (2) */
+	MNDOT_5("MnDOT 170 (5-bit)"),
 
 	/** Wavetronix SmartSensor 105 (3) */
 	SS_105("SmartSensor 105"),
@@ -42,13 +42,13 @@ public enum CommProtocol {
 	VICON_SWITCHER("Vicon Switcher"),
 
 	/** Pelco D camera control (6) */
-	PELCO_D_PTZ("Pelco D"),
+	PELCO_D_PTZ("Pelco D PTZ"),
 
 	/** NTCIP Class C (7) */
 	NTCIP_C("NTCIP Class C"),
 
 	/** Manchester camera control (8) */
-	MANCHESTER_PTZ("Manchester"),
+	MANCHESTER_PTZ("Manchester PTZ"),
 
 	/** DMS Lite (9) */
 	DMSLITE("DMS Lite"),
