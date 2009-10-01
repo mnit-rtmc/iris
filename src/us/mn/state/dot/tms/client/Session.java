@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
+import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.incident.IncidentManager;
 import us.mn.state.dot.tms.client.incident.IncidentTab;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
@@ -270,7 +271,7 @@ public class Session {
 
 	/** Add the DMS tab */
 	protected void addDMSTab() {
-		v_menu.addDMSItems();
+		v_menu.add(new SignMenu(this));
 		List<LayerState> lstates = createLayers();
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, lcs_array_manager.getProxyType());

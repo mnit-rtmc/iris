@@ -19,9 +19,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
-import us.mn.state.dot.tms.client.dms.DMSForm;
-import us.mn.state.dot.tms.client.dms.DMSForm2;
-import us.mn.state.dot.tms.client.dms.FontForm;
+import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.MapExtentForm;
@@ -29,15 +27,12 @@ import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.security.UserRoleForm;
 import us.mn.state.dot.tms.client.system.SystemAttributeForm;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
-import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
@@ -159,37 +154,6 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-	}
-
-	/** Add DMS items to the menu */
-	public void addDMSItems() {
-		String dms_name = I18N.get("dms.abbreviation");
-		JMenuItem item = new JMenuItem(dms_name,
-			Icons.getIcon("drum-inactive"));
-		if(dms_name.length() > 0)
-			item.setMnemonic(dms_name.charAt(0));
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(createDMSForm());
-			}
-		};
-		add(item);
-		item = new JMenuItem("Fonts");
-		item.setMnemonic('F');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new FontForm(state));
-			}
-		};
-		add(item);
-	}
-
-	/** Create the DMS form */
-	protected AbstractForm createDMSForm() {
-		if(SystemAttrEnum.DMS_FORM.getInt() == 2)
-			return new DMSForm2(session);
-		else
-			return new DMSForm(session);
 	}
 
 	/** Add the ramp meter menu item */
