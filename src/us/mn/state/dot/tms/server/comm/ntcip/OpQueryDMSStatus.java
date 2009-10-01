@@ -66,6 +66,38 @@ public class OpQueryDMSStatus extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + light);
 			DMS_LOG.log(dms.getName() + ": " + control);
 			dms.setLightOutput(light.getPercent());
+			return new QueryMessageTable();
+		}
+	}
+
+	/** Phase to query the DMS message table status */
+	protected class QueryMessageTable extends Phase {
+
+		/** Query the DMS message table status */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DmsNumPermanentMsg perm_num = new DmsNumPermanentMsg();
+			DmsNumChangeableMsg chg_num = new DmsNumChangeableMsg();
+			DmsMaxChangeableMsg chg_max = new DmsMaxChangeableMsg();
+			DmsFreeChangeableMemory chg_mem =
+				new DmsFreeChangeableMemory();
+			DmsNumVolatileMsg vol_num = new DmsNumVolatileMsg();
+			DmsMaxVolatileMsg vol_max = new DmsMaxVolatileMsg();
+			DmsFreeVolatileMemory vol_mem =
+				new DmsFreeVolatileMemory();
+			mess.add(perm_num);
+			mess.add(chg_num);
+			mess.add(chg_max);
+			mess.add(chg_mem);
+			mess.add(vol_num);
+			mess.add(vol_max);
+			mess.add(vol_mem);
+			DMS_LOG.log(dms.getName() + ": " + perm_num);
+			DMS_LOG.log(dms.getName() + ": " + chg_num);
+			DMS_LOG.log(dms.getName() + ": " + chg_max);
+			DMS_LOG.log(dms.getName() + ": " + chg_mem);
+			DMS_LOG.log(dms.getName() + ": " + vol_num);
+			DMS_LOG.log(dms.getName() + ": " + vol_max);
+			DMS_LOG.log(dms.getName() + ": " + vol_mem);
 			return new ControllerTemperature();
 		}
 	}
