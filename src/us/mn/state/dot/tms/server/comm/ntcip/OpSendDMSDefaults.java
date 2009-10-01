@@ -39,39 +39,30 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new CommLoss();
+		return new SetCommPowerLoss();
 	}
 
-	/** Phase to set the comm loss action */
-	protected class CommLoss extends Phase {
+	/** Phase to set the comm and power loss times */
+	protected class SetCommPowerLoss extends Phase {
 
 		/** Set the comm loss action */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			DmsShortPowerLossTime power_time =
+				new DmsShortPowerLossTime();
 			DmsTimeCommLoss comm_time = new DmsTimeCommLoss();
 			DmsEndDurationMessage end_msg =
 				new DmsEndDurationMessage();
+			power_time.setInteger(0);
 			comm_time.setInteger(10);
 			end_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
 			end_msg.setNumber(1);
 			end_msg.setCrc(0);
+			mess.add(power_time);
 			mess.add(comm_time);
 			mess.add(end_msg);
+			DMS_LOG.log(dms.getName() + ":= " + power_time);
 			DMS_LOG.log(dms.getName() + ":= " + comm_time);
 			DMS_LOG.log(dms.getName() + ":= " + end_msg);
-			mess.setRequest();
-			return new PowerLoss();
-		}
-	}
-
-	/** Phase to set the power loss action */
-	protected class PowerLoss extends Phase {
-
-		/** Set the comm loss action */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsShortPowerLossTime time =new DmsShortPowerLossTime();
-			time.setInteger(0);
-			mess.add(time);
-			DMS_LOG.log(dms.getName() + ":= " + time);
 			mess.setRequest();
 			return new PixelService();
 		}
