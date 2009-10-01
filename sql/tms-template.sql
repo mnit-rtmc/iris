@@ -262,11 +262,16 @@ CREATE TABLE iris.r_node (
 
 CREATE UNIQUE INDEX r_node_station_idx ON iris.r_node USING btree (station_id);
 
+CREATE TABLE iris.comm_protocol (
+	id smallint PRIMARY KEY,
+	description VARCHAR(20) NOT NULL
+);
+
 CREATE TABLE iris.comm_link (
 	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
 	url VARCHAR(64) NOT NULL,
-	protocol smallint NOT NULL,
+	protocol smallint NOT NULL REFERENCES iris.comm_protocol(id),
 	timeout integer NOT NULL
 );
 
@@ -1056,6 +1061,13 @@ CREATE VIEW controller_report AS
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
 
+CREATE VIEW comm_link_view AS
+	SELECT cl.name, cl.description, cl.url, cp.description AS protocol,
+	cl.timeout
+	FROM iris.comm_link cl
+	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
+GRANT SELECT ON comm_link_view TO PUBLIC;
+
 
 COPY iris.direction (id, direction, dir) FROM stdin;
 0		
@@ -1088,6 +1100,23 @@ COPY iris.road_modifier (id, modifier, mod) FROM stdin;
 6	S Junction	Sj
 7	E Junction	Ej
 8	W Junction	Wj
+\.
+
+COPY iris.comm_protocol (id, description) FROM stdin;
+0	NTCIP Class B
+1	MnDOT 170 (4-bit)
+2	MnDOT 170 (5-bit)
+3	SmartSensor 105
+4	Canoga
+5	Vicon Switcher
+6	Pelco D PTZ
+7	NTCIP Class C
+8	Manchester PTZ
+9	DMS Lite
+10	AWS
+11	NTCIP Class A
+12	Pelco Switcher
+13	Vicon PTZ
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
