@@ -349,12 +349,6 @@ public class MultiStringTest extends TestCase {
 		assertTrue(s[1].equals("DEF"));
 		assertTrue(s[2].equals("GHI"));
 		assertTrue(s[3].equals("123"));
-
-		// tag in the middle of a span
-		//FIXME: this should not fail?
-		//assertFalse(Arrays.equals(
-		//	new MultiString("ABC[nl]D[j1x]E[j1x]F[nl]GHI[nl]").
-		//	getText(), new String[] {"ABC", "DEF", "GHI"}));
 	}
 
 	/** getText2 */
@@ -386,10 +380,9 @@ public class MultiStringTest extends TestCase {
 			new String[] {"1", "2", "3"}));
 
 		// tag in the middle of a span
-		//FIXME: this should not fail?
-		//assertFalse(Arrays.equals(
-		//	new MultiString("ABC[nl]D[j1x]E[j1x]F[nl]GHI[nl]").
-		//	getText(), new String[] {"ABC", "DEF", "GHI"}));
+		assertTrue(Arrays.equals(
+			new MultiString("ABC[nl]D[j1x]E[j1x]FGH[nl]IJK[nl]").
+			getText(3), new String[] {"ABC", "D E FGH", "IJK"}));
 	}
 
 	/** getNumPages */
