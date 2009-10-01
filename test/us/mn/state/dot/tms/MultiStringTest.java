@@ -36,7 +36,6 @@ public class MultiStringTest extends TestCase {
 		replacePageOnTime();
 		equals();
 		getText();
-		getText2();
 		getNumPages();
 		etc();
 	}
@@ -343,16 +342,11 @@ public class MultiStringTest extends TestCase {
 		assertTrue(s[0].equals("ABC"));
 		assertTrue(s[1].equals("DEF"));
 
-		s = new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123").getText();
-		assertTrue(s.length == 4);
-		assertTrue(s[0].equals("ABC"));
-		assertTrue(s[1].equals("DEF"));
-		assertTrue(s[2].equals("GHI"));
-		assertTrue(s[3].equals("123"));
-	}
+		s = new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123").getText(0);
+		assertFalse(Arrays.equals(
+			new MultiString("ABC[nl]DEF[np]GHI[nl][nl]123").
+			getText(), new String[] {"ABC", "DEF", "GHI", "", "123"}));
 
-	/** getText2 */
-	private void getText2() {
 		assertTrue(Arrays.equals(
 			new MultiString("1[nl][nl]4[nl][nl]").getText(0), 
 			new String[] {"1", "", "4"}));

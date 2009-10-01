@@ -555,18 +555,7 @@ public class MultiString implements MultiStringState {
 
 	/** Get message line text as an array of strings. */
 	public String[] getText() {
-		final ArrayList<String> al = new ArrayList<String>();
-		MultiString ms = new MultiString() {
-			public void addSpan(String s) {
-				al.add(s);
-			}
-		};
-		parse(ms);
-		Object[] oa = al.toArray();
-		String[] ret = new String[al.size()];
-		for(int i = 0; i < ret.length; ++i)
-			ret[i] = (String)oa[i];
-		return ret;
+		return getText(0);
 	}
 
 	/** Get message lines text as an array of strings. See the test
