@@ -45,9 +45,6 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		r_node_manager = m;
 	}
 
-	/** Flag to indicate enumeration of all objects has completed */
-	protected boolean enumerated = false;
-
 	/** Create a new GeoLoc manager */
 	public GeoLocManager(TypeCache<GeoLoc> c) {
 		cache = c;
@@ -72,22 +69,9 @@ public class GeoLocManager implements ProxyListener<GeoLoc> {
 		}.addToScheduler();
 	}
 
-	/** Called when proxy enumeration is complete */
-	public synchronized void enumerationComplete() {
-		enumerated = true;
-		notify();
-	}
-
-	/** Wait for the objects to be enumerated */
-	public synchronized void waitForEnumeration() {
-		while(!enumerated) {
-			try {
-				wait();
-			}
-			catch(InterruptedException e) {
-				// whoops, try again
-			}
-		}
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// We're not interested
 	}
 
 	/** Remove a GeoLoc from the manager */

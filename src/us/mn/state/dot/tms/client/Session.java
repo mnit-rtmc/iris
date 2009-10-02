@@ -222,7 +222,6 @@ public class Session {
 		baseLayers = bl;
 		v_menu = new ViewMenu(this);
 		loc_manager = new GeoLocManager(state.getGeoLocs());
-		loc_manager.waitForEnumeration();
 		r_node_manager = new R_NodeManager(this,
 			state.getDetCache().getR_Nodes(), loc_manager);
 		cam_manager = new CameraManager(this,
