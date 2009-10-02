@@ -229,6 +229,9 @@ public class Session {
 			state.getCamCache().getCameras(), loc_manager);
 		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
 			loc_manager);
+		// NOTE: The LCS array layer must not be created before all
+		//       DMSs have been enumerated.
+		dms_manager.waitForEnumeration();
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
 		lane_marking_manager = new LaneMarkingManager(this,
