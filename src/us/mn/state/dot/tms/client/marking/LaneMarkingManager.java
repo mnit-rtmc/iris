@@ -57,7 +57,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	{
 		super(c, lm);
 		session = s;
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

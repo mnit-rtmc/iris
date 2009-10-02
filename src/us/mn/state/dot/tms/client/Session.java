@@ -250,7 +250,22 @@ public class Session {
 		//       DMS tab must not be created before LCS objects have
 		//       been enumerated.
 		inc_manager.waitForEnumeration();
+		initializeManagers();
 		addTabs();
+	}
+
+	/** Initialize all the proxy managers */
+	protected void initializeManagers() {
+		r_node_manager.initialize();
+		cam_manager.initialize();
+		dms_manager.initialize();
+		lcs_array_manager.initialize();
+		lcsi_manager.initialize();
+		lane_marking_manager.initialize();
+		det_manager.initialize();
+		warn_manager.initialize();
+		meter_manager.initialize();
+		inc_manager.initialize();
 	}
 
 	/** Add the tabs */

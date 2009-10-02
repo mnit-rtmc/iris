@@ -121,7 +121,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	public LCSArrayManager(Session s, GeoLocManager lm) {
 		super(getCache(s), lm);
 		session = s;
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

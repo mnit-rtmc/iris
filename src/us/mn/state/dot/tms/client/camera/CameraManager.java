@@ -72,7 +72,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	public CameraManager(Session s, TypeCache<Camera> c, GeoLocManager lm) {
 		super(c, lm);
 		session = s;
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

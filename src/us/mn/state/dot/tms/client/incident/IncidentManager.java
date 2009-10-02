@@ -65,7 +65,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	{
 		super(c, lm);
 		session = s;
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Get the proxy type name */

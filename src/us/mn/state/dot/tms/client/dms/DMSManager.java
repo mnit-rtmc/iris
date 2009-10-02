@@ -77,7 +77,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	public DMSManager(Session s, TypeCache<DMS> c, GeoLocManager lm) {
 		super(c, lm);
 		session = s;
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Create a style list model for the given symbol */

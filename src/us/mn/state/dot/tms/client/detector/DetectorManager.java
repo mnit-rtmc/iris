@@ -56,7 +56,7 @@ public class DetectorManager extends ProxyManager<Detector> {
 	/** Create a new detector manager */
 	public DetectorManager(TypeCache<Detector> c, GeoLocManager lm) {
 		super(c, lm);
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Create a style list model for the given symbol */

@@ -107,7 +107,6 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Initialize the proxy manager. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
-		cache.addProxyListener(this);
 		for(Symbol s: theme.getSymbols()) {
 			StyleListModel<T> slm = createStyleListModel(s);
 			if(slm != null) {

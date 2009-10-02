@@ -130,7 +130,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	{
 		super(c, lm);
 		session = s;
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Create a style list model for the given symbol */

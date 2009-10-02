@@ -114,7 +114,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		super(c, lm);
 		session = s;
 		lm.setR_NodeManager(this);
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Add a new proxy to the r_node manager */

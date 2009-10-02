@@ -47,7 +47,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	/** Create a new LCS indicaiton manager */
 	public LCSIManager(Session s, GeoLocManager lm) {
 		super(getCache(s), lm);
-		initialize();
+		cache.addProxyListener(this);
 	}
 
 	/** Get the proxy type name */
