@@ -131,8 +131,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(LCSArray proxy, float scale) {
-		float size = Math.max(Math.min(16 * scale, 120), 40);
-		return new LcsMarker(size);
+		return new LcsMarker(20 * scale);
 	}
 
 	/** Create a styled theme for LCS arrays */

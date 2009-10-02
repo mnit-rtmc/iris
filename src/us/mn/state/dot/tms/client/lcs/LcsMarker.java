@@ -14,17 +14,17 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.geom.Rectangle2D;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint LCS.
  *
  * @author Douglas Lau
  */
-public class LcsMarker extends Rectangle2D.Float {
+public class LcsMarker extends AbstractMarker {
 
-	/** Size (in user coordinates) to render LCS marker */
-	static protected final int MARKER_SIZE = 60;
+	/** Maximum size (in user coordinates) to render LCS marker */
+	static protected final int MARKER_SIZE = 320;
 
 	/** Create a new LCS marker */
 	public LcsMarker() {
@@ -33,6 +33,26 @@ public class LcsMarker extends Rectangle2D.Float {
 
 	/** Create a new LCS marker */
 	public LcsMarker(float size) {
-		super(0, -size / 4, size, size / 2);
+		super(14);
+		size = Math.min(MARKER_SIZE, size);
+		float tiny = size / 16;
+		float third = size / 3;
+		float half = size / 2;
+		float x = 0;
+		float y = half / 2;
+		path.moveTo(x, y);
+		path.lineTo(x += third, y);
+		path.lineTo(x, y -= tiny);
+		path.lineTo(x += third, y);
+		path.lineTo(x, y += tiny);
+		path.lineTo(x += third, y);
+		path.lineTo(x, y -= half);
+		path.lineTo(x -= third, y);
+		path.lineTo(x, y += tiny);
+		path.lineTo(x -= third, y);
+		path.lineTo(x, y -= tiny);
+		path.lineTo(x -= third, y);
+		path.lineTo(x, y += half);
+		path.closePath();
 	}
 }
