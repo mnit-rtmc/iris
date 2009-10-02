@@ -88,6 +88,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Iterate through all shapes in the layer */
 	public MapObject forEach(MapSearcher s) {
 		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
+		scale = Math.max(scale, 3);
 		return manager.forEach(s, scale);
 	}
 
