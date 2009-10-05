@@ -46,9 +46,14 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	/** Flag to indicate message row has been updated */
 	protected boolean row_updated = false;
 
-	/** Create a new DMS command message object */
-	public OpSendDMSMessage(DMSImpl d, SignMessage m, User o) {
-		super(d, m, 1);
+	/** Create a new send DMS message operation */
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
+		this(d, sm, o, 1);
+	}
+
+	/** Create a new send DMS message operation */
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o, int mn) {
+		super(d, sm, mn);
 		owner = o;
 	}
 

@@ -18,6 +18,8 @@ import java.io.EOFException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.LaneUseMulti;
+import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -43,7 +45,18 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		if(shouldSetTimeRemaining(dms, sm))
 			return new OpUpdateDMSDuration(dms, sm, o);
 		else
-			return new OpSendDMSMessage(dms, sm, o);
+			return new OpSendDMSMessage(dms, sm,o,lookupMsgNum(sm));
+	}
+
+	/** Lookup a sign message number */
+	static protected int lookupMsgNum(SignMessage sm) {
+		LaneUseMulti lum = LaneUseMultiHelper.find(sm.getMulti());
+		if(lum != null) {
+			Integer msg_num = lum.getMsgNum();
+			if(msg_num != null)
+				return msg_num;
+		}
+		return 1;
 	}
 
 	/** Check if we should just set the message time remaining */
