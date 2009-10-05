@@ -21,7 +21,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -36,14 +36,19 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading lane-use MULTIs...");
 		namespace.registerType(SONAR_TYPE, LaneUseMultiImpl.class);
-		store.query("SELECT name, indication, multi FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, indication, msg_num, width, height, "+
+			"quick_message FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LaneUseMultiImpl(
+					namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// indication
-					row.getString(3)	// multi
+					(Integer)row.getObject(3), // msg_num
+					row.getInt(4),		// width
+					row.getInt(5),		// height
+					row.getString(6)	// quick_message
 				));
 			}
 		});
@@ -54,7 +59,10 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("indication", indication);
-		map.put("multi", multi);
+		map.put("msg_num", msg_num);
+		map.put("width", width);
+		map.put("height", height);
+		map.put("quick_message", quick_message);
 		return map;
 	}
 
@@ -74,10 +82,23 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 	}
 
 	/** Create a new lane-use MULTI */
-	public LaneUseMultiImpl(String n, int i, String m) {
+	protected LaneUseMultiImpl(Namespace ns, String n, int i, Integer mn,
+		int w, int h, String qm)
+	{
+		this(n, i, mn, w, h, (QuickMessage)ns.lookupObject(
+		     QuickMessage.SONAR_TYPE, qm));
+	}
+
+	/** Create a new lane-use MULTI */
+	protected LaneUseMultiImpl(String n, int i, Integer mn, int w, int h,
+		QuickMessage qm)
+	{
 		this(n);
 		indication = i;
-		multi = m;
+		msg_num = mn;
+		width = w;
+		height = h;
+		quick_message = qm;
 	}
 
 	/** Ordinal of LaneUseIndication */
@@ -104,26 +125,87 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 		return indication;
 	}
 
-	/** MULTI string associated with the lane-use indication */
-	protected String multi;
+	/** Message number */
+	protected Integer msg_num;
 
-	/** Set the MULTI string */
-	public void setMulti(String m) {
-		multi = m;
+	/** Set the message number */
+	public void setMsgNum(Integer n) {
+		msg_num = n;
 	}
 
-	/** Set the MULTI string */
-	public void doSetMulti(String m) throws TMSException {
-		if(m == multi)
+	/** Set the message number */
+	public void doSetMsgNum(Integer n) throws TMSException {
+		if(n == msg_num)
 			return;
-		if(!new MultiString(m).isValid())
-			throw new ChangeVetoException("Invalid MULTI: " + m);
-		store.update(this, "multi", m);
-		setMulti(m);
+		store.update(this, "msg_num", n);
+		setMsgNum(n);
 	}
 
-	/** Get the MULTI string */
-	public String getMulti() {
-		return multi;
+	/** Get the message number */
+	public Integer getMsgNum() {
+		return msg_num;
+	}
+
+	/** Indication sign width */
+	protected int width;
+
+	/** Set the indication sign width */
+	public void setWidth(int w) {
+		width = w;
+	}
+
+	/** Set the indication sign width */
+	public void doSetWidth(int w) throws TMSException {
+		if(w == width)
+			return;
+		store.update(this, "width", w);
+		setWidth(w);
+	}
+
+	/** Get the indication sign width */
+	public int getWidth() {
+		return width;
+	}
+
+	/** Indication sign height */
+	protected int height;
+
+	/** Set the indication sign height */
+	public void setHeight(int h) {
+		height = h;
+	}
+
+	/** Set the indication sign height */
+	public void doSetHeight(int h) throws TMSException {
+		if(h == height)
+			return;
+		store.update(this, "height", h);
+		setHeight(h);
+	}
+
+	/** Get the indication sign height */
+	public int getHeight() {
+		return height;
+	}
+
+	/** Quick message to send for indication */
+	protected QuickMessage quick_message;
+
+	/** Set the quick message */
+	public void setQuickMessage(QuickMessage qm) {
+		quick_message = qm;
+	}
+
+	/** Set the quick message */
+	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
+		if(qm == quick_message)
+			return;
+		store.update(this, "quick_message", qm);
+		setQuickMessage(qm);
+	}
+
+	/** Get the quick message */
+	public QuickMessage getQuickMessage() {
+		return quick_message;
 	}
 }

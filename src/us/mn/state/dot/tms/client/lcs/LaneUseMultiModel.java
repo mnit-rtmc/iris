@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -38,23 +39,35 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 3;
+	static protected final int COLUMN_COUNT = 6;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
 
-	/** LaneUseMulti number column number */
+	/** Indication column number */
 	static protected final int COL_INDICATION = 1;
 
-	/** Bpp column number */
-	static protected final int COL_MULTI = 2;
+	/** Message number column number */
+	static protected final int COL_MSG_NUM = 2;
+
+	/** Width column number */
+	static protected final int COL_WIDTH = 3;
+
+	/** Height column number */
+	static protected final int COL_HEIGHT = 4;
+
+	/** Quick message column number */
+	static protected final int COL_Q_MSG = 5;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, "Name", 80));
 		m.addColumn(createIndicationColumn());
-		m.addColumn(createColumn(COL_MULTI, "MULTI", 680));
+		m.addColumn(createColumn(COL_MSG_NUM, "Msg #", 80));
+		m.addColumn(createColumn(COL_WIDTH, "Width", 80));
+		m.addColumn(createColumn(COL_HEIGHT, "Height", 80));
+		m.addColumn(createColumn(COL_Q_MSG, "Quick Message", 160));
 		return m;
 	}
 
@@ -107,10 +120,15 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Get the column class */
 	public Class getColumnClass(int column) {
-		if(column == COL_INDICATION)
+		switch(column) {
+		case COL_INDICATION:
+		case COL_MSG_NUM:
+		case COL_WIDTH:
+		case COL_HEIGHT:
 			return Integer.class;
-		else
+		default:
 			return String.class;
+		}
 	}
 
 	/** Get the value at the specified cell */
@@ -123,8 +141,14 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 			return p.getName();
 		case COL_INDICATION:
 			return p.getIndication();
-		case COL_MULTI:
-			return p.getMulti();
+		case COL_MSG_NUM:
+			return p.getMsgNum();
+		case COL_WIDTH:
+			return p.getWidth();
+		case COL_HEIGHT:
+			return p.getHeight();
+		case COL_Q_MSG:
+			return p.getQuickMessage();
 		default:
 			return null;
 		}
@@ -141,19 +165,34 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		LaneUseMulti p = getProxy(row);
+		if(p == null) {
+			String v = value.toString();
+			if(column == COL_INDICATION)
+				createObject(lookupIndication(v));
+			return;
+		}
 		switch(column) {
 		case COL_INDICATION:
-			if(value instanceof String) {
-				int ind = lookupIndication((String)value);
-				if(p != null)
-					p.setIndication(ind);
-				else
-					createObject(ind);
-			}
+			String v = value.toString();
+			p.setIndication(lookupIndication(v));
 			break;
-		case COL_MULTI:
-			if(p != null)
-				p.setMulti(value.toString());	
+		case COL_MSG_NUM:
+			if(value instanceof Integer)
+				p.setMsgNum((Integer)value);
+			else
+				p.setMsgNum(null);
+			break;
+		case COL_WIDTH:
+			if(value instanceof Integer)
+				p.setWidth((Integer)value);
+			break;
+		case COL_HEIGHT:
+			if(value instanceof Integer)
+				p.setHeight((Integer)value);
+			break;
+		case COL_Q_MSG:
+			p.setQuickMessage(QuickMessageHelper.lookup(
+				value.toString()));
 			break;
 		}
 	}
@@ -174,7 +213,6 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("indication", ind);
-			attrs.put("multi", "");
 			cache.createObject(name, attrs);
 		}
 	}

@@ -18,7 +18,7 @@ import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * A lane-use MULTI is an association between lane-use indication and a
- * MULTI string.
+ * quick message MULTI string.
  *
  * @author Douglas Lau
  */
@@ -33,9 +33,27 @@ public interface LaneUseMulti extends SonarObject {
 	/** Get the indication (ordinal of LaneUseIndication) */
 	int getIndication();
 
-	/** Set the MULTI string */
-	void setMulti(String m);
+	/** Set the message number */
+	void setMsgNum(Integer n);
 
-	/** Get the MULTI string */
-	String getMulti();
+	/** Get the message number */
+	Integer getMsgNum();
+
+	/** Set the indication sign width */
+	void setWidth(int w);
+
+	/** Get the indication sign width */
+	int getWidth();
+
+	/** Set the indication sign height */
+	void setHeight(int h);
+
+	/** Get the indication sign height */
+	int getHeight();
+
+	/** Set the quick message */
+	void setQuickMessage(QuickMessage qm);
+
+	/** Get the quick message */
+	QuickMessage getQuickMessage();
 }

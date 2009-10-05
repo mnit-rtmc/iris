@@ -62,10 +62,11 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup an indication on a sign message */
 	protected Integer lookupIndication(SignMessage sm) {
-		MultiString ms = new MultiString(sm.getMulti());
+		String m = sm.getMulti();
+		MultiString ms = new MultiString(m);
 		if(ms.isBlank())
 			return LaneUseIndication.DARK.ordinal();
-		LaneUseMulti lum = LaneUseMultiHelper.find(ms);
+		LaneUseMulti lum = LaneUseMultiHelper.find(m);
 		if(lum != null)
 			return lum.getIndication();
 		else

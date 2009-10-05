@@ -696,12 +696,6 @@ CREATE RULE lcs_indication_update AS ON UPDATE TO iris.lcs_indication DO INSTEAD
 CREATE RULE lcs_indication_delete AS ON DELETE TO iris.lcs_indication DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
 
-CREATE TABLE iris.lane_use_multi (
-	name VARCHAR(10) PRIMARY KEY,
-	indication INTEGER UNIQUE NOT NULL REFERENCES iris.lane_use_indication,
-	multi VARCHAR(256) NOT NULL
-);
-
 CREATE TABLE iris.sign_group (
 	name VARCHAR(16) PRIMARY KEY,
 	local BOOLEAN NOT NULL
@@ -738,6 +732,21 @@ CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	multi VARCHAR(256) NOT NULL
 );
+
+CREATE TABLE iris.lane_use_multi (
+	name VARCHAR(10) PRIMARY KEY,
+	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
+	msg_num INTEGER,
+	width INTEGER NOT NULL,
+	height INTEGER NOT NULL,
+	quick_message VARCHAR(20) REFERENCES iris.quick_message
+);
+
+CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
+	USING btree (indication, width, height);
+
+CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
+	USING btree (msg_num, width, height);
 
 CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
@@ -1202,7 +1211,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.102.0
+database_version	3.103.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3

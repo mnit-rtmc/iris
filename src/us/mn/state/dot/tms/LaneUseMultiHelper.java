@@ -36,11 +36,17 @@ public class LaneUseMultiHelper extends BaseHelper {
 
 	/** Get a lane-use MULTI for a given indication.
 	 * @param ind LaneUseIndication ordinal value.
+	 * @param w Sign width (pixels).
+	 * @param h Sign height (pixels).
 	 * @return A lane-use MULTI. */
-	static public LaneUseMulti find(final int ind) {
+	static public LaneUseMulti find(final int ind, final int w,
+		final int h)
+	{
 		return find(new Checker<LaneUseMulti>() {
 			public boolean check(LaneUseMulti lum) {
-				return lum.getIndication() == ind;
+				return lum.getIndication() == ind &&
+				       lum.getWidth() == w &&
+				       lum.getHeight() == h;
 			}
 		});
 	}
@@ -52,10 +58,13 @@ public class LaneUseMultiHelper extends BaseHelper {
 	}
 
 	/** Find a lane-use MULTI which matches a MULTI string */
-	static public LaneUseMulti find(final MultiString multi) {
+	static public LaneUseMulti find(String multi) {
+		final QuickMessage qm = QuickMessageHelper.find(multi);
+		if(qm == null)
+			return null;
 		return find(new Checker<LaneUseMulti>() {
 			public boolean check(LaneUseMulti lum) {
-				return multi.equals(lum.getMulti());
+				return qm == lum.getQuickMessage();
 			}
 		});
 	}

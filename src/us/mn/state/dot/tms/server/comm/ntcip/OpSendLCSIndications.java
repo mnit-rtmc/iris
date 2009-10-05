@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -95,7 +96,11 @@ public class OpSendLCSIndications extends OpLCS {
 		int ind = indications[lane];
 		DMSImpl dms = dmss[lane];
 		if(dms != null) {
-			String ms = createIndicationMulti(ind);
+			Integer w = dms.getWidthPixels();
+			Integer h = dms.getHeightPixels();
+			if(w == null || h == null)
+				return null;
+			String ms = createIndicationMulti(ind, w, h);
 			if(ms != null) {
 				// This is a *slow* operation, because it has
 				// to schedule a job on the SONAR task processor
@@ -109,11 +114,14 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	protected String createIndicationMulti(int ind) {
+	protected String createIndicationMulti(int ind, int w, int h) {
 		String m = "";
-		LaneUseMulti lum = LaneUseMultiHelper.find(ind);
-		if(lum != null)
-			m = lum.getMulti();
+		LaneUseMulti lum = LaneUseMultiHelper.find(ind, w, h);
+		if(lum != null) {
+			QuickMessage qm = lum.getQuickMessage();
+			if(qm != null)
+				m = qm.getMulti();
+		}
 		if(m.length() > 0 ||
 		   LaneUseIndication.fromOrdinal(ind) == LaneUseIndication.DARK)
 			return m;
