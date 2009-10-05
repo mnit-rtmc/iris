@@ -14,7 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
+import java.io.DataOutputStream;
+import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
 
 /**
  * DmsMessageCRC is a CRC based on the dmsMessageMultiString, dmsMessageBeacon,
@@ -24,6 +27,19 @@ import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
  * @author Douglas Lau
  */
 public class DmsMessageCRC extends ASN1Integer {
+
+	/** Calculate the CRC for a message */
+	static public int calculate(DmsMessageMultiString multi,
+		DmsMessageBeacon beacon, DmsMessagePixelService srv)
+		throws IOException
+	{
+		CRC16 crc = new CRC16();
+		DataOutputStream dos = new DataOutputStream(crc);
+		dos.write(multi.getOctetString());
+		dos.writeByte(beacon.getInteger());
+		dos.writeByte(srv.getInteger());
+		return crc.getCrc();
+	}
 
 	/** Create a new DmsMessageCRC object */
 	public DmsMessageCRC(DmsMessageMemoryType.Enum m, int number) {

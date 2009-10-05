@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
  *
  * @author Douglas Lau
  */
-public class OpSendDMSMessage extends OpDMS {
+public class OpSendDMSMessage extends OpDMSMessage {
 
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;
@@ -40,22 +40,12 @@ public class OpSendDMSMessage extends OpDMS {
 	protected final DmsLongPowerRecoveryMessage long_msg =
 		new DmsLongPowerRecoveryMessage();
 
-	/** Flag to avoid phase loops */
-	protected boolean modify = true;
-
-	/** Sign message */
-	protected final SignMessage message;
-
 	/** User who deployed the message */
 	protected final User owner;
 
-	/** Message CRC */
-	protected int messageCRC;
-
 	/** Create a new DMS command message object */
 	public OpSendDMSMessage(DMSImpl d, SignMessage m, User o) {
-		super(COMMAND, d);
-		message = m;
+		super(d, m);
 		owner = o;
 	}
 
@@ -64,131 +54,14 @@ public class OpSendDMSMessage extends OpDMS {
 		return new ModifyRequest();
 	}
 
+	/** Get the next phase of the operation */
+	protected Phase nextPhase() {
+		return new ActivateMessage();
+	}
+
 	/** Get the message duration */
 	protected int getDuration() {
 		return getDuration(message.getDuration());
-	}
-
-	/** Phase to set the status to modify request */
-	protected class ModifyRequest extends Phase {
-
-		/** Set the status to modify request */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			status.setEnum(DmsMessageStatus.Enum.modifyReq);
-			mess.add(status);
-			try {
-				DMS_LOG.log(dms.getName() + ":= " + status);
-				mess.setRequest();
-			}
-			catch(SNMP.Message.GenError e) {
-				if(modify) {
-					modify = false;
-					return new InitialStatus();
-				} else
-					throw e;
-			}
-			return new SetMultiString();
-		}
-	}
-
-	/** Phase to get the initial message status */
-	protected class InitialStatus extends Phase {
-
-		/** Get the initial message status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			mess.add(status);
-			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + status);
-			if(status.isModifying())
-				return new SetMultiString();
-			else
-				return new ModifyRequest();
-		}
-	}
-
-	/** Phase to set the message MULTI string */
-	protected class SetMultiString extends Phase {
-
-		/** Set the message MULTI string */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			multi.setString(message.getMulti().toString());
-			mess.add(multi);
-			DMS_LOG.log(dms.getName() + ":= " + multi);
-			mess.setRequest();
-			return new ValidateRequest();
-		}
-	}
-
-	/** Phase to set the status to validate request */
-	protected class ValidateRequest extends Phase {
-
-		/** Set the status to modify request */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			status.setEnum(DmsMessageStatus.Enum.validateReq);
-			mess.add(status);
-			try {
-				DMS_LOG.log(dms.getName() + ":= " + status);
-				mess.setRequest();
-			}
-			catch(SNMP.Message.GenError e) {
-				return new ValidateMessageError();
-			}
-			return new FinalStatus();
-		}
-	}
-
-	/** Phase to get the validate message error */
-	protected class ValidateMessageError extends Phase {
-
-		/** Get the validate message error */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsValidateMessageError error =
-				new DmsValidateMessageError();
-			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
-			DmsMultiSyntaxErrorPosition e_pos =
-				new DmsMultiSyntaxErrorPosition();
-			mess.add(error);
-			mess.add(m_err);
-			mess.add(e_pos);
-			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + error);
-			DMS_LOG.log(dms.getName() + ": " + m_err);
-			DMS_LOG.log(dms.getName() + ": " + e_pos);
-			if(error.isSyntaxMulti())
-				errorStatus = m_err.toString();
-			else if(error.isError())
-				errorStatus = error.toString();
-			return null;
-		}
-	}
-
-	/** Phase to get the final message status */
-	protected class FinalStatus extends Phase {
-
-		/** Get the final message status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			DmsMessageCRC crc = new DmsMessageCRC(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			mess.add(status);
-			mess.add(crc);
-			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + status);
-			DMS_LOG.log(dms.getName() + ": " + crc);
-			if(!status.isValid())
-				return new ValidateMessageError();
-			messageCRC = crc.getInteger();
-			return new ActivateMessage();
-		}
 	}
 
 	/** Phase to activate the message */
@@ -213,7 +86,7 @@ public class OpSendDMSMessage extends OpDMS {
 			}
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
-			return new SetCommLossPowerRecovery();
+			return new SetPostActivationStuff();
 		}
 	}
 
@@ -267,21 +140,30 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to set the comm loss and power recovery message */
-	protected class SetCommLossPowerRecovery extends Phase {
+	/** Phase to set the post-activation objects */
+	protected class SetPostActivationStuff extends Phase {
 
-		/** Set the comm loss action */
+		/** Set the post-activation objects */
 		protected Phase poll(AddressedMessage mess) throws IOException {
+			// NOTE: setting DmsMessageTimeRemaining should not
+			//       be necessary.  I don't really know why it's
+			//       done here -- probably to work around some
+			//       stupid sign bug.  It may no longer be needed.
+			DmsMessageTimeRemaining time =
+				new DmsMessageTimeRemaining();
+			time.setInteger(getDuration());
 			if(isScheduledIndefinite())
 				setCommAndPower();
 			else
 				setCommAndPowerBlank();
+			mess.add(time);
 			mess.add(comm_msg);
 			mess.add(long_msg);
+			DMS_LOG.log(dms.getName() + ":= " + time);
 			DMS_LOG.log(dms.getName() + ":= " + comm_msg);
 			DMS_LOG.log(dms.getName() + ":= " + long_msg);
 			mess.setRequest();
-			return new TimeRemaining();
+			return null;
 		}
 	}
 
@@ -308,20 +190,5 @@ public class OpSendDMSMessage extends OpDMS {
 		long_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
 		long_msg.setNumber(1);
 		long_msg.setCrc(0);
-	}
-
-	/** Phase to set the message time remaining */
-	protected class TimeRemaining extends Phase {
-
-		/** Set the message time remaining */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageTimeRemaining time =
-				new DmsMessageTimeRemaining();
-			time.setInteger(getDuration());
-			mess.add(time);
-			DMS_LOG.log(dms.getName() + ":= " + time);
-			mess.setRequest();
-			return null;
-		}
 	}
 }
