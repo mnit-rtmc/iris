@@ -43,6 +43,9 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	/** User who deployed the message */
 	protected final User owner;
 
+	/** Flag to indicate message row has been updated */
+	protected boolean row_updated = false;
+
 	/** Create a new DMS command message object */
 	public OpSendDMSMessage(DMSImpl d, SignMessage m, User o) {
 		super(d, m, 1);
@@ -51,7 +54,12 @@ public class OpSendDMSMessage extends OpDMSMessage {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		return new ModifyRequest();
+		if(msg_num > 1)
+			return new ActivateMessage();
+		else {
+			row_updated = true;
+			return new ModifyRequest();
+		}
 	}
 
 	/** Get the next phase of the operation */
@@ -82,7 +90,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 				mess.setRequest();
 			}
 			catch(SNMP.Message.GenError e) {
-				return new ActivateMessageError();
+				return new QueryActivateMsgError();
 			}
 			// FIXME: this should happen on SONAR thread
 			dms.setMessageCurrent(message, owner);
@@ -90,33 +98,51 @@ public class OpSendDMSMessage extends OpDMSMessage {
 		}
 	}
 
-	/** Phase to get the activate message error */
-	protected class ActivateMessageError extends Phase {
+	/** Phase to query the activate message error */
+	protected class QueryActivateMsgError extends Phase {
 
-		/** Get the activate message error */
+		/** Query the activate message error */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsActivateMsgError error = new DmsActivateMsgError();
-			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
-			DmsMultiSyntaxErrorPosition e_pos =
-				new DmsMultiSyntaxErrorPosition();
 			mess.add(error);
-			mess.add(m_err);
-			mess.add(e_pos);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + error);
-			DMS_LOG.log(dms.getName() + ": " + m_err);
-			DMS_LOG.log(dms.getName() + ": " + e_pos);
 			switch(error.getEnum()) {
 			case syntaxMULTI:
-				errorStatus = m_err.toString();
-				return null;
+				return new QueryMultiSyntaxError();
 			case other:
 				errorStatus = error.toString();
 				return new LedstarActivateError();
+			case messageStatus:
+			case messageNumber:
+			case messageCRC:
+				if(!row_updated) {
+					row_updated = true;
+					return new ModifyRequest();
+				}
+				// else fall through to default case ...
 			default:
 				errorStatus = error.toString();
 				return null;
 			}
+		}
+	}
+
+	/** Phase to query the MULTI syntax error */
+	protected class QueryMultiSyntaxError extends Phase {
+
+		/** Query the MULTI syntax error */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
+			DmsMultiSyntaxErrorPosition e_pos =
+				new DmsMultiSyntaxErrorPosition();
+			mess.add(m_err);
+			mess.add(e_pos);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + m_err);
+			DMS_LOG.log(dms.getName() + ": " + e_pos);
+			errorStatus = m_err.toString();
+			return null;
 		}
 	}
 
