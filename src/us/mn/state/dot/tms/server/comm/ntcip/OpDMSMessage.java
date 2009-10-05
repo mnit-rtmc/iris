@@ -151,6 +151,8 @@ abstract public class OpDMSMessage extends OpDMS {
 			if(!status.isValid())
 				return new ValidateMessageError();
 			if(message_crc != crc.getInteger()) {
+				DMS_LOG.log(dms.getName() + " Message CRC " +
+					message_crc);
 				throw new ControllerException("Message CRC: " +
 					message_crc + ", " + crc.getInteger());
 			}
