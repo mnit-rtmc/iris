@@ -45,7 +45,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 
 	/** Create a new DMS command message object */
 	public OpSendDMSMessage(DMSImpl d, SignMessage m, User o) {
-		super(d, m);
+		super(d, m, 1);
 		owner = o;
 	}
 
@@ -73,7 +73,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			act.setDuration(getDuration());
 			act.setPriority(MAX_MESSAGE_PRIORITY);
 			act.setMemoryType(DmsMessageMemoryType.Enum.changeable);
-			act.setNumber(1);
+			act.setNumber(msg_num);
 			act.setCrc(messageCRC);
 			act.setAddress(0);
 			mess.add(act);
@@ -175,10 +175,10 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	/** Set the comm loss and power recovery msgs */
 	protected void setCommAndPower() {
 		comm_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
-		comm_msg.setNumber(1);
+		comm_msg.setNumber(msg_num);
 		comm_msg.setCrc(messageCRC);
 		long_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
-		long_msg.setNumber(1);
+		long_msg.setNumber(msg_num);
 		long_msg.setCrc(messageCRC);
 	}
 

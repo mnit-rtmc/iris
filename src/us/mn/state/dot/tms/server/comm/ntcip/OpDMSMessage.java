@@ -33,13 +33,17 @@ abstract public class OpDMSMessage extends OpDMS {
 	/** Sign message */
 	protected final SignMessage message;
 
+	/** Message number (row in changeable message table) */
+	protected final int msg_num;
+
 	/** Message CRC */
 	protected int messageCRC;
 
 	/** Create a new DMS command message object */
-	public OpDMSMessage(DMSImpl d, SignMessage m) {
+	public OpDMSMessage(DMSImpl d, SignMessage m, int n) {
 		super(COMMAND, d);
 		message = m;
+		msg_num = n;
 	}
 
 	/** Phase to set the status to modify request */
@@ -48,7 +52,7 @@ abstract public class OpDMSMessage extends OpDMS {
 		/** Set the status to modify request */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.modifyReq);
 			mess.add(status);
 			try {
@@ -72,7 +76,7 @@ abstract public class OpDMSMessage extends OpDMS {
 		/** Get the initial message status */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			mess.add(status);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + status);
@@ -89,11 +93,11 @@ abstract public class OpDMSMessage extends OpDMS {
 		/** Set the message MULTI string */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.Enum.changeable, 1);
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			DmsMessageBeacon beacon = new DmsMessageBeacon(
-				DmsMessageMemoryType.Enum.changeable, 1);
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			DmsMessagePixelService srv = new DmsMessagePixelService(
-				DmsMessageMemoryType.Enum.changeable, 1);
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			multi.setString(message.getMulti());
 			mess.add(multi);
 			mess.add(beacon);
@@ -113,7 +117,7 @@ abstract public class OpDMSMessage extends OpDMS {
 		/** Set the status to modify request */
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
+				DmsMessageMemoryType.Enum.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.validateReq);
 			mess.add(status);
 			try {
@@ -124,6 +128,30 @@ abstract public class OpDMSMessage extends OpDMS {
 				return new ValidateMessageError();
 			}
 			return new FinalStatus();
+		}
+	}
+
+	/** Phase to get the final message status */
+	protected class FinalStatus extends Phase {
+
+		/** Get the final message status */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DmsMessageStatus status = new DmsMessageStatus(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			DmsMessageCRC crc = new DmsMessageCRC(
+				DmsMessageMemoryType.Enum.changeable, msg_num);
+			mess.add(status);
+			mess.add(crc);
+			mess.getRequest();
+			DMS_LOG.log(dms.getName() + ": " + status);
+			DMS_LOG.log(dms.getName() + ": " + crc);
+			if(!status.isValid())
+				return new ValidateMessageError();
+			// FIXME: throw an exception instead ...
+			if(messageCRC != crc.getInteger())
+				DMS_LOG.log(dms.getName() + " CRC invalid");
+			messageCRC = crc.getInteger();
+			return nextPhase();
 		}
 	}
 
@@ -149,30 +177,6 @@ abstract public class OpDMSMessage extends OpDMS {
 			else if(error.isError())
 				errorStatus = error.toString();
 			return null;
-		}
-	}
-
-	/** Phase to get the final message status */
-	protected class FinalStatus extends Phase {
-
-		/** Get the final message status */
-		protected Phase poll(AddressedMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			DmsMessageCRC crc = new DmsMessageCRC(
-				DmsMessageMemoryType.Enum.changeable, 1);
-			mess.add(status);
-			mess.add(crc);
-			mess.getRequest();
-			DMS_LOG.log(dms.getName() + ": " + status);
-			DMS_LOG.log(dms.getName() + ": " + crc);
-			if(!status.isValid())
-				return new ValidateMessageError();
-			// FIXME: throw an exception instead ...
-			if(messageCRC != crc.getInteger())
-				DMS_LOG.log(dms.getName() + " CRC invalid");
-			messageCRC = crc.getInteger();
-			return nextPhase();
 		}
 	}
 
