@@ -74,7 +74,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			act.setPriority(MAX_MESSAGE_PRIORITY);
 			act.setMemoryType(DmsMessageMemoryType.Enum.changeable);
 			act.setNumber(msg_num);
-			act.setCrc(messageCRC);
+			act.setCrc(message_crc);
 			act.setAddress(0);
 			mess.add(act);
 			try {
@@ -176,10 +176,10 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	protected void setCommAndPower() {
 		comm_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
 		comm_msg.setNumber(msg_num);
-		comm_msg.setCrc(messageCRC);
+		comm_msg.setCrc(message_crc);
 		long_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
 		long_msg.setNumber(msg_num);
-		long_msg.setCrc(messageCRC);
+		long_msg.setCrc(message_crc);
 	}
 
 	/** Set the comm loss and power recovery msgs to blank */

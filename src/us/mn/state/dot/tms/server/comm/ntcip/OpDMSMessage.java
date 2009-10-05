@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 
 /**
@@ -37,13 +38,14 @@ abstract public class OpDMSMessage extends OpDMS {
 	protected final int msg_num;
 
 	/** Message CRC */
-	protected int messageCRC;
+	protected final int message_crc;
 
 	/** Create a new DMS command message object */
 	public OpDMSMessage(DMSImpl d, SignMessage m, int n) {
 		super(COMMAND, d);
 		message = m;
 		msg_num = n;
+		message_crc = DmsMessageCRC.calculate(m.getMulti(), 0, 0);
 	}
 
 	/** Phase to set the status to modify request */
@@ -99,6 +101,8 @@ abstract public class OpDMSMessage extends OpDMS {
 			DmsMessagePixelService srv = new DmsMessagePixelService(
 				DmsMessageMemoryType.Enum.changeable, msg_num);
 			multi.setString(message.getMulti());
+			beacon.setInteger(0);
+			srv.setInteger(0);
 			mess.add(multi);
 			mess.add(beacon);
 			mess.add(srv);
@@ -106,7 +110,6 @@ abstract public class OpDMSMessage extends OpDMS {
 			DMS_LOG.log(dms.getName() + ":= " + beacon);
 			DMS_LOG.log(dms.getName() + ":= " + srv);
 			mess.setRequest();
-			messageCRC = DmsMessageCRC.calculate(multi, beacon,srv);
 			return new ValidateRequest();
 		}
 	}
@@ -147,10 +150,10 @@ abstract public class OpDMSMessage extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + crc);
 			if(!status.isValid())
 				return new ValidateMessageError();
-			// FIXME: throw an exception instead ...
-			if(messageCRC != crc.getInteger())
-				DMS_LOG.log(dms.getName() + " CRC invalid");
-			messageCRC = crc.getInteger();
+			if(message_crc != crc.getInteger()) {
+				throw new ControllerException("Message CRC: " +
+					message_crc + ", " + crc.getInteger());
+			}
 			return nextPhase();
 		}
 	}

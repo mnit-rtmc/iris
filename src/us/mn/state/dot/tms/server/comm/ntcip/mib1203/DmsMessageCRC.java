@@ -29,16 +29,19 @@ import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
 public class DmsMessageCRC extends ASN1Integer {
 
 	/** Calculate the CRC for a message */
-	static public int calculate(DmsMessageMultiString multi,
-		DmsMessageBeacon beacon, DmsMessagePixelService srv)
-		throws IOException
-	{
+	static public int calculate(String multi, int beacon, int srv) {
 		CRC16 crc = new CRC16();
-		DataOutputStream dos = new DataOutputStream(crc);
-		dos.write(multi.getOctetString());
-		dos.writeByte(beacon.getInteger());
-		dos.writeByte(srv.getInteger());
-		return crc.getCrc();
+		try {
+			DataOutputStream dos = new DataOutputStream(crc);
+			dos.write(multi.getBytes());
+			dos.writeByte(beacon);
+			dos.writeByte(srv);
+			return crc.getCrc();
+		}
+		catch(IOException e) {
+			// This should never happen
+			return 0;
+		}
 	}
 
 	/** Create a new DmsMessageCRC object */
