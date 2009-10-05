@@ -30,13 +30,14 @@ public class DmsMessageCRC extends ASN1Integer {
 
 	/** Calculate the CRC for a message */
 	static public int calculate(String multi, int beacon, int srv) {
-		CRC16 crc = new CRC16();
+		CRC16 crc16 = new CRC16();
 		try {
-			DataOutputStream dos = new DataOutputStream(crc);
+			DataOutputStream dos = new DataOutputStream(crc16);
 			dos.write(multi.getBytes());
 			dos.writeByte(beacon);
 			dos.writeByte(srv);
-			return crc.getCrc();
+			int crc = crc16.getCrc() ^ CRC16.INITIAL_CRC;
+			return ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
 		}
 		catch(IOException e) {
 			// This should never happen
