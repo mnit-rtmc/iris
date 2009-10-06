@@ -58,15 +58,11 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Sign messages for each DMS in the LCS array */
 	protected final SignMessage[] msgs;
 
-	/** User who sent the indications */
-	protected final User user;
-
 	/** Create a new operation to send LCS indications */
 	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
-		super(DEVICE_DATA, l);
+		super(DEVICE_DATA, l, u);
 		indications = ind;
 		msgs = new SignMessage[ind.length];
-		user = u;
 	}
 
 	/** Create the first real phase of the operation */

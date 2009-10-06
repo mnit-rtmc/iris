@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.util.Arrays;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
@@ -42,20 +43,29 @@ abstract public class OpLCS extends OpDevice {
 	/** DMS corresponsing to each LCS in the array */
 	protected final DMSImpl[] dmss;
 
+	/** User who initiated the operation */
+	protected final User user;
+
 	/** Create a new LCS operation */
 	protected OpLCS(int p, LCSArrayImpl l) {
+		this(p, l, null);
+	}
+
+	/** Create a new LCS operation */
+	protected OpLCS(int p, LCSArrayImpl l, User u) {
 		super(p, l);
 		lcs_array = l;
 		ind_before = l.getIndicationsCurrent();
 		ind_after = Arrays.copyOf(ind_before, ind_before.length);
 		dmss = new DMSImpl[ind_before.length];
+		user = u;
 		lookupDMSs();
 	}
 
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(!Arrays.equals(ind_before, ind_after))
-			lcs_array.setIndicationsCurrent(ind_after, null);
+			lcs_array.setIndicationsCurrent(ind_after, user);
 		for(DMSImpl dms: dmss) {
 			if(dms == null || dms.isFailed())
 				success = false;
