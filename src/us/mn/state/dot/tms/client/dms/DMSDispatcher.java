@@ -624,7 +624,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		if(bitmaps != null) {
 			return creator.create(multi, bitmaps,
 			       DMSMessagePriority.OVERRIDE,
-			       DMSMessagePriority.BLANK, 0);
+			       DMSMessagePriority.BLANK, null);
 		} else
 			return null;
 	}
