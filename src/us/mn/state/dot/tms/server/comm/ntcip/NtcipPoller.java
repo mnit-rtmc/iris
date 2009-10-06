@@ -38,14 +38,17 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  */
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
+	/** Check if a message is already deployed on the sign */
+	static protected boolean isMessageDeployed(DMSImpl dms, SignMessage sm){
+		// FIXME: should compare SignMessage, not just multi string
+		return sm.getMulti().equals(dms.getMessageCurrent().getMulti());
+	}
+
 	/** Create an operation to send a DMS message */
-	static protected OpDMS createOperation(DMSImpl dms, SignMessage sm,
+	static public OpDMS createSendMsgOp(DMSImpl dms, SignMessage sm,
 		User o)
 	{
-		if(shouldSetTimeRemaining(dms, sm))
-			return new OpUpdateDMSDuration(dms, sm, o);
-		else
-			return new OpSendDMSMessage(dms, sm,o,lookupMsgNum(sm));
+		return new OpSendDMSMessage(dms, sm, o, lookupMsgNum(sm));
 	}
 
 	/** Lookup a sign message number */
@@ -57,19 +60,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 				return msg_num;
 		}
 		return 1;
-	}
-
-	/** Check if we should just set the message time remaining */
-	static protected boolean shouldSetTimeRemaining(DMSImpl dms,
-		SignMessage sm)
-	{
-		return SignMessageHelper.isDurationZero(sm) ||
-		       isMessageDeployed(dms, sm);
-	}
-
-	/** Check if the message is already deployed on the sign */
-	static protected boolean isMessageDeployed(DMSImpl dms, SignMessage sm){
-		return sm.getMulti().equals(dms.getMessageCurrent().getMulti());
 	}
 
 	/** SNMP message protocol */
@@ -140,7 +130,10 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
-		createOperation(dms, sm, o).start();
+		if(isMessageDeployed(dms, sm))
+			new OpUpdateDMSDuration(dms, sm).start();
+		else
+			createSendMsgOp(dms, sm, o).start();
 	}
 
 	/** Send a device request message to an LCS array */

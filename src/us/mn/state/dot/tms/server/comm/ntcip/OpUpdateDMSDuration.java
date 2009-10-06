@@ -15,9 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
@@ -32,14 +30,10 @@ public class OpUpdateDMSDuration extends OpDMS {
 	/** Sign message to update */
 	protected final SignMessage message;
 
-	/** User who deployed the message */
-	protected final User owner;
-
 	/** Create a new DMS update duration operation */
-	public OpUpdateDMSDuration(DMSImpl d, SignMessage m, User o) {
+	public OpUpdateDMSDuration(DMSImpl d, SignMessage m) {
 		super(COMMAND, d);
 		message = m;
-		owner = o;
 	}
 
 	/** Create the first real phase of the operation */
@@ -49,10 +43,7 @@ public class OpUpdateDMSDuration extends OpDMS {
 
 	/** Get the message duration */
 	protected int getDuration() {
-		if(SignMessageHelper.isBlank(message))
-			return 0;
-		else
-			return getDuration(message.getDuration());
+		return getDuration(message.getDuration());
 	}
 
 	/** Phase to set message time remaining */
@@ -65,8 +56,6 @@ public class OpUpdateDMSDuration extends OpDMS {
 			mess.add(remaining);
 			DMS_LOG.log(dms.getName() + ":= " + remaining);
 			mess.setRequest();
-			// FIXME: this should happen on SONAR thread
-			dms.setMessageCurrent(message, owner);
 			return null;
 		}
 	}

@@ -31,18 +31,6 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
  */
 public class OpQueryDMSMessage extends OpDMS {
 
-	/** Create an operation to send a DMS message. This is similar to
-	 * NtcipPoller.createOperation, but does not check if the sign message
-	 * is the current IRIS message. */
-	static protected OpDMS createSendMsgOp(DMSImpl dms, SignMessage sm,
-		User o)
-	{
-		if(SignMessageHelper.isDurationZero(sm))
-			return new OpUpdateDMSDuration(dms, sm, o);
-		else
-			return new OpSendDMSMessage(dms, sm, o);
-	}
-
 	/** Create a new DMS query status object */
 	public OpQueryDMSMessage(DMSImpl d) {
 		super(DEVICE_DATA, d);
@@ -76,7 +64,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		} else {
 			/* The source is not valid. Create a new operation to
 			 * send the "current" message to the sign. */
-			createSendMsgOp(dms, sm, dms.getOwnerCurrent()).start();
+			NtcipPoller.createSendMsgOp(dms, sm,
+				dms.getOwnerCurrent()).start();
 		}
 		return null;
 	}

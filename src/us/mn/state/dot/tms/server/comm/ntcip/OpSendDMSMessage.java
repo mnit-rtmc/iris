@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
@@ -59,7 +60,9 @@ public class OpSendDMSMessage extends OpDMSMessage {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
-		if(msg_num > 1)
+		if(SignMessageHelper.isBlank(message))
+			return new BlankMessage();
+		else if(msg_num > 1)
 			return new ActivateMessage();
 		else {
 			row_updated = true;
@@ -75,6 +78,32 @@ public class OpSendDMSMessage extends OpDMSMessage {
 	/** Get the message duration */
 	protected int getDuration() {
 		return getDuration(message.getDuration());
+	}
+
+	/** Phase to activate a blank message */
+	protected class BlankMessage extends Phase {
+
+		/** Blank the message */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DmsActivateMessage act = new DmsActivateMessage();
+			act.setDuration(DURATION_INDEFINITE);
+			act.setPriority(MAX_MESSAGE_PRIORITY);
+			act.setMemoryType(DmsMessageMemoryType.Enum.blank);
+			act.setNumber(1);
+			act.setCrc(0);
+			act.setAddress(0);
+			mess.add(act);
+			try {
+				DMS_LOG.log(dms.getName() + ":= " + act);
+				mess.setRequest();
+			}
+			catch(SNMP.Message.GenError e) {
+				return new QueryActivateMsgError();
+			}
+			// FIXME: this should happen on SONAR thread
+			dms.setMessageCurrent(message, owner);
+			return new SetPostActivationStuff();
+		}
 	}
 
 	/** Phase to activate the message */
@@ -118,6 +147,10 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			case other:
 				errorStatus = error.toString();
 				return new LedstarActivateError();
+			case messageMemoryType:
+				// For original 1203v1, blank memory type was
+				// not defined.  This will cause a blank msg
+				// to be stored in changeable msg #1.
 			case messageStatus:
 			case messageNumber:
 			case messageCRC:

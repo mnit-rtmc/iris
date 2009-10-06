@@ -139,12 +139,6 @@ public class SignMessageHelper extends BaseHelper {
 		return ls.toArray(new String[0]);
 	}
 
-	/** Check if the duration of a message is zero */
-	static public boolean isDurationZero(SignMessage m) {
-		Integer d = m.getDuration();
-		return (d != null && d <= 0) || isBlank(m);
-	}
-
 	/** Check if a sign message is blank */
 	static public boolean isBlank(SignMessage m) {
 		return isMultiBlank(m) && isBitmapBlank(m);
