@@ -9,7 +9,7 @@
 </head>
 
 <body>
-<div id="stamp">5 June 2009</div>
+<div id="stamp">6 October 2009</div>
 <h1>Mn/DOT IRIS Installation and Configuration</h1>
 All commands must be run as the root user.
 <ol>
@@ -118,9 +118,14 @@ keytool -import -alias ldap-cert -keystore /etc/iris/iris-server.keystore -file 
 <pre>
 su tms
 psql tms
-INSERT INTO iris_user VALUES('user', 'dn', 'full name');
-INSERT INTO iris_user_role VALUES('user', 'admin');
-UPDATE role SET pattern = '.*', priv_r = 't', priv_w = 't', priv_c = 't', priv_d = 't' WHERE name = 'admin';
+INSERT INTO iris.i_user VALUES('user', 'dn', 'full name');
+INSERT INTO iris.i_user_role VALUES('user', 'login');
+INSERT INTO iris.i_user_role VALUES('user', 'operate');
+INSERT INTO iris.i_user_role VALUES('user', 'policy_admin');
+INSERT INTO iris.i_user_role VALUES('user', 'device_admin');
+INSERT INTO iris.i_user_role VALUES('user', 'maintenance');
+INSERT INTO iris.i_user_role VALUES('user', 'system_admin');
+INSERT INTO iris.i_user_role VALUES('user', 'user_admin');
 \q
 exit
 </pre>
