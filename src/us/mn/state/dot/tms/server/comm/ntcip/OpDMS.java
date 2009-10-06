@@ -45,7 +45,7 @@ abstract public class OpDMS extends OpDevice {
 
 	/** Parse an NTCIP duration value */
 	static protected Integer parseDuration(int d) {
-		if(d < 0 || d >= DURATION_INDEFINITE)
+		if(d <= 0 || d >= DURATION_INDEFINITE)
 			return null;
 		else
 			return d;
