@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -35,6 +36,7 @@ import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.event.SignStatusEvent;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -258,11 +260,51 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			return;
 		if(Arrays.equals(ind, indicationsCurrent))
 			return;
+		logIndications(ind, o);
 		indicationsCurrent = ind;
 		notifyAttribute("indicationsCurrent");
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
 		setIndicationsNext(null);
+	}
+
+	/** Log indications in event db */
+	protected void logIndications(Integer[] ind, User o) {
+		EventType et = EventType.LCS_DEPLOYED;
+		String text = createLogText(ind);
+		if(areAllDark(ind)) {
+			et = EventType.LCS_CLEARED;
+			text = null;
+		}
+		String owner = null;
+		if(o != null)
+			owner = o.getName();
+		SignStatusEvent ev = new SignStatusEvent(et, name, text, owner);
+		try {
+			ev.doStore();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Create a message to log LCS sign status event */
+	static protected String createLogText(Integer[] ind) {
+		StringBuilder sb = new StringBuilder();
+		for(int i = ind.length - 1; i >= 0; i--) {
+			sb.append(LaneUseIndication.fromOrdinal(ind[i]));
+			sb.append(' ');
+		}
+		return sb.toString().trim();
+	}
+
+	/** Test if all indications are DARK */
+	static protected boolean areAllDark(Integer[] ind) {
+		for(Integer i: ind) {
+			if(i != LaneUseIndication.DARK.ordinal())
+				return false;
+		}
+		return true;
 	}
 
 	/** Get the current lane-use indications.
