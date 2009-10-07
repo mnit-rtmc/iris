@@ -17,14 +17,13 @@ package us.mn.state.dot.tms.server.comm.smartsensor;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
  * Controller operation to send settings to a SmartSensor
  *
  * @author Douglas Lau
  */
-public class OpSendSensorSettings extends OpController {
+public class OpSendSensorSettings extends OpSS105 {
 
 	/** Time interval for data binning */
 	static protected final int BINNING_INTERVAL = 30;
@@ -34,7 +33,7 @@ public class OpSendSensorSettings extends OpController {
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
-		super(DOWNLOAD, c, c.toString());
+		super(DOWNLOAD, c);
 		restart = r;
 	}
 
@@ -54,6 +53,7 @@ public class OpSendSensorSettings extends OpController {
 			TimeIntervalRequest ti = new TimeIntervalRequest();
 			mess.add(ti);
 			mess.getRequest();
+			SS105_LOG.log(controller.getName() + ": " + ti);
 			if(ti.value == BINNING_INTERVAL)
 				return new GetClassification();
 			else
@@ -66,8 +66,11 @@ public class OpSendSensorSettings extends OpController {
 
 		/** Set the time interval (for binning) */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new TimeIntervalRequest(BINNING_INTERVAL));
+			TimeIntervalRequest ti = new TimeIntervalRequest(
+				BINNING_INTERVAL);
+			mess.add(ti);
 			mess.setRequest();
+			SS105_LOG.log(controller.getName() + ":= " + ti);
 			return new GetClassification();
 		}
 	}
@@ -80,6 +83,7 @@ public class OpSendSensorSettings extends OpController {
 			ClassificationRequest cr = new ClassificationRequest();
 			mess.add(cr);
 			mess.getRequest();
+			SS105_LOG.log(controller.getName() + ":= " + cr);
 			if(cr.isDefault())
 				return new QueryVersion();
 			else
@@ -92,8 +96,10 @@ public class OpSendSensorSettings extends OpController {
 
 		/** Set the classification lengths */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new ClassificationRequest());
+			ClassificationRequest cr = new ClassificationRequest();
+			mess.add(cr);
 			mess.setRequest();
+			SS105_LOG.log(controller.getName() + ":= " + cr);
 			return new QueryVersion();
 		}
 	}
@@ -106,6 +112,7 @@ public class OpSendSensorSettings extends OpController {
 			VersionRequest vr = new VersionRequest();
 			mess.add(vr);
 			mess.getRequest();
+			SS105_LOG.log(controller.getName() + "= " + vr);
 			controller.setVersion(vr.getVersion());
 			return new SynchronizeClock();
 		}
@@ -116,8 +123,10 @@ public class OpSendSensorSettings extends OpController {
 
 		/** Synchronize the clock */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			mess.add(new TimeRequest());
+			TimeRequest tr = new TimeRequest();
+			mess.add(tr);
 			mess.setRequest();
+			SS105_LOG.log(controller.getName() + "= " + tr);
 			return null;
 		}
 	}

@@ -100,4 +100,22 @@ public class ClassificationRequest extends MemoryRequest {
 			medium_min == MEDIUM_MIN && medium_max == MEDIUM_MAX &&
 			long_min == LONG_MIN && long_max == LONG_MAX;
 	}
+
+	/** Get a string representation of the request */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Classification: ");
+		sb.append(short_min);
+		sb.append('-');
+		sb.append(short_max);
+		sb.append(',');
+		sb.append(medium_min);
+		sb.append('-');
+		sb.append(medium_max);
+		sb.append(',');
+		sb.append(long_min);
+		sb.append('-');
+		sb.append(long_max);
+		return sb.toString();
+	}
 }

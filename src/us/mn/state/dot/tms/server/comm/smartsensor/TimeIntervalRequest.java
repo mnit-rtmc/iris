@@ -63,4 +63,12 @@ public class TimeIntervalRequest extends MemoryRequest {
 				"Invalid time interval: " + r);
 		}
 	}
+
+	/** Get a string representation of the request */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Time interval: ");
+		sb.append(value);
+		return sb.toString();
+	}
 }

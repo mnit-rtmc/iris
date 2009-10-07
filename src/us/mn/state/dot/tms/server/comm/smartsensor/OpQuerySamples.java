@@ -19,9 +19,7 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 
 /**
@@ -29,10 +27,7 @@ import us.mn.state.dot.tms.server.comm.DownloadRequestException;
  *
  * @author Douglas Lau
  */
-public class OpQuerySamples extends OpController {
-
-	/** Sample debug log */
-	static public final DebugLog SAMPLE_LOG = new DebugLog("samples");
+public class OpQuerySamples extends OpSS105 {
 
 	/** 30-Second interval completer */
 	protected final Completer completer;
@@ -90,9 +85,9 @@ public class OpQuerySamples extends OpController {
 			volume = bs.getVolume();
 			scans = bs.getScans();
 			speed = bs.getSpeed();
-			SAMPLE_LOG.log(bs.toString());
+			SS105_LOG.log(controller.getName() + ": " + bs);
 			if(stamp.before(oldest) || stamp.after(newest)) {
-				SAMPLE_LOG.log("BAD TIMESTAMP: " +
+				SS105_LOG.log("BAD TIMESTAMP: " +
 					stamp.getTime() + " for " + controller);
 				throw new DownloadRequestException(
 					controller.toString());
