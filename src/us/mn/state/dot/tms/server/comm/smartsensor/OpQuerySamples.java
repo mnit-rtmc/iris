@@ -89,6 +89,7 @@ public class OpQuerySamples extends OpSS105 {
 			if(stamp.before(oldest) || stamp.after(newest)) {
 				SS105_LOG.log("BAD TIMESTAMP: " +
 					stamp.getTime() + " for " + controller);
+				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());
 			}
