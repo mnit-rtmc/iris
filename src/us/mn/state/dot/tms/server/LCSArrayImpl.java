@@ -292,7 +292,11 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	static protected String createLogText(Integer[] ind) {
 		StringBuilder sb = new StringBuilder();
 		for(int i = ind.length - 1; i >= 0; i--) {
-			sb.append(LaneUseIndication.fromOrdinal(ind[i]));
+			Integer li = ind[i];
+			if(li != null)
+				sb.append(LaneUseIndication.fromOrdinal(li));
+			else
+				sb.append("UNKNOWN");
 			sb.append(' ');
 		}
 		return sb.toString().trim();
@@ -301,7 +305,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Test if all indications are DARK */
 	static protected boolean areAllDark(Integer[] ind) {
 		for(Integer i: ind) {
-			if(i != LaneUseIndication.DARK.ordinal())
+			if(i == null || i != LaneUseIndication.DARK.ordinal())
 				return false;
 		}
 		return true;
