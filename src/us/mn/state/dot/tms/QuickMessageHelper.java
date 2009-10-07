@@ -33,19 +33,4 @@ public class QuickMessageHelper extends BaseHelper {
 		return (QuickMessage)namespace.lookupObject(
 			QuickMessage.SONAR_TYPE, name);
 	}
-
-	/** Find a quick message using a Checker */
-	static public QuickMessage find(Checker<QuickMessage> checker) {
-		return (QuickMessage)namespace.findObject(
-			QuickMessage.SONAR_TYPE, checker);
-	}
-
-	/** Find a quick message which matches a MULTI string */
-	static public QuickMessage find(final String multi) {
-		return find(new Checker<QuickMessage>() {
-			public boolean check(QuickMessage qm) {
-				return multi.equals(qm.getMulti());
-			}
-		});
-	}
 }

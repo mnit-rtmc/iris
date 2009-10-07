@@ -58,13 +58,12 @@ public class LaneUseMultiHelper extends BaseHelper {
 	}
 
 	/** Find a lane-use MULTI which matches a MULTI string */
-	static public LaneUseMulti find(String multi) {
-		final QuickMessage qm = QuickMessageHelper.find(multi);
-		if(qm == null)
-			return null;
+	static public LaneUseMulti find(final String multi) {
 		return find(new Checker<LaneUseMulti>() {
 			public boolean check(LaneUseMulti lum) {
-				return qm == lum.getQuickMessage();
+				QuickMessage qm = lum.getQuickMessage();
+				return qm != null &&
+				       multi.equals(qm.getMulti());
 			}
 		});
 	}
