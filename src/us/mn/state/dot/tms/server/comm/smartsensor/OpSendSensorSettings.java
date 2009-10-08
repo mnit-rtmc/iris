@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.smartsensor;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 
@@ -111,9 +112,14 @@ public class OpSendSensorSettings extends OpSS105 {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			VersionRequest vr = new VersionRequest();
 			mess.add(vr);
-			mess.getRequest();
-			SS105_LOG.log(controller.getName() + "= " + vr);
-			controller.setVersion(vr.getVersion());
+			try {
+				mess.getRequest();
+				SS105_LOG.log(controller.getName() + "= " + vr);
+				controller.setVersion(vr.getVersion());
+			}
+			catch(SocketTimeoutException e) {
+				controller.setVersion("unknown (HD?)");
+			}
 			return new SynchronizeClock();
 		}
 	}

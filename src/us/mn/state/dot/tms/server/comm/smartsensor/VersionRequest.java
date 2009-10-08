@@ -18,7 +18,8 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * Firmware Version Request
+ * Firmware Version Request.  This is not a documented message, so it is not
+ * supported by HD sensors.
  *
  * @author Douglas Lau
  */
