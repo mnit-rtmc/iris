@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 
 /**
- * Controller operation to send settings to a SmartSensor
+ * Controller operation to send settings to an SS105.
  *
  * @author Douglas Lau
  */
