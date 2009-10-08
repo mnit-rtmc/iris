@@ -60,17 +60,17 @@ public class ClassificationRequest extends MemoryRequest {
 	/** Maximum length for LONG vehicle classification */
 	int long_max = LONG_MAX;
 
-	/** Get the SmartSensor memory buffer address */
+	/** Get the SS105 memory buffer address */
 	protected int memoryAddress() {
 		return 0x020000;
 	}
 
-	/** Get the SmartSensor memory buffer length */
+	/** Get the SS105 memory buffer length */
 	protected short memoryLength() {
 		return 40;
 	}
 
-	/** Format the buffer to write to SmartSensor memory */
+	/** Format the buffer to write to SS105 memory */
 	protected String formatBuffer() {
 		return hex(short_min, 4) + hex(short_max, 4) + hex(0, 8) +
 			hex(medium_min, 4) + hex(medium_max, 4) + hex(0, 8) +

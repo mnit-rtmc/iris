@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * SmartSensor Request
+ * SS105 Request
  *
  * @author Douglas Lau
  */

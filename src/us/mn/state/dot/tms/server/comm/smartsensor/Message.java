@@ -22,13 +22,13 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * SmartSensor message
+ * SS105 message
  *
  * @author Douglas Lau
  */
 public class Message implements AddressedMessage {
 
-	/** Multidrop SmartSensor protocol */
+	/** Multidrop SS105 protocol */
 	static protected final boolean MULTIDROP = true;
 
 	/** Serial output print stream */
@@ -37,13 +37,13 @@ public class Message implements AddressedMessage {
 	/** Serial input stream */
 	protected final InputStream is;
 
-	/** SmartSensor drop address */
+	/** SS105 drop address */
 	protected final int drop;
 
 	/** Request object */
 	protected Request req;
 
-	/** Create a new SmartSensor message */
+	/** Create a new SS105 message */
 	public Message(PrintStream p, InputStream i, ControllerImpl c) {
 		ps = p;
 		is = i;

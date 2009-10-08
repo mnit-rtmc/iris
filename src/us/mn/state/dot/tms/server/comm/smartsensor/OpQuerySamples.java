@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 
 /**
- * Operation to get binned samples from a SmartSensor device
+ * Operation to get binned samples from a SS105 device
  *
  * @author Douglas Lau
  */

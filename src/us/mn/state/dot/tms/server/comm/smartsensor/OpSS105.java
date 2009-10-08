@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.server.DebugLog;
 import us.mn.state.dot.tms.server.comm.OpController;
 
 /**
- * Operation for SmartSensor 105 device
+ * Operation for SS105 device
  *
  * @author Douglas Lau
  */
@@ -28,7 +28,7 @@ abstract public class OpSS105 extends OpController {
 	/** SS 105 debug log */
 	static protected final DebugLog SS105_LOG = new DebugLog("ss105");
 
-	/** Create a new SmartSensor 105 operation */
+	/** Create a new SS105 operation */
 	protected OpSS105(int p, ControllerImpl c) {
 		super(p, c);
 	}

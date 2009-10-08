@@ -33,13 +33,13 @@ abstract public class MemoryRequest extends Request {
 		return !is_set;
 	}
 
-	/** Get the SmartSensor memory buffer address */
+	/** Get the SS105 memory buffer address */
 	abstract protected int memoryAddress();
 
-	/** Get the SmartSensor memory buffer length */
+	/** Get the SS105 memory buffer length */
 	abstract protected short memoryLength();
 
-	/** Format the buffer to write to SmartSensor memory */
+	/** Format the buffer to write to SS105 memory */
 	abstract protected String formatBuffer();
 
 	/** Format a basic memory request */
@@ -67,7 +67,7 @@ abstract public class MemoryRequest extends Request {
 	{
 		super.doPoll(ps, h, r);
 		if(is_set) {
-			// NOTE: The SmartSensor needs 4 extra seconds to
+			// NOTE: The SS105 needs 4 extra seconds to
 			// respond (probably to update FLASH memory).
 			try {
 				Thread.sleep(4000);
@@ -85,7 +85,7 @@ abstract public class MemoryRequest extends Request {
 				return;
 			else
 				throw new ControllerException(
-					"Error writing SmartSensor memory");
+					"Error writing SS105 memory");
 		}
 	}
 }
