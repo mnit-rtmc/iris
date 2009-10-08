@@ -37,17 +37,17 @@ public class TimeIntervalRequest extends MemoryRequest {
 	/** Current value of time interval */
 	int value;
 
-	/** Get the SmartSensor memory buffer address */
+	/** Get the SS105 memory buffer address */
 	protected int memoryAddress() {
 		return 0x00008E;
 	}
 
-	/** Get the SmartSensor memory buffer length */
+	/** Get the SS105 memory buffer length */
 	protected short memoryLength() {
 		return 8;
 	}
 
-	/** Format the buffer to write to SmartSensor memory */
+	/** Format the buffer to write to SS105 memory */
 	protected String formatBuffer() {
 		return hex(value, 8);
 	}
