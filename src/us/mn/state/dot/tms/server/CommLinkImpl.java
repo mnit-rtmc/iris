@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.HDLCMessenger;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
-import us.mn.state.dot.tms.server.comm.smartsensor.SS105Poller;
+import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 

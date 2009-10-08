@@ -12,43 +12,70 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.smartsensor;
+package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
-import java.util.Date;
+import java.io.PrintStream;
 import us.mn.state.dot.tms.server.comm.ControllerException;
-import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Time Request
+ * Memory Request
  *
  * @author Douglas Lau
  */
-public class TimeRequest extends Request {
+abstract public class MemoryRequest extends Request {
 
 	/** Is this a SET request */
 	protected boolean is_set = false;
 
-	/** Time stamp */
-	protected long stamp = System.currentTimeMillis();
-
 	/** Check if the request has a checksum */
 	protected boolean hasChecksum() {
-		return false;
+		return !is_set;
+	}
+
+	/** Get the SS105 memory buffer address */
+	abstract protected int memoryAddress();
+
+	/** Get the SS105 memory buffer length */
+	abstract protected short memoryLength();
+
+	/** Format the buffer to write to SS105 memory */
+	abstract protected String formatBuffer();
+
+	/** Format a basic memory request */
+	protected String formatRequest() {
+		return "S" + hex(memoryAddress(), 6) + hex(memoryLength(), 4);
 	}
 
 	/** Format a basic "GET" request */
 	protected String formatGetRequest() {
 		is_set = false;
-		return "SB";
+		return "SJ" + formatRequest();
 	}
 
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() {
 		is_set = true;
-		stamp = System.currentTimeMillis();
-		int seconds = TimeStamp.seconds(new Date(stamp));
-		return "S4" + hex(seconds, 8);
+		String payload = formatRequest() + formatBuffer();
+		String hexsum = checksum(payload);
+		return "SK" + payload + hexsum;
+	}
+
+	/** Poll the sensor */
+	protected void doPoll(PrintStream ps, String h, String r)
+		throws IOException
+	{
+		super.doPoll(ps, h, r);
+		if(is_set) {
+			// NOTE: The SS105 needs 4 extra seconds to
+			// respond (probably to update FLASH memory).
+			try {
+				Thread.sleep(4000);
+			}
+			catch(InterruptedException e) {
+				// not sleepy?
+			}
+		}
 	}
 
 	/** Set the response to the request */
@@ -57,29 +84,8 @@ public class TimeRequest extends Request {
 			if(r.equals("Success"))
 				return;
 			else
-				throw new ControllerException("Time set error");
-		} else
-			parseGetResponse(r);
-	}
-
-	/** Parse the response to a GET request */
-	protected void parseGetResponse(String r) throws IOException {
-		try {
-			Date date = TimeStamp.parse(r);
-			stamp = date.getTime();
+				throw new ControllerException(
+					"Error writing SS105 memory");
 		}
-		catch(NumberFormatException e) {
-			throw new ParsingException("Invalid time stamp: " + r);
-		}
-	}
-
-	/** Get the sensor time */
-	public Date getTime() {
-		return new Date(stamp);
-	}
-
-	/** Get a string representation of the request */
-	public String toString() {
-		return "Time " + getTime();
 	}
 }

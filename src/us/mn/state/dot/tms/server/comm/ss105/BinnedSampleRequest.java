@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.smartsensor;
+package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
 import java.util.Date;

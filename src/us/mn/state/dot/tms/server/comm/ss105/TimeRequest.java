@@ -12,70 +12,43 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.smartsensor;
+package us.mn.state.dot.tms.server.comm.ss105;
 
 import java.io.IOException;
-import java.io.PrintStream;
+import java.util.Date;
 import us.mn.state.dot.tms.server.comm.ControllerException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Memory Request
+ * Time Request
  *
  * @author Douglas Lau
  */
-abstract public class MemoryRequest extends Request {
+public class TimeRequest extends Request {
 
 	/** Is this a SET request */
 	protected boolean is_set = false;
 
+	/** Time stamp */
+	protected long stamp = System.currentTimeMillis();
+
 	/** Check if the request has a checksum */
 	protected boolean hasChecksum() {
-		return !is_set;
-	}
-
-	/** Get the SS105 memory buffer address */
-	abstract protected int memoryAddress();
-
-	/** Get the SS105 memory buffer length */
-	abstract protected short memoryLength();
-
-	/** Format the buffer to write to SS105 memory */
-	abstract protected String formatBuffer();
-
-	/** Format a basic memory request */
-	protected String formatRequest() {
-		return "S" + hex(memoryAddress(), 6) + hex(memoryLength(), 4);
+		return false;
 	}
 
 	/** Format a basic "GET" request */
 	protected String formatGetRequest() {
 		is_set = false;
-		return "SJ" + formatRequest();
+		return "SB";
 	}
 
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() {
 		is_set = true;
-		String payload = formatRequest() + formatBuffer();
-		String hexsum = checksum(payload);
-		return "SK" + payload + hexsum;
-	}
-
-	/** Poll the sensor */
-	protected void doPoll(PrintStream ps, String h, String r)
-		throws IOException
-	{
-		super.doPoll(ps, h, r);
-		if(is_set) {
-			// NOTE: The SS105 needs 4 extra seconds to
-			// respond (probably to update FLASH memory).
-			try {
-				Thread.sleep(4000);
-			}
-			catch(InterruptedException e) {
-				// not sleepy?
-			}
-		}
+		stamp = System.currentTimeMillis();
+		int seconds = TimeStamp.seconds(new Date(stamp));
+		return "S4" + hex(seconds, 8);
 	}
 
 	/** Set the response to the request */
@@ -84,8 +57,29 @@ abstract public class MemoryRequest extends Request {
 			if(r.equals("Success"))
 				return;
 			else
-				throw new ControllerException(
-					"Error writing SS105 memory");
+				throw new ControllerException("Time set error");
+		} else
+			parseGetResponse(r);
+	}
+
+	/** Parse the response to a GET request */
+	protected void parseGetResponse(String r) throws IOException {
+		try {
+			Date date = TimeStamp.parse(r);
+			stamp = date.getTime();
 		}
+		catch(NumberFormatException e) {
+			throw new ParsingException("Invalid time stamp: " + r);
+		}
+	}
+
+	/** Get the sensor time */
+	public Date getTime() {
+		return new Date(stamp);
+	}
+
+	/** Get a string representation of the request */
+	public String toString() {
+		return "Time " + getTime();
 	}
 }
