@@ -80,6 +80,12 @@ public class ClassificationRequest extends MemoryRequest {
 	/** Set the response to the request */
 	protected void setResponse(String r) throws IOException {
 		super.setResponse(r);
+		if(!is_set)
+			parseGetResponse(r);
+	}
+
+	/** Parse the response to a GET request */
+	protected void parseGetResponse(String r) throws IOException {
 		try {
 			short_min = Integer.parseInt(r.substring(0, 4), 16);
 			short_max = Integer.parseInt(r.substring(4, 8), 16);
