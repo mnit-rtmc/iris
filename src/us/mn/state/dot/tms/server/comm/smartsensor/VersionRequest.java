@@ -51,4 +51,9 @@ public class VersionRequest extends Request {
 	public String getVersion() {
 		return version;
 	}
+
+	/** Get a string representation of the request */
+	public String toString() {
+		return "Version " + version;
+	}
 }
