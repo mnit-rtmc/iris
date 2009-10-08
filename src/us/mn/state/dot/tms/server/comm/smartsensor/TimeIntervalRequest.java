@@ -55,6 +55,12 @@ public class TimeIntervalRequest extends MemoryRequest {
 	/** Set the response to the request */
 	protected void setResponse(String r) throws IOException {
 		super.setResponse(r);
+		if(!is_set)
+			parseGetResponse(r);
+	}
+
+	/** Parse the response to a GET request */
+	protected void parseGetResponse(String r) throws IOException {
 		try {
 			value = Integer.parseInt(r, 16);
 		}
