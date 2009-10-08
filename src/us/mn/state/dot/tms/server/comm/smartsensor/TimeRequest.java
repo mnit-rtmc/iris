@@ -29,8 +29,8 @@ public class TimeRequest extends Request {
 	/** Is this a SET request */
 	protected boolean is_set = false;
 
-	/** Current sensor time */
-	protected Date time = null;
+	/** Time stamp */
+	protected long stamp = System.currentTimeMillis();
 
 	/** Check if the request has a checksum */
 	protected boolean hasChecksum() {
@@ -46,8 +46,9 @@ public class TimeRequest extends Request {
 	/** Format a basic "SET" request */
 	protected String formatSetRequest() {
 		is_set = true;
-		int stamp = TimeStamp.seconds(new Date());
-		return "S4" + hex(stamp, 8);
+		stamp = System.currentTimeMillis();
+		int seconds = TimeStamp.seconds(new Date(stamp));
+		return "S4" + hex(seconds, 8);
 	}
 
 	/** Set the response to the request */
@@ -57,9 +58,15 @@ public class TimeRequest extends Request {
 				return;
 			else
 				throw new ControllerException("Time set error");
-		}
+		} else
+			parseGetResponse(r);
+	}
+
+	/** Parse the response to a GET request */
+	protected void parseGetResponse(String r) throws IOException {
 		try {
-			time = TimeStamp.parse(r);
+			Date date = TimeStamp.parse(r);
+			stamp = date.getTime();
 		}
 		catch(NumberFormatException e) {
 			throw new ParsingException("Invalid time stamp: " + r);
@@ -68,6 +75,11 @@ public class TimeRequest extends Request {
 
 	/** Get the sensor time */
 	public Date getTime() {
-		return time;
+		return new Date(stamp);
+	}
+
+	/** Get a string representation of the request */
+	public String toString() {
+		return "Time " + getTime();
 	}
 }
