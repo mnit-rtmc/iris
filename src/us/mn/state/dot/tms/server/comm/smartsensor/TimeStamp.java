@@ -19,13 +19,14 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 /**
- * Time Stamp
+ * A SS105 time stamp is the number of seconds since the "epoch".  This can be
+ * any point in time, but is conventionally the beginning of 1 January 2000.
  *
  * @author Douglas Lau
  */
 public class TimeStamp {
 
-	/** Milliseconds offset for the SmartSensor epoch (Y2K) */
+	/** Milliseconds offset for the SS105 epoch (Y2K) */
 	static protected final long EPOCH;
 	static {
 		TimeZone UTC = TimeZone.getTimeZone("GMT");
@@ -35,16 +36,18 @@ public class TimeStamp {
 		EPOCH = c.getTimeInMillis();
 	}
 
-	/** Parse a SmartSensor timestamp */
+	/** Parse an SS105 timestamp */
 	static public Date parse(String s) {
 		long seconds = Long.parseLong(s, 16);
 		long ms = EPOCH + seconds * 1000;
 		return new Date(ms);
 	}
 
-	/** Format a SmartSensor timestamp */
+	/** Format an SS105 timestamp */
 	static public int seconds(Date d) {
 		long ms = d.getTime() - EPOCH;
+		if(ms < 0)
+			ms = 0;
 		// FIXME: check for overflow?
 		return (int)(ms / 1000);
 	}
