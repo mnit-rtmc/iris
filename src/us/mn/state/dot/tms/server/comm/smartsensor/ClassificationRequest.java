@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Classification Request
+ * A Classification Request contains vehicle classification length thresholds.
  *
  * @author Douglas Lau
  */
@@ -31,13 +31,13 @@ public class ClassificationRequest extends MemoryRequest {
 	static protected final int SHORT_MAX = 21;
 
 	/** Default minimum length for MEDIUM vehicle classification */
-	static protected final int MEDIUM_MIN = SHORT_MAX + 1;
+	static protected final int MEDIUM_MIN = SHORT_MAX;
 
 	/** Default maximum length for MEDIUM vehicle classification */
 	static protected final int MEDIUM_MAX = 35;
 
 	/** Default minimum length for LONG vehicle classification */
-	static protected final int LONG_MIN = MEDIUM_MAX + 1;
+	static protected final int LONG_MIN = MEDIUM_MAX;
 
 	/** Default maximum length for LONG vehicle classification */
 	static protected final int LONG_MAX = 328;
