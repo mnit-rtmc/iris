@@ -31,8 +31,8 @@ public class BinnedSampleRequest extends Request {
 	/** Sample timestamp */
 	Date timestamp = null;
 
-	/** Sample data for one lane */
-	protected LaneSample[] samples = null;
+	/** Sample data for each lane */
+	protected LaneSample[] samples = new LaneSample[0];
 
 	/** Create a new binned sample request */
 	public BinnedSampleRequest() {
@@ -132,45 +132,45 @@ public class BinnedSampleRequest extends Request {
 
 	/** Get a string representation of the sample data */
 	public String toString() {
-		StringBuffer b = new StringBuffer();
-		b.append("XD: ");
-		b.append(timestamp.toString());
-		for(int i = 0; i < samples.length; i++) {
-			b.append('\n');
-			b.append(samples[i].toString());
+		StringBuilder sb = new StringBuilder();
+		sb.append("XD: ");
+		sb.append(timestamp.toString());
+		for(LaneSample ls: samples) {
+			sb.append('\n');
+			sb.append(ls.toString());
 		}
-		return b.toString();
+		return sb.toString();
 	}
 
 	/** Get the highest detector sample number */
 	protected int maxDetNumber() {
 		int dets = 0;
-		for(int i = 0; i < samples.length; i++)
-			dets = Math.max(dets, samples[i].det);
+		for(LaneSample ls: samples)
+			dets = Math.max(dets, ls.det);
 		return dets;
 	}
 
 	/** Get the volume array */
 	public int[] getVolume() {
 		int[] volume = new int[maxDetNumber()];
-		for(int i = 0; i < samples.length; i++)
-			volume[samples[i].det - 1] = samples[i].volume;
+		for(LaneSample ls: samples)
+			volume[ls.det - 1] = ls.volume;
 		return volume;
 	}
 
 	/** Get the scan count array */
 	public int[] getScans() {
 		int[] scans = new int[maxDetNumber()];
-		for(int i = 0; i < samples.length; i++)
-			scans[samples[i].det - 1] = samples[i].getScans();
+		for(LaneSample ls: samples)
+			scans[ls.det - 1] = ls.getScans();
 		return scans;
 	}
 
 	/** Get the speed array */
 	public int[] getSpeed() {
 		int[] speed = new int[maxDetNumber()];
-		for(int i = 0; i < samples.length; i++)
-			speed[samples[i].det - 1] = samples[i].speed;
+		for(LaneSample ls: samples)
+			speed[ls.det - 1] = ls.speed;
 		return speed;
 	}
 }
