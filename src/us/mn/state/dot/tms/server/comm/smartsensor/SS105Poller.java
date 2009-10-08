@@ -24,15 +24,15 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
- * SmartSensorPoller is a java implementation of the Wavetronix SmartSensor
- * serial data communication protocol
+ * SS105Poller is a java implementation of the Wavetronix SmartSensor 105
+ * serial data communication protocol.
  *
  * @author Douglas Lau
  */
-public class SmartSensorPoller extends MessagePoller implements SamplePoller {
+public class SS105Poller extends MessagePoller implements SamplePoller {
 
-	/** Create a new SmartSensor poller */
-	public SmartSensorPoller(String n, Messenger m) {
+	/** Create a new SS105 poller */
+	public SS105Poller(String n, Messenger m) {
 		super(n, m);
 	}
 
