@@ -83,7 +83,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			ClassificationRequest cr = new ClassificationRequest();
 			mess.add(cr);
 			mess.getRequest();
-			SS105_LOG.log(controller.getName() + ":= " + cr);
+			SS105_LOG.log(controller.getName() + ": " + cr);
 			if(cr.isDefault())
 				return new QueryVersion();
 			else
@@ -98,8 +98,8 @@ public class OpSendSensorSettings extends OpSS105 {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			ClassificationRequest cr = new ClassificationRequest();
 			mess.add(cr);
-			mess.setRequest();
 			SS105_LOG.log(controller.getName() + ":= " + cr);
+			mess.setRequest();
 			return new QueryVersion();
 		}
 	}
@@ -125,8 +125,8 @@ public class OpSendSensorSettings extends OpSS105 {
 		protected Phase poll(AddressedMessage mess) throws IOException {
 			TimeRequest tr = new TimeRequest();
 			mess.add(tr);
+			SS105_LOG.log(controller.getName() + ":= " + tr);
 			mess.setRequest();
-			SS105_LOG.log(controller.getName() + "= " + tr);
 			return null;
 		}
 	}
