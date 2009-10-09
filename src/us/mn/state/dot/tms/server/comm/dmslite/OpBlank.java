@@ -92,15 +92,13 @@ public class OpBlank extends OpDms
 			mess.setName(getOpName());
 
 			// id
-			ReqRes rr0 = new ReqRes("Id", generateId(),
-				new String[] { "Id" });
-			xrr.add(rr0);
+			xrr.add(new ReqRes("Id", generateId(),
+				new String[] { "Id" }));
 
 			// drop
 			String drop = SString.intToString(controller.getDrop());
-			ReqRes rr1 = new ReqRes("Address", drop,
-				new String[] { "IsValid", "ErrMsg" });
-			xrr.add(rr1);
+			xrr.add(new ReqRes("Address", drop,
+				new String[] { "IsValid", "ErrMsg" }));
 
 			// ActPriority
 			xrr.add(new ReqRes("ActPriority", 
@@ -131,13 +129,13 @@ public class OpBlank extends OpDms
 
 			try {
 				// id
-				id = new Long(rr0.getResVal("Id"));
+				id = new Long(xrr.getResValue("Id"));
 
 				// isvalid
-				valid = new Boolean(rr1.getResVal("IsValid"));
+				valid = new Boolean(xrr.getResValue("IsValid"));
 
 				// error message text
-				errmsg = rr1.getResVal("ErrMsg");
+				errmsg = xrr.getResValue("ErrMsg");
 				if(!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 

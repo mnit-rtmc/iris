@@ -77,14 +77,12 @@ public class OpReset extends OpDms
 			mess.setName(getOpName());
 
 			// id
-			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
-			xrr.add(rr0);
+			xrr.add(new ReqRes("Id", generateId(), new String[] {"Id"}));
 
 			// everything else
 			String addr = Integer.toString(controller.getDrop());
-			ReqRes rr1 = new ReqRes("Address", addr, new 
-				String[] {"IsValid", "ErrMsg"});
-			xrr.add(rr1);
+			xrr.add(new ReqRes("Address", addr, new 
+				String[] {"IsValid", "ErrMsg"}));
 
 			// send request and read response
 			mess.add(xrr);
@@ -101,13 +99,13 @@ public class OpReset extends OpDms
 			// parse response
 			try {
 				// id
-				id = new Long(rr0.getResVal("Id"));
+				id = new Long(xrr.getResValue("Id"));
 
 				// valid flag
-				valid = new Boolean(rr1.getResVal("IsValid"));
+				valid = new Boolean(xrr.getResValue("IsValid"));
 
 				// error message text
-				errmsg = rr1.getResVal("ErrMsg");
+				errmsg = xrr.getResValue("ErrMsg");
 				if(!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 

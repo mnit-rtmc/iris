@@ -218,40 +218,34 @@ public class OpMessage extends OpDms {
 			setMsgAttributes(mess);
 
 			/*  build req msg and expected response
-			 *     <DmsLite>
-			 *        <SetSnglPgReqMsg>
-			 *           <Id>...</Id>
-			 *           <Address>...</Address>
-			 *           <MsgText>...</MsgText>
-			 *           <UseOnTime>...</UseOnTime>
-			 *           <OnTime>...</OnTime>
-			 *           <UseOffTime>...</UseOffTime>
-		 	 *           <OffTime>...</OffTime>
-			 *           <ActPriority>...</ActPriority>
-			 *           <RunPriority>...</RunPriority>
-			 *           <Owner>...</Owner>
-			 *           <Msg>...</Msg>
-			 *        </SetSnglPgReqMsg>
-			 *     </DmsLite>
+			 *	<DmsLite><SetSnglPgReqMsg>
+			 *		<Id>...</Id>
+			 *		<Address>...</Address>
+			 *		<MsgText>...</MsgText>
+			 *		<UseOnTime>...</UseOnTime>
+			 *		<OnTime>...</OnTime>
+			 *		<UseOffTime>...</UseOffTime>
+		 	 *		<OffTime>...</OffTime>
+			 *		<ActPriority>...</ActPriority>
+			 *		<RunPriority>...</RunPriority>
+			 *		<Owner>...</Owner>
+			 *		<Msg>...</Msg>
+			 *	</SetSnglPgReqMsg></DmsLite>
 			 */
 
+			// build xml request and expected response			
+			XmlReqRes xrr = new XmlReqRes("SetSnglPgReqMsg", 
+				"SetSnglPgRespMsg");
 			mess.setName(getOpName());
 
-			// build xml request and expected response			
-			final String reqname = "SetSnglPgReqMsg";
-			final String resname = "SetSnglPgRespMsg";
-			XmlReqRes xrr = new XmlReqRes(reqname, resname);
-
 			// id
-			ReqRes rr0 = new ReqRes("Id", generateId(), 
-				new String[] {"Id"});
-			xrr.add(rr0);
+			xrr.add(new ReqRes("Id", generateId(), 
+				new String[] {"Id"}));
 
-			// address
+			// address, etc.
 			String addr = Integer.toString(controller.getDrop());
-			ReqRes rr1 = new ReqRes("Address", addr,
-				new String[] { "IsValid", "ErrMsg" });
-			xrr.add(rr1);
+			xrr.add(new ReqRes("Address", addr,
+				new String[] { "IsValid", "ErrMsg" }));
 
 			// MsgText
 			xrr.add(new ReqRes("MsgText", m_sm.getMulti()));
@@ -305,16 +299,16 @@ public class OpMessage extends OpDms {
 
 				try {
 					// id
-					id = new Long(rr0.getResVal("Id"));
+					id = new Long(xrr.getResValue("Id"));
 
 					// valid flag
-					valid = new Boolean(rr1.getResVal("IsValid"));
+					valid = new Boolean(xrr.getResValue("IsValid"));
 					Log.finest(
 					    "dmslite.OpMessage.PhaseSendOnePageMessage.poll(msg): parsed msg values: IsValid:"
 					    + valid + ".");
 
 					// error message text
-					errmsg = rr1.getResVal("ErrMsg");
+					errmsg = xrr.getResValue("ErrMsg");
 					if(!valid && errmsg.length() <= 0)
 						errmsg = FAILURE_UNKNOWN;
 
@@ -391,25 +385,24 @@ public class OpMessage extends OpDms {
 			setMsgAttributes(mess);
 
 			/*
- 			 * Return a newly created SignViewOperation using a dmslite xml msg string. 
-			 * The xml string is expected to be in the following format. 
+ 			 * Return a newly created SignViewOperation using a 
+			 * dmslite xml msg string. The xml string is expected 
+			 * to be in the following format. 
 			 *
-			 *    <DmsLite>
-			 *       <SetMultiplePageReqMsg>
-			 *          <Id>...</Id>
-			 *          <Address>...</Address>
-			 *          <MsgText>...</MsgText>
-			 *          <UseOnTime>...</UseOnTime>
-			 *          <OnTime>...</OnTime>
-			 *          <UseOffTime>...</UseOffTime>
-			 *          <OffTime>...</OffTime>
-			 *          <DisplayTimeMS>...<DisplayTimeMS>
-			 *           <ActPriority>...</ActPriority>
-			 *           <RunPriority>...</RunPriority>
-			 *          <Owner>...</Owner>
-			 *          <Msg>...</Msg>
-			 *       </SetMultiplePageReqMsg>
-			 *    </DmsLite>
+			 *	<DmsLite><SetMultiplePageReqMsg>
+			 *		<Id>...</Id>
+			 *		<Address>...</Address>
+			 *		<MsgText>...</MsgText>
+			 *		<UseOnTime>...</UseOnTime>
+			 *		<OnTime>...</OnTime>
+			 *		<UseOffTime>...</UseOffTime>
+			 *		<OffTime>...</OffTime>
+			 *		<DisplayTimeMS>...<DisplayTimeMS>
+			 *		<ActPriority>...</ActPriority>
+			 *		<RunPriority>...</RunPriority>
+			 *		<Owner>...</Owner>
+			 *		<Msg>...</Msg>
+			 *	</SetMultiplePageReqMsg></DmsLite>
 			 */
 
 			// build xml request and expected response			
@@ -417,23 +410,15 @@ public class OpMessage extends OpDms {
 				"SetMultPgRespMsg");
 			mess.setName(getOpName());
 
-			ReqRes rr0;
-			{
-				// id
-				rr0 = new ReqRes("Id", generateId(), 
-					new String[] {"Id"});
-				xrr.add(rr0);
-			}
+			// id
+			xrr.add(new ReqRes("Id", generateId(), 
+				new String[] {"Id"}));
 
-			ReqRes rr1;
-			{
-				// drop
-				String addr = Integer.toString(
-					controller.getDrop());
-				rr1 = new ReqRes("Address", addr,new 
-					String[] { "IsValid", "ErrMsg" });
-				xrr.add(rr1);
-			}
+			// drop
+			String addr = Integer.toString(
+				controller.getDrop());
+			xrr.add(new ReqRes("Address", addr, 
+				new String[] { "IsValid", "ErrMsg" }));
 
 			// MsgText
 			xrr.add(new ReqRes("MsgText",m_sm.getMulti()));
@@ -487,13 +472,13 @@ public class OpMessage extends OpDms {
 
 				try {
 					// id
-					id = new Long(rr0.getResVal("Id"));
+					id = new Long(xrr.getResValue("Id"));
 
 					// isvalid
-					valid = new Boolean(rr1.getResVal("IsValid"));
+					valid = new Boolean(xrr.getResValue("IsValid"));
 
 					// error message text
-					errmsg = rr1.getResVal("ErrMsg");
+					errmsg = xrr.getResValue("ErrMsg");
 					if(!valid && errmsg.length() <= 0)
 						errmsg = FAILURE_UNKNOWN;
 

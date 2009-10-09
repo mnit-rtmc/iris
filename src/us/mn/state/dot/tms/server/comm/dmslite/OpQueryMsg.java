@@ -290,18 +290,16 @@ public class OpQueryMsg extends OpDms {
 
 			// id
 			String addr = Integer.toString(controller.getDrop());
-			ReqRes rr0 = new ReqRes("Id", generateId(), 
-				new String[] {"Id"});
-			xrr.add(rr0);
+			xrr.add(new ReqRes("Id", generateId(), 
+				new String[] {"Id"}));
 
 			// address
-			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
+			xrr.add(new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", 
 				"MsgText", "ActPriority", "RunPriority", 
 				"Owner", "UseOnTime", "OnTime", "UseOffTime", 
 				"OffTime", "DisplayTimeMS", "UseBitmap", 
-				"Bitmap"});
-			xrr.add(rr1);
+				"Bitmap"}));
 
 			// send request and read response
 			mess.add(xrr);
@@ -327,54 +325,54 @@ public class OpQueryMsg extends OpDms {
 			// parse respose
 			try {
 				// id
-				id = new Long(rr0.getResVal("Id"));
+				id = new Long(xrr.getResValue("Id"));
 
 				// valid flag
-				valid = new Boolean(rr1.getResVal("IsValid"));
+				valid = new Boolean(xrr.getResValue("IsValid"));
 
 				// error message text
-				errmsg = rr1.getResVal("ErrMsg");
+				errmsg = xrr.getResValue("ErrMsg");
 				if(!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 
 				if(valid) {
 					// msg text available
 					msgtextavailable = new Boolean(
-					    rr1.getResVal("MsgTextAvailable"));
+					    xrr.getResValue("MsgTextAvailable"));
 
 					// msg text
-					msgtext = rr1.getResVal("MsgText");
+					msgtext = xrr.getResValue("MsgText");
 
 					// activation priority
 					apri = DMSMessagePriority.fromOrdinal(SString.
-						stringToInt(rr1.getResVal("ActPriority")));
+						stringToInt(xrr.getResValue("ActPriority")));
 
 					// runtime priority
 					rpri = DMSMessagePriority.fromOrdinal(SString.
-						stringToInt(rr1.getResVal("RunPriority")));
+						stringToInt(xrr.getResValue("RunPriority")));
 
 					// owner
-					owner = rr1.getResVal("Owner");
+					owner = xrr.getResValue("Owner");
 
 					// ontime
-					useont = new Boolean(rr1.getResVal("UseOnTime"));
+					useont = new Boolean(xrr.getResValue("UseOnTime"));
 					if(useont)
-						ont.setTime(STime.XMLtoDate(rr1.getResVal("OnTime")));
+						ont.setTime(STime.XMLtoDate(xrr.getResValue("OnTime")));
 
 					// offtime
-					useofft = new Boolean(rr1.getResVal("UseOffTime"));
+					useofft = new Boolean(xrr.getResValue("UseOffTime"));
 					if(useofft)
-						offt.setTime(STime.XMLtoDate(rr1.getResVal("OffTime")));
+						offt.setTime(STime.XMLtoDate(xrr.getResValue("OffTime")));
 
 					// display time (pg on-time)
-					int ms = SString.stringToInt(rr1.getResVal("DisplayTimeMS"));
+					int ms = SString.stringToInt(xrr.getResValue("DisplayTimeMS"));
 					pgOnTime = new DmsPgTime(DmsPgTime.MsToTenths(ms)); 
 					Log.finest("OpQueryMsg.PhaseQueryMsg.poll(msg): ms=" + 
 						ms + ", pgOnTime="+pgOnTime.toMs());
 
 					// bitmap
-					usebitmap = new Boolean(rr1.getResVal("UseBitmap"));
-					bitmap = rr1.getResVal("Bitmap");
+					usebitmap = new Boolean(xrr.getResValue("UseBitmap"));
+					bitmap = xrr.getResValue("Bitmap");
 
 					Log.finest(
 						"OpQueryMsg.PhaseQueryMsg.poll(msg) parsed msg values: " +

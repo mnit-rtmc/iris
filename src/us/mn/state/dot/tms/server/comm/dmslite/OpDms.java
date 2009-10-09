@@ -330,17 +330,15 @@ abstract public class OpDms extends OpDevice {
 			mess.setName(getOpName());
 
 			String drop = Integer.toString(controller.getDrop());
-			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
-			ReqRes rr1 = new ReqRes("Address", drop, new String[] {
+			xrr.add(new ReqRes("Id", generateId(), new String[] {"Id"}));
+			xrr.add(new ReqRes("Address", drop, new String[] {
 				"IsValid", "ErrMsg", "signAccess", "model", "make",
 				"version", "type", "horizBorder", "vertBorder",
 				"horizPitch", "vertPitch", "signHeight",
 				"signWidth", "characterHeightPixels",
 				"characterWidthPixels", "signHeightPixels",
 				"signWidthPixels"
-			});
-			xrr.add(rr0);
-			xrr.add(rr1);
+			}));
 
 			// send request and read response
 			mess.add(xrr);
@@ -368,13 +366,13 @@ abstract public class OpDms extends OpDevice {
 
 			try {
 				// id
-				id = new Long(rr0.getResVal("Id"));
+				id = new Long(xrr.getResValue("Id"));
 
 				// valid flag
-				valid = new Boolean(rr1.getResVal("IsValid"));
+				valid = new Boolean(xrr.getResValue("IsValid"));
 
 				// error message text
-				errmsg = rr1.getResVal("ErrMsg");
+				errmsg = xrr.getResValue("ErrMsg");
 				if(!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 
@@ -383,41 +381,41 @@ abstract public class OpDms extends OpDevice {
 
 				// valid message received?
 				if(valid) {
-					signAccess = rr1.getResVal("signAccess");
-					model = rr1.getResVal("model");
-					make = rr1.getResVal("make");
-					version = rr1.getResVal("version");
+					signAccess = xrr.getResValue("signAccess");
+					model = xrr.getResValue("model");
+					make = xrr.getResValue("make");
+					version = xrr.getResValue("version");
 
 					// determine matrix type
-					String stype = rr1.getResVal("type");
+					String stype = xrr.getResValue("type");
 					if(stype.toLowerCase().contains("full"))
 						type = DMSType.VMS_FULL;
 					else
 						Log.severe("SEVERE: Unknown matrix type read ("+stype+")");
 
 					horizBorder = SString.stringToInt(
-						rr1.getResVal("horizBorder"));
+						xrr.getResValue("horizBorder"));
 					vertBorder = SString.stringToInt(
-						rr1.getResVal("vertBorder"));
+						xrr.getResValue("vertBorder"));
 					horizPitch = SString.stringToInt(
-						rr1.getResVal("horizPitch"));
+						xrr.getResValue("horizPitch"));
 					vertPitch = SString.stringToInt(
-						rr1.getResVal("vertPitch"));
+						xrr.getResValue("vertPitch"));
 					signHeight = SString.stringToInt(
-						rr1.getResVal("signHeight"));
+						xrr.getResValue("signHeight"));
 					signWidth = SString.stringToInt(
-						rr1.getResVal("signWidth"));
+						xrr.getResValue("signWidth"));
 					characterHeightPixels = SString.stringToInt(
-						rr1.getResVal(
+						xrr.getResValue(
 							"characterHeightPixels"));
 					characterWidthPixels = SString.stringToInt(
-						rr1.getResVal(
+						xrr.getResValue(
 							"characterWidthPixels"));
 					signHeightPixels = SString.stringToInt(
-						rr1.getResVal(
+						xrr.getResValue(
 							"signHeightPixels"));
 					signWidthPixels = SString.stringToInt(
-						rr1.getResVal(
+						xrr.getResValue(
 							"signWidthPixels"));
 
 					// Log.finest("PhaseGetConfig.poll(msg) parsed msg values: valid:"+

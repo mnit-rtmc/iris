@@ -141,28 +141,45 @@ public class ReqRes
 	}
 
 	/**
-	 *  search for a value in the request and response fields.
+	 *  Search for a value in the response fields.
 	 *  @param name Name of request or response to search for.
 	 *  @return null if not found else the value found.
 	 */
-	public String searchReqResVal(String name) {
+	public String searchResVal(String name) {
 		if(name == null)
 			return null;
-
-		// request
-		if(m_reqname != null)
-			if(m_reqname.equals(name))
-				return m_reqval;
-
-		// response
 		String ret = null;
 		try {
 			ret = getResVal(name);
 		} catch (IllegalArgumentException ex) {
 			ret = null;
 		}
-
 		return ret;
+	}
+
+	/**
+	 *  Search for a value in the request field.
+	 *  @param name Name of request or response to search for.
+	 *  @return null if not found else the value found.
+	 */
+	public String searchReqVal(String name) {
+		if(name == null)
+			return null;
+		// request
+		if(m_reqname != null)
+			if(m_reqname.equals(name))
+				return m_reqval;
+		return null;
+	}
+
+	/**
+	 *  Search for a value in the request and response fields.
+	 *  @param name Name of request or response to search for.
+	 *  @return null if not found else the value found.
+	 */
+	public String searchReqResVal(String name) {
+		String ret = searchReqVal(name);
+		return (ret == null ? searchResVal(name) : ret);
 	}
 
 	/** Get a response value for the specified name.

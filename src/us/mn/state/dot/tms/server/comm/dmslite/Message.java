@@ -46,8 +46,8 @@ public class Message implements AddressedMessage
 	/** Associated operation. */
 	OpDms m_opdms = null;
 
-	/** XML request and response element. */
-	XmlReqRes m_xmlreqres;
+	/** Container of XML requests and responses. */
+	XmlReqResContainer m_rrs = new XmlReqResContainer();
 
 	/** Name for this message. */
 	private String m_name = "DmsLiteMsg";
@@ -72,18 +72,18 @@ public class Message implements AddressedMessage
 
 	/** toString */
 	public String toString() {
-		String ret="Message(";
-		if (m_xmlreqres!=null) {
-			ret+="m_xmlreqres=" + m_xmlreqres.toString();
-		}
-		ret+=")";
+		String ret = "Message(";
+		if(m_rrs != null)
+			ret += "m_rrs=" + m_rrs.toString();
+		ret += ")";
 		return ret;
 	}
 
 	/** set timeout value in MS */
 	public void setTimeoutMS(int ms) {
-		m_dmsTimeoutMS=(ms<=0 ? DEFAULT_TIMEOUT_DMS_MS : ms);
-		Log.finest("DmsLite.Message.setTimeoutMS("+ms+") called.");
+		m_dmsTimeoutMS = (ms <= 0 ? DEFAULT_TIMEOUT_DMS_MS : ms);
+		Log.finest("DmsLite.Message.setTimeoutMS(" + ms + 
+			") called.");
 	}
 
 	/** set message name */
@@ -98,7 +98,7 @@ public class Message implements AddressedMessage
 
 	/** set completion time in MS */
 	public void setCompletionTimeMS(int ms) {
-		m_completiontimeMS=ms;
+		m_completiontimeMS = ms;
 	}
 
 	/** get completion time in MS */
@@ -106,12 +106,12 @@ public class Message implements AddressedMessage
 		return(m_completiontimeMS);
 	}
 
-	/** Add a XmlReqRes to this message. */
+	/** Add an XmlReqRes to this message. */
 	public void add(Object xmlrr) {
 		if(!(xmlrr instanceof XmlReqRes))
 			throw new IllegalArgumentException(
 			    "dmslite.Message.add() wrong arg type.");
-		m_xmlreqres = (XmlReqRes)xmlrr; //FIXME: use container?
+		m_rrs.add((XmlReqRes)xmlrr);
 	}
 
 	/** Update intermediate status */
@@ -169,7 +169,7 @@ public class Message implements AddressedMessage
 			Log.finer("Response received in " + 
 				getCompletionTimeMS() + " ms.");
 		} catch(IllegalStateException ex) {
-			String msg = "Contact AHMCT: buffer capacity exceeded.";
+			String msg = "Warning: buffer capacity exceeded.";
 			handleAwsFailure(msg);
 			throw new IOException(msg);
 		} catch(IOException ex) {
@@ -200,16 +200,16 @@ public class Message implements AddressedMessage
 			Log.finest("dmslite.Message.getRequest(): found "+
 				"complete token:" + token);
 			// throws IOException
-			m_xmlreqres.parseResponse(DMSLITEMSGTAG, token);
+			m_rrs.parseResponse(DMSLITEMSGTAG, token);
 		}
 	}
 
 	/** Search for a request or response value by name.
 	  * @return null if not found else the value. */
 	protected String searchForReqResItem(String name) {
-		if (m_xmlreqres==null)
+		if(m_rrs==null)
 			return null;
-		return m_xmlreqres.getResponseValue(name);
+		return m_rrs.getResValue(name);
 	}
 
 	/** Return true if message is owned by the AWS */
@@ -225,7 +225,7 @@ public class Message implements AddressedMessage
 	protected boolean checkAwsFailure() {
 		Log.finest("Message.checkAwsFailure() called. this=" + 
 			toString() + ", ownerIsAws=" + ownerIsAws());
- 		if(m_xmlreqres == null)
+ 		if(m_rrs == null)
 			return false;
 		String ret=null;
 
@@ -244,7 +244,7 @@ public class Message implements AddressedMessage
 
 	/** Generate an aws failure message */
 	protected String getAwsFailureMessage() {
-		if(m_xmlreqres == null)
+		if(m_rrs == null)
 			return "";
 
 		String ret = "";
@@ -341,8 +341,8 @@ public class Message implements AddressedMessage
 	/** Return a request message with this format:
 	 *     <DmsLite><msg name>...etc...</msg name></DmsLite> */
 	public byte[] buildReqMsg() {
-		if(m_xmlreqres == null)
+		if(m_rrs == null)
 			return new byte[0];
-		return m_xmlreqres.buildReqMsg(DMSLITEMSGTAG);
+		return m_rrs.buildReqMsg(DMSLITEMSGTAG);
 	}
 }
