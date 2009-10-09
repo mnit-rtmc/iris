@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.LinkedList;
 import javax.mail.MessagingException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -38,48 +37,44 @@ import us.mn.state.dot.tms.utils.SEmail;
  */
 public class Message implements AddressedMessage
 {
-    	// xml tag
+    	/** Root XML tag name. */
 	static final String DMSLITEMSGTAG = "DmsLite";
 
-    	// default max wait time for DMS response
-	static final int DEFAULT_TIMEOUT_DMS_MS = 1000*30;
+    	/** Default max wait time for DMS response. */
+	static final int DEFAULT_TIMEOUT_DMS_MS = 1000 * 30;
 
-	// associated operation
+	/** Associated operation. */
 	OpDms m_opdms = null;
 
-	// fields
-	private String m_name = "DmsLiteMsg";
-	private String m_reqmsgname = "";
-	private String m_respmsgname = "";
-	private int m_dmsTimeoutMS=DEFAULT_TIMEOUT_DMS_MS;
-	private int m_completiontimeMS=0;
+	/** XML request and response element. */
+	XmlReqRes m_xmlreqres;
 
-	/** List of objects set or get with this message */
-	protected final LinkedList<Object> m_objlist = 
-		new LinkedList<Object>();
+	/** Name for this message. */
+	private String m_name = "DmsLiteMsg";
+
+	/** Default timeout in ms. */
+	private int m_dmsTimeoutMS = DEFAULT_TIMEOUT_DMS_MS;
+
+	/** Completion time in ms. */
+	private int m_completiontimeMS = 0;
+
+	/** streams */
 	private final TokenStreamReader m_is;
 	private final OutputStream m_os;
 
 	/** Create a new message */
 	public Message(OutputStream os, InputStream is) {
 		m_os = os;
-		m_is = new TokenStreamReader(
-		    is, 1024, 16384, 1000);    // buffer size, max cap, sleep time
-		//Log.finest("dmslite.Message.Message() called.");
+		m_is = new TokenStreamReader(is, 
+			// buffer size, max cap, sleep time
+			1024, 16384, 1000);
 	}
 
 	/** toString */
 	public String toString() {
 		String ret="Message(";
-		if (m_objlist!=null) {
-			ret+="m_objlist.size()="+m_objlist.size();
-			int idx=0;
-	 		for(Object i : m_objlist) {
-				assert i instanceof ReqRes;
-				ReqRes rr = (ReqRes) i;
-				ret += ", m_objlist["+idx+"]="+rr.toString()+")";
-				++idx;
-			}
+		if (m_xmlreqres!=null) {
+			ret+="m_xmlreqres=" + m_xmlreqres.toString();
 		}
 		ret+=")";
 		return ret;
@@ -98,27 +93,7 @@ public class Message implements AddressedMessage
 
 	/** get message name */
 	public String getName() {
-		return (m_name);
-	}
-
-	/** set request message name */
-	public void setReqMsgName(String n) {
-		m_reqmsgname = n;
-	}
-
-	/** get request message name */
-	public String getReqMsgName() {
-		return (m_reqmsgname);
-	}
-
-	/** set response message name */
-	public void setRespMsgName(String n) {
-		m_respmsgname = n;
-	}
-
-	/** get response message name */
-	public String getRespMsgName() {
-		return (m_respmsgname);
+		return m_name;
 	}
 
 	/** set completion time in MS */
@@ -131,12 +106,12 @@ public class Message implements AddressedMessage
 		return(m_completiontimeMS);
 	}
 
-	/** Add an object to this message. The object must be a ReqRes */
-	public void add(Object mo) {
-		if(!(mo instanceof ReqRes))
+	/** Add a XmlReqRes to this message. */
+	public void add(Object xmlrr) {
+		if(!(xmlrr instanceof XmlReqRes))
 			throw new IllegalArgumentException(
 			    "dmslite.Message.add() wrong arg type.");
-		m_objlist.add(mo);
+		m_xmlreqres = (XmlReqRes)xmlrr; //FIXME: use container?
 	}
 
 	/** Update intermediate status */
@@ -145,24 +120,30 @@ public class Message implements AddressedMessage
 			m_opdms.updateInterStatus(m, false);
 	}
 
-	/**
-	 * Send a get request message
-	 * @throws IOException if received response is malformed or timed out.
-	 */
+	/** Send a get request message.
+	 * @throws IOException if received response is malformed or timed 
+	 *	   out waiting for response. */
 	public void getRequest(OpDms op) throws IOException {
 		m_opdms = op;
 		getRequest();
 	}
 
-	/**
-	 * Send a get request message
-	 * @throws IOException if received response is malformed or timed out.
-	 */
+	/** Send a get request message.
+	 * @throws IOException if received response is malformed or timed 
+	 *	   out waiting for response. */
 	public void getRequest() throws IOException {
-		//Log.finest("dmslite.Message.getRequest() called.");
 
+		// send request
+		long starttime = sendRequest();
+
+		// read response
+		readResponse(starttime);
+	}
+
+	/** Send a request */
+	private long sendRequest() throws IOException {
 		// build message
-		byte[] array = this.buildReqMsg();
+		byte[] array = buildReqMsg();
 
 		// send message
 		updateInterStatus("Sending request to sensorserver.");
@@ -172,10 +153,14 @@ public class Message implements AddressedMessage
 		m_is.resetBuffer();
 		m_os.write(array);
 		m_os.flush();
+		return starttime;
+	}
 
-		// read response
+	/** Read a response */
+	private void readResponse(long starttime) throws IOException {
+
 		updateInterStatus("Waiting for sensorserver.");
-		String token=null;
+		String token = null;
 		try {
 			token = m_is.readToken(m_dmsTimeoutMS,
 		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
@@ -207,8 +192,6 @@ public class Message implements AddressedMessage
 				"seconds). Timeout is " + m_dmsTimeoutMS 
 				/ 1000 + " secs). ";
 			handleAwsFailure(err);
-			err += "Sent operation=" + 
-				SString.byteArrayToString(array);
 			Log.severe(err);
 			throw new IOException(err);
 
@@ -216,32 +199,17 @@ public class Message implements AddressedMessage
 		} else {
 			Log.finest("dmslite.Message.getRequest(): found "+
 				"complete token:" + token);
-
-			// fill in returned fields for each ReqRes using received xml string
-			for(Object i : m_objlist) {
-				assert i instanceof ReqRes;
-				ReqRes rr = (ReqRes) i;
-				rr.parseRes(DMSLITEMSGTAG, getRespMsgName(),
-			    		token);    // throws IOException on error
-			}
+			// throws IOException
+			m_xmlreqres.parseResponse(DMSLITEMSGTAG, token);
 		}
 	}
 
-	/** 
-	  * Search for a request or response value by name.
-	  * @return null if not found else the value.
-	  */
+	/** Search for a request or response value by name.
+	  * @return null if not found else the value. */
 	protected String searchForReqResItem(String name) {
-		if (m_objlist==null)
+		if (m_xmlreqres==null)
 			return null;
- 		for(Object i : m_objlist) {
-			assert i instanceof ReqRes;
-			ReqRes rr = (ReqRes) i;
-			String value=rr.searchReqResVal(name);
-			if(value != null)
-				return value;
-		}
-		return null;
+		return m_xmlreqres.getResponseValue(name);
 	}
 
 	/** Return true if message is owned by the AWS */
@@ -257,7 +225,7 @@ public class Message implements AddressedMessage
 	protected boolean checkAwsFailure() {
 		Log.finest("Message.checkAwsFailure() called. this=" + 
 			toString() + ", ownerIsAws=" + ownerIsAws());
- 		if(m_objlist == null)
+ 		if(m_xmlreqres == null)
 			return false;
 		String ret=null;
 
@@ -276,7 +244,7 @@ public class Message implements AddressedMessage
 
 	/** Generate an aws failure message */
 	protected String getAwsFailureMessage() {
-		if(m_objlist == null)
+		if(m_xmlreqres == null)
 			return "";
 
 		String ret = "";
@@ -324,11 +292,10 @@ public class Message implements AddressedMessage
 		return ret;
 	}
 
-	/** 
-	  * This method handles a failure when IRIS fails to send an AWS 
-	  * message to a DMS.
-	  * @param errmsgnote Optional error message, appended to generated message.
-	  */
+	/** This method handles a failure when IRIS fails to send an AWS 
+	 *  message to a DMS.
+	 *  @param errmsgnote Optional error message, appended to generated 
+	 *	  message. */
 	public void handleAwsFailure(String errmsgnote) {
 		if(errmsgnote == null)
 			errmsgnote = "";
@@ -339,7 +306,8 @@ public class Message implements AddressedMessage
 
 		// generate an error message
 		String errmsg = getAwsFailureMessage() + errmsgnote;
-		Log.warning("Warning: failure to send AWS message to DMS: " + errmsg);
+		Log.warning("Warning: failure to send AWS message to DMS: " + 
+			errmsg);
 
 		// build email
 		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
@@ -357,11 +325,12 @@ public class Message implements AddressedMessage
 				errmsg);
 			try {
 				email.send();
-				Log.finest("Message.handleAwsFailure(): sent email");
+				Log.finest("Message.handleAwsFailure(): " + 
+					"sent email");
 			}
 			catch(MessagingException e) {
-				Log.warning("Message.handleAwsFailure(): email "+
-					"failed: " + e.getMessage());
+				Log.warning("Message.handleAwsFailure(): " +
+					"email failed: " + e.getMessage());
 			}
 		}
 	}
@@ -369,38 +338,11 @@ public class Message implements AddressedMessage
 	/** Send an set request message */
 	public void setRequest() throws IOException {}
 
-	/**
-	 * Return a request message with this format:
-	 *     <DmsLite><msg name>...etc...</msg name></DmsLite>
-	 */
+	/** Return a request message with this format:
+	 *     <DmsLite><msg name>...etc...</msg name></DmsLite> */
 	public byte[] buildReqMsg() {
-
-		// build child tags
-		StringBuilder children = new StringBuilder(256);
-
-		for(Object i : m_objlist) {
-			assert i instanceof ReqRes :
-			       "dmslite.Message() arg must be a ReqRes";
-
-			//Log.finest("will add:"+i);
-			Xml.addXmlTag(children, ((ReqRes) i).getReqName(),
-				((ReqRes) i).getReqVal());
-		}
-
-		// enclose child tags in message tag
-		StringBuilder msgtag = new StringBuilder(384);
-
-		Xml.addXmlTag(msgtag, this.getReqMsgName(), children);
-
-		// enclose message tag in top level doc
-		StringBuilder doc = new StringBuilder(384);
-
-		Xml.addXmlTag(doc, DMSLITEMSGTAG, msgtag);
-		Log.finest("dmslite.Message.buildReqMsg(): message to send is "
-			+ doc.length() + " bytes,msg:" + doc.toString() + ".");
-
-		byte[] array = doc.toString().getBytes();
-
-		return (array);
+		if(m_xmlreqres == null)
+			return new byte[0];
+		return m_xmlreqres.buildReqMsg(DMSLITEMSGTAG);
 	}
 }

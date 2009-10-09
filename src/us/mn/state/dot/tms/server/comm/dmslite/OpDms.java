@@ -270,6 +270,22 @@ abstract public class OpDms extends OpDevice {
 		ControllerHelper.updateInterStatus(controller, is);
 	}
 
+	/** Sends a request to the field controller and reads the response. */
+	protected void sendRead(Message mess) throws IOException {
+		mess.getRequest(getOpDms());	// throws IOException
+
+		// At this point, either a complete response or an 
+		// intermediate status update XML response was read.
+
+		// intermediate status update?
+		if(null != mess.searchForReqResItem("InterStatus")) {
+			String istatus = mess.searchForReqResItem("Msg");
+			if(istatus != null)
+				updateInterStatus(istatus, false);
+			STime.sleep(2000);
+		}
+	}
+
 	/** Phase to query the dms config, which is used by subclasses */
 	protected class PhaseGetConfig extends Phase
 	{
@@ -297,7 +313,8 @@ abstract public class OpDms extends OpDevice {
 		 * @see Messenger#shouldReopen()
 		 */
 		protected Phase poll(AddressedMessage argmess)
-			throws IOException {
+			throws IOException 
+		{
 
 			// Log.finest("dmslite.OpQueryConfig.PhaseGetConfig.poll(msg) called.");
 			assert argmess instanceof Message : "wrong message type";
@@ -307,10 +324,10 @@ abstract public class OpDms extends OpDevice {
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
 
-			// build req msg
+			// build xml request and expected response			
+			XmlReqRes xrr = new XmlReqRes("GetDmsConfigReqMsg", 
+				"GetDmsConfigRespMsg");
 			mess.setName(getOpName());
-			mess.setReqMsgName("GetDmsConfigReqMsg");
-			mess.setRespMsgName("GetDmsConfigRespMsg");
 
 			String drop = Integer.toString(controller.getDrop());
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
@@ -322,11 +339,12 @@ abstract public class OpDms extends OpDevice {
 				"characterWidthPixels", "signHeightPixels",
 				"signWidthPixels"
 			});
-			mess.add(rr0);
-			mess.add(rr1);
+			xrr.add(rr0);
+			xrr.add(rr1);
 
-			// send msg
-            		mess.getRequest(getOpDms());	// throws IOException
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
 
 			// parse resp msg
 			long id = 0;

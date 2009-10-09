@@ -283,24 +283,29 @@ public class OpQueryMsg extends OpDms {
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
 
-			// build req msg and expected response
+			// build xml request and expected response			
+			XmlReqRes xrr = new XmlReqRes("StatusReqMsg", 
+				"StatusRespMsg");
 			mess.setName(getOpName());
-			mess.setReqMsgName("StatusReqMsg");
-			mess.setRespMsgName("StatusRespMsg");
+
+			// id
 			String addr = Integer.toString(controller.getDrop());
 			ReqRes rr0 = new ReqRes("Id", generateId(), 
 				new String[] {"Id"});
+			xrr.add(rr0);
+
+			// address
 			ReqRes rr1 = new ReqRes("Address", addr, new String[] {
 				"IsValid", "ErrMsg", "MsgTextAvailable", 
 				"MsgText", "ActPriority", "RunPriority", 
 				"Owner", "UseOnTime", "OnTime", "UseOffTime", 
 				"OffTime", "DisplayTimeMS", "UseBitmap", 
 				"Bitmap"});
+			xrr.add(rr1);
 
-			// send msg to field controller
-			mess.add(rr0);
-			mess.add(rr1);
-            		mess.getRequest(getOpDms());	// throws IOException
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
 
 			// parse resp msg
 			long id = 0;

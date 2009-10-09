@@ -235,58 +235,66 @@ public class OpMessage extends OpDms {
 			 *     </DmsLite>
 			 */
 
+			mess.setName(getOpName());
+
+			// build xml request and expected response			
 			final String reqname = "SetSnglPgReqMsg";
 			final String resname = "SetSnglPgRespMsg";
+			XmlReqRes xrr = new XmlReqRes(reqname, resname);
 
-			mess.setName(getOpName());
-			mess.setReqMsgName(reqname);
-			mess.setRespMsgName(resname);
-
-			String addr = Integer.toString(controller.getDrop());
+			// id
 			ReqRes rr0 = new ReqRes("Id", generateId(), 
 				new String[] {"Id"});
+			xrr.add(rr0);
+
+			// address
+			String addr = Integer.toString(controller.getDrop());
 			ReqRes rr1 = new ReqRes("Address", addr,
 				new String[] { "IsValid", "ErrMsg" });
-			mess.add(rr0);
-			mess.add(rr1);
+			xrr.add(rr1);
 
 			// MsgText
-			mess.add(new ReqRes("MsgText", m_sm.getMulti()));
+			xrr.add(new ReqRes("MsgText", m_sm.getMulti()));
 
 			// UseOnTime, always true
-			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
+			xrr.add(new ReqRes("UseOnTime", 
+				new Boolean(true).toString()));
 
 			// OnTime
 			Calendar ontime=calcMsgOnTime();
-			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
+			xrr.add(new ReqRes("OnTime", 
+				STime.CalendarToXML(ontime)));
 
 			// UseOffTime
 			boolean useofftime = m_sm.getDuration() != null;
-			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
+			xrr.add(new ReqRes("UseOffTime",
+				new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
 			String offtime= (useofftime ?
 				STime.CalendarToXML(calcMsgOffTime(ontime)) :
 				"");
-			mess.add(new ReqRes("OffTime",offtime));
+			xrr.add(new ReqRes("OffTime",offtime));
 
 			// activation priority
-			mess.add(new ReqRes("ActPriority", 
+			xrr.add(new ReqRes("ActPriority", 
 				m_sm.getActivationPriority(), new String[0]));
 
 			// runtime priority
-			mess.add(new ReqRes("RunPriority", 
+			xrr.add(new ReqRes("RunPriority", 
 				m_sm.getRunTimePriority(), new String[0]));
 
 			// Owner
-			String owner = (m_user != null ? m_user.getName() : "");
-			mess.add(new ReqRes("Owner", owner));
+			String owner = 
+				(m_user != null ? m_user.getName() : "");
+			xrr.add(new ReqRes("Owner", owner));
 
 			// bitmap
-			mess.add(new ReqRes("Bitmap", getBitmapPage(0)));
+			xrr.add(new ReqRes("Bitmap", getBitmapPage(0)));
 
-			// send msg to field controller
-            		mess.getRequest(getOpDms());	// throws IOException
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
 
 			// parse resp msg
 			{
@@ -404,67 +412,71 @@ public class OpMessage extends OpDms {
 			 *    </DmsLite>
 			 */
 
-			ReqRes rr0;
-			ReqRes rr1;
-			{
-				mess.setName(getOpName());
-				mess.setReqMsgName("SetMultPgReqMsg");
-				mess.setRespMsgName("SetMultPgRespMsg");
+			// build xml request and expected response			
+			XmlReqRes xrr = new XmlReqRes("SetMultPgReqMsg", 
+				"SetMultPgRespMsg");
+			mess.setName(getOpName());
 
+			ReqRes rr0;
+			{
 				// id
 				rr0 = new ReqRes("Id", generateId(), 
 					new String[] {"Id"});
-				mess.add(rr0);
+				xrr.add(rr0);
+			}
 
+			ReqRes rr1;
+			{
 				// drop
 				String addr = Integer.toString(
 					controller.getDrop());
 				rr1 = new ReqRes("Address", addr,new 
 					String[] { "IsValid", "ErrMsg" });
-				mess.add(rr1);
+				xrr.add(rr1);
 			}
 
 			// MsgText
-			mess.add(new ReqRes("MsgText",m_sm.getMulti()));
+			xrr.add(new ReqRes("MsgText",m_sm.getMulti()));
 
 			// UseOnTime, always true
-			mess.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
+			xrr.add(new ReqRes("UseOnTime",new Boolean(true).toString()));
 
 			// OnTime
 			Calendar ontime=calcMsgOnTime();
-			mess.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
+			xrr.add(new ReqRes("OnTime",STime.CalendarToXML(ontime)));
 
 			// UseOffTime
 			boolean useofftime = m_sm.getDuration() != null;
-			mess.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
+			xrr.add(new ReqRes("UseOffTime",new Boolean(useofftime).toString()));
 
 			// OffTime, only used if duration is not infinite
 			String offtime= (useofftime ? 
 				STime.CalendarToXML(calcMsgOffTime(ontime)) : 
 				"");
-			mess.add(new ReqRes("OffTime",offtime));
+			xrr.add(new ReqRes("OffTime",offtime));
 
 			// DisplayTimeMS: extract from 1st page of MULTI
 			DmsPgTime pt = determinePageOnTime(m_sm.getMulti());
-			mess.add(new ReqRes("DisplayTimeMS", new Integer(pt.toMs()).toString()));
+			xrr.add(new ReqRes("DisplayTimeMS", new Integer(pt.toMs()).toString()));
 
 			// activation priority
-			mess.add(new ReqRes("ActPriority", 
+			xrr.add(new ReqRes("ActPriority", 
 				m_sm.getActivationPriority(), new String[0]));
 
 			// runtime priority
-			mess.add(new ReqRes("RunPriority", 
+			xrr.add(new ReqRes("RunPriority", 
 				m_sm.getRunTimePriority(), new String[0]));
 
 			// Owner
 			String owner = (m_user != null ? m_user.getName() : "");
-			mess.add(new ReqRes("Owner", owner));
+			xrr.add(new ReqRes("Owner", owner));
 
 			// bitmap
-			mess.add(new ReqRes("Bitmap", getBitmapPage(0) + getBitmapPage(1)));
+			xrr.add(new ReqRes("Bitmap", getBitmapPage(0) + getBitmapPage(1)));
 
-			// send msg to field controller
-           		mess.getRequest(getOpDms());	// throws IOException
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
 
 			// parse resp msg
 			{

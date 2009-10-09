@@ -71,26 +71,29 @@ public class OpReset extends OpDms
 			// set message attributes as a function of the operation
 			setMsgAttributes(mess);
 
-			// build req msg and expected response
+			// build xml request and expected response			
+			XmlReqRes xrr = new XmlReqRes("SetInitReqMsg", 
+				"SetInitRespMsg");
 			mess.setName(getOpName());
-			mess.setReqMsgName("SetInitReqMsg");
-			mess.setRespMsgName("SetInitRespMsg");
 
 			// id
 			ReqRes rr0 = new ReqRes("Id", generateId(), new String[] {"Id"});
-			mess.add(rr0);
+			xrr.add(rr0);
 
 			// everything else
 			String addr = Integer.toString(controller.getDrop());
 			ReqRes rr1 = new ReqRes("Address", addr, new 
 				String[] {"IsValid", "ErrMsg"});
-			mess.add(rr1);
+			xrr.add(rr1);
 
-			// send msg
-			mess.getRequest(getOpDms()); // throws IOException
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
 
-			// parse resp msg
-			// e.g. <DmsLite><SetInitRespMsg><Id>123</Id><IsValid>true</IsValid><ErrMsg></ErrMsg></SetInitRespMsg></DmsLite>
+			// parse resp msg:
+			// <DmsLite><SetInitRespMsg>
+			//	<Id>123</Id><IsValid>true</IsValid><ErrMsg></ErrMsg>
+			// </SetInitRespMsg></DmsLite>
 			long id = 0;
 			boolean valid = false;
 			String errmsg = "";

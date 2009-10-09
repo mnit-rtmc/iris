@@ -86,40 +86,38 @@ public class OpBlank extends OpDms
 			//	<Owner>bob</Owner>
 			// </SetBlankMsgReqMsg></DmsLite>
 
-			// build req msg
-			String reqname = "SetBlankMsgReqMsg";
-			String resname = "SetBlankMsgRespMsg";
-
+			// build xml request and expected response			
+			XmlReqRes xrr = new XmlReqRes("SetBlankMsgReqMsg", 
+				"SetBlankMsgRespMsg");
 			mess.setName(getOpName());
-			mess.setReqMsgName(reqname);
-			mess.setRespMsgName(resname);
 
 			// id
 			ReqRes rr0 = new ReqRes("Id", generateId(),
 				new String[] { "Id" });
-			mess.add(rr0);
+			xrr.add(rr0);
 
 			// drop
 			String drop = SString.intToString(controller.getDrop());
 			ReqRes rr1 = new ReqRes("Address", drop,
 				new String[] { "IsValid", "ErrMsg" });
-			mess.add(rr1);
+			xrr.add(rr1);
 
 			// ActPriority
-			mess.add(new ReqRes("ActPriority", 
+			xrr.add(new ReqRes("ActPriority", 
 				m_sm.getActivationPriority(), new String[0]));
 
 			// RunPriority
-			mess.add(new ReqRes("RunPriority", 
+			xrr.add(new ReqRes("RunPriority", 
 				m_sm.getRunTimePriority(), new String[0]));
 
 			// owner
 			String user = (m_user != null ? m_user.getName() : "");
 			ReqRes rr3 = new ReqRes("Owner", user, new String[0]);
-			mess.add(rr3);
+			xrr.add(rr3);
 
-			// send msg
-			mess.getRequest(getOpDms());    // throws IOException
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
 
 			// response: 
 			// <DmsLite><SetBlankMsgRespMsg>
