@@ -62,6 +62,16 @@ public class ReqRes
 	 * @param reqname Name of the request field.
 	 * @param reqval Value of the request field.
 	 */
+	ReqRes(String reqname, boolean reqval) {
+		constructor(reqname, new Boolean(reqval).toString());
+	}
+
+	/**
+	 * Constructor for a request that contains no associated responses.
+	 *
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 */
 	ReqRes(String reqname, String reqval) {
 		constructor(reqname, reqval);
 	}
@@ -95,6 +105,15 @@ public class ReqRes
 	 *                 zero length if none). */
 	ReqRes(String reqname, int reqval, String[] resnames) {
 		constructor(reqname, SString.intToString(reqval), resnames);
+	}
+
+	/** Constructor for a request that contains associated responses.
+	 * @param reqname Name of the request field.
+	 * @param reqval Value of the request field.
+	 * @param resnames Names of all associated response fields (may be 
+	 *                 zero length if none). */
+	ReqRes(String reqname, boolean reqval, String[] resnames) {
+		constructor(reqname, new Boolean(reqval).toString(), resnames);
 	}
 
 	/** Constructor for a request that contains associated responses.
