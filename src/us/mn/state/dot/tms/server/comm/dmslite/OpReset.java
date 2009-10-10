@@ -47,6 +47,87 @@ public class OpReset extends OpDms
 		return phase1;
 	}
 
+	/** Build request message in this format:
+	 *	<DmsLite><SetBlankMsgReqMsg>
+	 *		<Id></Id>
+	 *		<Address>1</Address>
+	 *	</SetBlankMsgReqMsg></DmsLite> */
+	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
+		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+
+		// id
+		xrr.add(new ReqRes("Id", generateId(), new String[] {"Id"}));
+
+		// everything else
+		String addr = Integer.toString(controller.getDrop());
+		xrr.add(new ReqRes("Address", addr, new 
+			String[] {"IsValid", "ErrMsg"}));
+
+		return xrr;
+	}
+
+	/** Parse response.
+	 *	<DmsLite><SetInitRespMsg>
+	 *		<Id></Id>
+	 *		<IsValid>true</IsValid>
+	 *		<ErrMsg></ErrMsg>
+	 *	</SetInitRespMsg></DmsLite>
+	 *  @return True to retry the operation else false if done. */
+	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+		long id = 0;
+		boolean valid = false;
+		String errmsg = "";
+
+		// parse response
+		try {
+			// id
+			id = new Long(xrr.getResValue("Id"));
+
+			// valid flag
+			valid = new Boolean(xrr.getResValue("IsValid"));
+
+			// error message text
+			errmsg = xrr.getResValue("ErrMsg");
+			if(!valid && errmsg.length() <= 0)
+				errmsg = FAILURE_UNKNOWN;
+
+		} catch (IllegalArgumentException ex) {
+			Log.severe("OpReset.PhaseResetDms: " +
+				"Malformed XML received:" + ex +
+				", id=" + id);
+			valid=false;
+			errmsg=ex.getMessage();
+			handleCommError(EventType.PARSING_ERROR,errmsg);
+		}
+
+		// update 
+		complete(mess);
+
+		// process response
+		if(valid) {
+			setErrorMsg("");
+
+			// set blank message
+			SignMessage sm = m_dms.createBlankMessage();
+			if(sm != null)
+                		m_dms.setMessageCurrent(sm, null);
+
+		// valid flag is false
+		} else {
+			Log.finest("OpReset: isvalid is false, " +
+				"errmsg=" + errmsg);
+			setErrorMsg(errmsg);
+
+			// try again
+			if (flagFailureShouldRetry(errmsg)) {
+				Log.finest("OpReset: will retry " +
+					"failed operation.");
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/**
 	 * Phase to reset dms.
 	 * Note, the type of exception thrown here determines
@@ -59,90 +140,30 @@ public class OpReset extends OpDms
 	protected class PhaseResetDms extends Phase
 	{
 		/** Query current message */
-		protected Phase poll(AddressedMessage argmess) throws IOException {
+		protected Phase poll(AddressedMessage argmess) 
+			throws IOException 
+		{
 			updateInterStatus("Starting operation", false);
 
 			Log.finest(
 			    "OpReset.PhaseResetDms.poll(msg) called.");
-			assert argmess instanceof Message : "wrong message type";
 
 			Message mess = (Message) argmess;
 
-			// set message attributes as a function of the operation
+			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
 			// build xml request and expected response			
-			XmlReqRes xrr = new XmlReqRes("SetInitReqMsg", 
-				"SetInitRespMsg");
 			mess.setName(getOpName());
-
-			// id
-			xrr.add(new ReqRes("Id", generateId(), new String[] {"Id"}));
-
-			// everything else
-			String addr = Integer.toString(controller.getDrop());
-			xrr.add(new ReqRes("Address", addr, new 
-				String[] {"IsValid", "ErrMsg"}));
+			XmlReqRes xrr = buildReqRes("SetInitReqMsg", 
+				"SetInitRespMsg");
 
 			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
 
-			// parse resp msg:
-			// <DmsLite><SetInitRespMsg>
-			//	<Id>123</Id><IsValid>true</IsValid><ErrMsg></ErrMsg>
-			// </SetInitRespMsg></DmsLite>
-			long id = 0;
-			boolean valid = false;
-			String errmsg = "";
-
-			// parse response
-			try {
-				// id
-				id = new Long(xrr.getResValue("Id"));
-
-				// valid flag
-				valid = new Boolean(xrr.getResValue("IsValid"));
-
-				// error message text
-				errmsg = xrr.getResValue("ErrMsg");
-				if(!valid && errmsg.length() <= 0)
-					errmsg = FAILURE_UNKNOWN;
-
-			} catch (IllegalArgumentException ex) {
-				Log.severe(
-				    "OpReset.PhaseResetDms: Malformed XML received:"+ ex+", id="+id);
-				valid=false;
-				errmsg=ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR,errmsg);
-			}
-
-			// update 
-			complete(mess);
-
-			// process response
-			if(valid) {
-				setErrorMsg("");
-
-				// set blank message
-				SignMessage sm = m_dms.createBlankMessage();
-				if(sm != null)
-	                		m_dms.setMessageCurrent(sm, null);
-
-			// valid flag is false
-			} else {
-				Log.finest(
-				    "OpReset: isvalid is false, errmsg="+errmsg);
-				setErrorMsg(errmsg);
-
-				// try again
-				if (flagFailureShouldRetry(errmsg)) {
-					Log.finest("OpReset: will retry failed operation.");
-					return this;
-				}
-			}
-
-			// this operation is complete
+			if(parseResponse(mess, xrr))
+				return this;
 			return null;
 		}
 	}

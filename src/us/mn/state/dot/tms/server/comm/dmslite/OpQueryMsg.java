@@ -55,7 +55,9 @@ public class OpQueryMsg extends OpDms {
 	 *  @param req Device request.
 	 *  @param startup True to indicate this is the device startup 
 	 *	   request, which is ignored for DMS on dial-up lines. */
-	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req, boolean startup) {
+	public OpQueryMsg(DMSImpl d, User u, DeviceRequest req, 
+		boolean startup) 
+	{
 		super(DEVICE_DATA, d, "Retrieving message", u);
 		m_req = req;
 		m_startup = startup;
@@ -70,19 +72,22 @@ public class OpQueryMsg extends OpDms {
 	 * @return Duration in minutes; null indicates no expiration.
 	 * @throws IllegalArgumentException if invalid args.
 	 */
-	static private Integer calcMsgDuration(boolean useont, boolean useofft,
-					   Calendar ontime, Calendar offtime)
+	static private Integer calcMsgDuration(boolean useont, 
+		boolean useofft, Calendar ontime, Calendar offtime)
 	{
 		if(!useont) {
-			throw new IllegalArgumentException("must have ontime in calcMsgDuration.");
+			throw new IllegalArgumentException(
+				"must have ontime in calcMsgDuration.");
 		}
 		if(!useofft)
 			return null;
 		if(ontime == null) {
-			throw new IllegalArgumentException("invalid null ontime in calcMsgDuration.");
+			throw new IllegalArgumentException(
+				"invalid null ontime in calcMsgDuration.");
 		}
 		if(offtime == null) {
-			throw new IllegalArgumentException("invalid null offtime in calcMsgDuration.");
+			throw new IllegalArgumentException(
+				"invalid null offtime in calcMsgDuration.");
 		}
 
 		// calc diff in mins
@@ -128,7 +133,7 @@ public class OpQueryMsg extends OpDms {
 	}
 
 	/** This is a hack.
-	 * @see us.mn.state.dot.tms.client.dms.SignTextComboBoxModel.ignoreLineHack
+	 * @see SignTextComboBoxModel.ignoreLineHack
 	 */
 	static protected String flagIgnoredSignLineHack(String line) {
 		return "_" + line + "_";
@@ -249,6 +254,239 @@ public class OpQueryMsg extends OpDms {
 		return ret;
 	}
 
+	/** Build request message in this format:
+	 *	<DmsLite><SetBlankMsgReqMsg>
+	 *		<Id></Id>
+	 *		<Address>1</Address>
+	 *	</SetBlankMsgReqMsg></DmsLite>
+	 */
+	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
+		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+
+		// id
+		String addr = Integer.toString(controller.getDrop());
+		xrr.add(new ReqRes("Id", generateId(), 
+			new String[] {"Id"}));
+
+		// address
+		xrr.add(new ReqRes("Address", addr, new String[] {
+			"IsValid", "ErrMsg", "MsgTextAvailable", 
+			"MsgText", "ActPriority", "RunPriority", 
+			"Owner", "UseOnTime", "OnTime", "UseOffTime", 
+			"OffTime", "DisplayTimeMS", "UseBitmap", 
+			"Bitmap"}));
+
+		return xrr;
+	}
+
+	/** Parse response.
+	 *  @return True to retry the operation else false if done. */
+	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+		long id = 0;
+		boolean valid = false;
+		String errmsg = "";
+		boolean txtavail = false;
+		String msgtext = "";
+		DMSMessagePriority apri = DMSMessagePriority.INVALID;
+		DMSMessagePriority rpri = DMSMessagePriority.INVALID;
+		String owner = "";
+		boolean useont = false;
+		Calendar ont = new GregorianCalendar();
+		boolean useofft = false;
+		Calendar offt = new GregorianCalendar();
+		DmsPgTime pgOnTime = new DmsPgTime(0);
+		boolean usebitmap = false;
+		String bitmap = "";
+
+		// parse response
+		try {
+			// id
+			id = new Long(xrr.getResValue("Id"));
+
+			// valid flag
+			valid = new Boolean(xrr.getResValue("IsValid"));
+
+			// error message text
+			errmsg = xrr.getResValue("ErrMsg");
+			if(!valid && errmsg.length() <= 0)
+				errmsg = FAILURE_UNKNOWN;
+
+			if(valid) {
+				// msg text available
+				txtavail = new Boolean(
+				    xrr.getResValue("MsgTextAvailable"));
+
+				// msg text
+				msgtext = xrr.getResValue("MsgText");
+
+				// activation priority
+				apri = DMSMessagePriority.fromOrdinal(SString.
+					stringToInt(xrr.getResValue(
+					"ActPriority")));
+
+				// runtime priority
+				rpri = DMSMessagePriority.fromOrdinal(SString.
+					stringToInt(xrr.getResValue(
+					"RunPriority")));
+
+				// owner
+				owner = xrr.getResValue("Owner");
+
+				// ontime
+				useont = new Boolean(xrr.getResValue(
+					"UseOnTime"));
+				if(useont) {
+					ont.setTime(STime.XMLtoDate(
+						xrr.getResValue("OnTime")));
+				}
+
+				// offtime
+				useofft = new Boolean(xrr.getResValue(
+					"UseOffTime"));
+				if(useofft) {
+					offt.setTime(STime.XMLtoDate(
+						xrr.getResValue("OffTime")));
+				}
+
+				// display time (pg on-time)
+				int ms = SString.stringToInt(xrr.getResValue(
+					"DisplayTimeMS"));
+				pgOnTime = new DmsPgTime(
+					DmsPgTime.MsToTenths(ms));
+				Log.finest("PhaseQueryMsg: ms=" + ms +
+					", pgOnTime="+pgOnTime.toMs());
+
+				// bitmap
+				usebitmap = new Boolean(xrr.getResValue(
+					"UseBitmap"));
+				bitmap = xrr.getResValue("Bitmap");
+
+				Log.finest(
+					"OpQueryMsg() parsed msg values: " +
+					"IsValid:" + valid + 
+					", MsgTextAvailable:" + txtavail + 
+					", MsgText:" + msgtext + 
+					", ActPriority:"  + apri + 
+					", RunPriority:"  + rpri + 
+					", Owner:"  + owner + 
+					", OnTime:"  + ont.getTime() + 
+					", OffTime:" + offt.getTime() + 
+					", pgOnTime:" + pgOnTime + 
+					", bitmap:" + bitmap);
+			}
+		} catch (IllegalArgumentException ex) {
+			Log.severe("OpQueryMsg: Malformed XML received:" +
+			    ex + ", id=" + id);
+			valid=false;
+			errmsg=ex.getMessage();
+			handleCommError(EventType.PARSING_ERROR,errmsg);
+		}
+
+		// update 
+		complete(mess);
+
+		// user who created the message retrieved from the DMS
+		User irisUser = null;
+
+		// process response
+		if(valid) {
+			setErrorMsg("");
+
+			// get user name via owner
+			if(owner != null) {
+				irisUser = IrisUserHelper.lookup(owner);
+				String iuser = (irisUser == null ? 
+					"null" : irisUser.getName());
+				Log.finest("OpQueryMsg: owner read from " + 
+					"sensorserver=" + owner + 
+					", Iris user lookup=" + iuser);
+			}
+
+			// have on time? if not, create
+			if (!useont) {
+				useont=true;
+				ont=new GregorianCalendar();
+			}
+
+			// error checking: valid off time?
+			if (useont && useofft && offt.compareTo(ont)<=0) {
+				useofft=false;
+			}
+
+			// calc message duration
+			Integer duramins = calcMsgDuration(useont,
+				useofft, ont, offt);
+
+			// have text
+			if(txtavail) {
+
+				// update page on-time in MULTI with value  
+				// read from controller, which comes from 
+				// the DisplayTimeMS XML field, not the 
+				// MULTI string.
+				msgtext = updatePageOnTime(msgtext, pgOnTime);
+
+				// this shouldn't happen if we have msg text
+				if(apri == DMSMessagePriority.INVALID) {
+					Log.warning("Received invalid " +
+						"actpriority for id=" + id);
+					apri = DMSMessagePriority.OPERATOR;
+				}
+				if(rpri == DMSMessagePriority.INVALID) {
+					Log.warning("Received invalid " +
+						"runpriority for id=" + id);
+					rpri = DMSMessagePriority.OPERATOR;
+				}
+				SignMessageImpl sm = (SignMessageImpl)
+					m_dms.createMessage(msgtext,
+					apri, rpri, duramins);
+				if(sm != null)
+					m_dms.setMessageCurrent(sm, irisUser);
+
+			// don't have text
+			} else {
+
+				SignMessageImpl sm = null;
+				if(usebitmap) {
+					sm = createSignMessageWithBitmap(
+						bitmap, duramins, pgOnTime, 
+						apri, rpri);
+					if(sm != null) {
+						m_dms.setMessageCurrent(sm, 
+							irisUser);
+					}
+				}
+				if(sm == null) {
+					sm = (SignMessageImpl)m_dms.
+						createMessage("",
+						DMSMessagePriority.OVERRIDE, 
+						DMSMessagePriority.OVERRIDE, 
+						null);
+					if(sm != null) {
+						m_dms.setMessageCurrent(sm, 
+							irisUser);
+					}
+				}
+			}
+
+		// valid flag is false
+		} else {
+			Log.finest("OpQueryMsg: response from SensorServer " +
+				"received, ignored, Xml valid field is " +
+				"false, errmsg=" + errmsg);
+			setErrorMsg(errmsg);
+
+			// try again
+			if(flagFailureShouldRetry(errmsg)) {
+				Log.finest("OpQueryMsg: will retry op.");
+				return true;
+			}
+		}
+
+		// this operation is complete
+		return false;
+	}
+
 	/**
 	 * Phase to get current message
 	 * Note, the type of exception throw here determines
@@ -265,228 +503,31 @@ public class OpQueryMsg extends OpDms {
 			throws IOException
 		{
 			// ignore startup operations for DMS on dial-up lines
-			if(m_startup && !DMSHelper.isPeriodicallyQueriable(m_dms))
+			if(m_startup && 
+				!DMSHelper.isPeriodicallyQueriable(m_dms)) {
 				return null;
+			}
 
 			updateInterStatus("Starting operation", false);
-			Log.finest(
-				"OpQueryMsg.PhaseQueryMsg.poll(msg) called, " +
-				"dms=" + m_dms.getName());
-			assert argmess instanceof Message :
-			       "wrong message type";
+			Log.finest("OpQueryMsg.PhaseQueryMsg.poll(msg) " +
+				"called, dms=" + m_dms.getName());
 
 			Message mess = (Message) argmess;
 
-			// user who created the message retrieved from the DMS
-			User irisUser = null;
-
-			// set message attributes as a function of the operation
+			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
 			// build xml request and expected response			
-			XmlReqRes xrr = new XmlReqRes("StatusReqMsg", 
-				"StatusRespMsg");
 			mess.setName(getOpName());
-
-			// id
-			String addr = Integer.toString(controller.getDrop());
-			xrr.add(new ReqRes("Id", generateId(), 
-				new String[] {"Id"}));
-
-			// address
-			xrr.add(new ReqRes("Address", addr, new String[] {
-				"IsValid", "ErrMsg", "MsgTextAvailable", 
-				"MsgText", "ActPriority", "RunPriority", 
-				"Owner", "UseOnTime", "OnTime", "UseOffTime", 
-				"OffTime", "DisplayTimeMS", "UseBitmap", 
-				"Bitmap"}));
+			XmlReqRes xrr = buildReqRes("StatusReqMsg", 
+				"StatusRespMsg");
 
 			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
 
-			// parse resp msg
-			long id = 0;
-			boolean valid = false;
-			String errmsg = "";
-			boolean msgtextavailable = false;
-			String msgtext = "";
-			DMSMessagePriority apri = DMSMessagePriority.INVALID;
-			DMSMessagePriority rpri = DMSMessagePriority.INVALID;
-			String owner = "";
-			boolean useont = false;
-			Calendar ont = new GregorianCalendar();
-			boolean useofft = false;
-			Calendar offt = new GregorianCalendar();
-			DmsPgTime pgOnTime = new DmsPgTime(0);
-			boolean usebitmap = false;
-			String bitmap = "";
-
-			// parse respose
-			try {
-				// id
-				id = new Long(xrr.getResValue("Id"));
-
-				// valid flag
-				valid = new Boolean(xrr.getResValue("IsValid"));
-
-				// error message text
-				errmsg = xrr.getResValue("ErrMsg");
-				if(!valid && errmsg.length() <= 0)
-					errmsg = FAILURE_UNKNOWN;
-
-				if(valid) {
-					// msg text available
-					msgtextavailable = new Boolean(
-					    xrr.getResValue("MsgTextAvailable"));
-
-					// msg text
-					msgtext = xrr.getResValue("MsgText");
-
-					// activation priority
-					apri = DMSMessagePriority.fromOrdinal(SString.
-						stringToInt(xrr.getResValue("ActPriority")));
-
-					// runtime priority
-					rpri = DMSMessagePriority.fromOrdinal(SString.
-						stringToInt(xrr.getResValue("RunPriority")));
-
-					// owner
-					owner = xrr.getResValue("Owner");
-
-					// ontime
-					useont = new Boolean(xrr.getResValue("UseOnTime"));
-					if(useont)
-						ont.setTime(STime.XMLtoDate(xrr.getResValue("OnTime")));
-
-					// offtime
-					useofft = new Boolean(xrr.getResValue("UseOffTime"));
-					if(useofft)
-						offt.setTime(STime.XMLtoDate(xrr.getResValue("OffTime")));
-
-					// display time (pg on-time)
-					int ms = SString.stringToInt(xrr.getResValue("DisplayTimeMS"));
-					pgOnTime = new DmsPgTime(DmsPgTime.MsToTenths(ms)); 
-					Log.finest("OpQueryMsg.PhaseQueryMsg.poll(msg): ms=" + 
-						ms + ", pgOnTime="+pgOnTime.toMs());
-
-					// bitmap
-					usebitmap = new Boolean(xrr.getResValue("UseBitmap"));
-					bitmap = xrr.getResValue("Bitmap");
-
-					Log.finest(
-						"OpQueryMsg.PhaseQueryMsg.poll(msg) parsed msg values: " +
-						"IsValid:" + valid + 
-						", MsgTextAvailable:" + msgtextavailable + 
-						", MsgText:" + msgtext + 
-						", ActPriority:"  + apri + 
-						", RunPriority:"  + rpri + 
-						", Owner:"  + owner + 
-						", OnTime:"  + ont.getTime() + 
-						", OffTime:" + offt.getTime() + 
-						", pgOnTime:" + pgOnTime + 
-						", bitmap:" + bitmap);
-				}
-			} catch (IllegalArgumentException ex) {
-				Log.severe("OpQueryMsg.PhaseQueryMsg: Malformed XML received:"
-				    + ex+", id="+id);
-				valid=false;
-				errmsg=ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR,errmsg);
-			}
-
-			// update 
-			complete(mess);
-
-			// process response
-			if(valid) {
-				setErrorMsg("");
-
-				// get user name via owner
-				if(owner != null) {
-					irisUser = IrisUserHelper.lookup(owner);
-					String iuser = (irisUser == null ? 
-						"null" : irisUser.getName());
-					Log.finest("OpQueryMsg: owner read from " + 
-						"sensorserver="+owner+", Iris user lookup="+iuser);
-				}
-
-				// error checking: have on time? if not, create new ontime
-				if (!useont) {
-					useont=true;
-					ont=new GregorianCalendar();
-					//Log.finest("NOTE: DmsLite.OpQueryMsg.PhaseQueryMsg():"+
-					//	" no ontime specified, assuming now.");
-				}
-
-				// error checking: valid off time?
-				if (useont && useofft && offt.compareTo(ont)<=0) {
-					useofft=false;
-					//Log.finest("NOTE: DmsLite.OpQueryMsg.PhaseQueryMsg():"+
-					//	" offtime <= ontime, so off time ignored.");
-				}
-
-				// calc message duration
-				Integer duramins = calcMsgDuration(useont,
-					useofft, ont, offt);
- 
-				// have text
-				if(msgtextavailable) {
-
-					// update page on-time in MULTI with value read 
-					// from controller, which comes from the DisplayTimeMS
-					// XML field, not the MULTI string.
-					msgtext = updatePageOnTime(msgtext, pgOnTime);
-
-					// this shouldn't happen if we have msg text
-					if(apri == DMSMessagePriority.INVALID) {
-						Log.warning("Received invalid actpriority for id=" + id);
-						apri = DMSMessagePriority.OPERATOR;
-					}
-					if(rpri == DMSMessagePriority.INVALID) {
-						Log.warning("Received invalid runpriority for id=" + id);
-						rpri = DMSMessagePriority.OPERATOR;
-					}
-					SignMessageImpl sm = (SignMessageImpl)
-						m_dms.createMessage(msgtext,
-						apri, rpri, duramins);
-					if(sm != null)
-						m_dms.setMessageCurrent(sm, irisUser);
-
-				// don't have text
-				} else {
-
-					SignMessageImpl sm = null;
-					if(usebitmap) {
-						sm = createSignMessageWithBitmap(bitmap, 
-							duramins, pgOnTime, apri, rpri);
-						if(sm != null)
-							m_dms.setMessageCurrent(sm, irisUser);
-					}
-					if(sm == null) {
-						sm = (SignMessageImpl)m_dms.createMessage("",
-							DMSMessagePriority.OVERRIDE, 
-							DMSMessagePriority.OVERRIDE, null);
-						if(sm != null)
-							m_dms.setMessageCurrent(sm, irisUser);
-					}
-				}
-
-			// valid flag is false
-			} else {
-				Log.finest(
-					"OpQueryMsg: response from SensorServer received, " +
-					"ignored, Xml valid field is false, errmsg="+errmsg);
-				setErrorMsg(errmsg);
-
-				// try again
-				if(flagFailureShouldRetry(errmsg)) {
-					Log.finest("OpQueryMsg: will retry failed operation.");
-					return this;
-				}
-			}
-
-			// this operation is complete
+			if(parseResponse(mess, xrr))
+				return this;
 			return null;
 		}
 	}

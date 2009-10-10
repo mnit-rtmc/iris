@@ -147,8 +147,8 @@ abstract public class OpDms extends OpDevice {
 		assert m_dms != null;
 		SignAccessType at = getSignAccessType(m_dms);
 		if(at == SignAccessType.DIALUPMODEM) {
-			int secs = SystemAttrEnum.DMSLITE_MODEM_OP_TIMEOUT_SECS.
-				getInt();
+			int secs = SystemAttrEnum.
+				DMSLITE_MODEM_OP_TIMEOUT_SECS.getInt();
 			Log.finest("connection type is modem" +
 				", dms=" + m_dms.toString() +
 				", timeout secs=" + secs);
@@ -315,13 +315,9 @@ abstract public class OpDms extends OpDevice {
 		protected Phase poll(AddressedMessage argmess)
 			throws IOException 
 		{
-
-			// Log.finest("dmslite.OpQueryConfig.PhaseGetConfig.poll(msg) called.");
-			assert argmess instanceof Message : "wrong message type";
-
 			Message mess = (Message) argmess;
 
-			// set message attributes as a function of the operation
+			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
 			// build xml request and expected response			
@@ -330,12 +326,14 @@ abstract public class OpDms extends OpDevice {
 			mess.setName(getOpName());
 
 			String drop = Integer.toString(controller.getDrop());
-			xrr.add(new ReqRes("Id", generateId(), new String[] {"Id"}));
+			xrr.add(new ReqRes("Id", generateId(), 
+				new String[] {"Id"}));
 			xrr.add(new ReqRes("Address", drop, new String[] {
-				"IsValid", "ErrMsg", "signAccess", "model", "make",
-				"version", "type", "horizBorder", "vertBorder",
-				"horizPitch", "vertPitch", "signHeight",
-				"signWidth", "characterHeightPixels",
+				"IsValid", "ErrMsg", "signAccess", "model", 
+				"make", "version", "type", "horizBorder", 
+				"vertBorder", "horizPitch", "vertPitch", 
+				"signHeight", "signWidth", 
+				"characterHeightPixels", 
 				"characterWidthPixels", "signHeightPixels",
 				"signWidthPixels"
 			}));
@@ -369,7 +367,8 @@ abstract public class OpDms extends OpDevice {
 				id = new Long(xrr.getResValue("Id"));
 
 				// valid flag
-				valid = new Boolean(xrr.getResValue("IsValid"));
+				valid = new Boolean(xrr.getResValue(
+					"IsValid"));
 
 				// error message text
 				errmsg = xrr.getResValue("ErrMsg");
@@ -381,64 +380,69 @@ abstract public class OpDms extends OpDevice {
 
 				// valid message received?
 				if(valid) {
-					signAccess = xrr.getResValue("signAccess");
+					signAccess = xrr.getResValue(
+						"signAccess");
 					model = xrr.getResValue("model");
 					make = xrr.getResValue("make");
 					version = xrr.getResValue("version");
 
 					// determine matrix type
 					String stype = xrr.getResValue("type");
-					if(stype.toLowerCase().contains("full"))
+					if(stype.toLowerCase().contains(
+						"full")) 
+					{
 						type = DMSType.VMS_FULL;
-					else
-						Log.severe("SEVERE: Unknown matrix type read ("+stype+")");
+					} else {
+						Log.severe("SEVERE: Unknown "
+							+ "matrix type read (" 
+							+ stype + ")");
+					}
 
-					horizBorder = SString.stringToInt(
-						xrr.getResValue("horizBorder"));
-					vertBorder = SString.stringToInt(
-						xrr.getResValue("vertBorder"));
-					horizPitch = SString.stringToInt(
-						xrr.getResValue("horizPitch"));
-					vertPitch = SString.stringToInt(
-						xrr.getResValue("vertPitch"));
-					signHeight = SString.stringToInt(
-						xrr.getResValue("signHeight"));
-					signWidth = SString.stringToInt(
-						xrr.getResValue("signWidth"));
-					characterHeightPixels = SString.stringToInt(
-						xrr.getResValue(
-							"characterHeightPixels"));
-					characterWidthPixels = SString.stringToInt(
-						xrr.getResValue(
-							"characterWidthPixels"));
+					horizBorder = SString.stringToInt(xrr.
+						getResValue("horizBorder"));
+					vertBorder = SString.stringToInt(xrr.
+						getResValue("vertBorder"));
+					horizPitch = SString.stringToInt(xrr.
+						getResValue("horizPitch"));
+					vertPitch = SString.stringToInt(xrr.
+						getResValue("vertPitch"));
+					signHeight = SString.stringToInt(xrr.
+						getResValue("signHeight"));
+					signWidth = SString.stringToInt(xrr.
+						getResValue("signWidth"));
+					characterHeightPixels = SString.
+						stringToInt(xrr.getResValue(
+						"characterHeightPixels"));
+					characterWidthPixels = SString.
+						stringToInt(xrr.getResValue(
+						"characterWidthPixels"));
 					signHeightPixels = SString.stringToInt(
 						xrr.getResValue(
-							"signHeightPixels"));
+						"signHeightPixels"));
 					signWidthPixels = SString.stringToInt(
 						xrr.getResValue(
 							"signWidthPixels"));
-
-					// Log.finest("PhaseGetConfig.poll(msg) parsed msg values: valid:"+
-					// valid+", model:"+model+", make:"+make+"...etc.");
 				}
 			} catch (IllegalArgumentException ex) {
-				Log.severe("PhaseGetConfig: Malformed XML received:"+ex+", id="+id);
+				Log.severe("PhaseGetConfig: Malformed XML " +
+					"received:" + ex + ", id=" + id);
 				valid = false;
 				errmsg = ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR,errmsg);
+				handleCommError(EventType.PARSING_ERROR, 
+					errmsg);
 			}
 
-			// set config values
-			// these values are displayed in the DMS dialog, Configuration tab
+			// set config values these values are displayed in 
+			// the DMS dialog, Configuration tab
 			if(valid) {
 				setErrorMsg("");
 				m_dms.setModel(model);
-				m_dms.setSignAccess(signAccess);    // wizard, modem
+				m_dms.setSignAccess(signAccess); // wizard, modem
 				m_dms.setMake(make);
 				m_dms.setVersion(version);
 				m_dms.setDmsType(type);
-				m_dms.setHorizontalBorder(horizBorder);    // in mm
-				m_dms.setVerticalBorder(vertBorder);    // in mm
+				m_dms.setHorizontalBorder(horizBorder);// in mm
+				m_dms.setVerticalBorder(vertBorder);   // in mm
 				m_dms.setHorizontalPitch(horizPitch);
 				m_dms.setVerticalPitch(vertPitch);
 
@@ -454,19 +458,23 @@ abstract public class OpDms extends OpDevice {
 				m_dms.setHeightPixels(signHeightPixels);
 				m_dms.setWidthPixels(signWidthPixels);
 				// NOTE: these must be set last
-				m_dms.setCharHeightPixels(characterHeightPixels);
-				m_dms.setCharWidthPixels(characterWidthPixels);
+				m_dms.setCharHeightPixels(
+					characterHeightPixels);
+				m_dms.setCharWidthPixels(
+					characterWidthPixels);
 
 			// failure
 			} else {
-				Log.warning(
-					"PhaseGetConfig: response from SensorServer received, " +
-					"ignored because Xml valid field is false, errmsg=" + errmsg);
+				Log.warning("PhaseGetConfig: response from " +
+					"SensorServer received, ignored " +
+					"because Xml valid field is false, " +
+					"errmsg=" + errmsg);
 				setErrorMsg(errmsg);
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {
-					Log.finest("PhaseGetConfig: will retry failed operation");
+					Log.finest("PhaseGetConfig: will " +
+						"retry failed op.");
 					return this;
 				}
 			}

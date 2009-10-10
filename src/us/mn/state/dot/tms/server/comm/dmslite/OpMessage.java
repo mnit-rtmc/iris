@@ -331,12 +331,14 @@ public class OpMessage extends OpDms {
 
 	/** Return Xml request element name */
 	private String getXmlReqName() {
-		return (m_npages <= 1 ? "SetSnglPgReqMsg" : "SetMultPgReqMsg");
+		return (m_npages <= 1 ? 
+			"SetSnglPgReqMsg" : "SetMultPgReqMsg");
 	}
 
 	/** Return Xml request element name */
 	private String getXmlResName() {
-		return (m_npages <= 1 ? "SetSnglPgRespMsg" : "SetMultPgRespMsg");
+		return (m_npages <= 1 ? 
+			"SetSnglPgRespMsg" : "SetMultPgRespMsg");
 	}
 
 	/**
@@ -351,7 +353,8 @@ public class OpMessage extends OpDms {
 	protected class PhaseSendMessage extends Phase {
 
 		/**
-		 * Set the status to modify request. Called by Operation.poll().
+		 * Set the status to modify request. Called by 
+		 * Operation.poll().
 		 * @param argmess
 		 * @return next Phase to execute else null.
 		 * @throws IOException
@@ -365,7 +368,7 @@ public class OpMessage extends OpDms {
 
 			Message mess = (Message) argmess;
 
-			// set message attributes as a function of the operation
+			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
 			// build request response

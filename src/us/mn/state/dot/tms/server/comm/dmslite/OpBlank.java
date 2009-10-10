@@ -51,6 +51,107 @@ public class OpBlank extends OpDms
 		return phase1;
 	}
 
+	/** Build request message in this format:
+	 *	<DmsLite><SetBlankMsgReqMsg>
+	 *		<Id></Id>
+	 *		<Address>1</Address>
+	 *		<ActPriority>3</ActPriority>
+	 *		<RunPriority>3</RunPriority>
+	 *		<Owner>bob</Owner>
+	 *	</SetBlankMsgReqMsg></DmsLite>
+	 */
+	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
+		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+
+		// id
+		xrr.add(new ReqRes("Id", generateId(),
+			new String[] { "Id" }));
+
+		// address
+		xrr.add(new ReqRes("Address", controller.getDrop(),
+			new String[] { "IsValid", "ErrMsg" }));
+
+		// ActPriority
+		xrr.add(new ReqRes("ActPriority", 
+			m_sm.getActivationPriority(), new String[0]));
+
+		// RunPriority
+		xrr.add(new ReqRes("RunPriority", 
+			m_sm.getRunTimePriority(), new String[0]));
+
+		// owner
+		xrr.add(new ReqRes("Owner", 
+			m_user != null ? m_user.getName() : "", 
+			new String[0]));
+
+		return xrr;
+	}
+
+	/** Parse response.
+	 *	<DmsLite><SetBlankMsgRespMsg>
+	 *		<Id></Id>
+	 *		<IsValid>true</IsValid>
+	 *		<ErrMsg></ErrMsg>
+	 *	</SetBlankMsgRespMsg></DmsLite>
+	 *  @return True to retry the operation else false if done. */
+	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+		long id = 0;
+		boolean valid = false;
+		String errmsg = "";
+
+		try {
+			// id
+			id = new Long(xrr.getResValue("Id"));
+
+			// isvalid
+			valid = new Boolean(xrr.getResValue("IsValid"));
+
+			// error message text
+			errmsg = xrr.getResValue("ErrMsg");
+			if(!valid && errmsg.length() <= 0)
+				errmsg = FAILURE_UNKNOWN;
+
+			// valid resp received?
+			Log.finest("OpBlank: isvalid =" + valid);
+		} catch (IllegalArgumentException ex) {
+			Log.severe("Malformed XML received in OpBlank(msg):" +
+				ex + ",id=" + id);
+			valid = false;
+			errmsg = ex.getMessage();
+			handleCommError(EventType.PARSING_ERROR,errmsg);
+		}
+
+		// update 
+		complete(mess);
+
+		// update dms
+		if(valid) {
+			m_dms.setMessageCurrent(m_sm, m_user);
+		} else {
+			Log.finest(
+				"OpBlank: response from SensorServer " +
+				"received, ignored because Xml valid " +
+				"field is false, errmsg=" + errmsg);
+			errorStatus = errmsg;
+
+			// try again
+			if(flagFailureShouldRetry(errmsg)) {
+				Log.finest("OpBlank: will retry failed op.");
+				return true;
+
+			// give up
+			} else {
+				// if aws failure, handle it
+				if(mess.checkAwsFailure())
+					mess.handleAwsFailure(
+						"was blanking a msg.");						
+			}
+		}
+
+		// done
+		return false;
+	}
+
 	/**
 	 * Phase to query the dms config
 	 * Note, the type of exception throw here determines
@@ -74,109 +175,20 @@ public class OpBlank extends OpDms
 			       "wrong message type";
 			Message mess = (Message) argmess;
 
-			// set message attributes as a function of the operation
+			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
-			// build message: 
-			// <DmsLite><SetBlankMsgReqMsg>
-			//	<Id></Id>
-			//	<Address>1</Address>
-			//	<ActPriority>3</ActPriority>
-			//	<RunPriority>3</RunPriority>
-			//	<Owner>bob</Owner>
-			// </SetBlankMsgReqMsg></DmsLite>
-
 			// build xml request and expected response			
-			XmlReqRes xrr = new XmlReqRes("SetBlankMsgReqMsg", 
-				"SetBlankMsgRespMsg");
 			mess.setName(getOpName());
-
-			// id
-			xrr.add(new ReqRes("Id", generateId(),
-				new String[] { "Id" }));
-
-			// address
-			xrr.add(new ReqRes("Address", controller.getDrop(),
-				new String[] { "IsValid", "ErrMsg" }));
-
-			// ActPriority
-			xrr.add(new ReqRes("ActPriority", 
-				m_sm.getActivationPriority(), new String[0]));
-
-			// RunPriority
-			xrr.add(new ReqRes("RunPriority", 
-				m_sm.getRunTimePriority(), new String[0]));
-
-			// owner
-			xrr.add(new ReqRes("Owner", 
-				m_user != null ? m_user.getName() : "", 
-				new String[0]));
+			XmlReqRes xrr = buildReqRes("SetBlankMsgReqMsg", 
+				"SetBlankMsgRespMsg");
 
 			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
 
-			// response: 
-			// <DmsLite><SetBlankMsgRespMsg>
-			//	<Id></Id><IsValid>true</IsValid><ErrMsg></ErrMsg>
-			// </SetBlankMsgRespMsg></DmsLite>
-
-			// parse resp msg
-			long id = 0;
-			boolean valid = false;
-			String errmsg = "";
-
-			try {
-				// id
-				id = new Long(xrr.getResValue("Id"));
-
-				// isvalid
-				valid = new Boolean(xrr.getResValue("IsValid"));
-
-				// error message text
-				errmsg = xrr.getResValue("ErrMsg");
-				if(!valid && errmsg.length() <= 0)
-					errmsg = FAILURE_UNKNOWN;
-
-				// valid resp received?
-				Log.finest("dmslite.OpBlank.PhaseSetBlank.poll(): success="
-					+ valid);
-			} catch (IllegalArgumentException ex) {
-				Log.severe(
-					"Malformed XML received in dmslite.OpBlank.PhaseSetBlank.poll(msg):"
-					+ ex + ",id=" + id);
-				valid = false;
-				errmsg = ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR,errmsg);
-			}
-
-			// update 
-			complete(mess);
-
-			// update dms
-			if(valid) {
-				m_dms.setMessageCurrent(m_sm, m_user);
-			} else {
-				Log.finest(
-					"OpBlank: response from SensorServer " +
-					"received, ignored because Xml valid " +
-					"field is false, errmsg=" + errmsg);
-				errorStatus = errmsg;
-
-				// try again
-				if(flagFailureShouldRetry(errmsg)) {
-					Log.finest("OpBlank: will retry failed operation");
-					return this;
-
-				// give up
-				} else {
-					// if aws failure, handle it
-					if(mess.checkAwsFailure())
-						mess.handleAwsFailure("was blanking a message.");						
-				}
-			}
-
-			// done
+			if(parseResponse(mess, xrr))
+				return this;
 			return null;
 		}
 	}

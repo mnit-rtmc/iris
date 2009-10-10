@@ -97,11 +97,22 @@ final public class ParseBuffer
 		}
 
 		// Log.finest("Will append "+numbytes+" bytes.");
-		char[] ca = Convert.byteArrayToCharArray(numbytes, ba);
+		char[] ca = byteArrayToCharArray(numbytes, ba);
+		if(ca != null)
+			append(numbytes, ca);
+	}
 
-		assert ca != null :
-		       "Failed to convert to char[] in ParseBuffer.append()";
-		this.append(numbytes, ca);
+	/** Convert byte[] to char[] using assumed encoding.
+	 *  @returns May return null. */
+	public static char[] byteArrayToCharArray(int len, byte[] ba) {
+		char[] ca;
+		try {
+			ca = new String(ba, 0, len, "ISO-8859-1").
+				toCharArray();
+		} catch (Exception UnsupportedEncodingException) {
+			ca = null;
+		}
+		return ca;
 	}
 
 	/**
@@ -110,9 +121,8 @@ final public class ParseBuffer
 	 *  @params a char array to append to the buffer.
 	 */
 	public void append(char[] a) throws IllegalStateException {
-		if(a == null) {
+		if(a == null)
 			throw new IllegalArgumentException("arg is invalid");
-		}
 
 		int numbytes = a.length;
 
