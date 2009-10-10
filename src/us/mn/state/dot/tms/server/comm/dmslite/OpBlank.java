@@ -95,9 +95,8 @@ public class OpBlank extends OpDms
 			xrr.add(new ReqRes("Id", generateId(),
 				new String[] { "Id" }));
 
-			// drop
-			String drop = SString.intToString(controller.getDrop());
-			xrr.add(new ReqRes("Address", drop,
+			// address
+			xrr.add(new ReqRes("Address", controller.getDrop(),
 				new String[] { "IsValid", "ErrMsg" }));
 
 			// ActPriority
@@ -109,9 +108,9 @@ public class OpBlank extends OpDms
 				m_sm.getRunTimePriority(), new String[0]));
 
 			// owner
-			String user = (m_user != null ? m_user.getName() : "");
-			ReqRes rr3 = new ReqRes("Owner", user, new String[0]);
-			xrr.add(rr3);
+			xrr.add(new ReqRes("Owner", 
+				m_user != null ? m_user.getName() : "", 
+				new String[0]));
 
 			// send request and read response
 			mess.add(xrr);
