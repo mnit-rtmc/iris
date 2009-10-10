@@ -52,16 +52,17 @@ public class OpReset extends OpDms
 	 *		<Id></Id>
 	 *		<Address>1</Address>
 	 *	</SetBlankMsgReqMsg></DmsLite> */
-	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
-		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+	private XmlElem buildReqRes(String elemReqName, String elemResName) {
+		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
-		// id
-		xrr.add(new ReqRes("Id", generateId(), new String[] {"Id"}));
+		// request
+		xrr.addReq("Id", generateId());
+		xrr.addReq("Address", controller.getDrop());
 
-		// everything else
-		String addr = Integer.toString(controller.getDrop());
-		xrr.add(new ReqRes("Address", addr, new 
-			String[] {"IsValid", "ErrMsg"}));
+		// responses
+		xrr.addRes("Id");
+		xrr.addRes("IsValid");
+		xrr.addRes("ErrMsg");
 
 		return xrr;
 	}
@@ -73,7 +74,7 @@ public class OpReset extends OpDms
 	 *		<ErrMsg></ErrMsg>
 	 *	</SetInitRespMsg></DmsLite>
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr) {
 		long id = 0;
 		boolean valid = false;
 		String errmsg = "";
@@ -81,13 +82,13 @@ public class OpReset extends OpDms
 		// parse response
 		try {
 			// id
-			id = new Long(xrr.getResValue("Id"));
+			id = xrr.getResLong("Id");
 
 			// valid flag
-			valid = new Boolean(xrr.getResValue("IsValid"));
+			valid = xrr.getResBoolean("IsValid");
 
 			// error message text
-			errmsg = xrr.getResValue("ErrMsg");
+			errmsg = xrr.getResString("ErrMsg");
 			if(!valid && errmsg.length() <= 0)
 				errmsg = FAILURE_UNKNOWN;
 
@@ -155,7 +156,7 @@ public class OpReset extends OpDms
 
 			// build xml request and expected response			
 			mess.setName(getOpName());
-			XmlReqRes xrr = buildReqRes("SetInitReqMsg", 
+			XmlElem xrr = buildReqRes("SetInitReqMsg", 
 				"SetInitRespMsg");
 
 			// send request and read response

@@ -46,8 +46,8 @@ public class Message implements AddressedMessage
 	/** Associated operation. */
 	OpDms m_opdms = null;
 
-	/** Container of XML requests and responses. */
-	XmlReqResContainer m_rrs = new XmlReqResContainer();
+	/** Container of XML elements. */
+	XmlElems m_rrs = new XmlElems();
 
 	/** Name for this message. */
 	private String m_name = "DmsLiteMsg";
@@ -106,12 +106,12 @@ public class Message implements AddressedMessage
 		return(m_completiontimeMS);
 	}
 
-	/** Add an XmlReqRes to this message. */
+	/** Add an XmlElem to this message. */
 	public void add(Object xmlrr) {
-		if(!(xmlrr instanceof XmlReqRes))
+		if(!(xmlrr instanceof XmlElem))
 			throw new IllegalArgumentException(
 			    "dmslite.Message.add() wrong arg type.");
-		m_rrs.add((XmlReqRes)xmlrr);
+		m_rrs.add((XmlElem)xmlrr);
 	}
 
 	/** Update intermediate status */
@@ -204,24 +204,22 @@ public class Message implements AddressedMessage
 		}
 	}
 
-	/** Search for a request or response value by name.
+	/** Get the response value by name.
 	  * @return null if not found else the value. */
-	protected String searchForReqResItem(String name) {
+	protected String getResString(String name) {
 		if(m_rrs==null)
 			return null;
-		return m_rrs.getResValue(name);
+		return m_rrs.getResString(name);
 	}
 
-	/** Return true if message is owned by the AWS */
+	/** Return true if message is owned by the AWS. */
 	protected boolean ownerIsAws() {
-		return OpDms.ownerIsAws(searchForReqResItem("Owner"));
+		return OpDms.ownerIsAws(getResString("Owner"));
 	}
 
-	/** 
-	  * Determine if failure sending an AWS message to the SensorServer
-	  * occurred. 
-	  * @return true on failure else false.
-	  */
+	/** Determine if failure sending an AWS message to the 
+	 *  SensorServer occurred. 
+	 * @return true on failure else false. */
 	protected boolean checkAwsFailure() {
 		Log.finest("Message.checkAwsFailure() called. this=" + 
 			toString() + ", ownerIsAws=" + ownerIsAws());
@@ -230,7 +228,7 @@ public class Message implements AddressedMessage
 		String ret=null;
 
 		// IsValid: was there an error?
-		String isvalid=this.searchForReqResItem("IsValid");
+		String isvalid = getResString("IsValid");
 		if(isvalid == null || isvalid.toLowerCase().equals("true"))
 			return false;
 
@@ -250,27 +248,27 @@ public class Message implements AddressedMessage
 		String ret = "";
 
 		// Owner: was owner the aws?
-		String owner = this.searchForReqResItem("Owner");
+		String owner = getResString("Owner");
 		if(owner == null)
 			owner = "";
 
 		// ErrMsg: get the error description
-		String errmsg = this.searchForReqResItem("ErrMsg");
+		String errmsg = getResString("ErrMsg");
 		if(errmsg == null)
 			errmsg = "";
 
 		// Id: get message id
-		String id = this.searchForReqResItem("Id");
+		String id = getResString("Id");
 		if(id == null)
 			id = "";
 
 		// Address: get cms number
-		String address = this.searchForReqResItem("Address");
+		String address = getResString("Address");
 		if(address == null)
 			address = "";
 
 		// MsgText: actual message
-		String msg = this.searchForReqResItem("MsgText");
+		String msg = getResString("MsgText");
 		if(msg == null)
 			msg = "";
 

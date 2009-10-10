@@ -278,8 +278,8 @@ abstract public class OpDms extends OpDevice {
 		// intermediate status update XML response was read.
 
 		// intermediate status update?
-		if(null != mess.searchForReqResItem("InterStatus")) {
-			String istatus = mess.searchForReqResItem("Msg");
+		if(null != mess.getResString("InterStatus")) {
+			String istatus = mess.getResString("Msg");
 			if(istatus != null)
 				updateInterStatus(istatus, false);
 			STime.sleep(2000);
@@ -295,54 +295,60 @@ abstract public class OpDms extends OpDevice {
 		/** constructor */
 		protected PhaseGetConfig() {}
 
-		/** 
-		 *  constructor
-		 *  @param next Phase to execute after this phase else null.
-		 */
+		/** Constructor
+		 *  @param next Phase to execute next else null. */
 		protected PhaseGetConfig(Phase next) {
 			m_next = next;
 		}
 
-		/**
-		 * Get the DMS configuration. This phase is used by subclassed
-		 * operations if the DMS configuration has not been requested.
-		 * Note, the type of exception throw here determines
-		 * if the messenger reopens the connection on failure.
-		 * @see MessagePoller#doPoll()
-		 * @see Messenger#handleCommError()
-		 * @see Messenger#shouldReopen()
+		/** Build request message in this format:
+		 *	<DmsLite><elemname>
+		 *		<Id>...</Id>
+		 *		<Address>...</Address>
+		 *		<MsgText>...</MsgText>
+		 *		<UseOnTime>...</UseOnTime>
+		 *		<OnTime>...</OnTime>
+		 *		<UseOffTime>...</UseOffTime>
+	 	 *		<OffTime>...</OffTime>
+		 *		<DisplayTimeMS>...</DisplayTimeMS>
+		 *		<ActPriority>...</ActPriority>
+		 *		<RunPriority>...</RunPriority>
+		 *		<Owner>...</Owner>
+		 *		<Msg>...</Msg>
+		 *	</elemname></DmsLite>
 		 */
-		protected Phase poll(AddressedMessage argmess)
-			throws IOException 
-		{
-			Message mess = (Message) argmess;
+		private XmlElem buildReqRes(String elemReqName, String elemResName) {
+			XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
-			// set message attributes as a function of the op
-			setMsgAttributes(mess);
+			// request
+			xrr.addReq("Id", generateId());
+			xrr.addReq("Address", controller.getDrop());
 
-			// build xml request and expected response			
-			XmlReqRes xrr = new XmlReqRes("GetDmsConfigReqMsg", 
-				"GetDmsConfigRespMsg");
-			mess.setName(getOpName());
+			// response
+			xrr.addRes("IsValid");
+			xrr.addRes("ErrMsg");
+			xrr.addRes("signAccess");
+			xrr.addRes("model");
+			xrr.addRes("make");
+			xrr.addRes("version");
+			xrr.addRes("type");
+			xrr.addRes("horizBorder");
+			xrr.addRes("vertBorder");
+			xrr.addRes("horizPitch");
+			xrr.addRes("vertPitch");
+			xrr.addRes("signHeight");
+			xrr.addRes("signWidth");
+			xrr.addRes("characterHeightPixels");
+			xrr.addRes("characterWidthPixels");
+			xrr.addRes("signHeightPixels");
+			xrr.addRes("signWidthPixels");
 
-			String drop = Integer.toString(controller.getDrop());
-			xrr.add(new ReqRes("Id", generateId(), 
-				new String[] {"Id"}));
-			xrr.add(new ReqRes("Address", drop, new String[] {
-				"IsValid", "ErrMsg", "signAccess", "model", 
-				"make", "version", "type", "horizBorder", 
-				"vertBorder", "horizPitch", "vertPitch", 
-				"signHeight", "signWidth", 
-				"characterHeightPixels", 
-				"characterWidthPixels", "signHeightPixels",
-				"signWidthPixels"
-			}));
+			return xrr;
+		}
 
-			// send request and read response
-			mess.add(xrr);
-			sendRead(mess);
-
-			// parse resp msg
+		/** Parse response.
+		 *  @return True to retry the operation else false if done. */
+		private boolean parseResponse(Message mess, XmlElem xrr) {
 			long id = 0;
 			boolean valid = false;
 			String errmsg = "";
@@ -364,14 +370,13 @@ abstract public class OpDms extends OpDevice {
 
 			try {
 				// id
-				id = new Long(xrr.getResValue("Id"));
+				id = xrr.getResLong("Id");
 
 				// valid flag
-				valid = new Boolean(xrr.getResValue(
-					"IsValid"));
+				valid = xrr.getResBoolean("IsValid");
 
 				// error message text
-				errmsg = xrr.getResValue("ErrMsg");
+				errmsg = xrr.getResString("ErrMsg");
 				if(!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 
@@ -380,14 +385,14 @@ abstract public class OpDms extends OpDevice {
 
 				// valid message received?
 				if(valid) {
-					signAccess = xrr.getResValue(
+					signAccess = xrr.getResString(
 						"signAccess");
-					model = xrr.getResValue("model");
-					make = xrr.getResValue("make");
-					version = xrr.getResValue("version");
+					model = xrr.getResString("model");
+					make = xrr.getResString("make");
+					version = xrr.getResString("version");
 
 					// determine matrix type
-					String stype = xrr.getResValue("type");
+					String stype = xrr.getResString("type");
 					if(stype.toLowerCase().contains(
 						"full")) 
 					{
@@ -398,30 +403,26 @@ abstract public class OpDms extends OpDevice {
 							+ stype + ")");
 					}
 
-					horizBorder = SString.stringToInt(xrr.
-						getResValue("horizBorder"));
-					vertBorder = SString.stringToInt(xrr.
-						getResValue("vertBorder"));
-					horizPitch = SString.stringToInt(xrr.
-						getResValue("horizPitch"));
-					vertPitch = SString.stringToInt(xrr.
-						getResValue("vertPitch"));
-					signHeight = SString.stringToInt(xrr.
-						getResValue("signHeight"));
-					signWidth = SString.stringToInt(xrr.
-						getResValue("signWidth"));
-					characterHeightPixels = SString.
-						stringToInt(xrr.getResValue(
-						"characterHeightPixels"));
-					characterWidthPixels = SString.
-						stringToInt(xrr.getResValue(
-						"characterWidthPixels"));
-					signHeightPixels = SString.stringToInt(
-						xrr.getResValue(
-						"signHeightPixels"));
-					signWidthPixels = SString.stringToInt(
-						xrr.getResValue(
-							"signWidthPixels"));
+					horizBorder = xrr.getResInt(
+						"horizBorder");
+					vertBorder = xrr.getResInt(
+						"vertBorder");
+					horizPitch = xrr.getResInt(
+						"horizPitch");
+					vertPitch = xrr.getResInt(
+						"vertPitch");
+					signHeight = xrr.getResInt(
+						"signHeight");
+					signWidth = xrr.getResInt(
+						"signWidth");
+					characterHeightPixels = xrr.getResInt(
+						"characterHeightPixels");
+					characterWidthPixels = xrr.getResInt(
+						"characterWidthPixels");
+					signHeightPixels = xrr.getResInt(
+						"signHeightPixels");
+					signWidthPixels = xrr.getResInt(
+						"signWidthPixels");
 				}
 			} catch (IllegalArgumentException ex) {
 				Log.severe("PhaseGetConfig: Malformed XML " +
@@ -475,12 +476,44 @@ abstract public class OpDms extends OpDevice {
 				if(flagFailureShouldRetry(errmsg)) {
 					Log.finest("PhaseGetConfig: will " +
 						"retry failed op.");
-					return this;
+					return true;
 				}
 			}
 
-			// if non-null, execute subsequent phase
-			return m_next;
+			// execute subsequent phase
+			return false;
+		}
+
+		/**
+		 * Get the DMS configuration. This phase is used by subclassed
+		 * operations if the DMS configuration has not been requested.
+		 * Note, the type of exception throw here determines
+		 * if the messenger reopens the connection on failure.
+		 * @see MessagePoller#doPoll()
+		 * @see Messenger#handleCommError()
+		 * @see Messenger#shouldReopen()
+		 */
+		protected Phase poll(AddressedMessage argmess)
+			throws IOException 
+		{
+			Message mess = (Message) argmess;
+
+			// set message attributes as a function of the op
+			setMsgAttributes(mess);
+
+			// build xml request and expected response			
+			mess.setName(getOpName());
+			XmlElem xrr = buildReqRes("GetDmsConfigReqMsg", 
+				"GetDmsConfigRespMsg");
+
+			// send request and read response
+			mess.add(xrr);
+			sendRead(mess);
+
+			if(parseResponse(mess, xrr))
+				return this;
+			else
+				return m_next;
 		}
 	}
 }

@@ -260,28 +260,36 @@ public class OpQueryMsg extends OpDms {
 	 *		<Address>1</Address>
 	 *	</SetBlankMsgReqMsg></DmsLite>
 	 */
-	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
-		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+	private XmlElem buildReqRes(String elemReqName, String elemResName) {
+		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
-		// id
-		String addr = Integer.toString(controller.getDrop());
-		xrr.add(new ReqRes("Id", generateId(), 
-			new String[] {"Id"}));
+		// request
+		xrr.addReq("Id", generateId());
+		xrr.addReq("Address", controller.getDrop());
 
-		// address
-		xrr.add(new ReqRes("Address", addr, new String[] {
-			"IsValid", "ErrMsg", "MsgTextAvailable", 
-			"MsgText", "ActPriority", "RunPriority", 
-			"Owner", "UseOnTime", "OnTime", "UseOffTime", 
-			"OffTime", "DisplayTimeMS", "UseBitmap", 
-			"Bitmap"}));
+		// response
+		xrr.addRes("Id");
+		xrr.addRes("IsValid");
+		xrr.addRes("ErrMsg");
+		xrr.addRes("MsgTextAvailable");
+		xrr.addRes("MsgText");
+		xrr.addRes("ActPriority");
+		xrr.addRes("RunPriority");
+		xrr.addRes("Owner");
+		xrr.addRes("UseOnTime");
+		xrr.addRes("OnTime");
+		xrr.addRes("UseOffTime");
+		xrr.addRes("OffTime");
+		xrr.addRes("DisplayTimeMS");
+		xrr.addRes("UseBitmap");
+		xrr.addRes("Bitmap");
 
 		return xrr;
 	}
 
 	/** Parse response.
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr) {
 		long id = 0;
 		boolean valid = false;
 		String errmsg = "";
@@ -301,65 +309,55 @@ public class OpQueryMsg extends OpDms {
 		// parse response
 		try {
 			// id
-			id = new Long(xrr.getResValue("Id"));
+			id = xrr.getResLong("Id");
 
 			// valid flag
-			valid = new Boolean(xrr.getResValue("IsValid"));
+			valid = xrr.getResBoolean("IsValid");
 
 			// error message text
-			errmsg = xrr.getResValue("ErrMsg");
+			errmsg = xrr.getResString("ErrMsg");
 			if(!valid && errmsg.length() <= 0)
 				errmsg = FAILURE_UNKNOWN;
 
 			if(valid) {
 				// msg text available
-				txtavail = new Boolean(
-				    xrr.getResValue("MsgTextAvailable"));
+				txtavail = xrr.getResBoolean(
+					"MsgTextAvailable");
 
 				// msg text
-				msgtext = xrr.getResValue("MsgText");
+				msgtext = xrr.getResString("MsgText");
 
 				// activation priority
-				apri = DMSMessagePriority.fromOrdinal(SString.
-					stringToInt(xrr.getResValue(
-					"ActPriority")));
+				apri = DMSMessagePriority.fromOrdinal(
+					xrr.getResInt("ActPriority"));
 
 				// runtime priority
-				rpri = DMSMessagePriority.fromOrdinal(SString.
-					stringToInt(xrr.getResValue(
-					"RunPriority")));
+				rpri = DMSMessagePriority.fromOrdinal(
+					xrr.getResInt("RunPriority"));
 
 				// owner
-				owner = xrr.getResValue("Owner");
+				owner = xrr.getResString("Owner");
 
 				// ontime
-				useont = new Boolean(xrr.getResValue(
-					"UseOnTime"));
-				if(useont) {
-					ont.setTime(STime.XMLtoDate(
-						xrr.getResValue("OnTime")));
-				}
+				useont = xrr.getResBoolean("UseOnTime");
+				if(useont)
+					ont.setTime(xrr.getResDate("OnTime"));
 
 				// offtime
-				useofft = new Boolean(xrr.getResValue(
-					"UseOffTime"));
-				if(useofft) {
-					offt.setTime(STime.XMLtoDate(
-						xrr.getResValue("OffTime")));
-				}
+				useofft = xrr.getResBoolean("UseOffTime");
+				if(useofft)
+					offt.setTime(xrr.getResDate("OffTime"));
 
 				// display time (pg on-time)
-				int ms = SString.stringToInt(xrr.getResValue(
-					"DisplayTimeMS"));
+				int ms = xrr.getResInt("DisplayTimeMS");
 				pgOnTime = new DmsPgTime(
 					DmsPgTime.MsToTenths(ms));
 				Log.finest("PhaseQueryMsg: ms=" + ms +
 					", pgOnTime="+pgOnTime.toMs());
 
 				// bitmap
-				usebitmap = new Boolean(xrr.getResValue(
-					"UseBitmap"));
-				bitmap = xrr.getResValue("Bitmap");
+				usebitmap = xrr.getResBoolean("UseBitmap");
+				bitmap = xrr.getResString("Bitmap");
 
 				Log.finest(
 					"OpQueryMsg() parsed msg values: " +
@@ -517,9 +515,9 @@ public class OpQueryMsg extends OpDms {
 			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
-			// build xml request and expected response			
+			// build xml request and expected response
 			mess.setName(getOpName());
-			XmlReqRes xrr = buildReqRes("StatusReqMsg", 
+			XmlElem xrr = buildReqRes("StatusReqMsg", 
 				"StatusRespMsg");
 
 			// send request and read response

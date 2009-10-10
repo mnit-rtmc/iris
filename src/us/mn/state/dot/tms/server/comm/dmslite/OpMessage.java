@@ -211,63 +211,65 @@ public class OpMessage extends OpDms {
 	 *		<Msg>...</Msg>
 	 *	</elemname></DmsLite>
 	 */
-	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
-		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+	private XmlElem buildReqRes(String elemReqName, String elemResName) {
+		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
 		// id
-		xrr.add(new ReqRes("Id", generateId(), 
-			new String[] {"Id"}));
+		xrr.addReq("Id", generateId());
 
 		// address, etc.
-		xrr.add(new ReqRes("Address", controller.getDrop(),
-			new String[] { "IsValid", "ErrMsg" }));
+		xrr.addReq("Address", controller.getDrop());
 
 		// MsgText
-		xrr.add(new ReqRes("MsgText", m_sm.getMulti()));
+		xrr.addReq("MsgText", m_sm.getMulti());
 
 		// UseOnTime, always true
-		xrr.add(new ReqRes("UseOnTime", true));
+		xrr.addReq("UseOnTime", true);
 
 		// OnTime
 		Calendar ontime = calcMsgOnTime();
-		xrr.add(new ReqRes("OnTime", 
-			STime.CalendarToXML(ontime)));
+		xrr.addReq("OnTime", 
+			STime.CalendarToXML(ontime));
 
 		// UseOffTime
 		boolean useofftime = (m_sm.getDuration() != null);
-		xrr.add(new ReqRes("UseOffTime", useofftime));
+		xrr.addReq("UseOffTime", useofftime);
 
 		// OffTime, only used if duration is not infinite
 		String offtime= (useofftime ?
-			STime.CalendarToXML(calcMsgOffTime(ontime)) :
-			"");
-		xrr.add(new ReqRes("OffTime", offtime));
+			STime.CalendarToXML(calcMsgOffTime(ontime)) : "");
+		xrr.addReq("OffTime", offtime);
 
 		// DisplayTimeMS: extract from 1st page of MULTI
 		DmsPgTime pt = determinePageOnTime(m_sm.getMulti());
-		xrr.add(new ReqRes("DisplayTimeMS", pt.toMs()));
+		xrr.addReq("DisplayTimeMS", pt.toMs());
 
 		// activation priority
-		xrr.add(new ReqRes("ActPriority", 
-			m_sm.getActivationPriority(), new String[0]));
+		xrr.addReq("ActPriority", 
+			m_sm.getActivationPriority());
 
 		// runtime priority
-		xrr.add(new ReqRes("RunPriority", 
-			m_sm.getRunTimePriority(), new String[0]));
+		xrr.addReq("RunPriority", 
+			m_sm.getRunTimePriority());
 
 		// Owner
-		xrr.add(new ReqRes("Owner", 
-			m_user != null ? m_user.getName() : ""));
+		xrr.addReq("Owner", 
+			m_user != null ? m_user.getName() : "");
 
 		// bitmap
-		xrr.add(new ReqRes("Bitmap", getBitmapPage()));
+		xrr.addReq("Bitmap", getBitmapPage());
+
+		// response
+		xrr.addRes("Id");
+		xrr.addRes("IsValid");
+		xrr.addRes("ErrMsg");
 
 		return xrr;
 	}
 
 	/** Parse response.
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr) {
 
 		long id = 0;
 		boolean valid = false;
@@ -275,13 +277,13 @@ public class OpMessage extends OpDms {
 
 		try {
 			// id
-			id = new Long(xrr.getResValue("Id"));
+			id = xrr.getResLong("Id");
 
 			// isvalid
-			valid = new Boolean(xrr.getResValue("IsValid"));
+			valid = xrr.getResBoolean("IsValid");
 
 			// error message text
-			errmsg = xrr.getResValue("ErrMsg");
+			errmsg = xrr.getResString("ErrMsg");
 			if(!valid && errmsg.length() <= 0)
 				errmsg = FAILURE_UNKNOWN;
 
@@ -317,7 +319,6 @@ public class OpMessage extends OpDms {
 
 			// give up
 			} else {
-				// if AWS failure, handle it
 				if(mess.checkAwsFailure()) {
 					mess.handleAwsFailure(
 						"was sending a message.");
@@ -363,17 +364,16 @@ public class OpMessage extends OpDms {
 			throws IOException 
 		{
 			updateInterStatus("Starting operation", false);
-			Log.finest(
-			    "PhaseSendMessage.poll(msg) called.");
+			Log.finest("PhaseSendMessage.poll(msg) called.");
 
 			Message mess = (Message) argmess;
 
 			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
-			// build request response
+			// build XML element with children
 			mess.setName(getOpName());
-			XmlReqRes xrr = buildReqRes(getXmlReqName(), 
+			XmlElem xrr = buildReqRes(getXmlReqName(), 
 				getXmlResName());
 
 			// send request and read response

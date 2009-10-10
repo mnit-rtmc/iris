@@ -60,29 +60,23 @@ public class OpBlank extends OpDms
 	 *		<Owner>bob</Owner>
 	 *	</SetBlankMsgReqMsg></DmsLite>
 	 */
-	private XmlReqRes buildReqRes(String elemReqName, String elemResName) {
-		XmlReqRes xrr = new XmlReqRes(elemReqName, elemResName);
+	private XmlElem buildReqRes(String elemReqName, String elemResName) {
+		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
-		// id
-		xrr.add(new ReqRes("Id", generateId(),
-			new String[] { "Id" }));
+		// request
+		xrr.addReq("Id", generateId());
+		xrr.addReq("Address", controller.getDrop());
+		xrr.addReq("ActPriority", 
+			m_sm.getActivationPriority());
+		xrr.addReq("RunPriority", 
+			m_sm.getRunTimePriority());
+		xrr.addReq("Owner", 
+			m_user != null ? m_user.getName() : "");
 
-		// address
-		xrr.add(new ReqRes("Address", controller.getDrop(),
-			new String[] { "IsValid", "ErrMsg" }));
-
-		// ActPriority
-		xrr.add(new ReqRes("ActPriority", 
-			m_sm.getActivationPriority(), new String[0]));
-
-		// RunPriority
-		xrr.add(new ReqRes("RunPriority", 
-			m_sm.getRunTimePriority(), new String[0]));
-
-		// owner
-		xrr.add(new ReqRes("Owner", 
-			m_user != null ? m_user.getName() : "", 
-			new String[0]));
+		// response
+		xrr.addRes("Id");
+		xrr.addRes("IsValid");
+		xrr.addRes("ErrMsg");
 
 		return xrr;
 	}
@@ -94,20 +88,20 @@ public class OpBlank extends OpDms
 	 *		<ErrMsg></ErrMsg>
 	 *	</SetBlankMsgRespMsg></DmsLite>
 	 *  @return True to retry the operation else false if done. */
-	private boolean parseResponse(Message mess, XmlReqRes xrr) {
+	private boolean parseResponse(Message mess, XmlElem xrr) {
 		long id = 0;
 		boolean valid = false;
 		String errmsg = "";
 
 		try {
 			// id
-			id = new Long(xrr.getResValue("Id"));
+			id = xrr.getResLong("Id");
 
 			// isvalid
-			valid = new Boolean(xrr.getResValue("IsValid"));
+			valid = xrr.getResBoolean("IsValid");
 
 			// error message text
-			errmsg = xrr.getResValue("ErrMsg");
+			errmsg = xrr.getResString("ErrMsg");
 			if(!valid && errmsg.length() <= 0)
 				errmsg = FAILURE_UNKNOWN;
 
@@ -180,7 +174,7 @@ public class OpBlank extends OpDms
 
 			// build xml request and expected response			
 			mess.setName(getOpName());
-			XmlReqRes xrr = buildReqRes("SetBlankMsgReqMsg", 
+			XmlElem xrr = buildReqRes("SetBlankMsgReqMsg", 
 				"SetBlankMsgRespMsg");
 
 			// send request and read response

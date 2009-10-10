@@ -19,26 +19,26 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 /**
- * A container for multiple XmlReqRes objects.
+ * A container for multiple XmlElem objects.
  *
  * @author      Michael Darter
  * @created     10/09/09
  */
-public class XmlReqResContainer
+public class XmlElems
 {
-	/** Container for XmlReqRes objects */
-	private final LinkedList<XmlReqRes> m_rrlist = 
-		new LinkedList<XmlReqRes>();
+	/** Container for XmlElem objects */
+	private final LinkedList<XmlElem> m_rrlist = 
+		new LinkedList<XmlElem>();
 
 	/** Constructor */
-	public XmlReqResContainer() {}
+	public XmlElems() {}
 
 	/** toString */
 	public String toString() {
-		String ret = "XmlReqResContainer(";
+		String ret = "XmlElems(";
 		ret += "size=" + m_rrlist.size();
 		int i = 0;
- 		for(XmlReqRes xrr : m_rrlist) {
+ 		for(XmlElem xrr : m_rrlist) {
 			ret += ", m_rrlist[" + i + "]=" + 
 				xrr.toString() + ")";
 			++i;
@@ -48,10 +48,10 @@ public class XmlReqResContainer
 	}
 
 	/** Parse response. */
-	public void parseResponse(String levelonetagname, String xml) 
+	public void parseResponse(String levelonetagname, String xml)
 		throws IOException
 	{
-		for(XmlReqRes xmlrr : m_rrlist) {
+		for(XmlElem xmlrr : m_rrlist) {
 			// throws IOException
 			xmlrr.parseResponse(levelonetagname, xml);
 		}
@@ -59,17 +59,17 @@ public class XmlReqResContainer
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected String getResValue(String reqname) {
- 		for(XmlReqRes xmlrr : m_rrlist) {
-			String value = xmlrr.getResValue(reqname);
+	protected String getResString(String reqname) {
+ 		for(XmlElem xmlrr : m_rrlist) {
+			String value = xmlrr.getResString(reqname);
 			if(value != null)
 				return value;
 		}
 		return null;
 	}
 
-	/** Add a request response. */
-	public void add(XmlReqRes xmlrr) {
+	/** Add an element. */
+	public void add(XmlElem xmlrr) {
 		m_rrlist.add(xmlrr);
 	}
 
@@ -86,7 +86,7 @@ public class XmlReqResContainer
 	 */
 	public byte[] buildReqMsg(String levelonetagname) {
 		StringBuilder children = new StringBuilder();
- 		for(XmlReqRes xmlrr : m_rrlist)
+ 		for(XmlElem xmlrr : m_rrlist)
 			children.append(xmlrr.buildReqMsg());
 
 		// enclose elements in root element
