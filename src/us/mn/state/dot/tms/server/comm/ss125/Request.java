@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * A request is a specific SS105 message.
@@ -44,6 +45,30 @@ abstract public class Request {
 		System.arraycopy(src, 0, dest, destPos, len);
 	}
 
+	/** Format a boolean value */
+	static protected void formatBool(boolean value, byte[] body, int pos) {
+		body[pos] = value ? (byte)1 : (byte)0;
+	}
+
+	/** Format an 8-bit value */
+	static protected void format8(int value, byte[] body, int pos) {
+		body[pos] = (byte)value;
+	}
+
+	/** Format a 16-bit value */
+	static protected void format16(int value, byte[] body, int pos) {
+		body[pos] = (byte)((value >> 8) & 0xFF);
+		body[pos + 1] = (byte)(value & 0xFF);
+	}
+
+	/** Format a 16-bit fixed-point value */
+	static protected void format16Fixed(float value, byte[] body, int pos) {
+		int intg = (int)value;
+		int frac = (int)(256 * (value - intg));
+		body[pos] = (byte)intg;
+		body[pos + 1] = (byte)frac;
+	}
+
 	/** Parse a string value */
 	static protected String parseString(byte[] body, int pos, int len)
 		throws IOException
@@ -51,11 +76,33 @@ abstract public class Request {
 		return new String(body, pos, len, CHARSET).trim();
 	}
 
+	/** Parse a boolean value */
+	static protected boolean parseBoolean(byte b) throws IOException {
+		if(b == 0)
+			return false;
+		else if(b == 1)
+			return true;
+		else
+			throw new ParsingException("Invalid boolean value");
+	}
+
+	/** Parse an 8-bit value */
+	static protected int parse8(byte b) {
+		return b & 0xFF;
+	}
+
 	/** Parse a 16-bit value */
 	static protected int parse16(byte[] body, int pos) {
-		int lo = body[pos] & 0xFF;
-		int hi = body[pos + 1] & 0xFF;
+		int hi = body[pos] & 0xFF;
+		int lo = body[pos + 1] & 0xFF;
 		return (hi << 8) | lo;
+	}
+
+	/** Parse a 16-bit fixed-point value */
+	static protected float parse16Fixed(byte[] body, int pos) {
+		int intg = body[pos] & 0xFF;
+		int frac = body[pos + 1] & 0xFF;
+		return intg + frac / 256f;
 	}
 
 	/** Format the body of a GET request */

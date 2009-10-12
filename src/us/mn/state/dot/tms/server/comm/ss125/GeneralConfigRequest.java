@@ -58,12 +58,7 @@ public class GeneralConfigRequest extends Request {
 		location = parseString(body, 5, 32);
 		description = parseString(body, 37, 32);
 		serialNumber = parseString(body, 69, 16);
-		if(body[85] == 0)
-			metric = false;
-		else if(body[85] == 1)
-			metric = true;
-		else
-			throw new ParsingException("SENSOR UNITS");
+		metric = parseBoolean(body[85]);
 	}
 
 	/** Sensor orientation */

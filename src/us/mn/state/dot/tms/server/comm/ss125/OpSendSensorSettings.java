@@ -36,6 +36,10 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected final GeneralConfigRequest gen_config =
 		new GeneralConfigRequest();
 
+	/** General config request */
+	protected final DataConfigRequest data_config =
+		new DataConfigRequest();
+
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c);
@@ -67,7 +71,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			if(shouldUpdateGenConfig())
 				return new SendGenConfig();
 			else
-				return null;
+				return new QueryDataConfig();
 		}
 	}
 
@@ -92,6 +96,87 @@ public class OpSendSensorSettings extends OpSS125 {
 				gen_config.getLocation());
 			SS125_LOG.log(controller.getName() + ":= metric " +
 				gen_config.isMetric());
+			mess.setRequest();
+			return new QueryDataConfig();
+		}
+	}
+
+	/** Phase to query the data config  */
+	protected class QueryDataConfig extends Phase {
+
+		/** Query the data config */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			mess.add(data_config);
+			mess.getRequest();
+			if(SS125_LOG.isOpen())
+				logDataConfig();
+			if(shouldUpdateDataConfig())
+				return new SendDataConfig();
+			else
+				return null;
+		}
+	}
+
+	/** Log data configuration request */
+	protected void logDataConfig() {
+		SS125_LOG.log(controller.getName() + ": interval " +
+			data_config.getInterval());
+		SS125_LOG.log(controller.getName() + ": mode " +
+			data_config.getMode());
+		logPushConfig(data_config.getEventPush(), "event");
+		logPushConfig(data_config.getIntervalPush(),"interval");
+		logPushConfig(data_config.getPresencePush(),"presence");
+		SS125_LOG.log(controller.getName() + ": default separation " +
+			data_config.getDefaultSeparation());
+		SS125_LOG.log(controller.getName() + ": default size " +
+			data_config.getDefaultSize());
+	}
+
+	/** Log push config for one data type */
+	protected void logPushConfig(DataConfigRequest.PushConfig pc,
+		String dtype)
+	{
+		SS125_LOG.log(controller.getName() + ": " + dtype +
+			" port " + pc.port);
+		SS125_LOG.log(controller.getName() + ": " + dtype +
+			" protocol " + pc.protocol);
+		SS125_LOG.log(controller.getName() + ": " + dtype +
+			" enable " + pc.enable);
+		SS125_LOG.log(controller.getName() + ": " + dtype +
+			" dest_sub_id " + pc.dest_sub_id);
+		SS125_LOG.log(controller.getName() + ": " + dtype +
+			" dest_id " + pc.dest_id);
+	}
+
+	/** Check if the data config should be updated */
+	protected boolean shouldUpdateDataConfig() {
+		if(data_config.getInterval() != BINNING_INTERVAL)
+			return true;
+		if(data_config.getMode() !=
+		   DataConfigRequest.StorageMode.CIRCULAR)
+			return true;
+		if(data_config.getEventPush().enable)
+			return true;
+		if(data_config.getIntervalPush().enable)
+			return true;
+		if(data_config.getPresencePush().enable)
+			return true;
+		return false;
+	}
+
+	/** Phase to send the data config */
+	protected class SendDataConfig extends Phase {
+
+		/** Send the data config */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			data_config.setInterval(BINNING_INTERVAL);
+			data_config.setMode(
+				DataConfigRequest.StorageMode.CIRCULAR);
+			data_config.getEventPush().enable = false;
+			data_config.getIntervalPush().enable = false;
+			data_config.getPresencePush().enable = false;
+			mess.add(data_config);
+			SS125_LOG.log(controller.getName() + ":= data config");
 			mess.setRequest();
 			return null;
 		}
