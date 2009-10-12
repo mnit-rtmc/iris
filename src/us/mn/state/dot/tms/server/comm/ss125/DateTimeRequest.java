@@ -89,8 +89,8 @@ public class DateTimeRequest extends Request {
 		int month = (date >> 5) & 0x0F;
 		int day = date & 0x1F;
 		int hour = (time >> 22) & 0x1F;
-		int minute = (time >> 16) & 0x2F;
-		int second = (time >> 10) & 0x2F;
+		int minute = (time >> 16) & 0x3F;
+		int second = (time >> 10) & 0x3F;
 		int ms = time & 0x3FF;
 		TimeZone utc = TimeZone.getTimeZone("GMT");
 		Calendar cal = Calendar.getInstance(utc);
