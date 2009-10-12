@@ -44,6 +44,13 @@ abstract public class Request {
 		System.arraycopy(src, 0, dest, destPos, len);
 	}
 
+	/** Parse a string value */
+	static protected String parseString(byte[] body, int pos, int len)
+		throws IOException
+	{
+		return new String(body, pos, len, CHARSET).trim();
+	}
+
 	/** Parse a 16-bit value */
 	static protected int parse16(byte[] body, int pos) {
 		int lo = body[pos] & 0xFF;

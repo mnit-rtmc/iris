@@ -54,10 +54,10 @@ public class GeneralConfigRequest extends Request {
 	void parsePayload(byte[] body) throws IOException {
 		if(body.length != 86)
 			throw new ParsingException("BODY LENGTH");
-		orientation = new String(body, 3, 2, CHARSET);
-		location = new String(body, 5, 32, CHARSET);
-		description = new String(body, 37, 32, CHARSET);
-		serialNumber = new String(body, 69, 16, CHARSET);
+		orientation = parseString(body, 3, 2);
+		location = parseString(body, 5, 32);
+		description = parseString(body, 37, 32);
+		serialNumber = parseString(body, 69, 16);
 		if(body[85] == 0)
 			metric = false;
 		else if(body[85] == 1)
@@ -82,6 +82,11 @@ public class GeneralConfigRequest extends Request {
 		return location;
 	}
 
+	/** Set the sensor location */
+	public void setLocation(String loc) {
+		location = loc;
+	}
+
 	/** Sensor description */
 	protected String description = "";
 
@@ -104,5 +109,10 @@ public class GeneralConfigRequest extends Request {
 	/** Get the metric flag */
 	public boolean isMetric() {
 		return metric;
+	}
+
+	/** Set the metric flag */
+	public void setMetric(boolean m) {
+		metric = m;
 	}
 }

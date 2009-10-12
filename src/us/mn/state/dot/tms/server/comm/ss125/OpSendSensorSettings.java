@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 
@@ -30,6 +31,10 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Flag to perform a controller restart */
 	protected final boolean restart;
+
+	/** General config request */
+	protected final GeneralConfigRequest gen_config =
+		new GeneralConfigRequest();
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
@@ -47,19 +52,47 @@ public class OpSendSensorSettings extends OpSS125 {
 
 		/** Query the general config */
 		protected Phase poll(AddressedMessage mess) throws IOException {
-			GeneralConfigRequest gcr = new GeneralConfigRequest();
-			mess.add(gcr);
+			mess.add(gen_config);
 			mess.getRequest();
 			SS125_LOG.log(controller.getName() + ": orientation " +
-				gcr.getOrientation());
+				gen_config.getOrientation());
 			SS125_LOG.log(controller.getName() + ": location " +
-				gcr.getLocation());
+				gen_config.getLocation());
 			SS125_LOG.log(controller.getName() + ": description " +
-				gcr.getDescription());
+				gen_config.getDescription());
 			SS125_LOG.log(controller.getName() + ": serial # " +
-				gcr.getSerialNumber());
+				gen_config.getSerialNumber());
 			SS125_LOG.log(controller.getName() + ": metric " +
-				gcr.isMetric());
+				gen_config.isMetric());
+			if(shouldUpdateGenConfig())
+				return new SendGenConfig();
+			else
+				return null;
+		}
+	}
+
+	/** Check if the general config should be updated */
+	protected boolean shouldUpdateGenConfig() {
+		String loc = ControllerHelper.getLocation(controller);
+		if(!loc.equals(gen_config.getLocation()))
+			return true;
+		return gen_config.isMetric();
+	}
+
+	/** Phase to send the general config */
+	protected class SendGenConfig extends Phase {
+
+		/** Send the general config */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			gen_config.setLocation(ControllerHelper.getLocation(
+				controller));
+			gen_config.setMetric(false);
+			mess.add(gen_config);
+			SS125_LOG.log(controller.getName() + ":= location " +
+				gen_config.getLocation());
+			SS125_LOG.log(controller.getName() + ":= metric " +
+				gen_config.isMetric());
+			mess.setRequest();
 			return null;
 		}
 	}

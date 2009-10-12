@@ -57,4 +57,15 @@ public class ControllerHelper extends BaseHelper {
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
 			ctrl.setInterStatus(is);
 	}
+
+	/** Get a controller location */
+	static public String getLocation(Controller ctrl) {
+		Cabinet cab = ctrl.getCabinet();
+		if(cab != null) {
+			GeoLoc loc = cab.getGeoLoc();
+			if(loc != null)
+				return GeoLocHelper.getDescription(loc);
+		}
+		return "";
+	}
 }
