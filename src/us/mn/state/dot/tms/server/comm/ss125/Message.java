@@ -145,20 +145,8 @@ public class Message implements AddressedMessage {
 		input.skip(input.available());
 		BufferedOutputStream bos = new BufferedOutputStream(output,256);
 		bos.write(header);
-/*{
-System.err.print("header: ");
-for(byte h: header)
-	System.err.print(Integer.toHexString(h & 0xff) + " ");
-System.err.println(Integer.toHexString(crc8(header) & 0xff));
-}*/
 		bos.write(crc8(header));
 		bos.write(body);
-/*{
-System.err.print("body: ");
-for(byte h: body)
-	System.err.print(Integer.toHexString(h & 0xff) + " ");
-System.err.println(Integer.toHexString(crc8(body) & 0xff));
-}*/
 		bos.write(crc8(body));
 		bos.flush();
 	}
