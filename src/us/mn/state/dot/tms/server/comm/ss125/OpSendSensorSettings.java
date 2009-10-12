@@ -140,15 +140,17 @@ public class OpSendSensorSettings extends OpSS125 {
 		String dtype)
 	{
 		SS125_LOG.log(controller.getName() + ": " + dtype +
-			" port " + pc.port);
-		SS125_LOG.log(controller.getName() + ": " + dtype +
-			" protocol " + pc.protocol);
-		SS125_LOG.log(controller.getName() + ": " + dtype +
 			" enable " + pc.enable);
-		SS125_LOG.log(controller.getName() + ": " + dtype +
-			" dest_sub_id " + pc.dest_sub_id);
-		SS125_LOG.log(controller.getName() + ": " + dtype +
-			" dest_id " + pc.dest_id);
+		if(pc.enable) {
+			SS125_LOG.log(controller.getName() + ": " + dtype +
+				" port " + pc.port);
+			SS125_LOG.log(controller.getName() + ": " + dtype +
+				" protocol " + pc.protocol);
+			SS125_LOG.log(controller.getName() + ": " + dtype +
+				" dest_sub_id " + pc.dest_sub_id);
+			SS125_LOG.log(controller.getName() + ": " + dtype +
+				" dest_id " + pc.dest_id);
+		}
 	}
 
 	/** Check if the data config should be updated */
