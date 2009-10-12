@@ -130,4 +130,10 @@ abstract public class Request {
 
 	/** Parse the payload of a GET response */
 	abstract void parsePayload(byte[] body) throws IOException;
+
+	/** Delay before checking for response */
+	void delayResponse() {
+		// Only needed if flash is being reprogrammed
+		// see FlashConfigRequest
+	}
 }

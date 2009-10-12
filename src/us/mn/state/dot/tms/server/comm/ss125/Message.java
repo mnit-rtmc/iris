@@ -160,6 +160,7 @@ public class Message implements AddressedMessage {
 	protected byte[] doResponse(byte[] shead, byte[] sbody)
 		throws IOException
 	{
+		req.delayResponse();
 		byte[] rhead = recvResponse(10);
 		byte h_crc = recvResponse(1)[0];
 		int n_body = parseHead(rhead, h_crc, shead);

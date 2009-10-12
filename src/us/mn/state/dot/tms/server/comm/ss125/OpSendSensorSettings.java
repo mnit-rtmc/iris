@@ -43,6 +43,9 @@ public class OpSendSensorSettings extends OpSS125 {
 	protected final DataConfigRequest data_config =
 		new DataConfigRequest();
 
+	/** Flag to indicate config has been updated */
+	protected boolean config_updated = false;
+
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
 		super(DOWNLOAD, c);
@@ -100,6 +103,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			SS125_LOG.log(controller.getName() + ":= metric " +
 				gen_config.isMetric());
 			mess.setRequest();
+			config_updated = true;
 			return new QueryDataConfig();
 		}
 	}
@@ -116,7 +120,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			if(shouldUpdateDataConfig())
 				return new SendDataConfig();
 			else
-				return new QueryDateTime();
+				return configDonePhase();
 		}
 	}
 
@@ -182,6 +186,28 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.getPresencePush().enable = false;
 			mess.add(data_config);
 			SS125_LOG.log(controller.getName() + ":= data config");
+			mess.setRequest();
+			config_updated = true;
+			return configDonePhase();
+		}
+	}
+
+	/** Phase after configuration is done */
+	protected Phase configDonePhase() {
+		if(config_updated)
+			return new StoreConfigFlash();
+		else
+			return new QueryDateTime();
+	}
+
+	/** Phase to store config to flash */
+	protected class StoreConfigFlash extends Phase {
+
+		/** Store the config to flash */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			FlashConfigRequest flash = new FlashConfigRequest();
+			mess.add(flash);
+			SS125_LOG.log(controller.getName() + ":= flash config");
 			mess.setRequest();
 			return new QueryDateTime();
 		}
