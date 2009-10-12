@@ -189,6 +189,18 @@ public class SString {
 		return i;
 	}
 
+	/** convert string to long. This method suppresses all number format
+	 *  exceptions, returning 0 if a NumberFormatException is caught. */
+	public static long stringToLong(String s) {
+		if (s == null)
+		    return (0);
+		long i = 0;
+		try {
+		    i = Long.parseLong(s);
+		} catch (Exception e) {}
+		return i;
+	}
+
 	/** convert string to double */
 	public static double stringToDouble(String s) {
 		if (s == null)
