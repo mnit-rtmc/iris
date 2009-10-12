@@ -69,6 +69,14 @@ abstract public class Request {
 		body[pos + 1] = (byte)frac;
 	}
 
+	/** Format a 32-bit value */
+	static protected void format32(int value, byte[] body, int pos) {
+		body[pos] = (byte)((value >> 24) & 0xFF);
+		body[pos + 1] = (byte)((value >> 16) & 0xFF);
+		body[pos + 2] = (byte)((value >> 8) & 0xFF);
+		body[pos + 3] = (byte)(value & 0xFF);
+	}
+
 	/** Parse a string value */
 	static protected String parseString(byte[] body, int pos, int len)
 		throws IOException
@@ -103,6 +111,15 @@ abstract public class Request {
 		int intg = body[pos] & 0xFF;
 		int frac = body[pos + 1] & 0xFF;
 		return intg + frac / 256f;
+	}
+
+	/** Parse a 32-bit value */
+	static protected int parse32(byte[] body, int pos) {
+		int b3 = body[pos] & 0xFF;
+		int b2 = body[pos + 1] & 0xFF;
+		int b1 = body[pos + 2] & 0xFF;
+		int b0 = body[pos + 3] & 0xFF;
+		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
 	}
 
 	/** Format the body of a GET request */

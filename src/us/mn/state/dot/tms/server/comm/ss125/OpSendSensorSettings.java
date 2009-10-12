@@ -29,6 +29,9 @@ public class OpSendSensorSettings extends OpSS125 {
 	/** Time interval for data binning */
 	static protected final int BINNING_INTERVAL = 30;
 
+	/** Error threshold for setting date / time */
+	static protected final int TIME_THRESHOLD = 5000;
+
 	/** Flag to perform a controller restart */
 	protected final boolean restart;
 
@@ -113,7 +116,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			if(shouldUpdateDataConfig())
 				return new SendDataConfig();
 			else
-				return null;
+				return new QueryDateTime();
 		}
 	}
 
@@ -178,6 +181,44 @@ public class OpSendSensorSettings extends OpSS125 {
 			mess.add(data_config);
 			SS125_LOG.log(controller.getName() + ":= data config");
 			mess.setRequest();
+			return new QueryDateTime();
+		}
+	}
+
+	/** Phase to query the date and time */
+	protected class QueryDateTime extends Phase {
+
+		/** Query the date and time */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DateTimeRequest date_time = new DateTimeRequest();
+			mess.add(date_time);
+			mess.getRequest();
+			SS125_LOG.log(controller.getName() + ": date/time " +
+				date_time.getStamp());
+			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
+				return new SendDateTime();
+			else
+				return null;
+		}
+	}
+
+	/** Check if the date / time should be updated */
+	protected boolean shouldUpdateDateTime(long stamp) {
+		long now = System.currentTimeMillis();
+		return stamp < (now - TIME_THRESHOLD) ||
+		       stamp > (now + TIME_THRESHOLD);
+	}
+
+	/** Phase to send the date and time */
+	protected class SendDateTime extends Phase {
+
+		/** Send the date and time */
+		protected Phase poll(AddressedMessage mess) throws IOException {
+			DateTimeRequest date_time = new DateTimeRequest();
+			mess.add(date_time);
+			mess.setRequest();
+			SS125_LOG.log(controller.getName() + ":= date/time " +
+				date_time.getStamp());
 			return null;
 		}
 	}
