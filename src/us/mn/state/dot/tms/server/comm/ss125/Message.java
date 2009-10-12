@@ -22,6 +22,7 @@ import java.io.InputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -115,7 +116,7 @@ public class Message implements AddressedMessage {
 		byte[] body = req.formatBodySet();
 		byte[] header = formatHeader(body);
 		doPoll(header, body);
-		doResponse(header, body);
+		parseResult(doResponse(header, body));
 	}
 
 	/** Format a request header.
@@ -239,5 +240,59 @@ public class Message implements AddressedMessage {
 			throw new ParsingException("MESSAGE SUB ID");
 		if(rbody[2] != sbody[2])
 			throw new ParsingException("READ OR WRITE");
+	}
+
+	/** Parse the result code.
+	 * @param rbody Received response body.
+	 * @throws ParsingException On any errors parsing result code.
+	 * @throws ControllerException If result indicates an error. */
+	protected void parseResult(byte[] rbody) throws IOException {
+		if(rbody.length != 5)
+			throw new ParsingException("RESULT LENGTH");
+		int result = Request.parse16(rbody, 3);
+		if(result > 0)
+			throw new ControllerException(lookupResult(result));
+	}
+
+	/** Lookup a result code */
+	static protected String lookupResult(int result) {
+		switch(result) {
+		case 1:
+			return "PAYLOAD SIZE";
+		case 2:
+			return "BODY CRC";
+		case 3:
+			return "READ ONLY";
+		case 15:
+			return "INTERVAL NONEXISTANT";
+		case 16:
+			return "LANE NONEXISTANT";
+		case 17:
+			return "FLASH BUSY (A)";
+		case 19:
+			return "INVALID PUSH STATE";
+		case 20:
+			return "ERROR SETTING RTC";
+		case 21:
+			return "RTC SYNC ERROR";
+		case 22:
+			return "FLASH ERASE ERROR";
+		case 23:
+			return "FLASH BUSY (B)";
+		case 24:
+			return "INVALID PROTOCOL STATE";
+		case 25:
+			return "TOO MANY APPROACHES";
+		case 26:
+			return "TOO MANY LANES";
+		case 30:
+			return "AUTOMATIC LANE";
+		case 31:
+			return "WRONG LANE COUNT";
+		case 33:
+			return "INVALID BAUD RATE";
+		default:
+			return "UNKNOWN ERROR";
+		}
 	}
 }
