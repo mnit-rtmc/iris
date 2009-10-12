@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
+import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 
@@ -302,6 +303,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return new SS105Poller(name, createSocketMessenger());
 	}
 
+	/** Create an SS125 poller */
+	protected MessagePoller createSS125Poller() throws IOException {
+		return new SS125Poller(name, createSocketMessenger());
+	}
+
 	/** Create a Canoga poller */
 	protected MessagePoller createCanogaPoller() throws IOException {
 		return new CanogaPoller(name, createSocketMessenger());
@@ -357,6 +363,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return createMndotPoller();
 		case SS_105:
 			return createSS105Poller();
+		case SS_125:
+			return createSS125Poller();
 		case CANOGA:
 			return createCanogaPoller();
 		case VICON_SWITCHER:

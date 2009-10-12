@@ -1126,6 +1126,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 11	NTCIP Class A
 12	Pelco Switcher
 13	Vicon PTZ
+14	SmartSensor 125 HD
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -1211,7 +1212,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.103.0
+database_version	3.104.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3

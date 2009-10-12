@@ -63,7 +63,10 @@ public enum CommProtocol {
 	PELCO_SWITCHER("Pelco Switcher"),
 
 	/** Vicon camera control (13) */
-	VICON_PTZ("Vicon PTZ");
+	VICON_PTZ("Vicon PTZ"),
+
+	/** Wavetronix SmartSensor 125 HD (14) */
+	SS_125("SmartSensor 125 HD");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
