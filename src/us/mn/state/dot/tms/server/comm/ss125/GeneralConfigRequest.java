@@ -59,6 +59,7 @@ public class GeneralConfigRequest extends Request {
 		description = parseString(body, 37, 32);
 		serialNumber = parseString(body, 69, 16);
 		metric = parseBoolean(body[85]);
+		setComplete(true);
 	}
 
 	/** Sensor orientation */

@@ -72,9 +72,9 @@ public class SS125Poller extends MessagePoller implements SamplePoller {
 
 	/** Query sample data */
 	public void querySamples(ControllerImpl c, int intvl, Completer comp) {
-/*		if(intvl == 30) {
+		if(intvl == 30) {
 			if(c.hasActiveDetector())
 				new OpQuerySamples(c, comp).start();
-		} */
+		}
 	}
 }

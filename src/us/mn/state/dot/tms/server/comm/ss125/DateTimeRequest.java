@@ -53,7 +53,8 @@ public class DateTimeRequest extends Request {
 	void parsePayload(byte[] body) throws IOException {
 		if(body.length != 11)
 			throw new ParsingException("BODY LENGTH");
-		parseDate(parse32(body, 3), parse32(body, 7));
+		stamp.setTime(parseDate(body, 3));
+		setComplete(true);
 	}
 
 	/** Date / time stamp */
@@ -81,21 +82,5 @@ public class DateTimeRequest extends Request {
 		int time = (hour << 22) | (minute << 16) | (second << 10) | ms;
 		format32(date, body, 3);
 		format32(time, body, 7);
-	}
-
-	/** Parse a date / time stamp */
-	protected void parseDate(int date, int time) {
-		int year = (date >> 9) & 0x0FFF;
-		int month = (date >> 5) & 0x0F;
-		int day = date & 0x1F;
-		int hour = (time >> 22) & 0x1F;
-		int minute = (time >> 16) & 0x3F;
-		int second = (time >> 10) & 0x3F;
-		int ms = time & 0x3FF;
-		TimeZone utc = TimeZone.getTimeZone("GMT");
-		Calendar cal = Calendar.getInstance(utc);
-		cal.set(year, month - 1, day, hour, minute, second);
-		cal.set(Calendar.MILLISECOND, ms);
-		stamp.setTime(cal.getTimeInMillis());
 	}
 }

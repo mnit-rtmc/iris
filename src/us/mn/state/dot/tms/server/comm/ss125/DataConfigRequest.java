@@ -64,6 +64,7 @@ public class DataConfigRequest extends Request {
 		presence_push = PushConfig.parse(rbody, 18);
 		default_sep = parse16Fixed(rbody, 24);
 		default_size = parse16Fixed(rbody, 26);
+		setComplete(true);
 	}
 
 	/** Data interval (seconds) */
@@ -119,8 +120,8 @@ public class DataConfigRequest extends Request {
 			pc.port = PushPort.fromOrdinal(rbody[pos]);
 			pc.protocol = PushProtocol.fromOrdinal(rbody[pos + 1]);
 			pc.enable = parseBoolean(rbody[pos + 2]);
-			pc.dest_sub_id = parse8(rbody[pos + 3]);
-			pc.dest_id = parse16(rbody, 4);
+			pc.dest_sub_id = parse8(rbody, pos + 3);
+			pc.dest_id = parse16(rbody, pos + 4);
 			return pc;
 		}
 
