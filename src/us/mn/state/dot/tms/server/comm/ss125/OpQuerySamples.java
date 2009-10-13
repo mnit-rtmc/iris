@@ -86,8 +86,9 @@ public class OpQuerySamples extends OpSS125 {
 	/** Cleanup the operation */
 	public void cleanup() {
 		if(success) {
-//			controller.storeData30Second(stamp, 1, volume, scans,
-//				speed);
+			controller.storeData30Second(stamp, 1,
+				sample_data.getVolume(), sample_data.getScans(),
+				sample_data.getSpeed());
 		}
 		completer.down();
 		super.cleanup();

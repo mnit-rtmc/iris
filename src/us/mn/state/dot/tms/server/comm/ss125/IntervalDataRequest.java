@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import java.io.IOException;
 import java.util.Date;
+import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -30,6 +31,12 @@ public class IntervalDataRequest extends Request {
 
 	/** Interval data request ID (from volatile memory) */
 	static protected final byte MSG_ID = 0x71;
+
+	/** Maximum scan count */
+	static protected final int MAX_SCANS = 1800;
+
+	/** Multiplier to convert occupancy to scan count */
+	static protected final float OCC_SCANS = MAX_SCANS / 100f;
 
 	/** Format the body of a GET request */
 	byte[] formatBodyGet() throws IOException {
@@ -96,7 +103,7 @@ public class IntervalDataRequest extends Request {
 	protected int n_approaches;
 
 	/** Lane interval data */
-	protected LaneInterval[] lanes;
+	protected LaneInterval[] lanes = new LaneInterval[0];
 
 	/** Lane interval data */
 	static public class LaneInterval {
@@ -122,6 +129,48 @@ public class IntervalDataRequest extends Request {
 			headway = parse24(body, 37);
 			gap = parse24(body, 40);
 		}
+		public int getScans() {
+			return Math.round(occ * OCC_SCANS);
+		}
+	}
+
+	/** Get the volume for all lanes */
+	public int[] getVolume() {
+		int[] vol = new int[lanes.length];
+		for(int i = 0; i < vol.length; i++) {
+			LaneInterval li = lanes[i];
+			if(li != null)
+				vol[i] = li.volume;
+			else
+				vol[i] = Constants.MISSING_DATA;
+		}
+		return vol;
+	}
+
+	/** Get the scans for all lanes */
+	public int[] getScans() {
+		int[] scans = new int[lanes.length];
+		for(int i = 0; i < scans.length; i++) {
+			LaneInterval li = lanes[i];
+			if(li != null)
+				scans[i] = li.getScans();
+			else
+				scans[i] = Constants.MISSING_DATA;
+		}
+		return scans;
+	}
+
+	/** Get the speeds for all lanes */
+	public int[] getSpeed() {
+		int[] speeds = new int[lanes.length];
+		for(int i = 0; i < speeds.length; i++) {
+			LaneInterval li = lanes[i];
+			if(li != null && li.speed != null)
+				speeds[i] = Math.round(li.speed);
+			else
+				speeds[i] = Constants.MISSING_DATA;
+		}
+		return speeds;
 	}
 
 	/** Get a string representation of the request */
@@ -131,10 +180,19 @@ public class IntervalDataRequest extends Request {
 		sb.append(interval);
 		sb.append(", ");
 		sb.append(new Date(stamp));
-		sb.append(", lanes: ");
-		sb.append(n_lanes);
-		sb.append(", approaches: ");
-		sb.append(n_approaches);
+		sb.append(", vol: [");
+		for(int v: getVolume())
+			sb.append("" + v + ",");
+		sb.setLength(sb.length() - 1);
+		sb.append("], scans: [");
+		for(int s: getScans())
+			sb.append("" + s + ",");
+		sb.setLength(sb.length() - 1);
+		sb.append("], speed: [");
+		for(int s: getSpeed())
+			sb.append("" + s + ",");
+		sb.setLength(sb.length() - 1);
+		sb.append("]");
 		return sb.toString();
 	}
 }
