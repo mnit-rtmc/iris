@@ -104,8 +104,15 @@ public class TokenStreamReader
 		// read bytes until token discovered
 		while(true) {
 
+			// is a complete token already in buffer? if yes, 
+			// extract it and delete preceeding text.
+			token = m_pb.getToken(ParseBuffer.ExtractType.DDK,
+				tokenstart, tokenend);
+			if(token != null)
+				return token;
+
 			// read
-			//Log.finest("TokenStreamReader:Waiting for bytes to read.");
+			//Log.finest("TokenStreamReader:Waiting for bytes to read, buf="+m_pb.toString());
 			try {
 				numread = m_inps.read(fragment, 0,fragment.length);
 			} catch (SocketTimeoutException ex) {
@@ -149,14 +156,14 @@ public class TokenStreamReader
 				if(token == null) {
 					continue;
 
-					// found token
+				// found token
 				} else {
 
 					// Log.finest("TokenStreamReader:Found complete token:"+token);
 					return (token);
 				}
 
-				// disconnect
+			// disconnect
 			} else if(numread < 0) {
 
 				// Log.finest("TokenStreamReader:Client disconnected (numread<0).");

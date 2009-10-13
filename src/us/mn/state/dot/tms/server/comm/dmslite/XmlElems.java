@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import us.mn.state.dot.tms.utils.Log;
 
 /**
  * A container for multiple XmlElem objects.
@@ -27,8 +28,13 @@ import java.util.LinkedList;
 public class XmlElems
 {
 	/** Container for XmlElem objects */
-	private final LinkedList<XmlElem> m_rrlist = 
+	private final LinkedList<XmlElem> m_xelems = 
 		new LinkedList<XmlElem>();
+
+	/** Queue for intermediate status messages. Messages are enqueued
+	 *  at the end of the list and dequeued from the start. */
+	private final LinkedList<String> m_istatusqueue = 
+		new LinkedList<String>();
 
 	/** Constructor */
 	public XmlElems() {}
@@ -36,32 +42,66 @@ public class XmlElems
 	/** toString */
 	public String toString() {
 		String ret = "XmlElems(";
-		ret += "size=" + m_rrlist.size();
+		ret += "size=" + m_xelems.size();
 		int i = 0;
- 		for(XmlElem xrr : m_rrlist) {
-			ret += ", m_rrlist[" + i + "]=" + 
-				xrr.toString() + ")";
+ 		for(XmlElem xe : m_xelems) {
+			ret += ", m_xelems[" + i + "]=" + 
+				xe.toString() + ")";
 			++i;
 		}
 		ret += ")";
 		return ret;
 	}
 
-	/** Parse response. */
-	public void parseResponse(String levelonetagname, String xml)
-		throws IOException
+	/** Parse response. The xml argument is parsed into the response 
+	 *  fields contained within each XmlElem.
+	 *  @param levelonetagname Xml string level one tag name.
+	 *  @param istag Intermediate status tag name.
+	 *  @param xml XML response string, may be null. */
+	public void parseResponse(String levelonetagname, String istag, 
+		String xml) throws IOException
 	{
-		for(XmlElem xmlrr : m_rrlist) {
-			// throws IOException
-			xmlrr.parseResponse(levelonetagname, xml);
+		String childTag = Xml.readSecondTagName(
+			levelonetagname, xml);
+		if(childTag == null || childTag.isEmpty())
+			return;
+		boolean readinterstatus = false;
+		for(XmlElem xe : m_xelems) {
+			// tag in xml matches xml element?
+			if(xe.resTagMatches(childTag)) {
+				// throws IOException
+				xe.parseResponse(levelonetagname, xml);
+				xe.flagResRead();
+
+				// if intermediate status update, enqueue msg
+				if(xe.resTagMatches(istag))
+					addInterStatusMsg(xe);
+			}
 		}
+	}
+
+	/** Enqueue an intermediate status message.
+	 *  @param xe This XML element is assumed to be an intermediate 
+	 *	   status message. */
+	private void addInterStatusMsg(XmlElem xe) {
+		m_istatusqueue.addLast(xe.getResString("Msg"));
+	}
+
+	/** Dequeue all intermediate status messages. Earlier messages
+	 *  have lower indexes.
+	 *  @return An array of String messages. */
+	public String[] getInterStatusMsgs() {
+		String[] ret = new String[m_istatusqueue.size()];
+		for(int i = 0; i < ret.length; ++i)
+			ret[i] = m_istatusqueue.removeFirst();
+		return ret;
 	}
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
 	protected String getResString(String reqname) {
- 		for(XmlElem xmlrr : m_rrlist) {
-			String value = xmlrr.getResString(reqname);
+ 		for(XmlElem xe : m_xelems) {
+			String value = xe.getResString(reqname);
 			if(value != null)
 				return value;
 		}
@@ -69,30 +109,43 @@ public class XmlElems
 	}
 
 	/** Add an element. */
-	public void add(XmlElem xmlrr) {
-		m_rrlist.add(xmlrr);
+	public void add(XmlElem xe) {
+		m_xelems.add(xe);
 	}
 
 	/** 
 	 * Return a request XML message in this form:
-	 *	<level 1 name>
+	 *	<levelonetagname>
 	 *		<msg 1 name>
 	 *			...child elements...
 	 *		</msg 1 name>
 	 *		<msg 2 name>
 	 *			...child elements...
 	 *		</msg 2 name>
-	 * 	</level 1 name>
+	 * 	</levelonetagname>
 	 */
 	public byte[] buildReqMsg(String levelonetagname) {
 		StringBuilder children = new StringBuilder();
- 		for(XmlElem xmlrr : m_rrlist)
-			children.append(xmlrr.buildReqMsg());
+ 		for(XmlElem xe : m_xelems)
+			if(xe.containsRequest())
+				children.append(xe.buildReqMsg());
 
 		// enclose elements in root element
 		StringBuilder doc = new StringBuilder();
 		Xml.addXmlTag(doc, levelonetagname, children);
-
 		return doc.toString().getBytes();
+	}
+
+	/** Is element reading done? Element reading is done when a request 
+	 *  element exists and its 'has been read' flag is true. */
+	public boolean readDone() {
+		boolean done = false;
+ 		for(XmlElem xe : m_xelems) {
+			if(xe.containsRequest() && xe.wasResRead()) {
+				done = true;
+				break;
+			}
+		}
+		return done;
 	}
 }

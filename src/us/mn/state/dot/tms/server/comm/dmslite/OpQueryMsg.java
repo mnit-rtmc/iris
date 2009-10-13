@@ -156,7 +156,9 @@ public class OpQueryMsg extends OpDms {
 	 * @param argbitmap Bitmap of all pages
 	 * @param pg Page number to extract
 	 * @return BitmapGraphic of requested page */
-	static protected BitmapGraphic extractBitmap(byte[] argbitmap, int pg) {
+	static protected BitmapGraphic extractBitmap(byte[] argbitmap, 
+		int pg) 
+	{
 		byte[] pix = extractPage(argbitmap, pg);
 		BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
 		bm.setPixels(pix);
@@ -254,13 +256,13 @@ public class OpQueryMsg extends OpDms {
 		return ret;
 	}
 
-	/** Build request message in this format:
+	/** Build XML element:
 	 *	<DmsLite><SetBlankMsgReqMsg>
 	 *		<Id></Id>
 	 *		<Address>1</Address>
 	 *	</SetBlankMsgReqMsg></DmsLite>
 	 */
-	private XmlElem buildReqRes(String elemReqName, String elemResName) {
+	private XmlElem buildXmlElem(String elemReqName, String elemResName) {
 		XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
 		// request
@@ -517,15 +519,15 @@ public class OpQueryMsg extends OpDms {
 
 			// build xml request and expected response
 			mess.setName(getOpName());
-			XmlElem xrr = buildReqRes("StatusReqMsg", 
+			XmlElem xrr = buildXmlElem("StatusReqMsg", 
 				"StatusRespMsg");
 
 			// send request and read response
 			mess.add(xrr);
 			sendRead(mess);
-
-			if(parseResponse(mess, xrr))
-				return this;
+			if(xrr.wasResRead())
+				if(parseResponse(mess, xrr))
+					return this;
 			return null;
 		}
 	}

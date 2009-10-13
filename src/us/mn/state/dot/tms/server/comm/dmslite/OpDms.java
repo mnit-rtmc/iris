@@ -226,7 +226,8 @@ abstract public class OpDms extends OpDevice {
 
 	/** return description of operation */
 	public String getOperationDescription() {
-		m_opDesc = (m_opDesc == null ? "Unnamed operation" : m_opDesc);
+		m_opDesc = (m_opDesc == null ? 
+			"Unnamed operation" : m_opDesc);
 		if(m_user == null)
 			return m_opDesc;
 		return m_opDesc + " (" + m_user.getFullName() + ")";
@@ -260,30 +261,47 @@ abstract public class OpDms extends OpDevice {
 		errorStatus = msg;
 	}
 
+
 	/** Update operation intermediate status in the client.
-	 *  @param is String to display.
+	 *  @param is Strings to display, may be null. */
+	protected void updateInterStatus(String[] is) {
+		if(is == null || is.length <= 0)
+			return;
+		for(int i = 0; i < is.length; ++i)
+			updateInterStatus(is[i], false);
+	}
+
+	/** Update operation intermediate status in the client.
+	 *  @param is String to display, may be null.
 	 *  @param last True for completion message else false. */
 	protected void updateInterStatus(String is, boolean last) {
+		if(is == null || is.isEmpty())
+			return;
+		// prepend attempt number so user knows this is a retry
 		if(m_retry > 0 && !last)
 			is = "(attempt " + String.valueOf(m_retry + 1) + 
 				") " + is;
 		ControllerHelper.updateInterStatus(controller, is);
 	}
 
+	/** Return an intermediate status XML element */
+	private static XmlElem buildInterStatusElem() {
+		XmlElem is = new XmlElem(Message.DMSLITEMSGTAG, 
+			Message.ISTATUSTAG);
+		// response (there is no request)
+		is.addRes("Id");
+		is.addRes("Msg");
+		return is;
+	}
+
 	/** Sends a request to the field controller and reads the response. */
 	protected void sendRead(Message mess) throws IOException {
-		mess.getRequest(getOpDms());	// throws IOException
 
-		// At this point, either a complete response or an 
-		// intermediate status update XML response was read.
+		// add intermediate status element as a possible response
+		mess.add(buildInterStatusElem());
 
-		// intermediate status update?
-		if(null != mess.getResString("InterStatus")) {
-			String istatus = mess.getResString("Msg");
-			if(istatus != null)
-				updateInterStatus(istatus, false);
-			STime.sleep(2000);
-		}
+		// send and read response, throws IOException
+		mess.getRequest(getOpDms());
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */
@@ -301,7 +319,7 @@ abstract public class OpDms extends OpDevice {
 			m_next = next;
 		}
 
-		/** Build request message in this format:
+		/** Build XML element:
 		 *	<DmsLite><elemname>
 		 *		<Id>...</Id>
 		 *		<Address>...</Address>
@@ -317,7 +335,9 @@ abstract public class OpDms extends OpDevice {
 		 *		<Msg>...</Msg>
 		 *	</elemname></DmsLite>
 		 */
-		private XmlElem buildReqRes(String elemReqName, String elemResName) {
+		private XmlElem buildXmlElem(String elemReqName, 
+			String elemResName) 
+		{
 			XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
 			// request
@@ -503,7 +523,7 @@ abstract public class OpDms extends OpDevice {
 
 			// build xml request and expected response			
 			mess.setName(getOpName());
-			XmlElem xrr = buildReqRes("GetDmsConfigReqMsg", 
+			XmlElem xrr = buildXmlElem("GetDmsConfigReqMsg", 
 				"GetDmsConfigRespMsg");
 
 			// send request and read response

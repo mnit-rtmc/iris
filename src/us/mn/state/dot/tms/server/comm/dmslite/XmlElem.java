@@ -20,6 +20,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import us.mn.state.dot.tms.utils.STime;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This class represents an XML element that contains child elements one
@@ -33,11 +34,11 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class XmlElem
 {
-	/** Top-level element request name */
-	private String m_reqname = "";
+	/** Top-level element request tag name */
+	private String m_reqtagname = "";
 
-	/** Top-level element response name */
-	private String m_resname = "";
+	/** Top-level element response tag name */
+	private String m_restagname = "";
 
 	/** Children request elements */
 	private final HashMap<String, Object> m_reqlist = 
@@ -47,12 +48,28 @@ public class XmlElem
 	private final HashMap<String, Object> m_reslist = 
 		new HashMap<String, Object>();
 
+	/** Flag if response has been read */
+	private boolean m_resread = false;
+
 	/** Constructor.
-	 * @param reqname XML tag name for request root element.
-	 * @param resname XML tag name for response root element. */
-	public XmlElem(String reqname, String resname) {
-		m_reqname = reqname;
-		m_resname = resname;
+	 * @param reqtagname XML tag name for request root element.
+	 * @param restagname XML tag name for response root element. */
+	public XmlElem(String reqtagname, String restagname) {
+		m_reqtagname = (reqtagname == null ? "" : reqtagname);
+		m_restagname = (restagname == null ? "" : restagname);
+	}
+
+	/** toString */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("XmlElem(");
+		sb.append("req size=").append(m_reqlist.size()).append(", ");
+		sb.append("res size=").append(m_reslist.size()).append(", ");
+		sb.append("reqtagname=").append(m_reqtagname).append(", ");
+		sb.append("restagname=").append(m_restagname).append(", ");
+		sb.append("resread=").append(m_resread);
+		sb.append(")");
+		return sb.toString();
 	}
 
 	/** Parse response using XML string and fill in response fields. */
@@ -63,7 +80,7 @@ public class XmlElem
 		Pair[] p;
 		try {
 			p = Xml.parseTagsAndChildren(levelonetagname, 
-				m_resname, xml);
+				m_restagname, xml);
 		} catch (IOException ex) {
 			throw ex;
 		}
@@ -90,13 +107,13 @@ public class XmlElem
 		} 
 		// enclose child tags in message tag
 		StringBuilder msgtag = new StringBuilder(384);
-		Xml.addXmlTag(msgtag, m_reqname, children);
+		Xml.addXmlTag(msgtag, m_reqtagname, children);
 		return msgtag.toString();
 	}
 
 	/** Get response value for the specified response name.
 	  * @return null if not found else the value. */
-	private Object getResValue(String resname) {
+	public Object getResValue(String resname) {
 		if(resname == null)
 			return null;
 		return m_reslist.get(resname);
@@ -104,7 +121,7 @@ public class XmlElem
 
 	/** Get response value for the specified request tag name.
 	  * @return null if not found else the value. */
-	protected String getResString(String resname) {
+	public String getResString(String resname) {
 		Object ret = getResValue(resname);
 		if(ret == null)
 			return null;
@@ -117,7 +134,7 @@ public class XmlElem
 		String ret = getResString(resname);
 		if(ret == null)
 			return 0;
-		return new Long(ret);
+		return SString.stringToLong(ret);
 	}
 
 	/** Get response value for the specified request tag name.
@@ -126,7 +143,7 @@ public class XmlElem
 		String ret = getResString(resname);
 		if(ret == null)
 			return 0;
-		return new Integer(ret);
+		return SString.stringToInt(ret);
 	}
 
 	/** Get response value for the specified request tag name.
@@ -135,7 +152,7 @@ public class XmlElem
 		String ret = getResString(resname);
 		if(ret == null)
 			return false;
-		return new Boolean(ret);
+		return SString.stringToBoolean(ret);
 	}
 
 	/** Get response value for the specified request tag name.
@@ -172,5 +189,31 @@ public class XmlElem
 			if(n.equals(resname))
 				m_reslist.put(resname, resval);
 		} 
+	}
+
+	/** Does the specified tag name match the name of the expected
+	 *  response tag? */
+	public boolean resTagMatches(String restagname) {
+		return m_restagname.equals(restagname);
+	}
+
+	/** Return the response name */
+	public String getResTagName() {
+		return m_restagname;
+	}
+
+	/** Does the element contain any requests? */
+	public boolean containsRequest() {
+		return m_reqlist.size() > 0;
+	}
+
+	/** Flag response has been read */
+	public void flagResRead() {
+		m_resread = true;
+	}
+
+	/** Has response been read? */
+	public boolean wasResRead() {
+		return m_resread;
 	}
 }

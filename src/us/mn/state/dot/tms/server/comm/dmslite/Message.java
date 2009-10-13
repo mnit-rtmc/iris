@@ -38,7 +38,10 @@ import us.mn.state.dot.tms.utils.SEmail;
 public class Message implements AddressedMessage
 {
     	/** Root XML tag name. */
-	static final String DMSLITEMSGTAG = "DmsLite";
+	public final static String DMSLITEMSGTAG = "DmsLite";
+
+	/** Intermediate status update XML tag name */
+	public final static String ISTATUSTAG = "InterStatus";
 
     	/** Default max wait time for DMS response. */
 	static final int DEFAULT_TIMEOUT_DMS_MS = 1000 * 30;
@@ -47,7 +50,7 @@ public class Message implements AddressedMessage
 	OpDms m_opdms = null;
 
 	/** Container of XML elements. */
-	XmlElems m_rrs = new XmlElems();
+	XmlElems m_xelems = new XmlElems();
 
 	/** Name for this message. */
 	private String m_name = "DmsLiteMsg";
@@ -73,8 +76,8 @@ public class Message implements AddressedMessage
 	/** toString */
 	public String toString() {
 		String ret = "Message(";
-		if(m_rrs != null)
-			ret += "m_rrs=" + m_rrs.toString();
+		if(m_xelems != null)
+			ret += "m_xelems=" + m_xelems.toString();
 		ret += ")";
 		return ret;
 	}
@@ -111,7 +114,13 @@ public class Message implements AddressedMessage
 		if(!(xmlrr instanceof XmlElem))
 			throw new IllegalArgumentException(
 			    "dmslite.Message.add() wrong arg type.");
-		m_rrs.add((XmlElem)xmlrr);
+		m_xelems.add((XmlElem)xmlrr);
+	}
+
+	/** Update intermediate status */
+	private void updateInterStatus(String[] m) {
+		if(m_opdms != null)
+			m_opdms.updateInterStatus(m);
 	}
 
 	/** Update intermediate status */
@@ -136,8 +145,8 @@ public class Message implements AddressedMessage
 		// send request
 		long starttime = sendRequest();
 
-		// read response
-		readResponse(starttime);
+		// read XML elements in response
+		readElements(starttime);
 	}
 
 	/** Send a request */
@@ -156,60 +165,96 @@ public class Message implements AddressedMessage
 		return starttime;
 	}
 
-	/** Read a response */
-	private void readResponse(long starttime) throws IOException {
+	/** Get DMS id */
+	private String getDmsId() {
+		if(m_opdms != null)
+			return m_opdms.m_dms.getName();
+		return "V?";
+	}
 
+	/** Read one XML element in the response. */
+	private void readElements(long starttime) throws IOException {
+		/** The intermediate status is updated in finally block. */
+		String[] istatus = new String[0];
+		long startms = STime.getCurTimeUTCinMillis();
 		updateInterStatus("Waiting for sensorserver.");
-		String token = null;
-		try {
-			token = m_is.readToken(m_dmsTimeoutMS,
-		       	"<" + DMSLITEMSGTAG + ">","</" + DMSLITEMSGTAG + ">");
-			setCompletionTimeMS((int)STime.
-				calcTimeDeltaMS(starttime));
-			Log.finer("Response received in " + 
-				getCompletionTimeMS() + " ms.");
-		} catch(IllegalStateException ex) {
-			String msg = "Warning: buffer capacity exceeded.";
-			handleAwsFailure(msg);
-			throw new IOException(msg);
-		} catch(IOException ex) {
-			String msg = "Unable to connect to SensorServer.";
-			handleAwsFailure(msg);
-			Log.warning(msg);
-			throw new IOException(msg);
-		} catch(Exception ex) {
-			String msg = "Unexpected problem: " + ex;
-			handleAwsFailure(msg);
-			throw new IOException(msg);
-		}
+		do {
+			String token = null;
+			try {
+				long elapsed = STime.calcTimeDeltaMS(startms);
+				int leftms = (int)(m_dmsTimeoutMS - elapsed);
+				if(leftms > 0) {
+					token = m_is.readToken(leftms,
+					       	"<" + DMSLITEMSGTAG + ">", 
+						"</" + DMSLITEMSGTAG + ">");
+					setCompletionTimeMS((int)STime.
+						calcTimeDeltaMS(starttime));
+					Log.finer("Response received in " + 
+						getCompletionTimeMS() + 
+						" ms.");
+				}
+			} catch(IllegalStateException ex) {
+				istatus = new String[] 
+					{"Warning: buffer cap exceeded."};
+				handleAwsFailure(istatus[0]);
+				throw new IOException(istatus[0]);
+			} catch(IOException ex) {
+				istatus = new String[] 
+					{"Can't connect to SensorServer."};
+				handleAwsFailure(istatus[0]);
+				Log.warning(istatus[0]);
+				throw new IOException(istatus[0]);
+			} catch(Exception ex) {
+				istatus = new String[] 
+					{"Unexpected problem: " + ex};
+				handleAwsFailure(istatus[0]);
+				throw new IOException(istatus[0]);
 
-		// timed out?
-		if(token == null) {
-			String err="";
-			err+="Warning: dmslite.Message.getRequest(): " +
-				"timed out waiting for CMS " + // m_dms + 
-				" (" + (getCompletionTimeMS()/1000) + 
-				"seconds). Timeout is " + m_dmsTimeoutMS 
-				/ 1000 + " secs). ";
-			handleAwsFailure(err);
-			Log.severe(err);
-			throw new IOException(err);
+			// update intermediate status when leaving method
+			} finally {
+				updateInterStatus(istatus);
+			}
 
-		// parse response
-		} else {
-			Log.finest("dmslite.Message.getRequest(): found "+
-				"complete token:" + token);
-			// throws IOException
-			m_rrs.parseResponse(DMSLITEMSGTAG, token);
-		}
+			// timed out?
+			if(token == null) {
+				String dmsid = getDmsId();
+				String err = "";
+				err += "dmslite.Message.readElements(): " +
+					"timed out waiting for " + dmsid + "("
+					+ (getCompletionTimeMS() / 1000) + 
+					" seconds). Timeout is " + 
+					m_dmsTimeoutMS / 1000 + " secs). ";
+				handleAwsFailure(err);
+				Log.severe(err);
+				istatus = new String[] 
+					{"Timed out waiting for sensorserver."};
+				throw new IOException("Timed out waiting " +
+					"for " + dmsid);
+
+			// parse response
+			} else {
+				Log.finest("dmslite.Message.getRequest(): " +
+					"found complete token:" + token);
+
+				// throws IOException
+				istatus = new String[] {"Parse error"};
+				// sets 'was read' flag for each XML element
+				m_xelems.parseResponse(Message.DMSLITEMSGTAG, 
+					Message.ISTATUSTAG, token);
+
+				// Either a completed response element or an
+				// intermediate status update was read.
+				istatus = getInterStatusMsgs();
+			}
+		} while(!m_xelems.readDone());
 	}
 
 	/** Get the response value by name.
 	  * @return null if not found else the value. */
 	protected String getResString(String name) {
-		if(m_rrs==null)
+		if(m_xelems == null)
 			return null;
-		return m_rrs.getResString(name);
+		return m_xelems.getResString(name);
 	}
 
 	/** Return true if message is owned by the AWS. */
@@ -223,7 +268,7 @@ public class Message implements AddressedMessage
 	protected boolean checkAwsFailure() {
 		Log.finest("Message.checkAwsFailure() called. this=" + 
 			toString() + ", ownerIsAws=" + ownerIsAws());
- 		if(m_rrs == null)
+ 		if(m_xelems == null)
 			return false;
 		String ret=null;
 
@@ -242,7 +287,7 @@ public class Message implements AddressedMessage
 
 	/** Generate an aws failure message */
 	protected String getAwsFailureMessage() {
-		if(m_rrs == null)
+		if(m_xelems == null)
 			return "";
 
 		String ret = "";
@@ -308,16 +353,18 @@ public class Message implements AddressedMessage
 			errmsg);
 
 		// build email
-		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
-		String recipient=SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
+		String sender = SystemAttrEnum.
+			EMAIL_SENDER_SERVER.getString();
+		String recipient = SystemAttrEnum.
+			EMAIL_RECIPIENT_AWS.getString();
 		String subject = "IRIS could not send AWS message to DMS";
 
 		// send
 		if(recipient == null || sender == null ||
 			recipient.length() <= 0 || sender.length() <= 0)
 		{
-			Log.warning("Message.handleAwsFailure(): didn't try "+
-				"to send AWS error email.");
+			Log.warning("Message.handleAwsFailure(): didn't" +
+				"try to send AWS error email.");
 		} else {
 			SEmail email = new SEmail(sender, recipient, subject,
 				errmsg);
@@ -339,8 +386,13 @@ public class Message implements AddressedMessage
 	/** Return a request message with this format:
 	 *     <DmsLite><msg name>...etc...</msg name></DmsLite> */
 	public byte[] buildReqMsg() {
-		if(m_rrs == null)
+		if(m_xelems == null)
 			return new byte[0];
-		return m_rrs.buildReqMsg(DMSLITEMSGTAG);
+		return m_xelems.buildReqMsg(DMSLITEMSGTAG);
+	}
+
+	/** Get pending intermediate status messages */
+	public String[] getInterStatusMsgs() {
+		return m_xelems.getInterStatusMsgs();
 	}
 }
