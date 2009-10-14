@@ -29,6 +29,11 @@ public class HolidayHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup the holiday with the specified name */
+	static public Holiday lookup(String name) {
+		return (Holiday)namespace.lookupObject(Holiday.SONAR_TYPE,name);
+	}
+
 	/** Find holiday using a Checker */
 	static public Holiday find(final Checker<Holiday> checker) {
 		return (Holiday)namespace.findObject(Holiday.SONAR_TYPE, 

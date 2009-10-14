@@ -209,6 +209,15 @@ CREATE TABLE iris.holiday (
 	period INTEGER NOT NULL
 );
 
+CREATE TABLE iris.day_plan (
+	name VARCHAR(10) PRIMARY KEY
+);
+
+CREATE TABLE iris.day_plan_holiday (
+	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+	holiday VARCHAR(32) NOT NULL REFERENCES iris.holiday
+);
+
 CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
 	freeway VARCHAR(20) REFERENCES iris.road(name),

@@ -52,3 +52,12 @@ ALTER TABLE iris.dms_action ADD COLUMN r_priority INTEGER;
 UPDATE iris.dms_action SET r_priority = priority;
 ALTER TABLE iris.dms_action ALTER COLUMN r_priority SET NOT NULL;
 ALTER TABLE iris.dms_action DROP COLUMN priority;
+
+CREATE TABLE iris.day_plan (
+	name VARCHAR(10) PRIMARY KEY
+);
+
+CREATE TABLE iris.day_plan_holiday (
+	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+	holiday VARCHAR(32) NOT NULL REFERENCES iris.holiday
+);
