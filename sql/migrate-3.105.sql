@@ -37,3 +37,10 @@ UPDATE iris.lane_action SET state = 0;
 UPDATE iris.lane_action SET state = 2 WHERE on_deploy = true;
 ALTER TABLE iris.lane_action ALTER COLUMN state SET NOT NULL;
 ALTER TABLE iris.lane_action DROP COLUMN on_deploy;
+
+ALTER TABLE iris.action_plan ADD COLUMN deploying_secs INTEGER;
+UPDATE iris.action_plan SET deploying_secs = 0;
+ALTER TABLE iris.action_plan ALTER COLUMN deploying_secs SET NOT NULL;
+ALTER TABLE iris.action_plan ADD COLUMN undeploying_secs INTEGER;
+UPDATE iris.action_plan SET undeploying_secs = 0;
+ALTER TABLE iris.action_plan ALTER COLUMN undeploying_secs SET NOT NULL;

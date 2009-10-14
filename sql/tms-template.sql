@@ -757,6 +757,8 @@ CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
 	description VARCHAR(64) NOT NULL,
 	sync_actions BOOLEAN NOT NULL,
+	deploying_secs INTEGER NOT NULL,
+	undeploying_secs INTEGER NOT NULL,
 	active BOOLEAN NOT NULL,
 	state INTEGER NOT NULL REFERENCES iris.plan_state
 );

@@ -38,6 +38,18 @@ public interface ActionPlan extends SonarObject {
 	/** Get the sync actions flag */
 	boolean getSyncActions();
 
+	/** Set the number of seconds to remain in deploying state */
+	void setDeployingSecs(int s);
+
+	/** Get the number of seconds to remain in deploying state */
+	int getDeployingSecs();
+
+	/** Set the number of seconds to remain in undeploying state */
+	void setUndeployingSecs(int s);
+
+	/** Get the number of seconds to remain in undeploying state */
+	int getUndeployingSecs();
+
 	/** Set the active status */
 	void setActive(boolean a);
 

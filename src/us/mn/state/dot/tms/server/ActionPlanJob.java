@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsAction;
@@ -64,11 +65,23 @@ public class ActionPlanJob extends Job {
 
 	/** Perform the action plan job */
 	public void perform() {
+		updateActionPlanStates();
 		// FIXME: TimeAction should have an associated DayPlan
 		if(!HolidayHelper.isHoliday(Calendar.getInstance()))
 			performTimeActions();
 		performDmsActions();
 		performLaneActions();
+	}
+
+	/** Update the action plan states */
+	protected void updateActionPlanStates() {
+		ActionPlanHelper.find(new Checker<ActionPlan>() {
+			public boolean check(ActionPlan ap) {
+				if(ap instanceof ActionPlanImpl)
+					((ActionPlanImpl)ap).updateState();
+				return false;
+			}
+		});
 	}
 
 	/** Perform time actions */

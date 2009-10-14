@@ -42,17 +42,19 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading action plans...");
 		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
-		store.query("SELECT name, description, sync_actions, active, " +
-			"state FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+		store.query("SELECT name, description, sync_actions, " +
+			"deploying_secs, undeploying_secs, active, state " +
+			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(
-					row.getString(1),	// name
-					row.getString(2),	// description
-					row.getBoolean(3),	// sync_actions
-					row.getBoolean(4),	// active
-					row.getInt(5)		// state
+					row.getString(1),  // name
+					row.getString(2),  // description
+					row.getBoolean(3), // sync_actions
+					row.getInt(4),	   // deploying_secs
+					row.getInt(5),	   // undeploying_secs
+					row.getBoolean(6), // active
+					row.getInt(7)	   // state
 				));
 			}
 		});
@@ -64,6 +66,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("name", name);
 		map.put("description", description);
 		map.put("sync_actions", sync_actions);
+		map.put("deploying_secs", deploying_secs);
+		map.put("undeploying_secs", undeploying_secs);
 		map.put("active", active);
 		map.put("state", state);
 		return map;
@@ -86,12 +90,14 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Create a new action plan */
-	protected ActionPlanImpl(String n, String dsc, boolean s, boolean a,
-		int st)
+	protected ActionPlanImpl(String n, String dsc, boolean s, int ds,
+		int us, boolean a, int st)
 	{
 		this(n);
 		description = dsc;
 		sync_actions = s;
+		deploying_secs = ds;
+		undeploying_secs = us;
 		active = a;
 		state = st;
 	}
@@ -138,6 +144,48 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return sync_actions;
 	}
 
+	/** Number of seconds to remain in deploying state */
+	protected int deploying_secs;
+
+	/** Set the number of seconds to remain in deploying state */
+	public void setDeployingSecs(int s) {
+		deploying_secs = s;
+	}
+
+	/** Set the number of seconds to remain in deploying state */
+	public void doSetDeployingSecs(int s) throws TMSException {
+		if(s == deploying_secs)
+			return;
+		store.update(this, "deploying_secs", s);
+		setDeployingSecs(s);
+	}
+
+	/** Get the number of seconds to remain in deploying state */
+	public int getDeployingSecs() {
+		return deploying_secs;
+	}
+
+	/** Number of seconds to remain in undeploying state */
+	protected int undeploying_secs;
+
+	/** Set the number of seconds to remain in undeploying state */
+	public void setUndeployingSecs(int s) {
+		undeploying_secs = s;
+	}
+
+	/** Set the number of seconds to remain in undeploying state */
+	public void doSetUndeployingSecs(int s) throws TMSException {
+		if(s == undeploying_secs)
+			return;
+		store.update(this, "undeploying_secs", s);
+		setUndeployingSecs(s);
+	}
+
+	/** Get the number of seconds to remain in undeploying state */
+	public int getUndeployingSecs() {
+		return undeploying_secs;
+	}
+
 	/** Active status */
 	protected boolean active;
 
@@ -162,10 +210,19 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Deployed state (ActionPlanState) */
 	protected int state;
 
+	/** Time stamp for last state change */
+	protected long state_time = System.currentTimeMillis();
+
+	/** Set the deployed state (ActionPlanState) */
+	protected void setStateNotify(ActionPlanState s) throws TMSException {
+		setStateNotify(s.ordinal());
+	}
+
 	/** Set the deployed state (ActionPlanState) */
 	protected void setStateNotify(int s) throws TMSException {
 		store.update(this, "state", s);
 		state = s;
+		state_time = System.currentTimeMillis();
 		notifyAttribute("state");
 	}
 
@@ -187,15 +244,22 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			validateDmsActions();
 			validateLaneActions();
 		}
-		setStateNotify(nextState(d).ordinal());
+		setStateNotify(nextState(d));
 	}
 
 	/** Get the next action plan state */
 	protected ActionPlanState nextState(boolean d) {
-		if(d)
-			return ActionPlanState.deployed;
-		else
-			return ActionPlanState.undeployed;
+		if(d) {
+			if(deploying_secs > 0)
+				return ActionPlanState.deploying;
+			else
+				return ActionPlanState.deployed;
+		} else {
+			if(undeploying_secs > 0)
+				return ActionPlanState.undeploying;
+			else
+				return ActionPlanState.undeployed;
+		}
 	}
 
 	/** Validate that all DMS actions are deployable */
@@ -257,5 +321,35 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Get the deployed state (ActionPlanState) */
 	public int getState() {
 		return state;
+	}
+
+	/** Update the plan state */
+	public void updateState() {
+		try {
+			updateState2();
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Update the plan state */
+	protected void updateState2() throws TMSException {
+		switch(ActionPlanState.fromOrdinal(state)) {
+		case deploying:
+			if(stateSecs() >= deploying_secs)
+				setStateNotify(ActionPlanState.deployed);
+			break;
+		case undeploying:
+			if(stateSecs() >= undeploying_secs)
+				setStateNotify(ActionPlanState.undeployed);
+			break;
+		}
+	}
+
+	/** Get the number of seconds in the current state */
+	protected int stateSecs() {
+		long elapsed = System.currentTimeMillis() - state_time;
+		return (int)(elapsed / 1000);
 	}
 }
