@@ -1263,15 +1263,20 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	public void performAction(DmsAction da) {
 		SignMessage sm = createMessage(da);
 		if(sm != null) {
-			SignMessage sched = messageSched;	// Avoid NPE
-			if(sched == null ||
-			   sm.getActivationPriority() >=
-			   sched.getRunTimePriority())
-			{
+			if(shouldReplaceScheduled(sm)) {
 				messageSched = sm;
 				is_scheduled = true;
 			}
 		}
+	}
+
+	/** Test if the given sign message should replace the current
+	 * scheduled message. */
+	protected boolean shouldReplaceScheduled(SignMessage sm) {
+		SignMessage s = messageSched;	// Avoid NPE
+		return s == null ||
+		       sm.getActivationPriority() > s.getActivationPriority() ||
+		       sm.getRunTimePriority() >= s.getRunTimePriority();
 	}
 
 	/** Create a message for the sign.
