@@ -776,7 +776,8 @@ CREATE TABLE iris.dms_action (
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	state INTEGER NOT NULL REFERENCES iris.plan_state,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
-	priority INTEGER NOT NULL
+	a_priority INTEGER NOT NULL,
+	r_priority INTEGER NOT NULL
 );
 
 CREATE TABLE iris.lane_action (

@@ -1279,11 +1279,13 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @return New sign message, or null on error */
 	protected SignMessage createMessage(DmsAction da) {
 		Integer d = da.getActionPlan().getSyncActions() ? null : 2;
-		DMSMessagePriority p = DMSMessagePriority.fromOrdinal(
-			da.getPriority());
+		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+			da.getActivationPriority());
+		DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+			da.getRunTimePriority());
 		String m = createMulti(da.getQuickMessage());
 		if(m != null)
-			return createMessage(m, p, p, true, d);
+			return createMessage(m, ap, rp, true, d);
 		else
 			return null;
 	}

@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 4;
+	static protected final int COLUMN_COUNT = 5;
 
 	/** Sign group column number */
 	static protected final int COL_GROUP = 0;
@@ -52,8 +52,11 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Quick message column number */
 	static protected final int COL_Q_MSG = 2;
 
-	/** Priority column number */
-	static protected final int COL_PRIORITY = 3;
+	/** Activation priority column number */
+	static protected final int COL_A_PRIORITY = 3;
+
+	/** Run-time priority column number */
+	static protected final int COL_R_PRIORITY = 4;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
@@ -61,7 +64,10 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		m.addColumn(createColumn(COL_GROUP, 120, "Sign Group"));
 		m.addColumn(createStateColumn());
 		m.addColumn(createColumn(COL_Q_MSG, 160, "Quick Message"));
-		m.addColumn(createPriorityColumn());
+		m.addColumn(createPriorityColumn(COL_A_PRIORITY,
+			"Activation Priority"));
+		m.addColumn(createPriorityColumn(COL_R_PRIORITY,
+			"Run-Time Priority"));
 		return m;
 	}
 
@@ -81,9 +87,11 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		ActionPlanState.undeploying
 	};
 
-	/** Create the priority column */
-	static protected TableColumn createPriorityColumn() {
-		TableColumn c = createColumn(COL_PRIORITY, 120, "Priority");
+	/** Create a priority column */
+	static protected TableColumn createPriorityColumn(int n,
+		String header)
+	{
+		TableColumn c = createColumn(n, 120, header);
 		JComboBox combo = new JComboBox(PRIORITIES);
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
@@ -151,8 +159,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			return ActionPlanState.fromOrdinal(da.getState());
 		case COL_Q_MSG:
 			return da.getQuickMessage();
-		case COL_PRIORITY:
-			return DMSMessagePriority.fromOrdinal(da.getPriority());
+		case COL_A_PRIORITY:
+			return DMSMessagePriority.fromOrdinal(
+			       da.getActivationPriority());
+		case COL_R_PRIORITY:
+			return DMSMessagePriority.fromOrdinal(
+			       da.getRunTimePriority());
 		default:
 			return null;
 		}
@@ -195,10 +207,16 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			String v = value.toString().trim();
 			da.setQuickMessage(QuickMessageHelper.lookup(v));
 			break;
-		case COL_PRIORITY:
+		case COL_A_PRIORITY:
 			if(value instanceof DMSMessagePriority) {
 				DMSMessagePriority p =(DMSMessagePriority)value;
-				da.setPriority(p.ordinal());
+				da.setActivationPriority(p.ordinal());
+			}
+			break;
+		case COL_R_PRIORITY:
+			if(value instanceof DMSMessagePriority) {
+				DMSMessagePriority p =(DMSMessagePriority)value;
+				da.setRunTimePriority(p.ordinal());
 			}
 			break;
 		}

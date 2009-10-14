@@ -44,3 +44,11 @@ ALTER TABLE iris.action_plan ALTER COLUMN deploying_secs SET NOT NULL;
 ALTER TABLE iris.action_plan ADD COLUMN undeploying_secs INTEGER;
 UPDATE iris.action_plan SET undeploying_secs = 0;
 ALTER TABLE iris.action_plan ALTER COLUMN undeploying_secs SET NOT NULL;
+
+ALTER TABLE iris.dms_action ADD COLUMN a_priority INTEGER;
+UPDATE iris.dms_action SET a_priority = priority;
+ALTER TABLE iris.dms_action ALTER COLUMN a_priority SET NOT NULL;
+ALTER TABLE iris.dms_action ADD COLUMN r_priority INTEGER;
+UPDATE iris.dms_action SET r_priority = priority;
+ALTER TABLE iris.dms_action ALTER COLUMN r_priority SET NOT NULL;
+ALTER TABLE iris.dms_action DROP COLUMN priority;

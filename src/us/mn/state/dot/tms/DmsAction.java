@@ -44,13 +44,23 @@ public interface DmsAction extends SonarObject {
 	/** Get the quick message */
 	QuickMessage getQuickMessage();
 
-	/** Set the message priority.
+	/** Set the activation priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
-	void setPriority(int p);
+	void setActivationPriority(int p);
 
-	/** Get the message priority.
+	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DMSMessagePriority */
-	int getPriority();
+	int getActivationPriority();
+
+	/** Set the run-time priority.
+	 * @param p Priority ranging from 1 (low) to 255 (high).
+	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	void setRunTimePriority(int p);
+
+	/** Get the run-time priority.
+	 * @return Priority ranging from 1 (low) to 255 (high).
+	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	int getRunTimePriority();
 }
