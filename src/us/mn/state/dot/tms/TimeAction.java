@@ -29,6 +29,9 @@ public interface TimeAction extends SonarObject {
 	/** Get the action plan */
 	ActionPlan getActionPlan();
 
+	/** Get the day plan */
+	DayPlan getDayPlan();
+
 	/** Get the minute-of-day (0-1440) */
 	short getMinute();
 

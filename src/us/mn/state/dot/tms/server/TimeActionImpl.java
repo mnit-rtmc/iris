@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TMSException;
 
@@ -33,16 +34,18 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading time actions...");
 		namespace.registerType(SONAR_TYPE, TimeActionImpl.class);
-		store.query("SELECT name, action_plan, minute, deploy " +
-			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
+		store.query("SELECT name, action_plan, day_plan, minute, " +
+			"deploy FROM iris." + SONAR_TYPE  +";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TimeActionImpl(
 					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
-					row.getShort(3),	// minute
-					row.getBoolean(4)	// deploy
+					row.getString(3),	// day_plan
+					row.getShort(4),	// minute
+					row.getBoolean(5)	// deploy
 				));
 			}
 		});
@@ -53,6 +56,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("action_plan", action_plan);
+		map.put("day_plan", day_plan);
 		map.put("minute", minute);
 		map.put("deploy", deploy);
 		return map;
@@ -74,17 +78,20 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Create a new time action */
-	protected TimeActionImpl(Namespace ns, String n, String a, short m,
-		boolean dp)
+	protected TimeActionImpl(Namespace ns, String n, String a, String d,
+		short m, boolean dp)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		     m, dp);
+		     (DayPlan)ns.lookupObject(DayPlan.SONAR_TYPE, d), m, dp);
 	}
 
 	/** Create a new time action */
-	protected TimeActionImpl(String n, ActionPlan a, short m, boolean dp) {
+	protected TimeActionImpl(String n, ActionPlan a, DayPlan d, short m,
+		boolean dp)
+	{
 		this(n);
 		action_plan = a;
+		day_plan = d;
 		minute = m;
 		deploy = dp;
 	}
@@ -95,6 +102,14 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	/** Get the action plan */
 	public ActionPlan getActionPlan() {
 		return action_plan;
+	}
+
+	/** Day plan */
+	protected DayPlan day_plan;
+
+	/** Get the day plan */
+	public DayPlan getDayPlan() {
+		return day_plan;
 	}
 
 	/** Minute-of-day (0-1440) */

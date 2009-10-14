@@ -61,3 +61,12 @@ CREATE TABLE iris.day_plan_holiday (
 	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
 	holiday VARCHAR(32) NOT NULL REFERENCES iris.holiday
 );
+
+INSERT INTO iris.day_plan (name) VALUES ('DEFAULT');
+INSERT INTO iris.day_plan_holiday (day_plan, holiday)
+	(SELECT 'DEFAULT', name FROM iris.holiday);
+
+ALTER TABLE iris.time_action ADD COLUMN day_plan VARCHAR(10)
+	REFERENCES iris.day_plan;
+UPDATE iris.time_action SET day_plan = 'DEFAULT';
+ALTER TABLE iris.time_action ALTER COLUMN day_plan SET NOT NULL;

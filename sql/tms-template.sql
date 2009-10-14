@@ -775,6 +775,7 @@ CREATE TABLE iris.action_plan (
 CREATE TABLE iris.time_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
 	minute SMALLINT NOT NULL,
 	deploy BOOLEAN NOT NULL
 );
