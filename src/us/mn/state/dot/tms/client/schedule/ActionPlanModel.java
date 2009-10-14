@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 5;
+	static protected final int COLUMN_COUNT = 7;
 
 	/** Name column number */
 	static protected final int COL_NAME = 0;
@@ -46,11 +46,17 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	/** Sync actions column number */
 	static protected final int COL_SYNC_ACTIONS = 2;
 
+	/** Deploying secs column number */
+	static protected final int COL_DEP_SECS = 3;
+
+	/** Undeploying secs column number */
+	static protected final int COL_UNDEP_SECS = 4;
+
 	/** Active column number */
-	static protected final int COL_ACTIVE = 3;
+	static protected final int COL_ACTIVE = 5;
 
 	/** State column number */
-	static protected final int COL_STATE = 4;
+	static protected final int COL_STATE = 6;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
@@ -58,6 +64,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		m.addColumn(createColumn(COL_NAME, 100, "Plan Name"));
 		m.addColumn(createColumn(COL_DESCRIPTION, 380, "Description"));
 		m.addColumn(createColumn(COL_SYNC_ACTIONS, 80, "Sync Actions"));
+		m.addColumn(createColumn(COL_DEP_SECS, 80, "Dep.Secs"));
+		m.addColumn(createColumn(COL_UNDEP_SECS, 80, "Undep.Secs"));
 		m.addColumn(createColumn(COL_ACTIVE, 80, "Active"));
 		m.addColumn(createStateColumn());
 		return m;
@@ -104,6 +112,9 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		case COL_SYNC_ACTIONS:
 		case COL_ACTIVE:
 			return Boolean.class;
+		case COL_DEP_SECS:
+		case COL_UNDEP_SECS:
+			return Integer.class;
 		default:
 			return String.class;
 		}
@@ -115,17 +126,20 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		if(plan == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return plan.getName();
-			case COL_DESCRIPTION:
-				return plan.getDescription();
-			case COL_SYNC_ACTIONS:
-				return plan.getSyncActions();
-			case COL_ACTIVE:
-				return plan.getActive();
-			case COL_STATE:
-				return ActionPlanState.fromOrdinal(
-				       plan.getState());
+		case COL_NAME:
+			return plan.getName();
+		case COL_DESCRIPTION:
+			return plan.getDescription();
+		case COL_SYNC_ACTIONS:
+			return plan.getSyncActions();
+		case COL_DEP_SECS:
+			return plan.getDeployingSecs();
+		case COL_UNDEP_SECS:
+			return plan.getUndeployingSecs();
+		case COL_ACTIVE:
+			return plan.getActive();
+		case COL_STATE:
+			return ActionPlanState.fromOrdinal(plan.getState());
 		}
 		return null;
 	}
@@ -144,29 +158,36 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		ActionPlan plan = getProxy(row);
 		String v = value.toString().trim();
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_DESCRIPTION:
-				plan.setDescription(v);
-				break;
-			case COL_SYNC_ACTIONS:
-				if(value instanceof Boolean)
-					plan.setSyncActions((Boolean)value);
-				break;
-			case COL_ACTIVE:
-				if(value instanceof Boolean)
-					plan.setActive((Boolean)value);
-				break;
-			case COL_STATE:
-				if(value instanceof ActionPlanState) {
-					ActionPlanState st =
-						(ActionPlanState)value;
-					plan.setDeployed(
-						ActionPlanState.isDeployed(st));
-				}
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_DESCRIPTION:
+			plan.setDescription(v);
+			break;
+		case COL_SYNC_ACTIONS:
+			if(value instanceof Boolean)
+				plan.setSyncActions((Boolean)value);
+			break;
+		case COL_DEP_SECS:
+			if(value instanceof Integer)
+				plan.setDeployingSecs((Integer)value);
+			break;
+		case COL_UNDEP_SECS:
+			if(value instanceof Integer)
+				plan.setUndeployingSecs((Integer)value);
+			break;
+		case COL_ACTIVE:
+			if(value instanceof Boolean)
+				plan.setActive((Boolean)value);
+			break;
+		case COL_STATE:
+			if(value instanceof ActionPlanState) {
+				ActionPlanState st = (ActionPlanState)value;
+				plan.setDeployed(
+					ActionPlanState.isDeployed(st));
+			}
+			break;
 		}
 	}
 
