@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.TMSException;
@@ -34,8 +36,8 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading lane actions...");
 		namespace.registerType(SONAR_TYPE, LaneActionImpl.class);
-		store.query("SELECT name, action_plan, lane_marking, on_deploy"+
-			" FROM iris." + SONAR_TYPE  +";", new ResultFactory()
+		store.query("SELECT name, action_plan, lane_marking, state " +
+			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LaneActionImpl(
@@ -43,7 +45,7 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
 					row.getString(3),	// lane_marking
-					row.getBoolean(4)	// on_deploy
+					row.getInt(4)		// state
 				));
 			}
 		});
@@ -55,7 +57,7 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("lane_marking", lane_marking);
-		map.put("on_deploy", on_deploy);
+		map.put("state", state);
 		return map;
 	}
 
@@ -76,21 +78,21 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 
 	/** Create a new lane action */
 	protected LaneActionImpl(Namespace ns, String n, String a, String lm,
-		boolean od)
+		int st)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
 		    (LaneMarking)ns.lookupObject(LaneMarking.SONAR_TYPE, lm),
-		    od);
+		    st);
 	}
 
 	/** Create a new lane action */
 	protected LaneActionImpl(String n, ActionPlan a, LaneMarking lm,
-		boolean od)
+		int st)
 	{
 		this(n);
 		action_plan = a;
 		lane_marking = lm;
-		on_deploy = od;
+		state = st;
 	}
 
 	/** Action plan */
@@ -109,24 +111,26 @@ public class LaneActionImpl extends BaseObjectImpl implements LaneAction {
 		return lane_marking;
 	}
 
-	/** Flag to trigger when action plan deployed / undeployed */
-	protected boolean on_deploy;
+	/** Action plan state to trigger action */
+	protected int state;
 
-	/** Set the "on deploy" trigger flag */
-	public void setOnDeploy(boolean od) {
-		on_deploy = od;
+	/** Set the plan state to perform action */
+	public void setState(int s) {
+		state = s;
 	}
 
-	/** Set the "on deploy" trigger flag */
-	public void doSetOnDeploy(boolean od) throws TMSException {
-		if(od == on_deploy)
+	/** Set the plan state to perform action */
+	public void doSetState(int s) throws TMSException {
+		if(s == state)
 			return;
-		store.update(this, "on_deploy", od);
-		setOnDeploy(od);
+		if(ActionPlanState.fromOrdinal(s) == null)
+			throw new ChangeVetoException("Invalid plan state");
+		store.update(this, "state", s);
+		setState(s);
 	}
 
-	/** Get the "on deploy" trigger flag */
-	public boolean getOnDeploy() {
-		return on_deploy;
+	/** Get the plan state to perform action */
+	public int getState() {
+		return state;
 	}
 }

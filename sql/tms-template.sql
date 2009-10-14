@@ -753,7 +753,7 @@ CREATE TABLE iris.action_plan (
 	description VARCHAR(64) NOT NULL,
 	sync_actions BOOLEAN NOT NULL,
 	active BOOLEAN NOT NULL,
-	deployed BOOLEAN NOT NULL
+	state INTEGER NOT NULL
 );
 
 CREATE TABLE iris.time_action (
@@ -767,7 +767,7 @@ CREATE TABLE iris.dms_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
-	on_deploy BOOLEAN NOT NULL,
+	state INTEGER NOT NULL,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
 	priority INTEGER NOT NULL
 );
@@ -776,7 +776,7 @@ CREATE TABLE iris.lane_action (
 	name VARCHAR(20) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	lane_marking VARCHAR(10) NOT NULL REFERENCES iris._lane_marking,
-	on_deploy BOOLEAN NOT NULL
+	state INTEGER NOT NULL
 );
 
 CREATE TABLE iris.timing_plan_type (
@@ -1212,7 +1212,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.104.0
+database_version	3.105.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3

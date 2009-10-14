@@ -14,27 +14,32 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
- * Action for deploying a lane marking triggered by an action plan.
+ * Action plan state enumeration.
  *
  * @author Douglas Lau
  */
-public interface LaneAction extends SonarObject {
+public enum ActionPlanState {
 
-	/** SONAR type name */
-	String SONAR_TYPE = "lane_action";
+	/** Deployment states for action plans */
+	undeployed, deploying, deployed, undeploying;
 
-	/** Get the action plan */
-	ActionPlan getActionPlan();
+	/** Get action plan state from an ordinal value */
+	static public ActionPlanState fromOrdinal(int o) {
+		for(ActionPlanState ps: ActionPlanState.values()) {
+			if(ps.ordinal() == o)
+				return ps;
+		}
+		return null;
+	}
 
-	/** Get the lane marking */
-	LaneMarking getLaneMarking();
+	/** Check if a state value is deploying or deployed */
+	static public boolean isDeployed(int s) {
+		return isDeployed(fromOrdinal(s));
+	}
 
-	/** Set the plan state to perform action */
-	void setState(int s);
-
-	/** Get the plan state to perform action */
-	int getState();
+	/** Check if a state is deploying or deployed */
+	static public boolean isDeployed(ActionPlanState s) {
+		return s == deploying || s == deployed;
+	}
 }

@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
@@ -36,7 +38,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		System.err.println("Loading DMS actions...");
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, sign_group, " +
-			"on_deploy, quick_message, priority FROM iris." +
+			"state, quick_message, priority FROM iris." +
 			SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -44,7 +46,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 					row.getString(1),	// name
 					row.getString(2),	// action_plan
 					row.getString(3),	// sign_group
-					row.getBoolean(4),	// on_deploy
+					row.getInt(4),		// state
 					row.getString(5),	// quick_message
 					row.getInt(6)		// priority
 				));
@@ -58,7 +60,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("name", name);
 		map.put("action_plan", action_plan);
 		map.put("sign_group", sign_group);
-		map.put("on_deploy", on_deploy);
+		map.put("state", state);
 		map.put("quick_message", quick_message);
 		map.put("priority", priority);
 		return map;
@@ -81,22 +83,22 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Create a new DMS action */
 	protected DmsActionImpl(Namespace ns, String n, String a, String sg,
-		boolean od, String qm, int p)
+		int st, String qm, int p)
 	{
 		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, sg), od,
+		    (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, sg), st,
 		    (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE, qm),
 		    p);
 	}
 
 	/** Create a new DMS action */
-	protected DmsActionImpl(String n, ActionPlan a, SignGroup sg,
-		boolean od, QuickMessage qm, int p)
+	protected DmsActionImpl(String n, ActionPlan a, SignGroup sg, int st,
+		QuickMessage qm, int p)
 	{
 		this(n);
 		action_plan = a;
 		sign_group = sg;
-		on_deploy = od;
+		state = st;
 		quick_message = qm;
 		priority = p;
 	}
@@ -117,25 +119,27 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return sign_group;
 	}
 
-	/** Flag to trigger when action plan deployed / undeployed */
-	protected boolean on_deploy;
+	/** Action plan state to trigger DMS action */
+	protected int state;
 
-	/** Set the "on deploy" trigger flag */
-	public void setOnDeploy(boolean od) {
-		on_deploy = od;
+	/** Set the plan state to perform action */
+	public void setState(int s) {
+		state = s;
 	}
 
-	/** Set the "on deploy" trigger flag */
-	public void doSetOnDeploy(boolean od) throws TMSException {
-		if(od == on_deploy)
+	/** Set the plan state to perform action */
+	public void doSetState(int s) throws TMSException {
+		if(s == state)
 			return;
-		store.update(this, "on_deploy", od);
-		setOnDeploy(od);
+		if(ActionPlanState.fromOrdinal(s) == null)
+			throw new ChangeVetoException("Invalid plan state");
+		store.update(this, "state", s);
+		setState(s);
 	}
 
-	/** Get the "on deploy" trigger flag */
-	public boolean getOnDeploy() {
-		return on_deploy;
+	/** Get the plan state to perform action */
+	public int getState() {
+		return state;
 	}
 
 	/** Quick message to send when action happens */

@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
@@ -128,7 +129,8 @@ public class ActionPlanComboModel extends ProxyListModel<ActionPlan>
 		check_box.removeChangeListener(listener);
 		check_box.setEnabled(canUpdate(p));
 		if(p != null) {
-			check_box.setSelected(p.getDeployed());
+			check_box.setSelected(ActionPlanState.isDeployed(
+				p.getState()));
 			check_box.addChangeListener(listener);
 		} else
 			check_box.setSelected(false);

@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
@@ -42,7 +43,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		System.err.println("Loading action plans...");
 		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
 		store.query("SELECT name, description, sync_actions, active, " +
-			"deployed FROM iris." + SONAR_TYPE  + ";",
+			"state FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -51,7 +52,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 					row.getString(2),	// description
 					row.getBoolean(3),	// sync_actions
 					row.getBoolean(4),	// active
-					row.getBoolean(5)	// deployed
+					row.getInt(5)		// state
 				));
 			}
 		});
@@ -64,7 +65,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		map.put("description", description);
 		map.put("sync_actions", sync_actions);
 		map.put("active", active);
-		map.put("deployed", deployed);
+		map.put("state", state);
 		return map;
 	}
 
@@ -86,13 +87,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Create a new action plan */
 	protected ActionPlanImpl(String n, String dsc, boolean s, boolean a,
-		boolean d)
+		int st)
 	{
 		this(n);
 		description = dsc;
 		sync_actions = s;
 		active = a;
-		deployed = d;
+		state = st;
 	}
 
 	/** Plan description */
@@ -158,24 +159,43 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		return active;
 	}
 
-	/** Deployed status */
-	protected boolean deployed;
+	/** Deployed state (ActionPlanState) */
+	protected int state;
 
-	/** Set the deployed status */
-	public void setDeployed(boolean d) {
-		deployed = d;
+	/** Set the deployed state (ActionPlanState) */
+	protected void setStateNotify(int s) throws TMSException {
+		store.update(this, "state", s);
+		state = s;
+		notifyAttribute("state");
 	}
 
-	/** Set the deployed status */
+	/** Set the deployed state (and notify clients) */
+	public void setDeployed(boolean d) {
+		try {
+			doSetDeployed(d);
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set the deployed state */
 	public void doSetDeployed(boolean d) throws TMSException {
-		if(d == deployed)
+		if(d == ActionPlanState.isDeployed(state))
 			return;
 		if(sync_actions) {
 			validateDmsActions();
 			validateLaneActions();
 		}
-		store.update(this, "deployed", d);
-		setDeployed(d);
+		setStateNotify(nextState(d).ordinal());
+	}
+
+	/** Get the next action plan state */
+	protected ActionPlanState nextState(boolean d) {
+		if(d)
+			return ActionPlanState.deployed;
+		else
+			return ActionPlanState.undeployed;
 	}
 
 	/** Validate that all DMS actions are deployable */
@@ -234,21 +254,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			return false;
 	}
 
-	/** Set the deployed state (and notify clients) */
-	public void setDeployedNotify(boolean d) {
-		if(d != deployed) {
-			try {
-				doSetDeployed(d);
-				notifyAttribute("deployed");
-			}
-			catch(TMSException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	/** Get the deployed status */
-	public boolean getDeployed() {
-		return deployed;
+	/** Get the deployed state (ActionPlanState) */
+	public int getState() {
+		return state;
 	}
 }

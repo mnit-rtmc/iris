@@ -89,7 +89,7 @@ public class ActionPlanJob extends Job {
 		if(ap instanceof ActionPlanImpl) {
 			ActionPlanImpl api = (ActionPlanImpl)ap;
 			if(api.getActive())
-				api.setDeployedNotify(ta.getDeploy());
+				api.setDeployed(ta.getDeploy());
 		}
 	}
 
@@ -99,7 +99,7 @@ public class ActionPlanJob extends Job {
 			public boolean check(DmsAction da) {
 				ActionPlan ap = da.getActionPlan();
 				if(ap.getActive()) {
-					if(ap.getDeployed() == da.getOnDeploy())
+					if(ap.getState() == da.getState())
 						performDmsAction(da);
 				}
 				return false;
@@ -155,16 +155,16 @@ public class ActionPlanJob extends Job {
 			public boolean check(LaneAction la) {
 				ActionPlan ap = la.getActionPlan();
 				if(ap.getActive())
-					performLaneAction(la, ap.getDeployed());
+					performLaneAction(la, ap.getState());
 				return false;
 			}
 		});
 	}
 
 	/** Perform a lane action */
-	protected void performLaneAction(LaneAction la, boolean d) {
+	protected void performLaneAction(LaneAction la, int s) {
 		LaneMarking lm = la.getLaneMarking();
 		if(lm != null)
-			lm.setDeployed(d == la.getOnDeploy());
+			lm.setDeployed(s == la.getState());
 	}
 }

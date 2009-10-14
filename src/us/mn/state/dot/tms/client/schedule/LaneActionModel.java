@@ -15,13 +15,17 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.util.HashMap;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
@@ -41,15 +45,31 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	static protected final int COL_MARKING = 0;
 
 	/** On-deploy column number */
-	static protected final int COL_DEPLOY = 1;
+	static protected final int COL_STATE = 1;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_MARKING, 160, "Lane Marking"));
-		m.addColumn(createColumn(COL_DEPLOY, 80, "On Deploy"));
+		m.addColumn(createStateColumn());
 		return m;
 	}
+
+	/** Create the state column */
+	static protected TableColumn createStateColumn() {
+		TableColumn c = createColumn(COL_STATE, 80, "State");
+		JComboBox combo = new JComboBox(STATES);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Allowed states */
+	static protected final ActionPlanState[] STATES = {
+		ActionPlanState.undeployed,
+		ActionPlanState.deploying,
+		ActionPlanState.deployed,
+		ActionPlanState.undeploying
+	};
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -92,8 +112,8 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 		switch(column) {
 		case COL_MARKING:
 			return la.getLaneMarking();
-		case COL_DEPLOY:
-			return la.getOnDeploy();
+		case COL_STATE:
+			return ActionPlanState.fromOrdinal(la.getState());
 		default:
 			return null;
 		}
@@ -101,10 +121,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
-		if(column == COL_DEPLOY)
-			return Boolean.class;
-		else
-			return String.class;
+		return String.class;
 	}
 
 	/** Check if the specified cell is editable */
@@ -128,9 +145,11 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 			}
 			return;
 		}
-		if(column == COL_DEPLOY) {
-			if(value instanceof Boolean)
-				la.setOnDeploy((Boolean)value);
+		if(column == COL_STATE) {
+			if(value instanceof ActionPlanState) {
+				ActionPlanState st = (ActionPlanState)value;
+				la.setState(st.ordinal());
+			}
 		}
 	}
 

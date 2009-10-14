@@ -47,6 +47,6 @@ public interface ActionPlan extends SonarObject {
 	/** Set the deployed status */
 	void setDeployed(boolean d);
 
-	/** Get the deployed status */
-	boolean getDeployed();
+	/** Get state (ordinal of ActionPlanState enum) */
+	int getState();
 }

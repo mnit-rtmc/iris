@@ -32,11 +32,11 @@ public interface DmsAction extends SonarObject {
 	/** Get the sign group */
 	SignGroup getSignGroup();
 
-	/** Set the "on deploy" trigger flag */
-	void setOnDeploy(boolean od);
+	/** Set the plan state to perform action */
+	void setState(int s);
 
-	/** Get the "on deploy" trigger flag */
-	boolean getOnDeploy();
+	/** Get the plan state to perform action */
+	int getState();
 
 	/** Set the quick message */
 	void setQuickMessage(QuickMessage qm);

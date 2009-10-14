@@ -14,13 +14,17 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -45,8 +49,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	/** Active column number */
 	static protected final int COL_ACTIVE = 3;
 
-	/** Deployed column number */
-	static protected final int COL_DEPLOYED = 4;
+	/** State column number */
+	static protected final int COL_STATE = 4;
 
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
@@ -55,9 +59,25 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		m.addColumn(createColumn(COL_DESCRIPTION, 380, "Description"));
 		m.addColumn(createColumn(COL_SYNC_ACTIONS, 80, "Sync Actions"));
 		m.addColumn(createColumn(COL_ACTIVE, 80, "Active"));
-		m.addColumn(createColumn(COL_DEPLOYED, 80, "Deployed"));
+		m.addColumn(createStateColumn());
 		return m;
 	}
+
+	/** Create the state column */
+	static protected TableColumn createStateColumn() {
+		TableColumn c = createColumn(COL_STATE, 80, "State");
+		JComboBox combo = new JComboBox(STATES);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Allowed states */
+	static protected final ActionPlanState[] STATES = {
+		ActionPlanState.undeployed,
+		ActionPlanState.deploying,
+		ActionPlanState.deployed,
+		ActionPlanState.undeploying
+	};
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -83,7 +103,6 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		switch(column) {
 		case COL_SYNC_ACTIONS:
 		case COL_ACTIVE:
-		case COL_DEPLOYED:
 			return Boolean.class;
 		default:
 			return String.class;
@@ -104,8 +123,9 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return plan.getSyncActions();
 			case COL_ACTIVE:
 				return plan.getActive();
-			case COL_DEPLOYED:
-				return plan.getDeployed();
+			case COL_STATE:
+				return ActionPlanState.fromOrdinal(
+				       plan.getState());
 		}
 		return null;
 	}
@@ -139,9 +159,13 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				if(value instanceof Boolean)
 					plan.setActive((Boolean)value);
 				break;
-			case COL_DEPLOYED:
-				if(value instanceof Boolean)
-					plan.setDeployed((Boolean)value);
+			case COL_STATE:
+				if(value instanceof ActionPlanState) {
+					ActionPlanState st =
+						(ActionPlanState)value;
+					plan.setDeployed(
+						ActionPlanState.isDeployed(st));
+				}
 				break;
 		}
 	}

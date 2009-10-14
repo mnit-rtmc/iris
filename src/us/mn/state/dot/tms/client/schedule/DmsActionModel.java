@@ -25,6 +25,7 @@ import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.QuickMessageHelper;
@@ -45,8 +46,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Sign group column number */
 	static protected final int COL_GROUP = 0;
 
-	/** On-deploy column number */
-	static protected final int COL_DEPLOY = 1;
+	/** Plan state column number */
+	static protected final int COL_STATE = 1;
 
 	/** Quick message column number */
 	static protected final int COL_Q_MSG = 2;
@@ -58,11 +59,27 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_GROUP, 120, "Sign Group"));
-		m.addColumn(createColumn(COL_DEPLOY, 80, "On Deploy"));
+		m.addColumn(createStateColumn());
 		m.addColumn(createColumn(COL_Q_MSG, 160, "Quick Message"));
 		m.addColumn(createPriorityColumn());
 		return m;
 	}
+
+	/** Create the state column */
+	static protected TableColumn createStateColumn() {
+		TableColumn c = createColumn(COL_STATE, 80, "State");
+		JComboBox combo = new JComboBox(STATES);
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
+	}
+
+	/** Allowed states */
+	static protected final ActionPlanState[] STATES = {
+		ActionPlanState.undeployed,
+		ActionPlanState.deploying,
+		ActionPlanState.deployed,
+		ActionPlanState.undeploying
+	};
 
 	/** Create the priority column */
 	static protected TableColumn createPriorityColumn() {
@@ -130,8 +147,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		switch(column) {
 		case COL_GROUP:
 			return da.getSignGroup();
-		case COL_DEPLOY:
-			return da.getOnDeploy();
+		case COL_STATE:
+			return ActionPlanState.fromOrdinal(da.getState());
 		case COL_Q_MSG:
 			return da.getQuickMessage();
 		case COL_PRIORITY:
@@ -143,10 +160,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
-		if(column == COL_DEPLOY)
-			return Boolean.class;
-		else
-			return String.class;
+		return String.class;
 	}
 
 	/** Check if the specified cell is editable */
@@ -171,9 +185,11 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			return;
 		}
 		switch(column) {
-		case COL_DEPLOY:
-			if(value instanceof Boolean)
-				da.setOnDeploy((Boolean)value);
+		case COL_STATE:
+			if(value instanceof ActionPlanState) {
+				ActionPlanState st = (ActionPlanState)value;
+				da.setState(st.ordinal());
+			}
 			break;
 		case COL_Q_MSG:
 			String v = value.toString().trim();
