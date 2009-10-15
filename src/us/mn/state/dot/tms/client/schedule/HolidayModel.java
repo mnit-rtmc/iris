@@ -18,15 +18,15 @@ import java.awt.Component;
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
 import java.util.LinkedList;
-import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -79,24 +79,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	static protected TableColumn createNameColumn() {
 		TableColumn c = new TableColumn(COL_NAME, 200);
 		c.setHeaderValue("Holiday Name");
-		c.setCellEditor(new NameCellEditor());
 		return c;
-	}
-
-	/** Inner class for editing cells in the name column */
-	static protected class NameCellEditor extends AbstractCellEditor
-		implements TableCellEditor
-	{
-		protected final JTextField text = new JTextField();
-		public Component getTableCellEditorComponent(JTable table,
-			Object value, boolean isSelected, int row, int column)
-		{
-			text.setText("");
-			return text;
-		}
-		public Object getCellEditorValue() {
-			return text.getText();
-		}
 	}
 
 	/** Create the month column */
@@ -221,9 +204,17 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		PERIODS.add("PM");
 	}
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** Logged-in user */
+	protected final User user;
+
 	/** Create a new holiday table model */
-	public HolidayModel(TypeCache<Holiday> c) {
+	public HolidayModel(TypeCache<Holiday> c, Namespace ns, User u) {
 		super(c);
+		namespace = ns;
+		user = u;
 		initialize();
 	}
 
@@ -238,22 +229,22 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		if(h == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return h.getName();
-			case COL_MONTH:
-				return MONTHS.get(h.getMonth() + 1);
-			case COL_DAY:
-				return DAYS.get(h.getDay());
-			case COL_WEEK:
-				return WEEKS.get(h.getWeek() + 1);
-			case COL_WEEKDAY:
-				return WEEKDAYS.get(h.getWeekday());
-			case COL_SHIFT:
-				return SHIFTS.get(h.getShift() + 2);
-			case COL_PERIOD:
-				return PERIODS.get(h.getPeriod() + 1);
-			default:
-				return null;
+		case COL_NAME:
+			return h.getName();
+		case COL_MONTH:
+			return MONTHS.get(h.getMonth() + 1);
+		case COL_DAY:
+			return DAYS.get(h.getDay());
+		case COL_WEEK:
+			return WEEKS.get(h.getWeek() + 1);
+		case COL_WEEKDAY:
+			return WEEKDAYS.get(h.getWeekday());
+		case COL_SHIFT:
+			return SHIFTS.get(h.getShift() + 2);
+		case COL_PERIOD:
+			return PERIODS.get(h.getPeriod() + 1);
+		default:
+			return null;
 		}
 	}
 
@@ -269,47 +260,79 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
-		if(column == COL_NAME)
-			return false;
 		Holiday h = getProxy(row);
-		if(column == COL_DAY)
+		if(h == null)
+			return canAdd() && column == COL_NAME;
+		if(!canUpdate(h))
+			return false;
+		switch(column) {
+		case COL_NAME:
+			return false;
+		case COL_DAY:
 			return isWeekShiftBlank(h);
-		if(column == COL_WEEK)
+		case COL_WEEK:
 			return isDayBlank(h);
-		if(column == COL_SHIFT)
+		case COL_SHIFT:
 			return isDayBlank(h);
-		return true;
+		default:
+			return true;
+		}
 	}
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		Holiday h = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_MONTH:
-				h.setMonth(MONTHS.indexOf(value) - 1);
-				break;
-			case COL_DAY:
-				h.setDay(DAYS.indexOf(value));
-				break;
-			case COL_WEEK:
-				h.setWeek(WEEKS.indexOf(value) - 1);
-				break;
-			case COL_WEEKDAY:
-				h.setWeekday(WEEKDAYS.indexOf(value));
-				break;
-			case COL_SHIFT:
-				h.setShift(SHIFTS.indexOf(value) - 2);
-				break;
-			case COL_PERIOD:
-				h.setPeriod(PERIODS.indexOf(value) - 1);
-				break;
+		case COL_NAME:
+			String v = value.toString().trim();
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_MONTH:
+			h.setMonth(MONTHS.indexOf(value) - 1);
+			break;
+		case COL_DAY:
+			h.setDay(DAYS.indexOf(value));
+			break;
+		case COL_WEEK:
+			h.setWeek(WEEKS.indexOf(value) - 1);
+			break;
+		case COL_WEEKDAY:
+			h.setWeekday(WEEKDAYS.indexOf(value));
+			break;
+		case COL_SHIFT:
+			h.setShift(SHIFTS.indexOf(value) - 2);
+			break;
+		case COL_PERIOD:
+			h.setPeriod(PERIODS.indexOf(value) - 1);
+			break;
 		}
+	}
+
+	/** Check if the user can add a holiday */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Holiday.SONAR_TYPE,
+		       "oname"));
+	}
+
+	/** Check if the user can update */
+	public boolean canUpdate(Holiday h) {
+		return namespace.canUpdate(user, new Name(Holiday.SONAR_TYPE,
+		       h.getName()));
+	}
+
+	/** Check if the user can remove the holiday at the specified row */
+	public boolean canRemove(int row) {
+		Holiday h = getProxy(row);
+		if(h != null)
+			return canRemove(h);
+		else
+			return false;
+	}
+
+	/** Check if the user can remove a holiday */
+	public boolean canRemove(Holiday h) {
+		return namespace.canRemove(user, new Name(Holiday.SONAR_TYPE,
+		       h.getName()));
 	}
 }

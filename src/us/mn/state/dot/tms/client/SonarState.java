@@ -29,6 +29,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
+import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
@@ -95,14 +96,6 @@ public class SonarState extends Client {
 	/** Get the system attribute type cache */
 	public TypeCache<SystemAttribute> getSystemAttributes() {
 		return system_attributes;
-	}
-
-	/** Cache of holiday proxies */
-	protected final TypeCache<Holiday> holidays;
-
-	/** Get the holiday type cache */
-	public TypeCache<Holiday> getHolidays() {
-		return holidays;
 	}
 
 	/** Cache of graphic proxies */
@@ -233,6 +226,30 @@ public class SonarState extends Client {
 		return incidents;
 	}
 
+	/** Cache of holiday proxies */
+	protected final TypeCache<Holiday> holidays;
+
+	/** Get the holiday type cache */
+	public TypeCache<Holiday> getHolidays() {
+		return holidays;
+	}
+
+	/** Cache of day plans */
+	protected final TypeCache<DayPlan> day_plans;
+
+	/** Get the day plan cache */
+	public TypeCache<DayPlan> getDayPlans() {
+		return day_plans;
+	}
+
+	/** Day plan proxy list model */
+	protected final ProxyListModel<DayPlan> day_model;
+
+	/** Get the day list model */
+	public ProxyListModel<DayPlan> getDayModel() {
+		return day_model;
+	}
+
 	/** Cache of action plans */
 	protected final TypeCache<ActionPlan> action_plans;
 
@@ -285,7 +302,6 @@ public class SonarState extends Client {
 		connections = new TypeCache<Connection>(Connection.class, this);
 		system_attributes = new TypeCache<SystemAttribute>(
 			SystemAttribute.class, this);
-		holidays = new TypeCache<Holiday>(Holiday.class, this);
 		graphics = new TypeCache<Graphic>(Graphic.class, this);
 		roads = new TypeCache<Road>(Road.class, this);
 		road_model = new ProxyListModel<Road>(roads);
@@ -313,6 +329,10 @@ public class SonarState extends Client {
 		lane_markings = new TypeCache<LaneMarking>(LaneMarking.class,
 			this);
 		incidents = new TypeCache<Incident>(Incident.class, this);
+		holidays = new TypeCache<Holiday>(Holiday.class, this);
+		day_plans = new TypeCache<DayPlan>(DayPlan.class, this);
+		day_model = new ProxyListModel<DayPlan>(day_plans);
+		day_model.initialize();
 		action_plans = new TypeCache<ActionPlan>(ActionPlan.class,this);
 		time_actions = new TypeCache<TimeAction>(TimeAction.class,this);
 		dms_actions = new TypeCache<DmsAction>(DmsAction.class, this);
@@ -344,12 +364,13 @@ public class SonarState extends Client {
 		lcs_cache.populate(this);
 		populate(lane_markings);
 		populate(incidents);
+		populate(holidays);
+		populate(day_plans);
 		populate(action_plans);
 		populate(time_actions);
 		populate(dms_actions);
 		populate(lane_actions);
 		populate(timing_plans);
-		populate(holidays);
 	}
 
 	/** Look up the specified user */

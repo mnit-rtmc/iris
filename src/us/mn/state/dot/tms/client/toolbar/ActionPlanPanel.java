@@ -35,6 +35,7 @@ public class ActionPlanPanel extends ToolPanel {
 	/** Create an action plan panel */
 	public ActionPlanPanel(Session s) {
 		model = new ActionPlanComboModel(s, this);
+		combo_box.setPrototypeDisplayValue("01234567890123456");
 		combo_box.setModel(model);
 		add(new JLabel("Action Plan"));
 		add(combo_box);

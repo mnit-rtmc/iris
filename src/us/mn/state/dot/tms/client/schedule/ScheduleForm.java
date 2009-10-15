@@ -38,23 +38,22 @@ public class ScheduleForm extends AbstractForm {
 	/** Action plan panel */
 	protected final ActionPlanPanel p_panel;
 
-	/** Holiday panel */
-	protected final HolidayPanel h_panel;
+	/** Day plan panel */
+	protected final DayPlanPanel d_panel;
 
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
 		super(TITLE);
 		session = s;
 		p_panel = new ActionPlanPanel(s);
-		h_panel = new HolidayPanel(s);
+		d_panel = new DayPlanPanel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
 		p_panel.initialize();
-		h_panel.initialize();
 		tab.add("Action Plans", p_panel);
-		tab.add("Holidays", h_panel);
+		tab.add("Day Plans", d_panel);
 		add(tab);
 		setBackground(Color.LIGHT_GRAY);
 	}
@@ -62,6 +61,6 @@ public class ScheduleForm extends AbstractForm {
 	/** Dispose of the form */
 	protected void dispose() {
 		p_panel.dispose();
-		h_panel.dispose();
+		d_panel.dispose();
 	}
 }
