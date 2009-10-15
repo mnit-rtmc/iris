@@ -27,8 +27,9 @@ import us.mn.state.dot.tms.TMSException;
  *
  * @author Douglas Lau
  */
-public class HolidayImpl extends BaseObjectImpl implements Holiday {
-
+public class HolidayImpl extends BaseObjectImpl implements Holiday,
+	Comparable<HolidayImpl>
+{
 	/** Load all the holidays */
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading holidays...");
@@ -90,6 +91,24 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday {
 		weekday = wd;
 		shift = s;
 		period = p;
+	}
+
+	/** Compare to another holiday */
+	public int compareTo(HolidayImpl o) {
+		return name.compareTo(o.name);
+	}
+
+	/** Test if the holiday equals another holiday */
+	public boolean equals(Object o) {
+		if(o instanceof HolidayImpl)
+			return name.equals(((HolidayImpl)o).name);
+		else
+			return false;
+	}
+
+	/** Calculate a hash code */
+	public int hashCode() {
+		return name.hashCode();
 	}
 
 	/** Check if a selection of properties is valid */
