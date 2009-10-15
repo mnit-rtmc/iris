@@ -1223,6 +1223,13 @@ COPY iris.meter_lock (id, description) FROM stdin;
 6	Other reason
 \.
 
+COPY iris.plan_state (id, description) FROM stdin;
+0	undeployed
+1	deploying
+2	deployed
+3	undeploying
+\.
+
 COPY iris.timing_plan_type (id, description) FROM stdin;
 0	Travel Time
 1	Simple Metering
