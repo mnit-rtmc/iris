@@ -332,10 +332,14 @@ public class OpQueryMsg extends OpDms {
 				// activation priority
 				apri = DMSMessagePriority.fromOrdinal(
 					xrr.getResInt("ActPriority"));
+				apri = (apri == DMSMessagePriority.INVALID ? 
+					DMSMessagePriority.OPERATOR : apri);
 
 				// runtime priority
 				rpri = DMSMessagePriority.fromOrdinal(
 					xrr.getResInt("RunPriority"));
+				rpri = (rpri == DMSMessagePriority.INVALID ? 
+					DMSMessagePriority.BLANK : rpri);
 
 				// owner
 				owner = xrr.getResString("Owner");
@@ -419,24 +423,11 @@ public class OpQueryMsg extends OpDms {
 
 			// have text
 			if(txtavail) {
-
 				// update page on-time in MULTI with value  
 				// read from controller, which comes from 
 				// the DisplayTimeMS XML field, not the 
 				// MULTI string.
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
-
-				// this shouldn't happen if we have msg text
-				if(apri == DMSMessagePriority.INVALID) {
-					Log.warning("Received invalid " +
-						"actpriority for id=" + id);
-					apri = DMSMessagePriority.OPERATOR;
-				}
-				if(rpri == DMSMessagePriority.INVALID) {
-					Log.warning("Received invalid " +
-						"runpriority for id=" + id);
-					rpri = DMSMessagePriority.OPERATOR;
-				}
 				SignMessageImpl sm = (SignMessageImpl)
 					m_dms.createMessage(msgtext,
 					apri, rpri, duramins);
@@ -458,9 +449,7 @@ public class OpQueryMsg extends OpDms {
 				}
 				if(sm == null) {
 					sm = (SignMessageImpl)m_dms.
-						createMessage("",
-						DMSMessagePriority.OVERRIDE, 
-						DMSMessagePriority.OVERRIDE, 
+						createMessage("", apri, rpri, 
 						null);
 					if(sm != null) {
 						m_dms.setMessageCurrent(sm, 

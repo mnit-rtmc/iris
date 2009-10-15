@@ -80,6 +80,8 @@ public class DmsLitePoller extends MessagePoller implements DMSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
+		Log.finest("DmsLitePoller.sendMessage(" + dms + ", " + 
+			m + ", " + o+ ") called.");
 		if(dms == null || m == null)
 			return;
 		if(SignMessageHelper.isBlank(m))
