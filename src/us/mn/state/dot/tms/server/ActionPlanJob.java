@@ -66,9 +66,7 @@ public class ActionPlanJob extends Job {
 	/** Perform the action plan job */
 	public void perform() {
 		updateActionPlanStates();
-		// FIXME: TimeAction should have an associated DayPlan
-		if(!HolidayHelper.isHoliday(Calendar.getInstance()))
-			performTimeActions();
+		performTimeActions();
 		performDmsActions();
 		performLaneActions();
 	}
@@ -86,24 +84,15 @@ public class ActionPlanJob extends Job {
 
 	/** Perform time actions */
 	protected void performTimeActions() {
-		final int minute = minute_of_day();
+		final Calendar cal = Calendar.getInstance();
+		final int min = minute_of_day();
 		TimeActionHelper.find(new Checker<TimeAction>() {
 			public boolean check(TimeAction ta) {
-				if(ta.getMinute() == minute)
-					performTimeAction(ta);
+				if(ta instanceof TimeActionImpl)
+					((TimeActionImpl)ta).perform(cal, min);
 				return false;
 			}
 		});
-	}
-
-	/** Perform a time action */
-	protected void performTimeAction(TimeAction ta) {
-		ActionPlan ap = ta.getActionPlan();
-		if(ap instanceof ActionPlanImpl) {
-			ActionPlanImpl api = (ActionPlanImpl)ap;
-			if(api.getActive())
-				api.setDeployed(ta.getDeploy());
-		}
 	}
 
 	/** Perform DMS actions */

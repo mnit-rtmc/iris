@@ -15,11 +15,13 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
+import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TMSException;
 
@@ -139,5 +141,23 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	/** Get the deploy trigger flag */
 	public boolean getDeploy() {
 		return deploy;
+	}
+
+	/** Perform action if date and time is right */
+	public void perform(Calendar cal, int min) {
+		if(getMinute() == min) {
+			if(!DayPlanHelper.isHoliday(day_plan, cal))
+				perform();
+		}
+	}
+
+	/** Perform the time action */
+	protected void perform() {
+		ActionPlan ap = action_plan;	// Avoid race
+		if(ap instanceof ActionPlanImpl) {
+			ActionPlanImpl api = (ActionPlanImpl)ap;
+			if(api.getActive())
+				api.setDeployed(getDeploy());
+		}
 	}
 }
