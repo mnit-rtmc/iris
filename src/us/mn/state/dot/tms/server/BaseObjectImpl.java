@@ -41,8 +41,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		store = s;
 		namespace = ns;
 		SystemAttributeImpl.loadAll();
-		HolidayImpl.loadAll();
-		DayPlanImpl.loadAll();
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();
@@ -72,6 +70,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		LCSIndicationImpl.loadAll();
 		LaneUseMultiImpl.loadAll();
 		IncidentImpl.loadAll();
+		HolidayImpl.loadAll();
+		DayPlanImpl.loadAll();
 		ActionPlanImpl.loadAll();
 		TimeActionImpl.loadAll();
 		DmsActionImpl.loadAll();
