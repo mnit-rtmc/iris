@@ -21,15 +21,21 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.TreeSet;
+import javax.swing.DefaultCellEditor;
+import javax.swing.ListModel;
+import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
+import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
 /**
  * Table model for time actions assigned to action plans
@@ -47,20 +53,33 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	};
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
+	static protected final int COLUMN_COUNT = 3;
+
+	/** Day plan column number */
+	static protected final int COL_DAY_PLAN = 0;
 
 	/** Time column number */
-	static protected final int COL_TIME = 0;
+	static protected final int COL_TIME = 1;
 
 	/** Deploy column number */
-	static protected final int COL_DEPLOY = 1;
+	static protected final int COL_DEPLOY = 2;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	static public TableColumnModel createColumnModel(ListModel day_model) {
 		TableColumnModel m = new DefaultTableColumnModel();
+		m.addColumn(createDayPlanColumn(day_model));
 		m.addColumn(createColumn(COL_TIME, 80, "Time"));
 		m.addColumn(createColumn(COL_DEPLOY, 60, "Deploy"));
 		return m;
+	}
+
+	/** Create the day plan column */
+	static protected TableColumn createDayPlanColumn(ListModel day_model) {
+		TableColumn c = createColumn(COL_DAY_PLAN, 100, "Day Plan");
+		JComboBox combo = new JComboBox();
+		combo.setModel(new WrapperComboBoxModel(day_model));
+		c.setCellEditor(new DefaultCellEditor(combo));
+		return c;
 	}
 
 	/** Parse a time string and return the minute-of-day */
@@ -106,6 +125,9 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
+	/** Day plan for new time action */
+	protected DayPlan day_plan;
+
 	/** Create a new time action table model */
 	public TimeActionModel(TypeCache<TimeAction> c, ActionPlan ap,
 		Namespace ns, User u)
@@ -140,9 +162,15 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	/** Get the value at the specified cell */
 	public Object getValueAt(int row, int column) {
 		TimeAction ta = getProxy(row);
-		if(ta == null)
-			return null;
+		if(ta == null) {
+			if(column == COL_DAY_PLAN)
+				return day_plan;
+			else
+				return null;
+		}
 		switch(column) {
+		case COL_DAY_PLAN:
+			return ta.getDayPlan();
 		case COL_TIME:
 			return timeString(ta.getMinute());
 		case COL_DEPLOY:
@@ -165,18 +193,31 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		TimeAction ta = getProxy(row);
 		if(ta != null)
 			return column == COL_DEPLOY && canUpdate();
-		else
-			return column == COL_TIME && canAdd();
+		else {
+			switch(column) {
+			case COL_DAY_PLAN:
+				return canAdd();
+			case COL_TIME:
+				return day_plan != null && canAdd();
+			default:
+				return false;
+			}
+		}
 	}
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		TimeAction ta = getProxy(row);
 		if(ta == null) {
+			if(column == COL_DAY_PLAN) {
+				if(value instanceof DayPlan)
+					day_plan = (DayPlan)value;
+			}
 			if(column == COL_TIME) {
 				Integer m = parseMinute(value.toString());
 				if(m != null)
 					create(m);
+				day_plan = null;
 			}
 		} else {
 			if(column == COL_DEPLOY) {
@@ -192,6 +233,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		if(name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
+			attrs.put("day_plan", day_plan);
 			attrs.put("action_plan", action_plan);
 			attrs.put("minute", m);
 			cache.createObject(name, attrs);

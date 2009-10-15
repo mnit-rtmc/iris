@@ -18,6 +18,7 @@ import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
@@ -99,6 +100,9 @@ public class ActionPlanPanel extends FormPanel {
 	/** Lane action type cache */
 	protected final TypeCache<LaneAction> l_cache;
 
+	/** Day plan model */
+	protected final ListModel day_model;
+
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(true);
@@ -109,6 +113,7 @@ public class ActionPlanPanel extends FormPanel {
 		d_cache = s.getSonarState().getDmsActions();
 		l_cache = s.getSonarState().getLaneActions();
 		p_model = new ActionPlanModel(cache, namespace, user);
+		day_model = s.getSonarState().getDayModel();
 	}
 
 	/** Initializze the widgets on the panel */
@@ -128,7 +133,8 @@ public class ActionPlanPanel extends FormPanel {
 		JPanel panel = new JPanel(new FlowLayout());
 		FormPanel t_panel = new FormPanel(true);
 		t_table.setAutoCreateColumnsFromModel(false);
-		t_table.setColumnModel(TimeActionModel.createColumnModel());
+		t_table.setColumnModel(TimeActionModel.createColumnModel(
+			day_model));
 		t_table.setRowHeight(ROW_HEIGHT);
 		t_table.setVisibleRowCount(12);
 		t_panel.addRow(t_table);
