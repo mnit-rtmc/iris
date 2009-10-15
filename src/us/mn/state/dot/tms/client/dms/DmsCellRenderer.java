@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -82,9 +83,16 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Determine mode */
 	protected RenderMode determineMode() {
-		//FIXME: determine mode as a function of the 
-		// jpanel size. See DMSManager.createStyleSummary().
-		return RenderMode.LARGE;
+		int ordinal = SystemAttrEnum.DMS_RENDER_SIZE.getInt();
+		// FIXME: a changeset has already been developed that sizes
+		// the cells automatically as a function of the amount of 
+		// space in the style summary.
+		if(ordinal == 0)
+			return RenderMode.LARGE;
+		else if(ordinal == 1)
+			return RenderMode.MEDIUM;
+		else
+			return RenderMode.LARGE;
 	}
 
 	/** Create a new DMS cell renderer with medium cells */
