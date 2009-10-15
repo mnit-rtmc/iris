@@ -230,7 +230,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
 			attrs.put("sign_group", sg);
-			attrs.put("priority",
+			attrs.put("a_priority",
+				DMSMessagePriority.SCHEDULED.ordinal());
+			attrs.put("r_priority",
 				DMSMessagePriority.SCHEDULED.ordinal());
 			cache.createObject(name, attrs);
 		}
