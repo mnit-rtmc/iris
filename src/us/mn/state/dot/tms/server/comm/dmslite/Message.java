@@ -158,7 +158,8 @@ public class Message implements AddressedMessage
 		updateInterStatus("Sending request to sensorserver.");
 		long starttime=STime.getCurTimeUTCinMillis();
 		Log.finest("getRequest(): Writing " + array.length + 
-			" bytes to SensorServer.");
+			" bytes to SensorServer: " + 
+			SString.byteArrayToString(array) + ".");
 		m_is.resetBuffer();
 		m_os.write(array);
 		m_os.flush();
