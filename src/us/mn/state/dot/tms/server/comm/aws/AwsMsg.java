@@ -165,7 +165,12 @@ public class AwsMsg {
 		return new DmsPgTime((double)SString.stringToDouble(pont));
 	}
 
-	/** Return a MULTI string representation of the AWS message. */
+	/** Return a MULTI string representation of the AWS message. 
+	 *  Pages may be rendered with the double stroke font, in which
+	 *  case the maximum lines per page is 2. If more than 2 lines
+	 *  per page are placed in the MULTI string with the DS font, 
+	 *  the bitmap renders blank. This will only happen if the AWS
+	 *  message file contains an error--3 lines per page w/ DS font. */
 	protected String createMultiString() {
 		if(NUM_TEXT_ROWS != 6)
 			Log.severe("Bogus number of rows dependency " +
@@ -175,12 +180,9 @@ public class AwsMsg {
 		// pg 1
 		m.setFont(m_fontnumpg1, null);
 		m.setPageTimes(m_pgontime.toTenths(), null);
-		m.addSpan(m_textlines[0]);
-		m.addLine();
-		m.addSpan(m_textlines[1]);
-		m.addLine();
-		m.addSpan(m_textlines[2]);
-		m.addLine();
+		addSpanLine(m_textlines[0], m, false);
+		addSpanLine(m_textlines[1], m, false);
+		addSpanLine(m_textlines[2], m, true);
 
 		// pg 2
 		if(m_textlines[3].length() + m_textlines[4].length() + 
@@ -188,14 +190,26 @@ public class AwsMsg {
 		{
 			m.addPage();
 			m.setFont(m_fontnumpg2, null);
-			m.addSpan(m_textlines[3]);
-			m.addLine();
-			m.addSpan(m_textlines[4]);
-			m.addLine();
-			m.addSpan(m_textlines[5]);
-			m.addLine();
+			addSpanLine(m_textlines[3], m, false);
+			addSpanLine(m_textlines[4], m, false);
+			addSpanLine(m_textlines[5], m, true);
 		}
 		return m.normalize().toString();
+	}
+
+	/** Add a span of text to the specified multistring. */
+	private void addSpanLine(String span, MultiString ms, 
+		boolean ignoreblankspan) 
+	{
+		if(ignoreblankspan) {
+			if(!span.trim().isEmpty()) {
+				ms.addSpan(span);
+				ms.addLine();
+			}
+		} else {
+			ms.addSpan(span);
+			ms.addLine();
+		}	
 	}
 
 	/**
