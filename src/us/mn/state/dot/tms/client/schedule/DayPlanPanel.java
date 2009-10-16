@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.JButton;
@@ -35,6 +37,7 @@ import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -43,6 +46,14 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  * @author Douglas Lau
  */
 public class DayPlanPanel extends JPanel {
+
+	/** Formatter for month labels */
+	static protected final SimpleDateFormat MONTH_LBL =
+		new SimpleDateFormat("MMMM");
+
+	/** Formatter for year labels */
+	static protected final SimpleDateFormat YEAR_LBL =
+		new SimpleDateFormat("yyyy");
 
 	/** Cache of day plans */
 	protected final TypeCache<DayPlan> cache;
@@ -61,6 +72,30 @@ public class DayPlanPanel extends JPanel {
 
 	/** Table to hold the day plan holidays */
 	protected final ZTable dh_table = new ZTable();
+
+	/** Month to display on calendar widget */
+	protected final Calendar month = Calendar.getInstance();
+
+	/** Button to select previous month */
+	protected final JButton prev_month = new JButton("<");
+
+	/** Month label */
+	protected final JLabel month_lbl = new JLabel();
+
+	/** Button to select next month */
+	protected final JButton next_month = new JButton(">");
+
+	/** Button to select previous year */
+	protected final JButton prev_year = new JButton("<");
+
+	/** Year label */
+	protected final JLabel year_lbl = new JLabel();
+
+	/** Button to select next year */
+	protected final JButton next_year = new JButton(">");
+
+	/** Calendar widget */
+	protected final CalendarWidget cal_widget = new CalendarWidget();
 
 	/** Table model for holidays */
 	protected final HolidayModel h_model;
@@ -113,6 +148,40 @@ public class DayPlanPanel extends JPanel {
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		add(dh_pane, bag);
+		bag.gridx = 3;
+		bag.gridy = 0;
+		bag.gridwidth = 1;
+		bag.gridheight = 1;
+		prev_month.setContentAreaFilled(false);
+		prev_month.setRolloverEnabled(true);
+		prev_month.setBorderPainted(false);
+		add(prev_month, bag);
+		bag.gridx = 4;
+		setMonthLabel();
+		add(month_lbl, bag);
+		bag.gridx = 5;
+		next_month.setContentAreaFilled(false);
+		next_month.setRolloverEnabled(true);
+		next_month.setBorderPainted(false);
+		add(next_month, bag);
+		bag.gridx = 6;
+		prev_year.setContentAreaFilled(false);
+		prev_year.setRolloverEnabled(true);
+		prev_year.setBorderPainted(false);
+		add(prev_year, bag);
+		bag.gridx = 7;
+		setYearLabel();
+		add(year_lbl, bag);
+		bag.gridx = 8;
+		next_year.setContentAreaFilled(false);
+		next_year.setRolloverEnabled(true);
+		next_year.setBorderPainted(false);
+		add(next_year, bag);
+		bag.gridx = 3;
+		bag.gridy = 1;
+		bag.gridwidth = 6;
+		bag.gridheight = 1;
+		add(cal_widget, bag);
 		h_model = new HolidayModel(holidays, namespace, user);
 		final ListSelectionModel lsm = h_table.getSelectionModel();
 		lsm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -123,7 +192,7 @@ public class DayPlanPanel extends JPanel {
 		h_table.setVisibleRowCount(10);
 		bag.gridx = 0;
 		bag.gridy = 2;
-		bag.gridwidth = 4;
+		bag.gridwidth = 9;
 		bag.gridheight = 1;
 		JScrollPane h_pane = new JScrollPane(h_table,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -147,8 +216,10 @@ public class DayPlanPanel extends JPanel {
 			public void enumerationComplete() {}
 			public void proxyRemoved(DayPlan dp) {}
 			public void proxyChanged(DayPlan dp, String attrib) {
-				if(attrib.equals("holidays"))
+				if(attrib.equals("holidays")) {
 					dh_model.updateHolidays(dp);
+					updateCalendarWidget();
+				}
 			}
 		};
 	}
@@ -171,6 +242,30 @@ public class DayPlanPanel extends JPanel {
 				deleteSelectedPlan();
 			}
 		};
+		new ActionJob(this, prev_month) {
+			public void perform() {
+				addMonth(-1);
+				updateCalendarWidget();
+			}
+		};
+		new ActionJob(this, next_month) {
+			public void perform() {
+				addMonth(1);
+				updateCalendarWidget();
+			}
+		};
+		new ActionJob(this, prev_year) {
+			public void perform() {
+				addYear(-1);
+				updateCalendarWidget();
+			}
+		};
+		new ActionJob(this, next_year) {
+			public void perform() {
+				addYear(1);
+				updateCalendarWidget();
+			}
+		};
 		new ListSelectionJob(this, h_table.getSelectionModel()) {
 			public void perform() {
 				if(!event.getValueIsAdjusting())
@@ -182,22 +277,73 @@ public class DayPlanPanel extends JPanel {
 				deleteSelectedHoliday();
 			}
 		};
+		cal_widget.setHighlighter(new CalendarWidget.Highlighter() {
+			public boolean isHighlighted(Calendar cal) {
+				DayPlan dp = getSelectedPlan();
+				if(dp != null)
+					return DayPlanHelper.isHoliday(dp, cal);
+				else
+					return false;
+			}
+		});
+	}
+
+	/** Add a month to calendar widget */
+	protected void addMonth(int m) {
+		month.add(Calendar.MONTH, m);
+	}
+
+	/** Add a year to calendar widget */
+	protected void addYear(int m) {
+		month.add(Calendar.YEAR, m);
+	}
+
+	/** Update the calendar widget */
+	protected void updateCalendarWidget() {
+		setMonthLabel();
+		setYearLabel();
+		cal_widget.setMonth(month);
+		cal_widget.revalidate();
+		prev_month.setEnabled(true);
+		next_month.setEnabled(true);
+	}
+
+	/** Set the month label */
+	protected void setMonthLabel() {
+		month_lbl.setText(MONTH_LBL.format(month.getTime()));
+	}
+
+	/** Set the year label */
+	protected void setYearLabel() {
+		year_lbl.setText(YEAR_LBL.format(month.getTime()));
 	}
 
 	/** Select a day plan */
 	protected void selectDayPlan() {
 		Object item = day_cbox.getSelectedItem();
 		if(item != null) {
-			String name = item.toString().trim();
-			DayPlan dp = DayPlanHelper.lookup(name);
+			DayPlan dp = getSelectedPlan();
 			dh_model.setDayPlan(dp);
-			if(dp == null && name.length() > 0 && canAdd(name))
-				cache.createObject(name);
 			del_plan.setEnabled(canRemove(dp));
+			if(dp == null) {
+				String name = item.toString().trim();
+				if(name.length() > 0 && canAdd(name))
+					cache.createObject(name);
+			}
 		} else {
 			dh_model.setDayPlan(null);
 			del_plan.setEnabled(false);
 		}
+		updateCalendarWidget();
+	}
+
+	/** Get the selected day plan */
+	protected DayPlan getSelectedPlan() {
+		Object item = day_cbox.getSelectedItem();
+		if(item != null)
+			return DayPlanHelper.lookup(item.toString().trim());
+		else
+			return null;
 	}
 
 	/** Delete the selected day plan */
