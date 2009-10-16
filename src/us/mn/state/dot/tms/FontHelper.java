@@ -27,6 +27,9 @@ import us.mn.state.dot.sonar.Checker;
  */
 public class FontHelper extends BaseHelper {
 
+	/** Fixed default font number */
+	public static final int DEFAULT_FONT_NUM = 1;
+
 	/** Disallow instantiation */
 	private FontHelper() {
 		assert false;
