@@ -61,6 +61,7 @@ public class AwsMsg {
 	private static final String AWS_DOUBLESTROKE = "Double Stroke";
 
 	/** Expected names of IRIS fonts */
+	private static final String IRIS_SINGLESTROKE = "CT_Single_Stroke";
 	private static final String IRIS_DOUBLESTROKE = "CT_Double_Stroke";
 
 	/** AWS message fields */
@@ -305,31 +306,48 @@ public class AwsMsg {
 		}
 	}
 
+	/** Return the DMS or null if it doesn't exist. */
+	private DMS getDms() {
+		String dmsname = "V" + Integer.toString(m_dmsid);
+		return DMSHelper.lookup(dmsname);
+	}
+
+	/** Return IRIS font name given the AWS font name. */
+	private static String getIrisFontName(String awsFontName) {
+		if(awsFontName.equals(AWS_SINGLESTROKE))
+			return IRIS_SINGLESTROKE;
+		else if(awsFontName.equals(AWS_DOUBLESTROKE))
+			return IRIS_DOUBLESTROKE;
+		else {
+			Log.severe("Unknown AWS font name (" + awsFontName +
+				") in AwsMsg.getIrisFontName().");
+			return IRIS_SINGLESTROKE;
+		}
+	}
+
+	/** Get the default DMS font number. */
+	private int getDmsDefaultFontNum() {
+		DMS dms = getDms();
+		if(dms == null)
+			return FontHelper.DEFAULT_FONT_NUM;
+		else
+			return DMSHelper.getDefaultFontNumber(dms);
+	}
+
 	/** Return the IRIS font number to use given an AWS font name.
 	 * @param f AWS font name.
 	 * @return IRIS font number. */
-	static protected int parseFont(String f) {
-		int ret;
-		if(f.equals(AWS_SINGLESTROKE)) {
-			// FIXME: use DMSHelper.getDefaultFontNumber
-			ret = 1;
-		} else if(f.equals(AWS_DOUBLESTROKE)) {
-			Font dsf = FontHelper.lookup(IRIS_DOUBLESTROKE);
-			if(dsf == null) {
-				Log.severe("Double stroke font (" + 
-					IRIS_DOUBLESTROKE + ") not found.");
-				// FIXME: use DMSHelper.getDefaultFontNumber
-				ret = 1;
-			}
-			else
-				ret = dsf.getNumber();
+	private int parseFont(String f) {
+		String irisfname = getIrisFontName(f);
+		Font ifont = FontHelper.lookup(irisfname);
+		int retfnum = FontHelper.DEFAULT_FONT_NUM;
+		if(ifont == null) {
+			Log.severe("Font doesn't exist (" + irisfname + ").");
+			retfnum = getDmsDefaultFontNum();
 		} else {
-			Log.severe("Unknown AWS font name received (" + f +
-				") in AwsMsg.parseFont().");
-			// FIXME: use DMSHelper.getDefaultFontNumber
-			ret = 1;
+			retfnum = ifont.getNumber();
 		}
-		return ret;
+		return retfnum;
 	}
 
 	/**
