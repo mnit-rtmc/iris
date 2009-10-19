@@ -69,6 +69,10 @@ public class Segment {
 	protected final HashMap<String, SensorSample> samples =
 		new HashMap<String, SensorSample>();
 
+	/** Mapping of sensor ID to sample data for next interval */
+	protected final HashMap<String, SensorSample> next_samples =
+		new HashMap<String, SensorSample>();
+
 	/** Get the count of lanes */
 	public int getLaneCount() {
 		if(r_node != null)
@@ -144,18 +148,17 @@ public class Segment {
 
 	/** Update one sample */
 	public void updateSample(SensorSample s) {
-		if(lane_sensors.containsKey(s.id)) {
-			synchronized(samples) {
-				samples.put(s.id, s);
-			}
-		}
+		if(lane_sensors.containsKey(s.id))
+			next_samples.put(s.id, s);
 	}
 
-	/** Clear the samples */
-	public void clearSamples() {
+	/** Swap the samples */
+	public void swapSamples() {
 		synchronized(samples) {
 			samples.clear();
+			samples.putAll(next_samples);
 		}
+		next_samples.clear();
 	}
 
 	/** Get the flow for the given lane */

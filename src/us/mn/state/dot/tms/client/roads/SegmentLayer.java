@@ -82,11 +82,11 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 		sc.addTdxmlListener(new SensorListener() {
 			public void update(boolean finish) {
 				if(finish) {
+					for(Segment seg: segments)
+						seg.swapSamples();
 					notifyLayerChanged();
 					return;
 				}
-				for(Segment seg: segments)
-					seg.clearSamples();
 			}
 			public void update(SensorSample s) {
 				for(Segment seg: segments)
