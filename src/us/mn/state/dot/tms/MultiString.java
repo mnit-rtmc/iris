@@ -205,12 +205,18 @@ public class MultiString implements MultiStringState {
 			return false;
 		if(!Arrays.equals(a.getFonts(1), b.getFonts(1)))
 			return false;
-		if(!Arrays.equals(a.getPageOnTimes(0), b.getPageOnTimes(0)))
+		if(a.getNumPages() != b.getNumPages())
 			return false;
 		if(!Arrays.equals(a.getText(), b.getText()))
 			return false;
-		if(a.getNumPages() != b.getNumPages())
+		// page on-times
+		int apont = DmsPgTime.getDefaultOn(a.singlePage()).toTenths();
+		int bpont = DmsPgTime.getDefaultOn(b.singlePage()).toTenths();
+		if(!Arrays.equals(a.getPageOnTimes(apont), 
+			b.getPageOnTimes(bpont)))
+		{
 			return false;
+		}
 		return true;
 	}
 

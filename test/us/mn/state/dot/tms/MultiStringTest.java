@@ -320,6 +320,20 @@ public class MultiStringTest extends TestCase {
 		assertFalse(MultiString.equals("[fo2]LINE1", "[fo1]LINE1"));
 		assertTrue(MultiString.equals("LINE1[nl][nl]", "LINE1"));
 		assertTrue(MultiString.equals("LINE1[nl][np]", "LINE1[np]"));
+
+		// an absent page on-time on a single page message should 
+		// equal an explicit page on-time of the system default for
+		// a single page message (zero).
+		String spgdef = DmsPgTime.getDefaultOn(true).toString();
+		assertTrue(MultiString.equals("[pt" + spgdef + 
+			"o]PAGE1", "PAGE1"));
+
+		// an absent page on-timeon a multi-page message should
+		// equal an explicit page on-time of the system default,
+		// for a multi-page message.
+		String mpgdef = DmsPgTime.getDefaultOn(false).toString();
+		assertTrue(MultiString.equals("[pt" + mpgdef + 
+			"o]PAGE1[np]PAGE2", "PAGE1[np]PAGE2"));
 	}
 
 	/** getText */
