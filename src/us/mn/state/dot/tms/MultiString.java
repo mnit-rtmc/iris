@@ -203,8 +203,11 @@ public class MultiString implements MultiStringState {
 			return true;
 		if(a == null || b == null)
 			return false;
-		if(!Arrays.equals(a.getFonts(1), b.getFonts(1)))
+		if(!Arrays.equals(a.getFonts(FontHelper.DEFAULT_FONT_NUM), 
+			b.getFonts(FontHelper.DEFAULT_FONT_NUM)))
+		{
 			return false;
+		}
 		if(a.getNumPages() != b.getNumPages())
 			return false;
 		if(!Arrays.equals(a.getText(), b.getText()))
