@@ -1,5 +1,5 @@
 /*
- * SONAR -- Simple Object Notification And Replication
+ * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.util.Arrays;
 import junit.framework.TestCase;
+import us.mn.state.dot.tms.utils.SString;
 
 /** 
  * MultiString test cases
@@ -320,6 +321,14 @@ public class MultiStringTest extends TestCase {
 		assertFalse(MultiString.equals("[fo2]LINE1", "[fo1]LINE1"));
 		assertTrue(MultiString.equals("LINE1[nl][nl]", "LINE1"));
 		assertTrue(MultiString.equals("LINE1[nl][np]", "LINE1[np]"));
+
+		// an absent font specification should equal the default
+		// font number.
+		String deffont = "[fo" + SString.intToString(
+			FontHelper.DEFAULT_FONT_NUM) + "]";
+		assertTrue(MultiString.equals(deffont + "LINE1", "LINE1"));
+		assertTrue(MultiString.equals(deffont + "LINE1[np]" + 
+			deffont + "PAGE2", "LINE1[np]PAGE2"));
 
 		// an absent page on-time on a single page message should 
 		// equal an explicit page on-time of the system default for
