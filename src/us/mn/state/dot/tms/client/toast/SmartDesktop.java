@@ -21,11 +21,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
+import javax.swing.JComponent;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
+import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import javax.swing.JComponent;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.tms.client.widget.Screen;
 
@@ -133,7 +134,16 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Show the specified form */
-	public Component show(AbstractForm form) {
+	public void show(final AbstractForm form) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				doShow(form);
+			}
+		});
+	}
+
+	/** Show the specified form */
+	protected void doShow(AbstractForm form) {
 		JInternalFrame frame = find(form.getTitle());
 		if(frame != null)
 			selectFrame(frame);
@@ -143,7 +153,6 @@ public class SmartDesktop extends JDesktopPane {
 		Point o = Screen.getLocation(this);
 		frame.setLocation(p.x - o.x, p.y - o.y);
 		frame.show();
-		return frame;
 	}
 
 	/** Close all internal frames */
