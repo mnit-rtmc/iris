@@ -61,6 +61,13 @@ public class SingleSignTab extends FormPanel {
 			return c.getStatus();
 	}
 
+	/** Is the proxy's controller active? */
+	private boolean isControllerActive() {
+		if(proxy == null)
+			return false;
+		return DMSHelper.isActive(proxy);
+	}
+
 	/** Get the controller intermediate status */
 	static protected String getInterStatus(Controller c) {
 		String is = "";
@@ -158,7 +165,9 @@ public class SingleSignTab extends FormPanel {
 	/** Adjusting counter */
 	protected int adjusting = 0;
 
-	/** Create a new single sign tab */
+	/** Create a new single sign tab. One instance of this class is
+	 *  created on client startup by DMSDispatcher. 
+	 *  @see DMSDispatcher. */
 	public SingleSignTab(DMSDispatcher d) {
 		super(true);
 		dispatcher = d;
@@ -178,7 +187,7 @@ public class SingleSignTab extends FormPanel {
 			addRow("Operation Status", interstatusTxt);
 		if(queryMsgBtn.getIEnabled())
 			addRow(I18N.get("SingleSignTab.ControllerStatus"), 
-			statusTxt, queryMsgBtn);
+				statusTxt, queryMsgBtn);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
@@ -299,7 +308,8 @@ public class SingleSignTab extends FormPanel {
 		}
 		if(a == null || a.equals("operation")) {
 			String status = getControllerStatus(dms);
-			if("".equals(status)) {
+			boolean cok = status.isEmpty();
+			if(cok) {
 				operationTxt.setForeground(null);
 				operationTxt.setBackground(null);
 			} else {
@@ -307,7 +317,7 @@ public class SingleSignTab extends FormPanel {
 				operationTxt.setBackground(Color.GRAY);
 			}
 			operationTxt.setText(dms.getOperation());
-			queryMsgBtn.setEnabled(true);
+			queryMsgBtn.setEnabled(isControllerActive());
 			statusTxt.setText(status);
 			updateAttribute(dms.getController(), "interStatus");
 		}
