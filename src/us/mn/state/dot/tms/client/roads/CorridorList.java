@@ -313,6 +313,8 @@ public class CorridorList extends JPanel implements ProxyListener<R_Node> {
 		R_Node proxy = getSelectedNode();
 		if(proxy != null)
 			manager.getSelectionModel().setSelected(proxy);
+		ebutton.setEnabled(proxy != null);
+		rbutton.setEnabled(proxy != null);
 	}
 
 	/** Do the add button action */
