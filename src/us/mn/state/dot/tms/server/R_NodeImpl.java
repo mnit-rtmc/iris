@@ -568,6 +568,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		out.print("n_type='" + node_type.description + "' ");
 		if(pickable)
 			out.print("pickable='t' ");
+		out.print("transition='" + transition.description + "' ");
 		String sid = station_id;
 		if(sid != null)
 			out.print("station_id='" + sid + "' ");
