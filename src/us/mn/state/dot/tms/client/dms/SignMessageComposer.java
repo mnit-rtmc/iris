@@ -130,7 +130,7 @@ public class SignMessageComposer extends JPanel {
 	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
 
 	/** Currently selected DMS */
-	protected DMS dms;
+	protected DMS sel_proxy;
 
 	/** Sign text model */
 	protected SignTextModel st_model;
@@ -285,7 +285,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Update the message combo box models */
 	public void setSign(DMS proxy, int nl, PixelMapBuilder builder) {
-		dms = proxy;
+		sel_proxy = proxy;
 		SignTextModel stm = createSignTextModel(proxy);
 		int ml = stm.getMaxLine();
 		int np = Math.max(calculateSignPages(ml, nl),
@@ -524,7 +524,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set the currently selected message */
 	public void setMessage() {
-		DMS proxy = dms;	// Avoid races
+		DMS proxy = sel_proxy;	// Avoid races
 		if(proxy == null || preview)
 			return;
 		int n_lines = dispatcher.getLineCount(proxy);
@@ -568,7 +568,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get default font number for the selected DMS */
 	protected int getDefaultFontNumber() {
-		DMS proxy = dms;	// Avoid races
+		DMS proxy = sel_proxy;	// Avoid races
 		if(proxy != null)
 			return DMSHelper.getDefaultFontNumber(proxy);
 		else
