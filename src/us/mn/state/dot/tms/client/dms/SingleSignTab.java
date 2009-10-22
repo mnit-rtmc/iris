@@ -30,7 +30,6 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -59,13 +58,6 @@ public class SingleSignTab extends FormPanel {
 			return "???";
 		else
 			return c.getStatus();
-	}
-
-	/** Is the proxy's controller active? */
-	private boolean isControllerActive() {
-		if(proxy == null)
-			return false;
-		return DMSHelper.isActive(proxy);
 	}
 
 	/** Get the controller intermediate status */
@@ -126,10 +118,6 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the current operation of the DMS */
 	protected final JTextField operationTxt = createTextField();
 
-	/** Button used to get the DMS message (optional) */
-	protected final IButton queryMsgBtn = new IButton("dms.query.msg",
-		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
-
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
 
@@ -185,9 +173,6 @@ public class SingleSignTab extends FormPanel {
 		interstatusTxt.setColumns(10);
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", interstatusTxt);
-		if(queryMsgBtn.getIEnabled())
-			addRow(I18N.get("SingleSignTab.ControllerStatus"), 
-				statusTxt, queryMsgBtn);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
@@ -215,14 +200,6 @@ public class SingleSignTab extends FormPanel {
 					togglePreview();
 			}
 		});
-		new ActionJob(this, queryMsgBtn) {
-			public void perform() {
-				if(proxy != null) {
-					proxy.setDeviceRequest(DeviceRequest.
-						QUERY_MESSAGE.ordinal());
-				}
-			}
-		};
 		new ActionJob(awsControlledCbx) {
 			public void perform() {
 				if(proxy != null) {
@@ -279,7 +256,6 @@ public class SingleSignTab extends FormPanel {
 		awsControlledCbx.setSelected(false);
 		awsControlledCbx.setEnabled(false);
 		operationTxt.setText("");
-		queryMsgBtn.setEnabled(false);
 		statusTxt.setText("");
 		interstatusTxt.setText("");
 		deployTxt.setText("");
@@ -317,7 +293,6 @@ public class SingleSignTab extends FormPanel {
 				operationTxt.setBackground(Color.GRAY);
 			}
 			operationTxt.setText(dms.getOperation());
-			queryMsgBtn.setEnabled(isControllerActive());
 			statusTxt.setText(status);
 			updateAttribute(dms.getController(), "interStatus");
 		}

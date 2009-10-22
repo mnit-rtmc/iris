@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsPgTime;
@@ -110,6 +111,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Action to blank selected DMS */
 	protected final BlankDmsAction blankAction;
+
+	/** Button to query the DMS message (optional) */
+	protected final IButton queryBtn = new IButton("dms.query.msg",
+		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
 
 	/** Card layout for alert panel */
 	protected final CardLayout cards = new CardLayout();
@@ -297,11 +302,20 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 					sendMessage();
 			}
 		};
+		new ActionJob(queryBtn) {
+			public void perform() {
+				queryMessage();
+			}
+		};
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
 		box.add(Box.createHorizontalStrut(4));
 		box.add(blankBtn);
+		if(queryBtn.getIEnabled()) {
+			box.add(Box.createHorizontalStrut(4));
+			box.add(queryBtn);
+		}
 		box.add(Box.createHorizontalGlue());
 		return box;
 	}
@@ -423,6 +437,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		durationCmb.setSelectedItem(null);
 		sendBtn.setEnabled(false);
 		blankBtn.setEnabled(false);
+		queryBtn.setEnabled(false);
 		qlibCmb.setEnabled(false);
 		qlibCmb.setSelectedItem("");
 		builder = null;
@@ -435,6 +450,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		durationCmb.setSelectedIndex(0);
 		sendBtn.setEnabled(true);
 		blankBtn.setEnabled(true);
+		queryBtn.setEnabled(true);
 		qlibCmb.setEnabled(true);
 		updateTextQLibCBox(true);
 		selectPreview(false);
@@ -596,6 +612,25 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				selectionModel.removeSelected(dms);
 			}
 		}
+	}
+
+	/** Query the current message on all selected signs */
+	private void queryMessage() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() < 1)
+			return;
+		for(DMS dms: sel) {
+			if(checkDimensions(dms)) {
+				dms.setDeviceRequest(DeviceRequest.
+					QUERY_MESSAGE.ordinal());
+			} else {
+				// NOTE: this sign does not match the proper
+				//       dimensions, so deselect it.
+				selectionModel.removeSelected(dms);
+			}
+		}
+		composer.updateMessageLibrary();
+		selectPreview(false);
 	}
 
 	/** Create a new message from the widgets.
