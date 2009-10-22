@@ -71,12 +71,20 @@ public class AwsMsg {
 	private AwsMsgType m_type;		// message type
 	private int m_fontnumpg1;		// IRIS font number
 	private int m_fontnumpg2;		// IRIS font number
-	private String[] m_textlines;		// lines of text
+	private String[] m_textlines = 
+		new String[NUM_TEXT_ROWS];	// lines of text
 	private boolean m_valid = false;	// is message valid?
-	private DmsPgTime m_pgontime;		// pg on-time
+	private DmsPgTime m_pgontime =
+		new DmsPgTime(0);		// pg on-time
 
 	/** AWS message types */
 	public enum AwsMsgType {BLANK, ONEPAGEMSG, TWOPAGEMSG, UNKNOWN}
+
+	/** Constructor */
+	public AwsMsg() {
+		for(int i = 0; i < m_textlines.length; ++i)
+			m_textlines[i] = "";
+	}
 
 	/** Parse a string that contains a single DMS message.
  	 * @param argline a single DMS message, fields delimited with ';'. */
@@ -154,16 +162,26 @@ public class AwsMsg {
 		this.setValid(ok);
 	}
 
-	/** Return the page on-time. If zero is read, the system default 
-	 *  is returned, as a function of the number of pages. */
+	/** Return the page on-time. If a bogus value is read, the system
+	 *  default as a function of the number of pages is returned. Zero
+	 *  is always returned for a single page message because flashing
+	 *  is not supported. The page on-time for multi page values is 
+	 *  validated. */
 	protected DmsPgTime createPgOnTime(String pont, AwsMsgType mtype) {
+		DmsPgTime ret; 
 		boolean singlepg = (mtype == mtype.ONEPAGEMSG);
-		if(pont == null || pont.isEmpty() || 
-			SString.stringToDouble(pont) <= 0)
-		{
-			return DmsPgTime.getDefaultOn(singlepg);
+		if(pont == null || pont.isEmpty())
+			ret = DmsPgTime.getDefaultOn(singlepg);
+		else if(singlepg)
+			// single page messages can not have a non-zero 
+			// page on-time (flashing).
+			ret = DmsPgTime.getDefaultOn(true);
+		else {
+			DmsPgTime ptread = new DmsPgTime((double)
+				SString.stringToDouble(pont));
+			ret = DmsPgTime.validateOnTime(ptread, false);
 		}
-		return new DmsPgTime((double)SString.stringToDouble(pont));
+		return ret;
 	}
 
 	/** Return a MULTI string representation of the AWS message. 
@@ -186,9 +204,7 @@ public class AwsMsg {
 		addSpanLine(m_textlines[2], m, true);
 
 		// pg 2
-		if(m_textlines[3].length() + m_textlines[4].length() + 
-			m_textlines[5].length() > 0) 
-		{
+		if(multiPageLines()) {
 			m.addPage();
 			m.setFont(m_fontnumpg2, null);
 			addSpanLine(m_textlines[3], m, false);
@@ -196,6 +212,13 @@ public class AwsMsg {
 			addSpanLine(m_textlines[5], m, true);
 		}
 		return m.normalize().toString();
+	}
+
+	/** Return true if the message lines contain a 2nd page. */
+	private boolean multiPageLines() {
+		return (m_textlines[3].length() + 
+			m_textlines[4].length() + 
+			m_textlines[5].length()) > 0;
 	}
 
 	/** Add a span of text to the specified multistring. */
