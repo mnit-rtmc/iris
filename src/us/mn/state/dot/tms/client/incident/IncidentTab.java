@@ -14,10 +14,11 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.awt.BorderLayout;
 import java.io.IOException;
 import java.util.List;
+import javax.swing.BoxLayout;
 import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -33,6 +34,9 @@ public class IncidentTab extends MapTab {
 	/** Incident manager */
 	protected final IncidentManager manager;
 
+	/** Incident creator */
+	protected final IncidentCreator creator;
+
 	/** Incident dispatcher */
 	protected final IncidentDispatcher dispatcher;
 
@@ -44,16 +48,19 @@ public class IncidentTab extends MapTab {
 		List<LayerState> lstates) throws IOException
 	{
 		super("Incident", "Manage Incidents");
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		manager = m;
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
 			if(ls.getLayer().getName().equals(m.getProxyType()))
 				map_model.setHomeLayer(ls);
 		}
+		creator = new IncidentCreator(manager.getTheme());
 		dispatcher = new IncidentDispatcher(session, manager);
 		summary = manager.createStyleSummary();
-		add(dispatcher, BorderLayout.NORTH);
-		add(summary, BorderLayout.CENTER);
+		add(creator);
+		add(dispatcher);
+		add(summary);
 	}
 
 	/** Get the tab number */
@@ -67,5 +74,12 @@ public class IncidentTab extends MapTab {
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 		dispatcher.dispose();
+		creator.dispose();
+	}
+
+	/** Set the map */
+	public void setMap(MapBean map) {
+		super.setMap(map);
+		creator.setMap(map);
 	}
 }

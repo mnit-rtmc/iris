@@ -47,8 +47,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Name of blockage style */
 	static public final String STYLE_BLOCKAGE = "Blockage";
 
-	/** Name of construction style */
-	static public final String STYLE_CONST = "Construction";
+	/** Name of road work style */
+	static public final String STYLE_WORK = "Road Work";
 
 	/** Name of cleared style */
 	static public final String STYLE_CLEARED = "Cleared";
@@ -85,7 +85,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 		theme.addStyle(STYLE_CRASH, Color.RED);
 		theme.addStyle(STYLE_STALL, Color.MAGENTA);
 		theme.addStyle(STYLE_BLOCKAGE, Color.YELLOW);
-		theme.addStyle(STYLE_CONST, Color.ORANGE);
+		theme.addStyle(STYLE_WORK, Color.ORANGE);
 		theme.addStyle(STYLE_CLEARED, Color.GREEN);
 		theme.addStyle(STYLE_ALL);
 		return theme;
@@ -135,7 +135,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return et == EventType.INCIDENT_STALL;
 		else if(STYLE_BLOCKAGE.equals(s))
 			return et == EventType.INCIDENT_BLOCKAGE;
-		else if(STYLE_CONST.equals(s))
+		else if(STYLE_WORK.equals(s))
 			return et == EventType.INCIDENT_CONST;
 		else if(STYLE_CLEARED.equals(s))
 			return proxy.getCleared();
