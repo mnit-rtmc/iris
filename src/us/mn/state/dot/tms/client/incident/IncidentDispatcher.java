@@ -119,6 +119,8 @@ public class IncidentDispatcher extends JPanel
 
 	/** Build the impact box */
 	protected Box buildImpactBox() {
+		impact_pnl.setBorder(BorderFactory.createTitledBorder(
+			"Impact"));
 		Box box = Box.createHorizontalBox();
 		box.add(createLabel("L"));
 		box.add(Box.createHorizontalStrut(4));

@@ -19,7 +19,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.Insets;
 import java.awt.Shape;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
@@ -71,11 +71,11 @@ public class ImpactPanel extends JPanel {
 	/** Paint the component */
 	public void paintComponent(Graphics g) {
 		Dimension d = (Dimension)getSize();
-		width = (int)d.getWidth();
-		height = (int)d.getHeight();
-		Graphics2D g2 = (Graphics2D)g;
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-			RenderingHints.VALUE_ANTIALIAS_ON);
+		Insets insets = getInsets();
+		width = (int)d.getWidth() - insets.left - insets.right;
+		height = (int)d.getHeight() - insets.top - insets.bottom;
+		Graphics2D g2 = (Graphics2D)g.create(insets.left, insets.top,
+			width, height);
 		g2.setColor(getBackground());
 		g2.fillRect(0, 0, width, height);
 		fillRoadway(g2);
@@ -121,7 +121,7 @@ public class ImpactPanel extends JPanel {
 	/** Get the preferred size */
 	public Dimension getPreferredSize() {
 		return new Dimension(LANE_WIDTH * (n_lanes + 3),
-			LANE_HEIGHT * 3);
+			LANE_HEIGHT * 4);
 	}
 
 	/** Get the minimum size */
