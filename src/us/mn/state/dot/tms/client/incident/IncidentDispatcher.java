@@ -73,17 +73,14 @@ public class IncidentDispatcher extends JPanel
 	/** Impact panel */
 	protected final ImpactPanel impact_pnl = new ImpactPanel();
 
-	/** Button to create a new incident */
-	protected final JButton create_btn = new JButton("Create");
+	/** Button to log an incident change */
+	protected final JButton log_btn = new JButton("Log");
 
 	/** Button to deploy devices */
 	protected final JButton deploy_btn = new JButton("Deploy");
 
 	/** Button to clear an incident */
 	protected final JToggleButton clear_btn = new JToggleButton("Clear");
-
-	/** Button to delete an incident */
-	protected final JButton delete_btn = new JButton("Delete");
 
 	/** Currently watching incident */
 	protected Incident watching;
@@ -113,10 +110,9 @@ public class IncidentDispatcher extends JPanel
 		panel.addRow("Camera", camera_txt);
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
-		btns.add(create_btn);
+		btns.add(log_btn);
 		btns.add(deploy_btn);
 		btns.add(clear_btn);
-		btns.add(delete_btn);
 		panel.addRow(btns);
 		return panel;
 	}
@@ -231,18 +227,16 @@ public class IncidentDispatcher extends JPanel
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		create_btn.setEnabled(false);
+		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
-		delete_btn.setEnabled(false);
 	}
 
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets() {
-		create_btn.setEnabled(true);
+		log_btn.setEnabled(true);
 		deploy_btn.setEnabled(true);
 		clear_btn.setEnabled(true);
-		delete_btn.setEnabled(true);
 	}
 
 	/** Update one attribute on the form */
