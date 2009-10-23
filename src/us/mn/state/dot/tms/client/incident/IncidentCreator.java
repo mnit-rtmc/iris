@@ -28,6 +28,7 @@ import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 
 /**
  * GUI for creating new incidents.
@@ -48,12 +49,18 @@ public class IncidentCreator extends JPanel {
 	/** Button to create a "road work" incident */
 	protected final JToggleButton work_btn;
 
+	/** Incident selection model */
+	protected final ProxySelectionModel<Incident> selectionModel;
+
 	/** Map bean */
 	protected MapBean map;
 
 	/** Create a new incident creator */
-	public IncidentCreator(StyledTheme theme) {
+	public IncidentCreator(StyledTheme theme,
+		ProxySelectionModel<Incident> sel_model)
+	{
 		super(new FlowLayout());
+		selectionModel = sel_model;
 		setBorder(BorderFactory.createTitledBorder(
 			"Create new incident"));
 		crash_btn = createButton(IncidentManager.STYLE_CRASH,
@@ -108,7 +115,7 @@ public class IncidentCreator extends JPanel {
 		}
 	}
 
-	/** Create a crash incident */
+	/** Create a incident */
 	protected void createIncident(final JToggleButton btn,
 		final EventType et)
 	{
@@ -123,11 +130,22 @@ public class IncidentCreator extends JPanel {
 			public void selectPoint(Point2D p) {
 				int x = (int)p.getX();
 				int y = (int)p.getY();
-System.err.println(et + ", x: " + x + ", y: " + y);
+				createIncident(et, x, y);
 				btn.setSelected(false);
 				setEnabled(true);
 			}
 		});
+	}
+
+	/** Create an incident */
+	protected void createIncident(final EventType et, int easting,
+		int northing)
+	{
+		// FIXME: look up nearest r_node and assign road, dir, easting
+		//        and northing based on that.
+		ClientIncident ci = new ClientIncident(et.id, null,
+			(short)1, easting, northing, "....");
+		selectionModel.setSelected(ci);
 	}
 
 	/** Get the selected toggle button */

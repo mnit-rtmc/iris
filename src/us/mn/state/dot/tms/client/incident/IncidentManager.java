@@ -142,4 +142,20 @@ public class IncidentManager extends ProxyManager<Incident> {
 		else
 			return STYLE_ALL.equals(s);
 	}
+
+	/** Get the style for an event type */
+	public String getStyle(EventType et) {
+		switch(et) {
+		case INCIDENT_CRASH:
+			return STYLE_CRASH;
+		case INCIDENT_STALL:
+			return STYLE_STALL;
+		case INCIDENT_DEBRIS:
+			return STYLE_DEBRIS;
+		case INCIDENT_ROADWORK:
+			return STYLE_ROADWORK;
+		default:
+			return null;
+		}
+	}
 }

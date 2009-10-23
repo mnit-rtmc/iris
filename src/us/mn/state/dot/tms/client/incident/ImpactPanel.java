@@ -108,7 +108,7 @@ public class ImpactPanel extends JPanel {
 	protected int height = 0;
 
 	/** Lane impact array */
-	protected LaneImpact[] impact;
+	protected LaneImpact[] impact = new LaneImpact[0];
 
 	/** Set the impact */
 	public void setImpact(String im) {
@@ -129,9 +129,6 @@ public class ImpactPanel extends JPanel {
 
 	/** Create a new roadway node renderer */
 	public ImpactPanel() {
-		impact = new LaneImpact[6];
-		for(int i = 0; i < impact.length; i++)
-			impact[i] = LaneImpact.open;
 		addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
 				doClick(e.getX(), e.getY());

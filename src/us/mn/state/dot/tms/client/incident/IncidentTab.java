@@ -55,7 +55,8 @@ public class IncidentTab extends MapTab {
 			if(ls.getLayer().getName().equals(m.getProxyType()))
 				map_model.setHomeLayer(ls);
 		}
-		creator = new IncidentCreator(manager.getTheme());
+		creator = new IncidentCreator(manager.getTheme(),
+			manager.getSelectionModel());
 		dispatcher = new IncidentDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);

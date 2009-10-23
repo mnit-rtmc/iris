@@ -27,10 +27,12 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -62,7 +64,7 @@ public class IncidentDispatcher extends JPanel
 	protected final User user;
 
 	/** Type label */
-	protected final JLabel type_lbl = new JLabel("FIXME: type plus icon");
+	protected final JLabel type_lbl = new JLabel();
 
 	/** Verify camera name textfield */
 	protected final JTextField camera_txt = FormPanel.createTextField();
@@ -82,16 +84,20 @@ public class IncidentDispatcher extends JPanel
 	/** Button to clear an incident */
 	protected final JToggleButton clear_btn = new JToggleButton("Clear");
 
+	/** Incident manager */
+	protected final IncidentManager manager;
+
 	/** Currently watching incident */
 	protected Incident watching;
 
 	/** Create a new incident dispatcher */
-	public IncidentDispatcher(Session session, IncidentManager manager) {
+	public IncidentDispatcher(Session session, IncidentManager man) {
 		super(new BorderLayout());
 		SonarState st = session.getSonarState();
 		namespace = st.getNamespace();
 		cache = st.getIncidents();
 		user = session.getUser();
+		manager = man;
 		selectionModel = manager.getSelectionModel();
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
@@ -101,7 +107,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Create the main panel */
 	protected JPanel createMainPanel() {
-		type_lbl.setHorizontalTextPosition(SwingConstants.LEADING);
+		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		FormPanel panel = new FormPanel(true);
 		panel.setBorder(BorderFactory.createTitledBorder(
 			"Selected Incident"));
@@ -216,8 +222,12 @@ public class IncidentDispatcher extends JPanel
 	protected void setSelected(Incident inc) {
 		if(watching != null)
 			cache.ignoreObject(watching);
-		watching = inc;
-		cache.watchObject(watching);
+		if(inc instanceof ClientIncident)
+			watching = null;
+		else {
+			watching = inc;
+			cache.watchObject(watching);
+		}
 		if(!inc.getCleared()) {
 			updateAttribute(inc, null);
 			enableWidgets();
@@ -241,6 +251,21 @@ public class IncidentDispatcher extends JPanel
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(Incident inc, String a) {
-		// FIXME
+		if(a == null || a.equals("event_type")) {
+			EventType et = EventType.fromId(inc.getEventType());
+			if(et != null) {
+				String sty = manager.getStyle(et);
+				if(sty != null) {
+					type_lbl.setText(sty);
+					Symbol sym = manager.getTheme().getSymbol(sty);
+					if(sym != null)
+						type_lbl.setIcon(sym.getLegend());
+				}
+			}
+		}
+		if(a == null || a.equals("impact")) {
+			impact_pnl.setImpact(inc.getImpact());
+		}
 	}
+
 }
