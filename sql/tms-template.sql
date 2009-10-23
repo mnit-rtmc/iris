@@ -1524,8 +1524,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 20	Incident CLEARED
 21	Incident CRASH
 22	Incident STALL
-23	Incident BLOCKAGE
-24	Incident CONSTRUCTION
+23	Incident DEBRIS
+24	Incident ROADWORK
 29	Incident IMPACT
 65	Comm FAILED
 89	LCS DEPLOYED

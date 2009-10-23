@@ -44,11 +44,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Name of stall style */
 	static public final String STYLE_STALL = "Stall";
 
-	/** Name of blockage style */
-	static public final String STYLE_BLOCKAGE = "Blockage";
+	/** Name of debris style */
+	static public final String STYLE_DEBRIS = "Debris";
 
 	/** Name of road work style */
-	static public final String STYLE_WORK = "Road Work";
+	static public final String STYLE_ROADWORK = "Road Work";
 
 	/** Name of cleared style */
 	static public final String STYLE_CLEARED = "Cleared";
@@ -84,8 +84,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 			getProxyType(), SHAPE);
 		theme.addStyle(STYLE_CRASH, Color.RED);
 		theme.addStyle(STYLE_STALL, Color.MAGENTA);
-		theme.addStyle(STYLE_BLOCKAGE, Color.YELLOW);
-		theme.addStyle(STYLE_WORK, Color.ORANGE);
+		theme.addStyle(STYLE_DEBRIS, Color.YELLOW);
+		theme.addStyle(STYLE_ROADWORK, Color.ORANGE);
 		theme.addStyle(STYLE_CLEARED, Color.GREEN);
 		theme.addStyle(STYLE_ALL);
 		return theme;
@@ -133,10 +133,10 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return et == EventType.INCIDENT_CRASH;
 		else if(STYLE_STALL.equals(s))
 			return et == EventType.INCIDENT_STALL;
-		else if(STYLE_BLOCKAGE.equals(s))
-			return et == EventType.INCIDENT_BLOCKAGE;
-		else if(STYLE_WORK.equals(s))
-			return et == EventType.INCIDENT_CONST;
+		else if(STYLE_DEBRIS.equals(s))
+			return et == EventType.INCIDENT_DEBRIS;
+		else if(STYLE_ROADWORK.equals(s))
+			return et == EventType.INCIDENT_ROADWORK;
 		else if(STYLE_CLEARED.equals(s))
 			return proxy.getCleared();
 		else

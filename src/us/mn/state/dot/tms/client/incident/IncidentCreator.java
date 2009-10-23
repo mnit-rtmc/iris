@@ -60,10 +60,10 @@ public class IncidentCreator extends JPanel {
 			EventType.INCIDENT_CRASH, theme);
 		stall_btn = createButton(IncidentManager.STYLE_STALL,
 			EventType.INCIDENT_STALL, theme);
-		block_btn = createButton(IncidentManager.STYLE_BLOCKAGE,
-			EventType.INCIDENT_BLOCKAGE, theme);
-		work_btn = createButton(IncidentManager.STYLE_WORK,
-			EventType.INCIDENT_CONST, theme);
+		block_btn = createButton(IncidentManager.STYLE_DEBRIS,
+			EventType.INCIDENT_DEBRIS, theme);
+		work_btn = createButton(IncidentManager.STYLE_ROADWORK,
+			EventType.INCIDENT_ROADWORK, theme);
 		setEnabled(false);
 	}
 
@@ -114,8 +114,8 @@ public class IncidentCreator extends JPanel {
 	{
 		assert et == EventType.INCIDENT_CRASH ||
 		       et == EventType.INCIDENT_STALL ||
-		       et == EventType.INCIDENT_BLOCKAGE ||
-		       et == EventType.INCIDENT_CONST;
+		       et == EventType.INCIDENT_DEBRIS ||
+		       et == EventType.INCIDENT_ROADWORK;
 		MapBean m = map;
 		if(m == null)
 			return;
