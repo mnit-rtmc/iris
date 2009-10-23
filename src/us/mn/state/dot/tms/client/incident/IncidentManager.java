@@ -82,11 +82,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	protected StyledTheme createTheme() {
 		ProxyTheme<Incident> theme = new ProxyTheme<Incident>(this,
 			getProxyType(), SHAPE);
-		theme.addStyle(STYLE_CRASH, Color.RED);
-		theme.addStyle(STYLE_STALL, Color.MAGENTA);
-		theme.addStyle(STYLE_DEBRIS, Color.YELLOW);
-		theme.addStyle(STYLE_ROADWORK, Color.ORANGE);
-		theme.addStyle(STYLE_CLEARED, Color.GREEN);
+		theme.addStyle(STYLE_CRASH, new Color(255, 128, 128));
+		theme.addStyle(STYLE_STALL, new Color(255, 128, 255));
+		theme.addStyle(STYLE_DEBRIS, new Color(255, 255, 128));
+		theme.addStyle(STYLE_ROADWORK, new Color(255, 208, 128));
+		theme.addStyle(STYLE_CLEARED, new Color(128, 255, 128));
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
