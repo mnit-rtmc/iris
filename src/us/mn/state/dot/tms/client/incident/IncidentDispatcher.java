@@ -76,6 +76,9 @@ public class IncidentDispatcher extends JPanel
 	/** Button to create a new incident */
 	protected final JButton create_btn = new JButton("Create");
 
+	/** Button to deploy devices */
+	protected final JButton deploy_btn = new JButton("Deploy");
+
 	/** Button to clear an incident */
 	protected final JToggleButton clear_btn = new JToggleButton("Clear");
 
@@ -111,6 +114,7 @@ public class IncidentDispatcher extends JPanel
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
 		btns.add(create_btn);
+		btns.add(deploy_btn);
 		btns.add(clear_btn);
 		btns.add(delete_btn);
 		panel.addRow(btns);
@@ -228,6 +232,7 @@ public class IncidentDispatcher extends JPanel
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
 		create_btn.setEnabled(false);
+		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
 		delete_btn.setEnabled(false);
 	}
@@ -235,6 +240,7 @@ public class IncidentDispatcher extends JPanel
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets() {
 		create_btn.setEnabled(true);
+		deploy_btn.setEnabled(true);
 		clear_btn.setEnabled(true);
 		delete_btn.setEnabled(true);
 	}
