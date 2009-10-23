@@ -15,8 +15,17 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
@@ -27,6 +36,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.toast.FormPanel;
 
 /**
  * The IncidentDispatcher is a GUI component for creating incidents.
@@ -36,6 +46,9 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 public class IncidentDispatcher extends JPanel
 	implements ProxyListener<Incident>, ProxySelectionListener<Incident>
 {
+	/** Font for "L" and "R" labels */
+	static protected final Font FONT = new Font(null, Font.BOLD, 24);
+
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
@@ -47,6 +60,27 @@ public class IncidentDispatcher extends JPanel
 
 	/** Currently logged in user */
 	protected final User user;
+
+	/** Type label */
+	protected final JLabel type_lbl = new JLabel("FIXME: type plus icon");
+
+	/** Verify camera name textfield */
+	protected final JTextField camera_txt = FormPanel.createTextField();
+
+	/** Location of incident */
+	protected final JTextField location_txt = FormPanel.createTextField();
+
+	/** Impact panel */
+	protected final ImpactPanel impact_pnl = new ImpactPanel();
+
+	/** Button to create a new incident */
+	protected final JButton create_btn = new JButton("Create");
+
+	/** Button to clear an incident */
+	protected final JToggleButton clear_btn = new JToggleButton("Clear");
+
+	/** Button to delete an incident */
+	protected final JButton delete_btn = new JButton("Delete");
 
 	/** Currently watching incident */
 	protected Incident watching;
@@ -61,6 +95,44 @@ public class IncidentDispatcher extends JPanel
 		selectionModel = manager.getSelectionModel();
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
+		add(createMainPanel());
+		clearSelected();
+	}
+
+	/** Create the main panel */
+	protected JPanel createMainPanel() {
+		type_lbl.setHorizontalTextPosition(SwingConstants.LEADING);
+		FormPanel panel = new FormPanel(true);
+		panel.setBorder(BorderFactory.createTitledBorder(
+			"Selected Incident"));
+		panel.addRow("Incident Type", type_lbl);
+		panel.addRow("Location", location_txt);
+		panel.addRow("Camera", camera_txt);
+		panel.addRow(buildImpactBox());
+		JPanel btns = new JPanel(new FlowLayout());
+		btns.add(create_btn);
+		btns.add(clear_btn);
+		btns.add(delete_btn);
+		panel.addRow(btns);
+		return panel;
+	}
+
+	/** Build the impact box */
+	protected Box buildImpactBox() {
+		Box box = Box.createHorizontalBox();
+		box.add(createLabel("L"));
+		box.add(Box.createHorizontalStrut(4));
+		box.add(impact_pnl);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(createLabel("R"));
+		return box;
+	}
+
+	/** Create an "L" or "R" label */
+	protected JLabel createLabel(String t) {
+		JLabel label = new JLabel(t);
+		label.setFont(FONT);
+		return label;
 	}
 
 	/** A new proxy has been added */
@@ -153,12 +225,16 @@ public class IncidentDispatcher extends JPanel
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		// FIXME
+		create_btn.setEnabled(false);
+		clear_btn.setEnabled(false);
+		delete_btn.setEnabled(false);
 	}
 
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets() {
-		// FIXME
+		create_btn.setEnabled(true);
+		clear_btn.setEnabled(true);
+		delete_btn.setEnabled(true);
 	}
 
 	/** Update one attribute on the form */

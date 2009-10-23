@@ -14,9 +14,10 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import java.awt.BorderLayout;
 import java.io.IOException;
 import java.util.List;
-import javax.swing.BoxLayout;
+import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.Incident;
@@ -48,7 +49,6 @@ public class IncidentTab extends MapTab {
 		List<LayerState> lstates) throws IOException
 	{
 		super("Incident", "Manage Incidents");
-		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		manager = m;
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
@@ -58,9 +58,16 @@ public class IncidentTab extends MapTab {
 		creator = new IncidentCreator(manager.getTheme());
 		dispatcher = new IncidentDispatcher(session, manager);
 		summary = manager.createStyleSummary();
-		add(creator);
-		add(dispatcher);
-		add(summary);
+		add(createNorthPanel(), BorderLayout.NORTH);
+		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Create the north panel */
+	protected JPanel createNorthPanel() {
+		JPanel panel = new JPanel(new BorderLayout());
+		panel.add(creator, BorderLayout.NORTH);
+		panel.add(dispatcher, BorderLayout.CENTER);
+		return panel;
 	}
 
 	/** Get the tab number */
