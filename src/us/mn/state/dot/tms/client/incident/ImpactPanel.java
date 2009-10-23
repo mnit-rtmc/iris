@@ -85,16 +85,16 @@ public class ImpactPanel extends JPanel {
 	);
 
 	/** Color for blocked impact */
-	static protected final Color COLOR_BLOCKED = new Color(208, 208, 208);
+	static protected final Color COLOR_BLOCKED = new Color(208, 64, 64);
 
 	/** Image for caution impact */
 	static protected final BufferedImage IMAGE_CAUTION =
-		new BufferedImage(4, 4, BufferedImage.TYPE_BYTE_GRAY);
+		new BufferedImage(4, 4, BufferedImage.TYPE_INT_RGB);
 	static {
-		IMAGE_CAUTION.setRGB(0, 0, 0xffff);
-		IMAGE_CAUTION.setRGB(1, 1, 0xffff);
-		IMAGE_CAUTION.setRGB(2, 2, 0xffff);
-		IMAGE_CAUTION.setRGB(3, 3, 0xffff);
+		IMAGE_CAUTION.setRGB(0, 0, 0xffff22);
+		IMAGE_CAUTION.setRGB(1, 1, 0xffff22);
+		IMAGE_CAUTION.setRGB(2, 2, 0xffff22);
+		IMAGE_CAUTION.setRGB(3, 3, 0xffff22);
 	}
 
 	/** Paint for caution impact */
@@ -132,12 +132,9 @@ public class ImpactPanel extends JPanel {
 		impact = new LaneImpact[6];
 		for(int i = 0; i < impact.length; i++)
 			impact[i] = LaneImpact.open;
-		impact[1] = LaneImpact.blocked;
-		impact[2] = LaneImpact.caution;
 		addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() == 1)
-					doClick(e.getX(), e.getY());
+				doClick(e.getX(), e.getY());
 			}
 		});
 	}
@@ -224,7 +221,6 @@ public class ImpactPanel extends JPanel {
 			g.drawRect(x, h, s, s);
 			break;
 		case caution:
-			g.setColor(Color.GRAY);
 			g.setPaint(PAINT_CAUTION);
 			g.fillRect(x, h, s, s);
 			g.setColor(Color.WHITE);
