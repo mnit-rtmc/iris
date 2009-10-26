@@ -33,7 +33,9 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -66,11 +68,11 @@ public class IncidentDispatcher extends JPanel
 	/** Type label */
 	protected final JLabel type_lbl = new JLabel();
 
-	/** Verify camera name textfield */
-	protected final JTextField camera_txt = FormPanel.createTextField();
-
 	/** Location of incident */
 	protected final JTextField location_txt = FormPanel.createTextField();
+
+	/** Verify camera name textfield */
+	protected final JTextField camera_txt = FormPanel.createTextField();
 
 	/** Impact panel */
 	protected final ImpactPanel impact_pnl = new ImpactPanel();
@@ -239,6 +241,7 @@ public class IncidentDispatcher extends JPanel
 	protected void disableWidgets() {
 		type_lbl.setText("");
 		type_lbl.setIcon(null);
+		location_txt.setText("");
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
@@ -265,6 +268,12 @@ public class IncidentDispatcher extends JPanel
 						type_lbl.setIcon(sym.getLegend());
 				}
 			}
+		}
+		if(a == null || a.equals("road") || a.equals("dir")) {
+			Road road = inc.getRoad();
+			short dir = inc.getDir();
+			String loc = GeoLocHelper.getCorridorName(road, dir);
+			location_txt.setText(loc);
 		}
 		if(a == null || a.equals("impact")) {
 			impact_pnl.setImpact(inc.getImpact());

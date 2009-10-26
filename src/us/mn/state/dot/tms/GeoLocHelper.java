@@ -187,7 +187,7 @@ public class GeoLocHelper extends BaseHelper {
 	}
 
 	/** Get the corridor for a road */
-	static protected String getCorridorName(Road r, short d) {
+	static public String getCorridorName(Road r, short d) {
 		if(r == null)
 			return null;
 		StringBuilder b = new StringBuilder();
