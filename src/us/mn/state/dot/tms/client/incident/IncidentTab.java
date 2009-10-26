@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
+import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
  * Tab for managing incidents.
@@ -46,7 +47,8 @@ public class IncidentTab extends MapTab {
 
 	/** Create a new incident tab */
   	public IncidentTab(Session session, IncidentManager m,
-		List<LayerState> lstates) throws IOException
+		List<LayerState> lstates, R_NodeManager r_man)
+		throws IOException
 	{
 		super("Incident", "Manage Incidents");
 		manager = m;
@@ -56,7 +58,7 @@ public class IncidentTab extends MapTab {
 				map_model.setHomeLayer(ls);
 		}
 		creator = new IncidentCreator(manager.getTheme(),
-			manager.getSelectionModel());
+			manager.getSelectionModel(), r_man);
 		dispatcher = new IncidentDispatcher(session, manager);
 		summary = manager.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);

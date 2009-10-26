@@ -331,7 +331,8 @@ public class Session {
 		hideLayer(lstates, lcs_array_manager.getProxyType());
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new IncidentTab(this, inc_manager, lstates));
+		tabs.add(new IncidentTab(this, inc_manager, lstates,
+			r_node_manager));
 	}
 
 	/** Add the meter tab */

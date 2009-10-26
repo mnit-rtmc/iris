@@ -291,6 +291,15 @@ public class GeoLocHelper extends BaseHelper {
 		return Math.hypot(e0 - e1, n0 - n1);
 	}
 
+	/** Calculate the distance between two locations (in meters) */
+	static public double metersTo(GeoLoc l, int easting, int northing) {
+		Integer e = getTrueEasting(l);
+		Integer n = getTrueNorthing(l);
+		if(e == null || n == null)
+			return Double.POSITIVE_INFINITY;
+		return Math.hypot(e - easting, n - northing);
+	}
+
 	/** Test if another location matches */
 	static public boolean matches(GeoLoc l0, GeoLoc l1) {
 		Road f0 = l0.getFreeway();

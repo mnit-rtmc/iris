@@ -218,4 +218,56 @@ public class CorridorBase {
 		}
 		return nearest;
 	}
+
+	/** Get the lane count at the given location */
+	public int getLaneCount(int easting, int northing) {
+		R_Node last = findLastBefore(easting, northing);
+		if(last == null)
+			return 0;
+		int left = 0;
+		int right = 0;
+		for(R_Node n: r_nodes) {
+			if(n.getAttachSide())
+				left = n.getShift();
+			else
+				right = n.getShift();
+			if(n.getNodeType() == R_NodeType.STATION.ordinal()) {
+				if(n.getAttachSide())
+					right = left + n.getLanes();
+				else
+					left = right - n.getLanes();
+			}
+			if(n == last)
+				break;
+		}
+		return right - left;
+	}
+
+	/** Fint the last node before the given location */
+	protected R_Node findLastBefore(int easting, int northing) {
+		R_Node nearest = null;
+		R_Node n_before = null;
+		R_Node n_after = null;
+		double n_meters = 0;
+		for(R_Node n: r_nodes) {
+			double m = GeoLocHelper.metersTo(n.getGeoLoc(),
+				easting, northing);
+			if(nearest == null || m < n_meters) {
+				n_before = nearest;
+				nearest = n;
+				n_after = n;
+				n_meters = m;
+			} else if(n_after == nearest)
+				n_after = n;
+		}
+		if(nearest == null)
+			return null;
+		GeoLoc ga = n_after.getGeoLoc();
+		double m0 = GeoLocHelper.metersTo(ga, nearest.getGeoLoc());
+		double m1 = GeoLocHelper.metersTo(ga, easting, northing);
+		if(m0 > m1)
+			return nearest;
+		else
+			return n_before;
+	}
 }
