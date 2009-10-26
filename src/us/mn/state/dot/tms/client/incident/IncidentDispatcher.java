@@ -237,9 +237,12 @@ public class IncidentDispatcher extends JPanel
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
+		type_lbl.setText("");
+		type_lbl.setIcon(null);
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
+		impact_pnl.setImpact("");
 	}
 
 	/** Enable the dispatcher widgets */
