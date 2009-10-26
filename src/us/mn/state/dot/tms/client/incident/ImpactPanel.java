@@ -116,6 +116,8 @@ public class ImpactPanel extends JPanel {
 		for(int i = 0; i < imp.length; i++)
 			imp[i] = LaneImpact.fromChar(im.charAt(i));
 		impact = imp;
+		revalidate();
+		repaint();
 	}
 
 	/** Get the impact */
