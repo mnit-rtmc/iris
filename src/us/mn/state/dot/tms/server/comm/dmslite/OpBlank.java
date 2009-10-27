@@ -126,7 +126,7 @@ public class OpBlank extends OpDms
 				"OpBlank: response from SensorServer " +
 				"received, ignored because Xml valid " +
 				"field is false, errmsg=" + errmsg);
-			errorStatus = errmsg;
+			setErrorMsg(errmsg);
 
 			// try again
 			if(flagFailureShouldRetry(errmsg)) {
