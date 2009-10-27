@@ -59,4 +59,21 @@ public class LineSegment2D {
 		// a and b, so calculate the point-line distance.
 		return Math.abs(ab.cross(ac)) / ab.getMagnitude();
 	}
+
+	/** Test if a point is closer to segment than either endpoint */
+	public boolean isWithin(double cx, double cy) {
+		// If the dot product of ab and bc is greater than zero,
+		// then the nearest point on the segment is b.
+		Vector2D ab = new Vector2D(bx - ax, by - ay);
+		Vector2D bc = new Vector2D(cx - bx, cy - by);
+		if(ab.dot(bc) > 0)
+			return false;
+		// If the dot product of ba and ac is greater than zero,
+		// then the nearest point on the segment is a.
+		Vector2D ba = new Vector2D(ax - bx, ay - by);
+		Vector2D ac = new Vector2D(cx - ax, cy - ay);
+		if(ba.dot(ac) > 0)
+			return false;
+		return true;
+	}
 }

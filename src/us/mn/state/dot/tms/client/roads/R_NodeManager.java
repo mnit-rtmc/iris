@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -436,6 +437,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		for(R_Node n: c.getNodes()) {
 			if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
 				continue;
+			if(n.getTransition() ==
+			   R_NodeTransition.COMMON.ordinal())
+			{
+				n_prev = null;
+				continue;
+			}
 			if(n_prev != null) {
 				double m = calcDistance(n_prev, n, east, north);
 				if(m < n_meters) {
@@ -463,7 +470,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int x1 = GeoLocHelper.getTrueEasting(l1);
 		int y1 = GeoLocHelper.getTrueNorthing(l1);
 		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
-		return seg.distanceTo(e, n);
+		if(seg.isWithin(e, n))
+			return seg.distanceTo(e, n);
+		else
+			return Double.POSITIVE_INFINITY;
 	}
 
 	/** Create a GeoLoc projected onto the line between two nodes */
