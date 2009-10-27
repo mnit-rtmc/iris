@@ -22,16 +22,16 @@ import us.mn.state.dot.tms.GeoLocHelper;
  *
  * @author Douglas Lau
  */
-public class Vector {
+public class Vector2D {
 
 	/** Get the vector to a location from the origin */
-	static public Vector create(GeoLoc loc) {
+	static public Vector2D create(GeoLoc loc) {
 		if(loc != null) {
 			int x = GeoLocHelper.getTrueEasting(loc);
 			int y = GeoLocHelper.getTrueNorthing(loc);
-			return new Vector(x, y);
+			return new Vector2D(x, y);
 		} else
-			return new Vector(0, 0);
+			return new Vector2D(0, 0);
 	}
 
 	/** X-coordinate */
@@ -41,7 +41,7 @@ public class Vector {
 	public final double y;
 
 	/** Create a new vector */
-	public Vector(double x, double y) {
+	public Vector2D(double x, double y) {
 		this.x = x;
 		this.y = y;
 	}
@@ -61,29 +61,29 @@ public class Vector {
 	}
 
 	/** Add a vector to this one */
-	public Vector add(Vector other) {
-		return new Vector(x + other.x, y + other.y);
+	public Vector2D add(Vector2D other) {
+		return new Vector2D(x + other.x, y + other.y);
 	}
 
 	/** Subtract another vector from this one */
-	public Vector subtract(Vector other) {
-		return new Vector(x - other.x, y - other.y);
+	public Vector2D subtract(Vector2D other) {
+		return new Vector2D(x - other.x, y - other.y);
 	}
 
 	/** Calculate the dot product with another vector */
-	public double dot(Vector other) {
+	public double dot(Vector2D other) {
 		return x * other.x + y * other.y;
 	}
 
 	/** Calculate the cross product with another vector.  This returns
 	 * the magnitude of the 3D cross product, since cross product only
 	 * makes sense for 3D vectors. */
-	public double cross(Vector other) {
+	public double cross(Vector2D other) {
 		return x * other.y - y * other.x;
 	}
 
 	/** Get a perpendicular vector */
-	public Vector perpendicular() {
-		return new Vector(y, -x);
+	public Vector2D perpendicular() {
+		return new Vector2D(y, -x);
 	}
 }

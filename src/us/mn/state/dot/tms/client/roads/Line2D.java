@@ -43,34 +43,34 @@ public class Line2D {
 
 	/** Calculate the distance to a given point */
 	public double distanceTo(double cx, double cy) {
-		Vector ab = vector();
-		Vector ac = new Vector(cx - ax, cy - ay);
+		Vector2D ab = vector();
+		Vector2D ac = new Vector2D(cx - ax, cy - ay);
 		return Math.abs(ab.cross(ac)) / ab.getMagnitude();
 	}
 
 	/** Get the direction vector */
-	protected Vector vector() {
-		return new Vector(bx - ax, by - ay);
+	protected Vector2D vector() {
+		return new Vector2D(bx - ax, by - ay);
 	}
 
 	/** Find the intersection point with another line */
-	public Vector intersect(Line2D other) {
-		Vector ab = vector();
-		Vector cd = other.vector();
+	public Vector2D intersect(Line2D other) {
+		Vector2D ab = vector();
+		Vector2D cd = other.vector();
 		double den = ab.cross(cd);
 		if(den == 0)
 			return null;
-		Vector ca = new Vector(other.ax - ax, other.ay - ay);
+		Vector2D ca = new Vector2D(other.ax - ax, other.ay - ay);
 		double num = ab.cross(ca);
 		double u = num / den;
 		double x = ax + u * (bx - ax);
 		double y = ay + u * (by - ay);
-		return new Vector(x, y);
+		return new Vector2D(x, y);
 	}
 
 	/** Project a point onto the line */
-	public Vector project(double x, double y) {
-		Vector perp = vector().perpendicular();
+	public Vector2D project(double x, double y) {
+		Vector2D perp = vector().perpendicular();
 		double x1 = x + perp.x;
 		double y1 = y + perp.y;
 		return intersect(new Line2D(x, y, x1, y1));

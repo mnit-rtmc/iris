@@ -45,14 +45,14 @@ public class LineSegment2D {
 	public double distanceTo(double cx, double cy) {
 		// If the dot product of ab and bc is greater than zero,
 		// then the nearest point on the segment is b.
-		Vector ab = new Vector(bx - ax, by - ay);
-		Vector bc = new Vector(cx - bx, cy - by);
+		Vector2D ab = new Vector2D(bx - ax, by - ay);
+		Vector2D bc = new Vector2D(cx - bx, cy - by);
 		if(ab.dot(bc) > 0)
 			return bc.getMagnitude();
 		// If the dot product of ba and ac is greater than zero,
 		// then the nearest point on the segment is a.
-		Vector ba = new Vector(ax - bx, ay - by);
-		Vector ac = new Vector(cx - ax, cy - ay);
+		Vector2D ba = new Vector2D(ax - bx, ay - by);
+		Vector2D ac = new Vector2D(cx - ax, cy - ay);
 		if(ba.dot(ac) > 0)
 			return ac.getMagnitude();
 		// Otherwise, the nearest point on the segment is between

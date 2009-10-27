@@ -165,9 +165,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		MapGeoLoc loc = null;
 		for(MapGeoLoc loc_b: locs) {
 			if(loc_a != null) {
-				Vector va = Vector.create(loc_a.getGeoLoc());
-				Vector vb = Vector.create(loc_b.getGeoLoc());
-				Vector a = vb.subtract(va);
+				Vector2D va = Vector2D.create(
+					loc_a.getGeoLoc());
+				Vector2D vb = Vector2D.create(
+					loc_b.getGeoLoc());
+				Vector2D a = vb.subtract(va);
 				double t = a.getAngle();
 				if(!Double.isInfinite(t) && !Double.isNaN(t))
 					loc.setTangent(t - NORTH_ANGLE);
@@ -475,7 +477,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int x1 = GeoLocHelper.getTrueEasting(l1);
 		int y1 = GeoLocHelper.getTrueNorthing(l1);
 		Line2D line = new Line2D(x0, y0, x1, y1);
-		Vector pnt = line.project(e, n);
+		Vector2D pnt = line.project(e, n);
 		return new ClientGeoLoc(l0.getFreeway(), l0.getFreeDir(),
 			(int)pnt.x, (int)pnt.y);
 	}
