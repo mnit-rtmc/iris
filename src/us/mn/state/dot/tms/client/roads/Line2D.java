@@ -60,8 +60,8 @@ public class Line2D {
 		double den = ab.cross(cd);
 		if(den == 0)
 			return null;
-		Vector2D ca = new Vector2D(other.ax - ax, other.ay - ay);
-		double num = ab.cross(ca);
+		Vector2D ca = new Vector2D(ax - other.ax, ay - other.ay);
+		double num = cd.cross(ca);
 		double u = num / den;
 		double x = ax + u * (bx - ax);
 		double y = ay + u * (by - ay);
