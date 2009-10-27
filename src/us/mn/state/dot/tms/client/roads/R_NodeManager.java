@@ -435,11 +435,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		R_Node n_prev = null;
 		double n_meters = Double.POSITIVE_INFINITY;
 		for(R_Node n: c.getNodes()) {
-			if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
-				continue;
-			if(n.getTransition() ==
-			   R_NodeTransition.COMMON.ordinal())
-			{
+			if(isContinuityBreak(n)) {
 				n_prev = null;
 				continue;
 			}
@@ -457,6 +453,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return createGeoLoc(n0, n1, east, north);
 		else
 			return null;
+	}
+
+	/** Check if a given node is a continuity break */
+	protected boolean isContinuityBreak(R_Node n) {
+		if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
+			return true;
+		if(n.getTransition() == R_NodeTransition.COMMON.ordinal())
+			return true;
+		return false;
 	}
 
 	/** Calculate the distance from a point to the given line segment */
