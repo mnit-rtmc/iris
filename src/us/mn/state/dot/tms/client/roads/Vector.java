@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2009  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ public class Vector {
 	}
 
 	/** X-coordinate */
-	protected final double x;
+	public final double x;
 
 	/** Y-coordinate */
-	protected final double y;
+	public final double y;
 
 	/** Create a new vector */
 	public Vector(double x, double y) {
@@ -60,8 +60,30 @@ public class Vector {
 			return -a;
 	}
 
+	/** Add a vector to this one */
+	public Vector add(Vector other) {
+		return new Vector(x + other.x, y + other.y);
+	}
+
 	/** Subtract another vector from this one */
 	public Vector subtract(Vector other) {
 		return new Vector(x - other.x, y - other.y);
+	}
+
+	/** Calculate the dot product with another vector */
+	public double dot(Vector other) {
+		return x * other.x + y * other.y;
+	}
+
+	/** Calculate the cross product with another vector.  This returns
+	 * the magnitude of the 3D cross product, since cross product only
+	 * makes sense for 3D vectors. */
+	public double cross(Vector other) {
+		return x * other.y - y * other.x;
+	}
+
+	/** Get a perpendicular vector */
+	public Vector perpendicular() {
+		return new Vector(y, -x);
 	}
 }

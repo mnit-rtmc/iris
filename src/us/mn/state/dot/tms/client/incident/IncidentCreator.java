@@ -25,15 +25,11 @@ import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ChangeJob;
-import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeHelper;
-import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
@@ -153,51 +149,18 @@ public class IncidentCreator extends JPanel {
 	protected void createIncident(final EventType et, int easting,
 		int northing)
 	{
-		R_Node node = findNearest(easting, northing);
-		if(node == null)
+		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing);
+		if(loc == null)
 			return;
-		GeoLoc loc = node.getGeoLoc();
 		Road road = loc.getFreeway();
 		short dir = loc.getFreeDir();
-		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		int n_lanes = cb.getLaneCount(easting, northing);
-		// FIXME: easting and northing should be a point on segment
-		// between nearest two r_node locations.
 		int east = GeoLocHelper.getTrueEasting(loc);
 		int north = GeoLocHelper.getTrueNorthing(loc);
+		CorridorBase cb = r_node_manager.lookupCorridor(loc);
+		int n_lanes = cb.getLaneCount(east, north);
 		ClientIncident ci = new ClientIncident(et.id, road, dir,
 			east, north, createImpact(n_lanes));
 		selectionModel.setSelected(ci);
-	}
-
-	/** Find the nearest node to the given location */
-	public R_Node findNearest(int easting, int northing) {
-		R_NodeChecker rnc = new R_NodeChecker(easting, northing);
-		R_NodeHelper.find(rnc);
-		return rnc.nearest;
-	}
-
-	/** Helper class to locate the nearest r_node */
-	static protected class R_NodeChecker implements Checker<R_Node> {
-		protected final int easting;
-		protected final int northing;
-		protected R_Node nearest = null;
-		protected double n_meters = 0;
-		protected R_NodeChecker(int e, int n) {
-			easting = e;
-			northing = n;
-		}
-		public boolean check(R_Node n) {
-			if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
-				return false;
-			double m = GeoLocHelper.metersTo(n.getGeoLoc(),
-				easting, northing);
-			if(nearest == null || m < n_meters) {
-				nearest = n;
-				n_meters = m;
-			}
-			return false;
-		}
 	}
 
 	/** Create an impact string for the given number of lanes */

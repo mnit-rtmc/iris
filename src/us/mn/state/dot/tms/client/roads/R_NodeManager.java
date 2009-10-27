@@ -403,4 +403,80 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected GeoLoc getGeoLoc(R_Node proxy) {
 		return proxy.getGeoLoc();
 	}
+
+	/** Create a GeoLoc snapped to nearest corridor */
+	public GeoLoc createGeoLoc(int easting, int northing) {
+		GeoLoc loc = null;
+		double distance = Double.POSITIVE_INFINITY;
+		for(CorridorBase c: corridors.values()) {
+			GeoLoc l = createGeoLoc(c, easting, northing);
+			if(l == null)
+				continue;
+			double m = GeoLocHelper.metersTo(l, easting, northing);
+			if(m < distance) {
+				loc = l;
+				distance = m;
+			}
+		}
+		return loc;
+	}
+
+	/** Create the nearest GeoLoc for the given corridor.
+	 * @param c Corridor to search.
+	 * @param east Easting of selected point.
+	 * @param north Northing of selected point.
+	 * @return GeoLoc snapped to corridor, or null if not found. */
+	protected GeoLoc createGeoLoc(CorridorBase c, int east, int north) {
+		R_Node n0 = null;
+		R_Node n1 = null;
+		R_Node n_prev = null;
+		double n_meters = Double.POSITIVE_INFINITY;
+		for(R_Node n: c.getNodes()) {
+			if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
+				continue;
+			if(n_prev != null) {
+				double m = calcDistance(n_prev, n, east, north);
+				if(m < n_meters) {
+					n0 = n_prev;
+					n1 = n;
+					n_meters = m;
+				}
+			}
+			n_prev = n;
+		}
+		if(n0 != null)
+			return createGeoLoc(n0, n1, east, north);
+		else
+			return null;
+	}
+
+	/** Calculate the distance from a point to the given line segment */
+	protected double calcDistance(R_Node n0, R_Node n1, int e, int n) {
+		GeoLoc l0 = n0.getGeoLoc();
+		GeoLoc l1 = n1.getGeoLoc();
+		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
+			return Double.POSITIVE_INFINITY;
+		int x0 = GeoLocHelper.getTrueEasting(l0);
+		int y0 = GeoLocHelper.getTrueNorthing(l0);
+		int x1 = GeoLocHelper.getTrueEasting(l1);
+		int y1 = GeoLocHelper.getTrueNorthing(l1);
+		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
+		return seg.distanceTo(e, n);
+	}
+
+	/** Create a GeoLoc projected onto the line between two nodes */
+	protected GeoLoc createGeoLoc(R_Node n0, R_Node n1, int e, int n) {
+		GeoLoc l0 = n0.getGeoLoc();
+		GeoLoc l1 = n1.getGeoLoc();
+		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
+			return null;
+		int x0 = GeoLocHelper.getTrueEasting(l0);
+		int y0 = GeoLocHelper.getTrueNorthing(l0);
+		int x1 = GeoLocHelper.getTrueEasting(l1);
+		int y1 = GeoLocHelper.getTrueNorthing(l1);
+		Line2D line = new Line2D(x0, y0, x1, y1);
+		Vector pnt = line.project(e, n);
+		return new ClientGeoLoc(l0.getFreeway(), l0.getFreeDir(),
+			(int)pnt.x, (int)pnt.y);
+	}
 }
