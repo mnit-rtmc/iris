@@ -46,6 +46,20 @@ public class Vector2D {
 		this.y = y;
 	}
 
+	/** Get the string representation of the vector */
+	public String toString() {
+		return "" + x + "," + y;
+	}
+
+	/** Test for equality */
+	public boolean equals(Object o) {
+		if(o instanceof Vector2D) {
+			Vector2D other = (Vector2D)o;
+			return x == other.x && y == other.y;
+		} else
+			return false;
+	}
+
 	/** Get the magnitude (length) */
 	public double getMagnitude() {
 		return Math.hypot(x, y);
