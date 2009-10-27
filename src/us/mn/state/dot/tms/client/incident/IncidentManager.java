@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
@@ -119,6 +120,16 @@ public class IncidentManager extends ProxyManager<Incident> {
 		p.addSeparator();
 		// FIXME: add menu item to clear incident
 		return p;
+	}
+
+	/** Find the map geo location for a proxy */
+	public MapGeoLoc findGeoLoc(Incident proxy) {
+		if(proxy instanceof ClientIncident) {
+			MapGeoLoc loc = new MapGeoLoc(getGeoLoc(proxy));
+			loc.setShape(getShape(proxy, 10));
+			return loc;
+		} else
+			return super.findGeoLoc(proxy);
 	}
 
 	/** Find the map geo location for a proxy */
