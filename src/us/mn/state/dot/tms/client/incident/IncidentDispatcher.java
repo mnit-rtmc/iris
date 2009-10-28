@@ -195,6 +195,7 @@ public class IncidentDispatcher extends JPanel
 			cache.createObject(name, attrs);
 			// FIXME: wait for object creation and select it
 			selectionModel.clearSelection();
+			manager.removeIncident(inc.getName());
 		}
 	}
 

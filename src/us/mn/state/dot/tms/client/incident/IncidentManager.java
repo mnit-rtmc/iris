@@ -135,6 +135,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return loc;
 	}
 
+	/** Remove a map geo location for an incident */
+	public void removeIncident(String name) {
+		locations.remove(name);
+	}
+
 	/** Find the map geo location for a proxy */
 	protected GeoLoc getGeoLoc(Incident proxy) {
 		return new IncidentLoc(proxy);
