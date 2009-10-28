@@ -36,9 +36,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class IncidentManager extends ProxyManager<Incident> {
 
-	/** Incident Map object shape */
-	static protected final Shape SHAPE = new IncidentMarker();
-
 	/** Name of crash style */
 	static public final String STYLE_CRASH = "Crash";
 
@@ -81,8 +78,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Create a styled theme for incidents */
 	protected StyledTheme createTheme() {
-		ProxyTheme<Incident> theme = new ProxyTheme<Incident>(this,
-			getProxyType(), SHAPE);
+		IncidentTheme theme = new IncidentTheme(this);
 		theme.addStyle(STYLE_CRASH, new Color(255, 128, 128));
 		theme.addStyle(STYLE_STALL, new Color(255, 128, 255));
 		theme.addStyle(STYLE_DEBRIS, new Color(255, 255, 128));
