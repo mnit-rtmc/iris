@@ -300,6 +300,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		return box;
 	}
 
+	/** Can the DMS be updated? */
+	public boolean canUpdate(DMS proxy) {
+		String name = proxy.getName();
+		return name != null && namespace.canUpdate(user,
+			new Name(DMS.SONAR_TYPE, name));
+	}
+
 	/** If enabled, prompt the user with a send confirmation.
 	 *  @return True to send the message else false to cancel. */
 	protected boolean sendConfirm() {
@@ -428,9 +435,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer.setEnabled(true);
 		durationCmb.setEnabled(true);
 		durationCmb.setSelectedIndex(0);
-		sendBtn.setEnabled(true);
-		blankBtn.setEnabled(true);
-		queryBtn.setEnabled(true);
+		sendBtn.setEnabled(canUpdate(watching));
+		blankBtn.setEnabled(canUpdate(watching));
+		queryBtn.setEnabled(canUpdate(watching));
 		qlibCmb.setEnabled(true);
 		updateTextQLibCBox(true);
 		selectPreview(false);
