@@ -28,11 +28,15 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.Road;
@@ -241,6 +245,7 @@ public class IncidentDispatcher extends JPanel
 	protected void disableWidgets() {
 		clearEventType();
 		location_txt.setText("");
+		camera_txt.setText("");
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
@@ -266,6 +271,11 @@ public class IncidentDispatcher extends JPanel
 			short dir = inc.getDir();
 			String loc = GeoLocHelper.getCorridorName(road, dir);
 			location_txt.setText(loc);
+			Camera cam = findNearestCamera(inc);
+			if(cam != null)
+				camera_txt.setText(cam.getName());
+			else
+				camera_txt.setText("");
 		}
 		if(a == null || a.equals("impact")) {
 			impact_pnl.setImpact(inc.getImpact());
@@ -290,5 +300,33 @@ public class IncidentDispatcher extends JPanel
 	protected void clearEventType() {
 		type_lbl.setText("");
 		type_lbl.setIcon(null);
+	}
+
+	/** Find the nearest camera to an incident */
+	protected Camera findNearestCamera(Incident inc) {
+		CameraFinder finder = new CameraFinder(inc);
+		CameraHelper.find(finder);
+		return finder.camera;
+	}
+
+	/** Inner class to find the camera nearest to an incident */
+	static protected class CameraFinder implements Checker<Camera> {
+		protected final int easting;
+		protected final int northing;
+		protected double dist = Double.POSITIVE_INFINITY;
+		protected Camera camera = null;
+		protected CameraFinder(Incident inc) {
+			easting = inc.getEasting();
+			northing = inc.getNorthing();
+		}
+		public boolean check(Camera cam) {
+			GeoLoc loc = cam.getGeoLoc();
+			double d = GeoLocHelper.metersTo(loc, easting,northing);
+			if(d < dist) {
+				dist = d;
+				camera = cam;
+			}
+			return false;
+		}
 	}
 }
