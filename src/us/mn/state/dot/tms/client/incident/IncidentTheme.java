@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.incident;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -36,10 +36,28 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 		super(man, man.getProxyType(), SHAPE);
 	}
 
+	/** Get an appropriate style for the given map object */
+	public Style getStyle(MapObject mo) {
+		if(mo instanceof IncidentGeoLoc) {
+			IncidentGeoLoc loc = (IncidentGeoLoc)mo;
+			return getStyle(loc.getIncident());
+		}
+		return dstyle;
+	}
+
+	/** Draw a map object */
+	public void draw(Graphics2D g, MapObject mo, float scale) {
+		if(mo instanceof IncidentGeoLoc) {
+			IncidentGeoLoc loc = (IncidentGeoLoc)mo;
+			loc.setShape(getShape(scale));
+		}
+		super.draw(g, mo, scale);
+	}
+
 	/** Draw a selected map object */
 	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
-		if(mo instanceof MapGeoLoc) {
-			MapGeoLoc loc = (MapGeoLoc)mo;
+		if(mo instanceof IncidentGeoLoc) {
+			IncidentGeoLoc loc = (IncidentGeoLoc)mo;
 			loc.setShape(getShape(scale));
 		}
 		super.drawSelected(g, mo, scale);

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
@@ -57,6 +58,10 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** User session */
 	protected final Session session;
 
+	/** Location mapping */
+	protected final HashMap<String, IncidentGeoLoc> locations =
+		new HashMap<String, IncidentGeoLoc>();
+
 	/** Create a new incident manager */
 	public IncidentManager(Session s, TypeCache<Incident> c,
 		GeoLocManager lm)
@@ -79,11 +84,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a styled theme for incidents */
 	protected StyledTheme createTheme() {
 		IncidentTheme theme = new IncidentTheme(this);
+		theme.addStyle(STYLE_CLEARED, new Color(128, 255, 128));
 		theme.addStyle(STYLE_CRASH, new Color(255, 128, 128));
 		theme.addStyle(STYLE_STALL, new Color(255, 128, 255));
 		theme.addStyle(STYLE_DEBRIS, new Color(255, 255, 128));
 		theme.addStyle(STYLE_ROADWORK, new Color(255, 208, 128));
-		theme.addStyle(STYLE_CLEARED, new Color(128, 255, 128));
 		theme.addStyle(STYLE_ALL);
 		return theme;
 	}
@@ -120,13 +125,14 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(Incident proxy) {
-		if(proxy instanceof ClientIncident) {
-			MapGeoLoc loc = new MapGeoLoc(getGeoLoc(proxy));
-			loc.setShape(getShape(proxy, 10));
-			loc_manager.setTangentAngle(loc);
-			return loc;
-		} else
-			return super.findGeoLoc(proxy);
+		String name = proxy.getName();
+		if(locations.containsKey(name))
+			return locations.get(name);
+		IncidentGeoLoc loc = new IncidentGeoLoc(proxy,
+			getGeoLoc(proxy));
+		loc_manager.setTangentAngle(loc);
+		locations.put(name, loc);
+		return loc;
 	}
 
 	/** Find the map geo location for a proxy */
