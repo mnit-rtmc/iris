@@ -123,6 +123,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 		if(proxy instanceof ClientIncident) {
 			MapGeoLoc loc = new MapGeoLoc(getGeoLoc(proxy));
 			loc.setShape(getShape(proxy, 10));
+			loc_manager.setTangentAngle(loc);
 			return loc;
 		} else
 			return super.findGeoLoc(proxy);
