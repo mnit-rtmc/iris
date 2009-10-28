@@ -25,11 +25,12 @@ import us.mn.state.dot.tms.Road;
 public class ClientGeoLoc implements GeoLoc {
 
 	/** Create an location */
-	public ClientGeoLoc(Road free, short fd, int e, int n) {
+	public ClientGeoLoc(Road free, short fd, int e, int n, double d) {
 		freeway = free;
 		free_dir = fd;
 		easting = e;
 		northing = n;
+		distance = d;
 	}
 
 	/** Get the type name */
@@ -147,5 +148,13 @@ public class ClientGeoLoc implements GeoLoc {
 	/** Get the UTM Northing offset */
 	public Integer getNorthOffset() {
 		return null;
+	}
+
+	/** Distance from selected point */
+	protected final double distance;
+
+	/** Get distance from selected point */
+	public double getDistance() {
+		return distance;
 	}
 }

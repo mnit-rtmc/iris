@@ -412,13 +412,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc loc = null;
 		double distance = Double.POSITIVE_INFINITY;
 		for(CorridorBase c: corridors.values()) {
-			GeoLoc l = createGeoLoc(c, easting, northing);
-			if(l == null)
-				continue;
-			double m = GeoLocHelper.metersTo(l, easting, northing);
-			if(m < distance) {
+			ClientGeoLoc l = createGeoLoc(c, easting, northing);
+			if(l != null && l.getDistance() < distance) {
 				loc = l;
-				distance = m;
+				distance = l.getDistance();
 			}
 		}
 		return loc;
@@ -428,8 +425,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	 * @param c Corridor to search.
 	 * @param east Easting of selected point.
 	 * @param north Northing of selected point.
-	 * @return GeoLoc snapped to corridor, or null if not found. */
-	protected GeoLoc createGeoLoc(CorridorBase c, int east, int north) {
+	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
+	protected ClientGeoLoc createGeoLoc(CorridorBase c, int east,
+		int north)
+	{
 		R_Node n0 = null;
 		R_Node n1 = null;
 		R_Node n_prev = null;
@@ -450,7 +449,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			n_prev = n;
 		}
 		if(n0 != null)
-			return createGeoLoc(n0, n1, east, north);
+			return createGeoLoc(n0, n1, east, north, n_meters);
 		else
 			return null;
 	}
@@ -464,7 +463,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return false;
 	}
 
-	/** Calculate the distance from a point to the given line segment */
+	/** Calculate the distance from a point to the given line segment.
+	 * @param n0 First r_node
+	 * @param n1 Second (adjacent) r_node.
+	 * @param e Selected Easting.
+	 * @param n Selected Northing.
+	 * @return Distance (meters) from segment to selected point. */
 	protected double calcDistance(R_Node n0, R_Node n1, int e, int n) {
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
@@ -475,14 +479,19 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int x1 = GeoLocHelper.getTrueEasting(l1);
 		int y1 = GeoLocHelper.getTrueNorthing(l1);
 		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
-		if(seg.isWithin(e, n))
-			return seg.distanceTo(e, n);
-		else
-			return Double.POSITIVE_INFINITY;
+		return seg.distanceTo(e, n);
 	}
 
-	/** Create a GeoLoc projected onto the line between two nodes */
-	protected GeoLoc createGeoLoc(R_Node n0, R_Node n1, int e, int n) {
+	/** Create a GeoLoc projected onto the line between two nodes.
+	 * @param n0 First node.
+	 * @param n1 Second (adjacent) node.
+	 * @param e Selected Easting.
+	 * @param n Selected Northing.
+	 * @param d Distance (meters).
+	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
+	protected ClientGeoLoc createGeoLoc(R_Node n0, R_Node n1, int e, int n,
+		double dist)
+	{
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
 		if(GeoLocHelper.isNull(l0) || GeoLocHelper.isNull(l1))
@@ -494,6 +503,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		Line2D line = new Line2D(x0, y0, x1, y1);
 		Vector2D pnt = line.project(e, n);
 		return new ClientGeoLoc(l0.getFreeway(), l0.getFreeDir(),
-			(int)pnt.x, (int)pnt.y);
+			(int)pnt.x, (int)pnt.y, dist);
 	}
 }
