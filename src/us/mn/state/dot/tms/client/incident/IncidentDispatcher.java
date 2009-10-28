@@ -269,11 +269,10 @@ public class IncidentDispatcher extends JPanel
 
 	/** Update the selected object(s) */
 	protected void updateSelected() {
-		List<Incident> selected = selectionModel.getSelected();
-		if(selected.size() == 1) {
-			for(Incident inc: selected)
-				setSelected(inc);
-		} else
+		Incident inc = getSingleSelection();
+		if(inc != null)
+			setSelected(inc);
+		else
 			clearSelected();
 	}
 
