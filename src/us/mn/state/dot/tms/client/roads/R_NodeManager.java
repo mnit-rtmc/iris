@@ -500,8 +500,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		int y0 = GeoLocHelper.getTrueNorthing(l0);
 		int x1 = GeoLocHelper.getTrueEasting(l1);
 		int y1 = GeoLocHelper.getTrueNorthing(l1);
-		Line2D line = new Line2D(x0, y0, x1, y1);
-		Vector2D pnt = line.project(e, n);
+		LineSegment2D seg = new LineSegment2D(x0, y0, x1, y1);
+		Vector2D pnt = seg.snap(e, n);
 		return new ClientGeoLoc(l0.getFreeway(), l0.getFreeDir(),
 			(int)pnt.x, (int)pnt.y, dist);
 	}

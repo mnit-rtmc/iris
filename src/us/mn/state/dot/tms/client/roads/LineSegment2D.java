@@ -60,20 +60,23 @@ public class LineSegment2D {
 		return Math.abs(ab.cross(ac)) / ab.getMagnitude();
 	}
 
-	/** Test if a point is closer to segment than either endpoint */
-	public boolean isWithin(double cx, double cy) {
+	/** Snap a point onto the line segment */
+	public Vector2D snap(double cx, double cy) {
 		// If the dot product of ab and bc is greater than zero,
 		// then the nearest point on the segment is b.
 		Vector2D ab = new Vector2D(bx - ax, by - ay);
 		Vector2D bc = new Vector2D(cx - bx, cy - by);
 		if(ab.dot(bc) > 0)
-			return false;
+			return new Vector2D(bx, by);
 		// If the dot product of ba and ac is greater than zero,
 		// then the nearest point on the segment is a.
 		Vector2D ba = new Vector2D(ax - bx, ay - by);
 		Vector2D ac = new Vector2D(cx - ax, cy - ay);
 		if(ba.dot(ac) > 0)
-			return false;
-		return true;
+			return new Vector2D(ax, ay);
+		// The nearest point is somewhere between a and b, so just
+		// project c onto the line fromed by a and b.
+		Line2D line = new Line2D(ax, ay, bx, by);
+		return line.project(cx, cy);
 	}
 }
