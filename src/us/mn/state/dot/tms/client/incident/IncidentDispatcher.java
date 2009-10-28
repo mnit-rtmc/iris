@@ -239,8 +239,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		type_lbl.setText("");
-		type_lbl.setIcon(null);
+		clearEventType();
 		location_txt.setText("");
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
@@ -259,15 +258,10 @@ public class IncidentDispatcher extends JPanel
 	protected void updateAttribute(Incident inc, String a) {
 		if(a == null || a.equals("event_type")) {
 			EventType et = EventType.fromId(inc.getEventType());
-			if(et != null) {
-				String sty = manager.getStyle(et);
-				if(sty != null) {
-					type_lbl.setText(sty);
-					Symbol sym = manager.getTheme().getSymbol(sty);
-					if(sym != null)
-						type_lbl.setIcon(sym.getLegend());
-				}
-			}
+			if(et != null)
+				updateEventType(et);
+			else
+				clearEventType();
 		}
 		if(a == null || a.equals("road") || a.equals("dir")) {
 			Road road = inc.getRoad();
@@ -280,4 +274,23 @@ public class IncidentDispatcher extends JPanel
 		}
 	}
 
+	/** Update the event type */
+	protected void updateEventType(EventType et) {
+		String sty = manager.getStyle(et);
+		if(sty != null) {
+			type_lbl.setText(sty);
+			Symbol sym = manager.getTheme().getSymbol(sty);
+			if(sym != null)
+				type_lbl.setIcon(sym.getLegend());
+			else
+				type_lbl.setIcon(null);
+		} else
+			clearEventType();
+	}
+
+	/** Clear the event type */
+	protected void clearEventType() {
+		type_lbl.setText("");
+		type_lbl.setIcon(null);
+	}
 }
