@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.client.incident;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -28,7 +30,9 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -56,6 +60,10 @@ public class IncidentDispatcher extends JPanel
 {
 	/** Font for "L" and "R" labels */
 	static protected final Font FONT = new Font(null, Font.BOLD, 24);
+
+	/** Formatter for incident names */
+	static protected final SimpleDateFormat NAME_FMT =
+		new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
 	/** SONAR namespace */
 	protected final Namespace namespace;
@@ -109,6 +117,7 @@ public class IncidentDispatcher extends JPanel
 		selectionModel.addProxySelectionListener(this);
 		add(createMainPanel());
 		clearSelected();
+		createButtonJobs();
 	}
 
 	/** Create the main panel */
@@ -147,6 +156,42 @@ public class IncidentDispatcher extends JPanel
 		JLabel label = new JLabel(t);
 		label.setFont(FONT);
 		return label;
+	}
+
+	/** Create jobs for button press events */
+	protected void createButtonJobs() {
+		new ActionJob(log_btn) {
+			public void perform() {
+				Incident inc = getSingleSelection();
+				if(inc instanceof ClientIncident)
+					create((ClientIncident)inc);
+			}
+		};
+	}
+
+	/** Create a new incident */
+	protected void create(ClientIncident inc) {
+		String name = createUniqueIncidentName();
+		if(canAdd(name)) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("event_type", inc.getEventType());
+			attrs.put("road", inc.getRoad());
+			attrs.put("dir", inc.getDir());
+			attrs.put("easting", inc.getEasting());
+			attrs.put("northing", inc.getNorthing());
+			attrs.put("impact", impact_pnl.getImpact());
+			attrs.put("cleared", false);
+			cache.createObject(name, attrs);
+			// FIXME: wait for object creation and select it
+			selectionModel.clearSelection();
+		}
+	}
+
+	/** Create a unique incident name */
+	protected String createUniqueIncidentName() {
+		String name = NAME_FMT.format(System.currentTimeMillis());
+		return name.substring(0, 16);
 	}
 
 	/** A new proxy has been added */
@@ -328,5 +373,12 @@ public class IncidentDispatcher extends JPanel
 			}
 			return false;
 		}
+	}
+
+	/** Check if the user can add the named incident */
+	public boolean canAdd(String oname) {
+		return oname != null &&
+		       namespace.canAdd(user, new Name(Incident.SONAR_TYPE,
+			oname));
 	}
 }
