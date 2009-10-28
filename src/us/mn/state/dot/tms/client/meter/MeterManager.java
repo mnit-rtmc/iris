@@ -98,7 +98,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Test if a meter is metering */
 	static protected boolean isMetering(RampMeter proxy) {
-		return proxy.getRate() != null;
+		return proxy.getRate() != null &&
+		       !isFailed(proxy);
 	}
 
 	/** Test if a meter has a queue */
