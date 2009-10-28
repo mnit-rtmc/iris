@@ -42,7 +42,7 @@ public class CameraTab extends MapTab {
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
 			String name = ls.getLayer().getName();
-			if(name.equals("Freeway"))
+			if(name.equals(manager.getProxyType()))
 				map_model.setHomeLayer(ls);
 		}
 		add(new CameraViewer(manager, props, logger, st, user),

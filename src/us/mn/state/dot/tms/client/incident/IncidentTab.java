@@ -54,7 +54,8 @@ public class IncidentTab extends MapTab {
 		manager = m;
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
-			if(ls.getLayer().getName().equals(m.getProxyType()))
+			String name = ls.getLayer().getName();
+			if(name.equals("Camera"))
 				map_model.setHomeLayer(ls);
 		}
 		creator = new IncidentCreator(manager.getTheme(),

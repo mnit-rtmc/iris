@@ -47,7 +47,7 @@ public class DMSTab extends MapTab {
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
 			String name = ls.getLayer().getName();
-			if(name.equals(I18N.get("dms.abbreviation")))
+			if(name.equals(manager.getProxyType()))
 				map_model.setHomeLayer(ls);
 		}
 		add(dispatcher, BorderLayout.NORTH);
