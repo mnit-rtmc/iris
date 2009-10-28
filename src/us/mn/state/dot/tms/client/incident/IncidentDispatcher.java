@@ -256,14 +256,12 @@ public class IncidentDispatcher extends JPanel
 
 	/** Update one attribute on the form */
 	protected void updateAttribute(Incident inc, String a) {
-		if(a == null || a.equals("event_type")) {
+		if(a == null) {
 			EventType et = EventType.fromId(inc.getEventType());
 			if(et != null)
 				updateEventType(et);
 			else
 				clearEventType();
-		}
-		if(a == null || a.equals("road") || a.equals("dir")) {
 			Road road = inc.getRoad();
 			short dir = inc.getDir();
 			String loc = GeoLocHelper.getCorridorName(road, dir);
