@@ -165,6 +165,16 @@ public class IncidentDispatcher extends JPanel
 				Incident inc = getSingleSelection();
 				if(inc instanceof ClientIncident)
 					create((ClientIncident)inc);
+				else if(inc != null)
+					logUpdate(inc);
+			}
+		};
+		new ActionJob(clear_btn) {
+			public void perform() {
+				Incident inc = getSingleSelection();
+				if(inc != null &&
+				   !(inc instanceof ClientIncident))
+					inc.setCleared(clear_btn.isSelected());
 			}
 		};
 	}
@@ -175,7 +185,7 @@ public class IncidentDispatcher extends JPanel
 		if(canAdd(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("event_type", inc.getEventType());
+			attrs.put("event_desc_id", inc.getEventType());
 			attrs.put("road", inc.getRoad());
 			attrs.put("dir", inc.getDir());
 			attrs.put("easting", inc.getEasting());
@@ -186,6 +196,11 @@ public class IncidentDispatcher extends JPanel
 			// FIXME: wait for object creation and select it
 			selectionModel.clearSelection();
 		}
+	}
+
+	/** Update an incident */
+	protected void logUpdate(Incident inc) {
+		inc.setImpact(impact_pnl.getImpact());
 	}
 
 	/** Create a unique incident name */
@@ -267,23 +282,6 @@ public class IncidentDispatcher extends JPanel
 		disableWidgets();
 	}
 
-	/** Set a single selected incident */
-	protected void setSelected(Incident inc) {
-		if(watching != null)
-			cache.ignoreObject(watching);
-		if(inc instanceof ClientIncident)
-			watching = null;
-		else {
-			watching = inc;
-			cache.watchObject(watching);
-		}
-		if(!inc.getCleared()) {
-			updateAttribute(inc, null);
-			enableWidgets(inc);
-		} else
-			disableWidgets();
-	}
-
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
 		clearEventType();
@@ -294,6 +292,20 @@ public class IncidentDispatcher extends JPanel
 		clear_btn.setEnabled(false);
 		clear_btn.setSelected(false);
 		impact_pnl.setImpact("");
+	}
+
+	/** Set a single selected incident */
+	protected void setSelected(Incident inc) {
+		if(watching != null)
+			cache.ignoreObject(watching);
+		if(inc instanceof ClientIncident)
+			watching = null;
+		else {
+			watching = inc;
+			cache.watchObject(watching);
+		}
+		updateAttribute(inc, null);
+		enableWidgets(inc);
 	}
 
 	/** Enable the dispatcher widgets */
