@@ -255,13 +255,11 @@ public class IncidentDispatcher extends JPanel
 	/** Update the selected object(s) */
 	protected void updateSelected() {
 		List<Incident> selected = selectionModel.getSelected();
-		if(selected.size() == 0)
-			clearSelected();
-		else if(selected.size() == 1) {
+		if(selected.size() == 1) {
 			for(Incident inc: selected)
 				setSelected(inc);
 		} else
-			enableWidgets();
+			clearSelected();
 	}
 
 	/** Clear the selection */
@@ -281,7 +279,7 @@ public class IncidentDispatcher extends JPanel
 		}
 		if(!inc.getCleared()) {
 			updateAttribute(inc, null);
-			enableWidgets();
+			enableWidgets(inc);
 		} else
 			disableWidgets();
 	}
@@ -294,14 +292,20 @@ public class IncidentDispatcher extends JPanel
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
+		clear_btn.setSelected(false);
 		impact_pnl.setImpact("");
 	}
 
 	/** Enable the dispatcher widgets */
-	protected void enableWidgets() {
+	protected void enableWidgets(Incident inc) {
 		log_btn.setEnabled(true);
-		deploy_btn.setEnabled(true);
-		clear_btn.setEnabled(true);
+		if(inc instanceof ClientIncident) {
+			deploy_btn.setEnabled(false);
+			clear_btn.setEnabled(false);
+		} else {
+			deploy_btn.setEnabled(true);
+			clear_btn.setEnabled(true);
+		}
 	}
 
 	/** Update one attribute on the form */
@@ -324,6 +328,9 @@ public class IncidentDispatcher extends JPanel
 		}
 		if(a == null || a.equals("impact")) {
 			impact_pnl.setImpact(inc.getImpact());
+		}
+		if(a == null || a.equals("cleared")) {
+			clear_btn.setSelected(inc.getCleared());
 		}
 	}
 
