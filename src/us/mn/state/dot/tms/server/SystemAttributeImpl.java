@@ -20,6 +20,7 @@ import java.util.Map;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.STime;
 
 /**
  * A system attribute is a name mapped to a string value.
@@ -114,7 +115,16 @@ public class SystemAttributeImpl extends BaseObjectImpl
 
 	/** Set the attribute value */
 	public void setValue(String arg_value) {
+		logChange(arg_value);
 		value = arg_value;
+	}
+
+	/** Log system attribute change. */
+	private void logChange(String newval) {
+		if(!value.equals(newval))
+			System.err.println("System attribute changed: name=" +
+				name + ", old=" + value + ", new=" + newval + 
+				", date=" + STime.getCurDateTimeString(true));
 	}
 
 	/** Set the attribute value, doSet is required for 
