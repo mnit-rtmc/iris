@@ -156,5 +156,6 @@ public class MainServer {
 		FLUSH.addJob(new XmlConfigJob());
 		FLUSH.addJob(new XmlConfigJob(1000));
 		FLUSH.addJob(new DmsXmlJob());
+		FLUSH.addJob(new IncidentXmlJob());
 	}
 }

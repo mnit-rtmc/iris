@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,6 +24,8 @@ import java.util.regex.Matcher;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.Direction;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
@@ -237,5 +240,23 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 			return;
 		store.update(this, "cleared", c);
 		setCleared(c);
+	}
+
+	/** Render the incident as xml */
+	public void printXmlElement(PrintWriter out) {
+		out.print("<incident");
+		out.print(XmlWriter.createAttribute("id", getName()));
+		out.print(XmlWriter.createAttribute("event_type",
+			EventType.fromId(event_desc_id)));
+		out.print(XmlWriter.createAttribute("event_date", event_date));
+		out.print(XmlWriter.createAttribute("road", road));
+		out.print(XmlWriter.createAttribute("dir",
+			Direction.DIRECTION[dir]));
+		out.print(XmlWriter.createAttribute("easting", easting));
+		out.print(XmlWriter.createAttribute("northing", northing));
+		out.print(XmlWriter.createAttribute("camera", camera));
+		out.print(XmlWriter.createAttribute("impact", impact));
+		out.print(XmlWriter.createAttribute("cleared", cleared));
+		out.println("/>");
 	}
 }

@@ -51,6 +51,8 @@ abstract public class XmlWriter {
 
 	/** Create an xml attribute */
 	static public String createAttribute(String name, Object value) {
+		if(value == null)
+			return "";
 		StringBuffer sb = new StringBuffer(" ");
 		sb.append(validateElementName(name));
 		sb.append("='");
