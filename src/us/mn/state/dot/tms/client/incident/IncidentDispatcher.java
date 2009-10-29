@@ -20,9 +20,12 @@ import java.awt.Font;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -83,8 +86,8 @@ public class IncidentDispatcher extends JPanel
 	/** Location of incident */
 	protected final JTextField location_txt = FormPanel.createTextField();
 
-	/** Verify camera name textfield */
-	protected final JTextField camera_txt = FormPanel.createTextField();
+	/** Verify camera combo box */
+	protected final JComboBox camera_cbx = new JComboBox();
 
 	/** Impact panel */
 	protected final ImpactPanel impact_pnl = new ImpactPanel();
@@ -128,7 +131,7 @@ public class IncidentDispatcher extends JPanel
 			"Selected Incident"));
 		panel.addRow("Incident Type", type_lbl);
 		panel.addRow("Location", location_txt);
-		panel.addRow("Camera", camera_txt);
+		panel.addRow("Camera", camera_cbx);
 		panel.addRow(buildImpactBox());
 		JPanel btns = new JPanel(new FlowLayout());
 		btns.add(log_btn);
@@ -190,12 +193,22 @@ public class IncidentDispatcher extends JPanel
 			attrs.put("dir", inc.getDir());
 			attrs.put("easting", inc.getEasting());
 			attrs.put("northing", inc.getNorthing());
+			attrs.put("camera", getSelectedCamera());
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
 			cache.createObject(name, attrs);
 			// FIXME: wait for object creation and select it
 			selectionModel.clearSelection();
 		}
+	}
+
+	/** Get the selected camera */
+	protected Object getSelectedCamera() {
+		Object cam = camera_cbx.getSelectedItem();
+		if(cam != null)
+			return cam;
+		else
+			return "";
 	}
 
 	/** Update an incident */
@@ -287,7 +300,8 @@ public class IncidentDispatcher extends JPanel
 	protected void disableWidgets() {
 		clearEventType();
 		location_txt.setText("");
-		camera_txt.setText("");
+		camera_cbx.setSelectedItem(null);
+		camera_cbx.setEnabled(false);
 		log_btn.setEnabled(false);
 		deploy_btn.setEnabled(false);
 		clear_btn.setEnabled(false);
@@ -311,6 +325,7 @@ public class IncidentDispatcher extends JPanel
 
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets(Incident inc) {
+		camera_cbx.setEnabled(true);
 		log_btn.setEnabled(true);
 		if(inc instanceof ClientIncident) {
 			deploy_btn.setEnabled(false);
@@ -333,11 +348,7 @@ public class IncidentDispatcher extends JPanel
 			short dir = inc.getDir();
 			String loc = GeoLocHelper.getCorridorName(road, dir);
 			location_txt.setText(loc);
-			Camera cam = findNearestCamera(inc);
-			if(cam != null)
-				camera_txt.setText(cam.getName());
-			else
-				camera_txt.setText("");
+			camera_cbx.setModel(createCameraModel(inc));
 		}
 		if(a == null || a.equals("impact")) {
 			impact_pnl.setImpact(inc.getImpact());
@@ -367,31 +378,47 @@ public class IncidentDispatcher extends JPanel
 		type_lbl.setIcon(null);
 	}
 
-	/** Find the nearest camera to an incident */
-	protected Camera findNearestCamera(Incident inc) {
-		CameraFinder finder = new CameraFinder(inc);
-		CameraHelper.find(finder);
-		return finder.camera;
+	/** Create a combo box model for nearby cameras */
+	protected DefaultComboBoxModel createCameraModel(Incident inc) {
+		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		if(inc instanceof ClientIncident) {
+			CameraFinder finder = new CameraFinder(
+				(ClientIncident)inc);
+			CameraHelper.find(finder);
+			for(Camera cam: finder.getNearest()) {
+				model.addElement(cam);
+				if(model.getSelectedItem() == null)
+					model.setSelectedItem(cam);
+			}
+			model.addElement(null);
+		} else {
+			model.addElement(inc.getCamera());
+			model.setSelectedItem(inc.getCamera());
+		}
+		return model;
 	}
 
 	/** Inner class to find the camera nearest to an incident */
 	static protected class CameraFinder implements Checker<Camera> {
 		protected final int easting;
 		protected final int northing;
-		protected double dist = Double.POSITIVE_INFINITY;
-		protected Camera camera = null;
-		protected CameraFinder(Incident inc) {
+		protected TreeMap<Double, Camera> cameras =
+			new TreeMap<Double, Camera>();
+		protected CameraFinder(ClientIncident inc) {
 			easting = inc.getEasting();
 			northing = inc.getNorthing();
 		}
 		public boolean check(Camera cam) {
 			GeoLoc loc = cam.getGeoLoc();
 			double d = GeoLocHelper.metersTo(loc, easting,northing);
-			if(d < dist) {
-				dist = d;
-				camera = cam;
-			}
+			cameras.put(d, cam);
+			while(cameras.size() > 5)
+				cameras.pollLastEntry();
 			return false;
+		}
+		protected Camera[] getNearest() {
+			return (Camera [])cameras.values().toArray(
+			       new Camera[0]);
 		}
 	}
 
