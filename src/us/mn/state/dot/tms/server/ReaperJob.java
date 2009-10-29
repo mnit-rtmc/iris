@@ -55,7 +55,7 @@ public class ReaperJob extends Job {
 	/** Reap an incident */
 	protected void reapIncident(IncidentImpl inc) {
 		if(inc.getCleared()) {
-			if(inc.getClearTime() + getIncidentClearThreshold() >
+			if(inc.getClearTime() + getIncidentClearThreshold() <
 			   System.currentTimeMillis())
 				MainServer.server.removeObject(inc);
 		}
