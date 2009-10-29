@@ -63,7 +63,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 				namespace.addObject(new IncidentImpl(namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// event_desc_id
-					row.getDate(3),		// event_date
+					row.getTimestamp(3),	// event_date
 					row.getString(4),	// road
 					row.getShort(5),	// dir
 					row.getInt(6),		// easting
@@ -123,7 +123,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	{
 		super(n);
 		event_desc_id = et;
-		event_date = ed;
+		event_date = new Date(ed.getTime());
 		road = r;
 		dir = d;
 		easting = ue;
