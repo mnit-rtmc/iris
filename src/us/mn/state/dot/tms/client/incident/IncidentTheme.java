@@ -65,6 +65,6 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Get the shape for a specified scale */
 	protected Shape getShape(float scale) {
-		return new IncidentMarker(32 * scale);
+		return new IncidentMarker(36 * scale);
 	}
 }
