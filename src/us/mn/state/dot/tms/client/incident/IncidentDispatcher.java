@@ -32,7 +32,6 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
@@ -42,7 +41,6 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
@@ -339,11 +337,7 @@ public class IncidentDispatcher extends JPanel
 	/** Update one attribute on the form */
 	protected void updateAttribute(Incident inc, String a) {
 		if(a == null) {
-			EventType et = EventType.fromId(inc.getEventType());
-			if(et != null)
-				updateEventType(et);
-			else
-				clearEventType();
+			manager.setTypeLabel(inc, type_lbl);
 			Road road = inc.getRoad();
 			short dir = inc.getDir();
 			String loc = GeoLocHelper.getCorridorName(road, dir);
@@ -356,20 +350,6 @@ public class IncidentDispatcher extends JPanel
 		if(a == null || a.equals("cleared")) {
 			clear_btn.setSelected(inc.getCleared());
 		}
-	}
-
-	/** Update the event type */
-	protected void updateEventType(EventType et) {
-		String sty = manager.getStyle(et);
-		if(sty != null) {
-			type_lbl.setText(sty);
-			Symbol sym = manager.getTheme().getSymbol(sty);
-			if(sym != null)
-				type_lbl.setIcon(sym.getLegend());
-			else
-				type_lbl.setIcon(null);
-		} else
-			clearEventType();
 	}
 
 	/** Clear the event type */

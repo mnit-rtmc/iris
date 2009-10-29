@@ -19,7 +19,9 @@ import java.awt.Shape;
 import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -74,6 +76,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Get the proxy type name */
 	public String getProxyType() {
 		return "Incident";
+	}
+
+	/** Create a list cell renderer */
+	public ListCellRenderer createCellRenderer() {
+		return new IncidentCellRenderer(this);
 	}
 
 	/** Get the shape for a given proxy */
@@ -175,6 +182,23 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return STYLE_ROADWORK;
 		default:
 			return null;
+		}
+	}
+
+	/** Update the event type on a label */
+	public void setTypeLabel(Incident inc, JLabel lbl) {
+		EventType et = EventType.fromId(inc.getEventType());
+		String sty = getStyle(et);
+		if(sty != null) {
+			lbl.setText(sty);
+			Symbol sym = getTheme().getSymbol(sty);
+			if(sym != null)
+				lbl.setIcon(sym.getLegend());
+			else
+				lbl.setIcon(null);
+		} else {
+			lbl.setText("");
+			lbl.setIcon(null);
 		}
 	}
 }
