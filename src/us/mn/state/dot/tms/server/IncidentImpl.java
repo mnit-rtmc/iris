@@ -232,6 +232,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Set the cleared status */
 	public void setCleared(boolean c) {
 		cleared = c;
+		clear_time = System.currentTimeMillis();
 	}
 
 	/** Set the cleared status */
@@ -240,6 +241,14 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 			return;
 		store.update(this, "cleared", c);
 		setCleared(c);
+	}
+
+	/** Time the incident was cleared */
+	protected long clear_time = System.currentTimeMillis();
+
+	/** Get the time the incident was cleared */
+	public long getClearTime() {
+		return clear_time;
 	}
 
 	/** Render the incident as xml */

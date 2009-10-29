@@ -147,6 +147,7 @@ public class MainServer {
 		TIMER.addJob(new CameraNoFailJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
+		TIMER.addJob(new ReaperJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */
