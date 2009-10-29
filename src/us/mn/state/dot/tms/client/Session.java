@@ -355,10 +355,6 @@ public class Session {
 	protected void addLcsTab() throws IOException {
 		v_menu.add(new LaneUseMenu(this));
 		List<LayerState> lstates = createLayers();
-		hideLayer(lstates, "Water");
-		hideLayer(lstates, "County Road");
-		hideLayer(lstates, "C.S.A.H.");
-		hideLayer(lstates, "Highway");
 		hideLayer(lstates, inc_manager.getProxyType());
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, dms_manager.getProxyType());
