@@ -44,6 +44,9 @@ public interface Incident extends SonarObject {
 	/** Get the UTM Northing */
 	int getNorthing();
 
+	/** Get the verification camera */
+	Camera getCamera();
+
 	/** Get the current impact code.
 	 * This is a coded string which indicates the lanes impacted by the
 	 * incident.

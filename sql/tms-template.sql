@@ -1237,7 +1237,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.105.0
+database_version	3.106.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1443,6 +1443,7 @@ CREATE TABLE event.incident (
 	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
 	easting INTEGER NOT NULL,
 	northing INTEGER NOT NULL,
+	camera VARCHAR(10),
 	impact VARCHAR(20) NOT NULL,
 	cleared BOOLEAN NOT NULL
 );

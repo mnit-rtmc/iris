@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.Road;
@@ -51,8 +52,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		System.err.println("Loading active incidents...");
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
 		store.query("SELECT name, event_desc_id, event_date, road, " +
-			"dir, easting, northing, impact, cleared FROM event." +
-			SONAR_TYPE + " WHERE cleared = 'f';",
+			"dir, easting, northing, camera, impact, cleared " +
+			"FROM event." + SONAR_TYPE + " WHERE cleared = 'f';",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -64,8 +65,9 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 					row.getShort(5),	// dir
 					row.getInt(6),		// easting
 					row.getInt(7),		// northing
-					row.getString(8),	// impact
-					row.getBoolean(9)	// cleared
+					row.getString(8),	// camera
+					row.getString(9),	// impact
+					row.getBoolean(10)	// cleared
 				));
 			}
 		});
@@ -81,6 +83,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("dir", dir);
 		map.put("easting", easting);
 		map.put("northing", northing);
+		map.put("camera", camera);
 		map.put("impact", impact);
 		map.put("cleared", cleared);
 		return map;
@@ -103,15 +106,17 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, int et, Date ed,
-		String r, short d, int ue, int un, String im, boolean c)
+		String r, short d, int ue, int un, String cam, String im,
+		boolean c)
 	{
 		this(n, et, ed, (Road)ns.lookupObject(Road.SONAR_TYPE, r), d,
-		     ue, un, im, c);
+		     ue, un, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
+		     im, c);
 	}
 
 	/** Create an incident */
 	protected IncidentImpl(String n, int et, Date ed, Road r, short d,
-		int ue, int un, String im, boolean c)
+		int ue, int un, Camera cam, String im, boolean c)
 	{
 		super(n);
 		event_desc_id = et;
@@ -120,6 +125,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		dir = d;
 		easting = ue;
 		northing = un;
+		camera = cam;
 		impact = im;
 		cleared = c;
 	}
@@ -179,6 +185,14 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Get the UTM Northing */
 	public int getNorthing() {
 		return northing;
+	}
+
+	/** Camera for verificaiton */
+	protected Camera camera;
+
+	/** Get the verification camera */
+	public Camera getCamera() {
+		return camera;
 	}
 
 	/** Impact code */

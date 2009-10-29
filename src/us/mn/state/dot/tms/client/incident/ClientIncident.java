@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.Road;
 
@@ -89,6 +90,11 @@ public class ClientIncident implements Incident {
 	/** Get the UTM Northing */
 	public int getNorthing() {
 		return northing;
+	}
+
+	/** Get the verification camera */
+	public Camera getCamera() {
+		return null;
 	}
 
 	/** Impact string */

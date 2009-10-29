@@ -9,3 +9,5 @@ UPDATE event.event_description SET description = 'Incident DEBRIS'
 	WHERE event_desc_id = 23;
 UPDATE event.event_description SET description = 'Incident ROADWORK'
 	WHERE event_desc_id = 24;
+
+ALTER TABLE event.incident ADD COLUMN camera VARCHAR(10);
