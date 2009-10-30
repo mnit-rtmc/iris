@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Component;
 import java.util.HashMap;
 import javax.swing.JLabel;
@@ -57,10 +58,12 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	/** Create the table column model */
 	static public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		TableColumn column = createColumn(COL_NAME, 200, "Name");
-		column.setCellRenderer(new NameCellRenderer());
-		m.addColumn(column);
-		m.addColumn(createColumn(COL_VALUE, 340, "Value"));
+		TableColumn ncol = createColumn(COL_NAME, 200, "Name");
+		ncol.setCellRenderer(new NameCellRenderer());
+		m.addColumn(ncol);
+		TableColumn vcol = createColumn(COL_VALUE, 340, "Value");
+		vcol.setCellRenderer(new ValueCellRenderer());
+		m.addColumn(vcol);
 		return m;
 	}
 
@@ -159,6 +162,34 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 				else
 					label.setForeground(null);
 			}
+			return label;
+		}
+	}
+
+	/** Renderer for system attribute value in a table cell */
+	static protected class ValueCellRenderer extends 
+		DefaultTableCellRenderer
+	{
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			JLabel label = (JLabel)
+				super.getTableCellRendererComponent(table,
+				value, isSelected, hasFocus, row, column);
+			if(!(value instanceof String))
+				return label;
+			// render non-default values in bold.
+			String an = (String)table.getValueAt(row, COL_NAME);
+			if(an == null)
+				return label;
+			SystemAttrEnum sa = SystemAttrEnum.lookup(an);
+			if(sa == null)
+				return label;
+			Font f = label.getFont();
+			if(!sa.equalsDefault())
+				label.setFont(f.deriveFont(
+					f.getStyle() ^ Font.BOLD));
 			return label;
 		}
 	}

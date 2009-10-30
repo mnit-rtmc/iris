@@ -209,6 +209,11 @@ public enum SystemAttrEnum {
 		return ret;
 	}
 
+	/** Return true if the value is the default value. */
+	public boolean equalsDefault() {
+		return get().toString().equals(getDefault());
+	}
+
 	/** Test if the attribute is a valid boolean */
 	private boolean isValidBoolean() {
 		return (atype == Boolean.class) &&
