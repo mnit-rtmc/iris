@@ -237,14 +237,19 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** A proxy has been changed */
-	public void proxyChanged(final Incident proxy, final String a) {
-		if(proxy == getSingleSelection()) {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					updateAttribute(proxy, a);
-				}
-			});
-		}
+	public void proxyChanged(Incident proxy, String a) {
+		if(proxy == getSingleSelection())
+			updateAttribute(proxy, a);
+	}
+
+	/** Update an attribute for the given proxy.
+	 * FIXME: this should be in ProxyDispatcher base class */
+	protected void updateAttribute(final Incident proxy, final String a) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				doUpdateAttribute(proxy, a);
+			}
+		});
 	}
 
 	/** Get the selected incident (if only one is selected) */
@@ -335,7 +340,7 @@ public class IncidentDispatcher extends JPanel
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(Incident inc, String a) {
+	protected void doUpdateAttribute(Incident inc, String a) {
 		if(a == null) {
 			manager.setTypeLabel(inc, type_lbl);
 			Road road = inc.getRoad();
