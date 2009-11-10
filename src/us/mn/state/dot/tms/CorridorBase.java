@@ -138,25 +138,27 @@ public class CorridorBase {
 	protected boolean isUpstreamToDownstream() {
 		R_Node first = r_nodes.getFirst();
 		R_Node last = r_nodes.getLast();
+		Integer nf = getTrueNorthing(first);
+		Integer nl = getTrueNorthing(last);
+		Integer ef = getTrueEasting(first);
+		Integer el = getTrueEasting(last);
+		if(nf == null || nl == null || ef == null || el == null)
+			return false;
 		switch(free_dir) {
-			case Road.NORTH:
-				return getTrueNorthing(first) <
-					getTrueNorthing(last);
-			case Road.SOUTH:
-				return getTrueNorthing(first) >
-					getTrueNorthing(last);
-			case Road.EAST:
-				return getTrueEasting(first) <
-					getTrueEasting(last);
-			case Road.WEST:
-				return getTrueEasting(first) >
-					getTrueEasting(last);
-			case Road.INNER_LOOP:
-				// FIXME: this might be tricky
-				return false;
-			case Road.OUTER_LOOP:
-				// FIXME: this might be tricky
-				return false;
+		case Road.NORTH:
+			return nf < nl;
+		case Road.SOUTH:
+			return nf > nl;
+		case Road.EAST:
+			return ef < el;
+		case Road.WEST:
+			return ef > el;
+		case Road.INNER_LOOP:
+			// FIXME: this might be tricky
+			return false;
+		case Road.OUTER_LOOP:
+			// FIXME: this might be tricky
+			return false;
 		}
 		return false;
 	}
