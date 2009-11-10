@@ -25,11 +25,11 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
@@ -96,7 +96,7 @@ public class IncidentDispatcher extends JPanel
 	protected final JButton deploy_btn = new JButton("Deploy");
 
 	/** Button to clear an incident */
-	protected final JToggleButton clear_btn = new JToggleButton("Clear");
+	protected final JCheckBox clear_btn = new JCheckBox("Clear");
 
 	/** Incident manager */
 	protected final IncidentManager manager;
