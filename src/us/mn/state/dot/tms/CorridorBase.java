@@ -209,10 +209,21 @@ public class CorridorBase {
 
 	/** Find the nearest node to the given location */
 	public R_Node findNearest(GeoLoc loc) {
+		Integer easting = GeoLocHelper.getTrueEasting(loc);
+		Integer northing = GeoLocHelper.getTrueNorthing(loc);
+		if(easting == null || northing == null)
+			return null;
+		else
+			return findNearest(easting, northing);
+	}
+
+	/** Find the nearest node to the given location */
+	public R_Node findNearest(int easting, int northing) {
 		R_Node nearest = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
-			double m = GeoLocHelper.metersTo(n.getGeoLoc(), loc);
+			double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
+				northing);
 			if(nearest == null || m < n_meters) {
 				nearest = n;
 				n_meters = m;

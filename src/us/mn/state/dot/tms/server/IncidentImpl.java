@@ -26,7 +26,9 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 
@@ -253,6 +255,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Render the incident as xml */
 	public void printXmlElement(PrintWriter out) {
+		String loc = lookupLocation();
 		out.print("<incident");
 		out.print(XmlWriter.createAttribute("id", getName()));
 		out.print(XmlWriter.createAttribute("event_type",
@@ -261,11 +264,27 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		out.print(XmlWriter.createAttribute("road", road));
 		out.print(XmlWriter.createAttribute("dir",
 			Direction.DIRECTION[dir]));
+		if(loc != null)
+			out.print(XmlWriter.createAttribute("location", loc));
 		out.print(XmlWriter.createAttribute("easting", easting));
 		out.print(XmlWriter.createAttribute("northing", northing));
 		out.print(XmlWriter.createAttribute("camera", camera));
 		out.print(XmlWriter.createAttribute("impact", impact));
 		out.print(XmlWriter.createAttribute("cleared", cleared));
 		out.println("/>");
+	}
+
+	/** Lookup the incident location */
+	protected String lookupLocation() {
+		if(corridors == null)
+			return null;
+		Corridor cor = corridors.getCorridor(
+			GeoLocHelper.getCorridorName(road, dir));
+		if(cor == null)
+			return null;
+		R_Node rnd = cor.findNearest(easting, northing);
+		if(rnd == null)
+			return null;
+		return GeoLocHelper.getCrossDescription(rnd.getGeoLoc());
 	}
 }
