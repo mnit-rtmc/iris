@@ -23,14 +23,17 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
  * An incident manager is a container for SONAR incident objects.
@@ -60,16 +63,20 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** User session */
 	protected final Session session;
 
+	/** R_Node manager */
+	protected final R_NodeManager r_node_manager;
+
 	/** Location mapping */
 	protected final HashMap<String, IncidentGeoLoc> locations =
 		new HashMap<String, IncidentGeoLoc>();
 
 	/** Create a new incident manager */
 	public IncidentManager(Session s, TypeCache<Incident> c,
-		GeoLocManager lm)
+		GeoLocManager lm, R_NodeManager r_man)
 	{
 		super(c, lm);
 		session = s;
+		r_node_manager = r_man;
 		cache.addProxyListener(this);
 	}
 
@@ -149,7 +156,14 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Find the map geo location for a proxy */
 	protected GeoLoc getGeoLoc(Incident proxy) {
-		return new IncidentLoc(proxy);
+		IncidentLoc loc = new IncidentLoc(proxy);
+		CorridorBase cb = r_node_manager.lookupCorridor(loc);
+		if(cb != null) {
+			R_Node rnd = cb.findNearest(loc);
+			if(rnd != null)
+				return new IncidentLoc(proxy, rnd.getGeoLoc());
+		}
+		return loc;
 	}
 
 	/** Check the style of the specified proxy */

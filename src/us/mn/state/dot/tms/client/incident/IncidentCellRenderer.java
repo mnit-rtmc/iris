@@ -22,7 +22,6 @@ import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.Road;
 
 /**
  * ListCellRenderer for incident cells.
@@ -52,19 +51,13 @@ public class IncidentCellRenderer extends DefaultListCellRenderer {
 				Incident inc = (Incident)value;
 				manager.setTypeLabel(inc, lbl);
 				String et = lbl.getText();
-				String loc = getLocation(inc);
+				String loc = GeoLocHelper.getDescription(
+					manager.getGeoLoc(inc));
 				lbl.setText(et + " on " + loc + getCamera(inc));
 			} else
 				lbl.setIcon(null);
 		}
 		return c;
-	}
-
-	/** Get the incident location */
-	protected String getLocation(Incident inc) {
-		Road road = inc.getRoad();
-		short dir = inc.getDir();
-		return GeoLocHelper.getCorridorName(road, dir);
 	}
 
 	/** Get the incident camera */

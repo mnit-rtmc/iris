@@ -28,9 +28,18 @@ public class IncidentLoc implements GeoLoc {
 	/** Incident in question */
 	protected final Incident incident;
 
+	/** Location of nearest r_node on corridor */
+	protected final GeoLoc rnd_loc;
+
 	/** Create an incident location */
-	public IncidentLoc(Incident inc) {
+	public IncidentLoc(Incident loc) {
+		this(loc, null);
+	}
+
+	/** Create an incident location */
+	public IncidentLoc(Incident inc, GeoLoc rlc) {
 		incident = inc;
+		rnd_loc = rlc;
 	}
 
 	/** Get the type name */
@@ -75,7 +84,10 @@ public class IncidentLoc implements GeoLoc {
 
 	/** Get the cross-street name */
 	public Road getCrossStreet() {
-		return null;
+		if(rnd_loc != null)
+			return rnd_loc.getCrossStreet();
+		else
+			return null;
 	}
 
 	/** Set the cross street direction */
@@ -85,7 +97,10 @@ public class IncidentLoc implements GeoLoc {
 
 	/** Get the cross street direction */
 	public short getCrossDir() {
-		return 0;
+		if(rnd_loc != null)
+			return rnd_loc.getCrossDir();
+		else
+			return 0;
 	}
 
 	/** Set the cross street modifier */
@@ -95,7 +110,10 @@ public class IncidentLoc implements GeoLoc {
 
 	/** Get the cross street modifier */
 	public short getCrossMod() {
-		return 0;
+		if(rnd_loc != null)
+			return rnd_loc.getCrossMod();
+		else
+			return 0;
 	}
 
 	/** Set the UTM Easting */

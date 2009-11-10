@@ -242,7 +242,7 @@ public class Session {
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, state.getIncidents(),
-			loc_manager);
+			loc_manager, r_node_manager);
 		// NOTE: The segment layer must not be created before all
 		//       detectors have been enumerated.
 		det_manager.waitForEnumeration();

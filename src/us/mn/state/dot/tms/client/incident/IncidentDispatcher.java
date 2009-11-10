@@ -44,7 +44,6 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -343,10 +342,8 @@ public class IncidentDispatcher extends JPanel
 	protected void doUpdateAttribute(Incident inc, String a) {
 		if(a == null) {
 			manager.setTypeLabel(inc, type_lbl);
-			Road road = inc.getRoad();
-			short dir = inc.getDir();
-			String loc = GeoLocHelper.getCorridorName(road, dir);
-			location_txt.setText(loc);
+			location_txt.setText(GeoLocHelper.getDescription(
+				manager.getGeoLoc(inc)));
 			camera_cbx.setModel(createCameraModel(inc));
 		}
 		if(a == null || a.equals("impact")) {
