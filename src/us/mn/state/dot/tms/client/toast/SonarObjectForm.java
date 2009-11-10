@@ -81,17 +81,21 @@ abstract public class SonarObjectForm<T extends SonarObject>
 
 	/** A proxy has been changed */
 	public void proxyChanged(T p, final String a) {
-		if(proxy == p) {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					updateAttribute(a);
-				}
-			});
-		}
+		if(proxy == p)
+			updateAttribute(a);
 	}
 
 	/** Update one attribute on the form */
-	abstract protected void updateAttribute(String a);
+	protected final void updateAttribute(final String a) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				doUpdateAttribute(a);
+			}
+		});
+	}
+
+	/** Update one attribute on the form */
+	abstract protected void doUpdateAttribute(String a);
 
 	/** Dispose of the form */
 	protected void dispose() {

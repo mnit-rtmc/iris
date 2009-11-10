@@ -139,7 +139,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(String a) {
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))

@@ -305,7 +305,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(String a) {
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("commLink")) {
 			comm_link.setSelectedItem(proxy.getCommLink());
 			drop_model = new DropNumberModel(

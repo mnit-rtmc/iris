@@ -548,7 +548,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(String a) {
+	protected void doUpdateAttribute(String a) {
 		messagesTab.updateAttribute(a);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());

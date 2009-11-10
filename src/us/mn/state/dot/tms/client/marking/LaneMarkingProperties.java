@@ -104,7 +104,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	}
 
 	/** Update one attribute on the form */
-	protected void updateAttribute(String a) {
+	protected void doUpdateAttribute(String a) {
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 	}
