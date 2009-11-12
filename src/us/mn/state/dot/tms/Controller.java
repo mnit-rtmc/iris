@@ -74,11 +74,29 @@ public interface Controller extends SonarObject {
 	/** Set the controller intermediate communication status */
 	void setInterStatus(String s);
 
-	/** Set the controller error status */
-	void setError(String e);
-
 	/** Get the controller error status */
 	String getError();
+
+	/** Get the timeout error count */
+	int getTimeoutErr();
+
+	/** Get the checksum error count */
+	int getChecksumErr();
+
+	/** Get the parsing error count */
+	int getParsingErr();
+
+	/** Get the controller error count */
+	int getControllerErr();
+
+	/** Get the successful operation count */
+	int getSuccessOps();
+
+	/** Get the failed operation count */
+	int getFailedOps();
+
+	/** Clear the counters and error status */
+	void setCounters(boolean clear);
 
 	/** Get the controller firmware version */
 	String getVersion();

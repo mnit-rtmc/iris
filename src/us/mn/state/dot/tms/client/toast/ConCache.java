@@ -100,5 +100,11 @@ public class ConCache {
 		client.populate(cabinets);
 		client.populate(comm_links);
 		client.populate(controllers);
+		controllers.ignoreAttribute("timeoutErr");
+		controllers.ignoreAttribute("checksumErr");
+		controllers.ignoreAttribute("parsingErr");
+		controllers.ignoreAttribute("controllerErr");
+		controllers.ignoreAttribute("successOps");
+		controllers.ignoreAttribute("failedOps");
 	}
 }

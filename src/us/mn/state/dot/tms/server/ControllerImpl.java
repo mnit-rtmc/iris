@@ -510,6 +510,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Log a comm event */
 	public void logCommEvent(EventType et, String id, String message) {
+		incrementCommCounter(et);
 		setStatus(message);
 		if(!isFailed())
 			logCommEvent(et, id);
@@ -557,14 +558,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notifyAttribute("error");
 	}
 
-	/** Set the controller error detail */
-	public void doSetError(String s) {
-		if(s == null)
-			error = "";
-		else
-			error = s;
-	}
-
 	/** Get the controller error detail */
 	public String getError() {
 		if(isFailed())
@@ -581,6 +574,125 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return 0;
 	}
 
+	/** Timeout error count */
+	protected int timeoutErr;
+
+	/** Get the timeout error count */
+	public int getTimeoutErr() {
+		return timeoutErr;
+	}
+
+	/** Increment the timeout error count */
+	protected void incrementTimeoutErr() {
+		timeoutErr++;
+		notifyAttribute("timeoutErr");
+	}
+
+	/** Checksum error count */
+	protected int checksumErr;
+
+	/** Get the checksum error count */
+	public int getChecksumErr() {
+		return checksumErr;
+	}
+
+	/** Increment the checksum error count */
+	protected void incrementChecksumErr() {
+		checksumErr++;
+		notifyAttribute("checksumErr");
+	}
+
+	/** Parsing error count */
+	protected int parsingErr;
+
+	/** Get the parsing error count */
+	public int getParsingErr() {
+		return parsingErr;
+	}
+
+	/** Increment the parsing error count */
+	protected void incrementParsingErr() {
+		parsingErr++;
+		notifyAttribute("parsingErr");
+	}
+
+	/** Controller error count */
+	protected int controllerErr;
+
+	/** Get the controller error count */
+	public int getControllerErr() {
+		return controllerErr;
+	}
+
+	/** Increment the controller error count */
+	protected void incrementControllerErr() {
+		controllerErr++;
+		notifyAttribute("controllerErr");
+	}
+
+	/** Increment a comm error counter */
+	protected void incrementCommCounter(EventType et) {
+		switch(et) {
+		case POLL_TIMEOUT_ERROR:
+			incrementTimeoutErr();
+			break;
+		case CHECKSUM_ERROR:
+			incrementChecksumErr();
+			break;
+		case PARSING_ERROR:
+			incrementParsingErr();
+			break;
+		case CONTROLLER_ERROR:
+			incrementControllerErr();
+			break;
+		}
+	}
+
+	/** Successful operations count */
+	protected int successOps;
+
+	/** Get the successful operation count */
+	public int getSuccessOps() {
+		return successOps;
+	}
+
+	/** Increment the successful operation count */
+	protected void incrementSuccessOps() {
+		successOps++;
+		notifyAttribute("successOps");
+	}
+
+	/** Failed operations count */
+	protected int failedOps;
+
+	/** Get the failed operation count */
+	public int getFailedOps() {
+		return failedOps;
+	}
+
+	/** Increment the failed operation count */
+	protected void incrementFailedOps() {
+		failedOps++;
+		notifyAttribute("failedOps");
+	}
+
+	/** Clear the counters and error status */
+	public void setCounters(boolean clear) {
+		setError("");
+		timeoutErr = 0;
+		notifyAttribute("timeoutErr");
+		checksumErr = 0;
+		notifyAttribute("checksumErr");
+		parsingErr = 0;
+		notifyAttribute("parsingErr");
+		controllerErr = 0;
+		notifyAttribute("controllerErr");
+		successOps = 0;
+		notifyAttribute("successOps");
+		failedOps = 0;
+		notifyAttribute("failedOps");
+	}
+
 	/** Log a comm event */
 	protected final void logCommEvent(EventType event, String id) {
 		CommEvent ev = new CommEvent(event, getName(), id);
@@ -594,6 +706,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Complete a controller operation */
 	public void completeOperation(String id, boolean success) {
+		if(success)
+			incrementSuccessOps();
+		else
+			incrementFailedOps();
 		setFailed(!success, id);
 	}
 

@@ -98,17 +98,35 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Controller IO model */
 	protected ControllerIOModel io_model;
 
+	/** Firmware version */
+	protected final JLabel version = new JLabel();
+
 	/** Status */
 	protected final JLabel status = new JLabel();
 
 	/** Error detail */
 	protected final JLabel error = new JLabel();
 
-	/** Firmware version */
-	protected final JLabel version = new JLabel();
+	/** Timeout errors label */
+	protected final JLabel timeout_lbl = new JLabel();
+
+	/** Checksum errors label */
+	protected final JLabel checksum_lbl = new JLabel();
+
+	/** Parsing errors label */
+	protected final JLabel parsing_lbl = new JLabel();
+
+	/** Controller errors label */
+	protected final JLabel controller_lbl = new JLabel();
+
+	/** Successful operations label */
+	protected final JLabel success_lbl = new JLabel();
+
+	/** Failed operations label */
+	protected final JLabel failed_lbl = new JLabel();
 
 	/** Clear error status button */
-	protected final JButton clearErrorBtn = new JButton("Clear Error");
+	protected final JButton clearErrorBtn = new JButton("Clear Errors");
 
 	/** Reset button */
 	protected final JButton reset =
@@ -290,16 +308,22 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		};
 		new ActionJob(this, clearErrorBtn) {
 			public void perform() {
-				proxy.setError("");
+				proxy.setCounters(true);
 			}
 		};
 		JPanel buttonPnl = new JPanel();
 		buttonPnl.add(clearErrorBtn);
 		buttonPnl.add(reset);
 		FormPanel panel = new FormPanel(true);
+		panel.addRow("Version:", version);
 		panel.addRow("Status:", status);
 		panel.addRow("Error Detail:", error);
-		panel.addRow("Version:", version);
+		panel.addRow("Timeout Errors:", timeout_lbl);
+		panel.addRow("Checksum Errors:", checksum_lbl);
+		panel.addRow("Parsing Errors:", parsing_lbl);
+		panel.addRow("Controller Errors:", controller_lbl);
+		panel.addRow("Successful Operations:", success_lbl);
+		panel.addRow("Failed Operations:", failed_lbl);
 		panel.addRow(buttonPnl);
 		return panel;
 	}
@@ -319,12 +343,36 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("active"))
 			active.setSelected(proxy.getActive());
+		if(a == null || a.equals("version"))
+			version.setText(proxy.getVersion());
 		if(a == null || a.equals("status"))
 			status.setText(proxy.getStatus());
 		if(a == null || a.equals("error"))
 			error.setText(proxy.getError());
-		if(a == null || a.equals("version"))
-			version.setText(proxy.getVersion());
+		if(a == null || a.equals("timeoutErr")) {
+			timeout_lbl.setText(String.valueOf(
+				proxy.getTimeoutErr()));
+		}
+		if(a == null || a.equals("checksumErr")) {
+			checksum_lbl.setText(String.valueOf(
+				proxy.getChecksumErr()));
+		}
+		if(a == null || a.equals("parsingErr")) {
+			parsing_lbl.setText(String.valueOf(
+				proxy.getParsingErr()));
+		}
+		if(a == null || a.equals("controllerErr")) {
+			controller_lbl.setText(String.valueOf(
+				proxy.getControllerErr()));
+		}
+		if(a == null || a.equals("successOps")) {
+			success_lbl.setText(String.valueOf(
+				proxy.getSuccessOps()));
+		}
+		if(a == null || a.equals("failedOps")) {
+			failed_lbl.setText(String.valueOf(
+				proxy.getFailedOps()));
+		}
 		if(a == null || a.equals("mile")) {
 			Float m = cabinet.getMile();
 			if(m == null)
