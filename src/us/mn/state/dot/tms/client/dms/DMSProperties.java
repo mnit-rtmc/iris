@@ -406,6 +406,14 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				}
 			};
 		}
+		JButton queryStatBtn = new JButton("Query Status");
+		new ActionJob(this, queryStatBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					QUERY_STATUS.ordinal());
+			}
+		};
+		panel.addRow(queryStatBtn);
 		JButton settingsBtn = new JButton("Send Settings");
 		new ActionJob(this, settingsBtn) {
 			public void perform() {
