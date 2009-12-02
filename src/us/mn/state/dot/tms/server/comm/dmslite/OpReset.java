@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -31,7 +32,9 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class OpReset extends OpDms
 {
-	/** Create a new DMS query status object */
+	/** Create a new DMS query status object.
+	 *  @param d Current DMS.
+	 *  @param u User performing the action, may be null. */
 	public OpReset(DMSImpl d, User u) {
 		super(DEVICE_DATA, d, "Reinitializing the CMS", u);
 	}
@@ -51,6 +54,9 @@ public class OpReset extends OpDms
 	 *	<DmsLite><SetBlankMsgReqMsg>
 	 *		<Id></Id>
 	 *		<Address>1</Address>
+	 *		<ActPriority>...</ActPriority>
+	 *		<RunPriority>...</RunPriority>
+	 *		<Owner>...</Owner>
 	 *	</SetBlankMsgReqMsg></DmsLite> */
 	private XmlElem buildReqRes(String elemReqName, String elemResName) {
 		XmlElem xrr = new XmlElem(elemReqName, elemResName);
@@ -58,6 +64,12 @@ public class OpReset extends OpDms
 		// request
 		xrr.addReq("Id", generateId());
 		xrr.addReq("Address", controller.getDrop());
+		xrr.addReq("ActPriority", 
+			DMSMessagePriority.OVERRIDE.ordinal());
+		xrr.addReq("RunPriority", 
+			DMSMessagePriority.BLANK.ordinal());
+		xrr.addReq("Owner", 
+			m_user != null ? m_user.getName() : "");
 
 		// responses
 		xrr.addRes("Id");
