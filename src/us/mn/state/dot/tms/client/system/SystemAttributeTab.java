@@ -19,10 +19,10 @@ import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This is a tab for viewing and editing system attributes.
@@ -41,14 +41,13 @@ public class SystemAttributeTab extends FormPanel {
 	/** Table model */
 	protected final SystemAttributeTableModel m_tableModel;
 
-	/** Traffic device attribute table */
+	/** System attribute table. */
 	protected final ZTable m_table = new ZTable() {
 		public String getToolTipText(int row, int column) {
 			Object value = m_tableModel.getValueAt(row,
 				SystemAttributeTableModel.COL_NAME);
 			if(value instanceof String) {
-				String aname = (String)value;
-				return I18N.get(aname);
+				return SystemAttrEnum.getDesc((String)value);
 			} else
 				return null;
 		}

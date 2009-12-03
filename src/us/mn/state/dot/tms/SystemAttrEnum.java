@@ -15,50 +15,52 @@
 package us.mn.state.dot.tms;
 
 import java.util.HashMap;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * This enum defines all system attributes.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum SystemAttrEnum {
-	ACTIONPLAN_TOOLBAR_ENABLE(true),
-	CAMERA_NUM_PRESET_BTNS(3, 0, 20),
+	ACTIONPLAN_TOOLBAR_ENABLE(true, Change.RESTART_CLIENT),
+	CAMERA_NUM_PRESET_BTNS(3, 0, 20, Change.RESTART_CLIENT),
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
-	CAMERA_PTZ_PANEL_ENABLE(false),
-	DATABASE_VERSION(String.class),
+	CAMERA_PTZ_PANEL_ENABLE(false, Change.RESTART_CLIENT),
+	DATABASE_VERSION(String.class, Change.RESTART_SERVER),
 	DETECTOR_AUTO_FAIL_ENABLE(true),
 	DMS_AWS_ENABLE(false),
 	DMS_AWS_LOG_ENABLE(false),
 	DMS_AWS_LOG_FILENAME("/var/www/html/awsreport.txt"),
 	DMS_AWS_RETRY_THRESHOLD(6, 1, 20),
-	DMS_BRIGHTNESS_ENABLE(true),
+	DMS_BRIGHTNESS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_DEFAULT_JUSTIFICATION_LINE(3, 2, 5),
 	DMS_DEFAULT_JUSTIFICATION_PAGE(2, 2, 4),
-	DMS_DURATION_ENABLE(true),
-	DMS_FONT_SELECTION_ENABLE(false),
-	DMS_COMPOSER_EDIT_MODE(1, 0, 2), 
-	DMS_PGONTIME_SELECTION_ENABLE(false),
+	DMS_DURATION_ENABLE(true, Change.RESTART_CLIENT),
+	DMS_FONT_SELECTION_ENABLE(false, Change.RESTART_CLIENT),
+	DMS_COMPOSER_EDIT_MODE(1, 0, 2, Change.RESTART_CLIENT), 
+	DMS_PGONTIME_SELECTION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_FORM(1, 1, 2), 
 	DMS_HIGH_TEMP_CUTOFF(60, 35, 100),
-	DMS_INTERMEDIATE_STATUS_ENABLE(false),
+	DMS_INTERMEDIATE_STATUS_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_LAMP_TEST_TIMEOUT_SECS(30, 5, 90),
-	DMS_MANUFACTURER_ENABLE(true),
+	DMS_MANUFACTURER_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_MAX_LINES(3, 1, 12),
 	DMS_MESSAGE_BLANK_LINE_ENABLE(true),
-	DMS_MESSAGE_MIN_PAGES(1, 1, 6),
+	DMS_MESSAGE_MIN_PAGES(1, 1, 6, Change.RESTART_CLIENT),
 	DMS_PAGE_ON_SECS(2f, 0f, 60f),
 	DMS_PAGE_OFF_SECS(0f, 0f, 60f),
 	DMS_PIXEL_OFF_LIMIT(2, 1),
 	DMS_PIXEL_ON_LIMIT(1, 1),
-	DMS_PIXEL_STATUS_ENABLE(true),
+	DMS_PIXEL_STATUS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_PIXEL_TEST_TIMEOUT_SECS(30, 5, 90),
-	DMS_POLL_FREQ_SECS(30, 0),
-	DMS_QLIB_ENABLE(false),
-	DMS_QUERYMSG_ENABLE(false),
-	DMS_RENDER_SIZE(0, 0, 1),
-	DMS_RESET_ENABLE(false),
-	DMS_SEND_CONFIRMATION_ENABLE(false),
+	DMS_POLL_FREQ_SECS(30, 0, Change.RESTART_SERVER),
+	DMS_QLIB_ENABLE(false, Change.RESTART_CLIENT),
+	DMS_QUERYMSG_ENABLE(false, Change.RESTART_CLIENT),
+	DMS_RENDER_SIZE(0, 0, 1, Change.RESTART_CLIENT),
+	DMS_RESET_ENABLE(false, Change.RESTART_CLIENT),
+	DMS_SEND_CONFIRMATION_ENABLE(false, Change.RESTART_CLIENT),
 	DMSLITE_MODEM_OP_TIMEOUT_SECS(5 * 60 + 5, 5),
 	DMSLITE_OP_TIMEOUT_SECS(60 + 5, 5),
 	EMAIL_SENDER_CLIENT(String.class),
@@ -78,27 +80,51 @@ public enum SystemAttrEnum {
 	MAP_NORTHERN_HEMISPHERE(true),
 	MAP_UTM_ZONE(15, 1, 60),
 	MAP_SEGMENT_MAX_METERS(2000, 100),
-	MAP_TOOLBAR_COORDS("WGS84"),
+	MAP_TOOLBAR_COORDS("WGS84", Change.RESTART_CLIENT),
 	METER_GREEN_SECS(1.3f, 0.1f, 10f),
 	METER_MAX_RED_SECS(13f, 5f, 30f),
 	METER_MIN_RED_SECS(0.1f, 0.1f, 10f),
 	METER_YELLOW_SECS(0.7f, 0.1f, 10f),
 	OPERATION_RETRY_THRESHOLD(3, 1, 20),
-	TEMP_FAHRENHEIT_ENABLE(true),
+	TEMP_FAHRENHEIT_ENABLE(true, Change.RESTART_CLIENT),
 	TESLA_HOST(String.class),
 	TRAVEL_TIME_MAX_LEGS(8, 1, 20),
 	TRAVEL_TIME_MAX_MILES(16, 1, 30),
 	TRAVEL_TIME_MIN_MPH(15, 1, 50),
 	UPTIME_LOG_ENABLE(false),
 	UPTIME_LOG_FILENAME("/var/www/html/irisuptimelog.csv"),
-	WINDOW_TITLE("IRIS: "),
+	WINDOW_TITLE("IRIS: ", Change.RESTART_CLIENT),
 	XML_OUTPUT_DIRECTORY("/var/www/html/dds/");
+
+	/** Change action, which indicates what action the admin must
+	 *  take after changing a system attribute. */
+	enum Change {
+		RESTART_SERVER("Restart the server after changing."), 
+		RESTART_CLIENT("Restart the client after changing."), 
+		NONE("A change takes effect immediately.");
+
+		/** Change message for user. */
+		String m_msg = "";
+
+		/** Constructor */
+		Change(String msg) {
+			m_msg = msg;
+		}
+
+		/** Get the restart message. */
+		public String getMessage() {
+			return m_msg;
+		}
+	}
 
 	/** System attribute class */
 	protected final Class atype;
 
 	/** Default value */
 	protected final Object def_value;
+
+	/** Change action */
+	protected final Change change_action;
 
 	/** Minimum value for number attributes */
 	protected final Number min_value;
@@ -108,42 +134,79 @@ public enum SystemAttrEnum {
 
 	/** Create a String attribute with the given default value */
 	private SystemAttrEnum(String d) {
-		this(String.class, d, null, null);
+		this(String.class, d, null, null, Change.NONE);
+	}
+
+	/** Create a String attribute with the given default value */
+	private SystemAttrEnum(String d, Change ca) {
+		this(String.class, d, null, null, ca);
 	}
 
 	/** Create a Boolean attribute with the given default value */
 	private SystemAttrEnum(boolean d) {
-		this(Boolean.class, d, null, null);
+		this(Boolean.class, d, null, null, Change.NONE);
+	}
+
+	/** Create a Boolean attribute with the given default value */
+	private SystemAttrEnum(boolean d, Change ca) {
+		this(Boolean.class, d, null, null, ca);
 	}
 
 	/** Create an Integer attribute with default, min and max values */
 	private SystemAttrEnum(int d, int mn, int mx) {
-		this(Integer.class, d, mn, mx);
+		this(Integer.class, d, mn, mx, Change.NONE);
+	}
+
+	/** Create an Integer attribute with default, min and max values */
+	private SystemAttrEnum(int d, int mn, int mx, Change ca) {
+		this(Integer.class, d, mn, mx, ca);
 	}
 
 	/** Create an Integer attribute with default and min values */
 	private SystemAttrEnum(int d, int mn) {
-		this(Integer.class, d, mn, null);
+		this(Integer.class, d, mn, null, Change.NONE);
+	}
+
+	/** Create an Integer attribute with default and min values */
+	private SystemAttrEnum(int d, int mn, Change ca) {
+		this(Integer.class, d, mn, null, ca);
 	}
 
 	/** Create a Float attribute with default, min and max values */
 	private SystemAttrEnum(float d, float mn, float mx) {
-		this(Float.class, d, mn, mx);
+		this(Float.class, d, mn, mx, Change.NONE);
 	}
 
 	/** Create a system attribute with a null default value */
 	private SystemAttrEnum(Class c) {
-		this(c, null, null, null);
+		this(c, null, null, null, Change.NONE);
+	}
+
+	/** Create a system attribute with a null default value */
+	private SystemAttrEnum(Class c, Change ca) {
+		this(c, null, null, null, ca);
 	}
 
 	/** Create a system attribute */
-	private SystemAttrEnum(Class c, Object d, Number mn, Number mx) {
+	private SystemAttrEnum(Class c, Object d, Number mn, Number mx, 
+		Change ca) 
+	{
 		atype = c;
 		def_value = d;
 		min_value = mn;
 		max_value = mx;
+		change_action = ca;
 		assert isValidBoolean() || isValidFloat() ||
 		       isValidInteger() || isValidString();
+	}
+
+	/** Get a description of the system attribute enum. */
+	public static String getDesc(String aname) {
+		String ret = I18N.get(aname);
+		SystemAttrEnum sae = lookup(aname);
+		if(sae !=null)
+			ret += " " + sae.change_action.getMessage();
+		return ret;
 	}
 
 	/** Test if the attribute is a valid boolean */
