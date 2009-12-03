@@ -55,7 +55,8 @@ public class ControllerHelper extends BaseHelper {
 	static public void updateInterStatus(Controller ctrl, String is) {
 		// intermediate status enabled?
 		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
-			ctrl.setInterStatus(is);
+			if(is != null && !is.equals(ctrl.getInterStatus()))
+				ctrl.setInterStatus(is);
 	}
 
 	/** Get a controller location */

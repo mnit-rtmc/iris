@@ -227,17 +227,19 @@ public class Message implements AddressedMessage
 					m_dmsTimeoutMS / 1000 + " secs). ";
 				handleAwsFailure(err);
 				Log.severe(err);
-				istatus = new String[] 
-					{"Timed out waiting for sensorserver."};
+				istatus = new String[] {"Timed out waiting " +
+					"for sensorserver."};
+				updateInterStatus(istatus);
 				throw new IOException("Timed out waiting " +
 					"for " + dmsid);
+			}
 
 			// parse response
-			} else {
-				Log.finest("dmslite.Message.getRequest(): " +
-					"found complete token:" + token);
+			Log.finest("dmslite.Message.getRequest(): " +
+				"found complete token:" + token);
 
-				// throws IOException
+			try {
+				// can throw IOException
 				istatus = new String[] {"Parse error"};
 				// sets 'was read' flag for each XML element
 				m_xelems.parseResponse(Message.DMSLITEMSGTAG, 
@@ -246,7 +248,11 @@ public class Message implements AddressedMessage
 				// Either a completed response element or an
 				// intermediate status update was read.
 				istatus = getInterStatusMsgs();
+
+			} finally {
+				updateInterStatus(istatus);
 			}
+
 		} while(!m_xelems.readDone());
 	}
 
