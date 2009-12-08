@@ -832,7 +832,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
 			s_routes.clear();
 		p.sendMessage(this, smn, o);
-		setMessageNext(smn);
 	}
 
 	/** Validate a sign message to send */
@@ -963,7 +962,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		notifyAttribute("messageCurrent");
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
-		setMessageNext(null);
 		// FIXME: destroy the previous message if no other signs are
 		// using it
 	}

@@ -60,6 +60,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 
 	/** Create the first real phase of the operation */
 	protected Phase phaseOne() {
+		dms.setMessageNext(message);
 		if(SignMessageHelper.isBlank(message))
 			return new BlankMessage();
 		else if(msg_num > 1)
@@ -254,5 +255,11 @@ public class OpSendDMSMessage extends OpDMSMessage {
 		long_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
 		long_msg.setNumber(1);
 		long_msg.setCrc(0);
+	}
+
+	/** Cleanup the operation */
+	public void cleanup() {
+		dms.setMessageNext(null);
+		super.cleanup();
 	}
 }
