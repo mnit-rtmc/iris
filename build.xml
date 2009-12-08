@@ -506,6 +506,7 @@
 		<exec executable="rpmbuild"
 		      dir="${build.rpm}"
 		      failonerror="true">
+		      	<arg value="--target=i386"/>
 			<arg value="-ba"/>
 			<arg value="--buildroot"/>
 			<arg value="${build.rpm}/BUILDROOT"/>
