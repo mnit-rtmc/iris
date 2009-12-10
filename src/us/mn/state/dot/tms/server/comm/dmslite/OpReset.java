@@ -118,7 +118,7 @@ public class OpReset extends OpDms
 
 		// process response
 		if(valid) {
-			setErrorMsg("");
+			setErrorStatus("");
 
 			// set blank message
 			SignMessage sm = m_dms.createBlankMessage();
@@ -129,7 +129,7 @@ public class OpReset extends OpDms
 		} else {
 			Log.finest("OpReset: isvalid is false, " +
 				"errmsg=" + errmsg);
-			setErrorMsg(errmsg);
+			setErrorStatus(errmsg);
 
 			// try again
 			if (flagFailureShouldRetry(errmsg)) {

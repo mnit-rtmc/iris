@@ -394,7 +394,7 @@ public class OpQueryMsg extends OpDms {
 
 		// process response
 		if(valid) {
-			setErrorMsg("");
+			setErrorStatus("");
 
 			// get user name via owner
 			if(owner != null) {
@@ -463,7 +463,7 @@ public class OpQueryMsg extends OpDms {
 			Log.finest("OpQueryMsg: response from SensorServer " +
 				"received, ignored, Xml valid field is " +
 				"false, errmsg=" + errmsg);
-			setErrorMsg(errmsg);
+			setErrorStatus(errmsg);
 
 			// try again
 			if(flagFailureShouldRetry(errmsg)) {

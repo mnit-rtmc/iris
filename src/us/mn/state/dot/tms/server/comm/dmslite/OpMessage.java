@@ -302,14 +302,14 @@ public class OpMessage extends OpDms {
 
 		// parse rest of response
 		if(valid) {
-			setErrorMsg("");
+			setErrorStatus("");
 			m_dms.setMessageCurrent(m_sm, m_user);
 		} else {
 			Log.finest("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +
 				"because Xml valid field is false, " +
 				"errmsg=" + errmsg + ", id=" + id);
-			setErrorMsg(errmsg);
+			setErrorStatus(errmsg);
 
 			// try again
 			if(flagFailureShouldRetry(errmsg)) {
