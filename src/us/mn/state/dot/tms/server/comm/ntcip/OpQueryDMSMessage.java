@@ -106,7 +106,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			} else {
 				System.err.println("OpQueryDMSMessage: " +
 					dms.getName() + ", " + status);
-				errorStatus = status.toString();
+				setErrorStatus(status.toString());
 			}
 			return null;
 		}

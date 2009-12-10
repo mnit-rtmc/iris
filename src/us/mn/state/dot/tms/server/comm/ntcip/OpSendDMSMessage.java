@@ -144,10 +144,10 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			DMS_LOG.log(dms.getName() + ": " + error);
 			switch(error.getEnum()) {
 			case syntaxMULTI:
-				errorStatus = error.toString();
+				setErrorStatus(error.toString());
 				return new QueryMultiSyntaxError();
 			case other:
-				errorStatus = error.toString();
+				setErrorStatus(error.toString());
 				return new LedstarActivateError();
 			case messageMemoryType:
 				// For original 1203v1, blank memory type was
@@ -162,7 +162,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 				}
 				// else fall through to default case ...
 			default:
-				errorStatus = error.toString();
+				setErrorStatus(error.toString());
 				return null;
 			}
 		}
@@ -181,7 +181,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + m_err);
 			DMS_LOG.log(dms.getName() + ": " + e_pos);
-			errorStatus = m_err.toString();
+			setErrorStatus(m_err.toString());
 			return null;
 		}
 	}
@@ -201,7 +201,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 				return null;
 			}
 			DMS_LOG.log(dms.getName() + ": " + error);
-			errorStatus = error.toString();
+			setErrorStatus(error.toString());
 			return null;
 		}
 	}

@@ -173,9 +173,9 @@ public class OpQueryDMSStatus extends OpDMS {
 			// If no error status bits should be reported,
 			// clear the controller error status by setting "".
 			if(shortError.shouldReport())
-				errorStatus = shortError.getValue();
+				setErrorStatus(shortError.getValue());
 			else
-				errorStatus = "";
+				setErrorStatus("");
 			return new MoreFailures();
 		}
 	}

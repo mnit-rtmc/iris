@@ -67,7 +67,7 @@ public class OpSendSampleSettings extends Op170 {
 	protected void checkCabinetStyle(int dips) {
 		Integer d = lookupDips();
 		if(d != null && d != dips)
-			errorStatus = "CABINET STYLE " + dips;
+			setErrorStatus("CABINET STYLE " + dips);
 	}
 
 	/** Lookup the correct dip switch setting to the controller */

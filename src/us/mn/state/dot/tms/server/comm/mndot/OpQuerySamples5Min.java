@@ -112,7 +112,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				}
 			}
 			catch(ControllerException e) {
-				errorStatus = e.getMessage();
+				setErrorStatus(e.getMessage());
 				rec = new byte[75];
 				mess.add(new MemoryRequest(
 					Address.DATA_BUFFER_5_MINUTE, rec));

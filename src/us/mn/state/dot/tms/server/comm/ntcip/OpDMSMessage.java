@@ -179,9 +179,9 @@ abstract public class OpDMSMessage extends OpDMS {
 			DMS_LOG.log(dms.getName() + ": " + m_err);
 			DMS_LOG.log(dms.getName() + ": " + e_pos);
 			if(error.isSyntaxMulti())
-				errorStatus = m_err.toString();
+				setErrorStatus(m_err.toString());
 			else if(error.isError())
-				errorStatus = error.toString();
+				setErrorStatus(error.toString());
 			return null;
 		}
 	}
