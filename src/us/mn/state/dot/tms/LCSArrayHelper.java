@@ -145,4 +145,20 @@ public class LCSArrayHelper extends BaseHelper {
 		}
 		return true;
 	}
+
+	/** Check if any LCSs in an array need maintenance */
+	static public boolean needsMaintenance(final LCSArray lcs_array) {
+		final LinkedList<LCS> lcss = new LinkedList<LCS>();
+		lookupLCS(lcs_array, new Checker<LCS>() {
+			public boolean check(LCS lcs) {
+				lcss.add(lcs);
+				return false;
+			}
+		});
+		for(LCS lcs: lcss) {
+			if(LCSHelper.needsMaintenance(lcs))
+				return true;
+		}
+		return false;
+	}
 }

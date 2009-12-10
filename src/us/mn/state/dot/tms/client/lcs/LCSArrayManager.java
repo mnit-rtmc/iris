@@ -77,7 +77,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Test if an LCS array needs maintenance */
 	static protected boolean needsMaintenance(LCSArray proxy) {
 		LCSArrayLock lck = LCSArrayLock.fromOrdinal(proxy.getLcsLock());
-		return lck == LCSArrayLock.MAINTENANCE;
+		return (lck == LCSArrayLock.MAINTENANCE) ||
+		       LCSArrayHelper.needsMaintenance(proxy);
 	}
 
 	/** Test if an LCS array is deployed */

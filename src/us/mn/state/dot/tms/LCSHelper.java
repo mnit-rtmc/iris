@@ -75,4 +75,14 @@ public class LCSHelper extends BaseHelper {
 		}
 		return true;
 	}
+
+	/** Check if an LCS needs maintenance */
+	static public boolean needsMaintenance(LCS lcs) {
+		String name = lcs.getName();
+		DMS dms = DMSHelper.lookup(name);
+		if(dms != null)
+			return DMSHelper.needsMaintenance(dms);
+		else
+			return false;
+	}
 }
