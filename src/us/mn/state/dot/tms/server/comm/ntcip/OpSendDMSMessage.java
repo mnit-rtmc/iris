@@ -144,6 +144,7 @@ public class OpSendDMSMessage extends OpDMSMessage {
 			DMS_LOG.log(dms.getName() + ": " + error);
 			switch(error.getEnum()) {
 			case syntaxMULTI:
+				errorStatus = error.toString();
 				return new QueryMultiSyntaxError();
 			case other:
 				errorStatus = error.toString();
