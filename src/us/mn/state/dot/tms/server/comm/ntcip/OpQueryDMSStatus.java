@@ -170,8 +170,12 @@ public class OpQueryDMSStatus extends OpDMS {
 			mess.add(shortError);
 			mess.getRequest();
 			DMS_LOG.log(dms.getName() + ": " + shortError);
+			// If no error status bits should be reported,
+			// clear the controller error status by setting "".
 			if(shortError.shouldReport())
 				errorStatus = shortError.getValue();
+			else
+				errorStatus = "";
 			return new MoreFailures();
 		}
 	}
