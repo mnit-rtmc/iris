@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.AddressedMessage;
 
 /**
- * Operation to send new indicaitons to a Lane Control Signal array.
+ * Operation to send settings to a Lane Control Signal array.
  *
  * @author Douglas Lau
  */
