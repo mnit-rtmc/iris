@@ -190,7 +190,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 		return ret;
 	}
 
-	/** Set value using the page-on time specified in the 1st page 
+	/** Set value using the page on-time specified in the 1st page 
 	 *  of the MULTI string. If no value is specified in the MULTI,
 	 *  the default value is used for multi-page messages else 0 
 	 *  for single page messages.
