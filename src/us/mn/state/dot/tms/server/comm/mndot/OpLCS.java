@@ -49,7 +49,7 @@ abstract public class OpLCS extends OpDevice {
 		for(int i = 0; i < lcss.length; i++) {
 			DMS dms = DMSHelper.lookup(lcss[i].getName());
 			if(dms instanceof DMSImpl)
-				dmss[i] = (DMSImpl)dms;
+				_dmss[i] = (DMSImpl)dms;
 		}
 		return _dmss;
 	}
