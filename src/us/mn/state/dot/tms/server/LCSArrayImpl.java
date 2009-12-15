@@ -312,7 +312,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Get the current lane-use indications.
-	 * @return Currently active indications (cannot be null) */
+	 * @return Array of currently active indications, one for each lane.
+	 *         These are ordinal values of the LaneUseIndication enum.
+	 *         A null indicates the indication for that lane is unknown. */
 	public Integer[] getIndicationsCurrent() {
 		return indicationsCurrent;
 	}
