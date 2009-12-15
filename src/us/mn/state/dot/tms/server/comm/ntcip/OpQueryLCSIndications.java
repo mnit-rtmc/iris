@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -52,7 +53,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup an indication on a DMS */
 	protected Integer lookupIndication(DMSImpl dms) {
-		if(dms.isFailed())
+		if(dms.isFailed() || DMSHelper.needsMaintenance(dms))
 			return null;
 		else {
 			SignMessage sm = dms.getMessageCurrent();
