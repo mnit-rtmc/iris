@@ -419,6 +419,8 @@
 	        depends="prepare"
 	        description="Compile the iris_service binary">
 		<exec executable="gcc" dir="${build.bin}" failonerror="true">
+			<arg value="-m32"/>
+			<arg value="-march=i386"/>
 			<arg value="iris_service.c"/>
 			<arg value="-oiris_service"/>
 		</exec>
