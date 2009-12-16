@@ -183,13 +183,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", opStatusTxt);
 		add("Deployed", deployTxt);
-		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
-			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-				add("Expires", expiresTxt);
-			else
-				addRow("Expires", expiresTxt);
-		} else
-			finishRow();
+		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
+			add("Expires", expiresTxt);
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			setWest();
 			final String mid = "dms.aws.controlled";
@@ -199,7 +194,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 			awsControlledCbx.setToolTipText(
 				I18N.get(mid + ".tooltip"));
 			addRow(awsControlledCbx);
-		}
+		} else
+			finishRow();
 		tab.add("Current", currentPnl);
 		tab.add("Preview", previewPnl);
 		addRow(tab);
