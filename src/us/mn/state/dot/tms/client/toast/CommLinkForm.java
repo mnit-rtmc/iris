@@ -180,7 +180,7 @@ public class CommLinkForm extends AbstractForm {
 		table.setColumnModel(model.createColumnModel());
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		table.setRowHeight(ROW_HEIGHT);
-		table.setVisibleRowCount(8);
+		table.setVisibleRowCount(5);
 		JScrollPane pane = new JScrollPane(table);
 		panel.add(pane, bag);
 		bag.gridwidth = 1;
@@ -292,7 +292,7 @@ public class CommLinkForm extends AbstractForm {
 		ftable.setAutoCreateColumnsFromModel(false);
 		ftable.setColumnModel(fmodel.createColumnModel());
 		ftable.setRowHeight(ROW_HEIGHT);
-		ftable.setVisibleRowCount(24);
+		ftable.setVisibleRowCount(16);
 		panel.addRow(ftable);
 		panel.add(go_button);
 		return panel;
