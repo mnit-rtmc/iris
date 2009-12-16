@@ -176,29 +176,45 @@ public class MultiString implements MultiStringState {
 	/** Flag for trailing message text */
 	protected boolean trailing = false;
 
-	/** Test if the MULTI string is equal to another MULTI string */
-	public boolean equals(Object o) {
+        /** Test if the MULTI string is equal to another MULTI string.
+	 *  This is a simple string comparison.
+	 *  @see isEquivalent() for a broader functional comparison. */
+        public boolean equals(Object o) {
+                if(o instanceof MultiString)
+                        return normalize().equals(
+                                ((MultiString)o).normalize());
+                if(o instanceof String)
+                        return normalize().equals(
+                                new MultiString((String)o).normalize());
+                return false;
+        }
+
+	/** Test if the MULTI string is equivalent to another MULTI string.
+	 *  This is a functional comparison based on attributes. */
+	public boolean isEquivalent(Object o) {
 		if(o instanceof MultiString)
-			return equals(this, (MultiString)o);
+			return isEquivalent(this, (MultiString)o);
 		else if(o instanceof String)
-			return equals(toString(), (String)o);
+			return isEquivalent(toString(), (String)o);
 		else
 			return false;
 	}
 
-	/** Test if the MULTI string is equal to another MULTI string.
+	/** Test if the MULTI string is equivalent to another MULTI string.
+	 *  This is a functional comparison based on attributes.
 	 * @param a MULTI string, may not be null.
 	 * @param b MULTI string, may not be null. 
 	 * @return True if ms1 equals ms2 else false. */
-	public static boolean equals(String a, String b) {
-		return equals(new MultiString(a), new MultiString(b));
+	public static boolean isEquivalent(String a, String b) {
+		return isEquivalent(new MultiString(a), new MultiString(b));
 	}
 
-	/** Test if the MULTI string is equal to another MULTI string.
+	/** Test if the MULTI string is equivalent to another MULTI string.
+	 *  This is a functional comparison based on attributes.
 	 * @param a MultiString, may be null.
 	 * @param b MultiString, may be null. 
 	 * @return True if ms1 equals ms2 else false. */
-	public static boolean equals(MultiString a, MultiString b) {
+	public static boolean isEquivalent(MultiString a, MultiString b) {
 		if(a == null && b == null)
 			return true;
 		if(a == null || b == null)

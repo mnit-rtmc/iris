@@ -36,6 +36,7 @@ public class MultiStringTest extends TestCase {
 		normalization();
 		replacePageOnTime();
 		equals();
+		isEquivalent();
 		getText();
 		getNumPages();
 		etc();
@@ -311,37 +312,51 @@ public class MultiStringTest extends TestCase {
 
 	/** equals */
 	private void equals() {
+		// simple cases
+		assertTrue(new MultiString("").equals(new MultiString("")));
+		assertTrue(new MultiString("").equals(""));
+		assertTrue(new MultiString("XXX").equals("XXX"));
+		assertTrue(new MultiString("XXX").equals(new MultiString("XXX")));
+		assertFalse(new MultiString("XXX").equals("XXY"));
+		assertFalse(new MultiString("XXX").equals(new MultiString("XXY")));
+		// verify normalization used
+		assertTrue(new MultiString("[fo1]abc").equals("[fo1]ABC"));
+		assertTrue(new MultiString("[fo1]abc").equals(new MultiString("[fo1]ABC")));
+	}
+
+	/** isEquivalent */
+	private void isEquivalent() {
 		{
 			MultiString s1 = null;
 			MultiString s2 = null;
-			assertTrue(MultiString.equals(s1, s2));
+			assertTrue(MultiString.isEquivalent(s1, s2));
 		}
-		assertFalse(MultiString.equals(null, new MultiString("")));
-		assertTrue(MultiString.equals("", ""));
-		assertFalse(MultiString.equals("[fo2]LINE1", "[fo1]LINE1"));
-		assertTrue(MultiString.equals("LINE1[nl][nl]", "LINE1"));
-		assertTrue(MultiString.equals("LINE1[nl][np]", "LINE1[np]"));
+		assertFalse(MultiString.isEquivalent(null, new MultiString("")));
+		assertTrue(MultiString.isEquivalent("", ""));
+		assertFalse(MultiString.isEquivalent("[fo2]LINE1", "[fo1]LINE1"));
+		assertTrue(MultiString.isEquivalent("LINE1[nl][nl]", "LINE1"));
+		assertTrue(MultiString.isEquivalent("LINE1[nl][np]", "LINE1[np]"));
 
 		// an absent font specification should equal the default
 		// font number.
 		String deffont = "[fo" + SString.intToString(
 			FontHelper.DEFAULT_FONT_NUM) + "]";
-		assertTrue(MultiString.equals(deffont + "LINE1", "LINE1"));
-		assertTrue(MultiString.equals(deffont + "LINE1[np]" + 
+		assertTrue(MultiString.isEquivalent(deffont + "LINE1", "LINE1"));
+		assertTrue(MultiString.isEquivalent(deffont + "LINE1[np]" + 
 			deffont + "PAGE2", "LINE1[np]PAGE2"));
 
 		// an absent page on-time on a single page message should 
 		// equal an explicit page on-time of the system default for
 		// a single page message (zero).
 		String spgdef = DmsPgTime.getDefaultOn(true).toString();
-		assertTrue(MultiString.equals("[pt" + spgdef + 
+		assertTrue(MultiString.isEquivalent("[pt" + spgdef + 
 			"o]PAGE1", "PAGE1"));
 
 		// an absent page on-timeon a multi-page message should
 		// equal an explicit page on-time of the system default,
 		// for a multi-page message.
 		String mpgdef = DmsPgTime.getDefaultOn(false).toString();
-		assertTrue(MultiString.equals("[pt" + mpgdef + 
+		assertTrue(MultiString.isEquivalent("[pt" + mpgdef + 
 			"o]PAGE1[np]PAGE2", "PAGE1[np]PAGE2"));
 	}
 

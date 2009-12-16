@@ -48,7 +48,7 @@ public class QuickMessageHelper extends BaseHelper {
 			return null;
 		return find(new Checker<QuickMessage>() {
 			public boolean check(QuickMessage qm) {
-				return MultiString.equals(qm.getMulti(), ms);
+				return MultiString.isEquivalent(qm.getMulti(), ms);
 			}
 		});
 	}

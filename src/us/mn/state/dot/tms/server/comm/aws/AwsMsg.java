@@ -449,7 +449,7 @@ public class AwsMsg {
 		SignMessage cur = dms.getMessageCurrent();
 		if(cur != null) {
 			// comparison of MULTI strings
-			boolean eq = MultiString.equals(cur.getMulti(), multi);
+			boolean eq = MultiString.isEquivalent(cur.getMulti(), multi);
 			Log.finest("cur=" + cur.getMulti() + ", new=" + 
 				multi + ", equal=" + eq);
 			return eq; 
