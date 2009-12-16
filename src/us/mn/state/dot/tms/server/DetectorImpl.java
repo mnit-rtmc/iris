@@ -787,7 +787,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,
 		if(!l.equals("FUTURE"))
 			out.print("label='" + l + "' ");
 		if(abandoned)
-			out.print("abandoned='t'");
+			out.print("abandoned='t' ");
 		if(lt != LaneType.NONE && lt != LaneType.MAINLINE)
 			out.print("category='" + lt.suffix + "' ");
 		if(lane > 0)
