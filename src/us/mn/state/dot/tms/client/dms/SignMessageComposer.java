@@ -179,27 +179,28 @@ public class SignMessageComposer extends JPanel {
 	protected Box createAllWidgets() {
 		Box box = Box.createVerticalBox();
 		box.add(pages);
-		if(PgTimeSpinner.getIEnabled())
-			box.add(createOnTimeBox());
-		box.add(createClearBtn());
+		box.add(createLowerBox());
 		return box;
 	}
 
-	/** Create page on-time box */
-	protected Box createOnTimeBox() {
+	/** Create lower box */
+	protected Box createLowerBox() {
 		Box box = Box.createHorizontalBox();
-		JLabel label = new JLabel();
-		label.setLabelFor(timeSpin);
-		label.setHorizontalAlignment(SwingConstants.RIGHT);
-		label.setDisplayedMnemonic('P');
-		// FIXME: move to a new ISpinner class.
-		label.setText(I18N.get("PgOnTimeSpinner"));
-		label.setMaximumSize(label.getMinimumSize());
-		box.add(Box.createHorizontalGlue());
-		box.add(label);
-		box.add(Box.createHorizontalStrut(4));
-		box.add(timeSpin);
-		box.add(Box.createHorizontalGlue());
+		box.add(createClearBtn());
+		if(PgTimeSpinner.getIEnabled()) {
+			JLabel label = new JLabel();
+			label.setLabelFor(timeSpin);
+			label.setHorizontalAlignment(SwingConstants.RIGHT);
+			label.setDisplayedMnemonic('P');
+			// FIXME: move to a new ISpinner class.
+			label.setText(I18N.get("PgOnTimeSpinner"));
+			label.setMaximumSize(label.getMinimumSize());
+			box.add(Box.createHorizontalGlue());
+			box.add(label);
+			box.add(Box.createHorizontalStrut(4));
+			box.add(timeSpin);
+			box.add(Box.createHorizontalGlue());
+		}
 		return box;
 	}
 
@@ -212,6 +213,8 @@ public class SignMessageComposer extends JPanel {
 			}
 		};
 		clearBtn.setMargin(new Insets(0, 6, 0, 6));
+		clearBtn.setFont(new java.awt.Font(("SansSerif"), 
+			java.awt.Font.PLAIN, 12));
 		clearBtn.setMaximumSize(clearBtn.getMinimumSize());
 		panel.add(clearBtn);
 		return panel;
