@@ -87,7 +87,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 			return false;
 		Integer[] ind = proxy.getIndicationsCurrent();
 		for(Integer i: ind) {
-			if(i == null || i != LaneUseIndication.DARK.ordinal())
+			if(i != null && i != LaneUseIndication.DARK.ordinal())
 				return true;
 		}
 		return false;
