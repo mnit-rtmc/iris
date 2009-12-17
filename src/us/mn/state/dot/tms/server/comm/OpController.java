@@ -51,8 +51,17 @@ abstract public class OpController extends Operation {
 	/** Device ID */
 	protected final String id;
 
+	/** Maint status message */
+	private String maintStatus = null;
+
+	/** Set the maint status message.  If non-null, the controller "maint"
+	 * attribute is set to this message when the operation completes. */
+	public void setMaintStatus(String s) {
+		maintStatus = s;
+	}
+
 	/** Error status message */
-	protected String errorStatus = null;
+	private String errorStatus = null;
 
 	/** Set the error status message.  If non-null, the controller "error"
 	 * attribute is set to this message when the operation completes. */
@@ -105,6 +114,8 @@ abstract public class OpController extends Operation {
 
 	/** Cleanup the operation */
 	public void cleanup() {
+		if(maintStatus != null)
+			controller.setMaint(filterMessage(maintStatus));
 		if(errorStatus != null)
 			controller.setError(filterMessage(errorStatus));
 		controller.completeOperation(id, success);

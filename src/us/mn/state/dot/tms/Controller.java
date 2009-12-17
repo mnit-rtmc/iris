@@ -74,7 +74,10 @@ public interface Controller extends SonarObject {
 	/** Set the controller intermediate communication status */
 	void setInterStatus(String s);
 
-	/** Get the controller error status */
+	/** FIXME: add maint attribute for non-critical maintenance status */
+
+	/** Get the controller error status.  If this attribute is set (not
+	 * an empty string), then there is a critical error. */
 	String getError();
 
 	/** Get the timeout error count */

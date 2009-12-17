@@ -76,11 +76,15 @@ public class ShortErrorStatus extends ASN1Integer {
 		"DOOR OPEN", "HUMIDITY"
 	};
 
-	/** Mask of errors reportable for maintenance */
-	static protected final int REPORTABLE_MASK =
-		OTHER | COMMUNICATIONS | POWER | ATTACHED_DEVICE | LAMP |
-		PHOTOCELL | CONTROLLER | TEMPERATURE | CRITICAL_TEMPERATURE |
-		DOOR_OPEN | HUMIDITY;
+	/** Mask of maintenance errors */
+	static protected final int MAINT_MASK =
+		LAMP | PHOTOCELL | TEMPERATURE | CLIMATE_CONTROL | DOOR_OPEN |
+		DRUM_ROTOR | HUMIDITY;
+
+	/** Mask of critical errors */
+	static protected final int CRITICAL_MASK =
+		OTHER | COMMUNICATIONS | POWER | ATTACHED_DEVICE |
+		CONTROLLER | CRITICAL_TEMPERATURE;
 
 	/** Create a new ShortErrorStatus object */
 	public ShortErrorStatus() {
@@ -110,12 +114,15 @@ public class ShortErrorStatus extends ASN1Integer {
 	}
 
 	/** Check if we should report the error for maintenance */
-	public boolean shouldReport() {
+	public boolean isMaintenance() {
 		// PIXEL errors are reported by DMSQueryPixelStatus operation.
 		// MESSAGE errors can pop up for lots of reasons,
 		// so we shouldn't consider them real errors.
-		// CLIMATE CONTROL errors are not reported because of too many
-		// false positives from existing signs (Mn/DOT).
-		return (value & REPORTABLE_MASK) != 0;
+		return (value & MAINT_MASK) != 0;
+	}
+
+	/** Check if the error is critical (prevents operation) */
+	public boolean isCritical() {
+		return (value & CRITICAL_MASK) != 0;
 	}
 }

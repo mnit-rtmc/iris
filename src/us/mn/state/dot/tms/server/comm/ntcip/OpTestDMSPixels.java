@@ -251,7 +251,7 @@ public class OpTestDMSPixels extends OpDMS {
 				Base64.encode(stuck_on.getPixels());
 			dms.setPixelStatus(status);
 			if(total_rows.getInteger() > REPORT_PIXEL_ERROR_COUNT) {
-				setErrorStatus("Too many pixel errors: " +
+				setMaintStatus("Too many pixel errors: " +
 					total_rows.getInteger());
 			}
 		}

@@ -543,6 +543,24 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return failed;
 	}
 
+	/** Controller maint status */
+	protected transient String maint = "";
+
+	/** Set the controller maint status */
+	public void setMaint(String s) {
+		if(s == null)
+			maint = "";
+		else
+			maint = s;
+		// FIXME: add maint attribute
+//		notifyAttribute("maint");
+	}
+
+	/** Get the controller maint status */
+	public String getMaint() {
+		return maint;
+	}
+
 	/** Time stamp of most recent comm failure */
 	protected transient Date failTime = new Date();
 
@@ -562,8 +580,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public String getError() {
 		if(isFailed())
 			return "FAIL @ " + failTime.toString();
-		else
+		// FIXME: split maint attribute
+		else if(!"".equals(error))
 			return error;
+		else
+			return maint;
 	}
 
 	/** Get the number of milliseconds the controller has been failed */
@@ -678,6 +699,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Clear the counters and error status */
 	public void setCounters(boolean clear) {
+		setMaint("");
 		setError("");
 		timeoutErr = 0;
 		notifyAttribute("timeoutErr");
