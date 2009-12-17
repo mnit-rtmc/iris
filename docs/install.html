@@ -9,12 +9,12 @@
 </head>
 
 <body>
-<div id="stamp">6 October 2009</div>
+<div id="stamp">17 December 2009</div>
 <h1>Mn/DOT IRIS Installation and Configuration</h1>
 All commands must be run as the root user.
 <ol>
 	<li>
-		Install <a href="http://fedoraproject.org">Fedora 10</a> onto
+		Install <a href="http://fedoraproject.org">Fedora 12</a> onto
 		the server machine.
 	</li>
 	<li>
@@ -75,7 +75,7 @@ exit
 	<li>
 		Create the tms database and populate it with template file.
 <pre>
-su tms
+su postgres
 createdb tms
 psql tms -f /var/lib/iris/sql/tms-template.sql
 exit
