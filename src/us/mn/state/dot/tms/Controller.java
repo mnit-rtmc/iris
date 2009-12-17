@@ -65,14 +65,11 @@ public interface Controller extends SonarObject {
 	/** Get the administrator notes */
 	String getNotes();
 
+	/** Get the controller operation status */
+	String getOpStatus();
+
 	/** Get the controller communication status */
 	String getStatus();
-
-	/** Get the controller intermediate communication status */
-	String getInterStatus();
-
-	/** Set the controller intermediate communication status */
-	void setInterStatus(String s);
 
 	/** Get the controller maint status.  If this attribute is set (not
 	 * an empty string), there is a non-critical maintenance problem. */

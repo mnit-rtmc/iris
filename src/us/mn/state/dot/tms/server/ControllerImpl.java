@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.Constants;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -489,6 +490,25 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			link.addOperation(o);
 	}
 
+	/** Controller operation status. This is updated during the course of
+	 * an operation to indicate the real-time status. A system attribute is
+	 * used to control if it is activated. */
+	protected transient String opStatus = "";
+
+	/** Get the controller operoption status */
+	public String getOpStatus() {
+		return opStatus;
+	}
+
+	/** Set the controller operation status */
+	public void setOpStatus(String s) {
+		if(s == null || s.equals(opStatus))
+			return;
+		opStatus = s;
+		if(SystemAttrEnum.CONTROLLER_OP_STATUS_ENABLE.getBoolean())
+			notifyAttribute("opStatus");
+	}
+
 	/** Controller communication status */
 	protected transient String status = Constants.UNKNOWN;
 
@@ -760,22 +780,5 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 		super.doDestroy();
 		MainServer.server.removeObject(cabinet);
-	}
-
-	/** Controller intermediate communication status. Unlike the status
-	 *  field, this field is updated during the course of an operation to
-	 *  indicate the real-time status. A system attribute is used to
-	 *  control if interStatus is activated (see ControllerHelper). */
-	protected transient String interStatus = "";
-
-	/** Get the controller intermediate communication status. */
-	public String getInterStatus() {
-		return interStatus;
-	}
-
-	/** Set the controller intermediate communication status. */
-	public void setInterStatus(String s) {
-		interStatus = s;
-		notifyAttribute("interStatus");
 	}
 }

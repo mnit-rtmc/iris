@@ -48,17 +48,6 @@ public class ControllerHelper extends BaseHelper {
 		});
 	}
 
-	/** Update the controller operation intermediate status. This
-	 *  method is in the helper so the system attribute can be used
-	 *  to conrol if the field is updated, so no network traffic will
-	 *  be generated if it is not enabled. */
-	static public void updateInterStatus(Controller ctrl, String is) {
-		// intermediate status enabled?
-		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
-			if(is != null && !is.equals(ctrl.getInterStatus()))
-				ctrl.setInterStatus(is);
-	}
-
 	/** Get a controller location */
 	static public String getLocation(Controller ctrl) {
 		Cabinet cab = ctrl.getCabinet();

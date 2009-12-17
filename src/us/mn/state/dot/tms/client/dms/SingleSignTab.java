@@ -60,11 +60,11 @@ public class SingleSignTab extends FormPanel {
 			return c.getStatus();
 	}
 
-	/** Get the controller intermediate status */
-	static protected String getInterStatus(Controller c) {
+	/** Get the controller operation status */
+	static protected String getOpStatus(Controller c) {
 		String is = "";
 		if(c != null) {
-			is = c.getInterStatus();
+			is = c.getOpStatus();
 			is = (is == null ? "" : is);
 		}
 		return is;
@@ -121,8 +121,8 @@ public class SingleSignTab extends FormPanel {
 	/** Displays the controller status (optional) */
 	protected final JTextField statusTxt = createTextField();
 
-	/** Displays the controller's intermediate status (optional) */
-	protected final JTextField interstatusTxt = createTextField();
+	/** Displays the controller operation status (optional) */
+	protected final JTextField opStatusTxt = createTextField();
 
 	/** Displays the current message deploy time */
 	protected final JTextField deployTxt = createTextField();
@@ -172,9 +172,9 @@ public class SingleSignTab extends FormPanel {
 		statusTxt.setColumns(10);
 		if(SystemAttrEnum.DMS_QUERYMSG_ENABLE.getBoolean())
 			addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt);
-		interstatusTxt.setColumns(10);
-		if(SystemAttrEnum.DMS_INTERMEDIATE_STATUS_ENABLE.getBoolean())
-			addRow("Operation Status", interstatusTxt);
+		opStatusTxt.setColumns(10);
+		if(SystemAttrEnum.CONTROLLER_OP_STATUS_ENABLE.getBoolean())
+			addRow("Operation Status", opStatusTxt);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
 			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
@@ -259,7 +259,7 @@ public class SingleSignTab extends FormPanel {
 		awsControlledCbx.setEnabled(false);
 		operationTxt.setText("");
 		statusTxt.setText("");
-		interstatusTxt.setText("");
+		opStatusTxt.setText("");
 		deployTxt.setText("");
 		expiresTxt.setText(EMPTY_TXT);
 	}
@@ -296,7 +296,7 @@ public class SingleSignTab extends FormPanel {
 			}
 			operationTxt.setText(dms.getOperation());
 			statusTxt.setText(status);
-			updateAttribute(dms.getController(), "interStatus");
+			updateAttribute(dms.getController(), "opStatus");
 		}
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
@@ -315,8 +315,9 @@ public class SingleSignTab extends FormPanel {
 	public void updateAttribute(Controller c, String a) {
 		if(!singleSel())
 			return;
-		if(a.equals("interStatus"))
+		if(a.equals("opStatus")) {
 			if(c == proxy.getController())
-				interstatusTxt.setText(getInterStatus(c));
+				opStatusTxt.setText(getOpStatus(c));
+		}
 	}
 }

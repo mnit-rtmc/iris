@@ -1539,7 +1539,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			SignMessageHelper.getFontNames(sm, 1))));
 
 		desc.append(Kml.descItem("Notes", getNotes()));
-		desc.append(Kml.descItem("Last Operation", getInterStatus()));
+		desc.append(Kml.descItem("Last Operation", getOpStatus()));
 
 		desc.append("<br>Updated by IRIS " + 
 			new Date().toString() + "<br><br>");
@@ -1549,12 +1549,13 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return Kml.htmlDesc(desc.toString());
 	}
 
-	/** Get controller intermediate status */
-	protected String getInterStatus() {
+	/** Get controller operation status */
+	protected String getOpStatus() {
 		Controller c = getController();
 		if(c == null)
 			return "";
-		return c.getInterStatus();
+		else
+			return c.getOpStatus();
 	}
 
 	/** get kml style selector (KmlFolder interface) */
@@ -1595,7 +1596,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		// DMS name, e.g. CMS or DMS
 		final String DMSABBR = I18N.get("dms.abbreviation");
 		final User owner = getOwnerCurrent();	// Avoid race
-		final String istatus = getInterStatus();	// Avoid race
+		final String op_status = getOpStatus();	// Avoid race
 		final GeoLoc loc = getGeoLoc();		// Avoid race
 		out.print("<" + DMSABBR);
 		out.print(XmlWriter.createAttribute("id", getName()));
@@ -1606,9 +1607,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 				owner.getFullName()));
 		}
 		out.print(XmlWriter.createAttribute("notes", getNotes()));
-		if(istatus != null) {
+		if(op_status != null) {
 			out.print(XmlWriter.createAttribute("last_operation",
-				istatus));
+				op_status));
 		}
 		if(loc != null) {
 			out.print(XmlWriter.createAttribute("geoloc",

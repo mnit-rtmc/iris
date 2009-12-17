@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dmslite;
 import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -273,7 +272,7 @@ abstract public class OpDms extends OpDevice {
 		if(m_retry > 0 && !last)
 			is = "(attempt " + String.valueOf(m_retry + 1) + 
 				") " + is;
-		ControllerHelper.updateInterStatus(controller, is);
+		controller.setOpStatus(is);
 	}
 
 	/** Return an intermediate status XML element */
