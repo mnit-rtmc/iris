@@ -121,6 +121,7 @@ public class DmsCache {
 		client.populate(quick_messages);
 		client.populate(dmss);
 		dmss.ignoreAttribute("operation");
+		dmss.ignoreAttribute("opStatus");
 		client.populate(sign_groups);
 		client.populate(dms_sign_groups);
 		client.populate(sign_text);

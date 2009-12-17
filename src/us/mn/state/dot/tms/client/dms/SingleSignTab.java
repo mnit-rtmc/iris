@@ -162,7 +162,7 @@ public class SingleSignTab extends FormPanel {
 		if(SystemAttrEnum.DMS_QUERYMSG_ENABLE.getBoolean())
 			addRow(I18N.get("SingleSignTab.ControllerStatus"), statusTxt);
 		opStatusTxt.setColumns(10);
-		if(SystemAttrEnum.CONTROLLER_OP_STATUS_ENABLE.getBoolean())
+		if(SystemAttrEnum.DMS_OP_STATUS_ENABLE.getBoolean())
 			addRow("Operation Status", opStatusTxt);
 		add("Deployed", deployTxt);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean()) {
