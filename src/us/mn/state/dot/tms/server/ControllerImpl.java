@@ -552,8 +552,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			maint = "";
 		else
 			maint = s;
-		// FIXME: add maint attribute
-//		notifyAttribute("maint");
+		notifyAttribute("maint");
 	}
 
 	/** Get the controller maint status */

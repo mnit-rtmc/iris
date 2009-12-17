@@ -194,8 +194,12 @@ public class DMSHelper extends BaseHelper {
 	static public boolean needsMaintenance(DMS proxy) {
 		if(isFailed(proxy) || !isActive(proxy))
 			return false;
-		// FIXME: add maint attribute
-		return hasCriticalError(proxy);
+		Controller ctr = proxy.getController();
+		if(ctr != null) {
+			String m = ctr.getMaint();
+			return !m.equals("");
+		} else
+			return hasCriticalError(proxy);
 	}
 
 	/** Test if a DMS has a critical error */
