@@ -53,7 +53,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Lookup an indication on a DMS */
 	protected Integer lookupIndication(DMSImpl dms) {
-		if(dms.isFailed() || DMSHelper.needsMaintenance(dms))
+		if(dms.isFailed() || DMSHelper.hasCriticalError(dms))
 			return null;
 		else {
 			SignMessage sm = dms.getMessageCurrent();
