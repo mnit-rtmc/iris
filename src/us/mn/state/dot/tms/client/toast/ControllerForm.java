@@ -101,11 +101,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Firmware version */
 	protected final JLabel version = new JLabel();
 
-	/** Status */
-	protected final JLabel status = new JLabel();
-
 	/** Maint status */
 	protected final JLabel maint = new JLabel();
+
+	/** Status */
+	protected final JLabel status = new JLabel();
 
 	/** Error detail */
 	protected final JLabel error = new JLabel();
@@ -319,8 +319,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		buttonPnl.add(reset);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Version:", version);
-		panel.addRow("Status:", status);
 		panel.addRow("Maint Status:", maint);
+		panel.addRow("Status:", status);
 		panel.addRow("Error Detail:", error);
 		panel.addRow("Timeout Errors:", timeout_lbl);
 		panel.addRow("Checksum Errors:", checksum_lbl);
@@ -349,10 +349,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			active.setSelected(proxy.getActive());
 		if(a == null || a.equals("version"))
 			version.setText(proxy.getVersion());
-		if(a == null || a.equals("status"))
-			status.setText(proxy.getStatus());
 		if(a == null || a.equals("maint"))
 			maint.setText(proxy.getMaint());
+		if(a == null || a.equals("status"))
+			status.setText(proxy.getStatus());
 		if(a == null || a.equals("error"))
 			error.setText(proxy.getError());
 		if(a == null || a.equals("timeoutErr")) {
