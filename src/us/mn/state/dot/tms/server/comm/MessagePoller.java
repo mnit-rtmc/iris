@@ -194,7 +194,7 @@ abstract public class MessagePoller extends Thread {
 			o.handleCommError(EventType.CONTROLLER_ERROR,
 				exceptionMessage(e));
 			o.setFailed();
-			o.setErrorStatus(exceptionMessage(e));
+			o.setMaintStatus(exceptionMessage(e));
 		}
 		catch(SocketTimeoutException e) {
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR,
