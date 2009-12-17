@@ -580,11 +580,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public String getError() {
 		if(isFailed())
 			return "FAIL @ " + failTime.toString();
-		// FIXME: split maint attribute
-		else if(!"".equals(error))
-			return error;
 		else
-			return maint;
+			return error;
 	}
 
 	/** Get the number of milliseconds the controller has been failed */
