@@ -29,7 +29,6 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -58,16 +57,6 @@ public class SingleSignTab extends FormPanel {
 			return "???";
 		else
 			return c.getStatus();
-	}
-
-	/** Get the controller operation status */
-	static protected String getOpStatus(Controller c) {
-		String is = "";
-		if(c != null) {
-			is = c.getOpStatus();
-			is = (is == null ? "" : is);
-		}
-		return is;
 	}
 
 	/** Formatter for displaying the hour and minute */
@@ -296,7 +285,7 @@ public class SingleSignTab extends FormPanel {
 			}
 			operationTxt.setText(dms.getOperation());
 			statusTxt.setText(status);
-			updateAttribute(dms.getController(), "opStatus");
+			opStatusTxt.setText(dms.getOpStatus());
 		}
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
@@ -308,16 +297,5 @@ public class SingleSignTab extends FormPanel {
 		}
 		if(a == null || a.equals("awsControlled"))
 			awsControlledCbx.setSelected(dms.getAwsControlled());
-	}
-
-	/** Update one attribute on the form using the controller.
-	 *  @see DMSDispatcher */
-	public void updateAttribute(Controller c, String a) {
-		if(!singleSel())
-			return;
-		if(a.equals("opStatus")) {
-			if(c == proxy.getController())
-				opStatusTxt.setText(getOpStatus(c));
-		}
 	}
 }

@@ -218,6 +218,23 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			return o.getOperationDescription();
 	}
 
+	/** Device operation status. This is updated during the course of an
+	 * operation to indicate the real-time status. */
+	protected transient String opStatus = "";
+
+	/** Get the device operoption status */
+	public String getOpStatus() {
+		return opStatus;
+	}
+
+	/** Set the device operation status */
+	public void setOpStatus(String s) {
+		if(s == null || s.equals(opStatus))
+			return;
+		opStatus = s;
+		notifyAttribute("opStatus");
+	}
+
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		// Don't allow a device to be destroyed if it is assigned to

@@ -272,7 +272,7 @@ abstract public class OpDms extends OpDevice {
 		if(m_retry > 0 && !last)
 			is = "(attempt " + String.valueOf(m_retry + 1) + 
 				") " + is;
-		controller.setOpStatus(is);
+		m_dms.setOpStatus(is);
 	}
 
 	/** Return an intermediate status XML element */

@@ -65,9 +65,6 @@ public interface Controller extends SonarObject {
 	/** Get the administrator notes */
 	String getNotes();
 
-	/** Get the controller operation status */
-	String getOpStatus();
-
 	/** Get the controller communication status */
 	String getStatus();
 

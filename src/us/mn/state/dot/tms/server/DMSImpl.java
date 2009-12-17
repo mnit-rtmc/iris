@@ -1549,15 +1549,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return Kml.htmlDesc(desc.toString());
 	}
 
-	/** Get controller operation status */
-	protected String getOpStatus() {
-		Controller c = getController();
-		if(c == null)
-			return "";
-		else
-			return c.getOpStatus();
-	}
-
 	/** get kml style selector (KmlFolder interface) */
 	public KmlStyleSelector getKmlStyleSelector() {
 		KmlStyle style = new KmlStyleImpl();

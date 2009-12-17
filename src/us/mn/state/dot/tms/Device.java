@@ -44,4 +44,7 @@ public interface Device extends ControllerIO {
 
 	/** Get the operation description */
 	String getOperation();
+
+	/** Get the operation status */
+	String getOpStatus();
 }

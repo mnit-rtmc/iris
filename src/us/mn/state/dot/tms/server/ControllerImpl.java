@@ -490,25 +490,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			link.addOperation(o);
 	}
 
-	/** Controller operation status. This is updated during the course of
-	 * an operation to indicate the real-time status. A system attribute is
-	 * used to control if it is activated. */
-	protected transient String opStatus = "";
-
-	/** Get the controller operoption status */
-	public String getOpStatus() {
-		return opStatus;
-	}
-
-	/** Set the controller operation status */
-	public void setOpStatus(String s) {
-		if(s == null || s.equals(opStatus))
-			return;
-		opStatus = s;
-		if(SystemAttrEnum.CONTROLLER_OP_STATUS_ENABLE.getBoolean())
-			notifyAttribute("opStatus");
-	}
-
 	/** Controller communication status */
 	protected transient String status = Constants.UNKNOWN;
 

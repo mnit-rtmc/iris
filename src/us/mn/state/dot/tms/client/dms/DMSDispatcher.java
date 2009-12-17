@@ -37,7 +37,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -144,9 +143,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Currently watching DMS */
 	protected DMS watching;
 
-	/** Controllers type cache */
-	protected final TypeCache<Controller> m_controllers;
-
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session session, DMSManager manager) {
 		super(new BorderLayout());
@@ -172,8 +168,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		clearSelected();
 		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
-		m_controllers = st.getConCache().getControllers();
-		m_controllers.addProxyListener(m_clistener);
 	}
 
 	/** Create a component to deploy signs */
@@ -222,18 +216,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		}
 	}
 
-	/** Proxy listener for controller proxies */
-	protected final ProxyListener<Controller> m_clistener =
-		new ProxyListener<Controller>()
-	{
-		public void proxyAdded(Controller p) {}
-		public void enumerationComplete() {}
-		public void proxyRemoved(Controller p) {}
-		public void proxyChanged(Controller c, String a) {
-			singleTab.updateAttribute(c, a);
-		}
-	};
-
 	/** Get the selected DMS (if a single sign is selected) */
 	protected DMS getSingleSelection() {
 		if(selectionModel.getSelectedCount() == 1) {
@@ -247,7 +229,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	public void dispose() {
 		multipleTab.dispose();
 		selectionModel.removeProxySelectionListener(this);
-		m_controllers.removeProxyListener(m_clistener);
 		cache.removeProxyListener(this);
 		if(watching != null) {
 			cache.ignoreObject(watching);
