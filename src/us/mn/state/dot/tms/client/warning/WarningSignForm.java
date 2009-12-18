@@ -39,7 +39,7 @@ public class WarningSignForm extends AbstractForm {
 	static protected final String TITLE = "Warning Signs";
 
 	/** Table model for warning signs */
-	protected WarningSignModel w_model;
+	protected final WarningSignModel w_model;
 
 	/** Table to hold the warning signs */
 	protected final ZTable w_table = new ZTable();
@@ -53,19 +53,18 @@ public class WarningSignForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** Warning sign type cache */
-	protected final TypeCache<WarningSign> cache;
-
 	/** Create a new warning sign form */
 	public WarningSignForm(Session s, TypeCache<WarningSign> c) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		w_model = new WarningSignModel(c,
+			session.getSonarState().getNamespace(),
+			session.getUser());
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		w_model = new WarningSignModel(cache);
+		w_model.initialize();
 		add(createWarningSignPanel());
 	}
 
@@ -122,9 +121,9 @@ public class WarningSignForm extends AbstractForm {
 
 	/** Change the selected warning sign */
 	protected void selectWarningSign() {
-		int row = w_table.getSelectedRow();
-		properties.setEnabled(row >= 0 && !w_model.isLastRow(row));
-		del_sign.setEnabled(row >= 0 && !w_model.isLastRow(row));
+		WarningSign ws = w_model.getProxy(w_table.getSelectedRow());
+		properties.setEnabled(ws != null);
+		del_sign.setEnabled(w_model.canRemove(ws));
 	}
 
 	/** Show the properties form for a warning sign */

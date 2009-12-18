@@ -16,6 +16,9 @@ package us.mn.state.dot.tms.client.warning;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -37,10 +40,19 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 	/** Location column number */
 	static protected final int COL_LOCATION = 1;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new warning sign table model */
-	public WarningSignModel(TypeCache<WarningSign> c) {
+	public WarningSignModel(TypeCache<WarningSign> c, Namespace ns,
+		User u)
+	{
 		super(c);
-		initialize();
+		namespace = ns;
+		user = u;
 	}
 
 	/** Get the count of columns in the table */
@@ -54,11 +66,10 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 		if(s == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return s.getName();
-			case COL_LOCATION:
-				return GeoLocHelper.getDescription(
-					s.getGeoLoc());
+		case COL_NAME:
+			return s.getName();
+		case COL_LOCATION:
+			return GeoLocHelper.getDescription(s.getGeoLoc());
 		}
 		return null;
 	}
@@ -84,5 +95,10 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 		m.addColumn(createColumn(COL_NAME, 200, "Warning Sign"));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		return m;
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(WarningSign ws) {
+		return ws != null && namespace.canRemove(user, new Name(ws));
 	}
 }
