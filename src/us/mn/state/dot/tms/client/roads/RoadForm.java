@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -44,14 +46,10 @@ public class RoadForm extends AbstractForm {
 	/** Button to delete the selected road */
 	protected final JButton del_road = new JButton("Delete");
 
-	/** Road type cache */
-	protected final TypeCache<Road> cache;
-
 	/** Create a new road form */
-	public RoadForm(TypeCache<Road> c) {
+	public RoadForm(TypeCache<Road> c, Namespace ns, User u) {
 		super(TITLE);
-		cache = c;
-		model = new RoadModel(cache);
+		model = new RoadModel(c, ns, u);
 	}
 
 	/** Initializze the widgets in the form */
@@ -95,7 +93,7 @@ public class RoadForm extends AbstractForm {
 
 	/** Change the selected road */
 	protected void selectRoad() {
-		int row = table.getSelectedRow();
-		del_road.setEnabled(row >= 0 && !model.isLastRow(row));
+		Road r = model.getProxy(table.getSelectedRow());
+		del_road.setEnabled(model.canRemove(r));
 	}
 }

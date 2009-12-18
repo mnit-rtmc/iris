@@ -20,6 +20,9 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.Direction;
@@ -64,9 +67,17 @@ public class RoadModel extends ProxyTableModel<Road> {
 			DIRECTION.add(d);
 	}
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new road table model */
-	public RoadModel(TypeCache<Road> c) {
+	public RoadModel(TypeCache<Road> c, Namespace ns, User u) {
 		super(c);
+		namespace = ns;
+		user = u;
 	}
 
 	/** Get the count of columns in the table */
@@ -163,5 +174,13 @@ public class RoadModel extends ProxyTableModel<Road> {
 		m.addColumn(createDirectionColumn());
 		m.addColumn(createAltDirColumn());
 		return m;
+	}
+
+	/** Check if the user can remove a road */
+	public boolean canRemove(Road r) {
+		if(r == null)
+			return false;
+		return namespace.canRemove(user, new Name(Road.SONAR_TYPE,
+			r.getName()));
 	}
 }

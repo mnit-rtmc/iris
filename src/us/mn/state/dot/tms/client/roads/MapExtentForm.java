@@ -46,22 +46,10 @@ public class MapExtentForm extends AbstractForm {
 	/** Button to delete the selected map extent */
 	protected final JButton del_btn = new JButton("Delete");
 
-	/** Map extent type cache */
-	protected final TypeCache<MapExtent> cache;
-
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new map extent form */
 	public MapExtentForm(TypeCache<MapExtent> c, Namespace ns, User u) {
 		super(TITLE);
-		cache = c;
-		namespace = ns;
-		user = u;
-		model = new MapExtentModel(cache, namespace, user);
+		model = new MapExtentModel(c, ns, u);
 	}
 
 	/** Initializze the widgets in the form */

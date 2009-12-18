@@ -106,7 +106,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('R');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RoadForm(state.getRoads()));
+				desktop.show(new RoadForm(state.getRoads(),
+					state.getNamespace(), user));
 			}
 		};
 		add(item);
