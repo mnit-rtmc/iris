@@ -43,18 +43,17 @@ public class CabinetStyleForm extends AbstractForm {
 	/** Button to delete the selected cabinet style */
 	protected final JButton del_button = new JButton("Delete");
 
-	/** Cabinet Style type cache */
-	protected final TypeCache<CabinetStyle> cache;
-
 	/** Create a new cabinet style form */
 	public CabinetStyleForm(SonarState state) {
 		super(TITLE);
-		cache = state.getConCache().getCabinetStyles();
+		TypeCache<CabinetStyle> cache =
+			state.getConCache().getCabinetStyles();
+		model = new CabinetStyleModel(cache);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new CabinetStyleModel(cache);
+		model.initialize();
 		add(createCabinetStylePanel());
 	}
 

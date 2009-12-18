@@ -46,7 +46,6 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(TypeCache<CabinetStyle> c) {
 		super(c);
-		initialize();
 	}
 
 	/** Get the count of columns in the table */
@@ -60,12 +59,12 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		if(c == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return c.getName();
-			case COL_DIP:
-				return c.getDip();
-			default:
-				return null;
+		case COL_NAME:
+			return c.getName();
+		case COL_DIP:
+			return c.getDip();
+		default:
+			return null;
 		}
 	}
 
@@ -82,13 +81,13 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		String v = value.toString().trim();
 		CabinetStyle c = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_DIP:
-				c.setDip((Integer)value);
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_DIP:
+			c.setDip((Integer)value);
+			break;
 		}
 	}
 
