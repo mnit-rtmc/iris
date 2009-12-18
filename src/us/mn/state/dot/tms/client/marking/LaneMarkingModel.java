@@ -103,4 +103,9 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 		return namespace.canAdd(user, new Name(LaneMarking.SONAR_TYPE,
 			"name"));
 	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(LaneMarking lm) {
+		return lm != null && namespace.canRemove(user, new Name(lm));
+	}
 }

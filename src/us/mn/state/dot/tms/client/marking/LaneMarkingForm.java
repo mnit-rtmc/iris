@@ -39,7 +39,7 @@ public class LaneMarkingForm extends AbstractForm {
 	static protected final String TITLE = "Lane Markings";
 
 	/** Table model for lane markings */
-	protected LaneMarkingModel m_model;
+	protected final LaneMarkingModel m_model;
 
 	/** Table to hold the lane markings */
 	protected final ZTable m_table = new ZTable();
@@ -53,21 +53,18 @@ public class LaneMarkingForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** Lane marking type cache */
-	protected final TypeCache<LaneMarking> cache;
-
 	/** Create a new lane marking form */
 	public LaneMarkingForm(Session s, TypeCache<LaneMarking> c) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		m_model = new LaneMarkingModel(c,
+			session.getSonarState().getNamespace(),
+			session.getUser());
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		m_model = new LaneMarkingModel(cache,
-			session.getSonarState().getNamespace(),
-			session.getUser());
+		m_model.initialize();
 		add(createLaneMarkingPanel());
 	}
 
@@ -124,9 +121,9 @@ public class LaneMarkingForm extends AbstractForm {
 
 	/** Change the selected lane marking */
 	protected void selectLaneMarking() {
-		int row = m_table.getSelectedRow();
-		properties.setEnabled(row >= 0 && !m_model.isLastRow(row));
-		del_btn.setEnabled(row >= 0 && !m_model.isLastRow(row));
+		LaneMarking lm = m_model.getProxy(m_table.getSelectedRow());
+		properties.setEnabled(lm != null);
+		del_btn.setEnabled(m_model.canRemove(lm));
 	}
 
 	/** Show the properties form for a lane marking */
