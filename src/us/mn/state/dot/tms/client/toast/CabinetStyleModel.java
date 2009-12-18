@@ -144,9 +144,6 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(CabinetStyle cs) {
-		if(cs != null)
-			return namespace.canRemove(user, new Name(cs));
-		else
-			return false;
+		return cs != null && namespace.canRemove(user, new Name(cs));
 	}
 }

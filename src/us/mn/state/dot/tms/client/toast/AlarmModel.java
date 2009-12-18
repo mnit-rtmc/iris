@@ -167,9 +167,6 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(Alarm a) {
-		if(a != null)
-			return namespace.canRemove(user, new Name(a));
-		else
-			return false;
+		return a != null && namespace.canRemove(user, new Name(a));
 	}
 }

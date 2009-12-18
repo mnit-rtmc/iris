@@ -150,15 +150,11 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 
 	/** Check if the user can update */
 	public boolean canUpdate(MapExtent me) {
-		return namespace.canUpdate(user, new Name(MapExtent.SONAR_TYPE,
-			me.getName()));
+		return namespace.canUpdate(user, new Name(me));
 	}
 
 	/** Check if the user can remove a map extent */
 	public boolean canRemove(MapExtent me) {
-		if(me == null)
-			return false;
-		return namespace.canRemove(user, new Name(MapExtent.SONAR_TYPE,
-			me.getName()));
+		return me != null && namespace.canRemove(user, new Name(me));
 	}
 }

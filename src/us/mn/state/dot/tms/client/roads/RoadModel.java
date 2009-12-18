@@ -178,9 +178,6 @@ public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Check if the user can remove a road */
 	public boolean canRemove(Road r) {
-		if(r == null)
-			return false;
-		return namespace.canRemove(user, new Name(Road.SONAR_TYPE,
-			r.getName()));
+		return r != null && namespace.canRemove(user, new Name(r));
 	}
 }
