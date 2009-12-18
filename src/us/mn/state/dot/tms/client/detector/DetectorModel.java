@@ -22,6 +22,9 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -73,10 +76,17 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 			LANE_TYPES.add(lt);
 	}
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new detector table model */
-	public DetectorModel(TypeCache<Detector> c) {
+	public DetectorModel(TypeCache<Detector> c, Namespace ns, User u) {
 		super(c);
-		initialize();
+		namespace = ns;
+		user = u;
 	}
 
 	/** Create an empty set of proxies */
@@ -113,26 +123,26 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		if(d == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return d.getName();
-			case COL_LABEL:
-				return DetectorHelper.getLabel(d);
-			case COL_LANE_TYPE:
-				return LANE_TYPES.get(d.getLaneType());
-			case COL_LANE_NUMBER:
-				return d.getLaneNumber();
-			case COL_ABANDONED:
-				return d.getAbandoned();
-			case COL_FORCE_FAIL:
-				return d.getForceFail();
-			case COL_FIELD_LENGTH:
-				return d.getFieldLength();
-			case COL_FAKE:
-				return d.getFake();
-			case COL_NOTES:
-				return d.getNotes();
-			default:
-				return null;
+		case COL_NAME:
+			return d.getName();
+		case COL_LABEL:
+			return DetectorHelper.getLabel(d);
+		case COL_LANE_TYPE:
+			return LANE_TYPES.get(d.getLaneType());
+		case COL_LANE_NUMBER:
+			return d.getLaneNumber();
+		case COL_ABANDONED:
+			return d.getAbandoned();
+		case COL_FORCE_FAIL:
+			return d.getForceFail();
+		case COL_FIELD_LENGTH:
+			return d.getFieldLength();
+		case COL_FAKE:
+			return d.getFake();
+		case COL_NOTES:
+			return d.getNotes();
+		default:
+			return null;
 		}
 	}
 
@@ -149,34 +159,34 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		String v = value.toString().trim();
 		Detector d = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_LANE_TYPE:
-				d.setLaneType((short)LANE_TYPES.indexOf(value));
-				break;
-			case COL_LANE_NUMBER:
-				d.setLaneNumber(((Number)value).shortValue());
-				break;
-			case COL_ABANDONED:
-				d.setAbandoned((Boolean)value);
-				break;
-			case COL_FORCE_FAIL:
-				d.setForceFail((Boolean)value);
-				break;
-			case COL_FIELD_LENGTH:
-				d.setFieldLength(((Number)value).floatValue());
-				break;
-			case COL_FAKE:
-				if(v.length() > 0)
-					d.setFake(v);
-				else
-					d.setFake(null);
-				break;
-			case COL_NOTES:
-				d.setNotes(v);
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_LANE_TYPE:
+			d.setLaneType((short)LANE_TYPES.indexOf(value));
+			break;
+		case COL_LANE_NUMBER:
+			d.setLaneNumber(((Number)value).shortValue());
+			break;
+		case COL_ABANDONED:
+			d.setAbandoned((Boolean)value);
+			break;
+		case COL_FORCE_FAIL:
+			d.setForceFail((Boolean)value);
+			break;
+		case COL_FIELD_LENGTH:
+			d.setFieldLength(((Number)value).floatValue());
+			break;
+		case COL_FAKE:
+			if(v.length() > 0)
+				d.setFake(v);
+			else
+				d.setFake(null);
+			break;
+		case COL_NOTES:
+			d.setNotes(v);
+			break;
 		}
 	}
 
@@ -202,5 +212,10 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		JComboBox combo = new JComboBox(LaneType.getDescriptions());
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(Detector d) {
+		return d != null && namespace.canRemove(user, new Name(d));
 	}
 }

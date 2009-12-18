@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -36,7 +38,7 @@ public class DetectorForm extends AbstractForm {
 	static protected final String TITLE = "Detectors";
 
 	/** Table model for detectors */
-	protected DetectorModel model;
+	protected final DetectorModel model;
 
 	/** Table to hold the detector list */
 	protected final ZTable table = new ZTable();
@@ -44,18 +46,15 @@ public class DetectorForm extends AbstractForm {
 	/** Button to delete the selected detector */
 	protected final JButton del_button = new JButton("Delete");
 
-	/** Detector type cache */
-	protected final TypeCache<Detector> cache;
-
 	/** Create a new detector form */
-	public DetectorForm(TypeCache<Detector> c) {
+	public DetectorForm(TypeCache<Detector> c, Namespace ns, User u) {
 		super(TITLE);
-		cache = c;
+		model = new DetectorModel(c, ns, u);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new DetectorModel(cache);
+		model.initialize();
 		add(createDetectorPanel());
 	}
 
@@ -95,7 +94,7 @@ public class DetectorForm extends AbstractForm {
 
 	/** Change the selected detector */
 	protected void selectDetector() {
-		int row = table.getSelectedRow();
-		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
+		Detector d = model.getProxy(table.getSelectedRow());
+		del_button.setEnabled(model.canRemove(d));
 	}
 }
