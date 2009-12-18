@@ -36,7 +36,7 @@ public class RoadForm extends AbstractForm {
 	static protected final String TITLE = "Roads";
 
 	/** Table model for roads */
-	protected RoadModel model;
+	protected final RoadModel model;
 
 	/** Table to hold the road list */
 	protected final ZTable table = new ZTable();
@@ -51,11 +51,12 @@ public class RoadForm extends AbstractForm {
 	public RoadForm(TypeCache<Road> c) {
 		super(TITLE);
 		cache = c;
+		model = new RoadModel(cache);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new RoadModel(cache);
+		model.initialize();
 		add(createRoadPanel());
 	}
 
