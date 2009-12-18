@@ -84,6 +84,7 @@ public class MainServer {
 	static public void main(String[] args) {
 		try {
 			redirectStdStreams();
+			checkAssert();
 			sanityChecks();
 			Properties props = PropertyLoader.load(PROP_FILE);
 			store = createStore(props);
@@ -158,5 +159,14 @@ public class MainServer {
 		FLUSH.addJob(new XmlConfigJob(1000));
 		FLUSH.addJob(new DmsXmlJob());
 		FLUSH.addJob(new IncidentXmlJob());
+	}
+
+	/** Check assertion status */
+	static protected void checkAssert() {
+		boolean assertsEnabled = false;
+		// Intentional assignment side-effect
+		assert assertsEnabled = true;
+		System.err.println("Assertions are turned " +
+			(assertsEnabled ? "on" : "off") + ".");
 	}
 }
