@@ -194,12 +194,14 @@ public class DMSHelper extends BaseHelper {
 	static public boolean needsMaintenance(DMS proxy) {
 		if(isFailed(proxy) || !isActive(proxy))
 			return false;
+		if(hasCriticalError(proxy))
+			return true;
 		Controller ctr = proxy.getController();
 		if(ctr != null) {
 			String m = ctr.getMaint();
 			return !m.equals("");
 		} else
-			return hasCriticalError(proxy);
+			return false;
 	}
 
 	/** Test if a DMS has a critical error */
