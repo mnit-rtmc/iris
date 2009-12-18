@@ -36,7 +36,7 @@ public class CabinetStyleForm extends AbstractForm {
 	static protected final String TITLE = "Cabinet Styles";
 
 	/** Table model for cabinet styles */
-	protected CabinetStyleModel model;
+	protected final CabinetStyleModel model;
 
 	/** Table to hold the cabinet style list */
 	protected final ZTable table = new ZTable();

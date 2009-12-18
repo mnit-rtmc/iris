@@ -100,7 +100,8 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('a');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new AlarmForm(state.getAlarms()));
+				desktop.show(new AlarmForm(state.getAlarms(),
+					state.getNamespace(), user));
 			}
 		};
 		add(item);

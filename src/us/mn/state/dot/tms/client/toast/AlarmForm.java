@@ -19,6 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -34,7 +36,7 @@ public class AlarmForm extends AbstractForm {
 	static protected final String TITLE = "Alarms";
 
 	/** Table model for alarms */
-	protected AlarmModel model;
+	protected final AlarmModel model;
 
 	/** Table to hold the alarm list */
 	protected final ZTable table = new ZTable();
@@ -42,18 +44,15 @@ public class AlarmForm extends AbstractForm {
 	/** Button to delete the selected alarm */
 	protected final JButton del_button = new JButton("Delete");
 
-	/** Alarm type cache */
-	protected final TypeCache<Alarm> cache;
-
 	/** Create a new alarm form */
-	public AlarmForm(TypeCache<Alarm> c) {
+	public AlarmForm(TypeCache<Alarm> c, Namespace ns, User u) {
 		super(TITLE);
-		cache = c;
+		model = new AlarmModel(c, ns, u);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new AlarmModel(cache);
+		model.initialize();
 		add(createAlarmPanel());
 	}
 
@@ -92,7 +91,7 @@ public class AlarmForm extends AbstractForm {
 
 	/** Change the selected alarm */
 	protected void selectAlarm() {
-		int row = table.getSelectedRow();
-		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
+		Alarm al = model.getProxy(table.getSelectedRow());
+		del_button.setEnabled(model.canRemove(al));
 	}
 }

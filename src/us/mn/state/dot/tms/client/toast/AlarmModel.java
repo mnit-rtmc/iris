@@ -22,6 +22,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -51,10 +54,17 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 	/** Pin column number */
 	static protected final int COL_PIN = 4;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new alarm table model */
-	public AlarmModel(TypeCache<Alarm> c) {
+	public AlarmModel(TypeCache<Alarm> c, Namespace ns, User u) {
 		super(c);
-		initialize();
+		namespace = ns;
+		user = u;
 	}
 
 	/** Get the count of columns in the table */
@@ -68,18 +78,18 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 		if(a == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return a.getName();
-			case COL_DESCRIPTION:
-				return a.getDescription();
-			case COL_STATE:
-				return a.getState();
-			case COL_CONTROLLER:
-				return a.getController();
-			case COL_PIN:
-				return a.getPin();
-			default:
-				return null;
+		case COL_NAME:
+			return a.getName();
+		case COL_DESCRIPTION:
+			return a.getDescription();
+		case COL_STATE:
+			return a.getState();
+		case COL_CONTROLLER:
+			return a.getController();
+		case COL_PIN:
+			return a.getPin();
+		default:
+			return null;
 		}
 	}
 
@@ -96,13 +106,13 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 		String v = value.toString().trim();
 		Alarm a = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_DESCRIPTION:
-				a.setDescription(v);
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_DESCRIPTION:
+			a.setDescription(v);
+			break;
 		}
 	}
 
@@ -153,5 +163,13 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 			}
 			return label;
 		}
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(Alarm a) {
+		if(a != null)
+			return namespace.canRemove(user, new Name(a));
+		else
+			return false;
 	}
 }
