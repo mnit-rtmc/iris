@@ -38,7 +38,7 @@ public class MapExtentForm extends AbstractForm {
 	static protected final String TITLE = "Map Extents";
 
 	/** Table model */
-	protected MapExtentModel model;
+	protected final MapExtentModel model;
 
 	/** Table to hold the map extents */
 	protected final ZTable table = new ZTable();
@@ -61,11 +61,12 @@ public class MapExtentForm extends AbstractForm {
 		cache = c;
 		namespace = ns;
 		user = u;
+		model = new MapExtentModel(cache, namespace, user);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new MapExtentModel(cache, namespace, user);
+		model.initialize();
 		add(createMapExtentPanel());
 	}
 

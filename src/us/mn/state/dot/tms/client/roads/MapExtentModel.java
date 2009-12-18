@@ -70,7 +70,6 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 		super(c);
 		namespace = ns;
 		user = u;
-		initialize();
 	}
 
 	/** Get the count of columns in the table */
