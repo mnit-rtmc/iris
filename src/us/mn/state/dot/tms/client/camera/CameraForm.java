@@ -40,7 +40,7 @@ public class CameraForm extends AbstractForm {
 	static protected final String TITLE = "Cameras";
 
 	/** Table model for cameras */
-	protected CameraModel c_model;
+	protected final CameraModel c_model;
 
 	/** Table to hold the camera list */
 	protected final ZTable c_table = new ZTable();
@@ -54,19 +54,18 @@ public class CameraForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** Camera type cache */
-	protected final TypeCache<Camera> cache;
-
 	/** Create a new camera form */
 	public CameraForm(Session s, TypeCache<Camera> c) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		c_model = new CameraModel(c,
+			session.getSonarState().getNamespace(),
+			session.getUser());
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		c_model = new CameraModel(cache);
+		c_model.initialize();
 		add(createCameraPanel());
 	}
 
@@ -123,9 +122,9 @@ public class CameraForm extends AbstractForm {
 
 	/** Change the selected camera */
 	protected void selectCamera() {
-		int row = c_table.getSelectedRow();
-		properties.setEnabled(row >= 0 && !c_model.isLastRow(row));
-		del_camera.setEnabled(row >= 0 && !c_model.isLastRow(row));
+		Camera c = c_model.getProxy(c_table.getSelectedRow());
+		properties.setEnabled(c != null);
+		del_camera.setEnabled(c_model.canRemove(c));
 	}
 
 	/** Show the properties form for a camera */

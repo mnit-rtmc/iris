@@ -16,6 +16,9 @@ package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -40,10 +43,17 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	/** Publish column number */
 	static protected final int COL_PUBLISH = 2;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new camera table model */
-	public CameraModel(TypeCache<Camera> c) {
+	public CameraModel(TypeCache<Camera> c, Namespace ns, User u) {
 		super(c);
-		initialize();
+		namespace = ns;
+		user = u;
 	}
 
 	/** Get the count of columns in the table */
@@ -57,13 +67,13 @@ public class CameraModel extends ProxyTableModel<Camera> {
 		if(c == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return c.getName();
-			case COL_LOCATION:
-				return GeoLocHelper.getDescription(
-					c.getGeoLoc());
-			case COL_PUBLISH:
-				return c.getPublish();
+		case COL_NAME:
+			return c.getName();
+		case COL_LOCATION:
+			return GeoLocHelper.getDescription(
+				c.getGeoLoc());
+		case COL_PUBLISH:
+			return c.getPublish();
 		}
 		return null;
 	}
@@ -87,14 +97,14 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	public void setValueAt(Object value, int row, int column) {
 		Camera c = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_PUBLISH:
-				c.setPublish((Boolean)value);
-				break;
+		case COL_NAME:
+			String v = value.toString().trim();
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_PUBLISH:
+			c.setPublish((Boolean)value);
+			break;
 		}
 	}
 
@@ -105,5 +115,10 @@ public class CameraModel extends ProxyTableModel<Camera> {
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		m.addColumn(createColumn(COL_PUBLISH, 120, "Publish"));
 		return m;
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(Camera c) {
+		return c != null && namespace.canRemove(user, new Name(c));
 	}
 }
