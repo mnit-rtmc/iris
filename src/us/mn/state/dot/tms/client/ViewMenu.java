@@ -82,7 +82,9 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('s');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CabinetStyleForm(state));
+				desktop.show(new CabinetStyleForm(
+					state.getConCache().getCabinetStyles(),
+					state.getNamespace(), user));
 			}
 		};
 		add(item);

@@ -23,6 +23,9 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -43,9 +46,19 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 	/** Dip switch column number */
 	static protected final int COL_DIP = 1;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new cabinet style table model */
-	public CabinetStyleModel(TypeCache<CabinetStyle> c) {
+	public CabinetStyleModel(TypeCache<CabinetStyle> c, Namespace ns,
+		User u)
+	{
 		super(c);
+		namespace = ns;
+		user = u;
 	}
 
 	/** Get the count of columns in the table */
@@ -127,5 +140,13 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		m.addColumn(createColumn(COL_NAME, 90, "Style"));
 		m.addColumn(createDipColumn());
 		return m;
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(CabinetStyle cs) {
+		if(cs != null)
+			return namespace.canRemove(user, new Name(cs));
+		else
+			return false;
 	}
 }
