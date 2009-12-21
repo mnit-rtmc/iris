@@ -19,7 +19,6 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
-import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.MapExtentForm;
