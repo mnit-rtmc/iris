@@ -41,7 +41,7 @@ public class DMSForm extends AbstractForm {
 	static protected final String TITLE = I18N.get("dms.title");
 
 	/** Table model for DMSs */
-	protected DMSModel d_model;
+	protected final DMSModel d_model;
 
 	/** Table to hold the DMS list */
 	protected final ZTable d_table = new ZTable();
@@ -55,19 +55,16 @@ public class DMSForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** DMS type cache */
-	protected final TypeCache<DMS> cache;
-
 	/** Create a new DMS form */
 	public DMSForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = s.getSonarState().getDmsCache().getDMSs();
+		d_model = new DMSModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		d_model = new DMSModel(cache);
+		d_model.initialize();
 		add(createDMSPanel());
 	}
 
@@ -124,9 +121,9 @@ public class DMSForm extends AbstractForm {
 
 	/** Change the selected sign */
 	protected void selectSign() {
-		int row = d_table.getSelectedRow();
-		properties.setEnabled(row >= 0 && !d_model.isLastRow(row));
-		del_sign.setEnabled(row >= 0 && !d_model.isLastRow(row));
+		DMS s = d_model.getProxy(d_table.getSelectedRow());
+		properties.setEnabled(s != null);
+		del_sign.setEnabled(d_model.canRemove(s));
 	}
 
 	/** Show the properties form */

@@ -16,9 +16,12 @@ package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -38,10 +41,17 @@ public class DMSModel extends ProxyTableModel<DMS> {
 	/** Location column number */
 	static protected final int COL_LOCATION = 1;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new DMS table model */
-	public DMSModel(TypeCache<DMS> c) {
-		super(c);
-		initialize();
+	public DMSModel(Session s) {
+		super(s.getSonarState().getDmsCache().getDMSs());
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 	}
 
 	/** Get the count of columns in the table */
@@ -55,11 +65,10 @@ public class DMSModel extends ProxyTableModel<DMS> {
 		if(s == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return s.getName();
-			case COL_LOCATION:
-				return GeoLocHelper.getDescription(
-					s.getGeoLoc());
+		case COL_NAME:
+			return s.getName();
+		case COL_LOCATION:
+			return GeoLocHelper.getDescription(s.getGeoLoc());
 		}
 		return null;
 	}
@@ -90,5 +99,10 @@ public class DMSModel extends ProxyTableModel<DMS> {
 			I18N.get("dms.abbreviation")));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		return m;
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(DMS s) {
+		return s != null && namespace.canRemove(user, new Name(s));
 	}
 }
