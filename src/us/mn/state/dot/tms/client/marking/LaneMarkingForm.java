@@ -85,7 +85,7 @@ public class LaneMarkingForm extends AbstractForm {
 		};
 		m_table.setModel(m_model);
 		m_table.setAutoCreateColumnsFromModel(false);
-		m_table.setColumnModel(LaneMarkingModel.createColumnModel());
+		m_table.setColumnModel(m_model.createColumnModel());
 		m_table.setVisibleRowCount(12);
 		new ActionJob(this, properties) {
 			public void perform() throws Exception {

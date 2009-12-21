@@ -70,7 +70,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	}
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 100, "Name"));
 		m.addColumn(createColumn(COL_MULTI, 680, "MULTI String"));

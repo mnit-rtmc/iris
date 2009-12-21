@@ -49,7 +49,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 	static protected final int COL_NORTH_SPAN = 4;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 160, "Map Extent"));
 		m.addColumn(createColumn(COL_EASTING, 80, "Easting"));

@@ -229,7 +229,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	}
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_LINE, 36, "Line"));
 		m.addColumn(createColumn(COL_MESSAGE, 200, "Message"));

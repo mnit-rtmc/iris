@@ -60,7 +60,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	static protected final int COL_Q_MSG = 5;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, "Name", 80));
 		m.addColumn(createIndicationColumn());

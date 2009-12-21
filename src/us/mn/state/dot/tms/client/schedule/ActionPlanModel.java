@@ -59,7 +59,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	static protected final int COL_STATE = 6;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 100, "Plan Name"));
 		m.addColumn(createColumn(COL_DESCRIPTION, 380, "Description"));

@@ -57,7 +57,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	static protected final int COL_MEMBER = 1;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 200, "Sign Group"));
 		m.addColumn(createColumn(COL_MEMBER, 50, "Member"));

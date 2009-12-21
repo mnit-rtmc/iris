@@ -51,7 +51,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	static protected final int COL_PRIV_D = 4;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_PATTERN, 420, "Pattern"));
 		m.addColumn(createColumn(COL_PRIV_R, 80, "Read"));

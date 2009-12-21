@@ -66,7 +66,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	}
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, "Name"));
 		m.addColumn(createColumn(COL_NUMBER, "Number"));

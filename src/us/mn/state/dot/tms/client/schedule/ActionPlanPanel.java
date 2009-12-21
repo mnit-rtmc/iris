@@ -124,7 +124,7 @@ public class ActionPlanPanel extends FormPanel {
 		addLaneActionJobs();
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
-		p_table.setColumnModel(ActionPlanModel.createColumnModel());
+		p_table.setColumnModel(p_model.createColumnModel());
 		p_table.setRowHeight(ROW_HEIGHT);
 		p_table.setVisibleRowCount(6);
 		addRow(p_table);
@@ -133,8 +133,7 @@ public class ActionPlanPanel extends FormPanel {
 		JPanel panel = new JPanel(new FlowLayout());
 		FormPanel t_panel = new FormPanel(true);
 		t_table.setAutoCreateColumnsFromModel(false);
-		t_table.setColumnModel(TimeActionModel.createColumnModel(
-			day_model));
+		t_table.setColumnModel(t_model.createColumnModel());
 		t_table.setRowHeight(ROW_HEIGHT);
 		t_table.setVisibleRowCount(12);
 		t_panel.addRow(t_table);
@@ -143,7 +142,7 @@ public class ActionPlanPanel extends FormPanel {
 		panel.add(t_panel);
 		FormPanel d_panel = new FormPanel(true);
 		d_table.setAutoCreateColumnsFromModel(false);
-		d_table.setColumnModel(DmsActionModel.createColumnModel());
+		d_table.setColumnModel(d_model.createColumnModel());
 		d_table.setRowHeight(ROW_HEIGHT);
 		d_table.setVisibleRowCount(10);
 		d_panel.addRow(d_table);
@@ -152,7 +151,7 @@ public class ActionPlanPanel extends FormPanel {
 		tab.add("DMS Actions", d_panel);
 		FormPanel l_panel = new FormPanel(true);
 		l_table.setAutoCreateColumnsFromModel(false);
-		l_table.setColumnModel(LaneActionModel.createColumnModel());
+		l_table.setColumnModel(l_model.createColumnModel());
 		l_table.setRowHeight(ROW_HEIGHT);
 		l_table.setVisibleRowCount(10);
 		l_panel.addRow(l_table);
@@ -263,7 +262,8 @@ public class ActionPlanPanel extends FormPanel {
 		del_p_btn.setEnabled(p_model.canRemove(row));
 		del_t_btn.setEnabled(false);
 		TimeActionModel ot_model = t_model;
-		t_model = new TimeActionModel(t_cache, ap, namespace, user);
+		t_model = new TimeActionModel(t_cache, ap, day_model,
+			namespace, user);
 		t_table.setModel(t_model);
 		if(ot_model != null)
 			ot_model.dispose();

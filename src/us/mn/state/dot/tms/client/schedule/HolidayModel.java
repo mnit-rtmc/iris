@@ -63,7 +63,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	static protected final int COL_PERIOD = 6;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createNameColumn());
 		m.addColumn(createMonthColumn());

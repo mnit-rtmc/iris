@@ -68,8 +68,7 @@ public class QuickMessageForm extends AbstractForm {
 			}
 		};
 		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(
-			QuickMessageTableModel.createColumnModel());
+		table.setColumnModel(model.createColumnModel());
 		table.setModel(model);
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(12);

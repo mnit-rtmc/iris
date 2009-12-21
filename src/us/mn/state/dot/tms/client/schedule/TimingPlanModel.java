@@ -138,7 +138,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	}
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, "Name", false));
 		m.addColumn(createTypeColumn());

@@ -100,8 +100,7 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Create the panel for the form */
 	protected JPanel createPanel() {
 		m_table.setAutoCreateColumnsFromModel(false);
-		m_table.setColumnModel(
-			SystemAttributeTableModel.createColumnModel());
+		m_table.setColumnModel(model.createColumnModel());
 		m_table.setModel(model);
 		m_table.setRowHeight(ROW_HEIGHT);
 		m_table.setVisibleRowCount(12);

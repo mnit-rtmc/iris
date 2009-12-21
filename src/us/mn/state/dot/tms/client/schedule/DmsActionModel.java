@@ -59,7 +59,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	static protected final int COL_R_PRIORITY = 4;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_GROUP, 120, "Sign Group"));
 		m.addColumn(createStateColumn());

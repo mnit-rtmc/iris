@@ -19,6 +19,7 @@ import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -68,6 +69,9 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public void dispose() {
 		cache.removeProxyListener(this);
 	}
+
+	/** Create the table column model */
+	abstract public TableColumnModel createColumnModel();
 
 	/** Add a new proxy to the table model */
 	protected int doProxyAdded(T proxy) {

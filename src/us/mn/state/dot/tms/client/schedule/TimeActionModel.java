@@ -65,16 +65,16 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	static protected final int COL_DEPLOY = 2;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel(ListModel day_model) {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createDayPlanColumn(day_model));
+		m.addColumn(createDayPlanColumn());
 		m.addColumn(createColumn(COL_TIME, 80, "Time"));
 		m.addColumn(createColumn(COL_DEPLOY, 60, "Deploy"));
 		return m;
 	}
 
 	/** Create the day plan column */
-	static protected TableColumn createDayPlanColumn(ListModel day_model) {
+	protected TableColumn createDayPlanColumn() {
 		TableColumn c = createColumn(COL_DAY_PLAN, 100, "Day Plan");
 		JComboBox combo = new JComboBox();
 		combo.setModel(new WrapperComboBoxModel(day_model));
@@ -125,15 +125,19 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
+	/** Day model */
+	protected final ListModel day_model;
+
 	/** Day plan for new time action */
 	protected DayPlan day_plan;
 
 	/** Create a new time action table model */
 	public TimeActionModel(TypeCache<TimeAction> c, ActionPlan ap,
-		Namespace ns, User u)
+		ListModel dm, Namespace ns, User u)
 	{
 		super(c);
 		action_plan = ap;
+		day_model = dm;
 		namespace = ns;
 		user = u;
 		initialize();

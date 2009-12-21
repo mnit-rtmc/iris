@@ -237,7 +237,7 @@ public class UserRoleForm extends AbstractForm {
 		});
 		p_table.setModel(p_model);
 		p_table.setAutoCreateColumnsFromModel(false);
-		p_table.setColumnModel(PrivilegeModel.createColumnModel());
+		p_table.setColumnModel(p_model.createColumnModel());
 		p_table.setVisibleRowCount(16);
 		pane = new JScrollPane(p_table);
 		panel.add(pane, bag);

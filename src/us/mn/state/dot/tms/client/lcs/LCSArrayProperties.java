@@ -155,7 +155,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 			}
 		};
 		lcs_table.setAutoCreateColumnsFromModel(false);
-		lcs_table.setColumnModel(LCSTableModel.createColumnModel());
+		lcs_table.setColumnModel(table_model.createColumnModel());
 		lcs_table.setModel(table_model);
 		lcs_table.setVisibleRowCount(12);
 		new ActionJob(this, edit_btn) {

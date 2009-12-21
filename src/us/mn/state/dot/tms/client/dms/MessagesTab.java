@@ -226,7 +226,7 @@ public class MessagesTab extends JPanel {
 		};
 		group_table.setAutoCreateColumnsFromModel(false);
 		group_table.setColumnModel(
-			SignGroupTableModel.createColumnModel());
+			sign_group_model.createColumnModel());
 		group_table.setModel(sign_group_model);
 		group_table.setVisibleRowCount(12);
 	}
@@ -239,6 +239,8 @@ public class MessagesTab extends JPanel {
 				sign_text_model.dispose();
 			sign_text_model = new SignTextTableModel(group, state,
 				user);
+			sign_text_table.setColumnModel(
+				sign_text_model.createColumnModel());
 			sign_text_table.setModel(sign_text_model);
 			delete_group.setEnabled(isGroupDeletable(group));
 		} else {
@@ -304,8 +306,6 @@ public class MessagesTab extends JPanel {
 			}
 		};
 		sign_text_table.setAutoCreateColumnsFromModel(false);
-		sign_text_table.setColumnModel(
-			SignTextTableModel.createColumnModel());
 		sign_text_table.setVisibleRowCount(12);
 	}
 

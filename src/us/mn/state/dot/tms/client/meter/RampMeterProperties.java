@@ -222,7 +222,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		};
 		plan_table.setAutoCreateColumnsFromModel(false);
 		plan_table.setModel(plan_model);
-		plan_table.setColumnModel(TimingPlanModel.createColumnModel());
+		plan_table.setColumnModel(plan_model.createColumnModel());
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(plan_table);
 		panel.addRow(deleteBtn);

@@ -40,7 +40,7 @@ public class RoleModel extends ProxyTableModel<Role> {
 	static protected final int COL_ENABLED = 1;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 160, "Name"));
 		m.addColumn(createColumn(COL_ENABLED, 60, "Enabled"));

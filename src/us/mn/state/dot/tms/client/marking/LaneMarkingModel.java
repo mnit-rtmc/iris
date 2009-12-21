@@ -41,7 +41,7 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 	static protected final int COL_LOCATION = 1;
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_NAME, 120, "Lane Marking"));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));

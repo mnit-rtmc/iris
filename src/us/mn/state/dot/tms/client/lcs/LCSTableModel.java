@@ -157,7 +157,7 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	}
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		m.addColumn(createColumn(COL_LANE, 36, "Lane"));
 		m.addColumn(createColumn(COL_NAME, 140, "LCS"));

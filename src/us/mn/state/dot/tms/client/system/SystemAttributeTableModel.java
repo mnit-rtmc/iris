@@ -59,7 +59,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	}
 
 	/** Create the table column model */
-	static public TableColumnModel createColumnModel() {
+	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
 		TableColumn ncol = createColumn(COL_NAME, 200, "Name");
 		ncol.setCellRenderer(new NameCellRenderer());

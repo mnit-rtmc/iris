@@ -82,7 +82,7 @@ public class MapExtentForm extends AbstractForm {
 		};
 		table.setModel(model);
 		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(MapExtentModel.createColumnModel());
+		table.setColumnModel(model.createColumnModel());
 		table.setVisibleRowCount(20);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(table);
