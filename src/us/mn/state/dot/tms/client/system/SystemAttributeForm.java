@@ -14,13 +14,17 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * The system attribute allows administrators to change system-wide policy
@@ -33,68 +37,84 @@ public class SystemAttributeForm extends AbstractForm {
 	/** Frame title */
 	static private final String TITLE = "System Attributes";
 
-	/** SystemAttribute type cache */
-	protected final TypeCache<SystemAttribute> cache;
+	/** Table row height */
+	static protected final int ROW_HEIGHT = 20;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
+	/** Table model */
+	protected final SystemAttributeTableModel model;
 
-	/** System attribute editor tab */
-	protected final SystemAttributeTab systemAttributeTab;
+	/** System attribute table. */
+	protected final ZTable m_table = new ZTable() {
+		public String getToolTipText(int row, int column) {
+			Object value = model.getValueAt(row,
+				SystemAttributeTableModel.COL_NAME);
+			if(value instanceof String)
+				return SystemAttrEnum.getDesc((String)value);
+			else
+				return null;
+		}
+	};
 
-	/** SONAR User for permission checks */
-	protected final User user;
+	/** Button to delete the selected attribute */
+	protected final JButton del_btn = new JButton("Delete");
 
 	/** Create a new system attribute form */
-	public SystemAttributeForm(SonarState st, User u) {
+	public SystemAttributeForm(Session s) {
 		super(TITLE);
 		setHelpPageName("Help.SystemAttributeForm");
-		cache = st.getSystemAttributes();
-		namespace = st.getNamespace();
-		user = u;
-		systemAttributeTab = new SystemAttributeTab(cache, this);
+		model = new SystemAttributeTableModel(s);
 	}
 
 	/** Initialise the widgets on the form */
 	protected void initialize() {
-		add(systemAttributeTab);
+		model.initialize();
+		createJobs();
+		add(createPanel());
 	}
 
 	/** Dispose of the form */
 	protected void dispose() {
-		systemAttributeTab.dispose();
+		model.dispose();
 	}
 
-	/** Check if the user can add the named attribute */
-	public boolean canAdd(String name) {
-		return name != null && namespace.canAdd(user,
-			new Name(SystemAttribute.SONAR_TYPE, name));
+	/** Create Gui jobs */
+	protected void createJobs() {
+		ListSelectionModel s = m_table.getSelectionModel();
+		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		new ListSelectionJob(this, s) {
+			public void perform() {
+				selectAttribute();
+			}
+		};
+		new ActionJob(this, del_btn) {
+			public void perform() throws Exception {
+				final ListSelectionModel s = 
+					m_table.getSelectionModel();
+				int row = s.getMinSelectionIndex();
+				if(row >= 0)
+					model.deleteRow(row);
+			}
+		};
 	}
 
-	/** Check if the user can update the named attribute */
-	public boolean canUpdate(String oname) {
-		return oname != null && namespace.canUpdate(user,
-			new Name(SystemAttribute.SONAR_TYPE, oname));
+	/** Create the panel for the form */
+	protected JPanel createPanel() {
+		m_table.setAutoCreateColumnsFromModel(false);
+		m_table.setColumnModel(
+			SystemAttributeTableModel.createColumnModel());
+		m_table.setModel(model);
+		m_table.setRowHeight(ROW_HEIGHT);
+		m_table.setVisibleRowCount(12);
+		FormPanel panel = new FormPanel(true);
+		panel.addRow(m_table);
+		panel.addRow(del_btn);
+		del_btn.setEnabled(false);
+		return panel;
 	}
 
-	/** Check if the user can update the named attribute */
-	public boolean canUpdate(String oname, String aname) {
-		return namespace.canUpdate(user,
-			new Name(SystemAttribute.SONAR_TYPE, oname, aname));
-	}
-
-	/** Check if the user can change the named attribute */
-	public boolean canChange(String oname) {
-		SystemAttribute sa = cache.lookupObject(oname);
-		if(sa != null)
-			return canUpdate(oname);
-		else
-			return canAdd(oname);
-	}
-
-	/** Check if the user can remove a system attribute */
-	public boolean canRemove(String name) {
-		return name != null && namespace.canRemove(user,
-			new Name(SystemAttribute.SONAR_TYPE, name));
+	/** Select an attribute */
+	protected void selectAttribute() {
+		SystemAttribute sa = model.getProxy(m_table.getSelectedRow());
+		del_btn.setEnabled(model.canRemove(sa));
 	}
 }

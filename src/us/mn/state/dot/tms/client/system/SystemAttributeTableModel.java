@@ -24,9 +24,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -67,19 +70,17 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		return m;
 	}
 
-	/** Form containing table */
-	protected final SystemAttributeForm m_form;
+	/** SONAR namespace */
+	protected final Namespace namespace;
 
-	/**
-	 * Create a new table model.
-	 * @param tc TypeCache for the table items being displayed/edited.
-	 */
-	public SystemAttributeTableModel(TypeCache<SystemAttribute> arg_tc,
-		SystemAttributeForm f)
-	{
-		super(arg_tc);
-		m_form = f;
-		initialize();
+	/** SONAR User for permission checks */
+	protected final User user;
+
+	/** Create a new table model */
+	public SystemAttributeTableModel(Session s) {
+		super(s.getSonarState().getSystemAttributes());
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 	}
 
 	/** Get the count of columns in the table */
@@ -109,11 +110,11 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
 		if(col == COL_NAME)
-			return isLastRow(row) && m_form.canAdd("test_attr");
+			return isLastRow(row) && canAdd("test_attr");
 		else if(col == COL_VALUE) {
 			SystemAttribute t = getProxy(row);
 			if(t != null)
-				return m_form.canUpdate(t.getName(), "value");
+				return canUpdate(t.getName(), "value");
 		}
 		return false;
 	}
@@ -192,5 +193,37 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 					f.getStyle() ^ Font.BOLD));
 			return label;
 		}
+	}
+
+	/** Check if the user can add the named attribute */
+	public boolean canAdd(String name) {
+		return name != null && namespace.canAdd(user,
+			new Name(SystemAttribute.SONAR_TYPE, name));
+	}
+
+	/** Check if the user can update the named attribute */
+	public boolean canUpdate(String oname) {
+		return oname != null && namespace.canUpdate(user,
+			new Name(SystemAttribute.SONAR_TYPE, oname));
+	}
+
+	/** Check if the user can update the named attribute */
+	public boolean canUpdate(String oname, String aname) {
+		return namespace.canUpdate(user,
+			new Name(SystemAttribute.SONAR_TYPE, oname, aname));
+	}
+
+	/** Check if the user can change the named attribute */
+	public boolean canChange(String oname) {
+		SystemAttribute sa = cache.lookupObject(oname);
+		if(sa != null)
+			return canUpdate(oname);
+		else
+			return canAdd(oname);
+	}
+
+	/** Check if the user can remove a system attribute */
+	public boolean canRemove(SystemAttribute sa) {
+		return sa != null && namespace.canRemove(user, new Name(sa));
 	}
 }
