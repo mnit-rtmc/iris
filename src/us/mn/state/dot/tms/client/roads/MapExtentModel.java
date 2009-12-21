@@ -17,10 +17,8 @@ package us.mn.state.dot.tms.client.roads;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -59,17 +57,9 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 		return m;
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new map extent table model */
-	public MapExtentModel(TypeCache<MapExtent> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
+	public MapExtentModel(Session s) {
+		super(s, s.getSonarState().getMapExtents());
 	}
 
 	/** Get the count of columns in the table */
@@ -146,15 +136,5 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(MapExtent.SONAR_TYPE,
 			"name"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate(MapExtent me) {
-		return namespace.canUpdate(user, new Name(me));
-	}
-
-	/** Check if the user can remove a map extent */
-	public boolean canRemove(MapExtent me) {
-		return me != null && namespace.canRemove(user, new Name(me));
 	}
 }

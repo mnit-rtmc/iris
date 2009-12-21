@@ -22,11 +22,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -54,17 +51,9 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 	/** Pin column number */
 	static protected final int COL_PIN = 4;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new alarm table model */
-	public AlarmModel(TypeCache<Alarm> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
+	public AlarmModel(Session s) {
+		super(s, s.getSonarState().getAlarms());
 	}
 
 	/** Get the count of columns in the table */
@@ -163,10 +152,5 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 			}
 			return label;
 		}
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(Alarm a) {
-		return a != null && namespace.canRemove(user, new Name(a));
 	}
 }

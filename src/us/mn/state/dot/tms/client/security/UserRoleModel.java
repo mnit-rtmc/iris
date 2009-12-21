@@ -18,10 +18,9 @@ import java.util.TreeSet;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -40,21 +39,12 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 	/** Assigned column number */
 	static protected final int COL_ASSIGNED = 1;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
 	/** Currently selected user */
 	protected User sel_user;
 
 	/** Create a new user-role table model */
-	public UserRoleModel(TypeCache<Role> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
-		initialize();
+	public UserRoleModel(Session s) {
+		super(s, s.getSonarState().getRoles());
 	}
 
 	/** Set the roles for a new user */

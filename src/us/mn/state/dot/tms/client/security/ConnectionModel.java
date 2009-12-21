@@ -18,7 +18,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -38,9 +38,8 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 	static protected final int COL_USER = 1;
 
 	/** Create a new connection table model */
-	public ConnectionModel(TypeCache<Connection> c) {
-		super(c);
-		initialize();
+	public ConnectionModel(Session s) {
+		super(s, s.getSonarState().getConnections());
 	}
 
 	/** Get the count of columns in the table */
@@ -61,14 +60,14 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 		if(c == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return c.getName();
-			case COL_USER:
-				User u = c.getUser();
-				if(u != null)
-					return u.getName();
-				else
-					return null;
+		case COL_NAME:
+			return c.getName();
+		case COL_USER:
+			User u = c.getUser();
+			if(u != null)
+				return u.getName();
+			else
+				return null;
 		}
 		return null;
 	}

@@ -119,7 +119,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(TITLE, s, meter);
 		state = s.getSonarState();
-		plan_model = new TimingPlanModel(state.getTimingPlans(), meter);
+		plan_model = new TimingPlanModel(s, meter);
 	}
 
 	/** Get the SONAR type cache */
@@ -130,6 +130,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Initialize the widgets on the form */
 	protected void initialize() {
 		super.initialize();
+		plan_model.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add("Location", createLocationPanel());
 		tab.add("Setup", createSetupPanel());

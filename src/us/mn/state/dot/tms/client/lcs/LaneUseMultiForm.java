@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -45,18 +44,15 @@ public class LaneUseMultiForm extends AbstractForm {
 	/** Button to delete the selected proxy */
 	protected final JButton deleteBtn = new JButton("Delete");
 
-	/** Type cache */
-	protected final TypeCache<LaneUseMulti> cache;
-
 	/** Create a new graphic form */
 	public LaneUseMultiForm(Session s) {
 		super(TITLE);
-		cache = s.getSonarState().getLcsCache().getLaneUseMultis();
+		model = new LaneUseMultiModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new LaneUseMultiModel(cache);
+		model.initialize();
 		add(createLaneUseMultiPanel());
 		table.setRowHeight(22);
 		table.setVisibleRowCount(10);

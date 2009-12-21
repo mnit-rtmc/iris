@@ -21,9 +21,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.DmsAction;
@@ -31,6 +28,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -107,24 +105,13 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DMSMessagePriority.INCIDENT_HIGH
 	};
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
 	/** Create a new DMS action table model */
-	public DmsActionModel(TypeCache<DmsAction> c, ActionPlan ap,
-		Namespace ns, User u)
-	{
-		super(c);
+	public DmsActionModel(Session s, ActionPlan ap) {
+		super(s, s.getSonarState().getDmsActions());
 		action_plan = ap;
-		namespace = ns;
-		user = u;
-		initialize();
 	}
 
 	/** Add a new proxy to the table model */
@@ -179,7 +166,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	public boolean isCellEditable(int row, int column) {
 		DmsAction da = getProxy(row);
 		if(da != null)
-			return column != COL_GROUP && canUpdate();
+			return column != COL_GROUP && canUpdate(da);
 		else
 			return column == COL_GROUP && canAdd();
 	}
@@ -252,26 +239,5 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(DmsAction.SONAR_TYPE,
 			"oname"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate() {
-		return namespace.canUpdate(user, new Name(DmsAction.SONAR_TYPE,
-			"oname", "aname"));
-	}
-
-	/** Check if the user can remove the action at the specified row */
-	public boolean canRemove(int row) {
-		DmsAction da = getProxy(row);
-		if(da != null)
-			return canRemove(da);
-		else
-			return false;
-	}
-
-	/** Check if the user can remove a DMS action */
-	public boolean canRemove(DmsAction da) {
-		return namespace.canRemove(user, new Name(DmsAction.SONAR_TYPE,
-			da.getName()));
 	}
 }

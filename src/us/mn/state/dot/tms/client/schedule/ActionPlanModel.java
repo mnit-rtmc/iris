@@ -20,11 +20,9 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -87,18 +85,9 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		ActionPlanState.undeploying
 	};
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new action plan table model */
-	public ActionPlanModel(TypeCache<ActionPlan> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
-		initialize();
+	public ActionPlanModel(Session s) {
+		super(s, s.getSonarState().getActionPlans());
 	}
 
 	/** Get the count of columns in the table */
@@ -195,26 +184,5 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(ActionPlan.SONAR_TYPE,
 			"oname"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate(ActionPlan plan) {
-		return namespace.canUpdate(user, new Name(ActionPlan.SONAR_TYPE,
-			plan.getName()));
-	}
-
-	/** Check if the user can remove the plan at the specified row */
-	public boolean canRemove(int row) {
-		ActionPlan plan = getProxy(row);
-		if(plan != null)
-			return canRemove(plan);
-		else
-			return false;
-	}
-
-	/** Check if the user can remove a plan */
-	public boolean canRemove(ActionPlan plan) {
-		return namespace.canRemove(user, new Name(ActionPlan.SONAR_TYPE,
-			plan.getName()));
 	}
 }

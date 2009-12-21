@@ -29,10 +29,10 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -95,10 +95,9 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Create a new controller table model */
-	public ControllerModel(TypeCache<Controller> c, CommLink cl) {
-		super(c);
+	public ControllerModel(Session s, CommLink cl) {
+		super(s, s.getSonarState().getConCache().getControllers());
 		comm_link = cl;
-		initialize();
 	}
 
 	/** Add a new proxy to the table model */

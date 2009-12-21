@@ -19,10 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CabinetStyle;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -45,11 +43,9 @@ public class CabinetStyleForm extends AbstractForm {
 	protected final JButton del_button = new JButton("Delete");
 
 	/** Create a new cabinet style form */
-	public CabinetStyleForm(TypeCache<CabinetStyle> c, Namespace ns,
-		User u)
-	{
+	public CabinetStyleForm(Session s) {
 		super(TITLE);
-		model = new CabinetStyleModel(c, ns, u);
+		model = new CabinetStyleModel(s);
 	}
 
 	/** Initializze the widgets in the form */

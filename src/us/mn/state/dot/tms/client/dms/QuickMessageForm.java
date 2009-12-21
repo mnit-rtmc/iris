@@ -92,9 +92,8 @@ public class QuickMessageForm extends AbstractForm {
 
 	/** Handle row selection change */
 	protected void selectRow() {
-		QuickMessage proxy = model.getProxy(table.getSelectedRow());
-		del_btn.setEnabled(proxy == null ? false : 
-			model.canRemove(proxy.getName()));
+		QuickMessage qm = model.getProxy(table.getSelectedRow());
+		del_btn.setEnabled(model.canRemove(qm));
 	}
 }
 

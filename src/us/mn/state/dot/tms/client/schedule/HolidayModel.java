@@ -25,10 +25,8 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -204,18 +202,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		PERIODS.add("PM");
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
 	/** Create a new holiday table model */
-	public HolidayModel(TypeCache<Holiday> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
-		initialize();
+	public HolidayModel(Session s) {
+		super(s, s.getSonarState().getHolidays());
 	}
 
 	/** Get the count of columns in the table */
@@ -313,26 +302,5 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(Holiday.SONAR_TYPE,
 		       "oname"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate(Holiday h) {
-		return namespace.canUpdate(user, new Name(Holiday.SONAR_TYPE,
-		       h.getName()));
-	}
-
-	/** Check if the user can remove the holiday at the specified row */
-	public boolean canRemove(int row) {
-		Holiday h = getProxy(row);
-		if(h != null)
-			return canRemove(h);
-		else
-			return false;
-	}
-
-	/** Check if the user can remove a holiday */
-	public boolean canRemove(Holiday h) {
-		return namespace.canRemove(user, new Name(Holiday.SONAR_TYPE,
-		       h.getName()));
 	}
 }

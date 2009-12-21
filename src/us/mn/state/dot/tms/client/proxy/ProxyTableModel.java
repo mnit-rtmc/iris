@@ -21,9 +21,13 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -54,9 +58,17 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Set of all proxies */
 	protected final TreeSet<T> proxies = createProxySet();
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new proxy table model */
-	public ProxyTableModel(TypeCache<T> c) {
+	public ProxyTableModel(Session s, TypeCache<T> c) {
 		cache = c;
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 	}
 
 	/** Initialize the proxy table model. This cannot be done in the
@@ -236,5 +248,20 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		T proxy = getProxy(row);
 		if(proxy != null)
 			proxy.destroy();
+	}
+
+	/** Check if the user can add a proxy */
+//	abstract public boolean canAdd();
+
+	/** Check if the user can update a proxy */
+	public boolean canUpdate(T proxy) {
+		return proxy != null &&
+		       namespace.canUpdate(user, new Name(proxy));
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(T proxy) {
+		return proxy != null &&
+		       namespace.canRemove(user, new Name(proxy));
 	}
 }

@@ -133,8 +133,8 @@ public class DayPlanPanel extends JPanel {
 		bag.gridy = 1;
 		bag.gridwidth = 2;
 		add(del_plan, bag);
-		TypeCache<Holiday> holidays = s.getSonarState().getHolidays();
-		dh_model = new DayPlanHolidayModel(holidays, namespace, user);
+		dh_model = new DayPlanHolidayModel(s);
+		dh_model.initialize();
 		dh_table.setModel(dh_model);
 		dh_table.setAutoCreateColumnsFromModel(false);
 		dh_table.setColumnModel(dh_model.createColumnModel());
@@ -182,7 +182,8 @@ public class DayPlanPanel extends JPanel {
 		bag.gridwidth = 6;
 		bag.gridheight = 1;
 		add(cal_widget, bag);
-		h_model = new HolidayModel(holidays, namespace, user);
+		h_model = new HolidayModel(s);
+		h_model.initialize();
 		final ListSelectionModel lsm = h_table.getSelectionModel();
 		lsm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		h_table.setModel(h_model);
@@ -359,8 +360,8 @@ public class DayPlanPanel extends JPanel {
 
 	/** Change the selected holiday */
 	protected void selectHoliday() {
-		int row = h_table.getSelectedRow();
-		del_holiday.setEnabled(h_model.canRemove(row));
+		Holiday h = h_model.getProxy(h_table.getSelectedRow());
+		del_holiday.setEnabled(h_model.canRemove(h));
 	}
 
 	/** Delete the selected holiday */

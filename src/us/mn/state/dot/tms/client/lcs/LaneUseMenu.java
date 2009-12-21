@@ -33,7 +33,6 @@ public class LaneUseMenu extends JMenu {
 	public LaneUseMenu(final Session s) {
 		super("Lane Use");
 		final SmartDesktop desktop = s.getDesktop();
-		final SonarState state = s.getSonarState();
 
 		JMenuItem item = new JMenuItem("LCS", Icons.getIcon(
 			"lanecontrol-inactive"));
@@ -47,8 +46,7 @@ public class LaneUseMenu extends JMenu {
 		item = new JMenuItem("Graphics");
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new GraphicForm(s,
-					state.getGraphics()));
+				desktop.show(new GraphicForm(s));
 			}
 		};
 		add(item);

@@ -35,7 +35,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
@@ -50,7 +49,7 @@ import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -108,11 +107,11 @@ public class SignMessageComposer extends JPanel {
 	protected final SignTextCellRenderer renderer =
 		new SignTextCellRenderer();
 
+	/** User session */
+	protected final Session session;
+
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
-
-	/** Soanr state */
-	protected final SonarState state;
 
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
@@ -122,9 +121,6 @@ public class SignMessageComposer extends JPanel {
 
 	/** Cache of font proxy objects */
 	protected final TypeCache<Font> fonts;
-
-	/** SONAR user */
-	protected final User user;
 
 	/** Tab pane to hold pages */
 	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
@@ -178,13 +174,13 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Create a new sign message composer */
-	public SignMessageComposer(DMSDispatcher ds, SonarState st, User u) {
+	public SignMessageComposer(Session s, DMSDispatcher ds) {
+		session = s;
 		dispatcher = ds;
-		state = st;
-		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
-		sign_text = st.getDmsCache().getSignText();
-		fonts = st.getDmsCache().getFonts();
-		user = u;
+		DmsCache dc = s.getSonarState().getDmsCache();
+		dms_sign_groups = dc.getDmsSignGroups();
+		sign_text = dc.getSignText();
+		fonts = dc.getFonts();
 		add(createAllWidgets());
 		initializeEtcWidgets(1, null);
 		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
@@ -301,7 +297,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new sign text model */
 	protected SignTextModel createSignTextModel(DMS proxy) {
-		SignTextModel stm = new SignTextModel(proxy, state, user);
+		SignTextModel stm = new SignTextModel(session, proxy);
 		stm.initialize();
 		SignTextModel om = st_model;
 		st_model = stm;

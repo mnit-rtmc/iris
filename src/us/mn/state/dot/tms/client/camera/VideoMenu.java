@@ -18,7 +18,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -32,13 +31,11 @@ public class VideoMenu extends JMenu {
 	public VideoMenu(final Session s) {
 		super("Video");
 		final SmartDesktop desktop = s.getDesktop();
-		final SonarState state = s.getSonarState();
 		JMenuItem item = new JMenuItem("Cameras");
 		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CameraForm(s,
-					state.getCamCache().getCameras()));
+				desktop.show(new CameraForm(s));
 			}
 		};
 		add(item);

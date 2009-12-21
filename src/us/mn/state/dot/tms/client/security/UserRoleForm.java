@@ -27,12 +27,10 @@ import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.Connection;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -50,13 +48,13 @@ public class UserRoleForm extends AbstractForm {
 	protected final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 
 	/** Table model for users */
-	protected UserModel u_model;
+	protected final UserModel u_model;
 
 	/** Table to hold the user list */
 	protected final ZTable u_table = new ZTable();
 
 	/** Table model for user roles */
-	protected UserRoleModel ur_model;
+	protected final UserRoleModel ur_model;
 
 	/** Table to hold the user role list */
 	protected final ZTable ur_table = new ZTable();
@@ -65,7 +63,7 @@ public class UserRoleForm extends AbstractForm {
 	protected final JButton del_user = new JButton("Delete User");
 
 	/** Table model for roles */
-	protected RoleModel r_model;
+	protected final RoleModel r_model;
 
 	/** Table model for privileges */
 	protected PrivilegeModel p_model;
@@ -83,7 +81,7 @@ public class UserRoleForm extends AbstractForm {
 	protected final JButton del_privilege = new JButton("Delete Privilege");
 
 	/** Table model for connections */
-	protected ConnectionModel c_model;
+	protected final ConnectionModel c_model;
 
 	/** Table to hold the connection list */
 	protected final ZTable c_table = new ZTable();
@@ -91,43 +89,28 @@ public class UserRoleForm extends AbstractForm {
 	/** Button to delete the selected connection */
 	protected final JButton del_conn = new JButton("Disconnect");
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR User */
-	protected final User user;
-
-	/** User type cache */
-	protected final TypeCache<User> cache;
-
-	/** Role type cache */
-	protected final TypeCache<Role> rcache;
-
-	/** Privilege type cache */
-	protected final TypeCache<Privilege> pcache;
-
-	/** Connection type cache */
-	protected final TypeCache<Connection> ccache;
+	/** User session */
+	protected final Session session;
 
 	/** Create a new user role form */
-	public UserRoleForm(SonarState st, User u) {
+	public UserRoleForm(Session s) {
 		super(TITLE);
+		session = s;
 		setHelpPageName("Help.UserRoleForm");
-		namespace = st.getNamespace();
-		user = u;
-		cache = st.getUsers();
-		rcache = st.getRoles();
-		pcache = st.getPrivileges();
-		ccache = st.getConnections();
+		ur_model = new UserRoleModel(s);
+		u_model = new UserModel(s, ur_model);
+		r_model = new RoleModel(s);
+		p_model = new PrivilegeModel(session, null);
+		c_model = new ConnectionModel(session);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		ur_model = new UserRoleModel(rcache, namespace, user);
-		u_model = new UserModel(cache, ur_model, namespace, user);
-		r_model = new RoleModel(rcache, namespace, user);
-		p_model = new PrivilegeModel(pcache, null, namespace, user);
-		c_model = new ConnectionModel(ccache);
+		ur_model.initialize();
+		u_model.initialize();
+		r_model.initialize();
+		p_model.initialize();
+		c_model.initialize();
 		tab.add("Users", createUserPanel());
 		tab.add("Roles", createRolePanel());
 		tab.add("Connections", createConnectionPanel());
@@ -272,7 +255,8 @@ public class UserRoleForm extends AbstractForm {
 		del_role.setEnabled(r_model.canRemove(r));
 		p_table.clearSelection();
 		final PrivilegeModel pm = p_model;
-		p_model = new PrivilegeModel(pcache, r, namespace, user);
+		p_model = new PrivilegeModel(session, r);
+		p_model.initialize();
 		p_table.setModel(p_model);
 		pm.dispose();
 	}
@@ -330,10 +314,5 @@ public class UserRoleForm extends AbstractForm {
 		ListSelectionModel s = c_table.getSelectionModel();
 		Connection c = c_model.getProxy(s.getMinSelectionIndex());
 		del_conn.setEnabled(c != null);
-	}
-
-	/** Check if the user can remove the specified name */
-	protected boolean canRemove(Name name) {
-		return namespace.canRemove(user, name);
 	}
 }

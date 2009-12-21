@@ -17,9 +17,8 @@ package us.mn.state.dot.tms.client.security;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -44,21 +43,10 @@ public class UserModel extends ProxyTableModel<User> {
 	/** User role model */
 	protected final UserRoleModel rmodel;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new user table model */
-	public UserModel(TypeCache<User> c, UserRoleModel r, Namespace ns,
-		User u)
-	{
-		super(c);
+	public UserModel(Session s, UserRoleModel r) {
+		super(s, s.getSonarState().getUsers());
 		rmodel = r;
-		namespace = ns;
-		user = u;
-		initialize();
 	}
 
 	/** Change a user in the table model */
@@ -79,12 +67,12 @@ public class UserModel extends ProxyTableModel<User> {
 		if(u == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return u.getName();
-			case COL_FULL_NAME:
-				return u.getFullName();
-			case COL_DN:
-				return u.getDn();
+		case COL_NAME:
+			return u.getName();
+		case COL_FULL_NAME:
+			return u.getFullName();
+		case COL_DN:
+			return u.getDn();
 		}
 		return null;
 	}
@@ -103,16 +91,16 @@ public class UserModel extends ProxyTableModel<User> {
 		User u = getProxy(row);
 		String v = value.toString().trim();
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_FULL_NAME:
-				u.setFullName(v);
-				break;
-			case COL_DN:
-				u.setDn(v);
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_FULL_NAME:
+			u.setFullName(v);
+			break;
+		case COL_DN:
+			u.setDn(v);
+			break;
 		}
 	}
 
@@ -130,17 +118,9 @@ public class UserModel extends ProxyTableModel<User> {
 		return namespace.canAdd(user, new Name(User.SONAR_TYPE,"name"));
 	}
 
-	/** Check if the user can update */
-	public boolean canUpdate(User u) {
-		return namespace.canUpdate(user, new Name(User.SONAR_TYPE,
-			u.getName()));
-	}
-
 	/** Check if the user can remove a user */
 	public boolean canRemove(User u) {
-		if(u == null || u.getRoles().length > 0)
-			return false;
-		return namespace.canRemove(user, new Name(User.SONAR_TYPE,
-			u.getName()));
+		return u != null && u.getRoles().length == 0 &&
+		       super.canRemove(u);
 	}
 }

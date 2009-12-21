@@ -24,11 +24,11 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -108,9 +108,8 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	}
 
 	/** Create a new graphic table model */
-	public LaneUseMultiModel(TypeCache<LaneUseMulti> c) {
-		super(c);
-		initialize();
+	public LaneUseMultiModel(Session s) {
+		super(s, s.getSonarState().getLcsCache().getLaneUseMultis());
 	}
 
 	/** Get the count of columns in the table */

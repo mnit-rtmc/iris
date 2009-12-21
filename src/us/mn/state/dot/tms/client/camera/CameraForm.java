@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -55,12 +54,10 @@ public class CameraForm extends AbstractForm {
 	protected final Session session;
 
 	/** Create a new camera form */
-	public CameraForm(Session s, TypeCache<Camera> c) {
+	public CameraForm(Session s) {
 		super(TITLE);
 		session = s;
-		c_model = new CameraModel(c,
-			session.getSonarState().getNamespace(),
-			session.getUser());
+		c_model = new CameraModel(s);
 	}
 
 	/** Initializze the widgets in the form */

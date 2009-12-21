@@ -53,7 +53,7 @@ public class GraphicForm extends AbstractForm {
 		"png", "gif", "bmp");
 
 	/** Table model for graphics */
-	protected GraphicModel model;
+	protected final GraphicModel model;
 
 	/** Table to hold the Graphic list */
 	protected final ZTable table = new ZTable();
@@ -71,15 +71,16 @@ public class GraphicForm extends AbstractForm {
 	protected final TypeCache<Graphic> cache;
 
 	/** Create a new graphic form */
-	public GraphicForm(Session s, TypeCache<Graphic> c) {
+	public GraphicForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		cache = s.getSonarState().getGraphics();
+		model = new GraphicModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new GraphicModel(cache);
+		model.initialize();
 		add(createGraphicPanel());
 		table.setVisibleRowCount(6);
 	}

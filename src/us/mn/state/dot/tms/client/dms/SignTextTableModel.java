@@ -20,11 +20,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -116,11 +114,10 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	protected Short m_priority;
 
 	/** Create a new sign text table model */
-	public SignTextTableModel(SignGroup g, SonarState st, User u) {
-		super(st.getDmsCache().getSignText());
+	public SignTextTableModel(Session s, SignGroup g) {
+		super(s, s.getSonarState().getDmsCache().getSignText());
 		group = g;
-		creator = new SignTextCreator(cache, st.getNamespace(), u);
-		initialize();
+		creator = new SignTextCreator(s);
 	}
 
 	/** Get the count of columns in the table */

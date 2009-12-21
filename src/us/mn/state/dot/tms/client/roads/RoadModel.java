@@ -20,12 +20,9 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.Direction;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -67,17 +64,9 @@ public class RoadModel extends ProxyTableModel<Road> {
 			DIRECTION.add(d);
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new road table model */
-	public RoadModel(TypeCache<Road> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
+	public RoadModel(Session s) {
+		super(s, s.getSonarState().getRoads());
 	}
 
 	/** Get the count of columns in the table */
@@ -91,16 +80,16 @@ public class RoadModel extends ProxyTableModel<Road> {
 		if(r == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return r.getName();
-			case COL_ABBREV:
-				return r.getAbbrev();
-			case COL_R_CLASS:
-				return R_CLASS.get(r.getRClass());
-			case COL_DIRECTION:
-				return DIRECTION.get(r.getDirection());
-			case COL_ALT_DIR:
-				return DIRECTION.get(r.getAltDir());
+		case COL_NAME:
+			return r.getName();
+		case COL_ABBREV:
+			return r.getAbbrev();
+		case COL_R_CLASS:
+			return R_CLASS.get(r.getRClass());
+		case COL_DIRECTION:
+			return DIRECTION.get(r.getDirection());
+		case COL_ALT_DIR:
+			return DIRECTION.get(r.getAltDir());
 		}
 		return null;
 	}
@@ -118,23 +107,23 @@ public class RoadModel extends ProxyTableModel<Road> {
 	public void setValueAt(Object value, int row, int column) {
 		Road r = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_ABBREV:
-				r.setAbbrev(value.toString());
-				break;
-			case COL_R_CLASS:
-				r.setRClass((short)R_CLASS.indexOf(value));
-				break;
-			case COL_DIRECTION:
-				r.setDirection((short)DIRECTION.indexOf(value));
-				break;
-			case COL_ALT_DIR:
-				r.setAltDir((short)DIRECTION.indexOf(value));
-				break;
+		case COL_NAME:
+			String v = value.toString().trim();
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_ABBREV:
+			r.setAbbrev(value.toString());
+			break;
+		case COL_R_CLASS:
+			r.setRClass((short)R_CLASS.indexOf(value));
+			break;
+		case COL_DIRECTION:
+			r.setDirection((short)DIRECTION.indexOf(value));
+			break;
+		case COL_ALT_DIR:
+			r.setAltDir((short)DIRECTION.indexOf(value));
+			break;
 		}
 	}
 
@@ -174,10 +163,5 @@ public class RoadModel extends ProxyTableModel<Road> {
 		m.addColumn(createDirectionColumn());
 		m.addColumn(createAltDirColumn());
 		return m;
-	}
-
-	/** Check if the user can remove a road */
-	public boolean canRemove(Road r) {
-		return r != null && namespace.canRemove(user, new Name(r));
 	}
 }

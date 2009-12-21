@@ -16,12 +16,9 @@ package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -43,17 +40,9 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	/** Publish column number */
 	static protected final int COL_PUBLISH = 2;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new camera table model */
-	public CameraModel(TypeCache<Camera> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
+	public CameraModel(Session s) {
+		super(s, s.getSonarState().getCamCache().getCameras());
 	}
 
 	/** Get the count of columns in the table */
@@ -115,10 +104,5 @@ public class CameraModel extends ProxyTableModel<Camera> {
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		m.addColumn(createColumn(COL_PUBLISH, 120, "Publish"));
 		return m;
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(Camera c) {
-		return c != null && namespace.canRemove(user, new Name(c));
 	}
 }

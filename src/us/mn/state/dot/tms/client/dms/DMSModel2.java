@@ -16,11 +16,11 @@ package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -114,8 +114,8 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	};
 
 	/** Create a new DMS table model */
-	public DMSModel2(DmsCache c) {
-		super(c.getDMSs());
+	public DMSModel2(Session s) {
+		super(s, s.getSonarState().getDmsCache().getDMSs());
 		initialize();
 	}
 

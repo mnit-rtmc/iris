@@ -19,10 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -47,9 +45,9 @@ public class DetectorForm extends AbstractForm {
 	protected final JButton del_button = new JButton("Delete");
 
 	/** Create a new detector form */
-	public DetectorForm(TypeCache<Detector> c, Namespace ns, User u) {
+	public DetectorForm(Session s) {
 		super(TITLE);
-		model = new DetectorModel(c, ns, u);
+		model = new DetectorModel(s);
 	}
 
 	/** Initializze the widgets in the form */

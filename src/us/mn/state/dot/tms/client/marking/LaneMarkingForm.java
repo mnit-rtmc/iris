@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -54,12 +53,10 @@ public class LaneMarkingForm extends AbstractForm {
 	protected final Session session;
 
 	/** Create a new lane marking form */
-	public LaneMarkingForm(Session s, TypeCache<LaneMarking> c) {
+	public LaneMarkingForm(Session s) {
 		super(TITLE);
 		session = s;
-		m_model = new LaneMarkingModel(c,
-			session.getSonarState().getNamespace(),
-			session.getUser());
+		m_model = new LaneMarkingModel(s);
 	}
 
 	/** Initializze the widgets in the form */

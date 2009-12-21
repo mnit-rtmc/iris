@@ -22,8 +22,6 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -82,23 +80,8 @@ public class ActionPlanPanel extends FormPanel {
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane();
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
-	/** Action plan type cache */
-	protected final TypeCache<ActionPlan> cache;
-
-	/** Time action type cache */
-	protected final TypeCache<TimeAction> t_cache;
-
-	/** DMS action type cache */
-	protected final TypeCache<DmsAction> d_cache;
-
-	/** Lane action type cache */
-	protected final TypeCache<LaneAction> l_cache;
+	/** User session */
+	protected final Session session;
 
 	/** Day plan model */
 	protected final ListModel day_model;
@@ -106,18 +89,14 @@ public class ActionPlanPanel extends FormPanel {
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(true);
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
-		cache = s.getSonarState().getActionPlans();
-		t_cache = s.getSonarState().getTimeActions();
-		d_cache = s.getSonarState().getDmsActions();
-		l_cache = s.getSonarState().getLaneActions();
-		p_model = new ActionPlanModel(cache, namespace, user);
+		session = s;
+		p_model = new ActionPlanModel(s);
 		day_model = s.getSonarState().getDayModel();
 	}
 
 	/** Initializze the widgets on the panel */
 	protected void initialize() {
+		p_model.initialize();
 		addActionPlanJobs();
 		addTimeActionJobs();
 		addDmsActionJobs();
@@ -257,25 +236,26 @@ public class ActionPlanPanel extends FormPanel {
 
 	/** Change the selected action plan */
 	protected void selectActionPlan() {
-		int row = p_table.getSelectedRow();
-		ActionPlan ap = p_model.getProxy(row);
-		del_p_btn.setEnabled(p_model.canRemove(row));
+		ActionPlan ap = p_model.getProxy(p_table.getSelectedRow());
+		del_p_btn.setEnabled(p_model.canRemove(ap));
 		del_t_btn.setEnabled(false);
 		TimeActionModel ot_model = t_model;
-		t_model = new TimeActionModel(t_cache, ap, day_model,
-			namespace, user);
+		t_model = new TimeActionModel(session, ap, day_model);
+		t_model.initialize();
 		t_table.setModel(t_model);
 		if(ot_model != null)
 			ot_model.dispose();
 		del_d_btn.setEnabled(false);
 		DmsActionModel od_model = d_model;
-		d_model = new DmsActionModel(d_cache, ap, namespace, user);
+		d_model = new DmsActionModel(session, ap);
+		d_model.initialize();
 		d_table.setModel(d_model);
 		if(od_model != null)
 			od_model.dispose();
 		del_l_btn.setEnabled(false);
 		LaneActionModel ol_model = l_model;
-		l_model = new LaneActionModel(l_cache, ap, namespace, user);
+		l_model = new LaneActionModel(session, ap);
+		l_model.initialize();
 		l_table.setModel(l_model);
 		if(ol_model != null)
 			ol_model.dispose();
@@ -283,19 +263,19 @@ public class ActionPlanPanel extends FormPanel {
 
 	/** Change the selected time action */
 	protected void selectTimeAction() {
-		int row = t_table.getSelectedRow();
-		del_t_btn.setEnabled(t_model.canRemove(row));
+		TimeAction ta = t_model.getProxy(t_table.getSelectedRow());
+		del_t_btn.setEnabled(t_model.canRemove(ta));
 	}
 
 	/** Change the selected DMS action */
 	protected void selectDmsAction() {
-		int row = d_table.getSelectedRow();
-		del_d_btn.setEnabled(d_model.canRemove(row));
+		DmsAction da = d_model.getProxy(d_table.getSelectedRow());
+		del_d_btn.setEnabled(d_model.canRemove(da));
 	}
 
 	/** Change the selected lane action */
 	protected void selectLaneAction() {
-		int row = l_table.getSelectedRow();
-		del_l_btn.setEnabled(l_model.canRemove(row));
+		LaneAction la = l_model.getProxy(l_table.getSelectedRow());
+		del_l_btn.setEnabled(l_model.canRemove(la));
 	}
 }

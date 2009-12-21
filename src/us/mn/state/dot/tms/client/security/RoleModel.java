@@ -17,10 +17,8 @@ package us.mn.state.dot.tms.client.security;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Role;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -47,18 +45,9 @@ public class RoleModel extends ProxyTableModel<Role> {
 		return m;
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new role table model */
-	public RoleModel(TypeCache<Role> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
-		initialize();
+	public RoleModel(Session s) {
+		super(s, s.getSonarState().getRoles());
 	}
 
 	/** Get the count of columns in the table */
@@ -83,10 +72,10 @@ public class RoleModel extends ProxyTableModel<Role> {
 	/** Get the class of the specified column */
 	public Class getColumnClass(int column) {
 		switch(column) {
-			case COL_ENABLED:
-				return Boolean.class;
-			default:
-				return String.class;
+		case COL_ENABLED:
+			return Boolean.class;
+		default:
+			return String.class;
 		}
 	}
 
@@ -104,32 +93,18 @@ public class RoleModel extends ProxyTableModel<Role> {
 		Role r = getProxy(row);
 		String v = value.toString().trim();
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_ENABLED:
-				r.setEnabled((Boolean)value);
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_ENABLED:
+			r.setEnabled((Boolean)value);
+			break;
 		}
 	}
 
 	/** Check if the user can add a role */
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(Role.SONAR_TYPE,"name"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate(Role r) {
-		return namespace.canUpdate(user, new Name(Role.SONAR_TYPE,
-			r.getName()));
-	}
-
-	/** Check if the user can remove a role */
-	public boolean canRemove(Role r) {
-		if(r == null)
-			return false;
-		return namespace.canRemove(user, new Name(Role.SONAR_TYPE,
-			r.getName()));
 	}
 }

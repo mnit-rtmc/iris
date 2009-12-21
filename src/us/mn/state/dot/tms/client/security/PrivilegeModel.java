@@ -18,11 +18,9 @@ import java.util.HashMap;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -64,21 +62,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	/** Role associated with privileges */
 	protected final Role role;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new privilege table model */
-	public PrivilegeModel(TypeCache<Privilege> c, Role r, Namespace ns,
-		User u)
-	{
-		super(c);
+	public PrivilegeModel(Session s, Role r) {
+		super(s, s.getSonarState().getPrivileges());
 		role = r;
-		namespace = ns;
-		user = u;
-		initialize();
 	}
 
 	/** Add a new proxy to the table model */
@@ -189,19 +176,5 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(Privilege.SONAR_TYPE,
 			"name"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate(Privilege p) {
-		return namespace.canUpdate(user, new Name(Privilege.SONAR_TYPE,
-			p.getName()));
-	}
-
-	/** Check if the user can remove a privilege */
-	public boolean canRemove(Privilege p) {
-		if(p == null)
-			return false;
-		return namespace.canRemove(user, new Name(Privilege.SONAR_TYPE,
-			p.getName()));
 	}
 }

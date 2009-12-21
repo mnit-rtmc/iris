@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.client.lcs;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -38,9 +38,8 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 	static protected final int COL_LOCATION = 1;
 
 	/** Create a new LCS array table model */
-	public LCSArrayModel(TypeCache<LCSArray> c) {
-		super(c);
-		initialize();
+	public LCSArrayModel(Session s) {
+		super(s, s.getSonarState().getLcsCache().getLCSArrays());
 	}
 
 	/** Get the count of columns in the table */

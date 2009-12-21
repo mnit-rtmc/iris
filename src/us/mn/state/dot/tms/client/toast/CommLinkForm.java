@@ -54,7 +54,7 @@ public class CommLinkForm extends AbstractForm {
 	protected final JTabbedPane tab = new JTabbedPane();
 
 	/** Table model for comm links */
-	protected CommLinkModel model;
+	protected final CommLinkModel model;
 
 	/** Table to hold the comm link list */
 	protected final ZTable table = new ZTable();
@@ -75,7 +75,7 @@ public class CommLinkForm extends AbstractForm {
 	protected final ZTable ftable = new ZTable();
 
 	/** Failed controller table model */
-	protected FailedControllerModel fmodel;
+	protected final FailedControllerModel fmodel;
 
 	/** Button to show controller properties */
 	protected final JButton ctr_props = new JButton("Properties");
@@ -89,26 +89,19 @@ public class CommLinkForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** Comm Link type cache */
-	protected final TypeCache<CommLink> cache;
-
-	/** Controller type cache */
-	protected final TypeCache<Controller> ccache;
-
 	/** Create a new comm link form */
 	public CommLinkForm(Session s) {
 		super(TITLE);
 		session = s;
-		ConCache con_cache = s.getSonarState().getConCache();
-		cache = con_cache.getCommLinks();
-		ccache = con_cache.getControllers();
+		model = new CommLinkModel(s);
+		fmodel = new FailedControllerModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
+		model.initialize();
+		fmodel.initialize();
 		setLayout(new BorderLayout());
-		model = new CommLinkModel(cache);
-		fmodel = new FailedControllerModel(ccache);
 		tab.add("All Links", createCommLinkPanel());
 		tab.add("Failed Controllers", createFailedControllerPanel());
 		add(tab);
@@ -246,7 +239,8 @@ public class CommLinkForm extends AbstractForm {
 		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
 		del_ctr.setEnabled(false);
 		ControllerModel old_model = cmodel;
-		cmodel = new ControllerModel(ccache, cl);
+		cmodel = new ControllerModel(session, cl);
+		cmodel.initialize();
 		ctable.setModel(cmodel);
 		ctable.setColumnModel(cmodel.createColumnModel());
 		if(old_model != null)

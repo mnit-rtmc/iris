@@ -19,6 +19,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -38,9 +39,8 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 	static protected final int COL_LOCATION = 1;
 
 	/** Create a new ramp meter table model */
-	public RampMeterModel(TypeCache<RampMeter> c) {
-		super(c);
-		initialize();
+	public RampMeterModel(Session s) {
+		super(s, s.getSonarState().getRampMeters());
 	}
 
 	/** Get the count of columns in the table */

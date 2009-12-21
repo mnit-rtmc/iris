@@ -17,11 +17,9 @@ package us.mn.state.dot.tms.client.marking;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -48,19 +46,9 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 		return m;
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new lane marking table model */
-	public LaneMarkingModel(TypeCache<LaneMarking> c, Namespace ns,
-		User u)
-	{
-		super(c);
-		namespace = ns;
-		user = u;
+	public LaneMarkingModel(Session s) {
+		super(s, s.getSonarState().getLaneMarkings());
 	}
 
 	/** Get the count of columns in the table */
@@ -101,10 +89,5 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(LaneMarking.SONAR_TYPE,
 			"name"));
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(LaneMarking lm) {
-		return lm != null && namespace.canRemove(user, new Name(lm));
 	}
 }

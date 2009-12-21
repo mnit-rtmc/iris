@@ -28,12 +28,10 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -116,12 +114,6 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		return (minute / 60) + ":" + min;
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
@@ -132,15 +124,10 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	protected DayPlan day_plan;
 
 	/** Create a new time action table model */
-	public TimeActionModel(TypeCache<TimeAction> c, ActionPlan ap,
-		ListModel dm, Namespace ns, User u)
-	{
-		super(c);
+	public TimeActionModel(Session s, ActionPlan ap, ListModel dm) {
+		super(s, s.getSonarState().getTimeActions());
 		action_plan = ap;
 		day_model = dm;
-		namespace = ns;
-		user = u;
-		initialize();
 	}
 
 	/** Add a new proxy to the table model */
@@ -196,7 +183,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	public boolean isCellEditable(int row, int column) {
 		TimeAction ta = getProxy(row);
 		if(ta != null)
-			return column == COL_DEPLOY && canUpdate();
+			return column == COL_DEPLOY && canUpdate(ta);
 		else {
 			switch(column) {
 			case COL_DAY_PLAN:
@@ -258,26 +245,5 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(TimeAction.SONAR_TYPE,
 			"oname"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate() {
-		return namespace.canUpdate(user, new Name(TimeAction.SONAR_TYPE,
-			"oname", "aname"));
-	}
-
-	/** Check if the user can remove the action at the specified row */
-	public boolean canRemove(int row) {
-		TimeAction ta = getProxy(row);
-		if(ta != null)
-			return canRemove(ta);
-		else
-			return false;
-	}
-
-	/** Check if the user can remove a time action */
-	public boolean canRemove(TimeAction ta) {
-		return namespace.canRemove(user, new Name(TimeAction.SONAR_TYPE,
-			ta.getName()));
 	}
 }

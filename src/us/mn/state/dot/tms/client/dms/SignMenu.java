@@ -40,7 +40,6 @@ public class SignMenu extends JMenu {
 		super("Message Signs");
 		session = s;
 		final SmartDesktop desktop = s.getDesktop();
-		final SonarState state = s.getSonarState();
 
 		String dms_name = I18N.get("dms.abbreviation");
 		JMenuItem item = new JMenuItem(dms_name,
@@ -57,7 +56,7 @@ public class SignMenu extends JMenu {
 		item.setMnemonic('F');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new FontForm(state));
+				desktop.show(new FontForm(session));
 			}
 		};
 		add(item);

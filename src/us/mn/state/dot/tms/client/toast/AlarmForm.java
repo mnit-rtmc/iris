@@ -19,10 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -45,9 +43,9 @@ public class AlarmForm extends AbstractForm {
 	protected final JButton del_button = new JButton("Delete");
 
 	/** Create a new alarm form */
-	public AlarmForm(TypeCache<Alarm> c, Namespace ns, User u) {
+	public AlarmForm(Session s) {
 		super(TITLE);
-		model = new AlarmModel(c, ns, u);
+		model = new AlarmModel(s);
 	}
 
 	/** Initializze the widgets in the form */

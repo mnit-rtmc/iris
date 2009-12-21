@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -57,12 +58,13 @@ public class SignTextModel implements ProxyListener<DmsSignGroup> {
 	protected final SignTextCreator creator;
 
 	/** Create a new sign text model */
-	public SignTextModel(DMS proxy, SonarState st, User u) {
+	public SignTextModel(Session s, DMS proxy) {
 		dms = proxy;
+		SonarState st = s.getSonarState();
 		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
 		sign_text = st.getDmsCache().getSignText();
-		user = u;
-		creator = new SignTextCreator(sign_text, st.getNamespace(), u);
+		user = s.getUser();
+		creator = new SignTextCreator(s);
 		listener = new ProxyListener<SignText>() {
 			public void proxyAdded(SignText proxy) {
 				if(isMember(proxy.getSignGroup()))

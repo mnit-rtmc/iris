@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Role;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -53,9 +53,8 @@ public class FontModel extends ProxyTableModel<Font> {
 	static protected final int COL_VERSION_ID = 6;
 
 	/** Create a new font table model */
-	public FontModel(TypeCache<Font> c) {
-		super(c);
-		initialize();
+	public FontModel(Session s) {
+		super(s, s.getSonarState().getDmsCache().getFonts());
 	}
 
 	/** Get the count of columns in the table */
@@ -69,20 +68,20 @@ public class FontModel extends ProxyTableModel<Font> {
 		if(f == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return f.getName();
-			case COL_NUMBER: 
-				return f.getNumber();
-			case COL_HEIGHT:
-				return f.getHeight();
-			case COL_WIDTH:
-				return f.getWidth();
-			case COL_LINE_SPACING:
-				return f.getLineSpacing();
-			case COL_CHAR_SPACING:
-				return f.getCharSpacing();
-			case COL_VERSION_ID:
-				return f.getVersionID();
+		case COL_NAME:
+			return f.getName();
+		case COL_NUMBER: 
+			return f.getNumber();
+		case COL_HEIGHT:
+			return f.getHeight();
+		case COL_WIDTH:
+			return f.getWidth();
+		case COL_LINE_SPACING:
+			return f.getLineSpacing();
+		case COL_CHAR_SPACING:
+			return f.getCharSpacing();
+		case COL_VERSION_ID:
+			return f.getVersionID();
 		}
 		return null;
 	}
@@ -110,29 +109,29 @@ public class FontModel extends ProxyTableModel<Font> {
 	public void setValueAt(Object value, int row, int column) {
 		Font f = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_NUMBER:
-				f.setNumber((Integer)value);
-				break;
-			case COL_HEIGHT:
-				f.setHeight((Integer)value);
-				break;
-			case COL_WIDTH:
-				f.setWidth((Integer)value);
-				break;
-			case COL_LINE_SPACING:
-				f.setLineSpacing((Integer)value);
-				break;
-			case COL_CHAR_SPACING:
-				f.setCharSpacing((Integer)value);
-				break;
-			case COL_VERSION_ID:
-				f.setVersionID((Integer)value);
-				break;
+		case COL_NAME:
+			String v = value.toString().trim();
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_NUMBER:
+			f.setNumber((Integer)value);
+			break;
+		case COL_HEIGHT:
+			f.setHeight((Integer)value);
+			break;
+		case COL_WIDTH:
+			f.setWidth((Integer)value);
+			break;
+		case COL_LINE_SPACING:
+			f.setLineSpacing((Integer)value);
+			break;
+		case COL_CHAR_SPACING:
+			f.setCharSpacing((Integer)value);
+			break;
+		case COL_VERSION_ID:
+			f.setVersionID((Integer)value);
+			break;
 		}
 	}
 

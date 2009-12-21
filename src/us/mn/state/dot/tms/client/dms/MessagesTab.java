@@ -43,7 +43,6 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.TmsForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
@@ -91,8 +90,8 @@ public class MessagesTab extends JPanel {
 	protected final JCheckBox awsControlled = new JCheckBox(
 		I18N.get("dms.aws.controlled"));
 
-	/** Sonar state */
-	protected final SonarState state;
+	/** User session */
+	protected final Session session;
 
 	/** DMS cache */
 	protected final DmsCache dms_cache;
@@ -109,12 +108,13 @@ public class MessagesTab extends JPanel {
 	/** Create a new messages tab */
 	public MessagesTab(Session s, DMS sign) {
 		super(new GridBagLayout());
-		state = s.getSonarState();
-		dms_cache = state.getDmsCache();
+		session = s;
+		dms_cache = s.getSonarState().getDmsCache();
 		proxy = sign;
-		namespace = state.getNamespace();
+		namespace = s.getSonarState().getNamespace();
 		user = s.getUser();
-		sign_group_model = new SignGroupTableModel(sign, state, user);
+		sign_group_model = new SignGroupTableModel(s, sign);
+		sign_group_model.initialize();
 		initGroupTable();
 		initSignTextTable();
 		createActions();
@@ -237,8 +237,9 @@ public class MessagesTab extends JPanel {
 		if(group != null) {
 			if(sign_text_model != null)
 				sign_text_model.dispose();
-			sign_text_model = new SignTextTableModel(group, state,
-				user);
+			sign_text_model = new SignTextTableModel(session,
+				group);
+			sign_text_model.initialize();
 			sign_text_table.setColumnModel(
 				sign_text_model.createColumnModel());
 			sign_text_table.setModel(sign_text_model);

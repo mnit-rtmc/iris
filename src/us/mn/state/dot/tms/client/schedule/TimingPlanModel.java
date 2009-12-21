@@ -29,12 +29,12 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanType;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -155,10 +155,9 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	protected final Device device;
 
 	/** Create a new timing plan table model */
-	public TimingPlanModel(TypeCache<TimingPlan> c, Device d) {
-		super(c);
+	public TimingPlanModel(Session s, Device d) {
+		super(s, s.getSonarState().getTimingPlans());
 		device = d;
-		initialize();
 	}
 
 	/** Add a new proxy to the table model */

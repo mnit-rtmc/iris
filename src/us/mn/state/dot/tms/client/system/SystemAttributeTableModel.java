@@ -25,8 +25,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
@@ -70,17 +68,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		return m;
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR User for permission checks */
-	protected final User user;
-
 	/** Create a new table model */
 	public SystemAttributeTableModel(Session s) {
-		super(s.getSonarState().getSystemAttributes());
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
+		super(s, s.getSonarState().getSystemAttributes());
 	}
 
 	/** Get the count of columns in the table */
@@ -109,14 +99,11 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
-		if(col == COL_NAME)
-			return isLastRow(row) && canAdd("test_attr");
-		else if(col == COL_VALUE) {
-			SystemAttribute t = getProxy(row);
-			if(t != null)
-				return canUpdate(t.getName(), "value");
-		}
-		return false;
+		SystemAttribute sa = getProxy(row);
+		if(sa != null)
+			return col != COL_NAME && canUpdate(sa);
+		else
+			return col == COL_NAME && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -195,35 +182,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		}
 	}
 
-	/** Check if the user can add the named attribute */
-	public boolean canAdd(String name) {
-		return name != null && namespace.canAdd(user,
-			new Name(SystemAttribute.SONAR_TYPE, name));
-	}
-
-	/** Check if the user can update the named attribute */
-	public boolean canUpdate(String oname) {
-		return oname != null && namespace.canUpdate(user,
-			new Name(SystemAttribute.SONAR_TYPE, oname));
-	}
-
-	/** Check if the user can update the named attribute */
-	public boolean canUpdate(String oname, String aname) {
-		return namespace.canUpdate(user,
-			new Name(SystemAttribute.SONAR_TYPE, oname, aname));
-	}
-
-	/** Check if the user can change the named attribute */
-	public boolean canChange(String oname) {
-		SystemAttribute sa = cache.lookupObject(oname);
-		if(sa != null)
-			return canUpdate(oname);
-		else
-			return canAdd(oname);
-	}
-
-	/** Check if the user can remove a system attribute */
-	public boolean canRemove(SystemAttribute sa) {
-		return sa != null && namespace.canRemove(user, new Name(sa));
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user,
+		       new Name(SystemAttribute.SONAR_TYPE));
 	}
 }

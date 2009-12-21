@@ -95,9 +95,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		User user = s.getUser();
 		creator = new LCSIndicationCreator(state.getNamespace(),
 			state.getLcsCache().getLCSIndications(), user);
-		table_model = new LCSTableModel(proxy,
-			state.getLcsCache().getLCSs(), state.getNamespace(),
-			user);
+		table_model = new LCSTableModel(s, proxy);
+		table_model.initialize();
 	}
 
 	/** Get the SONAR type cache */

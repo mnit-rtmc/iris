@@ -19,9 +19,9 @@ import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -74,9 +74,8 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Create a new failed controller table model */
-	public FailedControllerModel(TypeCache<Controller> c) {
-		super(c);
-		initialize();
+	public FailedControllerModel(Session s) {
+		super(s, s.getSonarState().getConCache().getControllers());
 	}
 
 	/** Check if a controller is "failed" */

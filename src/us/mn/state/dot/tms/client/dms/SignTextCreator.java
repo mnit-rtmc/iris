@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * This is a utility class to create sign text messages.
@@ -54,10 +55,10 @@ public class SignTextCreator {
 	protected int uid = 0;
 
 	/** Create a new sign text creator */
-	public SignTextCreator(TypeCache<SignText> st, Namespace ns, User u) {
-		sign_text = st;
-		namespace = ns;
-		user = u;
+	public SignTextCreator(Session s) {
+		sign_text = s.getSonarState().getDmsCache().getSignText();
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 	}
 
 	/** 

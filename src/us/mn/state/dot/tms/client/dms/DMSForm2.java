@@ -19,7 +19,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.DMS;
@@ -44,7 +43,7 @@ public class DMSForm2 extends AbstractForm {
 	static protected final String TITLE = I18N.get("dms.title");
 
 	/** Table model for DMSs */
-	protected DMSModel2 d_model;
+	protected final DMSModel2 d_model;
 
 	/** Table to hold the DMS list */
 	protected final ZTable d_table = new ZTable();
@@ -58,19 +57,16 @@ public class DMSForm2 extends AbstractForm {
 	/** Session */
 	protected final Session m_session;
 
-	/** DMS type cache */
-	protected final DmsCache m_dmsCache;
-
 	/** Create a new DMS form */
 	public DMSForm2(Session s) {
 		super(TITLE);
 		m_session = s;
-		m_dmsCache = s.getSonarState().getDmsCache();
+		d_model = new DMSModel2(s);
 	}
 
 	/** Initialize the widgets in the form */
 	protected void initialize() {
-		d_model = new DMSModel2(m_dmsCache);
+		d_model.initialize();
 		add(createDMSPanel());
 	}
 

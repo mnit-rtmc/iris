@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -54,19 +53,16 @@ public class RampMeterForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** Type cache */
-	protected final TypeCache<RampMeter> cache;
-
 	/** Create a new ramp meter form */
-	public RampMeterForm(Session s, TypeCache<RampMeter> c) {
+	public RampMeterForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = c;
+		model = new RampMeterModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new RampMeterModel(cache);
+		model.initialize();
 		add(createRampMeterPanel());
 		table.setVisibleRowCount(16);
 	}

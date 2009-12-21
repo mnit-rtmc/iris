@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -124,9 +125,8 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	}
 
 	/** Create a new graphic table model */
-	public GraphicModel(TypeCache<Graphic> c) {
-		super(c);
-		initialize();
+	public GraphicModel(Session s) {
+		super(s, s.getSonarState().getGraphics());
 	}
 
 	/** Add a new proxy to the table model */

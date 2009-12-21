@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -40,7 +39,7 @@ public class LcsForm extends AbstractForm {
 	static protected final String TITLE = "LCS Arrays";
 
 	/** Table model for LCS arrays */
-	protected LCSArrayModel model;
+	protected final LCSArrayModel model;
 
 	/** Table to hold the LCS array list */
 	protected final ZTable table = new ZTable();
@@ -54,19 +53,16 @@ public class LcsForm extends AbstractForm {
 	/** User session */
 	protected final Session session;
 
-	/** Type cache */
-	protected final TypeCache<LCSArray> cache;
-
 	/** Create a new LCS form */
 	public LcsForm(Session s) {
 		super(TITLE);
 		session = s;
-		cache = s.getSonarState().getLcsCache().getLCSArrays();
+		model = new LCSArrayModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		model = new LCSArrayModel(cache);
+		model.initialize();
 		add(createLCSArrayPanel());
 		table.setVisibleRowCount(16);
 	}

@@ -21,14 +21,12 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -71,24 +69,13 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 		ActionPlanState.undeploying
 	};
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
 	/** Create a new lane action table model */
-	public LaneActionModel(TypeCache<LaneAction> c, ActionPlan ap,
-		Namespace ns, User u)
-	{
-		super(c);
+	public LaneActionModel(Session s, ActionPlan ap) {
+		super(s, s.getSonarState().getLaneActions());
 		action_plan = ap;
-		namespace = ns;
-		user = u;
-		initialize();
 	}
 
 	/** Add a new proxy to the table model */
@@ -128,7 +115,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	public boolean isCellEditable(int row, int column) {
 		LaneAction la = getProxy(row);
 		if(la != null)
-			return column != COL_MARKING && canUpdate();
+			return column != COL_MARKING && canUpdate(la);
 		else
 			return column == COL_MARKING && canAdd();
 	}
@@ -179,26 +166,5 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(LaneAction.SONAR_TYPE,
 			"oname"));
-	}
-
-	/** Check if the user can update */
-	public boolean canUpdate() {
-		return namespace.canUpdate(user, new Name(LaneAction.SONAR_TYPE,
-			"oname", "aname"));
-	}
-
-	/** Check if the user can remove the action at the specified row */
-	public boolean canRemove(int row) {
-		LaneAction la = getProxy(row);
-		if(la != null)
-			return canRemove(la);
-		else
-			return false;
-	}
-
-	/** Check if the user can remove a lane action */
-	public boolean canRemove(LaneAction la) {
-		return namespace.canRemove(user, new Name(LaneAction.SONAR_TYPE,
-			la.getName()));
 	}
 }

@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
@@ -57,16 +57,13 @@ public class FontForm extends AbstractForm {
 	static protected final String TITLE = "DMS Fonts";
 
 	/** Table model for fonts */
-	protected FontModel f_model;
+	protected final FontModel f_model;
 
 	/** Table to hold the font list */
 	protected final ZTable f_table = new ZTable();
 
 	/** Button to delete the selected font */
 	protected final JButton del_font = new JButton("Delete Font");
-
-	/** Font type cache */
-	protected final TypeCache<Font> cache;
 
 	/** Glyph type cache */
 	protected final TypeCache<Glyph> glyphs;
@@ -143,16 +140,16 @@ public class FontForm extends AbstractForm {
 	protected GlyphEditor geditor;
 
 	/** Create a new font form */
-	public FontForm(SonarState state) {
+	public FontForm(Session s) {
 		super(TITLE);
-		cache = state.getDmsCache().getFonts();
-		glyphs = state.getDmsCache().getGlyphs();
-		graphics = state.getGraphics();
+		f_model = new FontModel(s);
+		glyphs = s.getSonarState().getDmsCache().getGlyphs();
+		graphics = s.getSonarState().getGraphics();
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		f_model = new FontModel(cache);
+		f_model.initialize();
 		add(createFontPanel());
 		graphics.addProxyListener(gr_listener);
 		glyphs.addProxyListener(gl_listener);

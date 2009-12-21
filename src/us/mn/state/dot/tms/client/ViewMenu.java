@@ -64,7 +64,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('U');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new UserRoleForm(state, user));
+				desktop.show(new UserRoleForm(session));
 			}
 		};
 		add(item);
@@ -80,9 +80,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('s');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CabinetStyleForm(
-					state.getConCache().getCabinetStyles(),
-					state.getNamespace(), user));
+				desktop.show(new CabinetStyleForm(session));
 			}
 		};
 		add(item);
@@ -98,8 +96,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('a');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new AlarmForm(state.getAlarms(),
-					state.getNamespace(), user));
+				desktop.show(new AlarmForm(session));
 			}
 		};
 		add(item);
@@ -107,8 +104,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('R');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RoadForm(state.getRoads(),
-					state.getNamespace(), user));
+				desktop.show(new RoadForm(session));
 			}
 		};
 		add(item);
@@ -116,9 +112,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('e');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new MapExtentForm(
-					state.getMapExtents(),
-					state.getNamespace(), user));
+				desktop.show(new MapExtentForm(session));
 			}
 		};
 		add(item);
@@ -126,9 +120,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('t');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new DetectorForm(
-					state.getDetCache().getDetectors(),
-					state.getNamespace(), user));
+				desktop.show(new DetectorForm(session));
 			}
 		};
 		add(item);
@@ -143,8 +135,7 @@ public class ViewMenu extends JMenu {
 		item = new JMenuItem("Lane Markings");
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new LaneMarkingForm(session,
-					state.getLaneMarkings()));
+				desktop.show(new LaneMarkingForm(session));
 			}
 		};
 		add(item);
@@ -152,8 +143,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('W');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new WarningSignForm(session,
-					state.getWarningSigns()));
+				desktop.show(new WarningSignForm(session));
 			}
 		};
 		add(item);
@@ -166,8 +156,7 @@ public class ViewMenu extends JMenu {
 		item.setMnemonic('M');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new RampMeterForm(session,
-					state.getRampMeters()));
+				desktop.show(new RampMeterForm(session));
 			}
 		};
 		add(item);

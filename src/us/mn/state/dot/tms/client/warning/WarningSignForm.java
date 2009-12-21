@@ -21,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
@@ -54,12 +53,10 @@ public class WarningSignForm extends AbstractForm {
 	protected final Session session;
 
 	/** Create a new warning sign form */
-	public WarningSignForm(Session s, TypeCache<WarningSign> c) {
+	public WarningSignForm(Session s) {
 		super(TITLE);
 		session = s;
-		w_model = new WarningSignModel(c,
-			session.getSonarState().getNamespace(),
-			session.getUser());
+		w_model = new WarningSignModel(s);
 	}
 
 	/** Initializze the widgets in the form */

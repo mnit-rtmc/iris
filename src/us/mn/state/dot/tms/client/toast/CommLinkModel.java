@@ -30,9 +30,9 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -72,9 +72,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	}
 
 	/** Create a new comm link table model */
-	public CommLinkModel(TypeCache<CommLink> c) {
-		super(c);
-		initialize();
+	public CommLinkModel(Session s) {
+		super(s, s.getSonarState().getConCache().getCommLinks());
 	}
 
 	/** Get the count of columns in the table */
@@ -88,20 +87,20 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		if(c == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return c.getName();
-			case COL_DESCRIPTION:
-				return c.getDescription();
-			case COL_URL:
-				return c.getUrl();
-			case COL_STATUS:
-				return c.getStatus();
-			case COL_PROTOCOL:
-				return PROTOCOLS.get(c.getProtocol());
-			case COL_TIMEOUT:
-				return c.getTimeout();
-			default:
-				return null;
+		case COL_NAME:
+			return c.getName();
+		case COL_DESCRIPTION:
+			return c.getDescription();
+		case COL_URL:
+			return c.getUrl();
+		case COL_STATUS:
+			return c.getStatus();
+		case COL_PROTOCOL:
+			return PROTOCOLS.get(c.getProtocol());
+		case COL_TIMEOUT:
+			return c.getTimeout();
+		default:
+			return null;
 		}
 	}
 
@@ -120,23 +119,23 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		String v = value.toString().trim();
 		CommLink c = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_DESCRIPTION:
-				c.setDescription(v);
-				break;
-			case COL_URL:
-				c.setUrl(v);
-				break;
-			case COL_PROTOCOL:
-				c.setProtocol(Short.valueOf(
-					(short)PROTOCOLS.indexOf(value)));
-				break;
-			case COL_TIMEOUT:
-				c.setTimeout((Integer)value);
-				break;
+		case COL_NAME:
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_DESCRIPTION:
+			c.setDescription(v);
+			break;
+		case COL_URL:
+			c.setUrl(v);
+			break;
+		case COL_PROTOCOL:
+			c.setProtocol(Short.valueOf(
+				(short)PROTOCOLS.indexOf(value)));
+			break;
+		case COL_TIMEOUT:
+			c.setTimeout((Integer)value);
+			break;
 		}
 	}
 

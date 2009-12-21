@@ -92,11 +92,12 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected final JTable det_table = new JTable();
 
 	/** R_Node detector modell */
-	protected R_NodeDetectorModel det_model;
+	protected final R_NodeDetectorModel det_model;
 
 	/** Create a new roadway node properties form */
 	public R_NodeProperties(Session s, R_Node n) {
 		super(TITLE, s, n);
+		det_model = new R_NodeDetectorModel(session, proxy);
 	}
 
 	/** Get the SONAR type cache */
@@ -108,8 +109,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 	protected void initialize() {
 		location = new LocationPanel(true, proxy.getGeoLoc(),
 			session.getSonarState());
-		det_model = new R_NodeDetectorModel(session,
-			state.getDetCache().getDetectors(), proxy);
+		det_model.initialize();
 		det_table.setAutoCreateColumnsFromModel(false);
 		det_table.setModel(det_model);
 		det_table.setColumnModel(det_model.createColumnModel());

@@ -22,7 +22,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -54,8 +53,8 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 	protected final WrapperComboBoxModel det_model;
 
 	/** Create a new r_node detector table model */
-	public R_NodeDetectorModel(Session s, TypeCache<Detector> c, R_Node n) {
-		super(c);
+	public R_NodeDetectorModel(Session s, R_Node n) {
+		super(s, s.getSonarState().getDetCache().getDetectors());
 		r_node = n;
 		det_model = new WrapperComboBoxModel(
 			s.getDetectorManager().getStyleModel(

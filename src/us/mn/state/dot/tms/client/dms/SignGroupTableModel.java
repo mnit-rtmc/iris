@@ -27,7 +27,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -112,17 +112,16 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** 
 	 * Create a new sign group table model.
+	 * @param s Session
 	 * @param dms DMS proxy object.
-	 * @param st SonarState cache.
-	 * @param u Logged-in user.
 	 */
-	public SignGroupTableModel(DMS proxy, SonarState st, User u) {
-		super(st.getDmsCache().getSignGroups());
+	public SignGroupTableModel(Session s, DMS proxy) {
+		super(s, s.getSonarState().getDmsCache().getSignGroups());
 		dms = proxy;
-		dms_sign_groups = st.getDmsCache().getDmsSignGroups();
-		namespace = st.getNamespace();
-		user = u;
-		initialize();
+		dms_sign_groups =
+			s.getSonarState().getDmsCache().getDmsSignGroups();
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 		final SignGroupTableModel model = this;
 		listener = new ProxyListener<DmsSignGroup>() {
 			public void proxyAdded(DmsSignGroup proxy) {

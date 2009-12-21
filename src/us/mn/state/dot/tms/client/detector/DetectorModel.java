@@ -22,13 +22,10 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -76,17 +73,9 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 			LANE_TYPES.add(lt);
 	}
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Create a new detector table model */
-	public DetectorModel(TypeCache<Detector> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
+	public DetectorModel(Session s) {
+		super(s, s.getSonarState().getDetCache().getDetectors());
 	}
 
 	/** Create an empty set of proxies */
@@ -212,10 +201,5 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		JComboBox combo = new JComboBox(LaneType.getDescriptions());
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(Detector d) {
-		return d != null && namespace.canRemove(user, new Name(d));
 	}
 }

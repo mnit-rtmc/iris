@@ -19,10 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -47,9 +45,9 @@ public class RoadForm extends AbstractForm {
 	protected final JButton del_road = new JButton("Delete");
 
 	/** Create a new road form */
-	public RoadForm(TypeCache<Road> c, Namespace ns, User u) {
+	public RoadForm(Session s) {
 		super(TITLE);
-		model = new RoadModel(c, ns, u);
+		model = new RoadModel(s);
 	}
 
 	/** Initializze the widgets in the form */

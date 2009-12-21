@@ -17,12 +17,9 @@ package us.mn.state.dot.tms.client.schedule;
 import java.util.TreeSet;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -41,21 +38,12 @@ public class DayPlanHolidayModel extends ProxyTableModel<Holiday> {
 	/** Assigned column number */
 	static protected final int COL_ASSIGNED = 1;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** Logged-in user */
-	protected final User user;
-
 	/** Currently selected day plan */
 	protected DayPlan day_plan;
 
 	/** Create a new day plan holiday table model */
-	public DayPlanHolidayModel(TypeCache<Holiday> c, Namespace ns, User u) {
-		super(c);
-		namespace = ns;
-		user = u;
-		initialize();
+	public DayPlanHolidayModel(Session s) {
+		super(s, s.getSonarState().getHolidays());
 	}
 
 	/** Set the holidays for a day plan */
@@ -106,8 +94,9 @@ public class DayPlanHolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int column) {
+		Holiday hol = getProxy(row);
 		return (column == COL_ASSIGNED) && (day_plan != null) &&
-		       canUpdate();
+		       canUpdate(hol);
 	}
 
 	/** Set the value at the specified cell */
@@ -150,11 +139,5 @@ public class DayPlanHolidayModel extends ProxyTableModel<Holiday> {
 		m.addColumn(createColumn(COL_NAME, 120, "Holiday"));
 		m.addColumn(createColumn(COL_ASSIGNED, 80, "Assigned"));
 		return m;
-	}
-
-	/** Check if the user can set day plan holidays */
-	public boolean canUpdate() {
-		return namespace.canUpdate(user, new Name(DayPlan.SONAR_TYPE,
-		       "holidays"));
 	}
 }
