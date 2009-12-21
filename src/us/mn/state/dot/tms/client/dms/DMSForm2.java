@@ -68,23 +68,10 @@ public class DMSForm2 extends AbstractForm {
 		m_dmsCache = s.getSonarState().getDmsCache();
 	}
 
-	/** set table sorter */
-	private void setSorter(DMSModel2 model) {
-		/* FIXME: enable sorting...
-		// blank row should always sort to bottom, also, row 
-		// selection needs to coorespond w/ DMS
-		TableRowSorter<DMSModel2> sorter = 
-			new TableRowSorter<DMSModel2>(model);
-		sorter.setComparator(0, new NumericAlphaComparator<String>());
-		d_table.setRowSorter(sorter);
-		*/
-	}
-
 	/** Initialize the widgets in the form */
 	protected void initialize() {
 		d_model = new DMSModel2(m_dmsCache);
 		add(createDMSPanel());
-		setSorter(d_model);
 	}
 
 	/** Dispose of the form */
