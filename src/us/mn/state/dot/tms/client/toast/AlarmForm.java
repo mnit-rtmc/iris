@@ -14,82 +14,19 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 
 /**
  * A form for displaying and editing alarms
  *
  * @author Douglas Lau
  */
-public class AlarmForm extends AbstractForm {
-
-	/** Frame title */
-	static protected final String TITLE = "Alarms";
-
-	/** Table model for alarms */
-	protected final AlarmModel model;
-
-	/** Table to hold the alarm list */
-	protected final ZTable table = new ZTable();
-
-	/** Button to delete the selected alarm */
-	protected final JButton del_button = new JButton("Delete");
+public class AlarmForm extends ProxyTableForm<Alarm> {
 
 	/** Create a new alarm form */
 	public AlarmForm(Session s) {
-		super(TITLE);
-		model = new AlarmModel(s);
-	}
-
-	/** Initializze the widgets in the form */
-	protected void initialize() {
-		model.initialize();
-		add(createAlarmPanel());
-	}
-
-	/** Dispose of the form */
-	protected void dispose() {
-		model.dispose();
-	}
-
-	/** Create alarm panel */
-	protected JPanel createAlarmPanel() {
-		final ListSelectionModel s = table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectAlarm();
-			}
-		};
-		new ActionJob(this, del_button) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					model.deleteRow(row);
-			}
-		};
-		table.setModel(model);
-		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(model.createColumnModel());
-		table.setVisibleRowCount(16);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(table);
-		panel.addRow(del_button);
-		del_button.setEnabled(false);
-		return panel;
-	}
-
-	/** Change the selected alarm */
-	protected void selectAlarm() {
-		Alarm al = model.getProxy(table.getSelectedRow());
-		del_button.setEnabled(model.canRemove(al));
+		super("Alarms", new AlarmModel(s));
 	}
 }
