@@ -32,9 +32,6 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class SystemAttributeTab extends FormPanel {
 
-	/** Tab name */
-	static protected final String TAB_NAME = "All";
-
 	/** Table row height */
 	static protected final int ROW_HEIGHT = 20;
 
@@ -70,11 +67,6 @@ public class SystemAttributeTab extends FormPanel {
 		m_form = form;
 		m_tableModel = new SystemAttributeTableModel(sa, form);
 		createControls();
-	}
-
-	/** return the text name of the tab */
-	public String getName() {
-		return TAB_NAME;
 	}
 
 	/** create the attribute editor tab */
