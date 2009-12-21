@@ -19,8 +19,8 @@ import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.widget.ZTable;
@@ -36,7 +36,7 @@ public class VideoMonitorForm extends AbstractForm {
 	static protected final String TITLE = "Video Monitors";
 
 	/** Table model for video monitors */
-	protected VideoMonitorModel m_model;
+	protected final VideoMonitorModel m_model;
 
 	/** Table to hold the video monitor list */
 	protected final ZTable m_table = new ZTable();
@@ -44,18 +44,15 @@ public class VideoMonitorForm extends AbstractForm {
 	/** Button to delete the selected video monitor */
 	protected final JButton del_monitor = new JButton("Delete");
 
-	/** Video monitor type cache */
-	protected final TypeCache<VideoMonitor> cache;
-
 	/** Create a new video monitor form */
-	public VideoMonitorForm(TypeCache<VideoMonitor> c) {
+	public VideoMonitorForm(Session s) {
 		super(TITLE);
-		cache = c;
+		m_model = new VideoMonitorModel(s);
 	}
 
 	/** Initializze the widgets in the form */
 	protected void initialize() {
-		m_model = new VideoMonitorModel(cache);
+		m_model.initialize();
 		add(createMonitorPanel());
 	}
 
@@ -93,7 +90,7 @@ public class VideoMonitorForm extends AbstractForm {
 
 	/** Change the selected monitor */
 	protected void selectMonitor() {
-		int row = m_table.getSelectedRow();
-		del_monitor.setEnabled(row >= 0 && !m_model.isLastRow(row));
+		VideoMonitor vm = m_model.getProxy(m_table.getSelectedRow());
+		del_monitor.setEnabled(m_model.canRemove(vm));
 	}
 }

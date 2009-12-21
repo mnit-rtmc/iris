@@ -16,8 +16,11 @@ package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -39,10 +42,17 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	/** Restricted column number */
 	static protected final int COL_RESTRICTED = 2;
 
+	/** SONAR namespace */
+	protected final Namespace namespace;
+
+	/** SONAR user */
+	protected final User user;
+
 	/** Create a new video monitor table model */
-	public VideoMonitorModel(TypeCache<VideoMonitor> c) {
-		super(c);
-		initialize();
+	public VideoMonitorModel(Session s) {
+		super(s.getSonarState().getCamCache().getVideoMonitors());
+		namespace = s.getSonarState().getNamespace();
+		user = s.getUser();
 	}
 
 	/** Get the count of columns in the table */
@@ -56,12 +66,12 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 		if(m == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return m.getName();
-			case COL_DESCRIPTION:
-				return m.getDescription();
-			case COL_RESTRICTED:
-				return m.getRestricted();
+		case COL_NAME:
+			return m.getName();
+		case COL_DESCRIPTION:
+			return m.getDescription();
+		case COL_RESTRICTED:
+			return m.getRestricted();
 		}
 		return null;
 	}
@@ -87,17 +97,17 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	public void setValueAt(Object value, int row, int column) {
 		VideoMonitor m = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-				break;
-			case COL_DESCRIPTION:
-				m.setDescription(value.toString());
-				break;
-			case COL_RESTRICTED:
-				m.setRestricted((Boolean)value);
-				break;
+		case COL_NAME:
+			String v = value.toString().trim();
+			if(v.length() > 0)
+				cache.createObject(v);
+			break;
+		case COL_DESCRIPTION:
+			m.setDescription(value.toString());
+			break;
+		case COL_RESTRICTED:
+			m.setRestricted((Boolean)value);
+			break;
 		}
 	}
 
@@ -108,5 +118,10 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 		m.addColumn(createColumn(COL_DESCRIPTION, 300, "Description"));
 		m.addColumn(createColumn(COL_RESTRICTED, 120, "Restricted"));
 		return m;
+	}
+
+	/** Check if the user can remove a proxy */
+	public boolean canRemove(VideoMonitor vm) {
+		return vm != null && namespace.canRemove(user, new Name(vm));
 	}
 }

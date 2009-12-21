@@ -45,8 +45,7 @@ public class VideoMenu extends JMenu {
 		item = new JMenuItem("Monitors");
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new VideoMonitorForm(
-					state.getCamCache().getVideoMonitors()));
+				desktop.show(new VideoMonitorForm(s));
 			}
 		};
 		add(item);
