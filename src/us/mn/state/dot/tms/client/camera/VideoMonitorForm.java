@@ -14,83 +14,19 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 
 /**
  * A form for displaying and editing video monitors
  *
  * @author Douglas Lau
  */
-public class VideoMonitorForm extends AbstractForm {
-
-	/** Frame title */
-	static protected final String TITLE = "Video Monitors";
-
-	/** Table model for video monitors */
-	protected final VideoMonitorModel m_model;
-
-	/** Table to hold the video monitor list */
-	protected final ZTable m_table = new ZTable();
-
-	/** Button to delete the selected video monitor */
-	protected final JButton del_monitor = new JButton("Delete");
+public class VideoMonitorForm extends ProxyTableForm<VideoMonitor> {
 
 	/** Create a new video monitor form */
 	public VideoMonitorForm(Session s) {
-		super(TITLE);
-		m_model = new VideoMonitorModel(s);
-	}
-
-	/** Initializze the widgets in the form */
-	protected void initialize() {
-		m_model.initialize();
-		add(createMonitorPanel());
-	}
-
-	/** Dispose of the form */
-	protected void dispose() {
-		m_model.dispose();
-	}
-
-	/** Create monitor panel */
-	protected JPanel createMonitorPanel() {
-		final ListSelectionModel s = m_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectMonitor();
-			}
-		};
-		m_table.setModel(m_model);
-		m_table.setAutoCreateColumnsFromModel(false);
-		m_table.setColumnModel(m_model.createColumnModel());
-		new ActionJob(this, del_monitor) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					m_model.deleteRow(row);
-			}
-		};
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(m_table);
-		panel.addRow(del_monitor);
-		del_monitor.setEnabled(false);
-		return panel;
-	}
-
-	/** Change the selected monitor */
-	protected void selectMonitor() {
-		VideoMonitor vm = m_model.getProxy(m_table.getSelectedRow());
-		del_monitor.setEnabled(m_model.canRemove(vm));
+		super("Video Monitors", new VideoMonitorModel(s));
 	}
 }
