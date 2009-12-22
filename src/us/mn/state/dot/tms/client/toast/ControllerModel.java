@@ -29,6 +29,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -127,51 +128,53 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		if(c == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return c.getName();
-			case COL_LOCATION:
-				return GeoLocHelper.getDescription(
-					c.getCabinet().getGeoLoc());
-			case COL_DROP:
-				return c.getDrop();
-			case COL_ACTIVE:
-				return c.getActive();
-			case COL_STATUS:
-				return c.getStatus();
-			case COL_ERROR:
-				return c.getError();
-			case COL_VERSION:
-				return c.getVersion();
-			default:
-				return null;
+		case COL_NAME:
+			return c.getName();
+		case COL_LOCATION:
+			return GeoLocHelper.getDescription(
+				c.getCabinet().getGeoLoc());
+		case COL_DROP:
+			return c.getDrop();
+		case COL_ACTIVE:
+			return c.getActive();
+		case COL_STATUS:
+			return c.getStatus();
+		case COL_ERROR:
+			return c.getError();
+		case COL_VERSION:
+			return c.getVersion();
+		default:
+			return null;
 		}
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
+	public boolean isCellEditable(int row, int col) {
 		if(comm_link == null)
 			return false;
-		if(isLastRow(row))
-			return column == COL_NAME;
-		else
-			return column == COL_DROP || column == COL_ACTIVE;
+		Controller c = getProxy(row);
+		if(c != null) {
+			return (col == COL_DROP || col == COL_ACTIVE) &&
+			       canUpdate(c);
+		} else
+			return (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int column) {
 		Controller c = getProxy(row);
 		switch(column) {
-			case COL_NAME:
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					createController(v);
-				break;
-			case COL_DROP:
-				c.setDrop(((Number)value).shortValue());
-				break;
-			case COL_ACTIVE:
-				c.setActive((Boolean)value);
-				break;
+		case COL_NAME:
+			String v = value.toString().trim();
+			if(v.length() > 0)
+				createController(v);
+			break;
+		case COL_DROP:
+			c.setDrop(((Number)value).shortValue());
+			break;
+		case COL_ACTIVE:
+			c.setActive((Boolean)value);
+			break;
 		}
 	}
 
@@ -261,5 +264,10 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		m.addColumn(createColumn(COL_ERROR, 240, "Error Detail"));
 		m.addColumn(createColumn(COL_VERSION, 120, "Version"));
 		return m;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Controller.SONAR_TYPE));
 	}
 }
