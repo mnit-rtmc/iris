@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * Table model for warning signs.
@@ -82,5 +83,17 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 		m.addColumn(createColumn(COL_NAME, 200, "Warning Sign"));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		return m;
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return true;
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<WarningSign> createPropertiesForm(
+		WarningSign proxy)
+	{
+		return new WarningSignProperties(session, proxy);
 	}
 }
