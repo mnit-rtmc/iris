@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -74,12 +75,12 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
-		if(column == COL_NAME)
-			return false;
-		return true;
+	public boolean isCellEditable(int row, int col) {
+		VideoMonitor vm = getProxy(row);
+		if(vm != null)
+			return col != COL_NAME && canUpdate(vm);
+		else
+			return col == COL_NAME && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -107,5 +108,11 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 		m.addColumn(createColumn(COL_DESCRIPTION, 300, "Description"));
 		m.addColumn(createColumn(COL_RESTRICTED, 120, "Restricted"));
 		return m;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user,
+			new Name(VideoMonitor.SONAR_TYPE));
 	}
 }
