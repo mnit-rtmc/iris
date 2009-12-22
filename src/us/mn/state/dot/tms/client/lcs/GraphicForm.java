@@ -62,7 +62,7 @@ public class GraphicForm extends AbstractForm {
 	protected final JButton createBtn = new JButton("Create");
 
 	/** Button to delete the selected proxy */
-	protected final JButton deleteBtn = new JButton("Delete");
+	protected final JButton del_btn = new JButton("Delete");
 
 	/** User session */
 	protected final Session session;
@@ -105,7 +105,7 @@ public class GraphicForm extends AbstractForm {
 				createGraphic();
 			}
 		};
-		new ActionJob(this, deleteBtn) {
+		new ActionJob(this, del_btn) {
 			public void perform() throws Exception {
 				int row = s.getMinSelectionIndex();
 				if(row >= 0)
@@ -119,15 +119,15 @@ public class GraphicForm extends AbstractForm {
 		table.setColumnModel(model.createColumnModel());
 		panel.addRow(table);
 		panel.add(createBtn);
-		panel.addRow(deleteBtn);
-		deleteBtn.setEnabled(false);
+		panel.addRow(del_btn);
+		del_btn.setEnabled(false);
 		return panel;
 	}
 
 	/** Change the selected proxy */
 	protected void selectProxy() {
-		int row = table.getSelectedRow();
-		deleteBtn.setEnabled(row >= 0 && !model.isLastRow(row));
+		Graphic proxy = model.getProxy(table.getSelectedRow());
+		del_btn.setEnabled(model.canRemove(proxy));
 	}
 
 	/** Create a new graphic */
