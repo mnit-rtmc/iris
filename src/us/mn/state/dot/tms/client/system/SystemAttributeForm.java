@@ -14,16 +14,10 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
@@ -32,88 +26,36 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  *
  * @author Douglas Lau
  */
-public class SystemAttributeForm extends AbstractForm {
-
-	/** Frame title */
-	static private final String TITLE = "System Attributes";
-
-	/** Table row height */
-	static protected final int ROW_HEIGHT = 20;
-
-	/** Table model */
-	protected final SystemAttributeTableModel model;
-
-	/** System attribute table. */
-	protected final ZTable m_table = new ZTable() {
-		public String getToolTipText(int row, int column) {
-			Object value = model.getValueAt(row,
-				SystemAttributeTableModel.COL_NAME);
-			if(value instanceof String)
-				return SystemAttrEnum.getDesc((String)value);
-			else
-				return null;
-		}
-	};
-
-	/** Button to delete the selected attribute */
-	protected final JButton del_btn = new JButton("Delete");
+public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
 
 	/** Create a new system attribute form */
 	public SystemAttributeForm(Session s) {
-		super(TITLE);
+		super("System Attributes", new SystemAttributeTableModel(s));
 		setHelpPageName("Help.SystemAttributeForm");
-		model = new SystemAttributeTableModel(s);
 	}
 
-	/** Initialise the widgets on the form */
-	protected void initialize() {
-		model.initialize();
-		createJobs();
-		add(createPanel());
-	}
-
-	/** Dispose of the form */
-	protected void dispose() {
-		model.dispose();
-	}
-
-	/** Create Gui jobs */
-	protected void createJobs() {
-		ListSelectionModel s = m_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				selectAttribute();
-			}
-		};
-		new ActionJob(this, del_btn) {
-			public void perform() throws Exception {
-				final ListSelectionModel s = 
-					m_table.getSelectionModel();
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					model.deleteRow(row);
+	/** Create the table */
+	protected ZTable createTable() {
+		return new ZTable() {
+			public String getToolTipText(int row, int column) {
+				Object value = model.getValueAt(row,
+					SystemAttributeTableModel.COL_NAME);
+				if(value instanceof String) {
+					return SystemAttrEnum.getDesc(
+						(String)value);
+				} else
+					return null;
 			}
 		};
 	}
 
-	/** Create the panel for the form */
-	protected JPanel createPanel() {
-		m_table.setAutoCreateColumnsFromModel(false);
-		m_table.setColumnModel(model.createColumnModel());
-		m_table.setModel(model);
-		m_table.setRowHeight(ROW_HEIGHT);
-		m_table.setVisibleRowCount(12);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(m_table);
-		panel.addRow(del_btn);
-		del_btn.setEnabled(false);
-		return panel;
+	/** Get the row height */
+	protected int getRowHeight() {
+		return 20;
 	}
 
-	/** Select an attribute */
-	protected void selectAttribute() {
-		SystemAttribute sa = model.getProxy(m_table.getSelectedRow());
-		del_btn.setEnabled(model.canRemove(sa));
+	/** Get the visible row count */
+	protected int getVisibleRowCount() {
+		return 12;
 	}
 }
