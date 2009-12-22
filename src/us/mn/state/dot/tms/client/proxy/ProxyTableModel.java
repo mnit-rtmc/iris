@@ -214,13 +214,6 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		}
 	}
 
-	/** Check if the specified row is the last row in the table */
-	public boolean isLastRow(int row) {
-		synchronized(proxies) {
-			return row == proxies.size();
-		}
-	}
-
 	/** Get the proxy at the specified row */
 	public T getProxy(int row) {
 		if(row < 0)
