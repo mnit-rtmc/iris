@@ -62,7 +62,6 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	 *  @param s Session */
 	public QuickMessageTableModel(Session s) {
 		super(s, s.getSonarState().getDmsCache().getQuickMessages());
-		initialize();
 	}
 
 	/** Get the count of columns in the table */

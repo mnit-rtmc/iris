@@ -118,7 +118,6 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	/** Create a new DMS table model */
 	public DMSModel2(Session s) {
 		super(s, s.getSonarState().getDmsCache().getDMSs());
-		initialize();
 	}
 
 	/** Get the count of columns in the table */

@@ -59,9 +59,7 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 		det_model = new WrapperComboBoxModel(
 			s.getDetectorManager().getStyleModel(
 			DetectorManager.STYLE_NO_R_NODE), true);
-		initialize();
 	}
-
 
 	/** Add a new proxy to the list model */
 	protected int doProxyAdded(Detector proxy) {
