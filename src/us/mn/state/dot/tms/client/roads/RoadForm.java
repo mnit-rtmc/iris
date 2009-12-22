@@ -14,84 +14,24 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 
 /**
  * A form for displaying and editing roads
  *
  * @author Douglas Lau
  */
-public class RoadForm extends AbstractForm {
-
-	/** Frame title */
-	static protected final String TITLE = "Roads";
-
-	/** Table model for roads */
-	protected final RoadModel model;
-
-	/** Table to hold the road list */
-	protected final ZTable table = new ZTable();
-
-	/** Button to delete the selected road */
-	protected final JButton del_road = new JButton("Delete");
+public class RoadForm extends ProxyTableForm<Road> {
 
 	/** Create a new road form */
 	public RoadForm(Session s) {
-		super(TITLE);
-		model = new RoadModel(s);
+		super("Roads", new RoadModel(s));
 	}
 
-	/** Initializze the widgets in the form */
-	protected void initialize() {
-		model.initialize();
-		add(createRoadPanel());
-	}
-
-	/** Dispose of the form */
-	protected void dispose() {
-		model.dispose();
-	}
-
-	/** Create road panel */
-	protected JPanel createRoadPanel() {
-		final ListSelectionModel s = table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectRoad();
-			}
-		};
-		new ActionJob(this, del_road) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					model.deleteRow(row);
-			}
-		};
-		table.setModel(model);
-		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(model.createColumnModel());
-		table.setVisibleRowCount(20);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(table);
-		panel.addRow(del_road);
-		del_road.setEnabled(false);
-		return panel;
-	}
-
-	/** Change the selected road */
-	protected void selectRoad() {
-		Road r = model.getProxy(table.getSelectedRow());
-		del_road.setEnabled(model.canRemove(r));
+	/** Get the visible row count */
+	protected int getVisibleRowCount() {
+		return 20;
 	}
 }
