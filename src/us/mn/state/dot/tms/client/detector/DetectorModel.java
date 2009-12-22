@@ -22,6 +22,7 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -136,11 +137,14 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
-		else
-			return column != COL_NAME && column != COL_LABEL;
+	public boolean isCellEditable(int row, int col) {
+		Detector det = getProxy(row);
+		if(det != null) {
+			return (col != COL_NAME) &&
+			       (col != COL_LABEL) &&
+			       canUpdate(det);
+		} else
+			return col == COL_NAME && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -201,5 +205,10 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		JComboBox combo = new JComboBox(LaneType.getDescriptions());
 		c.setCellEditor(new DefaultCellEditor(combo));
 		return c;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Detector.SONAR_TYPE));
 	}
 }
