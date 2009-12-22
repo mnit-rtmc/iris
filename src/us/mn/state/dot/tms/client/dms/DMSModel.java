@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -69,8 +70,9 @@ public class DMSModel extends ProxyTableModel<DMS> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return isLastRow(row) && column == COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		DMS dms = getProxy(row);
+		return (dms == null) && (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -99,5 +101,10 @@ public class DMSModel extends ProxyTableModel<DMS> {
 	/** Create a properties form for one proxy */
 	protected SonarObjectForm<DMS> createPropertiesForm(DMS proxy) {
 		return new DMSProperties(session, proxy);
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(DMS.SONAR_TYPE));
 	}
 }
