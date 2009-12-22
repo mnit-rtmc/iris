@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -77,10 +78,12 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
-		return column == COL_PUBLISH;
+	public boolean isCellEditable(int row, int col) {
+		Camera c = getProxy(row);
+		if(c != null)
+			return col == COL_PUBLISH && canUpdate(c);
+		else
+			return col == COL_NAME && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -115,5 +118,10 @@ public class CameraModel extends ProxyTableModel<Camera> {
 	/** Create a properties form for one proxy */
 	protected SonarObjectForm<Camera> createPropertiesForm(Camera proxy) {
 		return new CameraProperties(session, proxy);
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Camera.SONAR_TYPE));
 	}
 }
