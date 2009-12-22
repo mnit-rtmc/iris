@@ -29,6 +29,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.RampMeter;
@@ -215,12 +216,15 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_TYPE;
-		else
-			return column != COL_NAME && column != COL_TYPE &&
-			       column != COL_DEVICE;
+	public boolean isCellEditable(int row, int col) {
+		TimingPlan tp = getProxy(row);
+		if(tp != null) {
+			return (col != COL_NAME) &&
+			       (col != COL_TYPE) &&
+			       (col != COL_DEVICE) &&
+			       canUpdate(tp);
+		} else
+			return (col == COL_TYPE) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -309,5 +313,10 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 			}
 		});
 		return names;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(TimingPlan.SONAR_TYPE));
 	}
 }
