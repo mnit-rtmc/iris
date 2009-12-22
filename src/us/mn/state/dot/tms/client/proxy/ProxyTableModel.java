@@ -273,7 +273,9 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Check if the user can add a proxy */
-//	abstract public boolean canAdd();
+	public boolean canAdd() {
+		return false;
+	}
 
 	/** Check if the user can update a proxy */
 	public boolean canUpdate(T proxy) {

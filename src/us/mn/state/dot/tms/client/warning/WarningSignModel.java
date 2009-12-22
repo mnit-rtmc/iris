@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.warning;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -63,8 +64,9 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return isLastRow(row) && column == COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		WarningSign ws = getProxy(row);
+		return (ws == null) && (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -95,5 +97,10 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 		WarningSign proxy)
 	{
 		return new WarningSignProperties(session, proxy);
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(WarningSign.SONAR_TYPE));
 	}
 }
