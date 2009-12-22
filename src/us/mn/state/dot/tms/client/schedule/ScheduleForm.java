@@ -29,9 +29,6 @@ public class ScheduleForm extends AbstractForm {
 	/** Frame title */
 	static protected final String TITLE = "Plans and Schedules";
 
-	/** User session */
-	protected final Session session;
-
 	/** Tabbed pane */
 	protected final JTabbedPane tab = new JTabbedPane();
 
@@ -44,7 +41,6 @@ public class ScheduleForm extends AbstractForm {
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
 		super(TITLE);
-		session = s;
 		p_panel = new ActionPlanPanel(s);
 		d_panel = new DayPlanPanel(s);
 	}
