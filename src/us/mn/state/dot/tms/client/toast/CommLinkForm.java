@@ -236,7 +236,7 @@ public class CommLinkForm extends AbstractForm {
 			link_status.setText(cl.getStatus());
 		else
 			link_status.setText("");
-		del_button.setEnabled(row >= 0 && !model.isLastRow(row));
+		del_button.setEnabled(model.canRemove(cl));
 		del_ctr.setEnabled(false);
 		ControllerModel old_model = cmodel;
 		cmodel = new ControllerModel(session, cl);
@@ -251,10 +251,8 @@ public class CommLinkForm extends AbstractForm {
 	protected void selectController() {
 		int row = ctable.getSelectedRow();
 		Controller c = cmodel.getProxy(row);
-		boolean exists = row >= 0 && !cmodel.isLastRow(row);
-		ctr_props.setEnabled(exists);
-		// FIXME: should check for "deletable"
-		del_ctr.setEnabled(exists);
+		ctr_props.setEnabled(c != null);
+		del_ctr.setEnabled(cmodel.canRemove(c));
 	}
 
 	/** Do the action for controller properties button */
