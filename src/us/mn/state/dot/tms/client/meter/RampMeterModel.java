@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -70,8 +70,9 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return isLastRow(row) && column == COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		RampMeter mtr = getProxy(row);
+		return (mtr == null) && (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -101,5 +102,10 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 		RampMeter proxy)
 	{
 		return new RampMeterProperties(session, proxy);
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(RampMeter.SONAR_TYPE));
 	}
 }
