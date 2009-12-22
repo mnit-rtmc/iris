@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * Table model for ramp meters.
@@ -88,5 +89,17 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 		m.addColumn(createColumn(COL_NAME, 200, "Meter"));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		return m;
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return true;
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<RampMeter> createPropertiesForm(
+		RampMeter proxy)
+	{
+		return new RampMeterProperties(session, proxy);
 	}
 }
