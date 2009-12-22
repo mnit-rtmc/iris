@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -50,6 +50,9 @@ public class ActionPlanPanel extends FormPanel {
 	/** Button to delete the selected action plan */
 	protected final JButton del_p_btn = new JButton("Delete Plan");
 
+	/** Plan panel */
+	protected final JPanel p_panel = new JPanel(new GridLayout(1, 2));
+
 	/** Table model for time plans */
 	protected TimeActionModel t_model;
 
@@ -76,9 +79,6 @@ public class ActionPlanPanel extends FormPanel {
 
 	/** Button to delete the selected lane action */
 	protected final JButton del_l_btn = new JButton("Delete");
-
-	/** Tabbed pane */
-	protected final JTabbedPane tab = new JTabbedPane();
 
 	/** User session */
 	protected final Session session;
@@ -109,7 +109,6 @@ public class ActionPlanPanel extends FormPanel {
 		addRow(p_table);
 		addRow(del_p_btn);
 		del_p_btn.setEnabled(false);
-		JPanel panel = new JPanel(new FlowLayout());
 		FormPanel t_panel = new FormPanel(true);
 		t_table.setAutoCreateColumnsFromModel(false);
 		t_table.setRowHeight(ROW_HEIGHT);
@@ -117,7 +116,7 @@ public class ActionPlanPanel extends FormPanel {
 		t_panel.addRow(t_table);
 		t_panel.addRow(del_t_btn);
 		del_t_btn.setEnabled(false);
-		panel.add(t_panel);
+		p_panel.add(t_panel);
 		FormPanel d_panel = new FormPanel(true);
 		d_table.setAutoCreateColumnsFromModel(false);
 		d_table.setRowHeight(ROW_HEIGHT);
@@ -125,6 +124,7 @@ public class ActionPlanPanel extends FormPanel {
 		d_panel.addRow(d_table);
 		d_panel.addRow(del_d_btn);
 		del_d_btn.setEnabled(false);
+		JTabbedPane tab = new JTabbedPane();
 		tab.add("DMS Actions", d_panel);
 		FormPanel l_panel = new FormPanel(true);
 		l_table.setAutoCreateColumnsFromModel(false);
@@ -134,8 +134,9 @@ public class ActionPlanPanel extends FormPanel {
 		l_panel.addRow(del_l_btn);
 		del_l_btn.setEnabled(false);
 		tab.add("Lane Actions", l_panel);
-		panel.add(tab);
-		addRow(panel);
+		p_panel.add(tab);
+		setFill();
+		addRow(p_panel);
 	}
 
 	/** Add jobs for action plan table */
