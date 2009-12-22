@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -68,8 +69,9 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return isLastRow(row) && column == COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		LCSArray lcs = getProxy(row);
+		return (lcs == null) && (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -99,5 +101,10 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 		LCSArray proxy)
 	{
 		return new LCSArrayProperties(session, proxy);
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(LCSArray.SONAR_TYPE));
 	}
 }
