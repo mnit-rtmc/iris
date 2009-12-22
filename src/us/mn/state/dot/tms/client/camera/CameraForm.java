@@ -14,119 +14,24 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 
 /**
  * A form for displaying and editing cameras
  *
  * @author Douglas Lau
  */
-public class CameraForm extends AbstractForm {
-
-	/** Frame title */
-	static protected final String TITLE = "Cameras";
-
-	/** Table model for cameras */
-	protected final CameraModel c_model;
-
-	/** Table to hold the camera list */
-	protected final ZTable c_table = new ZTable();
-
-	/** Button to display the camera properties */
-	protected final JButton properties = new JButton("Properties");
-
-	/** Button to delete the selected camera */
-	protected final JButton del_camera = new JButton("Delete");
-
-	/** User session */
-	protected final Session session;
+public class CameraForm extends ProxyTableForm<Camera> {
 
 	/** Create a new camera form */
 	public CameraForm(Session s) {
-		super(TITLE);
-		session = s;
-		c_model = new CameraModel(s);
+		super("Cameras", new CameraModel(s));
 	}
 
-	/** Initializze the widgets in the form */
-	protected void initialize() {
-		c_model.initialize();
-		add(createCameraPanel());
-	}
-
-	/** Dispose of the form */
-	protected void dispose() {
-		c_model.dispose();
-	}
-
-	/** Create camera panel */
-	protected JPanel createCameraPanel() {
-		final ListSelectionModel s = c_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectCamera();
-			}
-		};
-		c_table.setModel(c_model);
-		c_table.setAutoCreateColumnsFromModel(false);
-		c_table.setColumnModel(c_model.createColumnModel());
-		c_table.setVisibleRowCount(12);
-		new ActionJob(this, properties) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0) {
-					Camera cam = c_model.getProxy(row);
-					if(cam != null)
-						showPropertiesForm(cam);
-				}
-			}
-		};
-		c_table.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() == 2)
-					properties.doClick();
-			}
-		});
-		new ActionJob(this, del_camera) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					c_model.deleteRow(row);
-			}
-		};
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(c_table);
-		panel.add(properties);
-		panel.addRow(del_camera);
-		properties.setEnabled(false);
-		del_camera.setEnabled(false);
-		return panel;
-	}
-
-	/** Change the selected camera */
-	protected void selectCamera() {
-		Camera c = c_model.getProxy(c_table.getSelectedRow());
-		properties.setEnabled(c != null);
-		del_camera.setEnabled(c_model.canRemove(c));
-	}
-
-	/** Show the properties form for a camera */
-	protected void showPropertiesForm(Camera cam) {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new CameraProperties(session, cam));
+	/** Get the visible row count */
+	protected int getVisibleRowCount() {
+		return 12;
 	}
 }
