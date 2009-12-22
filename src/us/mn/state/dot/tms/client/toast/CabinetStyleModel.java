@@ -23,6 +23,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -69,11 +70,12 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		CabinetStyle cs = getProxy(row);
+		if(cs != null)
+			return (col != COL_NAME) && canUpdate(cs);
 		else
-			return column != COL_NAME;
+			return (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -127,5 +129,11 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		m.addColumn(createColumn(COL_NAME, 90, "Style"));
 		m.addColumn(createDipColumn());
 		return m;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user,
+			new Name(CabinetStyle.SONAR_TYPE));
 	}
 }
