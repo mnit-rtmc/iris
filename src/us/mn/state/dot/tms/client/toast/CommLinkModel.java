@@ -30,6 +30,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
@@ -105,13 +106,14 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(column == COL_STATUS)
-			return false;
-		if(isLastRow(row))
-			return column == COL_NAME;
-		else
-			return column != COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		CommLink cl = getProxy(row);
+		if(cl != null) {
+			return (col != COL_NAME) &&
+			       (col != COL_STATUS) &&
+			       canUpdate(cl);
+		} else
+			return (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -215,5 +217,10 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		m.addColumn(createProtocolColumn());
 		m.addColumn(createTimeoutColumn());
 		return m;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(CommLink.SONAR_TYPE));
 	}
 }
