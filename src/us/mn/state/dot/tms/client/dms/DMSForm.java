@@ -14,20 +14,9 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -35,100 +24,15 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class DMSForm extends AbstractForm {
-
-	/** Frame title */
-	static protected final String TITLE = I18N.get("dms.title");
-
-	/** Table model for DMSs */
-	protected final DMSModel d_model;
-
-	/** Table to hold the DMS list */
-	protected final ZTable d_table = new ZTable();
-
-	/** Button to display the properties */
-	protected final JButton properties = new JButton("Properties");
-
-	/** Button to delete the selected sign */
-	protected final JButton del_sign = new JButton("Delete");
-
-	/** User session */
-	protected final Session session;
+public class DMSForm extends ProxyTableForm<DMS> {
 
 	/** Create a new DMS form */
 	public DMSForm(Session s) {
-		super(TITLE);
-		session = s;
-		d_model = new DMSModel(s);
+		super(I18N.get("dms.title"), new DMSModel(s));
 	}
 
-	/** Initializze the widgets in the form */
-	protected void initialize() {
-		d_model.initialize();
-		add(createDMSPanel());
-	}
-
-	/** Dispose of the form */
-	protected void dispose() {
-		d_model.dispose();
-	}
-
-	/** Create DMS panel */
-	protected JPanel createDMSPanel() {
-		final ListSelectionModel s = d_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectSign();
-			}
-		};
-		new ActionJob(this, properties) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0) {
-					DMS dms = d_model.getProxy(row);
-					if(dms != null)
-						showPropertiesForm(dms);
-				}
-			}
-		};
-		d_table.addMouseListener(new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				if(e.getClickCount() == 2)
-					properties.doClick();
-			}
-		});
-		new ActionJob(this, del_sign) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					d_model.deleteRow(row);
-			}
-		};
-		d_table.setModel(d_model);
-		d_table.setAutoCreateColumnsFromModel(false);
-		d_table.setColumnModel(d_model.createColumnModel());
-		d_table.setVisibleRowCount(12);
-		FormPanel panel = new FormPanel(true);
-		panel.addRow(d_table);
-		panel.add(properties);
-		panel.addRow(del_sign);
-		properties.setEnabled(false);
-		del_sign.setEnabled(false);
-		return panel;
-	}
-
-	/** Change the selected sign */
-	protected void selectSign() {
-		DMS s = d_model.getProxy(d_table.getSelectedRow());
-		properties.setEnabled(s != null);
-		del_sign.setEnabled(d_model.canRemove(s));
-	}
-
-	/** Show the properties form */
-	protected void showPropertiesForm(DMS dms) throws Exception {
-		SmartDesktop desktop = session.getDesktop();
-		desktop.show(new DMSProperties(session, dms));
+	/** Get the visible row count */
+	protected int getVisibleRowCount() {
+		return 12;
 	}
 }

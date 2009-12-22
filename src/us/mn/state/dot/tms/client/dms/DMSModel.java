@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -88,5 +89,15 @@ public class DMSModel extends ProxyTableModel<DMS> {
 			I18N.get("dms.abbreviation")));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		return m;
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return true;
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<DMS> createPropertiesForm(DMS proxy) {
+		return new DMSProperties(session, proxy);
 	}
 }
