@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * Table model for LCS arrays.
@@ -86,5 +87,17 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 		m.addColumn(createColumn(COL_NAME, 200, "LCS Array"));
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		return m;
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return true;
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<LCSArray> createPropertiesForm(
+		LCSArray proxy)
+	{
+		return new LCSArrayProperties(session, proxy);
 	}
 }
