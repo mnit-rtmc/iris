@@ -20,6 +20,7 @@ import javax.swing.JComboBox;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
@@ -95,12 +96,12 @@ public class RoadModel extends ProxyTableModel<Road> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
-		if(column == COL_NAME)
-			return false;
-		return true;
+	public boolean isCellEditable(int row, int col) {
+		Road r = getProxy(row);
+		if(r != null)
+			return (col != COL_NAME) && canUpdate(r);
+		else
+			return (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -163,5 +164,10 @@ public class RoadModel extends ProxyTableModel<Road> {
 		m.addColumn(createDirectionColumn());
 		m.addColumn(createAltDirColumn());
 		return m;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Road.SONAR_TYPE));
 	}
 }
