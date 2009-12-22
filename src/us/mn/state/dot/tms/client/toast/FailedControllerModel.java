@@ -109,19 +109,19 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 		if(c == null)
 			return null;
 		switch(column) {
-			case COL_NAME:
-				return c.getName();
-			case COL_LOCATION:
-				return GeoLocHelper.getDescription(
-					c.getCabinet().getGeoLoc());
-			case COL_COMM_LINK:
-				return c.getCommLink().getName();
-			case COL_DROP:
-				return c.getDrop();
-			case COL_ERROR:
-				return c.getError();
-			default:
-				return null;
+		case COL_NAME:
+			return c.getName();
+		case COL_LOCATION:
+			return GeoLocHelper.getDescription(
+				c.getCabinet().getGeoLoc());
+		case COL_COMM_LINK:
+			return c.getCommLink().getName();
+		case COL_DROP:
+			return c.getDrop();
+		case COL_ERROR:
+			return c.getError();
+		default:
+			return null;
 		}
 	}
 
