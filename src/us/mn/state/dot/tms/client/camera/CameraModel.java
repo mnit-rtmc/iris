@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * Table model for cameras
@@ -104,5 +105,15 @@ public class CameraModel extends ProxyTableModel<Camera> {
 		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
 		m.addColumn(createColumn(COL_PUBLISH, 120, "Publish"));
 		return m;
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return true;
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<Camera> createPropertiesForm(Camera proxy) {
+		return new CameraProperties(session, proxy);
 	}
 }

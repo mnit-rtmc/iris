@@ -28,6 +28,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -46,6 +47,9 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		c.setHeaderValue(header);
 		return c;
 	}
+
+	/** User session */
+	protected final Session session;
 
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
@@ -66,6 +70,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create a new proxy table model */
 	public ProxyTableModel(Session s, TypeCache<T> c) {
+		session = s;
 		cache = c;
 		namespace = s.getSonarState().getNamespace();
 		user = s.getUser();
@@ -248,6 +253,23 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		T proxy = getProxy(row);
 		if(proxy != null)
 			proxy.destroy();
+	}
+
+	/** Show the properties form for a camera */
+	public void showPropertiesForm(T proxy) {
+		SonarObjectForm<T> prop = createPropertiesForm(proxy);
+		if(prop != null)
+			session.getDesktop().show(prop);
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<T> createPropertiesForm(T proxy) {
+		return null;
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return false;
 	}
 
 	/** Check if the user can add a proxy */

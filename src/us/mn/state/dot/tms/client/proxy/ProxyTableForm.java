@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
@@ -37,6 +39,9 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Proxy table */
 	protected final ZTable table;
+
+	/** Button to display the proxy properties */
+	protected final JButton prop_btn = new JButton("Properties");
 
 	/** Button to delete the selected proxy */
 	protected final JButton del_btn = new JButton("Delete");
@@ -81,6 +86,21 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 					proxy.destroy();
 			}
 		};
+		if(model.hasProperties()) {
+			new ActionJob(this, prop_btn) {
+				public void perform() throws Exception {
+					T proxy = getSelectedProxy();
+					if(proxy != null)
+						model.showPropertiesForm(proxy);
+				}
+			};
+			table.addMouseListener(new MouseAdapter() {
+				public void mouseClicked(MouseEvent e) {
+					if(e.getClickCount() == 2)
+						prop_btn.doClick();
+				}
+			});
+		}
 	}
 
 	/** Create the panel for the form */
@@ -92,7 +112,10 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 		table.setVisibleRowCount(getVisibleRowCount());
 		FormPanel panel = new FormPanel(true);
 		panel.addRow(table);
+		if(model.hasProperties())
+			panel.add(prop_btn);
 		panel.addRow(del_btn);
+		prop_btn.setEnabled(false);
 		del_btn.setEnabled(false);
 		return panel;
 	}
@@ -114,6 +137,8 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Select a new proxy */
 	protected void selectProxy() {
-		del_btn.setEnabled(model.canRemove(getSelectedProxy()));
+		T proxy = getSelectedProxy();
+		prop_btn.setEnabled(proxy != null);
+		del_btn.setEnabled(model.canRemove(proxy));
 	}
 }
