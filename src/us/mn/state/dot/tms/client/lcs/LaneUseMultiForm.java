@@ -14,85 +14,29 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.ListSelectionModel;
-import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.FormPanel;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 
 /**
  * A form for displaying a table of lane-use MULTI strings.
  *
  * @author Douglas Lau
  */
-public class LaneUseMultiForm extends AbstractForm {
-
-	/** Frame title */
-	static protected final String TITLE = "Lane-Use MULTI";
-
-	/** Table model for lane-use MULTI */
-	protected LaneUseMultiModel model;
-
-	/** Table to hold the Graphic list */
-	protected final ZTable table = new ZTable();
-
-	/** Button to delete the selected proxy */
-	protected final JButton deleteBtn = new JButton("Delete");
+public class LaneUseMultiForm extends ProxyTableForm<LaneUseMulti> {
 
 	/** Create a new graphic form */
 	public LaneUseMultiForm(Session s) {
-		super(TITLE);
-		model = new LaneUseMultiModel(s);
+		super("Lane-Use MULTI", new LaneUseMultiModel(s));
 	}
 
-	/** Initializze the widgets in the form */
-	protected void initialize() {
-		model.initialize();
-		add(createLaneUseMultiPanel());
-		table.setRowHeight(22);
-		table.setVisibleRowCount(10);
+	/** Get the row height */
+	protected int getRowHeight() {
+		return 22;
 	}
 
-	/** Dispose of the form */
-	protected void dispose() {
-		model.dispose();
-	}
-
-	/** Create lane-use MULTI panel */
-	protected JPanel createLaneUseMultiPanel() {
-		final ListSelectionModel s = table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		new ListSelectionJob(this, s) {
-			public void perform() {
-				if(!event.getValueIsAdjusting())
-					selectProxy();
-			}
-		};
-		new ActionJob(this, deleteBtn) {
-			public void perform() throws Exception {
-				int row = s.getMinSelectionIndex();
-				if(row >= 0)
-					model.deleteRow(row);
-			}
-		};
-		FormPanel panel = new FormPanel(true);
-		table.setModel(model);
-		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(model.createColumnModel());
-		panel.addRow(table);
-		panel.addRow(deleteBtn);
-		deleteBtn.setEnabled(false);
-		return panel;
-	}
-
-	/** Change the selected proxy */
-	protected void selectProxy() {
-		int row = table.getSelectedRow();
-		deleteBtn.setEnabled(row >= 0 && !model.isLastRow(row));
+	/** Get the visible row count */
+	protected int getVisibleRowCount() {
+		return 10;
 	}
 }
