@@ -24,6 +24,7 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -154,11 +155,12 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_INDICATION;
+	public boolean isCellEditable(int row, int col) {
+		LaneUseMulti lum = getProxy(row);
+		if(lum != null)
+			return (col != COL_NAME) && canUpdate(lum);
 		else
-			return column != COL_NAME;
+			return (col == COL_INDICATION) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -225,5 +227,11 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 		}
 		assert false;
 		return null;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user,
+		       new Name(LaneUseMulti.SONAR_TYPE));
 	}
 }
