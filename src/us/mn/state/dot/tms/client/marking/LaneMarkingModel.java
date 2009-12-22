@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
 /**
  * Table model for lane markings.
@@ -89,5 +90,17 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 	public boolean canAdd() {
 		return namespace.canAdd(user, new Name(LaneMarking.SONAR_TYPE,
 			"name"));
+	}
+
+	/** Determine if a properties form is available */
+	public boolean hasProperties() {
+		return true;
+	}
+
+	/** Create a properties form for one proxy */
+	protected SonarObjectForm<LaneMarking> createPropertiesForm(
+		LaneMarking proxy)
+	{
+		return new LaneMarkingProperties(session, proxy);
 	}
 }
