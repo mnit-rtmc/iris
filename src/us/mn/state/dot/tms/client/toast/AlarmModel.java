@@ -22,6 +22,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -83,11 +84,12 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 	}
 
 	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		if(isLastRow(row))
-			return column == COL_NAME;
+	public boolean isCellEditable(int row, int col) {
+		Alarm a = getProxy(row);
+		if(a != null)
+			return (col == COL_DESCRIPTION) && canUpdate(a);
 		else
-			return column == COL_DESCRIPTION;
+			return (col == COL_NAME) && canAdd();
 	}
 
 	/** Set the value at the specified cell */
@@ -152,5 +154,10 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 			}
 			return label;
 		}
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(Alarm.SONAR_TYPE));
 	}
 }
