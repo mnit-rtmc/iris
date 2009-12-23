@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 import us.mn.state.dot.tms.utils.I18N;
@@ -35,81 +36,64 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSModel2 extends ProxyTableModel<DMS> {
 
+	/** DMS abbreviation */
+	protected final String dms_abr = I18N.get("dms.abbreviation");
+
 	/** AWS abbreviation */
-	protected final String m_awsAbbr = I18N.get("dms.aws.abbreviation");
-
-	/** A single column */
-	abstract private class Column {
-		String label;
-		Class cclass;
-		int width;
-
-		/** Constructor */
-		Column(String l, Class c, int w) {
-			label = l;
-			cclass = c;
-			width = w;
-		}
-
-		/** add a column to the model */
-		void addColumn(TableColumnModel m, int index) {
-			m.addColumn(createColumn(index, width, label));
-		}
-
-		/** Get the value of the column */
-		abstract Object getValueAt(DMS d);
-	}
+	protected final String aws_abbr = I18N.get("dms.aws.abbreviation");
 
 	/** Name column number, assumed to be 0th */
 	static protected final int COL_NAME = 0;
 
 	/** Create columns */
-	Column[] m_columns = new Column[] {
-		new Column(I18N.get("dms.abbreviation"), String.class, 40) {
-			Object getValueAt(DMS d) {
+	protected final ProxyColumn[] columns = new ProxyColumn[] {
+		new ProxyColumn<DMS>(dms_abr, String.class, 40) {
+			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
 		},
-		new Column("Location", String.class, 200) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>("Location", String.class, 200) {
+			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());
 			}
 		},
-		new Column("Dir.", String.class, 30) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>("Dir.", String.class, 30) {
+			public Object getValueAt(DMS d) {
 				return DMSHelper.getFreeDir(d);
 			}
 		},
-		new Column(m_awsAbbr +" Allowed", Boolean.class, 80) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>(aws_abbr +" Allowed", Boolean.class, 80) {
+			public Object getValueAt(DMS d) {
 				return d.getAwsAllowed();
 			}
 		},
-		new Column(m_awsAbbr + " Controlled", Boolean.class, 80) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>(aws_abbr + " Controlled", Boolean.class,
+			80)
+		{
+			public Object getValueAt(DMS d) {
 				return d.getAwsControlled();
 			}
 		},
-		new Column("Author", String.class, 60) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>("Author", String.class, 60) {
+			public Object getValueAt(DMS d) {
 				User u = d.getOwnerCurrent();
 				String name = (u == null ? "" : u.getName());
 				return (name == null ? "" : name);
 			}
 		},
-		new Column("Status", String.class, 100) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>("Status", String.class, 100) {
+			public Object getValueAt(DMS d) {
 				return DMSHelper.getAllStyles(d);
 			}
 		},
-		new Column("Model", String.class, 40) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>("Model", String.class, 40) {
+			public Object getValueAt(DMS d) {
 				return d.getModel();
 			}
 		},
-		new Column("Com Type", String.class, 140) {
-			Object getValueAt(DMS d) {
+		new ProxyColumn<DMS>("Com Type", String.class, 140) {
+			public Object getValueAt(DMS d) {
 				return d.getSignAccess();
 			}
 		}
@@ -122,20 +106,20 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Get the count of columns in the table */
 	public int getColumnCount() {
-		return m_columns.length;
+		return columns.length;
 	}
 
 	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
+	public Object getValueAt(int row, int col) {
 		DMS s = getProxy(row);
 		if(s == null)
 			return null;
-		return m_columns[column].getValueAt(s);
+		return columns[col].getValueAt(s);
 	}
 
 	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		return m_columns[column].cclass;
+	public Class getColumnClass(int col) {
+		return columns[col].getColumnClass();
 	}
 
 	/** Check if the specified cell is editable */
@@ -145,8 +129,8 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	}
 
 	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		if(column == COL_NAME) {
+	public void setValueAt(Object value, int row, int col) {
+		if(col == COL_NAME) {
 			String v = value.toString().trim();
 			if(v.length() > 0)
 				cache.createObject(v);
@@ -156,8 +140,8 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		for(int i = 0; i < m_columns.length; ++i)
-			m_columns[i].addColumn(m, i);
+		for(int i = 0; i < columns.length; ++i)
+			columns[i].addColumn(m, i);
 		return m;
 	}
 
