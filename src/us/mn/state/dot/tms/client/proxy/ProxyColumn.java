@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.SonarObject;
  * A column in the proxy table model.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 abstract public class ProxyColumn<T extends SonarObject> {
 
@@ -60,6 +61,16 @@ abstract public class ProxyColumn<T extends SonarObject> {
 		return c_class;
 	}
 
-	/** Get the value of the column */
+	/** Get the value of the column for the given proxy */
 	abstract public Object getValueAt(T proxy);
+
+	/** Test if the column for the given proxy is editable */
+	public boolean isEditable(T proxy) {
+		return false;
+	}
+
+	/** Set the value of the column for the given proxy */
+	public void setValueAt(T proxy, Object value) {
+		// Subclasses must override for editable columns
+	}
 }

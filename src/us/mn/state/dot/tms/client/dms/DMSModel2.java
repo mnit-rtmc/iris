@@ -42,14 +42,19 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 	/** AWS abbreviation */
 	protected final String aws_abbr = I18N.get("dms.aws.abbreviation");
 
-	/** Name column number, assumed to be 0th */
-	static protected final int COL_NAME = 0;
-
 	/** Create columns */
 	protected final ProxyColumn[] columns = new ProxyColumn[] {
 		new ProxyColumn<DMS>(dms_abr, String.class, 40) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
+			}
+			public boolean isEditable(DMS d) {
+				return (d == null) && canAdd();
+			}
+			public void setValueAt(DMS d, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
 			}
 		},
 		new ProxyColumn<DMS>("Location", String.class, 200) {
@@ -109,6 +114,14 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 		return columns.length;
 	}
 
+	/** Get the proxy column at the given column index */
+	public ProxyColumn getProxyColumn(int col) {
+		if(col >= 0 && col < columns.length)
+			return columns[col];
+		else
+			return null;
+	}
+
 	/** Get the value at the specified cell */
 	public Object getValueAt(int row, int col) {
 		DMS s = getProxy(row);
@@ -124,17 +137,15 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Check if the specified cell is editable */
 	public boolean isCellEditable(int row, int col) {
-		DMS dms = getProxy(row);
-		return (dms == null) && (col == COL_NAME) && canAdd();
+		ProxyColumn pc = getProxyColumn(col);
+		return pc != null && pc.isEditable(getProxy(row));
 	}
 
 	/** Set the value at the specified cell */
 	public void setValueAt(Object value, int row, int col) {
-		if(col == COL_NAME) {
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				cache.createObject(v);
-		}
+		ProxyColumn pc = getProxyColumn(col);
+		if(pc != null)
+			pc.setValueAt(getProxy(row), value);
 	}
 
 	/** Create the table column model */
