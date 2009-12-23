@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Michael Darter
  * @author Douglas Lau
- * @see DMSForm, DMSForm2, DMSTable
+ * @see DMSForm, DMSForm2
  */
 public class DMSModel2 extends ProxyTableModel<DMS> {
 
@@ -124,15 +124,22 @@ public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Get the value at the specified cell */
 	public Object getValueAt(int row, int col) {
-		DMS s = getProxy(row);
-		if(s == null)
-			return null;
-		return columns[col].getValueAt(s);
+		DMS d = getProxy(row);
+		if(d != null) {
+			ProxyColumn pc = getProxyColumn(col);
+			if(pc != null)
+				return pc.getValueAt(d);
+		}
+		return null;
 	}
 
 	/** Get the class of the specified column */
 	public Class getColumnClass(int col) {
-		return columns[col].getColumnClass();
+		ProxyColumn pc = getProxyColumn(col);
+		if(pc != null)
+			return pc.getColumnClass();
+		else
+			return null;
 	}
 
 	/** Check if the specified cell is editable */
