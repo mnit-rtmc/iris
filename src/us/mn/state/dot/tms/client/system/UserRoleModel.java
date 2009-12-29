@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.security;
+package us.mn.state.dot.tms.client.system;
 
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Name;
