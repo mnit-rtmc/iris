@@ -17,13 +17,12 @@ package us.mn.state.dot.tms.client.roads;
 import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -32,24 +31,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class RoadModel extends ProxyTableModel<Road> {
-
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 5;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Abbreviation column number */
-	static protected final int COL_ABBREV = 1;
-
-	/** Restricted column number */
-	static protected final int COL_R_CLASS = 2;
-
-	/** Direction column number */
-	static protected final int COL_DIRECTION = 3;
-
-	/** Alternate directino column number */
-	static protected final int COL_ALT_DIR = 4;
 
 	/** List of all possible road class values */
 	static LinkedList<String> R_CLASS = new LinkedList<String>();
@@ -65,109 +46,92 @@ public class RoadModel extends ProxyTableModel<Road> {
 			DIRECTION.add(d);
 	}
 
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Road>("Road", 200) {
+			public Object getValueAt(Road r) {
+				return r.getName();
+			}
+			public boolean isEditable(Road r) {
+				return (r == null) && canAdd();
+			}
+			public void setValueAt(Road r, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<Road>("Abbrev", 80) {
+			public Object getValueAt(Road r) {
+				return r.getAbbrev();
+			}
+			public boolean isEditable(Road r) {
+				return canUpdate(r);
+			}
+			public void setValueAt(Road r, Object value) {
+				r.setAbbrev(value.toString());
+			}
+		},
+		new ProxyColumn<Road>("Road Class", 120) {
+			public Object getValueAt(Road r) {
+				return R_CLASS.get(r.getRClass());
+			}
+			public boolean isEditable(Road r) {
+				return canUpdate(r);
+			}
+			public void setValueAt(Road r, Object value) {
+				r.setRClass((short)R_CLASS.indexOf(value));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(Road.R_CLASS);
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Road>("Direction", 120) {
+			public Object getValueAt(Road r) {
+				return DIRECTION.get(r.getDirection());
+			}
+			public boolean isEditable(Road r) {
+				return canUpdate(r);
+			}
+			public void setValueAt(Road r, Object value) {
+				r.setDirection((short)DIRECTION.indexOf(value));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					DIRECTION.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Road>("Alt Dir", 120) {
+			public Object getValueAt(Road r) {
+				return DIRECTION.get(r.getAltDir());
+			}
+			public boolean isEditable(Road r) {
+				return canUpdate(r);
+			}
+			public void setValueAt(Road r, Object value) {
+				r.setAltDir((short)DIRECTION.indexOf(value));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					DIRECTION.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		}
+	    };
+	}
+
 	/** Create a new road table model */
 	public RoadModel(Session s) {
 		super(s, s.getSonarState().getRoads());
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Road r = getProxy(row);
-		if(r == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return r.getName();
-		case COL_ABBREV:
-			return r.getAbbrev();
-		case COL_R_CLASS:
-			return R_CLASS.get(r.getRClass());
-		case COL_DIRECTION:
-			return DIRECTION.get(r.getDirection());
-		case COL_ALT_DIR:
-			return DIRECTION.get(r.getAltDir());
-		}
-		return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		Road r = getProxy(row);
-		if(r != null)
-			return (col != COL_NAME) && canUpdate(r);
-		else
-			return (col == COL_NAME) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		Road r = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_ABBREV:
-			r.setAbbrev(value.toString());
-			break;
-		case COL_R_CLASS:
-			r.setRClass((short)R_CLASS.indexOf(value));
-			break;
-		case COL_DIRECTION:
-			r.setDirection((short)DIRECTION.indexOf(value));
-			break;
-		case COL_ALT_DIR:
-			r.setAltDir((short)DIRECTION.indexOf(value));
-			break;
-		}
-	}
-
-	/** Create the road class column */
-	protected TableColumn createRClassColumn() {
-		TableColumn c = new TableColumn(COL_R_CLASS, 120);
-		c.setHeaderValue("Road Class");
-		JComboBox combo = new JComboBox(Road.R_CLASS);
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the direction column */
-	protected TableColumn createDirectionColumn() {
-		TableColumn c = new TableColumn(COL_DIRECTION, 120);
-		c.setHeaderValue("Direction");
-		JComboBox combo = new JComboBox(DIRECTION.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the alternate direction column */
-	protected TableColumn createAltDirColumn() {
-		TableColumn c = new TableColumn(COL_ALT_DIR, 120);
-		c.setHeaderValue("Alt Dir");
-		JComboBox combo = new JComboBox(DIRECTION.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Road"));
-		m.addColumn(createColumn(COL_ABBREV, 80, "Abbrev"));
-		m.addColumn(createRClassColumn());
-		m.addColumn(createDirectionColumn());
-		m.addColumn(createAltDirColumn());
-		return m;
-	}
-
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Road.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(Road.SONAR_TYPE,
+			"oname"));
 	}
 }

@@ -14,13 +14,11 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -32,88 +30,47 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** name column number */
-	static protected final int COL_NAME = 0;
-
-	/** multi column number */
-	static protected final int COL_MULTI = 1;
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		return c;
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 100, "Name"));
-		m.addColumn(createColumn(COL_MULTI, 680, "MULTI String"));
-		return m;
-	}
-
-	/** Create a new table model.
-	 *  @param s Session */
-	public QuickMessageTableModel(Session s) {
-		super(s, s.getSonarState().getDmsCache().getQuickMessages());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int col) {
-		QuickMessage qm = getProxy(row);
-		if(qm != null) {
-			switch(col) {
-			case COL_NAME:
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<QuickMessage>("Name", 100) {
+			public Object getValueAt(QuickMessage qm) {
 				return qm.getName();
-			case COL_MULTI:
+			}
+			public boolean isEditable(QuickMessage qm) {
+				return (qm == null) && canAdd();
+			}
+			public void setValueAt(QuickMessage qm, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<QuickMessage>("MULTI String", 680) {
+			public Object getValueAt(QuickMessage qm) {
 				return qm.getMulti();
 			}
-		}
-		return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		QuickMessage qm = getProxy(row);
-		if(qm == null)
-			return col == COL_NAME && canAdd("oname");
-		else {
-			return col == COL_MULTI && canUpdate(qm);
-		}
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int col) {
-		QuickMessage qm = getProxy(row);
-		if(col == COL_NAME) {
-			if(qm == null) {
-				String name = (value == null ? "" : 
-					value.toString().replace(" ", ""));
-				if(name.length() > 0 && canAdd(name))
-					cache.createObject(name);
+			public boolean isEditable(QuickMessage qm) {
+				return canUpdate(qm);
 			}
-		} else if(col == COL_MULTI) {
-			if(qm != null) {
+			public void setValueAt(QuickMessage qm, Object value) {
 				qm.setMulti(new MultiString(
 					value.toString()).normalize());
 			}
 		}
+	    };
+	}
+
+	/** Create a new table model.
+	 * @param s Session */
+	public QuickMessageTableModel(Session s) {
+		super(s, s.getSonarState().getDmsCache().getQuickMessages());
 	}
 
 	/** Check if the user can add a proxy */
-	public boolean canAdd(String oname) {
-		return namespace.canAdd(user, new Name(QuickMessage.SONAR_TYPE,
-		       oname));
+	public boolean canAdd() {
+		return namespace.canAdd(user,
+			new Name(QuickMessage.SONAR_TYPE, "oname"));
 	}
 }

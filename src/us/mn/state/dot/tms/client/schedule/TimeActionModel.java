@@ -24,14 +24,13 @@ import java.util.TreeSet;
 import javax.swing.DefaultCellEditor;
 import javax.swing.ListModel;
 import javax.swing.JComboBox;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 
@@ -49,36 +48,6 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		new SimpleDateFormat("h a"),
 		new SimpleDateFormat("H")
 	};
-
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 3;
-
-	/** Day plan column number */
-	static protected final int COL_DAY_PLAN = 0;
-
-	/** Time column number */
-	static protected final int COL_TIME = 1;
-
-	/** Deploy column number */
-	static protected final int COL_DEPLOY = 2;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createDayPlanColumn());
-		m.addColumn(createColumn(COL_TIME, 80, "Time"));
-		m.addColumn(createColumn(COL_DEPLOY, 60, "Deploy"));
-		return m;
-	}
-
-	/** Create the day plan column */
-	protected TableColumn createDayPlanColumn() {
-		TableColumn c = createColumn(COL_DAY_PLAN, 100, "Day Plan");
-		JComboBox combo = new JComboBox();
-		combo.setModel(new WrapperComboBoxModel(day_model));
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
 
 	/** Parse a time string and return the minute-of-day */
 	static protected Integer parseMinute(String t) {
@@ -114,6 +83,78 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		return (minute / 60) + ":" + min;
 	}
 
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<TimeAction>("Day Plan", 100) {
+			public Object getValueAt(TimeAction ta) {
+				if(ta == null)
+					return day_plan;
+				else
+					return ta.getDayPlan();
+			}
+			public boolean isEditable(TimeAction ta) {
+				return ta == null && canAdd();
+			}
+			public void setValueAt(TimeAction ta, Object value) {
+				if(value instanceof DayPlan)
+					day_plan = (DayPlan)value;
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox();
+				combo.setModel(new WrapperComboBoxModel(
+					day_model));
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<TimeAction>("Time", 80) {
+			public Object getValueAt(TimeAction ta) {
+				if(ta != null)
+					return timeString(ta.getMinute());
+				else
+					return null;
+			}
+			public boolean isEditable(TimeAction ta) {
+				return (day_plan != null) &&
+				       (ta == null) && canAdd();
+			}
+			public void setValueAt(TimeAction ta, Object value) {
+				Integer m = parseMinute(value.toString());
+				if(m != null)
+					create(m);
+				day_plan = null;
+			}
+		},
+		new ProxyColumn<TimeAction>("Deploy", 60, Boolean.class) {
+			public Object getValueAt(TimeAction ta) {
+				if(ta != null)
+					return ta.getDeploy();
+				else
+					return null;
+			}
+			public boolean isEditable(TimeAction ta) {
+				return canUpdate(ta);
+			}
+			public void setValueAt(TimeAction ta, Object value) {
+				if(value instanceof Boolean)
+					ta.setDeploy((Boolean)value);
+			}
+		}
+	    };
+	}
+
+	/** Get the value at the specified cell.  Note: this overrides the
+	 * method from ProxyTableModel to allow null proxies to be passed to
+	 * ProxyColumn.getValueAt. */
+	public Object getValueAt(int row, int col) {
+		TimeAction ta = getProxy(row);
+		ProxyColumn pc = getProxyColumn(col);
+		if(pc != null)
+			return pc.getValueAt(ta);
+		return null;
+	}
+
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
 
@@ -136,86 +177,6 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 			return super.doProxyAdded(ta);
 		else
 			return -1;
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the count of rows in the table */
-	public int getRowCount() {
-		synchronized(proxies) {
-			return proxies.size() + 1;
-		}
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		TimeAction ta = getProxy(row);
-		if(ta == null) {
-			if(column == COL_DAY_PLAN)
-				return day_plan;
-			else
-				return null;
-		}
-		switch(column) {
-		case COL_DAY_PLAN:
-			return ta.getDayPlan();
-		case COL_TIME:
-			return timeString(ta.getMinute());
-		case COL_DEPLOY:
-			return ta.getDeploy();
-		default:
-			return null;
-		}
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		if(column == COL_DEPLOY)
-			return Boolean.class;
-		else
-			return String.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		TimeAction ta = getProxy(row);
-		if(ta != null)
-			return column == COL_DEPLOY && canUpdate(ta);
-		else {
-			switch(column) {
-			case COL_DAY_PLAN:
-				return canAdd();
-			case COL_TIME:
-				return day_plan != null && canAdd();
-			default:
-				return false;
-			}
-		}
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		TimeAction ta = getProxy(row);
-		if(ta == null) {
-			if(column == COL_DAY_PLAN) {
-				if(value instanceof DayPlan)
-					day_plan = (DayPlan)value;
-			}
-			if(column == COL_TIME) {
-				Integer m = parseMinute(value.toString());
-				if(m != null)
-					create(m);
-				day_plan = null;
-			}
-		} else {
-			if(column == COL_DEPLOY) {
-				if(value instanceof Boolean)
-					ta.setDeploy((Boolean)value);
-			}
-		}
 	}
 
 	/** Create a new time action */

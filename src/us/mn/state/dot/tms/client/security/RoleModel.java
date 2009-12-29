@@ -14,11 +14,10 @@
  */
 package us.mn.state.dot.tms.client.security;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -28,21 +27,36 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class RoleModel extends ProxyTableModel<Role> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Enabled column number */
-	static protected final int COL_ENABLED = 1;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 160, "Name"));
-		m.addColumn(createColumn(COL_ENABLED, 60, "Enabled"));
-		return m;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Role>("Name", 160) {
+			public Object getValueAt(Role r) {
+				return r.getName();
+			}
+			public boolean isEditable(Role r) {
+				return r == null && canAdd();
+			}
+			public void setValueAt(Role r, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<Role>("Enabled", 60, Boolean.class) {
+			public Object getValueAt(Role r) {
+				return r.getEnabled();
+			}
+			public boolean isEditable(Role r) {
+				return canUpdate(r);
+			}
+			public void setValueAt(Role r, Object value) {
+				if(value instanceof Boolean)
+					r.setEnabled((Boolean)value);
+			}
+		}
+	    };
 	}
 
 	/** Create a new role table model */
@@ -50,61 +64,9 @@ public class RoleModel extends ProxyTableModel<Role> {
 		super(s, s.getSonarState().getRoles());
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Role r = getProxy(row);
-		if(r == null)
-			return null;
-		switch(column) {
-			case COL_NAME:
-				return r.getName();
-			case COL_ENABLED:
-				return r.getEnabled();
-		}
-		return null;
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		switch(column) {
-		case COL_ENABLED:
-			return Boolean.class;
-		default:
-			return String.class;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		Role r = getProxy(row);
-		if(r != null)
-			return column != COL_NAME && canUpdate(r);
-		else
-			return column == COL_NAME && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		Role r = getProxy(row);
-		String v = value.toString().trim();
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_ENABLED:
-			r.setEnabled((Boolean)value);
-			break;
-		}
-	}
-
 	/** Check if the user can add a role */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Role.SONAR_TYPE,"name"));
+		return namespace.canAdd(user, new Name(Role.SONAR_TYPE,
+			"oname"));
 	}
 }

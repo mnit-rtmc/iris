@@ -15,13 +15,11 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.util.HashMap;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -31,30 +29,40 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class LCSTableModel extends ProxyTableModel<LCS> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Message line column number */
-	static protected final int COL_LANE = 0;
-
-	/** Message text column number */
-	static protected final int COL_NAME = 1;
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		return c;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<LCS>("Lane", 36, Integer.class) {
+			public Object getValueAt(LCS lcs) {
+				return lcs.getLane();
+			}
+		},
+		new ProxyColumn<LCS>("Name", 140) {
+			public Object getValueAt(LCS lcs) {
+				return lcs.getName();
+			}
+			public boolean isEditable(LCS lcs) {
+				return (lcs == null) && canAdd();
+			}
+			public void setValueAt(LCS lcs, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0) {
+					int row = getRow(lcs);
+					if(row >= 0)
+						createLCS(v, row + 1);
+				}
+			}
+		}
+	    };
 	}
 
-	/** Add a new proxy to the table model */
-	protected int doProxyAdded(LCS proxy) {
-		if(proxy.getArray() == lcs_array)
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
+	/** Create a new LCS */
+	protected void createLCS(String name, int lane) {
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("lcsArray", lcs_array);
+		attrs.put("lane", new Integer(lane));
+		cache.createObject(name, attrs);
 	}
 
 	/** LCS array */
@@ -66,83 +74,16 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 		lcs_array = la;
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		LCS lcs = getProxy(row);
-		if(lcs != null)
-			return getValue(lcs, column);
+	/** Add a new proxy to the table model */
+	protected int doProxyAdded(LCS proxy) {
+		if(proxy.getArray() == lcs_array)
+			return super.doProxyAdded(proxy);
 		else
-			return null;
+			return -1;
 	}
 
-	/** Get the value of an LCS column */
-	protected Object getValue(LCS lcs, int column) {
-		switch(column) {
-		case COL_LANE:
-			return lcs.getLane();
-		case COL_NAME:
-			return lcs.getName();
-		default:
-			return null;
-		}
-	}
-
-	/** Get the column class */
-	public Class getColumnClass(int column) {
-		if(column == COL_NAME)
-			return String.class;
-		else
-			return Integer.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		synchronized(proxies) {
-			if(row == proxies.size() && column == COL_NAME)
-				return canAddLCS("arbitrary_name");
-		}
-		return false;
-	}
-
-	/** Check if the user can add the named LCS */
-	public boolean canAddLCS(String oname) {
-		return namespace.canAdd(user, new Name(LCS.SONAR_TYPE, oname));
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		assert column == COL_NAME;
-		addRow(value, row);
-	}
-
-	/** Add a row to the sign text table */
-	protected void addRow(Object value, int row) {
-		String name = value.toString();
-		if(name.length() > 0)
-			createLCS(name, row + 1);
-	}
-
-	/** Create a new LCS */
-	protected void createLCS(String name, int lane) {
-		if(canAddLCS(name)) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("lcsArray", lcs_array);
-			attrs.put("lane", new Integer(lane));
-			cache.createObject(name, attrs);
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_LANE, 36, "Lane"));
-		m.addColumn(createColumn(COL_NAME, 140, "LCS"));
-		return m;
+	/** Check if the user can add an LCS */
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(LCS.SONAR_TYPE,"oname"));
 	}
 }

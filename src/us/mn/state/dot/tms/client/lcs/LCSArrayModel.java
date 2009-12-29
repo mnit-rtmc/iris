@@ -14,12 +14,11 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
@@ -30,65 +29,34 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  */
 public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Location column number */
-	static protected final int COL_LOCATION = 1;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<LCSArray>("LCS Array", 200) {
+			public Object getValueAt(LCSArray a) {
+				return a.getName();
+			}
+			public boolean isEditable(LCSArray a) {
+				return (a == null) && canAdd();
+			}
+			public void setValueAt(LCSArray a, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<LCSArray>("Location", 300) {
+			public Object getValueAt(LCSArray a) {
+				return LCSArrayHelper.lookupLocation(a);
+			}
+		}
+	    };
+	}
 
 	/** Create a new LCS array table model */
 	public LCSArrayModel(Session s) {
 		super(s, s.getSonarState().getLcsCache().getLCSArrays());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		LCSArray proxy = getProxy(row);
-		if(proxy == null)
-			return null;
-		switch(column) {
-			case COL_NAME:
-				return proxy.getName();
-			case COL_LOCATION:
-				return LCSArrayHelper.lookupLocation(proxy);
-		}
-		return null;
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		return String.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		LCSArray lcs = getProxy(row);
-		return (lcs == null) && (col == COL_NAME) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		if(column == COL_NAME) {
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				cache.createObject(v);
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "LCS Array"));
-		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
-		return m;
 	}
 
 	/** Determine if a properties form is available */
@@ -105,6 +73,7 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(LCSArray.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(LCSArray.SONAR_TYPE,
+			"oname"));
 	}
 }

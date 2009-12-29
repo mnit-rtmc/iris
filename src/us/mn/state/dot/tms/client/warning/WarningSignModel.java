@@ -14,12 +14,11 @@
  */
 package us.mn.state.dot.tms.client.warning;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
@@ -30,61 +29,35 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  */
 public class WarningSignModel extends ProxyTableModel<WarningSign> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Location column number */
-	static protected final int COL_LOCATION = 1;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<WarningSign>("Warning Sign", 200) {
+			public Object getValueAt(WarningSign ws) {
+				return ws.getName();
+			}
+			public boolean isEditable(WarningSign ws) {
+				return (ws == null) && canAdd();
+			}
+			public void setValueAt(WarningSign ws, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<WarningSign>("Location", 300) {
+			public Object getValueAt(WarningSign ws) {
+				return GeoLocHelper.getDescription(
+					ws.getGeoLoc());
+			}
+		}
+	    };
+	}
 
 	/** Create a new warning sign table model */
 	public WarningSignModel(Session s) {
 		super(s, s.getSonarState().getWarningSigns());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		WarningSign s = getProxy(row);
-		if(s == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return s.getName();
-		case COL_LOCATION:
-			return GeoLocHelper.getDescription(s.getGeoLoc());
-		}
-		return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		WarningSign ws = getProxy(row);
-		return (ws == null) && (col == COL_NAME) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		WarningSign s = getProxy(row);
-		if(column == COL_NAME) {
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				cache.createObject(v);
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Warning Sign"));
-		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
-		return m;
 	}
 
 	/** Determine if a properties form is available */
@@ -101,6 +74,7 @@ public class WarningSignModel extends ProxyTableModel<WarningSign> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(WarningSign.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(WarningSign.SONAR_TYPE,
+			"oname"));
 	}
 }

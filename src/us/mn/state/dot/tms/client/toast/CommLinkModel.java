@@ -26,14 +26,13 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -43,27 +42,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class CommLinkModel extends ProxyTableModel<CommLink> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 6;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Description column number */
-	static protected final int COL_DESCRIPTION = 1;
-
-	/** URL column number */
-	static protected final int COL_URL = 2;
-
-	/** Link connection status */
-	static protected final int COL_STATUS = 3;
-
-	/** Protocol column number */
-	static protected final int COL_PROTOCOL = 4;
-
-	/** Timeout column number */
-	static protected final int COL_TIMEOUT = 5;
-
 	/** List of all possible protocol selections */
 	static protected final LinkedList<String> PROTOCOLS =
 		new LinkedList<String>();
@@ -72,98 +50,91 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			PROTOCOLS.add(cp);
 	}
 
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<CommLink>("Comm Link", 90) {
+			public Object getValueAt(CommLink cl) {
+				return cl.getName();
+			}
+			public boolean isEditable(CommLink cl) {
+				return (cl == null) && canAdd();
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<CommLink>("Description", 220) {
+			public Object getValueAt(CommLink cl) {
+				return cl.getDescription();
+			}
+			public boolean isEditable(CommLink cl) {
+				return canUpdate(cl);
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				cl.setDescription(value.toString().trim());
+			}
+		},
+		new ProxyColumn<CommLink>("URL", 280) {
+			public Object getValueAt(CommLink cl) {
+				return cl.getUrl();
+			}
+			public boolean isEditable(CommLink cl) {
+				return canUpdate(cl);
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				cl.setUrl(value.toString().trim());
+			}
+		},
+		new ProxyColumn<CommLink>("Status", 44) {
+			public Object getValueAt(CommLink cl) {
+				return cl.getStatus();
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new StatusCellRenderer();
+			}
+		},
+		new ProxyColumn<CommLink>("Protocol", 140) {
+			public Object getValueAt(CommLink cl) {
+				return PROTOCOLS.get(cl.getProtocol());
+			}
+			public boolean isEditable(CommLink cl) {
+				return canUpdate(cl);
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				cl.setProtocol(Short.valueOf(
+					(short)PROTOCOLS.indexOf(value)));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					PROTOCOLS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<CommLink>("Timeout", 60) {
+			public Object getValueAt(CommLink cl) {
+				return cl.getTimeout();
+			}
+			public boolean isEditable(CommLink cl) {
+				return canUpdate(cl);
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				if(value instanceof Integer)
+					cl.setTimeout((Integer)value);
+			}
+			protected TableCellEditor createCellEditor() {
+				return new TimeoutEditor();
+			}
+		}
+	    };
+	}
+
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
 		super(s, s.getSonarState().getConCache().getCommLinks());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		CommLink c = getProxy(row);
-		if(c == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return c.getName();
-		case COL_DESCRIPTION:
-			return c.getDescription();
-		case COL_URL:
-			return c.getUrl();
-		case COL_STATUS:
-			return c.getStatus();
-		case COL_PROTOCOL:
-			return PROTOCOLS.get(c.getProtocol());
-		case COL_TIMEOUT:
-			return c.getTimeout();
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		CommLink cl = getProxy(row);
-		if(cl != null) {
-			return (col != COL_NAME) &&
-			       (col != COL_STATUS) &&
-			       canUpdate(cl);
-		} else
-			return (col == COL_NAME) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		String v = value.toString().trim();
-		CommLink c = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_DESCRIPTION:
-			c.setDescription(v);
-			break;
-		case COL_URL:
-			c.setUrl(v);
-			break;
-		case COL_PROTOCOL:
-			c.setProtocol(Short.valueOf(
-				(short)PROTOCOLS.indexOf(value)));
-			break;
-		case COL_TIMEOUT:
-			c.setTimeout((Integer)value);
-			break;
-		}
-	}
-
-	/** Create the status column */
-	protected TableColumn createStatusColumn() {
-		TableColumn c = new TableColumn(COL_STATUS, 44);
-		c.setHeaderValue("Status");
-		c.setCellRenderer(new StatusCellRenderer());
-		return c;
-	}
-
-	/** Create the protocol column */
-	protected TableColumn createProtocolColumn() {
-		TableColumn c = new TableColumn(COL_PROTOCOL, 140);
-		c.setHeaderValue("Protocol");
-		JComboBox combo = new JComboBox(PROTOCOLS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the timeout column */
-	protected TableColumn createTimeoutColumn() {
-		TableColumn c = new TableColumn(COL_TIMEOUT, 60);
-		c.setHeaderValue("Timeout");
-		c.setCellEditor(new TimeoutEditor());
-		return c;
 	}
 
 	/** Renderer for link status in a table cell */
@@ -207,20 +178,9 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		}
 	}
 
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 90, "Comm Link"));
-		m.addColumn(createColumn(COL_DESCRIPTION, 220, "Description"));
-		m.addColumn(createColumn(COL_URL, 280, "URL"));
-		m.addColumn(createStatusColumn());
-		m.addColumn(createProtocolColumn());
-		m.addColumn(createTimeoutColumn());
-		return m;
-	}
-
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(CommLink.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(CommLink.SONAR_TYPE,
+			"oname"));
 	}
 }

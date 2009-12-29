@@ -20,15 +20,12 @@ import java.io.IOException;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -38,64 +35,67 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class GraphicModel extends ProxyTableModel<Graphic> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 6;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Graphic number column number */
-	static protected final int COL_NUMBER = 1;
-
-	/** Bpp column number */
-	static protected final int COL_BPP = 2;
-
-	/** Width column number */
-	static protected final int COL_WIDTH = 3;
-
-	/** Height column number */
-	static protected final int COL_HEIGHT = 4;
-
-	/** Image column number */
-	static protected final int COL_IMAGE = 5;
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int col, String name) {
-		TableColumn c = new TableColumn(col);
-		c.setHeaderValue(name);
-		return c;
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, "Name"));
-		m.addColumn(createColumn(COL_NUMBER, "Number"));
-		m.addColumn(createColumn(COL_BPP, "Bpp"));
-		m.addColumn(createColumn(COL_WIDTH, "Width"));
-		m.addColumn(createColumn(COL_HEIGHT, "Height"));
-		m.addColumn(createImageColumn());
-		return m;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Graphic>("Name") {
+			public Object getValueAt(Graphic g) {
+				return g.getName();
+			}
+		},
+		new ProxyColumn<Graphic>("Number", 0, Integer.class) {
+			public Object getValueAt(Graphic g) {
+				return g.getGNumber();
+			}
+			public boolean isEditable(Graphic g) {
+				return canUpdate(g);
+			}
+			public void setValueAt(Graphic g, Object value) {
+				if(value instanceof Integer)
+					g.setGNumber((Integer)value);
+			}
+		},
+		new ProxyColumn<Graphic>("Bpp", 0, Integer.class) {
+			public Object getValueAt(Graphic g) {
+				return g.getBpp();
+			}
+		},
+		new ProxyColumn<Graphic>("Width", 0, Integer.class) {
+			public Object getValueAt(Graphic g) {
+				return g.getWidth();
+			}
+		},
+		new ProxyColumn<Graphic>("Height", 0, Integer.class) {
+			public Object getValueAt(Graphic g) {
+				return g.getHeight();
+			}
+		},
+		new ProxyColumn<Graphic>("Image") {
+			public Object getValueAt(Graphic g) {
+				return g;
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new ImageCellRenderer();
+			}
+		}
+	    };
 	}
 
 	/** Create the image column */
-	static protected TableColumn createImageColumn() {
-		TableColumn c = createColumn(COL_IMAGE, "Image");
-		c.setCellRenderer(new TableCellRenderer() {
-			protected final ImageIcon icon = new ImageIcon();
-			public Component getTableCellRendererComponent(
-				JTable table, Object value, boolean isSelected,
-				boolean hasFocus, int row, int column)
-			{
-				BufferedImage im = createImage(value);
-				if(im != null) {
-					icon.setImage(im);
-					return new JLabel(icon);
-				} else
-					return new JLabel();
-			}
-		});
-		return c;
+	protected class ImageCellRenderer implements TableCellRenderer {
+		protected final ImageIcon icon = new ImageIcon();
+		public Component getTableCellRendererComponent(
+			JTable table, Object value, boolean isSelected,
+			boolean hasFocus, int row, int column)
+		{
+			BufferedImage im = createImage(value);
+			if(im != null) {
+				icon.setImage(im);
+				return new JLabel(icon);
+			} else
+				return new JLabel();
+		}
 	}
 
 	/** Create an image */
@@ -135,55 +135,5 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the column class */
-	public Class getColumnClass(int column) {
-		if(column == COL_NAME)
-			return String.class;
-		else
-			return Integer.class;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Graphic p = getProxy(row);
-		if(p == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return p.getName();
-		case COL_NUMBER:
-			return p.getGNumber();
-		case COL_BPP:
-			return p.getBpp();
-		case COL_WIDTH:
-			return p.getWidth();
-		case COL_HEIGHT:
-			return p.getHeight();
-		case COL_IMAGE:
-			return p;
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return column == COL_NUMBER;
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		Graphic p = getProxy(row);
-		if(p != null && column == COL_NUMBER) {
-			if(value instanceof Integer)
-				p.setGNumber((Integer)value);
-		}
 	}
 }

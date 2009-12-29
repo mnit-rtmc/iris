@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.SwingUtilities;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sched.AbstractJob;
@@ -54,6 +55,9 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
 
+	/** Proxy columns */
+	protected final ProxyColumn<T>[] columns;
+
 	/** Create an empty set of proxies */
 	protected TreeSet<T> createProxySet() {
 		return new TreeSet<T>(new NumericAlphaComparator<T>());
@@ -72,6 +76,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public ProxyTableModel(Session s, TypeCache<T> c) {
 		session = s;
 		cache = c;
+		columns = createColumns();
 		namespace = s.getSonarState().getNamespace();
 		user = s.getUser();
 	}
@@ -87,8 +92,62 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		cache.removeProxyListener(this);
 	}
 
+	/** Create the columns in the model */
+	abstract protected ProxyColumn<T>[] createColumns();
+
+	/** Get the count of columns in the table */
+	public int getColumnCount() {
+		return columns.length;
+	}
+
+	/** Get the proxy column at the given column index */
+	public ProxyColumn getProxyColumn(int col) {
+		if(col >= 0 && col < columns.length)
+			return columns[col];
+		else
+			return null;
+	}
+
+	/** Get the class of the specified column */
+	public Class getColumnClass(int col) {
+		ProxyColumn pc = getProxyColumn(col);
+		if(pc != null)
+			return pc.getColumnClass();
+		else
+			return null;
+	}
+
+	/** Get the value at the specified cell */
+	public Object getValueAt(int row, int col) {
+		T proxy = getProxy(row);
+		if(proxy != null) {
+			ProxyColumn pc = getProxyColumn(col);
+			if(pc != null)
+				return pc.getValueAt(proxy);
+		}
+		return null;
+	}
+
+	/** Check if the specified cell is editable */
+	public boolean isCellEditable(int row, int col) {
+		ProxyColumn pc = getProxyColumn(col);
+		return pc != null && pc.isEditable(getProxy(row));
+	}
+
+	/** Set the value at the specified cell */
+	public void setValueAt(Object value, int row, int col) {
+		ProxyColumn pc = getProxyColumn(col);
+		if(pc != null)
+			pc.setValueAt(getProxy(row), value);
+	}
+
 	/** Create the table column model */
-	abstract public TableColumnModel createColumnModel();
+	public TableColumnModel createColumnModel() {
+		TableColumnModel m = new DefaultTableColumnModel();
+		for(int i = 0; i < columns.length; ++i)
+			columns[i].addColumn(m, i);
+		return m;
+	}
 
 	/** Add a new proxy to the table model */
 	protected int doProxyAdded(T proxy) {

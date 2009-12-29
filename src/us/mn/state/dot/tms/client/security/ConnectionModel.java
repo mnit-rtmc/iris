@@ -14,11 +14,10 @@
  */
 package us.mn.state.dot.tms.client.security;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -28,65 +27,34 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class ConnectionModel extends ProxyTableModel<Connection> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** User column number */
-	static protected final int COL_USER = 1;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Connection>("Host:Port", 140) {
+			public Object getValueAt(Connection c) {
+				return c.getName();
+			}
+		},
+		new ProxyColumn<Connection>("User", 180) {
+			public Object getValueAt(Connection c) {
+				User u = c.getUser();
+				if(u != null)
+					return u.getName();
+				else
+					return null;
+			}
+		},
+	    };
+	}
 
 	/** Create a new connection table model */
 	public ConnectionModel(Session s) {
 		super(s, s.getSonarState().getConnections());
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
 	/** Get the count of rows in the table */
 	public int getRowCount() {
-		synchronized(proxies) {
-			return proxies.size();
-		}
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Connection c = getProxy(row);
-		if(c == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return c.getName();
-		case COL_USER:
-			User u = c.getUser();
-			if(u != null)
-				return u.getName();
-			else
-				return null;
-		}
-		return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return false;
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		// Not editable
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 140, "Host:Port"));
-		m.addColumn(createColumn(COL_USER, 180, "User"));
-		return m;
+		return super.getRowCount() - 1;
 	}
 }

@@ -20,16 +20,15 @@ import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.DefaultCellEditor;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -39,163 +38,98 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 6;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Indication column number */
-	static protected final int COL_INDICATION = 1;
-
-	/** Message number column number */
-	static protected final int COL_MSG_NUM = 2;
-
-	/** Width column number */
-	static protected final int COL_WIDTH = 3;
-
-	/** Height column number */
-	static protected final int COL_HEIGHT = 4;
-
-	/** Quick message column number */
-	static protected final int COL_Q_MSG = 5;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, "Name", 80));
-		m.addColumn(createIndicationColumn());
-		m.addColumn(createColumn(COL_MSG_NUM, "Msg #", 80));
-		m.addColumn(createColumn(COL_WIDTH, "Width", 80));
-		m.addColumn(createColumn(COL_HEIGHT, "Height", 80));
-		m.addColumn(createColumn(COL_Q_MSG, "Quick Message", 160));
-		return m;
-	}
-
-	/** Create the indication column */
-	static protected TableColumn createIndicationColumn() {
-		TableColumn col = createColumn(COL_INDICATION, "Indication",
-			100);
-		JComboBox combo = new JComboBox(
-			LaneUseIndication.getDescriptions());
-		col.setCellEditor(new DefaultCellEditor(combo));
-		col.setCellRenderer(new DefaultTableCellRenderer() {
-			public Component getTableCellRendererComponent(
-				JTable table, Object value, boolean isSelected,
-				boolean hasFocus, int row, int column)
-			{
-				return super.getTableCellRendererComponent(
-					table, getIndication(value),
-					isSelected, hasFocus, row, column);
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<LaneUseMulti>("Name", 80) {
+			public Object getValueAt(LaneUseMulti lum) {
+				return lum.getName();
 			}
-		});
-		return col;
-	}
-
-	/** Get an indication description */
-	static protected String getIndication(Object value) {
-		if(value instanceof Integer) {
-			return LaneUseIndication.fromOrdinal(
-				(Integer)value).description;
-		} else
-			return null;
-	}
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int col, String name, int w) {
-		TableColumn c = new TableColumn(col, w);
-		c.setHeaderValue(name);
-		return c;
+		},
+		new ProxyColumn<LaneUseMulti>("Indication", 100) {
+			public Object getValueAt(LaneUseMulti lum) {
+				return lum.getIndication();
+			}
+			public boolean isEditable(LaneUseMulti lum) {
+				if(lum != null)
+					return canUpdate(lum);
+				else
+					return canAdd();
+			}
+			public void setValueAt(LaneUseMulti lum, Object value) {
+				String v = value.toString();
+				int ind = lookupIndication(v);
+				if(lum != null)
+					lum.setIndication(ind);
+				else
+					createObject(ind);
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new IndicationCellRenderer();
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					LaneUseIndication.getDescriptions());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<LaneUseMulti>("Msg #", 80, Integer.class) {
+			public Object getValueAt(LaneUseMulti lum) {
+				return lum.getMsgNum();
+			}
+			public boolean isEditable(LaneUseMulti lum) {
+				return canUpdate(lum);
+			}
+			public void setValueAt(LaneUseMulti lum, Object value) {
+				if(value instanceof Integer)
+					lum.setMsgNum((Integer)value);
+				else
+					lum.setMsgNum(null);
+			}
+		},
+		new ProxyColumn<LaneUseMulti>("Width", 80, Integer.class) {
+			public Object getValueAt(LaneUseMulti lum) {
+				return lum.getWidth();
+			}
+			public boolean isEditable(LaneUseMulti lum) {
+				return canUpdate(lum);
+			}
+			public void setValueAt(LaneUseMulti lum, Object value) {
+				if(value instanceof Integer)
+					lum.setWidth((Integer)value);
+			}
+		},
+		new ProxyColumn<LaneUseMulti>("Height", 80, Integer.class) {
+			public Object getValueAt(LaneUseMulti lum) {
+				return lum.getHeight();
+			}
+			public boolean isEditable(LaneUseMulti lum) {
+				return canUpdate(lum);
+			}
+			public void setValueAt(LaneUseMulti lum, Object value) {
+				if(value instanceof Integer)
+					lum.setHeight((Integer)value);
+			}
+		},
+		new ProxyColumn<LaneUseMulti>("Quick Message", 160) {
+			public Object getValueAt(LaneUseMulti lum) {
+				return lum.getQuickMessage();
+			}
+			public boolean isEditable(LaneUseMulti lum) {
+				return canUpdate(lum);
+			}
+			public void setValueAt(LaneUseMulti lum, Object value) {
+				lum.setQuickMessage(QuickMessageHelper.lookup(
+					value.toString()));
+			}
+		}
+	    };
 	}
 
 	/** Create a new graphic table model */
 	public LaneUseMultiModel(Session s) {
 		super(s, s.getSonarState().getLcsCache().getLaneUseMultis());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the column class */
-	public Class getColumnClass(int column) {
-		switch(column) {
-		case COL_INDICATION:
-		case COL_MSG_NUM:
-		case COL_WIDTH:
-		case COL_HEIGHT:
-			return Integer.class;
-		default:
-			return String.class;
-		}
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		LaneUseMulti p = getProxy(row);
-		if(p == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return p.getName();
-		case COL_INDICATION:
-			return p.getIndication();
-		case COL_MSG_NUM:
-			return p.getMsgNum();
-		case COL_WIDTH:
-			return p.getWidth();
-		case COL_HEIGHT:
-			return p.getHeight();
-		case COL_Q_MSG:
-			return p.getQuickMessage();
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		LaneUseMulti lum = getProxy(row);
-		if(lum != null)
-			return (col != COL_NAME) && canUpdate(lum);
-		else
-			return (col == COL_INDICATION) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		LaneUseMulti p = getProxy(row);
-		if(p == null) {
-			String v = value.toString();
-			if(column == COL_INDICATION)
-				createObject(lookupIndication(v));
-			return;
-		}
-		switch(column) {
-		case COL_INDICATION:
-			String v = value.toString();
-			p.setIndication(lookupIndication(v));
-			break;
-		case COL_MSG_NUM:
-			if(value instanceof Integer)
-				p.setMsgNum((Integer)value);
-			else
-				p.setMsgNum(null);
-			break;
-		case COL_WIDTH:
-			if(value instanceof Integer)
-				p.setWidth((Integer)value);
-			break;
-		case COL_HEIGHT:
-			if(value instanceof Integer)
-				p.setHeight((Integer)value);
-			break;
-		case COL_Q_MSG:
-			p.setQuickMessage(QuickMessageHelper.lookup(
-				value.toString()));
-			break;
-		}
 	}
 
 	/** Lookup a lane-use indication */
@@ -232,6 +166,29 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
 		return namespace.canAdd(user,
-		       new Name(LaneUseMulti.SONAR_TYPE));
+		       new Name(LaneUseMulti.SONAR_TYPE, "oname"));
+	}
+
+	/** Indication cell renderer */
+	static protected class IndicationCellRenderer
+		extends DefaultTableCellRenderer
+	{
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			return super.getTableCellRendererComponent(table,
+				getIndication(value), isSelected, hasFocus,
+				row, column);
+		}
+	}
+
+	/** Get an indication description */
+	static protected String getIndication(Object value) {
+		if(value instanceof Integer) {
+			return LaneUseIndication.fromOrdinal(
+				(Integer)value).description;
+		} else
+			return null;
 	}
 }

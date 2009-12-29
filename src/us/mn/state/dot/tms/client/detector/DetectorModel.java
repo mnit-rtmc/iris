@@ -19,14 +19,13 @@ import java.util.LinkedList;
 import java.util.TreeSet;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -36,42 +35,132 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class DetectorModel extends ProxyTableModel<Detector> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 9;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Label column number */
-	static protected final int COL_LABEL = 1;
-
-	/** Lane type column number */
-	static protected final int COL_LANE_TYPE = 2;
-
-	/** Lane number column number */
-	static protected final int COL_LANE_NUMBER = 3;
-
-	/** Abandoned column number */
-	static protected final int COL_ABANDONED = 4;
-
-	/** Force fail column number */
-	static protected final int COL_FORCE_FAIL = 5;
-
-	/** Field length column number */
-	static protected final int COL_FIELD_LENGTH = 6;
-
-	/** Fake expression column number */
-	static protected final int COL_FAKE = 7;
-
-	/** Notes column number */
-	static protected final int COL_NOTES = 8;
-
 	/** List of all lane types */
 	static protected final LinkedList<String> LANE_TYPES =
 		new LinkedList<String>();
 	static {
 		for(String lt: LaneType.getDescriptions())
 			LANE_TYPES.add(lt);
+	}
+
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Detector>("Detector", 60) {
+			public Object getValueAt(Detector d) {
+				return d.getName();
+			}
+			public boolean isEditable(Detector d) {
+				return (d == null) && canAdd();
+			}
+			public void setValueAt(Detector d, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<Detector>("Label", 140) {
+			public Object getValueAt(Detector d) {
+				return DetectorHelper.getLabel(d);
+			}
+		},
+		new ProxyColumn<Detector>("Lane Type", 80) {
+			public Object getValueAt(Detector d) {
+				return LANE_TYPES.get(d.getLaneType());
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				d.setLaneType((short)LANE_TYPES.indexOf(value));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					LaneType.getDescriptions());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Detector>("Lane #", 60, Short.class) {
+			public Object getValueAt(Detector d) {
+				return d.getLaneNumber();
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				if(value instanceof Number) {
+					d.setLaneNumber(
+						((Number)value).shortValue());
+				}
+			}
+		},
+		new ProxyColumn<Detector>("Abandoned", 60, Boolean.class) {
+			public Object getValueAt(Detector d) {
+				return d.getAbandoned();
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				if(value instanceof Boolean)
+					d.setAbandoned((Boolean)value);
+			}
+		},
+		new ProxyColumn<Detector>("Force Fail", 60, Boolean.class) {
+			public Object getValueAt(Detector d) {
+				return d.getForceFail();
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				if(value instanceof Boolean)
+					d.setForceFail((Boolean)value);
+			}
+		},
+		new ProxyColumn<Detector>("Field Len", 60, Float.class) {
+			public Object getValueAt(Detector d) {
+				return d.getFieldLength();
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				if(value instanceof Number) {
+					d.setFieldLength(
+						((Number)value).floatValue());
+				}
+			}
+		},
+		new ProxyColumn<Detector>("Fake", 180) {
+			public Object getValueAt(Detector d) {
+				return d.getFake();
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					d.setFake(v);
+				else
+					d.setFake(null);
+			}
+		},
+		new ProxyColumn<Detector>("Notes", 180) {
+			public Object getValueAt(Detector d) {
+				return d.getNotes();
+			}
+			public boolean isEditable(Detector d) {
+				return canUpdate(d);
+			}
+			public void setValueAt(Detector d, Object value) {
+				String v = value.toString().trim();
+				d.setNotes(v);
+			}
+		}
+	    };
 	}
 
 	/** Create a new detector table model */
@@ -90,125 +179,9 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		);
 	}
 
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		if(column == COL_ABANDONED || column == COL_FORCE_FAIL)
-			return Boolean.class;
-		else if(column == COL_FIELD_LENGTH)
-			return Float.class;
-		else if(column == COL_LANE_NUMBER)
-			return Short.class;
-		else
-			return String.class;
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Detector d = getProxy(row);
-		if(d == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return d.getName();
-		case COL_LABEL:
-			return DetectorHelper.getLabel(d);
-		case COL_LANE_TYPE:
-			return LANE_TYPES.get(d.getLaneType());
-		case COL_LANE_NUMBER:
-			return d.getLaneNumber();
-		case COL_ABANDONED:
-			return d.getAbandoned();
-		case COL_FORCE_FAIL:
-			return d.getForceFail();
-		case COL_FIELD_LENGTH:
-			return d.getFieldLength();
-		case COL_FAKE:
-			return d.getFake();
-		case COL_NOTES:
-			return d.getNotes();
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		Detector det = getProxy(row);
-		if(det != null) {
-			return (col != COL_NAME) &&
-			       (col != COL_LABEL) &&
-			       canUpdate(det);
-		} else
-			return col == COL_NAME && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		String v = value.toString().trim();
-		Detector d = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_LANE_TYPE:
-			d.setLaneType((short)LANE_TYPES.indexOf(value));
-			break;
-		case COL_LANE_NUMBER:
-			d.setLaneNumber(((Number)value).shortValue());
-			break;
-		case COL_ABANDONED:
-			d.setAbandoned((Boolean)value);
-			break;
-		case COL_FORCE_FAIL:
-			d.setForceFail((Boolean)value);
-			break;
-		case COL_FIELD_LENGTH:
-			d.setFieldLength(((Number)value).floatValue());
-			break;
-		case COL_FAKE:
-			if(v.length() > 0)
-				d.setFake(v);
-			else
-				d.setFake(null);
-			break;
-		case COL_NOTES:
-			d.setNotes(v);
-			break;
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 60, "Detector"));
-		m.addColumn(createColumn(COL_LABEL, 140, "Label"));
-		m.addColumn(createLaneTypeColumn());
-		m.addColumn(createColumn(COL_LANE_NUMBER, 60, "Lane #"));
-		m.addColumn(createColumn(COL_ABANDONED, 60, "Abandoned"));
-		m.addColumn(createColumn(COL_FORCE_FAIL, 60, "Force Fail"));
-		m.addColumn(createColumn(COL_FIELD_LENGTH, 60, "Field Len"));
-		m.addColumn(createColumn(COL_FAKE, 180, "Fake"));
-		m.addColumn(createColumn(COL_NOTES, 180, "Notes"));
-		return m;
-	}
-
-	/** Create the lane type column */
-	protected TableColumn createLaneTypeColumn() {
-		TableColumn c = new TableColumn(COL_LANE_TYPE, 80);
-		c.setHeaderValue("Lane Type");
-		JComboBox combo = new JComboBox(LaneType.getDescriptions());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Detector.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(Detector.SONAR_TYPE,
+			"oname"));
 	}
 }

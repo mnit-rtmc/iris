@@ -14,11 +14,10 @@
  */
 package us.mn.state.dot.tms.client.security;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -28,17 +27,47 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class UserModel extends ProxyTableModel<User> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 3;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Full name column number */
-	static protected final int COL_FULL_NAME = 1;
-
-	/** Distinguished name column number */
-	static protected final int COL_DN = 2;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<User>("User", 100) {
+			public Object getValueAt(User u) {
+				return u.getName();
+			}
+			public boolean isEditable(User u) {
+				return u == null && canAdd();
+			}
+			public void setValueAt(User u, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<User>("Full Name", 180) {
+			public Object getValueAt(User u) {
+				return u.getFullName();
+			}
+			public boolean isEditable(User u) {
+				return canUpdate(u);
+			}
+			public void setValueAt(User u, Object value) {
+				u.setFullName(value.toString().trim());
+			}
+		},
+		new ProxyColumn<User>("Dn", 420) {
+			public Object getValueAt(User u) {
+				return u.getDn();
+			}
+			public boolean isEditable(User u) {
+				return canUpdate(u);
+			}
+			public void setValueAt(User u, Object value) {
+				u.setDn(value.toString().trim());
+			}
+		}
+	    };
+	}
 
 	/** User role model */
 	protected final UserRoleModel rmodel;
@@ -56,66 +85,10 @@ public class UserModel extends ProxyTableModel<User> {
 			rmodel.updateUserRoles(proxy);
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		User u = getProxy(row);
-		if(u == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return u.getName();
-		case COL_FULL_NAME:
-			return u.getFullName();
-		case COL_DN:
-			return u.getDn();
-		}
-		return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		User u = getProxy(row);
-		if(u != null)
-			return column != COL_NAME && canUpdate(u);
-		else
-			return column == COL_NAME && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		User u = getProxy(row);
-		String v = value.toString().trim();
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_FULL_NAME:
-			u.setFullName(v);
-			break;
-		case COL_DN:
-			u.setDn(v);
-			break;
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 100, "User"));
-		m.addColumn(createColumn(COL_FULL_NAME, 180, "Full Name"));
-		m.addColumn(createColumn(COL_DN, 420, "Dn"));
-		return m;
-	}
-
 	/** Check if the user can add a user */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(User.SONAR_TYPE,"name"));
+		return namespace.canAdd(user, new Name(User.SONAR_TYPE,
+			"oname"));
 	}
 
 	/** Check if the user can remove a user */

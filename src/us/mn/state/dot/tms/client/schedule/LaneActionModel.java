@@ -17,9 +17,7 @@ package us.mn.state.dot.tms.client.schedule;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
@@ -27,6 +25,7 @@ import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneMarkingHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -36,31 +35,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Lane marking column number */
-	static protected final int COL_MARKING = 0;
-
-	/** On-deploy column number */
-	static protected final int COL_STATE = 1;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_MARKING, 160, "Lane Marking"));
-		m.addColumn(createStateColumn());
-		return m;
-	}
-
-	/** Create the state column */
-	static protected TableColumn createStateColumn() {
-		TableColumn c = createColumn(COL_STATE, 80, "State");
-		JComboBox combo = new JComboBox(STATES);
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
 	/** Allowed states */
 	static protected final ActionPlanState[] STATES = {
 		ActionPlanState.undeployed,
@@ -68,6 +42,47 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 		ActionPlanState.deployed,
 		ActionPlanState.undeploying
 	};
+
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<LaneAction>("Lane Marking", 160) {
+			public Object getValueAt(LaneAction la) {
+				return la.getLaneMarking();
+			}
+			public boolean isEditable(LaneAction la) {
+				return la == null && canAdd();
+			}
+			public void setValueAt(LaneAction la, Object value) {
+				String v = value.toString().trim();
+				LaneMarking lm = LaneMarkingHelper.lookup(v);
+				if(lm != null)
+					create(lm);
+			}
+		},
+		new ProxyColumn<LaneAction>("State", 80) {
+			public Object getValueAt(LaneAction la) {
+				return ActionPlanState.fromOrdinal(
+					la.getState());
+			}
+			public boolean isEditable(LaneAction la) {
+				return canUpdate(la);
+			}
+			public void setValueAt(LaneAction la, Object value) {
+				if(value instanceof ActionPlanState) {
+					ActionPlanState st =
+						(ActionPlanState)value;
+					la.setState(st.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(STATES);
+				return new DefaultCellEditor(combo);
+			}
+		},
+	    };
+	}
 
 	/** Currently selected action plan */
 	protected final ActionPlan action_plan;
@@ -84,60 +99,6 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 			return super.doProxyAdded(la);
 		else
 			return -1;
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		LaneAction la = getProxy(row);
-		if(la == null)
-			return null;
-		switch(column) {
-		case COL_MARKING:
-			return la.getLaneMarking();
-		case COL_STATE:
-			return ActionPlanState.fromOrdinal(la.getState());
-		default:
-			return null;
-		}
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		return String.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		LaneAction la = getProxy(row);
-		if(la != null)
-			return column != COL_MARKING && canUpdate(la);
-		else
-			return column == COL_MARKING && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		LaneAction la = getProxy(row);
-		if(la == null) {
-			if(column == COL_MARKING) {
-				String v = value.toString().trim();
-				LaneMarking lm = LaneMarkingHelper.lookup(v);
-				if(lm != null)
-					create(lm);
-			}
-			return;
-		}
-		if(column == COL_STATE) {
-			if(value instanceof ActionPlanState) {
-				ActionPlanState st = (ActionPlanState)value;
-				la.setState(st.ordinal());
-			}
-		}
 	}
 
 	/** Create a new lane action */

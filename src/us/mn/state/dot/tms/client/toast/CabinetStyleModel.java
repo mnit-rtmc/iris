@@ -19,13 +19,11 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -35,70 +33,44 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Dip switch column number */
-	static protected final int COL_DIP = 1;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<CabinetStyle>("Style", 90) {
+			public Object getValueAt(CabinetStyle cs) {
+				return cs.getName();
+			}
+			public boolean isEditable(CabinetStyle cs) {
+				return (cs == null) && canAdd();
+			}
+			public void setValueAt(CabinetStyle cs, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<CabinetStyle>("Dip", 60) {
+			public Object getValueAt(CabinetStyle cs) {
+				return cs.getDip();
+			}
+			public boolean isEditable(CabinetStyle cs) {
+				return canUpdate(cs);
+			}
+			public void setValueAt(CabinetStyle cs, Object value) {
+				if(value instanceof Integer)
+					cs.setDip((Integer)value);
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DipEditor();
+			}
+		}
+	    };
+	}
 
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(Session s) {
 		super(s, s.getSonarState().getConCache().getCabinetStyles());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		CabinetStyle c = getProxy(row);
-		if(c == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return c.getName();
-		case COL_DIP:
-			return c.getDip();
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		CabinetStyle cs = getProxy(row);
-		if(cs != null)
-			return (col != COL_NAME) && canUpdate(cs);
-		else
-			return (col == COL_NAME) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		String v = value.toString().trim();
-		CabinetStyle c = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_DIP:
-			c.setDip((Integer)value);
-			break;
-		}
-	}
-
-	/** Create the dip column */
-	protected TableColumn createDipColumn() {
-		TableColumn c = new TableColumn(COL_DIP, 60);
-		c.setHeaderValue("Dip");
-		c.setCellEditor(new DipEditor());
-		return c;
 	}
 
 	/** Editor for dip values in a table cell */
@@ -123,17 +95,9 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		}
 	}
 
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 90, "Style"));
-		m.addColumn(createDipColumn());
-		return m;
-	}
-
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
 		return namespace.canAdd(user,
-			new Name(CabinetStyle.SONAR_TYPE));
+			new Name(CabinetStyle.SONAR_TYPE, "oname"));
 	}
 }

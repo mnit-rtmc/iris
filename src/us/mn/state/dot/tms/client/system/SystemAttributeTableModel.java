@@ -21,13 +21,12 @@ import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -38,86 +37,49 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Name column number */
-	static public final int COL_NAME = 0;
-
-	/** Value column number */
-	static public final int COL_VALUE = 1;
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		return c;
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		TableColumn ncol = createColumn(COL_NAME, 200, "Name");
-		ncol.setCellRenderer(new NameCellRenderer());
-		m.addColumn(ncol);
-		TableColumn vcol = createColumn(COL_VALUE, 340, "Value");
-		vcol.setCellRenderer(new ValueCellRenderer());
-		m.addColumn(vcol);
-		return m;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<SystemAttribute>("Name", 200) {
+			public Object getValueAt(SystemAttribute sa) {
+				return sa.getName();
+			}
+			public boolean isEditable(SystemAttribute sa) {
+				return (sa == null) && canAdd();
+			}
+			public void setValueAt(SystemAttribute sa,Object value){
+				addRow(value);
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new NameCellRenderer();
+			}
+		},
+		new ProxyColumn<SystemAttribute>("Value", 340) {
+			public Object getValueAt(SystemAttribute sa) {
+				return sa.getValue();
+			}
+			public boolean isEditable(SystemAttribute sa) {
+				return canUpdate(sa);
+			}
+			public void setValueAt(SystemAttribute sa,Object value){
+				String v = value.toString().trim();
+				SystemAttrEnum sae = SystemAttrEnum.lookup(
+					sa.getName());
+				if(sae != null)
+					v = sae.parseValue(v).toString();
+				sa.setValue(v);
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new ValueCellRenderer();
+			}
+		}
+	    };
 	}
 
 	/** Create a new table model */
 	public SystemAttributeTableModel(Session s) {
 		super(s, s.getSonarState().getSystemAttributes());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value of a column */
-	protected Object getValue(SystemAttribute t, int col) {
-		if(col == COL_NAME)
-			return t.getName();
-		else if(col == COL_VALUE)
-			return t.getValue();
-		else
-			return null;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int col) {
-		SystemAttribute t = getProxy(row);
-		if(t != null)
-			return getValue(t, col);
-		else
-			return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		SystemAttribute sa = getProxy(row);
-		if(sa != null)
-			return col != COL_NAME && canUpdate(sa);
-		else
-			return col == COL_NAME && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int col) {
-		SystemAttribute t = getProxy(row);
-		if(t == null) {
-			if(col == COL_NAME)
-				addRow(value);
-		} else if(col == COL_VALUE) {
-			SystemAttrEnum sa = SystemAttrEnum.lookup(t.getName());
-			if(sa != null)
-				value = sa.parseValue(value.toString());
-			t.setValue(value.toString());
-		}
 	}
 
 	/** Add a row to the table */
@@ -155,9 +117,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 	}
 
 	/** Renderer for system attribute value in a table cell */
-	static protected class ValueCellRenderer extends 
-		DefaultTableCellRenderer
-	{
+	protected class ValueCellRenderer extends DefaultTableCellRenderer {
 		public Component getTableCellRendererComponent(JTable table,
 			Object value, boolean isSelected, boolean hasFocus,
 			int row, int column)
@@ -165,26 +125,27 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 			JLabel label = (JLabel)
 				super.getTableCellRendererComponent(table,
 				value, isSelected, hasFocus, row, column);
-			if(!(value instanceof String))
-				return label;
-			// render non-default values in bold.
-			String an = (String)table.getValueAt(row, COL_NAME);
-			if(an == null)
-				return label;
-			SystemAttrEnum sa = SystemAttrEnum.lookup(an);
-			if(sa == null)
-				return label;
-			Font f = label.getFont();
-			if(!sa.equalsDefault())
+			SystemAttribute sa = getProxy(row);
+			if(!isValueDefault(sa)) {
+				Font f = label.getFont();
 				label.setFont(f.deriveFont(
 					f.getStyle() ^ Font.BOLD));
+			}
 			return label;
 		}
+	}
+
+	/** Check if a system attribute value is default */
+	static protected boolean isValueDefault(SystemAttribute sa) {
+		if(sa == null)
+			return true;
+		SystemAttrEnum sae = SystemAttrEnum.lookup(sa.getName());
+		return sae == null || sae.equalsDefault();
 	}
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
 		return namespace.canAdd(user,
-		       new Name(SystemAttribute.SONAR_TYPE));
+		       new Name(SystemAttribute.SONAR_TYPE, "oname"));
 	}
 }

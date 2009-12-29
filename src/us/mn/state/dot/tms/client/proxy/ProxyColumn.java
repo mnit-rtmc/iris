@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.SonarObject;
@@ -26,17 +28,8 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 abstract public class ProxyColumn<T extends SonarObject> {
 
-	/** Create a table column */
-	static protected TableColumn createColumn(int column, int width,
-		String header)
-	{
-		TableColumn c = new TableColumn(column, width);
-		c.setHeaderValue(header);
-		return c;
-	}
-
 	/** Column header */
-	protected final String label;
+	protected final String header;
 
 	/** Column class */
 	protected final Class c_class;
@@ -45,20 +38,52 @@ abstract public class ProxyColumn<T extends SonarObject> {
 	protected final int width;
 
 	/** Create a new proxy column */
-	public ProxyColumn(String l, Class c, int w) {
-		label = l;
-		c_class = c;
+	public ProxyColumn(String h, int w, Class c) {
+		header = h;
 		width = w;
+		c_class = c;
+	}
+
+	/** Create a new proxy column */
+	public ProxyColumn(String h, int w) {
+		this(h, w, String.class);
+	}
+
+	/** Create a new proxy column */
+	public ProxyColumn(String h) {
+		this(h, 0, String.class);
 	}
 
 	/** Add a column to the table column model */
-	public void addColumn(TableColumnModel m, int index) {
-		m.addColumn(createColumn(index, width, label));
+	public void addColumn(TableColumnModel m, int col) {
+		TableColumn tc = createTableColumn(col);
+		tc.setHeaderValue(header);
+		tc.setCellRenderer(createCellRenderer());
+		tc.setCellEditor(createCellEditor());
+		m.addColumn(tc);
+	}
+
+	/** Create a table column */
+	protected TableColumn createTableColumn(int col) {
+		if(width > 0)
+			return new TableColumn(col, width);
+		else
+			return new TableColumn(col);
 	}
 
 	/** Get the column class */
 	public Class getColumnClass() {
 		return c_class;
+	}
+
+	/** Create the table cell renderer */
+	protected TableCellRenderer createCellRenderer() {
+		return null;
+	}
+
+	/** Create the table cell editor */
+	protected TableCellEditor createCellEditor() {
+		return null;
 	}
 
 	/** Get the value of the column for the given proxy */

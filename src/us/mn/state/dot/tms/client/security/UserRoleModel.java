@@ -15,12 +15,11 @@
 package us.mn.state.dot.tms.client.security;
 
 import java.util.TreeSet;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -30,14 +29,53 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class UserRoleModel extends ProxyTableModel<Role> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Role>("Role", 120) {
+			public Object getValueAt(Role r) {
+				return r.getName();
+			}
+		},
+		new ProxyColumn<Role>("Assigned", 80, Boolean.class) {
+			public Object getValueAt(Role r) {
+				return isAssigned(r);
+			}
+			public boolean isEditable(Role r) {
+				return canUpdateUserRoles();
+			}
+			public void setValueAt(Role r, Object value) {
+				if(value instanceof Boolean)
+					setAssigned(r, (Boolean)value);
+			}
+		}
+	    };
+	}
 
-	/** Name column number */
-	static protected final int COL_NAME = 0;
+	/** Check if the given role is assigned */
+	protected boolean isAssigned(Role role) {
+		User u = sel_user;	// Avoid NPE
+		if(u != null) {
+			for(Role r: u.getRoles())
+				if(r == role)
+					return true;
+		}
+		return false;
+	}
 
-	/** Assigned column number */
-	static protected final int COL_ASSIGNED = 1;
+	/** Assign or unassign the specified role */
+	protected void setAssigned(Role r, boolean a) {
+		User u = sel_user;	// Avoid NPE
+		if(u != null) {
+			Role[] roles = u.getRoles();
+			if(a)
+				roles = addRole(roles, r);
+			else
+				roles = removeRole(roles, r);
+			u.setRoles(roles);
+		}
+	}
 
 	/** Currently selected user */
 	protected User sel_user;
@@ -59,46 +97,9 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 			fireTableDataChanged();
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
 	/** Get the count of rows in the table */
 	public int getRowCount() {
-		synchronized(proxies) {
-			return proxies.size();
-		}
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Role role = getProxy(row);
-		if(role == null)
-			return "";
-		if(column == COL_NAME)
-			return role.getName();
-		User u = sel_user;	// Avoid NPE
-		if(u != null) {
-			for(Role r: u.getRoles())
-				if(r == role)
-					return true;
-		}
-		return false;
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		if(column == COL_ASSIGNED)
-			return Boolean.class;
-		else
-			return String.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		return (column == COL_ASSIGNED) && (sel_user != null) &&
-			canUpdate();
+		return super.getRowCount() - 1;
 	}
 
 	/** Add a role to an array of roles */
@@ -119,34 +120,10 @@ public class UserRoleModel extends ProxyTableModel<Role> {
 		return role_set.toArray(new Role[0]);
 	}
 
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
+	/** Check if the user can update user roles */
+	protected boolean canUpdateUserRoles() {
 		User u = sel_user;	// Avoid NPE
-		if((column != COL_ASSIGNED) || (u == null))
-			return;
-		Boolean v = (Boolean)value;
-		Role role = getProxy(row);
-		if(role != null) {
-			Role[] roles = u.getRoles();
-			if(v)
-				roles = addRole(roles, role);
-			else
-				roles = removeRole(roles, role);
-			u.setRoles(roles);
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 120, "Role"));
-		m.addColumn(createColumn(COL_ASSIGNED, 80, "Assigned"));
-		return m;
-	}
-
-	/** Check if the user can set user roles */
-	public boolean canUpdate() {
-		return namespace.canUpdate(user, new Name(User.SONAR_TYPE,
+		return (u != null) && namespace.canUpdate(user, new Name(u,
 			"roles"));
 	}
 }

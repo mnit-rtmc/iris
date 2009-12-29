@@ -19,12 +19,11 @@ import java.awt.Component;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -34,96 +33,59 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class AlarmModel extends ProxyTableModel<Alarm> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 5;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Description column number */
-	static protected final int COL_DESCRIPTION = 1;
-
-	/** Triggered state column number */
-	static protected final int COL_STATE = 2;
-
-	/** Controller column number */
-	static protected final int COL_CONTROLLER = 3;
-
-	/** Pin column number */
-	static protected final int COL_PIN = 4;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Alarm>("Alarm", 80) {
+			public Object getValueAt(Alarm a) {
+				return a.getName();
+			}
+			public boolean isEditable(Alarm a) {
+				return (a == null) && canAdd();
+			}
+			public void setValueAt(Alarm a, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<Alarm>("Description", 200) {
+			public Object getValueAt(Alarm a) {
+				return a.getDescription();
+			}
+			public boolean isEditable(Alarm a) {
+				return canUpdate(a);
+			}
+			public void setValueAt(Alarm a, Object value) {
+				String v = value.toString().trim();
+				a.setDescription(v);
+			}
+		},
+		new ProxyColumn<Alarm>("State", 60) {
+			public Object getValueAt(Alarm a) {
+				return a.getState();
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new StateCellRenderer();
+			}
+		},
+		new ProxyColumn<Alarm>("Controller", 100) {
+			public Object getValueAt(Alarm a) {
+				return a.getController();
+			}
+		},
+		new ProxyColumn<Alarm>("Pin", 50) {
+			public Object getValueAt(Alarm a) {
+				return a.getPin();
+			}
+		}
+	    };
+	}
 
 	/** Create a new alarm table model */
 	public AlarmModel(Session s) {
 		super(s, s.getSonarState().getAlarms());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Alarm a = getProxy(row);
-		if(a == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return a.getName();
-		case COL_DESCRIPTION:
-			return a.getDescription();
-		case COL_STATE:
-			return a.getState();
-		case COL_CONTROLLER:
-			return a.getController();
-		case COL_PIN:
-			return a.getPin();
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		Alarm a = getProxy(row);
-		if(a != null)
-			return (col == COL_DESCRIPTION) && canUpdate(a);
-		else
-			return (col == COL_NAME) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		String v = value.toString().trim();
-		Alarm a = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_DESCRIPTION:
-			a.setDescription(v);
-			break;
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 80, "Alarm"));
-		m.addColumn(createColumn(COL_DESCRIPTION, 200, "Description"));
-		m.addColumn(createStateColumn());
-		m.addColumn(createColumn(COL_CONTROLLER, 100, "Controller"));
-		m.addColumn(createColumn(COL_PIN, 50, "Pin"));
-		return m;
-	}
-
-	/** Create the state column */
-	protected TableColumn createStateColumn() {
-		TableColumn c = new TableColumn(COL_STATE, 60);
-		c.setHeaderValue("State");
-		c.setCellRenderer(new StateCellRenderer());
-		return c;
 	}
 
 	/** Renderer for state in a table cell */
@@ -158,6 +120,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Alarm.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(Alarm.SONAR_TYPE,
+			"oname"));
 	}
 }

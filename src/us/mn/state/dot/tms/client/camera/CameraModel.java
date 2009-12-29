@@ -14,12 +14,11 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.toast.SonarObjectForm;
 
@@ -30,84 +29,47 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  */
 public class CameraModel extends ProxyTableModel<Camera> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 3;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Location column number */
-	static protected final int COL_LOCATION = 1;
-
-	/** Publish column number */
-	static protected final int COL_PUBLISH = 2;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Camera>("Camera", 200) {
+			public Object getValueAt(Camera c) {
+				return c.getName();
+			}
+			public boolean isEditable(Camera c) {
+				return (c == null) && canAdd();
+			}
+			public void setValueAt(Camera c, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<Camera>("Location", 300) {
+			public Object getValueAt(Camera c) {
+				return GeoLocHelper.getDescription(
+					c.getGeoLoc());
+			}
+		},
+		new ProxyColumn<Camera>("Publish", 120, Boolean.class) {
+			public Object getValueAt(Camera c) {
+				return c.getPublish();
+			}
+			public boolean isEditable(Camera c) {
+				return canUpdate(c);
+			}
+			public void setValueAt(Camera c, Object value) {
+				if(value instanceof Boolean)
+					c.setPublish((Boolean)value);
+			}
+		}
+	    };
+	}
 
 	/** Create a new camera table model */
 	public CameraModel(Session s) {
 		super(s, s.getSonarState().getCamCache().getCameras());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Camera c = getProxy(row);
-		if(c == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return c.getName();
-		case COL_LOCATION:
-			return GeoLocHelper.getDescription(
-				c.getGeoLoc());
-		case COL_PUBLISH:
-			return c.getPublish();
-		}
-		return null;
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		if(column == COL_PUBLISH)
-			return Boolean.class;
-		else
-			return String.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		Camera c = getProxy(row);
-		if(c != null)
-			return col == COL_PUBLISH && canUpdate(c);
-		else
-			return col == COL_NAME && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		Camera c = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_PUBLISH:
-			c.setPublish((Boolean)value);
-			break;
-		}
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Camera"));
-		m.addColumn(createColumn(COL_LOCATION, 300, "Location"));
-		m.addColumn(createColumn(COL_PUBLISH, 120, "Publish"));
-		return m;
 	}
 
 	/** Determine if a properties form is available */
@@ -122,6 +84,7 @@ public class CameraModel extends ProxyTableModel<Camera> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Camera.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(Camera.SONAR_TYPE,
+			"oname"));
 	}
 }

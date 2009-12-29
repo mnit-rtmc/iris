@@ -23,11 +23,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Device;
@@ -36,6 +32,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimingPlan;
 import us.mn.state.dot.tms.TimingPlanType;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -44,33 +41,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
-
-	/** Count of columns in timing plan table model */
-	static protected final int COLUMN_COUNT = 8;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Plan type column number */
-	static protected final int COL_TYPE = 1;
-
-	/** Device column number */
-	static protected final int COL_DEVICE = 2;
-
-	/** Start time column number */
-	static protected final int COL_START = 3;
-
-	/** Stop time column number */
-	static protected final int COL_STOP = 4;
-
-	/** Active column number */
-	static protected final int COL_ACTIVE = 5;
-
-	/** Testing column number */
-	static protected final int COL_TESTING = 6;
-
-	/** Target column number */
-	static protected final int COL_TARGET = 7;
 
 	/** Time parser formats */
 	static protected final DateFormat[] TIME_FORMATS = {
@@ -110,46 +80,101 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		return (minute / 60) + ":" + min;
 	}
 
-	/** Cell renderer for this table */
-	static protected final DefaultTableCellRenderer RENDERER =
-		new DefaultTableCellRenderer();
-	static {
-		RENDERER.setHorizontalAlignment(SwingConstants.CENTER);
-	}
-
-	/** Create a new table column */
-	static protected TableColumn createColumn(int col, String name,
-		boolean center)
-	{
-		TableColumn c = new TableColumn(col);
-		c.setHeaderValue(name);
-		if(center)
-			c.setCellRenderer(RENDERER);
-		return c;
-	}
-
-	/** Create the plan type column */
-	static protected TableColumn createTypeColumn() {
-		TableColumn c = new TableColumn(COL_TYPE, 140);
-		c.setHeaderValue("Plan Type");
-		JComboBox combo = new JComboBox(
-			TimingPlanType.getDescriptions());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, "Name", false));
-		m.addColumn(createTypeColumn());
-		m.addColumn(createColumn(COL_DEVICE, "Device", false));
-		m.addColumn(createColumn(COL_START, "Start Time", true));
-		m.addColumn(createColumn(COL_STOP, "Stop Time", true));
-		m.addColumn(createColumn(COL_ACTIVE, "Active", false));
-		m.addColumn(createColumn(COL_TESTING, "Testing", false));
-		m.addColumn(createColumn(COL_TARGET, "Target", true));
-		return m;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<TimingPlan>("Name") {
+			public Object getValueAt(TimingPlan tp) {
+				return tp.getName();
+			}
+		},
+		new ProxyColumn<TimingPlan>("Plan Type", 140) {
+			public Object getValueAt(TimingPlan tp) {
+				return TimingPlanType.fromOrdinal(
+					tp.getPlanType());
+			}
+			public boolean isEditable(TimingPlan tp) {
+				return tp == null && canAdd();
+			}
+			public void setValueAt(TimingPlan tp, Object value) {
+				if(value instanceof String)
+					createPlan((String)value);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					TimingPlanType.getDescriptions());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<TimingPlan>("Device") {
+			public Object getValueAt(TimingPlan tp) {
+				Device d = tp.getDevice();
+				if(d != null)
+					return d.getName();
+				else
+					return null;
+			}
+		},
+		new ProxyColumn<TimingPlan>("Start Time") {
+			public Object getValueAt(TimingPlan tp) {
+				return timeString(tp.getStartMin());
+			}
+			public boolean isEditable(TimingPlan tp) {
+				return canUpdate(tp);
+			}
+			public void setValueAt(TimingPlan tp, Object value) {
+				tp.setStartMin(parseMinute(value.toString()));
+			}
+		},
+		new ProxyColumn<TimingPlan>("Stop Time") {
+			public Object getValueAt(TimingPlan tp) {
+				return timeString(tp.getStopMin());
+			}
+			public boolean isEditable(TimingPlan tp) {
+				return canUpdate(tp);
+			}
+			public void setValueAt(TimingPlan tp, Object value) {
+				tp.setStopMin(parseMinute(value.toString()));
+			}
+		},
+		new ProxyColumn<TimingPlan>("Active", 0, Boolean.class) {
+			public Object getValueAt(TimingPlan tp) {
+				return tp.getActive();
+			}
+			public boolean isEditable(TimingPlan tp) {
+				return canUpdate(tp);
+			}
+			public void setValueAt(TimingPlan tp, Object value) {
+				if(value instanceof Boolean)
+					tp.setActive((Boolean)value);
+			}
+		},
+		new ProxyColumn<TimingPlan>("Testing", 0, Boolean.class) {
+			public Object getValueAt(TimingPlan tp) {
+				return tp.getTesting();
+			}
+			public boolean isEditable(TimingPlan tp) {
+				return canUpdate(tp);
+			}
+			public void setValueAt(TimingPlan tp, Object value) {
+				if(value instanceof Boolean)
+					tp.setTesting((Boolean)value);
+			}
+		},
+		new ProxyColumn<TimingPlan>("Target", 0, Integer.class) {
+			public Object getValueAt(TimingPlan tp) {
+				return tp.getTarget();
+			}
+			public boolean isEditable(TimingPlan tp) {
+				return canUpdate(tp);
+			}
+			public void setValueAt(TimingPlan tp, Object value) {
+				if(value instanceof Integer)
+					tp.setTarget((Integer)value);
+			}
+		}
+	    };
 	}
 
 	/** Device in question */
@@ -167,94 +192,6 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the column class */
-	public Class getColumnClass(int column) {
-		if(column == COL_ACTIVE || column == COL_TESTING)
-			return Boolean.class;
-		else if(column == COL_TARGET)
-			return Integer.class;
-		else
-			return String.class;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		TimingPlan p = getProxy(row);
-		if(p == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return p.getName();
-		case COL_TYPE:
-			return TimingPlanType.fromOrdinal(p.getPlanType());
-		case COL_DEVICE:
-			Device d = p.getDevice();
-			if(d != null)
-				return d.getName();
-			else
-				return null;
-		case COL_START:
-			return timeString(p.getStartMin());
-		case COL_STOP:
-			return timeString(p.getStopMin());
-		case COL_ACTIVE:
-			return p.getActive();
-		case COL_TESTING:
-			return p.getTesting();
-		case COL_TARGET:
-			return p.getTarget();
-		default:
-			return null;
-		}
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		TimingPlan tp = getProxy(row);
-		if(tp != null) {
-			return (col != COL_NAME) &&
-			       (col != COL_TYPE) &&
-			       (col != COL_DEVICE) &&
-			       canUpdate(tp);
-		} else
-			return (col == COL_TYPE) && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		TimingPlan p = getProxy(row);
-		if(p == null && column == COL_TYPE) {
-			if(value instanceof String)
-				createPlan((String)value);
-			return;
-		}
-		switch(column) {
-		case COL_START:
-			p.setStartMin(parseMinute(value.toString()));
-			break;
-		case COL_STOP:
-			p.setStopMin(parseMinute(value.toString()));
-			break;
-		case COL_ACTIVE:
-			if(value instanceof Boolean)
-				p.setActive((Boolean)value);
-			break;
-		case COL_TESTING:
-			if(value instanceof Boolean)
-				p.setTesting((Boolean)value);
-			break;
-		case COL_TARGET:
-			if(value instanceof Integer)
-				p.setTarget((Integer)value);
-			break;
-		}
 	}
 
 	/** Create a new timing plan */
@@ -317,6 +254,7 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(TimingPlan.SONAR_TYPE));
+		return namespace.canAdd(user, new Name(TimingPlan.SONAR_TYPE,
+			"oname"));
 	}
 }

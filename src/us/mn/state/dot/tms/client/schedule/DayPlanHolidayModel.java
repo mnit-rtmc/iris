@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.util.TreeSet;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -29,14 +29,53 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class DayPlanHolidayModel extends ProxyTableModel<Holiday> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Holiday>("Holiday", 120) {
+			public Object getValueAt(Holiday h) {
+				return h.getName();
+			}
+		},
+		new ProxyColumn<Holiday>("Assigned", 80, Boolean.class) {
+			public Object getValueAt(Holiday h) {
+				return isAssigned(h);
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdateDayPlanHolidays();
+			}
+			public void setValueAt(Holiday h, Object value) {
+				if(value instanceof Boolean)
+					setAssigned(h, (Boolean)value);
+			}
+		},
+	    };
+	}
 
-	/** Name column number */
-	static protected final int COL_NAME = 0;
+	/** Check if the given holiday is assigned */
+	protected boolean isAssigned(Holiday hol) {
+		DayPlan dp = day_plan;	// Avoid NPE
+		if(dp != null) {
+			for(Holiday h: dp.getHolidays())
+				if(h == hol)
+					return true;
+		}
+		return false;
+	}
 
-	/** Assigned column number */
-	static protected final int COL_ASSIGNED = 1;
+	/** Assign or unassign the specified holiday */
+	protected void setAssigned(Holiday h, boolean a) {
+		DayPlan dp = day_plan;	// Avoid NPE
+		if(dp != null) {
+			Holiday[] holidays = dp.getHolidays();
+			if(a)
+				holidays = addHoliday(holidays, h);
+			else
+				holidays = removeHoliday(holidays, h);
+			dp.setHolidays(holidays);
+		}
+	}
 
 	/** Currently selected day plan */
 	protected DayPlan day_plan;
@@ -58,61 +97,9 @@ public class DayPlanHolidayModel extends ProxyTableModel<Holiday> {
 			fireTableDataChanged();
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
 	/** Get the count of rows in the table */
 	public int getRowCount() {
 		return super.getRowCount() - 1;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Holiday hol = getProxy(row);
-		if(hol == null)
-			return "";
-		if(column == COL_NAME)
-			return hol.getName();
-		DayPlan dp = day_plan;	// Avoid NPE
-		if(dp != null) {
-			for(Holiday h: dp.getHolidays())
-				if(h == hol)
-					return true;
-		}
-		return false;
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		if(column == COL_ASSIGNED)
-			return Boolean.class;
-		else
-			return String.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		Holiday hol = getProxy(row);
-		return (column == COL_ASSIGNED) && (day_plan != null) &&
-		       canUpdate(hol);
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		DayPlan dp = day_plan;	// Avoid NPE
-		if((column != COL_ASSIGNED) || (dp == null))
-			return;
-		Holiday hol = getProxy(row);
-		if(hol != null && value instanceof Boolean) {
-			Holiday[] holidays = dp.getHolidays();
-			if((Boolean)value)
-				holidays = addHoliday(holidays, hol);
-			else
-				holidays = removeHoliday(holidays, hol);
-			dp.setHolidays(holidays);
-		}
 	}
 
 	/** Add a holiday to an array */
@@ -133,11 +120,10 @@ public class DayPlanHolidayModel extends ProxyTableModel<Holiday> {
 		return h_set.toArray(new Holiday[0]);
 	}
 
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 120, "Holiday"));
-		m.addColumn(createColumn(COL_ASSIGNED, 80, "Assigned"));
-		return m;
+	/** Check if the user can update day plan holidays */
+	protected boolean canUpdateDayPlanHolidays() {
+		DayPlan dp = day_plan;	// Avoid NPE
+		return (dp != null) && namespace.canUpdate(user, new Name(dp,
+			"holidays"));
 	}
 }

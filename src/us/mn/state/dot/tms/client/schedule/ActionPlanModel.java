@@ -16,13 +16,12 @@ package us.mn.state.dot.tms.client.schedule;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -32,51 +31,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 7;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Description column number */
-	static protected final int COL_DESCRIPTION = 1;
-
-	/** Sync actions column number */
-	static protected final int COL_SYNC_ACTIONS = 2;
-
-	/** Deploying secs column number */
-	static protected final int COL_DEP_SECS = 3;
-
-	/** Undeploying secs column number */
-	static protected final int COL_UNDEP_SECS = 4;
-
-	/** Active column number */
-	static protected final int COL_ACTIVE = 5;
-
-	/** State column number */
-	static protected final int COL_STATE = 6;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 100, "Plan Name"));
-		m.addColumn(createColumn(COL_DESCRIPTION, 380, "Description"));
-		m.addColumn(createColumn(COL_SYNC_ACTIONS, 80, "Sync Actions"));
-		m.addColumn(createColumn(COL_DEP_SECS, 80, "Dep.Secs"));
-		m.addColumn(createColumn(COL_UNDEP_SECS, 80, "Undep.Secs"));
-		m.addColumn(createColumn(COL_ACTIVE, 80, "Active"));
-		m.addColumn(createStateColumn());
-		return m;
-	}
-
-	/** Create the state column */
-	static protected TableColumn createStateColumn() {
-		TableColumn c = createColumn(COL_STATE, 80, "State");
-		JComboBox combo = new JComboBox(STATES);
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
 	/** Allowed states */
 	static protected final ActionPlanState[] STATES = {
 		ActionPlanState.undeployed,
@@ -85,99 +39,110 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		ActionPlanState.undeploying
 	};
 
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<ActionPlan>("Plan Name", 100) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getName();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return ap == null && canAdd();
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<ActionPlan>("Description", 380) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getDescription();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				String v = value.toString().trim();
+				ap.setDescription(v);
+			}
+		},
+		new ProxyColumn<ActionPlan>("Sync Actions", 80, Boolean.class) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getSyncActions();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof Boolean)
+					ap.setSyncActions((Boolean)value);
+			}
+		},
+		new ProxyColumn<ActionPlan>("Dep.Secs", 80, Integer.class) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getDeployingSecs();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof Integer)
+					ap.setDeployingSecs((Integer)value);
+			}
+		},
+		new ProxyColumn<ActionPlan>("Undep.Secs", 80, Integer.class) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getUndeployingSecs();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof Integer)
+					ap.setUndeployingSecs((Integer)value);
+			}
+		},
+		new ProxyColumn<ActionPlan>("Active", 80, Boolean.class) {
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getActive();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof Boolean)
+					ap.setActive((Boolean)value);
+			}
+		},
+		new ProxyColumn<ActionPlan>("State", 80) {
+			public Object getValueAt(ActionPlan ap) {
+				return ActionPlanState.fromOrdinal(
+					ap.getState());
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canUpdate(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				if(value instanceof ActionPlanState) {
+					ActionPlanState st =
+						(ActionPlanState)value;
+					ap.setDeployed(
+						ActionPlanState.isDeployed(st));
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(STATES);
+				return new DefaultCellEditor(combo);
+			}
+		}
+	    };
+	}
+
 	/** Create a new action plan table model */
 	public ActionPlanModel(Session s) {
 		super(s, s.getSonarState().getActionPlans());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the class of the specified column */
-	public Class getColumnClass(int column) {
-		switch(column) {
-		case COL_SYNC_ACTIONS:
-		case COL_ACTIVE:
-			return Boolean.class;
-		case COL_DEP_SECS:
-		case COL_UNDEP_SECS:
-			return Integer.class;
-		default:
-			return String.class;
-		}
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		ActionPlan plan = getProxy(row);
-		if(plan == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return plan.getName();
-		case COL_DESCRIPTION:
-			return plan.getDescription();
-		case COL_SYNC_ACTIONS:
-			return plan.getSyncActions();
-		case COL_DEP_SECS:
-			return plan.getDeployingSecs();
-		case COL_UNDEP_SECS:
-			return plan.getUndeployingSecs();
-		case COL_ACTIVE:
-			return plan.getActive();
-		case COL_STATE:
-			return ActionPlanState.fromOrdinal(plan.getState());
-		}
-		return null;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		ActionPlan plan = getProxy(row);
-		if(plan != null)
-			return column != COL_NAME && canUpdate(plan);
-		else
-			return column == COL_NAME && canAdd();
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		ActionPlan plan = getProxy(row);
-		String v = value.toString().trim();
-		switch(column) {
-		case COL_NAME:
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_DESCRIPTION:
-			plan.setDescription(v);
-			break;
-		case COL_SYNC_ACTIONS:
-			if(value instanceof Boolean)
-				plan.setSyncActions((Boolean)value);
-			break;
-		case COL_DEP_SECS:
-			if(value instanceof Integer)
-				plan.setDeployingSecs((Integer)value);
-			break;
-		case COL_UNDEP_SECS:
-			if(value instanceof Integer)
-				plan.setUndeployingSecs((Integer)value);
-			break;
-		case COL_ACTIVE:
-			if(value instanceof Boolean)
-				plan.setActive((Boolean)value);
-			break;
-		case COL_STATE:
-			if(value instanceof ActionPlanState) {
-				ActionPlanState st = (ActionPlanState)value;
-				plan.setDeployed(
-					ActionPlanState.isDeployed(st));
-			}
-			break;
-		}
 	}
 
 	/** Check if the user can add a plan */

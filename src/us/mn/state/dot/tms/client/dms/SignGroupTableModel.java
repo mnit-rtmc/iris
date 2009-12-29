@@ -15,19 +15,15 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -37,31 +33,41 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
-	/** Create a SONAR sign group name to check for allowed updates */
-	static public Name createSignGroupName(String oname) {
-		return new Name(SignGroup.SONAR_TYPE, oname);
-	}
-
-	/** Create a SONAR DMS sign group name to check for allowed updates */
-	static public Name createDmsSignGroupName(String oname) {
-		return new Name(DmsSignGroup.SONAR_TYPE, oname);
-	}
-
-	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 2;
-
-	/** Sign group name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Member column number */
-	static protected final int COL_MEMBER = 1;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createColumn(COL_NAME, 200, "Sign Group"));
-		m.addColumn(createColumn(COL_MEMBER, 50, "Member"));
-		return m;
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<SignGroup>("Sign Group", 200) {
+			public Object getValueAt(SignGroup sg) {
+				return sg.getName();
+			}
+			public boolean isEditable(SignGroup sg) {
+				return (sg == null) && canAdd();
+			}
+			public void setValueAt(SignGroup sg, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					createSignGroup(v);
+			}
+		},
+		new ProxyColumn<SignGroup>("Member", 50, Boolean.class) {
+			public Object getValueAt(SignGroup sg) {
+				return isSignGroupMember(sg);
+			}
+			public boolean isEditable(SignGroup sg) {
+				return canEditDmsSignGroup(sg);
+			}
+			public void setValueAt(SignGroup sg, Object value) {
+				if(value instanceof Boolean) {
+					Boolean b = (Boolean)value;
+					if(b.booleanValue())
+						createDmsSignGroup(sg);
+					else
+						destroyDmsSignGroup(sg);
+				}
+			}
+		}
+	    };
 	}
 
 	/** Lookup a DMS sign group */
@@ -101,12 +107,6 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	/** DMS sign group type cache */
 	protected final TypeCache<DmsSignGroup> dms_sign_groups;
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
-
-	/** SONAR user */
-	protected final User user;
-
 	/** Listener for DMS sign group proxies */
 	protected final ProxyListener<DmsSignGroup> listener;
 
@@ -120,8 +120,6 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 		dms = proxy;
 		dms_sign_groups =
 			s.getSonarState().getDmsCache().getDmsSignGroups();
-		namespace = s.getSonarState().getNamespace();
-		user = s.getUser();
 		final SignGroupTableModel model = this;
 		listener = new ProxyListener<DmsSignGroup>() {
 			public void proxyAdded(DmsSignGroup proxy) {
@@ -147,89 +145,27 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 		super.dispose();
 	}
 
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		SignGroup g = getProxy(row);
-		if(g != null)
-			return getValue(g, column);
-		else
-			return null;
-	}
-
-	/** Get the value of a sign group column */
-	protected Object getValue(SignGroup g, int column) {
-		switch(column) {
-		case COL_NAME:
-			return g.getName();
-		case COL_MEMBER:
-			return isSignGroupMember(g);
-		}
-		return null;
-	}
-
-	/** Get the column class */
-	public Class getColumnClass(int column) {
-		if(column == COL_NAME)
-			return String.class;
-		else
-			return Boolean.class;
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		SignGroup g = getProxy(row);
-		if(column == COL_MEMBER)
-			return canEditDmsSignGroup(g);
-		else
-			return (g == null) && canAddSignGroup("arbitrary_name");
-	}
-
 	/** Check if the user is allowed to add / destroy a DMS sign group */
 	protected boolean canEditDmsSignGroup(SignGroup g) {
-		return g != null && canAddAndRemove(createDmsSignGroupName(
-			createDmsSignGroupName(g)));
+		return g != null && canAddAndRemove(createDmsSignGroupName(g));
 	}
 
 	/** Create a DMS sign group name */
-	protected String createDmsSignGroupName(SignGroup g) {
-		return g.getName() + "_" + dms.getName();
+	protected String createDmsSignGroupName(SignGroup sg) {
+		return sg.getName() + "_" + dms.getName();
 	}
 
 	/** Check if the user can add and remove the specified name */
-	protected boolean canAddAndRemove(Name name) {
+	protected boolean canAddAndRemove(String oname) {
+		Name name = new Name(DmsSignGroup.SONAR_TYPE, oname);
 		return namespace.canAdd(user, name) &&
 		       namespace.canRemove(user, name);
 	}
 
 	/** Check if the user is allowed to add a sign group */
-	protected boolean canAddSignGroup(String name) {
-		return namespace.canAdd(user, createSignGroupName(name));
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		SignGroup g = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				createSignGroup(v);
-			break;
-		case COL_MEMBER:
-			if(g != null) {
-				Boolean b = (Boolean)value;
-				if(b.booleanValue())
-					createDmsSignGroup(g);
-				else
-					destroyDmsSignGroup(g);
-			}
-			break;
-		}
+	public boolean canAdd() {
+		return namespace.canAdd(user, new Name(SignGroup.SONAR_TYPE,
+			"oname"));
 	}
 
 	/** Create a new sign group */
@@ -242,11 +178,11 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Create a new DMS sign group */
 	protected void createDmsSignGroup(SignGroup g) {
-		String name = createDmsSignGroupName(g);
+		String oname = createDmsSignGroupName(g);
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("dms", dms);
 		attrs.put("sign_group", g);
-		dms_sign_groups.createObject(name, attrs);
+		dms_sign_groups.createObject(oname, attrs);
 	}
 
 	/** Destroy a DMS sign group */

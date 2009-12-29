@@ -38,11 +38,10 @@ public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
 	protected ZTable createTable() {
 		return new ZTable() {
 			public String getToolTipText(int row, int column) {
-				Object value = model.getValueAt(row,
-					SystemAttributeTableModel.COL_NAME);
-				if(value instanceof String) {
+				SystemAttribute sa = model.getProxy(row);
+				if(sa != null) {
 					return SystemAttrEnum.getDesc(
-						(String)value);
+						sa.getName());
 				} else
 					return null;
 			}

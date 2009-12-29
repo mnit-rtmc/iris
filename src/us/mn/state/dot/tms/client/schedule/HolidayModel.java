@@ -21,12 +21,11 @@ import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableColumnModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -35,59 +34,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class HolidayModel extends ProxyTableModel<Holiday> {
-
-	/** Count of columns in holiday table model */
-	static protected final int COLUMN_COUNT = 7;
-
-	/** Name column number */
-	static protected final int COL_NAME = 0;
-
-	/** Month column number */
-	static protected final int COL_MONTH = 1;
-
-	/** Day column number */
-	static protected final int COL_DAY = 2;
-
-	/** Week column number */
-	static protected final int COL_WEEK = 3;
-
-	/** Weekday column number */
-	static protected final int COL_WEEKDAY = 4;
-
-	/** Shift column number */
-	static protected final int COL_SHIFT = 5;
-
-	/** Period column number */
-	static protected final int COL_PERIOD = 6;
-
-	/** Create the table column model */
-	public TableColumnModel createColumnModel() {
-		TableColumnModel m = new DefaultTableColumnModel();
-		m.addColumn(createNameColumn());
-		m.addColumn(createMonthColumn());
-		m.addColumn(createDayColumn());
-		m.addColumn(createWeekColumn());
-		m.addColumn(createWeekdayColumn());
-		m.addColumn(createShiftColumn());
-		m.addColumn(createPeriodColumn());
-		return m;
-	}
-
-	/** Create the holiday name column */
-	static protected TableColumn createNameColumn() {
-		TableColumn c = new TableColumn(COL_NAME, 200);
-		c.setHeaderValue("Holiday Name");
-		return c;
-	}
-
-	/** Create the month column */
-	static protected TableColumn createMonthColumn() {
-		TableColumn c = new TableColumn(COL_MONTH, 100);
-		c.setHeaderValue("Month");
-		JComboBox combo = new JComboBox(MONTHS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
 
 	/** Date format symbols */
 	static protected final DateFormatSymbols SYMBOLS =
@@ -106,15 +52,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 			MONTHS.add(months[m]);
 	}
 
-	/** Create the day column */
-	static protected TableColumn createDayColumn() {
-		TableColumn c = new TableColumn(COL_DAY, 64);
-		c.setHeaderValue("Day");
-		JComboBox combo = new JComboBox(DAYS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
 	/** List of all possible day selections */
 	static protected final LinkedList<String> DAYS =
 		new LinkedList<String>();
@@ -122,15 +59,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		DAYS.add(ANY);
 		for(int d = 1; d <= 31; d++)
 			DAYS.add(String.valueOf(d));
-	}
-
-	/** Create the week column */
-	static protected TableColumn createWeekColumn() {
-		TableColumn c = new TableColumn(COL_WEEK, 80);
-		c.setHeaderValue("Week");
-		JComboBox combo = new JComboBox(WEEKS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
 	}
 
 	/** List of all possible week selections */
@@ -145,15 +73,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		WEEKS.add("Fourth");
 	}
 
-	/** Create the weekday column */
-	static protected TableColumn createWeekdayColumn() {
-		TableColumn c = new TableColumn(COL_WEEKDAY, 100);
-		c.setHeaderValue("Weekday");
-		JComboBox combo = new JComboBox(WEEKDAYS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
 	/** List of all possible weekday selections */
 	static protected final LinkedList<String> WEEKDAYS =
 		new LinkedList<String>();
@@ -162,15 +81,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		WEEKDAYS.add(ANY);
 		for(int d = Calendar.SUNDAY; d <= Calendar.SATURDAY; d++)
 			WEEKDAYS.add(weekdays[d]);
-	}
-
-	/** Create the shift column */
-	static protected TableColumn createShiftColumn() {
-		TableColumn c = new TableColumn(COL_SHIFT, 64);
-		c.setHeaderValue("Shift");
-		JComboBox combo = new JComboBox(SHIFTS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
 	}
 
 	/** List of all possible shift selections */
@@ -184,15 +94,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		SHIFTS.add("+2");
 	}
 
-	/** Create the period column */
-	static protected TableColumn createPeriodColumn() {
-		TableColumn c = new TableColumn(COL_PERIOD, 64);
-		c.setHeaderValue("Period");
-		JComboBox combo = new JComboBox(PERIODS.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
-		return c;
-	}
-
 	/** List of all possible period selections */
 	static protected final LinkedList<String> PERIODS =
 		new LinkedList<String>();
@@ -202,39 +103,124 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		PERIODS.add("PM");
 	}
 
+	/** Create the columns in the model */
+	protected ProxyColumn[] createColumns() {
+	    // NOTE: half-indent to declare array
+	    return new ProxyColumn[] {
+		new ProxyColumn<Holiday>("Holiday Name", 200) {
+			public Object getValueAt(Holiday h) {
+				return h.getName();
+			}
+			public boolean isEditable(Holiday h) {
+				return h == null && canAdd();
+			}
+			public void setValueAt(Holiday h, Object value) {
+				String v = value.toString().trim();
+				if(v.length() > 0)
+					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<Holiday>("Month", 100) {
+			public Object getValueAt(Holiday h) {
+				return MONTHS.get(h.getMonth() + 1);
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdate(h);
+			}
+			public void setValueAt(Holiday h, Object value) {
+				h.setMonth(MONTHS.indexOf(value) - 1);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					MONTHS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Holiday>("Day", 64) {
+			public Object getValueAt(Holiday h) {
+				return DAYS.get(h.getDay());
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdate(h) && isWeekShiftBlank(h);
+			}
+			public void setValueAt(Holiday h, Object value) {
+				h.setDay(DAYS.indexOf(value));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(DAYS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Holiday>("Week", 80) {
+			public Object getValueAt(Holiday h) {
+				return WEEKS.get(h.getWeek() + 1);
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdate(h) && isDayBlank(h);
+			}
+			public void setValueAt(Holiday h, Object value) {
+				h.setWeek(WEEKS.indexOf(value) - 1);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					WEEKS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Holiday>("Weekday", 100) {
+			public Object getValueAt(Holiday h) {
+				return WEEKDAYS.get(h.getWeekday());
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdate(h);
+			}
+			public void setValueAt(Holiday h, Object value) {
+				h.setWeekday(WEEKDAYS.indexOf(value));
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					WEEKDAYS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Holiday>("Shift", 64) {
+			public Object getValueAt(Holiday h) {
+				return SHIFTS.get(h.getShift() + 2);
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdate(h) && isDayBlank(h);
+			}
+			public void setValueAt(Holiday h, Object value) {
+				h.setShift(SHIFTS.indexOf(value) - 2);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					SHIFTS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+		new ProxyColumn<Holiday>("Period", 64) {
+			public Object getValueAt(Holiday h) {
+				return PERIODS.get(h.getPeriod() + 1);
+			}
+			public boolean isEditable(Holiday h) {
+				return canUpdate(h);
+			}
+			public void setValueAt(Holiday h, Object value) {
+				h.setPeriod(PERIODS.indexOf(value) - 1);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox combo = new JComboBox(
+					PERIODS.toArray());
+				return new DefaultCellEditor(combo);
+			}
+		},
+	    };
+	}
+
 	/** Create a new holiday table model */
 	public HolidayModel(Session s) {
 		super(s, s.getSonarState().getHolidays());
-	}
-
-	/** Get the count of columns in the table */
-	public int getColumnCount() {
-		return COLUMN_COUNT;
-	}
-
-	/** Get the value at the specified cell */
-	public Object getValueAt(int row, int column) {
-		Holiday h = getProxy(row);
-		if(h == null)
-			return null;
-		switch(column) {
-		case COL_NAME:
-			return h.getName();
-		case COL_MONTH:
-			return MONTHS.get(h.getMonth() + 1);
-		case COL_DAY:
-			return DAYS.get(h.getDay());
-		case COL_WEEK:
-			return WEEKS.get(h.getWeek() + 1);
-		case COL_WEEKDAY:
-			return WEEKDAYS.get(h.getWeekday());
-		case COL_SHIFT:
-			return SHIFTS.get(h.getShift() + 2);
-		case COL_PERIOD:
-			return PERIODS.get(h.getPeriod() + 1);
-		default:
-			return null;
-		}
 	}
 
 	/** Check if the day is blank for the specified holiday */
@@ -245,57 +231,6 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	/** Check if the week/shift is blank for the specified holiday */
 	protected boolean isWeekShiftBlank(Holiday h) {
 		return (h.getWeek() == 0) && (h.getShift() == 0);
-	}
-
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int column) {
-		Holiday h = getProxy(row);
-		if(h == null)
-			return canAdd() && column == COL_NAME;
-		if(!canUpdate(h))
-			return false;
-		switch(column) {
-		case COL_NAME:
-			return false;
-		case COL_DAY:
-			return isWeekShiftBlank(h);
-		case COL_WEEK:
-			return isDayBlank(h);
-		case COL_SHIFT:
-			return isDayBlank(h);
-		default:
-			return true;
-		}
-	}
-
-	/** Set the value at the specified cell */
-	public void setValueAt(Object value, int row, int column) {
-		Holiday h = getProxy(row);
-		switch(column) {
-		case COL_NAME:
-			String v = value.toString().trim();
-			if(v.length() > 0)
-				cache.createObject(v);
-			break;
-		case COL_MONTH:
-			h.setMonth(MONTHS.indexOf(value) - 1);
-			break;
-		case COL_DAY:
-			h.setDay(DAYS.indexOf(value));
-			break;
-		case COL_WEEK:
-			h.setWeek(WEEKS.indexOf(value) - 1);
-			break;
-		case COL_WEEKDAY:
-			h.setWeekday(WEEKDAYS.indexOf(value));
-			break;
-		case COL_SHIFT:
-			h.setShift(SHIFTS.indexOf(value) - 2);
-			break;
-		case COL_PERIOD:
-			h.setPeriod(PERIODS.indexOf(value) - 1);
-			break;
-		}
 	}
 
 	/** Check if the user can add a holiday */
