@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.roads;
+package us.mn.state.dot.tms.client.system;
 
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.Session;

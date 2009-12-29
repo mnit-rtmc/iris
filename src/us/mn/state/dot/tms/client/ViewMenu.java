@@ -21,7 +21,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
-import us.mn.state.dot.tms.client.roads.MapExtentForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
@@ -86,14 +85,6 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new RoadForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Map extents");
-		item.setMnemonic('e');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new MapExtentForm(session));
 			}
 		};
 		add(item);

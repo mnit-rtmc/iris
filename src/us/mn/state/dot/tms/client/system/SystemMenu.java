@@ -52,5 +52,13 @@ public class SystemMenu extends JMenu {
 			}
 		};
 		add(item);
+		item = new JMenuItem("Map extents");
+		item.setMnemonic('e');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new MapExtentForm(session));
+			}
+		};
+		add(item);
 	}
 }
