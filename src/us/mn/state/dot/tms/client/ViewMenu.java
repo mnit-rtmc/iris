@@ -24,8 +24,6 @@ import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.MapExtentForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
-import us.mn.state.dot.tms.client.system.SystemAttributeForm;
-import us.mn.state.dot.tms.client.system.UserRoleForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
@@ -59,23 +57,7 @@ public class ViewMenu extends JMenu {
 		state = session.getSonarState();
 		user = session.getUser();
 		setMnemonic('V');
-		JMenuItem item = new JMenuItem("Users/Roles");
-		item.setMnemonic('U');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new UserRoleForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("System Attributes");
-		item.setMnemonic('S');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new SystemAttributeForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Cabinet Styles");
+		JMenuItem item = new JMenuItem("Cabinet Styles");
 		item.setMnemonic('s');
 		new ActionJob(item) {
 			public void perform() throws Exception {

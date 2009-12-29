@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
+import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
@@ -57,6 +58,7 @@ import us.mn.state.dot.tms.client.roads.FreewayTheme;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
+import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.system.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -254,6 +256,8 @@ public class Session {
 		//       been enumerated.
 		inc_manager.waitForEnumeration();
 		initializeManagers();
+		if(canUpdate(SystemAttribute.SONAR_TYPE, "value"))
+			v_menu.add(new SystemMenu(this));
 		addTabs();
 	}
 
