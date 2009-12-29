@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
-import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -42,8 +41,7 @@ public class SignMenu extends JMenu {
 		final SmartDesktop desktop = s.getDesktop();
 
 		String dms_name = I18N.get("dms.abbreviation");
-		JMenuItem item = new JMenuItem(dms_name,
-			Icons.getIcon("drum-inactive"));
+		JMenuItem item = new JMenuItem(dms_name);
 		if(dms_name.length() > 0)
 			item.setMnemonic(dms_name.charAt(0));
 		new ActionJob(item) {

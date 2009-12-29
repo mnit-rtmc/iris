@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.client.system.SystemAttributeForm;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
-import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignForm;
 
@@ -100,7 +99,7 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Roadways", Icons.getIcon("roadway"));
+		item = new JMenuItem("Roadways");
 		item.setMnemonic('R');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -116,7 +115,7 @@ public class ViewMenu extends JMenu {
 			}
 		};
 		add(item);
-		item = new JMenuItem("Detectors", Icons.getIcon("detector"));
+		item = new JMenuItem("Detectors");
 		item.setMnemonic('t');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -151,8 +150,7 @@ public class ViewMenu extends JMenu {
 
 	/** Add the ramp meter menu item */
 	public void addMeterItem() {
-		JMenuItem item = new JMenuItem("Ramp Meters", Icons.getIcon(
-			"meter-inactive"));
+		JMenuItem item = new JMenuItem("Ramp Meters");
 		item.setMnemonic('M');
 		new ActionJob(item) {
 			public void perform() throws Exception {

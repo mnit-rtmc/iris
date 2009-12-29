@@ -19,7 +19,6 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -34,8 +33,7 @@ public class LaneUseMenu extends JMenu {
 		super("Lane Use");
 		final SmartDesktop desktop = s.getDesktop();
 
-		JMenuItem item = new JMenuItem("LCS", Icons.getIcon(
-			"lanecontrol-inactive"));
+		JMenuItem item = new JMenuItem("LCS");
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
