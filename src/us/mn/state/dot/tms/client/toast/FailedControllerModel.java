@@ -106,8 +106,6 @@ public class FailedControllerModel extends ProxyTableModel<Controller> {
 
 	/** Get the count of rows in the table */
 	public int getRowCount() {
-		synchronized(proxies) {
-			return proxies.size();
-		}
+		return super.getRowCount() - 1;
 	}
 }

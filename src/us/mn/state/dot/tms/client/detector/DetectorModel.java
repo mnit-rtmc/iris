@@ -20,7 +20,6 @@ import java.util.TreeSet;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -179,9 +178,8 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 		);
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Detector.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Detector.SONAR_TYPE;
 	}
 }

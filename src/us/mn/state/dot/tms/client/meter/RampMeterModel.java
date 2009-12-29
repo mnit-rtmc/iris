@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -72,9 +71,8 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 		return new RampMeterProperties(session, proxy);
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(RampMeter.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return RampMeter.SONAR_TYPE;
 	}
 }

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.marking;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -60,10 +59,9 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 		super(s, s.getSonarState().getLaneMarkings());
 	}
 
-	/** Check if the user can add a lane marking */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(LaneMarking.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return LaneMarking.SONAR_TYPE;
 	}
 
 	/** Determine if a properties form is available */

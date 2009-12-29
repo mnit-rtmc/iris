@@ -27,7 +27,6 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -219,9 +218,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		}
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Controller.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Controller.SONAR_TYPE;
 	}
 }

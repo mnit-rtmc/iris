@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -100,9 +99,8 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 		super(s, s.getSonarState().getMapExtents());
 	}
 
-	/** Check if the user can add a map extent */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(MapExtent.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return MapExtent.SONAR_TYPE;
 	}
 }

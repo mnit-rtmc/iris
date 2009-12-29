@@ -28,7 +28,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
@@ -178,9 +177,8 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		}
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(CommLink.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return CommLink.SONAR_TYPE;
 	}
 }

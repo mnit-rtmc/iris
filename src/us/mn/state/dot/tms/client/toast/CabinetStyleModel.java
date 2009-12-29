@@ -20,7 +20,6 @@ import javax.swing.JSpinner;
 import javax.swing.JTable;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -95,9 +94,8 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		}
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user,
-			new Name(CabinetStyle.SONAR_TYPE, "oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return CabinetStyle.SONAR_TYPE;
 	}
 }

@@ -18,7 +18,6 @@ import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
@@ -129,9 +128,8 @@ public class RoadModel extends ProxyTableModel<Road> {
 		super(s, s.getSonarState().getRoads());
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Road.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Road.SONAR_TYPE;
 	}
 }

@@ -18,7 +18,6 @@ import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.DmsAction;
@@ -192,9 +191,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		return null;
 	}
 
-	/** Check if the user can add */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(DmsAction.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return DmsAction.SONAR_TYPE;
 	}
 }

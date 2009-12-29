@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -82,9 +81,8 @@ public class CameraModel extends ProxyTableModel<Camera> {
 		return new CameraProperties(session, proxy);
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Camera.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Camera.SONAR_TYPE;
 	}
 }

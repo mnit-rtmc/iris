@@ -25,7 +25,6 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.ListModel;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TimeAction;
@@ -202,9 +201,8 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 		return null;
 	}
 
-	/** Check if the user can add */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(TimeAction.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return TimeAction.SONAR_TYPE;
 	}
 }

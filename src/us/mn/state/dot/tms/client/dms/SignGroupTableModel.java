@@ -162,10 +162,9 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 		       namespace.canRemove(user, name);
 	}
 
-	/** Check if the user is allowed to add a sign group */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(SignGroup.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return SignGroup.SONAR_TYPE;
 	}
 
 	/** Create a new sign group */

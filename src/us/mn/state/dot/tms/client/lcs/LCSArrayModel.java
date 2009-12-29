@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -71,9 +70,8 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 		return new LCSArrayProperties(session, proxy);
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(LCSArray.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return LCSArray.SONAR_TYPE;
 	}
 }

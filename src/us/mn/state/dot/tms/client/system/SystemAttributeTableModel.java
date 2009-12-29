@@ -22,7 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
@@ -143,9 +142,8 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		return sae == null || sae.equalsDefault();
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user,
-		       new Name(SystemAttribute.SONAR_TYPE, "oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return SystemAttribute.SONAR_TYPE;
 	}
 }

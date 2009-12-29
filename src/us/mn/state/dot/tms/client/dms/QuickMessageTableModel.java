@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.client.Session;
@@ -68,9 +67,8 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 		super(s, s.getSonarState().getDmsCache().getQuickMessages());
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user,
-			new Name(QuickMessage.SONAR_TYPE, "oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return QuickMessage.SONAR_TYPE;
 	}
 }

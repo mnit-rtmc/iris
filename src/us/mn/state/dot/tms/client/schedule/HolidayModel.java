@@ -22,7 +22,6 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -233,9 +232,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		return (h.getWeek() == 0) && (h.getShift() == 0);
 	}
 
-	/** Check if the user can add a holiday */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Holiday.SONAR_TYPE,
-		       "oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Holiday.SONAR_TYPE;
 	}
 }

@@ -25,7 +25,6 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.RampMeter;
@@ -252,9 +251,8 @@ public class TimingPlanModel extends ProxyTableModel<TimingPlan> {
 		return names;
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(TimingPlan.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return TimingPlan.SONAR_TYPE;
 	}
 }

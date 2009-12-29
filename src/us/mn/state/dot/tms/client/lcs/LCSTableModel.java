@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
@@ -82,8 +81,8 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 			return -1;
 	}
 
-	/** Check if the user can add an LCS */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(LCS.SONAR_TYPE,"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return LCS.SONAR_TYPE;
 	}
 }

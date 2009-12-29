@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.security;
 
 import java.util.HashMap;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
@@ -139,9 +138,8 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 		return null;
 	}
 
-	/** Check if the user can add a privilege */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Privilege.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Privilege.SONAR_TYPE;
 	}
 }

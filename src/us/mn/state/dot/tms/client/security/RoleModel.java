@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.security;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -64,9 +63,8 @@ public class RoleModel extends ProxyTableModel<Role> {
 		super(s, s.getSonarState().getRoles());
 	}
 
-	/** Check if the user can add a role */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Role.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Role.SONAR_TYPE;
 	}
 }

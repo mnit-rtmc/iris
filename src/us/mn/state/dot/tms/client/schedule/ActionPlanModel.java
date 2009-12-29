@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.schedule;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ActionPlanState;
 import us.mn.state.dot.tms.client.Session;
@@ -145,9 +144,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		super(s, s.getSonarState().getActionPlans());
 	}
 
-	/** Check if the user can add a plan */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(ActionPlan.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return ActionPlan.SONAR_TYPE;
 	}
 }

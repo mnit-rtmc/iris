@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.security;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -85,10 +84,9 @@ public class UserModel extends ProxyTableModel<User> {
 			rmodel.updateUserRoles(proxy);
 	}
 
-	/** Check if the user can add a user */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(User.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return User.SONAR_TYPE;
 	}
 
 	/** Check if the user can remove a user */

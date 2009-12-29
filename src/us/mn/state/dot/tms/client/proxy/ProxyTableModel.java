@@ -326,7 +326,22 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		return false;
+		return canAdd("oname");
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canAdd(String n) {
+		String tname = getSonarType();
+		if(tname != null)
+			return namespace.canAdd(user, new Name(tname, n));
+		else
+			return false;
+	}
+
+	/** Get the SONAR type name.  Subclasses must override this to allow
+	 * canAdd permission checking to work correctly. */
+	protected String getSonarType() {
+		return null;
 	}
 
 	/** Check if the user can update a proxy */

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -124,9 +123,8 @@ public class FontModel extends ProxyTableModel<Font> {
 		super(s, s.getSonarState().getDmsCache().getFonts());
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(Font.SONAR_TYPE,
-			"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return Font.SONAR_TYPE;
 	}
 }

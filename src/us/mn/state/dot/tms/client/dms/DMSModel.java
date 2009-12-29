@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -74,8 +73,8 @@ public class DMSModel extends ProxyTableModel<DMS> {
 		return new DMSProperties(session, proxy);
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return namespace.canAdd(user, new Name(DMS.SONAR_TYPE,"oname"));
+	/** Get the SONAR type name */
+	protected String getSonarType() {
+		return DMS.SONAR_TYPE;
 	}
 }
