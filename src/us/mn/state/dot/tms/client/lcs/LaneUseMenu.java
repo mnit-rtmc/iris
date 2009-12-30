@@ -18,6 +18,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -45,6 +46,9 @@ public class LaneUseMenu extends JMenu {
 		if(item != null)
 			add(item);
 		item = createLaneUseMultiItem();
+		if(item != null)
+			add(item);
+		item = createLaneMarkingItem();
 		if(item != null)
 			add(item);
 	}
@@ -84,6 +88,19 @@ public class LaneUseMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new LaneUseMultiForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the lane marking menu item */
+	protected JMenuItem createLaneMarkingItem() {
+		if(!LaneMarkingForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Lane Markings");
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new LaneMarkingForm(session));
 			}
 		};
 		return item;
