@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class WarningSignForm extends ProxyTableForm<WarningSign> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(WarningSign.SONAR_TYPE);
+	}
+
 	/** Create a new warning sign form */
 	public WarningSignForm(Session s) {
 		super("Warning Signs", new WarningSignModel(s));

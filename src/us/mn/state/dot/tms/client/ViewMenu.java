@@ -30,7 +30,6 @@ import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
-import us.mn.state.dot.tms.client.warning.WarningSignForm;
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
@@ -108,14 +107,6 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new ScheduleForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Warning Signs");
-		item.setMnemonic('W');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new WarningSignForm(session));
 			}
 		};
 		add(item);

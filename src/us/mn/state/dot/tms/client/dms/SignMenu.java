@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
+import us.mn.state.dot.tms.client.warning.WarningSignForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -48,6 +49,9 @@ public class SignMenu extends JMenu {
 		if(item != null)
 			add(item);
 		item = createQuickMessageItem();
+		if(item != null)
+			add(item);
+		item = createWarningSignItem();
 		if(item != null)
 			add(item);
 	}
@@ -99,6 +103,20 @@ public class SignMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new QuickMessageForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the warning sign menu item */
+	protected JMenuItem createWarningSignItem() {
+		if(!WarningSignForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Warning Signs");
+		item.setMnemonic('W');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new WarningSignForm(session));
 			}
 		};
 		return item;
