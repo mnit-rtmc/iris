@@ -27,13 +27,6 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class SystemMenu extends JMenu {
 
-	/** Check if the user is permitted to use the menu */
-	static public boolean isPermitted(Session s) {
-		return SystemAttributeForm.isPermitted(s) ||
-		       UserRoleForm.isPermitted(s) ||
-		       MapExtentForm.isPermitted(s);
-	}
-
 	/** User Session */
 	protected final Session session;
 

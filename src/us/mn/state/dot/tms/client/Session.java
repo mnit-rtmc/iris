@@ -256,8 +256,9 @@ public class Session {
 		//       been enumerated.
 		inc_manager.waitForEnumeration();
 		initializeManagers();
-		if(SystemMenu.isPermitted(this))
-			v_menu.add(new SystemMenu(this));
+		SystemMenu s_menu = new SystemMenu(this);
+		if(s_menu.getItemCount() > 0)
+			v_menu.add(s_menu);
 		addTabs();
 	}
 
