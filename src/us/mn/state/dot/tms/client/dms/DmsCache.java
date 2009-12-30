@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -24,6 +23,7 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * Cache for DMS proxy objects.
@@ -97,7 +97,7 @@ public class DmsCache {
 	}
 
 	/** Create a new DMS cache */
-	public DmsCache(Client client) throws IllegalAccessException,
+	public DmsCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
 	{
 		fonts = new TypeCache<Font>(Font.class, client);
@@ -114,16 +114,25 @@ public class DmsCache {
 	}
 
 	/** Populate the type caches */
-	public void populate(Client client) {
-		client.populate(fonts);
-		client.populate(glyphs);
-		client.populate(sign_messages);
-		client.populate(quick_messages);
-		client.populate(dmss);
-		dmss.ignoreAttribute("operation");
-		dmss.ignoreAttribute("opStatus");
-		client.populate(sign_groups);
-		client.populate(dms_sign_groups);
-		client.populate(sign_text);
+	public void populate(SonarState client) {
+		if(client.canRead(Font.SONAR_TYPE))
+			client.populate(fonts);
+		if(client.canRead(Glyph.SONAR_TYPE))
+			client.populate(glyphs);
+		if(client.canRead(SignMessage.SONAR_TYPE))
+			client.populate(sign_messages);
+		if(client.canRead(QuickMessage.SONAR_TYPE))
+			client.populate(quick_messages);
+		if(client.canRead(DMS.SONAR_TYPE)) {
+			client.populate(dmss);
+			dmss.ignoreAttribute("operation");
+			dmss.ignoreAttribute("opStatus");
+		}
+		if(client.canRead(SignGroup.SONAR_TYPE))
+			client.populate(sign_groups);
+		if(client.canRead(DmsSignGroup.SONAR_TYPE))
+			client.populate(dms_sign_groups);
+		if(client.canRead(SignText.SONAR_TYPE))
+			client.populate(sign_text);
 	}
 }

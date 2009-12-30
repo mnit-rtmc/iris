@@ -27,6 +27,7 @@ import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
@@ -219,7 +220,8 @@ public class Session {
 			loc_manager);
 		// NOTE: The LCS array layer must not be created before all
 		//       DMSs have been enumerated.
-		dms_manager.waitForEnumeration();
+		if(canRead(DMS.SONAR_TYPE))
+			dms_manager.waitForEnumeration();
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
 		lane_marking_manager = new LaneMarkingManager(this,
@@ -234,14 +236,16 @@ public class Session {
 			loc_manager, r_node_manager);
 		// NOTE: The segment layer must not be created before all
 		//       detectors have been enumerated.
-		det_manager.waitForEnumeration();
+		if(canRead(Detector.SONAR_TYPE))
+			det_manager.waitForEnumeration();
 		seg_layer = r_node_manager.createSegmentLayer();
 		// NOTE: Since incidents are populated last, we can wait for
 		//       them to be enumerated, and all other previous objects
 		//       will also have been enumerated.  For example, the
 		//       DMS tab must not be created before LCS objects have
 		//       been enumerated.
-		inc_manager.waitForEnumeration();
+		if(canRead(Incident.SONAR_TYPE))
+			inc_manager.waitForEnumeration();
 		initializeManagers();
 		addTabs();
 	}

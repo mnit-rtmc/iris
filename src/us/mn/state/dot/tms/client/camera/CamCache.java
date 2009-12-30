@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -60,7 +60,7 @@ public class CamCache {
 	}
 
 	/** Create a new camera cache */
-	public CamCache(Client client) throws IllegalAccessException,
+	public CamCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
 	{
 		cameras = new TypeCache<Camera>(Camera.class, client);
@@ -73,8 +73,10 @@ public class CamCache {
 	}
 
 	/** Populate the type caches */
-	public void populate(Client client) {
-		client.populate(cameras);
-		client.populate(monitors);
+	public void populate(SonarState client) {
+		if(client.canRead(Camera.SONAR_TYPE))
+			client.populate(cameras);
+		if(client.canRead(VideoMonitor.SONAR_TYPE))
+			client.populate(monitors);
 	}
 }

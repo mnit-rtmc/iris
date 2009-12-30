@@ -250,6 +250,6 @@ public class UserManager {
 	{
 		state.login(userName, new String(pwd));
 		state.populateCaches();
-		return state.lookupUser(userName);
+		return state.getUser();
 	}
 }

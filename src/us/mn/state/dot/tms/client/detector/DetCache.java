@@ -14,11 +14,11 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
-import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * Cache for detector-related proxy objects.
@@ -52,7 +52,7 @@ public class DetCache {
 	}
 
 	/** Create a new det cache */
-	public DetCache(Client client) throws IllegalAccessException,
+	public DetCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
 	{
 		r_nodes = new TypeCache<R_Node>(R_Node.class, client);
@@ -61,9 +61,12 @@ public class DetCache {
 	}
 
 	/** Populate the type caches */
-	public void populate(Client client) {
-		client.populate(r_nodes);
-		client.populate(stations);
-		client.populate(detectors);
+	public void populate(SonarState client) {
+		if(client.canRead(R_Node.SONAR_TYPE))
+			client.populate(r_nodes);
+		if(client.canRead(Station.SONAR_TYPE))
+			client.populate(stations);
+		if(client.canRead(Detector.SONAR_TYPE))
+			client.populate(detectors);
 	}
 }

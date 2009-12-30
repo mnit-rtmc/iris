@@ -14,12 +14,12 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSIndication;
+import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * Cache for LCS proxy objects.
@@ -61,7 +61,7 @@ public class LcsCache {
 	}
 
 	/** Create a new LCS cache */
-	public LcsCache(Client client) throws IllegalAccessException,
+	public LcsCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException 
 	{
 		lcs_arrays = new TypeCache<LCSArray>(LCSArray.class, client);
@@ -73,11 +73,16 @@ public class LcsCache {
 	}
 
 	/** Populate the LCS cache */
-	public void populate(Client client) {
-		client.populate(lcs_arrays);
-		lcs_arrays.ignoreAttribute("operation");
-		client.populate(lcss);
-		client.populate(lcs_indications);
-		client.populate(lane_use_multis);
+	public void populate(SonarState client) {
+		if(client.canRead(LCSArray.SONAR_TYPE)) {
+			client.populate(lcs_arrays);
+			lcs_arrays.ignoreAttribute("operation");
+		}
+		if(client.canRead(LCS.SONAR_TYPE))
+			client.populate(lcss);
+		if(client.canRead(LCSIndication.SONAR_TYPE))
+			client.populate(lcs_indications);
+		if(client.canRead(LaneUseMulti.SONAR_TYPE))
+			client.populate(lane_use_multis);
 	}
 }

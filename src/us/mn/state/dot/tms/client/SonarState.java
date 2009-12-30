@@ -20,6 +20,7 @@ import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
@@ -342,40 +343,72 @@ public class SonarState extends Client {
 		BaseHelper.namespace = getNamespace();
 	}
 
+	/** Logged-in user name */
+	protected String user_name;
+
+	/** Logged-in user */
+	protected User user;
+
+	/** Get the logged-in user */
+	public User getUser() {
+		return user;
+	}
+
+	/** Check if the user can read a type */
+	public boolean canRead(String tname) {
+		return getNamespace().canRead(user, new Name(tname));
+	}
+
+	/** Login to the SONAR server */
+	public void login(String u, String p) throws SonarException {
+		super.login(u, p);
+		user_name = u;
+	}
+
 	/** Populate the type caches */
 	public void populateCaches() {
 		populate(roles);
 		populate(privileges);
 		populate(users);
-		populate(connections);
+		populate(connections, true);
+		user = users.lookupObject(user_name);
 		populate(system_attributes);
+		populate(map_extents);
 		populate(roads, true);
 		populate(geo_locs, true);
-		populate(map_extents);
-		populate(graphics, true);
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);
-		populate(alarms);
-		populate(warn_signs);
-		populate(ramp_meters);
-		ramp_meters.ignoreAttribute("operation");
+		if(canRead(Alarm.SONAR_TYPE))
+			populate(alarms);
+		if(canRead(WarningSign.SONAR_TYPE))
+			populate(warn_signs);
+		if(canRead(RampMeter.SONAR_TYPE)) {
+			populate(ramp_meters);
+			ramp_meters.ignoreAttribute("operation");
+		}
+		if(canRead(Graphic.SONAR_TYPE))
+			populate(graphics, true);
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
-		populate(lane_markings);
-		populate(incidents);
-		populate(holidays);
-		populate(day_plans);
-		populate(action_plans);
-		populate(time_actions);
-		populate(dms_actions);
-		populate(lane_actions);
-		populate(timing_plans);
-	}
-
-	/** Look up the specified user */
-	public User lookupUser(String name) {
-		return users.lookupObject(name);
+		if(canRead(LaneMarking.SONAR_TYPE))
+			populate(lane_markings);
+		if(canRead(Incident.SONAR_TYPE))
+			populate(incidents);
+		if(canRead(Holiday.SONAR_TYPE))
+			populate(holidays);
+		if(canRead(DayPlan.SONAR_TYPE))
+			populate(day_plans);
+		if(canRead(ActionPlan.SONAR_TYPE))
+			populate(action_plans);
+		if(canRead(TimeAction.SONAR_TYPE))
+			populate(time_actions);
+		if(canRead(DmsAction.SONAR_TYPE))
+			populate(dms_actions);
+		if(canRead(LaneAction.SONAR_TYPE))
+			populate(lane_actions);
+		if(canRead(TimingPlan.SONAR_TYPE))
+			populate(timing_plans);
 	}
 
 	/** Look up the specified connection */

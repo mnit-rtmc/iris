@@ -14,12 +14,12 @@
  */
 package us.mn.state.dot.tms.client.toast;
 
-import us.mn.state.dot.sonar.client.Client;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -78,7 +78,7 @@ public class ConCache {
 	}
 
 	/** Create a new con cache */
-	public ConCache(Client client) throws IllegalAccessException,
+	public ConCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
 	{
 		cabinet_styles = new TypeCache<CabinetStyle>(
@@ -95,16 +95,21 @@ public class ConCache {
 	}
 
 	/** Populate the type caches */
-	public void populate(Client client) {
-		client.populate(cabinet_styles);
-		client.populate(cabinets);
-		client.populate(comm_links);
-		client.populate(controllers);
-		controllers.ignoreAttribute("timeoutErr");
-		controllers.ignoreAttribute("checksumErr");
-		controllers.ignoreAttribute("parsingErr");
-		controllers.ignoreAttribute("controllerErr");
-		controllers.ignoreAttribute("successOps");
-		controllers.ignoreAttribute("failedOps");
+	public void populate(SonarState client) {
+		if(client.canRead(CabinetStyle.SONAR_TYPE))
+			client.populate(cabinet_styles);
+		if(client.canRead(Cabinet.SONAR_TYPE))
+			client.populate(cabinets);
+		if(client.canRead(CommLink.SONAR_TYPE))
+			client.populate(comm_links);
+		if(client.canRead(Controller.SONAR_TYPE)) {
+			client.populate(controllers);
+			controllers.ignoreAttribute("timeoutErr");
+			controllers.ignoreAttribute("checksumErr");
+			controllers.ignoreAttribute("parsingErr");
+			controllers.ignoreAttribute("controllerErr");
+			controllers.ignoreAttribute("successOps");
+			controllers.ignoreAttribute("failedOps");
+		}
 	}
 }
