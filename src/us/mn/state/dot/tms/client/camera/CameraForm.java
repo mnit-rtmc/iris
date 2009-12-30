@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class CameraForm extends ProxyTableForm<Camera> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(Camera.SONAR_TYPE);
+	}
+
 	/** Create a new camera form */
 	public CameraForm(Session s) {
 		super("Cameras", new CameraModel(s));

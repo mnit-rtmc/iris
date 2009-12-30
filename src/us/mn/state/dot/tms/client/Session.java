@@ -39,7 +39,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WarningSign;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTab;
-import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorManager;
 import us.mn.state.dot.tms.client.dms.DMSManager;
 import us.mn.state.dot.tms.client.dms.DMSTab;
@@ -58,7 +57,6 @@ import us.mn.state.dot.tms.client.roads.FreewayTheme;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
-import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.system.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
@@ -256,9 +254,6 @@ public class Session {
 		//       been enumerated.
 		inc_manager.waitForEnumeration();
 		initializeManagers();
-		SystemMenu s_menu = new SystemMenu(this);
-		if(s_menu.getItemCount() > 0)
-			v_menu.add(s_menu);
 		addTabs();
 	}
 
@@ -369,7 +364,6 @@ public class Session {
 
 	/** Add the camera tab */
 	protected void addCameraTab() {
-		v_menu.add(new VideoMenu(this));
 		List<LayerState> lstates = createLayers();
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, dms_manager.getProxyType());

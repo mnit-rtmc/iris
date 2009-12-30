@@ -27,24 +27,49 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class VideoMenu extends JMenu {
 
+	/** User Session */
+	protected final Session session;
+
+	/** Desktop */
+	protected final SmartDesktop desktop;
+
 	/** Create a new video menu */
 	public VideoMenu(final Session s) {
 		super("Video");
-		final SmartDesktop desktop = s.getDesktop();
+		session = s;
+		desktop = s.getDesktop();
+		JMenuItem item = createCameraItem();
+		if(item != null)
+			add(item);
+		item = createVideoMonitorItem();
+		if(item != null)
+			add(item);
+	}
+
+	/** Create the camera menu item */
+	protected JMenuItem createCameraItem() {
+		if(!CameraForm.isPermitted(session))
+			return null;
 		JMenuItem item = new JMenuItem("Cameras");
 		item.setMnemonic('C');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new CameraForm(s));
+				desktop.show(new CameraForm(session));
 			}
 		};
-		add(item);
-		item = new JMenuItem("Monitors");
+		return item;
+	}
+
+	/** Create the video monitor menu item */
+	protected JMenuItem createVideoMonitorItem() {
+		if(!VideoMonitorForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Monitors");
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new VideoMonitorForm(s));
+				desktop.show(new VideoMonitorForm(session));
 			}
 		};
-		add(item);
+		return item;
 	}
 }

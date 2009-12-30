@@ -18,11 +18,13 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
+import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
 import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
 import us.mn.state.dot.tms.client.toast.CommLinkForm;
@@ -47,6 +49,12 @@ public class ViewMenu extends JMenu {
 		super("View");
 		session = s;
 		desktop = session.getDesktop();
+		SystemMenu s_menu = new SystemMenu(session);
+		if(s_menu.getItemCount() > 0)
+			add(s_menu);
+		VideoMenu vid_menu = new VideoMenu(session);
+		if(vid_menu.getItemCount() > 0)
+			add(vid_menu);
 		setMnemonic('V');
 		JMenuItem item = new JMenuItem("Cabinet Styles");
 		item.setMnemonic('s');

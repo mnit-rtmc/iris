@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class VideoMonitorForm extends ProxyTableForm<VideoMonitor> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(VideoMonitor.SONAR_TYPE);
+	}
+
 	/** Create a new video monitor form */
 	public VideoMonitorForm(Session s) {
 		super("Video Monitors", new VideoMonitorModel(s));
