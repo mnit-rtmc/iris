@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.dms.quicklib;
+package us.mn.state.dot.tms.client.dms;
 
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
