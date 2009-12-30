@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class CabinetStyleForm extends ProxyTableForm<CabinetStyle> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(CabinetStyle.SONAR_TYPE);
+	}
+
 	/** Create a new cabinet style form */
 	public CabinetStyleForm(Session s) {
 		super("Cabinet Styles", new CabinetStyleModel(s));

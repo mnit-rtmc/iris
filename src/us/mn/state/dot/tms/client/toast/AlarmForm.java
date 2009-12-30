@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class AlarmForm extends ProxyTableForm<Alarm> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(Alarm.SONAR_TYPE);
+	}
+
 	/** Create a new alarm form */
 	public AlarmForm(Session s) {
 		super("Alarms", new AlarmModel(s));

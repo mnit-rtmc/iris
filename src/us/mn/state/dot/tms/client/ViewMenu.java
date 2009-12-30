@@ -25,9 +25,7 @@ import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
-import us.mn.state.dot.tms.client.toast.AlarmForm;
-import us.mn.state.dot.tms.client.toast.CabinetStyleForm;
-import us.mn.state.dot.tms.client.toast.CommLinkForm;
+import us.mn.state.dot.tms.client.toast.MaintenanceMenu;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -48,9 +46,13 @@ public class ViewMenu extends JMenu {
 		super("View");
 		session = s;
 		desktop = session.getDesktop();
+		setMnemonic('V');
 		SystemMenu s_menu = new SystemMenu(session);
 		if(s_menu.getItemCount() > 0)
 			add(s_menu);
+		MaintenanceMenu m_menu = new MaintenanceMenu(session);
+		if(m_menu.getItemCount() > 0)
+			add(m_menu);
 		VideoMenu vid_menu = new VideoMenu(session);
 		if(vid_menu.getItemCount() > 0)
 			add(vid_menu);
@@ -60,32 +62,7 @@ public class ViewMenu extends JMenu {
 		LaneUseMenu lu_menu = new LaneUseMenu(session);
 		if(lu_menu.getItemCount() > 0)
 			add(lu_menu);
-		setMnemonic('V');
-		JMenuItem item = new JMenuItem("Cabinet Styles");
-		item.setMnemonic('s');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new CabinetStyleForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Comm Links");
-		item.setMnemonic('L');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new CommLinkForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Alarms");
-		item.setMnemonic('a');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new AlarmForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Detectors");
+		JMenuItem item = new JMenuItem("Detectors");
 		item.setMnemonic('t');
 		new ActionJob(item) {
 			public void perform() throws Exception {

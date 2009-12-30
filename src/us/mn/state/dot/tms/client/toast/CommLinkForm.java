@@ -44,6 +44,12 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class CommLinkForm extends AbstractForm {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(CommLink.SONAR_TYPE) &&
+		       s.canRead(Controller.SONAR_TYPE);
+	}
+
 	/** Comm link table row height */
 	static protected final int ROW_HEIGHT = 24;
 
