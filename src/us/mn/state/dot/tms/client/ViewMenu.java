@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
-import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.toast.AlarmForm;
@@ -83,14 +82,6 @@ public class ViewMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new AlarmForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Roadways");
-		item.setMnemonic('R');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new RoadForm(session));
 			}
 		};
 		add(item);

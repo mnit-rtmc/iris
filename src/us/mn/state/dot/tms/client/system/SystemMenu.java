@@ -18,6 +18,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -45,6 +46,9 @@ public class SystemMenu extends JMenu {
 		if(item != null)
 			add(item);
 		item = createMapExtentsItem();
+		if(item != null)
+			add(item);
+		item = createRoadItem();
 		if(item != null)
 			add(item);
 	}
@@ -86,6 +90,20 @@ public class SystemMenu extends JMenu {
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new MapExtentForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the road menu item */
+	protected JMenuItem createRoadItem() {
+		if(!RoadForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Roadways");
+		item.setMnemonic('R');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new RoadForm(session));
 			}
 		};
 		return item;
