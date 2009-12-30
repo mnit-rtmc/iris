@@ -26,6 +26,11 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSForm extends ProxyTableForm<DMS> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(DMS.SONAR_TYPE);
+	}
+
 	/** Create a new DMS form */
 	public DMSForm(Session s) {
 		super(I18N.get("dms.title"), new DMSModel(s));

@@ -53,6 +53,13 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class FontForm extends AbstractForm {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(Font.SONAR_TYPE) &&
+		       s.canRead(Glyph.SONAR_TYPE) &&
+		       s.canRead(Graphic.SONAR_TYPE);
+	}
+
 	/** Frame title */
 	static protected final String TITLE = "DMS Fonts";
 

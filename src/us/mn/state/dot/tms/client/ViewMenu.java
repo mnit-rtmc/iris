@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
+import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.roads.RoadForm;
@@ -55,6 +56,9 @@ public class ViewMenu extends JMenu {
 		VideoMenu vid_menu = new VideoMenu(session);
 		if(vid_menu.getItemCount() > 0)
 			add(vid_menu);
+		SignMenu sgn_menu = new SignMenu(session);
+		if(sgn_menu.getItemCount() > 0)
+			add(sgn_menu);
 		LaneUseMenu lu_menu = new LaneUseMenu(session);
 		if(lu_menu.getItemCount() > 0)
 			add(lu_menu);

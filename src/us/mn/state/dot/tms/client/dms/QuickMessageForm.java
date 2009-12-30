@@ -27,6 +27,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class QuickMessageForm extends ProxyTableForm<QuickMessage> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(QuickMessage.SONAR_TYPE);
+	}
+
 	/** Create a new quick message form.
 	 * @param s Session. */
 	public QuickMessageForm(Session s) {

@@ -19,7 +19,6 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
@@ -31,15 +30,32 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SignMenu extends JMenu {
 
-	/** Session */
+	/** User Session */
 	protected final Session session;
+
+	/** Desktop */
+	protected final SmartDesktop desktop;
 
 	/** Create a new sign menu */
 	public SignMenu(final Session s) {
 		super("Message Signs");
 		session = s;
-		final SmartDesktop desktop = s.getDesktop();
+		desktop = s.getDesktop();
+		JMenuItem item = createDmsItem();
+		if(item != null)
+			add(item);
+		item = createFontItem();
+		if(item != null)
+			add(item);
+		item = createQuickMessageItem();
+		if(item != null)
+			add(item);
+	}
 
+	/** Create the DMS menu item */
+	protected JMenuItem createDmsItem() {
+		if(!DMSForm.isPermitted(session))
+			return null;
 		String dms_name = I18N.get("dms.abbreviation");
 		JMenuItem item = new JMenuItem(dms_name);
 		if(dms_name.length() > 0)
@@ -49,23 +65,7 @@ public class SignMenu extends JMenu {
 				desktop.show(createDMSForm());
 			}
 		};
-		add(item);
-		item = new JMenuItem("Fonts");
-		item.setMnemonic('F');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new FontForm(session));
-			}
-		};
-		add(item);
-		item = new JMenuItem("Quick Messages");
-		item.setMnemonic('Q');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new QuickMessageForm(session));
-			}
-		};
-		add(item);
+		return item;
 	}
 
 	/** Create the DMS form */
@@ -74,5 +74,33 @@ public class SignMenu extends JMenu {
 			return new DMSForm2(session);
 		else
 			return new DMSForm(session);
+	}
+
+	/** Create the font menu item */
+	protected JMenuItem createFontItem() {
+		if(!FontForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Fonts");
+		item.setMnemonic('F');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new FontForm(session));
+			}
+		};
+		return item;
+	}
+
+	/** Create the quick message menu item */
+	protected JMenuItem createQuickMessageItem() {
+		if(!QuickMessageForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Quick Messages");
+		item.setMnemonic('Q');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new QuickMessageForm(session));
+			}
+		};
+		return item;
 	}
 }
