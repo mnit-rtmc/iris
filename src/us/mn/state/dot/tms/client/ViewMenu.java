@@ -36,25 +36,17 @@ import us.mn.state.dot.tms.client.warning.WarningSignForm;
  */
 public class ViewMenu extends JMenu {
 
-	/** Session */
+	/** User Session */
 	protected final Session session;
 
 	/** Smart desktop */
 	protected final SmartDesktop desktop;
-
-	/** SONAR state */
-	protected final SonarState state;
-
-	/** SONAR user */
-	protected final User user;
 
 	/** Create a new view menu */
 	public ViewMenu(Session s) {
 		super("View");
 		session = s;
 		desktop = session.getDesktop();
-		state = session.getSonarState();
-		user = session.getUser();
 		setMnemonic('V');
 		JMenuItem item = new JMenuItem("Cabinet Styles");
 		item.setMnemonic('s');
