@@ -117,14 +117,6 @@ public class Session {
 		return logger;
 	}
 
-	/** View menu */
-	protected final ViewMenu v_menu;
-
-	/** Get the view menu */
-	public ViewMenu getViewMenu() {
-		return v_menu;
-	}
-
 	/** Base layers */
 	protected final List<Layer> baseLayers;
 
@@ -218,7 +210,6 @@ public class Session {
 		props = p;
 		logger = l;
 		baseLayers = bl;
-		v_menu = new ViewMenu(this);
 		loc_manager = new GeoLocManager(state.getGeoLocs());
 		r_node_manager = new R_NodeManager(this,
 			state.getDetCache().getR_Nodes(), loc_manager);

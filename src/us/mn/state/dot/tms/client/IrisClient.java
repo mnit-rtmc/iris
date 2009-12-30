@@ -200,7 +200,7 @@ public class IrisClient extends JFrame {
 		session = new Session(userManager, desktop, props, logger,
 			baseLayers);
 		arrangeTabs();
-		viewMenu = session.getViewMenu();
+		viewMenu = new ViewMenu(session);
 		getJMenuBar().add(viewMenu, 1);
 
 		// post-login additions to help menu
