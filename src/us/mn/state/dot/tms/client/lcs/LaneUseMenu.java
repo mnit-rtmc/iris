@@ -18,7 +18,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
 /**
@@ -28,32 +27,65 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class LaneUseMenu extends JMenu {
 
+	/** User Session */
+	protected final Session session;
+
+	/** Desktop */
+	protected final SmartDesktop desktop;
+
 	/** Create a new lane use menu */
 	public LaneUseMenu(final Session s) {
 		super("Lane Use");
-		final SmartDesktop desktop = s.getDesktop();
+		session = s;
+		desktop = s.getDesktop();
+		JMenuItem item = createLcsItem();
+		if(item != null)
+			add(item);
+		item = createGraphicItem();
+		if(item != null)
+			add(item);
+		item = createLaneUseMultiItem();
+		if(item != null)
+			add(item);
+	}
 
+	/** Create the LCS menu item */
+	protected JMenuItem createLcsItem() {
+		if(!LcsForm.isPermitted(session))
+			return null;
 		JMenuItem item = new JMenuItem("LCS");
 		item.setMnemonic('L');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new LcsForm(s));
+				desktop.show(new LcsForm(session));
 			}
 		};
-		add(item);
-		item = new JMenuItem("Graphics");
+		return item;
+	}
+
+	/** Create the graphics menu item */
+	protected JMenuItem createGraphicItem() {
+		if(!GraphicForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Graphics");
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new GraphicForm(s));
+				desktop.show(new GraphicForm(session));
 			}
 		};
-		add(item);
-		item = new JMenuItem("Lane-Use MULTI");
+		return item;
+	}
+
+	/** Create the lane-use MULTI menu item */
+	protected JMenuItem createLaneUseMultiItem() {
+		if(!LaneUseMultiForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Lane-Use MULTI");
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				desktop.show(new LaneUseMultiForm(s));
+				desktop.show(new LaneUseMultiForm(session));
 			}
 		};
-		add(item);
+		return item;
 	}
 }

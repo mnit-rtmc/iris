@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class LcsForm extends ProxyTableForm<LCSArray> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(LCSArray.SONAR_TYPE);
+	}
+
 	/** Create a new LCS form */
 	public LcsForm(Session s) {
 		super("LCS Arrays", new LCSArrayModel(s));

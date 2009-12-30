@@ -44,6 +44,11 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class GraphicForm extends AbstractForm {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(Graphic.SONAR_TYPE);
+	}
+
 	/** Frame title */
 	static protected final String TITLE = "Graphics";
 

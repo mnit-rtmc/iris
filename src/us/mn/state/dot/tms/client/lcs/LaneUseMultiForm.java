@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class LaneUseMultiForm extends ProxyTableForm<LaneUseMulti> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(LaneUseMulti.SONAR_TYPE);
+	}
+
 	/** Create a new graphic form */
 	public LaneUseMultiForm(Session s) {
 		super("Lane-Use MULTI", new LaneUseMultiModel(s));
