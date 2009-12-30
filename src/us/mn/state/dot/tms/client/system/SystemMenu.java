@@ -27,15 +27,39 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class SystemMenu extends JMenu {
 
-	/** Session */
+	/** Check if the user is permitted to use the menu */
+	static public boolean isPermitted(Session s) {
+		return SystemAttributeForm.isPermitted(s) ||
+		       UserRoleForm.isPermitted(s) ||
+		       MapExtentForm.isPermitted(s);
+	}
+
+	/** User Session */
 	protected final Session session;
+
+	/** Desktop */
+	protected final SmartDesktop desktop;
 
 	/** Create a new system menu */
 	public SystemMenu(final Session s) {
 		super("System");
 		session = s;
-		final SmartDesktop desktop = s.getDesktop();
+		desktop = s.getDesktop();
+		JMenuItem item = createSystemAttributesItem();
+		if(item != null)
+			add(item);
+		item = createUsersAndRolesItem();
+		if(item != null)
+			add(item);
+		item = createMapExtentsItem();
+		if(item != null)
+			add(item);
+	}
 
+	/** Create the system attributes menu item */
+	protected JMenuItem createSystemAttributesItem() {
+		if(!SystemAttributeForm.isPermitted(session))
+			return null;
 		JMenuItem item = new JMenuItem("System Attributes");
 		item.setMnemonic('S');
 		new ActionJob(item) {
@@ -43,22 +67,34 @@ public class SystemMenu extends JMenu {
 				desktop.show(new SystemAttributeForm(session));
 			}
 		};
-		add(item);
-		item = new JMenuItem("Users and Roles");
+		return item;
+	}
+
+	/** Create the users and roles menu item */
+	protected JMenuItem createUsersAndRolesItem() {
+		if(!UserRoleForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Users and Roles");
 		item.setMnemonic('U');
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new UserRoleForm(session));
 			}
 		};
-		add(item);
-		item = new JMenuItem("Map extents");
+		return item;
+	}
+
+	/** Create the map extents menu item */
+	protected JMenuItem createMapExtentsItem() {
+		if(!MapExtentForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Map extents");
 		item.setMnemonic('e');
 		new ActionJob(item) {
 			public void perform() throws Exception {
 				desktop.show(new MapExtentForm(session));
 			}
 		};
-		add(item);
+		return item;
 	}
 }

@@ -256,7 +256,7 @@ public class Session {
 		//       been enumerated.
 		inc_manager.waitForEnumeration();
 		initializeManagers();
-		if(canUpdate(SystemAttribute.SONAR_TYPE, "value"))
+		if(SystemMenu.isPermitted(this))
 			v_menu.add(new SystemMenu(this));
 		addTabs();
 	}
@@ -285,7 +285,7 @@ public class Session {
 			addMeterTab();
 		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
 			addLcsTab();
-		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
+		if(canRead(Camera.SONAR_TYPE))
 			addCameraTab();
 		if(namespace.canAdd(user, new Name(R_Node.SONAR_TYPE, "oname")))
 			addRoadwayTab();
@@ -305,7 +305,7 @@ public class Session {
 		List<LayerState> lstates = createBaseLayers();
 		if(seg_layer != null)
 			lstates.add(seg_layer.createState());
-		if(namespace.canRead(user, new Name(Camera.SONAR_TYPE)))
+		if(canRead(Camera.SONAR_TYPE))
 			lstates.add(cam_manager.getLayer().createState());
 		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
 			lstates.add(meter_manager.getLayer().createState());
@@ -384,9 +384,19 @@ public class Session {
 		tabs.add(new RoadwayTab(this, r_node_manager, lstates));
 	}
 
+	/** Check if the user can read a type */
+	public boolean canRead(String tname) {
+		return namespace.canRead(user, new Name(tname));
+	}
+
 	/** Check if the user can update an attribute */
-	protected boolean canUpdate(String tname, String aname) {
+	public boolean canUpdate(String tname, String aname) {
 		return namespace.canUpdate(user, new Name(tname,"oname",aname));
+	}
+
+	/** Check if the user can update an attribute */
+	public boolean canUpdate(String tname) {
+		return canUpdate(tname, "aname");
 	}
 
 	/** Dispose of the session */

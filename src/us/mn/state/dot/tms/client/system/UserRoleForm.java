@@ -41,6 +41,13 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class UserRoleForm extends AbstractForm {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canUpdate(User.SONAR_TYPE) ||
+		       s.canUpdate(Role.SONAR_TYPE) ||
+		       s.canUpdate(Privilege.SONAR_TYPE);
+	}
+
 	/** Frame title */
 	static protected final String TITLE = "Users and Roles";
 
