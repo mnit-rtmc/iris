@@ -47,6 +47,12 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class DayPlanPanel extends JPanel {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(DayPlan.SONAR_TYPE) &&
+		       s.canRead(Holiday.SONAR_TYPE);
+	}
+
 	/** Formatter for month labels */
 	static protected final SimpleDateFormat MONTH_LBL =
 		new SimpleDateFormat("MMMM");

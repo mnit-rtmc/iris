@@ -26,6 +26,12 @@ import us.mn.state.dot.tms.client.toast.AbstractForm;
  */
 public class ScheduleForm extends AbstractForm {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return ActionPlanPanel.isPermitted(s) &&
+		       DayPlanPanel.isPermitted(s);
+	}
+
 	/** Frame title */
 	static protected final String TITLE = "Plans and Schedules";
 

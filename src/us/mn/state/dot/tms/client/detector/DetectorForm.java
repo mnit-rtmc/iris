@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class DetectorForm extends ProxyTableForm<Detector> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(Detector.SONAR_TYPE);
+	}
+
 	/** Create a new detector form */
 	public DetectorForm(Session s) {
 		super("Detectors", new DetectorModel(s));

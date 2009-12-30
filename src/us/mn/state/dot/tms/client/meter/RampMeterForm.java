@@ -25,6 +25,11 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
  */
 public class RampMeterForm extends ProxyTableForm<RampMeter> {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(RampMeter.SONAR_TYPE);
+	}
+
 	/** Create a new ramp meter form */
 	public RampMeterForm(Session s) {
 		super("Ramp Meters", new RampMeterModel(s));

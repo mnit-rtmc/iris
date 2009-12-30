@@ -334,7 +334,6 @@ public class Session {
 
 	/** Add the meter tab */
 	protected void addMeterTab() throws IOException {
-		v_menu.addMeterItem();
 		List<LayerState> lstates = createLayers();
 		for(LayerState ls: lstates) {
 			for(Theme t: ls.getThemes()) {

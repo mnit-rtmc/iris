@@ -38,6 +38,14 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class ActionPlanPanel extends FormPanel {
 
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.canRead(ActionPlan.SONAR_TYPE) &&
+		       s.canRead(DmsAction.SONAR_TYPE) &&
+		       s.canRead(LaneAction.SONAR_TYPE) &&
+		       s.canRead(TimeAction.SONAR_TYPE);
+	}
+
 	/** Table row height */
 	static protected final int ROW_HEIGHT = 20;
 

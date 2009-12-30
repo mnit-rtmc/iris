@@ -62,6 +62,21 @@ public class ViewMenu extends JMenu {
 		LaneUseMenu lu_menu = new LaneUseMenu(session);
 		if(lu_menu.getItemCount() > 0)
 			add(lu_menu);
+		JMenuItem item = createDetectorItem();
+		if(item != null)
+			add(item);
+		item = createMeterItem();
+		if(item != null)
+			add(item);
+		item = createScheduleItem();
+		if(item != null)
+			add(item);
+	}
+
+	/** Create the detector menu item */
+	protected JMenuItem createDetectorItem() {
+		if(!DetectorForm.isPermitted(session))
+			return null;
 		JMenuItem item = new JMenuItem("Detectors");
 		item.setMnemonic('t');
 		new ActionJob(item) {
@@ -69,19 +84,13 @@ public class ViewMenu extends JMenu {
 				desktop.show(new DetectorForm(session));
 			}
 		};
-		add(item);
-		item = new JMenuItem("Plans and Schedules");
-		item.setMnemonic('P');
-		new ActionJob(item) {
-			public void perform() throws Exception {
-				desktop.show(new ScheduleForm(session));
-			}
-		};
-		add(item);
+		return item;
 	}
 
-	/** Add the ramp meter menu item */
-	public void addMeterItem() {
+	/** Create the ramp meter menu item */
+	protected JMenuItem createMeterItem() {
+		if(!RampMeterForm.isPermitted(session))
+			return null;
 		JMenuItem item = new JMenuItem("Ramp Meters");
 		item.setMnemonic('M');
 		new ActionJob(item) {
@@ -89,6 +98,20 @@ public class ViewMenu extends JMenu {
 				desktop.show(new RampMeterForm(session));
 			}
 		};
-		add(item);
+		return item;
+	}
+
+	/** Create the schedule menu item */
+	protected JMenuItem createScheduleItem() {
+		if(!ScheduleForm.isPermitted(session))
+			return null;
+		JMenuItem item = new JMenuItem("Plans and Schedules");
+		item.setMnemonic('P');
+		new ActionJob(item) {
+			public void perform() throws Exception {
+				desktop.show(new ScheduleForm(session));
+			}
+		};
+		return item;
 	}
 }
