@@ -33,11 +33,6 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class SignMessageCreator {
 
-	/** Create a SONAR name to check for allowed updates */
-	static protected Name createSignMessageName(String oname) {
-		return new Name(SignMessage.SONAR_TYPE, oname);
-	}
-
 	/** Sign message type cache */
 	protected final TypeCache<SignMessage> sign_messages;
 
@@ -138,7 +133,7 @@ public class SignMessageCreator {
 	/** Check if the user can add the named sign message */
 	public boolean canAddSignMessage(String name) {
 		return name != null && namespace.canAdd(user,
-			createSignMessageName(name));
+			new Name(SignMessage.SONAR_TYPE, name));
 	}
 
 	/** 
