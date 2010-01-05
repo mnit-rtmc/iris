@@ -300,13 +300,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		return box;
 	}
 
-	/** Can the DMS be updated? */
-	public boolean canUpdate(DMS proxy) {
-		String name = proxy.getName();
-		return name != null && namespace.canUpdate(user,
-			new Name(DMS.SONAR_TYPE, name));
-	}
-
 	/** If enabled, prompt the user with a send confirmation.
 	 *  @return True to send the message else false to cancel. */
 	protected boolean sendConfirm() {
@@ -795,6 +788,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return b.createPixmaps(ms);
 		} else
 			return null;
+	}
+
+	/** Can the DMS be updated? */
+	public boolean canUpdate(DMS dms) {
+		return dms != null && namespace.canUpdate(user, new Name(dms));
 	}
 
 	/** Check if AWS is allowed and user has permission to change */
