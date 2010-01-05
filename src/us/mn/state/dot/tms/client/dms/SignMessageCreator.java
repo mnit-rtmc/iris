@@ -33,6 +33,9 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class SignMessageCreator {
 
+	/** Extra message ID numbers for new sign messages */
+	static protected final int EXTRA_MSG_IDS = 5;
+
 	/** Sign message type cache */
 	protected final TypeCache<SignMessage> sign_messages;
 
@@ -145,7 +148,7 @@ public class SignMessageCreator {
 		HashSet<String> names = createSignMessageNameSet();
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
-		final int uid_max = names.size() + 1;
+		final int uid_max = names.size() + EXTRA_MSG_IDS;
 		for(int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
 			String n = user.getName() + "_" + _uid;
