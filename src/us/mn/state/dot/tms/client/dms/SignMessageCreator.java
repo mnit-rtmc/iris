@@ -64,7 +64,7 @@ public class SignMessageCreator {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param duration Message duration; null for indefinite.
-	 * @return Proxy of new sign message.
+	 * @return Proxy of new sign message, or null on error.
 	 */
 	public SignMessage create(String multi, String bitmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
@@ -88,7 +88,7 @@ public class SignMessageCreator {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param duration Message duration; null for indefinite.
-	 * @return Proxy of new sign message.
+	 * @return Proxy of new sign message, or null on error.
 	 */
 	protected SignMessage create(String name, String multi, String bitmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
@@ -101,7 +101,12 @@ public class SignMessageCreator {
 		if(duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);
-		return getProxy(name);
+		SignMessage sm = getProxy(name);
+		// Make sure this is the sign message we just created
+		if(multi.equals(sm.getMulti()))
+			return sm;
+		else
+			return null;
 	}
 
 	/** Get the sign message proxy object */
