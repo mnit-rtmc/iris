@@ -264,13 +264,13 @@ public class Session {
 
 	/** Add the tabs */
 	protected void addTabs() throws IOException {
-		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
+		if(canRead(DMS.SONAR_TYPE))
 			addDMSTab();
-		if(canUpdate(Incident.SONAR_TYPE, "cleared"))
+		if(canRead(Incident.SONAR_TYPE))
 			addIncidentTab();
-		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
+		if(canRead(RampMeter.SONAR_TYPE))
 			addMeterTab();
-		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
+		if(canRead(LCSArray.SONAR_TYPE))
 			addLcsTab();
 		if(canRead(Camera.SONAR_TYPE))
 			addCameraTab();
@@ -293,15 +293,15 @@ public class Session {
 			lstates.add(seg_layer.createState());
 		if(canRead(Camera.SONAR_TYPE))
 			lstates.add(cam_manager.getLayer().createState());
-		if(canUpdate(RampMeter.SONAR_TYPE, "rateNext"))
+		if(canRead(RampMeter.SONAR_TYPE))
 			lstates.add(meter_manager.getLayer().createState());
-		if(canUpdate(DMS.SONAR_TYPE, "messageNext"))
+		if(canRead(DMS.SONAR_TYPE))
 			lstates.add(dms_manager.getLayer().createState());
-		if(canUpdate(LCSArray.SONAR_TYPE, "indicationsNext"))
+		if(canRead(LCSArray.SONAR_TYPE))
 			lstates.add(lcs_array_manager.getLayer().createState());
-		if(canUpdate(WarningSign.SONAR_TYPE, "deployed"))
+		if(canRead(WarningSign.SONAR_TYPE))
 			lstates.add(warn_manager.getLayer().createState());
-		if(canUpdate(Incident.SONAR_TYPE, "cleared"))
+		if(canRead(Incident.SONAR_TYPE))
 			lstates.add(inc_manager.getLayer().createState());
 		return lstates;
 	}
