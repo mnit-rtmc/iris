@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,12 @@ public class SignMessageHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Find a sign message using a Checker */
+	static public SignMessage find(final Checker<SignMessage> checker) {
+		return (SignMessage)namespace.findObject(SignMessage.SONAR_TYPE,
+			checker);
+	}
+
 	/** Find a sign message with matching attributes */
 	static public SignMessage find(final String multi, final String bitmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, final boolean s,
@@ -39,9 +45,7 @@ public class SignMessageHelper extends BaseHelper {
 	{
 		final int api = ap.ordinal();
 		final int rpi = rp.ordinal();
-		return (SignMessage)namespace.findObject(SignMessage.SONAR_TYPE,
-			new Checker<SignMessage>()
-		{
+		return find(new Checker<SignMessage>() {
 			public boolean check(SignMessage sm) {
 				return multi.equals(sm.getMulti()) &&
 				       bitmaps.equals(sm.getBitmaps()) &&
