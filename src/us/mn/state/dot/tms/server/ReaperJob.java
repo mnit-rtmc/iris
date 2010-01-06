@@ -85,16 +85,24 @@ public class ReaperJob extends Job {
 		// only happen during a very short window about one minute
 		// after the message loses its last reference.  Is it worth
 		// making a fix for this unlikely scenario?
-		for(SignMessage sm: reapable) {
-			if(!isReferenced(sm))
-				MainServer.server.removeObject(sm);
+		if(reapable.isEmpty())
+			findReapableMessages();
+		else {
+			for(SignMessage sm: reapable) {
+				// Make sure the message has not already been
+				// reaped by looking it up in the namespace.
+				// This is needed because objects are removed
+				// asynchronously from the namespace.
+				sm = SignMessageHelper.lookup(sm.getName());
+				if(sm != null && !isReferenced(sm))
+					MainServer.server.removeObject(sm);
+			}
+			reapable.clear();
 		}
-		findReapableMessages();
 	}
 
 	/** Find all reapable sign messages */
 	protected void findReapableMessages() {
-		reapable.clear();
 		SignMessageHelper.find(new Checker<SignMessage>() {
 			public boolean check(SignMessage sm) {
 				reapable.add(sm);

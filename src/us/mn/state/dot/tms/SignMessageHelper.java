@@ -32,6 +32,12 @@ public class SignMessageHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup the sign message with the specified name */
+	static public SignMessage lookup(String name) {
+		return (SignMessage)namespace.lookupObject(
+			SignMessage.SONAR_TYPE, name);
+	}
+
 	/** Find a sign message using a Checker */
 	static public SignMessage find(final Checker<SignMessage> checker) {
 		return (SignMessage)namespace.findObject(SignMessage.SONAR_TYPE,
