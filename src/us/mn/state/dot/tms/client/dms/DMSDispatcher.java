@@ -792,7 +792,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Can the DMS be updated? */
 	public boolean canUpdate(DMS dms) {
-		return dms != null && namespace.canUpdate(user, new Name(dms));
+		if(dms == null)
+			return false;
+		return namespace.canUpdate(user, new Name(dms, "ownerNext")) &&
+		       namespace.canUpdate(user, new Name(dms, "messageNext"));
 	}
 
 	/** Check if AWS is allowed and user has permission to change */
