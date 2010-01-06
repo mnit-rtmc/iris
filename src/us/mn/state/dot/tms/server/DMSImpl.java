@@ -836,7 +836,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Check if the sign has a reference to a sign message */
 	public boolean hasReference(SignMessage sm) {
-		return sm == messageCurrent || sm == messageNext;
+		return sm == messageCurrent ||
+		       sm == messageSched ||
+		       sm == messageNext;
 	}
 
 	/** Validate a sign message to send */
