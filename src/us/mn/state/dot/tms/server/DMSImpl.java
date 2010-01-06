@@ -947,7 +947,8 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @return true If priority is high enough to deploy. */
 	public boolean shouldActivate(SignMessage sm) {
 		return SignMessageHelper.shouldActivate(messageCurrent, sm) &&
-		       SignMessageHelper.shouldActivate(messageNext, sm);
+		       SignMessageHelper.shouldActivate(messageNext, sm) &&
+		       SignMessageHelper.lookup(sm.getName()) == sm;
 	}
 
 	/** Send a sign message created by IRIS server */
