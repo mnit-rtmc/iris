@@ -130,8 +130,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		new AbstractJob() {
 			public void perform() {
 				arrangeCorridors();
+				superComplete();
 			}
 		}.addToScheduler();
+	}
+
+	/** Call the enumerationComplete method of the super class */
+	protected void superComplete() {
 		super.enumerationComplete();
 	}
 
