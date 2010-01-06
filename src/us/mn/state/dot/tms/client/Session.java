@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client;
 
 import java.io.IOException;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
