@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -428,9 +428,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer.setEnabled(true);
 		durationCmb.setEnabled(true);
 		durationCmb.setSelectedIndex(0);
-		sendBtn.setEnabled(canUpdate(watching));
-		blankBtn.setEnabled(canUpdate(watching));
-		queryBtn.setEnabled(canUpdate(watching));
+		sendBtn.setEnabled(canSend(watching));
+		blankBtn.setEnabled(canSend(watching));
+		queryBtn.setEnabled(canRequest(watching));
 		qlibCmb.setEnabled(true);
 		updateTextQLibCBox(true);
 		selectPreview(false);
@@ -790,12 +790,17 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return null;
 	}
 
-	/** Can the DMS be updated? */
-	public boolean canUpdate(DMS dms) {
-		if(dms == null)
-			return false;
-		return namespace.canUpdate(user, new Name(dms, "ownerNext")) &&
+	/** Can a message be sent to the DMS? */
+	public boolean canSend(DMS dms) {
+		return dms != null &&
+		       namespace.canUpdate(user, new Name(dms, "ownerNext")) &&
 		       namespace.canUpdate(user, new Name(dms, "messageNext"));
+	}
+
+	/** Can a device request be sent to the DMS? */
+	public boolean canRequest(DMS dms) {
+		return dms != null && namespace.canUpdate(user,
+			new Name(dms, "deviceRequest"));
 	}
 
 	/** Check if AWS is allowed and user has permission to change */
