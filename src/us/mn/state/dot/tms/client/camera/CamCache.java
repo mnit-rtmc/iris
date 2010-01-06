@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,9 +74,7 @@ public class CamCache {
 
 	/** Populate the type caches */
 	public void populate(SonarState client) {
-		if(client.canRead(Camera.SONAR_TYPE))
-			client.populate(cameras);
-		if(client.canRead(VideoMonitor.SONAR_TYPE))
-			client.populate(monitors);
+		client.populateReadable(cameras);
+		client.populateReadable(monitors);
 	}
 }

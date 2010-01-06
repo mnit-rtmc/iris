@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,6 +107,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Initialize the proxy manager. This cannot be done in the constructor
 	 * because subclasses may not be fully constructed. */
 	public void initialize() {
+		waitForEnumeration();
 		for(Symbol s: theme.getSymbols()) {
 			StyleListModel<T> slm = createStyleListModel(s);
 			if(slm != null) {

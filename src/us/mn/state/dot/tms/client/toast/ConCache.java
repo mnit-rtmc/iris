@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,14 +96,11 @@ public class ConCache {
 
 	/** Populate the type caches */
 	public void populate(SonarState client) {
-		if(client.canRead(CabinetStyle.SONAR_TYPE))
-			client.populate(cabinet_styles);
-		if(client.canRead(Cabinet.SONAR_TYPE))
-			client.populate(cabinets);
-		if(client.canRead(CommLink.SONAR_TYPE))
-			client.populate(comm_links);
+		client.populateReadable(cabinet_styles);
+		client.populateReadable(cabinets);
+		client.populateReadable(comm_links);
+		client.populateReadable(controllers);
 		if(client.canRead(Controller.SONAR_TYPE)) {
-			client.populate(controllers);
 			controllers.ignoreAttribute("timeoutErr");
 			controllers.ignoreAttribute("checksumErr");
 			controllers.ignoreAttribute("parsingErr");

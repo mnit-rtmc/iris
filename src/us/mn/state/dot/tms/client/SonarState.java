@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -365,6 +365,19 @@ public class SonarState extends Client {
 		user_name = u;
 	}
 
+	/** Populate the specified type cache */
+	public void populateReadable(TypeCache tc, boolean wait) {
+		if(canRead(tc.tname))
+			populate(tc, wait);
+		else
+			tc.enumerationComplete();
+	}
+
+	/** Populate the specified type cache */
+	public void populateReadable(TypeCache tc) {
+		populateReadable(tc, false);
+	}
+
 	/** Populate the type caches */
 	public void populateCaches() {
 		populate(roles);
@@ -379,36 +392,23 @@ public class SonarState extends Client {
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);
-		if(canRead(Alarm.SONAR_TYPE))
-			populate(alarms);
-		if(canRead(WarningSign.SONAR_TYPE))
-			populate(warn_signs);
-		if(canRead(RampMeter.SONAR_TYPE)) {
-			populate(ramp_meters);
+		populateReadable(alarms);
+		populateReadable(warn_signs);
+		populateReadable(ramp_meters);
+		if(canRead(RampMeter.SONAR_TYPE))
 			ramp_meters.ignoreAttribute("operation");
-		}
-		if(canRead(Graphic.SONAR_TYPE))
-			populate(graphics, true);
+		populateReadable(graphics, true);
 		dms_cache.populate(this);
 		lcs_cache.populate(this);
-		if(canRead(LaneMarking.SONAR_TYPE))
-			populate(lane_markings);
-		if(canRead(Incident.SONAR_TYPE))
-			populate(incidents);
-		if(canRead(Holiday.SONAR_TYPE))
-			populate(holidays);
-		if(canRead(DayPlan.SONAR_TYPE))
-			populate(day_plans);
-		if(canRead(ActionPlan.SONAR_TYPE))
-			populate(action_plans);
-		if(canRead(TimeAction.SONAR_TYPE))
-			populate(time_actions);
-		if(canRead(DmsAction.SONAR_TYPE))
-			populate(dms_actions);
-		if(canRead(LaneAction.SONAR_TYPE))
-			populate(lane_actions);
-		if(canRead(TimingPlan.SONAR_TYPE))
-			populate(timing_plans);
+		populateReadable(lane_markings);
+		populateReadable(incidents);
+		populateReadable(holidays);
+		populateReadable(day_plans);
+		populateReadable(action_plans);
+		populateReadable(time_actions);
+		populateReadable(dms_actions);
+		populateReadable(lane_actions);
+		populateReadable(timing_plans);
 	}
 
 	/** Look up the specified connection */

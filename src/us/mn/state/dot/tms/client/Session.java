@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -216,10 +216,6 @@ public class Session {
 			state.getCamCache().getCameras(), loc_manager);
 		dms_manager = new DMSManager(this,state.getDmsCache().getDMSs(),
 			loc_manager);
-		// NOTE: The LCS array layer must not be created before all
-		//       DMSs have been enumerated.
-		if(canRead(DMS.SONAR_TYPE))
-			dms_manager.waitForEnumeration();
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		lcsi_manager = new LCSIManager(this, loc_manager);
 		lane_marking_manager = new LaneMarkingManager(this,
@@ -232,19 +228,8 @@ public class Session {
 			state.getRampMeters(), loc_manager);
 		inc_manager = new IncidentManager(this, state.getIncidents(),
 			loc_manager, r_node_manager);
-		// NOTE: The segment layer must not be created before all
-		//       detectors have been enumerated.
-		if(canRead(Detector.SONAR_TYPE))
-			det_manager.waitForEnumeration();
-		seg_layer = r_node_manager.createSegmentLayer();
-		// NOTE: Since incidents are populated last, we can wait for
-		//       them to be enumerated, and all other previous objects
-		//       will also have been enumerated.  For example, the
-		//       DMS tab must not be created before LCS objects have
-		//       been enumerated.
-		if(canRead(Incident.SONAR_TYPE))
-			inc_manager.waitForEnumeration();
 		initializeManagers();
+		seg_layer = r_node_manager.createSegmentLayer();
 		addTabs();
 	}
 

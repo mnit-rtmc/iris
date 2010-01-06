@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,15 +74,11 @@ public class LcsCache {
 
 	/** Populate the LCS cache */
 	public void populate(SonarState client) {
-		if(client.canRead(LCSArray.SONAR_TYPE)) {
-			client.populate(lcs_arrays);
+		client.populateReadable(lcs_arrays);
+		if(client.canRead(LCSArray.SONAR_TYPE))
 			lcs_arrays.ignoreAttribute("operation");
-		}
-		if(client.canRead(LCS.SONAR_TYPE))
-			client.populate(lcss);
-		if(client.canRead(LCSIndication.SONAR_TYPE))
-			client.populate(lcs_indications);
-		if(client.canRead(LaneUseMulti.SONAR_TYPE))
-			client.populate(lane_use_multis);
+		client.populateReadable(lcss);
+		client.populateReadable(lcs_indications);
+		client.populateReadable(lane_use_multis);
 	}
 }

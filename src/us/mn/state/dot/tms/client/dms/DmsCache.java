@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -115,24 +115,17 @@ public class DmsCache {
 
 	/** Populate the type caches */
 	public void populate(SonarState client) {
-		if(client.canRead(Font.SONAR_TYPE))
-			client.populate(fonts);
-		if(client.canRead(Glyph.SONAR_TYPE))
-			client.populate(glyphs);
-		if(client.canRead(SignMessage.SONAR_TYPE))
-			client.populate(sign_messages);
-		if(client.canRead(QuickMessage.SONAR_TYPE))
-			client.populate(quick_messages);
+		client.populateReadable(fonts);
+		client.populateReadable(glyphs);
+		client.populateReadable(sign_messages);
+		client.populateReadable(quick_messages);
+		client.populateReadable(dmss);
 		if(client.canRead(DMS.SONAR_TYPE)) {
-			client.populate(dmss);
 			dmss.ignoreAttribute("operation");
 			dmss.ignoreAttribute("opStatus");
 		}
-		if(client.canRead(SignGroup.SONAR_TYPE))
-			client.populate(sign_groups);
-		if(client.canRead(DmsSignGroup.SONAR_TYPE))
-			client.populate(dms_sign_groups);
-		if(client.canRead(SignText.SONAR_TYPE))
-			client.populate(sign_text);
+		client.populateReadable(sign_groups);
+		client.populateReadable(dms_sign_groups);
+		client.populateReadable(sign_text);
 	}
 }
