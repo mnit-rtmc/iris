@@ -26,7 +26,6 @@ import java.util.zip.ZipEntry;
 
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.DMSList;
