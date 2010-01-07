@@ -1413,8 +1413,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Lookup a route by station ID */
 	protected Route lookupRoute(String sid) {
-		if(!s_routes.containsKey(sid))
-			s_routes.put(sid, createRoute(sid));
+		if(!s_routes.containsKey(sid)) {
+			Route r = createRoute(sid);
+			if(r != null)
+				s_routes.put(sid, r);
+		}
 		return s_routes.get(sid);
 	}
 
