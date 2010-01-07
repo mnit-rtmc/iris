@@ -116,26 +116,7 @@ public class IrisClient extends JFrame {
 		s_panes = new ScreenPane[screens.length];
 		desktop = new SmartDesktop(screens[0]);
 		baseLayers = new BaseLayers().getLayers();
-		for(int s = 0; s < s_panes.length; s++)
-			s_panes[s] = new ScreenPane();
-		for(ScreenPane sp: s_panes) {
-			sp.addComponentListener(new ComponentAdapter() {
-				public void componentHidden(ComponentEvent e) {
-					arrangeTabs();
-				}
-				public void componentShown(ComponentEvent e) {
-					arrangeTabs();
-				}
-			});
-			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
-			MapModel mm = new MapModel();
-			for(Layer l: baseLayers) {
-				LayerState ls = l.createState();
-				mm.addLayer(ls);
-				mm.setHomeLayer(ls);
-			}
-			sp.getMap().setModel(mm);
-		}
+		initializeScreenPanes();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
 				userManager.quit();
@@ -156,6 +137,30 @@ public class IrisClient extends JFrame {
 
 		// auto login if enabled
 		userManager.autoLogin();
+	}
+
+	/** Initialize the screen panes */
+	protected void initializeScreenPanes() {
+		for(int s = 0; s < s_panes.length; s++)
+			s_panes[s] = new ScreenPane();
+		for(ScreenPane sp: s_panes) {
+			sp.addComponentListener(new ComponentAdapter() {
+				public void componentHidden(ComponentEvent e) {
+					arrangeTabs();
+				}
+				public void componentShown(ComponentEvent e) {
+					arrangeTabs();
+				}
+			});
+			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
+			MapModel mm = new MapModel();
+			for(Layer l: baseLayers) {
+				LayerState ls = l.createState();
+				mm.addLayer(ls);
+				mm.setHomeLayer(ls);
+			}
+			sp.getMap().setModel(mm);
+		}
 	}
 
 	/** Make the frame displayable (called by window toolkit) */
