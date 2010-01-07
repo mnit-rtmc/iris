@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@ public class MainClient {
 
 	/** Create a URL for the specified property file */
 	static protected URL createURL(String prop_file) throws IOException {
-		String workingDir = System.getProperty("user.dir");
-		File file = new File(workingDir, prop_file);
+		String wd = System.getProperty("user.dir");
+		File file = new File(wd, prop_file);
 		if(file.exists())
 			return file.toURI().toURL();
 		else
