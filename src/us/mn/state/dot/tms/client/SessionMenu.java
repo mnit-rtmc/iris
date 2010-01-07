@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import us.mn.state.dot.sched.ActionJob;
-import us.mn.state.dot.tms.client.system.LoginListener;
-import us.mn.state.dot.tms.client.system.UserManager;
 
 /** 
  * The sessoin menu contains menu items for logging in, logging out and exiting
@@ -30,9 +28,6 @@ import us.mn.state.dot.tms.client.system.UserManager;
  */
 public class SessionMenu extends JMenu {
 
-	/** UserManager to use for logging in users */
-	protected final UserManager userManager;
-
 	/** Log in menu item */
 	protected final JMenuItem log_in = new JMenuItem("Log In");
 
@@ -40,31 +35,20 @@ public class SessionMenu extends JMenu {
 	protected final JMenuItem log_out = new JMenuItem("Log Out");
 	
 	/** Create a new session menu */	
-	public SessionMenu(final UserManager um) {
+	public SessionMenu(final IrisClient ic) {
 		super("Session");
-		userManager = um;
-		userManager.addLoginListener(new LoginListener() {
-			public void login() {
-				log_in.setEnabled(false);
-				log_out.setEnabled(true);
-			}
-			public void logout() {
-				log_in.setEnabled(true);
-				log_out.setEnabled(false);
-			}
-		});
 		setMnemonic('e');
 		log_in.setMnemonic('L');
 		new ActionJob(log_in) {
 			public void perform() throws Exception {
-				userManager.login();
+				ic.login();
 			}
 		};
 		add(log_in);
 		log_out.setMnemonic('O');
 		new ActionJob(log_out) {
 			public void perform() throws Exception {
-				userManager.logout();
+				ic.logout();
 			}
 		};
 		log_out.setEnabled(false);
@@ -74,9 +58,15 @@ public class SessionMenu extends JMenu {
 		item.setMnemonic('x');
 		new ActionJob(item) {
 			public void perform() throws Exception {
-				userManager.quit();
+				ic.quit();
 			}
 		};
 		add(item);
+	}
+
+	/** Set the logged-in status */
+	public void setLoggedIn(boolean in) {
+		log_in.setEnabled(!in);
+		log_out.setEnabled(in);
 	}
 }

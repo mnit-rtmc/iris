@@ -53,7 +53,6 @@ import us.mn.state.dot.tms.client.roads.FreewayTheme;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.RoadwayTab;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
-import us.mn.state.dot.tms.client.system.UserManager;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.warning.WarningSignManager;
 
@@ -198,11 +197,11 @@ public class Session {
 	}
 
 	/** Create a new session */
-	public Session(UserManager um, SmartDesktop d, Properties p, Logger l,
+	public Session(SonarState st, SmartDesktop d, Properties p, Logger l,
 		List<Layer> bl) throws IOException
 	{
-		user = um.getUser();
-		state = um.getSonarState();
+		state = st;
+		user = state.getUser();
 		namespace = state.getNamespace();
 		desktop = d;
 		props = p;

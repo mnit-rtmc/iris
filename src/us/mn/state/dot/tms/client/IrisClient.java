@@ -34,12 +34,15 @@ import us.mn.state.dot.log.TmsLogFactory;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapModel;
+import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sonar.ConfigurationError;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.system.LoginListener;
-import us.mn.state.dot.tms.client.system.UserManager;
+import us.mn.state.dot.tms.utils.PropertyFile;
+import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
@@ -52,6 +55,9 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class IrisClient extends JFrame {
+
+	/** Login scheduler */
+	static protected final Scheduler LOGIN = new Scheduler("LOGIN");
 
 	/** Window title login message */
 	static protected final String WINDOW_TITLE_LOGIN = "Login to Start";
@@ -83,9 +89,6 @@ public class IrisClient extends JFrame {
 	/** Desktop pane */
 	protected final SmartDesktop desktop;
 
-	/** Handles all user authentication */
-	protected final UserManager userManager;
-
 	/** Screen layout for desktop pane */
 	protected final ScreenLayout layout;
 
@@ -95,14 +98,17 @@ public class IrisClient extends JFrame {
 	/** Client properties */
 	protected final Properties props;
 
+	/** Session menu */
+	protected final SessionMenu session_menu;
+
 	/** View menu */
-	protected JMenu viewMenu;
+	protected JMenu view_menu;
+
+	/** Help menu */
+	protected final HelpMenu help_menu;
 
 	/** Login session information */
 	protected Session session;
-
-	/** the help menu changes after login */
-	protected HelpMenu m_helpmenu;
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws IOException {
@@ -119,24 +125,25 @@ public class IrisClient extends JFrame {
 		initializeScreenPanes();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent evt) {
-				userManager.quit();
+				quit();
 			}
 		});
-		userManager = new UserManager(desktop, props);
 		layout = new ScreenLayout(desktop);
 		getContentPane().add(desktop);
+		session_menu = new SessionMenu(this);
+		help_menu = new HelpMenu(desktop);
 		buildMenus();
-		userManager.addLoginListener(new LoginListener() {
-			public void login() throws Exception {
-				setUser(userManager.getUser());
-			}
-			public void logout() {
-				loggedout();
-			}
-		});
+		autoLogin();
+	}
 
-		// auto login if enabled
-		userManager.autoLogin();
+	/** Log out the current session and quit the client */
+	public void quit() {
+		logout();
+		new AbstractJob(LOGIN) {
+			public void perform() {
+				System.exit(0);
+			}
+		}.addToScheduler();
 	}
 
 	/** Initialize the screen panes */
@@ -173,11 +180,29 @@ public class IrisClient extends JFrame {
 
 	/** Build all the menus */
 	protected void buildMenus() {
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(new SessionMenu(userManager));
-		m_helpmenu = new HelpMenu(desktop);
-		menuBar.add(m_helpmenu);
-		this.setJMenuBar(menuBar);
+		JMenuBar m_bar = new JMenuBar();
+		m_bar.add(session_menu);
+		m_bar.add(help_menu);
+		setJMenuBar(m_bar);
+	}
+
+	/** Auto-login the user if enabled */
+	protected void autoLogin() {
+		String un = PropertyFile.get(props, "autologin.username");
+		String pws = PropertyFile.get(props, "autologin.password");
+		if(un == null || pws == null)
+			return;
+		char[] pw = pws.toCharArray();
+		pws = null;
+		if(un.length() > 0 && pw.length > 0) {
+			try {
+				doLogin(un, pw);
+			}
+			catch(Exception ex) {
+				System.err.println("Auto-login failed.");
+				ex.printStackTrace();
+			}
+		}
 	}
 
 	/** Get a list of all visible screen panes. Will return an empty
@@ -209,29 +234,84 @@ public class IrisClient extends JFrame {
 		}
 	}
 
-	/** Set the logged in user */
-	protected void setUser(User user) throws IOException,
-		TdxmlException
-	{
+	/** Show the login form */
+	public void login() {
+		if(session == null)
+			desktop.show(new LoginForm(this, desktop));
+	}
+
+	/** Login a user */
+	public void login(final String user, final char[] pwd) {
+		new AbstractJob(LOGIN) {
+			public void perform() throws Exception {
+				doLogin(user, pwd);
+			}
+		}.addToScheduler();
+	}
+
+	/** Login a user */
+	protected void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		setTitle(getWindowTitle(user));
-		session = new Session(userManager, desktop, props, logger,
-			baseLayers);
-		arrangeTabs();
-		viewMenu = new ViewMenu(session);
-		getJMenuBar().add(viewMenu, 1);
+		closeSession();
+		try {
+			session = createSession(user, pwd);
+		}
+		finally {
+			for(int i = 0; i < pwd.length; ++i)
+				pwd[i] = ' ';
+			updateMenus(session);
+			arrangeTabs();
+			setCursor(null);
+			validate();
+		}
+	}
 
-		// post-login additions to help menu
-		if(m_helpmenu != null)
-			m_helpmenu.add(desktop);
+	/** Create a new session */
+	protected Session createSession(String user, char[] pwd)
+		throws IOException, ConfigurationError, SonarException,
+		NoSuchFieldException, IllegalAccessException
+	{
+		SonarState state = createSonarState();
+		state.login(user, new String(pwd));
+		state.populateCaches();
+		setTitle(getWindowTitle(state.getUser()));
+		return new Session(state, desktop, props, logger, baseLayers);
+	}
 
-		setCursor(null);
-		validate();
+	/** Create a new SONAR state */
+	protected SonarState createSonarState() throws IOException,
+		ConfigurationError, NoSuchFieldException, IllegalAccessException
+	{
+		return new SonarState(props, new SimpleHandler());
+	}
+
+	/** Update the menus for a session */
+	protected void updateMenus(Session s) {
+		JMenu vm = view_menu;
+		if(vm != null)
+			getJMenuBar().remove(vm);
+		if(s != null) {
+			view_menu = new ViewMenu(s);
+			getJMenuBar().add(view_menu, 1);
+			help_menu.add(desktop);
+		} else {
+			view_menu = null;
+		}
+		session_menu.setLoggedIn(s != null);
+	}
+
+	/** Logout of the current session */
+	public void logout() {
+		new AbstractJob(LOGIN) {
+			public void perform() {
+				doLogout();
+			}
+		}.addToScheduler();
 	}
 
 	/** Clean up when the user logs out */
-	protected void loggedout() {
-		clearViewMenu();
+	protected void doLogout() {
+		updateMenus(null);
 		removeTabs();
 		closeSession();
 		setTitle(getWindowTitle(null));
@@ -244,14 +324,6 @@ public class IrisClient extends JFrame {
 		if(s != null)
 			s.dispose();
 		session = null;
-	}
-
-	/** Clear the view menu */
-	protected void clearViewMenu() {
-		JMenu v = viewMenu;
-		if(v != null)
-			getJMenuBar().remove(v);
-		viewMenu = null;
 	}
 
 	/** Removed all the tabs */
