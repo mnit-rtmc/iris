@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,24 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IrisClient extends JFrame {
 
+	/** Window title login message */
+	static protected final String WINDOW_TITLE_LOGIN = "Login to Start";
+
+	/** Get window title.
+	 * @param u User, may be null. */
+	static protected String getWindowTitle(User u) {
+		return SystemAttrEnum.WINDOW_TITLE.getString() +
+		       getWindowTitleSuffix(u);
+	}
+
+	/** Get the window title suffix */
+	static protected String getWindowTitleSuffix(User u) {
+		if(u != null)
+			return u.getName() + " (" + u.getFullName() + ")";
+		else
+			return WINDOW_TITLE_LOGIN;
+	}
+
 	/** Array of screens to display client */
 	protected final Screen[] screens;
 
@@ -86,17 +104,12 @@ public class IrisClient extends JFrame {
 	/** the help menu changes after login */
 	protected HelpMenu m_helpmenu;
 
-	/** Window title login message */
-	protected final static String WINDOW_TITLE_LOGIN = 
-		"IRIS: Login to Start";
-
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws IOException {
-		super(WINDOW_TITLE_LOGIN);
+		super(getWindowTitle(null));
 		this.props = props;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
-		setName( "IRIS" );
 		I18N.initialize(props);
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
@@ -216,7 +229,7 @@ public class IrisClient extends JFrame {
 		clearViewMenu();
 		removeTabs();
 		closeSession();
-		setTitle(WINDOW_TITLE_LOGIN);
+		setTitle(getWindowTitle(null));
 		validate();
 	}
 
@@ -240,15 +253,5 @@ public class IrisClient extends JFrame {
 	protected void removeTabs() {
 		for(ScreenPane sp: s_panes)
 			sp.removeTabs();
-	}
-
-	/** Get window title.
-	 *  @param u User, may be null. */
-	protected String getWindowTitle(User u) {
-		String title = SystemAttrEnum.WINDOW_TITLE.getString();
-		if(u != null)
-			title += "User = " + u.getName() + " (" + 
-				u.getFullName() + ")";
-		return title;
 	}
 }
