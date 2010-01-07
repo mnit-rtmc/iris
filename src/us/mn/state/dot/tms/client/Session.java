@@ -371,5 +371,16 @@ public class Session {
 		desktop.closeFrames();
 		for(MapTab tab: tabs)
 			tab.dispose();
+		r_node_manager.dispose();
+		cam_manager.dispose();
+		dms_manager.dispose();
+		lcs_array_manager.dispose();
+		lcsi_manager.dispose();
+		lane_marking_manager.dispose();
+		det_manager.dispose();
+		warn_manager.dispose();
+		meter_manager.dispose();
+		inc_manager.dispose();
+		loc_manager.dispose();
 	}
 }
