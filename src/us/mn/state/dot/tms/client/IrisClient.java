@@ -191,7 +191,7 @@ public class IrisClient extends JFrame {
 		Session s = session;
 		if(s != null) {
 			LinkedList<ScreenPane> visible = getVisiblePanes();
-			if(visible.size() <= 0)
+			if(visible.isEmpty())
 				return;
 			for(MapTab tab: s.getTabs()) {
 				int p = tab.getNumber() % visible.size();
