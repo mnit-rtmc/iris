@@ -35,9 +35,6 @@ public class MainClient {
 	static protected final String DEFAULT_PROPERTIES =
 		"iris-client.properties";
 
-	/** Application name */
-	static protected final String NAME = "IRIS Client";
-
 	/** Create a URL for the specified property file */
 	static protected URL createURL(String prop_file) throws IOException {
 		String wd = System.getProperty("user.dir");
