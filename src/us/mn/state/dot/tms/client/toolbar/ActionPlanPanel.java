@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.toolbar;
 
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -26,9 +27,10 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class ActionPlanPanel extends ToolPanel {
 
-	/** Is this panel IRIS enabled? */
-	static public boolean getIEnabled() {
-		return SystemAttrEnum.ACTIONPLAN_TOOLBAR_ENABLE.getBoolean();
+	/** Should the action plan panel be displayed? */
+	static public boolean shouldDisplay(Session s) {
+		return SystemAttrEnum.ACTIONPLAN_TOOLBAR_ENABLE.getBoolean() &&
+		       s.canUpdate(ActionPlan.SONAR_TYPE, "deployed");
 	}
 
 	/** Combo box for all action plans */
