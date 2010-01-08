@@ -59,21 +59,26 @@ public class IrisClient extends JFrame {
 	static protected final Scheduler LOGIN = new Scheduler("LOGIN");
 
 	/** Window title login message */
-	static protected final String WINDOW_TITLE_LOGIN = "Login to Start";
+	static protected final String TITLE_NOT_LOGGED_IN = "Not logged in";
 
-	/** Get window title.
-	 * @param u User, may be null. */
-	static protected String getWindowTitle(User u) {
-		return SystemAttrEnum.WINDOW_TITLE.getString() +
-		       getWindowTitleSuffix(u);
+	/** Window title login message */
+	static protected final String TITLE_LOGIN_IN_PROGRESS =
+		"Logging in ... please wait";
+
+	/** Create the window title */
+	static protected String createTitle(String suffix) {
+		return SystemAttrEnum.WINDOW_TITLE.getString() + suffix;
 	}
 
-	/** Get the window title suffix */
-	static protected String getWindowTitleSuffix(User u) {
-		if(u != null)
-			return u.getName() + " (" + u.getFullName() + ")";
-		else
-			return WINDOW_TITLE_LOGIN;
+	/** Create the window title.
+	 * @param s Current session, or null if not logged in. */
+	static protected String createTitle(Session s) {
+		if(s != null) {
+			User u = s.getUser();
+			return createTitle(u.getName() + " (" +
+				u.getFullName() + ")");
+		}
+		return createTitle(TITLE_NOT_LOGGED_IN);
 	}
 
 	/** Array of screens to display client */
@@ -111,7 +116,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws IOException {
-		super(getWindowTitle(null));
+		super(createTitle(TITLE_NOT_LOGGED_IN));
 		this.props = props;
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
@@ -244,6 +249,7 @@ public class IrisClient extends JFrame {
 	/** Login a user */
 	protected void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		setTitle(createTitle(TITLE_LOGIN_IN_PROGRESS));
 		session_menu.setLoggedIn(true);
 		closeSession();
 		try {
@@ -254,6 +260,7 @@ public class IrisClient extends JFrame {
 				pwd[i] = ' ';
 			updateMenus(session);
 			arrangeTabs();
+			setTitle(createTitle(session));
 			setCursor(null);
 			validate();
 		}
@@ -267,7 +274,6 @@ public class IrisClient extends JFrame {
 		SonarState state = createSonarState();
 		state.login(user, new String(pwd));
 		state.populateCaches();
-		setTitle(getWindowTitle(state.getUser()));
 		return new Session(state, desktop, props, logger, baseLayers);
 	}
 
@@ -307,7 +313,7 @@ public class IrisClient extends JFrame {
 		updateMenus(null);
 		removeTabs();
 		closeSession();
-		setTitle(getWindowTitle(null));
+		setTitle(createTitle(TITLE_NOT_LOGGED_IN));
 		validate();
 	}
 
