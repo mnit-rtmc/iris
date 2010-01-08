@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -273,14 +273,14 @@ public class ControllerIOModel extends AbstractTableModel {
 	public Object getValueAt(int row, int column) {
 		int pin = row + 1;
 		switch(column) {
-			case COL_PIN:
-				return pin;
-			case COL_TYPE:
-				return types[pin];
-			case COL_DEVICE:
-				return io[pin];
-			default:
-				return null;
+		case COL_PIN:
+			return pin;
+		case COL_TYPE:
+			return types[pin];
+		case COL_DEVICE:
+			return io[pin];
+		default:
+			return null;
 		}
 	}
 
@@ -293,12 +293,12 @@ public class ControllerIOModel extends AbstractTableModel {
 	public void setValueAt(Object value, int row, int column) {
 		int pin = row + 1;
 		switch(column) {
-			case COL_TYPE:
-				setDeviceType(pin, (DeviceType)value);
-				break;
-			case COL_DEVICE:
-				setDevice(pin, value);
-				break;
+		case COL_TYPE:
+			setDeviceType(pin, (DeviceType)value);
+			break;
+		case COL_DEVICE:
+			setDevice(pin, value);
+			break;
 		}
 	}
 
@@ -361,24 +361,24 @@ public class ControllerIOModel extends AbstractTableModel {
 		if(d == null)
 			return no_model;
 		switch(d) {
-			case Alarm:
-				return a_model;
-			case Camera:
-				return c_model;
-			case Detector:
-				return dt_model;
-			case DMS:
-				return dms_model;
-			case Lane_Marking:
-				return lmark_model;
-			case LCSIndication:
-				return lcsi_model;
-			case Ramp_Meter:
-				return m_model;
-			case Warning_Sign:
-				return w_model;
-			default:
-				return no_model;
+		case Alarm:
+			return a_model;
+		case Camera:
+			return c_model;
+		case Detector:
+			return dt_model;
+		case DMS:
+			return dms_model;
+		case Lane_Marking:
+			return lmark_model;
+		case LCSIndication:
+			return lcsi_model;
+		case Ramp_Meter:
+			return m_model;
+		case Warning_Sign:
+			return w_model;
+		default:
+			return no_model;
 		}
 	}
 
