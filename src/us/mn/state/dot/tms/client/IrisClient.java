@@ -188,21 +188,14 @@ public class IrisClient extends JFrame {
 
 	/** Auto-login the user if enabled */
 	protected void autoLogin() {
-		String un = PropertyFile.get(props, "autologin.username");
+		String user = PropertyFile.get(props, "autologin.username");
 		String pws = PropertyFile.get(props, "autologin.password");
-		if(un == null || pws == null)
+		if(user == null || pws == null)
 			return;
-		char[] pw = pws.toCharArray();
+		char[] pwd = pws.toCharArray();
 		pws = null;
-		if(un.length() > 0 && pw.length > 0) {
-			try {
-				doLogin(un, pw);
-			}
-			catch(Exception ex) {
-				System.err.println("Auto-login failed.");
-				ex.printStackTrace();
-			}
-		}
+		if(user.length() > 0 && pwd.length > 0)
+			login(user, pwd);
 	}
 
 	/** Get a list of all visible screen panes. Will return an empty
@@ -252,6 +245,7 @@ public class IrisClient extends JFrame {
 	/** Login a user */
 	protected void doLogin(String user, char[] pwd) throws Exception {
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+		session_menu.setLoggedIn(true);
 		closeSession();
 		try {
 			session = createSession(user, pwd);
