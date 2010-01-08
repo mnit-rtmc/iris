@@ -89,6 +89,9 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		tab.add("Setup", createSetupPanel());
 		add(tab);
 		updateAttribute(null);
+		if(canUpdate())
+			createJobs();
+		controller.setEnabled(true);
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -103,11 +106,6 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
 		location.addRow("Notes", notes);
-		new FocusJob(notes) {
-			public void perform() {
-				proxy.setNotes(notes.getText());
-			}
-		};
 		location.setCenter();
 		location.addRow(controller);
 		new ActionJob(this, controller) {
@@ -131,33 +129,42 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 
 	/** Create camera setup panel */
 	protected JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow("Encoder", encoder);
+		panel.addRow("Encoder Channel", encoder_channel);
+		panel.addRow("NVR", nvr);
+		panel.addRow("Publish", publish);
+		return panel;
+	}
+
+	/** Create jobs */
+	protected void createJobs() {
+		new FocusJob(notes) {
+			public void perform() {
+				proxy.setNotes(notes.getText());
+			}
+		};
 		new FocusJob(encoder) {
 			public void perform() {
 				proxy.setEncoder(encoder.getText());
 			}
 		};
-		panel.addRow("Encoder Channel", encoder_channel);
 		new ChangeJob(this, encoder_channel) {
 			public void perform() {
 				Number c = (Number)encoder_channel.getValue();
 				proxy.setEncoderChannel(c.intValue());
 			}
 		};
-		panel.addRow("NVR", nvr);
 		new FocusJob(nvr) {
 			public void perform() {
 				proxy.setNvr(nvr.getText());
 			}
 		};
-		panel.addRow("Publish", publish);
 		new ActionJob(this, publish) {
 			public void perform() {
 				proxy.setPublish(publish.isSelected());
 			}
 		};
-		return panel;
 	}
 
 	/** Update one attribute on the form */
