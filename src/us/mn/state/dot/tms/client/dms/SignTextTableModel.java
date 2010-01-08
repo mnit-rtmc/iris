@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,7 +137,6 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
-		String oname = group.getName() + "_XX";
-		return creator.canAddSignText(oname);
+		return creator.canAddSignText(group.getName() + "_XX");
 	}
 }
