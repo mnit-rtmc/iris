@@ -48,7 +48,7 @@ import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * The Main class for IrisClient.
+ * The main window for the IRIS client application.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
