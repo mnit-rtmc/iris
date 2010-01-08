@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,13 +16,13 @@ package us.mn.state.dot.tms.utils;
 
 import java.awt.event.KeyEvent;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.ResourceBundle;
 
 /**
  * Convenience class to handle I18N messages.
  *
- * @version Initial release, 06/03/08
  * @author P.W. Wong, AHMCT
  * @author Michael Darter
  */
@@ -53,30 +53,24 @@ public class I18N {
 	 * 		language, country, and variant.
 	 */
 	static public void initialize(Properties props) {
-		String l = PropertyFile.get(props, "language");
-		String c = PropertyFile.get(props, "country");
-		String v = PropertyFile.get(props, "variant");
-
-		Log.finest(
-			"Note: I18N: opening I18N resources: Language=" +
+		String l = props.getProperty("language");
+		String c = props.getProperty("country");
+		String v = props.getProperty("variant");
+		if(l == null || c == null || v == null) {
+			Log.severe("Error: I18N properties (language, " +
+				"country, variant) not set");
+			return;
+		}
+		Log.finest("Note: I18N: opening resources: Language=" +
 			l + ", Country=" + c + ", Variant=" + v);
 		try {
-			if(v != null && l != null && c != null) {
-				Locale loc = new Locale(l, c, v);
-				m_bundle = ResourceBundle.getBundle(
-					BASENAME, loc);
-			}
+			Locale loc = new Locale(l, c, v);
+			m_bundle = ResourceBundle.getBundle(BASENAME, loc);
 		}
-		catch(Exception ex) {
-			Log.severe("Error: could not load message " +
+		catch(MissingResourceException ex) {
+			Log.severe("Error: I18N could not load message " +
 				"bundle: " + ex);
-			m_bundle = null;
 		}
-		if(m_bundle == null) {
-			Log.severe("Error: failed to open I18N resource " +
-				"bundle: " + BASENAME + "_" + l + "_" + c + 
-				"_" + v);
- 		}
 	}
 
 	/** Get the specified message, with no error messages returned
@@ -90,7 +84,8 @@ public class I18N {
 			return null;
 		try {
 			return m_bundle.getString(id);
-		} catch(Exception ex) {
+		}
+		catch(Exception ex) {
 			return null;
 		}
 	}
@@ -109,9 +104,8 @@ public class I18N {
 			return m_bundle.getString(id);
 		}
 		catch(Exception ex) {
-			Log.warning(
-				"Error: attempting to read id ("+id+
-				") from bundle, ex="+ex);
+			Log.warning("Error: attempting to read id (" + id +
+				") from bundle, ex=" + ex);
 			return NOT_READ;
 		}
 	}
