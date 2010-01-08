@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,11 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class ActionPlanPanel extends ToolPanel {
 
+	/** Is this panel IRIS enabled? */
+	static public boolean getIEnabled() {
+		return SystemAttrEnum.ACTIONPLAN_TOOLBAR_ENABLE.getBoolean();
+	}
+
 	/** Combo box for all action plans */
 	protected final JComboBox combo_box = new JComboBox();
 
@@ -45,12 +50,6 @@ public class ActionPlanPanel extends ToolPanel {
 	/** Dispose of the panel */
 	public void dispose() {
 		model.dispose();
-	}
-
-	/** Is this panel IRIS enabled? */
-	public static boolean getIEnabled() {
-		return SystemAttrEnum.
-			ACTIONPLAN_TOOLBAR_ENABLE.getBoolean();
 	}
 
 	/** Set the tool tip text */
