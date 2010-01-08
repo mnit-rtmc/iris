@@ -288,14 +288,14 @@ public class IrisClient extends JFrame {
 		JMenu vm = view_menu;
 		if(vm != null)
 			getJMenuBar().remove(vm);
-		if(s != null) {
+		boolean in = s != null;
+		if(in) {
 			view_menu = new ViewMenu(s);
 			getJMenuBar().add(view_menu, 1);
-			help_menu.add(desktop);
-		} else {
+		} else
 			view_menu = null;
-		}
-		session_menu.setLoggedIn(s != null);
+		session_menu.setLoggedIn(in);
+		help_menu.setLoggedIn(in);
 	}
 
 	/** Logout of the current session */

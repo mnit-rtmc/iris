@@ -32,8 +32,9 @@ public class HelpMenu extends JMenu {
 	/** Smart desktop */
 	protected final SmartDesktop desktop;
 
-	/** open trouble ticket menu item */
-	protected JMenuItem m_opentroubleticket;
+	/** Open trouble ticket menu item */
+	protected final JMenuItem ticket_item = new JMenuItem(
+		"Open Trouble Ticket");
 
 	/** Create a new HelpMenu */
 	public HelpMenu(SmartDesktop sd) { 
@@ -68,32 +69,27 @@ public class HelpMenu extends JMenu {
 		add(item);
 	}
 
-	/** add additional menu items to the existing help menu */
-	public void add(final SmartDesktop desktop) { 
-		addOpenTroubleTicket(desktop);
+	/** Set the logged-in status */
+	public void setLoggedIn(boolean in) {
+		if(in && SystemAttrEnum.HELP_TROUBLE_TICKET_ENABLE.getBoolean())
+			addOpenTroubleTicketItem();
 	}
 
 	/** Add the 'open trouble ticket' menu item. This menu item
-	 *  is inserted at the begining of the help menu and not removed
-	 *  when the user logs out. */
-	protected void addOpenTroubleTicket(final SmartDesktop desktop) { 
-	   	if(!SystemAttrEnum.HELP_TROUBLE_TICKET_ENABLE.getBoolean())
-			return;
-
+	 * is inserted at the begining of the help menu and not removed
+	 * when the user logs out. */
+	protected void addOpenTroubleTicketItem() { 
 		// it's already on the menu
-		if(isMenuComponent(m_opentroubleticket))
+		if(isMenuComponent(ticket_item))
 			return;
-
 		final String url =
 			SystemAttrEnum.HELP_TROUBLE_TICKET_URL.getString();
-		m_opentroubleticket = new JMenuItem("Open Trouble Ticket");
-		m_opentroubleticket.setMnemonic('T');
-		new ActionJob(m_opentroubleticket) {
+		ticket_item.setMnemonic('T');
+		new ActionJob(ticket_item) {
 			public void perform() throws Exception {
 				Help.invokeHelp(url);
 			}
 		};
-		// add as 0th item in menu
-		insert(m_opentroubleticket, 0);
+		insert(ticket_item, 0);
 	}
 }
