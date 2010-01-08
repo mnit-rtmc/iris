@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,6 +127,7 @@ public class MessagesTab extends JPanel {
 		JScrollPane scroll = new JScrollPane(group_table);
 		add(scroll, bag);
 		scroll = new JScrollPane(sign_text_table);
+		scroll.setPreferredSize(new Dimension(284, 0));
 		bag.gridx = 1;
 		bag.gridy = 0;
 		add(scroll, bag);
