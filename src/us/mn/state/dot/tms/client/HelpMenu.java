@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,18 +29,24 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class HelpMenu extends JMenu {
 
+	/** Smart desktop */
+	protected final SmartDesktop desktop;
+
 	/** open trouble ticket menu item */
-	JMenuItem m_opentroubleticket;
+	protected JMenuItem m_opentroubleticket;
 
 	/** Create a new HelpMenu */
-	public HelpMenu(final SmartDesktop desktop) { 
+	public HelpMenu(SmartDesktop sd) { 
 		super("Help");
 		setMnemonic('H');
+		desktop = sd;
+		addSupportItem();
+		addAboutItem();
+	}
 
-		JMenuItem item;
-
-		// add menu item: Support
-		item = new JMenuItem("Support");
+	/** Add support menu item */
+	protected void addSupportItem() {
+		JMenuItem item = new JMenuItem("Support");
 		item.setMnemonic('S');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -48,9 +54,11 @@ public class HelpMenu extends JMenu {
 			}
 		};
 		add(item);
+	}
 
-		// add menu item: About IRIS
-		item = new JMenuItem("About IRIS");
+	/** Add about menu item */
+	protected void addAboutItem() {
+		JMenuItem item = new JMenuItem("About IRIS");
 		item.setMnemonic('A');
 		new ActionJob(item) {
 			public void perform() throws Exception {
@@ -78,8 +86,7 @@ public class HelpMenu extends JMenu {
 
 		final String url =
 			SystemAttrEnum.HELP_TROUBLE_TICKET_URL.getString();
-		m_opentroubleticket = new JMenuItem(
-			"Open Trouble Ticket");
+		m_opentroubleticket = new JMenuItem("Open Trouble Ticket");
 		m_opentroubleticket.setMnemonic('T');
 		new ActionJob(m_opentroubleticket) {
 			public void perform() throws Exception {
