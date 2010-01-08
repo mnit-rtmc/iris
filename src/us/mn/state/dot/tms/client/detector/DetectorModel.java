@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 				return d.getForceFail();
 			}
 			public boolean isEditable(Detector d) {
-				return canUpdate(d);
+				return canUpdate(d, "forceFail");
 			}
 			public void setValueAt(Detector d, Object value) {
 				if(value instanceof Boolean)
@@ -123,7 +123,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 				return d.getFieldLength();
 			}
 			public boolean isEditable(Detector d) {
-				return canUpdate(d);
+				return canUpdate(d, "fieldLength");
 			}
 			public void setValueAt(Detector d, Object value) {
 				if(value instanceof Number) {

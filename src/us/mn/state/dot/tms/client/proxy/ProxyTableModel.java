@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -348,6 +348,12 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public boolean canUpdate(T proxy) {
 		return proxy != null &&
 		       namespace.canUpdate(user, new Name(proxy));
+	}
+
+	/** Check if the user can update a proxy */
+	public boolean canUpdate(T proxy, String aname) {
+		return proxy != null &&
+		       namespace.canUpdate(user, new Name(proxy, aname));
 	}
 
 	/** Check if the user can remove a proxy */
