@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,8 +107,7 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Initialize the widgets on the form */
 	protected void initialize() {
-		location = new LocationPanel(true, proxy.getGeoLoc(),
-			session.getSonarState());
+		location = new LocationPanel(session, proxy.getGeoLoc());
 		det_model.initialize();
 		det_table.setAutoCreateColumnsFromModel(false);
 		det_table.setModel(det_model);

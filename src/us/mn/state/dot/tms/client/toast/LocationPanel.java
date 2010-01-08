@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
 /**
@@ -106,16 +107,16 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	protected final JButton select = new JButton("Select Point");
 
 	/** Create a new location panel */
-	public LocationPanel(boolean enable, GeoLoc l, SonarState st) {
-		super(enable);
+	public LocationPanel(Session s, GeoLoc l) {
+		super(s.canUpdate(l));
 		loc = l;
-		state = st;
-		cache = st.getGeoLocs();
+		state = s.getSonarState();
+		cache = state.getGeoLocs();
 	}
 
 	/** Create a new location panel */
-	public LocationPanel(boolean enable, String l, SonarState st) {
-		this(enable, GeoLocHelper.lookup(l), st);
+	public LocationPanel(Session s, String l) {
+		this(s, GeoLocHelper.lookup(l));
 	}
 
 	/** Initialize the location panel */
@@ -140,6 +141,13 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		add("Northing", northing);
 		setEast();
 		addRow("North Offset", northOff);
+		if(enable)
+			createJobs();
+		updateAttribute(null);
+	}
+
+	/** Create the jobs */
+	protected void createJobs() {
 		new ActionJob(this, freeway) {
 			public void perform() {
 				loc.setFreeway((Road)freeway.getSelectedItem());
@@ -189,7 +197,6 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 				loc.setNorthOffset(getSpinnerInteger(northOff));
 			}
 		};
-		updateAttribute(null);
 	}
 
 	/** Dispose of the location panel */

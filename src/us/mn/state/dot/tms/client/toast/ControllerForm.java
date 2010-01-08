@@ -275,7 +275,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the cabinet panel */
 	protected JPanel createCabinetPanel() {
-		location = new LocationPanel(true, cabinet.getGeoLoc(), state);
+		location = new LocationPanel(session, cabinet.getGeoLoc());
 		location.initialize();
 		location.add("Milepoint", mile);
 		location.finishRow();
