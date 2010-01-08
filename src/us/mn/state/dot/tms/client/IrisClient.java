@@ -41,7 +41,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.trafmap.BaseLayers;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.PropertyFile;
 import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.Screen;
@@ -188,14 +187,14 @@ public class IrisClient extends JFrame {
 
 	/** Auto-login the user if enabled */
 	protected void autoLogin() {
-		String user = PropertyFile.get(props, "autologin.username");
-		String pws = PropertyFile.get(props, "autologin.password");
-		if(user == null || pws == null)
-			return;
-		char[] pwd = pws.toCharArray();
-		pws = null;
-		if(user.length() > 0 && pwd.length > 0)
-			login(user, pwd);
+		String user = props.getProperty("autologin.username");
+		String pws = props.getProperty("autologin.password");
+		if(user != null && pws != null) {
+			char[] pwd = pws.toCharArray();
+			pws = null;
+			if(user.length() > 0 && pwd.length > 0)
+				login(user, pwd);
+		}
 	}
 
 	/** Get a list of all visible screen panes. Will return an empty
