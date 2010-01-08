@@ -14,14 +14,13 @@
  */
 package us.mn.state.dot.tms.client;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.ProxySelector;
-import java.net.URL;
 import java.util.Properties;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.util.HTTPProxySelector;
+import us.mn.state.dot.tms.utils.PropertyLoader;
 
 /**
  * Main entry point for IrisClient.
@@ -34,25 +33,6 @@ public class MainClient {
 	/** Name of default properties file to load */
 	static protected final String DEFAULT_PROPERTIES =
 		"iris-client.properties";
-
-	/** Create a URL for the specified property file */
-	static protected URL createURL(String prop_file) throws IOException {
-		String wd = System.getProperty("user.dir");
-		File file = new File(wd, prop_file);
-		if(file.exists())
-			return file.toURI().toURL();
-		else
-			return new URL(prop_file);
-	}
-
-	/** Read the IRIS property file */
-	static protected Properties readPropertyFile(URL url)
-		throws IOException
-	{
-		Properties props = new Properties();
-		props.load(url.openStream());
-		return props;
-	}
 
 	/** Get the name of the property file to use */
 	static protected String getPropertyFile(String[] args) {
@@ -78,8 +58,8 @@ public class MainClient {
 	static protected IrisClient createClient(String[] args)
 		throws IOException
 	{
-		URL url = createURL(getPropertyFile(args));
-		Properties props = readPropertyFile(url);
+		String loc = getPropertyFile(args);
+		Properties props = PropertyLoader.load(loc);
 		updateSystemProperties(props);
 		return new IrisClient(props);
 	}

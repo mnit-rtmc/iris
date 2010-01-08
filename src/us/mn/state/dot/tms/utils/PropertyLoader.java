@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -35,7 +36,7 @@ public class PropertyLoader {
 			return new FileInputStream(loc);
 		}
 		catch(FileNotFoundException e) {
-			return PropertyLoader.class.getResourceAsStream(loc);
+			return new URL(loc).openStream();
 		}
 	}
 
