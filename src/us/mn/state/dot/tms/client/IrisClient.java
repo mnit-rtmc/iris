@@ -36,7 +36,6 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.sched.AbstractJob;
 import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.trafmap.BaseLayers;
@@ -268,8 +267,8 @@ public class IrisClient extends JFrame {
 
 	/** Create a new session */
 	protected Session createSession(String user, char[] pwd)
-		throws IOException, ConfigurationError, SonarException,
-		NoSuchFieldException, IllegalAccessException
+		throws IOException, SonarException, NoSuchFieldException,
+		IllegalAccessException
 	{
 		SonarState state = createSonarState();
 		state.login(user, new String(pwd));
@@ -279,7 +278,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a new SONAR state */
 	protected SonarState createSonarState() throws IOException,
-		ConfigurationError, NoSuchFieldException, IllegalAccessException
+		SonarException, NoSuchFieldException, IllegalAccessException
 	{
 		return new SonarState(props, new SimpleHandler());
 	}
