@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,8 @@ public class FormPanel extends JPanel {
 	/** Add one component with the current grid bag state */
 	public void add(JComponent comp) {
 		add(comp, bag);
-		comp.setEnabled(enable);
+		if(!(comp instanceof JLabel))
+			comp.setEnabled(enable);
 	}
 
 	/** Add a pair of components to the panel */

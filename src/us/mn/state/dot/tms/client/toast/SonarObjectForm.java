@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,5 +108,15 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	protected void showForm(SonarObjectForm form) {
 		SmartDesktop desktop = session.getDesktop();
 		desktop.show(form);
+	}
+
+	/** Check if the user can update an attribute */
+	protected boolean canUpdate() {
+		return session.canUpdate(proxy.getTypeName());
+	}
+
+	/** Check if the user can update an attribute */
+	protected boolean canUpdate(String aname) {
+		return session.canUpdate(proxy.getTypeName(), aname);
 	}
 }

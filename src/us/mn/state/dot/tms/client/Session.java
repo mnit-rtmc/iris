@@ -24,6 +24,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.Theme;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Detector;
@@ -363,6 +364,11 @@ public class Session {
 	/** Check if the user can update an attribute */
 	public boolean canUpdate(String tname) {
 		return canUpdate(tname, "aname");
+	}
+
+	/** Check if the user can update a proxy */
+	public boolean canUpdate(SonarObject proxy) {
+		return namespace.canUpdate(user, new Name(proxy));
 	}
 
 	/** Dispose of the session */
