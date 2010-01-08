@@ -128,6 +128,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller object */
 	protected final Controller controller;
 
+	/** Login session */
+	protected final Session session;
+
 	/** SONAR state */
 	protected final SonarState state;
 
@@ -193,6 +196,7 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Create a new controller IO model */
 	public ControllerIOModel(Session s, Controller c) {
+		session = s;
 		state = s.getSonarState();;
 		controller = c;
 		io = new ControllerIO[Controller.ALL_PINS];
@@ -285,8 +289,26 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Is the specified cell editable? */
-	public boolean isCellEditable(int row, int column) {
-		return column != COL_PIN;
+	public boolean isCellEditable(int row, int col) {
+		return col != COL_PIN && canUpdateIO();
+	}
+
+	/** Check if the user can update device IO */
+	protected boolean canUpdateIO() {
+		return canUpdateIO(Alarm.SONAR_TYPE) &&
+		       canUpdateIO(Camera.SONAR_TYPE) &&
+		       canUpdateIO(Detector.SONAR_TYPE) &&
+		       canUpdateIO(DMS.SONAR_TYPE) &&
+		       canUpdateIO(LaneMarking.SONAR_TYPE) &&
+		       canUpdateIO(LCSIndication.SONAR_TYPE) &&
+		       canUpdateIO(RampMeter.SONAR_TYPE) &&
+		       canUpdateIO(WarningSign.SONAR_TYPE);
+	}
+
+	/** Check if the user can update one device IO */
+	protected boolean canUpdateIO(String tname) {
+		return session.canUpdate(tname, "pin") &&
+		       session.canUpdate(tname, "controller");
 	}
 
 	/** Set the value of one cell in the table */
