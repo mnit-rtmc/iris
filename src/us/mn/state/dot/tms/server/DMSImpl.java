@@ -728,6 +728,9 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the pixel status array */
 	public void setPixelStatus(String[] p) {
+		// FIXME: if this is larger than the sonar MessageEncoder
+		//        MAX_MESSAGE_SIZE, everything will break.  Maybe we
+		//        should refuse to set this if it's too long?
 		pixelStatus = p;
 		notifyAttribute("pixelStatus");
 	}
