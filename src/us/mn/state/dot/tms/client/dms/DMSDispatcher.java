@@ -358,6 +358,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			for(DMS dms: selected)
 				setSelected(dms);
 		} else {
+			// FIXME: fix multi-selection problems
 			singleTab.clearSelected();
 			enableWidgets();
 			selectMultipleTab();
@@ -428,6 +429,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer.setEnabled(true);
 		durationCmb.setEnabled(true);
 		durationCmb.setSelectedIndex(0);
+		// FIXME: breaks multi-selection
 		sendBtn.setEnabled(canSend(watching));
 		blankBtn.setEnabled(canSend(watching));
 		queryBtn.setEnabled(canRequest(watching));
@@ -731,6 +733,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Get the number of lines on the current sign */
 	public int getLineCount() {
+		// FIXME: broken for multi-selection
 		if(watching == null)
 			return 0;
 		return getLineCount(watching);
