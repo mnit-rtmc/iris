@@ -39,7 +39,7 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Find a sign message using a Checker */
-	static public SignMessage find(final Checker<SignMessage> checker) {
+	static public SignMessage find(Checker<SignMessage> checker) {
 		return (SignMessage)namespace.findObject(SignMessage.SONAR_TYPE,
 			checker);
 	}
