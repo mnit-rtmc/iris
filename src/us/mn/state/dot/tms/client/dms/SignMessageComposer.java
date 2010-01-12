@@ -151,7 +151,7 @@ public class SignMessageComposer extends JPanel {
 	/** Preview mode */
 	protected boolean preview = false;
 
-	/** Counter to indicate we're adjusting combo boxes */
+	/** Counter to indicate we're adjusting widgets */
 	protected int adjusting = 0;
 
 	/** Listener for combo box events */
@@ -164,9 +164,16 @@ public class SignMessageComposer extends JPanel {
 	/** Handle action event for line combo boxes.  This is called whenever
 	 * one of the line combo boxes changes its selected item. */
 	protected void handleActionPerformed(ActionEvent e) {
-		selectPreview(true);
-		if(adjusting == 0)
-			dispatcher.updateQuickMessage();
+		if(adjusting == 0) {
+			selectPreview(true);
+			adjusting++;
+			try {
+				dispatcher.setMessage(getMessage());
+			}
+			finally {
+				adjusting--;
+			}
+		}
 	}
 
 	/** Create a new sign message composer */
@@ -216,20 +223,31 @@ public class SignMessageComposer extends JPanel {
 		JPanel panel = new JPanel();
 		new ActionJob(clearBtn) {
 			public void perform() {
-				clearSelections();
-				clearFonts();
-				dispatcher.qlibCmb.setSelectedIndex(-1);
-				// note: set the spinner to zero after 
-				// clearing message lines because spinner 
-				// validation depends on message lines.
-				timeSpin.setValue(0);
-				selectPreview(true);
+				clearWidgets();
 			}
 		};
 		clearBtn.setMargin(new Insets(0, 6, 0, 6));
 		clearBtn.setMaximumSize(clearBtn.getMinimumSize());
 		panel.add(clearBtn);
 		return panel;
+	}
+
+	/** Clear the widgets */
+	protected void clearWidgets() {
+		clearSelections();
+		clearFonts();
+		adjusting++;
+		try {
+			dispatcher.qlibCmb.setSelectedIndex(-1);
+		}
+		finally {
+			adjusting--;
+		}
+		// note: set the spinner to zero after 
+		// clearing message lines because spinner 
+		// validation depends on message lines.
+		timeSpin.setValue(0);
+		selectPreview(true);
 	}
 
 	/** Dispose of the message selector */
@@ -266,12 +284,16 @@ public class SignMessageComposer extends JPanel {
 	/** Set the preview mode.
 	 *  @param p True to select preview else false. */
 	public void selectPreview(boolean p) {
-		preview = p;
 		if(adjusting == 0) {
+			preview = p;
 			adjusting++;
-			dispatcher.selectPreview(p);
+			try {
+				dispatcher.selectPreview(p);
+			}
+			finally {
+				adjusting--;
+			}
 			setMessage();
-			adjusting--;
 		}
 	}
 
@@ -442,7 +464,13 @@ public class SignMessageComposer extends JPanel {
 				// the user might have changed cbox contents, 
 				// so reevaluate the currently selected quick 
 				// message.
-				dispatcher.updateQuickMessage();
+				adjusting++;
+				try {
+					dispatcher.setMessage(getMessage());
+				}
+				finally {
+					adjusting--;
+				}
 			}
 		});
 	}
@@ -520,11 +548,9 @@ public class SignMessageComposer extends JPanel {
 		if(proxy == null || preview)
 			return;
 		int n_lines = dispatcher.getLineCount(proxy);
-		adjusting++;
 		SignMessage sm = proxy.getMessageCurrent();
 		if(sm != null)
 			setMessage(sm.getMulti(), n_lines);
-		adjusting--;
 	}
 
 	/** Set the currently selected message */
@@ -578,10 +604,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Clear the combobox selections */
 	public void clearSelections() {
-		adjusting++;
 		for(JComboBox cbox: cmbLine)
 			cbox.setSelectedIndex(-1);
-		adjusting--;
 	}
 
 	/** Clear the font comboboxes */

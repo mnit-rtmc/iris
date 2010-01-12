@@ -365,7 +365,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		} else {
 			// FIXME: fix multi-selection problems
 			singleTab.clearSelected();
-			updateQuickMessage(null);
+			setMessage("");
 			enableWidgets();
 			selectMultipleTab();
 		}
@@ -390,7 +390,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			enableWidgets();
 			SignMessage sm = dms.getMessageCurrent();
 			if(sm != null)
-				updateQuickMessage(sm.getMulti());
+				setMessage(sm.getMulti());
 		} else {
 			disableWidgets();
 			singleTab.updateAttribute(dms, null);
@@ -448,21 +448,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Set the fully composed message */
 	public void setMessage(String ms) {
-		String cms = composer.getMessage();
-		if(!MultiString.equals(ms, cms))
-			composer.setMessage(ms, getLineCount());
-	}
-
-	/** Update the quick message combo box using the specified message */
-	protected void updateQuickMessage(String ms) {
-		QuickMessage qm = QuickMessageHelper.find(ms);
-		qlibCmb.setSelectedItem(qm);
-	}
-
-	/** Update the quick message combo box using the currently selected
-	 * message from widgets. */
-	public void updateQuickMessage() {
-		updateQuickMessage(composer.getMessage());
+		composer.setMessage(ms, getLineCount());
+		qlibCmb.setSelectedItem(QuickMessageHelper.find(ms));
 	}
 
 	/** Get the bitmap graphic for all pages */
