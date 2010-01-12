@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,7 +101,7 @@ public class SignMessageCreator {
 		sign_messages.createObject(name, attrs);
 		SignMessage sm = getProxy(name);
 		// Make sure this is the sign message we just created
-		if(multi.equals(sm.getMulti()))
+		if(sm != null && multi.equals(sm.getMulti()))
 			return sm;
 		else
 			return null;
