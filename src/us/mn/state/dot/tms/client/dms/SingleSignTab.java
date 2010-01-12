@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -199,12 +199,6 @@ public class SingleSignTab extends FormPanel {
 				}
 			}
 		};
-	}
-
-	/** Return true if a single DMS is selected else false 
-	 *  if none or multiple are selected. */
-	protected boolean singleSel() {
-		return proxy != null;
 	}
 
 	/** Get the panel for drawing current pixel status */
