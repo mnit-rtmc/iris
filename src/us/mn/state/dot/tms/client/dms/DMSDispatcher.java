@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -387,7 +388,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			builder = DMSHelper.createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
 			enableWidgets();
-			updateQuickMessage(dms.getMessageCurrent());
+			SignMessage sm = dms.getMessageCurrent();
+			if(sm != null)
+				updateQuickMessage(sm.getMulti());
 		} else {
 			disableWidgets();
 			singleTab.updateAttribute(dms, null);
@@ -447,32 +450,20 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	 *  the widgets, which is used by SignMessageComposer. */
 	protected boolean m_updating_widgets = false;
 
-	/** Update widgets based on current quick library message. This
-	 *  method is called by QLibCBox when its state changes. */
-	public void updateWidgetsUsingQuickLib() {
-		// get qlib multi
-		String qlib_multi = "";
-		{
-			QuickMessage qlib_qm = qlibCmb.getSelectedProxy();
-			if(qlib_qm == null)
-				return;
-			qlib_multi = new MultiString(qlib_qm.getMulti()).
-				normalize();
-			if(qlib_multi.isEmpty())
-				return;
-		}
-
-		String multi = composer.getMessage();
-		if(!MultiString.equals(qlib_multi, multi)) {
+	/** Set the fully composed message */
+	public void setMessage(String ms) {
+		String cms = composer.getMessage();
+		if(!MultiString.equals(ms, cms)) {
 			m_updating_widgets = true;
-			composer.setMessage(qlib_multi, getLineCount());
+			composer.setMessage(ms, getLineCount());
 			m_updating_widgets = false;
 		}
 	}
 
 	/** Update the quick message combo box using the specified message */
-	protected void updateQuickMessage(SignMessage sm) {
-		qlibCmb.setSelectedItem(sm);
+	protected void updateQuickMessage(String ms) {
+		QuickMessage qm = QuickMessageHelper.find(ms);
+		qlibCmb.setSelectedItem(qm);
 	}
 
 	/** Update the quick message combo box using the currently selected
@@ -485,9 +476,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		// edit field.
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				// FIXME: this is the wrong time to be creating
-				//        a SignMessage.
-				updateQuickMessage(createMessage());
+				updateQuickMessage(composer.getMessage());
 			}
 		});
 	}

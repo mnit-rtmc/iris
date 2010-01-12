@@ -20,10 +20,8 @@ import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import javax.swing.JComboBox;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
@@ -36,7 +34,18 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class QLibCBox extends JComboBox implements ActionListener {
+public class QLibCBox extends JComboBox {
+
+	/** Given a QuickMessage or String, return the cooresponding quick 
+	 * library message name or an empty string if none exists. */
+	static protected String getQuickLibMsgName(Object obj) {
+		if(obj instanceof String)
+			return (String)obj;
+		else if(obj instanceof QuickMessage)
+			return ((QuickMessage)obj).getName();
+		else
+			return "";
+	}
 
 	/** Canned blank quick library message */
 	static public final QuickMessage BLANK_QMESSAGE = new QuickMessage() {
@@ -70,24 +79,20 @@ public class QLibCBox extends JComboBox implements ActionListener {
 		public void destroy() {}
 	};
 
-	/** container of this cbox */
-	protected final DMSDispatcher m_dispatcher;
+	/** DMS dispatcher */
+	protected final DMSDispatcher dispatcher;
 
 	/** Focus listener for editor component */
-	private final FocusListener m_flistener;
+	private final FocusListener focus_listener;
+
+	/** Action listener for combo box */
+	private final ActionListener action_listener;
 
 	/** Create a new quick message combo box */
 	public QLibCBox(DMSDispatcher d) {
-		m_dispatcher = d;
+		dispatcher = d;
 		setEditable(true);
-		m_flistener = createFocusListener();
-		getEditor().getEditorComponent().addFocusListener(m_flistener);
-		addActionListener(this);
-	}
-
-	/** Create focus listener for editor */
-	protected FocusListener createFocusListener() {
-		return new FocusAdapter() {
+		focus_listener = new FocusAdapter() {
 			public void focusGained(FocusEvent e) {
 				getEditor().selectAll();
 			}
@@ -95,6 +100,14 @@ public class QLibCBox extends JComboBox implements ActionListener {
 				handleEditorFocusLost(e);
 			}
 		};
+		getEditor().getEditorComponent().addFocusListener(
+			focus_listener);
+		action_listener = new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				updateDispatcher();
+			}
+		};
+		addActionListener(action_listener);
 	}
 
 	/** Handle editor focus lost */
@@ -111,12 +124,19 @@ public class QLibCBox extends JComboBox implements ActionListener {
 		QuickMessage qm = QuickMessageHelper.lookup(name);
 		if(qm != null) {
 			getModel().setSelectedItem(qm);
-			m_dispatcher.updateWidgetsUsingQuickLib();
+			updateDispatcher(qm);
 		}
 	}
 
-	/** Return the currently selected proxy */
-	public QuickMessage getSelectedProxy() {
+	/** Update the dispatcher with the selected quick message */
+	protected void updateDispatcher() {
+		QuickMessage qm = getSelectedProxy();
+		if(qm != null)
+			updateDispatcher(qm);
+	}
+
+	/** Get the currently selected proxy */
+	protected QuickMessage getSelectedProxy() {
 		Object obj = getSelectedItem();
 		if(obj instanceof QuickMessage)
 			return (QuickMessage)obj;
@@ -124,49 +144,23 @@ public class QLibCBox extends JComboBox implements ActionListener {
 			return null;
 	}
 
-	/** return the name of the currently selected proxy */
-	public String getSelectedName() {
-		Object obj = getSelectedItem();
-		if(obj == null) {
-			return "";
-		} else if(obj instanceof String) {
-			return (String)obj;
-		} else if(obj instanceof QuickMessage) {
-			return ((QuickMessage)obj).getName();
-		}
-		return "";
-	}
-
-	/** Catch events: enter pressed, cbox item clicked, cursor
-	 * up/down, lost focus (e.g. tab pressed). Also called after
-	 * a setSelectedItem() call. */
-	public void actionPerformed(ActionEvent e) {
-		if("comboBoxChanged".equals(e.getActionCommand()))
-			m_dispatcher.updateWidgetsUsingQuickLib();
+	/** Update the dispatcher with the specified quick message */
+	protected void updateDispatcher(QuickMessage qm) {
+		String ms = qm.getMulti();
+		if(!ms.isEmpty())
+			dispatcher.setMessage(ms);
 	}
 
 	/** Set selected item, but only if it is different from the 
-	 *  currently selected item. Triggers a call to actionPerformed().
-	 *  @param obj May be a String, SignMessage, QuickMessage. */
+	 * currently selected item. Triggers a call to actionPerformed().
+	 * @param obj May be a String, or QuickMessage. */
 	public void setSelectedItem(Object obj) {
-		String nametoset = "";
-		if(obj == null) {
-			nametoset = "";
-		} else if(obj instanceof String) {
-			nametoset = (String)obj;
-		} else if(obj instanceof QuickMessage) {
-			nametoset = ((QuickMessage)obj).getName();
-		} else if(obj instanceof SignMessage) {
-			nametoset = getQuickLibMsgName(obj);
-		}
-		nametoset = (nametoset == null ? "" : nametoset);
-		// set if different from current
+		String nametoset = getQuickLibMsgName(obj);
 		String namecur = getSelectedName();
-		namecur = (namecur == null ? "" : namecur);
 		if(!namecur.equals(nametoset)) {
-			if(nametoset.isEmpty()) {
+			if(nametoset.isEmpty())
 				super.setSelectedItem(BLANK_QMESSAGE);
-			} else {
+			else {
 				QuickMessage qm = QuickMessageHelper.lookup(
 					nametoset);
 				super.setSelectedItem(qm);
@@ -174,34 +168,20 @@ public class QLibCBox extends JComboBox implements ActionListener {
 		}
 	}
 
-	/** Given a QuickMessage or String, return the cooresponding quick 
-	 *  library message name or an empty string if none exists. */
-	protected String getQuickLibMsgName(Object obj) {
-		if(obj == null) {
-			return "";
-		} else if(obj instanceof String) {
-			return (String)obj;
-		} else if(obj instanceof QuickMessage) {
-			return ((QuickMessage)obj).getName();
-		} else if(obj instanceof SignMessage) {
-			// lookup based on multi equality
-			SignMessage sm = (SignMessage)obj;
-			QuickMessage qm =
-				QuickMessageHelper.find(sm.getMulti());
-			return (qm == null ? "" : qm.getName());
-		}
-		return "";
+	/** Get the name of the currently selected quick message */
+	protected String getSelectedName() {
+		return getQuickLibMsgName(getSelectedItem());
 	}
 
 	/** Dispose */
 	public void dispose() {
+		removeActionListener(action_listener);
 		getEditor().getEditorComponent().
-			removeFocusListener(m_flistener);
-		removeActionListener(this);
+			removeFocusListener(focus_listener);
 	}
 
-	/** is this control IRIS enabled? */
-	public static boolean getIEnabled() {
+	/** Is this control IRIS enabled? */
+	static public boolean getIEnabled() {
 		return SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean();
 	}
 }
