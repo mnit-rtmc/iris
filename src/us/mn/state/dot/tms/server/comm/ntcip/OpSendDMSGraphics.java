@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,16 +118,13 @@ public class OpSendDMSGraphics extends OpDMS {
 
 	/** Lookup all graphics which have the proper color scheme */
 	protected void lookupGraphics() {
-		final int bpp = getBpp();
 		final LinkedList<Graphic> graphics = new LinkedList<Graphic>();
 		GraphicHelper.find(new Checker<Graphic>() {
 			public boolean check(Graphic g) {
 				Integer g_num = g.getGNumber();
-				if(g_num != null) {
-					if(g.getBpp()== 1 || g.getBpp() == bpp){
-						graphics.add(g);
-						num_2_row.put(g_num, null);
-					}
+				if(shouldSend(g_num, g)) {
+					graphics.add(g);
+					num_2_row.put(g_num, null);
 				}
 				return false;
 			}
@@ -135,19 +132,29 @@ public class OpSendDMSGraphics extends OpDMS {
 		graphic_iterator = graphics.iterator();
 	}
 
+	/** Test if we should send the given graphic */
+	protected boolean shouldSend(Integer g_num, Graphic g) {
+		Integer w = dms.getWidthPixels();
+		Integer h = dms.getHeightPixels();
+		int bpp = getBpp();
+		return (g_num != null && w != null && h != null) &&
+		       (g.getWidth() <= w) && (g.getHeight() <= h) &&
+		       (g.getBpp() == 1 || g.getBpp() == bpp);
+	}
+
 	/** Get the bpp of the sign's color scheme */
 	protected int getBpp() {
 		switch(color_scheme.getEnum()) {
-			case monochrome1bit:
-				return 1;
-			case monochrome8bit:
-				return 8;
-			case colorClassic:
-				return 8;
-			case color24bit:
-				return 24;
-			default:
-				return 0;
+		case monochrome1bit:
+			return 1;
+		case monochrome8bit:
+			return 8;
+		case colorClassic:
+			return 8;
+		case color24bit:
+			return 24;
+		default:
+			return 0;
 		}
 	}
 
