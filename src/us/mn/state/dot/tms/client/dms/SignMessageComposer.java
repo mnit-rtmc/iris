@@ -47,7 +47,6 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.I18N;
@@ -522,21 +521,22 @@ public class SignMessageComposer extends JPanel {
 			return;
 		int n_lines = dispatcher.getLineCount(proxy);
 		adjusting++;
-		setMessage(proxy.getMessageCurrent(), n_lines);
+		SignMessage sm = proxy.getMessageCurrent();
+		if(sm != null)
+			setMessage(sm.getMulti(), n_lines);
 		adjusting--;
 	}
 
 	/** Set the currently selected message */
-	protected void setMessage(SignMessage m, int n_lines) {
+	public void setMessage(String ms, int n_lines) {
 		// Note: order here is crucial. The font cbox must be updated
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
 		// font from the font combobox.
-		if(m != null) {
-			timeSpin.setValueNoAction(m.getMulti());
-			setFontComboBoxes(new MultiString(m.getMulti()));
-		}
-		String[] lines = SignMessageHelper.createLines(m, n_lines);
+		MultiString multi = new MultiString(ms);
+		timeSpin.setValueNoAction(ms);
+		setFontComboBoxes(multi);
+		String[] lines = multi.getText(n_lines);
 		final JComboBox[] cl = cmbLine;		// Avoid races
 		for(int i = 0; i < cl.length; i++) {
 			if(i < lines.length)

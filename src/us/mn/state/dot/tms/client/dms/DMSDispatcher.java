@@ -450,9 +450,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Update widgets based on current quick library message. This
 	 *  method is called by QLibCBox when its state changes. */
 	public void updateWidgetsUsingQuickLib() {
-		if(!QLibCBox.getIEnabled())
-			return;
-
 		// get qlib multi
 		String qlib_multi = "";
 		{
@@ -465,28 +462,12 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 				return;
 		}
 
-		// compare MULTI strings
-		SignMessage widg_sm = createMessage();
-		boolean set = true;
-		if(widg_sm != null)
-			set = !(MultiString.equals(qlib_multi, 
-				widg_sm.getMulti()));
-
-		// set sign message if MULTIs are different or no widget multi
-		if(set) {
-			SignMessage sm = createMessage(qlib_multi);
-			if(sm != null) {
-				m_updating_widgets = true;
-				setMessage(sm);
-				m_updating_widgets = false;
-			}
+		String multi = composer.getMessage();
+		if(!MultiString.equals(qlib_multi, multi)) {
+			m_updating_widgets = true;
+			composer.setMessage(qlib_multi, getLineCount());
+			m_updating_widgets = false;
 		}
-	}
-
-	/** Set the composer's current sign message. Called by quick 
-	 *  library cbox when the user changes the quick message. */
-	public void setMessage(SignMessage sm) {
-		composer.setMessage(sm, getLineCount());
 	}
 
 	/** Update the quick message combo box using the specified message */
