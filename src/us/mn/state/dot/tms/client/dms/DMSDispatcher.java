@@ -364,6 +364,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		} else {
 			// FIXME: fix multi-selection problems
 			singleTab.clearSelected();
+			updateQuickMessage(null);
 			enableWidgets();
 			selectMultipleTab();
 		}
@@ -386,6 +387,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			builder = DMSHelper.createPixelMapBuilder(dms);
 			updateAttribute(dms, null);
 			enableWidgets();
+			updateQuickMessage(dms.getMessageCurrent());
 		} else {
 			disableWidgets();
 			singleTab.updateAttribute(dms, null);
@@ -438,7 +440,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		blankBtn.setEnabled(canSend(watching));
 		queryBtn.setEnabled(canRequest(watching));
 		qlibCmb.setEnabled(true);
-		updateTextQLibCBox(true);
 		selectPreview(false);
 	}
 
@@ -488,39 +489,26 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer.setMessage(sm, getLineCount());
 	}
 
-	/** Update the quick library cbox using the current sign message 
-	 *  on either the DMS or from the widgets.
-	 *  @param useDms True to use the DMS as the message source else false
-	 *		  to use the sign message widgets as the source. */
-	public void updateTextQLibCBox(final boolean useDms) {
-		if(!QLibCBox.getIEnabled())
+	/** Update the quick message combo box using the specified message */
+	protected void updateQuickMessage(SignMessage sm) {
+		qlibCmb.setSelectedItem(sm);
+	}
+
+	/** Update the quick message combo box using the currently selected
+	 * message from widgets. */
+	public void updateQuickMessage() {
+		if(m_updating_widgets)
 			return;
-
-		// get sign message from dms
-		final SignMessage sm_dms = (watching == null ? null : 
-			watching.getMessageCurrent());
-
 		// this is invoked later because the model probably hasn't 
 		// been updated with the free-form text in the editor's 
 		// edit field.
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				handleUpdateTextQLibCBox(useDms, sm_dms);
+				// FIXME: this is the wrong time to be creating
+				//        a SignMessage.
+				updateQuickMessage(createMessage());
 			}
 		});
-	}
-
-	/** handle update to quick lib combobox */
-	protected void handleUpdateTextQLibCBox(boolean useDms, 
-		SignMessage sm_dms) 
-	{
-		if(useDms)
-			qlibCmb.setSelectedItem(sm_dms);
-		else {
-			final SignMessage sm = createMessage();
-			if(sm != null)
-				qlibCmb.setSelectedItem(sm);
-		}
 	}
 
 	/** Get the bitmap graphic for all pages */

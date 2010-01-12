@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,15 +162,12 @@ public class SignMessageComposer extends JPanel {
 		}
 	};
 
-	/** handle action event */
+	/** Handle action event for line combo boxes.  This is called whenever
+	 * one of the line combo boxes changes its selected item. */
 	protected void handleActionPerformed(ActionEvent e) {
-		if(adjusting != 0)
-			return;
 		selectPreview(true);
-		// the user might have changed cbox contents, so
-		// reevaluate the currently selected quick message.
-		if(!dispatcher.m_updating_widgets)
-			dispatcher.updateTextQLibCBox(false);
+		if(adjusting == 0)
+			dispatcher.updateQuickMessage();
 	}
 
 	/** Create a new sign message composer */
@@ -446,7 +443,7 @@ public class SignMessageComposer extends JPanel {
 				// the user might have changed cbox contents, 
 				// so reevaluate the currently selected quick 
 				// message.
-				dispatcher.updateTextQLibCBox(false);
+				dispatcher.updateQuickMessage();
 			}
 		});
 	}
