@@ -88,6 +88,9 @@ public class QLibCBox extends JComboBox {
 	/** Action listener for combo box */
 	private final ActionListener action_listener;
 
+	/** Flag to indicate we're adjusting widgets */
+	protected boolean adjusting = false;
+
 	/** Create a new quick message combo box */
 	public QLibCBox(DMSDispatcher d) {
 		dispatcher = d;
@@ -147,14 +150,19 @@ public class QLibCBox extends JComboBox {
 	/** Update the dispatcher with the specified quick message */
 	protected void updateDispatcher(QuickMessage qm) {
 		String ms = qm.getMulti();
-		if(!ms.isEmpty())
+		if(!ms.isEmpty()) {
+			adjusting = true;
 			dispatcher.setMessage(ms);
+			adjusting = false;
+		}
 	}
 
 	/** Set selected item, but only if it is different from the 
 	 * currently selected item. Triggers a call to actionPerformed().
 	 * @param obj May be a String, or QuickMessage. */
 	public void setSelectedItem(Object obj) {
+		if(adjusting)
+			return;
 		String nametoset = getQuickLibMsgName(obj);
 		String namecur = getSelectedName();
 		if(!namecur.equals(nametoset)) {

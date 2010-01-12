@@ -446,18 +446,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		selectPreview(false);
 	}
 
-	/** True to indicate updateWidgetsUsingQuickLib() is updating 
-	 *  the widgets, which is used by SignMessageComposer. */
-	protected boolean m_updating_widgets = false;
-
 	/** Set the fully composed message */
 	public void setMessage(String ms) {
 		String cms = composer.getMessage();
-		if(!MultiString.equals(ms, cms)) {
-			m_updating_widgets = true;
+		if(!MultiString.equals(ms, cms))
 			composer.setMessage(ms, getLineCount());
-			m_updating_widgets = false;
-		}
 	}
 
 	/** Update the quick message combo box using the specified message */
@@ -469,16 +462,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Update the quick message combo box using the currently selected
 	 * message from widgets. */
 	public void updateQuickMessage() {
-		if(m_updating_widgets)
-			return;
-		// this is invoked later because the model probably hasn't 
-		// been updated with the free-form text in the editor's 
-		// edit field.
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				updateQuickMessage(composer.getMessage());
-			}
-		});
+		updateQuickMessage(composer.getMessage());
 	}
 
 	/** Get the bitmap graphic for all pages */
