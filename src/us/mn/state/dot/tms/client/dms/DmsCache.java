@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Cache for DMS proxy objects.
@@ -62,6 +63,14 @@ public class DmsCache {
 	/** Get the quick message cache */
 	public TypeCache<QuickMessage> getQuickMessages() {
 		return quick_messages;
+	}
+
+	/** Quick message proxy list model */
+	protected final ProxyListModel<QuickMessage> qm_model;
+
+	/** Get the quick message list model */
+	public ProxyListModel<QuickMessage> getQuickMessageModel() {
+		return qm_model;
 	}
 
 	/** Cache of dynamic message signs */
@@ -106,6 +115,8 @@ public class DmsCache {
 			client);
 		quick_messages = new TypeCache<QuickMessage>(QuickMessage.class,
 			client);
+		qm_model = new ProxyListModel<QuickMessage>(quick_messages);
+		qm_model.initialize();
 		dmss = new TypeCache<DMS>(DMS.class, client);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, client);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(

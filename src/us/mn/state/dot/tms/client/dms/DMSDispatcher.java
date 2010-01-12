@@ -52,6 +52,7 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
+import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -153,7 +154,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
 		blankAction = new BlankDmsAction(selectionModel, this, user);
-		qlibCmb = new QLibCBox(this, dms_cache.getQuickMessages());
+		qlibCmb = new QLibCBox(this);
+		qlibCmb.setModel(new WrapperComboBoxModel(
+			st.getDmsCache().getQuickMessageModel()));
 		blankBtn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
 		composer = new SignMessageComposer(session, this);
@@ -510,12 +513,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected void handleUpdateTextQLibCBox(boolean useDms, 
 		SignMessage sm_dms) 
 	{
-		if(useDms) {
-			if(qlibCmb != null)
-				qlibCmb.setSelectedItem(sm_dms);
-		} else {
+		if(useDms)
+			qlibCmb.setSelectedItem(sm_dms);
+		else {
 			final SignMessage sm = createMessage();
-			if(sm != null && qlibCmb != null)
+			if(sm != null)
 				qlibCmb.setSelectedItem(sm);
 		}
 	}
