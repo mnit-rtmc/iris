@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,12 @@ public class GraphicForm extends AbstractForm {
 	static protected final FileNameExtensionFilter FILTER =
 		new FileNameExtensionFilter("PNG, GIF and BMP Images",
 		"png", "gif", "bmp");
+
+	/** Maximum allowed graphic height */
+	static protected final int MAX_GRAPHIC_HEIGHT = 144;
+
+	/** Maximum allowed graphic width */
+	static protected final int MAX_GRAPHIC_WIDTH = 144;
 
 	/** Table model for graphics */
 	protected final GraphicModel model;
@@ -142,7 +148,8 @@ public class GraphicForm extends AbstractForm {
 		int r = jfc.showOpenDialog(null);
 		if(r == JFileChooser.APPROVE_OPTION) {
 			BufferedImage im = ImageIO.read(jfc.getSelectedFile());
-			if(im.getHeight() <= 64 && im.getWidth() <= 80)
+			if(im.getHeight() <= MAX_GRAPHIC_HEIGHT &&
+			   im.getWidth() <= MAX_GRAPHIC_WIDTH)
 				createGraphic(im);
 		}
 	}
