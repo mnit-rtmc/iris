@@ -483,8 +483,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Set the composer's current sign message. Called by quick 
 	 *  library cbox when the user changes the quick message. */
-	public void setMessage(SignMessage m) {
-		composer.setMessage(m, getLineCount());
+	public void setMessage(SignMessage sm) {
+		composer.setMessage(sm, getLineCount());
 	}
 
 	/** Update the quick library cbox using the current sign message 
@@ -526,10 +526,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected BitmapGraphic[] getBitmaps(DMS dms) {
 		if(dms == null)
 			return null;
-		SignMessage m = dms.getMessageCurrent();
-		if(m == null)
+		SignMessage sm = dms.getMessageCurrent();
+		if(sm == null)
 			return null;
-		byte[] bmaps = decodeBitmaps(m.getBitmaps());
+		byte[] bmaps = decodeBitmaps(sm.getBitmaps());
 		if(bmaps == null)
 			return null;
 		BitmapGraphic bg = createBitmapGraphic(dms);
@@ -573,20 +573,20 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected void sendMessage() {
 		List<DMS> sel = selectionModel.getSelected();
 		if(sel.size() > 0) {
-			SignMessage m = createMessage();
-			if(m != null)
-				sendMessage(m, sel);
+			SignMessage sm = createMessage();
+			if(sm != null)
+				sendMessage(sm, sel);
 			composer.updateMessageLibrary();
 			selectPreview(false);
 		}
 	}
 
 	/** Send a message to a list of signs */
-	protected void sendMessage(SignMessage m, List<DMS> sel) {
+	protected void sendMessage(SignMessage sm, List<DMS> sel) {
 		for(DMS dms: sel) {
 			if(checkDimensions(dms)) {
 				dms.setOwnerNext(user);
-				dms.setMessageNext(m);
+				dms.setMessageNext(sm);
 			} else {
 				// NOTE: this sign does not match the proper
 				//       dimensions, so deselect it.
