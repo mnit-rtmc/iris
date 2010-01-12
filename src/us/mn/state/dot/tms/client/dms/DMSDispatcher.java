@@ -229,7 +229,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
-		multipleTab.dispose();
 		selectionModel.removeProxySelectionListener(this);
 		cache.removeProxyListener(this);
 		if(watching != null) {
@@ -239,6 +238,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		clearSelected();
 		clearCurrentPager();
 		clearPreviewPager();
+		singleTab.dispose();
+		multipleTab.dispose();
 		composer.dispose();
 		qlibCmb.dispose();
 		removeAll();

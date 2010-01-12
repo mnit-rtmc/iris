@@ -201,6 +201,11 @@ public class SingleSignTab extends FormPanel {
 		};
 	}
 
+	/** Dispose of the sign tab */
+	public void dispose() {
+		clearSelected();
+	}
+
 	/** Get the panel for drawing current pixel status */
 	public SignPixelPanel getCurrentPanel() {
 		return currentPnl;
