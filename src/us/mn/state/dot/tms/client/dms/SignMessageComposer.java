@@ -148,10 +148,9 @@ public class SignMessageComposer extends JPanel {
 	/** Clear button */
 	protected IButton clearBtn = new IButton("dms.clear");
 
-	/** Preview mode */
-	protected boolean preview = false;
-
-	/** Counter to indicate we're adjusting widgets */
+	/** Counter to indicate we're adjusting widgets.  This needs to be
+	 * incremented before calling dispatcher methods which might cause
+	 * callbacks to this class.  This prevents infinite loops. */
 	protected int adjusting = 0;
 
 	/** Listener for combo box events */
@@ -285,7 +284,8 @@ public class SignMessageComposer extends JPanel {
 	 *  @param p True to select preview else false. */
 	public void selectPreview(boolean p) {
 		if(adjusting == 0) {
-			preview = p;
+			if(!p)
+				setMessage();
 			adjusting++;
 			try {
 				dispatcher.selectPreview(p);
@@ -293,7 +293,6 @@ public class SignMessageComposer extends JPanel {
 			finally {
 				adjusting--;
 			}
-			setMessage();
 		}
 	}
 
@@ -545,12 +544,12 @@ public class SignMessageComposer extends JPanel {
 	/** Set the currently selected message */
 	public void setMessage() {
 		DMS proxy = sel_proxy;	// Avoid races
-		if(proxy == null || preview)
-			return;
-		int n_lines = dispatcher.getLineCount(proxy);
-		SignMessage sm = proxy.getMessageCurrent();
-		if(sm != null)
-			setMessage(sm.getMulti(), n_lines);
+		if(proxy != null) {
+			int n_lines = dispatcher.getLineCount(proxy);
+			SignMessage sm = proxy.getMessageCurrent();
+			if(sm != null)
+				setMessage(sm.getMulti(), n_lines);
+		}
 	}
 
 	/** Set the currently selected message */
