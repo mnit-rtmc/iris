@@ -545,7 +545,7 @@ public class SignMessageComposer extends JPanel {
 	public void setMessage() {
 		DMS proxy = sel_proxy;	// Avoid races
 		if(proxy != null) {
-			int n_lines = dispatcher.getLineCount(proxy);
+			int n_lines = dispatcher.getLineCount();
 			SignMessage sm = proxy.getMessageCurrent();
 			if(sm != null)
 				setMessage(sm.getMulti(), n_lines);

@@ -446,10 +446,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		selectPreview(false);
 	}
 
-	/** Set the fully composed message */
+	/** Set the fully composed message.  This will update all the widgets
+	 * on the dispatcher with the specified message. */
 	public void setMessage(String ms) {
 		composer.setMessage(ms, getLineCount());
 		qlibCmb.setSelectedItem(QuickMessageHelper.find(ms));
+		// FIXME: this should only happen in preview mode
+		updatePreviewPanel();
 	}
 
 	/** Get the bitmap graphic for all pages */
@@ -634,10 +637,8 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			BitmapGraphic[] bmaps = getBitmaps(dms);
 			currentPnlPager = new DMSPanelPager(currentPnl, dms,
 				bmaps, getPgOnTime(dms));
-			if(a == null) {
-				composer.setSign(dms, getLineCount(dms),
-					builder);
-			}
+			if(a == null)
+				composer.setSign(dms, getLineCount(), builder);
 			composer.setMessage();
 		}
 	}
@@ -663,26 +664,16 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			DmsPgTime.getDefaultOn(true) : ms.getPageOnTime());
 	}
 
-	/** Get the number of lines on the current sign */
+	/** Get the number of lines on the selected sign(s) */
 	public int getLineCount() {
-		// FIXME: broken for multi-selection
-		if(watching == null)
-			return 0;
-		return getLineCount(watching);
-	}
-
-	/** Get the number of lines on a sign */
-	public int getLineCount(DMS dms) {
 		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
 		int lh = getLineHeightPixels();
-		Integer h = dms.getHeightPixels();
-		int ret;
-		if(h != null && h > 0 && lh >= h) {
+		int h = getHeightPixels();
+		if(h > 0 && lh >= h) {
 			int nl = h / lh;
-			ret = Math.min(nl, ml);
+			return Math.min(nl, ml);
 		} else
-			ret = ml;
-		return ret;
+			return ml;
 	}
 
 	/** Get the line height */
@@ -694,10 +685,21 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return 7;
 	}
 
+	/** Get the pixel height */
+	protected int getHeightPixels() {
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.height;
+		else
+			return 0;
+	}
+
 	/** Select the preview mode */
 	public void selectPreview(boolean p) {
 		if(p)
 			updatePreviewPanel();
+		else
+			clearPreviewPager();
 		composer.selectPreview(p);
 		singleTab.selectPreview(p);
 	}
