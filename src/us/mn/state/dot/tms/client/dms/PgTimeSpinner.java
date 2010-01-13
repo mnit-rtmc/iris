@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,14 @@ import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A spinner for the DMS message page time.
- * @see DmsPgTime, SignMessageComposer, SystemAttributeForm
+ * @see DmsPgTime, DMSDispatcher, SystemAttributeForm
  * @author Michael Darter
+ * @author Douglas Lau
  */
-public class PgTimeSpinner extends JSpinner implements ChangeListener
-{
+public class PgTimeSpinner extends JSpinner implements ChangeListener {
+
 	/** Page on-time increment value */
-	public static final float INC_ONTIME_SECS = .1f;
+	static public final float INC_ONTIME_SECS = .1f;
 
 	/** Does the current message have single or multiple pages.
 	 *  This determines if zero is an acceptable value. */
@@ -44,6 +45,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	/** Page time spinner model, which allows for an closed range of
 	 *  values. Single page messages also allow a value of zero. */
 	protected class PgTimeSpinnerModel extends AbstractSpinnerModel {
+
 		/** Current model value */
 		private double m_value = 0;
 
@@ -118,13 +120,13 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 		}
 	}
 
-	/** This component's container */
-	private final SignMessageComposer m_composer;
+	/** DMS dispatcher */
+	protected final DMSDispatcher dispatcher;
 
-	/** Constructor 
-	 *  @param c This widget's container, may be null. */
-	public PgTimeSpinner(SignMessageComposer c) {
-		m_composer = c;
+	/** Create a new page time spinner.
+	 * @param d DMS dispatcher */
+	public PgTimeSpinner(DMSDispatcher d) {
+		dispatcher = d;
 		setModel(new PgTimeSpinnerModel(
 			DmsPgTime.getDefaultOn(true).toSecs(),
 			DmsPgTime.MIN_ONTIME.toSecs(), 
@@ -162,17 +164,18 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 		super.setValue(t.toSecs());
 	}
 
-	/** When this ignore field is > 0, stateChanged events should 
-	 *  be ignored. */
-	private int m_ignore = 0;
+	/** Counter to indicate we're adjusting widgets.  This needs to be
+	 * incremented before calling dispatcher methods which might cause
+	 * callbacks to this class.  This prevents infinite loops. */
+	protected int adjusting = 0;
 
 	/** Set the selected item and ignore any actionPerformed 
 	 *  events that are generated. 
-	 *  @param s MULTI string containing page on time. */
-	public void setValueNoAction(String s) {
-		++m_ignore;
-		setValue(s);
-		--m_ignore;
+	 *  @param ms MULTI string containing page on time. */
+	public void setValueNoAction(String ms) {
+		adjusting++;
+		setValue(ms);
+		adjusting--;
 	}
 
 	/** If the spinner is IRIS enabled, return the current value, 
@@ -193,16 +196,15 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	 *  the default value is used for multi-page messages else 0 
 	 *  for single page messages.
 	 *  @param smulti A MULTI string, containing possible page times. */
-	public void setValue(String m) {
-		setValue(new MultiString(m).getPageOnTime());
+	public void setValue(String ms) {
+		setValue(new MultiString(ms).getPageOnTime());
 	}
 
 	/** Catch state change events. Defined in interface ChangeListener. */
 	public void stateChanged(ChangeEvent e) {
 		// only update preview if user changed spinner
-		if(m_ignore == 0)
-			if( m_composer != null)
-				m_composer.selectPreview(true);
+		if(adjusting == 0)
+			dispatcher.selectPreview(true);
 	}
 
 	/** Set number of pages in current message. */
@@ -214,11 +216,10 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener
 	public void updateValidation(String multi) {
 		setSinglePage(new MultiString(multi).singlePage());
 		DmsPgTime pt = getValuePgTime();
-
-		// validate
-		if(!m_singlepg)
+		if(!m_singlepg) {
 			if(pt.isZero())
 				setValue(DmsPgTime.getDefaultOn(m_singlepg));
+		}
 	}
 
 	/** Round to a single decimal point */

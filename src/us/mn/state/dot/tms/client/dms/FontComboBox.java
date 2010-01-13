@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,39 +30,40 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class FontComboBox extends JComboBox implements ActionListener
-{
+public class FontComboBox extends JComboBox implements ActionListener {
+
 	/** Cache of font proxy objects */
 	protected final TypeCache<Font> m_fonts;
 
 	/** Font combo box model */
 	private final FontComboBoxModel m_fontModel;
 
-	/** This component's container */
-	private final SignMessageComposer m_composer;
+	/** DMS dispatcher */
+	private final DMSDispatcher dispatcher;
 
 	/** constructor */
 	public FontComboBox(TypeCache<Font> fonts, PixelMapBuilder builder, 
-		SignMessageComposer c) 
+		DMSDispatcher d) 
 	{
 		m_fonts = fonts;
-		m_composer = c;
+		dispatcher = d;
 		setToolTipText(I18N.get("DMSDispatcher.FontComboBox.ToolTip"));
 		m_fontModel = new FontComboBoxModel(fonts, builder);
 		setModel(m_fontModel);
 		addActionListener(this);
 	}
 
-	/** Ignore flag is > 0 when actionPerformed events should 
-	 *  be ignored. */
-	private int m_ignore = 0;
+	/** Counter to indicate we're adjusting widgets.  This needs to be
+	 * incremented before calling dispatcher methods which might cause
+	 * callbacks to this class.  This prevents infinite loops. */
+	protected int adjusting = 0;
 
 	/** Set the selected font number and ignore any actionPerformed 
 	 *  events that are generated. */
 	public void setSelectedFontNumber(Integer fnum) {
-		++m_ignore;
+		adjusting++;
 		setSelectedItem(FontHelper.find(fnum));
-		--m_ignore;
+		adjusting--;
 	}
 
 	/** Get the selected font number or null if nothing selected. */
@@ -81,14 +82,11 @@ public class FontComboBox extends JComboBox implements ActionListener
 	}
 
 	/** Catch events: enter pressed, cbox item clicked, cursor up/down
-	 *  lost focus (e.g. tab pressed). Also called after a 
-	 *  setSelectedItem() call. Defined in interface ActionListener. */
+	 * lost focus (e.g. tab pressed). Also called after a 
+	 * setSelectedItem() call. Defined in interface ActionListener. */
 	public void actionPerformed(ActionEvent e) {
-		// only update preview if user clicked font cbox
-		if(m_ignore == 0) {
-			if("comboBoxChanged".equals(e.getActionCommand()))
-				m_composer.selectPreview(true);
-		}
+		if(adjusting == 0)
+			dispatcher.selectPreview(true);
 	}
 
 	/** is this control IRIS enabled? */

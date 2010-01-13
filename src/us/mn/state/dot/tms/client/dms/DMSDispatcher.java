@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.Box;
@@ -27,25 +26,18 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.client.ProxyListener;
-import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
-import us.mn.state.dot.tms.QuickMessage;
-import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -54,6 +46,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.FormPanel;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -67,14 +60,10 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
-	ProxySelectionListener<DMS>
+public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 {
 	/** SONAR namespace */
 	protected final Namespace namespace;
-
-	/** Cache of DMS proxy objects */
-	protected final TypeCache<DMS> cache;
 
 	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
@@ -83,16 +72,10 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	protected final JTabbedPane tabPane = new JTabbedPane();
 
 	/** Single sign tab */
-	protected final SingleSignTab singleTab = new SingleSignTab(this);
+	protected final SingleSignTab singleTab;
 
 	/** Multiple sign tab */
 	protected final MultipleSignTab multipleTab;
-
-	/** Panel used for drawing a DMS */
-	protected final SignPixelPanel currentPnl;
-
-	/** Panel used for drawing a preview DMS */
-	protected final SignPixelPanel previewPnl;
 
 	/** Message composer widget */
 	protected final SignMessageComposer composer;
@@ -133,17 +116,11 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Sign message creator */
 	protected final SignMessageCreator creator;
 
-	/** Pager for current DMS panel */
-	protected DMSPanelPager currentPnlPager;
-
-	/** Pager for preview DMS panel */
-	protected DMSPanelPager previewPnlPager;
-
 	/** Pixel map builder */
 	protected PixelMapBuilder builder;
 
-	/** Currently watching DMS */
-	protected DMS watching;
+	/** Current message MULTI string */
+	protected String message = "";
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session session, DMSManager manager) {
@@ -151,7 +128,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		SonarState st = session.getSonarState();
 		DmsCache dms_cache = st.getDmsCache();
 		namespace = st.getNamespace();
-		cache = dms_cache.getDMSs();
 		user = session.getUser();
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
@@ -162,15 +138,13 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		blankBtn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
 		composer = new SignMessageComposer(session, this);
-		currentPnl = singleTab.getCurrentPanel();
-		previewPnl = singleTab.getPreviewPanel();
+		singleTab = new SingleSignTab(this, dms_cache.getDMSs());
 		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
 		tabPane.addTab("Single", singleTab);
 		tabPane.addTab("Multiple", multipleTab);
 		add(tabPane, BorderLayout.CENTER);
 		add(createDeployBox(), BorderLayout.SOUTH);
 		clearSelected();
-		cache.addProxyListener(this);
 		selectionModel.addProxySelectionListener(this);
 	}
 
@@ -193,33 +167,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		return deployBox;
 	}
 
-	/** A new proxy has been added */
-	public void proxyAdded(DMS proxy) {
-		// we're not interested
-	}
-
-	/** Enumeration of the proxy type has completed */
-	public void enumerationComplete() {
-		// we're not interested
-	}
-
-	/** A proxy has been removed */
-	public void proxyRemoved(DMS proxy) {
-		// Note: the DMSManager will remove the proxy from the
-		//       ProxySelectionModel, so we can ignore this.
-	}
-
-	/** A proxy has been changed */
-	public void proxyChanged(final DMS proxy, final String a) {
-		if(proxy == getSingleSelection()) {
-			SwingUtilities.invokeLater(new Runnable() {
-				public void run() {
-					updateAttribute(proxy, a);
-				}
-			});
-		}
-	}
-
 	/** Get the selected DMS (if a single sign is selected) */
 	protected DMS getSingleSelection() {
 		if(selectionModel.getSelectedCount() == 1) {
@@ -232,37 +179,12 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Dispose of the dispatcher */
 	public void dispose() {
 		selectionModel.removeProxySelectionListener(this);
-		cache.removeProxyListener(this);
-		if(watching != null) {
-			cache.ignoreObject(watching);
-			watching = null;
-		}
 		clearSelected();
-		clearCurrentPager();
-		clearPreviewPager();
 		singleTab.dispose();
 		multipleTab.dispose();
 		composer.dispose();
 		qlibCmb.dispose();
 		removeAll();
-	}
-
-	/** Clear the current DMS panel pager */
-	protected void clearCurrentPager() {
-		DMSPanelPager pager = currentPnlPager;
-		if(pager != null) {
-			pager.dispose();
-			currentPnlPager = null;
-		}
-	}
-
-	/** Clear the preview DMS panel pager */
-	protected void clearPreviewPager() {
-		DMSPanelPager pager = previewPnlPager;
-		if(pager != null) {
-			pager.dispose();
-			previewPnlPager = null;
-		}
 	}
 
 	/** Build the quick lib panel */
@@ -381,21 +303,16 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Set a single selected DMS */
 	protected void setSelected(DMS dms) {
-		if(watching != null)
-			cache.ignoreObject(watching);
-		watching = dms;
-		cache.watchObject(watching);
 		if(DMSHelper.isActive(dms)) {
 			builder = DMSHelper.createPixelMapBuilder(dms);
-			updateAttribute(dms, null);
+			composer.setSign(dms, builder);
 			enableWidgets();
 			SignMessage sm = dms.getMessageCurrent();
 			if(sm != null)
 				setMessage(sm.getMulti());
-		} else {
+		} else
 			disableWidgets();
-			singleTab.updateAttribute(dms, null);
-		}
+		singleTab.setSelected(dms);
 		selectSingleTab();
 	}
 
@@ -418,10 +335,6 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 
 	/** Disable the dispatcher widgets */
 	protected void disableWidgets() {
-		clearCurrentPager();
-		clearPreviewPager();
-		currentPnl.clear();
-		previewPnl.clear();
 		composer.setEnabled(false);
 		composer.clearSelections();
 		durationCmb.setEnabled(false);
@@ -449,57 +362,17 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Set the fully composed message.  This will update all the widgets
 	 * on the dispatcher with the specified message. */
 	public void setMessage(String ms) {
-		composer.setMessage(ms, getLineCount());
-		qlibCmb.setSelectedItem(QuickMessageHelper.find(ms));
-		// FIXME: this should only happen in preview mode
-		updatePreviewPanel();
-	}
-
-	/** Get the bitmap graphic for all pages */
-	protected BitmapGraphic[] getBitmaps(DMS dms) {
-		if(dms == null)
-			return null;
-		SignMessage sm = dms.getMessageCurrent();
-		if(sm == null)
-			return null;
-		byte[] bmaps = decodeBitmaps(sm.getBitmaps());
-		if(bmaps == null)
-			return null;
-		BitmapGraphic bg = createBitmapGraphic(dms);
-		if(bg == null)
-			return null;
-		int blen = bg.length();
-		if(blen == 0 || bmaps.length % blen != 0)
-			return null;
-		int n_pages = bmaps.length / blen;
-		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
-		for(int i = 0; i < n_pages; i++) {
-			bitmaps[i] = createBitmapGraphic(dms);
-			byte[] b = new byte[blen];
-			System.arraycopy(bmaps, i * blen, b, 0, blen);
-			bitmaps[i].setPixels(b);
-		}
-		return bitmaps;
-	}
-
-	/** Decode the bitmaps */
-	protected byte[] decodeBitmaps(String bitmaps) {
-		try {
-			return Base64.decode(bitmaps);
-		}
-		catch(IOException e) {
-			return null;
+		if(ms != null) {
+			message = ms;
+			singleTab.setMessage();
+			composer.setMessage(ms);
+			qlibCmb.setMessage(ms);
 		}
 	}
 
-	/** Create a bitmap graphic */
-	protected BitmapGraphic createBitmapGraphic(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		if(wp != null && hp != null)
-			return new BitmapGraphic(wp, hp);
-		else
-			return null;
+	/** Get the current selected message */
+	public String getMessage() {
+		return message;
 	}
 
 	/** Send a new message to the selected DMS */
@@ -550,7 +423,7 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 	/** Create a new message from the widgets.
 	 * @return A newly created SignMessage else null. */
 	protected SignMessage createMessage() {
-		String multi = composer.getMessage();
+		String multi = message;	// Avoid races
 		if(multi.isEmpty())
 			return null;
 		else
@@ -629,100 +502,17 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		return false;
 	}
 
-	/** Update one attribute on the form */
-	protected void updateAttribute(DMS dms, String a) {
-		singleTab.updateAttribute(dms, a);
-		if(a == null || a.equals("messageCurrent")) {
-			clearCurrentPager();
-			BitmapGraphic[] bmaps = getBitmaps(dms);
-			currentPnlPager = new DMSPanelPager(currentPnl, dms,
-				bmaps, getPgOnTime(dms));
-			if(a == null)
-				composer.setSign(dms, getLineCount(), builder);
-			composer.setMessage();
-		}
-	}
-
-	/** Return the MULTI string currently on the specified dms. */
-	private MultiString getMultiString(DMS dms) {
-		if(dms == null)
-			return null;
-		SignMessage sm = dms.getMessageCurrent();
-		if(sm == null)
-			return null;
-		String m = sm.getMulti();
-		if(m == null)
-			return null;
-		return new MultiString(m);
-	}
-
-	/** Return the page on-time for the current message on the 
-	 *  specified DMS. */
-	private DmsPgTime getPgOnTime(DMS dms) {
-		MultiString ms = getMultiString(dms);
-		return (ms == null ? 
-			DmsPgTime.getDefaultOn(true) : ms.getPageOnTime());
-	}
-
-	/** Get the number of lines on the selected sign(s) */
-	public int getLineCount() {
-		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
-		int lh = getLineHeightPixels();
-		int h = getHeightPixels();
-		if(h > 0 && lh >= h) {
-			int nl = h / lh;
-			return Math.min(nl, ml);
-		} else
-			return ml;
-	}
-
-	/** Get the line height */
-	protected int getLineHeightPixels() {
-		PixelMapBuilder b = builder;
-		if(b != null)
-			return b.getLineHeightPixels();
-		else
-			return 7;
-	}
-
-	/** Get the pixel height */
-	protected int getHeightPixels() {
-		PixelMapBuilder b = builder;
-		if(b != null)
-			return b.height;
-		else
-			return 0;
-	}
-
 	/** Select the preview mode */
 	public void selectPreview(boolean p) {
-		if(p)
-			updatePreviewPanel();
-		else
-			clearPreviewPager();
-		composer.selectPreview(p);
 		singleTab.selectPreview(p);
 	}
 
-	/** Update the preview panel */
-	protected void updatePreviewPanel() {
-		clearPreviewPager();
-		DMS dms = getSingleSelection();
-		if(dms == null)
-			return;
-		BitmapGraphic[] bmaps = getBitmaps(composer.getMessage());
-		previewPnlPager = new DMSPanelPager(previewPnl,	dms, bmaps,
-			composer.getCurrentPgOnTime());
-	}
-
-	/** Get the bitmap graphic for the given message.
-	 *  @param m MULTI string, may be null. */
-	protected BitmapGraphic[] getBitmaps(String m) {
-		m = (m == null ? "" : m);
+	/** Get the bitmap graphic array for the current message */
+	public BitmapGraphic[] getBitmaps() {
 		PixelMapBuilder b = builder;
 		if(b != null) {
-			MultiString ms = new MultiString(m);
-			return b.createPixmaps(ms);
+			MultiString multi = new MultiString(message);
+			return b.createPixmaps(multi);
 		} else
 			return null;
 	}

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JButton;
@@ -24,14 +25,21 @@ import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Base64;
+import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.toast.FormPanel;
@@ -40,12 +48,14 @@ import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A SingleSignTab is a GUI component for displaying the status of a single
- * selected DMS within the DMS dispatcher.
+ * selected DMS within the DMS dispatcher.  One instance of this class is
+ * created on client startup by DMSDispatcher. 
+ * @see DMSDispatcher.
  *
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SingleSignTab extends FormPanel {
+public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Empty text field */
 	static protected final String EMPTY_TXT = "    ";
@@ -102,7 +112,7 @@ public class SingleSignTab extends FormPanel {
 	protected final JTextField locationTxt = createTextField();
 
 	/** AWS controlled checkbox (optional) */
-	protected final JCheckBox awsControlledCbx = new JCheckBox(); //FIXME: make subclass of IComboBox
+	protected final JCheckBox awsControlledCbx = new JCheckBox();
 
 	/** Displays the current operation of the DMS */
 	protected final JTextField operationTxt = createTextField();
@@ -129,25 +139,33 @@ public class SingleSignTab extends FormPanel {
 	protected final SignPixelPanel previewPnl = new SignPixelPanel(true,
 		new Color(0, 0, 0.4f));
 
+	/** Pager for selected DMS panel */
+	protected DMSPanelPager pnlPager;
+
 	/** Tabbed pane for current/preview panels */
 	protected final JTabbedPane tab = new JTabbedPane();
 
-	/** DMS proxy, which is null if none or multiple DMS are selected,
-	 *  otherwise it is the currently single selected DMS. */
-	protected DMS proxy;
+	/** Cache of DMS proxy objects */
+	protected final TypeCache<DMS> cache;
+
+	/** Currently selected DMS.  This will be null if there are zero or
+	 * multiple DMS selected. */
+	protected DMS watching;
 
 	/** Preview mode */
 	protected boolean preview;
 
-	/** Adjusting counter */
+	/** Counter to indicate we're adjusting widgets.  This needs to be
+	 * incremented before calling dispatcher methods which might cause
+	 * callbacks to this class.  This prevents infinite loops. */
 	protected int adjusting = 0;
 
-	/** Create a new single sign tab. One instance of this class is
-	 *  created on client startup by DMSDispatcher. 
-	 *  @see DMSDispatcher. */
-	public SingleSignTab(DMSDispatcher d) {
+	/** Create a new single sign tab. */
+	public SingleSignTab(DMSDispatcher d, TypeCache<DMS> tc) {
 		super(true);
 		dispatcher = d;
+		cache = tc;
+		cache.addProxyListener(this);
 		currentPnl.setPreferredSize(new Dimension(390, 108));
 		previewPnl.setPreferredSize(new Dimension(390, 108));
 		add("Name", nameTxt);
@@ -187,12 +205,12 @@ public class SingleSignTab extends FormPanel {
 		addRow(tab);
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				if(adjusting == 0)
-					togglePreview();
+				selectPreview(!preview);
 			}
 		});
 		new ActionJob(awsControlledCbx) {
 			public void perform() {
+				DMS proxy = watching;
 				if(proxy != null) {
 					proxy.setAwsControlled(
 						awsControlledCbx.isSelected());
@@ -203,23 +221,36 @@ public class SingleSignTab extends FormPanel {
 
 	/** Dispose of the sign tab */
 	public void dispose() {
-		clearSelected();
+		setSelected(null);
+		cache.removeProxyListener(this);
+		clearPager();
 	}
 
-	/** Get the panel for drawing current pixel status */
-	public SignPixelPanel getCurrentPanel() {
-		return currentPnl;
+	/** A new proxy has been added */
+	public void proxyAdded(DMS proxy) {
+		// we're not interested
 	}
 
-	/** Get the panel for drawing preview pixel status */
-	public SignPixelPanel getPreviewPanel() {
-		return previewPnl;
+	/** Enumeration of the proxy type has completed */
+	public void enumerationComplete() {
+		// we're not interested
 	}
 
-	/** Toggle the preview mode */
-	protected void togglePreview() {
-		preview = !preview;
-		dispatcher.selectPreview(preview);
+	/** A proxy has been removed */
+	public void proxyRemoved(DMS proxy) {
+		// Note: the DMSManager will remove the proxy from the
+		//       ProxySelectionModel, so we can ignore this.
+	}
+
+	/** A proxy has been changed */
+	public void proxyChanged(final DMS proxy, final String a) {
+		if(proxy == watching) {
+			SwingUtilities.invokeLater(new Runnable() {
+				public void run() {
+					updateAttribute(proxy, a);
+				}
+			});
+		}
 	}
 
 	/** Select the preview (or current) tab */
@@ -227,18 +258,40 @@ public class SingleSignTab extends FormPanel {
 		preview = p;
 		if(adjusting == 0) {
 			adjusting++;
-			if(p)
-				tab.setSelectedComponent(previewPnl);
-			else
-				tab.setSelectedComponent(currentPnl);
-			dispatcher.selectPreview(p);
+			setMessage();
 			adjusting--;
 		}
 	}
 
+	/** Set the displayed message */
+	public void setMessage() {
+		if(preview) {
+			updatePreviewPanel(watching);
+			tab.setSelectedComponent(previewPnl);
+		} else {
+			updateCurrentPanel(watching);
+			tab.setSelectedComponent(currentPnl);
+		}
+	}
+
+	/** Set a single selected DMS */
+	public void setSelected(DMS dms) {
+		if(watching != null)
+			cache.ignoreObject(watching);
+		if(dms != null)
+			cache.watchObject(dms);
+		watching = dms;
+		if(dms != null)
+			updateAttribute(dms, null);
+		else
+			clearSelected();
+	}
+
 	/** Clear the selected DMS */
-	public void clearSelected() {
-		proxy = null;
+	protected void clearSelected() {
+		clearPager();
+		currentPnl.clear();
+		previewPnl.clear();
 		nameTxt.setText(EMPTY_TXT);
 		brightnessTxt.setText(EMPTY_TXT);
 		cameraTxt.setText(EMPTY_TXT);
@@ -252,10 +305,10 @@ public class SingleSignTab extends FormPanel {
 		expiresTxt.setText(EMPTY_TXT);
 	}
 
-	/** Update one attribute on the form and update the current proxy.
-	 *  @param dms The newly selected DMS. May not be null. */
-	public void updateAttribute(DMS dms, String a) {
-		proxy = dms;
+	/** Update one (or all) attribute(s) on the form.
+	 * @param dms The newly selected DMS. May not be null.
+	 * @param a Attribute to update, null for all attributes. */
+	protected void updateAttribute(DMS dms, String a) {
 		if(a == null || a.equals("name"))
 			nameTxt.setText(dms.getName());
 		if(a == null || a.equals("lightOutput")) {
@@ -289,6 +342,8 @@ public class SingleSignTab extends FormPanel {
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
 			expiresTxt.setText(formatExpires(dms));
+			if(!preview)
+				updateMessageCurrent(dms);
 		}
 		if(a == null || a.equals("awsAllowed")) {
 			awsControlledCbx.setEnabled(
@@ -296,5 +351,116 @@ public class SingleSignTab extends FormPanel {
 		}
 		if(a == null || a.equals("awsControlled"))
 			awsControlledCbx.setSelected(dms.getAwsControlled());
+	}
+
+	/** Update the current message */
+	protected void updateMessageCurrent(DMS dms) {
+		updateCurrentPanel(dms);
+		adjusting++;
+		dispatcher.setMessage(getMultiString(dms));
+		adjusting--;
+	}
+
+	/** Update the current panel */
+	protected void updateCurrentPanel(DMS dms) {
+		clearPager();
+		if(dms != null) {
+			BitmapGraphic[] bmaps = getBitmaps(dms);
+			if(bmaps != null) {
+				pnlPager = new DMSPanelPager(currentPnl, dms,
+					bmaps, getPgOnTime(dms));
+			}
+		}
+	}
+
+	/** Get the current bitmap graphic for all pages of the specified DMS.
+	 * @param DMS with the graphic.
+	 * @return Array of bitmaps, one for each page, or null on error. */
+	protected BitmapGraphic[] getBitmaps(DMS dms) {
+		SignMessage sm = dms.getMessageCurrent();
+		if(sm == null)
+			return null;
+		byte[] bmaps = decodeBitmaps(sm.getBitmaps());
+		if(bmaps == null)
+			return null;
+		BitmapGraphic bg = createBitmapGraphic(dms);
+		if(bg == null)
+			return null;
+		int blen = bg.length();
+		if(blen == 0 || bmaps.length % blen != 0)
+			return null;
+		int n_pages = bmaps.length / blen;
+		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
+		for(int i = 0; i < n_pages; i++) {
+			bitmaps[i] = createBitmapGraphic(dms);
+			byte[] b = new byte[blen];
+			System.arraycopy(bmaps, i * blen, b, 0, blen);
+			bitmaps[i].setPixels(b);
+		}
+		return bitmaps;
+	}
+
+	/** Decode the bitmaps */
+	protected byte[] decodeBitmaps(String bitmaps) {
+		try {
+			return Base64.decode(bitmaps);
+		}
+		catch(IOException e) {
+			return null;
+		}
+	}
+
+	/** Create a bitmap graphic */
+	protected BitmapGraphic createBitmapGraphic(DMS dms) {
+		Integer wp = dms.getWidthPixels();
+		Integer hp = dms.getHeightPixels();
+		if(wp != null && hp != null)
+			return new BitmapGraphic(wp, hp);
+		else
+			return null;
+	}
+
+	/** Get the page on-time for the current message on the 
+	 * specified DMS. */
+	protected DmsPgTime getPgOnTime(DMS dms) {
+		return getPgOnTime(getMultiString(dms));
+	}
+
+	/** Get the page-on time for the specified multi string */
+	protected DmsPgTime getPgOnTime(String ms) {
+		if(ms.isEmpty())
+			return DmsPgTime.getDefaultOn(true);
+		else
+			return new MultiString(ms).getPageOnTime();
+	}
+
+	/** Get the MULTI string currently on the specified dms.
+	 * @param dms DMS to lookup, may not be null. */
+	protected String getMultiString(DMS dms) {
+		SignMessage sm = dms.getMessageCurrent();
+		if(sm != null)
+			return sm.getMulti();
+		else
+			return "";
+	}
+
+	/** Update the preview panel */
+	protected void updatePreviewPanel(DMS dms) {
+		clearPager();
+		if(dms != null) {
+			String ms = dispatcher.getMessage();
+			BitmapGraphic[] bmaps = dispatcher.getBitmaps();
+			pnlPager = new DMSPanelPager(previewPnl, dms, bmaps,
+				getPgOnTime(ms));
+		}
+	}
+
+	/** Clear the DMS panel pager */
+	protected void clearPager() {
+		DMSPanelPager pager = pnlPager;
+		if(pager != null) {
+			pager.dispose();
+			pnlPager = null;
+		}
 	}
 }

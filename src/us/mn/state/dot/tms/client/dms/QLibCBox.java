@@ -157,12 +157,16 @@ public class QLibCBox extends JComboBox {
 		}
 	}
 
+	/** Set the current message MULTI string */
+	public void setMessage(String ms) {
+		if(!adjusting)
+			setSelectedItem(QuickMessageHelper.find(ms));
+	}
+
 	/** Set selected item, but only if it is different from the 
 	 * currently selected item. Triggers a call to actionPerformed().
 	 * @param obj May be a String, or QuickMessage. */
 	public void setSelectedItem(Object obj) {
-		if(adjusting)
-			return;
 		String nametoset = getQuickLibMsgName(obj);
 		String namecur = getSelectedName();
 		if(!namecur.equals(nametoset)) {

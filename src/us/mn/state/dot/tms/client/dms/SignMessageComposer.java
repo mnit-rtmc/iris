@@ -38,15 +38,12 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.widget.IButton;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PixelMapBuilder;
 import us.mn.state.dot.tms.SignText;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.I18N;
@@ -124,26 +121,20 @@ public class SignMessageComposer extends JPanel {
 	/** Tab pane to hold pages */
 	protected final JTabbedPane pages = new JTabbedPane(JTabbedPane.RIGHT);
 
-	/** Currently selected DMS */
-	protected DMS sel_proxy;
+	/** Pixel map builder */
+	protected PixelMapBuilder builder;
 
 	/** Sign text model */
 	protected SignTextModel st_model;
 
-	/** Number of pages on the currently selected sign */
-	protected int n_pages;
-
 	/** Line combo box widgets */
 	protected JComboBox[] cmbLine = new JComboBox[0];
-
-	/** Number of lines on the currently selected sign */
-	protected int n_lines;
 
 	/** Font combo box widgets */
 	protected FontComboBox[] fontCmb = new FontComboBox[0];
 
-	/** page on-time spinner */
-	protected PgTimeSpinner timeSpin = new PgTimeSpinner(null);
+	/** Page on-time spinner */
+	protected final PgTimeSpinner timeSpin;
 
 	/** Clear button */
 	protected IButton clearBtn = new IButton("dms.clear");
@@ -164,14 +155,10 @@ public class SignMessageComposer extends JPanel {
 	 * one of the line combo boxes changes its selected item. */
 	protected void handleActionPerformed(ActionEvent e) {
 		if(adjusting == 0) {
-			selectPreview(true);
 			adjusting++;
-			try {
-				dispatcher.setMessage(getMessage());
-			}
-			finally {
-				adjusting--;
-			}
+			dispatcher.selectPreview(true);
+			dispatcher.setMessage(getMessage());
+			adjusting--;
 		}
 	}
 
@@ -183,8 +170,9 @@ public class SignMessageComposer extends JPanel {
 		dms_sign_groups = dc.getDmsSignGroups();
 		sign_text = dc.getSignText();
 		fonts = dc.getFonts();
+		timeSpin = new PgTimeSpinner(dispatcher);
 		add(createAllWidgets());
-		initializeEtcWidgets(1, null);
+		initializeEtcWidgets(1);
 		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
 	}
 
@@ -200,7 +188,6 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create page on-time box */
 	protected Box createOnTimeBox() {
-		timeSpin = new PgTimeSpinner(this);
 		Box box = Box.createHorizontalBox();
 		JLabel label = new JLabel();
 		label.setLabelFor(timeSpin);
@@ -236,17 +223,12 @@ public class SignMessageComposer extends JPanel {
 		clearSelections();
 		clearFonts();
 		adjusting++;
-		try {
-			dispatcher.qlibCmb.setSelectedIndex(-1);
-		}
-		finally {
-			adjusting--;
-		}
+		dispatcher.qlibCmb.setSelectedIndex(-1);
+		adjusting--;
 		// note: set the spinner to zero after 
 		// clearing message lines because spinner 
 		// validation depends on message lines.
 		timeSpin.setValue(0);
-		selectPreview(true);
 	}
 
 	/** Dispose of the message selector */
@@ -280,30 +262,15 @@ public class SignMessageComposer extends JPanel {
 		fontCmb = new FontComboBox[0];
 	}
 
-	/** Set the preview mode.
-	 *  @param p True to select preview else false. */
-	public void selectPreview(boolean p) {
-		if(adjusting == 0) {
-			if(!p)
-				setMessage();
-			adjusting++;
-			try {
-				dispatcher.selectPreview(p);
-			}
-			finally {
-				adjusting--;
-			}
-		}
-	}
-
 	/** Update the message combo box models */
-	public void setSign(DMS proxy, int nl, PixelMapBuilder builder) {
-		sel_proxy = proxy;
+	public void setSign(DMS proxy, PixelMapBuilder b) {
+		builder = b;
 		SignTextModel stm = createSignTextModel(proxy);
+		int nl = getLineCount();
 		int ml = stm.getMaxLine();
 		int np = Math.max(calculateSignPages(ml, nl),
 			SystemAttrEnum.DMS_MESSAGE_MIN_PAGES.getInt());
-		initializeEtcWidgets(np, builder);
+		initializeEtcWidgets(np);
 		initializeWidgets(nl, np);
 		if(stm != null) {
 			final JComboBox[] cl = cmbLine;		// Avoid races
@@ -323,6 +290,36 @@ public class SignMessageComposer extends JPanel {
 		return stm;
 	}
 
+	/** Get the number of lines on the selected sign(s) */
+	protected int getLineCount() {
+		int ml = SystemAttrEnum.DMS_MAX_LINES.getInt();
+		int lh = getLineHeightPixels();
+		int h = getHeightPixels();
+		if(h > 0 && lh >= h) {
+			int nl = h / lh;
+			return Math.min(nl, ml);
+		} else
+			return ml;
+	}
+
+	/** Get the line height */
+	protected int getLineHeightPixels() {
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.getLineHeightPixels();
+		else
+			return 7;
+	}
+
+	/** Get the pixel height */
+	protected int getHeightPixels() {
+		PixelMapBuilder b = builder;
+		if(b != null)
+			return b.height;
+		else
+			return 0;
+	}
+
 	/** Calculate the number of pages for the sign.
 	 * @param ml Number of lines in message library.
 	 * @param nl Number of lines on sign face. */
@@ -333,28 +330,27 @@ public class SignMessageComposer extends JPanel {
 			return 1;
 	}
 
-	/** Initialize the other widgets for all pages */
-	protected void initializeEtcWidgets(int np, PixelMapBuilder builder) {
+	/** Initialize the other widgets for all pages.
+	 * @param np Number of pages. */
+	protected void initializeEtcWidgets(int np) {
 		disposeEtcWidgets();
 		FontComboBox[] fc = new FontComboBox[np];
 		for(int i = 0; i < np; i++)
-			fc[i] = new FontComboBox(fonts, builder, this);
+			fc[i] = new FontComboBox(fonts, builder, dispatcher);
 		fontCmb = fc;
 	}
 
 	/** Initialize the page tabs and message combo boxes */
 	protected void initializeWidgets(int nl, int np) {
 		disposeLines();
-		n_lines = nl;
-		n_pages = np;
-		JComboBox[] cl = new JComboBox[n_lines * n_pages];
+		JComboBox[] cl = new JComboBox[nl * np];
 		for(int i = 0; i < cl.length; i++)
 			cl[i] = createLineCombo();
 		cmbLine = cl;
-		for(int i = 0; i < n_pages; i++)
-			setPage(i, createPage(i));
-		while(n_pages < pages.getTabCount())
-			pages.removeTabAt(n_pages);
+		for(int i = 0; i < np; i++)
+			setPage(i, createPage(i, nl));
+		while(np < pages.getTabCount())
+			pages.removeTabAt(np);
 	}
 
 	/** Create a line combo box */
@@ -373,13 +369,13 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Create a new page panel */
-	protected JPanel createPage(int p) {
+	protected JPanel createPage(int p, int nl) {
 		JPanel page = new JPanel(new BorderLayout());
-		JPanel panel = new JPanel(new GridLayout(n_lines, 1, 6, 6));
+		JPanel panel = new JPanel(new GridLayout(nl, 1, 6, 6));
 		panel.setBackground(Color.BLACK);
 		panel.setBorder(BorderFactory.createEmptyBorder(6, 6, 6, 6));
-		for(int i = 0; i < n_lines; i++)
-			panel.add(cmbLine[i + p * n_lines]);
+		for(int i = 0; i < nl; i++)
+			panel.add(cmbLine[i + p * nl]);
 		page.add(panel, BorderLayout.CENTER);
 		if(FontComboBox.getIEnabled())
 			page.add(createFontBox(p), BorderLayout.PAGE_END);
@@ -464,12 +460,8 @@ public class SignMessageComposer extends JPanel {
 				// so reevaluate the currently selected quick 
 				// message.
 				adjusting++;
-				try {
-					dispatcher.setMessage(getMessage());
-				}
-				finally {
-					adjusting--;
-				}
+				dispatcher.setMessage(getMessage());
+				adjusting--;
 			}
 		});
 	}
@@ -516,6 +508,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Build a MULTI string from an array of line strings */
 	protected MultiString buildMulti(String[] mess, int m) {
+		int nl = getLineCount();
 		MultiString multi = new MultiString();
 		int p = 0;
 		Integer f = getFontNumber(0);
@@ -527,7 +520,7 @@ public class SignMessageComposer extends JPanel {
 		}
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
-				if(i % n_lines == 0) {
+				if(i % nl == 0) {
 					multi.addPage();
 					p++;
 					f = getFontNumber(p);
@@ -542,26 +535,16 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Set the currently selected message */
-	public void setMessage() {
-		DMS proxy = sel_proxy;	// Avoid races
-		if(proxy != null) {
-			int n_lines = dispatcher.getLineCount();
-			SignMessage sm = proxy.getMessageCurrent();
-			if(sm != null)
-				setMessage(sm.getMulti(), n_lines);
-		}
-	}
-
-	/** Set the currently selected message */
-	public void setMessage(String ms, int n_lines) {
+	public void setMessage(String ms) {
+		timeSpin.setValueNoAction(ms);
 		// Note: order here is crucial. The font cbox must be updated
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
 		// font from the font combobox.
 		MultiString multi = new MultiString(ms);
-		timeSpin.setValueNoAction(ms);
 		setFontComboBoxes(multi);
-		String[] lines = multi.getText(n_lines);
+		int nl = getLineCount();
+		String[] lines = multi.getText(nl);
 		final JComboBox[] cl = cmbLine;		// Avoid races
 		for(int i = 0; i < cl.length; i++) {
 			if(i < lines.length)
@@ -586,11 +569,11 @@ public class SignMessageComposer extends JPanel {
 
 	/** Get default font number for the selected DMS */
 	protected int getDefaultFontNumber() {
-		DMS proxy = sel_proxy;	// Avoid races
-		if(proxy != null)
-			return DMSHelper.getDefaultFontNumber(proxy);
+		PixelMapBuilder b = builder;	// Avoid race
+		if(b != null)
+			return b.getDefaultFontNumber();
 		else
-			return 1;
+			return FontHelper.DEFAULT_FONT_NUM;
 	}
 
 	/** Set the selected message for a message line combo box */
@@ -618,12 +601,5 @@ public class SignMessageComposer extends JPanel {
 	public void updateMessageLibrary() {
 		if(st_model != null)
 			st_model.updateMessageLibrary();
-	}
-
-	/** Return the current validated page on-time. If the page on-time 
-	 *  spinner is not enabled, the default pg on-time is returned. */
-	public DmsPgTime getCurrentPgOnTime() {
-		timeSpin.updateValidation(getMessage());
-		return timeSpin.getValuePgTime();
 	}
 }
