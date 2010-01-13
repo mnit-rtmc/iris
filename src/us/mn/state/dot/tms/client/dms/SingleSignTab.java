@@ -255,8 +255,8 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 
 	/** Select the preview (or current) tab */
 	public void selectPreview(boolean p) {
-		preview = p;
 		if(adjusting == 0) {
+			preview = p;
 			adjusting++;
 			setMessage();
 			adjusting--;

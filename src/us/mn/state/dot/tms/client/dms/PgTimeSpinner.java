@@ -202,7 +202,6 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 
 	/** Catch state change events. Defined in interface ChangeListener. */
 	public void stateChanged(ChangeEvent e) {
-		// only update preview if user changed spinner
 		if(adjusting == 0)
 			dispatcher.selectPreview(true);
 	}

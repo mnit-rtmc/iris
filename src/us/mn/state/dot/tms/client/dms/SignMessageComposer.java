@@ -147,17 +147,16 @@ public class SignMessageComposer extends JPanel {
 	/** Listener for combo box events */
 	protected final ActionListener comboListener = new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
-			handleActionPerformed(e);
+			updateMessage();
 		}
 	};
 
-	/** Handle action event for line combo boxes.  This is called whenever
-	 * one of the line combo boxes changes its selected item. */
-	protected void handleActionPerformed(ActionEvent e) {
+	/** Update the DMS dispatcher message */
+	protected void updateMessage() {
 		if(adjusting == 0) {
 			adjusting++;
-			dispatcher.selectPreview(true);
 			dispatcher.setMessage(getMessage());
+			dispatcher.selectPreview(true);
 			adjusting--;
 		}
 	}
@@ -452,17 +451,10 @@ public class SignMessageComposer extends JPanel {
 					first_key_event = null;
 				}
 			}
-			// the cbox editor lost focus, which only happens
-			// if the cbox is editable.
 			public void focusLost(FocusEvent e) {
 				if(editmode == EditMode.AFTERKEY)
 					cbox.setEditable(false);
-				// the user might have changed cbox contents, 
-				// so reevaluate the currently selected quick 
-				// message.
-				adjusting++;
-				dispatcher.setMessage(getMessage());
-				adjusting--;
+				updateMessage();
 			}
 		});
 	}
@@ -546,13 +538,16 @@ public class SignMessageComposer extends JPanel {
 		setFontComboBoxes(multi);
 		int nl = getLineCount();
 		String[] lines = multi.getText(nl);
+		adjusting++;
 		final JComboBox[] cl = cmbLine;		// Avoid races
 		for(int i = 0; i < cl.length; i++) {
+			JComboBox cbox = cl[i];
 			if(i < lines.length)
 				setLineSelection(i, lines[i]);
-			else if(cl[i].getItemCount() > 0)
-				cl[i].setSelectedIndex(0);
+			else if(cbox.getItemCount() > 0)
+				cbox.setSelectedIndex(0);
 		}
+		adjusting--;
 	}
 
 	/** set all font comboboxes using the specified MultiString */
@@ -587,8 +582,10 @@ public class SignMessageComposer extends JPanel {
 
 	/** Clear the combobox selections */
 	public void clearSelections() {
+		adjusting++;
 		for(JComboBox cbox: cmbLine)
 			cbox.setSelectedIndex(-1);
+		adjusting--;
 	}
 
 	/** Clear the font comboboxes */
