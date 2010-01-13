@@ -58,6 +58,7 @@ import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
+ * It contains several other components and keeps their state synchronized.
  * It uses a number of optional controls which appear or do not appear on screen
  * as a function of system attributes.
  * @see SignMessage, DMSPanelPager, SignMessageComposer
@@ -438,10 +439,9 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 		composer.setEnabled(true);
 		durationCmb.setEnabled(true);
 		durationCmb.setSelectedIndex(0);
-		// FIXME: breaks multi-selection
-		sendBtn.setEnabled(canSend(watching));
-		blankBtn.setEnabled(canSend(watching));
-		queryBtn.setEnabled(canRequest(watching));
+		sendBtn.setEnabled(canSend());
+		blankBtn.setEnabled(canSend());
+		queryBtn.setEnabled(canRequest());
 		qlibCmb.setEnabled(true);
 		selectPreview(false);
 	}
@@ -727,14 +727,38 @@ public class DMSDispatcher extends JPanel implements ProxyListener<DMS>,
 			return null;
 	}
 
-	/** Can a message be sent to the DMS? */
+	/** Can a message be sent to all selected DMS? */
+	public boolean canSend() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.isEmpty())
+			return false;
+		for(DMS dms: sel) {
+			if(!canSend(dms))
+				return false;
+		}
+		return true;
+	}
+
+	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return dms != null &&
 		       namespace.canUpdate(user, new Name(dms, "ownerNext")) &&
 		       namespace.canUpdate(user, new Name(dms, "messageNext"));
 	}
 
-	/** Can a device request be sent to the DMS? */
+	/** Can a device request be sent to all selected DMS? */
+	public boolean canRequest() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.isEmpty())
+			return false;
+		for(DMS dms: sel) {
+			if(!canRequest(dms))
+				return false;
+		}
+		return true;
+	}
+
+	/** Can a device request be sent to the specified DMS? */
 	public boolean canRequest(DMS dms) {
 		return dms != null && namespace.canUpdate(user,
 			new Name(dms, "deviceRequest"));
