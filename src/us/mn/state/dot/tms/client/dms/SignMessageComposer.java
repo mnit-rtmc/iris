@@ -355,17 +355,17 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a line combo box */
 	protected JComboBox createLineCombo() {
-		JComboBox cmb = new JComboBox();
-		createEditor(cmb);
-		cmb.setMaximumRowCount(21);
+		JComboBox cbox = new JComboBox();
+		createEditor(cbox);
+		cbox.setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the
 		//       widgets from being rearranged whenever a new sign is
 		//       selected.
-		cmb.setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
-		cmb.setRenderer(renderer);
-		cmb.addActionListener(comboListener);
-		return cmb;
+		cbox.setPrototypeDisplayValue(PROTOTYPE_SIGN_TEXT);
+		cbox.setRenderer(renderer);
+		cbox.addActionListener(comboListener);
+		return cbox;
 	}
 
 	/** Create a new page panel */
@@ -426,9 +426,10 @@ public class SignMessageComposer extends JPanel {
 		final MsgComboBoxEditor cbe = new MsgComboBoxEditor();
 		final java.awt.Component editor = cbe.getEditorComponent();
 		cbox.setEditor(cbe);
-		if(editmode == EditMode.ALWAYS)
+		if(editmode == EditMode.ALWAYS) {
 			if(!cbox.isEditable())
 				cbox.setEditable(true);
+		}
 		cbox.addKeyListener(new KeyAdapter() {
 			public void keyTyped(KeyEvent e) {
 				if(!cbox.isEditable()) {
