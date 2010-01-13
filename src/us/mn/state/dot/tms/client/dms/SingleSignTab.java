@@ -206,6 +206,11 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
+				if((adjusting == 0) && !preview) {
+					DMS dms = watching;
+					if(dms != null)
+						updateMessageCurrent(dms);
+				}
 			}
 		});
 		new ActionJob(awsControlledCbx) {
@@ -342,8 +347,10 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		if(a == null || a.equals("messageCurrent")) {
 			deployTxt.setText(formatDeploy(dms));
 			expiresTxt.setText(formatExpires(dms));
-			if(!preview)
+			if(!preview) {
+				updateCurrentPanel(dms);
 				updateMessageCurrent(dms);
+			}
 		}
 		if(a == null || a.equals("awsAllowed")) {
 			awsControlledCbx.setEnabled(
@@ -351,14 +358,6 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 		}
 		if(a == null || a.equals("awsControlled"))
 			awsControlledCbx.setSelected(dms.getAwsControlled());
-	}
-
-	/** Update the current message */
-	protected void updateMessageCurrent(DMS dms) {
-		updateCurrentPanel(dms);
-		adjusting++;
-		dispatcher.setMessage(getMultiString(dms));
-		adjusting--;
 	}
 
 	/** Update the current panel */
@@ -371,6 +370,13 @@ public class SingleSignTab extends FormPanel implements ProxyListener<DMS> {
 					bmaps, getPgOnTime(dms));
 			}
 		}
+	}
+
+	/** Update the current message */
+	protected void updateMessageCurrent(DMS dms) {
+		adjusting++;
+		dispatcher.setMessage(getMultiString(dms));
+		adjusting--;
 	}
 
 	/** Get the current bitmap graphic for all pages of the specified DMS.
