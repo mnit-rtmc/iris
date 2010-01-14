@@ -38,28 +38,27 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	/** Font combo box model */
 	private final FontComboBoxModel m_fontModel;
 
-	/** DMS dispatcher */
-	private final DMSDispatcher dispatcher;
-
-	/** constructor */
-	public FontComboBox(TypeCache<Font> fonts, PixelMapBuilder builder, 
-		DMSDispatcher d) 
-	{
-		m_fonts = fonts;
-		dispatcher = d;
-		setToolTipText(I18N.get("DMSDispatcher.FontComboBox.ToolTip"));
-		m_fontModel = new FontComboBoxModel(fonts, builder);
-		setModel(m_fontModel);
-		addActionListener(this);
-	}
+	/** Sign message composer */
+	private final SignMessageComposer composer;
 
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
 	 * callbacks to this class.  This prevents infinite loops. */
 	protected int adjusting = 0;
 
-	/** Set the selected font number and ignore any actionPerformed 
-	 *  events that are generated. */
+	/** Create a new font combo box */
+	public FontComboBox(TypeCache<Font> fonts, PixelMapBuilder builder, 
+		SignMessageComposer c) 
+	{
+		m_fonts = fonts;
+		composer = c;
+		setToolTipText(I18N.get("DMSDispatcher.FontComboBox.ToolTip"));
+		m_fontModel = new FontComboBoxModel(fonts, builder);
+		setModel(m_fontModel);
+		addActionListener(this);
+	}
+
+	/** Set the selected font number */
 	public void setSelectedFontNumber(Integer fnum) {
 		adjusting++;
 		setSelectedItem(FontHelper.find(fnum));
@@ -75,7 +74,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 			return null;
 	}
 
-	/** dispose */
+	/** Dispose of the font combo box */
 	public void dispose() {
 		m_fontModel.dispose();
 		removeActionListener(this);
@@ -86,13 +85,12 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	 * setSelectedItem() call. Defined in interface ActionListener. */
 	public void actionPerformed(ActionEvent e) {
 		if(adjusting == 0)
-			dispatcher.selectPreview(true);
+			composer.updateMessage();
 	}
 
 	/** is this control IRIS enabled? */
 	public static boolean getIEnabled() {
-		return SystemAttrEnum.
-			DMS_FONT_SELECTION_ENABLE.getBoolean();
+		return SystemAttrEnum.DMS_FONT_SELECTION_ENABLE.getBoolean();
 	}
 
 	/** enable or disable */

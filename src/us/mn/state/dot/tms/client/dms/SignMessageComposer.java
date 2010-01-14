@@ -152,7 +152,7 @@ public class SignMessageComposer extends JPanel {
 	};
 
 	/** Update the DMS dispatcher message */
-	protected void updateMessage() {
+	public void updateMessage() {
 		if(adjusting == 0) {
 			adjusting++;
 			dispatcher.setMessage(getMessage());
@@ -335,7 +335,7 @@ public class SignMessageComposer extends JPanel {
 		disposeEtcWidgets();
 		FontComboBox[] fc = new FontComboBox[np];
 		for(int i = 0; i < np; i++)
-			fc[i] = new FontComboBox(fonts, builder, dispatcher);
+			fc[i] = new FontComboBox(fonts, builder, this);
 		fontCmb = fc;
 	}
 
@@ -550,7 +550,7 @@ public class SignMessageComposer extends JPanel {
 		adjusting--;
 	}
 
-	/** set all font comboboxes using the specified MultiString */
+	/** Set all font comboboxes using the specified MultiString */
 	protected void setFontComboBoxes(MultiString ms) {
 		final FontComboBox[] fc = fontCmb;	// Avoid races
 		final int dfnum = getDefaultFontNumber();
