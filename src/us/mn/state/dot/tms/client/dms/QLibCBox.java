@@ -88,8 +88,10 @@ public class QLibCBox extends JComboBox {
 	/** Action listener for combo box */
 	private final ActionListener action_listener;
 
-	/** Flag to indicate we're adjusting widgets */
-	protected boolean adjusting = false;
+	/** Counter to indicate we're adjusting widgets.  This needs to be
+	 * incremented before calling dispatcher methods which might cause
+	 * callbacks to this class.  This prevents infinite loops. */
+	protected int adjusting = 0;
 
 	/** Create a new quick message combo box */
 	public QLibCBox(DMSDispatcher d) {
@@ -151,16 +153,16 @@ public class QLibCBox extends JComboBox {
 	protected void updateDispatcher(QuickMessage qm) {
 		String ms = qm.getMulti();
 		if(!ms.isEmpty()) {
-			adjusting = true;
+			adjusting++;
 			dispatcher.setMessage(ms);
 			dispatcher.selectPreview(true);
-			adjusting = false;
+			adjusting--;
 		}
 	}
 
 	/** Set the current message MULTI string */
 	public void setMessage(String ms) {
-		if(!adjusting) {
+		if(adjusting == 0) {
 			if(ms.isEmpty())
 				setSelectedItem(null);
 			else
