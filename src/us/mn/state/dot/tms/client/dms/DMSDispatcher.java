@@ -287,7 +287,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 				setSelected(dms);
 		} else {
 			// FIXME: fix multi-selection problems
-			singleTab.clearSelected();
+			singleTab.setSelected(null);
 			setMessage("");
 			enableWidgets();
 			selectMultipleTab();
@@ -297,7 +297,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Clear the selection */
 	protected void clearSelected() {
 		disableWidgets();
-		singleTab.clearSelected();
+		setMessage("");
+		singleTab.setSelected(null);
 		selectSingleTab();
 	}
 
