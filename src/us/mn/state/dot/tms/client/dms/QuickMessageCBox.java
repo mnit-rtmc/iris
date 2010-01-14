@@ -47,38 +47,6 @@ public class QuickMessageCBox extends JComboBox {
 			return "";
 	}
 
-	/** Canned blank quick message */
-	static public final QuickMessage BLANK_QMESSAGE = new QuickMessage() {
-
-		/** Get the SONAR object name */
-		public String getName() {
-			return "";
-		}
-
-		/** To string */
-		public String toString() {
-			return getName();
-		}
-
-		/** Get the SONAR type name */
-		public String getTypeName() {
-			return SONAR_TYPE;
-		}
-
-		/** Get MULTI string */
-		public String getMulti() {
-			return "";
-		}
-
-		/** Set MULTI string */
-		public void setMulti(String s) {
-			// not settable
-		}
-
-		/** destroy */
-		public void destroy() {}
-	};
-
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
 
@@ -178,7 +146,7 @@ public class QuickMessageCBox extends JComboBox {
 		String namecur = getSelectedName();
 		if(!namecur.equals(nametoset)) {
 			if(nametoset.isEmpty())
-				super.setSelectedItem(BLANK_QMESSAGE);
+				super.setSelectedItem(null);
 			else {
 				QuickMessage qm = QuickMessageHelper.lookup(
 					nametoset);
