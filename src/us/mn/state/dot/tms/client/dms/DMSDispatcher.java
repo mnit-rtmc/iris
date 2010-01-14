@@ -85,7 +85,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		new JComboBox(Expiration.values());
 
 	/** Combobox used to select a quick library message (optional). */
-	protected final QLibCBox qlibCmb;
+	protected final QuickMessageCBox qlibCmb;
 
 	/** Button used to send a message to the DMS */
 	protected final IButton sendBtn = new IButton("dms.send");
@@ -132,7 +132,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
 		blankAction = new BlankDmsAction(selectionModel, this, user);
-		qlibCmb = new QLibCBox(this);
+		qlibCmb = new QuickMessageCBox(this);
 		qlibCmb.setModel(new WrapperComboBoxModel(
 			st.getDmsCache().getQuickMessageModel()));
 		blankBtn.setAction(blankAction);
@@ -158,7 +158,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		card_panel.add(new JLabel(), "Hidden");
 		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
-		if(QLibCBox.getIEnabled())
+		if(QuickMessageCBox.getIEnabled())
 			panel.addRow(buildQuickLibPanel());
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();

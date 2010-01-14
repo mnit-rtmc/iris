@@ -25,16 +25,16 @@ import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
- * Quick library combobox. This combobox stores quick messages.
- * When the user changes a quick message selection via this
- * combobox, the dispatcher is flagged that it should update its
- * widgets with this cbox's currently selected message.
+ * The quick message combobox is a widget which allows the user to select
+ * a precomposed "quick" message. When the user changes a quick message
+ * selection via this combobox, the dispatcher is flagged that it should update
+ * its widgets with the newly selected message.
  *
- * @see DMSDispatcher, QuickMessage, QLibCBoxModel, SignMessageComposer
+ * @see DMSDispatcher, QuickMessage
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class QLibCBox extends JComboBox {
+public class QuickMessageCBox extends JComboBox {
 
 	/** Given a QuickMessage or String, return the cooresponding quick 
 	 * library message name or an empty string if none exists. */
@@ -94,7 +94,7 @@ public class QLibCBox extends JComboBox {
 	protected int adjusting = 0;
 
 	/** Create a new quick message combo box */
-	public QLibCBox(DMSDispatcher d) {
+	public QuickMessageCBox(DMSDispatcher d) {
 		dispatcher = d;
 		setEditable(true);
 		focus_listener = new FocusAdapter() {
