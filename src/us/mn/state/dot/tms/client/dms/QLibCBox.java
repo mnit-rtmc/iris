@@ -153,14 +153,19 @@ public class QLibCBox extends JComboBox {
 		if(!ms.isEmpty()) {
 			adjusting = true;
 			dispatcher.setMessage(ms);
+			dispatcher.selectPreview(true);
 			adjusting = false;
 		}
 	}
 
 	/** Set the current message MULTI string */
 	public void setMessage(String ms) {
-		if(!adjusting)
-			setSelectedItem(QuickMessageHelper.find(ms));
+		if(!adjusting) {
+			if(ms.isEmpty())
+				setSelectedItem(null);
+			else
+				setSelectedItem(QuickMessageHelper.find(ms));
+		}
 	}
 
 	/** Set selected item, but only if it is different from the 

@@ -330,7 +330,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		if(tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
 		cards.show(card_panel, "Alert");
-		qlibCmb.setSelectedItem("");
+		qlibCmb.setSelectedItem(null);
 	}
 
 	/** Disable the dispatcher widgets */
@@ -343,7 +343,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		blankBtn.setEnabled(false);
 		queryBtn.setEnabled(false);
 		qlibCmb.setEnabled(false);
-		qlibCmb.setSelectedItem("");
+		qlibCmb.setSelectedItem(null);
 		builder = null;
 	}
 

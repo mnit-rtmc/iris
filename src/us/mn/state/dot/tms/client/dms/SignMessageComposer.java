@@ -222,7 +222,7 @@ public class SignMessageComposer extends JPanel {
 		clearSelections();
 		clearFonts();
 		adjusting++;
-		dispatcher.qlibCmb.setSelectedIndex(-1);
+		dispatcher.setMessage("");
 		adjusting--;
 		// note: set the spinner to zero after 
 		// clearing message lines because spinner 
