@@ -512,9 +512,14 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		PixelMapBuilder b = builder;
 		if(b != null) {
 			MultiString multi = new MultiString(message);
-			return b.createPixmaps(multi);
-		} else
-			return null;
+			try {
+				return b.createPixmaps(multi);
+			}
+			catch(ArrayIndexOutOfBoundsException e) {
+				// oh well, no graphic to display
+			}
+		}
+		return null;
 	}
 
 	/** Can a message be sent to all selected DMS? */
