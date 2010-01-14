@@ -84,8 +84,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected final JComboBox durationCmb =
 		new JComboBox(Expiration.values());
 
-	/** Combobox used to select a quick library message (optional). */
-	protected final QuickMessageCBox qlibCmb;
+	/** Combobox used to select a quick message */
+	protected final QuickMessageCBox qmsgCmb;
 
 	/** Button used to send a message to the DMS */
 	protected final IButton sendBtn = new IButton("dms.send");
@@ -132,8 +132,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		creator = new SignMessageCreator(st, user);
 		selectionModel = manager.getSelectionModel();
 		blankAction = new BlankDmsAction(selectionModel, this, user);
-		qlibCmb = new QuickMessageCBox(this);
-		qlibCmb.setModel(new WrapperComboBoxModel(
+		qmsgCmb = new QuickMessageCBox(this);
+		qmsgCmb.setModel(new WrapperComboBoxModel(
 			st.getDmsCache().getQuickMessageModel()));
 		blankBtn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
@@ -183,7 +183,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		singleTab.dispose();
 		multipleTab.dispose();
 		composer.dispose();
-		qlibCmb.dispose();
+		qmsgCmb.dispose();
 		removeAll();
 	}
 
@@ -192,13 +192,13 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		JLabel label = new JLabel();
-		label.setLabelFor(qlibCmb);
+		label.setLabelFor(qmsgCmb);
 		label.setDisplayedMnemonic('Q');
 		label.setText("<html><p align=\"right\"><u>Q</u>uick" +
 			"<br>Message</p></html>");
 		box.add(label);
 		box.add(box.createHorizontalStrut(4));
-		box.add(qlibCmb);
+		box.add(qmsgCmb);
 		return box;
 	}
 
@@ -331,7 +331,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		if(tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
 		cards.show(card_panel, "Alert");
-		qlibCmb.setSelectedItem(null);
+		qmsgCmb.setSelectedItem(null);
 	}
 
 	/** Disable the dispatcher widgets */
@@ -343,8 +343,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		sendBtn.setEnabled(false);
 		blankBtn.setEnabled(false);
 		queryBtn.setEnabled(false);
-		qlibCmb.setEnabled(false);
-		qlibCmb.setSelectedItem(null);
+		qmsgCmb.setEnabled(false);
+		qmsgCmb.setSelectedItem(null);
 		builder = null;
 	}
 
@@ -356,7 +356,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		sendBtn.setEnabled(canSend());
 		blankBtn.setEnabled(canSend());
 		queryBtn.setEnabled(canRequest());
-		qlibCmb.setEnabled(true);
+		qmsgCmb.setEnabled(true);
 		selectPreview(false);
 	}
 
@@ -367,7 +367,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			message = ms;
 			singleTab.setMessage();
 			composer.setMessage(ms);
-			qlibCmb.setMessage(ms);
+			qmsgCmb.setMessage(ms);
 		}
 	}
 

@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class QuickMessageCBox extends JComboBox {
 
 	/** Given a QuickMessage or String, return the cooresponding quick 
-	 * library message name or an empty string if none exists. */
+	 * message name or an empty string if none exists. */
 	static protected String getQuickLibMsgName(Object obj) {
 		if(obj instanceof String)
 			return (String)obj;
@@ -47,7 +47,7 @@ public class QuickMessageCBox extends JComboBox {
 			return "";
 	}
 
-	/** Canned blank quick library message */
+	/** Canned blank quick message */
 	static public final QuickMessage BLANK_QMESSAGE = new QuickMessage() {
 
 		/** Get the SONAR object name */
