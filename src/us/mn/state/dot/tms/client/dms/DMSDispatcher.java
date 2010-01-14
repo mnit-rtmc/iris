@@ -155,7 +155,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
 			panel.addRow("Duration", durationCmb);
 		panel.addRow(card_panel);
-		card_panel.add(new JLabel(), "Blank");
+		card_panel.add(new JLabel(), "Hidden");
 		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
 		if(QLibCBox.getIEnabled())
@@ -322,7 +322,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			alertCbx.setSelected(false);
 			tabPane.setSelectedComponent(singleTab);
 		}
-		cards.show(card_panel, "Blank");
+		cards.show(card_panel, "Hidden");
 	}
 
 	/** Select the multiple selection tab */
