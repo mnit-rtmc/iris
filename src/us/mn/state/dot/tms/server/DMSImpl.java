@@ -973,8 +973,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		notifyAttribute("messageCurrent");
 		ownerCurrent = o;
 		notifyAttribute("ownerCurrent");
-		// FIXME: destroy the previous message if no other signs are
-		// using it
 	}
 
 	/** Get the current messasge.
