@@ -62,6 +62,12 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 {
+	/** Name of hidden card for card layout */
+	static protected final String CARD_HIDDEN = "Hidden";
+
+	/** Name of shown card for card layout */
+	static protected final String CARD_SHOWN = "Shown";
+
 	/** SONAR namespace */
 	protected final Namespace namespace;
 
@@ -100,11 +106,12 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected final IButton queryBtn = new IButton("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
 
-	/** Card layout for alert panel */
-	protected final CardLayout cards = new CardLayout();
+	/** Card layout for alert panel. This is used to hide the alert
+	 * checkbox without causing all the widgets to be revalidated. */
+	protected final CardLayout alert_layout = new CardLayout();
 
 	/** Card panel for alert panels */
-	protected final JPanel card_panel = new JPanel(cards);
+	protected final JPanel alert_panel = new JPanel(alert_layout);
 
 	/** AMBER Alert checkbox */
 	protected final JCheckBox alertCbx =
@@ -154,9 +161,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		FormPanel panel = new FormPanel(true);
 		if(SystemAttrEnum.DMS_DURATION_ENABLE.getBoolean())
 			panel.addRow("Duration", durationCmb);
-		panel.addRow(card_panel);
-		card_panel.add(new JLabel(), "Hidden");
-		card_panel.add(alertCbx, "Alert");
+		panel.addRow(alert_panel);
+		alert_panel.add(new JLabel(), CARD_HIDDEN);
+		alert_panel.add(alertCbx, CARD_SHOWN);
 		panel.setCenter();
 		if(QuickMessageCBox.getIEnabled())
 			panel.addRow(buildQuickMsgPanel());
@@ -323,14 +330,14 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			alertCbx.setSelected(false);
 			tabPane.setSelectedComponent(singleTab);
 		}
-		cards.show(card_panel, "Hidden");
+		alert_layout.show(alert_panel, CARD_HIDDEN);
 	}
 
 	/** Select the multiple selection tab */
 	protected void selectMultipleTab() {
 		if(tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
-		cards.show(card_panel, "Alert");
+		alert_layout.show(alert_panel, CARD_SHOWN);
 		qmsgCmb.setSelectedItem(null);
 	}
 
