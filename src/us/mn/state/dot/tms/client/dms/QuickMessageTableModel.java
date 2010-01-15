@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -44,6 +45,18 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				String v = value.toString().trim();
 				if(v.length() > 0)
 					cache.createObject(v);
+			}
+		},
+		new ProxyColumn<QuickMessage>("Sign Group", 120) {
+			public Object getValueAt(QuickMessage qm) {
+				return qm.getSignGroup();
+			}
+			public boolean isEditable(QuickMessage qm) {
+				return canUpdate(qm);
+			}
+			public void setValueAt(QuickMessage qm, Object value) {
+				String v = value.toString().trim();
+				qm.setSignGroup(SignGroupHelper.lookup(v));
 			}
 		},
 		new ProxyColumn<QuickMessage>("MULTI String", 680) {
