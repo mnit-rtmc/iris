@@ -4,6 +4,8 @@ SET SESSION AUTHORIZATION 'tms';
 
 UPDATE iris.system_attribute SET value = '3.110.0'
 	WHERE name = 'database_version';
+UPDATE iris.system_attribute SET name = 'dms_page_on_selection_enable'
+	WHERE name = 'dms_pgontime_selection_enable';
 
 ALTER TABLE iris.quick_message ADD COLUMN sign_group VARCHAR(16);
 ALTER TABLE iris.quick_message ADD CONSTRAINT quick_message_sign_group_fkey

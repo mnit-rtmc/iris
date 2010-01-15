@@ -142,8 +142,7 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 
 	/** Is this control IRIS enabled? */
 	public static boolean getIEnabled() {
-		return SystemAttrEnum.
-			DMS_PGONTIME_SELECTION_ENABLE.getBoolean();
+		return SystemAttrEnum.DMS_PAGE_ON_SELECTION_ENABLE.getBoolean();
 	}
 
 	/** Enable or disable */

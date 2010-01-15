@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ public enum SystemAttrEnum {
 	DMS_DURATION_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_FONT_SELECTION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_COMPOSER_EDIT_MODE(1, 0, 2, Change.RESTART_CLIENT), 
-	DMS_PGONTIME_SELECTION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_FORM(1, 1, 2), 
 	DMS_HIGH_TEMP_CUTOFF(60, 35, 100),
 	DMS_LAMP_TEST_TIMEOUT_SECS(30, 5, 90),
@@ -49,8 +48,9 @@ public enum SystemAttrEnum {
 	DMS_MESSAGE_BLANK_LINE_ENABLE(true),
 	DMS_MESSAGE_MIN_PAGES(1, 1, 6, Change.RESTART_CLIENT),
 	DMS_OP_STATUS_ENABLE(false, Change.RESTART_CLIENT),
-	DMS_PAGE_ON_SECS(2f, 0f, 60f),
 	DMS_PAGE_OFF_SECS(0f, 0f, 60f),
+	DMS_PAGE_ON_SECS(2f, 0f, 60f),
+	DMS_PAGE_ON_SELECTION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_PIXEL_OFF_LIMIT(2, 1),
 	DMS_PIXEL_ON_LIMIT(1, 1),
 	DMS_PIXEL_STATUS_ENABLE(true, Change.RESTART_CLIENT),
