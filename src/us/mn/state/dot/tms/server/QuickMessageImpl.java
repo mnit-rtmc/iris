@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -36,13 +37,14 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading quick messages...");
 		namespace.registerType(SONAR_TYPE, QuickMessageImpl.class);
-		store.query("SELECT name, multi FROM iris.quick_message;", 
-			new ResultFactory()
+		store.query("SELECT name, sign_group, multi FROM " +
+			"iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new QuickMessageImpl(
 					row.getString(1),	// name
-					row.getString(2)	// multi
+					row.getString(2),	// sign_group
+					row.getString(3)	// multi
 				));
 			}
 		});
@@ -52,6 +54,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("sign_group", sign_group);
 		map.put("multi", multi);
 		return map;
 	}
@@ -71,10 +74,41 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		super(n);
 	}
 
-	/** Create a message */
-	protected QuickMessageImpl(String n, String m) {
+	/** Create a quick message */
+	protected QuickMessageImpl(String n, String sg, String m) {
+		this(n, (SignGroup)namespace.lookupObject(SignGroup.SONAR_TYPE,
+			sg), m);
+	}
+
+	/** Create a quick message */
+	protected QuickMessageImpl(String n, SignGroup sg, String m) {
 		super(n);
+		sign_group = sg;
 		multi = m;
+	}
+
+	/** Sign group */
+	protected SignGroup sign_group;
+
+	/** Get the sign group associated with the quick message.
+	 * @return Sign group for quick message; null for no group. */
+	public SignGroup getSignGroup() {
+		return sign_group;
+	}
+
+	/** Set the sign group associated with the quick message.
+	 * @param sg Sign group to associate; null for no group. */
+	public void setSignGroup(SignGroup sg) {
+		sign_group = sg;
+	}
+
+	/** Set the sign group associated with the quick message.
+	 * @param sg Sign group to associate; null for no group. */
+	public void doSetSignGroup(SignGroup sg) throws TMSException {
+		if(sg == sign_group)
+			return;
+		store.update(this, "sign_group", sg);
+		setSignGroup(sg);
 	}
 
 	/** Message MULTI string, contains message text for all pages */
