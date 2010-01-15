@@ -65,14 +65,6 @@ public class DmsCache {
 		return quick_messages;
 	}
 
-	/** Quick message proxy list model */
-	protected final ProxyListModel<QuickMessage> qm_model;
-
-	/** Get the quick message list model */
-	public ProxyListModel<QuickMessage> getQuickMessageModel() {
-		return qm_model;
-	}
-
 	/** Cache of dynamic message signs */
 	protected final TypeCache<DMS> dmss;
 
@@ -115,8 +107,6 @@ public class DmsCache {
 			client);
 		quick_messages = new TypeCache<QuickMessage>(QuickMessage.class,
 			client);
-		qm_model = new ProxyListModel<QuickMessage>(quick_messages);
-		qm_model.initialize();
 		dmss = new TypeCache<DMS>(DMS.class, client);
 		sign_groups = new TypeCache<SignGroup>(SignGroup.class, client);
 		dms_sign_groups = new TypeCache<DmsSignGroup>(

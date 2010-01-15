@@ -19,10 +19,14 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.SignGroup;
+import us.mn.state.dot.tms.SignGroupHelper;
 
 /**
  * The quick message combobox is a widget which allows the user to select
@@ -47,6 +51,9 @@ public class QuickMessageCBox extends JComboBox {
 			return "";
 	}
 
+	/** Combo box model for quick messages */
+	protected final DefaultComboBoxModel model = new DefaultComboBoxModel();
+
 	/** DMS dispatcher */
 	protected final DMSDispatcher dispatcher;
 
@@ -63,6 +70,7 @@ public class QuickMessageCBox extends JComboBox {
 
 	/** Create a new quick message combo box */
 	public QuickMessageCBox(DMSDispatcher d) {
+		setModel(model);
 		dispatcher = d;
 		setEditable(true);
 		focus_listener = new FocusAdapter() {
@@ -160,15 +168,25 @@ public class QuickMessageCBox extends JComboBox {
 		return getQuickLibMsgName(getSelectedItem());
 	}
 
+	/** Populate the quick message model */
+	public void populateModel(DMS dms) {
+		model.removeAllElements();
+		for(SignGroup sg: SignGroupHelper.find(dms)) {
+			final SignGroup group = sg;
+			QuickMessageHelper.find(new Checker<QuickMessage>() {
+				public boolean check(QuickMessage qm) {
+					if(qm.getSignGroup() == group)
+						model.addElement(qm);
+					return false;
+				}
+			});
+		}
+	}
+
 	/** Dispose */
 	public void dispose() {
 		removeActionListener(action_listener);
 		getEditor().getEditorComponent().
 			removeFocusListener(focus_listener);
-	}
-
-	/** Is this control IRIS enabled? */
-	static public boolean getIEnabled() {
-		return SystemAttrEnum.DMS_QLIB_ENABLE.getBoolean();
 	}
 }

@@ -100,6 +100,13 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected final JCheckBox alertCbx =
 		new JCheckBox(I18N.get("dms.alert"));
 
+	/** Card layout for quick msg panel. This is used to hide the quick
+	 * message without causing all the widgets to be revalidated. */
+	protected final CardLayout qmsg_layout = new CardLayout();
+
+	/** Card panel for quick message */
+	protected final JPanel qmsg_panel = new JPanel(qmsg_layout);
+
 	/** Combobox used to select a quick message */
 	protected final QuickMessageCBox qmsgCmb;
 
@@ -139,8 +146,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		selectionModel = manager.getSelectionModel();
 		blankAction = new BlankDmsAction(selectionModel, this, user);
 		qmsgCmb = new QuickMessageCBox(this);
-		qmsgCmb.setModel(new WrapperComboBoxModel(
-			st.getDmsCache().getQuickMessageModel()));
 		blankBtn.setAction(blankAction);
 		manager.setBlankAction(blankAction);
 		composer = new SignMessageComposer(session, this);
@@ -164,8 +169,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		panel.addRow(alert_panel);
 		alert_panel.add(new JLabel(), CARD_HIDDEN);
 		alert_panel.add(alertCbx, CARD_SHOWN);
-		if(QuickMessageCBox.getIEnabled())
-			panel.addRow(buildQuickMsgPanel());
+		panel.addRow(qmsg_panel);
+		qmsg_panel.add(new JLabel(), CARD_HIDDEN);
+		qmsg_panel.add(buildQuickMsgPanel(), CARD_SHOWN);
 		panel.setCenter();
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
@@ -431,6 +437,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		if(DMSHelper.isActive(dms)) {
 			builder = DMSHelper.createPixelMapBuilder(dms);
 			composer.setSign(dms, builder);
+			qmsgCmb.populateModel(dms);
 			enableWidgets();
 			SignMessage sm = dms.getMessageCurrent();
 			if(sm != null)
@@ -467,8 +474,10 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		sendBtn.setEnabled(false);
 		blankBtn.setEnabled(false);
 		queryBtn.setEnabled(false);
+		qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
 		qmsgCmb.setEnabled(false);
 		qmsgCmb.setSelectedItem(null);
+		qmsgCmb.removeAllItems();
 		builder = null;
 	}
 
@@ -480,6 +489,10 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		sendBtn.setEnabled(canSend());
 		blankBtn.setEnabled(canSend());
 		queryBtn.setEnabled(canRequest());
+		if(qmsgCmb.getItemCount() > 0)
+			qmsg_layout.show(qmsg_panel, CARD_SHOWN);
+		else
+			qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
 		qmsgCmb.setEnabled(true);
 		selectPreview(false);
 	}

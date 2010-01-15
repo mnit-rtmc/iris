@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,17 +32,5 @@ public class DmsSignGroupHelper extends BaseHelper {
 	static public DmsSignGroup find(final Checker<DmsSignGroup> checker) {
 		return (DmsSignGroup)namespace.findObject(
 			DmsSignGroup.SONAR_TYPE, checker);
-	}
-
-	/** Lookup a DMS sign group */
-	static public DmsSignGroup find(final SignGroup group,
-		final Checker<DMS> checker)
-	{
-		return find(new Checker<DmsSignGroup>() {
-			public boolean check(DmsSignGroup g) {
-				return g.getSignGroup() == group &&
-				       checker.check(g.getDms());
-			}
-		});
 	}
 }
