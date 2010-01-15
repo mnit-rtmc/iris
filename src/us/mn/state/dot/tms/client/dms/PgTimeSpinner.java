@@ -129,8 +129,8 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 		dispatcher = d;
 		setModel(new PgTimeSpinnerModel(
 			DmsPgTime.getDefaultOn(true).toSecs(),
-			DmsPgTime.MIN_ONTIME.toSecs(), 
-			DmsPgTime.MAX_ONTIME.toSecs(), INC_ONTIME_SECS));
+			DmsPgTime.getMinOnTime().toSecs(), 
+			DmsPgTime.getMaxOnTime().toSecs(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("PgOnTimeSpinner.ToolTip"));
 		addChangeListener(this);
 

@@ -25,11 +25,17 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DmsPgTime {
 
-	/** On-time minimum and maximum values, inclusive */
-	public static final DmsPgTime MIN_ONTIME = new DmsPgTime(5);
-	public static final DmsPgTime MAX_ONTIME = new DmsPgTime(100);
-	/** on-time default, used only if system default is bogus. */
-	private static final DmsPgTime DEF_ONTIME = new DmsPgTime(25);
+	/** Get minimum page on time */
+	static public DmsPgTime getMinOnTime() {
+		return new DmsPgTime(
+			SystemAttrEnum.DMS_PAGE_ON_MIN_SECS.getFloat());
+	}
+
+	/** Get maximum page on time */
+	static public DmsPgTime getMaxOnTime() {
+		return new DmsPgTime(
+			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
+	}
 
 	/** page time */
 	private final int m_tenths;
@@ -125,7 +131,7 @@ public class DmsPgTime {
 		if(t == null)
 			throw new NullPointerException();
 		int tenths = (int)validateValue(t.toTenths(), singlepg, 
-			MIN_ONTIME.toTenths(), MAX_ONTIME.toTenths());
+			getMinOnTime().toTenths(), getMaxOnTime().toTenths());
 		return new DmsPgTime(tenths);
 	}
 

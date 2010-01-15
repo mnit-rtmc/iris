@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,10 @@ public class DmsPgTimeTest extends TestCase {
 		assertTrue(DmsPgTime.validateOnTime(
 			new DmsPgTime(0), true).toTenths() 
 			== DmsPgTime.getDefaultOn(true).toTenths());
+		// a validated multipage on-time should equal the minimum
 		assertTrue(DmsPgTime.validateOnTime(
 			new DmsPgTime(0), false).toTenths() 
-			== DmsPgTime.MIN_ONTIME.toTenths());
+			== DmsPgTime.getMinOnTime().toTenths());
 
 		// validateValue: single page
 		assertTrue(new DmsPgTime(0).equals(

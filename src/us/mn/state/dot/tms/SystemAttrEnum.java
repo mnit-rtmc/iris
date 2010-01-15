@@ -50,6 +50,8 @@ public enum SystemAttrEnum {
 	DMS_OP_STATUS_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_PAGE_OFF_DEFAULT_SECS(0f, 0f, 60f),
 	DMS_PAGE_ON_DEFAULT_SECS(2f, 0f, 60f),
+	DMS_PAGE_ON_MAX_SECS(10.0f, 0f, 100f, Change.RESTART_CLIENT),
+	DMS_PAGE_ON_MIN_SECS(0.5f, 0f, 100f, Change.RESTART_CLIENT),
 	DMS_PAGE_ON_SELECTION_ENABLE(false, Change.RESTART_CLIENT),
 	DMS_PIXEL_OFF_LIMIT(2, 1),
 	DMS_PIXEL_ON_LIMIT(1, 1),
@@ -175,6 +177,11 @@ public enum SystemAttrEnum {
 	/** Create a Float attribute with default, min and max values */
 	private SystemAttrEnum(float d, float mn, float mx) {
 		this(Float.class, d, mn, mx, Change.NONE);
+	}
+
+	/** Create a Float attribute with default, min and max values */
+	private SystemAttrEnum(float d, float mn, float mx, Change ca) {
+		this(Float.class, d, mn, mx, ca);
 	}
 
 	/** Create a system attribute with a null default value */
