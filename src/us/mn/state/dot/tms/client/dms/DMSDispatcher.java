@@ -159,7 +159,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		card_panel.add(alertCbx, "Alert");
 		panel.setCenter();
 		if(QuickMessageCBox.getIEnabled())
-			panel.addRow(buildQuickLibPanel());
+			panel.addRow(buildQuickMsgPanel());
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
 		deployBox.add(composer);
@@ -187,8 +187,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		removeAll();
 	}
 
-	/** Build the quick lib panel */
-	protected Box buildQuickLibPanel() {
+	/** Build the quick message panel */
+	protected Box buildQuickMsgPanel() {
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		JLabel label = new JLabel();
