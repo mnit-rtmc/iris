@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,10 +105,10 @@ public class OpSendDMSDefaults extends OpDMS {
 			DefaultPageOffTime off_time = new DefaultPageOffTime();
 			line.setEnum(MultiString.JustificationLine.CENTER);
 			page.setEnum(MultiString.JustificationPage.TOP);
-			on_time.setInteger(Math.round(10 *
-				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat()));
-			off_time.setInteger(Math.round(10 *
-				SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat()));
+			on_time.setInteger(Math.round(10 * SystemAttrEnum.
+				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
+			off_time.setInteger(Math.round(10 * SystemAttrEnum.
+				DMS_PAGE_OFF_DEFAULT_SECS.getFloat()));
 			mess.add(line);
 			mess.add(page);
 			mess.add(on_time);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,15 +90,16 @@ public class DmsPgTime {
 	public static DmsPgTime getDefaultOn(boolean singlepg) {
 		if(singlepg)
 			return new DmsPgTime(0);
-		else
-			return new DmsPgTime(secsToTenths(
-				SystemAttrEnum.DMS_PAGE_ON_SECS.getFloat()));
+		else {
+			return new DmsPgTime(secsToTenths(SystemAttrEnum.
+				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
+		}
 	}
 
 	/** Get default page off-time */
 	public static DmsPgTime getDefaultOff() {
 		return new DmsPgTime(secsToTenths(
-			SystemAttrEnum.DMS_PAGE_OFF_SECS.getFloat()));
+			SystemAttrEnum.DMS_PAGE_OFF_DEFAULT_SECS.getFloat()));
 	}
 
 	/** Convert from 10ths of a second to seconds */
