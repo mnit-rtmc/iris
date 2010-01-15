@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tms.ActionPlan;
@@ -25,10 +24,10 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
 import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -279,17 +278,11 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Check if a DMS action is deployable */
 	protected boolean isDeployable(final DmsAction da) {
-		final LinkedList<DMSImpl> dmss = new LinkedList<DMSImpl>();
-		DmsSignGroupHelper.find(da.getSignGroup(), new Checker<DMS>() {
-			public boolean check(DMS dms) {
-				if(dms instanceof DMSImpl)
-					dmss.add((DMSImpl)dms);
-				return true;
+		for(DMS dms: SignGroupHelper.find(da.getSignGroup())) {
+			if(dms instanceof DMSImpl) {
+				if(!((DMSImpl)dms).isDeployable(da))
+					return false;
 			}
-		});
-		for(DMSImpl dms: dmss) {
-			if(!dms.isDeployable(da))
-				return false;
 		}
 		return true;
 	}
