@@ -89,6 +89,17 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected final JComboBox durationCmb =
 		new JComboBox(Expiration.values());
 
+	/** Card layout for alert panel. This is used to hide the alert
+	 * checkbox without causing all the widgets to be revalidated. */
+	protected final CardLayout alert_layout = new CardLayout();
+
+	/** Card panel for alert panels */
+	protected final JPanel alert_panel = new JPanel(alert_layout);
+
+	/** AMBER Alert checkbox */
+	protected final JCheckBox alertCbx =
+		new JCheckBox(I18N.get("dms.alert"));
+
 	/** Combobox used to select a quick message */
 	protected final QuickMessageCBox qmsgCmb;
 
@@ -104,17 +115,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Button to query the DMS message (optional) */
 	protected final IButton queryBtn = new IButton("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
-
-	/** Card layout for alert panel. This is used to hide the alert
-	 * checkbox without causing all the widgets to be revalidated. */
-	protected final CardLayout alert_layout = new CardLayout();
-
-	/** Card panel for alert panels */
-	protected final JPanel alert_panel = new JPanel(alert_layout);
-
-	/** AMBER Alert checkbox */
-	protected final JCheckBox alertCbx =
-		new JCheckBox(I18N.get("dms.alert"));
 
 	/** Currently logged in user */
 	protected final User user;
@@ -152,6 +152,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		add(createDeployBox(), BorderLayout.SOUTH);
 		clearSelected();
 		selectionModel.addProxySelectionListener(this);
+		createJobs();
 	}
 
 	/** Create a component to deploy signs */
@@ -173,26 +174,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		return deployBox;
 	}
 
-	/** Get the selected DMS (if a single sign is selected) */
-	protected DMS getSingleSelection() {
-		if(selectionModel.getSelectedCount() == 1) {
-			for(DMS dms: selectionModel.getSelected())
-				return dms;
-		}
-		return null;
-	}
-
-	/** Dispose of the dispatcher */
-	public void dispose() {
-		selectionModel.removeProxySelectionListener(this);
-		clearSelected();
-		singleTab.dispose();
-		multipleTab.dispose();
-		composer.dispose();
-		qmsgCmb.dispose();
-		removeAll();
-	}
-
 	/** Build the quick message panel */
 	protected Box buildQuickMsgPanel() {
 		Box box = Box.createHorizontalBox();
@@ -210,17 +191,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Build the button panel */
 	protected Box buildButtonPanel() {
-		new ActionJob(sendBtn) {
-			public void perform() {
-				if(shouldSendMessage())
-					sendMessage();
-			}
-		};
-		new ActionJob(queryBtn) {
-			public void perform() {
-				queryMessage();
-			}
-		};
 		Box box = Box.createHorizontalBox();
 		box.add(Box.createHorizontalGlue());
 		box.add(sendBtn);
@@ -232,6 +202,21 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		}
 		box.add(Box.createHorizontalGlue());
 		return box;
+	}
+
+	/** Create the button jobs */
+	protected void createJobs() {
+		new ActionJob(sendBtn) {
+			public void perform() {
+				if(shouldSendMessage())
+					sendMessage();
+			}
+		};
+		new ActionJob(queryBtn) {
+			public void perform() {
+				queryMessage();
+			}
+		};
 	}
 
 	/** If enabled, prompt the user with a send confirmation.
@@ -278,6 +263,132 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			}
 		}
 		return sb.toString();
+	}
+
+	/** Send a new message to the selected DMS */
+	protected void sendMessage() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() > 0) {
+			SignMessage sm = createMessage();
+			if(sm != null)
+				sendMessage(sm, sel);
+			composer.updateMessageLibrary();
+			selectPreview(false);
+		}
+	}
+
+	/** Send a message to a list of signs */
+	protected void sendMessage(SignMessage sm, List<DMS> sel) {
+		for(DMS dms: sel) {
+			if(checkDimensions(dms)) {
+				dms.setOwnerNext(user);
+				dms.setMessageNext(sm);
+			} else {
+				// NOTE: this sign does not match the proper
+				//       dimensions, so deselect it.
+				selectionModel.removeSelected(dms);
+			}
+		}
+	}
+
+	/** Create a new message from the widgets.
+	 * @return A newly created SignMessage else null. */
+	protected SignMessage createMessage() {
+		String multi = message;	// Avoid races
+		if(multi.isEmpty())
+			return null;
+		else
+			return createMessage(multi);
+	}
+
+	/** Create a new message using the specified MULTI */
+	protected SignMessage createMessage(String multi) {
+		String bitmaps = createBitmaps(multi);
+		if(bitmaps != null) {
+			return creator.create(multi, bitmaps, getPriority(),
+				getPriority(), getDuration());
+		} else
+			return null;
+	}
+
+	/** Get the selected priority */
+	protected DMSMessagePriority getPriority() {
+		if(alertCbx.isSelected())
+		       return DMSMessagePriority.ALERT;
+		else
+		       return DMSMessagePriority.OPERATOR;
+	}
+
+	/** Get the selected duration */
+	protected Integer getDuration() {
+		Expiration e = (Expiration)durationCmb.getSelectedItem();
+		if(e != null)
+			return e.duration;
+		else
+			return null;
+	}
+
+	/** Create a new blank message */
+	public SignMessage createBlankMessage() {
+		String multi = "";
+		String bitmaps = createBitmaps(multi);
+		if(bitmaps != null) {
+			return creator.create(multi, bitmaps,
+			       DMSMessagePriority.OVERRIDE,
+			       DMSMessagePriority.BLANK, null);
+		} else
+			return null;
+	}
+
+	/** Create bitmap graphics for a MULTI string */
+	protected String createBitmaps(String multi) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			MultiString ms = new MultiString(multi);
+			return encodeBitmaps(b.createPixmaps(ms));
+		} else
+			return null;
+	}
+
+	/** Encode the bitmaps to Base64 */
+	protected String encodeBitmaps(BitmapGraphic[] bmaps) {
+		int blen = bmaps[0].length();
+		byte[] bitmaps = new byte[bmaps.length * blen];
+		for(int i = 0; i < bmaps.length; i++) {
+			byte[] pix = bmaps[i].getPixels();
+			System.arraycopy(pix, 0, bitmaps, i * blen, blen);
+		}
+		return Base64.encode(bitmaps);
+	}
+
+	/** Query the current message on all selected signs */
+	protected void queryMessage() {
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() < 1)
+			return;
+		for(DMS dms: sel) {
+			if(checkDimensions(dms)) {
+				dms.setDeviceRequest(DeviceRequest.
+					QUERY_MESSAGE.ordinal());
+			} else {
+				// NOTE: this sign does not match the proper
+				//       dimensions, so deselect it.
+				selectionModel.removeSelected(dms);
+			}
+		}
+		composer.updateMessageLibrary();
+		selectPreview(false);
+	}
+
+	/** Dispose of the dispatcher */
+	public void dispose() {
+		selectionModel.removeProxySelectionListener(this);
+		clearSelected();
+		singleTab.dispose();
+		multipleTab.dispose();
+		composer.dispose();
+		qmsgCmb.dispose();
+		removeAll();
 	}
 
 	/** Called whenever a sign is added to the selection */
@@ -387,121 +498,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Get the current selected message */
 	public String getMessage() {
 		return message;
-	}
-
-	/** Send a new message to the selected DMS */
-	protected void sendMessage() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() > 0) {
-			SignMessage sm = createMessage();
-			if(sm != null)
-				sendMessage(sm, sel);
-			composer.updateMessageLibrary();
-			selectPreview(false);
-		}
-	}
-
-	/** Send a message to a list of signs */
-	protected void sendMessage(SignMessage sm, List<DMS> sel) {
-		for(DMS dms: sel) {
-			if(checkDimensions(dms)) {
-				dms.setOwnerNext(user);
-				dms.setMessageNext(sm);
-			} else {
-				// NOTE: this sign does not match the proper
-				//       dimensions, so deselect it.
-				selectionModel.removeSelected(dms);
-			}
-		}
-	}
-
-	/** Query the current message on all selected signs */
-	private void queryMessage() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() < 1)
-			return;
-		for(DMS dms: sel) {
-			if(checkDimensions(dms)) {
-				dms.setDeviceRequest(DeviceRequest.
-					QUERY_MESSAGE.ordinal());
-			} else {
-				// NOTE: this sign does not match the proper
-				//       dimensions, so deselect it.
-				selectionModel.removeSelected(dms);
-			}
-		}
-		composer.updateMessageLibrary();
-		selectPreview(false);
-	}
-
-	/** Create a new message from the widgets.
-	 * @return A newly created SignMessage else null. */
-	protected SignMessage createMessage() {
-		String multi = message;	// Avoid races
-		if(multi.isEmpty())
-			return null;
-		else
-			return createMessage(multi);
-	}
-
-	/** Create a new message using the specified MULTI */
-	protected SignMessage createMessage(String multi) {
-		String bitmaps = createBitmaps(multi);
-		if(bitmaps != null) {
-			return creator.create(multi, bitmaps, getPriority(),
-				getPriority(), getDuration());
-		} else
-			return null;
-	}
-
-	/** Create a new blank message */
-	protected SignMessage createBlankMessage() {
-		String multi = "";
-		String bitmaps = createBitmaps(multi);
-		if(bitmaps != null) {
-			return creator.create(multi, bitmaps,
-			       DMSMessagePriority.OVERRIDE,
-			       DMSMessagePriority.BLANK, null);
-		} else
-			return null;
-	}
-
-	/** Create bitmap graphics for a MULTI string */
-	protected String createBitmaps(String multi) {
-		PixelMapBuilder b = builder;
-		if(b != null) {
-			MultiString ms = new MultiString(multi);
-			return encodeBitmaps(b.createPixmaps(ms));
-		} else
-			return null;
-	}
-
-	/** Encode the bitmaps to Base64 */
-	protected String encodeBitmaps(BitmapGraphic[] bmaps) {
-		int blen = bmaps[0].length();
-		byte[] bitmaps = new byte[bmaps.length * blen];
-		for(int i = 0; i < bmaps.length; i++) {
-			byte[] pix = bmaps[i].getPixels();
-			System.arraycopy(pix, 0, bitmaps, i * blen, blen);
-		}
-		return Base64.encode(bitmaps);
-	}
-
-	/** Get the selected priority */
-	protected DMSMessagePriority getPriority() {
-		if(alertCbx.isSelected())
-		       return DMSMessagePriority.ALERT;
-		else
-		       return DMSMessagePriority.OPERATOR;
-	}
-
-	/** Get the selected duration */
-	protected Integer getDuration() {
-		Expiration e = (Expiration)durationCmb.getSelectedItem();
-		if(e != null)
-			return e.duration;
-		else
-			return null;
 	}
 
 	/** Check the dimensions of a sign against the pixel map builder */
