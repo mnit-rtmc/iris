@@ -164,9 +164,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		panel.addRow(alert_panel);
 		alert_panel.add(new JLabel(), CARD_HIDDEN);
 		alert_panel.add(alertCbx, CARD_SHOWN);
-		panel.setCenter();
 		if(QuickMessageCBox.getIEnabled())
 			panel.addRow(buildQuickMsgPanel());
+		panel.setCenter();
 		panel.addRow(buildButtonPanel());
 		Box deployBox = Box.createHorizontalBox();
 		deployBox.add(composer);
