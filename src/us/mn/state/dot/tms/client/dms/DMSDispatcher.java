@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -252,26 +251,29 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		return res == 0;
 	}
 
-	/** Return a string which is a list of selected DMS.
-	 *  @return An empty string if no DMS selected else the message. */
+	/** Build a confirmation message containing all selected DMS.
+	 * @return An empty string if no DMS selected else the message. */
 	protected String buildConfirmMsg() {
-		StringBuilder ret = new StringBuilder("Send message to ");
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() <= 0)
-			return "";
-		if(sel.size() == 1)
-			ret.append(((DMS)sel.get(0)).getName());
-		else {
-			for(Iterator iter = sel.iterator(); iter.hasNext();) {
-			   DMS dms = (DMS) iter.next();
-				if(checkDimensions(dms))
-					ret.append(dms.getName());
-				if(iter.hasNext())
-					ret.append(", ");
+		String sel = buildSelectedList();
+		if(sel.isEmpty())
+			return sel;
+		else
+			return "Send message to " + sel + "?";
+	}
+
+	/** Build a string of selected DMS */
+	protected String buildSelectedList() {
+		boolean first = true;
+		StringBuilder sb = new StringBuilder();
+		for(DMS dms: selectionModel.getSelected()) {
+			if(checkDimensions(dms)) {
+				if(!first)
+					sb.append(", ");
+				sb.append(dms.getName());
+				first = false;
 			}
 		}
-		ret.append("?");
-		return ret.toString();
+		return sb.toString();
 	}
 
 	/** Called whenever a sign is added to the selection */
