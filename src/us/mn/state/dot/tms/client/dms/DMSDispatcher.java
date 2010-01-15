@@ -212,7 +212,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected Box buildButtonPanel() {
 		new ActionJob(sendBtn) {
 			public void perform() {
-				if(sendConfirm())
+				if(shouldSendMessage())
 					sendMessage();
 			}
 		};
@@ -235,20 +235,24 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** If enabled, prompt the user with a send confirmation.
-	 *  @return True to send the message else false to cancel. */
-	protected boolean sendConfirm() {
-		// send confirmation is not enabled
-		if(!SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
+	 * @return True to send the message else false to cancel. */
+	protected boolean shouldSendMessage() {
+		if(SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
+			return showConfirmDialog();
+		else
 			return true;
-		int res = 0;
-		try {
-			String m = buildConfirmMsg();
-			if(!m.isEmpty())
-				res = JOptionPane.showConfirmDialog(null, m, 
-					"Send Confirmation",
-					JOptionPane.OK_CANCEL_OPTION);
-		} catch(Exception ex) {}
-		return res == 0;
+	}
+
+	/** Show a message confirmation dialog.
+	 * @return True if message should be sent. */
+	protected boolean showConfirmDialog() {
+		String m = buildConfirmMsg();
+		if(!m.isEmpty()) {
+			return 0 == JOptionPane.showConfirmDialog(null, m, 
+				"Send Confirmation",
+				JOptionPane.OK_CANCEL_OPTION);
+		} else
+			return false;
 	}
 
 	/** Build a confirmation message containing all selected DMS.
