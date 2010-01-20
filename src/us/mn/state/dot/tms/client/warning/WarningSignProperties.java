@@ -105,6 +105,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 				controllerPressed();
 			}
 		};
+		controller.setEnabled(proxy.getController() != null);
 		return location;
 	}
 

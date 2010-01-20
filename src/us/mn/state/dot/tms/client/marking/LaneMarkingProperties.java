@@ -91,6 +91,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 				controllerPressed();
 			}
 		};
+		controller.setEnabled(proxy.getController() != null);
 		return location;
 	}
 

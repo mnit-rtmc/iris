@@ -168,6 +168,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		location.finishRow();
 		location.setCenter();
 		location.addRow(controllerBtn);
+		controllerBtn.setEnabled(proxy.getController() != null);
 		return location;
 	}
 

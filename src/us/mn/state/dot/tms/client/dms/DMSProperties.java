@@ -313,6 +313,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location.finishRow();
 		location.setCenter();
 		location.addRow(controllerBtn);
+		controllerBtn.setEnabled(proxy.getController() != null);
 		return location;
 	}
 
