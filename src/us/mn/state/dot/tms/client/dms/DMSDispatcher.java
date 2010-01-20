@@ -471,29 +471,33 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		composer.clearSelections();
 		durationCmb.setEnabled(false);
 		durationCmb.setSelectedItem(null);
-		sendBtn.setEnabled(false);
-		blankBtn.setEnabled(false);
-		queryBtn.setEnabled(false);
+		alert_layout.show(alert_panel, CARD_HIDDEN);
+		alertCbx.setEnabled(false);
 		qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
 		qmsgCmb.setEnabled(false);
 		qmsgCmb.setSelectedItem(null);
 		qmsgCmb.removeAllItems();
+		sendBtn.setEnabled(false);
+		blankBtn.setEnabled(false);
+		queryBtn.setEnabled(false);
 		builder = null;
 	}
 
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets() {
-		composer.setEnabled(true);
-		durationCmb.setEnabled(true);
+		boolean send = canSend();
+		composer.setEnabled(send);
+		durationCmb.setEnabled(send);
 		durationCmb.setSelectedIndex(0);
-		sendBtn.setEnabled(canSend());
-		blankBtn.setEnabled(canSend());
-		queryBtn.setEnabled(canRequest());
+		alertCbx.setEnabled(send);
 		if(qmsgCmb.getItemCount() > 0)
 			qmsg_layout.show(qmsg_panel, CARD_SHOWN);
 		else
 			qmsg_layout.show(qmsg_panel, CARD_HIDDEN);
-		qmsgCmb.setEnabled(true);
+		qmsgCmb.setEnabled(send);
+		sendBtn.setEnabled(send);
+		blankBtn.setEnabled(send);
+		queryBtn.setEnabled(canRequest());
 		selectPreview(false);
 	}
 
