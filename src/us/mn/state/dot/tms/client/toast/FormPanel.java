@@ -167,6 +167,7 @@ public class FormPanel extends JPanel {
 		area.setWrapStyleWord(true);
 		area.setLineWrap(true);
 		setFill();
+		area.setEnabled(enable);
 		addRow(new JScrollPane(area,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
@@ -175,6 +176,7 @@ public class FormPanel extends JPanel {
 	/** Add a table component */
 	public void addRow(JTable table) {
 		setFill();
+		table.setEnabled(enable);
 		addRow(new JScrollPane(table,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
