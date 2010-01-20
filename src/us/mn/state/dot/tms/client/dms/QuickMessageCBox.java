@@ -104,7 +104,7 @@ public class QuickMessageCBox extends JComboBox {
 		getEditor().setItem(name);
 		QuickMessage qm = QuickMessageHelper.lookup(name);
 		if(qm != null) {
-			getModel().setSelectedItem(qm);
+			model.setSelectedItem(qm);
 			updateDispatcher(qm);
 		}
 	}
