@@ -46,7 +46,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Controller button */
-	protected final JButton controller = new JButton("Controller");
+	protected final JButton controllerBtn = new JButton("Controller");
 
 	/** Create a new lane marking properties form */
 	public LaneMarkingProperties(Session s, LaneMarking ws) {
@@ -65,6 +65,9 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 		tab.add("Location", createLocationPanel());
 		add(tab);
 		updateAttribute(null);
+		if(canUpdate())
+			createUpdateJobs();
+		createControllerJob();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -79,33 +82,40 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
 		location.addRow("Notes", notes);
+		location.setCenter();
+		location.addRow(controllerBtn);
+		return location;
+	}
+
+	/** Create the widget jobs */
+	protected void createUpdateJobs() {
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
 			}
 		};
-		location.setCenter();
-		location.addRow(controller);
-		new ActionJob(this, controller) {
+	}
+
+	/** Create the controller job */
+	protected void createControllerJob() {
+		new ActionJob(this, controllerBtn) {
 			public void perform() throws Exception {
 				controllerPressed();
 			}
 		};
-		controller.setEnabled(proxy.getController() != null);
-		return location;
 	}
 
 	/** Controller lookup button pressed */
 	protected void controllerPressed() {
 		Controller c = proxy.getController();
-		if(c == null)
-			controller.setEnabled(false);
-		else
+		if(c != null)
 			showForm(new ControllerForm(session, c));
 	}
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
+		if(a == null || a.equals("controller"))
+			controllerBtn.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 	}

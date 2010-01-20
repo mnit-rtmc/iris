@@ -131,6 +131,7 @@ public class GraphicForm extends AbstractForm {
 		panel.addRow(table);
 		panel.add(createBtn);
 		panel.addRow(del_btn);
+		createBtn.setEnabled(model.canAdd());
 		del_btn.setEnabled(false);
 		return panel;
 	}
