@@ -112,6 +112,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Status component */
 	protected final JLabel l_status = new JLabel();
 
+	/** Send settings button */
+	protected final JButton settingsBtn = new JButton("Send Settings");
+
 	/** Sonar state */
 	protected final SonarState state;
 
@@ -138,11 +141,32 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		tab.add("Status", createStatusPanel());
 		add(tab);
 		updateAttribute(null);
+		if(canUpdate())
+			createUpdateJobs();
+		createControllerJob();
+		if(canUpdate("deviceRequest"))
+			createRequestJobs();
+		else
+			disableRequestWidgets();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
+		location = new LocationPanel(session, proxy.getGeoLoc());
+		location.initialize();
+		location.addRow("Notes", notes);
+		camera.setModel(new WrapperComboBoxModel(
+			state.getCamCache().getCameraModel()));
+		location.add("Camera", camera);
+		location.finishRow();
+		location.setCenter();
+		location.addRow(controllerBtn);
+		return location;
+	}
+
+	/** Create the widget jobs */
+	protected void createUpdateJobs() {
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
@@ -154,37 +178,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 					(Camera)camera.getSelectedItem());
 			}
 		};
-		new ActionJob(this, controllerBtn) {
-			public void perform() {
-				controllerPressed();
-			}
-		};
-		location = new LocationPanel(session, proxy.getGeoLoc());
-		location.initialize();
-		location.addRow("Notes", notes);
-		camera.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
-		location.add("Camera", camera);
-		location.finishRow();
-		location.setCenter();
-		location.addRow(controllerBtn);
-		controllerBtn.setEnabled(proxy.getController() != null);
-		return location;
-	}
-
-	/** Controller lookup button pressed */
-	protected void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c == null)
-			controllerBtn.setEnabled(false);
-		else {
-			session.getDesktop().show(
-				new ControllerForm(session, c));
-		}
-	}
-
-	/** Create ramp meter setup panel */
-	protected JPanel createSetupPanel() {
 		new ActionJob(this, meterType) {
 			public void perform() {
 				int t = meterType.getSelectedIndex();
@@ -204,7 +197,46 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 					wait.getText()));
 			}
 		};
-		FormPanel panel = new FormPanel(true);
+		m_lock.setAction(new LockMeterAction(proxy, m_lock));
+	}
+
+	/** Create the controller job */
+	protected void createControllerJob() {
+		new ActionJob(this, controllerBtn) {
+			public void perform() {
+				controllerPressed();
+			}
+		};
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() {
+		Controller c = proxy.getController();
+		if(c != null) {
+			session.getDesktop().show(
+				new ControllerForm(session, c));
+		}
+	}
+
+	/** Create the device request jobs */
+	protected void createRequestJobs() {
+		new ActionJob(this, settingsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					SEND_SETTINGS.ordinal());
+			}
+		};
+		settingsBtn.setEnabled(true);
+	}
+
+	/** Disable the device request widgets */
+	protected void disableRequestWidgets() {
+		settingsBtn.setEnabled(false);
+	}
+
+	/** Create ramp meter setup panel */
+	protected JPanel createSetupPanel() {
+		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow("Meter Type", meterType);
 		panel.addRow("Storage (feet)", storage);
 		panel.addRow("Max Wait (seconds)", wait);
@@ -233,27 +265,21 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create ramp meter status panel */
 	protected JPanel createStatusPanel() {
-		m_lock.setAction(new LockMeterAction(proxy, m_lock));
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel(canUpdate());
 		panel.addRow("Release rate", release);
 		panel.addRow("Cycle time", cycle);
 		panel.addRow("Queue", queue);
 		panel.addRow("Lock", m_lock);
 		panel.addRow("Operation", operation);
 		panel.addRow("Status", l_status);
-		JButton settingsBtn = new JButton("Send Settings");
-		new ActionJob(this, settingsBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					SEND_SETTINGS.ordinal());
-			}
-		};
 		panel.addRow(settingsBtn);
 		return panel;
 	}
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
+		if(a == null || a.equals("controller"))
+			controllerBtn.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
