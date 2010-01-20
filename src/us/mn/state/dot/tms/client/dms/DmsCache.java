@@ -119,7 +119,6 @@ public class DmsCache {
 		client.populateReadable(fonts);
 		client.populateReadable(glyphs);
 		client.populateReadable(sign_messages);
-		client.populateReadable(quick_messages);
 		client.populateReadable(dmss);
 		if(client.canRead(DMS.SONAR_TYPE)) {
 			dmss.ignoreAttribute("operation");
@@ -127,6 +126,7 @@ public class DmsCache {
 		}
 		client.populateReadable(sign_groups);
 		client.populateReadable(dms_sign_groups);
+		client.populateReadable(quick_messages);
 		client.populateReadable(sign_text);
 	}
 }
