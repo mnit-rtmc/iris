@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,6 +88,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Operation description label */
 	protected final JLabel operation = new JLabel();
 
+	/** Button to send settings */
+	protected final JButton settingsBtn = new JButton("Send Settings");
+
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(Session s, LCSArray proxy) {
 		super(TITLE, s, proxy);
@@ -112,6 +115,12 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		tab.add("Status", createStatusPanel());
 		add(tab);
 		updateAttribute(null);
+		if(canUpdate())
+			createUpdateJobs();
+		if(canUpdate("lcsLock"))
+			createLockJob();
+		if(canUpdate("deviceRequest"))
+			createRequestJobs();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -123,12 +132,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create setup panel */
 	protected JPanel createSetupPanel() {
-		new FocusJob(notes) {
-			public void perform() {
-				proxy.setNotes(notes.getText());
-			}
-		};
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel(canUpdate());
 		initTable();
 		FormPanel tpnl = new FormPanel(true);
 		tpnl.addRow(lcs_table);
@@ -142,6 +146,15 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		panel.addRow(createIndicationPanel());
 		panel.addRow("Notes", notes);
 		return panel;
+	}
+
+	/** Create jobs for updating widgets */
+	protected void createUpdateJobs() {
+		new FocusJob(notes) {
+			public void perform() {
+				proxy.setNotes(notes.getText());
+			}
+		};
 	}
 
 	/** Initialize the table */
@@ -277,19 +290,28 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create status panel */
 	protected JPanel createStatusPanel() {
-		lcs_lock.setAction(new LockLcsAction(proxy, lcs_lock));
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel(false);
 		panel.addRow("Lock", lcs_lock);
 		panel.addRow("Operation", operation);
-		JButton settingsBtn = new JButton("Send Settings");
+		panel.addRow(settingsBtn);
+		return panel;
+	}
+
+	/** Create lock job */
+	protected void createLockJob() {
+		lcs_lock.setAction(new LockLcsAction(proxy, lcs_lock));
+		lcs_lock.setEnabled(true);
+	}
+
+	/** Create request jobs */
+	protected void createRequestJobs() {
 		new ActionJob(this, settingsBtn) {
 			public void perform() {
 				proxy.setDeviceRequest(DeviceRequest.
 					SEND_SETTINGS.ordinal());
 			}
 		};
-		panel.addRow(settingsBtn);
-		return panel;
+		settingsBtn.setEnabled(true);
 	}
 
 	/** Update one attribute on the form */
