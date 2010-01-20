@@ -14,10 +14,12 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.util.Properties;
 import java.util.TimeZone;
+import javax.swing.UIManager;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.util.HTTPProxySelector;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -89,6 +91,7 @@ public class MainClient {
 		Scheduler.setHandler(handler);
 		checkTimeZone();
 		checkAssert();
+		tweakLookAndFeel();
 		try {
 			IrisClient c = createClientSplash(args);
 			handler.setOwner(c);
@@ -117,5 +120,15 @@ public class MainClient {
 		assert assertsEnabled = true;
 		System.err.println("Assertions are turned " +
 			(assertsEnabled ? "on" : "off") + ".");
+	}
+
+	/** Tweak the look and feel */
+	static protected void tweakLookAndFeel() {
+		UIManager.put("ComboBox.disabledForeground",
+			new javax.swing.plaf.ColorUIResource(Color.GRAY));
+		UIManager.put("TextField.inactiveForeground",
+			 new javax.swing.plaf.ColorUIResource(Color.GRAY));
+		UIManager.put("TextArea.inactiveForeground",
+			 new javax.swing.plaf.ColorUIResource(Color.GRAY));
 	}
 }
