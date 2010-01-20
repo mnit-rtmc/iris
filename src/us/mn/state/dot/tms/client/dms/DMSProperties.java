@@ -170,6 +170,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Character height label */
 	protected final JLabel cHeight = new JLabel();
 
+	/** Button to query configuration */
+	protected final JButton configBtn = new JButton("Query Configuration");
+
 	/** Cabinet temperature label */
 	protected final JLabel cabinetTemp = new JLabel();
 
@@ -182,6 +185,20 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Operation description label */
 	protected final JLabel operation = new JLabel();
 
+	/** Query message button */
+	protected final IButton queryMsgBtn = new IButton("dms.query.msg", 
+		SystemAttrEnum.DMS_QUERYMSG_ENABLE);
+
+	/** Reset DMS button */
+	protected final IButton resetBtn = new IButton("dms.reset", 
+		SystemAttrEnum.DMS_RESET_ENABLE);
+
+	/** Query status button */
+	protected final JButton queryStatBtn = new JButton("Query Status");
+
+	/** Send settings button */
+	protected final JButton settingsBtn = new JButton("Send Settings");
+
 	/** Bad pixel count label */
 	protected final JLabel badPixels = new JLabel();
 
@@ -190,6 +207,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Stuck on pixel panel */
 	protected final SignPixelPanel stuck_on_pnl = new SignPixelPanel(true);
+
+	/** Button to query pixel failures */
+	protected final JButton queryPixelsBtn = new JButton(
+		"Query Pixel Failures");
+
+	/** Button to test pixel failures */
+	protected final JButton testPixelsBtn = new JButton("Test Pixels");
 
 	/** Lamp status table */
 	protected final ZTable lampTable = new ZTable();
@@ -206,6 +230,9 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			DeviceRequest.BRIGHTNESS_TOO_BRIGHT
 		}
 	);
+
+	/** Button to test lamps */
+	protected final JButton testLampsBtn = new JButton("Test Lamps");
 
 	/** Card layout for manufacturer panels */
 	protected final CardLayout cards = new CardLayout();
@@ -276,6 +303,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 			tab.add("Manufacturer", createManufacturerPanel());
 		add(tab);
 		updateAttribute(null);
+		if(canUpdate())
+			createUpdateJobs();
+		createControllerJob();
+		if(canRequest())
+			createRequestJobs();
+		else
+			disableRequestWidgets();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -286,8 +320,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		super.dispose();
 	}
 
-	/** Create the location panel */
-	protected JPanel createLocationPanel() {
+	/** Create the widget jobs */
+	protected void createUpdateJobs() {
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
@@ -299,11 +333,119 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 					(Camera)camera.getSelectedItem());
 			}
 		};
+		new ChangeJob(this, ldcPotBaseSpn) {
+			public void perform() {
+				Number n = (Number)ldcPotBaseSpn.getValue();
+				proxy.setLdcPotBase(n.intValue());
+			}
+		};
+		new ChangeJob(this, currentLowSpn) {
+			public void perform() {
+				Number n = (Number)currentLowSpn.getValue();
+				proxy.setPixelCurrentLow(n.intValue());
+			}
+		};
+		new ChangeJob(this, currentHighSpn) {
+			public void perform() {
+				Number n = (Number)currentHighSpn.getValue();
+				proxy.setPixelCurrentHigh(n.intValue());
+			}
+		};
+	}
+
+	/** Create the controller job */
+	protected void createControllerJob() {
 		new ActionJob(this, controllerBtn) {
 			public void perform() {
 				controllerPressed();
 			}
 		};
+	}
+
+	/** Create the device request jobs */
+	protected void createRequestJobs() {
+		new ActionJob(this, configBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					QUERY_CONFIGURATION.ordinal());
+			}
+		};
+		new ActionJob(this, queryMsgBtn) {
+			public void perform() throws Exception {
+				proxy.setDeviceRequest(DeviceRequest.
+					QUERY_MESSAGE.ordinal());
+			}
+		};
+		new ActionJob(this, resetBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					RESET_DEVICE.ordinal());
+			}
+		};
+		new ActionJob(this, queryStatBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					QUERY_STATUS.ordinal());
+			}
+		};
+		new ActionJob(this, settingsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					SEND_SETTINGS.ordinal());
+			}
+		};
+		new ActionJob(this, queryPixelsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(DeviceRequest.
+					QUERY_PIXEL_FAILURES.ordinal());
+			}
+		};
+		new ActionJob(this, testPixelsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(
+					DeviceRequest.TEST_PIXELS.ordinal());
+			}
+		};
+		new ActionJob(this, feedback) {
+			public void perform() {
+				DeviceRequest sr = (DeviceRequest)
+					feedback.getSelectedItem();
+				proxy.setDeviceRequest(sr.ordinal());
+				feedback.setEnabled(false);
+			}
+		};
+		new ActionJob(this, testLampsBtn) {
+			public void perform() {
+				proxy.setDeviceRequest(
+					DeviceRequest.TEST_LAMPS.ordinal());
+			}
+		};
+	}
+
+	/** Disable the device request widgets */
+	protected void disableRequestWidgets() {
+		configBtn.setEnabled(false);
+		queryMsgBtn.setEnabled(false);
+		resetBtn.setEnabled(false);
+		queryStatBtn.setEnabled(false);
+		settingsBtn.setEnabled(false);
+		queryPixelsBtn.setEnabled(false);
+		testPixelsBtn.setEnabled(false);
+		feedback.setEnabled(false);
+		testLampsBtn.setEnabled(false);
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() {
+		Controller c = proxy.getController();
+		if(c != null) {
+			session.getDesktop().show(
+				new ControllerForm(session, c));
+		}
+	}
+
+	/** Create the location panel */
+	protected JPanel createLocationPanel() {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
 		location.addRow("Notes", notes);
@@ -313,19 +455,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		location.finishRow();
 		location.setCenter();
 		location.addRow(controllerBtn);
-		controllerBtn.setEnabled(proxy.getController() != null);
 		return location;
-	}
-
-	/** Controller lookup button pressed */
-	protected void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c == null)
-			controllerBtn.setEnabled(false);
-		else {
-			session.getDesktop().show(
-				new ControllerForm(session, c));
-		}
 	}
 
 	/** Create the configuration panel */
@@ -361,13 +491,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Sign height", pHeight);
 		panel.addRow("Character width", cWidth);
 		panel.addRow("Character height", cHeight);
-		JButton configBtn = new JButton("Query Configuration");
-		new ActionJob(this, configBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					QUERY_CONFIGURATION.ordinal());
-			}
-		};
 		panel.addRow(configBtn);
 		return panel;
 	}
@@ -383,67 +506,21 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		panel.addRow("Ambient temp", ambientTemp);
 		panel.addRow("Housing temp", housingTemp);
 		panel.add("Operation", operation);
-		IButton queryMsgBtn = new IButton("dms.query.msg", 
-			SystemAttrEnum.DMS_QUERYMSG_ENABLE);
-		if(queryMsgBtn.getIEnabled()) {
+		if(queryMsgBtn.getIEnabled())
 			panel.add(queryMsgBtn);
-			new ActionJob(this, queryMsgBtn) {
-				public void perform() throws Exception {
-					proxy.setDeviceRequest(DeviceRequest.
-						QUERY_MESSAGE.ordinal());
-				}
-			};
-		}
 		panel.finishRow();
-		IButton resetBtn = new IButton("dms.reset", 
-			SystemAttrEnum.DMS_RESET_ENABLE);
-		if(resetBtn.getIEnabled()) {
+		if(resetBtn.getIEnabled())
 			panel.addRow(resetBtn);
-			new ActionJob(this, resetBtn) {
-				public void perform() {
-					proxy.setDeviceRequest(DeviceRequest.
-						RESET_DEVICE.ordinal());
-				}
-			};
-		}
-		JButton queryStatBtn = new JButton("Query Status");
-		new ActionJob(this, queryStatBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					QUERY_STATUS.ordinal());
-			}
-		};
 		panel.addRow(queryStatBtn);
-		JButton settingsBtn = new JButton("Send Settings");
-		new ActionJob(this, settingsBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					SEND_SETTINGS.ordinal());
-			}
-		};
 		panel.addRow(settingsBtn);
 		return panel;
 	}
 
 	/** Create pixel panel */
 	protected JPanel createPixelPanel() {
-		JButton queryBtn = new JButton("Query Pixel Failures");
-		new ActionJob(this, queryBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(DeviceRequest.
-					QUERY_PIXEL_FAILURES.ordinal());
-			}
-		};
-		JButton testBtn = new JButton("Test Pixels");
-		new ActionJob(this, testBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(
-					DeviceRequest.TEST_PIXELS.ordinal());
-			}
-		};
 		JPanel buttonPnl = new JPanel();
-		buttonPnl.add(queryBtn);
-		buttonPnl.add(testBtn);
+		buttonPnl.add(queryPixelsBtn);
+		buttonPnl.add(testPixelsBtn);
 		badPixels.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Pixel errors", badPixels);
@@ -466,28 +543,13 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create brightness panel */
 	protected JPanel createBrightnessPanel() {
-		new ActionJob(this, feedback) {
-			public void perform() {
-				DeviceRequest sr = (DeviceRequest)
-					feedback.getSelectedItem();
-				proxy.setDeviceRequest(sr.ordinal());
-				feedback.setEnabled(false);
-			}
-		};
-		JButton testBtn = new JButton("Test Lamps");
-		new ActionJob(this, testBtn) {
-			public void perform() {
-				proxy.setDeviceRequest(
-					DeviceRequest.TEST_LAMPS.ordinal());
-			}
-		};
 		lightOutput.setForeground(OK);
 		FormPanel panel = new FormPanel(true);
 		panel.addRow("Lamp status", lampTable);
 		panel.addRow("Light output", lightOutput);
 		panel.addRow("Feedback", feedback);
 		panel.setCenter();
-		panel.addRow(testBtn);
+		panel.addRow(testLampsBtn);
 		return panel;
 	}
 
@@ -517,25 +579,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 
 	/** Create Ledstar-specific panel */
 	protected JPanel createLedstarPanel() {
-		new ChangeJob(this, ldcPotBaseSpn) {
-			public void perform() {
-				Number n = (Number)ldcPotBaseSpn.getValue();
-				proxy.setLdcPotBase(n.intValue());
-			}
-		};
-		new ChangeJob(this, currentLowSpn) {
-			public void perform() {
-				Number n = (Number)currentLowSpn.getValue();
-				proxy.setPixelCurrentLow(n.intValue());
-			}
-		};
-		new ChangeJob(this, currentHighSpn) {
-			public void perform() {
-				Number n = (Number)currentHighSpn.getValue();
-				proxy.setPixelCurrentHigh(n.intValue());
-			}
-		};
-		FormPanel panel = new FormPanel(true);
+		FormPanel panel = new FormPanel(canUpdate());
 		panel.setTitle(MAKE_LEDSTAR);
 		panel.addRow("LDC pot base", ldcPotBaseSpn);
 		panel.addRow("Pixel current low threshold", currentLowSpn);
@@ -558,6 +602,8 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
 		messagesTab.updateAttribute(a);
+		if(a == null || a.equals("controller"))
+			controllerBtn.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
@@ -640,8 +686,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				lightOutput.setText("" + o + "%");
 			else
 				lightOutput.setText(UNKNOWN);
-			// FIXME: should check SONAR roles
-			feedback.setEnabled(true);
+			feedback.setEnabled(canRequest());
 		}
 		if(a == null || a.equals("minCabinetTemp") ||
 		   a.equals("maxCabinetTemp"))
@@ -789,5 +834,10 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	/** Check if the user can make device requests */
+	protected boolean canRequest() {
+		return canUpdate("deviceRequest");
 	}
 }
