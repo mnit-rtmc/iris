@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public enum SystemAttrEnum {
-	ACTIONPLAN_TOOLBAR_ENABLE(true, Change.RESTART_CLIENT),
 	CAMERA_NUM_PRESET_BTNS(3, 0, 20, Change.RESTART_CLIENT),
 	CAMERA_NUM_VIDEO_FRAMES(900, 0),
 	CAMERA_PTZ_PANEL_ENABLE(false, Change.RESTART_CLIENT),

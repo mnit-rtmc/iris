@@ -29,8 +29,7 @@ public class ActionPlanPanel extends ToolPanel {
 
 	/** Should the action plan panel be displayed? */
 	static public boolean shouldDisplay(Session s) {
-		return SystemAttrEnum.ACTIONPLAN_TOOLBAR_ENABLE.getBoolean() &&
-		       s.canUpdate(ActionPlan.SONAR_TYPE, "deployed");
+		return s.canUpdate(ActionPlan.SONAR_TYPE, "deployed");
 	}
 
 	/** Combo box for all action plans */
