@@ -11,6 +11,41 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.110.0 (20 January 2010)</dt>
+	<dd><ul>
+		<li>
+			Allow larger graphics to be used on DMS (144x144).
+		</li>
+		<li>
+			Add a "sign group" attribute to quick messages.
+			Now, the quick message widget is displayed for any
+			sign in a group which has associated quick messages.
+			Removed dms_qlib_enable system attribute.
+		</li>
+		<li>
+			Changed system attributes related to DMS page times.
+			Renamed dms_pgontime_selection_enable to
+			dms_page_on_selection_enable.  Also, renamed
+			dms_page_[on|off]_secs to
+			dms_page_[on|off]_default_secs.  Added
+			dms_page_on_min_secs and dms_page_on_max_secs.
+		</li>
+		<li>
+			Added some changes to make client run better on a
+			1024x768 screen.
+		</li>
+		<li>
+			Improved client permission checking for some widgets.
+		</li>
+		<li>
+			Lots of cleanups in client code.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.110.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.109.0 (7 January 2010)</dt>
 	<dd><ul>
 		<li>
