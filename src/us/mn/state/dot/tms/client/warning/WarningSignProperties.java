@@ -53,7 +53,7 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 	protected final JTextArea notes = new JTextArea(3, 24);
 
 	/** Controller button */
-	protected final JButton controller = new JButton("Controller");
+	protected final JButton controllerBtn = new JButton("Controller");
 
 	/** Camera combo box */
 	protected final JComboBox camera = new JComboBox();
@@ -79,6 +79,9 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		tab.add("Setup", createSetupPanel());
 		add(tab);
 		updateAttribute(null);
+		if(canUpdate())
+			createUpdateJobs();
+		createControllerJob();
 		setBackground(Color.LIGHT_GRAY);
 	}
 
@@ -93,54 +96,61 @@ public class WarningSignProperties extends SonarObjectForm<WarningSign> {
 		location = new LocationPanel(session, proxy.getGeoLoc());
 		location.initialize();
 		location.addRow("Notes", notes);
+		location.setCenter();
+		location.addRow(controllerBtn);
+		return location;
+	}
+
+	/** Create jobs for updating */
+	protected void createUpdateJobs() {
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
 			}
 		};
-		location.setCenter();
-		location.addRow(controller);
-		new ActionJob(this, controller) {
-			public void perform() throws Exception {
-				controllerPressed();
-			}
-		};
-		controller.setEnabled(proxy.getController() != null);
-		return location;
-	}
-
-	/** Controller lookup button pressed */
-	protected void controllerPressed() {
-		Controller c = proxy.getController();
-		if(c == null)
-			controller.setEnabled(false);
-		else
-			showForm(new ControllerForm(session, c));
-	}
-
-	/** Create the setup panel */
-	protected JPanel createSetupPanel() {
-		FormPanel panel = new FormPanel(true);
-		ListModel m = state.getCamCache().getCameraModel();
-		camera.setModel(new WrapperComboBoxModel(m));
-		panel.addRow("Camera", camera);
 		new ActionJob(this, camera) {
 			public void perform() {
 				proxy.setCamera(
 					(Camera)camera.getSelectedItem());
 			}
 		};
-		panel.addRow("Sign Text", message);
 		new FocusJob(message) {
 			public void perform() {
 				proxy.setMessage(message.getText());
 			}
 		};
+	}
+
+	/** Create the controller job */
+	protected void createControllerJob() {
+		new ActionJob(this, controllerBtn) {
+			public void perform() {
+				controllerPressed();
+			}
+		};
+	}
+
+	/** Controller lookup button pressed */
+	protected void controllerPressed() {
+		Controller c = proxy.getController();
+		if(c != null)
+			showForm(new ControllerForm(session, c));
+	}
+
+	/** Create the setup panel */
+	protected JPanel createSetupPanel() {
+		FormPanel panel = new FormPanel(canUpdate());
+		ListModel m = state.getCamCache().getCameraModel();
+		camera.setModel(new WrapperComboBoxModel(m));
+		panel.addRow("Camera", camera);
+		panel.addRow("Sign Text", message);
 		return panel;
 	}
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
+		if(a == null || a.equals("controller"))
+			controllerBtn.setEnabled(proxy.getController() != null);
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("camera"))
