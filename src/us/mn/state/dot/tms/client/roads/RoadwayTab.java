@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +56,6 @@ public class RoadwayTab extends MapTab {
 	/** Set the map */
 	public void setMap(MapBean map) {
 		chooser.setMap(map);
-		// FIXME: this is ugly
-		R_NodeProperties.map = map;
 	}
 
 	/** Get the tab number */

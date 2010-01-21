@@ -28,9 +28,9 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.PointSelector;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
@@ -62,6 +62,9 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		else
 			return 0;
 	}
+
+	/** Smart desktop */
+	protected final SmartDesktop desktop;
 
 	/** GeoLoc type cache */
 	protected final TypeCache<GeoLoc> cache;
@@ -110,6 +113,7 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 	public LocationPanel(Session s, GeoLoc l) {
 		super(s.canUpdate(l));
 		loc = l;
+		desktop = s.getDesktop();
 		state = s.getSonarState();
 		cache = state.getGeoLocs();
 	}
@@ -141,6 +145,8 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 		add("Northing", northing);
 		setEast();
 		addRow("North Offset", northOff);
+		setWidth(4);
+		addRow(select);
 		if(enable)
 			createJobs();
 		updateAttribute(null);
@@ -197,6 +203,26 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 				loc.setNorthOffset(getSpinnerInteger(northOff));
 			}
 		};
+		final PointSelector ps = new PointSelector() {
+			public void selectPoint(Point2D p) {
+				int x = (int)p.getX();
+				eastOff.setValue(x - getSpinnerInt(easting));
+				int y = (int)p.getY();
+				northOff.setValue(y - getSpinnerInt(northing));
+				setPointSelector(null);
+			}
+		};
+		new ActionJob(this, select) {
+			public void perform() throws Exception {
+				setPointSelector(ps);
+			}
+		};
+	}
+
+	/** Set the point selector for all map beans */
+	protected void setPointSelector(PointSelector ps) {
+		for(ScreenPane sp: desktop.client.getVisiblePanes())
+			sp.getMap().addPointSelector(ps);
 	}
 
 	/** Dispose of the location panel */
@@ -256,30 +282,5 @@ public class LocationPanel extends FormPanel implements ProxyListener<GeoLoc> {
 			northing.setValue(asInt(loc.getNorthing()));
 		if(a == null || a.equals("northOffset"))
 			northOff.setValue(asInt(loc.getNorthOffset()));
-	}
-
-	/** Add a "Select Point" button */
-	public void addSelectPointButton(final MapBean map) {
-		if(enable) {
-			setWidth(4);
-			addRow(select);
-			new ActionJob(this, select) {
-				public void perform() throws Exception {
-					selectPressed(map);
-				}
-			};
-		}
-	}
-
-	/** Select point button is pressed */
-	protected void selectPressed(MapBean map) {
-		map.addPointSelector(new PointSelector() {
-			public void selectPoint(Point2D p) {
-				int x = (int)p.getX();
-				eastOff.setValue(x - getSpinnerInt(easting));
-				int y = (int)p.getY();
-				northOff.setValue(y - getSpinnerInt(northing));
-			}
-		});
 	}
 }

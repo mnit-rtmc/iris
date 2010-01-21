@@ -123,7 +123,7 @@ public class IrisClient extends JFrame {
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
-		desktop = new SmartDesktop(screens[0]);
+		desktop = new SmartDesktop(screens[0], this);
 		baseLayers = new BaseLayers().getLayers();
 		initializeScreenPanes();
 		addWindowListener(new WindowAdapter() {
@@ -202,8 +202,8 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Get a list of all visible screen panes. Will return an empty
-	 *  list if IRIS is minimized. */
-	protected LinkedList<ScreenPane> getVisiblePanes() {
+	 * list if IRIS is minimized. */
+	public LinkedList<ScreenPane> getVisiblePanes() {
 		LinkedList<ScreenPane> visible = new LinkedList<ScreenPane>();
 		for(ScreenPane s: s_panes)
 			if(s.isVisible())

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
 import us.mn.state.dot.sched.AbstractJob;
+import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.Screen;
 
 /**
@@ -55,9 +56,13 @@ public class SmartDesktop extends JDesktopPane {
 	/** Main desktop screen */
 	protected final Screen screen;
 
+	/** Iris client */
+	public final IrisClient client;
+
 	/** Create a new smart desktop */
-	public SmartDesktop(Screen s) {
+	public SmartDesktop(Screen s, IrisClient ic) {
 		screen = s;
+		client = ic;
 
 		// register the keystroke that invokes the help system
 		setFocusable(true); // required to receive focus notification

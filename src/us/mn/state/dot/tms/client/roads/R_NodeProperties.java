@@ -31,7 +31,6 @@ import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
@@ -46,9 +45,6 @@ import us.mn.state.dot.tms.client.toast.SonarObjectForm;
  * @author Douglas Lau
  */
 public class R_NodeProperties extends SonarObjectForm<R_Node> {
-
-	/** Map for selecting points (FIXME) */
-	static public MapBean map;
 
 	/** Frame title */
 	static protected final String TITLE = "R_Node: ";
@@ -136,7 +132,6 @@ public class R_NodeProperties extends SonarObjectForm<R_Node> {
 
 	/** Create the location panel */
 	protected JPanel createLocationPanel() {
-		location.addSelectPointButton(map);
 		location.addRow("Notes", notes);
 		new FocusJob(notes) {
 			public void perform() {
