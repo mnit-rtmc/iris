@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			return null;
 	}
 
+	/** Current session */
+	protected final Session session;
+
 	/** Cache of LCS array proxy objects */
 	protected final TypeCache<LCSArray> cache;
 
@@ -108,8 +111,9 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 	protected LCSArray watching;
 
 	/** Create a new LCS dispatcher */
-	public LcsDispatcher(Session session, LCSArrayManager manager) {
+	public LcsDispatcher(Session s, LCSArrayManager manager) {
 		super(new BorderLayout());
+		session = s;
 		cache = session.getSonarState().getLcsCache().getLCSArrays();
 		user = session.getUser();
 		selectionModel = manager.getSelectionModel();
@@ -252,12 +256,17 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			cache.ignoreObject(watching);
 		watching = lcs_array;
 		cache.watchObject(watching);
-		indicationSelector.setEnabled(true);
+		boolean update = canUpdate(lcs_array);
 		indicationSelector.setLCSArray(lcs_array);
-		lcs_lock.setEnabled(true);
-		lcs_lock.setAction(new LockLcsAction(lcs_array, lcs_lock));
-		sendBtn.setEnabled(true);
-		blankBtn.setEnabled(true);
+		indicationSelector.setEnabled(update);
+		if(update) {
+			lcs_lock.setAction(new LockLcsAction(lcs_array,
+				lcs_lock));
+		} else
+			lcs_lock.setAction(null);
+		lcs_lock.setEnabled(update);
+		sendBtn.setEnabled(update);
+		blankBtn.setEnabled(update);
 		updateAttribute(lcs_array, null);
 	}
 
@@ -305,7 +314,8 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			// These operations can be very slow -- discourage
 			// users from sending multiple operations at once
 			// RE: None -- see server.DeviceImpl.getOperation()
-			sendBtn.setEnabled(op.equals("None"));
+			sendBtn.setEnabled(canUpdate(lcs_array) &&
+				op.equals("None"));
 		}
 		if(a == null || a.equals("lcsLock")) {
 			Integer lk = lcs_array.getLcsLock();
@@ -337,5 +347,10 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 			lcs_array.setOwnerNext(user);
 			lcs_array.setIndicationsNext(indications);
 		}
+	}
+
+	/** Check if the user can update the given LCS array */
+	protected boolean canUpdate(LCSArray lcs_array) {
+		return session.canUpdate(lcs_array);
 	}
 }
