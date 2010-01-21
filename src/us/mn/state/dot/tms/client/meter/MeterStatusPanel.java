@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,6 +116,9 @@ public class MeterStatusPanel extends FormPanel
 	/** Metering off radio button */
 	protected final JRadioButton meterOffBtn = new JRadioButton("Off");
 
+	/** Current session */
+	protected final Session session;
+
 	/** Ramp meter manager */
 	protected final MeterManager manager;
 
@@ -129,8 +132,9 @@ public class MeterStatusPanel extends FormPanel
 	protected RampMeter selected = null;
 
 	/** Create a new MeterStatusPanel */
-	public MeterStatusPanel(Session session, MeterManager m) {
+	public MeterStatusPanel(Session s, MeterManager m) {
 		super(true);
+		session = s;
 		manager = m;
 		selectionModel = manager.getSelectionModel();
 		cache = session.getSonarState().getRampMeters();
@@ -238,7 +242,7 @@ public class MeterStatusPanel extends FormPanel
 			shrinkBtn.setEnabled(false);
 			growBtn.setEnabled(false);
 		}
-		setEnabled(proxy != null);
+		setEnabled(canUpdate(proxy));
 	}
 
 	/** Enable or disable the status panel */
@@ -279,8 +283,8 @@ public class MeterStatusPanel extends FormPanel
 				meterOnBtn.setSelected(true);
 			else
 				meterOffBtn.setSelected(true);
-			shrinkBtn.setEnabled(rate != null);
-			growBtn.setEnabled(rate != null);
+			shrinkBtn.setEnabled(canUpdate(meter) && rate != null);
+			growBtn.setEnabled(canUpdate(meter) && rate != null);
 		}
 		if(a == null || a.equals("queue")) {
 			RampMeterQueue q = RampMeterQueue.fromOrdinal(
@@ -294,5 +298,10 @@ public class MeterStatusPanel extends FormPanel
 			else
 				lockCmb.setSelectedIndex(0);
 		}
+	}
+
+	/** Check if the user can update the given ramp meter */
+	protected boolean canUpdate(RampMeter meter) {
+		return session.canUpdate(meter);
 	}
 }
