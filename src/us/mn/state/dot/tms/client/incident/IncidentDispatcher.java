@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -327,14 +327,18 @@ public class IncidentDispatcher extends JPanel
 
 	/** Enable the dispatcher widgets */
 	protected void enableWidgets(Incident inc) {
-		camera_cbx.setEnabled(true);
-		log_btn.setEnabled(true);
 		if(inc instanceof ClientIncident) {
+			boolean create = canAdd("oname");
+			camera_cbx.setEnabled(create);
+			log_btn.setEnabled(create);
 			deploy_btn.setEnabled(false);
 			clear_btn.setEnabled(false);
 		} else {
-//			deploy_btn.setEnabled(true);
-			clear_btn.setEnabled(true);
+			boolean update = canUpdate(inc);
+			camera_cbx.setEnabled(false);
+			log_btn.setEnabled(update);
+			deploy_btn.setEnabled(false);
+			clear_btn.setEnabled(update);
 		}
 	}
 
@@ -346,12 +350,10 @@ public class IncidentDispatcher extends JPanel
 				manager.getGeoLoc(inc)));
 			camera_cbx.setModel(createCameraModel(inc));
 		}
-		if(a == null || a.equals("impact")) {
+		if(a == null || a.equals("impact"))
 			impact_pnl.setImpact(inc.getImpact());
-		}
-		if(a == null || a.equals("cleared")) {
+		if(a == null || a.equals("cleared"))
 			clear_btn.setSelected(inc.getCleared());
-		}
 	}
 
 	/** Clear the event type */
@@ -409,5 +411,11 @@ public class IncidentDispatcher extends JPanel
 		return oname != null &&
 		       namespace.canAdd(user, new Name(Incident.SONAR_TYPE,
 			oname));
+	}
+
+	/** Check if the user can update the given incident */
+	protected boolean canUpdate(Incident inc) {
+		return inc != null &&
+		       namespace.canUpdate(user, new Name(inc));
 	}
 }
