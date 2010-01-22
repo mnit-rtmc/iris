@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -214,6 +215,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected void createJobs() {
 		new ActionJob(sendBtn) {
 			public void perform() {
+				removeInvalidSelections();
 				if(shouldSendMessage())
 					sendMessage();
 			}
@@ -223,6 +225,26 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 				queryMessage();
 			}
 		};
+	}
+
+	/** Remove all invalid selected DMS */
+	protected void removeInvalidSelections() {
+		for(DMS dms: selectionModel.getSelected()) {
+			if(!checkDimensions(dms))
+				selectionModel.removeSelected(dms);
+		}
+	}
+
+	/** Check the dimensions of a sign against the pixel map builder */
+	protected boolean checkDimensions(DMS dms) {
+		PixelMapBuilder b = builder;
+		if(b != null) {
+			Integer w = dms.getWidthPixels();
+			Integer h = dms.getHeightPixels();
+			if(w != null && h != null)
+				return b.width == w && b.height == h;
+		}
+		return false;
 	}
 
 	/** If enabled, prompt the user with a send confirmation.
@@ -260,40 +282,41 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	protected String buildSelectedList() {
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
-		for(DMS dms: selectionModel.getSelected()) {
-			if(checkDimensions(dms)) {
-				if(!first)
-					sb.append(", ");
-				sb.append(dms.getName());
-				first = false;
-			}
+		for(DMS dms: getSelected()) {
+			if(!first)
+				sb.append(", ");
+			sb.append(dms.getName());
+			first = false;
 		}
 		return sb.toString();
 	}
 
-	/** Send a new message to the selected DMS */
-	protected void sendMessage() {
+	/** Get a list of the selected DMS */
+	protected List<DMS> getSelected() {
 		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() > 0) {
-			SignMessage sm = createMessage();
-			if(sm != null)
-				sendMessage(sm, sel);
-			composer.updateMessageLibrary();
-			selectPreview(false);
+		Iterator<DMS> it = sel.iterator();
+		while(it.hasNext()) {
+			DMS dms = it.next();
+			if(!checkDimensions(dms))
+				it.remove();
 		}
+		return sel;
 	}
 
-	/** Send a message to a list of signs */
-	protected void sendMessage(SignMessage sm, List<DMS> sel) {
-		for(DMS dms: sel) {
-			if(checkDimensions(dms)) {
-				dms.setOwnerNext(user);
-				dms.setMessageNext(sm);
-			} else {
-				// NOTE: this sign does not match the proper
-				//       dimensions, so deselect it.
-				selectionModel.removeSelected(dms);
+	/** Send a new message to the selected DMS */
+	protected void sendMessage() {
+		List<DMS> sel = getSelected();
+		if(sel.size() > 0) {
+			SignMessage sm = createMessage();
+			if(sm != null) {
+				for(DMS dms: sel) {
+					dms.setOwnerNext(user);
+					dms.setMessageNext(sm);
+				}
 			}
+			if(sel.size() == 1)
+				composer.updateMessageLibrary();
+			selectPreview(false);
 		}
 	}
 
@@ -369,20 +392,10 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Query the current message on all selected signs */
 	protected void queryMessage() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() < 1)
-			return;
-		for(DMS dms: sel) {
-			if(checkDimensions(dms)) {
-				dms.setDeviceRequest(DeviceRequest.
-					QUERY_MESSAGE.ordinal());
-			} else {
-				// NOTE: this sign does not match the proper
-				//       dimensions, so deselect it.
-				selectionModel.removeSelected(dms);
-			}
+		for(DMS dms: getSelected()) {
+			dms.setDeviceRequest(
+				DeviceRequest.QUERY_MESSAGE.ordinal());
 		}
-		composer.updateMessageLibrary();
 		selectPreview(false);
 	}
 
@@ -398,22 +411,22 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Called whenever a sign is added to the selection */
-	public void selectionAdded(DMS s) {
+	public void selectionAdded(DMS dms) {
 		updateSelected();
 	}
 
 	/** Called whenever a sign is removed from the selection */
-	public void selectionRemoved(DMS s) {
+	public void selectionRemoved(DMS dms) {
 		updateSelected();
 	}
 
 	/** Update the selected sign(s) */
 	protected void updateSelected() {
-		List<DMS> selected = selectionModel.getSelected();
-		if(selected.size() == 0)
+		List<DMS> sel = selectionModel.getSelected();
+		if(sel.size() == 0)
 			clearSelected();
-		else if(selected.size() == 1) {
-			for(DMS dms: selected)
+		else if(sel.size() == 1) {
+			for(DMS dms: sel)
 				setSelected(dms);
 		} else {
 			// FIXME: fix multi-selection problems
@@ -517,18 +530,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		return message;
 	}
 
-	/** Check the dimensions of a sign against the pixel map builder */
-	protected boolean checkDimensions(DMS dms) {
-		PixelMapBuilder b = builder;
-		if(b != null) {
-			Integer w = dms.getWidthPixels();
-			Integer h = dms.getHeightPixels();
-			if(w != null && h != null)
-				return b.width == w && b.height == h;
-		}
-		return false;
-	}
-
 	/** Select the preview mode */
 	public void selectPreview(boolean p) {
 		singleTab.selectPreview(p);
@@ -551,7 +552,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a message be sent to all selected DMS? */
 	public boolean canSend() {
-		List<DMS> sel = selectionModel.getSelected();
+		List<DMS> sel = getSelected();
 		if(sel.isEmpty())
 			return false;
 		for(DMS dms: sel) {
@@ -570,7 +571,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a device request be sent to all selected DMS? */
 	public boolean canRequest() {
-		List<DMS> sel = selectionModel.getSelected();
+		List<DMS> sel = getSelected();
 		if(sel.isEmpty())
 			return false;
 		for(DMS dms: sel) {
