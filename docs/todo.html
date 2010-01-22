@@ -10,7 +10,7 @@
 </head>
 
 <body>
-<p id="stamp">19 September 2009</p>
+<p id="stamp">22 January 2010</p>
 <h2>IRIS Version 4 TODO List</h2>
 <dl>
 	<dt>General</dt>
@@ -20,7 +20,27 @@
 	</ol></dd>
 	<dt>Toast</dt>
 	<dd><ol>
-		<li>SELECT comm_line_event on ControllerForm (1 week)</li>
+		<li>SELECT comm_line_event on ControllerForm</li>
+	</ol></dd>
+	<dt>Mapping</dt>
+	<dd><ol>
+		<li>Use <a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql">osm2pgsql</a>
+		    or <a href="http://wiki.openstreetmap.org/wiki/Osmosis">osmosis</a>
+		    to import selected openstreetmap.org data into a PostGIS
+		    database.
+		</li>
+		<li>Use <a href="http://mapnik.org/">mapnik</a> to generate
+		    tiles for each zoom level required.
+		</li>
+		<li>Store the map tiles on the apache web server which hosts
+		    the IRIS web start client files.
+		</li>
+		<li>Change MapBean to have a set of fixed zoom levels (to match
+		    the resolution of our tiles).
+		</li>
+		<li>Add a raster layer to MapBean, which uses http to grab the
+		    tiles from apache.
+		</li>
 	</ol></dd>
 </dl>
 </body>
