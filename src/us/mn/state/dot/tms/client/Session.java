@@ -372,6 +372,12 @@ public class Session {
 		       namespace.canUpdate(user, new Name(proxy));
 	}
 
+	/** Check if the user can update a proxy */
+	public boolean canUpdate(SonarObject proxy, String aname) {
+		return proxy != null &&
+		       namespace.canUpdate(user, new Name(proxy, aname));
+	}
+
 	/** Dispose of the session */
 	public void dispose() {
 		desktop.closeFrames();

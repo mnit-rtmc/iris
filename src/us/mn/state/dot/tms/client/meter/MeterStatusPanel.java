@@ -302,6 +302,7 @@ public class MeterStatusPanel extends FormPanel
 
 	/** Check if the user can update the given ramp meter */
 	protected boolean canUpdate(RampMeter meter) {
-		return session.canUpdate(meter);
+		return session.canUpdate(meter, "rateNext") &&
+		       session.canUpdate(meter, "mLock");
 	}
 }
