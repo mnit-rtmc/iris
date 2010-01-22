@@ -19,6 +19,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.LinkedList;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.sonar.Checker;
@@ -171,16 +172,21 @@ public class QuickMessageCBox extends JComboBox {
 	/** Populate the quick message model */
 	public void populateModel(DMS dms) {
 		model.removeAllElements();
+		final LinkedList<QuickMessage> msgs =
+			new LinkedList<QuickMessage>();
 		for(SignGroup sg: SignGroupHelper.find(dms)) {
 			final SignGroup group = sg;
 			QuickMessageHelper.find(new Checker<QuickMessage>() {
 				public boolean check(QuickMessage qm) {
 					if(qm.getSignGroup() == group)
-						model.addElement(qm);
+						msgs.add(qm);
 					return false;
 				}
 			});
 		}
+		// This cannot be done inside a Checker because of deadlocks
+		for(QuickMessage qm: msgs)
+			model.addElement(qm);
 	}
 
 	/** Dispose */
