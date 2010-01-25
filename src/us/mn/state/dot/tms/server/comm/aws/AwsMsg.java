@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,26 +163,50 @@ public class AwsMsg {
 		this.setValid(ok);
 	}
 
-	/** Return the page on-time. If a bogus value is read, the system
-	 *  default as a function of the number of pages is returned. Zero
+	/** Return the page on-time. If a bogus value is read the system
+	 *  default is returned as a funtion of the number of pages. Zero
 	 *  is always returned for a single page message because flashing
-	 *  is not supported. The page on-time for multi page values is 
-	 *  validated. */
-	protected DmsPgTime createPgOnTime(String pont, AwsMsgType mtype) {
-		DmsPgTime ret; 
-		boolean singlepg = (mtype == mtype.ONEPAGEMSG);
-		if(pont == null || pont.isEmpty())
-			ret = DmsPgTime.getDefaultOn(singlepg);
-		else if(singlepg)
+	 *  is not supported as of yet. The page on-time for multipage 
+	 *  messages is validated.
+	 *  @param pont Page on-time in seconds, e.g. "2.5"
+	 *  @param mtype AWS message type.
+	 *  @return the validated page on-time. */
+	private static DmsPgTime createPgOnTime(String pont, AwsMsgType mtype) {
+		DmsPgTime ret;
+		if(pont == null || pont.isEmpty()) {
+			ret = DmsPgTime.getDefaultOn(true);
+		} else if(mtype == mtype.BLANK) {
+			ret = DmsPgTime.getDefaultOn(true);
+		} else if(mtype == mtype.ONEPAGEMSG) {
 			// single page messages can not have a non-zero 
 			// page on-time (flashing).
 			ret = DmsPgTime.getDefaultOn(true);
-		else {
-			DmsPgTime ptread = new DmsPgTime((double)
-				SString.stringToDouble(pont));
-			ret = DmsPgTime.validateOnTime(ptread, false);
+		} else if(mtype == mtype.TWOPAGEMSG) {
+			double s = SString.stringToDouble(pont);
+			// if zero is specified, use system default
+			s = (s <= 0 ? 
+				DmsPgTime.getDefaultOn(false).toSecs() : s);
+			DmsPgTime pt = new DmsPgTime(s);
+			ret = DmsPgTime.validateOnTime(pt, false);
+		} else {
+			Log.severe("AwsMsg.createPgOnTime(): bogus mtype.");
+			ret = DmsPgTime.getDefaultOn(true);
 		}
 		return ret;
+	}
+
+	/** Return true if the 1st page contains text. */
+	private boolean textPage1() {
+		return (m_textlines[0].length() + 
+			m_textlines[1].length() + 
+			m_textlines[2].length()) > 0;
+	}
+
+	/** Return true if the 2nd page contains text. */
+	private boolean textPage2() {
+		return (m_textlines[3].length() + 
+			m_textlines[4].length() + 
+			m_textlines[5].length()) > 0;
 	}
 
 	/** Return a MULTI string representation of the AWS message. 
@@ -190,35 +215,29 @@ public class AwsMsg {
 	 *  per page are placed in the MULTI string with the DS font, 
 	 *  the bitmap renders blank. This will only happen if the AWS
 	 *  message file contains an error--3 lines per page w/ DS font. */
-	protected String createMultiString() {
+	protected MultiString toMultiString() {
 		if(NUM_TEXT_ROWS != 6)
 			Log.severe("Bogus number of rows dependency " +
-				"in createMultiString()");
+				"in toMultiString()");
 		MultiString m = new MultiString();
-
+		boolean multipage = textPage2();
 		// pg 1
-		m.setFont(m_fontnumpg1, null);
-		m.setPageTimes(m_pgontime.toTenths(), null);
+		if(textPage1())
+			m.setFont(m_fontnumpg1, null);
+		if(multipage)
+			m.setPageTimes(m_pgontime.toTenths(), null);
 		addSpanLine(m_textlines[0], m, false);
 		addSpanLine(m_textlines[1], m, false);
 		addSpanLine(m_textlines[2], m, true);
-
 		// pg 2
-		if(multiPageLines()) {
+		if(multipage) {
 			m.addPage();
 			m.setFont(m_fontnumpg2, null);
 			addSpanLine(m_textlines[3], m, false);
 			addSpanLine(m_textlines[4], m, false);
 			addSpanLine(m_textlines[5], m, true);
 		}
-		return m.normalize().toString();
-	}
-
-	/** Return true if the message lines contain a 2nd page. */
-	private boolean multiPageLines() {
-		return (m_textlines[3].length() + 
-			m_textlines[4].length() + 
-			m_textlines[5].length()) > 0;
+		return m;
 	}
 
 	/** Add a span of text to the specified multistring. */
@@ -385,11 +404,10 @@ public class AwsMsg {
 			sendMessage(dms);
 	}
 
-	/**
-	 * Decide if aws message should be sent to a DMS.
+
+	/** Decide if the AWS message should be sent to a DMS.
 	 * @params dms The associated DMS.
-	 * @return true to send the message.
-	 */
+	 * @return true to send the message. */
 	protected boolean shouldSendMessage(DMSImpl dms) {
 		if(dms == null)
 			return false;
@@ -409,82 +427,88 @@ public class AwsMsg {
 		Log.finest("AwsMsg.shouldSendMessage(): DMS " +
 			getIrisDmsId() + " is AWS allowed & controlled.");
 
-		boolean isDeployed = DMSHelper.isAwsMessageDeployed(dms);
+		// create multi to send
+		MultiString newmulti = toMultiString();
 		Log.finest("AwsMsg.shouldSendMessage(" + dms.getName() + 
-			") isDeployed="+isDeployed);
-		String newmulti = createMultiString();
-		Log.finest("AwsMsg.shouldSendMessage(" + dms.getName() + 
-			") newMulti="+newmulti);
+			") newmulti="+newmulti);
 
-		// DMS already blank and sending a blank?
-		if(!isDeployed) {
-			if(new MultiString(newmulti).isBlank()) {
+		// true if sign has AWS message, regardless of error state
+		boolean awsdeployed = DMSHelper.isAwsDeployed(dms);
+
+		// sending a blank?
+		if(newmulti.isBlank()) {
+			// send if existing msg is non-blank AWS message, 
+			// regardless of if the DMS is in an error state.
+			boolean sendblank = awsdeployed;
+			Log.finest("AwsMsg.shouldSendMessage(" + 
+				dms.getName() + ") send blank=" + sendblank);
+			return sendblank;
+		}
+
+		// send msg unless existing is an AWS msg and identical
+		Log.finest("AwsMsg.shouldSendMessage(" + dms.getName() + 
+			"): an existing AWS msg is deployed=" + awsdeployed);
+		if(awsdeployed) {
+			// send msg only if different from existing AWS msg
+			boolean eq = equalsCurrentSignMessage(dms, newmulti);
+			Log.finest("AwsMsg.shouldSendMessage(" + dms.getName()
+				+ "): new msg is identical to exist=" + eq);
+			if(eq) {
 				Log.finest("AwsMsg.shouldSendMessage(" + 
-					dms.getName() + "): sign and new " +
-					"multi both blank, send=false.");
+					dms.getName() + "): will not send " +
+					"new message because existing is " +
+					"AWS and identical.");
 				return false;
 			}
 		}
-
-		// Be safe and send the aws message by default, unless:
-		//	1) AWS message deployed, and
-		//	2) priority is AWS, and
-		//	3) MULTI strings are equal.
-		boolean send = true;
-		if(isDeployed)
-			if(equalsCurrentSignMessage(dms, newmulti))
-				send = false;
-
-		Log.finest("AwsMsg.shouldSendMessage(): should send="
-			+ send);
-		return send;
+		Log.finest("AwsMsg.shouldSendMessage(" + dms.getName() + 
+			"): will send new non-blank message.");
+		return true;
 	}
 
 	/** Is the current sign message equal to the specified MULT? */
 	protected static boolean equalsCurrentSignMessage(DMSImpl dms, 
-		String multi) 
+		MultiString multi) 
 	{
 		if(dms == null || multi == null)
 			return false;
 		SignMessage cur = dms.getMessageCurrent();
-		if(cur != null) {
-			// comparison of MULTI strings
-			boolean eq = MultiString.isEquivalent(cur.getMulti(), multi);
-			Log.finest("cur=" + cur.getMulti() + ", new=" + 
-				multi + ", equal=" + eq);
-			return eq; 
-		}
-		return false;
+		if(cur == null)
+			return false;
+		// comparison of tags and text in MULTI strings
+		boolean eq = multi.equals(cur.getMulti());
+		Log.finest("AwsMsg.equalsCurrentsignMessage(): cur=" + 
+			cur.getMulti() + ", new=" + multi + ", equal=" + eq);
+		return eq; 
 	}
 
 	/** Send a message to the specified DMS.
 	 * @params dms The associated DMS. */
 	protected void sendMessage(DMSImpl dms) {
-		if(m_type == null)
-			return;
-		switch(m_type) {
-		case BLANK:
-		case ONEPAGEMSG:
-		case TWOPAGEMSG:
-			Log.finest("AwsMsg.sendMessage(): will activate" +
-				"DMS " + getIrisDmsId() + ":" + this);
+		if(m_type == null) {
+			assert false;
+			Log.severe("sendMessage(): arg is null.");
+		} else if(m_type == AwsMsgType.BLANK || 
+			m_type == AwsMsgType.ONEPAGEMSG || 
+			m_type == AwsMsgType.TWOPAGEMSG ) 
+		{
+			Log.finest("AwsMsg.sendMessage(" + dms.getName() + 
+				"): will activate:" + this + ", user=" + 
+				getAwsUserName());
 			try {
 				dms.doSetMessageNext(toSignMessage(dms), 
 					getAwsUserName());
-			}
-			catch(Exception e) {
+			} catch(Exception e) {
 				Log.warning("AwsMsg.sendMessage(): " +
 					"exception:" + e);
 			}
-			break;
-		case UNKNOWN:
+		} else if( m_type == AwsMsgType.UNKNOWN) {
 			// for safety, change the message type and send it
 			Log.severe("AwsMsg.sendMessage(): unknown AWS " +
 				"message type."); 
 			m_type = AwsMsgType.ONEPAGEMSG;
 			sendMessage(dms);
-			break;
-		default:
+		} else {
 			assert false;
 			Log.severe("AwsMsg: unknown AwsMsgType.");
 		}
@@ -523,12 +547,16 @@ public class AwsMsg {
 	public SignMessage toSignMessage(DMSImpl dms) throws SonarException,
 		TMSException
 	{
-		String multi = createMultiString();
-		boolean isblank = new MultiString(multi).isBlank();
-		DMSMessagePriority runp = (isblank ? 
+		MultiString multi = toMultiString();
+		DMSMessagePriority runp = (multi.isBlank() ? 
 			DMSMessagePriority.BLANK : DMSMessagePriority.AWS);
-		return dms.createMessage(multi, DMSMessagePriority.AWS,
+		DMSMessagePriority actp = DMSMessagePriority.AWS;
+		Log.finest("AwsMsg.toSignMessage(): creating sign message " +
+			"with actp=" + actp + ", runp = " + runp + 
+			", multi=" + multi);
+		SignMessage sm = dms.createMessage(multi.toString(), actp, 
 			runp, getSignMessageDuration());
+		return sm;
 	}
 
 	/** toString */
@@ -536,7 +564,7 @@ public class AwsMsg {
 		StringBuilder sb = new StringBuilder();
 		sb.append("DMS ").append(m_dmsid).append(", ");
 		sb.append("MultiString: ").append(
-			createMultiString()).append(", ");
+			toMultiString().toString()).append(", ");
 		sb.append("FontNum pg1: ").append(m_fontnumpg1).append(", ");
 		sb.append("FontNum pg2: ").append(m_fontnumpg2).append(", ");
 		sb.append("Pg On-time: ").append(m_pgontime.toString());

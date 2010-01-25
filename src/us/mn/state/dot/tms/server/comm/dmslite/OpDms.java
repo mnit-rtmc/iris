@@ -96,8 +96,7 @@ abstract public class OpDms extends OpDevice {
 			return super.getRetryThreshold();
 	}
 
-	/** Cleanup the operation, which is called by MessagePoller.doPoll() 
-	 *  if an operation is successful. */
+	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
 	public void cleanup() {
 		if(success) {
 			m_dms.requestConfigure();
@@ -105,6 +104,7 @@ abstract public class OpDms extends OpDevice {
 			// flag dms not configured
 			m_dms.setConfigure(false);
 		}
+		m_dms.setMessageNext(null);
 		super.cleanup();
 	}
 
