@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.utils.SString;
  * Helper for dealing with sign messages.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SignMessageHelper extends BaseHelper {
 
@@ -71,12 +73,12 @@ public class SignMessageHelper extends BaseHelper {
 			return i0.equals(i1);
 	}
 
-	/** Compare 2 sign messages.
+	/** Compare the attributes of 2 sign messages.
 	 * @param sm1 SignMessage which may be null.
 	 * @param sm2 SignMessage which may be null.
 	 * @return True if sm1 and sm2 have equal MULTIs, priorities, 
 	 *         and bitmaps. */
-	static public boolean equals(SignMessage sm1, SignMessage sm2) {
+	static public boolean isEquivalent(SignMessage sm1, SignMessage sm2) {
 		if(sm1 == null && sm2 == null)
 			return true;
 		if(sm1 == null || sm2 == null)

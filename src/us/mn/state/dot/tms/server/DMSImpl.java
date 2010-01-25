@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -965,7 +966,7 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 
 	/** Set the current message */
 	public void setMessageCurrent(SignMessage sm, User o) {
-		if(SignMessageHelper.equals(messageCurrent, sm))
+		if(SignMessageHelper.isEquivalent(messageCurrent, sm))
 			return;
 		logMessage(sm, o);
 		setDeployTime();
