@@ -40,9 +40,6 @@ import us.mn.state.dot.tms.utils.STime;
  */
 public class AwsPoller extends MessagePoller
 {
-	/** 30 sec AWS job will execute at :08 and :38 */
-	private static final int JOB_EXEC_TIME_SECS = 8;
-
 	/** Create scheduler that runs AWS activation job */
 	static protected final Scheduler m_scheduler =
 		new Scheduler("Scheduler: AWS Activation");
@@ -85,6 +82,20 @@ public class AwsPoller extends MessagePoller
 		return (ControllerImpl)ControllerHelper.getAwsController();
 	}
 
+	/** Return true if the AWS is activated. */
+	public static boolean awsActive() {
+		return SystemAttrEnum.DMS_AWS_ENABLE.getBoolean();
+	}
+
+	/** Get the AWS read time in seconds. This is the number of seconds
+	 *  to wait after :00 and :30 to read the AWS messages. */
+	public static int getAwsReadTimeSecs() {
+		int secs = SystemAttrEnum.DMS_AWS_READ_TIME.getInt();
+		secs = (secs < 0 ? 0 : secs);
+		secs = (secs > 29 ? 29 : secs);
+		return secs;
+	}
+
 	/** AWS timer job */
 	protected class AwsTimerJob extends Job {
 
@@ -104,7 +115,7 @@ public class AwsPoller extends MessagePoller
 		/** Create a new 30-second timer job */
 		protected AwsTimerJob() {
 			super(Calendar.SECOND, 30, Calendar.SECOND, 
-				JOB_EXEC_TIME_SECS);
+				getAwsReadTimeSecs());
 			m_comp = new Completer("30-Second", m_scheduler, job);
 		}
 
@@ -125,13 +136,14 @@ public class AwsPoller extends MessagePoller
 
 		/** do the job work */
 		private void doWork() {
-			if(getController() == null) {
+			ControllerImpl c = getController();
+			if(c == null) {
 				Log.config("AWS controller not defined, " +
 					"unable to activate AWS messages.");
 				return;
 			}
-			if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-				new OpProcessAwsMsgs(getController()).start();
+			if(awsActive())
+				new OpProcessAwsMsgs(c).start();
 		}
 	}
 }

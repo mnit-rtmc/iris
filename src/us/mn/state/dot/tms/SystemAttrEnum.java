@@ -32,6 +32,7 @@ public enum SystemAttrEnum {
 	DMS_AWS_ENABLE(false),
 	DMS_AWS_LOG_ENABLE(false),
 	DMS_AWS_LOG_FILENAME("/var/www/html/awsreport.txt"),
+	DMS_AWS_READ_TIME(0, 0, 29, Change.RESTART_SERVER),
 	DMS_AWS_RETRY_THRESHOLD(6, 1, 20),
 	DMS_BRIGHTNESS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_DEFAULT_JUSTIFICATION_LINE(3, 2, 5),
