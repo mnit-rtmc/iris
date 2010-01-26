@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2009 Minnesota Department of Transportation
+ * Copyright (C) 2009-2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,53 +24,65 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
-import javax.swing.Timer;
+import javax.swing.table.TableColumn;
 import java.awt.BorderLayout;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.StringTokenizer;
+import us.mn.state.dot.sched.Completer;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SFile;
 import us.mn.state.dot.tms.utils.SString;
+import us.mn.state.dot.tms.utils.STime;
 
 /**
  * Form that displays all current AWS messages. This form is presently highly
- * Caltrans D10 specific but is anticipated to be generalized in the future. 
- * It reads current AWS messages from a URL directly, rather than getting 
- * this information from the IRIS server, which it should probably do in the 
- * future).
+ * Caltrans D10 specific. It reads current AWS messages from a URL directly, 
+ * rather than getting this information from the IRIS server, which it should 
+ * probably do in the future.
  *
  * @author Michael Darter
  */
 public class ViewAwsMsgsForm extends AbstractForm {
 
-	/** table */
-	protected JTable m_table = null;
+	/** Scheduler that runs refresh job */
+	private Scheduler m_scheduler;
 
-	/** refresh interval */
-	//FIXME: add periodic reading of file
-	protected final int timerTickLengthMS = 10*1000;
+	/** Sonar state */
+	private final SonarState m_st;
+
+	/** Scheduler refresh job */
+	private Job m_rjob;
+
+	/** Number of columns in table */
+	private static final int NUM_COLS = 12;
 
 	/** Create a new form */
-	public ViewAwsMsgsForm() {
+	public ViewAwsMsgsForm(SonarState st) {
 		super("Current " + I18N.get("dms.aws.abbreviation") +
 			" Messages");
-		setPreferredSize(new Dimension(850,425));
-
-		// create refresh timer
-		Timer rt = new Timer(timerTickLengthMS, new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				refreshTimerTick();
-			} 
-		});
-		rt.start();
+ 		m_st = st;
+		setPreferredSize(new Dimension(880, 480));
 	}
 
 	/** Initialize form. Called from SmartDesktop.addForm() */
 	protected void initialize() {
+		add(createFormPanel());
+		m_scheduler = new Scheduler("Scheduler: AWS form refresh");
+		m_rjob = new RefreshTimerJob();
+		m_scheduler.addJob(m_rjob);
+	}
+
+	/** Create form panel */
+	private JPanel createFormPanel() {
 
 		// center panel, contains text
 		JPanel centerPanel = new JPanel();
@@ -77,23 +90,17 @@ public class ViewAwsMsgsForm extends AbstractForm {
 			BoxLayout.Y_AXIS));
 		centerPanel.add(Box.createHorizontalStrut(10));
 
-		// title
-		//String title = Integer.toString(m_counter);
-		//JLabel label1 = new JLabel(title);
-		//centerPanel.add(label1);
-
-		// create table
-		m_table = createTable();
-		JScrollPane scrollPane = new JScrollPane(m_table);
-		centerPanel.add( scrollPane, BorderLayout.CENTER );
+		JTable table = createTable();
+		JScrollPane scrollPane = new JScrollPane(table);
+		centerPanel.add(scrollPane, BorderLayout.CENTER);
 
 		centerPanel.add(Box.createHorizontalStrut(10));
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		add(centerPanel);
+		return centerPanel;	
 	}
 
 	/** Create table */
-	protected JTable createTable() {
+	private JTable createTable() {
 		// create table
 		String[] columnNames = {"Time", I18N.get("dms.abbreviation"), 
 			"State", "Font 1", "Font 2", "Line 1", "Line 2", 
@@ -104,14 +111,74 @@ public class ViewAwsMsgsForm extends AbstractForm {
 		if(data == null)
 			data = new Object[1][columnNames.length];
 		JTable table = new JTable(data, columnNames);
-		table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-		table.setPreferredScrollableViewportSize(
-			new Dimension(800, 800));
+		setTableColWidths(table);
 		return table;
 	}
 
-	/** Get the AWS message URL, which is specified in the comm link URL */
-	protected String getAwsUrl() {
+	/** Set table column widths */
+	private static void setTableColWidths(JTable jt) {
+		jt.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		int[] cw = {110, 30, 100, 80, 80, 80, 80, 80, 80, 80, 80, 60};
+		assert cw.length == NUM_COLS;
+		for(int i = 0; i < cw.length; ++i)
+			setTableColWidth(jt, i, cw[i]);
+	}
+
+	/** Set table column width */
+	private static void setTableColWidth(JTable jt, int col, int wid) {
+		jt.getColumnModel().getColumn(col).setPreferredWidth(wid);
+	}
+
+	/** Refresh timer job */
+	protected class RefreshTimerJob extends Job {
+
+		/** Job completer */
+		protected final Completer m_comp;
+
+		/** Current time stamp */
+		protected Calendar stamp;
+
+		/** Job to be performed on completion */
+		protected final Job job = new Job() {
+			public void perform() {
+				// nothing
+			}
+		};
+
+		/** Create a new 30-second timer job */
+		protected RefreshTimerJob() {
+			super(Calendar.SECOND, 30, Calendar.SECOND, 
+				getAwsReadTimeSecs());
+			m_comp = new Completer("30-Second", m_scheduler, job);
+		}
+
+		/** Perform the 30-second timer job */
+		public void perform() throws Exception {
+			if(!m_comp.checkComplete())
+				return;
+			Calendar s = Calendar.getInstance();
+			s.add(Calendar.SECOND, -30);
+			stamp = s;
+			m_comp.reset(stamp);
+			try {
+				doWork();
+			} finally {
+				m_comp.makeReady();
+			}
+		}
+
+		/** do the job work */
+		private void doWork() {
+			JPanel jp = createFormPanel();
+			removeAll();
+			add(jp);
+			revalidate();
+		}
+	}
+
+	/** Get the AWS message URL, which is specified in the CommLink URL. */
+	private String getAwsUrl() {
+
 		CommLink cl = CommLinkHelper.getAwsCommLink();
 		if(cl != null)
 			return cl.getUrl();
@@ -119,13 +186,8 @@ public class ViewAwsMsgsForm extends AbstractForm {
 			return null;
 	}
 
-	/** refresh table timer tick */
-	protected void refreshTimerTick() {
-		//FIXME: refresh the table here
-	}
-
 	/** Read AWS message values from a URL */
-	protected Object[][] getAwsValues(String awsFileUrl) {
+	private Object[][] getAwsValues(String awsFileUrl) {
 		if(awsFileUrl == null || awsFileUrl.length() <= 0)
 			return null;
 		byte[] msgs = SFile.readUrl(awsFileUrl);
@@ -143,7 +205,7 @@ public class ViewAwsMsgsForm extends AbstractForm {
 		return ret;
 	}
 
-	/** Parse a byte array of AWS messages */
+	/** Parse a byte array of AWS messages. */
 	private ArrayList parseAwsFile(byte[] argmsgs) {
 		ArrayList ret = new ArrayList<String>();
 
@@ -157,15 +219,13 @@ public class ViewAwsMsgsForm extends AbstractForm {
 		return ret;
 	}
 
-	/**
-	 * Parse a string that contains a single DMS message.
-	 * @param argline a single DMS message, fields delimited with ';'.
-	 */
-	public Object[] parseAwsFileLine(String argline) {
+	/** Parse a string that contains a single DMS message.
+	 * @param argline a single DMS message, fields delimited with ';'. */
+	private Object[] parseAwsFileLine(String argline) {
 		if(argline == null)
 			argline = "";
 
-		Object[] ret = new Object[12];
+		Object[] ret = new Object[NUM_COLS];
 		for(int i = 0; i < ret.length; ++i)
 			ret[i] = "";
 		try {
@@ -185,9 +245,9 @@ public class ViewAwsMsgsForm extends AbstractForm {
 			if(numtoks != EXPNUMTOKS1 && numtoks != EXPNUMTOKS2) {
 				throw new IllegalArgumentException("Bogus " +
 					"CMS message format, numtoks was " + 
-					numtoks + ", expected " + EXPNUMTOKS1 +
-					" or " + EXPNUMTOKS2 + " (" + argline +
-					").");
+					numtoks + ", expected " + EXPNUMTOKS1
+					+ " or " + EXPNUMTOKS2 + " (" + 
+					argline	+ ").");
 			}
 
 			// #1, date: 20080403085910
@@ -226,5 +286,21 @@ public class ViewAwsMsgsForm extends AbstractForm {
 		}
 
 		return ret;
+	}
+
+	/** Get the AWS read time in seconds. This is the number of seconds
+	 *  to wait after :00 and :30 to read the AWS messages. */
+	public static int getAwsReadTimeSecs() {
+		int secs = SystemAttrEnum.DMS_AWS_READ_TIME.getInt();
+		secs = (secs < 0 ? 0 : secs);
+		secs = (secs > 29 ? 29 : secs);
+		return secs;
+	}
+
+	/** Form closed */
+	protected void dispose() {
+		m_scheduler.removeJob(m_rjob);
+		m_scheduler = null;
+		super.dispose();
 	}
 }

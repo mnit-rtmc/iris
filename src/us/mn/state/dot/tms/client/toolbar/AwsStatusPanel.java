@@ -70,9 +70,13 @@ public class AwsStatusPanel extends ToolPanel implements
 	/** desktop */
 	final SmartDesktop m_desktop;
 
+	/** Sonar state */
+	final private SonarState m_st;
+
 	/** Constructor */
 	public AwsStatusPanel(SonarState st, final SmartDesktop desktop) {
 		assert st !=  null;
+		m_st = st;
 		m_dms = st.getDmsCache();
 		m_sysattribs = st.getSystemAttributes();
 		m_desktop = desktop;
@@ -106,7 +110,7 @@ public class AwsStatusPanel extends ToolPanel implements
 		// add action for view button click
 		new ActionJob(this, m_btnView) {
 			public void perform() throws Exception {
-				m_desktop.show(new ViewAwsMsgsForm());
+				m_desktop.show(new ViewAwsMsgsForm(m_st));
 			}
 		};
 	}
