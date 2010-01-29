@@ -412,12 +412,36 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Called whenever a sign is added to the selection */
 	public void selectionAdded(DMS dms) {
+		if(!checkDimensions(dms))
+			createBuilder(dms);
 		updateSelected();
+	}
+
+	/** Create a pixel map builder */
+	protected void createBuilder(DMS dms) {
+		builder = DMSHelper.createPixelMapBuilder(dms);
+		composer.setSign(dms, builder);
 	}
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(DMS dms) {
+		if(!isBuilderValid()) {
+			builder = null;
+			for(DMS s: selectionModel.getSelected()) {
+				createBuilder(s);
+				break;
+			}
+		}
 		updateSelected();
+	}
+
+	/** Check if the builder is valid for at least one selected DMS */
+	protected boolean isBuilderValid() {
+		for(DMS dms: selectionModel.getSelected()) {
+			if(checkDimensions(dms))
+				return true;
+		}
+		return false;
 	}
 
 	/** Update the selected sign(s) */
@@ -429,9 +453,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 			for(DMS dms: sel)
 				setSelected(dms);
 		} else {
-			// FIXME: fix multi-selection problems
 			singleTab.setSelected(null);
-			setMessage("");
 			enableWidgets();
 			selectMultipleTab();
 		}
@@ -448,8 +470,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Set a single selected DMS */
 	protected void setSelected(DMS dms) {
 		if(DMSHelper.isActive(dms)) {
-			builder = DMSHelper.createPixelMapBuilder(dms);
-			composer.setSign(dms, builder);
 			qmsgCmb.populateModel(dms);
 			enableWidgets();
 			SignMessage sm = dms.getMessageCurrent();
@@ -493,7 +513,6 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		sendBtn.setEnabled(false);
 		blankBtn.setEnabled(false);
 		queryBtn.setEnabled(false);
-		builder = null;
 	}
 
 	/** Enable the dispatcher widgets */
