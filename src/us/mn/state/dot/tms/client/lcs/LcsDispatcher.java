@@ -351,6 +351,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 
 	/** Check if the user can update the given LCS array */
 	protected boolean canUpdate(LCSArray lcs_array) {
-		return session.canUpdate(lcs_array);
+		return session.canUpdate(lcs_array, "indicationsNext") &&
+		       session.canUpdate(lcs_array, "ownerNext");
 	}
 }
