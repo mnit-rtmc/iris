@@ -358,6 +358,10 @@ public class MultiStringTest extends TestCase {
 		String mpgdef = DmsPgTime.getDefaultOn(false).toString();
 		assertTrue(MultiString.isEquivalent("[pt" + mpgdef + 
 			"o]PAGE1[np]PAGE2", "PAGE1[np]PAGE2"));
+
+		// blank multistrings containing other text tags are equal
+		assertTrue(MultiString.isEquivalent("[fo1]", "[fo2]"));
+		assertTrue(MultiString.isEquivalent("[pt3o3]", "[pt9o2]"));
 	}
 
 	/** getText */
