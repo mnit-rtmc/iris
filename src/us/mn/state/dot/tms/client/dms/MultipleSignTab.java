@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -141,8 +142,12 @@ public class MultipleSignTab extends JPanel implements
 	}
 
 	/** Called whenever a sign is added to the selection */
-	public void selectionAdded(DMS dms) {
-		sel_model.addElement(dms);
+	public void selectionAdded(final DMS dms) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				sel_model.addElement(dms);
+			}
+		});
 		updateSelectedLabel();
 		SignGroup group = getSelectedGroup();
 		if(group != null && !isGroupMember(dms, group))
@@ -150,8 +155,12 @@ public class MultipleSignTab extends JPanel implements
 	}
 
 	/** Called whenever a sign is removed from the selection */
-	public void selectionRemoved(DMS dms) {
-		sel_model.removeElement(dms);
+	public void selectionRemoved(final DMS dms) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				sel_model.removeElement(dms);
+			}
+		});
 		updateSelectedLabel();
 		SignGroup group = getSelectedGroup();
 		if(group != null && isGroupMember(dms, group))
