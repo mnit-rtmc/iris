@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +52,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class IrisClient extends JFrame {
 
@@ -113,6 +115,9 @@ public class IrisClient extends JFrame {
 	/** Login session information */
 	protected Session session;
 
+	/** Mutable user properties stored on client workstation */
+	private UserProperties m_uprops;
+
 	/** Create a new Iris client */
 	public IrisClient(Properties props) throws IOException {
 		super(createTitle(TITLE_NOT_LOGGED_IN));
@@ -120,6 +125,9 @@ public class IrisClient extends JFrame {
 		logger = TmsLogFactory.createLogger("IRIS", Level.WARNING,
 			null);
 		I18N.initialize(props);
+		m_uprops =  new UserProperties(
+			props.getProperty(UserProperties.FNAME_PROP_NAME));
+		m_uprops.read();
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -142,11 +150,18 @@ public class IrisClient extends JFrame {
 	/** Log out the current session and quit the client */
 	public void quit() {
 		logout();
+		writeUserProperties();
 		new AbstractJob(LOGIN) {
 			public void perform() {
 				System.exit(0);
 			}
 		}.addToScheduler();
+	}
+
+	/** Update and write user properties file */
+	private void writeUserProperties() {
+		m_uprops.setWindowProperties(this);
+		m_uprops.write();
 	}
 
 	/** Initialize the screen panes */
@@ -176,9 +191,20 @@ public class IrisClient extends JFrame {
 	/** Make the frame displayable (called by window toolkit) */
 	public void addNotify() {
 		super.addNotify();
-		setBounds(Screen.getMaximizedBounds());
-		if(screens.length < 2)
-			setExtendedState(MAXIMIZED_BOTH);
+		setPosition();
+	}
+
+	/** Set position of frame window using properties values. */
+	private void setPosition() {
+		if(m_uprops.used()) {
+			if(m_uprops.haveWindowPosition())
+				setBounds(m_uprops.getWindowPosition());
+			setExtendedState(m_uprops.getWindowState());
+		} else {
+			setBounds(Screen.getMaximizedBounds());
+			if(screens.length < 2)
+				setExtendedState(MAXIMIZED_BOTH);
+		}
 	}
 
 	/** Build all the menus */
