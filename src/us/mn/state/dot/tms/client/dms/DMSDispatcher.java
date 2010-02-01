@@ -425,7 +425,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Called whenever a sign is removed from the selection */
 	public void selectionRemoved(DMS dms) {
-		if(!isBuilderValid()) {
+		if(!areBuilderAndComposerValid()) {
 			builder = null;
 			for(DMS s: selectionModel.getSelected()) {
 				createBuilder(s);
@@ -436,10 +436,15 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Check if the builder is valid for at least one selected DMS */
-	protected boolean isBuilderValid() {
-		for(DMS dms: selectionModel.getSelected()) {
-			if(checkDimensions(dms))
-				return true;
+	protected boolean areBuilderAndComposerValid() {
+		List<DMS> sel = selectionModel.getSelected();
+		// If there is only one DMS selected, then the composer needs
+		// to be updated for that sign.
+		if(sel.size() > 1) {
+			for(DMS dms: sel) {
+				if(checkDimensions(dms))
+					return true;
+			}
 		}
 		return false;
 	}
