@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,9 +55,6 @@ public class AwsStatusPanel extends ToolPanel implements
 	/** SystemAttribute type cache */
 	protected final TypeCache<SystemAttribute> m_sysattribs;
 
-	/** The label used for cursor coordinates */
-	protected final JLabel m_coordinates = new JLabel();
-
 	/** Button to view all AWS messages */
 	protected final String m_btnViewText = m_awsName + " Messages";
 	protected final JButton m_btnView = new JButton(m_btnViewText);
@@ -73,6 +71,9 @@ public class AwsStatusPanel extends ToolPanel implements
 	/** Sonar state */
 	final private SonarState m_st;
 
+	/** List of deactivated DMS, can never be null */
+	private String[] m_deactivated_dms = new String[0];
+
 	/** Constructor */
 	public AwsStatusPanel(SonarState st, final SmartDesktop desktop) {
 		assert st !=  null;
@@ -82,7 +83,6 @@ public class AwsStatusPanel extends ToolPanel implements
 		m_desktop = desktop;
 		createComponents();
 		addComponents();
-		setToolTipText();
 
 		// listen for changes to DMS
 		m_dms.getDMSs().addProxyListener(this);
@@ -95,11 +95,6 @@ public class AwsStatusPanel extends ToolPanel implements
 	/** is this panel IRIS enabled? */
 	public static boolean getIEnabled() {
 		return SystemAttrEnum.DMS_AWS_ENABLE.getBoolean();
-	}
-
-	/** set tooltip text */
-	public void setToolTipText() {
-		// none
 	}
 
 	/** create components */
@@ -121,63 +116,63 @@ public class AwsStatusPanel extends ToolPanel implements
 		add(m_btnView);
 	}
 
-	/** Set the optional AWS text on the status bar */
-	protected void setAWSText(String text) {
-		text = (text == null ? "" : text);
-		m_awstext.setText(text);
+	/** Update the AWS text on the toolbar and tooltip text */
+	private void updateAWSText() {
+		String tt = "";
+		String mt = "";
+		// AWS is enabled
+		if(getIEnabled()) {
+			updateDeactivatedDMSList();
+			String list = genDeactivatedDmsList();
+			if(m_deactivated_dms.length <= 0) {
+				mt = "";
+				tt = "";
+			// short list
+			} else if(m_deactivated_dms.length < 5) {
+				mt = createRedHtml(m_awsName + 
+					" deactivated: " + list);
+				tt = "";
+			// long list
+			} else {
+				mt = createRedHtml("Multiple " + m_dmsAbbr + 
+					" deactivated (" + 
+					m_deactivated_dms.length + ")");
+				tt = createRedHtml(m_awsName + 
+					" deactivated: " + list);
+			}
+		} else {
+			mt = createRedHtml(m_awsName + " is deactivated");
+			tt = "";
+		}
+		m_awstext.setText(mt);
+		m_awstext.setToolTipText(tt);
 	}
 
-	/** Update the AWS text on the toolbar */
-	protected void updateAWSText() {
-		m_awstext.setText(buildAWSText());
-	}
-
-	/** Return the AWS toolbar text, which consists of a color
-	 *  coded list of deactivated DMS. */
-	protected String buildAWSText() {
+	/** Return the specified string as html in red. */
+	private String createRedHtml(String argtext) {
 		final String htmlStart = "<html>";
 		final String htmlStop = "</html>";
 		final String redFontStart = "<font color=#FF0000>";
 		final String redFontStop = "</font>";
-
-		// AWS not activated?
-		if(!getIEnabled())
-			return htmlStart + "<b>" + redFontStart + m_awsName + 
-				" is not activated" + redFontStop + "<b>" + 
-				htmlStop;
-
-		// build list of deactivated DMS
-		String dal = createDeactivatedDMSList();
-
-		// no deactivated dms?
-		if(dal == null || dal.length() <= 0)
-			return "";
-
-		// construct list of deactivated dms
-		StringBuilder text = new StringBuilder();
-		text.append(htmlStart);
-		text.append(redFontStart);
-		text.append(m_awsName);
-		text.append(" deactivated ");
-		text.append(m_dmsAbbr);
-		text.append(": ");
-		text.append(dal);
-		text.append(redFontStop);
-		text.append(htmlStop);
-
-		return text.toString();
+		return htmlStart + "<b>" + redFontStart + argtext + 
+			redFontStop + "<b>" + htmlStop;
 	}
 
-	/** create list of deactivated DMS */
-	protected String createDeactivatedDMSList() {
-		String[] ids = createAwsStatusList(m_dms.getDMSs(), false);
-		if(ids == null || ids.length == 0)
-			return null;
+	/** Update field which is a list of deactivated DMS */
+	protected void updateDeactivatedDMSList() {
+		m_deactivated_dms = createAwsStatusList(m_dms.getDMSs(), false);
+	}
+
+	/** Generate a comma separated list based on the current list field. 
+	 * @return A comma separated string of DMS ids or the empty string. */
+	protected String genDeactivatedDmsList() {
+		if(m_deactivated_dms.length <= 0)
+			return "";
 		StringBuilder text = new StringBuilder();
-		for(int i = 0; i<ids.length; ++i ) {
-			if(ids[i] != null)
-				text.append(ids[i]);
-			if(i < ids.length - 1)
+		for(int i = 0; i<m_deactivated_dms.length; ++i ) {
+			if(m_deactivated_dms[i] != null)
+				text.append(m_deactivated_dms[i]);
+			if(i < m_deactivated_dms.length - 1)
 				text.append(", ");
 		}
 		return text.toString();
