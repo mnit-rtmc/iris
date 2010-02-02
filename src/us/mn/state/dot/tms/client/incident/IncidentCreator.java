@@ -102,6 +102,7 @@ public class IncidentCreator extends JPanel {
 	/** Handler for button changed events */
 	protected void buttonChanged(JToggleButton btn, EventType et) {
 		if(btn.isSelected()) {
+			selectionModel.clearSelection();
 			// NOTE: cannot use ButtonGroup for this because it
 			// will not let the user deselect a button by clicking
 			// on it once it has been selected.  Arrgh!
