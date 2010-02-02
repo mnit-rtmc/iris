@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.CardLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -34,6 +36,7 @@ import us.mn.state.dot.sonar.SonarObject;
  * Panel to display a summary of styled objects and select status to list
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class StyleSummary<T extends SonarObject> extends JPanel {
 
@@ -123,6 +126,11 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.weighty = 1;
 		bag.fill = GridBagConstraints.BOTH;
 		add(list_panel, bag);
+
+		// These sizes force the SignPixelPanel in the 
+		// dispatcher to switch sizes.
+		setMinimumSize(new Dimension(500, 200));
+		setPreferredSize(new Dimension(500, 275));
 	}
 
 	/** Set the selected style */

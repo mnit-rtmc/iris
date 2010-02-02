@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +31,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
  * Pixel panel renders a representation of the pixels on a sign.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SignPixelPanel extends JPanel {
 
@@ -103,7 +105,7 @@ public class SignPixelPanel extends JPanel {
 				repaint();
 			}
 		});
-		setMinimumSize(new Dimension(128, 32));
+		setSizes();
 	}
 
 	/** Set the physical sign dimensions */
@@ -321,5 +323,18 @@ public class SignPixelPanel extends JPanel {
 			return excess / gaps;
 		else
 			return 0;
+	}
+
+	/* Set the panel size. */
+	private void setSizes() {
+		setMinimumSize(calcDimsUsingHeight(54));
+		setPreferredSize(calcDimsUsingHeight(108));
+		setMaximumSize(calcDimsUsingHeight(108));
+	}
+
+	/* Calculate pixel panel dimensions as a function of height. */
+	private Dimension calcDimsUsingHeight(int height) {
+		final double WTH_RATIO = 3.61;
+		return new Dimension((int)(height * WTH_RATIO), height);
 	}
 }

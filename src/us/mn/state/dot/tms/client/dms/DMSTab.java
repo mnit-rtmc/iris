@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
+import javax.swing.BoxLayout;
 import java.util.List;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.DMS;
@@ -28,6 +30,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSTab extends MapTab {
 
@@ -50,8 +53,9 @@ public class DMSTab extends MapTab {
 			if(name.equals(manager.getProxyType()))
 				map_model.setHomeLayer(ls);
 		}
-		add(dispatcher, BorderLayout.NORTH);
-		add(summary, BorderLayout.CENTER);
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		add(dispatcher);
+		add(summary);
 	}
 
 	/** Get the tab number */
