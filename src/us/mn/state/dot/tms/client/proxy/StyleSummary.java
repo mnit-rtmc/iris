@@ -27,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.border.TitledBorder;
 import javax.swing.ListCellRenderer;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
@@ -52,16 +53,17 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** List panel for card layout */
 	protected final JPanel list_panel;
 
-	/** Status label */
-	protected final JLabel s_label = new JLabel();
+	/** Titled border */
+	TitledBorder m_border;
 
 	/** Create a new style summary panel */
 	public StyleSummary(final ProxyManager<T> man) {
 		super(new GridBagLayout());
 		manager = man;
 		ListCellRenderer renderer = manager.createCellRenderer();
-		setBorder(BorderFactory.createTitledBorder(
-			manager.getProxyType() + " Summary"));
+		m_border = BorderFactory.createTitledBorder(
+			manager.getProxyType() + " Summary");
+		setBorder(m_border);
 		list_panel = new JPanel(cards);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
@@ -120,7 +122,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.gridy = half + 1;
 		bag.gridwidth = 9;
 		bag.insets.top = 8;
-		add(s_label, bag);
 		bag.gridy = half + 2;
 		bag.weightx = 1;
 		bag.weighty = 1;
@@ -135,7 +136,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Set the selected style */
 	public void setStyle(String style) {
-		s_label.setText(manager.getProxyType() + " status: " + style);
+		String t = manager.getProxyType() + " status: " + style;
+		m_border = BorderFactory.createTitledBorder(t);
+		m_border.setTitle(t);
+		setBorder(m_border);
 		cards.show(list_panel, style);
 	}
 
