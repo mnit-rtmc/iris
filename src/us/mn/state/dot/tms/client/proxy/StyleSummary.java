@@ -88,9 +88,14 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
 		m_list = new ProxyJList<?>[styles.length];
-		int half = styles.length / 2;
 		String default_rbutton = "";
+		final int colsper = 4; // blank, button, #, icon
+		final int numcols = 3;
+		final int numrows = (styles.length - 1) / numcols + 1;
+		// grid is filled top to bottom, left to right
 		for(int i = 0; i < styles.length; i++) {
+			int col = i / numrows;
+			int row = i % numrows;
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
 			m_list[i] = manager.createList(styles[i]); 
@@ -102,12 +107,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			// by default, the 1st button is selected
 			if(i == 0)
 				default_rbutton = m.getName();
-			bag.gridx = 1;
-			bag.gridy = i;
-			if(i >= half) {
-				bag.gridx = 5;
-				bag.gridy -= half;
-			}
+			bag.gridx = col * colsper + 1;
+			bag.gridy = row;
 			bag.insets.right = 2;
 			bag.anchor = GridBagConstraints.WEST;
 			add(b, bag);
@@ -134,20 +135,21 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 				}
 			});
 		}
+
+		// add vertical space left of each column and right of last
+		for(int c = 0; c < numcols + 1; ++c) {
+			bag.gridx = c * colsper;
+			bag.gridy = 0;
+			bag.weightx = 1;
+			bag.fill = GridBagConstraints.HORIZONTAL;
+			add(new JPanel(), bag);
+		}
+
+		// add listbox
 		bag.gridx = 0;
-		bag.gridy = 0;
-		bag.weightx = 1;
-		bag.fill = GridBagConstraints.HORIZONTAL;
-		add(new JPanel(), bag);
-		bag.gridx = 4;
-		add(new JPanel(), bag);
-		bag.gridx = 8;
-		add(new JPanel(), bag);
-		bag.gridx = 0;
-		bag.gridy = half + 1;
-		bag.gridwidth = 9;
+		bag.gridwidth = colsper * numcols;
 		bag.insets.top = 8;
-		bag.gridy = half + 2;
+		bag.gridy = numrows + 1;
 		bag.weightx = 1;
 		bag.weighty = 1;
 		bag.fill = GridBagConstraints.BOTH;
