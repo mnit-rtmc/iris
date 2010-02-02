@@ -21,6 +21,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Enumeration;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
@@ -68,6 +69,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
 		int half = styles.length / 2;
+		String default_rbutton = "";
 		for(int i = 0; i < styles.length; i++) {
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
@@ -77,6 +79,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			list_panel.add(scroll, m.getName());
 			final JRadioButton b = new JRadioButton(m.getName());
 			r_buttons.add(b);
+			// by default, the 1st button is selected
+			if(i == 0)
+				default_rbutton = m.getName();
 			bag.gridx = 1;
 			bag.gridy = i;
 			if(i >= half) {
@@ -94,7 +99,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			add(new JLabel(m.getLegend()), bag);
 			b.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					setStyle(m.getName());
+					setStyleAction(m.getName());
 				}
 			});
 			m.addListDataListener(new ListDataListener() {
@@ -132,10 +137,26 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		// dispatcher to switch sizes.
 		setMinimumSize(new Dimension(500, 200));
 		setPreferredSize(new Dimension(500, 275));
+
+		// select default button
+		setStyle(default_rbutton);
 	}
 
-	/** Set the selected style */
+	/** Set the selected style, results in action + button selection
+	 * changes. This method is called by external classes, so the 
+	 * specified button is selected, all other deselected. */
 	public void setStyle(String style) {
+		for(Enumeration e = r_buttons.getElements(); 
+			e.hasMoreElements(); ) 
+		{
+			JRadioButton b = (JRadioButton)e.nextElement();
+			b.setSelected(b.getText().equals(style));
+		}
+		setStyleAction(style);
+	}
+
+	/** Button click action. */
+	private void setStyleAction(String style) {
 		String t = manager.getProxyType() + " status: " + style;
 		m_border = BorderFactory.createTitledBorder(t);
 		m_border.setTitle(t);
