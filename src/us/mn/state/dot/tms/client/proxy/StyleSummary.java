@@ -21,6 +21,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentListener;
 import java.util.Enumeration;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -35,7 +36,9 @@ import javax.swing.event.ListDataListener;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * Panel to display a summary of styled objects and select status to list
+ * Panel to display a summary of styled objects, which contains radio
+ * buttons which selected the current view, and a listbox below to show
+ * the objects associated with the selected style.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -57,9 +60,25 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Titled border */
 	TitledBorder m_border;
 
-	/** Create a new style summary panel */
-	public StyleSummary(final ProxyManager<T> man) {
+	/** Component listener, may be null */
+	ComponentListener m_clistener;
+
+	/** Listboxes for each style */
+	protected ProxyJList<?>[] m_list;
+
+	/** scroll pane */
+	private JScrollPane m_scroll;
+
+	/** Create a new style summary panel.  
+	 * @param man ProxyManager.
+	 * @param clistener A ComponentListener or null to ignore. */
+	public StyleSummary(final ProxyManager<T> man, 
+		ComponentListener clistener)
+	{
 		super(new GridBagLayout());
+		m_clistener = clistener;
+		if(clistener != null)
+			addComponentListener(clistener);
 		manager = man;
 		ListCellRenderer renderer = manager.createCellRenderer();
 		m_border = BorderFactory.createTitledBorder(
@@ -68,15 +87,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		list_panel = new JPanel(cards);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
+		m_list = new ProxyJList<?>[styles.length];
 		int half = styles.length / 2;
 		String default_rbutton = "";
 		for(int i = 0; i < styles.length; i++) {
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
-			ProxyJList<T> list = manager.createList(styles[i]);
-			list.setCellRenderer(renderer);
-			JScrollPane scroll = new JScrollPane(list);
-			list_panel.add(scroll, m.getName());
+			m_list[i] = manager.createList(styles[i]); 
+			m_list[i].setCellRenderer(renderer);
+			m_scroll = new JScrollPane(m_list[i]);
+			list_panel.add(m_scroll, m.getName());
 			final JRadioButton b = new JRadioButton(m.getName());
 			r_buttons.add(b);
 			// by default, the 1st button is selected
@@ -164,8 +184,24 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		cards.show(list_panel, style);
 	}
 
+	/** Get the listbox viewport size */
+	public Dimension getViewportExtentSize() {
+		return m_scroll.getViewport().getExtentSize();
+	}
+
+	/** The JPanel containing the listboxes has been resized. Update
+	 *  all cell renderers. */
+	public void updateRenderer() {
+		ListCellRenderer r = manager.createCellRenderer();
+		String[] styles = manager.getStyles();
+		for(int i = 0; i < styles.length; i++)
+			m_list[i].setCellRenderer(r);
+	}
+
 	/** Dispose of the widget */
 	public void dispose() {
+		if(m_clistener != null)
+			removeComponentListener(m_clistener);
 		removeAll();
 	}
 }

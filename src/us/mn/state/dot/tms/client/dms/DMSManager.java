@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +18,14 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
+import java.awt.event.ComponentListener;
+import java.awt.Dimension;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
@@ -48,6 +54,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * A DMS manager is a container for SONAR DMS objects.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSManager extends ProxyManager<DMS> {
 
@@ -71,6 +78,9 @@ public class DMSManager extends ProxyManager<DMS> {
 	public void setBlankAction(BlankDmsAction a) {
 		blankAction = a;
 	}
+
+	/** Size of StyleSummary listbox viewport, updated after a resize. */
+	private Dimension m_vpsize;
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, TypeCache<DMS> c, GeoLocManager lm) {
@@ -153,9 +163,24 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Add a proxy to the manager */
 	protected void proxyAddedSlow(DMS dms) {
 		super.proxyAddedSlow(dms);
-		DmsCellRenderer r = new DmsCellRenderer();
+		DmsCellRenderer r = newCellRenderer();
 		r.setDms(dms);
 		renderers.put(dms.getName(), r);
+	}
+
+	/** Get the Style Summary listbox viewport dimension */
+	private Dimension getViewPortDims() {
+		return m_vpsize;
+	}
+
+	/** Set the Style Summary listbox viewport dimension */
+	private void setViewPortDims(Dimension d) {
+		m_vpsize = d;
+	}
+
+	/** Create a cell renderer */
+	private DmsCellRenderer newCellRenderer() {
+		return new DmsCellRenderer(getViewPortDims());
 	}
 
 	/** Called when a proxy attribute has changed */
@@ -173,9 +198,25 @@ public class DMSManager extends ProxyManager<DMS> {
 		return list;
 	}
 
+	/** Set style summary viewport size due to resize. 
+	 * @param vpdims Size of the style summary listbox viewport. */
+	public void styleSummaryResize(Dimension vpdims) {
+		setViewPortDims(vpdims);
+		// update all cell renderers
+		Iterator pairs = renderers.entrySet().iterator();
+		while(pairs.hasNext()) {
+			Map.Entry entry = (Map.Entry)pairs.next();
+			String dmsname = (String)entry.getKey();
+			DMS d = DMSHelper.lookup(dmsname);
+			DmsCellRenderer r = newCellRenderer();
+			r.setDms(d);
+			renderers.put(dmsname, r);
+		}
+	}
+
 	/** Create a new style summary for this proxy type */
-	public StyleSummary<DMS> createStyleSummary() {
-		StyleSummary<DMS> summary = super.createStyleSummary();
+	public StyleSummary<DMS> createStyleSummary(ComponentListener cl) {
+		StyleSummary<DMS> summary = super.createStyleSummary(cl);
 		summary.setStyle(DMSHelper.STYLE_DEPLOYED);
 		return summary;
 	}

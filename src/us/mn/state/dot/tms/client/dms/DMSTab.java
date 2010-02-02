@@ -15,8 +15,12 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.Dimension;
 import javax.swing.BoxLayout;
 import java.util.List;
+import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
@@ -39,13 +43,17 @@ public class DMSTab extends MapTab {
 	/** Summary of DMSs of each status */
 	protected final StyleSummary<DMS> summary;
 
+	/** DMS Manager */
+	protected final DMSManager m_manager;
+
 	/** Create a new DMS tab */
  	public DMSTab(Session session, DMSManager manager, 
 		List<LayerState> lstates)
 	{
 		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
+		m_manager = manager;
 		dispatcher = new DMSDispatcher(session, manager);
-		summary = manager.createStyleSummary();
+		summary = manager.createStyleSummary(m_ssclistener);
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
 			String name = ls.getLayer().getName();
@@ -56,6 +64,24 @@ public class DMSTab extends MapTab {
 		add(dispatcher);
 		add(summary);
 	}
+
+	/** Listener for StyleSummary ComponentListener messages. This object
+	 *  listens for resize events for the JPanel in the StyleSummary. */
+	private ComponentListener m_ssclistener = new ComponentListener() {
+		public void componentHidden(ComponentEvent e) {}
+		public void componentMoved(ComponentEvent e) {}
+		public void componentShown(ComponentEvent e) {}
+		public void componentResized(ComponentEvent e) {
+			Object obj = e.getComponent();
+			if(obj == null || !(obj instanceof JPanel))
+				return;
+			Dimension dim_vp = summary.getViewportExtentSize();
+			if(DmsCellRenderer.willCellSizeChange(dim_vp)) {
+				m_manager.styleSummaryResize(dim_vp);
+				summary.updateRenderer();
+			}
+		}
+	};
 
 	/** Get the tab number */
 	public int getNumber() {

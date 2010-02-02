@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -26,10 +28,12 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
+import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
@@ -68,35 +72,108 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	protected final JLabel lblLocation = new JLabel();
 
 	/** Render mode */
-	protected enum RenderMode {LARGE, MEDIUM};
-	protected RenderMode m_mode = RenderMode.LARGE;
+	private enum RenderMode {
+		LARGE(190, 92),
+		MEDIUM(46 * 2, 46),
+		SMALL(36, 24);
 
-	/** Create a new DMS cell renderer */
-	public DmsCellRenderer() {
+		/** Fixed cell size */
+		Dimension m_size = new Dimension(1, 1);
+
+		/** constructor */
+		private RenderMode(int w, int h) {
+			m_size.width = w;
+			m_size.height = h;
+		}
+
+		/** Get size */
+		public Dimension getSize() {
+			return m_size;
+		}
+
+		/** Calculate number of vertical large renderers */
+		public int numVert(int vertpix) {
+			return vertpix / (int)getSize().getHeight();
+		}
+
+		/** Determine the mode, which determines the size and 
+		 *  apperance of the renderer.
+		 * @param sz Viewport size of listbox containing 
+		 *	  renderers, may be null. */
+		protected static RenderMode determine(Dimension sz) {
+			int ordinal = SystemAttrEnum.DMS_RENDER_SIZE.getInt();
+			if(ordinal == 0)
+				return RenderMode.LARGE;
+			else if(ordinal == 1)
+				return RenderMode.MEDIUM;
+			else if(ordinal == 2)
+				return RenderMode.SMALL;
+			else if(ordinal == 3) {
+				if(sz == null)
+					return RenderMode.LARGE;
+				RenderMode rm;
+				int vsz = (int)sz.getHeight();
+				if(LARGE.numVert(vsz) >= 3)
+					rm = RenderMode.LARGE;
+				else if(RenderMode.MEDIUM.numVert(vsz) >= 3)
+					rm = RenderMode.MEDIUM;
+				else
+					rm = RenderMode.SMALL;
+				return rm;
+			} else
+				return RenderMode.LARGE;
+		}
+
+	};
+
+	/** Render mode */
+	private RenderMode m_mode = RenderMode.LARGE;
+
+	/** Last render mode, which is used to determine if a resize
+	 *  will result in a cell size change. */
+	private static RenderMode m_lastmode = RenderMode.LARGE;
+
+	/** Set cell render mode. */
+	private void setMode(RenderMode newmode) {
+		m_mode = newmode;
+		m_lastmode = newmode;
+	}
+
+	/** Create a new DMS cell renderer as a function of the style
+	 * summary viewport size. 
+	 * @param sz StyleSummary listbox viewport dimensions. */
+	public DmsCellRenderer(Dimension sz) {
 		super(new BorderLayout());
-		m_mode = determineMode();
-		if(m_mode == RenderMode.MEDIUM)
+		create(RenderMode.determine(sz));
+	}
+
+	/** Create a new DMS cell renderer of the specified size. */
+	private void create(RenderMode m) {
+		setMode(m);
+		if(m == RenderMode.LARGE)
+			createLarge();
+		else if(m == RenderMode.MEDIUM)
 			createMedium();
+		else if(m == RenderMode.SMALL)
+			createSmall();
 		else
 			createLarge();
 	}
 
-	/** Determine mode */
-	protected RenderMode determineMode() {
-		int ordinal = SystemAttrEnum.DMS_RENDER_SIZE.getInt();
-		// FIXME: a changeset has already been developed that sizes
-		// the cells automatically as a function of the amount of 
-		// space in the style summary.
-		if(ordinal == 0)
-			return RenderMode.LARGE;
-		else if(ordinal == 1)
-			return RenderMode.MEDIUM;
-		else
-			return RenderMode.LARGE;
+	/** Create a new DMS cell renderer with small cells */
+	private void createSmall() {
+		setBorder(BorderFactory.createEtchedBorder(
+			EtchedBorder.RAISED));
+		title.setLayout(new GridLayout(1, 1));
+		title.add(lblID);
+		add(title);
+		//setPreferredSize(m_mode.getSize());
+		setPreferredSize(new Dimension(36, 24));
 	}
 
 	/** Create a new DMS cell renderer with medium cells */
-	public void createMedium() {
+	private void createMedium() {
+		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
@@ -110,7 +187,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Create a new DMS cell renderer with large cells */
-	public void createLarge() {
+	private void createLarge() {
+		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
@@ -130,6 +208,12 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	public boolean isOpaque() {
 		return true;
 	}
+
+	/** Return true if the new viewport size will change modes. */
+	public static boolean willCellSizeChange(Dimension sz) {
+		RenderMode newmode = RenderMode.determine(sz);
+		return m_lastmode != newmode;
+ 	}
 
 	/** Get a component configured to render a cell of the list */
 	public Component getListCellRendererComponent(JList list, Object value,
@@ -184,16 +268,26 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 			lblLocation.setText(loca);
 			setDimensions(dms);
 			pixelPnl.setGraphic(getPageOne(dms));
-			updateToolTip(dmsname, loca);
+			updateToolTip(dms, dmsname, loca, formatOwner(dms));
 		} else if(a.equals("ownerCurrent"))
 			lblUser.setText(formatOwner(dms));
 	}
 
 	/** Update tooltip */
-	protected void updateToolTip(String dmsname, String loca) {
-		if(m_mode == RenderMode.MEDIUM)
-			setToolTipText(dmsname + ": " + loca);
-	}
+	private void updateToolTip(DMS dms, String dmsname, String loca, 
+		String author) 
+	{
+		StringBuilder tt = new StringBuilder("");
+		if(m_mode == RenderMode.SMALL) {
+			tt.append(dmsname);
+			if(!author.isEmpty())
+			tt.append(": ").append(author);
+			tt.append(": ").append(loca);
+			tt.append(": ").append(DMSHelper.buildMsgLine(dms));
+		} else if(m_mode == RenderMode.MEDIUM)
+			tt.append(dmsname).append(": ").append(loca);
+		setToolTipText(tt.toString());
+ 	}
 
 	/** Set the dimensions of the pixel panel */
 	protected void setDimensions(DMS dms) {

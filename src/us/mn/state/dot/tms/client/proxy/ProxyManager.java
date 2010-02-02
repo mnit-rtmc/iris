@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.Shape;
+import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -224,7 +226,13 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<T> createStyleSummary() {
-		return new StyleSummary<T>(this);
+		return createStyleSummary(null);
+	}
+
+	/** Create a new style summary for this proxy type.
+	 * @param clistener A ComponentListener or null to ignore. */
+	public StyleSummary<T> createStyleSummary(ComponentListener cl) {
+		return new StyleSummary<T>(this, cl);
 	}
 
 	/** Get the specified style list model */
