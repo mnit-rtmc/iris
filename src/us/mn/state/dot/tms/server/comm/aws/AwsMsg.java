@@ -476,7 +476,7 @@ public class AwsMsg {
 		if(cur == null)
 			return false;
 		// comparison of tags and text in MULTI strings
-		boolean eq = multi.equals(cur.getMulti());
+		boolean eq = multi.isEquivalent(cur.getMulti());
 		Log.finest("AwsMsg.equalsCurrentsignMessage(): cur=" + 
 			cur.getMulti() + ", new=" + multi + ", equal=" + eq);
 		return eq; 
