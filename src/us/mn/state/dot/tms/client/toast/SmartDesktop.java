@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +17,14 @@ package us.mn.state.dot.tms.client.toast;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
@@ -154,9 +157,20 @@ public class SmartDesktop extends JDesktopPane {
 			selectFrame(frame);
 		else
 			frame = addForm(form);
-		Point p = screen.getCenteredLocation(frame.getSize());
-		Point o = Screen.getLocation(this);
-		frame.setLocation(p.x - o.x, p.y - o.y);
+		Point wl;
+		if(client.getExtendedState() == JFrame.MAXIMIZED_BOTH) {
+			// locate new form relative to desktop
+			Point p = screen.getCenteredLocation(frame.getSize());
+			Point o = Screen.getLocation(this);
+			wl = new Point(p.x - o.x, p.y - o.y);
+		} else {
+			// locate new form centered within jframe
+			Dimension cfs = client.getSize();
+			Dimension nfs = frame.getSize();
+			wl = new Point(cfs.width / 2 - nfs.width / 2, 
+				cfs.height / 2 - nfs.height / 2);
+		}
+		frame.setLocation(wl);
 		frame.show();
 	}
 
