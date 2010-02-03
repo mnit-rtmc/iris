@@ -11,6 +11,31 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>3.111.0 (3 February 2010)</dt>
+	<dd><ul>
+		<li>
+			Added lane_type to incidents, to allow incidents on
+			exit ramps, etc.
+		</li>
+		<li>
+			Improved multiple DMS selection handling.
+		</li>
+		<li>
+			Improved client permission checking for some widgets.
+		</li>
+		<li>
+			Fixed a couple of serious bugs in client code.
+		</li>
+		<li>
+			All devices now have a "Select Point" button on the
+			location tab.
+		</li>
+		<li>
+			Iris client and server must be upgraded together.
+			Migrate script must be run to update database:
+			<code>psql tms -f migrate-3.111.sql</code>.
+		</li>
+	</ul></dd>
 	<dt>3.110.0 (20 January 2010)</dt>
 	<dd><ul>
 		<li>
