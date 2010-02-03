@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -199,12 +200,35 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 	}
 
+	/** Get the lane type description */
+	protected String getLaneType(LaneType lt) {
+		switch(lt) {
+		case MAINLINE:
+		case EXIT:
+		case MERGE:
+		case CD_LANE:
+			return lt.toString();
+		default:
+			return null;
+		}
+	}
+
+	/** Get the event description */
+	protected String getDesc(String sty, String ltd) {
+		if(ltd != null)
+			return sty + " on " + ltd;
+		else
+			return sty;
+	}
+
 	/** Update the event type on a label */
 	public void setTypeLabel(Incident inc, JLabel lbl) {
 		EventType et = EventType.fromId(inc.getEventType());
 		String sty = getStyle(et);
+		LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
+		String ltd = getLaneType(lt);
 		if(sty != null) {
-			lbl.setText(sty);
+			lbl.setText(getDesc(sty, ltd));
 			Symbol sym = getTheme().getSymbol(sty);
 			if(sym != null)
 				lbl.setIcon(sym.getLegend());

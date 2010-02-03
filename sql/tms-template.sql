@@ -1238,7 +1238,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.110.0
+database_version	3.111.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
@@ -1440,6 +1440,7 @@ CREATE TABLE event.incident (
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
+	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	road VARCHAR(20) NOT NULL,
 	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
 	easting INTEGER NOT NULL,

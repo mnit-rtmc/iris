@@ -14,9 +14,12 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.awt.FlowLayout;
 import java.awt.geom.Point2D;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
 import javax.swing.SwingConstants;
@@ -30,6 +33,9 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
@@ -53,6 +59,9 @@ public class IncidentCreator extends JPanel {
 	/** Button to create a "road work" incident */
 	protected final JToggleButton work_btn;
 
+	/** Lane type combo box */
+	protected final JComboBox ltype_cbox;
+
 	/** Incident selection model */
 	protected final ProxySelectionModel<Incident> selectionModel;
 
@@ -66,7 +75,7 @@ public class IncidentCreator extends JPanel {
 	public IncidentCreator(StyledTheme theme,
 		ProxySelectionModel<Incident> sel_model, R_NodeManager r_man)
 	{
-		super(new FlowLayout());
+		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		selectionModel = sel_model;
 		r_node_manager = r_man;
 		setBorder(BorderFactory.createTitledBorder(
@@ -79,7 +88,35 @@ public class IncidentCreator extends JPanel {
 			EventType.INCIDENT_DEBRIS, theme);
 		work_btn = createButton(IncidentManager.STYLE_ROADWORK,
 			EventType.INCIDENT_ROADWORK, theme);
+		ltype_cbox = createLaneTypeCombo();
+		Box box = Box.createHorizontalBox();
+		box.add(crash_btn);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(stall_btn);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(block_btn);
+		box.add(Box.createHorizontalStrut(4));
+		box.add(work_btn);
+		add(box);
+		add(Box.createVerticalStrut(4));
+		box = Box.createHorizontalBox();
+		box.add(Box.createHorizontalGlue());
+		box.add(new JLabel("Lane Type"));
+		box.add(Box.createHorizontalStrut(4));
+		box.add(ltype_cbox);
+		box.add(Box.createHorizontalGlue());
+		add(box);
 		setEnabled(false);
+	}
+
+	/** Create the lane type combo box */
+	protected JComboBox createLaneTypeCombo() {
+		return new JComboBox(new LaneType[] {
+			LaneType.MAINLINE,
+			LaneType.EXIT,
+			LaneType.MERGE,
+			LaneType.CD_LANE
+		});
 	}
 
 	/** Create a button for creating an incident */
@@ -95,7 +132,6 @@ public class IncidentCreator extends JPanel {
 			}
 		};
 		btn.setHorizontalTextPosition(SwingConstants.LEADING);
-		add(btn);
 		return btn;
 	}
 
@@ -150,18 +186,76 @@ public class IncidentCreator extends JPanel {
 	protected void createIncident(final EventType et, int easting,
 		int northing)
 	{
-		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing);
+		LaneType lt = (LaneType)ltype_cbox.getSelectedItem();
+		if(lt == null)
+			return;
+		GeoLoc loc = r_node_manager.createGeoLoc(easting, northing,
+			lt == LaneType.CD_LANE);
 		if(loc == null)
 			return;
+		loc = snapGeoLoc(lt, loc);
 		Road road = loc.getFreeway();
 		short dir = loc.getFreeDir();
 		int east = GeoLocHelper.getTrueEasting(loc);
 		int north = GeoLocHelper.getTrueNorthing(loc);
+		int n_lanes = getLaneCount(lt, loc);
+		if(n_lanes > 0) {
+			ClientIncident ci = new ClientIncident(et.id,
+				(short)lt.ordinal(), road, dir, east, north,
+				createImpact(n_lanes));
+			selectionModel.setSelected(ci);
+			ltype_cbox.setSelectedItem(LaneType.MAINLINE);
+		}
+	}
+
+	/** Snap a location to the proper lane type */
+	protected GeoLoc snapGeoLoc(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		int n_lanes = cb.getLaneCount(east, north);
-		ClientIncident ci = new ClientIncident(et.id, road, dir,
-			east, north, createImpact(n_lanes));
-		selectionModel.setSelected(ci);
+		if(cb == null)
+			return loc;
+		int east = GeoLocHelper.getTrueEasting(loc);
+		int north = GeoLocHelper.getTrueNorthing(loc);
+		switch(lt) {
+		case EXIT:
+			R_Node n = cb.findNearest(east, north, R_NodeType.EXIT);
+			if(n != null)
+				return n.getGeoLoc();
+			else
+				return loc;
+		case MERGE:
+			R_Node mn = cb.findNearest(east, north,
+				R_NodeType.ENTRANCE);
+			if(mn != null)
+				return mn.getGeoLoc();
+			else
+				return loc;
+		default:
+			return loc;
+		}
+	}
+
+	/** Get the lane count at the incident location */
+	protected int getLaneCount(LaneType lt, GeoLoc loc) {
+		CorridorBase cb = r_node_manager.lookupCorridor(loc);
+		int east = GeoLocHelper.getTrueEasting(loc);
+		int north = GeoLocHelper.getTrueNorthing(loc);
+		switch(lt) {
+		case EXIT:
+			R_Node n = cb.findNearest(east, north, R_NodeType.EXIT);
+			if(n != null)
+				return n.getLanes();
+			else
+				return 0;
+		case MERGE:
+			R_Node mn = cb.findNearest(east, north,
+				R_NodeType.ENTRANCE);
+			if(mn != null)
+				return mn.getLanes();
+			else
+				return 0;
+		default:
+			return cb.getLaneCount(east, north);
+		}
 	}
 
 	/** Create an impact string for the given number of lanes */

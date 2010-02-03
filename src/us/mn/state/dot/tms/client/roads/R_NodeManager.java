@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
+import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -414,10 +415,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a GeoLoc snapped to nearest corridor */
-	public GeoLoc createGeoLoc(int easting, int northing) {
+	public GeoLoc createGeoLoc(int easting, int northing, boolean cd_road) {
 		GeoLoc loc = null;
 		double distance = Double.POSITIVE_INFINITY;
 		for(CorridorBase c: corridors.values()) {
+			boolean cd = c.getFreeway().getRClass() == Road.CD_ROAD;
+			if((cd_road && !cd) || (cd && !cd_road))
+				continue;
 			ClientGeoLoc l = createGeoLoc(c, easting, northing);
 			if(l != null && l.getDistance() < distance) {
 				loc = l;

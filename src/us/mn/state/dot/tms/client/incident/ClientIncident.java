@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
 
 /**
@@ -26,10 +27,11 @@ import us.mn.state.dot.tms.Road;
 public class ClientIncident implements Incident {
 
 	/** Create a new client incident */
-	public ClientIncident(int et, Road rd, short d, int e, int n,
+	public ClientIncident(int et, short lt, Road rd, short d, int e, int n,
 		String i)
 	{
 		event_type = et;
+		lane_type = LaneType.fromOrdinal(lt);
 		road = rd;
 		dir = d;
 		easting = e;
@@ -58,6 +60,14 @@ public class ClientIncident implements Incident {
 	/** Get the event date (timestamp) */
 	public long getEventDate() {
 		return System.currentTimeMillis();
+	}
+
+	/** Lane type */
+	protected final LaneType lane_type;
+
+	/** Get the lane type ordinal */
+	public short getLaneType() {
+		return (short)lane_type.ordinal();
 	}
 
 	/** Road */

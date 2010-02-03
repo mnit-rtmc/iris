@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -222,6 +222,23 @@ public class CorridorBase {
 		R_Node nearest = null;
 		double n_meters = 0;
 		for(R_Node n: r_nodes) {
+			double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
+				northing);
+			if(nearest == null || m < n_meters) {
+				nearest = n;
+				n_meters = m;
+			}
+		}
+		return nearest;
+	}
+
+	/** Find the nearest node to the given location with given type */
+	public R_Node findNearest(int easting, int northing, R_NodeType nt) {
+		R_Node nearest = null;
+		double n_meters = 0;
+		for(R_Node n: r_nodes) {
+			if(n.getNodeType() != nt.ordinal())
+				continue;
 			double m = GeoLocHelper.metersTo(n.getGeoLoc(), easting,
 				northing);
 			if(nearest == null || m < n_meters) {

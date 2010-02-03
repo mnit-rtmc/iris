@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
@@ -56,23 +57,24 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading active incidents...");
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
-		store.query("SELECT name, event_desc_id, event_date, road, " +
-			"dir, easting, northing, camera, impact, cleared " +
-			"FROM event." + SONAR_TYPE + " WHERE cleared = 'f';",
-			new ResultFactory()
+		store.query("SELECT name, event_desc_id, event_date, " +
+			"lane_type, road, dir, easting, northing, camera, " +
+			"impact, cleared FROM event." + SONAR_TYPE +
+			" WHERE cleared = 'f';", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncidentImpl(namespace,
 					row.getString(1),	// name
 					row.getInt(2),		// event_desc_id
 					row.getTimestamp(3),	// event_date
-					row.getString(4),	// road
-					row.getShort(5),	// dir
-					row.getInt(6),		// easting
-					row.getInt(7),		// northing
-					row.getString(8),	// camera
-					row.getString(9),	// impact
-					row.getBoolean(10)	// cleared
+					row.getShort(4),	// lane_type
+					row.getString(5),	// road
+					row.getShort(6),	// dir
+					row.getInt(7),		// easting
+					row.getInt(8),		// northing
+					row.getString(9),	// camera
+					row.getString(10),	// impact
+					row.getBoolean(11)	// cleared
 				));
 			}
 		});
@@ -84,6 +86,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("name", name);
 		map.put("event_desc_id", event_desc_id);
 		map.put("event_date", event_date);
+		map.put("lane_type", (short)lane_type.ordinal());
 		map.put("road", road);
 		map.put("dir", dir);
 		map.put("easting", easting);
@@ -111,21 +114,22 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, int et, Date ed,
-		String r, short d, int ue, int un, String cam, String im,
-		boolean c)
+		short lt, String r, short d, int ue, int un, String cam,
+		String im, boolean c)
 	{
-		this(n, et, ed, (Road)ns.lookupObject(Road.SONAR_TYPE, r), d,
-		     ue, un, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
+		this(n, et, ed, lt, (Road)ns.lookupObject(Road.SONAR_TYPE, r),
+		     d, ue, un, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
 		     im, c);
 	}
 
 	/** Create an incident */
-	protected IncidentImpl(String n, int et, Date ed, Road r, short d,
-		int ue, int un, Camera cam, String im, boolean c)
+	protected IncidentImpl(String n, int et, Date ed, short lt, Road r,
+		short d, int ue, int un, Camera cam, String im, boolean c)
 	{
 		super(n);
 		event_desc_id = et;
 		event_date = new Date(ed.getTime());
+		lane_type = LaneType.fromOrdinal(lt);
 		road = r;
 		dir = d;
 		easting = ue;
@@ -158,6 +162,14 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Get the event date (timestamp) */
 	public long getEventDate() {
 		return event_date.getTime();
+	}
+
+	/** Lane type */
+	protected LaneType lane_type = LaneType.MAINLINE;
+
+	/** Get the lane type */
+	public short getLaneType() {
+		return (short)lane_type.ordinal();
 	}
 
 	/** Road for incident location */
@@ -261,6 +273,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		out.print(XmlWriter.createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
 		out.print(XmlWriter.createAttribute("event_date", event_date));
+		out.print(XmlWriter.createAttribute("lane_type", lane_type));
 		out.print(XmlWriter.createAttribute("road", road));
 		out.print(XmlWriter.createAttribute("dir",
 			Direction.DIRECTION[dir]));
