@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,13 +70,16 @@ public class SegmentLayerState extends LayerState {
 		return null;
 	}
 
-	/** Iterate through each lane segment in the layer */
+	/** Iterate through each lane segment in the layer.
+	 * @param s Map searcher callback.
+	 * @param scale Number of meters per pixel.
+	 * @return Map object found, if any. */
 	protected MapObject forEachLane(MapSearcher s, float scale) {
-		scale = Math.max(scale, 5);
+		float lane_width = 3 * scale + 5 * (20 - scale) / 20;
 		for(Segment seg: segments) {
 			int n_lanes = Math.max(seg.getLaneCount(), 1);
 			float inner = scale / 2;
-			float outer = 3 * scale * n_lanes;
+			float outer = lane_width * n_lanes;
 			float width = (outer - inner) / n_lanes;
 			for(int i = 0; i < n_lanes; i++) {
 				int l = i + 1;
