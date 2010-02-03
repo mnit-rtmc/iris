@@ -118,7 +118,6 @@ public class SignTextComboBoxModel extends AbstractListModel
 		else if(s instanceof SignText)
 			m_selected = (SignText)s;
 		else {
-			assert false: "unknown arg type";
 			m_selected = null;
 		}
 		// this results in a call to the editor's setSelectedItem method
