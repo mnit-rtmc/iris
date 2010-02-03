@@ -86,7 +86,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("name", name);
 		map.put("event_desc_id", event_desc_id);
 		map.put("event_date", event_date);
-		map.put("lane_type", (short)lane_type.ordinal());
+		map.put("lane_type", lane_type);
 		map.put("road", road);
 		map.put("dir", dir);
 		map.put("easting", easting);
@@ -129,7 +129,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		super(n);
 		event_desc_id = et;
 		event_date = new Date(ed.getTime());
-		lane_type = LaneType.fromOrdinal(lt);
+		lane_type = lt;
 		road = r;
 		dir = d;
 		easting = ue;
@@ -164,12 +164,12 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		return event_date.getTime();
 	}
 
-	/** Lane type */
-	protected LaneType lane_type = LaneType.MAINLINE;
+	/** Lane type ordinal */
+	protected short lane_type = (short)LaneType.MAINLINE.ordinal();
 
 	/** Get the lane type */
 	public short getLaneType() {
-		return (short)lane_type.ordinal();
+		return lane_type;
 	}
 
 	/** Road for incident location */
@@ -273,7 +273,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		out.print(XmlWriter.createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
 		out.print(XmlWriter.createAttribute("event_date", event_date));
-		out.print(XmlWriter.createAttribute("lane_type", lane_type));
+		out.print(XmlWriter.createAttribute("lane_type",
+			LaneType.fromOrdinal(lane_type)));
 		out.print(XmlWriter.createAttribute("road", road));
 		out.print(XmlWriter.createAttribute("dir",
 			Direction.DIRECTION[dir]));
