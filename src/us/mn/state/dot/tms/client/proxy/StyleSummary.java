@@ -58,7 +58,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	protected final JPanel list_panel;
 
 	/** Titled border */
-	TitledBorder m_border;
+	protected final TitledBorder border;
 
 	/** Component listener, may be null */
 	ComponentListener m_clistener;
@@ -81,9 +81,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			addComponentListener(clistener);
 		manager = man;
 		ListCellRenderer renderer = manager.createCellRenderer();
-		m_border = BorderFactory.createTitledBorder(
-			manager.getProxyType() + " Summary");
-		setBorder(m_border);
+		border = BorderFactory.createTitledBorder("");
+		setBorder(border);
 		list_panel = new JPanel(cards);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
@@ -187,9 +186,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Button click action. */
 	private void setStyleAction(String style) {
 		String t = manager.getProxyType() + " status: " + style;
-		m_border = BorderFactory.createTitledBorder(t);
-		m_border.setTitle(t);
-		setBorder(m_border);
+		border.setTitle(t);
+		// Force the border title to be repainted
+		repaint();
 		cards.show(list_panel, style);
 	}
 
