@@ -1,4 +1,7 @@
 /*
+ * IRIS -- Intelligent Roadway Information System
+ * Copyright (C) 2008-2010 AHMCT, University of California
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -26,7 +29,7 @@ import javax.swing.JButton;
 public class PTZButton extends JButton {
 
 	/** The preferred size of the button */
-	static protected final Dimension SIZE = new Dimension(30, 30);
+	static protected final Dimension SIZE = new Dimension(20, 20);
 
 	/** The preferred insets for the button */
 	static protected final Insets INSETS = new Insets(0, 0, 0, 0);
