@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.Shape;
-import java.awt.event.ComponentListener;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -226,13 +225,7 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<T> createStyleSummary() {
-		return createStyleSummary(null);
-	}
-
-	/** Create a new style summary for this proxy type.
-	 * @param clistener A ComponentListener or null to ignore. */
-	public StyleSummary<T> createStyleSummary(ComponentListener cl) {
-		return new StyleSummary<T>(this, cl);
+		return new StyleSummary<T>(this);
 	}
 
 	/** Get the specified style list model */

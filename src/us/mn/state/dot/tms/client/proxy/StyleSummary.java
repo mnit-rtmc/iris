@@ -21,7 +21,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentListener;
 import java.util.Enumeration;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -60,9 +59,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Titled border */
 	protected final TitledBorder border;
 
-	/** Component listener, may be null */
-	ComponentListener m_clistener;
-
 	/** Listboxes for each style */
 	protected ProxyJList<?>[] m_list;
 
@@ -70,15 +66,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	private JScrollPane m_scroll;
 
 	/** Create a new style summary panel.  
-	 * @param man ProxyManager.
-	 * @param clistener A ComponentListener or null to ignore. */
-	public StyleSummary(final ProxyManager<T> man, 
-		ComponentListener clistener)
-	{
+	 * @param man ProxyManager */
+	public StyleSummary(final ProxyManager<T> man) {
 		super(new GridBagLayout());
-		m_clistener = clistener;
-		if(clistener != null)
-			addComponentListener(clistener);
 		manager = man;
 		ListCellRenderer renderer = manager.createCellRenderer();
 		border = BorderFactory.createTitledBorder("");
@@ -208,8 +198,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Dispose of the widget */
 	public void dispose() {
-		if(m_clistener != null)
-			removeComponentListener(m_clistener);
 		removeAll();
 	}
 }

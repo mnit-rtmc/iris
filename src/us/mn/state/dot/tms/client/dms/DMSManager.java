@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
-import java.awt.event.ComponentListener;
 import java.awt.Dimension;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -215,8 +214,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a new style summary for this proxy type */
-	public StyleSummary<DMS> createStyleSummary(ComponentListener cl) {
-		StyleSummary<DMS> summary = super.createStyleSummary(cl);
+	public StyleSummary<DMS> createStyleSummary() {
+		StyleSummary<DMS> summary = super.createStyleSummary();
 		summary.setStyle(DMSHelper.STYLE_DEPLOYED);
 		return summary;
 	}
