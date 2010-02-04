@@ -44,6 +44,12 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public class StyleSummary<T extends SonarObject> extends JPanel {
 
+	/** Number of style columns in summary */
+	static protected final int STYLE_COLS = 3;
+
+	/** Number of grid columns for each style column */
+	static protected final int GRID_COLS = 4;
+
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
@@ -62,7 +68,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Listboxes for each style */
 	protected final ProxyJList<?>[] s_list;
 
-	/** scroll pane */
+	/** scroll pane.  FIXME: this is only the last scroll pane created. */
 	private JScrollPane m_scroll;
 
 	/** Create a new style summary panel.  
@@ -78,13 +84,11 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		String[] styles = manager.getStyles();
 		s_list = new ProxyJList<?>[styles.length];
 		String default_rbutton = "";
-		final int colsper = 4; // blank, button, #, icon
-		final int numcols = 3;
-		final int numrows = (styles.length - 1) / numcols + 1;
+		final int n_rows = (styles.length - 1) / STYLE_COLS + 1;
 		// grid is filled top to bottom, left to right
 		for(int i = 0; i < styles.length; i++) {
-			int col = i / numrows;
-			int row = i % numrows;
+			int col = i / n_rows;
+			int row = i % n_rows;
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
 			s_list[i] = manager.createList(styles[i]); 
@@ -94,7 +98,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			// by default, the 1st button is selected
 			if(i == 0)
 				default_rbutton = m.getName();
-			bag.gridx = col * colsper + 1;
+			bag.gridx = col * GRID_COLS;
 			bag.gridy = row;
 			bag.insets.right = 2;
 			bag.anchor = GridBagConstraints.EAST;
@@ -105,20 +109,20 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			add(createRadioButton(m), bag);
 		}
 
-		// add vertical space left of each column and right of last
-		for(int c = 0; c < numcols + 1; ++c) {
-			bag.gridx = c * colsper;
+		// add vertical space right of each column (except last)
+		for(int c = 1; c < STYLE_COLS; c++) {
+			bag.gridx = c * GRID_COLS - 1;
 			bag.gridy = 0;
 			bag.weightx = 1;
 			bag.fill = GridBagConstraints.HORIZONTAL;
-			add(new JPanel(), bag);
+			add(new JLabel(), bag);
 		}
 
 		// add listbox
 		bag.gridx = 0;
-		bag.gridwidth = colsper * numcols;
+		bag.gridwidth = GridBagConstraints.REMAINDER;
 		bag.insets.top = 8;
-		bag.gridy = numrows + 1;
+		bag.gridy = n_rows + 1;
 		bag.weightx = 1;
 		bag.weighty = 1;
 		bag.fill = GridBagConstraints.BOTH;
