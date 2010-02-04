@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -193,7 +193,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a proxy JList for the given style */
 	public ProxyJList<DMS> createList(String style) {
 		ProxyJList<DMS> list = super.createList(style);
-		list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
 	}
