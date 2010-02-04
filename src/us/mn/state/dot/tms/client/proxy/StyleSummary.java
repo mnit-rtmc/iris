@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,8 +29,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.border.TitledBorder;
 import javax.swing.ListCellRenderer;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ListDataEvent;
 import javax.swing.event.ListDataListener;
 import us.mn.state.dot.sonar.SonarObject;
@@ -102,38 +102,18 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			m_list[i].setCellRenderer(renderer);
 			m_scroll = new JScrollPane(m_list[i]);
 			list_panel.add(m_scroll, m.getName());
-			final JRadioButton b = new JRadioButton(m.getName());
-			r_buttons.add(b);
 			// by default, the 1st button is selected
 			if(i == 0)
 				default_rbutton = m.getName();
 			bag.gridx = col * colsper + 1;
 			bag.gridy = row;
 			bag.insets.right = 2;
-			bag.anchor = GridBagConstraints.WEST;
-			add(b, bag);
-			bag.gridx = GridBagConstraints.RELATIVE;
 			bag.anchor = GridBagConstraints.EAST;
-			final JLabel c = new JLabel(Integer.toString(
-				m.getSize()));
-			add(c, bag);
 			add(new JLabel(m.getLegend()), bag);
-			b.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					setStyleAction(m.getName());
-				}
-			});
-			m.addListDataListener(new ListDataListener() {
-				public void contentsChanged(ListDataEvent e) { }
-				public void intervalAdded(ListDataEvent e) {
-					c.setText(Integer.toString(
-						m.getSize()));
-				}
-				public void intervalRemoved(ListDataEvent e) {
-					c.setText(Integer.toString(
-						m.getSize()));
-				}
-			});
+			bag.gridx = GridBagConstraints.RELATIVE;
+			add(createCount(m), bag);
+			bag.anchor = GridBagConstraints.WEST;
+			add(createRadioButton(m), bag);
 		}
 
 		// add vertical space left of each column and right of last
@@ -164,15 +144,42 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		setStyle(default_rbutton);
 	}
 
+	/** Create a radio button for the given style list model */
+	protected JRadioButton createRadioButton(final StyleListModel<T> mdl) {
+		final JRadioButton btn = new JRadioButton(mdl.getName());
+		r_buttons.add(btn);
+		btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setStyleAction(mdl.getName());
+			}
+		});
+		return btn;
+	}
+
+	/** Create a count label for the given style list model */
+	protected JLabel createCount(final StyleListModel<T> mdl) {
+		final JLabel lbl = new JLabel(Integer.toString(mdl.getSize()));
+		mdl.addListDataListener(new ListDataListener() {
+			public void contentsChanged(ListDataEvent e) { }
+			public void intervalAdded(ListDataEvent e) {
+				lbl.setText(Integer.toString(mdl.getSize()));
+			}
+			public void intervalRemoved(ListDataEvent e) {
+				lbl.setText(Integer.toString(mdl.getSize()));
+			}
+		});
+		return lbl;
+	}
+
 	/** Set the selected style, results in action + button selection
 	 * changes. This method is called by external classes, so the 
 	 * specified button is selected, all other deselected. */
 	public void setStyle(String style) {
 		for(Enumeration e = r_buttons.getElements(); 
-			e.hasMoreElements(); ) 
+		    e.hasMoreElements(); ) 
 		{
-			JRadioButton b = (JRadioButton)e.nextElement();
-			b.setSelected(b.getText().equals(style));
+			JRadioButton btn = (JRadioButton)e.nextElement();
+			btn.setSelected(btn.getText().equals(style));
 		}
 		setStyleAction(style);
 	}
