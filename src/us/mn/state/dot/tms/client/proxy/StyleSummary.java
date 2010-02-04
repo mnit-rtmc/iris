@@ -60,7 +60,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	protected final TitledBorder border;
 
 	/** Listboxes for each style */
-	protected ProxyJList<?>[] m_list;
+	protected final ProxyJList<?>[] s_list;
 
 	/** scroll pane */
 	private JScrollPane m_scroll;
@@ -76,7 +76,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		list_panel = new JPanel(cards);
 		GridBagConstraints bag = new GridBagConstraints();
 		String[] styles = manager.getStyles();
-		m_list = new ProxyJList<?>[styles.length];
+		s_list = new ProxyJList<?>[styles.length];
 		String default_rbutton = "";
 		final int colsper = 4; // blank, button, #, icon
 		final int numcols = 3;
@@ -87,9 +87,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			int row = i % numrows;
 			final StyleListModel<T> m =
 				manager.getStyleModel(styles[i]);
-			m_list[i] = manager.createList(styles[i]); 
-			m_list[i].setCellRenderer(renderer);
-			m_scroll = new JScrollPane(m_list[i]);
+			s_list[i] = manager.createList(styles[i]); 
+			s_list[i].setCellRenderer(renderer);
+			m_scroll = new JScrollPane(s_list[i]);
 			list_panel.add(m_scroll, m.getName());
 			// by default, the 1st button is selected
 			if(i == 0)
@@ -193,7 +193,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		ListCellRenderer r = manager.createCellRenderer();
 		String[] styles = manager.getStyles();
 		for(int i = 0; i < styles.length; i++)
-			m_list[i].setCellRenderer(r);
+			s_list[i].setCellRenderer(r);
 	}
 
 	/** Dispose of the widget */
