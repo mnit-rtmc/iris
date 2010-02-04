@@ -779,10 +779,15 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
-	/** Next message owner */
+	/** The owner of the next message to be displayed.  This is a write-only
+	 * SONAR attribute. */
 	protected transient User ownerNext;
 
-	/** Set the message owner */
+	/** Set the message owner.  When a user sends a new message to the DMS,
+	 * two attributes must be set: ownerNext and messageNext.  There can be
+	 * a race between two clients setting these attributes.  If ownerNext
+	 * is non-null when being set, then a race has been detected, meaning
+	 * two clients are trying to send a message at the same time. */
 	public synchronized void setOwnerNext(User o) {
 		if(ownerNext != null && o != null) {
 			System.err.println("DMSImpl.setOwnerNext: " + getName()+
@@ -793,7 +798,12 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 			ownerNext = o;
 	}
 
-	/** Next message to be displayed */
+	/** The next message to be displayed.  This is a write-only SONAR
+	 * attribute.  It is checked to prevent a lower priority message from
+	 * getting queued during the time when a message gets queued and it
+	 * becomes activated.  It must be set to null after an operation
+	 * completes.
+	 * @see DMSImpl#shouldActivate */
 	protected transient SignMessage messageNext;
 
 	/** Set the next sign message */
@@ -801,8 +811,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		messageNext = sm;
 	}
 
-	/** Set the next sign message */
+	/** Set the next sign message.  This is called by SONAR when the
+	 * messageNext attribute is set.  The ownerNext attribute should have
+	 * been set by the client prior to setting this attribute. */
 	public void doSetMessageNext(SignMessage sm) throws TMSException {
+		// FIXME: make sure that ownerNext is non-null
 		try {
 			doSetMessageNext(sm, ownerNext);
 		}
