@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,8 @@ import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
-import us.mn.state.dot.tms.R_NodeTransition;
-import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
 /**
@@ -37,20 +32,18 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
  */
 public class Segment {
 
-	/** R_Node for segment */
-	protected final R_Node r_node;
+	/** Upstream mainline node */
+	protected final R_Node upstream;
 
-	/** Get the segment r_node */
-	public R_Node getR_Node() {
-		return r_node;
-	}
+	/** Upstream node */
+	protected final R_Node node_a;
+
+	/** Downstream node */
+	protected final R_Node node_b;
 
 	/** Get the station ID */
 	public String getStationID() {
-		if(r_node != null)
-			return r_node.getStationID();
-		else
-			return "";
+		return upstream.getStationID();
 	}
 
 	/** List of map geo locations */
@@ -73,77 +66,67 @@ public class Segment {
 	protected final HashMap<String, SensorSample> next_samples =
 		new HashMap<String, SensorSample>();
 
-	/** Get the count of lanes */
+	/** Get the count of lanes through the segment */
 	public int getLaneCount() {
-		if(r_node != null)
-			return r_node.getLanes();
-		else
-			return lane_sensors.size();
+		return getRightShift() - getLeftShift();
 	}
 
-	/** Create a new segment */
-	public Segment() {
-		this(null);
+	/** Get the left side shift */
+	protected int getLeftShift() {
+		return Math.max(getLeftShift(node_a), getLeftShift(node_b));
 	}
 
-	/** Create a new segment */
-	public Segment(R_Node n) {
-		r_node = n;
-		if(r_node != null) {
-			DetectorHelper.find(new Checker<Detector>() {
-				public boolean check(Detector d) {
-					if(d.getR_Node() == r_node) {
-						String id = "D" + d.getName();
-						int n = d.getLaneNumber();
-						lane_sensors.put(id, n);
-					}
-					return false;
-				}
-			});
+	/** Get the left shift for the specified node */
+	protected int getLeftShift(R_Node n) {
+		if(n.getAttachSide())
+			return n.getShift();
+		else if(R_NodeHelper.isStation(n))
+			return n.getShift() - n.getLanes();
+		else {
+			return upstream.getAttachSide() ? upstream.getShift() :
+			       upstream.getShift() - upstream.getLanes();
 		}
+	}
+
+	/** Get the right side shift */
+	protected int getRightShift() {
+		return Math.min(getRightShift(node_a), getRightShift(node_b));
+	}
+
+	/** Get the right shift for the specified node */
+	protected int getRightShift(R_Node n) {
+		if(!n.getAttachSide())
+			return n.getShift();
+		else if(R_NodeHelper.isStation(n))
+			return n.getShift() + n.getLanes();
+		else {
+			return upstream.getAttachSide() ? upstream.getShift() +
+			       upstream.getLanes() : upstream.getShift();
+		}
+	}
+
+	/** Create a new segment */
+	public Segment(R_Node u, R_Node a, R_Node b) {
+		upstream = u;
+		node_a = a;
+		node_b = b;
+		final int shift = getRightShift() - getRightShift(upstream);
+		DetectorHelper.find(new Checker<Detector>() {
+			public boolean check(Detector d) {
+				if(d.getR_Node() == upstream) {
+					String id = "D" + d.getName();
+					int n = d.getLaneNumber() + shift;
+					lane_sensors.put(id, n);
+				}
+				return false;
+			}
+		});
 	}
 
 	/** Add a point to the segment */
 	public void addNode(MapGeoLoc loc) {
 		if(loc != null)
 			locs.add(loc);
-	}
-
-	/** Check if a node is at a segment break */
-	public boolean isBreak(R_Node n) {
-		return isStationBreak(n) || isLaneChange(n) || !isJoined(n);
-	}
-
-	/** Check if a node is at a station break */
-	public boolean isStationBreak(R_Node n) {
-		return n.getNodeType() == R_NodeType.STATION.ordinal() &&
-		       R_NodeHelper.hasDetection(n);
-	}
-
-	/** Check if a node has a change in lane count */
-	protected boolean isLaneChange(R_Node n) {
-		return n.getNodeType() == R_NodeType.STATION.ordinal() &&
-		       n.getLanes() != getLaneCount();
-	}
-
-	/** Check if a node should be joined with a segment */
-	public boolean isJoined(R_Node n) {
-		return n.getTransition() != R_NodeTransition.COMMON.ordinal() ||
-		       n.getNodeType() != R_NodeType.ENTRANCE.ordinal();
-	}
-
-	/** Check if a location is beyond distance threshold */
-	public boolean isTooDistant(MapGeoLoc loc) {
-		if(r_node == null)
-			return false;
-		else {
-			if(loc == null)
-				return true;
-			GeoLoc g0 = r_node.getGeoLoc();
-			GeoLoc g1 = loc.getGeoLoc();
-			return GeoLocHelper.metersTo(g0, g1) >
-			       SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
-		}
 	}
 
 	/** Update one sample */

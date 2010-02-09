@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.net.URL;
 import java.util.LinkedList;
@@ -24,8 +23,6 @@ import java.util.logging.Logger;
 import us.mn.state.dot.map.DynamicLayer;
 import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.Outline;
-import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.event.LayerChange;
 import us.mn.state.dot.map.event.LayerChangedEvent;
 import us.mn.state.dot.tdxml.SensorListener;
@@ -33,7 +30,10 @@ import us.mn.state.dot.tdxml.SensorSample;
 import us.mn.state.dot.tdxml.TdxmlException;
 import us.mn.state.dot.tdxml.XmlSensorClient;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
@@ -105,31 +105,32 @@ public class SegmentLayer extends Layer implements DynamicLayer {
 
 	/** Add a corridor to the segment layer */
 	public void addCorridor(CorridorBase c) {
-		Segment seg = new Segment();
+		R_Node un = null;
 		R_Node pn = null;
 		MapGeoLoc ploc = null;
 		for(R_Node n: c.getNodes()) {
 			MapGeoLoc loc = manager.findGeoLoc(n);
-			if(seg.isTooDistant(loc)) {
-				segments.add(seg);
-				seg = new Segment(pn);
-				seg.addNode(ploc);
+			if(un != null) {
+				if(R_NodeHelper.isJoined(n) &&
+				   !isTooDistant(ploc, loc))
+				{
+					Segment seg = new Segment(un, pn, n);
+					seg.addNode(ploc);
+					seg.addNode(loc);
+					segments.add(seg);
+				}
 			}
-			if(seg.isJoined(n) && !seg.isTooDistant(loc))
-				seg.addNode(loc);
-			if(seg.isBreak(n)) {
-				segments.add(seg);
-				R_Node sn = seg.getR_Node();
-				if(seg.isStationBreak(n) || sn == null)
-					seg = new Segment(n);
-				else
-					seg = new Segment(sn);
-				seg.addNode(loc);
-			}
-			pn = n;
 			ploc = loc;
+			pn = n;
+			if(un == null || R_NodeHelper.isStationBreak(n))
+				un = n;
 		}
-		segments.add(seg);
+	}
+
+	/** Check if two locations are too distant */
+	static protected boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
+		return GeoLocHelper.metersTo(l0.getGeoLoc(), l1.getGeoLoc()) >
+		       SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
 	}
 
 	/** Create a new layer state */

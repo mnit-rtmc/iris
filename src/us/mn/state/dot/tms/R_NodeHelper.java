@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,11 @@ public class R_NodeHelper extends BaseHelper {
 	/** Find r_nodes using a Checker */
 	static public R_Node find(final Checker<R_Node> checker) {
 		return (R_Node)namespace.findObject(R_Node.SONAR_TYPE, checker);
+	}
+
+	/** Check if the r_node is a station */
+	static public boolean isStation(R_Node r_node) {
+		return r_node.getNodeType() == R_NodeType.STATION.ordinal();
 	}
 
 	/** Check if the r_node is an entrance */
@@ -73,5 +78,16 @@ public class R_NodeHelper extends BaseHelper {
 				       !d.getAbandoned();
 			}
 		});
+	}
+
+	/** Check if a node is at a station break */
+	static public boolean isStationBreak(R_Node r_node) {
+		return isStation(r_node) && hasDetection(r_node);
+	}
+
+	/** Check if a node should be joined with a segment */
+	static public boolean isJoined(R_Node r_node) {
+		return r_node.getTransition() != R_NodeTransition.COMMON.ordinal() ||
+		       r_node.getNodeType() != R_NodeType.ENTRANCE.ordinal();
 	}
 }
