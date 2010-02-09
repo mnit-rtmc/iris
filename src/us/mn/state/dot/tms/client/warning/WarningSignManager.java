@@ -69,7 +69,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(WarningSign proxy, float scale) {
-		return new WarningSignMarker(20 * scale);
+		return new WarningSignMarker(scale);
 	}
 
 	/** Create a styled theme for warning signs */

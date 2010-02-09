@@ -14,27 +14,31 @@
  */
 package us.mn.state.dot.tms.client.marking;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint lane markings.
  *
  * @author Douglas Lau
  */
-public class LaneMarkingMarker extends AbstractMarker {
+public class LaneMarkingMarker extends IrisMarker {
 
 	/** Maximum size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE = 600;
+	static protected final int MARKER_SIZE_MAX = 600;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 20;
 
 	/** Create a new lane marking marker */
 	public LaneMarkingMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
-	/** Create a new lane marking marker */
-	public LaneMarkingMarker(float size) {
-		super(3);
-		size = Math.min(size, MARKER_SIZE);
+	/** Create a new lane marking marker.
+	 * @param scale Map scale in pixels per user coordinate. */
+	public LaneMarkingMarker(float scale) {
+		super(3, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		path.moveTo(0, 0);
 		path.lineTo(size, size);
 		path.closePath();

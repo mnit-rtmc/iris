@@ -101,7 +101,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(DMS proxy, float scale) {
-		return new DmsMarker(64 * scale);
+		return new DmsMarker(scale);
 	}
 
 	/** Create a styled theme for DMSs */

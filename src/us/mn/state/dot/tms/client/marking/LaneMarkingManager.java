@@ -67,7 +67,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(LaneMarking proxy, float scale) {
-		return new LaneMarkingMarker(20 * scale);
+		return new LaneMarkingMarker(scale);
 	}
 
 	/** Create a styled theme for lane markings */

@@ -15,27 +15,30 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.geom.Ellipse2D;
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint warning signs.
  *
  * @author Douglas Lau
  */
-public class WarningSignMarker extends AbstractMarker {
+public class WarningSignMarker extends IrisMarker {
 
 	/** Size (in user coordinates) to render warning sign marker */
-	static protected final int MARKER_SIZE = 1000;
+	static protected final int MARKER_SIZE_MAX = 1000;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 20;
 
 	/** Create a new warning sign marker */
 	public WarningSignMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
 	/** Create a new warning sign marker */
-	public WarningSignMarker(float size) {
-		super(10);
-		size = Math.min(size, MARKER_SIZE);
+	public WarningSignMarker(float scale) {
+		super(10, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		float sixth = size / 6;
 		float third = size / 3;
 		float half = size / 2;

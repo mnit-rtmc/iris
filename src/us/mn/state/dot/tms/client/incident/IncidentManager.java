@@ -93,7 +93,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(Incident proxy, float scale) {
-		return new IncidentMarker(36 * scale);
+		return new IncidentMarker(scale);
 	}
 
 	/** Create a styled theme for incidents */

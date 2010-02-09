@@ -15,27 +15,31 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.geom.Arc2D;
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint ramp meters.
  *
  * @author Douglas Lau
  */
-public class MeterMarker extends AbstractMarker {
+public class MeterMarker extends IrisMarker {
 
-	/** Size (in user coordinates) to render ramp meter marker */
-	static protected final int MARKER_SIZE = 500;
+	/** Maximum size (in user coordinates) to render marker */
+	static protected final int MARKER_SIZE_MAX = 500;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 20;
 
 	/** Create a new ramp meter marker */
 	public MeterMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
-	/** Create a new ramp meter marker */
-	public MeterMarker(float size) {
-		super(4);
-		size = Math.min(size, MARKER_SIZE);
+	/** Create a new ramp meter marker.
+	 * @param scale Map scale in pixels per user coordinate. */
+	public MeterMarker(float scale) {
+		super(4, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		path.moveTo(0, 0);
 		Arc2D.Float arc = new Arc2D.Float(0, -size, size, size,
 			-90, 270, Arc2D.OPEN);

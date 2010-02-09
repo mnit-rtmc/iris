@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +15,33 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint DMS.
  *
  * @author Erik Engstrom
  * @author Douglas Lau
+ * @author Michael Darter
  */
-public class DmsMarker extends AbstractMarker {
+public class DmsMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render DMS marker */
-	static protected final int MARKER_SIZE = 1000;
+	/** Maximum size (in user coordinates) to render marker */
+	static protected final int MARKER_SIZE_MAX = 1000;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 64;
 
 	/** Create a new DMS marker */
 	public DmsMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
-	/** Create a new DMS marker */
-	public DmsMarker(float size) {
-		super(13);
-		size = Math.min(MARKER_SIZE, size);
+	/** Create a new DMS marker.
+	 * @param scale Map scale in pixels per user coordinate. */
+	public DmsMarker(float scale) {
+		super(13, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		float height = 3 * size / 5;
 		float half_width = size / 2;
 		float third_width = size / 3;

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,27 +15,32 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint cameras.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
-public class CameraMarker extends AbstractMarker {
+public class CameraMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render camera marker */
-	static protected final int MARKER_SIZE = 600;
+	/** Maximum size (in user coordinates) to render marker */
+	static protected final int MARKER_SIZE_MAX = 600;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 32;
 
 	/** Create a new camera marker */
 	public CameraMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
-	/** Create a new camera marker */
-	public CameraMarker(float size) {
-		super(11);
-		size = Math.min(size, MARKER_SIZE);
+	/** Create a new camera marker.
+	 * @param scale Map scale in pixels per user coordinate. */
+	public CameraMarker(float scale) {
+		super(11, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		float tenth = size / 10;
 		float quarter = size / 4;
 		float third = size / 3;

@@ -14,27 +14,31 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint LCS.
  *
  * @author Douglas Lau
  */
-public class LcsMarker extends AbstractMarker {
+public class LcsMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render LCS marker */
-	static protected final int MARKER_SIZE = 320;
+	/** Maximum size (in user coordinates) to render marker */
+	static protected final int MARKER_SIZE_MAX = 320;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 20;
 
 	/** Create a new LCS marker */
 	public LcsMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
-	/** Create a new LCS marker */
-	public LcsMarker(float size) {
-		super(14);
-		size = Math.min(MARKER_SIZE, size);
+	/** Create a new LCS marker.
+	 * @param scale Map scale in pixels per user coordinate. */
+	public LcsMarker(float scale) {
+		super(14, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		float tiny = size / 16;
 		float third = size / 3;
 		float half = size / 2;

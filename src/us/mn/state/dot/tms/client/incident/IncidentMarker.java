@@ -14,27 +14,30 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.map.marker.AbstractMarker;
+import us.mn.state.dot.tms.client.IrisMarker;
 
 /**
  * Marker used to paint incidents.
  *
  * @author Douglas Lau
  */
-public class IncidentMarker extends AbstractMarker {
+public class IncidentMarker extends IrisMarker {
 
 	/** Maximum size (in user coordinates) to render incident marker */
-	static protected final int MARKER_SIZE = 1000;
+	static protected final int MARKER_SIZE_MAX = 1000;
+
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 36;
 
 	/** Create a new incident marker */
 	public IncidentMarker() {
-		this(MARKER_SIZE);
+		this(INIT_SCALE);
 	}
 
 	/** Create a new incident marker */
-	public IncidentMarker(float size) {
-		super(5);
-		size = Math.min(MARKER_SIZE, size);
+	public IncidentMarker(float scale) {
+		super(5, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		float size = getMarkerSize(scale);
 		float half = size / 2;
 		float quarter = size / 4;
 		float x = 0;
