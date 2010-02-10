@@ -28,7 +28,19 @@ import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
- * A spinner for the DMS message page time.
+ * A spinner for the DMS message page time. This control is used to specify
+ * page on-time (and in the future, perhaps page off-time). Page on-time is
+ * a function of the current number of pages. For a single page message, zero
+ * should be the default, with non-zero values possible, which indicates
+ * a single page flashing message. For multi-page messages, the page on-time
+ * must be non-zero. System attributes are used to specify the minimum, 
+ * default,and maximum values for page on-time. This spinner enforces these 
+ * values. Because the valid value for page on-time is a function of the 
+ * current number of pages (in the composer), those controls notify the 
+ * spinner of the current number of pages, so the spinner can adjust the 
+ * current value--e.g. if it's 0, and the user has just entered a 2nd page,
+ * the spinner sets a non-default page on-time.
+ *
  * @see DmsPgTime, DMSDispatcher, SystemAttributeForm
  * @author Michael Darter
  * @author Douglas Lau
