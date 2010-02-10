@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,6 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  * @author Timothy Johnson
  */
 public class Message implements AddressedMessage {
-
-	/** Start Of Header byte */
-	static protected final byte SOH = (byte)1;
 
 	/** Acknowledge response */
 	static protected final String ACK = "AK";
@@ -84,7 +81,6 @@ public class Message implements AddressedMessage {
 	public void setRequest() throws IOException {
 		String req = toString();
 		is.skip(is.available());
-		os.write(SOH);
 		os.write(req.getBytes());
 		os.flush();
 		getResponse();
