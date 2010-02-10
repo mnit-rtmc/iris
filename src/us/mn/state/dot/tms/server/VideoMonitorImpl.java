@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,6 +156,8 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Select a camera for the video monitor */
 	public void selectCamera(final String cam) {
+		// FIXME: video monitor should implement ControllerIO so that
+		//        multiple video switchers can be used.
 		ControllerHelper.find(new Checker<Controller>() {
 			public boolean check(Controller c) {
 				if(c instanceof ControllerImpl)
