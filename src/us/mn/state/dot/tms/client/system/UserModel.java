@@ -54,7 +54,7 @@ public class UserModel extends ProxyTableModel<User> {
 				u.setFullName(value.toString().trim());
 			}
 		},
-		new ProxyColumn<User>("Dn", 420) {
+		new ProxyColumn<User>("Dn", 400) {
 			public Object getValueAt(User u) {
 				return u.getDn();
 			}

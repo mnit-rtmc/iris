@@ -32,7 +32,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	protected ProxyColumn[] createColumns() {
 	    // NOTE: half-indent to declare array
 	    return new ProxyColumn[] {
-		new ProxyColumn<Privilege>("Pattern", 420) {
+		new ProxyColumn<Privilege>("Pattern", 400) {
 			public Object getValueAt(Privilege p) {
 				return p.getPattern();
 			}
