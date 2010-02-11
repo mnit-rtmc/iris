@@ -24,11 +24,8 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class MeterMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE_MAX = 500;
-
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 20;
+	static protected final int MARKER_SIZE_PIX = 22;
 
 	/** Create a new ramp meter marker */
 	public MeterMarker() {
@@ -38,7 +35,7 @@ public class MeterMarker extends IrisMarker {
 	/** Create a new ramp meter marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public MeterMarker(float scale) {
-		super(4, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(4, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		path.moveTo(0, 0);
 		Arc2D.Float arc = new Arc2D.Float(0, -size, size, size,

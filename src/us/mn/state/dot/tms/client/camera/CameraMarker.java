@@ -25,11 +25,8 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class CameraMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE_MAX = 600;
-
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 32;
+	static protected final int MARKER_SIZE_PIX = 24;
 
 	/** Create a new camera marker */
 	public CameraMarker() {
@@ -39,7 +36,7 @@ public class CameraMarker extends IrisMarker {
 	/** Create a new camera marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public CameraMarker(float scale) {
-		super(11, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(11, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		float tenth = size / 10;
 		float quarter = size / 4;

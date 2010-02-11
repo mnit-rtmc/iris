@@ -23,11 +23,8 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class LcsMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE_MAX = 320;
-
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 20;
+	static protected final int MARKER_SIZE_PIX = 24;
 
 	/** Create a new LCS marker */
 	public LcsMarker() {
@@ -37,7 +34,7 @@ public class LcsMarker extends IrisMarker {
 	/** Create a new LCS marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public LcsMarker(float scale) {
-		super(14, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(14, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		float tiny = size / 16;
 		float third = size / 3;

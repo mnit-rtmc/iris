@@ -26,11 +26,8 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class DmsMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE_MAX = 1000;
-
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 64;
+	static protected final int MARKER_SIZE_PIX = 32;
 
 	/** Create a new DMS marker */
 	public DmsMarker() {
@@ -40,7 +37,7 @@ public class DmsMarker extends IrisMarker {
 	/** Create a new DMS marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public DmsMarker(float scale) {
-		super(13, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(13, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		float height = 3 * size / 5;
 		float half_width = size / 2;

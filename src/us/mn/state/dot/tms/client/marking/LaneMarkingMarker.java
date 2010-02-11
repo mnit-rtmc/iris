@@ -23,9 +23,6 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class LaneMarkingMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE_MAX = 600;
-
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;
 
@@ -37,7 +34,7 @@ public class LaneMarkingMarker extends IrisMarker {
 	/** Create a new lane marking marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public LaneMarkingMarker(float scale) {
-		super(3, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(3, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		path.moveTo(0, 0);
 		path.lineTo(size, size);

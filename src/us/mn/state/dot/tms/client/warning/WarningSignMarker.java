@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +24,6 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class WarningSignMarker extends IrisMarker {
 
-	/** Size (in user coordinates) to render warning sign marker */
-	static protected final int MARKER_SIZE_MAX = 1000;
-
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;
 
@@ -37,7 +34,7 @@ public class WarningSignMarker extends IrisMarker {
 
 	/** Create a new warning sign marker */
 	public WarningSignMarker(float scale) {
-		super(10, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(10, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		float sixth = size / 6;
 		float third = size / 3;

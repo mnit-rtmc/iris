@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,6 @@ import us.mn.state.dot.tms.client.IrisMarker;
  */
 public class IncidentMarker extends IrisMarker {
 
-	/** Maximum size (in user coordinates) to render incident marker */
-	static protected final int MARKER_SIZE_MAX = 1000;
-
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 36;
 
@@ -36,7 +33,7 @@ public class IncidentMarker extends IrisMarker {
 
 	/** Create a new incident marker */
 	public IncidentMarker(float scale) {
-		super(5, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
+		super(5, MARKER_SIZE_PIX);
 		float size = getMarkerSize(scale);
 		float half = size / 2;
 		float quarter = size / 4;
