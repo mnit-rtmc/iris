@@ -26,6 +26,11 @@ public class LaneMarkingMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;
 
+	/** Get the default marker size in pixels */
+	protected float getSizePixels() {
+		return MARKER_SIZE_PIX;
+	}
+
 	/** Create a new lane marking marker */
 	public LaneMarkingMarker() {
 		this(INIT_SCALE);
@@ -34,7 +39,7 @@ public class LaneMarkingMarker extends IrisMarker {
 	/** Create a new lane marking marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public LaneMarkingMarker(float scale) {
-		super(3, MARKER_SIZE_PIX);
+		super(3);
 		float size = getMarkerSize(scale);
 		path.moveTo(0, 0);
 		path.lineTo(size, size);

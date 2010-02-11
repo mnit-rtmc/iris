@@ -26,6 +26,11 @@ public class IncidentMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 36;
 
+	/** Get the default marker size in pixels */
+	protected float getSizePixels() {
+		return MARKER_SIZE_PIX;
+	}
+
 	/** Create a new incident marker */
 	public IncidentMarker() {
 		this(INIT_SCALE);
@@ -33,7 +38,7 @@ public class IncidentMarker extends IrisMarker {
 
 	/** Create a new incident marker */
 	public IncidentMarker(float scale) {
-		super(5, MARKER_SIZE_PIX);
+		super(5);
 		float size = getMarkerSize(scale);
 		float half = size / 2;
 		float quarter = size / 4;

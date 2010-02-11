@@ -27,6 +27,11 @@ public class MeterMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 22;
 
+	/** Get the default marker size in pixels */
+	protected float getSizePixels() {
+		return MARKER_SIZE_PIX;
+	}
+
 	/** Create a new ramp meter marker */
 	public MeterMarker() {
 		this(INIT_SCALE);
@@ -35,7 +40,7 @@ public class MeterMarker extends IrisMarker {
 	/** Create a new ramp meter marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public MeterMarker(float scale) {
-		super(4, MARKER_SIZE_PIX);
+		super(4);
 		float size = getMarkerSize(scale);
 		path.moveTo(0, 0);
 		Arc2D.Float arc = new Arc2D.Float(0, -size, size, size,

@@ -29,6 +29,11 @@ public class DmsMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 32;
 
+	/** Get the default marker size in pixels */
+	protected float getSizePixels() {
+		return MARKER_SIZE_PIX;
+	}
+
 	/** Create a new DMS marker */
 	public DmsMarker() {
 		this(INIT_SCALE);
@@ -37,7 +42,7 @@ public class DmsMarker extends IrisMarker {
 	/** Create a new DMS marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public DmsMarker(float scale) {
-		super(13, MARKER_SIZE_PIX);
+		super(13);
 		float size = getMarkerSize(scale);
 		float height = 3 * size / 5;
 		float half_width = size / 2;

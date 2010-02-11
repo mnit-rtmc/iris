@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class IrisMarker extends AbstractMarker {
+abstract public class IrisMarker extends AbstractMarker {
 
 	/** Initial scale used in subclass constructors, pixels/map unit */
 	static protected final float INIT_SCALE = 1000;
@@ -35,16 +35,14 @@ public class IrisMarker extends AbstractMarker {
 		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
 	}
 
-	/** Marker size in pixels */
-	protected final float size_pixels;
-
 	/** Create a new iris marker.
-	 * @param c Count of nodes on marker path.
-	 * @param sp Default size of marker in pixels. */
-	public IrisMarker(int c, int sp) {
+	 * @param c Count of nodes on marker path. */
+	public IrisMarker(int c) {
 		super(c);
-		size_pixels = sp;
 	}
+
+	/** Get the default marker size in pixels */
+	abstract protected float getSizePixels();
 
 	/** Get the scaled marker size.
 	 * @param scale Map scale in user coordinates per pixel.
@@ -54,6 +52,6 @@ public class IrisMarker extends AbstractMarker {
 		float sc_max = getIconSizeScaleMax();
 		float sc = (sc_max > 0) ?
 			Math.max(Math.min(scale, sc_max), sc_min) : scale;
-		return size_pixels * sc;
+		return sc * getSizePixels();
 	}
 }

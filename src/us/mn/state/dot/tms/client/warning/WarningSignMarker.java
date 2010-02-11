@@ -27,6 +27,11 @@ public class WarningSignMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;
 
+	/** Get the default marker size in pixels */
+	protected float getSizePixels() {
+		return MARKER_SIZE_PIX;
+	}
+
 	/** Create a new warning sign marker */
 	public WarningSignMarker() {
 		this(INIT_SCALE);
@@ -34,7 +39,7 @@ public class WarningSignMarker extends IrisMarker {
 
 	/** Create a new warning sign marker */
 	public WarningSignMarker(float scale) {
-		super(10, MARKER_SIZE_PIX);
+		super(10);
 		float size = getMarkerSize(scale);
 		float sixth = size / 6;
 		float third = size / 3;

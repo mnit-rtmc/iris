@@ -28,6 +28,11 @@ public class CameraMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 24;
 
+	/** Get the default marker size in pixels */
+	protected float getSizePixels() {
+		return MARKER_SIZE_PIX;
+	}
+
 	/** Create a new camera marker */
 	public CameraMarker() {
 		this(INIT_SCALE);
@@ -36,7 +41,7 @@ public class CameraMarker extends IrisMarker {
 	/** Create a new camera marker.
 	 * @param scale Map scale (user coordinates per pixel). */
 	public CameraMarker(float scale) {
-		super(11, MARKER_SIZE_PIX);
+		super(11);
 		float size = getMarkerSize(scale);
 		float tenth = size / 10;
 		float quarter = size / 4;
