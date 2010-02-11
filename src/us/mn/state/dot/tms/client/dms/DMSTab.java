@@ -15,10 +15,6 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Dimension;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
 import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -26,6 +22,8 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.CellRendererSize;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -47,14 +45,22 @@ public class DMSTab extends MapTab {
 	/** Summary of DMSs of each status */
 	protected final StyleSummary<DMS> summary;
 
+	/** Event called on style summary cell resize */
+	private ProxyManager.ResizeEventCallback m_resizeEvent = 
+		new ProxyManager.ResizeEventCallback() {
+			public void resized(CellRendererSize sz) {
+				manager.styleSummaryResize(sz);
+				summary.updateRenderer(sz);
+			}
+		};
+
 	/** Create a new DMS tab */
  	public DMSTab(Session session, DMSManager man, List<LayerState> lstates)
 	{
 		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
 		manager = man;
 		dispatcher = new DMSDispatcher(session, manager);
-		summary = manager.createStyleSummary();
-		summary.addComponentListener(comp_listener);
+		summary = manager.createStyleSummary(true, m_resizeEvent);
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
 			String name = ls.getLayer().getName();
@@ -66,18 +72,6 @@ public class DMSTab extends MapTab {
 		add(summary);
 	}
 
-	/** Listener for StyleSummary ComponentListener messages. This object
-	 * listens for resize events for the JPanel in the StyleSummary. */
-	private final ComponentListener comp_listener = new ComponentAdapter() {
-		public void componentResized(ComponentEvent e) {
-			Dimension dim_vp = summary.getViewportExtentSize();
-			if(DmsCellRenderer.willCellSizeChange(dim_vp)) {
-				manager.styleSummaryResize(dim_vp);
-				summary.updateRenderer();
-			}
-		}
-	};
-
 	/** Get the tab number */
 	public int getNumber() {
 		return 0;
@@ -87,7 +81,6 @@ public class DMSTab extends MapTab {
 	public void dispose() {
 		super.dispose();
 		dispatcher.dispose();
-		summary.removeComponentListener(comp_listener);
 		summary.dispose();
 	}
 }

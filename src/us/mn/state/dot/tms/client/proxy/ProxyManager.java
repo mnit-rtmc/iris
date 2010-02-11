@@ -47,6 +47,11 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 abstract public class ProxyManager<T extends SonarObject>
 	implements ProxyListener<T>
 {
+	/** Callback for style summary resize event */
+	public interface ResizeEventCallback {
+		public void resized(CellRendererSize sz);
+	}
+
 	/** Name of list model containing all objects */
 	static public final String STYLE_ALL = "All";
 
@@ -225,6 +230,19 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Get a transformed marker shape */
 	abstract protected Shape getShape(AffineTransform at);
 
+	/** Current cell renderer size */
+	private CellRendererSize m_cellSize = CellRendererSize.MEDIUM;
+
+	/** Set the current cell size */
+	public void setCellSize(CellRendererSize cellSize) {
+		m_cellSize = cellSize;
+	}
+
+	/** Get the current cell size */
+	public CellRendererSize getCellSize() {
+		return m_cellSize;
+	}
+
 	/** Get the theme */
 	public StyledTheme getTheme() {
 		return theme;
@@ -240,9 +258,17 @@ abstract public class ProxyManager<T extends SonarObject>
 		return s_model;
 	}
 
-	/** Create a new style summary for this proxy type */
+	/** Create a new style summary for this proxy type, with no 
+	 * cell renderer size buttons. */
 	public StyleSummary<T> createStyleSummary() {
-		return new StyleSummary<T>(this);
+		return new StyleSummary<T>(this, false, null);
+	}
+
+	/** Create a new style summary for this proxy type */
+	public StyleSummary<T> createStyleSummary(boolean enableCellSizeBtns, 
+		ResizeEventCallback event) 
+	{
+		return new StyleSummary<T>(this, enableCellSizeBtns, event);
 	}
 
 	/** Get the specified style list model */

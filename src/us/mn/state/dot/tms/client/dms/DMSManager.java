@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
@@ -78,9 +79,6 @@ public class DMSManager extends ProxyManager<DMS> {
 	public void setBlankAction(BlankDmsAction a) {
 		blankAction = a;
 	}
-
-	/** Size of StyleSummary listbox viewport, updated after a resize. */
-	private Dimension m_vpsize;
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, TypeCache<DMS> c, GeoLocManager lm) {
@@ -168,19 +166,9 @@ public class DMSManager extends ProxyManager<DMS> {
 		renderers.put(dms.getName(), r);
 	}
 
-	/** Get the Style Summary listbox viewport dimension */
-	private Dimension getViewPortDims() {
-		return m_vpsize;
-	}
-
-	/** Set the Style Summary listbox viewport dimension */
-	private void setViewPortDims(Dimension d) {
-		m_vpsize = d;
-	}
-
 	/** Create a cell renderer */
 	private DmsCellRenderer newCellRenderer() {
-		return new DmsCellRenderer(getViewPortDims());
+		return new DmsCellRenderer(getCellSize());
 	}
 
 	/** Called when a proxy attribute has changed */
@@ -200,8 +188,8 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Set style summary viewport size due to resize. 
 	 * @param vpdims Size of the style summary listbox viewport. */
-	public void styleSummaryResize(Dimension vpdims) {
-		setViewPortDims(vpdims);
+	public void styleSummaryResize(CellRendererSize cs) {
+		setCellSize(cs);
 		// update all cell renderers
 		Iterator pairs = renderers.entrySet().iterator();
 		while(pairs.hasNext()) {
@@ -216,7 +204,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<DMS> createStyleSummary() {
-		StyleSummary<DMS> summary = super.createStyleSummary();
+		StyleSummary<DMS> summary = super.createStyleSummary(true, null);
 		summary.setStyle(DMSHelper.STYLE_DEPLOYED);
 		return summary;
 	}

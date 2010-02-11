@@ -19,15 +19,20 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Enumeration;
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListDataEvent;
@@ -71,11 +76,22 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** scroll pane.  FIXME: this is only the last scroll pane created. */
 	private JScrollPane m_scroll;
 
-	/** Create a new style summary panel.  
+	/** Indicates if optional cell size buttons are enabled. */
+	private boolean m_enableCellSizeBtns;
+
+	/** Callback for cell resize event handling, may be null */
+	private ProxyManager.ResizeEventCallback m_resizeEvent;
+
+	/** Create a new style summary panel, with optional cell size buttons.
 	 * @param man ProxyManager */
-	public StyleSummary(final ProxyManager<T> man) {
+	public StyleSummary(final ProxyManager<T> man, 
+		boolean enableCellSizeBtns, 
+		ProxyManager.ResizeEventCallback resizeEvent)
+	{
 		super(new GridBagLayout());
 		manager = man;
+		m_enableCellSizeBtns = enableCellSizeBtns;
+		m_resizeEvent = resizeEvent;
 		ListCellRenderer renderer = manager.createCellRenderer();
 		border = BorderFactory.createTitledBorder("");
 		setBorder(border);
@@ -100,7 +116,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 				default_rbutton = m.getName();
 			bag.gridx = col * GRID_COLS;
 			bag.gridy = row;
-			bag.insets.right = 2;
+			bag.insets = new Insets(0, 0, 0, 2);
 			bag.anchor = GridBagConstraints.EAST;
 			add(new JLabel(m.getLegend()), bag);
 			bag.gridx = GridBagConstraints.RELATIVE;
@@ -115,13 +131,27 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			bag.gridy = 0;
 			bag.weightx = 1;
 			bag.fill = GridBagConstraints.HORIZONTAL;
+			bag.insets = new Insets(0, 0, 0, 0);
 			add(new JLabel(), bag);
 		}
 
+		// add optional panel with cell size selection buttons
+		if(m_enableCellSizeBtns) {
+			bag.gridx = 0;
+			bag.gridwidth = 1;
+			bag.gridheight = 1;
+			bag.insets = new Insets(8, 2, 0, 0);
+			bag.gridy = n_rows + 1;
+			bag.weightx = 1;
+			bag.weighty = 1;
+			bag.fill = GridBagConstraints.BOTH;
+			add(createCellSizePanel(), bag);
+		}
+
 		// add listbox
-		bag.gridx = 0;
+		bag.gridx = (m_enableCellSizeBtns ? 1 : 0);
 		bag.gridwidth = GridBagConstraints.REMAINDER;
-		bag.insets.top = 8;
+		bag.insets = new Insets(8, 0, 0, 0);
 		bag.gridy = n_rows + 1;
 		bag.weightx = 1;
 		bag.weighty = 1;
@@ -135,6 +165,60 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 		// select default button
 		setStyle(default_rbutton);
+	}
+
+	/** Create the optional panel that contains cell size buttons. */
+	private JPanel createCellSizePanel() {
+		JPanel panel = new JPanel();
+		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+		AbstractButton bs = createButton(CellRendererSize.SMALL);
+		AbstractButton bm = createButton(CellRendererSize.MEDIUM);
+		AbstractButton bl = createButton(CellRendererSize.LARGE);
+		panel.add(bs);
+		Dimension vspace = new Dimension(0,4);
+		panel.add(Box.createRigidArea(vspace));
+		panel.add(bm);
+		panel.add(Box.createRigidArea(vspace));
+		panel.add(bl);
+		ButtonGroup bgroup = new ButtonGroup();
+		bgroup.add(bs);
+		bgroup.add(bm);
+		bgroup.add(bl);
+		selectCellBtn(bgroup, bm);
+		return panel;
+	}
+
+	/** Create a toggle button for a cell renderer size. */
+	private AbstractButton createButton(CellRendererSize size) {
+		String label = size.m_sname;
+		JToggleButton b = new JToggleButton(label);
+		b.setMargin(new Insets(0, 0, 0, 0));
+		b.setFont(new java.awt.Font(("SansSerif"), 
+			java.awt.Font.PLAIN, 10));
+		b.setToolTipText("Switch to " + size.m_name + " " + 
+			manager.getProxyType() + " icons.");
+		Dimension bsize = new Dimension(18, 24);
+		b.setPreferredSize(bsize);
+		b.setMaximumSize(bsize);
+		b.setMinimumSize(bsize);
+		b.addActionListener(new ActionListener() {
+			// cell resize button pressed
+			public void actionPerformed(ActionEvent e) {
+				if(m_resizeEvent == null)
+					return;
+				m_resizeEvent.resized(CellRendererSize.get(
+					e.getActionCommand()));
+			}
+		});
+		return b;
+	}
+
+	/** Select toggle button */
+	private static void selectCellBtn(ButtonGroup g, AbstractButton d) {
+		for(Enumeration e = g.getElements(); e.hasMoreElements();) {
+			AbstractButton b = (AbstractButton)e.nextElement();
+			b.setSelected(b == d);
+		}
 	}
 
 	/** Create a radio button for the given style list model */
@@ -186,14 +270,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		cards.show(list_panel, style);
 	}
 
-	/** Get the listbox viewport size */
-	public Dimension getViewportExtentSize() {
-		return m_scroll.getViewport().getExtentSize();
-	}
-
-	/** The JPanel containing the listboxes has been resized. Update
-	 *  all cell renderers. */
-	public void updateRenderer() {
+	/** The cell renderer has changed sizes, update cell renderers. */
+	public void updateRenderer(CellRendererSize cellSize) {
+		manager.setCellSize(cellSize);
 		ListCellRenderer r = manager.createCellRenderer();
 		String[] styles = manager.getStyles();
 		for(int i = 0; i < styles.length; i++)
