@@ -35,6 +35,16 @@ abstract public class IrisMarker extends AbstractMarker {
 		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
 	}
 
+	/** Limit the map scale based on system attributes.
+	 * @param scale Map scale in user coordinates per pixel.
+	 * @return Adjusted map scale in user coordinates per pixel. */
+	static public float adjustScale(final float scale) {
+		float sc_min = scale / 4.0f;
+		float sc_max = getIconSizeScaleMax();
+		return (sc_max > 0) ?
+			Math.max(Math.min(scale, sc_max), sc_min) : scale;
+	}
+
 	/** Create a new iris marker.
 	 * @param c Count of nodes on marker path. */
 	public IrisMarker(int c) {
@@ -47,11 +57,7 @@ abstract public class IrisMarker extends AbstractMarker {
 	/** Get the scaled marker size.
 	 * @param scale Map scale in user coordinates per pixel.
 	 * @return Marker size in user coordinates. */
-	protected float getMarkerSize(final float scale) {
-		float sc_min = scale / 4.0f;
-		float sc_max = getIconSizeScaleMax();
-		float sc = (sc_max > 0) ?
-			Math.max(Math.min(scale, sc_max), sc_min) : scale;
-		return sc * getSizePixels();
+	protected float getMarkerSize(float scale) {
+		return getSizePixels() * adjustScale(scale);
 	}
 }
