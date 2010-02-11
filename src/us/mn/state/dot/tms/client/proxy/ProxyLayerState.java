@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,6 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Iterate through all shapes in the layer */
 	public MapObject forEach(MapSearcher s) {
 		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
-		scale = Math.max(scale, 3);
 		return manager.forEach(s, scale);
 	}
 
