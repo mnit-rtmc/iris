@@ -35,7 +35,7 @@ public class CameraMarker extends IrisMarker {
 
 	/** Create a new camera marker */
 	public CameraMarker() {
-		this(INIT_SCALE);
+		this(1);
 	}
 
 	/** Create a new camera marker.

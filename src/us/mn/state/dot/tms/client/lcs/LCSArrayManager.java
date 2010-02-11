@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -48,8 +49,8 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class LCSArrayManager extends ProxyManager<LCSArray> {
 
-	/** LCS array map object shape */
-	static protected final Shape SHAPE = new LcsMarker();
+	/** LCS array map object marker */
+	static protected final LcsMarker MARKER = new LcsMarker();
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
@@ -131,14 +132,14 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(LCSArray proxy, float scale) {
-		return new LcsMarker(scale);
+	protected Shape getShape(LCSArray proxy, AffineTransform at) {
+		return MARKER.createTransformedMarker(at);
 	}
 
 	/** Create a styled theme for LCS arrays */
 	protected StyledTheme createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
-			getProxyType(), SHAPE);
+			getProxyType(), MARKER);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_LOCKED, null);

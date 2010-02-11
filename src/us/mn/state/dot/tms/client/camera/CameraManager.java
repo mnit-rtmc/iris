@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.HashSet;
 import javax.swing.JPopupMenu;
@@ -41,8 +42,8 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class CameraManager extends ProxyManager<Camera> {
 
-	/** Camera map object shape */
-	static protected final Shape SHAPE = new CameraMarker();
+	/** Camera map object marker */
+	static protected final CameraMarker MARKER = new CameraMarker();
 
 	/** Name of active style */
 	static public final String STYLE_ACTIVE = "Active";
@@ -81,14 +82,14 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(Camera proxy, float scale) {
-		return new CameraMarker(scale);
+	protected Shape getShape(Camera proxy, AffineTransform at) {
+		return MARKER.createTransformedMarker(at);
 	}
 
 	/** Create a styled theme for cameras */
 	protected StyledTheme createTheme() {
 		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
-			getProxyType(), SHAPE);
+			getProxyType(), MARKER);
 		theme.addStyle(STYLE_UNPUBLISHED, ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(STYLE_INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);

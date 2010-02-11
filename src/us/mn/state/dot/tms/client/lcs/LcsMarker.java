@@ -33,7 +33,7 @@ public class LcsMarker extends IrisMarker {
 
 	/** Create a new LCS marker */
 	public LcsMarker() {
-		this(INIT_SCALE);
+		this(1);
 	}
 
 	/** Create a new LCS marker.

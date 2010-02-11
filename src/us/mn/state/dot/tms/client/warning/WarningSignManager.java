@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.warning;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -35,8 +36,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class WarningSignManager extends ProxyManager<WarningSign> {
 
-	/** Warning sign map object shape */
-	static protected final Shape SHAPE = new WarningSignMarker();
+	/** Warning sign map object marker */
+	static protected final WarningSignMarker MARKER =
+		new WarningSignMarker();
 
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "Deployed";
@@ -68,14 +70,14 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(WarningSign proxy, float scale) {
-		return new WarningSignMarker(scale);
+	protected Shape getShape(WarningSign proxy, AffineTransform at) {
+		return MARKER.createTransformedMarker(at);
 	}
 
 	/** Create a styled theme for warning signs */
 	protected StyledTheme createTheme() {
 		ProxyTheme<WarningSign> theme =new ProxyTheme<WarningSign>(this,
-			getProxyType(), SHAPE);
+			getProxyType(), MARKER);
 		theme.addStyle(STYLE_DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_FAILED, ProxyTheme.COLOR_FAILED);

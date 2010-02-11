@@ -34,7 +34,7 @@ public class MeterMarker extends IrisMarker {
 
 	/** Create a new ramp meter marker */
 	public MeterMarker() {
-		this(INIT_SCALE);
+		this(1);
 	}
 
 	/** Create a new ramp meter marker.

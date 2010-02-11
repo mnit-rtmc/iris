@@ -33,7 +33,7 @@ public class IncidentMarker extends IrisMarker {
 
 	/** Create a new incident marker */
 	public IncidentMarker() {
-		this(INIT_SCALE);
+		this(1);
 	}
 
 	/** Create a new incident marker */

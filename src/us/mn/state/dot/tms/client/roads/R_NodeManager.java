@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -240,7 +241,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get the shape to use for the given r_node */
-	protected Shape getShape(R_Node n, float scale) {
+	protected Shape getShape(R_Node n, AffineTransform at) {
 		R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
 		switch(nt) {
 		case ENTRANCE:

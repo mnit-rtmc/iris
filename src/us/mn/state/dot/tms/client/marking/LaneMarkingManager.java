@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.marking;
 
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -33,8 +34,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
-	/** Lane marking map object shape */
-	static protected final Shape SHAPE = new LaneMarkingMarker();
+	/** Lane marking map object marker */
+	static protected final LaneMarkingMarker MARKER =
+		new LaneMarkingMarker();
 
 	/** Name of deployed style */
 	static public final String STYLE_DEPLOYED = "Deployed";
@@ -66,14 +68,14 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(LaneMarking proxy, float scale) {
-		return new LaneMarkingMarker(scale);
+	protected Shape getShape(LaneMarking proxy, AffineTransform at) {
+		return MARKER.createTransformedMarker(at);
 	}
 
 	/** Create a styled theme for lane markings */
 	protected StyledTheme createTheme() {
 		ProxyTheme<LaneMarking> theme = new ProxyTheme<LaneMarking>(
-			this, getProxyType(), SHAPE);
+			this, getProxyType(), MARKER);
 		theme.addStyle(STYLE_NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(STYLE_ALL);

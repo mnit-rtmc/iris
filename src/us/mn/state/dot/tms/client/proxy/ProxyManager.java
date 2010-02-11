@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -35,6 +36,7 @@ import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -57,6 +59,21 @@ abstract public class ProxyManager<T extends SonarObject>
 		b.add(Box.createHorizontalGlue());
 		b.add(Box.createHorizontalStrut(6));
 		return b;
+	}
+
+	/** Limit the map scale based on system attributes.
+	 * @param scale Map scale in user coordinates per pixel.
+	 * @return Adjusted map scale in user coordinates per pixel. */
+	static protected float adjustScale(final float scale) {
+		float sc_min = scale / 4.0f;
+		float sc_max = getIconSizeScaleMax();
+		return (sc_max > 0) ?
+			Math.max(Math.min(scale, sc_max), sc_min) : scale;
+	}
+
+	/** Get the map icon maximum size scale */
+	static private float getIconSizeScaleMax() {
+		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
 	}
 
 	/** Proxy type cache */
@@ -206,7 +223,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	abstract protected StyledTheme createTheme();
 
 	/** Get the shape for a given proxy */
-	abstract protected Shape getShape(T proxy, float scale);
+	abstract protected Shape getShape(T proxy, AffineTransform at);
 
 	/** Get the theme */
 	public StyledTheme getTheme() {
@@ -263,11 +280,14 @@ abstract public class ProxyManager<T extends SonarObject>
 
 	/** Iterate through all proxy objects */
 	public MapObject forEach(final MapSearcher s, final float scale) {
+		float sc = adjustScale(scale);
+		final AffineTransform at = new AffineTransform();
+		at.setToScale(sc, sc);
 		T result = cache.findObject(new Checker<T>() {
 			public boolean check(T proxy) {
 				MapGeoLoc loc = findGeoLoc(proxy);
 				if(isLocationSet(loc)) {
-					loc.setShape(getShape(proxy, scale));
+					loc.setShape(getShape(proxy, at));
 					return s.next(loc);
 				}
 				return false;

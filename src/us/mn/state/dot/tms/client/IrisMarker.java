@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms.client;
 
+import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import us.mn.state.dot.map.marker.AbstractMarker;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -26,9 +28,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  */
 abstract public class IrisMarker extends AbstractMarker {
-
-	/** Initial scale used in subclass constructors, pixels/map unit */
-	static protected final float INIT_SCALE = 1000;
 
 	/** Get the map icon maximum size scale */
 	static private float getIconSizeScaleMax() {
@@ -59,5 +58,10 @@ abstract public class IrisMarker extends AbstractMarker {
 	 * @return Marker size in user coordinates. */
 	protected float getMarkerSize(float scale) {
 		return getSizePixels() * adjustScale(scale);
+	}
+
+	/** Create a transformed marker with the specified transform */
+	public Shape createTransformedMarker(AffineTransform at) {
+		return path.createTransformedShape(at);
 	}
 }

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -42,6 +43,9 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
  * @author Douglas Lau
  */
 public class IncidentManager extends ProxyManager<Incident> {
+
+	/** Incident Map object marker */
+	static protected final IncidentMarker MARKER = new IncidentMarker();
 
 	/** Name of crash style */
 	static public final String STYLE_CRASH = "Crash";
@@ -92,8 +96,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(Incident proxy, float scale) {
-		return new IncidentMarker(scale);
+	protected Shape getShape(Incident proxy, AffineTransform at) {
+		return MARKER.createTransformedMarker(at);
 	}
 
 	/** Create a styled theme for incidents */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.map.StyledTheme;
@@ -42,8 +43,8 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class MeterManager extends ProxyManager<RampMeter> {
 
-	/** Ramp meter map object shape */
-	static protected final Shape SHAPE = new MeterMarker();
+	/** Ramp meter map object marker */
+	static protected final MeterMarker MARKER = new MeterMarker();
 
 	/** Name of available style */
 	static public final String STYLE_AVAILABLE = "Available";
@@ -146,14 +147,14 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(RampMeter proxy, float scale) {
-		return new MeterMarker(scale);
+	protected Shape getShape(RampMeter proxy, AffineTransform at) {
+		return MARKER.createTransformedMarker(at);
 	}
 
 	/** Create a styled theme for ramp meters */
 	protected StyledTheme createTheme() {
 		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
-			getProxyType(), SHAPE);
+			getProxyType(), MARKER);
 		theme.addStyle(STYLE_AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(STYLE_QUEUE_FULL, Color.ORANGE);
 		theme.addStyle(STYLE_QUEUE_EXISTS, ProxyTheme.COLOR_DEPLOYED);

@@ -34,7 +34,7 @@ public class WarningSignMarker extends IrisMarker {
 
 	/** Create a new warning sign marker */
 	public WarningSignMarker() {
-		this(INIT_SCALE);
+		this(1);
 	}
 
 	/** Create a new warning sign marker */

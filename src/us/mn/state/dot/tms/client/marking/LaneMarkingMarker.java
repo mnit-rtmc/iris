@@ -33,7 +33,7 @@ public class LaneMarkingMarker extends IrisMarker {
 
 	/** Create a new lane marking marker */
 	public LaneMarkingMarker() {
-		this(INIT_SCALE);
+		this(1);
 	}
 
 	/** Create a new lane marking marker.
