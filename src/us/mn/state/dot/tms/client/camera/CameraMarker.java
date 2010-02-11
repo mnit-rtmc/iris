@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,7 +37,7 @@ public class CameraMarker extends IrisMarker {
 	}
 
 	/** Create a new camera marker.
-	 * @param scale Map scale in pixels per user coordinate. */
+	 * @param scale Map scale (user coordinates per pixel). */
 	public CameraMarker(float scale) {
 		super(11, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
 		float size = getMarkerSize(scale);

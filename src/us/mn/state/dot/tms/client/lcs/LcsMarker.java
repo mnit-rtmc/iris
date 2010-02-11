@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2009  Minnesota Department of Transportation
+ * Copyright (C) 2004-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public class LcsMarker extends IrisMarker {
 	}
 
 	/** Create a new LCS marker.
-	 * @param scale Map scale in pixels per user coordinate. */
+	 * @param scale Map scale (user coordinates per pixel). */
 	public LcsMarker(float scale) {
 		super(14, MARKER_SIZE_PIX, MARKER_SIZE_MAX);
 		float size = getMarkerSize(scale);

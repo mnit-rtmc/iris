@@ -57,7 +57,7 @@ public class IrisMarker extends AbstractMarker {
 	}
 
 	/** Get the scaled marker size.
-	 * @param scale Map scale in pixels per user coordinate.
+	 * @param scale Map scale in user coordinates per pixel.
 	 * @return Marker size in user coordinates. */
 	protected float getMarkerSize(float scale) {
 		float size = size_pixels * scale;
