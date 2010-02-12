@@ -184,7 +184,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bgroup.add(bs);
 		bgroup.add(bm);
 		bgroup.add(bl);
-		selectCellBtn(bgroup, bm);
+		selectCellBtn(bgroup, bl);
 		return panel;
 	}
 

@@ -231,7 +231,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	abstract protected Shape getShape(AffineTransform at);
 
 	/** Current cell renderer size */
-	private CellRendererSize m_cellSize = CellRendererSize.MEDIUM;
+	private CellRendererSize m_cellSize = CellRendererSize.LARGE;
 
 	/** Set the current cell size */
 	public void setCellSize(CellRendererSize cellSize) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  * Copyright (C) 2009-2010 AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -109,7 +109,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 				if(e.m_rs == sz)
 					return e;
 			assert false;
-			return MEDIUM;
+			return LARGE;
 		}
 	}
 
