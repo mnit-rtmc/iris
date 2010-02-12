@@ -26,15 +26,10 @@ public class LaneMarkingMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;
 
-	/** Get the default marker size in pixels */
-	protected float getSizePixels() {
-		return MARKER_SIZE_PIX;
-	}
-
 	/** Create a new lane marking marker */
 	public LaneMarkingMarker() {
 		super(3);
-		float size = getSizePixels();
+		float size = MARKER_SIZE_PIX;
 		path.moveTo(0, 0);
 		path.lineTo(size, size);
 		path.closePath();

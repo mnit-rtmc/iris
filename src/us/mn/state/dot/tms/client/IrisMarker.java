@@ -34,9 +34,6 @@ abstract public class IrisMarker extends AbstractMarker {
 		super(c);
 	}
 
-	/** Get the default marker size in pixels */
-	abstract protected float getSizePixels();
-
 	/** Create a transformed marker with the specified transform */
 	public Shape createTransformedMarker(AffineTransform at) {
 		return path.createTransformedShape(at);

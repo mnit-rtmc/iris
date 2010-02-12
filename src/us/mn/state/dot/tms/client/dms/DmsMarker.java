@@ -29,15 +29,10 @@ public class DmsMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 32;
 
-	/** Get the default marker size in pixels */
-	protected float getSizePixels() {
-		return MARKER_SIZE_PIX;
-	}
-
 	/** Create a new DMS marker */
 	public DmsMarker() {
 		super(13);
-		float size = getSizePixels();
+		float size = MARKER_SIZE_PIX;
 		float height = 3 * size / 5;
 		float half_width = size / 2;
 		float third_width = size / 3;

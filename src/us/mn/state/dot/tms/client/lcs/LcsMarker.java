@@ -26,15 +26,10 @@ public class LcsMarker extends IrisMarker {
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 24;
 
-	/** Get the default marker size in pixels */
-	protected float getSizePixels() {
-		return MARKER_SIZE_PIX;
-	}
-
 	/** Create a new LCS marker */
 	public LcsMarker() {
 		super(14);
-		float size = getSizePixels();
+		float size = MARKER_SIZE_PIX;
 		float tiny = size / 16;
 		float third = size / 3;
 		float half = size / 2;
