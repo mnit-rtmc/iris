@@ -21,8 +21,6 @@ import java.awt.Shape;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -186,25 +184,20 @@ public class DMSManager extends ProxyManager<DMS> {
 		return list;
 	}
 
-	/** Set style summary viewport size due to resize. 
-	 * @param vpdims Size of the style summary listbox viewport. */
-	public void styleSummaryResize(CellRendererSize cs) {
-		setCellSize(cs);
+	/** Set the current cell size */
+	public void setCellSize(CellRendererSize size) {
+		super.setCellSize(size);
 		// update all cell renderers
-		Iterator pairs = renderers.entrySet().iterator();
-		while(pairs.hasNext()) {
-			Map.Entry entry = (Map.Entry)pairs.next();
-			String dmsname = (String)entry.getKey();
-			DMS d = DMSHelper.lookup(dmsname);
+		for(String dms_id: renderers.keySet()) {
 			DmsCellRenderer r = newCellRenderer();
-			r.setDms(d);
-			renderers.put(dmsname, r);
+			r.setDms(DMSHelper.lookup(dms_id));
+			renderers.put(dms_id, r);
 		}
 	}
 
 	/** Create a new style summary for this proxy type */
 	public StyleSummary<DMS> createStyleSummary() {
-		StyleSummary<DMS> summary = super.createStyleSummary(true, null);
+		StyleSummary<DMS> summary = super.createStyleSummary(true);
 		summary.setStyle(DMSHelper.STYLE_DEPLOYED);
 		return summary;
 	}

@@ -45,22 +45,13 @@ public class DMSTab extends MapTab {
 	/** Summary of DMSs of each status */
 	protected final StyleSummary<DMS> summary;
 
-	/** Event called on style summary cell resize */
-	private ProxyManager.ResizeEventCallback m_resizeEvent = 
-		new ProxyManager.ResizeEventCallback() {
-			public void resized(CellRendererSize sz) {
-				manager.styleSummaryResize(sz);
-				summary.updateRenderer(sz);
-			}
-		};
-
 	/** Create a new DMS tab */
  	public DMSTab(Session session, DMSManager man, List<LayerState> lstates)
 	{
 		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
 		manager = man;
 		dispatcher = new DMSDispatcher(session, manager);
-		summary = manager.createStyleSummary(true, m_resizeEvent);
+		summary = manager.createStyleSummary(true);
 		for(LayerState ls: lstates) {
 			map_model.addLayer(ls);
 			String name = ls.getLayer().getName();
