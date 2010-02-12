@@ -79,72 +79,57 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		SMALL(36, 24, CellRendererSize.SMALL);
 
 		/** Fixed cell size */
-		Dimension m_size = new Dimension(1, 1);
+		protected final Dimension size;
 
-		/** Associated style summary renderer size */
-		CellRendererSize m_rs;
+		/** Associated style summary cell renderer size */
+		protected final CellRendererSize cell_size;
 
 		/** constructor */
-		private DmsRendererMode(int w, int h, CellRendererSize rs) {
-			m_size.width = w;
-			m_size.height = h;
-			m_rs = rs;
+		private DmsRendererMode(int w, int h, CellRendererSize cs) {
+			size = new Dimension(w, h);
+			cell_size = cs;
 		}
 
-		/** Get size */
+		/** Get renderer size */
 		public Dimension getSize() {
-			return m_size;
-		}
-
-		/** Calculate number of vertical large renderers */
-		public int numVert(int vertpix) {
-			return vertpix / (int)getSize().getHeight();
+			return size;
 		}
 
 		/** Determine the dms renderer mode, which determines the size
 		 * and apperance of the renderer.
 		 * @param sz StyleSummary renderer size. */
-		private static DmsRendererMode determine(CellRendererSize sz) {
-			for(DmsRendererMode e : DmsRendererMode.values()) 
-				if(e.m_rs == sz)
-					return e;
+		static private DmsRendererMode determine(CellRendererSize sz) {
+			for(DmsRendererMode m : DmsRendererMode.values()) 
+				if(m.cell_size == sz)
+					return m;
 			assert false;
 			return LARGE;
 		}
 	}
 
 	/** DMS cell renderer mode */
-	private DmsRendererMode m_mode = DmsRendererMode.LARGE;
+	private final DmsRendererMode mode;
 
-	/** Last render mode, which is used to determine if a resize
-	 *  will result in a cell size change. */
-	private static DmsRendererMode m_lastmode = DmsRendererMode.LARGE;
-
-	/** Set cell render mode. */
-	private void setMode(DmsRendererMode newmode) {
-		m_mode = newmode;
-		m_lastmode = newmode;
-	}
-
-	/** Create a new DMS cell renderer as a function of the style
-	 * summary viewport size. 
+	/** Create a new DMS cell renderer.
 	 * @param sz StyleSummary renderer cell size. */
 	public DmsCellRenderer(CellRendererSize sz) {
 		super(new BorderLayout());
-		create(DmsRendererMode.determine(sz));
-	}
-
-	/** Create a new DMS cell renderer of the specified size. */
-	private void create(DmsRendererMode m) {
-		setMode(m);
-		if(m == DmsRendererMode.LARGE)
+		mode = DmsRendererMode.determine(sz);
+		switch(mode) {
+		case LARGE:
 			createLarge();
-		else if(m == DmsRendererMode.MEDIUM)
+			break;
+		case MEDIUM:
 			createMedium();
-		else if(m == DmsRendererMode.SMALL)
+			break;
+		case SMALL:
 			createSmall();
-		else
+			break;
+		default:
+			assert false;
 			createLarge();
+		}
+		setPreferredSize(mode.getSize());
 	}
 
 	/** Create a new DMS cell renderer with small cells */
@@ -154,13 +139,10 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		title.setLayout(new GridLayout(1, 1));
 		title.add(lblID);
 		add(title);
-		setPreferredSize(m_mode.getSize());
-		//setPreferredSize(new Dimension(36, 24));
 	}
 
 	/** Create a new DMS cell renderer with medium cells */
 	private void createMedium() {
-		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
@@ -170,12 +152,10 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		title.add(lblUser);
 		add(title, BorderLayout.NORTH);
 		add(pixelPnl, BorderLayout.CENTER);
-		setPreferredSize(new Dimension(46 * 2, 46));
 	}
 
 	/** Create a new DMS cell renderer with large cells */
 	private void createLarge() {
-		setLayout(new BorderLayout());
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
@@ -188,7 +168,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(title, BorderLayout.NORTH);
 		add(pixelPnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
-		setPreferredSize(new Dimension(190, 92)); // aspect 2.065
 	}
 
 	/** Check if the background is opaque */
@@ -213,7 +192,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	protected String formatOwner(DMS dms) {
 		User u = dms.getOwnerCurrent();
 		String s = pruneOwner(u);
-		if(m_mode == DmsRendererMode.MEDIUM)
+		if(mode == DmsRendererMode.MEDIUM)
 			s = SString.truncate(s, 8);
 		return s;
 	}
@@ -259,13 +238,13 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		String author) 
 	{
 		StringBuilder tt = new StringBuilder("");
-		if(m_mode == DmsRendererMode.SMALL) {
+		if(mode == DmsRendererMode.SMALL) {
 			tt.append(dmsname);
 			if(!author.isEmpty())
-			tt.append(": ").append(author);
+				tt.append(": ").append(author);
 			tt.append(": ").append(loca);
 			tt.append(": ").append(DMSHelper.buildMsgLine(dms));
-		} else if(m_mode == DmsRendererMode.MEDIUM)
+		} else if(mode == DmsRendererMode.MEDIUM)
 			tt.append(dmsname).append(": ").append(loca);
 		setToolTipText(tt.toString());
  	}
