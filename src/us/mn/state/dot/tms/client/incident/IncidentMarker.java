@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.tms.client.IrisMarker;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint incidents.
  *
  * @author Douglas Lau
  */
-public class IncidentMarker extends IrisMarker {
+public class IncidentMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 36;

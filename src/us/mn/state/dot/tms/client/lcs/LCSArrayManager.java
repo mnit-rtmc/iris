@@ -133,7 +133,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(LCSArray proxy, AffineTransform at) {
-		return MARKER.createTransformedMarker(at);
+		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a styled theme for LCS arrays */

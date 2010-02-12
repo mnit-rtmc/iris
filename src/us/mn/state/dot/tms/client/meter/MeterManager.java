@@ -148,7 +148,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(RampMeter proxy, AffineTransform at) {
-		return MARKER.createTransformedMarker(at);
+		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a styled theme for ramp meters */

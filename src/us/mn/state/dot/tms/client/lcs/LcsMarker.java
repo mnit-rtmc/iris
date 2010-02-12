@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import us.mn.state.dot.tms.client.IrisMarker;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint LCS.
  *
  * @author Douglas Lau
  */
-public class LcsMarker extends IrisMarker {
+public class LcsMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 24;

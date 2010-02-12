@@ -83,7 +83,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Get the shape for a given proxy */
 	protected Shape getShape(Camera proxy, AffineTransform at) {
-		return MARKER.createTransformedMarker(at);
+		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a styled theme for cameras */

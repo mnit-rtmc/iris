@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import us.mn.state.dot.tms.client.IrisMarker;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint DMS.
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.client.IrisMarker;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsMarker extends IrisMarker {
+public class DmsMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 32;

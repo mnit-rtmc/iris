@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.marking;
 
-import us.mn.state.dot.tms.client.IrisMarker;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint lane markings.
  *
  * @author Douglas Lau
  */
-public class LaneMarkingMarker extends IrisMarker {
+public class LaneMarkingMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;

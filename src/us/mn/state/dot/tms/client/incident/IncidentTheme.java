@@ -70,6 +70,6 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 		float sc = ProxyManager.adjustScale(scale);
 		AffineTransform at = new AffineTransform();
 		at.setToScale(sc, sc);
-		return MARKER.createTransformedMarker(at);
+		return MARKER.createTransformedShape(at);
 	}
 }

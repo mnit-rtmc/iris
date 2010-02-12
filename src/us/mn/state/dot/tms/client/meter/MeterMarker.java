@@ -15,14 +15,14 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.geom.Arc2D;
-import us.mn.state.dot.tms.client.IrisMarker;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint ramp meters.
  *
  * @author Douglas Lau
  */
-public class MeterMarker extends IrisMarker {
+public class MeterMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 22;

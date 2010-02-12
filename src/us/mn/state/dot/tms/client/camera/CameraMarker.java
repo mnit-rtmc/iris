@@ -15,7 +15,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import us.mn.state.dot.tms.client.IrisMarker;
+import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
  * Marker used to paint cameras.
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.client.IrisMarker;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class CameraMarker extends IrisMarker {
+public class CameraMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 24;
