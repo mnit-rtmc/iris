@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.client;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import us.mn.state.dot.map.marker.AbstractMarker;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * An iris marker uses system attributes to determine the default size and
@@ -29,21 +28,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 abstract public class IrisMarker extends AbstractMarker {
 
-	/** Get the map icon maximum size scale */
-	static private float getIconSizeScaleMax() {
-		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
-	}
-
-	/** Limit the map scale based on system attributes.
-	 * @param scale Map scale in user coordinates per pixel.
-	 * @return Adjusted map scale in user coordinates per pixel. */
-	static public float adjustScale(final float scale) {
-		float sc_min = scale / 4.0f;
-		float sc_max = getIconSizeScaleMax();
-		return (sc_max > 0) ?
-			Math.max(Math.min(scale, sc_max), sc_min) : scale;
-	}
-
 	/** Create a new iris marker.
 	 * @param c Count of nodes on marker path. */
 	public IrisMarker(int c) {
@@ -52,13 +36,6 @@ abstract public class IrisMarker extends AbstractMarker {
 
 	/** Get the default marker size in pixels */
 	abstract protected float getSizePixels();
-
-	/** Get the scaled marker size.
-	 * @param scale Map scale in user coordinates per pixel.
-	 * @return Marker size in user coordinates. */
-	protected float getMarkerSize(float scale) {
-		return getSizePixels() * adjustScale(scale);
-	}
 
 	/** Create a transformed marker with the specified transform */
 	public Shape createTransformedMarker(AffineTransform at) {

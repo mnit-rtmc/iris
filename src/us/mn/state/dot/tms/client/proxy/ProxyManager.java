@@ -64,7 +64,7 @@ abstract public class ProxyManager<T extends SonarObject>
 	/** Limit the map scale based on system attributes.
 	 * @param scale Map scale in user coordinates per pixel.
 	 * @return Adjusted map scale in user coordinates per pixel. */
-	static protected float adjustScale(final float scale) {
+	static public float adjustScale(final float scale) {
 		float sc_min = scale / 4.0f;
 		float sc_max = getIconSizeScaleMax();
 		return (sc_max > 0) ?

@@ -33,14 +33,8 @@ public class LcsMarker extends IrisMarker {
 
 	/** Create a new LCS marker */
 	public LcsMarker() {
-		this(1);
-	}
-
-	/** Create a new LCS marker.
-	 * @param scale Map scale (user coordinates per pixel). */
-	public LcsMarker(float scale) {
 		super(14);
-		float size = getMarkerSize(scale);
+		float size = getSizePixels();
 		float tiny = size / 16;
 		float third = size / 3;
 		float half = size / 2;

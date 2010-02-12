@@ -33,13 +33,8 @@ public class IncidentMarker extends IrisMarker {
 
 	/** Create a new incident marker */
 	public IncidentMarker() {
-		this(1);
-	}
-
-	/** Create a new incident marker */
-	public IncidentMarker(float scale) {
 		super(5);
-		float size = getMarkerSize(scale);
+		float size = getSizePixels();
 		float half = size / 2;
 		float quarter = size / 4;
 		float x = 0;

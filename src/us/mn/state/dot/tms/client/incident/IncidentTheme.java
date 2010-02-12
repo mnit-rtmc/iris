@@ -16,9 +16,11 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Graphics2D;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -29,7 +31,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Incident Map object marker */
-	static protected final Shape MARKER = new IncidentMarker();
+	static protected final IncidentMarker MARKER = new IncidentMarker();
 
 	/** Create a new incident theme */
 	public IncidentTheme(IncidentManager man) {
@@ -65,6 +67,9 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Get the shape for a specified scale */
 	protected Shape getShape(float scale) {
-		return new IncidentMarker(36 * scale);
+		float sc = ProxyManager.adjustScale(scale);
+		AffineTransform at = new AffineTransform();
+		at.setToScale(sc, sc);
+		return MARKER.createTransformedMarker(at);
 	}
 }

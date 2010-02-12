@@ -33,14 +33,8 @@ public class LaneMarkingMarker extends IrisMarker {
 
 	/** Create a new lane marking marker */
 	public LaneMarkingMarker() {
-		this(1);
-	}
-
-	/** Create a new lane marking marker.
-	 * @param scale Map scale (user coordinates per pixel). */
-	public LaneMarkingMarker(float scale) {
 		super(3);
-		float size = getMarkerSize(scale);
+		float size = getSizePixels();
 		path.moveTo(0, 0);
 		path.lineTo(size, size);
 		path.closePath();
