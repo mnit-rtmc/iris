@@ -70,7 +70,7 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(WarningSign proxy, AffineTransform at) {
+	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 

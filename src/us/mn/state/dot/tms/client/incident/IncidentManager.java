@@ -96,7 +96,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(Incident proxy, AffineTransform at) {
+	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 

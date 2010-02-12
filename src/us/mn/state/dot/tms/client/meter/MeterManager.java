@@ -147,7 +147,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(RampMeter proxy, AffineTransform at) {
+	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 

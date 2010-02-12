@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2007  Minnesota Department of Transportation
+ * Copyright (C) 2006-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,13 @@ import us.mn.state.dot.map.marker.AbstractMarker;
  */
 public class StationMarker extends AbstractMarker {
 
-	/** Size (in user coordinates) to render station marker */
-	static protected final int MARKER_SIZE = 300;
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 36;
 
 	/** Create a new station marker */
 	public StationMarker() {
-		this(MARKER_SIZE);
-	}
-
-	/** Create a new station marker */
-	public StationMarker(float size) {
 		super(4);
+		float size = MARKER_SIZE_PIX;
 		float half = size / 2;
 		float third = size / 3;
 		float sixth = size / 6;

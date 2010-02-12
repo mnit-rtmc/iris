@@ -101,7 +101,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(DMS proxy, AffineTransform at) {
+	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 

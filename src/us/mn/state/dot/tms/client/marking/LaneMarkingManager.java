@@ -68,7 +68,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(LaneMarking proxy, AffineTransform at) {
+	protected Shape getShape(AffineTransform at) {
 		return MARKER.createTransformedShape(at);
 	}
 

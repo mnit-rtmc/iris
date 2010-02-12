@@ -55,6 +55,7 @@ public class RoadwayTab extends MapTab {
 
 	/** Set the map */
 	public void setMap(MapBean map) {
+		super.setMap(map);
 		chooser.setMap(map);
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,17 +23,13 @@ import us.mn.state.dot.map.marker.AbstractMarker;
  */
 public class ExitMarker extends AbstractMarker {
 
-	/** Size (in user coordinates) to render marker */
-	static protected final int MARKER_SIZE = 300;
+	/** Size in pixels to render marker */
+	static protected final int MARKER_SIZE_PIX = 32;
 
 	/** Create a new roadway exit node marker */
 	public ExitMarker() {
-		this(MARKER_SIZE);
-	}
-
-	/** Create a new roadway exit node marker */
-	public ExitMarker(float size) {
 		super(4);
+		float size = MARKER_SIZE_PIX;
 		float half = size / 2;
 		float third = size / 3;
 		float sixth = size / 6;

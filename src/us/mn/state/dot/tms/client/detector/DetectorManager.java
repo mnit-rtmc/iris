@@ -71,8 +71,8 @@ public class DetectorManager extends ProxyManager<Detector> {
 	}
 
 	/** Get the shape for a given proxy */
-	protected Shape getShape(Detector proxy, AffineTransform at) {
-		return MARKER;
+	protected Shape getShape(AffineTransform at) {
+		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a styled theme for detectors */
