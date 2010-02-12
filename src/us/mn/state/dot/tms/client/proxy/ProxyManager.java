@@ -279,16 +279,23 @@ abstract public class ProxyManager<T extends SonarObject>
 	abstract protected JPopupMenu createPopup();
 
 	/** Iterate through all proxy objects */
-	public MapObject forEach(final MapSearcher s, final float scale) {
+	public MapObject forEach(MapSearcher ms, float scale) {
 		float sc = adjustScale(scale);
-		final AffineTransform at = new AffineTransform();
+		AffineTransform at = new AffineTransform();
 		at.setToScale(sc, sc);
+		return forEach(ms, at);
+	}
+
+	/** Iterate through all proxy objects */
+	protected MapObject forEach(final MapSearcher ms,
+		final AffineTransform at)
+	{
 		T result = cache.findObject(new Checker<T>() {
 			public boolean check(T proxy) {
 				MapGeoLoc loc = findGeoLoc(proxy);
 				if(isLocationSet(loc)) {
 					loc.setShape(getShape(proxy, at));
-					return s.next(loc);
+					return ms.next(loc);
 				}
 				return false;
 			}
