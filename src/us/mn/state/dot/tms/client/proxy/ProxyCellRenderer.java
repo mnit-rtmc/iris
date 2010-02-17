@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.awt.Component;
 import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.tms.GeoLocHelper;
 
 /**
  * ListCellRenderer for ProxyJList cells.
