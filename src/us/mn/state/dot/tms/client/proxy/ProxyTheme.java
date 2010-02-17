@@ -114,15 +114,9 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Get tooltip text for the given map object */
 	public String getTip(MapObject o) {
 		T proxy = manager.findProxy(o);
-		if(proxy != null) {
-			StringBuilder b = new StringBuilder();
-			b.append(proxy.getName());
-			if(o instanceof MapGeoLoc) {
-				b.append(" - ");
-				b.append(((MapGeoLoc)o).getDescription());
-			}
-			return b.toString();
-		} else
+		if(proxy != null)
+			return manager.getDescription(proxy);
+		else
 			return null;
 	}
 }
