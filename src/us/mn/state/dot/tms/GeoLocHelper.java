@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,21 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get a description of the location */
 	static public String getDescription(GeoLoc l) {
+		return getDescription(l, " ");
+	}
+
+	/** Get a description of an on-ramp location */
+	static public String getOnRampDescription(GeoLoc l) {
+		return getDescription(l, " from ");
+	}
+
+	/** Get a description of an off-ramp location */
+	static public String getOffRampDescription(GeoLoc l) {
+		return getDescription(l, " to ");
+	}
+
+	/** Get a description of the location */
+	static private String getDescription(GeoLoc l, String connect) {
 		StringBuilder b = new StringBuilder();
 		if(l != null) {
 			Road f = l.getFreeway();
@@ -55,7 +70,7 @@ public class GeoLocHelper extends BaseHelper {
 		String c = getCrossDescription(l);
 		if(c != null) {
 			if(b.length() > 0)
-				b.append(' ');
+				b.append(connect);
 			b.append(c);
 		}
 		if(b.length() > 0)
@@ -78,29 +93,6 @@ public class GeoLocHelper extends BaseHelper {
 			}
 		}
 		return null;
-	}
-
-	/** Get a description of a ramp meter location */
-	static public String getMeterDescription(GeoLoc l) {
-		StringBuilder b = new StringBuilder();
-		String c = getCrossDescription(l);
-		if(c != null)
-			b.append(c);
-		if(l != null) {
-			Road f = l.getFreeway();
-			if(f != null) {
-				if(b.length() > 0)
-					b.append(" to ");
-				short fd = l.getFreeDir();
-				String free = f.getName() + " " +
-					Direction.DIRECTION[fd];
-				b.append(free.trim());
-			}
-		}
-		if(b.length() > 0)
-			return b.toString();
-		else
-			return "Unknown location";
 	}
 
 	/** Filter for alternate directions on a North-South road.
