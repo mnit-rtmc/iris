@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -30,7 +31,6 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.Log;
-import us.mn.state.dot.tms.utils.STime;
 
 /**
  * AWS poller, which periodically retrieves DMS messages
@@ -80,9 +80,17 @@ public class AwsPoller extends MessagePoller
 
 	/** Get the one AWS controller */
 	protected ControllerImpl getController() {
-		//FIXME: flag error if more than one controller of this type
+		checkNumCommLinksDefined();
 		return (ControllerImpl)ControllerHelper.getController(
 			CommProtocol.AWS);
+	}
+
+	/** Check the number of defined comm links and log config errors */
+	private void checkNumCommLinksDefined() {
+		int nc = CommLinkHelper.countCommLinks(CommProtocol.AWS);
+		if(nc != 1)
+			Log.config("One AWS comm link should be defined: " +
+				nc + " are defined.");
 	}
 
 	/** Return true if the AWS is activated. */

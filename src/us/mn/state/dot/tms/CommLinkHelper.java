@@ -41,4 +41,19 @@ public class CommLinkHelper extends BaseHelper {
 			}
 		});
 	}
+
+	/** Count the number of comm links with the specified protocol */
+	static public int countCommLinks(final CommProtocol proto) {
+		final int[] num = new int[1];
+		num[0] = 0;
+		namespace.findObject(CommLink.SONAR_TYPE, 
+			new Checker<CommLink>()
+		{
+			public boolean check(CommLink c) {
+				num[0] += (c.getProtocol() == proto.ordinal() ? 1 : 0);
+				return false;
+			}
+		});
+		return num[0];
+	}
 }
