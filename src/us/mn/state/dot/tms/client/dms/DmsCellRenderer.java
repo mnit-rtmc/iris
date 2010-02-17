@@ -117,23 +117,23 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		mode = DmsRendererMode.determine(sz);
 		switch(mode) {
 		case LARGE:
-			createLarge();
+			initLarge();
 			break;
 		case MEDIUM:
-			createMedium();
+			initMedium();
 			break;
 		case SMALL:
-			createSmall();
+			initSmall();
 			break;
 		default:
 			assert false;
-			createLarge();
+			initLarge();
 		}
 		setPreferredSize(mode.getSize());
 	}
 
-	/** Create a new DMS cell renderer with small cells */
-	private void createSmall() {
+	/** Initialize a small size DMS cell renderer */
+	private void initSmall() {
 		setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.RAISED));
 		title.setLayout(new GridLayout(1, 1));
@@ -141,8 +141,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(title);
 	}
 
-	/** Create a new DMS cell renderer with medium cells */
-	private void createMedium() {
+	/** Initialize a medium size DMS cell renderer */
+	private void initMedium() {
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
@@ -154,8 +154,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		add(pixelPnl, BorderLayout.CENTER);
 	}
 
-	/** Create a new DMS cell renderer with large cells */
-	private void createLarge() {
+	/** Initialize a large size DMS cell renderer */
+	private void initLarge() {
 		setBorder(BorderFactory.createCompoundBorder(
 			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
 			  BorderFactory.createRaisedBevelBorder()));
