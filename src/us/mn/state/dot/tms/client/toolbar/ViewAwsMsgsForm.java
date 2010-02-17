@@ -35,6 +35,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.toast.AbstractForm;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
@@ -179,7 +180,7 @@ public class ViewAwsMsgsForm extends AbstractForm {
 	/** Get the AWS message URL, which is specified in the CommLink URL. */
 	private String getAwsUrl() {
 
-		CommLink cl = CommLinkHelper.getAwsCommLink();
+		CommLink cl = CommLinkHelper.getCommLink(CommProtocol.AWS);
 		if(cl != null)
 			return cl.getUrl();
 		else

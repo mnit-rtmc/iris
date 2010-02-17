@@ -29,17 +29,15 @@ public class CommLinkHelper extends BaseHelper {
 		assert false;
 	}
 
-	/** Get the AWS comm link.
-	 * @return The AWS comm link or null if one is not defined. If 
-	 *         AWS comm links are defined (which shouldn't be) the 
-	 *         1st one found is returned. */
-	static public CommLink getAwsCommLink() {
+	/** Get the first comm link associated with the specified protocol.
+	 * @return The first comm link of the specified protocol or null if 
+	 *	   one is not defined. */
+	static public CommLink getCommLink(final CommProtocol proto) {
 		return (CommLink)namespace.findObject(CommLink.SONAR_TYPE, 
 			new Checker<CommLink>() 
 		{
 			public boolean check(CommLink c) {
-				return c.getProtocol() ==
-				       CommProtocol.AWS.ordinal();
+				return c.getProtocol() == proto.ordinal();
 			}
 		});
 	}

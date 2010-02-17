@@ -35,15 +35,16 @@ public class ControllerHelper extends BaseHelper {
 			checker);
 	}
 
-	/** Get the AWS controller associated with the AWS comm link.
+	/** Get the controller associated with the AWS comm link that uses
+	 *  the specified protocol.
 	 * @return The AWS controller or null if one is not defined. */
-	static public Controller getAwsController() {
-		final CommLink awscl = CommLinkHelper.getAwsCommLink();
-		if(awscl == null)
+	static public Controller getController(final CommProtocol proto) {
+		final CommLink cl = CommLinkHelper.getCommLink(proto);
+		if(cl == null)
 			return null;
 		return find(new Checker<Controller>() {
 			public boolean check(Controller c) {
-				return c.getCommLink() == awscl;
+				return c.getCommLink() == cl;
 			}
 		});
 	}

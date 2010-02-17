@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.Completer;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.server.ServerNamespace;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -79,7 +80,9 @@ public class AwsPoller extends MessagePoller
 
 	/** Get the one AWS controller */
 	protected ControllerImpl getController() {
-		return (ControllerImpl)ControllerHelper.getAwsController();
+		//FIXME: flag error if more than one controller of this type
+		return (ControllerImpl)ControllerHelper.getController(
+			CommProtocol.AWS);
 	}
 
 	/** Return true if the AWS is activated. */
