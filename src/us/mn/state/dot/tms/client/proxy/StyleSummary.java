@@ -73,9 +73,6 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Listboxes for each style */
 	protected final ProxyJList<?>[] s_list;
 
-	/** scroll pane.  FIXME: this is only the last scroll pane created. */
-	private JScrollPane m_scroll;
-
 	/** Indicates if optional cell size buttons are enabled. */
 	private final boolean m_enableCellSizeBtns;
 
@@ -104,8 +101,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 				manager.getStyleModel(styles[i]);
 			s_list[i] = manager.createList(styles[i]); 
 			s_list[i].setCellRenderer(renderer);
-			m_scroll = new JScrollPane(s_list[i]);
-			list_panel.add(m_scroll, m.getName());
+			JScrollPane sp = new JScrollPane(s_list[i]);
+			list_panel.add(sp, m.getName());
 			// by default, the 1st button is selected
 			if(i == 0)
 				default_rbutton = m.getName();
