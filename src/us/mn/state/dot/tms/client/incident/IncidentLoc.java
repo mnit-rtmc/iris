@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
 
 /**
@@ -154,5 +156,17 @@ public class IncidentLoc implements GeoLoc {
 	/** Get the UTM Northing offset */
 	public Integer getNorthOffset() {
 		return null;
+	}
+
+	/** Get a description of an incident location */
+	public String getDescription() {
+		switch(LaneType.fromOrdinal(incident.getLaneType())) {
+		case MERGE:
+			return GeoLocHelper.getOnRampDescription(rnd_loc);
+		case EXIT:
+			return GeoLocHelper.getOffRampDescription(rnd_loc);
+		default:
+			return GeoLocHelper.getDescription(rnd_loc);
+		}
 	}
 }

@@ -160,7 +160,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	}
 
 	/** Find the map geo location for a proxy */
-	protected GeoLoc getGeoLoc(Incident proxy) {
+	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		if(cb != null) {

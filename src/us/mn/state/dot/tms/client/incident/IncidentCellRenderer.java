@@ -20,7 +20,6 @@ import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 
 /**
@@ -51,8 +50,8 @@ public class IncidentCellRenderer extends DefaultListCellRenderer {
 				Incident inc = (Incident)value;
 				manager.setTypeLabel(inc, lbl);
 				String et = lbl.getText();
-				String loc = GeoLocHelper.getDescription(
-					manager.getGeoLoc(inc));
+				String loc =
+					manager.getGeoLoc(inc).getDescription();
 				lbl.setText(et + " on " + loc + getCamera(inc));
 			} else
 				lbl.setIcon(null);

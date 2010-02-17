@@ -347,8 +347,8 @@ public class IncidentDispatcher extends JPanel
 	protected void doUpdateAttribute(Incident inc, String a) {
 		if(a == null) {
 			manager.setTypeLabel(inc, type_lbl);
-			location_txt.setText(GeoLocHelper.getDescription(
-				manager.getGeoLoc(inc)));
+			location_txt.setText(
+				manager.getGeoLoc(inc).getDescription());
 			camera_cbx.setModel(createCameraModel(inc));
 		}
 		if(a == null || a.equals("impact"))
