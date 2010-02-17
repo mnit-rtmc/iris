@@ -42,17 +42,17 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get a description of the location */
 	static public String getDescription(GeoLoc l) {
-		return getDescription(l, " ");
+		return getDescription(l, null);
 	}
 
 	/** Get a description of an on-ramp location */
 	static public String getOnRampDescription(GeoLoc l) {
-		return getDescription(l, " from ");
+		return getDescription(l, "from");
 	}
 
 	/** Get a description of an off-ramp location */
 	static public String getOffRampDescription(GeoLoc l) {
-		return getDescription(l, " to ");
+		return getDescription(l, "to");
 	}
 
 	/** Get a description of the location */
@@ -61,16 +61,14 @@ public class GeoLocHelper extends BaseHelper {
 		if(l != null) {
 			Road f = l.getFreeway();
 			if(f != null) {
-				short fd = l.getFreeDir();
 				String free = f.getName() + " " +
-					Direction.DIRECTION[fd];
+					getDirection(l.getFreeDir());
 				b.append(free.trim());
 			}
 		}
-		String c = getCrossDescription(l);
+		String c = getCrossDescription(l, connect);
 		if(c != null) {
-			if(b.length() > 0)
-				b.append(connect);
+			b.append(' ');
 			b.append(c);
 		}
 		if(b.length() > 0)
@@ -81,18 +79,44 @@ public class GeoLocHelper extends BaseHelper {
 
 	/** Get a description of the cross-street location */
 	static public String getCrossDescription(GeoLoc l) {
+		return getCrossDescription(l, null);
+	}
+
+	/** Get a description of the cross-street location */
+	static private String getCrossDescription(GeoLoc l, String connect) {
 		if(l != null) {
 			Road x = l.getCrossStreet();
 			if(x != null) {
-				short xd = l.getCrossDir();
-				short xm = l.getCrossMod();
-				String cross = Direction.MODIFIER[xm] +
-					" " + x.getName() + " " +
-					Direction.DIRECTION[xd];
-				return cross.trim();
+				StringBuilder cross = new StringBuilder();
+				if(connect != null)
+					cross.append(connect);
+				else
+					cross.append(getModifier(l));
+				cross.append(' ');
+				cross.append(x.getName());
+				cross.append(' ');
+				cross.append(getDirection(l.getCrossDir()));
+				return cross.toString().trim();
 			}
 		}
 		return null;
+	}
+
+	/** Get the cross-street modifier */
+	static public String getModifier(GeoLoc l) {
+		int mod = l.getCrossMod();
+		if(mod >= 0 && mod < Direction.MODIFIER.length)
+			return Direction.MODIFIER[mod];
+		else
+			return "";
+	}
+
+	/** Get the direction description */
+	static public String getDirection(short dir) {
+		if(dir > 0 && dir < Direction.DIRECTION.length)
+			return Direction.DIRECTION[dir];
+		else
+			return "";
 	}
 
 	/** Filter for alternate directions on a North-South road.
@@ -172,9 +196,7 @@ public class GeoLocHelper extends BaseHelper {
 			b.append(ab);
 		else
 			return "null";
-		short fd = filterDirection(d, f);
-		if(fd > 0 && fd < Direction.DIRECTION.length)
-			b.append(Direction.DIRECTION[fd]);
+		b.append(getDirection(filterDirection(d, f)));
 		return b.toString();
 	}
 
@@ -182,14 +204,9 @@ public class GeoLocHelper extends BaseHelper {
 	static public String getCorridorName(Road r, short d) {
 		if(r == null)
 			return null;
-		StringBuilder b = new StringBuilder();
-		b.append(r.getName());
-		short fd = filterDirection(d, r);
-		if(fd > 0 && fd < Direction.DIRECTION.length) {
-			b.append(' ');
-			b.append(Direction.DIRECTION[fd]);
-		}
-		return b.toString();
+		String corridor = r.getName() + " " + getDirection(
+			filterDirection(d, r));
+		return corridor.trim();
 	}
 
 	/** Get the freeway corridor */

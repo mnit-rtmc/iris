@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -83,7 +82,7 @@ public class Corridor extends CorridorBase {
 	/** Print out the corridor to an XML file */
 	public void printXml(PrintWriter out) {
 		out.println("<corridor route='" + freeway + "' dir='" +
-			Direction.DIRECTION[free_dir] + "'>");
+			GeoLocHelper.getDirection(free_dir) + "'>");
 		for(R_Node n: r_nodes)
 			((R_NodeImpl)n).printXml(out);
 		out.println("</corridor>");

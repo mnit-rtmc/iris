@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
@@ -277,7 +276,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 			LaneType.fromOrdinal(lane_type)));
 		out.print(XmlWriter.createAttribute("road", road));
 		out.print(XmlWriter.createAttribute("dir",
-			Direction.DIRECTION[dir]));
+			GeoLocHelper.getDirection(dir)));
 		if(loc != null)
 			out.print(XmlWriter.createAttribute("location", loc));
 		out.print(XmlWriter.createAttribute("easting", easting));

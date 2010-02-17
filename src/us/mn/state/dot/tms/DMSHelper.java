@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -309,14 +309,14 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the DMS freeway direction from the geo location as a String */
 	static public String getFreeDir(DMS proxy) {
-		if(proxy == null)
-			return "";
-		GeoLoc g = proxy.getGeoLoc();
-		if(g == null)
-			return "";
-		short fd = g.getFreeDir();
-		String free = Direction.DIRECTION[fd];
-		return free;
+		if(proxy != null) {
+			GeoLoc loc = proxy.getGeoLoc();
+			if(loc != null) {
+				return GeoLocHelper.getDirection(
+					loc.getFreeDir());
+			}
+		}
+		return "";
 	}
 
 	/** Get the default font number for a DMS */
