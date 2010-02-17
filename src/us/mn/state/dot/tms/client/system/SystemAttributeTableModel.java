@@ -62,7 +62,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 				return canUpdate(sa);
 			}
 			public void setValueAt(SystemAttribute sa,Object value){
-				String v = value.toString().trim();
+				String v = value.toString();
 				SystemAttrEnum sae = SystemAttrEnum.lookup(
 					sa.getName());
 				if(sae != null)
