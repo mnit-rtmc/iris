@@ -76,7 +76,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	private enum DmsRendererMode {
 		LARGE(190, 92, CellRendererSize.LARGE),
 		MEDIUM(46 * 2, 46, CellRendererSize.MEDIUM),
-		SMALL(36, 24, CellRendererSize.SMALL);
+		SMALL(64, 20, CellRendererSize.SMALL);
 
 		/** Fixed cell size */
 		protected final Dimension size;
