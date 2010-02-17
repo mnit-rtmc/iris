@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +47,8 @@ public class SystemAttributeHelper extends BaseHelper {
 		// assume that if the namespace is null junit test cases 
 		// are running and we're not connected to a live server.
 		if(namespace == null) {
-			System.err.println("SONAR namespace is null.");
+			System.err.println("SONAR namespace is null during " +
+				"lookup of " + aname + ".");
 			SystemAttrEnum sa = SystemAttrEnum.lookup(aname);
 			SystemAttribute ret = null;
 			if(sa != null)
