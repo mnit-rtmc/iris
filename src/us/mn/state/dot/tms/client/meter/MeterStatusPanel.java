@@ -261,7 +261,7 @@ public class MeterStatusPanel extends FormPanel
 			cameraTxt.setText(getCameraName(meter));
 		// FIXME: this won't update when geoLoc attributes change
 		if(a == null || a.equals("geoLoc")) {
-			locationTxt.setText(GeoLocHelper.getDescription(
+			locationTxt.setText(GeoLocHelper.getOnRampDescription(
 				meter.getGeoLoc()));
 		}
 		if(a == null || a.equals("operation")) {

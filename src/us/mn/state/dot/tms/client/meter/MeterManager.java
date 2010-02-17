@@ -24,6 +24,7 @@ import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.RampMeterQueue;
@@ -256,5 +257,11 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Find the map geo location for a proxy */
 	protected GeoLoc getGeoLoc(RampMeter proxy) {
 		return proxy.getGeoLoc();
+	}
+
+	/** Get the description of a proxy */
+	public String getDescription(RampMeter proxy) {
+		return proxy.getName() + " - " +
+			GeoLocHelper.getOnRampDescription(getGeoLoc(proxy));
 	}
 }
