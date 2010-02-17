@@ -32,6 +32,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.Name;
@@ -346,7 +347,12 @@ public class IncidentDispatcher extends JPanel
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(Incident inc, String a) {
 		if(a == null) {
-			manager.setTypeLabel(inc, type_lbl);
+			type_lbl.setText(manager.getTypeDesc(inc));
+			Symbol sym = manager.getSymbol(inc);
+			if(sym != null)
+				type_lbl.setIcon(sym.getLegend());
+			else
+				type_lbl.setIcon(null);
 			location_txt.setText(
 				manager.getGeoLoc(inc).getDescription());
 			camera_cbx.setModel(createCameraModel(inc));

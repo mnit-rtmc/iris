@@ -204,6 +204,27 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 	}
 
+	/** Get the description of an incident */
+	public String getDescription(Incident inc) {
+		String td = getTypeDesc(inc);
+		if(td.length() > 0) {
+			String loc = getGeoLoc(inc).getDescription();
+			return td + " -- " + loc;
+		} else
+			return "";
+	}
+
+	/** Get the incident type description */
+	public String getTypeDesc(Incident inc) {
+		EventType et = EventType.fromId(inc.getEventType());
+		String sty = getStyle(et);
+		if(sty != null) {
+			LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
+			return getTypeDesc(sty, getLaneType(lt));
+		} else
+			return "";
+	}
+
 	/** Get the lane type description */
 	protected String getLaneType(LaneType lt) {
 		switch(lt) {
@@ -217,30 +238,24 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 	}
 
-	/** Get the event description */
-	protected String getDesc(String sty, String ltd) {
+	/** Get the incident type description.
+	 * @param sty Style of incident.
+	 * @param ltd Lane type description (may be null).
+	 * @return Description of incident type. */
+	protected String getTypeDesc(String sty, String ltd) {
 		if(ltd != null)
 			return sty + " on " + ltd;
 		else
 			return sty;
 	}
 
-	/** Update the event type on a label */
-	public void setTypeLabel(Incident inc, JLabel lbl) {
+	/** Get the symbol for an incident */
+	public Symbol getSymbol(Incident inc) {
 		EventType et = EventType.fromId(inc.getEventType());
 		String sty = getStyle(et);
-		LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
-		String ltd = getLaneType(lt);
-		if(sty != null) {
-			lbl.setText(getDesc(sty, ltd));
-			Symbol sym = getTheme().getSymbol(sty);
-			if(sym != null)
-				lbl.setIcon(sym.getLegend());
-			else
-				lbl.setIcon(null);
-		} else {
-			lbl.setText("");
-			lbl.setIcon(null);
-		}
+		if(sty != null)
+			return getTheme().getSymbol(sty);
+		else
+			return null;
 	}
 }
