@@ -37,6 +37,9 @@ import us.mn.state.dot.tms.LCSArrayHelper;
  */
 public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 
+	/** Size in pixels for each LCS in array */
+	static protected final int LCS_SIZE = 32;
+
 	/** List cell renderer (needed for colors) */
 	protected final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
@@ -44,20 +47,22 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	/** Title bar */
 	protected final JPanel title = new JPanel();
 
-	/** LCS array name label */
-	protected final JLabel nameLbl = new JLabel();
+	/** LCS array name label.  NOTE: this needs to be initialized to a
+	 * non-empty string to force getPreferredSize() to give a sane value. */
+	protected final JLabel nameLbl = new JLabel(" ");
 
 	/** Label for the user */
 	protected final JLabel userLbl = new JLabel();
 
 	/** LCS array panel */
-	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(32);
+	protected final LCSArrayPanel lcsPnl = new LCSArrayPanel(LCS_SIZE);
 
 	/** Location bar */
 	protected final Box location = Box.createHorizontalBox();
 
-	/** Label for location */
-	protected final JLabel locationLbl = new JLabel();
+	/** Label for location.  NOTE: this needs to be initialized to a
+	 * non-empty string to force getPreferredSize() to give a sane value. */
+	protected final JLabel locationLbl = new JLabel(" ");
 
 	/** Create a new LCS array cell renderer */
 	public LCSArrayCellRenderer() {
@@ -74,7 +79,12 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 		add(title, BorderLayout.NORTH);
 		add(lcsPnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
-		setPreferredSize(new Dimension(190, 72));
+		int w = lcsPnl.getPreferredSize().width + 4;
+		int h = nameLbl.getPreferredSize().height +
+			lcsPnl.getPreferredSize().height +
+			locationLbl.getPreferredSize().height + 4;
+		setMinimumSize(new Dimension(w, h));
+		setPreferredSize(new Dimension(w, h));
 	}
 
 	/**
