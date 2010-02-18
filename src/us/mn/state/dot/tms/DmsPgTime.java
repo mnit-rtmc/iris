@@ -115,7 +115,7 @@ public class DmsPgTime {
 
 	/** Convert from seconds to 10ths. */
 	public static int secsToTenths(float secs) {
-		return (int)(secs * 10f);
+		return Math.round(secs * 10f);
 	}
 
 	/** Convert from seconds to 10ths. */
