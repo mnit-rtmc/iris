@@ -17,14 +17,10 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.AbstractSpinnerModel;
 import javax.swing.JFormattedTextField;
 import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DmsPgTime;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -41,19 +37,14 @@ import us.mn.state.dot.tms.utils.SString;
  * current value--e.g. if it's 0, and the user has just entered a 2nd page,
  * the spinner sets a non-default page on-time.
  *
- * @see DmsPgTime, DMSDispatcher, SystemAttributeForm
+ * @see DmsPgTime
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class PgTimeSpinner extends JSpinner implements ChangeListener {
+public class PgTimeSpinner extends JSpinner {
 
 	/** Page on-time increment value */
 	static public final float INC_ONTIME_SECS = .1f;
-
-	/** Round to a single decimal point */
-	static protected double roundSingle(double v) {
-		return (double)Math.round(v * 10.0) / 10.0;
-	}
 
 	/** Is this control IRIS enabled? */
 	static public boolean getIEnabled() {
@@ -91,11 +82,11 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 			m_min = Math.min(min, max);
 			m_max = Math.max(min, max);
 			m_value = validate(def);
-			m_inc = roundSingle(inc);
+			m_inc = inc;
 		}
 
 		/** Return a validated spinner value in seconds. A value of
-		 *  zero is valid for single page messages only. */
+		 * zero is valid for single page messages only. */
 		private double validate(double value) {
 			DmsPgTime t = new DmsPgTime(value).validateValue(
 				m_singlepg, new DmsPgTime(m_min),
@@ -108,7 +99,8 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 		public Object getNextValue() {
 			if(m_singlepg && m_value == 0)
 				return m_min;
-			return validate(m_value + m_inc);
+			else
+				return validate(m_value + m_inc);
 		}
 
 		/** Get previous value, or null if the previous value is
@@ -116,7 +108,8 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 		public Object getPreviousValue() {
 			if(m_singlepg && m_value == 0)
 				return null;
-			return validate(m_value - m_inc);
+			else
+				return validate(m_value - m_inc);
 		}
 
 		/** Get current value */
@@ -126,35 +119,34 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 
 		/** Set current value */
 		public void setValue(Object value) {
-			if(value == null) {
-				m_value = 0;
-			} else if(value instanceof DmsPgTime) {
+			if(value == null)
+				setValueDouble(0.0);
+			else if(value instanceof DmsPgTime) {
 				DmsPgTime pt = (DmsPgTime)value;
-				m_value = pt.toSecs();
+				setValueDouble(pt.toSecs());
 			} else if(value instanceof Number) {
-				m_value = roundSingle(
-					((Number)value).doubleValue());
+				Number n = (Number)value;
+				setValueDouble(n.doubleValue());
 			} else {
-				m_value = SString.stringToDouble(
-					value.toString());
+				setValueDouble(SString.stringToDouble(
+					value.toString()));
 			}
+		}
+
+		/** Set the current value */
+		protected void setValueDouble(double value) {
+			m_value = validate(value);
 			fireStateChanged();
 		}
 	}
 
-	/** DMS dispatcher */
-	protected final DMSDispatcher dispatcher;
-
-	/** Create a new page time spinner.
-	 * @param d DMS dispatcher */
-	public PgTimeSpinner(DMSDispatcher d) {
-		dispatcher = d;
+	/** Create a new page time spinner */
+	public PgTimeSpinner() {
 		setModel(new PgTimeSpinnerModel(
 			DmsPgTime.getDefaultOn(true).toSecs(),
 			DmsPgTime.getMinOnTime().toSecs(),
 			DmsPgTime.getMaxOnTime().toSecs(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("PgOnTimeSpinner.ToolTip"));
-		addChangeListener(this);
 
 		// force the spinner to be editable
 		JFormattedTextField tf = ((JSpinner.DefaultEditor)
@@ -180,65 +172,27 @@ public class PgTimeSpinner extends JSpinner implements ChangeListener {
 		super.setValue(t.toSecs());
 	}
 
-	/** Counter to indicate we're adjusting widgets.  This needs to be
-	 * incremented before calling dispatcher methods which might cause
-	 * callbacks to this class.  This prevents infinite loops. */
-	protected int adjusting = 0;
-
-	/** Set the selected item and ignore any actionPerformed
-	 *  events that are generated.
-	 *  @param ms MULTI string containing page on time. */
-	public void setValueNoAction(String ms) {
-		adjusting++;
-		setValue(ms);
-		adjusting--;
-	}
-
-	/** If the spinner is IRIS enabled, return the current value,
-	 *  otherwise return the system default. */
+	/** Get the current value as a DmsPgTime. */
 	public DmsPgTime getValuePgTime() {
-		DmsPgTime ret = DmsPgTime.getDefaultOn(m_singlepg);
-		// return current value
-		if(getIEnabled()) {
-			Object v = super.getValue();
-			if(v instanceof Number)
-				ret = new DmsPgTime(((Number)v).floatValue());
-		}
-		return ret;
+		Object v = getValue();
+		if(v instanceof Number)
+			return new DmsPgTime(((Number)v).floatValue());
+		else
+			return DmsPgTime.getDefaultOn(m_singlepg);
 	}
 
 	/** Set value using the page on-time specified in the 1st page
-	 *  of the MULTI string. If no value is specified in the MULTI,
-	 *  the default value is used for multi-page messages else 0
-	 *  for single page messages.
-	 *  @param smulti A MULTI string, containing possible page times. */
+	 * of the MULTI string. If no value is specified in the MULTI,
+	 * the default value is used for multi-page messages else 0
+	 * for single page messages.
+	 * @param ms A MULTI string, containing possible page times. */
 	public void setValue(String ms) {
+		setSinglePage(new MultiString(ms).singlePage());
 		setValue(new MultiString(ms).getPageOnTime());
-	}
-
-	/** Catch state change events. Defined in interface ChangeListener. */
-	public void stateChanged(ChangeEvent e) {
-		if(adjusting == 0)
-			dispatcher.selectPreview(true);
 	}
 
 	/** Set number of pages in current message. */
 	private void setSinglePage(boolean sp) {
 		m_singlepg = sp;
-	}
-
-	/** Validate the current value using the current multistring. */
-	public void updateValidation(String multi) {
-		setSinglePage(new MultiString(multi).singlePage());
-		DmsPgTime pt = getValuePgTime();
-		if(!m_singlepg) {
-			if(pt.isZero())
-				setValue(DmsPgTime.getDefaultOn(m_singlepg));
-		}
-	}
-
-	/** Dispose */
-	public void dispose() {
-		removeChangeListener(this);
 	}
 }

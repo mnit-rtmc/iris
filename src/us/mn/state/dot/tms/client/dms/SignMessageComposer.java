@@ -28,6 +28,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -151,6 +153,13 @@ public class SignMessageComposer extends JPanel {
 		}
 	};
 
+	/** Listener for spinner change events */
+	protected final ChangeListener spin_listener = new ChangeListener() {
+		public void stateChanged(ChangeEvent e) {
+			updateMessage();
+		}
+	};
+
 	/** Update the DMS dispatcher message */
 	public void updateMessage() {
 		if(adjusting == 0) {
@@ -169,10 +178,11 @@ public class SignMessageComposer extends JPanel {
 		dms_sign_groups = dc.getDmsSignGroups();
 		sign_text = dc.getSignText();
 		fonts = dc.getFonts();
-		timeSpin = new PgTimeSpinner(dispatcher);
+		timeSpin = new PgTimeSpinner();
 		add(createAllWidgets());
 		initializeEtcWidgets(1);
 		initializeWidgets(SystemAttrEnum.DMS_MAX_LINES.getInt(), 1);
+		timeSpin.addChangeListener(spin_listener);
 	}
 
 	/** Create all widgets */
@@ -226,18 +236,15 @@ public class SignMessageComposer extends JPanel {
 		clearFonts();
 		adjusting++;
 		dispatcher.setMessage("");
+		timeSpin.setValue("");
 		adjusting--;
-		// note: set the spinner to zero after 
-		// clearing message lines because spinner 
-		// validation depends on message lines.
-		timeSpin.setValue(0);
 	}
 
 	/** Dispose of the message selector */
 	public void dispose() {
 		removeAll();
 		disposeLines();
-		timeSpin.dispose();
+		timeSpin.removeChangeListener(spin_listener);
 		disposeEtcWidgets();
 		SignTextModel stm = st_model;
 		if(stm != null) {
@@ -511,8 +518,9 @@ public class SignMessageComposer extends JPanel {
 		if(f != null)
 			multi.setFont(f, null);
 		if(PgTimeSpinner.getIEnabled()) {
-			multi.setPageTimes(timeSpin.
-				getValuePgTime().toTenths(), null);
+			int pt = timeSpin.getValuePgTime().toTenths();
+			if(pt > 0)
+				multi.setPageTimes(pt, null);
 		}
 		for(int i = 0; i < m; i++) {
 			if(i > 0) {
@@ -532,7 +540,8 @@ public class SignMessageComposer extends JPanel {
 
 	/** Set the currently selected message */
 	public void setMessage(String ms) {
-		timeSpin.setValueNoAction(ms);
+		adjusting++;
+		timeSpin.setValue(ms);
 		// Note: order here is crucial. The font cbox must be updated
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
@@ -541,7 +550,6 @@ public class SignMessageComposer extends JPanel {
 		setFontComboBoxes(multi);
 		int nl = getLineCount();
 		String[] lines = multi.getText(nl);
-		adjusting++;
 		final JComboBox[] cl = cmbLine;		// Avoid races
 		for(int i = 0; i < cl.length; i++) {
 			JComboBox cbox = cl[i];
