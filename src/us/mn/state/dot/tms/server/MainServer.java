@@ -134,7 +134,7 @@ public class MainServer {
 
 	/** Schedule jobs on TIMER thread */
 	static protected void scheduleTimerJobs() {
-		int secs = SystemAttrEnum.DMS_POLL_FREQ_SECS.getInt();
+		int secs = SystemAttrEnum.DMS_POLL_PERIOD_SECS.getInt();
 		if(secs > 5) {
 			TIMER.addJob(new DmsQueryMsgJob(secs));
 			TIMER.addJob(new LcsQueryMsgJob(secs));
