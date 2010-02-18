@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 public class LCSArrayPanel extends JPanel {
 
 	/** Maximum number of lanes */
-	static protected final int MAX_LANES = 5;
+	static protected final int MAX_LANES = 6;
 
 	/** Pixel size (height and width) of each LCS */
 	protected final int pixels;
