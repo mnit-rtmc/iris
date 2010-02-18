@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -190,24 +191,11 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Return the owner name as a function of the display mode */
 	protected String formatOwner(DMS dms) {
-		User u = dms.getOwnerCurrent();
-		String s = pruneOwner(u);
+		String s = IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
 		if(mode == DmsRendererMode.MEDIUM)
-			s = SString.truncate(s, 8);
-		return s;
-	}
-
-	/** Prune the owner string to the first dot. FIXME:move to UserHelper*/
-	static protected String pruneOwner(User owner) {
-		if(owner != null) {
-			String o = owner.getName();
-			int i = o.indexOf('.');
-			if(i >= 0)
-				return o.substring(0, i);
-			else
-				return o;
-		} else
-			return "";
+			return SString.truncate(s, 8);
+		else
+			return s;
 	}
 
 	/** Set the DMS to be displayed. All attributes are updated. */

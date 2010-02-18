@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 
@@ -103,22 +104,9 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	/** Set the LCS array */
 	protected void setLcsArray(LCSArray lcs_array) {
 		nameLbl.setText(lcs_array.getName());
-		userLbl.setText(formatOwner(lcs_array.getOwnerCurrent()));
+		userLbl.setText(IrisUserHelper.getNamePruned(
+			lcs_array.getOwnerCurrent()));
 		lcsPnl.setIndications(lcs_array.getIndicationsCurrent());
 		locationLbl.setText(LCSArrayHelper.lookupLocation(lcs_array));
-	}
-
-	/** Prune the owner string to the first dot.
-	 * FIXME: move to UserHelper */
-	static protected String formatOwner(User owner) {
-		if(owner != null) {
-			String o = owner.getName();
-			int i = o.indexOf('.');
-			if(i >= 0)
-				return o.substring(0, i);
-			else
-				return o;
-		} else
-			return "";
 	}
 }
