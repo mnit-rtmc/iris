@@ -36,3 +36,6 @@ CREATE RULE lcs_array_update AS ON UPDATE TO iris.lcs_array DO INSTEAD
 
 CREATE RULE lcs_array_delete AS ON DELETE TO iris.lcs_array DO INSTEAD
 	DELETE FROM iris._device_io WHERE name = OLD.name;
+
+UPDATE iris.system_attribute SET name = 'dms_poll_period_secs'
+        WHERE name = 'dms_poll_freq_secs';
