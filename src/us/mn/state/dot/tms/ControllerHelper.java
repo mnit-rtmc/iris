@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ public class ControllerHelper extends BaseHelper {
 			checker);
 	}
 
-	/** Get the controller associated with the AWS comm link that uses
-	 *  the specified protocol.
-	 * @return The AWS controller or null if one is not defined. */
+	/** Find a controller associated with the comm link that uses the
+	 * specified protocol.
+	 * @return The controller or null if one is not defined. */
 	static public Controller getController(final CommProtocol proto) {
 		final CommLink cl = CommLinkHelper.getCommLink(proto);
 		if(cl == null)
