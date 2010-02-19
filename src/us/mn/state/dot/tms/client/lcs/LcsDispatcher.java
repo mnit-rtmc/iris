@@ -161,6 +161,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		box.add(createLabel("L"));
 		box.add(Box.createHorizontalStrut(4));
 		vbox.add(lcsPnl);
+		vbox.add(Box.createVerticalStrut(2));
 		vbox.add(indicationSelector);
 		box.add(vbox);
 		box.add(Box.createHorizontalStrut(4));
@@ -326,7 +327,7 @@ public class LcsDispatcher extends JPanel implements ProxyListener<LCSArray>,
 		}
 		if(a == null || a.equals("indicationsCurrent")) {
 			Integer[] ind = lcs_array.getIndicationsCurrent();
-			lcsPnl.setIndications(ind);
+			lcsPnl.setIndications(ind, lcs_array.getShift());
 			indicationSelector.setIndications(ind);
 		}
 	}

@@ -16,13 +16,13 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LCSArray;
 
 /**
  * Scale GUI representation of a LCS array panel.
@@ -31,46 +31,49 @@ import us.mn.state.dot.tms.LaneUseIndication;
  */
 public class LCSArrayPanel extends JPanel {
 
-	/** Maximum number of lanes */
-	static protected final int MAX_LANES = 6;
-
 	/** Pixel size (height and width) of each LCS */
 	protected final int pixels;
+
+	/** Array of lane indication labels (icons) from left to right */
+	protected final JLabel[] lanes = new JLabel[LCSArray.MAX_LANES];
 
 	/**
 	 * Create an LCS array panel
 	 * @param p Pixel size for each LCS.
 	 */
 	public LCSArrayPanel(int p) {
-		super(new GridBagLayout());
+		super(new GridLayout(1, LCSArray.MAX_LANES, 2, 2));
 		pixels = p;
-		int w = MAX_LANES * pixels + MAX_LANES * 2;
+		int w = LCSArray.MAX_LANES * (pixels + 2);
 		setMinimumSize(new Dimension(w, pixels + 2));
 		setPreferredSize(new Dimension(w, pixels + 2));
+		for(int i = 0; i < lanes.length; i++) {
+			lanes[i] = new JLabel();
+			add(lanes[i]);
+		}
 	}
 
 	/** Set new indications */
-	public void setIndications(Integer[] ind) {
-		removeAll();
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = new Insets(1, 1, 1, 1);
-		bag.anchor = GridBagConstraints.EAST;
-		bag.gridy = 0;
-		for(int i = ind.length - 1; i >= 0; i--) {
-			Icon icon = IndicationIcon.create(pixels,
-				LaneUseIndication.fromOrdinal(ind[i]));
-			JLabel lbl = new JLabel(icon);
-			lbl.setOpaque(true);
-			lbl.setBackground(Color.BLACK);
-			add(lbl, bag);
-			bag.anchor = GridBagConstraints.WEST;
+	public void setIndications(Integer[] ind, int shift) {
+		for(int i = 0; i < lanes.length; i++) {
+			JLabel lbl = lanes[i];
+			int ln = shift + ind.length - 1 - i;
+			if(ln >= 0 && ln < ind.length) {
+				Icon icon = IndicationIcon.create(pixels,
+					LaneUseIndication.fromOrdinal(ind[ln]));
+				lbl.setIcon(icon);
+				lbl.setOpaque(true);
+				lbl.setBackground(Color.BLACK);
+			} else {
+				lbl.setIcon(null);
+				lbl.setOpaque(false);
+				lbl.setBackground(null);
+			}
 		}
-		revalidate();
-		repaint();
 	}
 
 	/** Clear the LCS panel */
 	public void clear() {
-		removeAll();
+		setIndications(new Integer[0], 0);
 	}
 }

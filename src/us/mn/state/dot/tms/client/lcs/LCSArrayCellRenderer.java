@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Insets;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.BorderFactory;
@@ -25,6 +26,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
+import javax.swing.border.Border;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.LCSArray;
@@ -67,9 +69,11 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	/** Create a new LCS array cell renderer */
 	public LCSArrayCellRenderer() {
 		super(new BorderLayout());
-		setBorder(BorderFactory.createCompoundBorder(
+		Border b = BorderFactory.createCompoundBorder(
 		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
-		          BorderFactory.createRaisedBevelBorder()));
+		          BorderFactory.createRaisedBevelBorder());
+		setBorder(b);
+		Insets bi = b.getBorderInsets(this);
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(nameLbl);
 		title.add(Box.createGlue());
@@ -79,10 +83,11 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 		add(title, BorderLayout.NORTH);
 		add(lcsPnl, BorderLayout.CENTER);
 		add(location, BorderLayout.SOUTH);
-		int w = lcsPnl.getPreferredSize().width + 4;
-		int h = nameLbl.getPreferredSize().height +
+		int w = lcsPnl.getPreferredSize().width + bi.left + bi.right;
+		int h = bi.top + bi.bottom +
+			nameLbl.getPreferredSize().height +
 			lcsPnl.getPreferredSize().height +
-			locationLbl.getPreferredSize().height + 4;
+			locationLbl.getPreferredSize().height;
 		setMinimumSize(new Dimension(w, h));
 		setPreferredSize(new Dimension(w, h));
 	}
@@ -116,7 +121,8 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 		nameLbl.setText(lcs_array.getName());
 		userLbl.setText(IrisUserHelper.getNamePruned(
 			lcs_array.getOwnerCurrent()));
-		lcsPnl.setIndications(lcs_array.getIndicationsCurrent());
+		lcsPnl.setIndications(lcs_array.getIndicationsCurrent(),
+			lcs_array.getShift());
 		locationLbl.setText(LCSArrayHelper.lookupLocation(lcs_array));
 	}
 }

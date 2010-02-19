@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,8 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.awt.GridLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneUseIndication;
@@ -35,81 +31,101 @@ import us.mn.state.dot.tms.LCSHelper;
  */
 public class IndicationSelector extends JPanel {
 
-	/** List of combo boxes for selecting lane-use indications */
-	protected final LinkedList<JComboBox> indications =
-		new LinkedList<JComboBox>();
+	/** Array of lane-use indication combo boxes (left to right) */
+	protected final JComboBox[] indications =
+		new JComboBox[LCSArray.MAX_LANES];
+
+	/** Number of lanes */
+	protected int n_lanes = 0;
+
+	/** Lane shift */
+	protected int shift = 0;
 
 	/** Create a new indication selector */
 	public IndicationSelector() {
-		super(new GridBagLayout());
+		super(new GridLayout(1, LCSArray.MAX_LANES, 2, 2));
+		IndicationRenderer ir = new IndicationRenderer(32);
+		for(int i = 0; i < indications.length; i++) {
+			JComboBox cbx = new JComboBox();
+			cbx.setRenderer(ir);
+			add(cbx);
+			indications[i] = cbx;
+		}
 	}
 
 	/** Dispose of the indication selector */
 	public void dispose() {
 		removeAll();
-		indications.clear();
 	}
 
 	/** Set the LCS array */
 	public void setLCSArray(LCSArray lcs_array) {
-		removeAll();
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = new Insets(1, 1, 1, 1);
-		bag.anchor = GridBagConstraints.EAST;
-		bag.gridy = 0;
-		indications.clear();
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		for(LCS lcs: lcss) {
-			if(lcs == null)
-				return;
-			indications.add(createCombo(lcs));
+		n_lanes = lcss.length;
+		shift = lcs_array.getShift();
+		for(int i = 0; i < indications.length; i++) {
+			JComboBox cbx = indications[i];
+			int ln = shift + n_lanes - 1 - i;
+			if(ln >= 0 && ln < n_lanes) {
+				cbx.setModel(createModel(lcss[ln]));
+				cbx.setVisible(true);
+			} else {
+				cbx.setModel(createModel(null));
+				cbx.setVisible(false);
+			}
 		}
-		Iterator<JComboBox> it = indications.descendingIterator();
-		while(it.hasNext()) {
-			add(it.next(), bag);
-			bag.anchor = GridBagConstraints.WEST;
-		}
-		revalidate();
-		repaint();
 	}
 
-	/** Create a combo box for selecting lane-use indications */
-	protected JComboBox createCombo(LCS lcs) {
-		JComboBox c = new JComboBox(LCSHelper.lookupIndications(lcs));
-		c.setRenderer(new IndicationRenderer(32));
-		return c;
+	/** Create a combo box model for selecting lane-use indications */
+	protected DefaultComboBoxModel createModel(LCS lcs) {
+		if(lcs != null) {
+			return new DefaultComboBoxModel(
+				LCSHelper.lookupIndications(lcs));
+		} else
+			return new DefaultComboBoxModel();
 	}
 
 	/** Enable/disable all widgets */
 	public void setEnabled(boolean enabled) {
-		for(Component c: getComponents())
-			c.setEnabled(enabled);
+		for(JComboBox cbx: indications) {
+			cbx.setEnabled(enabled);
+			if(!enabled) {
+				cbx.setVisible(false);
+				cbx.removeAllItems();
+			}
+		}
 	}
 
 	/** Set the selected indications */
 	public void setIndications(Integer[] ind) {
-		if(ind.length != indications.size())
+		if(ind.length != n_lanes)
 			return;
-		for(int i = 0; i < ind.length; i++) {
-			JComboBox combo = indications.get(i);
-			LaneUseIndication lui = 
-				LaneUseIndication.fromOrdinal(ind[i]);
-			combo.setSelectedItem(lui != null ? lui :
-				LaneUseIndication.DARK);
+		for(int i = 0; i < indications.length; i++) {
+			int ln = shift + n_lanes - 1 - i;
+			if(ln >= 0 && ln < ind.length) {
+				LaneUseIndication lui = 
+					LaneUseIndication.fromOrdinal(ind[ln]);
+				JComboBox cbx = indications[i];
+				cbx.setSelectedItem(lui != null ? lui :
+					LaneUseIndication.DARK);
+			}
 		}
 	}
 
 	/** Get the selected indications */
 	public Integer[] getIndications() {
-		Integer[] ind = new Integer[indications.size()];
-		for(int i = 0; i < ind.length; i++) {
-			JComboBox combo = indications.get(i);
-			LaneUseIndication lui =
-				(LaneUseIndication)combo.getSelectedItem();
-			if(lui != null)
-				ind[i] = lui.ordinal();
-			else
-				return null;
+		Integer[] ind = new Integer[n_lanes];
+		for(int i = 0; i < indications.length; i++) {
+			int ln = shift + n_lanes - 1 - i;
+			if(ln >= 0 && ln < ind.length) {
+				JComboBox cbx = indications[i];
+				LaneUseIndication lui = (LaneUseIndication)
+					cbx.getSelectedItem();
+				if(lui != null)
+					ind[ln] = lui.ordinal();
+				else
+					return null;
+			}
 		}
 		return ind;
 	}

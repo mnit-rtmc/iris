@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,8 +54,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	static protected void loadAll() throws TMSException {
 		System.err.println("Loading LCS arrays...");
 		namespace.registerType(SONAR_TYPE, LCSArrayImpl.class);
-		store.query("SELECT name, controller, pin, notes, lcs_lock " +
-			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
+		store.query("SELECT name, controller, pin, notes, shift, " +
+			"lcs_lock FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LCSArrayImpl(namespace,
@@ -63,7 +64,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 					row.getString(2),	// controller
 					row.getInt(3),		// pin
 					row.getString(4),	// notes
-					row.getInt(5)		// lcs_lock
+					row.getInt(5),		// shift
+					row.getInt(6)		// lcs_lock
 				));
 			}
 		});
@@ -76,6 +78,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("shift", shift);
 		if(lcs_lock != null)
 			map.put("lcs_lock", lcs_lock.ordinal());
 		return map;
@@ -98,17 +101,18 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Create an LCS array */
 	public LCSArrayImpl(Namespace ns, String n, String c, int p, String nt,
-		Integer lk)
+		int s, Integer lk)
 	{
 		this(n, (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
-		     c), p, nt, lk);
+		     c), p, nt, s, lk);
 	}
 
 	/** Create an LCS array */
-	public LCSArrayImpl(String n, ControllerImpl c, int p, String nt,
+	public LCSArrayImpl(String n, ControllerImpl c, int p, String nt, int s,
 		Integer lk)
 	{
 		super(n, c, p, nt);
+		shift = s;
 		lcs_lock = LCSArrayLock.fromOrdinal(lk);
 	}
 
@@ -134,6 +138,29 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Set the controller I/O pin number */
 	public void doSetPin(int p) throws TMSException {
 		throw new ChangeVetoException("Cannot assign pin");
+	}
+
+	/** Lane shift of left lane */
+	protected int shift;
+
+	/** Set the lane shift of left lane */
+	public void setShift(int s) {
+		shift = s;
+	}
+
+	/** Set the lane shift of left lane */
+	public void doSetShift(int s) throws TMSException {
+		if(s == shift)
+			return;
+		if(s < 0)
+			throw new ChangeVetoException("Negative shift");
+		store.update(this, "shift", s);
+		setShift(s);
+	}
+
+	/** Get the lane shift of left lane */
+	public int getShift() {
+		return shift;
 	}
 
 	/** Lock status */

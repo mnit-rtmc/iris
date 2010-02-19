@@ -22,10 +22,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import us.mn.state.dot.sched.ActionJob;
+import us.mn.state.dot.sched.ChangeJob;
 import us.mn.state.dot.sched.FocusJob;
 import us.mn.state.dot.sched.ListSelectionJob;
 import us.mn.state.dot.sonar.Checker;
@@ -73,6 +76,10 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Button to delete the selected LCS */
 	protected final JButton delete_btn = new JButton("Delete");
+
+	/** Spinner for lane shift */
+	protected final JSpinner shift_spn = new JSpinner(
+		new SpinnerNumberModel(0, 0, 12, 1));
 
 	/** Notes text area */
 	protected final JTextArea notes = new JTextArea(3, 24);
@@ -134,12 +141,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected JPanel createSetupPanel() {
 		FormPanel panel = new FormPanel(canUpdate());
 		initTable();
-		FormPanel tpnl = new FormPanel(true);
+		FormPanel tpnl = new FormPanel(canUpdate());
 		tpnl.addRow(lcs_table);
 		tpnl.add(edit_btn);
 		edit_btn.setEnabled(false);
 		tpnl.addRow(delete_btn);
 		delete_btn.setEnabled(false);
+		tpnl.addRow("Lane Shift", shift_spn);
 		// this panel is needed to make the widgets line up
 		panel.add(new JPanel());
 		panel.add(tpnl);
@@ -150,6 +158,12 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create jobs for updating widgets */
 	protected void createUpdateJobs() {
+		new ChangeJob(this, shift_spn) {
+			public void perform() {
+				Number n = (Number)shift_spn.getValue();
+				proxy.setShift(n.intValue());
+			}
+		};
 		new FocusJob(notes) {
 			public void perform() {
 				proxy.setNotes(notes.getText());
@@ -316,6 +330,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(String a) {
+		if(a == null || a.equals("shift"))
+			shift_spn.setValue(proxy.getShift());
 		if(a == null || a.equals("notes"))
 			notes.setText(proxy.getNotes());
 		if(a == null || a.equals("lcsLock")) {

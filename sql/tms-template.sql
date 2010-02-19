@@ -626,6 +626,7 @@ CREATE TABLE iris.lcs_lock (
 CREATE TABLE iris._lcs_array (
 	name VARCHAR(10) PRIMARY KEY,
 	notes text NOT NULL,
+	shift INTEGER NOT NULL,
 	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
 );
 
@@ -633,13 +634,14 @@ ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.lcs_array AS SELECT
-	d.name, controller, pin, notes, lcs_lock
+	d.name, controller, pin, notes, shift, lcs_lock
 	FROM iris._lcs_array la JOIN iris._device_io d ON la.name = d.name;
 
 CREATE RULE lcs_array_insert AS ON INSERT TO iris.lcs_array DO INSTEAD
 (
 	INSERT INTO iris._device_io VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lcs_array VALUES (NEW.name, NEW.notes, NEW.lcs_lock);
+	INSERT INTO iris._lcs_array VALUES (NEW.name, NEW.notes, NEW.shift,
+		NEW.lcs_lock);
 );
 
 CREATE RULE lcs_array_update AS ON UPDATE TO iris.lcs_array DO INSTEAD
@@ -650,6 +652,7 @@ CREATE RULE lcs_array_update AS ON UPDATE TO iris.lcs_array DO INSTEAD
 	WHERE name = OLD.name;
 	UPDATE iris._lcs_array SET
 		notes = NEW.notes,
+		shift = NEW.shift,
 		lcs_lock = NEW.lcs_lock
 	WHERE name = OLD.name;
 );
@@ -1238,7 +1241,7 @@ COPY iris.timing_plan_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
-database_version	3.111.0
+database_version	3.112.0
 dms_default_justification_line	3
 dms_default_justification_page	2
 dms_max_lines	3
