@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,8 +95,6 @@ public class MapExtentImpl extends BaseObjectImpl implements MapExtent {
 	public void doSetEasting(int x) throws TMSException {
 		if(x == easting)
 			return;
-		if(x < 0)
-			throw new ChangeVetoException("Invalid Easting");
 		store.update(this, "easting", x);
 		setEasting(x);
 	}
