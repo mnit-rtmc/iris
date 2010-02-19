@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,13 +29,17 @@ public class CommLinkHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Find a comm link using a Checker */
+	static public CommLink find(final Checker<CommLink> checker) {
+		return (CommLink)namespace.findObject(CommLink.SONAR_TYPE,
+			checker);
+	}
+
 	/** Get the first comm link associated with the specified protocol.
 	 * @return The first comm link of the specified protocol or null if 
 	 *	   one is not defined. */
 	static public CommLink getCommLink(final CommProtocol proto) {
-		return (CommLink)namespace.findObject(CommLink.SONAR_TYPE, 
-			new Checker<CommLink>() 
-		{
+		return find(new Checker<CommLink>() {
 			public boolean check(CommLink c) {
 				return c.getProtocol() == proto.ordinal();
 			}
@@ -43,17 +47,23 @@ public class CommLinkHelper extends BaseHelper {
 	}
 
 	/** Count the number of comm links with the specified protocol */
-	static public int countCommLinks(final CommProtocol proto) {
-		final int[] num = new int[1];
-		num[0] = 0;
-		namespace.findObject(CommLink.SONAR_TYPE, 
-			new Checker<CommLink>()
-		{
-			public boolean check(CommLink c) {
-				num[0] += (c.getProtocol() == proto.ordinal() ? 1 : 0);
-				return false;
-			}
-		});
-		return num[0];
+	static public int countCommLinks(CommProtocol proto) {
+		LinkCounter lc = new LinkCounter(proto);
+		find(lc);
+		return lc.n_links;
+	}
+
+	/** Simple class to count comm links */
+	static protected class LinkCounter implements Checker<CommLink> {
+		protected final CommProtocol proto;
+		int n_links = 0;
+		protected LinkCounter(CommProtocol cp) {
+			proto = cp;
+		}
+		public boolean check(CommLink c) {
+			if(c.getProtocol() == proto.ordinal())
+				n_links++;
+			return false;
+		}
 	}
 }
