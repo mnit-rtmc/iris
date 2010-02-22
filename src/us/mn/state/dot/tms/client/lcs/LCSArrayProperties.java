@@ -143,6 +143,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		initTable();
 		FormPanel tpnl = new FormPanel(canUpdate());
 		tpnl.addRow(lcs_table);
+		lcs_table.setEnabled(true);
 		tpnl.add(edit_btn);
 		edit_btn.setEnabled(false);
 		tpnl.addRow(delete_btn);
