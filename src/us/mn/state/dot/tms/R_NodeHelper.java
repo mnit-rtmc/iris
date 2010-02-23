@@ -48,6 +48,11 @@ public class R_NodeHelper extends BaseHelper {
 		return r_node.getNodeType() == R_NodeType.EXIT.ordinal();
 	}
 
+	/** Check if this r_node links to a CD road */
+	static public boolean isCD(R_Node r_node) {
+		return r_node.getNodeType() == R_NodeTransition.CD.ordinal();
+	}
+
 	/** Check if the r_node is an access node */
 	static public boolean isAccess(R_Node r_node) {
 		return r_node.getNodeType() == R_NodeType.ACCESS.ordinal();

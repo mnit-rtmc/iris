@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * A corridor is a collection of all R_Node objects for one freeway corridor.
@@ -26,6 +27,22 @@ import java.util.Set;
  * @author Douglas Lau
  */
 public class CorridorBase {
+
+	/** Conversion value from meter to mile length units */
+	static protected final float METERS_PER_MILE = 1609.344f;
+
+	/** Convert meters to miles */
+	static protected float metersToMiles(double meters) {
+		return (float)(meters / METERS_PER_MILE);
+	}
+
+	/** Adjustment for r_node milepoints falling on exact same spot */
+	static protected float calculateEpsilon(float v) {
+		if(v != 0)
+			return v * 0.0000001f;
+		else
+			return 0.0000001f;
+	}
 
 	/** Calculate the distance to another roadway node (in meters) */
 	static public Double metersTo(R_Node a, R_Node b) {
@@ -85,6 +102,10 @@ public class CorridorBase {
 	/** Roadway node list */
 	protected final LinkedList<R_Node> r_nodes = new LinkedList<R_Node>();
 
+	/** Mapping from milepoint to r_node */
+	protected final TreeMap<Float, R_Node> n_points =
+		new TreeMap<Float, R_Node>();
+
 	/** Create a new corridor */
 	public CorridorBase(GeoLoc loc, boolean order) {
 		name = GeoLocHelper.getCorridorName(loc);
@@ -108,6 +129,7 @@ public class CorridorBase {
 	/** Arrange the nodes in the corridor */
 	public void arrangeNodes() {
 		sortNodes();
+		calculateNodeMilePoints();
 	}
 
 	/** Sort the roadway nodes for the corridor */
@@ -200,6 +222,21 @@ public class CorridorBase {
 		r_nodes.clear();
 		for(R_Node r_node: tmp)
 			r_nodes.addFirst(r_node);
+	}
+
+	/** Calculate the mile points for all nodes on the corridor */
+	protected void calculateNodeMilePoints() {
+		assert n_points.isEmpty();
+		float miles = 0;
+		R_Node previous = null;
+		for(R_Node n: r_nodes) {
+			if(previous != null)
+				miles += metersToMiles(metersTo(previous, n));
+			while(n_points.containsKey(miles))
+				miles += calculateEpsilon(miles);
+			n_points.put(miles, n);
+			previous = n;
+		}
 	}
 
 	/** Get the list of r_nodes */

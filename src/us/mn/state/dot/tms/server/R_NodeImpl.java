@@ -286,11 +286,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return isExit() && (transition == R_NodeTransition.COMMON);
 	}
 
-	/** Check if this r_node links to a CD road */
-	public boolean isCD() {
-		return transition == R_NodeTransition.CD;
-	}
-
 	/** Check if this r_node has a link to the downstream r_node */
 	protected boolean hasDownstreamLink() {
 		return isCorridorType() && !isCommonExit();
