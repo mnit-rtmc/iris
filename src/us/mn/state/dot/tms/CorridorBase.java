@@ -49,6 +49,11 @@ public class CorridorBase {
 		return GeoLocHelper.metersTo(a.getGeoLoc(), b.getGeoLoc());
 	}
 
+	/** Calculate the distance to a location (in meters) */
+	static public Double metersTo(R_Node n, GeoLoc l) {
+		return GeoLocHelper.metersTo(n.getGeoLoc(), l);
+	}
+
 	/** Get the true UTM Northing (without offset) */
 	static protected Integer getTrueNorthing(R_Node n) {
 		return GeoLocHelper.getTrueNorthing(n.getGeoLoc());
@@ -237,6 +242,34 @@ public class CorridorBase {
 			n_points.put(miles, n);
 			previous = n;
 		}
+	}
+
+	/** Calculate the mile point for a location.
+	 * @param loc Location to calculate.
+	 * @return Mile point for location, or null if no r_nodes exist. */
+	public Float calculateMilePoint(GeoLoc loc) {
+		if(n_points.isEmpty())
+			return null;
+		R_Node nearest = null;
+		R_Node n_after = null;
+		float n_mile = 0;
+		double n_meters = 0;
+		for(Float mile: n_points.keySet()) {
+			R_Node n = n_points.get(mile);
+			double m = metersTo(n, loc);
+			if(nearest == null || m < n_meters) {
+				nearest = n;
+				n_after = n;
+				n_mile = mile;
+				n_meters = m;
+			} else if(n_after == nearest)
+				n_after = n;
+		}
+		float mi = metersToMiles(n_meters);
+		if(metersTo(n_after, nearest) > metersTo(n_after, loc))
+			return n_mile + mi;
+		else
+			return n_mile - mi;
 	}
 
 	/** Get the list of r_nodes */

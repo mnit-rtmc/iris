@@ -32,11 +32,6 @@ import us.mn.state.dot.tms.R_NodeHelper;
  */
 public class Corridor extends CorridorBase {
 
-	/** Calculate the distance to a location (in meters) */
-	static public Double metersTo(R_Node n, GeoLoc l) {
-		return GeoLocHelper.metersTo(n.getGeoLoc(), l);
-	}
-
 	/** Create a new corridor */
 	public Corridor(GeoLoc loc) {
 		super(loc);
@@ -64,32 +59,6 @@ public class Corridor extends CorridorBase {
 		}
 	}
 
-	/** Calculate the mile point for a location */
-	public float calculateMilePoint(GeoLoc loc) throws BadRouteException {
-		if(n_points.isEmpty())
-			throw new BadRouteException("No nodes on corridor");
-		R_Node nearest = null;
-		R_Node n_after = null;
-		float n_mile = 0;
-		double n_meters = 0;
-		for(Float mile: n_points.keySet()) {
-			R_Node n = n_points.get(mile);
-			double m = metersTo(n, loc);
-			if(nearest == null || m < n_meters) {
-				nearest = n;
-				n_after = n;
-				n_mile = mile;
-				n_meters = m;
-			} else if(n_after == nearest)
-				n_after = n;
-		}
-		float mi = metersToMiles(n_meters);
-		if(metersTo(n_after, nearest) > metersTo(n_after, loc))
-			return n_mile + mi;
-		else
-			return n_mile - mi;
-	}
-
 	/** Create a mapping from mile points to stations */
 	public TreeMap<Float, StationImpl> createStationMap() {
 		TreeMap<Float, StationImpl> stations =
@@ -107,8 +76,10 @@ public class Corridor extends CorridorBase {
 
 	/** Calculate the distance for the given O/D pair (miles) */
 	public float calculateDistance(ODPair od) throws BadRouteException {
-		float origin = calculateMilePoint(od.getOrigin());
-		float destination = calculateMilePoint(od.getDestination());
+		Float origin = calculateMilePoint(od.getOrigin());
+		Float destination = calculateMilePoint(od.getDestination());
+		if(origin == null || destination == null)
+			throw new BadRouteException("No nodes on corridor");
 		if(origin > destination) {
 			throw new BadRouteException("Origin (" + origin +
 				") > destin (" + destination + "), " + od);
@@ -120,7 +91,9 @@ public class Corridor extends CorridorBase {
 	public R_NodeImpl findDownstreamNode(GeoLoc loc)
 		throws BadRouteException
 	{
-		float m = calculateMilePoint(loc);
+		Float m = calculateMilePoint(loc);
+		if(m == null)
+			throw new BadRouteException("No nodes on corridor");
 		for(Float mile: n_points.keySet()) {
 			if(mile > m)
 				return (R_NodeImpl)n_points.get(mile);
