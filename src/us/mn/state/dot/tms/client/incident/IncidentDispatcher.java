@@ -35,9 +35,6 @@ import javax.swing.SwingUtilities;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
-import us.mn.state.dot.sonar.Name;
-import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
@@ -45,6 +42,8 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
@@ -66,17 +65,14 @@ public class IncidentDispatcher extends JPanel
 	static protected final SimpleDateFormat NAME_FMT =
 		new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
-	/** SONAR namespace */
-	protected final Namespace namespace;
+	/** User session */
+	protected final Session session;
 
 	/** Cache of incident proxy objects */
 	protected final TypeCache<Incident> cache;
 
 	/** Selection model */
 	protected final ProxySelectionModel<Incident> selectionModel;
-
-	/** Currently logged in user */
-	protected final User user;
 
 	/** Type label */
 	protected final JLabel type_lbl = new JLabel();
@@ -106,12 +102,11 @@ public class IncidentDispatcher extends JPanel
 	protected Incident watching;
 
 	/** Create a new incident dispatcher */
-	public IncidentDispatcher(Session session, IncidentManager man) {
+	public IncidentDispatcher(Session s, IncidentManager man) {
 		super(new BorderLayout());
+		session = s;
 		SonarState st = session.getSonarState();
-		namespace = st.getNamespace();
 		cache = st.getIncidents();
-		user = session.getUser();
 		manager = man;
 		selectionModel = manager.getSelectionModel();
 		cache.addProxyListener(this);
@@ -170,6 +165,14 @@ public class IncidentDispatcher extends JPanel
 					logUpdate(inc);
 			}
 		};
+		new ActionJob(deploy_btn) {
+			public void perform() {
+				Incident inc = getSingleSelection();
+				if(inc != null &&
+				   !(inc instanceof ClientIncident))
+					showDeployForm(inc);
+			}
+		};
 		new ActionJob(clear_btn) {
 			public void perform() {
 				Incident inc = getSingleSelection();
@@ -213,6 +216,11 @@ public class IncidentDispatcher extends JPanel
 	/** Update an incident */
 	protected void logUpdate(Incident inc) {
 		inc.setImpact(impact_pnl.getImpact());
+	}
+
+	/** Show the incident deploy form */
+	protected void showDeployForm(Incident inc) {
+		session.getDesktop().show(new IncidentDeployForm(session, inc));
 	}
 
 	/** Create a unique incident name */
@@ -339,7 +347,7 @@ public class IncidentDispatcher extends JPanel
 			boolean update = canUpdate(inc);
 			camera_cbx.setEnabled(false);
 			log_btn.setEnabled(update);
-			deploy_btn.setEnabled(false);
+			deploy_btn.setEnabled(update && canDeploy(inc));
 			clear_btn.setEnabled(update);
 		}
 	}
@@ -415,14 +423,27 @@ public class IncidentDispatcher extends JPanel
 
 	/** Check if the user can add the named incident */
 	public boolean canAdd(String oname) {
-		return oname != null &&
-		       namespace.canAdd(user, new Name(Incident.SONAR_TYPE,
-			oname));
+		return session.canAdd(Incident.SONAR_TYPE, oname);
 	}
 
 	/** Check if the user can update the given incident */
 	protected boolean canUpdate(Incident inc) {
-		return inc != null &&
-		       namespace.canUpdate(user, new Name(inc));
+		return session.canUpdate(inc);
+	}
+
+	/** Check if the user can deploy signs for an incident */
+	protected boolean canDeploy(Incident inc) {
+		switch(LaneType.fromOrdinal(inc.getLaneType())) {
+		case MAINLINE:
+			return canSendIndications();
+		default:
+			return false;
+		}
+	}
+
+	/** Check if the user can send LCS array indications */
+	protected boolean canSendIndications() {
+		return session.canUpdate(LCSArray.SONAR_TYPE, "indicationsNext")
+		    && session.canUpdate(LCSArray.SONAR_TYPE, "ownerNext");
 	}
 }

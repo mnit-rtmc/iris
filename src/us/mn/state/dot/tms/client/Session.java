@@ -258,7 +258,7 @@ public class Session {
 			addLcsTab();
 		if(canRead(Camera.SONAR_TYPE))
 			addCameraTab();
-		if(namespace.canAdd(user, new Name(R_Node.SONAR_TYPE, "oname")))
+		if(canAdd(R_Node.SONAR_TYPE))
 			addRoadwayTab();
 	}
 
@@ -349,6 +349,17 @@ public class Session {
 	protected void addRoadwayTab() {
 		List<LayerState> lstates = createBaseLayers();
 		tabs.add(new RoadwayTab(this, r_node_manager, lstates));
+	}
+
+	/** Check if the user can add an object */
+	public boolean canAdd(String tname) {
+		return canAdd(tname, "oname");
+	}
+
+	/** Check if the user can add an object */
+	public boolean canAdd(String tname, String oname) {
+		return oname != null &&
+		       namespace.canAdd(user, new Name(tname, oname));
 	}
 
 	/** Check if the user can read a type */

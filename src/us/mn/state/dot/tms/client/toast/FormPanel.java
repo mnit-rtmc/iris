@@ -20,6 +20,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -169,6 +170,15 @@ public class FormPanel extends JPanel {
 		setFill();
 		area.setEnabled(enable);
 		addRow(new JScrollPane(area,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+	}
+
+	/** Add a list component */
+	public void addRow(JList list) {
+		setFill();
+		list.setEnabled(enable);
+		addRow(new JScrollPane(list,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 	}
