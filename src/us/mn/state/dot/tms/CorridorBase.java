@@ -105,18 +105,29 @@ public class CorridorBase {
 			unsorted.add(r_node);
 	}
 
-	/** Find the nearest unsorted node to the given node */
-	protected R_Node findNearest(R_Node end) {
-		R_Node nearest = null;
-		double n_meters = 0;
-		for(R_Node r_node: unsorted) {
-			double m = metersTo(r_node, end);
-			if(nearest == null || m < n_meters) {
-				nearest = r_node;
-				n_meters = m;
-			}
+	/** Arrange the nodes in the corridor */
+	public void arrangeNodes() {
+		sortNodes();
+	}
+
+	/** Sort the roadway nodes for the corridor */
+	protected void sortNodes() {
+		assert r_nodes.isEmpty();
+		beginList();
+		while(!unsorted.isEmpty())
+			linkNearestNode();
+		if(isReversed())
+			reverseList();
+	}
+
+	/** Put one r_node into the list */
+	protected void beginList() {
+		// Only way to get one Set element is to get iterator
+		Iterator<R_Node> it = unsorted.iterator();
+		if(it.hasNext()) {
+			r_nodes.add(it.next());
+			it.remove();
 		}
-		return nearest;
 	}
 
 	/** Link the nearest node */
@@ -132,6 +143,26 @@ public class CorridorBase {
 			r_nodes.addLast(lnear);
 			unsorted.remove(lnear);
 		}
+	}
+
+	/** Find the nearest unsorted node to the given node */
+	protected R_Node findNearest(R_Node end) {
+		R_Node nearest = null;
+		double n_meters = 0;
+		for(R_Node r_node: unsorted) {
+			double m = metersTo(r_node, end);
+			if(nearest == null || m < n_meters) {
+				nearest = r_node;
+				n_meters = m;
+			}
+		}
+		return nearest;
+	}
+
+	/** Check if the roadway nodes are in reverse order */
+	protected boolean isReversed() {
+		return r_nodes.size() > 1 &&
+			(order_down_up == isUpstreamToDownstream());
 	}
 
 	/** Check if the nodes are in upstream-to-downstream order */
@@ -163,43 +194,12 @@ public class CorridorBase {
 		return false;
 	}
 
-	/** Check if the roadway nodes are in reverse order */
-	protected boolean isReversed() {
-		return r_nodes.size() > 1 &&
-			(order_down_up == isUpstreamToDownstream());
-	}
-
 	/** Reverse the list of roadway nodes */
 	protected void reverseList() {
 		LinkedList<R_Node> tmp = new LinkedList<R_Node>(r_nodes);
 		r_nodes.clear();
 		for(R_Node r_node: tmp)
 			r_nodes.addFirst(r_node);
-	}
-
-	/** Put one r_node into the list */
-	protected void beginList() {
-		// Only way to get one Set element is to get iterator
-		Iterator<R_Node> it = unsorted.iterator();
-		if(it.hasNext()) {
-			r_nodes.add(it.next());
-			it.remove();
-		}
-	}
-
-	/** Sort the roadway nodes for the corridor */
-	protected void sortNodes() {
-		assert r_nodes.isEmpty();
-		beginList();
-		while(!unsorted.isEmpty())
-			linkNearestNode();
-		if(isReversed())
-			reverseList();
-	}
-
-	/** Arrange the nodes in the corridor */
-	public void arrangeNodes() {
-		sortNodes();
 	}
 
 	/** Get the list of r_nodes */
