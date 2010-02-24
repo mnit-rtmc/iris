@@ -22,9 +22,12 @@ import java.util.List;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
+import javax.swing.SwingConstants;
+import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.User;
@@ -346,8 +349,16 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Create the panel for the form */
 	protected JPanel createPanel() {
+		JLabel lbl = new JLabel();
+		lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
+		lbl.setText(manager.getDescription(proxy));
+		Symbol sym = manager.getSymbol(proxy);
+		if(sym != null)
+			lbl.setIcon(sym.getLegend());
 		FormPanel panel = new FormPanel(false);
-		panel.addRow(list);
+		panel.addRow(lbl);
+		panel.addRow("<html><p align=\"right\">Proposed" +
+			"<br/>Indications</p></html>", list);
 		panel.addRow(send_btn);
 		send_btn.setEnabled(model.getSize() > 0);
 		return panel;
