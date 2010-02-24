@@ -198,6 +198,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		new ActionJob(send_btn) {
 			public void perform() {
 				sendIndications();
+				closeForm();
 			}
 		};
 	}
