@@ -170,6 +170,11 @@ public class Session {
 	/** R_Node manager */
 	protected final R_NodeManager r_node_manager;
 
+	/** Get the r_node manager */
+	public R_NodeManager getR_NodeManager() {
+		return r_node_manager;
+	}
+
 	/** Warning sign manager */
 	protected final WarningSignManager warn_manager;
 
@@ -225,8 +230,7 @@ public class Session {
 			state.getWarningSigns(), loc_manager);
 		meter_manager = new MeterManager(this,
 			state.getRampMeters(), loc_manager);
-		inc_manager = new IncidentManager(this, state.getIncidents(),
-			loc_manager, r_node_manager);
+		inc_manager = new IncidentManager(this, loc_manager);
 		initializeManagers();
 		seg_layer = r_node_manager.createSegmentLayer();
 		addTabs();
@@ -305,8 +309,7 @@ public class Session {
 		hideLayer(lstates, lcs_array_manager.getProxyType());
 		hideLayer(lstates, meter_manager.getProxyType());
 		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new IncidentTab(this, inc_manager, lstates,
-			r_node_manager));
+		tabs.add(new IncidentTab(this, inc_manager, lstates));
 	}
 
 	/** Add the meter tab */

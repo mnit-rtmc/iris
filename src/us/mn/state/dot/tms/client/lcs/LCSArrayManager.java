@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.util.Comparator;
+import java.util.TreeSet;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -24,9 +26,11 @@ import javax.swing.ListCellRenderer;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -38,6 +42,7 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.toast.SmartDesktop;
 
@@ -151,6 +156,49 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {
 		return new LCSArrayCellRenderer();
+	}
+
+	/** Comparator for ordering LCS arrays */
+	protected final Comparator<LCSArray> comparator =
+		new Comparator<LCSArray>()
+	{
+		// FIXME: if an LCS array is moved, that will break the sort
+		//        and lead to unpredictable results.
+		public int compare(LCSArray l0, LCSArray l1) {
+			GeoLoc g0 = LCSArrayHelper.lookupGeoLoc(l0);
+			GeoLoc g1 = LCSArrayHelper.lookupGeoLoc(l1);
+			String c0 = GeoLocHelper.getCorridorID(g0);
+			String c1 = GeoLocHelper.getCorridorID(g1);
+			int c = c0.compareTo(c1);
+			if(c != 0)
+				return c;
+			CorridorBase cb =
+				session.getR_NodeManager().lookupCorridor(g0);
+			if(cb != null) {
+				Float f0 = cb.calculateMilePoint(g0);
+				Float f1 = cb.calculateMilePoint(g1);
+				if(f0 != null && f1 != null) {
+					if(f0 < f1)
+						return 1;
+					else if(f0 > f1)
+						return -1;
+					else
+						return 0;
+				}
+			}
+			return l0.getName().compareTo(l1.getName());
+		}
+	};
+
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<LCSArray> createStyleListModel(Symbol s) {
+		return new StyleListModel<LCSArray>(this, s.getLabel(),
+			s.getLegend())
+		{
+			protected TreeSet<LCSArray> createProxySet() {
+				return new TreeSet<LCSArray>(comparator);
+			}
+		};
 	}
 
 	/** Create a proxy JList for the given style */

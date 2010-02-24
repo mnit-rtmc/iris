@@ -36,7 +36,6 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
  * An incident manager is a container for SONAR incident objects.
@@ -66,23 +65,22 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Name of all style */
 	static public final String STYLE_ALL = "All";
 
+	/** Get the incident cache */
+	static protected TypeCache<Incident> getCache(Session s) {
+		return s.getSonarState().getIncidents();
+	}
+
 	/** User session */
 	protected final Session session;
-
-	/** R_Node manager */
-	protected final R_NodeManager r_node_manager;
 
 	/** Location mapping */
 	protected final HashMap<String, IncidentGeoLoc> locations =
 		new HashMap<String, IncidentGeoLoc>();
 
 	/** Create a new incident manager */
-	public IncidentManager(Session s, TypeCache<Incident> c,
-		GeoLocManager lm, R_NodeManager r_man)
-	{
-		super(c, lm);
+	public IncidentManager(Session s, GeoLocManager lm) {
+		super(getCache(s), lm);
 		session = s;
-		r_node_manager = r_man;
 		cache.addProxyListener(this);
 	}
 
@@ -174,7 +172,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Lookup the corridor for an incident location */
 	public CorridorBase lookupCorridor(IncidentLoc loc) {
-		return r_node_manager.lookupCorridor(loc);
+		return session.getR_NodeManager().lookupCorridor(loc);
 	}
 
 	/** Check the style of the specified proxy */
