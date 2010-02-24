@@ -220,7 +220,8 @@ public class IncidentDispatcher extends JPanel
 
 	/** Show the incident deploy form */
 	protected void showDeployForm(Incident inc) {
-		session.getDesktop().show(new IncidentDeployForm(session, inc));
+		session.getDesktop().show(new IncidentDeployForm(session, inc,
+			manager));
 	}
 
 	/** Create a unique incident name */
@@ -347,7 +348,8 @@ public class IncidentDispatcher extends JPanel
 			boolean update = canUpdate(inc);
 			camera_cbx.setEnabled(false);
 			log_btn.setEnabled(update);
-			deploy_btn.setEnabled(update && canDeploy(inc));
+			deploy_btn.setEnabled(update && canDeploy(inc) &&
+				!inc.getCleared());
 			clear_btn.setEnabled(update);
 		}
 	}
@@ -367,8 +369,10 @@ public class IncidentDispatcher extends JPanel
 		}
 		if(a == null || a.equals("impact"))
 			impact_pnl.setImpact(inc.getImpact());
-		if(a == null || a.equals("cleared"))
+		if(a == null || a.equals("cleared")) {
 			clear_btn.setSelected(inc.getCleared());
+			enableWidgets(inc);
+		}
 	}
 
 	/** Clear the event type */

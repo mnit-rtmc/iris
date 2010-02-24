@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 
 /**
@@ -162,13 +163,18 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Find the map geo location for a proxy */
 	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
-		CorridorBase cb = r_node_manager.lookupCorridor(loc);
+		CorridorBase cb = lookupCorridor(loc);
 		if(cb != null) {
 			R_Node rnd = cb.findNearest(loc);
 			if(rnd != null)
 				return new IncidentLoc(proxy, rnd.getGeoLoc());
 		}
 		return loc;
+	}
+
+	/** Lookup the corridor for an incident location */
+	public CorridorBase lookupCorridor(IncidentLoc loc) {
+		return r_node_manager.lookupCorridor(loc);
 	}
 
 	/** Check the style of the specified proxy */
@@ -202,6 +208,13 @@ public class IncidentManager extends ProxyManager<Incident> {
 		default:
 			return null;
 		}
+	}
+
+	/** Create a new style summary for this proxy type */
+	public StyleSummary<Incident> createStyleSummary() {
+		StyleSummary<Incident> summary = super.createStyleSummary();
+		summary.setStyle(STYLE_ALL);
+		return summary;
 	}
 
 	/** Get the description of an incident */

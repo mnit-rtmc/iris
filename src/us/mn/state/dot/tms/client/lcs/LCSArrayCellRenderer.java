@@ -120,9 +120,19 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	protected void setLcsArray(LCSArray lcs_array) {
 		nameLbl.setText(lcs_array.getName());
 		userLbl.setText(IrisUserHelper.getNamePruned(
-			lcs_array.getOwnerCurrent()));
-		lcsPnl.setIndications(lcs_array.getIndicationsCurrent(),
+			getUser(lcs_array)));
+		lcsPnl.setIndications(getIndications(lcs_array),
 			lcs_array.getShift());
 		locationLbl.setText(LCSArrayHelper.lookupLocation(lcs_array));
+	}
+
+	/** Get the user name (may be overridden) */
+	protected User getUser(LCSArray lcs_array) {
+		return lcs_array.getOwnerCurrent();
+	}
+
+	/** Get the indications (may be overridden) */
+	protected Integer[] getIndications(LCSArray lcs_array) {
+		return lcs_array.getIndicationsCurrent();
 	}
 }

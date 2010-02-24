@@ -370,4 +370,29 @@ public class CorridorBase {
 		else
 			return n_before;
 	}
+
+	/** Get the left lane shift at the given location */
+	public int getShift(int easting, int northing) {
+		R_Node last = findLastBefore(easting, northing);
+		if(last == null)
+			return 0;
+		int left = 0;
+		int right = 0;
+		for(R_Node n: r_nodes) {
+			if(n.getAttachSide())
+				left = n.getShift();
+			else
+				right = n.getShift();
+			if(n.getNodeType() == R_NodeType.STATION.ordinal()) {
+				if(n.getAttachSide())
+					right = left + n.getLanes();
+				else
+					left = right - n.getLanes();
+			}
+			if(n == last)
+				return left;
+		}
+		// This should never happen -- we didn't find last node?
+		return 0;
+	}
 }

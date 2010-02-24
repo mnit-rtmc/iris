@@ -55,10 +55,11 @@ public class LCSArrayPanel extends JPanel {
 
 	/** Set new indications */
 	public void setIndications(Integer[] ind, int shift) {
+		int ilen = ind != null ? ind.length : 0;
 		for(int i = 0; i < lanes.length; i++) {
 			JLabel lbl = lanes[i];
-			int ln = shift + ind.length - 1 - i;
-			if(ln >= 0 && ln < ind.length) {
+			int ln = shift + ilen - 1 - i;
+			if(ln >= 0 && ln < ilen) {
 				Icon icon = IndicationIcon.create(pixels,
 					LaneUseIndication.fromOrdinal(ind[ln]));
 				lbl.setIcon(icon);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,16 +81,19 @@ public class LCSArrayHelper extends BaseHelper {
 
 	/** Lookup the location of the LCS array */
 	static public String lookupLocation(LCSArray lcs_array) {
+		return GeoLocHelper.getDescription(lookupGeoLoc(lcs_array));
+	}
+
+	/** Lookup the location of the LCS array */
+	static public GeoLoc lookupGeoLoc(LCSArray lcs_array) {
 		// get the location of the DMS in lane 1
-		LCS lcs = LCSArrayHelper.lookupLCS(lcs_array, 1);
+		LCS lcs = lookupLCS(lcs_array, 1);
 		if(lcs != null) {
 			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null) {
-				return GeoLocHelper.getDescription(
-					dms.getGeoLoc());
-			}
+			if(dms != null)
+				return dms.getGeoLoc();
 		}
-		return "";
+		return null;
 	}
 
 	/** Get the controller status */
