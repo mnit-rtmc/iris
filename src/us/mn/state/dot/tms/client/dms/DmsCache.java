@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.SonarState;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
  * Cache for DMS proxy objects.
