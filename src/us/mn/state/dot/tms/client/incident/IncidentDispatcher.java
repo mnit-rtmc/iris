@@ -44,6 +44,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
@@ -208,8 +209,11 @@ public class IncidentDispatcher extends JPanel
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
 			cache.createObject(name, attrs);
-			// FIXME: wait for object creation and select it
-			selectionModel.clearSelection();
+			Incident proxy = getProxy(name);
+			if(proxy != null)
+				selectionModel.setSelected(proxy);
+			else
+				selectionModel.clearSelection();
 		}
 	}
 
@@ -237,6 +241,23 @@ public class IncidentDispatcher extends JPanel
 	protected String createUniqueIncidentName() {
 		String name = NAME_FMT.format(System.currentTimeMillis());
 		return name.substring(0, 16);
+	}
+
+	/** Get the incident proxy object */
+	protected Incident getProxy(String name) {
+		// wait for up to 20 seconds for proxy to be created
+		for(int i = 0; i < 200; i++) {
+			Incident inc = IncidentHelper.lookup(name);
+			if(inc != null)
+				return inc;
+			try {
+				Thread.sleep(100);
+			}
+			catch(InterruptedException e) {
+				// Ignore
+			}
+		}
+		return null;
 	}
 
 	/** A new proxy has been added */
