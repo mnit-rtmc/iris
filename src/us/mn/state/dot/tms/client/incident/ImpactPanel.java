@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,10 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.LinkedList;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Panel for incident impact.
@@ -100,6 +103,10 @@ public class ImpactPanel extends JPanel {
 	/** Paint for caution impact */
 	static protected final TexturePaint PAINT_CAUTION = new TexturePaint(
 		IMAGE_CAUTION, new Rectangle2D.Float(0, 0, 4, 4));
+
+	/** The listeners of this model */
+	protected final LinkedList<ChangeListener> listeners =
+		new LinkedList<ChangeListener>();
 
 	/** Renderer component width */
 	protected int width = 0;
@@ -256,6 +263,7 @@ public class ImpactPanel extends JPanel {
 			return;
 		imp[lane] = imp[lane].next();
 		repaint();
+		fireStateChanged();
 	}
 
 	/** Get the preferred size */
@@ -267,5 +275,22 @@ public class ImpactPanel extends JPanel {
 	/** Get the minimum size */
 	public Dimension getMinimumSize() {
 		return getPreferredSize();
+	}
+
+	/** Add a change listener to the model */
+	public void addChangeListener(ChangeListener l) {
+		listeners.add(l);
+	}
+
+	/** Remove a change listener from the model */
+	public void removeChangeListener(ChangeListener l) {
+		listeners.remove(l);
+	}
+
+	/** Fire a change event to all listeners */
+	protected void fireStateChanged() {
+		ChangeEvent ce = new ChangeEvent(this);
+		for(ChangeListener l: listeners)
+			l.stateChanged(ce);
 	}
 }

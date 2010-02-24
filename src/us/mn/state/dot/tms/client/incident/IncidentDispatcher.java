@@ -32,6 +32,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.ActionJob;
 import us.mn.state.dot.sonar.Checker;
@@ -156,6 +158,13 @@ public class IncidentDispatcher extends JPanel
 
 	/** Create jobs for button press events */
 	protected void createButtonJobs() {
+		impact_pnl.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent ce) {
+				Incident inc = watching;
+				if(inc != null)
+					enableWidgets(inc);
+			}
+		});
 		new ActionJob(log_btn) {
 			public void perform() {
 				Incident inc = getSingleSelection();
@@ -347,11 +356,17 @@ public class IncidentDispatcher extends JPanel
 		} else {
 			boolean update = canUpdate(inc);
 			camera_cbx.setEnabled(false);
-			log_btn.setEnabled(update);
+			log_btn.setEnabled(update && isImpactChanged(inc));
 			deploy_btn.setEnabled(update && canDeploy(inc) &&
 				!inc.getCleared());
 			clear_btn.setEnabled(update);
 		}
+	}
+
+	/** Check if the impact has changed */
+	protected boolean isImpactChanged(Incident inc) {
+		String imp = impact_pnl.getImpact();
+		return !imp.equals(inc.getImpact());
 	}
 
 	/** Update one attribute on the form */
@@ -369,10 +384,10 @@ public class IncidentDispatcher extends JPanel
 		}
 		if(a == null || a.equals("impact"))
 			impact_pnl.setImpact(inc.getImpact());
-		if(a == null || a.equals("cleared")) {
+		if(a == null || a.equals("cleared"))
 			clear_btn.setSelected(inc.getCleared());
+		if(a != null && (a.equals("impact") || a.equals("cleared")))
 			enableWidgets(inc);
-		}
 	}
 
 	/** Clear the event type */
