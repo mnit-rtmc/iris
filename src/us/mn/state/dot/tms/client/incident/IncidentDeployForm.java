@@ -149,9 +149,11 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		int shift = cb.getShift(proxy.getEasting(),proxy.getNorthing());
 		for(Float up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
-			model.addElement(lcs_array);
-			indications.put(lcs_array.getName(),
-				createIndications(lcs_array, up, shift));
+			Integer[] ind = createIndications(lcs_array, up, shift);
+			if(shouldDeploy(ind)) {
+				model.addElement(lcs_array);
+				indications.put(lcs_array.getName(), ind);
+			}
 		}
 	}
 
@@ -304,6 +306,21 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 				return LaneUseIndication.MERGE_LEFT;
 		} else
 			return LaneUseIndication.LANE_CLOSED_AHEAD;
+	}
+
+	/** Check if a set of indications should be deployed */
+	static protected boolean shouldDeploy(Integer[] ind) {
+		for(int i: ind) {
+			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
+			switch(LaneUseIndication.fromOrdinal(i)) {
+			case DARK:
+			case LANE_OPEN:
+				continue;
+			default:
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/** Find all LCS arrays on the given corridor */
