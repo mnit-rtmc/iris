@@ -59,34 +59,45 @@ public class IncidentPolicy {
 	/** Create proposed indications for an LCS array.
 	 * @param up Distance upstream from incident (miles).
 	 * @param n_lanes Number of lanes on LCS array.
-	 * @param l_shift Lane shift relative to incident.
+	 * @param shift Lane shift relative to incident.
 	 * @return Array of LaneUseIndication ordinal values. */
-	public Integer[] createIndications(float up, int n_lanes, int l_shift) {
-		if(up < 0 || up > DIST_UPSTREAM_3_MILES)
-			return new Integer[0];
-		if(up < DIST_UPSTREAM_1_MILES)
-			return createIndications1(n_lanes, l_shift);
-		if(up < DIST_UPSTREAM_2_MILES)
-			return createIndications2(n_lanes, l_shift);
-		else
-			return createIndications3(n_lanes, l_shift);
-	}
-
-	/** Create first indications for an LCS array.
-	 * @param n_lanes Number of lanes on LCS array.
-	 * @param l_shift Lane shift relative to incident.
-	 * @return Array of LaneUseIndication ordinal values. */
-	protected Integer[] createIndications1(int n_lanes, int l_shift) {
+	public Integer[] createIndications(float up, int n_lanes, int shift) {
 		Integer[] ind = new Integer[n_lanes];
 		for(int i = 0; i < ind.length; i++)
-			ind[i] = getIndication1(l_shift + n_lanes -i).ordinal();
+			ind[i] = getIndication(up, n_lanes, shift, i).ordinal();
 		return ind;
 	}
 
-	/** Get the first indication for one lane.
-	 * @param ln Lane shift relative to incident.
+	/** Get an indication for one lane.
+	 * @param up Distance upstream from incident (miles).
+	 * @param n_lanes Number of lanes on LCS array.
+	 * @param shift Lane shift relative to incident.
+	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication1(int ln) {
+	protected LaneUseIndication getIndication(float up, int n_lanes,
+		int shift, int i)
+	{
+		if(up < 0)
+			return LaneUseIndication.DARK;
+		if(up < DIST_UPSTREAM_1_MILES)
+			return getIndication1(n_lanes, shift, i);
+		if(up < DIST_UPSTREAM_2_MILES)
+			return getIndication2(n_lanes, shift, i);
+		if(up < DIST_UPSTREAM_3_MILES)
+			return getIndication3(n_lanes, shift, i);
+		else
+			return LaneUseIndication.DARK;
+	}
+
+	/** Get the first indication for one lane.
+	 * @param n_lanes Number of lanes on LCS array.
+	 * @param shift Lane shift relative to incident.
+	 * @param i Lane number.
+	 * @return LaneUseIndication value. */
+	protected LaneUseIndication getIndication1(int n_lanes, int shift,
+		int i)
+	{
+		int ln = shift + n_lanes - i;
 		ImpactCode def = ImpactCode.FREE_FLOWING;
 		ImpactCode ic = getImpact(ln, def);
 		if(ic == ImpactCode.BLOCKED)
@@ -111,26 +122,16 @@ public class IncidentPolicy {
 			return ImpactCode.fromChar(impact.charAt(ln));
 	}
 
-	/** Create second indications for an LCS array.
-	 * @param n_lanes Number of lanes on LCS array.
-	 * @param l_shift Lane shift relative to incident.
-	 * @return Array of LaneUseIndication ordinal values. */
-	protected Integer[] createIndications2(int n_lanes, int l_shift) {
-		Integer[] ind = new Integer[n_lanes];
-		for(int i = 0; i < ind.length; i++)
-			ind[i] = getIndication2(n_lanes, l_shift, i).ordinal();
-		return ind;
-	}
-
 	/** Get the second indication for one lane.
 	 * @param n_lanes Number of lanes in array.
-	 * @param l_shift Lane shift relative to incident.
+	 * @param shift Lane shift relative to incident.
+	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication2(int n_lanes, int l_shift,
+	protected LaneUseIndication getIndication2(int n_lanes, int shift,
 		int i)
 	{
 		ImpactCode def = ImpactCode.BLOCKED;
-		int ln = l_shift + n_lanes - i;
+		int ln = shift + n_lanes - i;
 		ImpactCode ic = getImpact(ln, def);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
@@ -150,26 +151,16 @@ public class IncidentPolicy {
 			return LaneUseIndication.MERGE_LEFT;
 	}
 
-	/** Create third indications for an LCS array.
-	 * @param n_lanes Number of lanes on LCS array.
-	 * @param l_shift Lane shift relative to incident.
-	 * @return Array of LaneUseIndication ordinal values. */
-	protected Integer[] createIndications3(int n_lanes, int l_shift) {
-		Integer[] ind = new Integer[n_lanes];
-		for(int i = 0; i < ind.length; i++)
-			ind[i] = getIndication3(n_lanes, l_shift, i).ordinal();
-		return ind;
-	}
-
 	/** Get the third indication for one lane.
 	 * @param n_lanes Number of lanes in array.
-	 * @param l_shift Lane shift relative to incident.
+	 * @param shift Lane shift relative to incident.
+	 * @param i Lane number.
 	 * @return LaneUseIndication value. */
-	protected LaneUseIndication getIndication3(int n_lanes, int l_shift,
+	protected LaneUseIndication getIndication3(int n_lanes, int shift,
 		int i)
 	{
 		ImpactCode def = ImpactCode.BLOCKED;
-		int ln = l_shift + n_lanes - i;
+		int ln = shift + n_lanes - i;
 		ImpactCode ic = getImpact(ln, def);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
