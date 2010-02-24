@@ -130,8 +130,10 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		int shift = cb.getShift(proxy.getEasting(),proxy.getNorthing());
 		for(Float up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
-			Integer[] ind = policy.createIndications(lcs_array, up,
-				shift);
+			int n_lanes = lcs_array.getIndicationsCurrent().length;
+			int l_shift = lcs_array.getShift() - shift;
+			Integer[] ind = policy.createIndications(up, n_lanes,
+				l_shift);
 			if(shouldDeploy(ind)) {
 				model.addElement(lcs_array);
 				indications.put(lcs_array.getName(), ind);

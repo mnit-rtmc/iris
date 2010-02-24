@@ -58,17 +58,13 @@ public class IncidentPolicy {
 	}
 
 	/** Create proposed indications for an LCS array.
-	 * @param lcs_array LCS array to deploy.
 	 * @param up Distance upstream from incident (miles).
-	 * @param shift Left lane shift at incident.
+	 * @param n_lanes Number of lanes on LCS array.
+	 * @param l_shift Lane shift relative to incident.
 	 * @return Array of LaneUseIndication ordinal values. */
-	public Integer[] createIndications(LCSArray lcs_array, float up,
-		int shift)
-	{
+	public Integer[] createIndications(float up, int n_lanes, int l_shift) {
 		if(up < 0 || up > DIST_UPSTREAM_3_MILES)
 			return new Integer[0];
-		int n_lanes = lcs_array.getIndicationsCurrent().length;
-		int l_shift = lcs_array.getShift() - shift;
 		if(up < DIST_UPSTREAM_1_MILES)
 			return createIndications1(n_lanes, l_shift);
 		if(up < DIST_UPSTREAM_2_MILES)
