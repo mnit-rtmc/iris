@@ -87,25 +87,26 @@ public class IncidentPolicy {
 	 * @param ln Lane shift relative to incident.
 	 * @return LaneUseIndication value. */
 	protected LaneUseIndication getIndication1(int ln) {
-		ImpactCode ic = getImpact(ln);
+		ImpactCode def = ImpactCode.FREE_FLOWING;
+		ImpactCode ic = getImpact(ln, def);
 		if(ic == ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
 		if(ic == ImpactCode.PARTIALLY_BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
-		ImpactCode right = getImpact(ln + 1);
+		ImpactCode right = getImpact(ln + 1, def);
 		if(right == ImpactCode.BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
-		ImpactCode left = getImpact(ln - 1);
+		ImpactCode left = getImpact(ln - 1, def);
 		if(left == ImpactCode.BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
 		return LaneUseIndication.LANE_OPEN;
 	}
 
 	/** Get the impact at the specified lane */
-	protected ImpactCode getImpact(int ln) {
+	protected ImpactCode getImpact(int ln, ImpactCode def) {
 		String impact = incident.getImpact();
 		if(ln < 0 || ln >= impact.length())
-			return ImpactCode.FREE_FLOWING;
+			return def;
 		else
 			return ImpactCode.fromChar(impact.charAt(ln));
 	}
@@ -128,14 +129,15 @@ public class IncidentPolicy {
 	protected LaneUseIndication getIndication2(int n_lanes, int l_shift,
 		int i)
 	{
+		ImpactCode def = ImpactCode.BLOCKED;
 		int ln = l_shift + n_lanes - i;
-		ImpactCode ic = getImpact2(ln);
+		ImpactCode ic = getImpact(ln, def);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		ImpactCode right = getImpact2(ln + 1);
+		ImpactCode right = getImpact(ln + 1, def);
 		if(i - 1 < 0)
 			right = ImpactCode.BLOCKED;
-		ImpactCode left = getImpact2(ln - 1);
+		ImpactCode left = getImpact(ln - 1, def);
 		if(i + 1 >= n_lanes)
 			left = ImpactCode.BLOCKED;
 		if(left == ImpactCode.BLOCKED && right == ImpactCode.BLOCKED)
@@ -146,15 +148,6 @@ public class IncidentPolicy {
 			return LaneUseIndication.MERGE_RIGHT;
 		else
 			return LaneUseIndication.MERGE_LEFT;
-	}
-
-	/** Get the impact at the specified lane */
-	protected ImpactCode getImpact2(int ln) {
-		String impact = incident.getImpact();
-		if(ln < 0 || ln >= impact.length())
-			return ImpactCode.BLOCKED;
-		else
-			return ImpactCode.fromChar(impact.charAt(ln));
 	}
 
 	/** Create third indications for an LCS array.
@@ -175,23 +168,24 @@ public class IncidentPolicy {
 	protected LaneUseIndication getIndication3(int n_lanes, int l_shift,
 		int i)
 	{
+		ImpactCode def = ImpactCode.BLOCKED;
 		int ln = l_shift + n_lanes - i;
-		ImpactCode ic = getImpact2(ln);
+		ImpactCode ic = getImpact(ln, def);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		ImpactCode right = getImpact2(ln + 1);
+		ImpactCode right = getImpact(ln + 1, def);
 		if(i - 1 < 0)
 			right = ImpactCode.BLOCKED;
-		ImpactCode left = getImpact2(ln - 1);
+		ImpactCode left = getImpact(ln - 1, def);
 		if(i + 1 >= n_lanes)
 			left = ImpactCode.BLOCKED;
 		if(left == ImpactCode.BLOCKED && right == ImpactCode.BLOCKED) {
 			// NOTE: adjacent lanes are also blocked, so find the
 			//       impact 2 lanes to the left and right
-			right = getImpact2(ln + 2);
+			right = getImpact(ln + 2, def);
 			if(i - 2 < 0)
 				right = ImpactCode.BLOCKED;
-			left = getImpact2(ln - 2);
+			left = getImpact(ln - 2, def);
 			if(i + 2 >= n_lanes)
 				left = ImpactCode.BLOCKED;
 			if(left != ImpactCode.BLOCKED &&
