@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
