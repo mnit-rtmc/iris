@@ -98,7 +98,6 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 				return indications.get(lcs_array.getName());
 			}
 		});
-		list.setVisibleRowCount(3);
 		populateList();
 		add(createPanel());
 		createJobs();
