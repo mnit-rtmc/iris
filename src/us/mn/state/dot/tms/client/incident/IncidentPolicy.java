@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LCSArray;
 
 /**
  * IncidentPolicy determines which LCS indications to propose for an incident.
