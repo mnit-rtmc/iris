@@ -98,23 +98,33 @@ public class IncidentPolicy {
 		int i)
 	{
 		int ln = shift + n_lanes - i;
-		ImpactCode def = ImpactCode.FREE_FLOWING;
-		ImpactCode ic = getImpact(ln, def);
+		ImpactCode ic = getImpact(ln);
 		if(ic == ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
 		if(ic == ImpactCode.PARTIALLY_BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
-		ImpactCode right = getImpact(ln + 1, def);
+		ImpactCode def = ImpactCode.FREE_FLOWING;
+		ImpactCode right = getAdjacentImpact(ln + 1, def);
 		if(right == ImpactCode.BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
-		ImpactCode left = getImpact(ln - 1, def);
+		ImpactCode left = getAdjacentImpact(ln - 1, def);
 		if(left == ImpactCode.BLOCKED)
 			return LaneUseIndication.USE_CAUTION;
 		return LaneUseIndication.LANE_OPEN;
 	}
 
 	/** Get the impact at the specified lane */
-	protected ImpactCode getImpact(int ln, ImpactCode def) {
+	protected ImpactCode getImpact(int ln) {
+		String impact = incident.getImpact();
+		// Don't look at the shoulder lanes
+		if(ln <= 0 || ln >= impact.length() - 1)
+			return ImpactCode.FREE_FLOWING;
+		else
+			return ImpactCode.fromChar(impact.charAt(ln));
+	}
+
+	/** Get the impact at the specified adjacent lane */
+	protected ImpactCode getAdjacentImpact(int ln, ImpactCode def) {
 		String impact = incident.getImpact();
 		if(ln < 0 || ln >= impact.length())
 			return def;
@@ -130,15 +140,15 @@ public class IncidentPolicy {
 	protected LaneUseIndication getIndication2(int n_lanes, int shift,
 		int i)
 	{
-		ImpactCode def = ImpactCode.BLOCKED;
 		int ln = shift + n_lanes - i;
-		ImpactCode ic = getImpact(ln, def);
+		ImpactCode ic = getImpact(ln);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		ImpactCode right = getImpact(ln + 1, def);
+		ImpactCode def = ImpactCode.BLOCKED;
+		ImpactCode right = getAdjacentImpact(ln + 1, def);
 		if(i - 1 < 0)
 			right = ImpactCode.BLOCKED;
-		ImpactCode left = getImpact(ln - 1, def);
+		ImpactCode left = getAdjacentImpact(ln - 1, def);
 		if(i + 1 >= n_lanes)
 			left = ImpactCode.BLOCKED;
 		if(left == ImpactCode.BLOCKED && right == ImpactCode.BLOCKED)
@@ -159,24 +169,24 @@ public class IncidentPolicy {
 	protected LaneUseIndication getIndication3(int n_lanes, int shift,
 		int i)
 	{
-		ImpactCode def = ImpactCode.BLOCKED;
 		int ln = shift + n_lanes - i;
-		ImpactCode ic = getImpact(ln, def);
+		ImpactCode ic = getImpact(ln);
 		if(ic != ImpactCode.BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		ImpactCode right = getImpact(ln + 1, def);
+		ImpactCode def = ImpactCode.BLOCKED;
+		ImpactCode right = getAdjacentImpact(ln + 1, def);
 		if(i - 1 < 0)
 			right = ImpactCode.BLOCKED;
-		ImpactCode left = getImpact(ln - 1, def);
+		ImpactCode left = getAdjacentImpact(ln - 1, def);
 		if(i + 1 >= n_lanes)
 			left = ImpactCode.BLOCKED;
 		if(left == ImpactCode.BLOCKED && right == ImpactCode.BLOCKED) {
 			// NOTE: adjacent lanes are also blocked, so find the
 			//       impact 2 lanes to the left and right
-			right = getImpact(ln + 2, def);
+			right = getAdjacentImpact(ln + 2, def);
 			if(i - 2 < 0)
 				right = ImpactCode.BLOCKED;
-			left = getImpact(ln - 2, def);
+			left = getAdjacentImpact(ln - 2, def);
 			if(i + 2 >= n_lanes)
 				left = ImpactCode.BLOCKED;
 			if(left != ImpactCode.BLOCKED &&
