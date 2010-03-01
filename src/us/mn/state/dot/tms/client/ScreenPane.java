@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
+import java.util.LinkedList;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -32,9 +33,12 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
 import us.mn.state.dot.sonar.Checker;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
@@ -66,6 +70,10 @@ public class ScreenPane extends JPanel {
 	/** IRIS tool bar */
 	protected final IrisToolBar tool_bar;
 
+	/** List of tab switchers */
+	protected final LinkedList<TabSwitcher> switchers =
+		new LinkedList<TabSwitcher>();
+
 	/** Create a new screen pane */
 	public ScreenPane() {
 		setLayout(new BorderLayout());
@@ -80,15 +88,58 @@ public class ScreenPane extends JPanel {
 		add(map_panel, BorderLayout.CENTER);
 		tab_pane.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
-				Component tab = tab_pane.getSelectedComponent();
-				if(tab instanceof MapTab) {
-					MapTab mt = (MapTab)tab;
-					mt.setMap(map);
-					map.getModel().setHomeLayer(
-						mt.getHomeLayer());
-				}
+				setHomeLayer();
 			}
 		});
+	}
+
+	/** Set the home layer for the screen pane */
+	protected void setHomeLayer() {
+		Component tab = tab_pane.getSelectedComponent();
+		if(tab instanceof MapTab) {
+			MapTab mt = (MapTab)tab;
+			map.getModel().setHomeLayer(mt.getHomeLayer());
+		}
+	}
+
+	/** Add a tab to the screen pane */
+	public void addTab(MapTab mt) {
+		tab_pane.addTab(mt.getName(), null, mt, mt.getTip());
+		mt.setMap(map);
+		LayerState ls = mt.getHomeLayer();
+		if(ls instanceof ProxyLayerState) {
+			ProxyLayerState pls = (ProxyLayerState)ls;
+			TabSwitcher ts = new TabSwitcher(mt,
+				pls.getSelectionModel());
+			switchers.add(ts);
+		}
+	}
+
+	/** Class to listen for proxy selection events and select tabs */
+	protected class TabSwitcher implements ProxySelectionListener {
+		protected final MapTab tab;
+		protected final ProxySelectionModel model;
+		protected TabSwitcher(MapTab mt, ProxySelectionModel psm) {
+			tab = mt;
+			model = psm;
+			model.addProxySelectionListener(this);
+		}
+		protected void dispose() {
+			model.removeProxySelectionListener(this);
+		}
+		public void selectionAdded(SonarObject proxy) {
+			tab_pane.setSelectedComponent(tab);
+		}
+		public void selectionRemoved(SonarObject proxy) { }
+	}
+
+	/** Remove all the tabs */
+	public void removeTabs() {
+		for(TabSwitcher ts: switchers)
+			ts.dispose();
+		switchers.clear();
+		tab_pane.removeAll();
+		tool_bar.clear();
 	}
 
 	/** Set the map layers */
@@ -103,17 +154,7 @@ public class ScreenPane extends JPanel {
 				sls.setMap(map);
 			}
 		}
-	}
-
-	/** Add a tab to the screen pane */
-	public void addTab(MapTab tab) {
-		tab_pane.addTab(tab.getName(), null, tab, tab.getTip());
-	}
-
-	/** Remove all the tabs */
-	public void removeTabs() {
-		tab_pane.removeAll();
-		tool_bar.clear();
+		setHomeLayer();
 	}
 
 	/** Create the map panel */

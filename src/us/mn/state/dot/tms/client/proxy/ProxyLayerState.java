@@ -40,6 +40,11 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Proxy selection model */
 	protected final ProxySelectionModel<T> model;
 
+	/** Get the proxy selection model */
+	public ProxySelectionModel<T> getSelectionModel() {
+		return model;
+	}
+
 	/** Listener for proxy selection events */
 	protected final ProxySelectionListener<T> listener;
 

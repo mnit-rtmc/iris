@@ -248,8 +248,8 @@ public class IrisClient extends JFrame {
 				return;
 			for(MapTab tab: s.getTabs()) {
 				int p = tab.getNumber() % visible.size();
-				ScreenPane pane = visible.get(p);
-				pane.addTab(tab);
+				ScreenPane sp = visible.get(p);
+				sp.addTab(tab);
 			}
 			for(ScreenPane sp: visible) {
 				sp.createToolPanels(s);
