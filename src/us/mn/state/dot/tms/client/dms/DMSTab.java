@@ -15,15 +15,10 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.util.List;
 import javax.swing.BoxLayout;
-import javax.swing.JPanel;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.CellRendererSize;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -36,9 +31,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class DMSTab extends MapTab {
 
-	/** DMS Manager */
-	protected final DMSManager manager;
-
 	/** DMS dispatcher component */
 	protected final DMSDispatcher dispatcher;
 
@@ -46,18 +38,10 @@ public class DMSTab extends MapTab {
 	protected final StyleSummary<DMS> summary;
 
 	/** Create a new DMS tab */
- 	public DMSTab(Session session, DMSManager man, List<LayerState> lstates)
-	{
-		super(I18N.get("dms.abbreviation"), I18N.get("dms.title"));
-		manager = man;
+ 	public DMSTab(Session session, DMSManager manager) {
+		super(manager.getProxyType(), I18N.get("dms.title"));
 		dispatcher = new DMSDispatcher(session, manager);
 		summary = manager.createStyleSummary(true);
-		for(LayerState ls: lstates) {
-			map_model.addLayer(ls);
-			String name = ls.getLayer().getName();
-			if(name.equals(manager.getProxyType()))
-				map_model.setHomeLayer(ls);
-		}
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		add(dispatcher);
 		add(summary);

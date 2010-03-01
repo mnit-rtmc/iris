@@ -64,14 +64,6 @@ import us.mn.state.dot.tms.client.warning.WarningSignManager;
  */
 public class Session {
 
-	/** Hide the named layer */
-	static protected void hideLayer(List<LayerState> lstates, String name) {
-		for(LayerState ls: lstates) {
-			if(ls.getLayer().getName().equals(name))
-				ls.setVisible(false);
-		}
-	}
-
 	/** Session User */
 	protected final User user;
 
@@ -268,14 +260,11 @@ public class Session {
 
 	/** Add the DMS tab */
 	protected void addDMSTab() {
-		List<LayerState> lstates = createLayers();
-		hideLayer(lstates, meter_manager.getProxyType());
-		hideLayer(lstates, lcs_array_manager.getProxyType());
-		tabs.add(new DMSTab(this, dms_manager, lstates));
+		tabs.add(new DMSTab(this, dms_manager));
 	}
 
 	/** Create the layer states */
-	protected List<LayerState> createLayers() {
+	public List<LayerState> createLayers() {
 		List<LayerState> lstates = createBaseLayers();
 		if(seg_layer != null)
 			lstates.add(seg_layer.createState());
@@ -291,6 +280,11 @@ public class Session {
 			lstates.add(warn_manager.getLayer().createState());
 		if(canRead(Incident.SONAR_TYPE))
 			lstates.add(inc_manager.getLayer().createState());
+		if(canAdd(R_Node.SONAR_TYPE)) {
+			LayerState ls = r_node_manager.getLayer().createState();
+			ls.setVisible(false);
+			lstates.add(ls);
+		}
 		return lstates;
 	}
 
@@ -304,54 +298,27 @@ public class Session {
 
 	/** Add the incident tab */
 	protected void addIncidentTab() throws IOException {
-		List<LayerState> lstates = createLayers();
-		hideLayer(lstates, dms_manager.getProxyType());
-		hideLayer(lstates, lcs_array_manager.getProxyType());
-		hideLayer(lstates, meter_manager.getProxyType());
-		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new IncidentTab(this, inc_manager, lstates));
+		tabs.add(new IncidentTab(this, inc_manager));
 	}
 
 	/** Add the meter tab */
 	protected void addMeterTab() throws IOException {
-		List<LayerState> lstates = createLayers();
-		for(LayerState ls: lstates) {
-			for(Theme t: ls.getThemes()) {
-				if(t instanceof FreewayTheme)
-					ls.setTheme(t);
-			}
-		}
-		hideLayer(lstates, dms_manager.getProxyType());
-		hideLayer(lstates, lcs_array_manager.getProxyType());
-		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new RampMeterTab(this, meter_manager, lstates));
+		tabs.add(new RampMeterTab(this, meter_manager));
 	}
 
 	/** Add the LCS tab */
 	protected void addLcsTab() throws IOException {
-		List<LayerState> lstates = createLayers();
-		hideLayer(lstates, inc_manager.getProxyType());
-		hideLayer(lstates, meter_manager.getProxyType());
-		hideLayer(lstates, dms_manager.getProxyType());
-		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new LcsTab(this, lcs_array_manager, lstates));
+		tabs.add(new LcsTab(this, lcs_array_manager));
 	}
 
 	/** Add the camera tab */
 	protected void addCameraTab() {
-		List<LayerState> lstates = createLayers();
-		hideLayer(lstates, meter_manager.getProxyType());
-		hideLayer(lstates, dms_manager.getProxyType());
-		hideLayer(lstates, lcs_array_manager.getProxyType());
-		hideLayer(lstates, warn_manager.getProxyType());
-		tabs.add(new CameraTab(cam_manager, lstates, props, logger,
-			state, user));
+		tabs.add(new CameraTab(cam_manager, props, logger, state,user));
 	}
 
 	/** Add the roadway tab */
 	protected void addRoadwayTab() {
-		List<LayerState> lstates = createBaseLayers();
-		tabs.add(new RoadwayTab(this, r_node_manager, lstates));
+		tabs.add(new RoadwayTab(this, r_node_manager));
 	}
 
 	/** Check if the user can add an object */

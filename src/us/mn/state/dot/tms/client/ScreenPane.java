@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,14 @@ import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapToolBar;
 import us.mn.state.dot.sonar.Checker;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
+import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
+import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
 /**
@@ -79,11 +82,26 @@ public class ScreenPane extends JPanel {
 			public void stateChanged(ChangeEvent e) {
 				Component tab = tab_pane.getSelectedComponent();
 				if(tab instanceof MapTab) {
-					MapTab it = (MapTab)tab;
-					map.setModel(it.getMapModel());
+					MapTab mt = (MapTab)tab;
+					map.getModel().setHomeLayer(
+						mt.getHomeLayer(map));
 				}
 			}
 		});
+	}
+
+	/** Set the map layers */
+	public void setMapLayers() {
+		for(LayerState ls: map.getLayers()) {
+			if(ls instanceof ProxyLayerState) {
+				ProxyLayerState pls = (ProxyLayerState)ls;
+				pls.setMap(map);
+			}
+			if(ls instanceof SegmentLayerState) {
+				SegmentLayerState sls = (SegmentLayerState)ls;
+				sls.setMap(map);
+			}
+		}
 	}
 
 	/** Add a tab to the screen pane */

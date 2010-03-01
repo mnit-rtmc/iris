@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BorderLayout;
-import java.util.List;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.MapTab;
@@ -36,27 +35,20 @@ public class RoadwayTab extends MapTab {
 	protected final CorridorList clist;
 
 	/** Create a new roadway node tab */
-	public RoadwayTab(Session session, R_NodeManager m,
-		List<LayerState> lstates)
-	{
+	public RoadwayTab(Session session, R_NodeManager man) {
 		super("Roadway", "View / edit roadway nodes");
 		SonarState st = session.getSonarState();
 		R_NodeCreator creator = new R_NodeCreator(st,session.getUser());
-		clist = new CorridorList(m, creator);
-		chooser = new CorridorChooser(m, clist);
-		for(LayerState ls: lstates)
-			map_model.addLayer(ls);
-		LayerState ls = m.getLayer().createState();
-		map_model.addLayer(ls);
-		map_model.setHomeLayer(ls);
+		clist = new CorridorList(man, creator);
+		chooser = new CorridorChooser(man, clist);
 		add(chooser, BorderLayout.NORTH);
 		add(clist, BorderLayout.CENTER);
 	}
 
-	/** Set the map */
-	public void setMap(MapBean map) {
-		super.setMap(map);
+	/** Get the home layer for the tab */
+	public LayerState getHomeLayer(MapBean map) {
 		chooser.setMap(map);
+		return super.getHomeLayer(map);
 	}
 
 	/** Get the tab number */

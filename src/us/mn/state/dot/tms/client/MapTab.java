@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,9 +18,6 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.map.MapModel;
-import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
-import us.mn.state.dot.tms.client.roads.SegmentLayerState;
 
 /**
  * Super class of all tabs used in the IrisClient.
@@ -49,12 +46,14 @@ abstract public class MapTab extends JPanel {
 		return tip;
 	}
 
-	/** Map model for the tab */
-	protected final MapModel map_model = new MapModel();
-
-	/** Get the map model */
-	public MapModel getMapModel() {
-		return map_model;
+	/** Get the home layer for the tab */
+	public LayerState getHomeLayer(MapBean map) {
+		for(LayerState ls: map.getLayers()) {
+			String ln = ls.getLayer().getName();
+			if(ln.equals(name))
+				return ls;
+		}
+		return null;
 	}
 
 	/** Create a new map tab */
@@ -64,22 +63,8 @@ abstract public class MapTab extends JPanel {
 		tip = t;
 	}
 
-	/** Set the map */
-	public void setMap(MapBean map) {
-		for(LayerState ls: map_model.getLayers()) {
-			if(ls instanceof ProxyLayerState) {
-				ProxyLayerState pls = (ProxyLayerState)ls;
-				pls.setMap(map);
-			}
-			if(ls instanceof SegmentLayerState) {
-				SegmentLayerState sls = (SegmentLayerState)ls;
-				sls.setMap(map);
-			}
-		}
-	}
-
 	/** Perform any clean up necessary */
 	public void dispose() {
-		map_model.dispose();
+		// nothing to do
 	}
 }

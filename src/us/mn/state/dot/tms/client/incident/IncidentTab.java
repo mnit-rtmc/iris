@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
-import java.util.List;
 import javax.swing.JPanel;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
@@ -45,17 +44,11 @@ public class IncidentTab extends MapTab {
 	protected final StyleSummary<Incident> summary;
 
 	/** Create a new incident tab */
-  	public IncidentTab(Session session, IncidentManager m,
-		List<LayerState> lstates) throws IOException
+  	public IncidentTab(Session session, IncidentManager m)
+		throws IOException
 	{
 		super("Incident", "Manage Incidents");
 		manager = m;
-		for(LayerState ls: lstates) {
-			map_model.addLayer(ls);
-			String name = ls.getLayer().getName();
-			if(name.equals("Camera"))
-				map_model.setHomeLayer(ls);
-		}
 		creator = new IncidentCreator(manager.getTheme(),
 			manager.getSelectionModel(),session.getR_NodeManager());
 		dispatcher = new IncidentDispatcher(session, manager);
@@ -86,11 +79,11 @@ public class IncidentTab extends MapTab {
 		creator.dispose();
 	}
 
-	/** Set the map */
-	public void setMap(MapBean map) {
-		super.setMap(map);
+	/** Get the home layer for the tab */
+	public LayerState getHomeLayer(MapBean map) {
 		creator.setMap(map);
 		creator.setEnabled(canAdd() && map != null);
+		return super.getHomeLayer(map);
 	}
 
 	/** Check if the user can add an incident */

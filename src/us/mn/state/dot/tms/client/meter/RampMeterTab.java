@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.client.meter;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
-import java.util.List;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -41,16 +39,11 @@ public class RampMeterTab extends MapTab {
 	protected final StyleSummary<RampMeter> summary;
 
 	/** Create a new ramp meter tab */
-  	public RampMeterTab(Session session, MeterManager m,
-		List<LayerState> lstates) throws IOException
+  	public RampMeterTab(Session session, MeterManager man)
+		throws IOException
 	{
-		super("Meter", "Operate Ramp Meters");
-		manager = m;
-		for(LayerState ls: lstates) {
-			map_model.addLayer(ls);
-			if(ls.getLayer().getName().equals(m.getProxyType()))
-				map_model.setHomeLayer(ls);
-		}
+		super(man.getProxyType(), "Operate Ramp Meters");
+		manager = man;
 		statusPanel = new MeterStatusPanel(session, manager);
 		summary = manager.createStyleSummary();
 		add(statusPanel, BorderLayout.NORTH);

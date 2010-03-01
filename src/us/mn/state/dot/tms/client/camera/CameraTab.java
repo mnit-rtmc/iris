@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,8 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Logger;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.SonarState;
@@ -30,21 +28,11 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class CameraTab extends MapTab {
 
-	/** Message logger */
-	protected final Logger logger;
-
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(CameraManager manager, List<LayerState> lstates,
-		Properties props, Logger l, SonarState st, User user)
+	public CameraTab(CameraManager manager, Properties props, Logger logger,
+		SonarState st, User user)
 	{
-		super("Camera", "Camera summary");
-		logger = l;
-		for(LayerState ls: lstates) {
-			map_model.addLayer(ls);
-			String name = ls.getLayer().getName();
-			if(name.equals(manager.getProxyType()))
-				map_model.setHomeLayer(ls);
-		}
+		super(manager.getProxyType(), "Camera summary");
 		add(new CameraViewer(manager, props, logger, st, user),
 			BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);

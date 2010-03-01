@@ -249,10 +249,11 @@ public class IrisClient extends JFrame {
 				int p = tab.getNumber() % visible.size();
 				ScreenPane pane = visible.get(p);
 				pane.addTab(tab);
-				tab.setMap(pane.getMap());
 			}
-			for(ScreenPane sp: visible)
+			for(ScreenPane sp: visible) {
 				sp.createToolPanels(s);
+				sp.setMapLayers();
+			}
 		}
 	}
 
@@ -284,6 +285,7 @@ public class IrisClient extends JFrame {
 			for(int i = 0; i < pwd.length; ++i)
 				pwd[i] = ' ';
 			updateMenus(session);
+			updateMaps();
 			arrangeTabs();
 			setTitle(createTitle(session));
 			setCursor(null);
@@ -322,6 +324,19 @@ public class IrisClient extends JFrame {
 			view_menu = null;
 		session_menu.setLoggedIn(in);
 		help_menu.setLoggedIn(in);
+	}
+
+	/** Update the maps on all screen panes */
+	protected void updateMaps() {
+		Session s = session;
+		if(s != null) {
+			for(ScreenPane sp: getVisiblePanes()) {
+				MapModel mm = new MapModel();
+				for(LayerState ls: s.createLayers())
+					mm.addLayer(ls);
+				sp.getMap().setModel(mm);
+			}
+		}
 	}
 
 	/** Logout of the current session */
