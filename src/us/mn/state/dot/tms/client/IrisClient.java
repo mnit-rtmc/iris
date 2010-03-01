@@ -184,6 +184,7 @@ public class IrisClient extends JFrame {
 				mm.addLayer(ls);
 				mm.setHomeLayer(ls);
 			}
+			mm.home();
 			sp.getMap().setModel(mm);
 		}
 	}
