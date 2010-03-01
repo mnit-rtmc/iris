@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.BorderLayout;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
@@ -45,10 +44,10 @@ public class RoadwayTab extends MapTab {
 		add(clist, BorderLayout.CENTER);
 	}
 
-	/** Get the home layer for the tab */
-	public LayerState getHomeLayer(MapBean map) {
-		chooser.setMap(map);
-		return super.getHomeLayer(map);
+	/** Set the map for this tab */
+	public void setMap(MapBean m) {
+		super.setMap(m);
+		chooser.setMap(m);
 	}
 
 	/** Get the tab number */

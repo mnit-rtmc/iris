@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.incident;
 import java.awt.BorderLayout;
 import java.io.IOException;
 import javax.swing.JPanel;
-import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.MapTab;
@@ -79,11 +78,11 @@ public class IncidentTab extends MapTab {
 		creator.dispose();
 	}
 
-	/** Get the home layer for the tab */
-	public LayerState getHomeLayer(MapBean map) {
-		creator.setMap(map);
-		creator.setEnabled(canAdd() && map != null);
-		return super.getHomeLayer(map);
+	/** Set the map for this tab */
+	public void setMap(MapBean m) {
+		super.setMap(m);
+		creator.setMap(m);
+		creator.setEnabled(canAdd() && m != null);
 	}
 
 	/** Check if the user can add an incident */

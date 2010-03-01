@@ -83,8 +83,9 @@ public class ScreenPane extends JPanel {
 				Component tab = tab_pane.getSelectedComponent();
 				if(tab instanceof MapTab) {
 					MapTab mt = (MapTab)tab;
+					mt.setMap(map);
 					map.getModel().setHomeLayer(
-						mt.getHomeLayer(map));
+						mt.getHomeLayer());
 				}
 			}
 		});

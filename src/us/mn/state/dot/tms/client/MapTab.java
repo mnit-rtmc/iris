@@ -46,12 +46,23 @@ abstract public class MapTab extends JPanel {
 		return tip;
 	}
 
+	/** Current map for this tab */
+	protected MapBean map;
+
+	/** Set the map for this tab */
+	public void setMap(MapBean m) {
+		map = m;
+	}
+
 	/** Get the home layer for the tab */
-	public LayerState getHomeLayer(MapBean map) {
-		for(LayerState ls: map.getLayers()) {
-			String ln = ls.getLayer().getName();
-			if(ln.equals(name))
-				return ls;
+	public LayerState getHomeLayer() {
+		MapBean m = map;
+		if(m != null) {
+			for(LayerState ls: m.getLayers()) {
+				String ln = ls.getLayer().getName();
+				if(ln.equals(name))
+					return ls;
+			}
 		}
 		return null;
 	}
