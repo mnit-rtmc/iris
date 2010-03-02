@@ -12,23 +12,23 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.roads;
+package us.mn.state.dot.tms.client.detector;
 
 import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
- * Marker used to paint roadway station nodes.
+ * Marker used to paint detector stations.
  *
  * @author Douglas Lau
  */
-public class StationMarker extends AbstractMarker {
+public class DetectorMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 36;
 
-	/** Create a new station marker */
-	public StationMarker() {
-		super(4);
+	/** Create a new detector marker */
+	public DetectorMarker() {
+		super(12);
 		float size = MARKER_SIZE_PIX;
 		float half = size / 2;
 		float third = size / 3;

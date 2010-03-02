@@ -30,7 +30,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
-import us.mn.state.dot.tms.client.roads.StationMarker;
 
 /**
  * A detector manager is a container for SONAR detector objects.
@@ -40,7 +39,7 @@ import us.mn.state.dot.tms.client.roads.StationMarker;
 public class DetectorManager extends ProxyManager<Detector> {
 
 	/** Shape for map object rendering */
-	static protected final StationMarker MARKER = new StationMarker();
+	static protected final DetectorMarker MARKER = new DetectorMarker();
 
 	/** Name of active style */
 	static public final String STYLE_ACTIVE = "Active";
