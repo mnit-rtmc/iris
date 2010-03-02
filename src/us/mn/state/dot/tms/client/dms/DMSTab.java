@@ -49,7 +49,7 @@ public class DMSTab extends MapTab {
 
 	/** Get the tab number */
 	public int getNumber() {
-		return 0;
+		return 1;
 	}
 
 	/** Dispose of the DMS tab */

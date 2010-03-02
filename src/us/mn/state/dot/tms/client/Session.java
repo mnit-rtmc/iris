@@ -244,23 +244,18 @@ public class Session {
 
 	/** Add the tabs */
 	protected void addTabs() throws IOException {
-		if(canRead(DMS.SONAR_TYPE))
-			addDMSTab();
 		if(canRead(Incident.SONAR_TYPE))
-			addIncidentTab();
-		if(canRead(RampMeter.SONAR_TYPE))
-			addMeterTab();
-		if(canRead(LCSArray.SONAR_TYPE))
-			addLcsTab();
+			tabs.add(new IncidentTab(this, inc_manager));
+		if(canRead(DMS.SONAR_TYPE))
+			tabs.add(new DMSTab(this, dms_manager));
 		if(canRead(Camera.SONAR_TYPE))
-			addCameraTab();
+			tabs.add(new CameraTab(this, cam_manager));
+		if(canRead(LCSArray.SONAR_TYPE))
+			tabs.add(new LcsTab(this, lcs_array_manager));
+		if(canRead(RampMeter.SONAR_TYPE))
+			tabs.add(new RampMeterTab(this, meter_manager));
 		if(canAdd(R_Node.SONAR_TYPE))
-			addRoadwayTab();
-	}
-
-	/** Add the DMS tab */
-	protected void addDMSTab() {
-		tabs.add(new DMSTab(this, dms_manager));
+			tabs.add(new RoadwayTab(this, r_node_manager));
 	}
 
 	/** Create the layer states */
@@ -294,31 +289,6 @@ public class Session {
 		for(Layer l: baseLayers)
 			lstates.add(l.createState());
 		return lstates;
-	}
-
-	/** Add the incident tab */
-	protected void addIncidentTab() throws IOException {
-		tabs.add(new IncidentTab(this, inc_manager));
-	}
-
-	/** Add the meter tab */
-	protected void addMeterTab() throws IOException {
-		tabs.add(new RampMeterTab(this, meter_manager));
-	}
-
-	/** Add the LCS tab */
-	protected void addLcsTab() throws IOException {
-		tabs.add(new LcsTab(this, lcs_array_manager));
-	}
-
-	/** Add the camera tab */
-	protected void addCameraTab() {
-		tabs.add(new CameraTab(cam_manager, props, logger, state,user));
-	}
-
-	/** Add the roadway tab */
-	protected void addRoadwayTab() {
-		tabs.add(new RoadwayTab(this, r_node_manager));
 	}
 
 	/** Check if the user can add an object */

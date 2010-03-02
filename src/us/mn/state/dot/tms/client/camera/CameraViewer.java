@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,6 @@ import java.awt.Insets;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
-import java.util.Properties;
-import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -39,6 +37,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -90,12 +89,6 @@ public class CameraViewer extends JPanel
 		}
 	}
 
-	/** Properties for configuring the video client */
-	private final Properties videoProps;
-
-	/** Message logger */
-	protected final Logger logger;
-
 	/** Sonar state */
 	protected final SonarState state;
 
@@ -116,7 +109,7 @@ public class CameraViewer extends JPanel
 
 	/** Video monitor output */
 	protected us.mn.state.dot.tms.VideoMonitor video_monitor;
-	
+
 	/** Streaming video viewer */
 	protected final us.mn.state.dot.video.client.VideoMonitor monitor =
 		new us.mn.state.dot.video.client.VideoMonitor();
@@ -145,19 +138,16 @@ public class CameraViewer extends JPanel
 
 	/** Joystick polling thread */
 	protected final JoystickThread joystick = new JoystickThread();
-	
+
 	/** Create a new camera viewer */
-	public CameraViewer(CameraManager m, Properties p, Logger l,
-		SonarState st, User u)
-	{
+	public CameraViewer(Session session, CameraManager man) {
 		super(new GridBagLayout());
-		manager = m;
+		manager = man;
 		manager.getSelectionModel().addProxySelectionListener(this);
-		videoProps = p;
-		logger = l;
-		state = st;
-		user = u;
-		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
+		state = session.getSonarState();
+		user = session.getUser();
+		streamUrls = AbstractDataSource.createBackendUrls(
+			session.getProperties(), 1);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;

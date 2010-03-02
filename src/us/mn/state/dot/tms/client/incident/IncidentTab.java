@@ -66,7 +66,7 @@ public class IncidentTab extends MapTab {
 
 	/** Get the tab number */
 	public int getNumber() {
-		return 2;
+		return 0;
 	}
 
 	/** Dispose of the incident tab */

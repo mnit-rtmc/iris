@@ -15,11 +15,8 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
-import java.util.Properties;
-import java.util.logging.Logger;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.MapTab;
-import us.mn.state.dot.tms.client.SonarState;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * Provides a GUI for the camera tab on the operator interface for IRIS.
@@ -29,17 +26,14 @@ import us.mn.state.dot.tms.client.SonarState;
 public class CameraTab extends MapTab {
 
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(CameraManager manager, Properties props, Logger logger,
-		SonarState st, User user)
-	{
+	public CameraTab(Session session, CameraManager manager) {
 		super(manager.getProxyType(), "Camera summary");
-		add(new CameraViewer(manager, props, logger, st, user),
-			BorderLayout.NORTH);
+		add(new CameraViewer(session, manager), BorderLayout.NORTH);
 		add(manager.createStyleSummary(), BorderLayout.CENTER);
 	}
 
 	/** Get the tab number */
 	public int getNumber() {
-		return 4;
+		return 2;
 	}
 }

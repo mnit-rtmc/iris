@@ -52,7 +52,7 @@ public class RampMeterTab extends MapTab {
 
 	/** Get the tab number */
 	public int getNumber() {
-		return 1;
+		return 4;
 	}
 
 	/** Dispose of the ramp meter tab */
