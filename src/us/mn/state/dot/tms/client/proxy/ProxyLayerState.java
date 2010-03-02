@@ -24,7 +24,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.map.event.LayerChangedEvent;
+import us.mn.state.dot.map.event.LayerChange;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -90,10 +90,20 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 		model.removeProxySelectionListener(listener);
 	}
 
+	/** Flag to indicate the tab is selected */
+	protected boolean tab_selected = false;
+
+	/** Set the tab selected flag */
+	public void setTabSelected(boolean ts) {
+		tab_selected = ts;
+		if(visible == null)
+			notifyLayerChangedListeners(LayerChange.visibility);
+	}
+
 	/** Get the visibility flag */
 	public boolean isVisible() {
 		if(visible == null)
-			return manager.isVisible(getScale());
+			return tab_selected || manager.isVisible(getScale());
 		else
 			return visible;
 	}

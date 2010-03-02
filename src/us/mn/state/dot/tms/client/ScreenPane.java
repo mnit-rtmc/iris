@@ -93,12 +93,24 @@ public class ScreenPane extends JPanel {
 		});
 	}
 
+	/** Most recently selected home layer */
+	protected ProxyLayerState home_layer;
+
 	/** Set the home layer for the screen pane */
 	protected void setHomeLayer() {
+		if(home_layer != null) {
+			home_layer.setTabSelected(false);
+			home_layer = null;
+		}
 		Component tab = tab_pane.getSelectedComponent();
 		if(tab instanceof MapTab) {
 			MapTab mt = (MapTab)tab;
-			map.getModel().setHomeLayer(mt.getHomeLayer());
+			LayerState ls = mt.getHomeLayer();
+			map.getModel().setHomeLayer(ls);
+			if(ls instanceof ProxyLayerState) {
+				home_layer = (ProxyLayerState)ls;
+				home_layer.setTabSelected(true);
+			}
 		}
 	}
 
