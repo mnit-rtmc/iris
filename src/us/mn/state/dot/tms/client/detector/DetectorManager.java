@@ -126,4 +126,9 @@ public class DetectorManager extends ProxyManager<Detector> {
 	protected GeoLoc getGeoLoc(Detector proxy) {
 		return DetectorHelper.getGeoLoc(proxy);
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 1.0f;
+	}
 }

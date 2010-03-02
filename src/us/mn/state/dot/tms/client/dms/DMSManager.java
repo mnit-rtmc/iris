@@ -264,4 +264,9 @@ public class DMSManager extends ProxyManager<DMS> {
 	public boolean checkStyle(String s, DMS proxy) {
 		return DMSHelper.checkStyle(s, proxy);
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 5.0f;
+	}
 }

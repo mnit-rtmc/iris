@@ -110,4 +110,9 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	protected GeoLoc getGeoLoc(LaneMarking proxy) {
 		return proxy.getGeoLoc();
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 1.0f;
+	}
 }

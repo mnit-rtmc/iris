@@ -161,4 +161,9 @@ public class WarningSignManager extends ProxyManager<WarningSign> {
 	protected GeoLoc getGeoLoc(WarningSign proxy) {
 		return proxy.getGeoLoc();
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 3.0f;
+	}
 }

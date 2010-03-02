@@ -90,10 +90,22 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 		model.removeProxySelectionListener(listener);
 	}
 
+	/** Get the visibility flag */
+	public boolean isVisible() {
+		if(visible == null)
+			return manager.isVisible(getScale());
+		else
+			return visible;
+	}
+
+	/** Get the current map scale */
+	protected float getScale() {
+		return (map == null) ? 150f : (float)map.getPixelWorld();
+	}
+
 	/** Iterate through all shapes in the layer */
 	public MapObject forEach(MapSearcher s) {
-		float scale = (map == null) ? 150f : (float)map.getPixelWorld();
-		return manager.forEach(s, scale);
+		return manager.forEach(s, getScale());
 	}
 
 	/** Do mouse click event processing */

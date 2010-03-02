@@ -290,4 +290,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		}
 		return null;
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 1.0f;
+	}
 }

@@ -94,4 +94,9 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	protected GeoLoc getGeoLoc(LCSIndication proxy) {
 		return null;
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 0.0f;
+	}
 }

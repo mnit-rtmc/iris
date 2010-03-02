@@ -356,4 +356,13 @@ abstract public class ProxyManager<T extends SonarObject>
 		return proxy.getName() + " - " +
 			GeoLocHelper.getDescription(getGeoLoc(proxy));
 	}
+
+	/** Check if the corresponding layer is visible */
+	public boolean isVisible(float scale) {
+		float rel = scale / getIconSizeScaleMax();
+		return rel < getScaleThreshold();
+	}
+
+	/** Get the layer scale visibility threshold */
+	abstract protected float getScaleThreshold();
 }

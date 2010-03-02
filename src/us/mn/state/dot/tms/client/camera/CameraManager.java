@@ -217,4 +217,9 @@ public class CameraManager extends ProxyManager<Camera> {
 	protected GeoLoc getGeoLoc(Camera proxy) {
 		return proxy.getGeoLoc();
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 3.0f;
+	}
 }

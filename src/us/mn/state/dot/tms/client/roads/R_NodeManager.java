@@ -546,4 +546,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return new ClientGeoLoc(l0.getFreeway(), l0.getFreeDir(),
 			(int)pnt.x, (int)pnt.y, dist);
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 0.25f;
+	}
 }

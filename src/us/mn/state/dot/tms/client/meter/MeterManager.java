@@ -264,4 +264,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return proxy.getName() + " - " +
 			GeoLocHelper.getOnRampDescription(getGeoLoc(proxy));
 	}
+
+	/** Get the layer scale visibility threshold */
+	protected float getScaleThreshold() {
+		return 0.5f;
+	}
 }
