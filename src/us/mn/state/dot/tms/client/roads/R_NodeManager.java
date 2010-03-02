@@ -27,8 +27,6 @@ import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.StyledTheme;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sched.AbstractJob;
@@ -57,23 +55,9 @@ import us.mn.state.dot.tms.client.toast.SmartDesktop;
  */
 public class R_NodeManager extends ProxyManager<R_Node> {
 
-	/** Marker to draw roadway entrance nodes */
-	static protected final EntranceMarker ENTRANCE_MARKER =
-		new EntranceMarker();
-
-	/** Marker to draw roadway exit nodes */
-	static protected final ExitMarker EXIT_MARKER = new ExitMarker();
-
-	/** Marker to draw roadway station nodes */
-	static protected final StationMarker STATION_MARKER =
-		new StationMarker();
-
-	/** Marker to draw roadway intersection nodes */
-	static protected final IntersectionMarker INTERSECTION_MARKER =
-		new IntersectionMarker();
-
-	/** Marker to draw access nodes */
-	static protected final AccessMarker ACCESS_MARKER = new AccessMarker();
+	/** Marker to draw r_nodes */
+	static protected final R_NodeMarker MARKER =
+		new R_NodeMarker();
 
 	/** Offset angle for default North map markers */
 	static protected final double NORTH_ANGLE = Math.PI / 2;
@@ -244,47 +228,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return "R_Node";
 	}
 
-	/** Iterate through all proxy objects.  This overrides forEach from
-	 * ProxyManager, calling getShape for each proxy. */
-	protected MapObject forEach(final MapSearcher ms,
-		final AffineTransform at)
-	{
-		R_Node result = cache.findObject(new Checker<R_Node>() {
-			public boolean check(R_Node proxy) {
-				MapGeoLoc loc = findGeoLoc(proxy);
-				if(isLocationSet(loc)) {
-					loc.setShape(getShape(proxy, at));
-					return ms.next(loc);
-				}
-				return false;
-			}
-		});
-		if(result != null)
-			return findGeoLoc(result);
-		else
-			return null;
-	}
-
 	/** Get a transformed marker shape */
 	protected Shape getShape(AffineTransform at) {
-		return STATION_MARKER.createTransformedShape(at);
-	}
-
-	/** Get the shape to use for the given r_node */
-	protected Shape getShape(R_Node n, AffineTransform at) {
-		R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
-		switch(nt) {
-		case ENTRANCE:
-			return ENTRANCE_MARKER.createTransformedShape(at);
-		case EXIT:
-			return EXIT_MARKER.createTransformedShape(at);
-		case INTERSECTION:
-			return INTERSECTION_MARKER.createTransformedShape(at);
-		case ACCESS:
-			return ACCESS_MARKER.createTransformedShape(at);
-		default:
-			return STATION_MARKER.createTransformedShape(at);
-		}
+		return MARKER.createTransformedShape(at);
 	}
 
 	/** Check the style of the specified proxy */
@@ -549,6 +495,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Get the layer scale visibility threshold */
 	protected float getScaleThreshold() {
-		return 0.25f;
+		return 0.2f;
 	}
 }

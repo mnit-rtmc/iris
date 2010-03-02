@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2010  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,28 +14,30 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.geom.Arc2D;
 import us.mn.state.dot.map.marker.AbstractMarker;
 
 /**
- * Marker used to paint roadway access nodes.
+ * Marker used to paint roadway nodes.
  *
  * @author Douglas Lau
  */
-public class AccessMarker extends AbstractMarker {
+public class R_NodeMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static protected final int MARKER_SIZE_PIX = 64;
+	static protected final int MARKER_SIZE_PIX = 12;
 
-	/** Create a new access marker */
-	public AccessMarker() {
-		super(5);
+	/** Create a new r_node marker */
+	public R_NodeMarker() {
+		super(4);
 		float size = MARKER_SIZE_PIX;
 		float half = size / 2;
 		float third = size / 3;
-		path.moveTo(0, half);
-		path.lineTo(third, 0);
-		path.lineTo(0, -half);
-		path.lineTo(-third, 0);
-		path.closePath();
+		path.moveTo(-third, -third);
+		path.lineTo(third, third);
+		path.moveTo(third, -third);
+		path.lineTo(-third, third);
+		path.append(new Arc2D.Float(-half, -half, size, size, 0, 360,
+			Arc2D.OPEN), false);
 	}
 }
