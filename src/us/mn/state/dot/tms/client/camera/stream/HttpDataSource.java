@@ -24,6 +24,9 @@ import java.net.URL;
  */
 public class HttpDataSource extends AbstractDataSource {
 
+	/** Default timeout for direct URL Connections */
+	static public final int TIMEOUT_DIRECT = 5 * 1000;
+
 	protected final URL url;
 
 	/** Create a new HTTP data source */

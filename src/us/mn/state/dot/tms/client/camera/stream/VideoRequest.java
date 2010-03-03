@@ -13,8 +13,11 @@
 */
 package us.mn.state.dot.tms.client.camera.stream;
 
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.Properties;
 
 /**
@@ -99,7 +102,40 @@ public class VideoRequest {
 
 	/** Create a new video request */
 	public VideoRequest(Properties p) {
-		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
+		streamUrls = createBackendUrls(p, 1);
+	}
+
+	/** Create an array of urls for connecting to the backend servers.
+	 * @param p
+	 * @param type Stream (1) or Still (2)
+	 * @return */
+	static public String[] createBackendUrls(Properties p, int type) {
+		LinkedList<String> urls = new LinkedList<String>();
+		int id = 0;
+		while(true) {
+			String ip = p.getProperty("video.backend.host" + id);
+			if(ip == null)
+				break;
+			try {
+				ip = InetAddress.getByName(ip).getHostAddress();
+			}
+			catch(UnknownHostException uhe) {
+				System.out.println("Invalid backend server " +
+					id + " " + uhe.getMessage());
+				break;
+			}
+			String port = p.getProperty("video.backend.port" + id,
+				p.getProperty("video.backend.port" + 0));
+			String servletName = "";
+			if(type == 1)
+				servletName = "stream";
+			if(type == 2)
+				servletName = "image";
+			urls.add("http://" + ip + ":" + port +
+				"/video/" + servletName);
+			id++;
+		}
+		return (String[])urls.toArray(new String[0]);
 	}
 
 	/** Get the URL for the request */
