@@ -32,15 +32,7 @@ abstract public class AbstractDataSource extends Thread implements DataSource {
 	/** List of DataSinks for this stream. */
 	private ArrayList<DataSink> sinks = new ArrayList<DataSink>();
 
-	/** Timestamp for creation of this thread */
-	private final Long timeStamp;
-
-	/** Constructor for the ImageFactory. */
-	protected AbstractDataSource() {
-		timeStamp = System.currentTimeMillis();
-	}
-
-	public synchronized DataSink[] getListeners(){
+	public synchronized DataSink[] getListeners() {
 		return (DataSink[])sinks.toArray(new DataSink[0]);
 	}
 
