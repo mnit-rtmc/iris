@@ -38,12 +38,39 @@ public class StreamPanel extends JPanel {
 	static protected final Dimension SIF_FULL = new Dimension(352, 240);
 	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
-	private VideoStream stream = null;
+	/** Label to display video stream */
 	private final JLabel screen = new JLabel();
+
+	/** Current video stream */
+	private VideoStream stream = null;
+
+	/** Progress bar for duration */
 	private JProgressBar progress = new JProgressBar(0, 100);
+
+	/** Total number of frames requested */
 	private int n_frames = 0;
+
+	/** Size of video image */
 	private Dimension imageSize = new Dimension(SIF_FULL);
 
+	/** Create a new stream panel */
+	public StreamPanel() {
+		super(new BorderLayout());
+		JPanel p = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.BOTH;
+		c.gridx = 0;
+		c.gridy = GridBagConstraints.RELATIVE;
+		p.add(screen, c);
+		p.add(progress, c);
+		add(p);
+		setVideoSize(imageSize);
+		screen.setBorder(BorderFactory.createBevelBorder(
+			BevelBorder.LOWERED));
+		thread.start();
+	}
+
+	/** Anonymous thread to read video stream */
 	private final Thread thread = new Thread() {
 		public void run() {
 			while(true) {
@@ -79,21 +106,10 @@ public class StreamPanel extends JPanel {
 		}
 	};
 
-	/** Create a new stream panel */
-	public StreamPanel() {
-		super(new BorderLayout());
-		JPanel p = new JPanel(new GridBagLayout());
-		GridBagConstraints c = new GridBagConstraints();
-		c.fill = GridBagConstraints.BOTH;
-		c.gridx = 0;
-		c.gridy = GridBagConstraints.RELATIVE;
-		p.add(screen, c);
-		p.add(progress, c);
-		add(p);
-		setVideoSize(imageSize);
-		screen.setBorder(BorderFactory.createBevelBorder(
-			BevelBorder.LOWERED));
-		thread.start();
+	/** Clear the stream panel */
+	private void clear() {
+		progress.setValue(0);
+		screen.setIcon(null);
 	}
 
 	/** Set the dimensions of the video stream */
@@ -103,6 +119,7 @@ public class StreamPanel extends JPanel {
 		screen.setMinimumSize(d);
 	}
 
+	/** Set the video stream to display */
 	public void setVideoStream(VideoStream vs, int f) {
 		stream = vs;
 		n_frames = f;
@@ -113,21 +130,19 @@ public class StreamPanel extends JPanel {
 		}
 	}
 
+	/** Flush data */
 	protected void flush(byte[] idata) {
-		setImage(new ImageIcon(idata));
+		screen.setIcon(createIcon(idata));
 	}
 
-	/** Set the image to be displayed on the panel
-	 * @param image  The image to display. */
-	private synchronized void setImage(ImageIcon icon) {
-		Image i = icon.getImage().getScaledInstance(
+	/** Create an image icon from image data */
+	protected ImageIcon createIcon(byte[] idata) {
+		ImageIcon icon = new ImageIcon(idata);
+		if(icon.getIconWidth() == imageSize.width &&
+		   icon.getIconHeight() == imageSize.height)
+			return icon;
+		Image im = icon.getImage().getScaledInstance(
 			imageSize.width, imageSize.height, Image.SCALE_FAST);
-		screen.setIcon(new ImageIcon(i));
-		repaint();
-	}
-
-	private void clear() {
-		progress.setValue(0);
-		screen.setIcon(null);
+		return new ImageIcon(im);
 	}
 }
