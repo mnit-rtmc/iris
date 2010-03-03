@@ -33,11 +33,12 @@ import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
 
 /**
- * A JPanel that can display an RTMC video stream.
+ * A JPanel that can display a video stream.
  *
- * @author    Timothy Johnson
+ * @author Timothy Johnson
+ * @author Douglas Lau
  */
-public class VideoMonitor extends JPanel implements DataSink {
+public class StreamPanel extends JPanel implements DataSink {
 
 	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
 	static protected final Dimension SIF_FULL = new Dimension(352, 240);
@@ -63,10 +64,8 @@ public class VideoMonitor extends JPanel implements DataSink {
 	private Dimension imageSize = new Dimension(SIF_FULL);
 	protected URI imageURI = null;
 	
-	/**
-	 * Constructor for the VideoMonitor
-	 */
-	public VideoMonitor() {
+	/** Create a new stream panel */
+	public StreamPanel() {
 		super(new BorderLayout());
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();

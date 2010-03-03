@@ -46,6 +46,7 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.camera.stream.AbstractDataSource;
 import us.mn.state.dot.tms.client.camera.stream.Client;
 import us.mn.state.dot.tms.client.camera.stream.HttpDataSource;
+import us.mn.state.dot.tms.client.camera.stream.StreamPanel;
 
 /**
  * GUI for viewing camera images
@@ -107,11 +108,10 @@ public class CameraViewer extends JPanel
 	protected final JComboBox cmbOutput;
 
 	/** Video monitor output */
-	protected us.mn.state.dot.tms.VideoMonitor video_monitor;
+	protected VideoMonitor video_monitor;
 
 	/** Streaming video viewer */
-	protected final us.mn.state.dot.tms.client.camera.stream.VideoMonitor monitor =
-		new us.mn.state.dot.tms.client.camera.stream.VideoMonitor();
+	protected final StreamPanel s_panel = new StreamPanel();
 
 	/** Button used to play video */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
@@ -183,10 +183,10 @@ public class CameraViewer extends JPanel
 		bag.gridwidth = 4;
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.BOTH;
-		add(monitor, bag);
-		monitor.setStatusVisible(false);
-		monitor.setProgressVisible(true);
-		monitor.setLabelVisible(false);
+		add(s_panel, bag);
+		s_panel.setStatusVisible(false);
+		s_panel.setProgressVisible(true);
+		s_panel.setLabelVisible(false);
 		bag.gridy = 3;
 		bag.fill = GridBagConstraints.NONE;
 		play.setToolTipText("Play");
@@ -394,9 +394,8 @@ public class CameraViewer extends JPanel
 	protected void monitorSelected() {
 		Camera camera = selected;
 		Object o = cmbOutput.getSelectedItem();
-		if(o instanceof us.mn.state.dot.tms.VideoMonitor) {
-			video_monitor =
-				(us.mn.state.dot.tms.VideoMonitor)o;
+		if(o instanceof VideoMonitor) {
+			video_monitor = (VideoMonitor)o;
 			video_monitor.setCamera(camera);
 		} else
 			video_monitor = null;
@@ -409,7 +408,7 @@ public class CameraViewer extends JPanel
 			new us.mn.state.dot.tms.client.camera.stream.Camera();
 		camera.setId(c.getName());
 		client.setCamera(camera);
-		monitor.setDataSource(new HttpDataSource(client,
+		s_panel.setDataSource(new HttpDataSource(client,
 			new URL(streamUrls[client.getArea()] + "?id=" +
 			client.getCameraId() + "&ssid=" +
 			client.getSonarSessionId())), STREAM_DURATION);
@@ -417,7 +416,7 @@ public class CameraViewer extends JPanel
 
 	/** Stop video streaming */
 	protected void stopPressed() {
-		monitor.setDataSource(null, 0);
+		s_panel.setDataSource(null, 0);
 	}
 
 	/** Clear all of the fields */
