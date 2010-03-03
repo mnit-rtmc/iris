@@ -13,8 +13,7 @@
  */
 package us.mn.state.dot.tms.client.camera.stream;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * An abstract implementation of a DataSource.
@@ -29,20 +28,17 @@ abstract public class AbstractDataSource extends Thread implements DataSource {
 		done = true;
 	}
 
-	/** List of DataSinks for this stream. */
-	private ArrayList<DataSink> sinks = new ArrayList<DataSink>();
+	/** List of DataSinks for this stream */
+	private LinkedList<DataSink> sinks = new LinkedList<DataSink>();
 
 	public synchronized DataSink[] getListeners() {
-		return (DataSink[])sinks.toArray(new DataSink[0]);
+		return (DataSink [])sinks.toArray(new DataSink[0]);
 	}
 
 	/** Notify listeners that an image was created */
 	protected synchronized void notifySinks(byte[] data) {
-		DataSink sink;
-		for (Iterator i = sinks.listIterator(); i.hasNext();) {
-			sink = (DataSink) i.next();
+		for(DataSink sink: sinks)
 			sink.flush(data);
-		}
 	}
 
 	/** Add a DataSink to this Image Factory. */
@@ -58,7 +54,7 @@ abstract public class AbstractDataSource extends Thread implements DataSource {
 			halt();
 	}
 
-	protected synchronized void removeSinks(){
+	protected synchronized void removeSinks() {
 	 	sinks.clear();
 		halt();
 	}
