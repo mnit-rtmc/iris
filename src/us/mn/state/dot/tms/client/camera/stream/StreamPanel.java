@@ -18,9 +18,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.net.URI;
-import java.util.LinkedList;
-
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -42,14 +39,10 @@ public class StreamPanel extends JPanel implements DataSink {
 
 	private DataSource source = null;
 	private int imagesRendered = 0;
-	Image image = null;
-	String imageName = null;
 	private final JLabel screen = new JLabel();
 	private JProgressBar progress = new JProgressBar(0, 100);
-	private LinkedList<byte[]> images = new LinkedList<byte[]>();
 	private int imagesRequested = 0;
 	private Dimension imageSize = new Dimension(SIF_FULL);
-	protected URI imageURI = null;
 
 	/** Create a new stream panel */
 	public StreamPanel() {
@@ -67,41 +60,23 @@ public class StreamPanel extends JPanel implements DataSink {
 			BevelBorder.LOWERED));
 	}
 
-	public void setImageUri(URI uri){
-		imageURI = uri;
-	}
-
-	public synchronized void setVideoSize(Dimension d){
+	public synchronized void setVideoSize(Dimension d) {
 		imageSize = d;
 		screen.setPreferredSize(d);
 		screen.setMinimumSize(d);
 	}
 
-	/**
-	 * Set the image to be displayed on the panel
-	 *
-	 * @param image  The image to display.
-	 */
-	private synchronized void setImage(ImageIcon icon){
-		Image i = icon.getImage().getScaledInstance(
-			imageSize.width, imageSize.height,
-				Image.SCALE_FAST);
-		screen.setIcon(new ImageIcon(i));
-		repaint();
-	}
-
-	public void setDataSource(DataSource src, int totalFrames){
-		if(source != null ){
+	public void setDataSource(DataSource src, int totalFrames) {
+		if(source != null)
 			source.disconnectSink(this);
-		}
 		imagesRendered = 0;
-		this.imagesRequested = totalFrames;
-		if(src != null){
+		imagesRequested = totalFrames;
+		if(src != null) {
 			src.connectSink(this);
-			images.clear();
-			try{
+			try {
 				((Thread)src).start();
-			}catch(IllegalThreadStateException its){
+			}
+			catch(IllegalThreadStateException its) {
 				// do nothing... it's already been started.
 			}
 		}
@@ -110,12 +85,12 @@ public class StreamPanel extends JPanel implements DataSink {
 		progress.setValue(0);
 	}
 
-	public void flush(byte[] i){
+	public void flush(byte[] i) {
 		ImageIcon icon = new ImageIcon(i);
 		setImage(icon);
 		progress.setValue(imagesRendered);
 		imagesRendered++;
-		if(imagesRendered >= imagesRequested){
+		if(imagesRendered >= imagesRequested) {
 			//FIXME: This is a thread safety violation since this
 			//call to a synchronized method disconnectSink is
 			//called from another synchronized method notifySinks.
@@ -130,7 +105,17 @@ public class StreamPanel extends JPanel implements DataSink {
 		}
 	}
 
-	private void clear(){
+	/** Set the image to be displayed on the panel
+	 * @param image  The image to display. */
+	private synchronized void setImage(ImageIcon icon) {
+		Image i = icon.getImage().getScaledInstance(
+			imageSize.width, imageSize.height,
+				Image.SCALE_FAST);
+		screen.setIcon(new ImageIcon(i));
+		repaint();
+	}
+
+	private void clear() {
 		progress.setMaximum(imagesRequested);
 		progress.setValue(0);
 	}

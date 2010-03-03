@@ -140,6 +140,7 @@ public class CameraViewer extends JPanel
 		state = session.getSonarState();
 		user = session.getUser();
 		request = new VideoRequest(session.getProperties());
+		request.setFrames(STREAM_DURATION);
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
@@ -390,7 +391,7 @@ public class CameraViewer extends JPanel
 	/** Start video streaming */
 	protected void playPressed(Camera c) {
 		s_panel.setDataSource(new HttpDataSource(request.getUrl(
-			c.getName())), STREAM_DURATION);
+			c.getName())), request.getFrames());
 	}
 
 	/** Stop video streaming */

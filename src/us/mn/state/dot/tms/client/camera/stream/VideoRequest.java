@@ -76,14 +76,14 @@ public class VideoRequest {
 		this.rate = rate;
 	}
 
-	private int duration = 60;
+	private int frames = 60 * 30;
 
-	public int getDuration() {
-		return duration;
+	public int getFrames() {
+		return frames;
 	}
 
-	public void setDuration(int duration) {
-		this.duration = duration;
+	public void setFrames(int f) {
+		frames = f;
 	}
 
 	private int size = 2;
@@ -154,9 +154,5 @@ public class VideoRequest {
 	protected URL createURL(String cid) throws MalformedURLException {
 		return new URL(streamUrls[area] + "?id=" + cid + "&ssid=" +
 			sonarSessionId);
-	}
-
-	public int getFramesRequested() {
-		return duration * rate;
 	}
 }
