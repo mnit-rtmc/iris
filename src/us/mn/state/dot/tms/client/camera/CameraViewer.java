@@ -43,10 +43,10 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.video.AbstractDataSource;
-import us.mn.state.dot.video.Client;
-import us.mn.state.dot.video.HttpDataSource;
-import us.mn.state.dot.video.VideoException;
+import us.mn.state.dot.tms.client.camera.stream.AbstractDataSource;
+import us.mn.state.dot.tms.client.camera.stream.Client;
+import us.mn.state.dot.tms.client.camera.stream.HttpDataSource;
+import us.mn.state.dot.tms.client.camera.stream.VideoException;
 
 /**
  * GUI for viewing camera images
@@ -111,8 +111,8 @@ public class CameraViewer extends JPanel
 	protected us.mn.state.dot.tms.VideoMonitor video_monitor;
 
 	/** Streaming video viewer */
-	protected final us.mn.state.dot.video.client.VideoMonitor monitor =
-		new us.mn.state.dot.video.client.VideoMonitor();
+	protected final us.mn.state.dot.tms.client.camera.stream.VideoMonitor monitor =
+		new us.mn.state.dot.tms.client.camera.stream.VideoMonitor();
 
 	/** Button used to play video */
 	protected final JButton play = new JButton(Icons.getIcon("play"));
@@ -408,8 +408,8 @@ public class CameraViewer extends JPanel
 	protected void playPressed(Camera c) throws MalformedURLException,
 		VideoException
 	{
-		us.mn.state.dot.video.Camera camera =
-			new us.mn.state.dot.video.Camera();
+		us.mn.state.dot.tms.client.camera.stream.Camera camera =
+			new us.mn.state.dot.tms.client.camera.stream.Camera();
 		camera.setId(c.getName());
 		client.setCamera(camera);
 		monitor.setDataSource(new HttpDataSource(client,

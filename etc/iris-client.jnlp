@@ -23,7 +23,6 @@
 	<jar href="lib/tdxml-@@TDXML.VERSION@@.jar"/>
 	<jar href="lib/TrafMap-@@TRAFMAP.VERSION@@.jar"/>
 	<jar href="lib/shapes-@@SHAPES.VERSION@@.jar"/>
-	<jar href="lib/video-client-@@VIDEOCLIENT.VERSION@@.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
     </resources>
     <security>

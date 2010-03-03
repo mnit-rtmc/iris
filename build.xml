@@ -68,8 +68,6 @@
 	<property name="tms-log.jar" value="tms-log-${tms-log.version}.jar"/>
 	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="tdxml.jar" value="tdxml-${tdxml.version}.jar"/>
-	<property name="videoclient.jar"
-		  value="video-client-${videoclient.version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
@@ -190,12 +188,6 @@
 			<param name="repo.name" value="shapes"/>
 			<param name="repo.version" value="${shapes.version}"/>
 		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${videoclient.jar}"/>
-			<param name="repo.name" value="video"/>
-			<param name="repo.version"
-			       value="${videoclient.version}"/>
-		</antcall>
 	</target>
 
 	<!-- Prepare the build/etc directory -->
@@ -221,8 +213,6 @@
 					value="${mapbean.version}"/>
 				<filter token="TRAFMAP.VERSION"
 					value="${trafmap.version}"/>
-				<filter token="VIDEOCLIENT.VERSION"
-					value="${videoclient.version}"/>
 				<filter token="SHAPES.VERSION"
 					value="${shapes.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
@@ -391,7 +381,6 @@
 				<include name="${shapes.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${tms-log.jar}"/>
-				<include name="${videoclient.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
 				<include name="${common.jar}"/>
@@ -557,7 +546,6 @@
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
 				<include name="${tms-log.jar}"/>
-				<include name="${videoclient.jar}"/>
 			</fileset>
 		</delete>
 	</target>
