@@ -83,12 +83,6 @@ public class VideoRequest {
 		this.duration = duration;
 	}
 
-	private Camera camera = null;
-
-	public void setCamera(Camera c) {
-		this.camera = c;
-	}
-
 	private int size = 2;
 
 	public int getSize() {
@@ -109,10 +103,10 @@ public class VideoRequest {
 	}
 
 	/** Get the URL for the request */
-	public URL getUrl() {
+	public URL getUrl(String cid) {
 		try {
 			if(area >= 0 && area < streamUrls.length)
-				return createURL(getCameraId());
+				return createURL(cid);
 		}
 		catch(MalformedURLException e) {
 			e.printStackTrace();
@@ -128,15 +122,5 @@ public class VideoRequest {
 
 	public int getFramesRequested() {
 		return duration * rate;
-	}
-	public String getCameraId() {
-		return camera.getId();
-	}
-	public void setCameraId(String id) {
-		if(id == null || id.length() > 10)
-			return;
-		if(camera == null)
-			camera = new Camera();
-		camera.setId(Camera.createStandardId(id));
 	}
 }
