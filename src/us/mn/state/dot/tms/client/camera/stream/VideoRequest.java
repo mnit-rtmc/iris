@@ -89,7 +89,7 @@ public class VideoRequest {
 		this.camera = c;
 	}
 
-	int size = 2;
+	private int size = 2;
 
 	public int getSize() {
 		return size;
@@ -132,7 +132,7 @@ public class VideoRequest {
 	public String getCameraId() {
 		return camera.getId();
 	}
-	public void setCameraId(String id){
+	public void setCameraId(String id) {
 		if(id == null || id.length() > 10)
 			return;
 		if(camera == null)
