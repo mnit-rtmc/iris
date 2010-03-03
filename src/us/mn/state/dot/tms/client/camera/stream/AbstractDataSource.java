@@ -132,7 +132,7 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
     		if(type==2) servletName = "image";
     		baseUrls.add(
 				"http://" + ip + ":" + port +
-				"/@@NAME@@/" + servletName);
+				"/video/" + servletName);
     		id++;
 	    }
 	    System.out.println("Video server backend URLs:");
