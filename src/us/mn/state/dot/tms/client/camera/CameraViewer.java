@@ -18,8 +18,6 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,7 +41,6 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
-import us.mn.state.dot.tms.client.camera.stream.AbstractDataSource;
 import us.mn.state.dot.tms.client.camera.stream.VideoRequest;
 import us.mn.state.dot.tms.client.camera.stream.HttpDataSource;
 import us.mn.state.dot.tms.client.camera.stream.StreamPanel;
@@ -331,14 +328,9 @@ public class CameraViewer extends JPanel
 			txtId.setText(camera.getName());
 			txtLocation.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
-			try {
-				playPressed(camera);
-				if(video_monitor != null)
-					video_monitor.setCamera(camera);
-			}
-			catch(Exception e) {
-				e.printStackTrace();
-			}
+			playPressed(camera);
+			if(video_monitor != null)
+				video_monitor.setCamera(camera);
 		}
 		updateMonitorPanel(camera);
 	}
@@ -396,15 +388,13 @@ public class CameraViewer extends JPanel
 	}
 
 	/** Start video streaming */
-	protected void playPressed(Camera c) throws MalformedURLException {
+	protected void playPressed(Camera c) {
 		us.mn.state.dot.tms.client.camera.stream.Camera camera =
 			new us.mn.state.dot.tms.client.camera.stream.Camera();
 		camera.setId(c.getName());
 		request.setCamera(camera);
 		s_panel.setDataSource(new HttpDataSource(request,
-			new URL(request.getUrl() + "?id=" +
-			request.getCameraId() + "&ssid=" +
-			request.getSonarSessionId())), STREAM_DURATION);
+			request.getUrl()), STREAM_DURATION);
 	}
 
 	/** Stop video streaming */

@@ -13,6 +13,8 @@
 */
 package us.mn.state.dot.tms.client.camera.stream;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Properties;
 
 /**
@@ -106,19 +108,26 @@ public class VideoRequest {
 		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
 	}
 
-	public String getUrl() {
-		if(area >= 0 && area < streamUrls.length)
-			return streamUrls[area];
-		else
-			return new String();
+	/** Get the URL for the request */
+	public URL getUrl() {
+		try {
+			if(area >= 0 && area < streamUrls.length)
+				return createURL(getCameraId());
+		}
+		catch(MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	/** Create the URL for the request */
+	protected URL createURL(String cid) throws MalformedURLException {
+		return new URL(streamUrls[area] + "?id=" + cid + "&ssid=" +
+			sonarSessionId);
 	}
 
 	public int getFramesRequested() {
 		return duration * rate;
-	}
-	public String toString() {
-		return "C=" + getCameraId() + " S=" + size + " R=" + rate +
-			" D=" + duration;
 	}
 	public String getCameraId() {
 		return camera.getId();
