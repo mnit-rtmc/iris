@@ -18,6 +18,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
+import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -31,18 +32,53 @@ import javax.swing.border.BevelBorder;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class StreamPanel extends JPanel implements DataSink {
+public class StreamPanel extends JPanel {
 
 	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
 	static protected final Dimension SIF_FULL = new Dimension(352, 240);
 	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
-	private DataSource source = null;
+	private VideoStream stream = null;
 	private int imagesRendered = 0;
 	private final JLabel screen = new JLabel();
 	private JProgressBar progress = new JProgressBar(0, 100);
 	private int imagesRequested = 0;
 	private Dimension imageSize = new Dimension(SIF_FULL);
+
+	private final Thread thread = new Thread() {
+		public void run() {
+			while(true) {
+				VideoStream vs = stream;
+				if(vs != null)
+					readStream(vs);
+				synchronized(thread) {
+					try {
+						thread.wait();
+					}
+					catch(InterruptedException e) {
+						// nothing to do
+					}
+				}
+			}
+		}
+		protected void readStream(VideoStream vs) {
+			try {
+				while(vs == stream) {
+					byte[] im = vs.getImage();
+					if(im != null)
+						flush(im);
+					else
+						break;
+				}
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
+			finally {
+				vs.close();
+			}
+		}
+	};
 
 	/** Create a new stream panel */
 	public StreamPanel() {
@@ -58,6 +94,7 @@ public class StreamPanel extends JPanel implements DataSink {
 		setVideoSize(imageSize);
 		screen.setBorder(BorderFactory.createBevelBorder(
 			BevelBorder.LOWERED));
+		thread.start();
 	}
 
 	/** Set the dimensions of the video stream */
@@ -67,41 +104,22 @@ public class StreamPanel extends JPanel implements DataSink {
 		screen.setMinimumSize(d);
 	}
 
-	public void setDataSource(DataSource src, int totalFrames) {
-		if(source != null)
-			source.disconnectSink(this);
-		imagesRendered = 0;
-		imagesRequested = totalFrames;
-		if(src != null) {
-			src.connectSink(this);
-			try {
-				((Thread)src).start();
-			}
-			catch(IllegalThreadStateException its) {
-				// do nothing... it's already been started.
-			}
-		}
-		source = src;
+	public void setVideoStream(VideoStream vs, int f) {
+		stream = vs;
+		imagesRequested = f;
 		progress.setMaximum(imagesRequested);
 		progress.setValue(0);
+		synchronized(thread) {
+			thread.notify();
+		}
 	}
 
-	public void flush(byte[] i) {
-		ImageIcon icon = new ImageIcon(i);
-		setImage(icon);
+	protected void flush(byte[] i) {
+		setImage(new ImageIcon(i));
 		progress.setValue(imagesRendered);
 		imagesRendered++;
 		if(imagesRendered >= imagesRequested) {
-			//FIXME: This is a thread safety violation since this
-			//call to a synchronized method disconnectSink is
-			//called from another synchronized method notifySinks.
-			//Both method calls are running in different threads
-			//and operating on the same ArrayList.
-
-			//Note: We actually prefer continuous video so the fix
-			//for us is to remove the following call.
-
-			//source.disconnectSink(this);
+			stream = null;
 			clear();
 		}
 	}

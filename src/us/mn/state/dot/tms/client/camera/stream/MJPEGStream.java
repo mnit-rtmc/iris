@@ -39,10 +39,10 @@ public class MJPEGStream implements VideoStream {
 		int n_bytes = 0;
 		while(n_bytes < n_size) {
 			int r = stream.read(image, n_bytes, n_size - n_bytes);
-			if(r == -1)
-				break;
-			else
+			if(r >= 0)
 				n_bytes += r;
+			else
+				throw new IOException("End of stream");
 		}
 		return image;
 	}
@@ -90,5 +90,15 @@ public class MJPEGStream implements VideoStream {
 				break;
 		}
 		return b.toString();
+	}
+
+	/** Close the video stream */
+	public void close() {
+		try {
+			stream.close();
+		}
+		catch(IOException e) {
+			e.printStackTrace();
+		}
 	}
 }

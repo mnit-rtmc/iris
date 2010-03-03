@@ -18,6 +18,7 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.io.IOException;
 import java.util.Map;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -329,7 +330,12 @@ public class CameraViewer extends JPanel
 			txtId.setText(camera.getName());
 			txtLocation.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
-			playPressed(camera);
+			try {
+				playPressed(camera);
+			}
+			catch(IOException e) {
+				e.printStackTrace();
+			}
 			if(video_monitor != null)
 				video_monitor.setCamera(camera);
 		}
@@ -389,14 +395,16 @@ public class CameraViewer extends JPanel
 	}
 
 	/** Start video streaming */
-	protected void playPressed(Camera c) {
-		s_panel.setDataSource(new HttpDataSource(request.getUrl(
-			c.getName())), request.getFrames());
+	protected void playPressed(Camera c) throws IOException {
+		HttpDataSource source = new HttpDataSource(request.getUrl(
+			c.getName()));
+		s_panel.setVideoStream(source.createStream(),
+			request.getFrames());
 	}
 
 	/** Stop video streaming */
 	protected void stopPressed() {
-		s_panel.setDataSource(null, 0);
+		s_panel.setVideoStream(null, 0);
 	}
 
 	/** Clear all of the fields */

@@ -24,5 +24,8 @@ import java.io.IOException;
 public interface VideoStream {
 
 	/** Get the next image in the stream */
-	public byte[] getImage() throws IOException;
+	byte[] getImage() throws IOException;
+
+	/** Close the video stream */
+	void close();
 }

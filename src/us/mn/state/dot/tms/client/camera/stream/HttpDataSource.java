@@ -23,7 +23,7 @@ import java.net.URL;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class HttpDataSource extends AbstractDataSource {
+public class HttpDataSource {
 
 	/** Default timeout for direct URL Connections */
 	static protected final int TIMEOUT_DIRECT = 5 * 1000;
@@ -47,35 +47,9 @@ public class HttpDataSource extends AbstractDataSource {
 		url = u;
 	}
 
-	/** Start the stream */
-	public void run() {
-		if(url != null) {
-			try {
-				readStream();
-			}
-			catch(IOException e) {
-				e.printStackTrace();
-			}
-			finally {
-				removeSinks();
-			}
-		}
-	}
-
-	/** Read data from the stream */
-	protected void readStream() throws IOException {
+	/** Create the video stream */
+	public VideoStream createStream() throws IOException {
 		HttpURLConnection conn = createConnection(url);
-		try {
-			MJPEGStream stream = new MJPEGStream(
-				conn.getInputStream());
-			while(!done && isAlive()) {
-				byte[] img = stream.getImage();
-				if(img != null && img.length > 0)
-					notifySinks(img);
-			}
-		}
-		finally {
-			conn.disconnect();
-		}
+		return new MJPEGStream(conn.getInputStream());
 	}
 }
