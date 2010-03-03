@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.camera.stream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.logging.Logger;
 
 /**
  * The HttpDataSource gets it's data via the HTTP protocol
@@ -27,16 +26,9 @@ public class HttpDataSource extends AbstractDataSource {
 
 	protected final URL url;
 
-	/** Constructor for the HttpDataSource. */
+	/** Create a new HTTP data source */
 	public HttpDataSource(VideoRequest vr, URL url) {
-		this(vr, null, null, url);
-	}
-
-	/** Constructor for the HttpDataSource. */
-	public HttpDataSource(VideoRequest vr, Logger l, ThreadMonitor m,
-		URL url)
-	{
-		super(vr, l, m);
+		super(vr);
 		this.url = url;
 	}
 
@@ -47,7 +39,6 @@ public class HttpDataSource extends AbstractDataSource {
 			try{
 				conn = createConnection(url);
 				final MJPEGReader stream = new MJPEGReader(conn.getInputStream());
-				logger.fine("Starting: " + this);
 				byte[] img;
 				while(!done && this.isAlive()){
 					if(stream==null) {
@@ -64,20 +55,17 @@ public class HttpDataSource extends AbstractDataSource {
 						//break;
 					}
 				}
-			}catch(IOException ioe){
-				logger.info(ioe.getMessage());
-			}catch(InstantiationException ie){
-				logger.info(ie.getMessage());
-			}finally{
-				logger.fine("Stopping: " + this);
+			}
+			catch(IOException ioe) {
+				ioe.printStackTrace();
+			}
+			finally {
 				try{
 					conn.disconnect();
 				}catch(Exception e2){
 				}
 				removeSinks();
 			}
-		}else{
-			logger.fine("No encoder defined for this source.");
 		}
 	}
 

@@ -36,8 +36,7 @@ public abstract class VideoThread extends Thread{
 	/** Default timeout for HttpUrlConnection read */
 	public final static int TIMEOUT_READ = 5 * 1000;
 
-	public VideoThread(ThreadMonitor m){
-		if(m != null) m.addThread(this);
+	public VideoThread() {
 	}
 
 	public final Calendar getStartTime(){

@@ -17,10 +17,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.logging.Logger;
 import java.util.Iterator;
-
-import us.mn.state.dot.log.TmsLogFactory;
 
 /**
  * An abstract implementation of a DataSource.
@@ -32,20 +29,14 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 	/** List of DataSinks for this stream. */
 	private ArrayList<DataSink> sinks = new ArrayList<DataSink>();
 
-	protected final Logger logger;
-
 	protected final VideoRequest request;
 
 	/** Timestamp for creation of this thread */
 	private final Long timeStamp;
 
 	/** Constructor for the ImageFactory. */
-	protected AbstractDataSource(VideoRequest vr, Logger l,
-		ThreadMonitor m)
-	{
-		super(m);
+	protected AbstractDataSource(VideoRequest vr) {
 		request = vr;
-		logger = l==null ? TmsLogFactory.createLogger("video"): l;
 		timeStamp = System.currentTimeMillis();
 	}
 
@@ -68,29 +59,21 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 		DataSink sink;
 		for (Iterator i = sinks.listIterator(); i.hasNext();) {
 			sink = (DataSink) i.next();
-			logger.fine(this.getClass().getSimpleName() +
-					" is Notifying " + sink.toString() +
-					": image size is " + data.length);
 			sink.flush(data);
 		}
 	}
 
 	/** Add a DataSink to this Image Factory. */
 	public synchronized void connectSink(DataSink sink) {
-		if(sink != null){
-			logger.fine("Adding DataSink: " + sink.toString());
+		if(sink != null)
 			sinks.add(sink);
-		}
 	}
 
 	/** Remove a DataSink from this DataSource. */
 	public synchronized void disconnectSink(DataSink sink) {
-		logger.info("Removing DataSink: " + sink.getClass().getSimpleName());
 		sinks.remove(sink);
-		if(sinks.size()==0){
-			logger.fine(this.toString() + " has no sinks, stopping now.");
+		if(sinks.size() == 0)
 			halt();
-		}
 	}
 
 	protected synchronized void removeSinks(){

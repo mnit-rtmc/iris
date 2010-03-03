@@ -25,9 +25,7 @@ public class MJPEGReader implements VideoStream {
 
 	private final InputStream stream;
 
-	public MJPEGReader(InputStream is)throws InstantiationException{
-		if(is==null)throw new InstantiationException(
-				"Can't create a MJPEGStream with null InputStream.");
+	public MJPEGReader(InputStream is) {
 		stream = is;
 	}
 
