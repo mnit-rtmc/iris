@@ -14,9 +14,9 @@
 package us.mn.state.dot.tms.client.camera.stream;
 
 /**
+ * The video stream request parameter wrapper.
  * 
  * @author Timothy Johnson
- *
  */
 public class Client {
 
