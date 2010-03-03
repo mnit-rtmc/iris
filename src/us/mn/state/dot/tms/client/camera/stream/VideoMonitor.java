@@ -39,6 +39,10 @@ import javax.swing.border.BevelBorder;
  */
 public class VideoMonitor extends JPanel implements DataSink {
 
+	static protected final Dimension SIF_QUARTER = new Dimension(176, 120);
+	static protected final Dimension SIF_FULL = new Dimension(352, 240);
+	static protected final Dimension SIF_4X = new Dimension(704, 480);
+
 	private Camera camera = null;
 	private DataSource source = null;
 	private int imagesRendered = 0;
@@ -56,7 +60,7 @@ public class VideoMonitor extends JPanel implements DataSink {
 	public static final String STREAM_COMPLETE = "Stream finished.";
 	public static final String WAIT_ON_USER = "Waiting for user...";
 	private int imagesRequested = 0;
-	private Dimension imageSize = new Dimension(Constants.SIF_FULL);
+	private Dimension imageSize = new Dimension(SIF_FULL);
 	protected URI imageURI = null;
 	
 	/**
