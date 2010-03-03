@@ -46,7 +46,6 @@ import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.camera.stream.AbstractDataSource;
 import us.mn.state.dot.tms.client.camera.stream.Client;
 import us.mn.state.dot.tms.client.camera.stream.HttpDataSource;
-import us.mn.state.dot.tms.client.camera.stream.VideoException;
 
 /**
  * GUI for viewing camera images
@@ -405,9 +404,7 @@ public class CameraViewer extends JPanel
 	}
 
 	/** Start video streaming */
-	protected void playPressed(Camera c) throws MalformedURLException,
-		VideoException
-	{
+	protected void playPressed(Camera c) throws MalformedURLException {
 		us.mn.state.dot.tms.client.camera.stream.Camera camera =
 			new us.mn.state.dot.tms.client.camera.stream.Camera();
 		camera.setId(c.getName());
