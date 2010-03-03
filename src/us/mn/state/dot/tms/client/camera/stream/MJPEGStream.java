@@ -17,19 +17,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * This is a wrapper around an input stream.  It can retrieve the
- * next image in the stream.
+ * A video stream which reads an MJPEG source.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class MJPEGReader implements VideoStream {
+public class MJPEGStream implements VideoStream {
 
 	/** Input stream to read */
 	private final InputStream stream;
 
 	/** Create a new MJPEG stream */
-	public MJPEGReader(InputStream is) {
+	public MJPEGStream(InputStream is) {
 		stream = is;
 	}
 

@@ -66,7 +66,7 @@ public class HttpDataSource extends AbstractDataSource {
 	protected void readStream() throws IOException {
 		HttpURLConnection conn = createConnection(url);
 		try {
-			MJPEGReader stream = new MJPEGReader(
+			MJPEGStream stream = new MJPEGStream(
 				conn.getInputStream());
 			while(!done && isAlive()) {
 				byte[] img = stream.getImage();
