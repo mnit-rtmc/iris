@@ -43,8 +43,6 @@ public abstract class VideoThread extends Thread{
 		return startTime;
 	}
 
-	public abstract String getStatus();
-
 	public final void halt(){
 		done = true;
 	}

@@ -27,9 +27,8 @@ public class HttpDataSource extends AbstractDataSource {
 	protected final URL url;
 
 	/** Create a new HTTP data source */
-	public HttpDataSource(VideoRequest vr, URL url) {
-		super(vr);
-		this.url = url;
+	public HttpDataSource(URL u) {
+		url = u;
 	}
 
 	/** Start the stream. */

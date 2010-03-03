@@ -29,25 +29,12 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 	/** List of DataSinks for this stream. */
 	private ArrayList<DataSink> sinks = new ArrayList<DataSink>();
 
-	protected final VideoRequest request;
-
 	/** Timestamp for creation of this thread */
 	private final Long timeStamp;
 
 	/** Constructor for the ImageFactory. */
-	protected AbstractDataSource(VideoRequest vr) {
-		request = vr;
+	protected AbstractDataSource() {
 		timeStamp = System.currentTimeMillis();
-	}
-
-	/** Get the string representation of this factory */
-	public final String toString() {
-		return "DataSource for " + request.getCameraId() + " size " +
-			request.getSize() + " timestamp " + timeStamp;
-	}
-
-	public final String getStatus(){
-		return sinks.size() + " listeners.";
 	}
 
 	public synchronized DataSink[] getListeners(){
@@ -79,10 +66,6 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 	protected synchronized void removeSinks(){
 	 	sinks.clear();
 		halt();
-	}
-
-	public final VideoRequest getVideoRequest() {
-		return request;
 	}
 
 	/** Create an array of baseUrls for connecting to the backend

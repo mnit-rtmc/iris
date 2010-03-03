@@ -393,8 +393,8 @@ public class CameraViewer extends JPanel
 			new us.mn.state.dot.tms.client.camera.stream.Camera();
 		camera.setId(c.getName());
 		request.setCamera(camera);
-		s_panel.setDataSource(new HttpDataSource(request,
-			request.getUrl()), STREAM_DURATION);
+		s_panel.setDataSource(new HttpDataSource(request.getUrl()),
+			STREAM_DURATION);
 	}
 
 	/** Stop video streaming */
