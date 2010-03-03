@@ -31,16 +31,13 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.border.BevelBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 /**
  * A JPanel that can display an RTMC video stream.
  *
  * @author    Timothy Johnson
  */
-public class VideoMonitor extends JPanel
-		implements DataSink, ListSelectionListener {
+public class VideoMonitor extends JPanel implements DataSink {
 
 	private Camera camera = null;
 	private DataSource source = null;
@@ -180,12 +177,6 @@ public class VideoMonitor extends JPanel
 
 	public void setLabelVisible(boolean m){
 		description.setVisible(m);
-	}
-
-	public void valueChanged(ListSelectionEvent evt){
-		if(evt.getValueIsAdjusting()) return;
-		CameraSelector s = (CameraSelector)evt.getSource();
-		this.setCamera((Camera)s.getSelectedValue());
 	}
 
 	public void setCamera(Camera c){
