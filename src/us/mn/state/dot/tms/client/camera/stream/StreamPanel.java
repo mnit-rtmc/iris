@@ -18,11 +18,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.LinkedList;
 
 import javax.swing.BorderFactory;
@@ -50,16 +46,8 @@ public class StreamPanel extends JPanel implements DataSink {
 	Image image = null;
 	String imageName = null;
 	private final JLabel screen = new JLabel();
-	private final JLabel description = new JLabel(null,null,JLabel.CENTER);
 	private JProgressBar progress = new JProgressBar(0, 100);
 	private LinkedList<byte[]> images = new LinkedList<byte[]>();
-	private final JLabel status = new JLabel();
-	public static final String CONNECT_ERROR = "Unable to connect to stream.";
-	public static final String CONNECTING = "Connecting...";
-	public static final String STREAMING = "Streaming...";
-	public static final String STREAM_ERROR = "Stream unavailable.";
-	public static final String STREAM_COMPLETE = "Stream finished.";
-	public static final String WAIT_ON_USER = "Waiting for user...";
 	private int imagesRequested = 0;
 	private Dimension imageSize = new Dimension(SIF_FULL);
 	protected URI imageURI = null;
@@ -70,16 +58,14 @@ public class StreamPanel extends JPanel implements DataSink {
 		JPanel p = new JPanel(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
 		c.fill = GridBagConstraints.BOTH;
-		p.add(description, c);
 		c.gridx = 0;
 		c.gridy = GridBagConstraints.RELATIVE;
 		p.add(screen, c);
 		p.add(progress, c);
-		c.gridwidth = 1;
-		p.add(status, c);
-		this.add(p);
+		add(p);
 		setVideoSize(imageSize);
-		screen.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+		screen.setBorder(BorderFactory.createBevelBorder(
+			BevelBorder.LOWERED));
 	}
 
 	public void setImageUri(URI uri){
@@ -88,8 +74,6 @@ public class StreamPanel extends JPanel implements DataSink {
 	
 	public synchronized void setVideoSize(Dimension d){
 		imageSize = d;
-		status.setPreferredSize(new Dimension(d.width, 20));
-		description.setPreferredSize(new Dimension(d.width, 20));
 		screen.setPreferredSize(d);
 		screen.setMinimumSize(d);
 	}
@@ -116,14 +100,11 @@ public class StreamPanel extends JPanel implements DataSink {
 		if(src != null){
 			src.connectSink(this);
 			images.clear();
-			status.setText(CONNECTING);
 			try{
 				((Thread)src).start();
 			}catch(IllegalThreadStateException its){
 				// do nothing... it's already been started.
 			}
-		}else{
-			status.setText(WAIT_ON_USER);
 		}
 		source = src;
 		progress.setMaximum(imagesRequested);
@@ -131,8 +112,6 @@ public class StreamPanel extends JPanel implements DataSink {
 	}
 	
 	public void flush(byte[] i){
-//		write2File(i);
-		status.setText(STREAMING);
 		ImageIcon icon = new ImageIcon(i);
 		setImage(icon);
 		progress.setValue(imagesRendered);
@@ -152,41 +131,18 @@ public class StreamPanel extends JPanel implements DataSink {
 		}
 	}
 	
-	private void write2File(byte[] image){
-		try{
-			File f = new File("/tmp/image_" + imagesRendered + ".jpg");
-			FileOutputStream fos = new FileOutputStream(f);
-			fos.write(image);
-			fos.flush();
-			fos.close();
-		}catch(Exception e){
-			e.printStackTrace();
-		}
-	}
-	
 	private void clear(){
 		progress.setMaximum(imagesRequested);
 		progress.setValue(0);
-		status.setText(WAIT_ON_USER);
 	}
 	
 	public void setProgressVisible(boolean m){
 		progress.setVisible(m);
 	}
 
-	public void setStatusVisible(boolean m){
-		status.setVisible(m);
-	}
-
-	public void setLabelVisible(boolean m){
-		description.setVisible(m);
-	}
-
 	public void setCamera(Camera c){
 		camera = c;
-		if(camera != null)
-			description.setText(camera.toString());
-		else
+		if(camera == null)
 			setImage(null);
 	}
 
