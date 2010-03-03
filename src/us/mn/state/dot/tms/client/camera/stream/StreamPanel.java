@@ -184,10 +184,10 @@ public class StreamPanel extends JPanel implements DataSink {
 
 	public void setCamera(Camera c){
 		camera = c;
-		if(camera != null){
+		if(camera != null)
 			description.setText(camera.toString());
-			updateScreen();
-		}
+		else
+			setImage(null);
 	}
 
 	public String toString(){
@@ -197,17 +197,5 @@ public class StreamPanel extends JPanel implements DataSink {
 		}catch(Exception e){
 		}
 		return id + " video monitor";
-	}
-	
-	/** Update the video screen with the latest camera image. */
-	protected void updateScreen(){
-		if(camera == null) setImage(null);
-		try{
-			URL url = new URL(imageURI + "?id=" + camera.getId());
-			byte[] image = ConnectionFactory.getImage(url);
-			setImage(new ImageIcon(image));
-		}catch(IOException ioe){
-			ioe.printStackTrace();
-		}
 	}
 }

@@ -28,7 +28,6 @@ import java.net.URLConnection;
  * connection timeout.
  * 
  * @author Timothy A. Johnson
- *
  */
 abstract public class ConnectionFactory {
 
@@ -39,63 +38,5 @@ abstract public class ConnectionFactory {
 		c.setConnectTimeout(VideoThread.TIMEOUT_DIRECT);
 		c.setReadTimeout(VideoThread.TIMEOUT_DIRECT);
 		return c;
-	}
-	
-	/** Read data from the URL into a file.
-	 * 
-	 * @param url The URL of the source
-	 * @param f The file in which to save the data.
-	 * @throws IOException
-	 */
-	public static void readData(URL url, File f)
-			throws IOException{
-		FileOutputStream out = new FileOutputStream(f);
-		try{
-			URLConnection c = createConnection(url);
-			InputStream in = c.getInputStream();
-			byte[] data = new byte[1024];
-			int bytesRead = 0;
-			while(true){
-				bytesRead = in.read(data);
-				if(bytesRead==-1) break;
-				out.write(data, 0, bytesRead);
-			}
-		}finally{
-			try{
-				out.flush();
-				out.close();
-			}catch(Exception e){
-			}
-		}
-	}
-
-	/**
-	 * Get an image from the given url
-	 * @param url The location of the image file
-	 * @return A byte[] containing the image data.
-	 * @throws IOException
-	 */
-	public static byte[] getImage(URL url)
-			throws IOException{
-		InputStream in = null;
-		try{
-			URLConnection c = createConnection(url);
-			in = c.getInputStream();
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			byte[] data = new byte[1024];
-			int bytesRead = 0;
-			while(true){
-				bytesRead = in.read(data);
-				if(bytesRead==-1) break;
-				bos.write(data, 0, bytesRead);
-			}
-			return bos.toByteArray();
-		}finally{
-			try{
-				in.close();
-			}catch(IOException ioe2){
-			}catch(NullPointerException npe){
-			}
-		}
 	}
 }
