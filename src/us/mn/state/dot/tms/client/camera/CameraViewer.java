@@ -92,11 +92,8 @@ public class CameraViewer extends JPanel
 	/** Sonar state */
 	protected final SonarState state;
 
-	/** The base URLs of the backend video stream servers */
-	private final String[] streamUrls;
-
 	/** The video stream request parameter wrapper */
-	private final VideoRequest request = new VideoRequest();
+	private final VideoRequest request;
 
 	/** Displays the name of the selected camera */
 	protected final JTextField txtId = new JTextField();
@@ -145,8 +142,7 @@ public class CameraViewer extends JPanel
 		manager.getSelectionModel().addProxySelectionListener(this);
 		state = session.getSonarState();
 		user = session.getUser();
-		streamUrls = AbstractDataSource.createBackendUrls(
-			session.getProperties(), 1);
+		request = new VideoRequest(session.getProperties());
 		setBorder(BorderFactory.createTitledBorder("Selected Camera"));
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.gridx = 0;
@@ -406,7 +402,7 @@ public class CameraViewer extends JPanel
 		camera.setId(c.getName());
 		request.setCamera(camera);
 		s_panel.setDataSource(new HttpDataSource(request,
-			new URL(streamUrls[request.getArea()] + "?id=" +
+			new URL(request.getUrl() + "?id=" +
 			request.getCameraId() + "&ssid=" +
 			request.getSonarSessionId())), STREAM_DURATION);
 	}

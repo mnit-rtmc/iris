@@ -13,6 +13,8 @@
 */
 package us.mn.state.dot.tms.client.camera.stream;
 
+import java.util.Properties;
+
 /**
  * The video stream request parameter wrapper.
  *
@@ -96,7 +98,19 @@ public class VideoRequest {
 			this.size = size;
 	}
 
-	public VideoRequest() {
+	/** The base URLs of the backend video stream servers */
+	private final String[] streamUrls;
+
+	/** Create a new video request */
+	public VideoRequest(Properties p) {
+		streamUrls = AbstractDataSource.createBackendUrls(p, 1);
+	}
+
+	public String getUrl() {
+		if(area >= 0 && area < streamUrls.length)
+			return streamUrls[area];
+		else
+			return new String();
 	}
 
 	public int getFramesRequested() {
