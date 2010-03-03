@@ -19,21 +19,20 @@ import java.util.LinkedList;
  * An abstract implementation of a DataSource.
  *
  * @author Timothy Johnson
+ * @author Douglas Lau
  */
 abstract public class AbstractDataSource extends Thread implements DataSource {
 
+	/** Flag to indicate the stream is done */
 	protected boolean done = false;
 
+	/** Halt the stream */
 	public void halt() {
 		done = true;
 	}
 
 	/** List of DataSinks for this stream */
 	private LinkedList<DataSink> sinks = new LinkedList<DataSink>();
-
-	public synchronized DataSink[] getListeners() {
-		return (DataSink [])sinks.toArray(new DataSink[0]);
-	}
 
 	/** Notify listeners that an image was created */
 	protected synchronized void notifySinks(byte[] data) {
@@ -47,13 +46,14 @@ abstract public class AbstractDataSource extends Thread implements DataSource {
 			sinks.add(sink);
 	}
 
-	/** Remove a DataSink from this DataSource. */
+	/** Remove a DataSink from this DataSource */
 	public synchronized void disconnectSink(DataSink sink) {
 		sinks.remove(sink);
 		if(sinks.size() == 0)
 			halt();
 	}
 
+	/** Remove all connected data sinks */
 	protected synchronized void removeSinks() {
 	 	sinks.clear();
 		halt();

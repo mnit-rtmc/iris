@@ -21,12 +21,25 @@ import java.net.URL;
  * The HttpDataSource gets it's data via the HTTP protocol
  *
  * @author Timothy Johnson
+ * @author Douglas Lau
  */
 public class HttpDataSource extends AbstractDataSource {
 
 	/** Default timeout for direct URL Connections */
-	static public final int TIMEOUT_DIRECT = 5 * 1000;
+	static protected final int TIMEOUT_DIRECT = 5 * 1000;
 
+	/** Create an HTTP connection */
+	static protected HttpURLConnection createConnection(URL url)
+		throws IOException
+	{
+		HttpURLConnection c = (HttpURLConnection)url.openConnection();
+		HttpURLConnection.setFollowRedirects(true);
+		c.setConnectTimeout(TIMEOUT_DIRECT);
+		c.setReadTimeout(TIMEOUT_DIRECT);
+		return c;
+	}
+
+	/** URL of the data source */
 	protected final URL url;
 
 	/** Create a new HTTP data source */
@@ -34,49 +47,35 @@ public class HttpDataSource extends AbstractDataSource {
 		url = u;
 	}
 
-	/** Start the stream. */
+	/** Start the stream */
 	public void run() {
-		HttpURLConnection conn = null;
-		if(url != null){
-			try{
-				conn = createConnection(url);
-				final MJPEGReader stream = new MJPEGReader(conn.getInputStream());
-				byte[] img;
-				while(!done && this.isAlive()){
-					if(stream==null) {
-						break;
-					}
-					img = stream.getImage();
-					if(img != null && img.length > 0){
-						notifySinks(img);
-					}else{
-						//FIXME: Continue trying to get images even if null or empty.
-						//Pehaps a counter can keep track of contiguous failures and
-						//then break.
-
-						//break;
-					}
-				}
+		if(url != null) {
+			try {
+				readStream();
 			}
-			catch(IOException ioe) {
-				ioe.printStackTrace();
+			catch(IOException e) {
+				e.printStackTrace();
 			}
 			finally {
-				try{
-					conn.disconnect();
-				}catch(Exception e2){
-				}
 				removeSinks();
 			}
 		}
 	}
 
-	public static HttpURLConnection createConnection(URL url)
-			throws IOException {
-		HttpURLConnection c = (HttpURLConnection)url.openConnection();
-		HttpURLConnection.setFollowRedirects(true);
-		c.setConnectTimeout(TIMEOUT_DIRECT);
-		c.setReadTimeout(TIMEOUT_DIRECT);
-		return c;
+	/** Read data from the stream */
+	protected void readStream() throws IOException {
+		HttpURLConnection conn = createConnection(url);
+		try {
+			MJPEGReader stream = new MJPEGReader(
+				conn.getInputStream());
+			while(!done && isAlive()) {
+				byte[] img = stream.getImage();
+				if(img != null && img.length > 0)
+					notifySinks(img);
+			}
+		}
+		finally {
+			conn.disconnect();
+		}
 	}
 }
