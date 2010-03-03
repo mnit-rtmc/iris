@@ -60,7 +60,8 @@ public class StreamPanel extends JPanel implements DataSink {
 			BevelBorder.LOWERED));
 	}
 
-	public synchronized void setVideoSize(Dimension d) {
+	/** Set the dimensions of the video stream */
+	protected void setVideoSize(Dimension d) {
 		imageSize = d;
 		screen.setPreferredSize(d);
 		screen.setMinimumSize(d);
@@ -109,8 +110,7 @@ public class StreamPanel extends JPanel implements DataSink {
 	 * @param image  The image to display. */
 	private synchronized void setImage(ImageIcon icon) {
 		Image i = icon.getImage().getScaledInstance(
-			imageSize.width, imageSize.height,
-				Image.SCALE_FAST);
+			imageSize.width, imageSize.height, Image.SCALE_FAST);
 		screen.setIcon(new ImageIcon(i));
 		repaint();
 	}
