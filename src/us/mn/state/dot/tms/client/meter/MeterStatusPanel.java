@@ -236,6 +236,8 @@ public class MeterStatusPanel extends FormPanel
 			cameraTxt.setText("");
 			locationTxt.setText("");
 			operationTxt.setText("");
+			operationTxt.setForeground(null);
+			operationTxt.setBackground(null);
 			releaseTxt.setText("");
 			cycleTxt.setText("");
 			queueTxt.setText("");
