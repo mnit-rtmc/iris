@@ -34,9 +34,6 @@ public class Client {
 
 	public static int maxImageSize = LARGE;
 	
-	/** The parameters for a video clip request */
-	private VideoClip clip = new VideoClip();
-	
 	private int area = 0;
 	
 	private int rate = 30;
@@ -110,12 +107,6 @@ public class Client {
 	}
 	public void setCompression(int compression) {
 		this.compression = compression;
-	}
-	public VideoClip getClip() {
-		return clip;
-	}
-	public void setClip(VideoClip clip) {
-		this.clip = clip;
 	}
 	public String getCameraId(){
 		return camera.getId();
