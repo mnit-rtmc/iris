@@ -24,7 +24,16 @@ import java.util.Iterator;
  *
  * @author Timothy Johnson
  */
-public abstract class AbstractDataSource extends VideoThread implements DataSource {
+abstract public class AbstractDataSource extends Thread implements DataSource {
+
+	/** Default timeout for direct URL Connections */
+	static public final int TIMEOUT_DIRECT = 5 * 1000;
+
+	protected boolean done = false;
+
+	public void halt() {
+		done = true;
+	}
 
 	/** List of DataSinks for this stream. */
 	private ArrayList<DataSink> sinks = new ArrayList<DataSink>();

@@ -72,8 +72,8 @@ public class HttpDataSource extends AbstractDataSource {
 			throws IOException {
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
 		HttpURLConnection.setFollowRedirects(true);
-		c.setConnectTimeout(VideoThread.TIMEOUT_DIRECT);
-		c.setReadTimeout(VideoThread.TIMEOUT_DIRECT);
+		c.setConnectTimeout(TIMEOUT_DIRECT);
+		c.setReadTimeout(TIMEOUT_DIRECT);
 		return c;
 	}
 }
