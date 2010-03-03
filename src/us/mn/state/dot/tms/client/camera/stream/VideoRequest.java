@@ -17,22 +17,21 @@ package us.mn.state.dot.tms.client.camera.stream;
  * The video stream request parameter wrapper.
  *
  * @author Timothy Johnson
+ * @author Douglas Lau
  */
 public class VideoRequest {
 
-	/** Sonar session identifier for authenticating to the video system */
-	private long sonarSessionId = -1;
-
 	/** Constant for small sized images */
-	public static final int SMALL = 1;
+	static public final int SMALL = 1;
 
 	/** Constant for medium sized images */
-	public static final int MEDIUM = 2;
+	static public final int MEDIUM = 2;
 
 	/** Constant for large sized images */
-	public static final int LARGE = 3;
+	static public final int LARGE = 3;
 
-	public static int maxImageSize = LARGE;
+	/** Sonar session identifier for authenticating to the video system */
+	private long sonarSessionId = -1;
 
 	private int area = 0;
 
@@ -70,7 +69,7 @@ public class VideoRequest {
 		return duration * rate;
 	}
 	public int getSize() {
-		return Math.min(maxImageSize, size);
+		return size;
 	}
 	public int getArea() {
 		return area;
@@ -102,8 +101,8 @@ public class VideoRequest {
 		this.rate = rate;
 	}
 	public void setSize(int size) {
-		size = Math.min(maxImageSize, size);
-		if(size >= SMALL && size <= LARGE) this.size = size;
+		if(size >= SMALL && size <= LARGE)
+			this.size = size;
 	}
 	public void setCompression(int compression) {
 		this.compression = compression;
@@ -115,10 +114,6 @@ public class VideoRequest {
 		if(id == null || id.length() > 10) return;
 		if(camera == null) camera = new Camera();
 		camera.setId(Camera.createStandardId(id));
-	}
-
-	public static void setMaxImageSize(int i){
-		if(i >= SMALL && i <= LARGE) maxImageSize = i;
 	}
 
 	/** Get the SONAR session ID */
