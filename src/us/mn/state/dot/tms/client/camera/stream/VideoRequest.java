@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.client.camera.stream;
  * 
  * @author Timothy Johnson
  */
-public class Client {
+public class VideoRequest {
 
 	/** Sonar session identifier for authenticating to the video system */
 	private long sonarSessionId = -1;
@@ -51,7 +51,7 @@ public class Client {
 	/** Value for the jpeg compression level */
 	int compression = 50;
 	
-	public Client(){
+	public VideoRequest(){
 	}
 
 	public int getDuration() {

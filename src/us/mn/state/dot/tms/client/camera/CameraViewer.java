@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.toast.Icons;
 import us.mn.state.dot.tms.client.toast.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.camera.stream.AbstractDataSource;
-import us.mn.state.dot.tms.client.camera.stream.Client;
+import us.mn.state.dot.tms.client.camera.stream.VideoRequest;
 import us.mn.state.dot.tms.client.camera.stream.HttpDataSource;
 import us.mn.state.dot.tms.client.camera.stream.StreamPanel;
 
@@ -96,7 +96,7 @@ public class CameraViewer extends JPanel
 	private final String[] streamUrls;
 
 	/** The video stream request parameter wrapper */
-	private final Client client = new Client();
+	private final VideoRequest request = new VideoRequest();
 
 	/** Displays the name of the selected camera */
 	protected final JTextField txtId = new JTextField();
@@ -220,8 +220,8 @@ public class CameraViewer extends JPanel
 			}
 		};
 		Connection c = state.lookupConnection(state.getConnection());
-		client.setSonarSessionId(c.getSessionId());
-		client.setRate(30);
+		request.setSonarSessionId(c.getSessionId());
+		request.setRate(30);
 		t.setDaemon(true);
 		t.start();
 		joystick.addJoystickListener(new JoystickListener() {
@@ -404,11 +404,11 @@ public class CameraViewer extends JPanel
 		us.mn.state.dot.tms.client.camera.stream.Camera camera =
 			new us.mn.state.dot.tms.client.camera.stream.Camera();
 		camera.setId(c.getName());
-		client.setCamera(camera);
-		s_panel.setDataSource(new HttpDataSource(client,
-			new URL(streamUrls[client.getArea()] + "?id=" +
-			client.getCameraId() + "&ssid=" +
-			client.getSonarSessionId())), STREAM_DURATION);
+		request.setCamera(camera);
+		s_panel.setDataSource(new HttpDataSource(request,
+			new URL(streamUrls[request.getArea()] + "?id=" +
+			request.getCameraId() + "&ssid=" +
+			request.getSonarSessionId())), STREAM_DURATION);
 	}
 
 	/** Stop video streaming */

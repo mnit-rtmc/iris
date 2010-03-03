@@ -34,29 +34,25 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 
 	protected final Logger logger;
 	
-	protected final Client client;
+	protected final VideoRequest request;
 	
 	/** Timestamp for creation of this thread */
 	private final Long timeStamp;
 	
 	/** Constructor for the ImageFactory. */
-	protected AbstractDataSource(Client c,
-			Logger l, ThreadMonitor m) {
+	protected AbstractDataSource(VideoRequest vr, Logger l,
+		ThreadMonitor m)
+	{
 		super(m);
-		client = c;
+		request = vr;
 		logger = l==null ? TmsLogFactory.createLogger("video"): l;
 		timeStamp = System.currentTimeMillis();
 	}
 
 	/** Get the string representation of this factory */
 	public final String toString() {
-		if(client==null){
-			return "Uninitialized DataSource";
-		}
-		return "DataSource for" +
-			" " + client.getCameraId() + " " +
-			"size " + client.getSize() +
-			" timestamp " + timeStamp;
+		return "DataSource for " + request.getCameraId() + " size " +
+			request.getSize() + " timestamp " + timeStamp;
 	}
 
 	public final String getStatus(){
@@ -102,8 +98,8 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 		halt();	
 	}
 	
-	public final Client getClient() {
-		return client;
+	public final VideoRequest getVideoRequest() {
+		return request;
 	}
 
 	/** Create an array of baseUrls for connecting to the backend

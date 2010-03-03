@@ -28,13 +28,15 @@ public class HttpDataSource extends AbstractDataSource {
 	protected final URL url;
 
 	/** Constructor for the HttpDataSource. */
-	public HttpDataSource(Client c, URL url) {
-		this(c, null, null, url);
+	public HttpDataSource(VideoRequest vr, URL url) {
+		this(vr, null, null, url);
 	}
 
 	/** Constructor for the HttpDataSource. */
-	public HttpDataSource(Client c, Logger l, ThreadMonitor m, URL url) {
-		super(c, l, m);
+	public HttpDataSource(VideoRequest vr, Logger l, ThreadMonitor m,
+		URL url)
+	{
+		super(vr, l, m);
 		this.url = url;
 	}
 	
