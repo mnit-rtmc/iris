@@ -26,7 +26,7 @@ import java.net.URL;
 public class HttpDataSource {
 
 	/** Default timeout for direct URL Connections */
-	static protected final int TIMEOUT_DIRECT = 5 * 1000;
+	static protected final int TIMEOUT_DIRECT = 6 * 1000;
 
 	/** Create an HTTP connection */
 	static protected HttpURLConnection createConnection(URL url)

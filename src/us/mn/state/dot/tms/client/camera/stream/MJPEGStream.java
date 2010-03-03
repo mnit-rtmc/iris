@@ -27,6 +27,9 @@ public class MJPEGStream implements VideoStream {
 	/** Input stream to read */
 	private final InputStream stream;
 
+	/** Count of rendered frames */
+	private int n_frames = 0;
+
 	/** Create a new MJPEG stream */
 	public MJPEGStream(InputStream is) {
 		stream = is;
@@ -44,22 +47,22 @@ public class MJPEGStream implements VideoStream {
 			else
 				throw new IOException("End of stream");
 		}
+		n_frames++;
 		return image;
 	}
 
 	/** Get the length of the next image */
 	private int getImageSize() throws IOException {
-		String s = readLine();
-		while(s != null) {
+		for(int i = 0; i < 100; i++) {
+			String s = readLine();
 			if(s.toLowerCase().indexOf("content-length") > -1) {
 				// throw away an empty line after the
 				// content-length header
 				readLine();
 				return parseContentLength(s);
 			}
-			s = readLine();
 		}
-		return 0;
+		throw new IOException("Too many headers");
 	}
 
 	/** Parse the content-length header */
@@ -81,7 +84,7 @@ public class MJPEGStream implements VideoStream {
 			int ch = stream.read();
 			if(ch < 0) {
 				if(b.length() == 0)
-					return null;
+					throw new IOException("End of stream");
 				else
 					break;
 			}
@@ -100,5 +103,10 @@ public class MJPEGStream implements VideoStream {
 		catch(IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	/** Get the number of frames rendered */
+	public int getFrameCount() {
+		return n_frames;
 	}
 }

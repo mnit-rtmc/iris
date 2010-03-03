@@ -39,10 +39,9 @@ public class StreamPanel extends JPanel {
 	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
 	private VideoStream stream = null;
-	private int imagesRendered = 0;
 	private final JLabel screen = new JLabel();
 	private JProgressBar progress = new JProgressBar(0, 100);
-	private int imagesRequested = 0;
+	private int n_frames = 0;
 	private Dimension imageSize = new Dimension(SIF_FULL);
 
 	private final Thread thread = new Thread() {
@@ -64,10 +63,9 @@ public class StreamPanel extends JPanel {
 		protected void readStream(VideoStream vs) {
 			try {
 				while(vs == stream) {
-					byte[] im = vs.getImage();
-					if(im != null)
-						flush(im);
-					else
+					flush(vs.getImage());
+					progress.setValue(vs.getFrameCount());
+					if(vs.getFrameCount() >= n_frames)
 						break;
 				}
 			}
@@ -76,6 +74,7 @@ public class StreamPanel extends JPanel {
 			}
 			finally {
 				vs.close();
+				clear();
 			}
 		}
 	};
@@ -106,22 +105,16 @@ public class StreamPanel extends JPanel {
 
 	public void setVideoStream(VideoStream vs, int f) {
 		stream = vs;
-		imagesRequested = f;
-		progress.setMaximum(imagesRequested);
+		n_frames = f;
+		progress.setMaximum(n_frames);
 		progress.setValue(0);
 		synchronized(thread) {
 			thread.notify();
 		}
 	}
 
-	protected void flush(byte[] i) {
-		setImage(new ImageIcon(i));
-		progress.setValue(imagesRendered);
-		imagesRendered++;
-		if(imagesRendered >= imagesRequested) {
-			stream = null;
-			clear();
-		}
+	protected void flush(byte[] idata) {
+		setImage(new ImageIcon(idata));
 	}
 
 	/** Set the image to be displayed on the panel
@@ -134,7 +127,7 @@ public class StreamPanel extends JPanel {
 	}
 
 	private void clear() {
-		progress.setMaximum(imagesRequested);
 		progress.setValue(0);
+		screen.setIcon(null);
 	}
 }

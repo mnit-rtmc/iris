@@ -28,4 +28,7 @@ public interface VideoStream {
 
 	/** Close the video stream */
 	void close();
+
+	/** Get the number of frames rendered */
+	int getFrameCount();
 }
