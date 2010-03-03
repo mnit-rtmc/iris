@@ -33,89 +33,6 @@ public class VideoRequest {
 	/** Sonar session identifier for authenticating to the video system */
 	private long sonarSessionId = -1;
 
-	private int area = 0;
-
-	private int rate = 30;
-
-	private String host = "unknown";
-
-	private String user = "unknown";
-
-	private int duration = 60;
-
-	private Camera camera = null;
-
-	int size = 2;
-
-	/** Value for the jpeg compression level */
-	int compression = 50;
-
-	public VideoRequest(){
-	}
-
-	public int getDuration() {
-		return duration;
-	}
-	public String getHost() {
-		return host;
-	}
-	public int getRate() {
-		return rate;
-	}
-	public String getUser() {
-		return user;
-	}
-	public int getFramesRequested() {
-		return duration * rate;
-	}
-	public int getSize() {
-		return size;
-	}
-	public int getArea() {
-		return area;
-	}
-	public int getCompression() {
-		return compression;
-	}
-	public String toString(){
-		return user + "@" + host + ": C=" + getCameraId() +
-			" S=" + size + " R=" + rate + " D=" +
-			duration;
-	}
-	public void setUser(String user) {
-		this.user = user;
-	}
-	public void setHost(String host) {
-		this.host = host;
-	}
-	public void setArea(int area) {
-		this.area = area;
-	}
-	public void setCamera(Camera c) {
-		this.camera = c;
-	}
-	public void setDuration(int duration) {
-		this.duration = duration;
-	}
-	public void setRate(int rate) {
-		this.rate = rate;
-	}
-	public void setSize(int size) {
-		if(size >= SMALL && size <= LARGE)
-			this.size = size;
-	}
-	public void setCompression(int compression) {
-		this.compression = compression;
-	}
-	public String getCameraId(){
-		return camera.getId();
-	}
-	public void setCameraId(String id){
-		if(id == null || id.length() > 10) return;
-		if(camera == null) camera = new Camera();
-		camera.setId(Camera.createStandardId(id));
-	}
-
 	/** Get the SONAR session ID */
 	public long getSonarSessionId() {
 		return sonarSessionId;
@@ -124,5 +41,79 @@ public class VideoRequest {
 	/** Set the SONAR session ID */
 	public void setSonarSessionId(long sonarSessionId) {
 		this.sonarSessionId = sonarSessionId;
+	}
+
+	/** Area number */
+	private int area = 0;
+
+	/** Get the area number */
+	public int getArea() {
+		return area;
+	}
+
+	/** Set the area number */
+	public void setArea(int area) {
+		this.area = area;
+	}
+
+	/** Frame rate (per second) */
+	private int rate = 30;
+
+	/** Get the frame rate (per second) */
+	public int getRate() {
+		return rate;
+	}
+
+	/** Set the frame rate (per second) */
+	public void setRate(int rate) {
+		this.rate = rate;
+	}
+
+	private int duration = 60;
+
+	public int getDuration() {
+		return duration;
+	}
+
+	public void setDuration(int duration) {
+		this.duration = duration;
+	}
+
+	private Camera camera = null;
+
+	public void setCamera(Camera c) {
+		this.camera = c;
+	}
+
+	int size = 2;
+
+	public int getSize() {
+		return size;
+	}
+
+	public void setSize(int size) {
+		if(size >= SMALL && size <= LARGE)
+			this.size = size;
+	}
+
+	public VideoRequest() {
+	}
+
+	public int getFramesRequested() {
+		return duration * rate;
+	}
+	public String toString() {
+		return "C=" + getCameraId() + " S=" + size + " R=" + rate +
+			" D=" + duration;
+	}
+	public String getCameraId() {
+		return camera.getId();
+	}
+	public void setCameraId(String id){
+		if(id == null || id.length() > 10)
+			return;
+		if(camera == null)
+			camera = new Camera();
+		camera.setId(Camera.createStandardId(id));
 	}
 }
