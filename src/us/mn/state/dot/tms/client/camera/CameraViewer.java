@@ -184,7 +184,6 @@ public class CameraViewer extends JPanel
 		bag.anchor = GridBagConstraints.CENTER;
 		bag.fill = GridBagConstraints.BOTH;
 		add(s_panel, bag);
-		s_panel.setProgressVisible(true);
 		bag.gridy = 3;
 		bag.fill = GridBagConstraints.NONE;
 		play.setToolTipText("Play");

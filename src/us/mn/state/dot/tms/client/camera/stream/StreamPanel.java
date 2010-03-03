@@ -40,7 +40,6 @@ public class StreamPanel extends JPanel implements DataSink {
 	static protected final Dimension SIF_FULL = new Dimension(352, 240);
 	static protected final Dimension SIF_4X = new Dimension(704, 480);
 
-	private Camera camera = null;
 	private DataSource source = null;
 	private int imagesRendered = 0;
 	Image image = null;
@@ -134,24 +133,5 @@ public class StreamPanel extends JPanel implements DataSink {
 	private void clear(){
 		progress.setMaximum(imagesRequested);
 		progress.setValue(0);
-	}
-	
-	public void setProgressVisible(boolean m){
-		progress.setVisible(m);
-	}
-
-	public void setCamera(Camera c){
-		camera = c;
-		if(camera == null)
-			setImage(null);
-	}
-
-	public String toString(){
-		String id = "";
-		try{
-			id = camera.getId();
-		}catch(Exception e){
-		}
-		return id + " video monitor";
 	}
 }
