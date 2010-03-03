@@ -19,76 +19,77 @@ import java.io.InputStream;
 /**
  * This is a wrapper around an input stream.  It can retrieve the
  * next image in the stream.
- * @author    Timothy Johnson
+ *
+ * @author Timothy Johnson
+ * @author Douglas Lau
  */
 public class MJPEGReader implements VideoStream {
 
+	/** Input stream to read */
 	private final InputStream stream;
 
+	/** Create a new MJPEG stream */
 	public MJPEGReader(InputStream is) {
 		stream = is;
 	}
 
-	private String readLine() throws IOException{
-		StringBuffer buf = new StringBuffer();
-		int ch;
-		for(;;) {
-			ch = stream.read();
-			if(ch < 0) {
-				if(buf.length() == 0) {
-					return null;
-				} else {
-					break;
-				}
-			}
-			buf.append((char)ch);
-			if (ch == '\r') {
-				continue;
-			} else if (ch == '\n') {
+	/** Get the next image in the mjpeg stream */
+	public byte[] getImage() throws IOException {
+		int n_size = getImageSize();
+		byte[] image = new byte[n_size];
+		int n_bytes = 0;
+		while(n_bytes < n_size) {
+			int r = stream.read(image, n_bytes, n_size - n_bytes);
+			if(r == -1)
 				break;
-			}
-        }
-		return (buf.toString());
-	}
-
-	/** Get the next image in the mjpeg stream
-	 *
-	 * @return
-	 */
-	public byte[] getImage(){
-		try{
-			int imageSize = getImageSize();
-			byte[] image = new byte[imageSize];
-			int bytesRead = 0;
-			int currentRead = 0;
-			while(bytesRead < imageSize){
-				currentRead = stream.read(image, bytesRead,
-						imageSize - bytesRead);
-				if(currentRead==-1){
-					break;
-				}else{
-					bytesRead = bytesRead + currentRead;
-				}
-			}
-			return image;
-		}catch(Exception e){
-			return new byte[0];
+			else
+				n_bytes += r;
 		}
+		return image;
 	}
 
-	private int getImageSize() throws IOException{
+	/** Get the length of the next image */
+	private int getImageSize() throws IOException {
 		String s = readLine();
-		while(s!=null){
-			if(s.toLowerCase().indexOf("content-length")>-1){
-				s = s.substring(s.indexOf(":") + 1);
-				s = s.trim();
-				//throw away an empty line after the
-				//content-length header
+		while(s != null) {
+			if(s.toLowerCase().indexOf("content-length") > -1) {
+				// throw away an empty line after the
+				// content-length header
 				readLine();
-				return Integer.parseInt(s);
+				return parseContentLength(s);
 			}
 			s = readLine();
 		}
 		return 0;
+	}
+
+	/** Parse the content-length header */
+	private int parseContentLength(String s) throws IOException {
+		s = s.substring(s.indexOf(":") + 1);
+		s = s.trim();
+		try {
+			return Integer.parseInt(s);
+		}
+		catch(NumberFormatException e) {
+			throw new IOException("Invalid content-length");
+		}
+	}
+
+	/** Read the next line of text */
+	private String readLine() throws IOException {
+		StringBuilder b = new StringBuilder();
+		while(true) {
+			int ch = stream.read();
+			if(ch < 0) {
+				if(b.length() == 0)
+					return null;
+				else
+					break;
+			}
+			b.append((char)ch);
+			if(ch == '\n')
+				break;
+		}
+		return b.toString();
 	}
 }

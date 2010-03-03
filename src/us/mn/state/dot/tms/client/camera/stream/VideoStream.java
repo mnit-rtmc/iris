@@ -13,11 +13,16 @@
 */
 package us.mn.state.dot.tms.client.camera.stream;
 
+import java.io.IOException;
+
+/**
+ * A video stream produces a stream of image data.
+ *
+ * @author Timothy Johnson
+ * @author Douglas Lau
+ */
 public interface VideoStream {
 
-	/**
-	 * Get the next image in the stream
-	 * @return
-	 */
-	public byte[] getImage();
+	/** Get the next image in the stream */
+	public byte[] getImage() throws IOException;
 }
