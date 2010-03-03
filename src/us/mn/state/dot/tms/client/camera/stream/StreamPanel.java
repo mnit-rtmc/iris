@@ -50,7 +50,7 @@ public class StreamPanel extends JPanel implements DataSink {
 	private int imagesRequested = 0;
 	private Dimension imageSize = new Dimension(SIF_FULL);
 	protected URI imageURI = null;
-	
+
 	/** Create a new stream panel */
 	public StreamPanel() {
 		super(new BorderLayout());
@@ -70,7 +70,7 @@ public class StreamPanel extends JPanel implements DataSink {
 	public void setImageUri(URI uri){
 		imageURI = uri;
 	}
-	
+
 	public synchronized void setVideoSize(Dimension d){
 		imageSize = d;
 		screen.setPreferredSize(d);
@@ -109,7 +109,7 @@ public class StreamPanel extends JPanel implements DataSink {
 		progress.setMaximum(imagesRequested);
 		progress.setValue(0);
 	}
-	
+
 	public void flush(byte[] i){
 		ImageIcon icon = new ImageIcon(i);
 		setImage(icon);
@@ -117,10 +117,10 @@ public class StreamPanel extends JPanel implements DataSink {
 		imagesRendered++;
 		if(imagesRendered >= imagesRequested){
 			//FIXME: This is a thread safety violation since this
-			//call to a synchronized method disconnectSink is 
+			//call to a synchronized method disconnectSink is
 			//called from another synchronized method notifySinks.
 			//Both method calls are running in different threads
-			//and operating on the same ArrayList.   
+			//and operating on the same ArrayList.
 
 			//Note: We actually prefer continuous video so the fix
 			//for us is to remove the following call.
@@ -129,7 +129,7 @@ public class StreamPanel extends JPanel implements DataSink {
 			clear();
 		}
 	}
-	
+
 	private void clear(){
 		progress.setMaximum(imagesRequested);
 		progress.setValue(0);

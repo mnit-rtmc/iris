@@ -15,14 +15,14 @@ package us.mn.state.dot.tms.client.camera.stream;
 
 /**
  * The video stream request parameter wrapper.
- * 
+ *
  * @author Timothy Johnson
  */
 public class VideoRequest {
 
 	/** Sonar session identifier for authenticating to the video system */
 	private long sonarSessionId = -1;
-	
+
 	/** Constant for small sized images */
 	public static final int SMALL = 1;
 
@@ -33,24 +33,24 @@ public class VideoRequest {
 	public static final int LARGE = 3;
 
 	public static int maxImageSize = LARGE;
-	
+
 	private int area = 0;
-	
+
 	private int rate = 30;
 
 	private String host = "unknown";
-	
+
 	private String user = "unknown";
-	
+
 	private int duration = 60;
-	
+
 	private Camera camera = null;
 
 	int size = 2;
 
 	/** Value for the jpeg compression level */
 	int compression = 50;
-	
+
 	public VideoRequest(){
 	}
 
@@ -116,7 +116,7 @@ public class VideoRequest {
 		if(camera == null) camera = new Camera();
 		camera.setId(Camera.createStandardId(id));
 	}
-	
+
 	public static void setMaxImageSize(int i){
 		if(i >= SMALL && i <= LARGE) maxImageSize = i;
 	}

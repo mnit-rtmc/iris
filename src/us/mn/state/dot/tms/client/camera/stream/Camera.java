@@ -5,11 +5,11 @@ import java.awt.Point;
 public class Camera {
 
 	protected String id = null;
-	
+
 	protected String freeway = "";
-	
+
 	protected String crossStreet = "";
-	
+
 	protected Point location = new Point(0,0);
 
 	public Camera(){
@@ -46,7 +46,7 @@ public class Camera {
 	public void setNorthing(int n){
 		location.y = n;
 	}
-	
+
 	public String toString(){
 		return id + ": (" + getFreeway() + " @ " + getCrossStreet() + ")";
 	}

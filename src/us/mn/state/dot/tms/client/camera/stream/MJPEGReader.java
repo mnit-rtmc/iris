@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * This is a wrapper around an input stream.  It can retrieve the 
+ * This is a wrapper around an input stream.  It can retrieve the
  * next image in the stream.
  * @author    Timothy Johnson
  */
@@ -30,7 +30,7 @@ public class MJPEGReader implements VideoStream {
 				"Can't create a MJPEGStream with null InputStream.");
 		stream = is;
 	}
-	
+
 	private String readLine() throws IOException{
 		StringBuffer buf = new StringBuffer();
 		int ch;
@@ -54,7 +54,7 @@ public class MJPEGReader implements VideoStream {
 	}
 
 	/** Get the next image in the mjpeg stream
-	 * 
+	 *
 	 * @return
 	 */
 	public byte[] getImage(){

@@ -33,12 +33,12 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 	private ArrayList<DataSink> sinks = new ArrayList<DataSink>();
 
 	protected final Logger logger;
-	
+
 	protected final VideoRequest request;
-	
+
 	/** Timestamp for creation of this thread */
 	private final Long timeStamp;
-	
+
 	/** Constructor for the ImageFactory. */
 	protected AbstractDataSource(VideoRequest vr, Logger l,
 		ThreadMonitor m)
@@ -62,7 +62,7 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 	public synchronized DataSink[] getListeners(){
 		return (DataSink[])sinks.toArray(new DataSink[0]);
 	}
-	
+
 	/** Notify listeners that an image was created */
 	protected synchronized void notifySinks(byte[] data) {
 		DataSink sink;
@@ -95,9 +95,9 @@ public abstract class AbstractDataSource extends VideoThread implements DataSour
 
 	protected synchronized void removeSinks(){
 	 	sinks.clear();
-		halt();	
+		halt();
 	}
-	
+
 	public final VideoRequest getVideoRequest() {
 		return request;
 	}

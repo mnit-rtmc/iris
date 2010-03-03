@@ -8,7 +8,7 @@ public interface DataSource {
 
 	/** Connect a DataSink */
 	public void connectSink(DataSink sink);
-	
+
 	/** Disconnect a DataSink */
 	public void disconnectSink(DataSink sink);
 

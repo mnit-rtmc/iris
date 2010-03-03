@@ -18,8 +18,8 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
- * ThreadMonitor is a thread used to monitor other threads when debugging 
- * multi-threaded apps.  It will periodically report on the status 
+ * ThreadMonitor is a thread used to monitor other threads when debugging
+ * multi-threaded apps.  It will periodically report on the status
  * of each registered thread.
  * @author Timothy Johnson
  *
@@ -31,7 +31,7 @@ public class ThreadMonitor extends Thread {
 		new TreeSet<VideoThread>(new VideoThreadComparator());
 	private final String name;
 	private int interval = 20 * 1000;
-	
+
 	public ThreadMonitor(String name, int interval, Logger l){
 		this.name = name;
 		if(interval>0){
@@ -41,11 +41,11 @@ public class ThreadMonitor extends Thread {
 		logger.fine("Initialized thread monitor.");
 		start();
 	}
-		
+
 	public synchronized void addThread(VideoThread t){
 		threads.add(t);
 	}
-	
+
 	public void run(){
 		try{
 			while(true){

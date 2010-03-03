@@ -39,13 +39,13 @@ public class HttpDataSource extends AbstractDataSource {
 		super(vr, l, m);
 		this.url = url;
 	}
-	
+
 	/** Start the stream. */
 	public void run() {
 		HttpURLConnection conn = null;
 		if(url != null){
 			try{
-				conn = createConnection(url); 
+				conn = createConnection(url);
 				final MJPEGReader stream = new MJPEGReader(conn.getInputStream());
 				logger.fine("Starting: " + this);
 				byte[] img;
