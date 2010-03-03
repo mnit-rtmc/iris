@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Logger;
+
 /**
  * The HttpDataSource gets it's data via the HTTP protocol
  *
@@ -42,7 +43,7 @@ public class HttpDataSource extends AbstractDataSource {
 		HttpURLConnection conn = null;
 		if(url != null){
 			try{
-				conn = ConnectionFactory.createConnection(url); 
+				conn = createConnection(url); 
 				final MJPEGReader stream = new MJPEGReader(conn.getInputStream());
 				logger.fine("Starting: " + this);
 				byte[] img;
@@ -76,5 +77,14 @@ public class HttpDataSource extends AbstractDataSource {
 		}else{
 			logger.fine("No encoder defined for this source.");
 		}
+	}
+
+	public static HttpURLConnection createConnection(URL url)
+			throws IOException {
+		HttpURLConnection c = (HttpURLConnection)url.openConnection();
+		HttpURLConnection.setFollowRedirects(true);
+		c.setConnectTimeout(VideoThread.TIMEOUT_DIRECT);
+		c.setReadTimeout(VideoThread.TIMEOUT_DIRECT);
+		return c;
 	}
 }
